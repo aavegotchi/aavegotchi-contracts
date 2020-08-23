@@ -19,10 +19,12 @@ Metrics:
 * Storing 200 bytes as a contract is 140,681 gas.
 
 Storing bytes as a contract has a high fixed cost: 21,000 for the transaction, 20,000 for contract storage, 31,000 for creating a contract.
+
 Fixed cost: 21,000 + 20,000 + 31,000 = 72,000 gas
+
 The total cost is the fixed cost plus between 343.4 and 241.81 gas per byte.
 
-Because of the high fixed gas costs it makes sense to add multiple SVG files to the blockchain in one transaction and store them together as a single contract.
+Because of the high fixed gas cost it makes sense to add multiple SVG files to the blockchain in one transaction and store them together as a single contract.
 So I implemented the `setSVGContract` function to do that.
 
 Calling the `setSVGContract` function with 10 SVG files, each 1000 bytes in size reduces the gas cost of storing 1000 bytes of data to 245,426 gas.  All 10 SVG files are stored as a single contract. This is not theoretical but results from actual testing.  
@@ -33,7 +35,7 @@ Any number of SVG files can be stored as the same contract until their combined 
 
 ## SVG Retrieval 
 
-Retrieving SVG files from the blockchain is easy. Each SVG has a unique identifier.  A contract function such as `getSVG(uint _id)` is called that returns the SVG as a string.  The identifiers start at 0 and increment each time a new SVG is uploaded to the blockchain. 
+Retrieving SVG files from the blockchain is easy. Each SVG has a unique identifier.  A contract function such as `getSVG(uint _id)` is called that returns an SVG file as a string.  The identifiers start at 0 and increment each time a new SVG is uploaded to the blockchain. 
 
 
 
