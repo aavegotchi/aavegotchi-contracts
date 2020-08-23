@@ -27,7 +27,7 @@ The total cost is the fixed cost plus between 343.4 and 241.81 gas per byte.
 Because of the high fixed gas cost it makes sense to add multiple SVG files to the blockchain in one transaction and store them together as a single contract.
 So I implemented the `setSVGContract` function to do that.
 
-Calling the `setSVGContract` function with 10 SVG files, each 1000 bytes in size reduces the gas cost of storing 1000 bytes of data to 245,426 gas.  All 10 SVG files are stored as a single contract. This is not theoretical but results from actual testing.  
+Calling the `setSVGContract` function with 10 SVG files, each 1000 bytes in size reduces the gas cost of storing 1000 bytes of data to 245,426 gas, down from 313,810 gas.  All 10 SVG files are stored as a single contract. This is not theoretical but results from actual testing.  
 
 This is good because we probably want to upload multiple SVG files to the blockchain at the same time anyway.
 
