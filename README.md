@@ -2,7 +2,7 @@
 
 
 
-## Storing SVGs on the Blockchain
+## Storing SVGs Layers on the Blockchain
 
 There are two ways to store data on the Ethereum blockchain: contract storage and storing data as contracts.
 
