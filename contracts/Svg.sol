@@ -27,7 +27,7 @@ contract Svg {
     // 61_00_00 PUSH2 (size)
     // 60_00 PUSH1 (mem position)
     // f3 RETURN 
-    bytes memory init = hex"610000_600e_6000_39_610000_6000_f3";                           
+    bytes memory init = hex"610000_600e_6000_39_610000_6000_f3";
     byte size1 = byte(uint8(bytes(_svg).length));
     byte size2 = byte(uint8(bytes(_svg).length >> 8));
     init[2] = size1;
@@ -49,5 +49,16 @@ contract Svg {
     
   }
  
-  
+  function getSVG(uint _id) external view returns(string memory) {
+    SVGContract storage svgLayer = svgs[_id];
+    address svgContract = svgLayer.svgContract;
+    uint size = svgLayer.size;
+    uint offset = svgLayer.offset;
+    bytes memory data = new bytes(size);
+    assembly {
+        extcodecopy(svgContract, add(data,32), offset, size)
+    }
+    return string(data);
+
+  }
 }
