@@ -10,14 +10,6 @@ contract Svg {
     uint16 size;
   }
   SVGContract[] svgs;
-  string[] svg;
-  
-
-  function setSvg(string calldata _svg) external {
-    //console.log("Changing greeting from '%s' to '%s'", greeting, _greeting);
-    //greeting = _greeting;
-    svg.push(_svg);    
-  }
 
   function setSvgContract(string calldata _svg, uint[] memory sizes) external {
     // 61_00_00 -- PUSH2 (size)
