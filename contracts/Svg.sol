@@ -12,6 +12,7 @@ contract Svg {
   SVGContract[] svgs;
 
   function setSvgContract(string calldata _svg, uint[] memory sizes) external {
+    require(bytes(_svg).length < 24576, "Exceeded 24KB max contract size");
     // 61_00_00 -- PUSH2 (size)
     // 60_00 -- PUSH1 (code position)
     // 60_00 -- PUSH1 (mem position)    
