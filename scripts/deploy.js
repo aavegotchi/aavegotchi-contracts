@@ -16,21 +16,21 @@ async function main () {
   // We get the contract to deploy
 
   const SVGStorage = await ethers.getContractFactory('SVGStorage')
-  const svgStorage = SVGStorage.attach('0x4fe23a33922BcC5e560fdd74A84cDDe4D2BdaaAC')
-  // const svgStorage = await SVGStorage.deploy()
-  // await svgStorage.deployed()
-  // console.log()
-  // console.log('Deployed SVGStorage contract.')
-  // console.log(svgStorage.address)
-  // kovan: 0x4fe23a33922BcC5e560fdd74A84cDDe4D2BdaaAC
+  // const svgStorage = SVGStorage.attach('0x4fe23a33922BcC5e560fdd74A84cDDe4D2BdaaAC')
+  const svgStorage = await SVGStorage.deploy()
+  await svgStorage.deployed()
+  console.log()
+  console.log('Deployed SVGStorage contract.')
+  console.log(svgStorage.address)
+  // kovan: 0xAFFF04FbFe54Cc985E25493A8F9D7114012D6d6F
 
   const AavegotchiDiamond = await ethers.getContractFactory('Aavegotchi')
-  const aavegotchiDiamond = AavegotchiDiamond.attach('0xFCB5348111665Cf95a777f0c4FCA768E05601760')
-  // const aavegotchiDiamond = await AavegotchiDiamond.deploy(svgStorage.address)
-  // await aavegotchiDiamond.deployed()
-  // console.log('Deployed Aavegotchi contract:')
-  // console.log(aavegotchiDiamond.address)
-  // kovan: 0xFCB5348111665Cf95a777f0c4FCA768E05601760
+  // const aavegotchiDiamond = AavegotchiDiamond.attach('0xFCB5348111665Cf95a777f0c4FCA768E05601760')
+  const aavegotchiDiamond = await AavegotchiDiamond.deploy(svgStorage.address)
+  await aavegotchiDiamond.deployed()
+  console.log('Deployed Aavegotchi contract:')
+  console.log(aavegotchiDiamond.address)
+  // kovan: 0x201Df88D8d79ACA0AA6360F02eb9dD8aefdB1dfb
   // ----------------------------------------------------------------
   // Upload SVG layers
 

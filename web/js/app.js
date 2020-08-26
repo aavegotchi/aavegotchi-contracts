@@ -8,7 +8,7 @@ import { ethers } from './ethers-5.0.esm.min.js'
 // what Metamask injects as window.ethereum into each page
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 const abi = ['function getAavegotchi(uint) view returns (string memory)']
-const address = '0xFCB5348111665Cf95a777f0c4FCA768E05601760'
+const address = '0x201Df88D8d79ACA0AA6360F02eb9dD8aefdB1dfb'
 const aavegotchiNFT = new ethers.Contract(address, abi, provider)
 
 // Integrating RunCSS with Webscript
