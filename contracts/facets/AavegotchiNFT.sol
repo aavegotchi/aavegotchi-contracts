@@ -22,7 +22,7 @@ interface ERC721TokenReceiver {
 }
 
 
-contract ERC721 {
+contract AavegotchiNFT {
 
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
@@ -60,7 +60,9 @@ contract ERC721 {
                 svg = abi.encodePacked(svg, svgStorage.getSVGLayer(svgId));
             }
             else {
-                ag = string(svg);
+                bytes memory header = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">';
+                bytes memory footer = '</svg>';
+                ag = string(abi.encodePacked(header,svg,footer));
                 break;
             }
 

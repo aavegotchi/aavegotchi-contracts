@@ -14,11 +14,11 @@ import "./facets/DiamondLoupeFacet.sol";
 import "./interfaces/IERC165.sol";
 import "./interfaces/IDiamond.sol";
 import "./interfaces/IDiamondLoupe.sol";
-import "./facets/ERC721.sol";
+import "./facets/AavegotchiNFT.sol";
 import "./SVGStorage.sol";
 import "./libs/ALib.sol";
 
-contract DiamondExample {
+contract Aavegotchi {
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
@@ -35,7 +35,7 @@ contract DiamondExample {
         // Create a DiamondLoupeFacet contract which implements the Diamond Loupe interface
         DiamondLoupeFacet diamondLoupeFacet = new DiamondLoupeFacet();
 
-        ERC721 erc721 = new ERC721();
+        AavegotchiNFT aavegotchiNFT = new AavegotchiNFT();
 
         bytes[] memory cut = new bytes[](4);
 
@@ -55,9 +55,9 @@ contract DiamondExample {
         cut[2] = abi.encodePacked(address(this), IERC165.supportsInterface.selector);
 
         cut[3] = abi.encodePacked(
-            erc721,
-            ERC721.mintAavegotchi.selector,
-            ERC721.getAavegotchi.selector
+            aavegotchiNFT,
+            AavegotchiNFT.mintAavegotchi.selector,
+            AavegotchiNFT.getAavegotchi.selector
         );
 
         // execute non-standard internal diamondCut function to add functions

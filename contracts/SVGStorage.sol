@@ -11,6 +11,10 @@ contract SVGStorage {
   }
   SVGLayer[] svgLayers;
 
+  constructor() {
+    svgLayers.push(SVGLayer(address(0),0,0));
+  }
+
   function createSVGContract(string calldata _svgLayers, uint[] memory sizes) external {
     require(bytes(_svgLayers).length < 24576, "Exceeded 24KB max contract size");
     // 61_00_00 -- PUSH2 (size)
