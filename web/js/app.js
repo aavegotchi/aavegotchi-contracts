@@ -23,7 +23,7 @@ const { div, body } = builders(createElement)
 
 // const { svg } = builders(createSVGElement)
 
-const svgDiv = div.class`max-w-xl mx-auto mt-5`()
+const svgDiv = div.class`max-w-xl mx-auto mt-5``Switch to Kovan Network`
 
 const app = div.class`container mx-auto`(
   svgDiv
