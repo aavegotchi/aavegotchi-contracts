@@ -1,6 +1,5 @@
 import builders from './webscript.modern.js'
 import createDOMElement from './createDOMElement.modern.js'
-import createSVGElement from './createSVGElement.modern.js'
 import processClasses from './runcss.modern.js'
 import { ethers } from './ethers-5.0.esm.min.js'
 

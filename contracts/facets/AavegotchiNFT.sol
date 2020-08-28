@@ -21,12 +21,12 @@ interface ERC721TokenReceiver {
     function onERC721Received(address _operator, address _from, uint256 _tokenId, bytes calldata _data) external returns(bytes4);
 }
 
-
 contract AavegotchiNFT {
 
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
+    event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
 
     /// @dev This emits when the approved address for an NFT is changed or
     ///  reaffirmed. The zero address indicates there is no approved address.
@@ -39,18 +39,18 @@ contract AavegotchiNFT {
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
     function mintAavegotchi(bytes32 _traits) external {
-        ALib.Storage storage aStorage = ALib.getStorage();
-        uint tokenId = aStorage.totalSupply++;
-        uint32 ownerIndex = uint32(aStorage.aavegotchis[msg.sender].length);
-        aStorage.aavegotchis[msg.sender].push(tokenId);
-        aStorage.owner[tokenId] = ALib.OwnerAndIndex({owner: msg.sender, index: ownerIndex});
-        aStorage.traits[tokenId] = _traits;
+        ALib.Storage storage ags = ALib.getStorage();
+        uint tokenId = ags.totalSupply++ | 1 << 240;
+        uint32 ownerIndex = uint32(ags.aavegotchis[msg.sender].length);
+        ags.aavegotchis[msg.sender].push(tokenId);
+        ags.owner[tokenId] = ALib.OwnerAndIndex({owner: msg.sender, index: ownerIndex});
+        ags.traits[tokenId] = _traits;
     }
 
     function getAavegotchi(uint _tokenId) external view returns(string memory ag) {
-        ALib.Storage storage aStorage = ALib.getStorage();
-        SVGStorage svgStorage = aStorage.svgStorage;
-        bytes32 traits = aStorage.traits[_tokenId];
+        ALib.Storage storage ags = ALib.getStorage();
+        SVGStorage svgStorage = ags.svgStorage;
+        bytes32 traits = ags.traits[_tokenId];
         require(traits != 0, "ERC721: _tokenId does not exist");
         uint svgId;
         bytes memory svg;
@@ -75,8 +75,8 @@ contract AavegotchiNFT {
     /// @param _owner An address for whom to query the balance
     /// @return balance The number of NFTs owned by `_owner`, possibly zero
     function balanceOf(address _owner) external view returns (uint256 balance) {
-        ALib.Storage storage aStorage = ALib.getStorage();
-        balance = aStorage.aavegotchis[_owner].length;
+        ALib.Storage storage ags = ALib.getStorage();
+        balance = ags.aavegotchis[_owner].length;
     }
 
     /// @notice Find the owner of an NFT
@@ -85,8 +85,8 @@ contract AavegotchiNFT {
     /// @param _tokenId The identifier for an NFT
     /// @return owner The address of the owner of the NFT
     function ownerOf(uint256 _tokenId) external view returns (address owner) {
-        ALib.Storage storage aStorage = ALib.getStorage();
-        owner = aStorage.owner[_tokenId].owner;
+        ALib.Storage storage ags = ALib.getStorage();
+        owner = ags.owner[_tokenId].owner;
     }
 
     /// @notice Transfers the ownership of an NFT from one address to another address
@@ -141,31 +141,32 @@ contract AavegotchiNFT {
 
     function transferFromInternal(address _from, address _to, uint256 _tokenId) internal {
         require(_to != address(0), "ER721: Can't transfer to 0 address");
-        ALib.Storage storage aStorage = ALib.getStorage();                
-        address owner = aStorage.owner[_tokenId].owner;
-        uint index = aStorage.owner[_tokenId].index;
+        ALib.Storage storage ags = ALib.getStorage();                
+        address owner = ags.owner[_tokenId].owner;
+        uint index = ags.owner[_tokenId].index;
         require(owner != address(0), "ERC721: Invalid tokenId or can't be transferred");
         require(msg.sender == owner 
-            || aStorage.operators[owner][msg.sender] 
-            || aStorage.approved[_tokenId] == msg.sender, "ERC721: Not owner or approved to transfer");        
+            || ags.operators[owner][msg.sender] 
+            || ags.approved[_tokenId] == msg.sender, "ERC721: Not owner or approved to transfer");        
         require(_from == owner, "ERC721: _from is not owner, transfer failed");        
-        aStorage.owner[_tokenId] = ALib.OwnerAndIndex({
-            owner: _to, index: uint32(aStorage.aavegotchis[_to].length)
+        ags.owner[_tokenId] = ALib.OwnerAndIndex({
+            owner: _to, index: uint32(ags.aavegotchis[_to].length)
         });
-        aStorage.aavegotchis[_to].push(_tokenId);        
+        ags.aavegotchis[_to].push(_tokenId);        
 
-        uint lastIndex = aStorage.aavegotchis[_from].length - 1;
+        uint lastIndex = ags.aavegotchis[_from].length - 1;
         if(index != lastIndex) {
-            uint lastTokenId = aStorage.aavegotchis[_from][lastIndex];
-            aStorage.aavegotchis[_from][index] = lastTokenId;
-            aStorage.owner[lastTokenId].index = uint32(index);
+            uint lastTokenId = ags.aavegotchis[_from][lastIndex];
+            ags.aavegotchis[_from][index] = lastTokenId;
+            ags.owner[lastTokenId].index = uint32(index);
         }
-        aStorage.aavegotchis[_from].pop();
-        if(aStorage.approved[_tokenId] != address(0)) {
-            delete aStorage.approved[_tokenId];
+        ags.aavegotchis[_from].pop();
+        if(ags.approved[_tokenId] != address(0)) {
+            delete ags.approved[_tokenId];
             emit Approval(owner, address(0), _tokenId);
         }
         emit Transfer(_from, _to, _tokenId);
+        emit TransferSingle(msg.sender, _from, _to, _tokenId, 1);
     }
 
     /// @notice Change or reaffirm the approved address for an NFT
@@ -175,10 +176,10 @@ contract AavegotchiNFT {
     /// @param _approved The new approved NFT controller
     /// @param _tokenId The NFT to approve
     function approve(address _approved, uint256 _tokenId) external {
-        ALib.Storage storage aStorage = ALib.getStorage();
-        address owner = aStorage.owner[_tokenId].owner;
-        require(owner == msg.sender || aStorage.operators[owner][msg.sender], "ERC721: Not owner or operator of token.");
-        aStorage.approved[_tokenId] = _approved;
+        ALib.Storage storage ags = ALib.getStorage();
+        address owner = ags.owner[_tokenId].owner;
+        require(owner == msg.sender || ags.operators[owner][msg.sender], "ERC721: Not owner or operator of token.");
+        ags.approved[_tokenId] = _approved;
         emit Approval(owner, _approved, _tokenId);
 
     }
@@ -190,8 +191,8 @@ contract AavegotchiNFT {
     /// @param _operator Address to add to the set of authorized operators
     /// @param _approved True if the operator is approved, false to revoke approval
     function setApprovalForAll(address _operator, bool _approved) external {
-        ALib.Storage storage aStorage = ALib.getStorage();
-        aStorage.operators[msg.sender][_operator] = _approved;
+        ALib.Storage storage ags = ALib.getStorage();
+        ags.operators[msg.sender][_operator] = _approved;
         emit ApprovalForAll(msg.sender, _operator, _approved);
     }
 
@@ -200,9 +201,9 @@ contract AavegotchiNFT {
     /// @param _tokenId The NFT to find the approved address for
     /// @return approved The approved address for this NFT, or the zero address if there is none    
     function getApproved(uint256 _tokenId) external view returns (address approved) {
-        ALib.Storage storage aStorage = ALib.getStorage();
-        require(_tokenId < aStorage.totalSupply, "ERC721: tokenId is invalid");  
-        approved = aStorage.approved[_tokenId];
+        ALib.Storage storage ags = ALib.getStorage();
+        require(_tokenId < ags.totalSupply, "ERC721: tokenId is invalid");  
+        approved = ags.approved[_tokenId];
     }
 
     /// @notice Query if an address is an authorized operator for another address
@@ -210,7 +211,7 @@ contract AavegotchiNFT {
     /// @param _operator The address that acts on behalf of the owner
     /// @return approved True if `_operator` is an approved operator for `_owner`, false otherwise
     function isApprovedForAll(address _owner, address _operator) external view returns (bool approved) {
-        ALib.Storage storage aStorage = ALib.getStorage();
-        approved = aStorage.operators[_owner][_operator];
+        ALib.Storage storage ags = ALib.getStorage();
+        approved = ags.operators[_owner][_operator];
     }
 }
