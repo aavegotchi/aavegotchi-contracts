@@ -45,6 +45,32 @@ contract Wearables {
     bytes4 constant public ERC1155_ACCEPTED = 0xf23a6e61; // Return value from `onERC1155Received` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`).
     bytes4 constant public ERC1155_BATCH_ACCEPTED = 0xbc197c81; // Return value from `onERC1155BatchReceived` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).
 
+    
+    /// @dev This emits when a token is transferred to an ERC721 token
+    /// @param _toContract The contract the token is transferred to
+    /// @param _toTokenId The token the token is transferred to
+    /// @param _tokenTypeId The token type that is being transferred
+    /// @param _value The amount of tokens transferred
+    event TransferToParent(
+        address indexed _toContract, 
+        uint256 indexed _toTokenId, 
+        uint256 indexed _tokenTypeId,
+        uint256 _value
+    );
+
+    
+    /// @dev This emits when a token is transferred from an ERC721 token
+    /// @param _fromContract The contract the token is transferred from
+    /// @param _fromTokenId The token the token is transferred from
+    /// @param _tokenTypeId The token type that is being transferred
+    /// @param _value The amount of tokens transferred
+    event TransferFromParent(
+        address indexed _fromContract, 
+        uint256 indexed _fromTokenId,
+        uint256 indexed _tokenTypeId, 
+        uint256 _value        
+    );
+    
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
@@ -84,8 +110,18 @@ contract Wearables {
     */
     event URI(string _value, uint256 indexed _id);  
 
-    function isAavegotchi(uint _tokenId) internal pure returns (bool) {
-        return _tokenId >> 240 == 1;
+
+    function mintWearables() external {
+        ALib.Storage storage ags = ALib.getStorage();
+        uint count = ags.wearablesSVG.length;
+        for(uint i = 1; i < count; i++) {
+            ags.wearables[msg.sender][i << 240]++;
+        }
+
+    }
+
+    function isAavegotchi(uint _id) internal pure returns (bool) {
+        return _id >> 240 == 0;
     }
     
 
@@ -104,7 +140,7 @@ contract Wearables {
         @param _data    Additional data with no specified format, MUST be sent unaltered in call to `onERC1155Received` on `_to`
     */
     function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
-        require(_to == address(0), "Wearables: Can't transfer to 0 address");
+        require(_to != address(0), "Wearables: Can't transfer to 0 address");
         ALib.Storage storage ags = ALib.getStorage();
         require(msg.sender == _from || ags.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
         if(isAavegotchi(_id)) {
@@ -169,7 +205,7 @@ contract Wearables {
         @param _data    Additional data with no specified format, MUST be sent unaltered in call to the `ERC1155TokenReceiver` hook(s) on `_to`
     */
     function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external {
-        require(_to == address(0), "Wearables: Can't transfer to 0 address");
+        require(_to != address(0), "Wearables: Can't transfer to 0 address");
         ALib.Storage storage ags = ALib.getStorage();
         require(msg.sender == _from || ags.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");        
         for(uint i; i < _ids.length; i++) {
@@ -214,7 +250,67 @@ contract Wearables {
         }        
     }
 
-    
+    /// @notice Transfer tokens from owner address to a token
+    /// @param _from The owner address
+    /// @param _id ID of the token
+    /// @param _toContract The ERC721 contract of the receiving token
+    /// @param _toTokenId The receiving token
+    /// @param _value The amount of tokens to transfer
+    function transferToParent(address _from, address _toContract, uint _toTokenId, uint _id, uint _value) external {
+        require(_toContract != address(0), "Wearables: Can't transfer to 0 address");
+        ALib.Storage storage ags = ALib.getStorage();
+        require(msg.sender == _from || ags.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");        
+        require(!isAavegotchi(_id), "Wearables: Cannot transfer aavegotchi to token");
+
+        uint bal = ags.wearables[_from][_id];
+        require(_value <= bal, "Wearables: Doesn't have that many to transfer");
+        ags.wearables[_from][_id] = bal - _value;
+        ags.nftBalances[_toContract][_toTokenId][_id] += _value;
+        emit TransferSingle(msg.sender, _from, _toContract, _id, _value);
+        emit TransferToParent(_toContract,_toTokenId, _id, _value);          
+    }
+
+    /// @notice Transfer token from a token to an address
+    /// @param _fromContract The address of the owning contract
+    /// @param _fromTokenId The owning token
+    /// @param _to The address the token is transferred to
+    /// @param _id ID of the token
+    /// @param _value The amount of tokens to transfer
+    function transferFromParent(address _fromContract, uint _fromTokenId, address _to, uint _id, uint _value) external {
+        require(_to != address(0), "Wearables: Can't transfer to 0 address");
+        ALib.Storage storage ags = ALib.getStorage();
+        address owner = ags.owner[_fromTokenId].owner;
+        require(msg.sender == owner || ags.operators[owner][msg.sender], "Wearables: Not owner and not approved to transfer");
+        require(!isAavegotchi(_id), "Wearables: Cannot transfer aavegotchi to token");
+        uint bal = ags.nftBalances[_fromContract][_fromTokenId][_id];
+        require(_value <= bal, "Wearables: Doesn't have that many to transfer");
+        ags.nftBalances[_fromContract][_fromTokenId][_id] = bal - _value;
+        ags.wearables[_to][_id] += _value;                   
+        emit TransferSingle(msg.sender, _fromContract, _to, _id, _value);
+        emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);        
+    }
+
+
+    /// @notice Transfer a token from a token to another token
+    /// @param _fromContract The address of the owning contract
+    /// @param _fromTokenId The owning token
+    /// @param _toContract The ERC721 contract of the receiving token
+    /// @param _toTokenId The receiving token
+    /// @param _id ID of the token
+    /// @param _value The amount tokens to transfer
+    function transferAsChild(address _fromContract, uint _fromTokenId, address _toContract, uint _toTokenId, uint _id, uint _value) external {
+        require(_toContract != address(0), "Wearables: Can't transfer to 0 address");
+        ALib.Storage storage ags = ALib.getStorage();
+        address owner = ags.owner[_fromTokenId].owner;
+        require(msg.sender == owner || ags.operators[owner][msg.sender], "Wearables: Not owner and not approved to transfer");
+        uint bal = ags.nftBalances[_fromContract][_fromTokenId][_id];
+        require(_value <= bal, "Wearables: Doesn't have that many to transfer");
+        ags.nftBalances[_fromContract][_fromTokenId][_id] = bal - _value;
+        ags.nftBalances[_toContract][_toTokenId][_id] += _value;
+        emit TransferSingle(msg.sender, _fromContract, _toContract, _id, _value);
+        emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
+        emit TransferToParent(_toContract, _toTokenId, _id, _value);
+    }
 
     /**
         @notice Get the balance of an account's tokens.
@@ -223,7 +319,7 @@ contract Wearables {
         @return bal    The _owner's balance of the token type requested
      */
     function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal) {
-        ALib.Storage storage ags = ALib.getStorage();        
+        ALib.Storage storage ags = ALib.getStorage();      
         if(isAavegotchi(_id)) {
             if(ags.owner[_id].owner == _owner) {
                 bal = 1;        
@@ -233,6 +329,18 @@ contract Wearables {
             bal = ags.wearables[_owner][_id];
         }
     }
+
+    /// @notice Get the balance of a non-fungible parent token
+    /// @param _tokenContract The contract tracking the parent token
+    /// @param _tokenId The ID of the parent token
+    /// @param _id     ID of the token
+    /// @return value The balance of the token
+    function balanceOfToken(address _tokenContract, uint _tokenId, uint _id) external view returns (uint256 value) {
+        ALib.Storage storage ags = ALib.getStorage();
+        value = ags.nftBalances[_tokenContract][_tokenId][_id];
+    }
+
+
 
     /**
         @notice Get the balance of multiple account/token pairs

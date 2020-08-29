@@ -15,29 +15,35 @@ import "./interfaces/IERC165.sol";
 import "./interfaces/IDiamond.sol";
 import "./interfaces/IDiamondLoupe.sol";
 import "./facets/AavegotchiNFT.sol";
-import "./SVGStorage.sol";
+import "./facets/SVGStorage.sol";
 import "./libs/ALib.sol";
+import "./facets/Wearables.sol";
 
 contract Aavegotchi {
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    constructor(address _svgStorage) {
+    constructor() {
         DiamondLib.Storage storage ds = DiamondLib.getStorage();
         ds.contractOwner = msg.sender;
             
-        ALib.Storage storage aStorage = ALib.getStorage();
-        aStorage.svgStorage = SVGStorage(_svgStorage);
+        ALib.Storage storage ags = ALib.getStorage();               
+        ags.wearablesSVG.push();
 
+        
         // Create a DiamondFacet contract which implements the Diamond interface
         DiamondFacet diamondFacet = new DiamondFacet();
 
         // Create a DiamondLoupeFacet contract which implements the Diamond Loupe interface
         DiamondLoupeFacet diamondLoupeFacet = new DiamondLoupeFacet();
 
+        SVGStorage svgStorage = new SVGStorage();
+
         AavegotchiNFT aavegotchiNFT = new AavegotchiNFT();
 
-        bytes[] memory cut = new bytes[](4);
+        Wearables wearables = new Wearables();
+
+        bytes[] memory cut = new bytes[](6);
 
         // Adding cut function
         cut[0] = abi.encodePacked(diamondFacet, IDiamond.diamondCut.selector);
@@ -58,6 +64,19 @@ contract Aavegotchi {
             aavegotchiNFT,
             AavegotchiNFT.mintAavegotchi.selector,
             AavegotchiNFT.getAavegotchi.selector
+        );
+
+        cut[4] = abi.encodePacked(
+            svgStorage,
+            SVGStorage.storeAavegotchiLayersSVG.selector,
+            SVGStorage.storeWearablesSVG.selector
+        );
+
+        cut[5] = abi.encodePacked(
+            wearables,
+            Wearables.mintWearables.selector,
+            Wearables.transferToParent.selector,
+            Wearables.transferFromParent.selector
         );
 
         // execute non-standard internal diamondCut function to add functions

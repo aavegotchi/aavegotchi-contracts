@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
-import "../SVGStorage.sol";
-
 library ALib {
     uint16 constant AAVEGOTCHI_TOKEN_TYPE = 1;
 
@@ -11,7 +9,21 @@ library ALib {
         uint32 index;
     }
 
+    struct SVGLayer {
+        address svgLayersContract;
+        uint16 offset;
+        uint16 size;
+    }
+
     struct Storage {
+
+        SVGLayer[] aavegotchiLayersSVG;
+        SVGLayer[] wearablesSVG;
+
+        // contractAddress => nftId  => id => balance
+        mapping(address => mapping(uint => mapping(uint => uint))) nftBalances;
+        
+        // owner => (id => balance)
         mapping(address => mapping(uint => uint)) wearables;
         // owner => aavegotchis
         mapping(address => uint[]) aavegotchis;
@@ -21,9 +33,7 @@ library ALib {
         mapping(uint => address) approved;
         
         mapping(uint => bytes32) traits;
-        uint totalSupply;
-
-        SVGStorage svgStorage;
+        uint totalSupply;       
     }
 
     function getStorage() internal pure returns(Storage storage ds) {
@@ -31,35 +41,31 @@ library ALib {
         assembly { ds.slot := position }
     }
 
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
-    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
-
-    function transferFromInternal(address _from, address _to, uint256 _tokenId) internal {
-        require(_to != address(0), "ER721: Can't transfer to 0 address");
-        ALib.Storage storage ags = ALib.getStorage();                
-        address owner = ags.owner[_tokenId].owner;
-        uint index = ags.owner[_tokenId].index;
-        require(owner != address(0), "ALib: Invalid tokenId or can't be transferred");
-        require(msg.sender == owner 
-            || ags.operators[owner][msg.sender] 
-            || ags.approved[_tokenId] == msg.sender, "ALib: Not owner or approved to transfer");        
-        require(_from == owner, "ALib: _from is not owner, transfer failed");        
-        ags.owner[_tokenId] = ALib.OwnerAndIndex({
-            owner: _to, index: uint32(ags.aavegotchis[_to].length)
-        });
-        ags.aavegotchis[_to].push(_tokenId);        
-
-        uint lastIndex = ags.aavegotchis[_from].length - 1;
-        if(index != lastIndex) {
-            uint lastTokenId = ags.aavegotchis[_from][lastIndex];
-            ags.aavegotchis[_from][index] = lastTokenId;
-            ags.owner[lastTokenId].index = uint32(index);
+    function getAavegotchiLayerSVG(uint _id) internal view returns(bytes memory) {
+        ALib.Storage storage ags = ALib.getStorage();
+        require(_id < ags.aavegotchiLayersSVG.length, "SVG id does not exist.");
+        ALib.SVGLayer storage svgLayer = ags.aavegotchiLayersSVG[_id];
+        address svgContract = svgLayer.svgLayersContract;
+        uint size = svgLayer.size;
+        uint offset = svgLayer.offset;
+        bytes memory data = new bytes(size);
+        assembly {
+            extcodecopy(svgContract, add(data,32), offset, size)
         }
-        ags.aavegotchis[_from].pop();
-        if(ags.approved[_tokenId] != address(0)) {
-            delete ags.approved[_tokenId];
-            emit Approval(owner, address(0), _tokenId);
+        return data;
+    }
+
+  function getWearablesSVG(uint _id) internal view returns(bytes memory) {
+        ALib.Storage storage ags = ALib.getStorage();
+        require(_id < ags.wearablesSVG.length, "SVG id does not exist.");
+        ALib.SVGLayer storage svgLayer = ags.wearablesSVG[_id];
+        address svgContract = svgLayer.svgLayersContract;
+        uint size = svgLayer.size;
+        uint offset = svgLayer.offset;
+        bytes memory data = new bytes(size);
+        assembly {
+            extcodecopy(svgContract, add(data,32), offset, size)
         }
-        emit Transfer(_from, _to, _tokenId);
+        return data;
     }
 }

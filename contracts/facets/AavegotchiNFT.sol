@@ -3,6 +3,7 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "../libs/ALib.sol";
+import "../facets/SVGStorage.sol";
 
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
 interface ERC721TokenReceiver {
@@ -22,7 +23,7 @@ interface ERC721TokenReceiver {
 }
 
 contract AavegotchiNFT {
-
+    
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
@@ -40,33 +41,34 @@ contract AavegotchiNFT {
 
     function mintAavegotchi(bytes32 _traits) external {
         ALib.Storage storage ags = ALib.getStorage();
-        uint tokenId = ags.totalSupply++ | 1 << 240;
+        uint tokenId = ags.totalSupply++;
         uint32 ownerIndex = uint32(ags.aavegotchis[msg.sender].length);
         ags.aavegotchis[msg.sender].push(tokenId);
         ags.owner[tokenId] = ALib.OwnerAndIndex({owner: msg.sender, index: ownerIndex});
         ags.traits[tokenId] = _traits;
-    }
+    }  
 
     function getAavegotchi(uint _tokenId) external view returns(string memory ag) {
-        ALib.Storage storage ags = ALib.getStorage();
-        SVGStorage svgStorage = ags.svgStorage;
+        ALib.Storage storage ags = ALib.getStorage();        
         bytes32 traits = ags.traits[_tokenId];
-        require(traits != 0, "ERC721: _tokenId does not exist");
+        require(traits != 0, "AavegotchiNFT: _tokenId does not exist");
         uint svgId;
         bytes memory svg;
         for(uint i; i < 16; i++) {
             svgId = uint((traits << i*16) >> 240);
             if(svgId > 0) {
-                svg = abi.encodePacked(svg, svgStorage.getSVGLayer(svgId));
-            }
-            else {
-                bytes memory header = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">';
-                bytes memory footer = '</svg>';
-                ag = string(abi.encodePacked(header,svg,footer));
-                break;
-            }
-
+                svg = abi.encodePacked(svg, ALib.getAavegotchiLayerSVG(svgId));
+            }            
         }
+        uint count = ags.wearablesSVG.length;
+        for(uint i = 0; i < count; i++) {
+            if(ags.nftBalances[address(this)][_tokenId][i << 240] > 0) {
+                svg = abi.encodePacked(svg, ALib.getWearablesSVG(i));
+            }
+        }
+        bytes memory header = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">';
+        bytes memory footer = '</svg>';
+        ag = string(abi.encodePacked(header,svg,footer));
     }
 
     /// @notice Count all NFTs assigned to an owner
@@ -77,7 +79,7 @@ contract AavegotchiNFT {
     function balanceOf(address _owner) external view returns (uint256 balance) {
         ALib.Storage storage ags = ALib.getStorage();
         balance = ags.aavegotchis[_owner].length;
-    }
+    }   
 
     /// @notice Find the owner of an NFT
     /// @dev NFTs assigned to zero address are considered invalid, and queries
