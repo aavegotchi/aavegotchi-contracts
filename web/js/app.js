@@ -42,7 +42,7 @@ function createElement (type, props, ...children) {
   return createDOMElement(type, props, ...children)
 }
 
-const { div, body, button, span } = builders(createElement)
+const { div, body, button, span, a } = builders(createElement)
 
 function wearableId (id) {
   return ethers.BigNumber.from(id).mul(ethers.BigNumber.from(2).pow(240))
@@ -198,7 +198,8 @@ async function main () {
           )
         )
       )
-    )
+    ),
+    div.class`text-lg``Get some ether ${a.class`text-blue underline`.href`https://faucet.kovan.network/`.target`_blank``here`}.`
   )
   document.body = body(app)
 }
