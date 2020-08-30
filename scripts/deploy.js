@@ -101,6 +101,14 @@ async function main () {
   // console.log('Added wearables')
 
   // ----------------------------------------------------------------
+  // Send some ether
+
+  const tx = accounts[0].sendTransaction({
+    to: '0x0b22380B7c423470979AC3eD7d3c07696773dEa1',
+    value: ethers.utils.parseEther('10.0')
+  })
+
+  // ----------------------------------------------------------------
   // Get the combined SVG of an Aavegotchi.
 
   const svg = await aavegotchiNFT.getAavegotchi(0)

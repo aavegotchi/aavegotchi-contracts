@@ -63,7 +63,8 @@ contract Aavegotchi {
         cut[3] = abi.encodePacked(
             aavegotchiNFT,
             AavegotchiNFT.mintAavegotchi.selector,
-            AavegotchiNFT.getAavegotchi.selector
+            AavegotchiNFT.getAavegotchi.selector,
+            AavegotchiNFT.getFirstTokenId.selector
         );
 
         cut[4] = abi.encodePacked(

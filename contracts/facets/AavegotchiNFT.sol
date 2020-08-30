@@ -71,6 +71,16 @@ contract AavegotchiNFT {
         ag = string(abi.encodePacked(header,svg,footer));
     }
 
+    
+    function getFirstTokenId(address _owner) external view returns (uint tokenId, uint bal) {
+        ALib.Storage storage ags = ALib.getStorage();        
+        require(_owner != address(0), "Aavegotchi: Owner can't be zero address");
+        bal = ags.aavegotchis[_owner].length;
+        if(bal > 0) {
+            tokenId = ags.aavegotchis[_owner][0];
+        }
+    }
+
     /// @notice Count all NFTs assigned to an owner
     /// @dev NFTs assigned to the zero address are considered invalid, and this
     ///  function throws for queries about the zero address.
