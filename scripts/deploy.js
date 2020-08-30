@@ -68,23 +68,23 @@ async function main () {
   // ----------------------------------------------------------------
   // Mint Aavegotchi with SVG Layers
 
-  let svgLayers = [0, 1, 2, 3]
-  svgLayers = svgLayers.map(value => {
-    value = ethers.utils.hexlify(value)
-    value = value.slice(2)
-    if (value.length === 2) {
-      value = '00' + value
-    }
-    return value
-  })
-  svgLayers = '0x' + svgLayers.join('').padEnd(64, '0')
-  await aavegotchiNFT.mintAavegotchi(svgLayers)
-  console.log('Mint Aavegotchi with SVG Layers')
+  // let svgLayers = [0, 1, 2, 3]
+  // svgLayers = svgLayers.map(value => {
+  //   value = ethers.utils.hexlify(value)
+  //   value = value.slice(2)
+  //   if (value.length === 2) {
+  //     value = '00' + value
+  //   }
+  //   return value
+  // })
+  // svgLayers = '0x' + svgLayers.join('').padEnd(64, '0')
+  // await aavegotchiNFT.mintAavegotchi(svgLayers)
+  // console.log('Mint Aavegotchi with SVG Layers')
 
   // ----------------------------------------------------------------
   // Mint Wearables
-  await wearables.mintWearables()
-  console.log('Minted one set of wearables')
+  // await wearables.mintWearables()
+  // console.log('Minted one set of wearables')
 
   // ----------------------------------------------------------------
   // Add Wearables
@@ -102,19 +102,18 @@ async function main () {
 
   // ----------------------------------------------------------------
   // Send some ether
-
-  const tx = accounts[0].sendTransaction({
-    to: '0x0b22380B7c423470979AC3eD7d3c07696773dEa1',
-    value: ethers.utils.parseEther('10.0')
-  })
+  // const tx = accounts[0].sendTransaction({
+  //   to: '0x0b22380B7c423470979AC3eD7d3c07696773dEa1',
+  //   value: ethers.utils.parseEther('0.1')
+  // })
 
   // ----------------------------------------------------------------
   // Get the combined SVG of an Aavegotchi.
 
-  const svg = await aavegotchiNFT.getAavegotchi(0)
-  console.log('Get the combined SVG of an Aavegotchi.')
-  console.log()
-  console.log(svg)
+  // const svg = await aavegotchiNFT.getAavegotchiSVG(0)
+  // console.log('Get the combined SVG of an Aavegotchi.')
+  // console.log()
+  // console.log(svg)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

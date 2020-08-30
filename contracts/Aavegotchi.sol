@@ -63,8 +63,8 @@ contract Aavegotchi {
         cut[3] = abi.encodePacked(
             aavegotchiNFT,
             AavegotchiNFT.mintAavegotchi.selector,
-            AavegotchiNFT.getAavegotchi.selector,
-            AavegotchiNFT.getFirstTokenId.selector
+            AavegotchiNFT.getAavegotchiSVG.selector,
+            AavegotchiNFT.getFirstAavegotchi.selector            
         );
 
         cut[4] = abi.encodePacked(
@@ -77,7 +77,9 @@ contract Aavegotchi {
             wearables,
             Wearables.mintWearables.selector,
             Wearables.transferToParent.selector,
-            Wearables.transferFromParent.selector
+            Wearables.transferFromParent.selector,
+            Wearables.wearablesBalances.selector,
+            Wearables.balanceOfToken.selector
         );
 
         // execute non-standard internal diamondCut function to add functions

@@ -46,9 +46,11 @@ contract AavegotchiNFT {
         ags.aavegotchis[msg.sender].push(tokenId);
         ags.owner[tokenId] = ALib.OwnerAndIndex({owner: msg.sender, index: ownerIndex});
         ags.traits[tokenId] = _traits;
+        emit Transfer(address(0), msg.sender, tokenId);
+        emit TransferSingle(msg.sender, address(0), msg.sender, tokenId, 1);
     }  
 
-    function getAavegotchi(uint _tokenId) external view returns(string memory ag) {
+    function getAavegotchiSVG(uint _tokenId) public view returns(string memory ag) {
         ALib.Storage storage ags = ALib.getStorage();        
         bytes32 traits = ags.traits[_tokenId];
         require(traits != 0, "AavegotchiNFT: _tokenId does not exist");
@@ -72,14 +74,15 @@ contract AavegotchiNFT {
     }
 
     
-    function getFirstTokenId(address _owner) external view returns (uint tokenId, uint bal) {
+    function getFirstAavegotchi(address _owner) external view returns (uint tokenId, string memory svg) {
         ALib.Storage storage ags = ALib.getStorage();        
         require(_owner != address(0), "Aavegotchi: Owner can't be zero address");
-        bal = ags.aavegotchis[_owner].length;
+        uint bal = ags.aavegotchis[_owner].length;
         if(bal > 0) {
             tokenId = ags.aavegotchis[_owner][0];
+            svg = getAavegotchiSVG(tokenId);
         }
-    }
+    }   
 
     /// @notice Count all NFTs assigned to an owner
     /// @dev NFTs assigned to the zero address are considered invalid, and this

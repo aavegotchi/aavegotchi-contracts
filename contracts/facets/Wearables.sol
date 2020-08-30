@@ -115,9 +115,20 @@ contract Wearables {
         ALib.Storage storage ags = ALib.getStorage();
         uint count = ags.wearablesSVG.length;
         for(uint i = 1; i < count; i++) {
-            ags.wearables[msg.sender][i << 240]++;
-        }
+            uint id = i << 240;
+            ags.wearables[msg.sender][id]++;
+            emit TransferSingle(msg.sender, address(0), msg.sender, id, 1);
+        }        
+    }
 
+    function wearablesBalances(address _account) external view returns (uint[] memory bals) {
+        ALib.Storage storage ags = ALib.getStorage();
+        uint count = ags.wearablesSVG.length;
+        bals = new uint[](count-1);
+        for(uint i = 1; i < count; i++) {
+            uint id = i << 240;
+            bals[i-1] = ags.wearables[_account][id];
+        }
     }
 
     function isAavegotchi(uint _id) internal pure returns (bool) {
