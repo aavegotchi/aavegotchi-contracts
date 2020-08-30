@@ -3,8 +3,11 @@ pragma solidity ^0.7.0;
 //pragma experimental ABIEncoderV2;
 import '../libs/ALib.sol';
 
+// This contract was added as a facet to the diamond
 contract SVGStorage { 
 
+    // Stores aavegotchi layers
+    // The id for an SVG is the same as its position in the aavegotchiLayersSVG array
     function storeAavegotchiLayersSVG(string calldata _svgLayers, uint[] memory sizes) external {
         require(bytes(_svgLayers).length < 24576, "Exceeded 24KB max contract size");
         ALib.Storage storage ags = ALib.getStorage();
@@ -34,9 +37,11 @@ contract SVGStorage {
           ags.aavegotchiLayersSVG.push(ALib.SVGLayer(svgLayersContract,uint16(offset),uint16(sizes[i])));
           offset += sizes[i];          
         }    
-  }
+    }
 
-  function storeWearablesSVG(string calldata _svgLayers, uint[] memory sizes) external {
+    // Stores wearable SVGs
+    // The id for a wearable is the same as its position in the wearablesSVG array
+    function storeWearablesSVG(string calldata _svgLayers, uint[] memory sizes) external {
         require(bytes(_svgLayers).length < 24576, "Exceeded 24KB max contract size");
         ALib.Storage storage ags = ALib.getStorage();
         // 61_00_00 -- PUSH2 (size)
@@ -65,6 +70,5 @@ contract SVGStorage {
           ags.wearablesSVG.push(ALib.SVGLayer(svgLayersContract,uint16(offset),uint16(sizes[i])));
           offset += sizes[i];          
         }    
-  }
-   
+    }   
 }

@@ -39,6 +39,9 @@ contract AavegotchiNFT {
     ///  The operator can manage all NFTs of the owner.
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
+    // Makes a new aavegotchi.
+    // _traits is up to 16 two byte integers. Each integer is an SVG layer id.
+    // The layer ids are used to determine which SVG layers to use with an aavegotchi
     function mintAavegotchi(bytes32 _traits) external {
         ALib.Storage storage ags = ALib.getStorage();
         uint tokenId = ags.totalSupply++;
@@ -50,18 +53,21 @@ contract AavegotchiNFT {
         emit TransferSingle(msg.sender, address(0), msg.sender, tokenId, 1);
     }  
 
+    // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
     function getAavegotchiSVG(uint _tokenId) public view returns(string memory ag) {
         ALib.Storage storage ags = ALib.getStorage();        
         bytes32 traits = ags.traits[_tokenId];
         require(traits != 0, "AavegotchiNFT: _tokenId does not exist");
         uint svgId;
         bytes memory svg;
+        // Find and get up to 16 SVG layers
         for(uint i; i < 16; i++) {
             svgId = uint((traits << i*16) >> 240);
             if(svgId > 0) {
                 svg = abi.encodePacked(svg, ALib.getAavegotchiLayerSVG(svgId));
             }            
         }
+        // add any wearables here
         uint count = ags.wearablesSVG.length;
         for(uint i = 0; i < count; i++) {
             if(ags.nftBalances[address(this)][_tokenId][i << 240] > 0) {
@@ -73,7 +79,7 @@ contract AavegotchiNFT {
         ag = string(abi.encodePacked(header,svg,footer));
     }
 
-    
+    // get the first Aavegotchi that someone uses. This function is for demo purposes.
     function getFirstAavegotchi(address _owner) external view returns (uint tokenId, string memory svg) {
         ALib.Storage storage ags = ALib.getStorage();        
         require(_owner != address(0), "Aavegotchi: Owner can't be zero address");
@@ -154,6 +160,7 @@ contract AavegotchiNFT {
         transferFromInternal(_from, _to, _tokenId);
     }
 
+    // This function is used by transfer functions
     function transferFromInternal(address _from, address _to, uint256 _tokenId) internal {
         require(_to != address(0), "ER721: Can't transfer to 0 address");
         ALib.Storage storage ags = ALib.getStorage();                

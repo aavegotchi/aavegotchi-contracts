@@ -110,7 +110,9 @@ contract Wearables {
     */
     event URI(string _value, uint256 indexed _id);  
 
-
+    // Mint a set of wearables.
+    // How many wearables there are is determined by how many wearable SVG files have been uploaded.
+    // The wearbles are minted to the account that calls this function
     function mintWearables() external {
         ALib.Storage storage ags = ALib.getStorage();
         uint count = ags.wearablesSVG.length;
@@ -121,6 +123,7 @@ contract Wearables {
         }        
     }
 
+    // Returns balance for each wearable that exists for an account
     function wearablesBalances(address _account) external view returns (uint[] memory bals) {
         ALib.Storage storage ags = ALib.getStorage();
         uint count = ags.wearablesSVG.length;
@@ -131,6 +134,8 @@ contract Wearables {
         }
     }
 
+    // The category id for an aavegotchi tokenid is 0
+    // So this checks to see if a token id is an Aavegotchi or not
     function isAavegotchi(uint _id) internal pure returns (bool) {
         return _id >> 240 == 0;
     }

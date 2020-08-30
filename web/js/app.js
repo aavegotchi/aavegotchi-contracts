@@ -46,18 +46,20 @@ function wearableId (id) {
   return ethers.BigNumber.from(id).mul(ethers.BigNumber.from(2).pow(240))
 }
 
+// Anytime something changes this function gets called to refresh what is shown
+// on the webpage.
 async function main () {
   const accountAddress = await signer.getAddress()
   const [[tokenId, svg], wearableBalances] = await Promise.all([
     agr.getFirstAavegotchi(accountAddress),
     agr.wearablesBalances(accountAddress)
   ])
-  console.log(wearableBalances)
   const tokenExists = svg.length > 0
   let tokenHatBalance = 0
   let tokenPantsBalance = 0
   let tokenStickBalance = 0
   if (tokenExists) {
+    // Get the account's wearable balance for each wearable
     ;[tokenHatBalance, tokenPantsBalance, tokenStickBalance] = await Promise.all([
       agr.balanceOfToken(contractAddress, tokenId, wearableId(1)),
       agr.balanceOfToken(contractAddress, tokenId, wearableId(2)),
@@ -68,6 +70,7 @@ async function main () {
     tokenStickBalance = tokenStickBalance.toNumber()
   }
 
+  // Display and logic to mint a new aavegotchi
   const svgDiv = div.class`flex-1 text-4xl text-center`(
     div.class`mt-38`(
       span.class`inline-flex rounded-md shadow-sm`(
@@ -102,6 +105,7 @@ async function main () {
   const app = div.class`container mx-auto`(
     div.class`flex justify-center text-xl`(
       svgDiv,
+      // display the wearable balances for an account and wearable minting logic
       div.class`flex-1 mt-18`(
         div`Farmer Hats: ${wearableBalances[0]}`,
         div`Farmer Pants: ${wearableBalances[1]}`,
@@ -117,6 +121,7 @@ async function main () {
               })`Mint Wearables`
           )
         ),
+        // display the wearable buttons and logic for adding/removing them to the aavegotchi
         div.class`mt-10`(
           span.class`inline-flex rounded-md shadow-sm`(
             button
@@ -209,6 +214,7 @@ agr.on('TransferSingle', () => {
 })
 
 function runMain () {
+  // Check if we are on Kovan network
   if (window.ethereum.chainId === '0x2a') {
     main().then(result => {
     // console.log('success')
