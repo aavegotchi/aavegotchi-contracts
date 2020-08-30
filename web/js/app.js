@@ -6,9 +6,7 @@ import { ethers } from './ethers-5.0.esm.min.js'
 window.ethereum.enable()
 window.ethereum.autoRefreshOnNetworkChange = false
 
-window.ethereum.on('networkChanged', function (value) {
-  runMain()
-})
+window.ethereum.on('chainChanged', (_chainId) => window.location.reload())
 
 // A Web3Provider wraps a standard Web3 provider, which is
 // what Metamask injects as window.ethereum into each page
@@ -28,8 +26,8 @@ const abi = [
   'event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value)'
 ]
 // const address = '0x201Df88D8d79ACA0AA6360F02eb9dD8aefdB1dfb'
-// const contractAddress = '0x7c2C195CD6D34B8F845992d380aADB2730bB9C6F'
-const contractAddress = '0x10E79E279a6cfEEf54428091Dc22da04f49d1E0b'
+const contractAddress = '0x187DffAef821d03055aC5eAa1524c53EBB36eA97'
+// const contractAddress = '0x10E79E279a6cfEEf54428091Dc22da04f49d1E0b'
 
 const agr = new ethers.Contract(contractAddress, abi, provider)
 const agw = agr.connect(signer)
@@ -54,6 +52,7 @@ async function main () {
     agr.getFirstAavegotchi(accountAddress),
     agr.wearablesBalances(accountAddress)
   ])
+  console.log(wearableBalances)
   const tokenExists = svg.length > 0
   let tokenHatBalance = 0
   let tokenPantsBalance = 0
@@ -210,12 +209,15 @@ agr.on('TransferSingle', () => {
 })
 
 function runMain () {
-  main().then(result => {
+  if (window.ethereum.chainId === '0x2a') {
+    main().then(result => {
     // console.log('success')
-  }, error => {
+    }, error => {
+      console.log('yikers: ' + error)
+    })
+  } else {
     document.body = body(div.class`text-4xl container mx-auto text-center mt-30``Switch to the Kovan Network`)
-    console.log('yikers: ' + error)
-  })
+  }
 }
 
 runMain()
