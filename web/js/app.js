@@ -28,9 +28,8 @@ function createElement (type, props, ...children) {
 const { div, body } = builders(createElement)
 
 async function main () {
-  const svgDiv = div.class`max-w-xl mx-auto mt-5`(
-    await ag.getAavegotchi(0)
-  )
+  const svgDiv = div.class`max-w-xl mx-auto mt-5``Switch to the Kovan Network`
+  svgDiv.innerHTML = await ag.getAavegotchi(0)
 
   const app = div.class`container mx-auto`(
     svgDiv
