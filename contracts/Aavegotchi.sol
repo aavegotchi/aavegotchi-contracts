@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
 /******************************************************************************\
@@ -8,34 +8,27 @@ pragma experimental ABIEncoderV2;
 * Implementation of an example of a diamond.
 /******************************************************************************/
 
-import "./libs/DiamondLib.sol";
-import "./facets/DiamondFacet.sol";
+import "./facets/OwnershipFacet.sol";
+import "./libraries/LibDiamondCut.sol";
+import "./facets/DiamondCutFacet.sol";
 import "./facets/DiamondLoupeFacet.sol";
 import "./interfaces/IERC165.sol";
-import "./interfaces/IDiamond.sol";
+import "./interfaces/IDiamondCut.sol";
 import "./interfaces/IDiamondLoupe.sol";
 import "./facets/AavegotchiNFT.sol";
 import "./facets/SVGStorage.sol";
-import "./libs/ALib.sol";
+import "./libraries/ALib.sol";
 import "./facets/Wearables.sol";
 
 contract Aavegotchi {
-
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    constructor() {
-        DiamondLib.Storage storage ds = DiamondLib.getStorage();
+    constructor(address[] memory _contracts) {
+        LibDiamondStorage.DiamondStorage storage ds = LibDiamondStorage.diamondStorage();
         ds.contractOwner = msg.sender;
-            
-        ALib.Storage storage ags = ALib.getStorage();               
+
+        ALib.Storage storage ags = ALib.getStorage();
         ags.wearablesSVG.push();
-
-        
-        // Create a DiamondFacet contract which implements the Diamond interface
-        DiamondFacet diamondFacet = new DiamondFacet();
-
-        // Create a DiamondLoupeFacet contract which implements the Diamond Loupe interface
-        DiamondLoupeFacet diamondLoupeFacet = new DiamondLoupeFacet();
 
         SVGStorage svgStorage = new SVGStorage();
 
@@ -43,78 +36,81 @@ contract Aavegotchi {
 
         Wearables wearables = new Wearables();
 
-        bytes[] memory cut = new bytes[](6);
+        IDiamondCut.Facet[] memory diamondCut = new IDiamondCut.Facet[](3);
 
-        // Adding cut function
-        cut[0] = abi.encodePacked(diamondFacet, IDiamond.diamondCut.selector);
+        // adding diamondCut function
+        diamondCut[0].facetAddress = _contracts[0];
+        diamondCut[0].functionSelectors = new bytes4[](1);
+        diamondCut[0].functionSelectors[0] = DiamondCutFacet.diamondCut.selector;
 
-        // Adding diamond loupe functions
-        cut[1] = abi.encodePacked(
-            diamondLoupeFacet,
-            IDiamondLoupe.facetFunctionSelectors.selector,
-            IDiamondLoupe.facets.selector,
-            IDiamondLoupe.facetAddress.selector,
-            IDiamondLoupe.facetAddresses.selector
-        );
+        // adding diamond loupe functions
+        diamondCut[1].facetAddress = _contracts[1];
+        diamondCut[1].functionSelectors = new bytes4[](5);
+        diamondCut[1].functionSelectors[0] = DiamondLoupeFacet.facetFunctionSelectors.selector;
+        diamondCut[1].functionSelectors[1] = DiamondLoupeFacet.facets.selector;
+        diamondCut[1].functionSelectors[2] = DiamondLoupeFacet.facetAddress.selector;
+        diamondCut[1].functionSelectors[3] = DiamondLoupeFacet.facetAddresses.selector;
+        diamondCut[1].functionSelectors[4] = DiamondLoupeFacet.supportsInterface.selector;
 
-        // Adding supportsInterface function
-        cut[2] = abi.encodePacked(address(this), IERC165.supportsInterface.selector);
+        // adding ownership functions
+        diamondCut[2].facetAddress = _contracts[2];
+        diamondCut[2].functionSelectors = new bytes4[](2);
+        diamondCut[2].functionSelectors[0] = OwnershipFacet.transferOwnership.selector;
+        diamondCut[2].functionSelectors[1] = OwnershipFacet.owner.selector;
 
-        cut[3] = abi.encodePacked(
-            aavegotchiNFT,
-            AavegotchiNFT.mintAavegotchi.selector,
-            AavegotchiNFT.getAavegotchiSVG.selector,
-            AavegotchiNFT.getFirstAavegotchi.selector            
-        );
+        diamondCut[3].facetAddress = address(aavegotchiNFT);
+        diamondCut[3].functionSelectors = new bytes4[](3);
+        diamondCut[3].functionSelectors[0] = AavegotchiNFT.mintAavegotchi.selector;
+        diamondCut[3].functionSelectors[1] = AavegotchiNFT.getAavegotchiSVG.selector;
+        diamondCut[3].functionSelectors[2] = AavegotchiNFT.getFirstAavegotchi.selector;
 
-        cut[4] = abi.encodePacked(
-            svgStorage,
-            SVGStorage.storeAavegotchiLayersSVG.selector,
-            SVGStorage.storeWearablesSVG.selector
-        );
+        diamondCut[4].facetAddress = address(svgStorage);
+        diamondCut[4].functionSelectors = new bytes4[](2);
+        diamondCut[4].functionSelectors[0] = SVGStorage.storeAavegotchiLayersSVG.selector;
+        diamondCut[4].functionSelectors[1] = SVGStorage.storeWearablesSVG.selector;
 
-        cut[5] = abi.encodePacked(
-            wearables,
-            Wearables.mintWearables.selector,
-            Wearables.transferToParent.selector,
-            Wearables.transferFromParent.selector,
-            Wearables.wearablesBalances.selector,
-            Wearables.balanceOfToken.selector
-        );
+        diamondCut[5].facetAddress = address(wearables);
+        diamondCut[5].functionSelectors = new bytes4[](3);
+        diamondCut[5].functionSelectors[0] = Wearables.mintWearables.selector;
+        diamondCut[5].functionSelectors[1] = Wearables.transferToParent.selector;
+        diamondCut[5].functionSelectors[2] = Wearables.transferFromParent.selector;
+        diamondCut[5].functionSelectors[2] = Wearables.wearablesBalances.selector;
+        diamondCut[5].functionSelectors[2] = Wearables.balanceOfToken.selector;
 
         // execute non-standard internal diamondCut function to add functions
-        DiamondLib.diamondCut(cut);
-        
+        LibDiamondCut.diamondCut(diamondCut);
+
         // adding ERC165 data
         ds.supportedInterfaces[IERC165.supportsInterface.selector] = true;
-        ds.supportedInterfaces[IDiamond.diamondCut.selector] = true;
-        bytes4 interfaceID = IDiamondLoupe.facets.selector ^ IDiamondLoupe.facetFunctionSelectors.selector ^ IDiamondLoupe.facetAddresses.selector ^ IDiamondLoupe.facetAddress.selector;
+        ds.supportedInterfaces[IDiamondCut.diamondCut.selector] = true;
+        bytes4 interfaceID = IDiamondLoupe.facets.selector ^
+            IDiamondLoupe.facetFunctionSelectors.selector ^
+            IDiamondLoupe.facetAddresses.selector ^
+            IDiamondLoupe.facetAddress.selector;
         ds.supportedInterfaces[interfaceID] = true;
     }
 
-    // This is an immutable functions because it is defined directly in the diamond.
-    // Why is it here instead of in a facet?  No reason, just to show an immutable function.
-    // This implements ERC-165.
-    function supportsInterface(bytes4 _interfaceID) external view returns (bool) {
-        DiamondLib.Storage storage ds = DiamondLib.getStorage();
-        return ds.supportedInterfaces[_interfaceID];
-    }
-
-    // Finds facet for function that is called and executes the
-    // function if it is found and returns any value.
+    // Find facet for function that is called and execute the
+    // function if a facet is found and return any value.
     fallback() external payable {
-        DiamondLib.Storage storage ds;
-        bytes32 position = DiamondLib.DIAMOND_STORAGE_POSITION;
-        assembly { ds.slot := position }
+        LibDiamondStorage.DiamondStorage storage ds;
+        bytes32 position = LibDiamondStorage.DIAMOND_STORAGE_POSITION;
+        assembly {
+            ds.slot := position
+        }
         address facet = address(bytes20(ds.facets[msg.sig]));
-        require(facet != address(0));   
-        assembly {            
+        require(facet != address(0));
+        assembly {
             calldatacopy(0, 0, calldatasize())
-            let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)            
+            let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)
             returndatacopy(0, 0, returndatasize())
             switch result
-            case 0 {revert(0, returndatasize())}
-            default {return (0, returndatasize())}
+                case 0 {
+                    revert(0, returndatasize())
+                }
+                default {
+                    return(0, returndatasize())
+                }
         }
     }
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity 0.7.1;
 
-import '../libs/ALib.sol';
+import "../libraries/ALib.sol";
 
 /**
     Note: The ERC-165 identifier for this interface is 0x4e2312e0.
@@ -20,7 +20,13 @@ interface ERC1155TokenReceiver {
         @param _data      Additional data with no specified format
         @return           `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`
     */
-    function onERC1155Received(address _operator, address _from, uint256 _id, uint256 _value, bytes calldata _data) external returns(bytes4);
+    function onERC1155Received(
+        address _operator,
+        address _from,
+        uint256 _id,
+        uint256 _value,
+        bytes calldata _data
+    ) external returns (bytes4);
 
     /**
         @notice Handle the receipt of multiple ERC1155 token types.
@@ -35,46 +41,39 @@ interface ERC1155TokenReceiver {
         @param _data      Additional data with no specified format
         @return           `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`
     */
-    function onERC1155BatchReceived(address _operator, address _from, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external returns(bytes4);       
+    function onERC1155BatchReceived(
+        address _operator,
+        address _from,
+        uint256[] calldata _ids,
+        uint256[] calldata _values,
+        bytes calldata _data
+    ) external returns (bytes4);
 }
 
 contract Wearables {
+    bytes4 public constant ERC1155_ERC165 = 0xd9b67a26; // ERC-165 identifier for the main token standard.
+    bytes4 public constant ERC1155_ERC165_TOKENRECEIVER = 0x4e2312e0; // ERC-165 identifier for the `ERC1155TokenReceiver` support (i.e. `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)")) ^ bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).
+    bytes4 public constant ERC1155_ACCEPTED = 0xf23a6e61; // Return value from `onERC1155Received` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`).
+    bytes4 public constant ERC1155_BATCH_ACCEPTED = 0xbc197c81; // Return value from `onERC1155BatchReceived` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).
 
-    bytes4 constant public ERC1155_ERC165 = 0xd9b67a26; // ERC-165 identifier for the main token standard.
-    bytes4 constant public ERC1155_ERC165_TOKENRECEIVER = 0x4e2312e0; // ERC-165 identifier for the `ERC1155TokenReceiver` support (i.e. `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)")) ^ bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).
-    bytes4 constant public ERC1155_ACCEPTED = 0xf23a6e61; // Return value from `onERC1155Received` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`).
-    bytes4 constant public ERC1155_BATCH_ACCEPTED = 0xbc197c81; // Return value from `onERC1155BatchReceived` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).
-
-    
     /// @dev This emits when a token is transferred to an ERC721 token
     /// @param _toContract The contract the token is transferred to
     /// @param _toTokenId The token the token is transferred to
     /// @param _tokenTypeId The token type that is being transferred
     /// @param _value The amount of tokens transferred
-    event TransferToParent(
-        address indexed _toContract, 
-        uint256 indexed _toTokenId, 
-        uint256 indexed _tokenTypeId,
-        uint256 _value
-    );
+    event TransferToParent(address indexed _toContract, uint256 indexed _toTokenId, uint256 indexed _tokenTypeId, uint256 _value);
 
-    
     /// @dev This emits when a token is transferred from an ERC721 token
     /// @param _fromContract The contract the token is transferred from
     /// @param _fromTokenId The token the token is transferred from
     /// @param _tokenTypeId The token type that is being transferred
     /// @param _value The amount of tokens transferred
-    event TransferFromParent(
-        address indexed _fromContract, 
-        uint256 indexed _fromTokenId,
-        uint256 indexed _tokenTypeId, 
-        uint256 _value        
-    );
-    
+    event TransferFromParent(address indexed _fromContract, uint256 indexed _fromTokenId, uint256 indexed _tokenTypeId, uint256 _value);
+
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
-  /**
+    /**
         @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
         The `_operator` argument MUST be the address of an account/contract that is approved to make the transfer (SHOULD be msg.sender).
         The `_from` argument MUST be the address of the holder whose balance is decreased.
@@ -108,38 +107,37 @@ contract Wearables {
         URIs are defined in RFC 3986.
         The URI MUST point to a JSON file that conforms to the "ERC-1155 Metadata URI JSON Schema".
     */
-    event URI(string _value, uint256 indexed _id);  
+    event URI(string _value, uint256 indexed _id);
 
     // Mint a set of wearables.
     // How many wearables there are is determined by how many wearable SVG files have been uploaded.
     // The wearbles are minted to the account that calls this function
     function mintWearables() external {
         ALib.Storage storage ags = ALib.getStorage();
-        uint count = ags.wearablesSVG.length;
-        for(uint i = 1; i < count; i++) {
-            uint id = i << 240;
+        uint256 count = ags.wearablesSVG.length;
+        for (uint256 i = 1; i < count; i++) {
+            uint256 id = i << 240;
             ags.wearables[msg.sender][id]++;
             emit TransferSingle(msg.sender, address(0), msg.sender, id, 1);
-        }        
+        }
     }
 
     // Returns balance for each wearable that exists for an account
-    function wearablesBalances(address _account) external view returns (uint[] memory bals) {
+    function wearablesBalances(address _account) external view returns (uint256[] memory bals) {
         ALib.Storage storage ags = ALib.getStorage();
-        uint count = ags.wearablesSVG.length;
-        bals = new uint[](count-1);
-        for(uint i = 1; i < count; i++) {
-            uint id = i << 240;
-            bals[i-1] = ags.wearables[_account][id];
+        uint256 count = ags.wearablesSVG.length;
+        bals = new uint256[](count - 1);
+        for (uint256 i = 1; i < count; i++) {
+            uint256 id = i << 240;
+            bals[i - 1] = ags.wearables[_account][id];
         }
     }
 
     // The category id for an aavegotchi tokenid is 0
     // So this checks to see if a token id is an Aavegotchi or not
-    function isAavegotchi(uint _id) internal pure returns (bool) {
+    function isAavegotchi(uint256 _id) internal pure returns (bool) {
         return _id >> 240 == 0;
     }
-    
 
     /**
         @notice Transfers `_value` amount of an `_id` from the `_from` address to the `_to` address specified (with safety call).
@@ -155,55 +153,65 @@ contract Wearables {
         @param _value   Transfer amount
         @param _data    Additional data with no specified format, MUST be sent unaltered in call to `onERC1155Received` on `_to`
     */
-    function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _id,
+        uint256 _value,
+        bytes calldata _data
+    ) external {
         require(_to != address(0), "Wearables: Can't transfer to 0 address");
         ALib.Storage storage ags = ALib.getStorage();
         require(msg.sender == _from || ags.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
-        if(isAavegotchi(_id)) {
+        if (isAavegotchi(_id)) {
             require(_value == 1, "Wearables: Can only transfer 1 aavegotchi");
             address owner = ags.owner[_id].owner;
-            uint index = ags.owner[_id].index;
-            require(owner != address(0), "Wearables: Invalid tokenId or can't be transferred");            
-            require(_from == owner, "Wearable: _from is not owner, transfer failed");        
-            ags.owner[_id] = ALib.OwnerAndIndex({
-                owner: _to, index: uint32(ags.aavegotchis[_to].length)
-            });
-            ags.aavegotchis[_to].push(_id);        
+            uint256 index = ags.owner[_id].index;
+            require(owner != address(0), "Wearables: Invalid tokenId or can't be transferred");
+            require(_from == owner, "Wearable: _from is not owner, transfer failed");
+            ags.owner[_id] = ALib.OwnerAndIndex({owner: _to, index: uint32(ags.aavegotchis[_to].length)});
+            ags.aavegotchis[_to].push(_id);
 
-            uint lastIndex = ags.aavegotchis[_from].length - 1;
-            if(index != lastIndex) {
-                uint lastTokenId = ags.aavegotchis[_from][lastIndex];
+            uint256 lastIndex = ags.aavegotchis[_from].length - 1;
+            if (index != lastIndex) {
+                uint256 lastTokenId = ags.aavegotchis[_from][lastIndex];
                 ags.aavegotchis[_from][index] = lastTokenId;
                 ags.owner[lastTokenId].index = uint32(index);
             }
             ags.aavegotchis[_from].pop();
-            if(ags.approved[_id] != address(0)) {
+            if (ags.approved[_id] != address(0)) {
                 delete ags.approved[_id];
                 emit Approval(owner, address(0), _id);
             }
             emit Transfer(_from, _to, _id);
-        } 
-        else {
-            uint bal = ags.wearables[_from][_id];
+        } else {
+            uint256 bal = ags.wearables[_from][_id];
             require(_value <= bal, "Wearables: Doesn't have that many to transfer");
             ags.wearables[_from][_id] = bal - _value;
             ags.wearables[_to][_id] += _value;
-        }                    
+        }
         emit TransferSingle(msg.sender, _from, _to, _id, _value);
-        uint size;
-        assembly { size := extcodesize(_to) }
+        uint256 size;
+        assembly {
+            size := extcodesize(_to)
+        }
         if (size > 0) {
-            require(ERC1155_ACCEPTED == ERC1155TokenReceiver(_to).onERC1155Received(msg.sender, _from, _id, _value, _data), "Wearables: Transfer rejected/failed by _to");            
-        }        
+            require(
+                ERC1155_ACCEPTED == ERC1155TokenReceiver(_to).onERC1155Received(msg.sender, _from, _id, _value, _data),
+                "Wearables: Transfer rejected/failed by _to"
+            );
+        }
     }
+
     struct BatchVars {
-        uint id;
-        uint value;
-        uint bal;
+        uint256 id;
+        uint256 value;
+        uint256 bal;
         address owner;
-        uint index;
-        uint lastIndex;
+        uint256 index;
+        uint256 lastIndex;
     }
+
     /**
         @notice Transfers `_values` amount(s) of `_ids` from the `_from` address to the `_to` address specified (with safety call).
         @dev Caller must be approved to manage the tokens being transferred out of the `_from` account (see "Approval" section of the standard).
@@ -220,50 +228,58 @@ contract Wearables {
         @param _values  Transfer amounts per token type (order and length must match _ids array)
         @param _data    Additional data with no specified format, MUST be sent unaltered in call to the `ERC1155TokenReceiver` hook(s) on `_to`
     */
-    function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external {
+    function safeBatchTransferFrom(
+        address _from,
+        address _to,
+        uint256[] calldata _ids,
+        uint256[] calldata _values,
+        bytes calldata _data
+    ) external {
         require(_to != address(0), "Wearables: Can't transfer to 0 address");
         ALib.Storage storage ags = ALib.getStorage();
-        require(msg.sender == _from || ags.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");        
-        for(uint i; i < _ids.length; i++) {
+        require(msg.sender == _from || ags.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
+        for (uint256 i; i < _ids.length; i++) {
             BatchVars memory v;
             v.id = _ids[i];
             v.value = _values[i];
             v.bal = ags.wearables[_from][_ids[i]];
-            if(isAavegotchi(v.id)) {
+            if (isAavegotchi(v.id)) {
                 v.owner = ags.owner[v.id].owner;
                 v.index = ags.owner[v.id].index;
-                require(v.owner != address(0), "Wearables: Invalid tokenId or can't be transferred");                
-                require(_from == v.owner, "Wearables: _from is not owner, transfer failed");        
-                ags.owner[v.id] = ALib.OwnerAndIndex({
-                    owner: _to, index: uint32(ags.aavegotchis[_to].length)
-                });
-                ags.aavegotchis[_to].push(v.id);        
+                require(v.owner != address(0), "Wearables: Invalid tokenId or can't be transferred");
+                require(_from == v.owner, "Wearables: _from is not owner, transfer failed");
+                ags.owner[v.id] = ALib.OwnerAndIndex({owner: _to, index: uint32(ags.aavegotchis[_to].length)});
+                ags.aavegotchis[_to].push(v.id);
 
                 v.lastIndex = ags.aavegotchis[_from].length - 1;
-                if(v.index != v.lastIndex) {
-                    uint lastTokenId = ags.aavegotchis[_from][v.lastIndex];
+                if (v.index != v.lastIndex) {
+                    uint256 lastTokenId = ags.aavegotchis[_from][v.lastIndex];
                     ags.aavegotchis[_from][v.index] = lastTokenId;
                     ags.owner[lastTokenId].index = uint32(v.index);
                 }
                 ags.aavegotchis[_from].pop();
-                if(ags.approved[v.id] != address(0)) {
+                if (ags.approved[v.id] != address(0)) {
                     delete ags.approved[v.id];
                     emit Approval(v.owner, address(0), v.id);
                 }
                 emit Transfer(_from, _to, v.id);
-            }
-            else {
+            } else {
                 require(v.value <= v.bal, "Wearables: Doesn't have that many to transfer");
                 ags.wearables[_from][v.id] = v.bal - v.value;
-                ags.wearables[_to][v.id] += v.value;            
-            }            
+                ags.wearables[_to][v.id] += v.value;
+            }
         }
         emit TransferBatch(msg.sender, _from, _to, _ids, _values);
-        uint size;
-        assembly { size := extcodesize(_to) }
+        uint256 size;
+        assembly {
+            size := extcodesize(_to)
+        }
         if (size > 0) {
-            require(ERC1155_BATCH_ACCEPTED == ERC1155TokenReceiver(_to).onERC1155BatchReceived(msg.sender, _from, _ids, _values, _data), "Wearables: Transfer rejected/failed by _to");
-        }        
+            require(
+                ERC1155_BATCH_ACCEPTED == ERC1155TokenReceiver(_to).onERC1155BatchReceived(msg.sender, _from, _ids, _values, _data),
+                "Wearables: Transfer rejected/failed by _to"
+            );
+        }
     }
 
     /// @notice Transfer tokens from owner address to a token
@@ -272,18 +288,24 @@ contract Wearables {
     /// @param _toContract The ERC721 contract of the receiving token
     /// @param _toTokenId The receiving token
     /// @param _value The amount of tokens to transfer
-    function transferToParent(address _from, address _toContract, uint _toTokenId, uint _id, uint _value) external {
+    function transferToParent(
+        address _from,
+        address _toContract,
+        uint256 _toTokenId,
+        uint256 _id,
+        uint256 _value
+    ) external {
         require(_toContract != address(0), "Wearables: Can't transfer to 0 address");
         ALib.Storage storage ags = ALib.getStorage();
-        require(msg.sender == _from || ags.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");        
+        require(msg.sender == _from || ags.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
         require(!isAavegotchi(_id), "Wearables: Cannot transfer aavegotchi to token");
 
-        uint bal = ags.wearables[_from][_id];
+        uint256 bal = ags.wearables[_from][_id];
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
         ags.wearables[_from][_id] = bal - _value;
         ags.nftBalances[_toContract][_toTokenId][_id] += _value;
         emit TransferSingle(msg.sender, _from, _toContract, _id, _value);
-        emit TransferToParent(_toContract,_toTokenId, _id, _value);          
+        emit TransferToParent(_toContract, _toTokenId, _id, _value);
     }
 
     /// @notice Transfer token from a token to an address
@@ -292,20 +314,25 @@ contract Wearables {
     /// @param _to The address the token is transferred to
     /// @param _id ID of the token
     /// @param _value The amount of tokens to transfer
-    function transferFromParent(address _fromContract, uint _fromTokenId, address _to, uint _id, uint _value) external {
+    function transferFromParent(
+        address _fromContract,
+        uint256 _fromTokenId,
+        address _to,
+        uint256 _id,
+        uint256 _value
+    ) external {
         require(_to != address(0), "Wearables: Can't transfer to 0 address");
         ALib.Storage storage ags = ALib.getStorage();
         address owner = ags.owner[_fromTokenId].owner;
         require(msg.sender == owner || ags.operators[owner][msg.sender], "Wearables: Not owner and not approved to transfer");
         require(!isAavegotchi(_id), "Wearables: Cannot transfer aavegotchi to token");
-        uint bal = ags.nftBalances[_fromContract][_fromTokenId][_id];
+        uint256 bal = ags.nftBalances[_fromContract][_fromTokenId][_id];
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
         ags.nftBalances[_fromContract][_fromTokenId][_id] = bal - _value;
-        ags.wearables[_to][_id] += _value;                   
+        ags.wearables[_to][_id] += _value;
         emit TransferSingle(msg.sender, _fromContract, _to, _id, _value);
-        emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);        
+        emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
     }
-
 
     /// @notice Transfer a token from a token to another token
     /// @param _fromContract The address of the owning contract
@@ -314,12 +341,19 @@ contract Wearables {
     /// @param _toTokenId The receiving token
     /// @param _id ID of the token
     /// @param _value The amount tokens to transfer
-    function transferAsChild(address _fromContract, uint _fromTokenId, address _toContract, uint _toTokenId, uint _id, uint _value) external {
+    function transferAsChild(
+        address _fromContract,
+        uint256 _fromTokenId,
+        address _toContract,
+        uint256 _toTokenId,
+        uint256 _id,
+        uint256 _value
+    ) external {
         require(_toContract != address(0), "Wearables: Can't transfer to 0 address");
         ALib.Storage storage ags = ALib.getStorage();
         address owner = ags.owner[_fromTokenId].owner;
         require(msg.sender == owner || ags.operators[owner][msg.sender], "Wearables: Not owner and not approved to transfer");
-        uint bal = ags.nftBalances[_fromContract][_fromTokenId][_id];
+        uint256 bal = ags.nftBalances[_fromContract][_fromTokenId][_id];
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
         ags.nftBalances[_fromContract][_fromTokenId][_id] = bal - _value;
         ags.nftBalances[_toContract][_toTokenId][_id] += _value;
@@ -335,13 +369,12 @@ contract Wearables {
         @return bal    The _owner's balance of the token type requested
      */
     function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal) {
-        ALib.Storage storage ags = ALib.getStorage();      
-        if(isAavegotchi(_id)) {
-            if(ags.owner[_id].owner == _owner) {
-                bal = 1;        
-            }            
-        }
-        else {
+        ALib.Storage storage ags = ALib.getStorage();
+        if (isAavegotchi(_id)) {
+            if (ags.owner[_id].owner == _owner) {
+                bal = 1;
+            }
+        } else {
             bal = ags.wearables[_owner][_id];
         }
     }
@@ -351,12 +384,14 @@ contract Wearables {
     /// @param _tokenId The ID of the parent token
     /// @param _id     ID of the token
     /// @return value The balance of the token
-    function balanceOfToken(address _tokenContract, uint _tokenId, uint _id) external view returns (uint256 value) {
+    function balanceOfToken(
+        address _tokenContract,
+        uint256 _tokenId,
+        uint256 _id
+    ) external view returns (uint256 value) {
         ALib.Storage storage ags = ALib.getStorage();
         value = ags.nftBalances[_tokenContract][_tokenId][_id];
     }
-
-
 
     /**
         @notice Get the balance of multiple account/token pairs
@@ -366,19 +401,18 @@ contract Wearables {
      */
     function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory bals) {
         ALib.Storage storage ags = ALib.getStorage();
-        bals = new uint[](_owners.length);
-        for(uint i; i < 0; i++) {
-            uint bal;
-            uint id = _ids[i];
+        bals = new uint256[](_owners.length);
+        for (uint256 i; i < 0; i++) {
+            uint256 bal;
+            uint256 id = _ids[i];
             address owner = _owners[i];
-            if(isAavegotchi(id)) {
-                if(ags.owner[id].owner == owner) {
+            if (isAavegotchi(id)) {
+                if (ags.owner[id].owner == owner) {
                     bal = 1;
                 }
-            }
-            else {
+            } else {
                 bal = ags.wearables[owner][id];
-            }        
+            }
             bals[i] = bal;
         }
     }

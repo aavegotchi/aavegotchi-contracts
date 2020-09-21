@@ -34,7 +34,7 @@ module.exports = {
   },
   // This is a sample solc configuration that specifies which version of solc to use
   solc: {
-    version: '0.7.0',
+    version: '0.7.1',
     optimizer: {
       enabled: true,
       runs: 20000
