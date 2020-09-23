@@ -2,8 +2,9 @@
 pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "../libraries/ALib.sol";
-import "../facets/SVGStorage.sol";
+import "../libraries/LibA.sol";
+import "./SVGStorage.sol";
+import "./GHSTERC20.sol";
 
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
 interface ERC721TokenReceiver {
@@ -43,39 +44,52 @@ contract AavegotchiNFT {
     ///  The operator can manage all NFTs of the owner.
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
-    // Makes a new aavegotchi.
-    // _traits is up to 16 two byte integers. Each integer is an SVG layer id.
-    // The layer ids are used to determine which SVG layers to use with an aavegotchi
-    function mintAavegotchi(bytes32 _traits) external {
-        ALib.Storage storage ags = ALib.getStorage();
-        uint256 tokenId = ags.totalSupply++;
-        uint32 ownerIndex = uint32(ags.aavegotchis[msg.sender].length);
-        ags.aavegotchis[msg.sender].push(tokenId);
-        ags.owner[tokenId] = ALib.OwnerAndIndex({owner: msg.sender, index: ownerIndex});
-        ags.traits[tokenId] = _traits;
-        emit Transfer(address(0), msg.sender, tokenId);
-        emit TransferSingle(msg.sender, address(0), msg.sender, tokenId, 1);
+    function buyPortals(uint256 _ghst) external {
+        LibA.Storage storage ags = LibA.diamondStorage();
+        require(_ghst >= 100e18, "AavegotchiNFT: Not enough GHST to buy portal");
+        for (uint256 i; i < _ghst / 100e18; i++) {
+            uint256 tokenId = ags.totalSupply++;
+            uint32 ownerIndex = uint32(ags.aavegotchiOwnerEnumeration[msg.sender].length);
+            ags.aavegotchiOwnerEnumeration[msg.sender].push(tokenId);
+            ags.aavegotchis[tokenId].owner = msg.sender;
+            ags.aavegotchis[tokenId].ownerEnumerationIndex = ownerIndex;
+            ags.aavegotchis[tokenId].isPortal = true;
+            emit Transfer(address(0), msg.sender, tokenId);
+            emit TransferSingle(msg.sender, address(0), msg.sender, tokenId, 1);
+        }
+        uint256 amount = _ghst - (_ghst % 100e18);
+        uint256 burnAmount = amount / 10;
+        GHSTERC20(ags.ghstDiamond).transferFrom(msg.sender, address(-1), burnAmount);
+        GHSTERC20(ags.ghstDiamond).transferFrom(msg.sender, address(this), amount - burnAmount);
+    }
+
+    function ghstAddress() external view returns (address contract_) {
+        contract_ = LibA.diamondStorage().ghstDiamond;
     }
 
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
     function getAavegotchiSVG(uint256 _tokenId) public view returns (string memory ag) {
-        ALib.Storage storage ags = ALib.getStorage();
-        bytes32 traits = ags.traits[_tokenId];
-        require(traits != 0, "AavegotchiNFT: _tokenId does not exist");
-        uint256 svgId;
+        LibA.Storage storage ags = LibA.diamondStorage();
         bytes memory svg;
-        // Find and get up to 16 SVG layers
-        for (uint256 i; i < 16; i++) {
-            svgId = uint256((traits << (i * 16)) >> 240);
-            if (svgId > 0) {
-                svg = abi.encodePacked(svg, ALib.getAavegotchiLayerSVG(svgId));
+        if (ags.aavegotchis[_tokenId].isPortal) {
+            svg = LibA.getSVG(ags.itemsSVG, 0);
+        } else {
+            bytes32 traits = ags.aavegotchis[_tokenId].traits;
+            require(traits != 0, "AavegotchiNFT: _tokenId does not exist");
+            uint256 svgId;
+            // Find and get up to 16 SVG layers
+            for (uint256 i; i < 16; i++) {
+                svgId = uint256((traits << (i * 16)) >> 240);
+                if (svgId > 0) {
+                    svg = abi.encodePacked(svg, LibA.getSVG(ags.aavegotchiLayersSVG, svgId));
+                }
             }
-        }
-        // add any wearables here
-        uint256 count = ags.wearablesSVG.length;
-        for (uint256 i = 0; i < count; i++) {
-            if (ags.nftBalances[address(this)][_tokenId][i << 240] > 0) {
-                svg = abi.encodePacked(svg, ALib.getWearablesSVG(i));
+            // add any wearables here
+            uint256 count = ags.wearablesSVG.length;
+            for (uint256 i = 0; i < count; i++) {
+                if (ags.nftBalances[address(this)][_tokenId][i << 240] > 0) {
+                    svg = abi.encodePacked(svg, LibA.getSVG(ags.wearablesSVG, i));
+                }
             }
         }
         bytes memory header = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">';
@@ -85,11 +99,11 @@ contract AavegotchiNFT {
 
     // get the first Aavegotchi that someone uses. This function is for demo purposes.
     function getFirstAavegotchi(address _owner) external view returns (uint256 tokenId, string memory svg) {
-        ALib.Storage storage ags = ALib.getStorage();
+        LibA.Storage storage ags = LibA.diamondStorage();
         require(_owner != address(0), "Aavegotchi: Owner can't be zero address");
-        uint256 bal = ags.aavegotchis[_owner].length;
+        uint256 bal = ags.aavegotchiOwnerEnumeration[_owner].length;
         if (bal > 0) {
-            tokenId = ags.aavegotchis[_owner][0];
+            tokenId = ags.aavegotchiOwnerEnumeration[_owner][0];
             svg = getAavegotchiSVG(tokenId);
         }
     }
@@ -100,8 +114,8 @@ contract AavegotchiNFT {
     /// @param _owner An address for whom to query the balance
     /// @return balance The number of NFTs owned by `_owner`, possibly zero
     function balanceOf(address _owner) external view returns (uint256 balance) {
-        ALib.Storage storage ags = ALib.getStorage();
-        balance = ags.aavegotchis[_owner].length;
+        LibA.Storage storage ags = LibA.diamondStorage();
+        balance = ags.aavegotchiOwnerEnumeration[_owner].length;
     }
 
     /// @notice Find the owner of an NFT
@@ -110,8 +124,8 @@ contract AavegotchiNFT {
     /// @param _tokenId The identifier for an NFT
     /// @return owner The address of the owner of the NFT
     function ownerOf(uint256 _tokenId) external view returns (address owner) {
-        ALib.Storage storage ags = ALib.getStorage();
-        owner = ags.owner[_tokenId].owner;
+        LibA.Storage storage ags = LibA.diamondStorage();
+        owner = ags.aavegotchis[_tokenId].owner;
     }
 
     /// @notice Transfers the ownership of an NFT from one address to another address
@@ -194,25 +208,25 @@ contract AavegotchiNFT {
         uint256 _tokenId
     ) internal {
         require(_to != address(0), "ER721: Can't transfer to 0 address");
-        ALib.Storage storage ags = ALib.getStorage();
-        address owner = ags.owner[_tokenId].owner;
-        uint256 index = ags.owner[_tokenId].index;
+        LibA.Storage storage ags = LibA.diamondStorage();
+        address owner = ags.aavegotchis[_tokenId].owner;
+        uint256 index = ags.aavegotchis[_tokenId].ownerEnumerationIndex;
         require(owner != address(0), "ERC721: Invalid tokenId or can't be transferred");
         require(
             msg.sender == owner || ags.operators[owner][msg.sender] || ags.approved[_tokenId] == msg.sender,
             "ERC721: Not owner or approved to transfer"
         );
         require(_from == owner, "ERC721: _from is not owner, transfer failed");
-        ags.owner[_tokenId] = ALib.OwnerAndIndex({owner: _to, index: uint32(ags.aavegotchis[_to].length)});
-        ags.aavegotchis[_to].push(_tokenId);
-
-        uint256 lastIndex = ags.aavegotchis[_from].length - 1;
+        ags.aavegotchis[_tokenId].owner = _to;
+        ags.aavegotchis[_tokenId].ownerEnumerationIndex = uint32(ags.aavegotchiOwnerEnumeration[_to].length);
+        ags.aavegotchiOwnerEnumeration[_to].push(_tokenId);
+        uint256 lastIndex = ags.aavegotchiOwnerEnumeration[_from].length - 1;
         if (index != lastIndex) {
-            uint256 lastTokenId = ags.aavegotchis[_from][lastIndex];
-            ags.aavegotchis[_from][index] = lastTokenId;
-            ags.owner[lastTokenId].index = uint32(index);
+            uint256 lastTokenId = ags.aavegotchiOwnerEnumeration[_from][lastIndex];
+            ags.aavegotchiOwnerEnumeration[_from][index] = lastTokenId;
+            ags.aavegotchis[lastTokenId].ownerEnumerationIndex = uint32(index);
         }
-        ags.aavegotchis[_from].pop();
+        ags.aavegotchiOwnerEnumeration[_from].pop();
         if (ags.approved[_tokenId] != address(0)) {
             delete ags.approved[_tokenId];
             emit Approval(owner, address(0), _tokenId);
@@ -228,8 +242,8 @@ contract AavegotchiNFT {
     /// @param _approved The new approved NFT controller
     /// @param _tokenId The NFT to approve
     function approve(address _approved, uint256 _tokenId) external {
-        ALib.Storage storage ags = ALib.getStorage();
-        address owner = ags.owner[_tokenId].owner;
+        LibA.Storage storage ags = LibA.diamondStorage();
+        address owner = ags.aavegotchis[_tokenId].owner;
         require(owner == msg.sender || ags.operators[owner][msg.sender], "ERC721: Not owner or operator of token.");
         ags.approved[_tokenId] = _approved;
         emit Approval(owner, _approved, _tokenId);
@@ -242,7 +256,7 @@ contract AavegotchiNFT {
     /// @param _operator Address to add to the set of authorized operators
     /// @param _approved True if the operator is approved, false to revoke approval
     function setApprovalForAll(address _operator, bool _approved) external {
-        ALib.Storage storage ags = ALib.getStorage();
+        LibA.Storage storage ags = LibA.diamondStorage();
         ags.operators[msg.sender][_operator] = _approved;
         emit ApprovalForAll(msg.sender, _operator, _approved);
     }
@@ -252,7 +266,7 @@ contract AavegotchiNFT {
     /// @param _tokenId The NFT to find the approved address for
     /// @return approved The approved address for this NFT, or the zero address if there is none
     function getApproved(uint256 _tokenId) external view returns (address approved) {
-        ALib.Storage storage ags = ALib.getStorage();
+        LibA.Storage storage ags = LibA.diamondStorage();
         require(_tokenId < ags.totalSupply, "ERC721: tokenId is invalid");
         approved = ags.approved[_tokenId];
     }
@@ -262,7 +276,7 @@ contract AavegotchiNFT {
     /// @param _operator The address that acts on behalf of the owner
     /// @return approved True if `_operator` is an approved operator for `_owner`, false otherwise
     function isApprovedForAll(address _owner, address _operator) external view returns (bool approved) {
-        ALib.Storage storage ags = ALib.getStorage();
+        LibA.Storage storage ags = LibA.diamondStorage();
         approved = ags.operators[_owner][_operator];
     }
 }

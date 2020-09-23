@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-import "../libraries/ALib.sol";
+import "../libraries/LibA.sol";
 
 /**
     Note: The ERC-165 identifier for this interface is 0x4e2312e0.
@@ -113,7 +113,7 @@ contract Wearables {
     // How many wearables there are is determined by how many wearable SVG files have been uploaded.
     // The wearbles are minted to the account that calls this function
     function mintWearables() external {
-        ALib.Storage storage ags = ALib.getStorage();
+        LibA.Storage storage ags = LibA.diamondStorage();
         uint256 count = ags.wearablesSVG.length;
         for (uint256 i = 1; i < count; i++) {
             uint256 id = i << 240;
@@ -124,7 +124,7 @@ contract Wearables {
 
     // Returns balance for each wearable that exists for an account
     function wearablesBalances(address _account) external view returns (uint256[] memory bals) {
-        ALib.Storage storage ags = ALib.getStorage();
+        LibA.Storage storage ags = LibA.diamondStorage();
         uint256 count = ags.wearablesSVG.length;
         bals = new uint256[](count - 1);
         for (uint256 i = 1; i < count; i++) {
@@ -161,24 +161,25 @@ contract Wearables {
         bytes calldata _data
     ) external {
         require(_to != address(0), "Wearables: Can't transfer to 0 address");
-        ALib.Storage storage ags = ALib.getStorage();
+        LibA.Storage storage ags = LibA.diamondStorage();
         require(msg.sender == _from || ags.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
         if (isAavegotchi(_id)) {
             require(_value == 1, "Wearables: Can only transfer 1 aavegotchi");
-            address owner = ags.owner[_id].owner;
-            uint256 index = ags.owner[_id].index;
+            address owner = ags.aavegotchis[_id].owner;
+            uint256 index = ags.aavegotchis[_id].ownerEnumerationIndex;
             require(owner != address(0), "Wearables: Invalid tokenId or can't be transferred");
             require(_from == owner, "Wearable: _from is not owner, transfer failed");
-            ags.owner[_id] = ALib.OwnerAndIndex({owner: _to, index: uint32(ags.aavegotchis[_to].length)});
-            ags.aavegotchis[_to].push(_id);
+            ags.aavegotchis[_id].owner = _to;
+            ags.aavegotchis[_id].ownerEnumerationIndex = uint32(ags.aavegotchiOwnerEnumeration[_to].length);
+            ags.aavegotchiOwnerEnumeration[_to].push(_id);
 
-            uint256 lastIndex = ags.aavegotchis[_from].length - 1;
+            uint256 lastIndex = ags.aavegotchiOwnerEnumeration[_from].length - 1;
             if (index != lastIndex) {
-                uint256 lastTokenId = ags.aavegotchis[_from][lastIndex];
-                ags.aavegotchis[_from][index] = lastTokenId;
-                ags.owner[lastTokenId].index = uint32(index);
+                uint256 lastTokenId = ags.aavegotchiOwnerEnumeration[_from][lastIndex];
+                ags.aavegotchiOwnerEnumeration[_from][index] = lastTokenId;
+                ags.aavegotchis[lastTokenId].ownerEnumerationIndex = uint32(index);
             }
-            ags.aavegotchis[_from].pop();
+            ags.aavegotchiOwnerEnumeration[_from].pop();
             if (ags.approved[_id] != address(0)) {
                 delete ags.approved[_id];
                 emit Approval(owner, address(0), _id);
@@ -236,7 +237,7 @@ contract Wearables {
         bytes calldata _data
     ) external {
         require(_to != address(0), "Wearables: Can't transfer to 0 address");
-        ALib.Storage storage ags = ALib.getStorage();
+        LibA.Storage storage ags = LibA.diamondStorage();
         require(msg.sender == _from || ags.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
         for (uint256 i; i < _ids.length; i++) {
             BatchVars memory v;
@@ -244,20 +245,21 @@ contract Wearables {
             v.value = _values[i];
             v.bal = ags.wearables[_from][_ids[i]];
             if (isAavegotchi(v.id)) {
-                v.owner = ags.owner[v.id].owner;
-                v.index = ags.owner[v.id].index;
+                v.owner = ags.aavegotchis[v.id].owner;
+                v.index = ags.aavegotchis[v.id].ownerEnumerationIndex;
                 require(v.owner != address(0), "Wearables: Invalid tokenId or can't be transferred");
                 require(_from == v.owner, "Wearables: _from is not owner, transfer failed");
-                ags.owner[v.id] = ALib.OwnerAndIndex({owner: _to, index: uint32(ags.aavegotchis[_to].length)});
-                ags.aavegotchis[_to].push(v.id);
+                ags.aavegotchis[v.id].owner = _to;
+                ags.aavegotchis[v.id].ownerEnumerationIndex = uint32(ags.aavegotchiOwnerEnumeration[_to].length);
+                ags.aavegotchiOwnerEnumeration[_to].push(v.id);
 
-                v.lastIndex = ags.aavegotchis[_from].length - 1;
+                v.lastIndex = ags.aavegotchiOwnerEnumeration[_from].length - 1;
                 if (v.index != v.lastIndex) {
-                    uint256 lastTokenId = ags.aavegotchis[_from][v.lastIndex];
-                    ags.aavegotchis[_from][v.index] = lastTokenId;
-                    ags.owner[lastTokenId].index = uint32(v.index);
+                    uint256 lastTokenId = ags.aavegotchiOwnerEnumeration[_from][v.lastIndex];
+                    ags.aavegotchiOwnerEnumeration[_from][v.index] = lastTokenId;
+                    ags.aavegotchis[lastTokenId].ownerEnumerationIndex = uint32(v.index);
                 }
-                ags.aavegotchis[_from].pop();
+                ags.aavegotchiOwnerEnumeration[_from].pop();
                 if (ags.approved[v.id] != address(0)) {
                     delete ags.approved[v.id];
                     emit Approval(v.owner, address(0), v.id);
@@ -296,7 +298,7 @@ contract Wearables {
         uint256 _value
     ) external {
         require(_toContract != address(0), "Wearables: Can't transfer to 0 address");
-        ALib.Storage storage ags = ALib.getStorage();
+        LibA.Storage storage ags = LibA.diamondStorage();
         require(msg.sender == _from || ags.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
         require(!isAavegotchi(_id), "Wearables: Cannot transfer aavegotchi to token");
 
@@ -322,8 +324,8 @@ contract Wearables {
         uint256 _value
     ) external {
         require(_to != address(0), "Wearables: Can't transfer to 0 address");
-        ALib.Storage storage ags = ALib.getStorage();
-        address owner = ags.owner[_fromTokenId].owner;
+        LibA.Storage storage ags = LibA.diamondStorage();
+        address owner = ags.aavegotchis[_fromTokenId].owner;
         require(msg.sender == owner || ags.operators[owner][msg.sender], "Wearables: Not owner and not approved to transfer");
         require(!isAavegotchi(_id), "Wearables: Cannot transfer aavegotchi to token");
         uint256 bal = ags.nftBalances[_fromContract][_fromTokenId][_id];
@@ -350,8 +352,8 @@ contract Wearables {
         uint256 _value
     ) external {
         require(_toContract != address(0), "Wearables: Can't transfer to 0 address");
-        ALib.Storage storage ags = ALib.getStorage();
-        address owner = ags.owner[_fromTokenId].owner;
+        LibA.Storage storage ags = LibA.diamondStorage();
+        address owner = ags.aavegotchis[_fromTokenId].owner;
         require(msg.sender == owner || ags.operators[owner][msg.sender], "Wearables: Not owner and not approved to transfer");
         uint256 bal = ags.nftBalances[_fromContract][_fromTokenId][_id];
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
@@ -369,9 +371,9 @@ contract Wearables {
         @return bal    The _owner's balance of the token type requested
      */
     function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal) {
-        ALib.Storage storage ags = ALib.getStorage();
+        LibA.Storage storage ags = LibA.diamondStorage();
         if (isAavegotchi(_id)) {
-            if (ags.owner[_id].owner == _owner) {
+            if (ags.aavegotchis[_id].owner == _owner) {
                 bal = 1;
             }
         } else {
@@ -389,7 +391,7 @@ contract Wearables {
         uint256 _tokenId,
         uint256 _id
     ) external view returns (uint256 value) {
-        ALib.Storage storage ags = ALib.getStorage();
+        LibA.Storage storage ags = LibA.diamondStorage();
         value = ags.nftBalances[_tokenContract][_tokenId][_id];
     }
 
@@ -400,14 +402,14 @@ contract Wearables {
         @return bals   The _owner's balance of the token types requested (i.e. balance for each (owner, id) pair)
      */
     function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory bals) {
-        ALib.Storage storage ags = ALib.getStorage();
+        LibA.Storage storage ags = LibA.diamondStorage();
         bals = new uint256[](_owners.length);
         for (uint256 i; i < 0; i++) {
             uint256 bal;
             uint256 id = _ids[i];
             address owner = _owners[i];
             if (isAavegotchi(id)) {
-                if (ags.owner[id].owner == owner) {
+                if (ags.aavegotchis[id].owner == owner) {
                     bal = 1;
                 }
             } else {

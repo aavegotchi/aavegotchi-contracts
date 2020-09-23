@@ -17,17 +17,18 @@ import "./interfaces/IDiamondCut.sol";
 import "./interfaces/IDiamondLoupe.sol";
 import "./facets/AavegotchiNFT.sol";
 import "./facets/SVGStorage.sol";
-import "./libraries/ALib.sol";
+import "./libraries/LibA.sol";
 import "./facets/Wearables.sol";
+import "./GHST.sol";
 
 contract Aavegotchi {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    constructor(address[] memory _contracts) {
+    constructor(address[] memory _facets) {
         LibDiamondStorage.DiamondStorage storage ds = LibDiamondStorage.diamondStorage();
         ds.contractOwner = msg.sender;
 
-        ALib.Storage storage ags = ALib.getStorage();
+        LibA.Storage storage ags = LibA.diamondStorage();
         ags.wearablesSVG.push();
 
         SVGStorage svgStorage = new SVGStorage();
@@ -36,15 +37,15 @@ contract Aavegotchi {
 
         Wearables wearables = new Wearables();
 
-        IDiamondCut.Facet[] memory diamondCut = new IDiamondCut.Facet[](3);
+        IDiamondCut.Facet[] memory diamondCut = new IDiamondCut.Facet[](6);
 
         // adding diamondCut function
-        diamondCut[0].facetAddress = _contracts[0];
+        diamondCut[0].facetAddress = _facets[0];
         diamondCut[0].functionSelectors = new bytes4[](1);
         diamondCut[0].functionSelectors[0] = DiamondCutFacet.diamondCut.selector;
 
         // adding diamond loupe functions
-        diamondCut[1].facetAddress = _contracts[1];
+        diamondCut[1].facetAddress = _facets[1];
         diamondCut[1].functionSelectors = new bytes4[](5);
         diamondCut[1].functionSelectors[0] = DiamondLoupeFacet.facetFunctionSelectors.selector;
         diamondCut[1].functionSelectors[1] = DiamondLoupeFacet.facets.selector;
@@ -53,21 +54,23 @@ contract Aavegotchi {
         diamondCut[1].functionSelectors[4] = DiamondLoupeFacet.supportsInterface.selector;
 
         // adding ownership functions
-        diamondCut[2].facetAddress = _contracts[2];
+        diamondCut[2].facetAddress = _facets[2];
         diamondCut[2].functionSelectors = new bytes4[](2);
         diamondCut[2].functionSelectors[0] = OwnershipFacet.transferOwnership.selector;
         diamondCut[2].functionSelectors[1] = OwnershipFacet.owner.selector;
 
         diamondCut[3].facetAddress = address(aavegotchiNFT);
         diamondCut[3].functionSelectors = new bytes4[](3);
-        diamondCut[3].functionSelectors[0] = AavegotchiNFT.mintAavegotchi.selector;
-        diamondCut[3].functionSelectors[1] = AavegotchiNFT.getAavegotchiSVG.selector;
-        diamondCut[3].functionSelectors[2] = AavegotchiNFT.getFirstAavegotchi.selector;
+        diamondCut[3].functionSelectors[0] = AavegotchiNFT.buyPortals.selector;
+        diamondCut[3].functionSelectors[1] = AavegotchiNFT.ghstAddress.selector;
+        diamondCut[3].functionSelectors[2] = AavegotchiNFT.getAavegotchiSVG.selector;
+        diamondCut[3].functionSelectors[3] = AavegotchiNFT.getFirstAavegotchi.selector;
 
         diamondCut[4].facetAddress = address(svgStorage);
         diamondCut[4].functionSelectors = new bytes4[](2);
         diamondCut[4].functionSelectors[0] = SVGStorage.storeAavegotchiLayersSVG.selector;
         diamondCut[4].functionSelectors[1] = SVGStorage.storeWearablesSVG.selector;
+        diamondCut[4].functionSelectors[2] = SVGStorage.storeItemsSVG.selector;
 
         diamondCut[5].facetAddress = address(wearables);
         diamondCut[5].functionSelectors = new bytes4[](3);
@@ -88,18 +91,22 @@ contract Aavegotchi {
             IDiamondLoupe.facetAddresses.selector ^
             IDiamondLoupe.facetAddress.selector;
         ds.supportedInterfaces[interfaceID] = true;
+
+        
+        ags.ghstDiamond = address(new GHST(_facets, address(this)));
+
     }
 
     // Find facet for function that is called and execute the
     // function if a facet is found and return any value.
     fallback() external payable {
         LibDiamondStorage.DiamondStorage storage ds;
-        bytes32 position = LibDiamondStorage.DIAMOND_STORAGE_POSITION;
+        bytes32 position = LibDiamondStorage.DIAMOND_STORAGE_POSITION;                
         assembly {
             ds.slot := position
-        }
+        }         
         address facet = address(bytes20(ds.facets[msg.sig]));
-        require(facet != address(0));
+        require(facet != address(0), "Diamond: Function does not exist");
         assembly {
             calldatacopy(0, 0, calldatasize())
             let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)
@@ -111,8 +118,8 @@ contract Aavegotchi {
                 default {
                     return(0, returndatasize())
                 }
-        }
+        }        
     }
-
+     
     receive() external payable {}
 }
