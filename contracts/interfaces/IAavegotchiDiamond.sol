@@ -10,6 +10,8 @@ interface IAavegotchiDiamond {
 
     function balanceOf(address _owner) external view returns (uint256 balance);
 
+    function tokenOfOwnerByIndex(address _owner, uint256 _index) external view returns (uint256 tokenId);
+
     function ownerOf(uint256 _tokenId) external view returns (address owner);
 
     function safeTransferFrom(

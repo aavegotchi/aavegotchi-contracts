@@ -118,6 +118,21 @@ contract AavegotchiNFT {
         balance = ags.aavegotchiOwnerEnumeration[_owner].length;
     }
 
+    /// @notice Enumerate NFTs assigned to an owner
+    /// @dev Throws if `_index` >= `balanceOf(_owner)` or if
+    ///  `_owner` is the zero address, representing invalid NFTs.
+    /// @param _owner An address where we are interested in NFTs owned by them
+    /// @param _index A counter less than `balanceOf(_owner)`
+    /// @return tokenId The token identifier for the `_index`th NFT assigned to `_owner`,
+    ///   (sort order not specified)
+    function tokenOfOwnerByIndex(address _owner, uint256 _index) external view returns (uint256 tokenId) {
+        LibA.Storage storage ags = LibA.diamondStorage();
+        uint256 balance = ags.aavegotchiOwnerEnumeration[_owner].length;
+        require(_index < balance, "AavegotchiNFT: Does not have token at index");
+        require(_owner != address(0), "AavegotchiNFT:Owner can't be address(0");
+        tokenId = ags.aavegotchiOwnerEnumeration[_owner][_index];
+    }
+
     /// @notice Find the owner of an NFT
     /// @dev NFTs assigned to zero address are considered invalid, and queries
     ///  about them do throw.

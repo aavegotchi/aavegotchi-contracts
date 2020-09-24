@@ -13,18 +13,22 @@ async function main () {
   // to make sure everything is compiled
   // await bre.run('compile');
 
+  const accounts = await ethers.getSigners()
+  const account = await accounts[0].getAddress()
+  console.log('Account: ' + account)
+
   const DiamondCutFacet = await ethers.getContractFactory('DiamondCutFacet')
-  const diamondCutFacet = await DiamondCutFacet.deploy()
-
   const DiamondLoupeFacet = await ethers.getContractFactory('DiamondLoupeFacet')
-  const diamondLoupeFacet = await DiamondLoupeFacet.deploy()
-
   const OwnershipFacet = await ethers.getContractFactory('OwnershipFacet')
-  const ownershipFacet = await OwnershipFacet.deploy()
 
-  await diamondCutFacet.deployed()
-  await diamondLoupeFacet.deployed()
-  await ownershipFacet.deployed()
+  const [diamondCutFacet, diamondLoupeFacet, ownershipFacet] =
+    await Promise.all([DiamondCutFacet.deploy(), DiamondLoupeFacet.deploy(), OwnershipFacet.deploy()])
+
+  await Promise.all([
+    diamondCutFacet.deployed(),
+    diamondLoupeFacet.deployed(),
+    ownershipFacet.deployed()
+  ])
 
   // We get the contract to deploy
   const AavegotchiDiamond = await ethers.getContractFactory('Aavegotchi')
@@ -34,23 +38,35 @@ async function main () {
     diamondLoupeFacet.address,
     ownershipFacet.address
   ])
+
   await aavegotchiDiamond.deployed()
+  console.log('Deployed Aavegotchi diamond:')
+  console.log(aavegotchiDiamond.address)
+  // kovan demo: 0x201Df88D8d79ACA0AA6360F02eb9dD8aefdB1dfb
+
+  const IAavegotchiDiamond = await ethers.getContractFactory('IAavegotchiDiamond')
+  const iAavegotchiDiamond = IAavegotchiDiamond.attach(aavegotchiDiamond.address)
+  const ghstDiamondAddress = await iAavegotchiDiamond.ghstAddress()
+  console.log('Deployed GHST diamond: ')
+  console.log(ghstDiamondAddress)
+
+  const IGHSTDiamond = await ethers.getContractFactory('IGHSTDiamond')
+  const iGHSTDiamond = IGHSTDiamond.attach(ghstDiamondAddress)
+
+  iGHSTDiamond.mint()
 
   const SVGStorage = await ethers.getContractFactory('SVGStorage')
   const svgStorage = SVGStorage.attach(aavegotchiDiamond.address)
 
-  const AavegotchiNFT = await ethers.getContractFactory('AavegotchiNFT')
-  const aavegotchiNFT = AavegotchiNFT.attach(aavegotchiDiamond.address)
+  // const AavegotchiNFT = await ethers.getContractFactory('AavegotchiNFT')
+  // const aavegotchiNFT = AavegotchiNFT.attach(aavegotchiDiamond.address)
 
-  const Wearables = await ethers.getContractFactory('Wearables')
-  const wearables = Wearables.attach(aavegotchiDiamond.address)
+  // const Wearables = await ethers.getContractFactory('Wearables')
+  // const wearables = Wearables.attach(aavegotchiDiamond.address)
 
-  const accounts = await ethers.getSigners()
-  const address = await accounts[0].getAddress()
+  // const accounts = await ethers.getSigners()
+  // const address = await accounts[0].getAddress()
 
-  console.log('Deployed Aavegotchi contract:')
-  console.log(aavegotchiDiamond.address)
-  // kovan demo: 0x201Df88D8d79ACA0AA6360F02eb9dD8aefdB1dfb
   // ----------------------------------------------------------------
   // Upload SVG layers
 
@@ -68,8 +84,7 @@ async function main () {
   ]
   let sizes = svgs.map(value => value.length)
   svgs = svgs.join('')
-  await svgStorage.storeAavegotchiLayersSVG(svgs, sizes)
-  console.log('Uploaded Aavegotchi SVG Layers')
+  const p1 = svgStorage.storeAavegotchiLayersSVG(svgs, sizes)
 
   svgs = [
     // farmer hat
@@ -81,8 +96,7 @@ async function main () {
   ]
   sizes = svgs.map(value => value.length)
   svgs = svgs.join('')
-  await svgStorage.storeWearablesSVG(svgs, sizes)
-  console.log('Uploaded Wearables SVG')
+  const p2 = svgStorage.storeWearablesSVG(svgs, sizes)
 
   svgs = [
     // portal
@@ -90,8 +104,13 @@ async function main () {
   ]
   sizes = svgs.map(value => value.length)
   svgs = svgs.join('')
-  await svgStorage.storeItemsSVG(svgs, sizes)
+  const p3 = svgStorage.storeItemsSVG(svgs, sizes)
+
+  await Promise.all([p1, p2, p3])
+  console.log('Uploaded Aavegotchi SVG Layers')
+  console.log('Uploaded Wearables SVG')
   console.log('Uploaded Items SVG')
+  // testing minting portals
 
   // ----------------------------------------------------------------
   // Mint Aavegotchi with SVG Layers
@@ -117,9 +136,9 @@ async function main () {
   // ----------------------------------------------------------------
   // Add Wearables
   // transferToParent(address _from, address _toContract, uint _toTokenId, uint _id, uint _value)
-  function wearableId (id) {
-    return ethers.BigNumber.from(id).mul(ethers.BigNumber.from(2).pow(240))
-  }
+  // function wearableId (id) {
+  //   return ethers.BigNumber.from(id).mul(ethers.BigNumber.from(2).pow(240))
+  // }
   // const id1 = wearableId(1)
   // const id2 = wearableId(2)
   // const id3 = wearableId(3)

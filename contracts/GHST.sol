@@ -54,7 +54,7 @@ contract GHST {
         diamondCut[2].functionSelectors[1] = OwnershipFacet.owner.selector;
 
         diamondCut[3].facetAddress = address(ghstERC20);
-        diamondCut[3].functionSelectors = new bytes4[](3);
+        diamondCut[3].functionSelectors = new bytes4[](13);
         diamondCut[3].functionSelectors[0] = GHSTERC20.name.selector;
         diamondCut[3].functionSelectors[1] = GHSTERC20.symbol.selector;
         diamondCut[3].functionSelectors[2] = GHSTERC20.decimals.selector;

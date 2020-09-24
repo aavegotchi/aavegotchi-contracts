@@ -60,25 +60,25 @@ contract Aavegotchi {
         diamondCut[2].functionSelectors[1] = OwnershipFacet.owner.selector;
 
         diamondCut[3].facetAddress = address(aavegotchiNFT);
-        diamondCut[3].functionSelectors = new bytes4[](3);
+        diamondCut[3].functionSelectors = new bytes4[](4);
         diamondCut[3].functionSelectors[0] = AavegotchiNFT.buyPortals.selector;
         diamondCut[3].functionSelectors[1] = AavegotchiNFT.ghstAddress.selector;
         diamondCut[3].functionSelectors[2] = AavegotchiNFT.getAavegotchiSVG.selector;
         diamondCut[3].functionSelectors[3] = AavegotchiNFT.getFirstAavegotchi.selector;
 
         diamondCut[4].facetAddress = address(svgStorage);
-        diamondCut[4].functionSelectors = new bytes4[](2);
+        diamondCut[4].functionSelectors = new bytes4[](3);
         diamondCut[4].functionSelectors[0] = SVGStorage.storeAavegotchiLayersSVG.selector;
         diamondCut[4].functionSelectors[1] = SVGStorage.storeWearablesSVG.selector;
         diamondCut[4].functionSelectors[2] = SVGStorage.storeItemsSVG.selector;
 
         diamondCut[5].facetAddress = address(wearables);
-        diamondCut[5].functionSelectors = new bytes4[](3);
+        diamondCut[5].functionSelectors = new bytes4[](5);
         diamondCut[5].functionSelectors[0] = Wearables.mintWearables.selector;
         diamondCut[5].functionSelectors[1] = Wearables.transferToParent.selector;
         diamondCut[5].functionSelectors[2] = Wearables.transferFromParent.selector;
-        diamondCut[5].functionSelectors[2] = Wearables.wearablesBalances.selector;
-        diamondCut[5].functionSelectors[2] = Wearables.balanceOfToken.selector;
+        diamondCut[5].functionSelectors[3] = Wearables.wearablesBalances.selector;
+        diamondCut[5].functionSelectors[4] = Wearables.balanceOfToken.selector;
 
         // execute non-standard internal diamondCut function to add functions
         LibDiamondCut.diamondCut(diamondCut);

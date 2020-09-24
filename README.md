@@ -9,3 +9,18 @@ To easily see what functions these ABI files provide check the corresponding fil
 
 1. IAavegotchiDiamond.sol
 1. IGHSTDiamond.sol
+
+Using a diamond ABI should look something like this:
+
+```javascript
+let aavegotchiDiamond = new web3.eth.Contract(
+  JSON.parse(jsonfromfile).abi,
+  aavegotchiDiamondAddress
+);
+```
+
+## Deployment
+
+```console
+npx buidler run scripts/deploy.js
+```
