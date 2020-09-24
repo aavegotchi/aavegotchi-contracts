@@ -24,7 +24,8 @@ module.exports = {
   networks: {
     kovan: {
       url: 'https://kovan.infura.io/v3/37b0df2bfa8d412580671665570d81dc',
-      accounts: [account]
+      accounts: [account],
+      gasPrice: 65000000000
     }
   },
   gasReporter: {
