@@ -27,9 +27,9 @@ contract GHSTERC20 {
         return ghst.totalSupply;
     }
 
-    function balanceOf(address _owner) public view returns (uint256 balances) {
+    function balanceOf(address _owner) public view returns (uint256 balance) {
         LibGHST.Storage storage ghst = LibGHST.diamondStorage();
-        balances = ghst.balances[_owner];
+        balance = ghst.balances[_owner];
     }
 
     function transfer(address _to, uint256 _value) public returns (bool success) {
