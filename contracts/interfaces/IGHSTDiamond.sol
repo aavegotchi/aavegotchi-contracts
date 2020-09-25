@@ -10,7 +10,7 @@ interface IGHSTDiamond {
 
     function totalSupply() external view returns (uint256);
 
-    function balancesOf(address _owner) external view returns (uint256 balances);
+    function balanceOf(address _owner) external view returns (uint256 balances);
 
     function transfer(address _to, uint256 _value) external returns (bool success);
 
