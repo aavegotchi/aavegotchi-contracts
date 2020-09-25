@@ -40,4 +40,6 @@ interface IAavegotchiDiamond {
     function getApproved(uint256 _tokenId) external view returns (address approved);
 
     function isApprovedForAll(address _owner, address _operator) external view returns (bool approved);
+
+    function allAavegotchisOfOwner(address _owner) external view returns (uint256[] memory tokenIds);
 }

@@ -5,6 +5,25 @@
       "inputs": [
         {
           "internalType": "address",
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "allAavegotchisOfOwner",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "tokenIds",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
           "name": "_approved",
           "type": "address"
         },

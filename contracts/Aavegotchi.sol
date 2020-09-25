@@ -60,11 +60,24 @@ contract Aavegotchi {
         diamondCut[2].functionSelectors[1] = OwnershipFacet.owner.selector;
 
         diamondCut[3].facetAddress = address(aavegotchiNFT);
-        diamondCut[3].functionSelectors = new bytes4[](4);
+        diamondCut[3].functionSelectors = new bytes4[](15);
         diamondCut[3].functionSelectors[0] = AavegotchiNFT.buyPortals.selector;
         diamondCut[3].functionSelectors[1] = AavegotchiNFT.ghstAddress.selector;
         diamondCut[3].functionSelectors[2] = AavegotchiNFT.getAavegotchiSVG.selector;
         diamondCut[3].functionSelectors[3] = AavegotchiNFT.getFirstAavegotchi.selector;
+        diamondCut[3].functionSelectors[4] = AavegotchiNFT.balanceOf.selector;
+        diamondCut[3].functionSelectors[5] = AavegotchiNFT.tokenOfOwnerByIndex.selector;
+        diamondCut[3].functionSelectors[6] = AavegotchiNFT.ownerOf.selector;
+        diamondCut[3].functionSelectors[7] = 0x42842e0e; // safeTransferFrom(address,address,uint256)
+        diamondCut[3].functionSelectors[8] = 0xb88d4fde; // safeTransferFrom(address,address,uint256,bytes)
+        diamondCut[3].functionSelectors[9] = AavegotchiNFT.transferFrom.selector;
+        diamondCut[3].functionSelectors[10] = AavegotchiNFT.approve.selector;
+        diamondCut[3].functionSelectors[11] = AavegotchiNFT.setApprovalForAll.selector;
+        diamondCut[3].functionSelectors[12] = AavegotchiNFT.getApproved.selector;
+        diamondCut[3].functionSelectors[13] = AavegotchiNFT.isApprovedForAll.selector;
+        diamondCut[3].functionSelectors[14] = AavegotchiNFT.allAavegotchisOfOwner.selector;
+
+
 
         diamondCut[4].facetAddress = address(svgStorage);
         diamondCut[4].functionSelectors = new bytes4[](3);

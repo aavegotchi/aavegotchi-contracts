@@ -59,7 +59,7 @@ contract GHST {
         diamondCut[3].functionSelectors[1] = GHSTERC20.symbol.selector;
         diamondCut[3].functionSelectors[2] = GHSTERC20.decimals.selector;
         diamondCut[3].functionSelectors[3] = GHSTERC20.totalSupply.selector;
-        diamondCut[3].functionSelectors[4] = GHSTERC20.balancesOf.selector;
+        diamondCut[3].functionSelectors[4] = GHSTERC20.balanceOf.selector;
         diamondCut[3].functionSelectors[5] = GHSTERC20.transfer.selector;
         diamondCut[3].functionSelectors[6] = GHSTERC20.transferFrom.selector;
         diamondCut[3].functionSelectors[7] = GHSTERC20.approve.selector;

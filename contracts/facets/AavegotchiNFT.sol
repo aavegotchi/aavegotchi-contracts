@@ -133,6 +133,11 @@ contract AavegotchiNFT {
         tokenId = ags.aavegotchiOwnerEnumeration[_owner][_index];
     }
 
+    function allAavegotchisOfOwner(address _owner) external view returns (uint256[] memory tokenIds) {
+        LibA.Storage storage ags = LibA.diamondStorage();
+        tokenIds = ags.aavegotchiOwnerEnumeration[_owner];
+    }
+
     /// @notice Find the owner of an NFT
     /// @dev NFTs assigned to zero address are considered invalid, and queries
     ///  about them do throw.
