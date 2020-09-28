@@ -19,10 +19,11 @@ contract DiamondCutFacet is IDiamondCut {
     /// @param _calldata A function call, including function selector and arguments
     ///                  _calldata is executed with delegatecall on _init
     function diamondCut(
-        Facet[] calldata _diamondCut,
+        FacetCut[] calldata _diamondCut,
         address _init,
         bytes calldata _calldata
     ) external override {
+        require(_diamondCut.length > 0, "DiamondCutFacet: No facets to cut");
         LibDiamondStorage.DiamondStorage storage ds = LibDiamondStorage.diamondStorage();
         require(msg.sender == ds.contractOwner, "DiamondCutFacet: Must own the contract");
         uint256 originalSelectorCount = ds.selectorCount;
@@ -39,33 +40,18 @@ contract DiamondCutFacet is IDiamondCut {
                 selectorCount,
                 selectorSlot,
                 _diamondCut[facetIndex].facetAddress,
+                _diamondCut[facetIndex].action,
                 _diamondCut[facetIndex].functionSelectors
             );
         }
         if (selectorCount != originalSelectorCount) {
-            ds.selectorCount = selectorCount;
+            ds.selectorCount = uint16(selectorCount);
         }
         // If last selector slot is not full
         if (selectorCount % 8 > 0) {
             ds.selectorSlots[selectorCount / 8] = selectorSlot;
         }
         emit DiamondCut(_diamondCut, _init, _calldata);
-        if (_init == address(0)) {
-            require(_calldata.length == 0, "DiamondCutFacet: _init is address(0) but_calldata is not empty");
-        } else {
-            require(_calldata.length > 0, "DiamondCutFacet: _calldata is empty but _init is not address(0)");
-            if (_init != address(this)) {
-                LibDiamondCut.hasContractCode(_init, "DiamondCutFacet: _init address has no code");
-            }
-            (bool success, bytes memory error) = _init.delegatecall(_calldata);
-            if (!success) {
-                if (error.length > 0) {
-                    // bubble up the error
-                    revert(string(error));
-                } else {
-                    revert("DiamondCutFacet: _init function reverted");
-                }
-            }
-        }
+        LibDiamondCut.initializeDiamondCut(_init, _calldata);
     }
 }

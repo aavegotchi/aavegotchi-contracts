@@ -31,15 +31,17 @@ contract GHST {
         
         GHSTERC20 ghstERC20 = new GHSTERC20();
 
-        IDiamondCut.Facet[] memory diamondCut = new IDiamondCut.Facet[](4);
+        IDiamondCut.FacetCut[] memory diamondCut = new IDiamondCut.FacetCut[](4);
 
         // adding diamondCut function
         diamondCut[0].facetAddress = _facets[0];
+        diamondCut[0].action = IDiamondCut.FacetCutAction.Add;
         diamondCut[0].functionSelectors = new bytes4[](1);
         diamondCut[0].functionSelectors[0] = DiamondCutFacet.diamondCut.selector;
 
         // adding diamond loupe functions
         diamondCut[1].facetAddress = _facets[1];
+        diamondCut[1].action = IDiamondCut.FacetCutAction.Add;
         diamondCut[1].functionSelectors = new bytes4[](5);
         diamondCut[1].functionSelectors[0] = DiamondLoupeFacet.facetFunctionSelectors.selector;
         diamondCut[1].functionSelectors[1] = DiamondLoupeFacet.facets.selector;
@@ -49,11 +51,13 @@ contract GHST {
 
         // adding ownership functions
         diamondCut[2].facetAddress = _facets[2];
+        diamondCut[2].action = IDiamondCut.FacetCutAction.Add;
         diamondCut[2].functionSelectors = new bytes4[](2);
         diamondCut[2].functionSelectors[0] = OwnershipFacet.transferOwnership.selector;
         diamondCut[2].functionSelectors[1] = OwnershipFacet.owner.selector;
 
         diamondCut[3].facetAddress = address(ghstERC20);
+        diamondCut[3].action = IDiamondCut.FacetCutAction.Add;
         diamondCut[3].functionSelectors = new bytes4[](13);
         diamondCut[3].functionSelectors[0] = GHSTERC20.name.selector;
         diamondCut[3].functionSelectors[1] = GHSTERC20.symbol.selector;
@@ -69,7 +73,7 @@ contract GHST {
         diamondCut[3].functionSelectors[12] = GHSTERC20.mint.selector;  
 
         // execute non-standard internal diamondCut function to add functions
-        LibDiamondCut.diamondCut(diamondCut);
+        LibDiamondCut.diamondCut(diamondCut, address(0), new bytes(0));
 
         // adding ERC165 data
         ds.supportedInterfaces[IERC165.supportsInterface.selector] = true;

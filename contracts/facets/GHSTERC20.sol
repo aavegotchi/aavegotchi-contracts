@@ -56,6 +56,7 @@ contract GHSTERC20 {
             require(allowance >= _value, "GHST: Not allowed to transfer");
             if (allowance != MAX_UINT) {
                 ghst.allowances[msg.sender][_from] = allowance - _value;
+                emit Approval(_from, msg.sender, allowance - _value);
             }
         }
         require(fromBalance >= _value, "GHST: Not enough GHST to transfer");

@@ -37,15 +37,17 @@ contract Aavegotchi {
 
         Wearables wearables = new Wearables();
 
-        IDiamondCut.Facet[] memory diamondCut = new IDiamondCut.Facet[](6);
+        IDiamondCut.FacetCut[] memory diamondCut = new IDiamondCut.FacetCut[](6);
 
         // adding diamondCut function
         diamondCut[0].facetAddress = _facets[0];
+        diamondCut[0].action = IDiamondCut.FacetCutAction.Add;
         diamondCut[0].functionSelectors = new bytes4[](1);
         diamondCut[0].functionSelectors[0] = DiamondCutFacet.diamondCut.selector;
 
         // adding diamond loupe functions
         diamondCut[1].facetAddress = _facets[1];
+        diamondCut[1].action = IDiamondCut.FacetCutAction.Add;
         diamondCut[1].functionSelectors = new bytes4[](5);
         diamondCut[1].functionSelectors[0] = DiamondLoupeFacet.facetFunctionSelectors.selector;
         diamondCut[1].functionSelectors[1] = DiamondLoupeFacet.facets.selector;
@@ -55,11 +57,13 @@ contract Aavegotchi {
 
         // adding ownership functions
         diamondCut[2].facetAddress = _facets[2];
+        diamondCut[2].action = IDiamondCut.FacetCutAction.Add;
         diamondCut[2].functionSelectors = new bytes4[](2);
         diamondCut[2].functionSelectors[0] = OwnershipFacet.transferOwnership.selector;
         diamondCut[2].functionSelectors[1] = OwnershipFacet.owner.selector;
 
         diamondCut[3].facetAddress = address(aavegotchiNFT);
+        diamondCut[3].action = IDiamondCut.FacetCutAction.Add;
         diamondCut[3].functionSelectors = new bytes4[](15);
         diamondCut[3].functionSelectors[0] = AavegotchiNFT.buyPortals.selector;
         diamondCut[3].functionSelectors[1] = AavegotchiNFT.ghstAddress.selector;
@@ -77,15 +81,15 @@ contract Aavegotchi {
         diamondCut[3].functionSelectors[13] = AavegotchiNFT.isApprovedForAll.selector;
         diamondCut[3].functionSelectors[14] = AavegotchiNFT.allAavegotchisOfOwner.selector;
 
-
-
         diamondCut[4].facetAddress = address(svgStorage);
+        diamondCut[4].action = IDiamondCut.FacetCutAction.Add;
         diamondCut[4].functionSelectors = new bytes4[](3);
         diamondCut[4].functionSelectors[0] = SVGStorage.storeAavegotchiLayersSVG.selector;
         diamondCut[4].functionSelectors[1] = SVGStorage.storeWearablesSVG.selector;
         diamondCut[4].functionSelectors[2] = SVGStorage.storeItemsSVG.selector;
 
         diamondCut[5].facetAddress = address(wearables);
+        diamondCut[5].action = IDiamondCut.FacetCutAction.Add;
         diamondCut[5].functionSelectors = new bytes4[](5);
         diamondCut[5].functionSelectors[0] = Wearables.mintWearables.selector;
         diamondCut[5].functionSelectors[1] = Wearables.transferToParent.selector;
@@ -94,7 +98,7 @@ contract Aavegotchi {
         diamondCut[5].functionSelectors[4] = Wearables.balanceOfToken.selector;
 
         // execute non-standard internal diamondCut function to add functions
-        LibDiamondCut.diamondCut(diamondCut);
+        LibDiamondCut.diamondCut(diamondCut, address(0), new bytes(0));
 
         // adding ERC165 data
         ds.supportedInterfaces[IERC165.supportsInterface.selector] = true;

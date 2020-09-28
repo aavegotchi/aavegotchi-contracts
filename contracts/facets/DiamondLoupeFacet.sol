@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
 /******************************************************************************\
@@ -36,12 +36,12 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
                     break;
                 }
                 bytes4 selector = bytes4(slot << (selectorSlotIndex * 32));
-                address facetAddress = address(bytes20(ds.facets[selector]));
+                address facetAddress_ = address(bytes20(ds.facets[selector]));
                 bool continueLoop = false;
                 for (uint256 facetIndex; facetIndex < numFacets; facetIndex++) {
-                    if (facets_[facetIndex].facetAddress == facetAddress) {
+                    if (facets_[facetIndex].facetAddress == facetAddress_) {
                         facets_[facetIndex].functionSelectors[numFacetSelectors[facetIndex]] = selector;
-                        // probably will never have more than 255 functions from one facet contract
+                        // probably will never have more than 256 functions from one facet contract
                         require(numFacetSelectors[facetIndex] < 255);
                         numFacetSelectors[facetIndex]++;
                         continueLoop = true;
@@ -52,7 +52,7 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
                     continueLoop = false;
                     continue;
                 }
-                facets_[numFacets].facetAddress = facetAddress;
+                facets_[numFacets].facetAddress = facetAddress_;
                 facets_[numFacets].functionSelectors = new bytes4[](ds.selectorCount);
                 facets_[numFacets].functionSelectors[0] = selector;
                 numFacetSelectors[numFacets] = 1;
@@ -119,10 +119,10 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
                     break;
                 }
                 bytes4 selector = bytes4(slot << (selectorSlotIndex * 32));
-                address facetAddress = address(bytes20(ds.facets[selector]));
+                address facetAddress_ = address(bytes20(ds.facets[selector]));
                 bool continueLoop = false;
                 for (uint256 facetIndex; facetIndex < numFacets; facetIndex++) {
-                    if (facetAddress == facetAddresses_[facetIndex]) {
+                    if (facetAddress_ == facetAddresses_[facetIndex]) {
                         continueLoop = true;
                         break;
                     }
@@ -131,7 +131,7 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
                     continueLoop = false;
                     continue;
                 }
-                facetAddresses_[numFacets] = facetAddress;
+                facetAddresses_[numFacets] = facetAddress_;
                 numFacets++;
             }
         }
