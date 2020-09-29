@@ -24,10 +24,10 @@ import "./facets/GHSTERC20.sol";
 contract GHST {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    constructor(address[] memory _facets, address _aavegotchiDiamond) {
+    constructor(address _owner, address[] memory _facets, address _aavegotchiDiamond) {
         LibDiamondStorage.DiamondStorage storage ds = LibDiamondStorage.diamondStorage();
         LibGHST.Storage storage ghst = LibGHST.diamondStorage();
-        ds.contractOwner = msg.sender;
+        ds.contractOwner = _owner;
         
         GHSTERC20 ghstERC20 = new GHSTERC20();
 

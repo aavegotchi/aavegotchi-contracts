@@ -52,10 +52,10 @@ contract GHSTERC20 {
         if (msg.sender == _from || msg.sender == ghst.aavegotchiDiamond) {
             // pass
         } else {
-            uint256 allowance = ghst.allowances[msg.sender][_from];
+            uint256 allowance = ghst.allowances[_from][msg.sender];
             require(allowance >= _value, "GHST: Not allowed to transfer");
             if (allowance != MAX_UINT) {
-                ghst.allowances[msg.sender][_from] = allowance - _value;
+                ghst.allowances[_from][msg.sender] = allowance - _value;
                 emit Approval(_from, msg.sender, allowance - _value);
             }
         }

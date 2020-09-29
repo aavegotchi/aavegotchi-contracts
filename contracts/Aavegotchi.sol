@@ -108,9 +108,8 @@ contract Aavegotchi {
             IDiamondLoupe.facetAddresses.selector ^
             IDiamondLoupe.facetAddress.selector;
         ds.supportedInterfaces[interfaceID] = true;
-
         
-        ags.ghstDiamond = address(new GHST(_facets, address(this)));
+        ags.ghstDiamond = address(new GHST(msg.sender, _facets, address(this)));
 
     }
 
