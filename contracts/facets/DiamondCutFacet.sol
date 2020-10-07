@@ -7,8 +7,7 @@ pragma experimental ABIEncoderV2;
 /******************************************************************************/
 
 import "../interfaces/IDiamondCut.sol";
-import "../libraries/LibDiamondStorage.sol";
-import "../libraries/LibDiamondCut.sol";
+import "../libraries/LibDiamond.sol";
 
 contract DiamondCutFacet is IDiamondCut {
     // Standard diamondCut external function
@@ -23,9 +22,8 @@ contract DiamondCutFacet is IDiamondCut {
         address _init,
         bytes calldata _calldata
     ) external override {
-        require(_diamondCut.length > 0, "DiamondCutFacet: No facets to cut");
-        LibDiamondStorage.DiamondStorage storage ds = LibDiamondStorage.diamondStorage();
-        require(msg.sender == ds.contractOwner, "DiamondCutFacet: Must own the contract");
+        LibDiamond.enforceIsContractOwner();
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
         uint256 originalSelectorCount = ds.selectorCount;
         uint256 selectorCount = originalSelectorCount;
         bytes32 selectorSlot;
@@ -36,7 +34,7 @@ contract DiamondCutFacet is IDiamondCut {
         }
         // loop through diamond cut
         for (uint256 facetIndex; facetIndex < _diamondCut.length; facetIndex++) {
-            (selectorCount, selectorSlot) = LibDiamondCut.addReplaceRemoveFacetSelectors(
+            (selectorCount, selectorSlot) = LibDiamond.addReplaceRemoveFacetSelectors(
                 selectorCount,
                 selectorSlot,
                 _diamondCut[facetIndex].facetAddress,
@@ -52,6 +50,6 @@ contract DiamondCutFacet is IDiamondCut {
             ds.selectorSlots[selectorCount / 8] = selectorSlot;
         }
         emit DiamondCut(_diamondCut, _init, _calldata);
-        LibDiamondCut.initializeDiamondCut(_init, _calldata);
+        LibDiamond.initializeDiamondCut(_init, _calldata);
     }
 }

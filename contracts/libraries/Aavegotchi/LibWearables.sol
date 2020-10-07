@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-library WearablesLib {
+library LibWearables {
     struct OwnerAndIndex {
         address owner;
         uint32 index;

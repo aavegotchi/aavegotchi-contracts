@@ -1,18 +1,19 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity 0.7.1;
 //pragma experimental ABIEncoderV2;
-import "../libraries/LibA.sol";
+import {AppStorage, SVGLayer} from "../libraries/Aavegotchi/AppStorage.sol";
 
 // This contract was added as a facet to the diamond
-contract SVGStorage {
+contract SVGStorageFacet {
+    AppStorage internal s;
+
     // Stores aavegotchi layers
     // The id for an SVG is the same as its position in the aavegotchiLayersSVG array
     function storeAavegotchiLayersSVG(string calldata _svgLayers, uint256[] calldata sizes) external {
-        LibA.Storage storage ags = LibA.diamondStorage();
         address svgContract = storeSVG(_svgLayers);
         uint256 offset = 0;
         for (uint256 i; i < sizes.length; i++) {
-            ags.aavegotchiLayersSVG.push(LibA.SVGLayer(svgContract, uint16(offset), uint16(sizes[i])));
+            s.aavegotchiLayersSVG.push(SVGLayer(svgContract, uint16(offset), uint16(sizes[i])));
             offset += sizes[i];
         }
     }
@@ -20,23 +21,20 @@ contract SVGStorage {
     // Stores wearable SVGs
     // The id for a wearable is the same as its position in the wearablesSVG array
     function storeWearablesSVG(string calldata _svgLayers, uint256[] calldata sizes) external {
-        LibA.Storage storage ags = LibA.diamondStorage();
         address svgContract = storeSVG(_svgLayers);
-
         uint256 offset = 0;
         for (uint256 i; i < sizes.length; i++) {
-            ags.wearablesSVG.push(LibA.SVGLayer(svgContract, uint16(offset), uint16(sizes[i])));
+            s.wearablesSVG.push(SVGLayer(svgContract, uint16(offset), uint16(sizes[i])));
             offset += sizes[i];
         }
     }
 
     function storeItemsSVG(string calldata _svgLayers, uint256[] calldata sizes) external {
-        LibA.Storage storage ags = LibA.diamondStorage();
         address svgContract = storeSVG(_svgLayers);
 
         uint256 offset = 0;
         for (uint256 i; i < sizes.length; i++) {
-            ags.itemsSVG.push(LibA.SVGLayer(svgContract, uint16(offset), uint16(sizes[i])));
+            s.itemsSVG.push(SVGLayer(svgContract, uint16(offset), uint16(sizes[i])));
             offset += sizes[i];
         }
     }
