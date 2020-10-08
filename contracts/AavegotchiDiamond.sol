@@ -9,28 +9,29 @@ pragma experimental ABIEncoderV2;
 /******************************************************************************/
 
 import "./facets/OwnershipFacet.sol";
-import "./libraries/LibDiamondCut.sol";
+import "./libraries/Aavegotchi/AppStorage.sol";
 import "./facets/DiamondCutFacet.sol";
 import "./facets/DiamondLoupeFacet.sol";
 import "./interfaces/IERC165.sol";
 import "./interfaces/IDiamondCut.sol";
 import "./interfaces/IDiamondLoupe.sol";
-import "./facets/AavegotchiNFT.sol";
-import "./facets/SVGStorage.sol";
-import "./libraries/AppStorage.sol";
-import "./facets/Wearables.sol";
-import "./GHST.sol";
+import "./facets/AavegotchiFacet.sol";
+import "./facets/SVGStorageFacet.sol";
+import "./facets/WearablesFacet.sol";
+import "./libraries/LibDiamond.sol";
 
-contract Aavegotchi {
+contract AavegotchiDiamond {
     AppStorage s;
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    constructor(IDiamondCut.FacetCut[] memory _diamondCut, address _owner, address _ghstContract) {
-        LibDiamondCut.diamondCut(_diamondCut, address(0), new bytes(0));
+    constructor(IDiamondCut.FacetCut[] memory _diamondCut, address _owner, address _ghstContract, address[] memory  _collaterals) {
+        LibDiamond.diamondCut(_diamondCut, address(0), new bytes(0));
         s.contractOwner = _owner;
         s.wearablesSVG.push();
         
-        LibDiamondStorage.DiamondStorage storage ds = LibDiamondStorage.diamondStorage();      
+        s.collaterals = _collaterals;
+
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();      
 
         // adding ERC165 data
         ds.supportedInterfaces[IERC165.supportsInterface.selector] = true;
@@ -47,8 +48,8 @@ contract Aavegotchi {
     // Find facet for function that is called and execute the
     // function if a facet is found and return any value.
     fallback() external payable {
-        LibDiamondStorage.DiamondStorage storage ds;
-        bytes32 position = LibDiamondStorage.DIAMOND_STORAGE_POSITION;                
+        LibDiamond.DiamondStorage storage ds;
+        bytes32 position = LibDiamond.DIAMOND_STORAGE_POSITION;                
         assembly {
             ds.slot := position
         }         

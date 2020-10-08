@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 import "../libraries/Aavegotchi/AppStorage.sol";
 import "../interfaces/IERC20.sol";
 import "../libraries/Aavegotchi/LibSVG.sol";
+import "../libraries/LibDiamond.sol";
 
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
 interface ERC721TokenReceiver {
@@ -44,6 +45,30 @@ contract AavegotchiFacet {
     /// @dev This emits when an operator is enabled or disabled for an owner.
     ///  The operator can manage all NFTs of the owner.
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+
+    function addCollateral(address _collateral) external {
+        LibDiamond.enforceIsContractOwner();
+        s.collaterals.push(_collateral);
+        s.collateralIndexes[_collateral] = s.collaterals.length;
+    }
+
+    function removeCollateral(address _collateral) external {
+        uint256 index = s.collateralIndexes[_collateral];
+        require(index > 0, "Aavegotchi: _collateral does not exist");
+        index--;
+        uint256 lastIndex = s.collaterals.length - 1;
+        if (index != lastIndex) {
+            address lastCollateral = s.collaterals[lastIndex];
+            s.collaterals[index] = lastCollateral;
+            s.collateralIndexes[lastCollateral] = index + 1;
+        }
+        s.collaterals.pop();
+        delete s.collateralIndexes[_collateral];
+    }
+
+    function collaterals() external view returns (address[] memory collaterals_) {
+        collaterals_ = s.collaterals;
+    }
 
     function aavegotchiNameAvailable(string memory _name) external view returns (bool available_) {
         available_ = s.aavegotchiNamesUsed[_name];
@@ -86,14 +111,20 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].status = 1;
     }
 
-    function portalAavegotchiTraits(uint256 _tokenId) external view returns (uint256[7][10] memory _aavegotchiTraits) {
+    struct PortalAavegotchiTraits {
+        uint256[7] traits;
+        address collateral;
+    }
+
+    function portalAavegotchiTraits(uint256 _tokenId) external view returns (PortalAavegotchiTraits[10] memory _aavegotchiTraits) {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         for (uint256 i; i < 10; i++) {
             uint256 randomNumberN = uint256(keccak256(abi.encodePacked(randomNumber, i)));
             for (uint256 j; j < 7; j++) {
                 uint256 trait = uint8(randomNumberN >> (j * 8)) % 100;
-                _aavegotchiTraits[i][j] = trait;
+                _aavegotchiTraits[i].traits[j] = trait;
             }
+            _aavegotchiTraits[i].collateral = s.collaterals[(randomNumberN >> 248) % s.collaterals.length];
         }
     }
 

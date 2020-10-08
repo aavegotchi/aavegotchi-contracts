@@ -12,6 +12,7 @@ struct Aavegotchi {
     // track status of aavegotchi
     // 0 == portal, 1 = open portal, 2 = Aavegotchi
     uint8 status;
+    address collateral;
 }
 
 struct SVGLayer {
@@ -21,6 +22,8 @@ struct SVGLayer {
 }
 
 struct AppStorage {
+    address[] collaterals;
+    mapping(address => uint256) collateralIndexes;
     SVGLayer[] aavegotchiLayersSVG;
     SVGLayer[] wearablesSVG;
     SVGLayer[] itemsSVG;
