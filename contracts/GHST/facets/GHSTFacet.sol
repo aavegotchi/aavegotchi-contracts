@@ -2,8 +2,8 @@
 pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "../libraries/LibDiamond.sol";
-import "../libraries/GHST/AppStorage.sol";
+import "../../shared/libraries/LibDiamond.sol";
+import "../libraries/AppStorage.sol";
 
 contract GHSTFacet {
     AppStorage internal s;

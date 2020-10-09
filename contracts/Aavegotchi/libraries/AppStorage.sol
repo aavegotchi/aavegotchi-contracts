@@ -1,34 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-// uint16 constant AAVEGOTCHI_TOKEN_TYPE = 1;
-
-struct Traits {
-    uint8 energy;
-    uint8 aggressiveeness;
-    uint8 spookiness;
-    uint8 ethereality;
-    uint8 brainSize;
-    uint8 eyeShape;
-    uint8 eyeColor;
-    address collateral;
-    uint40 empty1;
-    uint256 empty2;
-    uint256 empty3;
-    uint256 empty4;
-    uint256 empty5;
-    uint256 empty6;
-}
+/*
+Numeric traits by possition in the array:
+energy
+aggressiveeness
+spookiness
+ethereality
+brainSize
+eyeShape
+eyeColor
+*/
 
 struct Aavegotchi {
     string name;
+    uint8[] numericTraits;
     uint256 randomNumber;
+    bytes32[1000] emptySlots;
     address owner;
     uint32 ownerEnumerationIndex;
     // track status of aavegotchi
     // 0 == portal, 1 = open portal, 2 = Aavegotchi
     uint8 status;
-    Traits traits;
+    address collateral;
 }
 
 struct SVGLayer {
@@ -54,7 +48,7 @@ struct AppStorage {
     mapping(address => mapping(address => bool)) operators;
     mapping(uint256 => address) approved;
     mapping(string => bool) aavegotchiNamesUsed;
-    bytes32[1000] emptyMapSlots;
+    bytes32[1000] emptySlots;
     // owner of the contract
     address contractOwner;
     uint32 totalSupply;

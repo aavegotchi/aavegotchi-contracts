@@ -8,23 +8,23 @@ pragma experimental ABIEncoderV2;
 * Implementation of an example of a diamond.
 /******************************************************************************/
 
-import "./facets/OwnershipFacet.sol";
-import "./libraries/Aavegotchi/AppStorage.sol";
-import "./facets/DiamondCutFacet.sol";
-import "./facets/DiamondLoupeFacet.sol";
-import "./interfaces/IERC165.sol";
-import "./interfaces/IDiamondCut.sol";
-import "./interfaces/IDiamondLoupe.sol";
+import "../shared/facets/OwnershipFacet.sol";
+import "./libraries/AppStorage.sol";
+import "../shared/facets/DiamondCutFacet.sol";
+import "../shared/facets/DiamondLoupeFacet.sol";
+import "../shared/interfaces/IERC165.sol";
+import "../shared/interfaces/IDiamondCut.sol";
+import "../shared/interfaces/IDiamondLoupe.sol";
 import "./facets/AavegotchiFacet.sol";
 import "./facets/SVGStorageFacet.sol";
 import "./facets/WearablesFacet.sol";
-import "./libraries/LibDiamond.sol";
+import "../shared/libraries/LibDiamond.sol";
 
 contract AavegotchiDiamond {
     AppStorage s;
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    constructor(IDiamondCut.FacetCut[] memory _diamondCut, address _owner, address _ghstContract, address[] memory  _collaterals) {
+    constructor(IDiamondCut.FacetCut[] memory _diamondCut, address _owner, address _ghstContract, address[] memory _collaterals) {
         LibDiamond.diamondCut(_diamondCut, address(0), new bytes(0));
         s.contractOwner = _owner;
         s.wearablesSVG.push();

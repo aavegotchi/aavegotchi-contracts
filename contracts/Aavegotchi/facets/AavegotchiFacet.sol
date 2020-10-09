@@ -2,10 +2,10 @@
 pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "../libraries/Aavegotchi/AppStorage.sol";
-import "../interfaces/IERC20.sol";
-import "../libraries/Aavegotchi/LibSVG.sol";
-import "../libraries/LibDiamond.sol";
+import "../libraries/AppStorage.sol";
+import "../../shared/interfaces/IERC20.sol";
+import "../libraries/LibSVG.sol";
+import "../../shared/libraries/LibDiamond.sol";
 
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
 interface ERC721TokenReceiver {
@@ -114,29 +114,21 @@ contract AavegotchiFacet {
     }
 
     struct PortalAavegotchiTraits {
-        uint8 energy;
-        uint8 aggressiveeness;
-        uint8 spookiness;
-        uint8 ethereality;
-        uint8 brainSize;
-        uint8 eyeShape;
-        uint8 eyeColor;
+        uint256 randomNumber;
+        uint8[7] numericTraits;
         address collateral;
     }
 
-    function portalAavegotchiTraits(uint256 _tokenId) external view returns (PortalAavegotchiTraits[10] memory _aavegotchiTraits) {
+    function portalAavegotchiTraits(uint256 _tokenId) external view returns (PortalAavegotchiTraits[10] memory portalAavegotchiTraits_) {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
         for (uint256 i; i < 10; i++) {
             uint256 randomNumberN = uint256(keccak256(abi.encodePacked(randomNumber, i)));
-            _aavegotchiTraits[i].energy = uint8(randomNumberN) % 100;
-            _aavegotchiTraits[i].aggressiveeness = uint8(randomNumberN >> 8) % 100;
-            _aavegotchiTraits[i].spookiness = uint8(randomNumberN >> 16) % 100;
-            _aavegotchiTraits[i].ethereality = uint8(randomNumberN >> 24) % 100;
-            _aavegotchiTraits[i].brainSize = uint8(randomNumberN >> 32) % 100;
-            _aavegotchiTraits[i].eyeShape = uint8(randomNumberN >> 40) % 100;
-            _aavegotchiTraits[i].eyeColor = uint8(randomNumberN >> 48) % 100;
-            _aavegotchiTraits[i].collateral = s.collaterals[(randomNumberN >> 248) % s.collaterals.length];
+            portalAavegotchiTraits_[i].randomNumber = randomNumberN;
+            for (uint256 j; j < 7; j++) {
+                portalAavegotchiTraits_[i].numericTraits[j] = uint8(randomNumberN >> (j * 8)) % 100;
+            }
+            portalAavegotchiTraits_[i].collateral = s.collaterals[(randomNumberN >> 248) % s.collaterals.length];
         }
     }
 
@@ -144,14 +136,11 @@ contract AavegotchiFacet {
         require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
         uint256 randomNumber = uint256(keccak256(abi.encodePacked(s.aavegotchis[_tokenId].randomNumber, _option)));
-        s.aavegotchis[_tokenId].traits.energy = uint8(randomNumber) % 100;
-        s.aavegotchis[_tokenId].traits.aggressiveeness = uint8(randomNumber >> 8) % 100;
-        s.aavegotchis[_tokenId].traits.spookiness = uint8(randomNumber >> 16) % 100;
-        s.aavegotchis[_tokenId].traits.ethereality = uint8(randomNumber >> 24) % 100;
-        s.aavegotchis[_tokenId].traits.brainSize = uint8(randomNumber >> 32) % 100;
-        s.aavegotchis[_tokenId].traits.eyeShape = uint8(randomNumber >> 40) % 100;
-        s.aavegotchis[_tokenId].traits.eyeColor = uint8(randomNumber >> 48) % 100;
-        s.aavegotchis[_tokenId].traits.collateral = s.collaterals[(randomNumber >> 248) % s.collaterals.length];
+        s.aavegotchis[_tokenId].randomNumber = randomNumber;
+        for (uint256 j; j < 7; j++) {
+            s.aavegotchis[_tokenId].numericTraits[j] = uint8(randomNumber >> (j * 8)) % 100;
+        }
+        s.aavegotchis[_tokenId].collateral = s.collaterals[(randomNumber >> 248) % s.collaterals.length];
         s.aavegotchis[_tokenId].status = 2;
     }
 
@@ -160,7 +149,7 @@ contract AavegotchiFacet {
     }
 
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
-    function getAavegotchiSVG(uint256 _tokenId) public view returns (string memory ag) {
+    function getAavegotchiSVG(uint256 _tokenId) public view returns (string memory ag_) {
         bytes memory svg;
 
         if (s.aavegotchis[_tokenId].status == 0) {
@@ -187,16 +176,16 @@ contract AavegotchiFacet {
         }
         bytes memory header = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">';
         bytes memory footer = "</svg>";
-        ag = string(abi.encodePacked(header, svg, footer));
+        ag_ = string(abi.encodePacked(header, svg, footer));
     }
 
     // get the first Aavegotchi that someone uses. This function is for demo purposes.
-    function getFirstAavegotchi(address _owner) external view returns (uint256 tokenId, string memory svg) {
+    function getFirstAavegotchi(address _owner) external view returns (uint256 tokenId_, string memory svg_) {
         require(_owner != address(0), "Aavegotchi: Owner can't be zero address");
         uint256 bal = s.aavegotchiOwnerEnumeration[_owner].length;
         if (bal > 0) {
-            tokenId = s.aavegotchiOwnerEnumeration[_owner][0];
-            svg = getAavegotchiSVG(tokenId);
+            tokenId_ = s.aavegotchiOwnerEnumeration[_owner][0];
+            svg_ = getAavegotchiSVG(tokenId_);
         }
     }
 
@@ -204,9 +193,9 @@ contract AavegotchiFacet {
     /// @dev NFTs assigned to the zero address are considered invalid, and this
     ///  function throws for queries about the zero address.
     /// @param _owner An address for whom to query the balance
-    /// @return balance The number of NFTs owned by `_owner`, possibly zero
-    function balanceOf(address _owner) external view returns (uint256 balance) {
-        balance = s.aavegotchiOwnerEnumeration[_owner].length;
+    /// @return balance_ The number of NFTs owned by `_owner`, possibly zero
+    function balanceOf(address _owner) external view returns (uint256 balance_) {
+        balance_ = s.aavegotchiOwnerEnumeration[_owner].length;
     }
 
     /// @notice Enumerate NFTs assigned to an owner
@@ -214,30 +203,47 @@ contract AavegotchiFacet {
     ///  `_owner` is the zero address, representing invalid NFTs.
     /// @param _owner An address where we are interested in NFTs owned by them
     /// @param _index A counter less than `balanceOf(_owner)`
-    /// @return tokenId The token identifier for the `_index`th NFT assigned to `_owner`,
+    /// @return tokenId_ The token identifier for the `_index`th NFT assigned to `_owner`,
     ///   (sort order not specified)
-    function tokenOfOwnerByIndex(address _owner, uint256 _index) external view returns (uint256 tokenId) {
+    function tokenOfOwnerByIndex(address _owner, uint256 _index) external view returns (uint256 tokenId_) {
         uint256 balance = s.aavegotchiOwnerEnumeration[_owner].length;
         require(_index < balance, "AavegotchiNFT: Does not have token at index");
         require(_owner != address(0), "AavegotchiNFT:Owner can't be address(0");
-        tokenId = s.aavegotchiOwnerEnumeration[_owner][_index];
+        tokenId_ = s.aavegotchiOwnerEnumeration[_owner][_index];
     }
 
-    function getAavegotchi(uint256 _tokenId) public view returns (Aavegotchi memory aavegotchi) {
-        return s.aavegotchis[_tokenId];
+    struct AavegotchiInfo {
+        uint256 tokenId;
+        string name;
+        address owner;
+        uint256 randomNumber;
+        uint8 status;
+        uint8[] numericTraits;
+        address collateral;
     }
 
-    function allAavegotchiIDsOfOwner(address _owner) external view returns (uint256[] memory tokenIds) {
-        tokenIds = s.aavegotchiOwnerEnumeration[_owner];
+    function getAavegotchi(uint256 _tokenId) public view returns (AavegotchiInfo memory aavegotchiInfo_) {
+        aavegotchiInfo_.tokenId = _tokenId;
+        aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
+        aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
+        aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
+        aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
+        aavegotchiInfo_.numericTraits = s.aavegotchis[_tokenId].numericTraits;
+        aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateral;
+        return aavegotchiInfo_;
     }
 
-    function allAavegotchisOfOwner(address _owner) external view returns (Aavegotchi[] memory aavegotchis) {
-        //Haven't tested but should work
+    function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
+        tokenIds_ = s.aavegotchiOwnerEnumeration[_owner];
+    }
+
+    function allAavegotchisOfOwner(address _owner) external view returns (AavegotchiInfo[] memory aavegotchiInfos_) {
+        //Haven't tested but should work -- yes sir
         uint256[] memory tokenIds = s.aavegotchiOwnerEnumeration[_owner];
+        aavegotchiInfos_ = new AavegotchiInfo[](tokenIds.length);
 
-        for (uint256 index = 0; index < tokenIds.length; index++) {
-            uint256 tokenId = tokenIds[index];
-            aavegotchis[index] = getAavegotchi(tokenId);
+        for (uint256 index; index < tokenIds.length; index++) {
+            aavegotchiInfos_[index] = getAavegotchi(tokenIds[index]);
         }
     }
 
@@ -245,9 +251,9 @@ contract AavegotchiFacet {
     /// @dev NFTs assigned to zero address are considered invalid, and queries
     ///  about them do throw.
     /// @param _tokenId The identifier for an NFT
-    /// @return owner The address of the owner of the NFT
-    function ownerOf(uint256 _tokenId) external view returns (address owner) {
-        owner = s.aavegotchis[_tokenId].owner;
+    /// @return owner_ The address of the owner of the NFT
+    function ownerOf(uint256 _tokenId) external view returns (address owner_) {
+        owner_ = s.aavegotchis[_tokenId].owner;
     }
 
     /// @notice Transfers the ownership of an NFT from one address to another address
@@ -383,17 +389,17 @@ contract AavegotchiFacet {
     /// @notice Get the approved address for a single NFT
     /// @dev Throws if `_tokenId` is not a valid NFT.
     /// @param _tokenId The NFT to find the approved address for
-    /// @return approved The approved address for this NFT, or the zero address if there is none
-    function getApproved(uint256 _tokenId) external view returns (address approved) {
+    /// @return approved_ The approved address for this NFT, or the zero address if there is none
+    function getApproved(uint256 _tokenId) external view returns (address approved_) {
         require(_tokenId < s.totalSupply, "ERC721: tokenId is invalid");
-        approved = s.approved[_tokenId];
+        approved_ = s.approved[_tokenId];
     }
 
     /// @notice Query if an address is an authorized operator for another address
     /// @param _owner The address that owns the NFTs
     /// @param _operator The address that acts on behalf of the owner
-    /// @return approved True if `_operator` is an approved operator for `_owner`, false otherwise
-    function isApprovedForAll(address _owner, address _operator) external view returns (bool approved) {
-        approved = s.operators[_owner][_operator];
+    /// @return approved_ True if `_operator` is an approved operator for `_owner`, false otherwise
+    function isApprovedForAll(address _owner, address _operator) external view returns (bool approved_) {
+        approved_ = s.operators[_owner][_operator];
     }
 }

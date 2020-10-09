@@ -2,6 +2,7 @@
 
 usePlugin('@nomiclabs/buidler-waffle')
 usePlugin('buidler-gas-reporter')
+usePlugin('buidler-contract-sizer')
 
 // This is a sample Buidler task. To learn how to create your own go to
 // https://buidler.dev/guides/create-task.html
@@ -32,6 +33,10 @@ module.exports = {
     currency: 'USD',
     gasPrice: 100,
     enabled: false
+  },
+  contractSizer: {
+    alphaSort: false,
+    runOnCompile: false
   },
   // This is a sample solc configuration that specifies which version of solc to use
   solc: {
