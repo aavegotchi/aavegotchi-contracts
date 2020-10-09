@@ -3,16 +3,32 @@ pragma solidity 0.7.1;
 
 // uint16 constant AAVEGOTCHI_TOKEN_TYPE = 1;
 
+struct Traits {
+    uint8 energy;
+    uint8 aggressiveeness;
+    uint8 spookiness;
+    uint8 ethereality;
+    uint8 brainSize;
+    uint8 eyeShape;
+    uint8 eyeColor;
+    address collateral;
+    uint40 empty1;
+    uint256 empty2;
+    uint256 empty3;
+    uint256 empty4;
+    uint256 empty5;
+    uint256 empty6;
+}
+
 struct Aavegotchi {
     string name;
     uint256 randomNumber;
-    bytes32 traits;
     address owner;
     uint32 ownerEnumerationIndex;
     // track status of aavegotchi
     // 0 == portal, 1 = open portal, 2 = Aavegotchi
     uint8 status;
-    address collateral;
+    Traits traits;
 }
 
 struct SVGLayer {

@@ -106,26 +106,53 @@ contract AavegotchiFacet {
     }
 
     function openPortal(uint256 _tokenId) external {
+        require(s.aavegotchis[_tokenId].status == 0, "AavegotchiFacet: Portal is not closed");
+        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
         s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(block.timestamp)));
         // status is open portal
         s.aavegotchis[_tokenId].status = 1;
     }
 
     struct PortalAavegotchiTraits {
-        uint256[7] traits;
+        uint8 energy;
+        uint8 aggressiveeness;
+        uint8 spookiness;
+        uint8 ethereality;
+        uint8 brainSize;
+        uint8 eyeShape;
+        uint8 eyeColor;
         address collateral;
     }
 
     function portalAavegotchiTraits(uint256 _tokenId) external view returns (PortalAavegotchiTraits[10] memory _aavegotchiTraits) {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
+        require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
         for (uint256 i; i < 10; i++) {
             uint256 randomNumberN = uint256(keccak256(abi.encodePacked(randomNumber, i)));
-            for (uint256 j; j < 7; j++) {
-                uint256 trait = uint8(randomNumberN >> (j * 8)) % 100;
-                _aavegotchiTraits[i].traits[j] = trait;
-            }
+            _aavegotchiTraits[i].energy = uint8(randomNumberN) % 100;
+            _aavegotchiTraits[i].aggressiveeness = uint8(randomNumberN >> 8) % 100;
+            _aavegotchiTraits[i].spookiness = uint8(randomNumberN >> 16) % 100;
+            _aavegotchiTraits[i].ethereality = uint8(randomNumberN >> 24) % 100;
+            _aavegotchiTraits[i].brainSize = uint8(randomNumberN >> 32) % 100;
+            _aavegotchiTraits[i].eyeShape = uint8(randomNumberN >> 40) % 100;
+            _aavegotchiTraits[i].eyeColor = uint8(randomNumberN >> 48) % 100;
             _aavegotchiTraits[i].collateral = s.collaterals[(randomNumberN >> 248) % s.collaterals.length];
         }
+    }
+
+    function claimAavegotchiFromPortal(uint256 _tokenId, uint256 _option) external {
+        require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
+        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
+        uint256 randomNumber = uint256(keccak256(abi.encodePacked(s.aavegotchis[_tokenId].randomNumber, _option)));
+        s.aavegotchis[_tokenId].traits.energy = uint8(randomNumber) % 100;
+        s.aavegotchis[_tokenId].traits.aggressiveeness = uint8(randomNumber >> 8) % 100;
+        s.aavegotchis[_tokenId].traits.spookiness = uint8(randomNumber >> 16) % 100;
+        s.aavegotchis[_tokenId].traits.ethereality = uint8(randomNumber >> 24) % 100;
+        s.aavegotchis[_tokenId].traits.brainSize = uint8(randomNumber >> 32) % 100;
+        s.aavegotchis[_tokenId].traits.eyeShape = uint8(randomNumber >> 40) % 100;
+        s.aavegotchis[_tokenId].traits.eyeColor = uint8(randomNumber >> 48) % 100;
+        s.aavegotchis[_tokenId].traits.collateral = s.collaterals[(randomNumber >> 248) % s.collaterals.length];
+        s.aavegotchis[_tokenId].status = 2;
     }
 
     function ghstAddress() external view returns (address contract_) {
@@ -140,23 +167,23 @@ contract AavegotchiFacet {
             // is a portal
             svg = LibSVG.getSVG(s.itemsSVG, 0);
         } else {
-            bytes32 traits = s.aavegotchis[_tokenId].traits;
-            require(traits != 0, "AavegotchiNFT: _tokenId does not exist");
-            uint256 svgId;
-            // Find and get up to 16 SVG layers
-            for (uint256 i; i < 16; i++) {
-                svgId = uint256((traits << (i * 16)) >> 240);
-                if (svgId > 0) {
-                    svg = abi.encodePacked(svg, LibSVG.getSVG(s.aavegotchiLayersSVG, svgId));
-                }
-            }
-            // add any wearables here
-            uint256 count = s.wearablesSVG.length;
-            for (uint256 i = 0; i < count; i++) {
-                if (s.nftBalances[address(this)][_tokenId][i << 240] > 0) {
-                    svg = abi.encodePacked(svg, LibSVG.getSVG(s.wearablesSVG, i));
-                }
-            }
+            // bytes32 traits = s.aavegotchis[_tokenId].traits;
+            // require(traits != 0, "AavegotchiNFT: _tokenId does not exist");
+            // uint256 svgId;
+            // // Find and get up to 16 SVG layers
+            // for (uint256 i; i < 16; i++) {
+            //     svgId = uint256((traits << (i * 16)) >> 240);
+            //     if (svgId > 0) {
+            //         svg = abi.encodePacked(svg, LibSVG.getSVG(s.aavegotchiLayersSVG, svgId));
+            //     }
+            // }
+            // // add any wearables here
+            // uint256 count = s.wearablesSVG.length;
+            // for (uint256 i = 0; i < count; i++) {
+            //     if (s.nftBalances[address(this)][_tokenId][i << 240] > 0) {
+            //         svg = abi.encodePacked(svg, LibSVG.getSVG(s.wearablesSVG, i));
+            //     }
+            // }
         }
         bytes memory header = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">';
         bytes memory footer = "</svg>";
