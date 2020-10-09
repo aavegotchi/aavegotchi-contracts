@@ -1,5 +1,5 @@
-// //SPDX-License-Identifier: Unlicense
-// pragma solidity 0.7.1;
+//SPDX-License-Identifier: Unlicense
+pragma solidity 0.7.1;
 
 // // import {SafeMath as SafeMath_Chainlink} from "./vendor/SafeMath.sol";
 

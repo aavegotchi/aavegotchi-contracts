@@ -223,8 +223,22 @@ contract AavegotchiFacet {
         tokenId = s.aavegotchiOwnerEnumeration[_owner][_index];
     }
 
-    function allAavegotchisOfOwner(address _owner) external view returns (uint256[] memory tokenIds) {
+    function getAavegotchi(uint256 _tokenId) public view returns (Aavegotchi memory aavegotchi) {
+        return s.aavegotchis[_tokenId];
+    }
+
+    function allAavegotchiIDsOfOwner(address _owner) external view returns (uint256[] memory tokenIds) {
         tokenIds = s.aavegotchiOwnerEnumeration[_owner];
+    }
+
+    function allAavegotchisOfOwner(address _owner) external view returns (Aavegotchi[] memory aavegotchis) {
+        //Haven't tested but should work
+        uint256[] memory tokenIds = s.aavegotchiOwnerEnumeration[_owner];
+
+        for (uint256 index = 0; index < tokenIds.length; index++) {
+            uint256 tokenId = tokenIds[index];
+            aavegotchis[index] = getAavegotchi(tokenId);
+        }
     }
 
     /// @notice Find the owner of an NFT
