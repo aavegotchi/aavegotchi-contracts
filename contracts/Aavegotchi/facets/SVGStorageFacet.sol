@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity 0.7.1;
+pragma solidity 0.7.3;
 //pragma experimental ABIEncoderV2;
-import {AppStorage, SVGLayer} from "../libraries/AppStorage.sol";
+import {AppStorage, SVGLayer} from "../libraries/LibAppStorage.sol";
 
 // This contract was added as a facet to the diamond
 contract SVGStorageFacet {

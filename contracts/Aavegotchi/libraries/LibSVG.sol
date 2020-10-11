@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.1;
+pragma solidity 0.7.3;
 
-import {SVGLayer} from "./AppStorage.sol";
+import {SVGLayer} from "./LibAppStorage.sol";
 
 library LibSVG {
     function getSVG(SVGLayer[] storage items, uint256 _id) internal view returns (bytes memory) {

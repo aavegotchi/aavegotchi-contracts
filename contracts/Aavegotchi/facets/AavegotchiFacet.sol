@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.3;
 pragma experimental ABIEncoderV2;
 
-import "../libraries/AppStorage.sol";
+import "../libraries/LibAppStorage.sol";
 import "../../shared/interfaces/IERC20.sol";
 import "../libraries/LibSVG.sol";
 import "../../shared/libraries/LibDiamond.sol";
@@ -30,6 +30,7 @@ interface ERC721TokenReceiver {
 }
 
 contract AavegotchiFacet {
+    using LibAppStorage for AppStorage;
     AppStorage internal s;
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
@@ -46,28 +47,28 @@ contract AavegotchiFacet {
     ///  The operator can manage all NFTs of the owner.
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
-    function addCollateral(address _collateral) external {
+    function addCollateralTypes(LibAppStorage.AavegotchiCollateralTypeInput[] memory _collateralTypes) external {
         LibDiamond.enforceIsContractOwner();
-        s.collaterals.push(_collateral);
-        s.collateralIndexes[_collateral] = s.collaterals.length;
+        s.addCollateralTypes(_collateralTypes);
     }
 
-    function removeCollateral(address _collateral) external {
-        uint256 index = s.collateralIndexes[_collateral];
+    function removeCollateralType(address _collateralType) external {
+        uint256 index = s.collateralTypeIndexes[_collateralType];
         require(index > 0, "Aavegotchi: _collateral does not exist");
         index--;
-        uint256 lastIndex = s.collaterals.length - 1;
+        uint256 lastIndex = s.collateralTypes.length - 1;
         if (index != lastIndex) {
-            address lastCollateral = s.collaterals[lastIndex];
-            s.collaterals[index] = lastCollateral;
-            s.collateralIndexes[lastCollateral] = index + 1;
+            address lastCollateral = s.collateralTypes[lastIndex];
+            s.collateralTypes[index] = lastCollateral;
+            s.collateralTypeIndexes[lastCollateral] = index + 1;
         }
-        s.collaterals.pop();
-        delete s.collateralIndexes[_collateral];
+        s.collateralTypes.pop();
+        delete s.collateralTypeIndexes[_collateralType];
+        delete s.collateralTypeInfo[_collateralType];
     }
 
-    function collaterals() external view returns (address[] memory collaterals_) {
-        collaterals_ = s.collaterals;
+    function collaterals() external view returns (address[] memory collateralTypes_) {
+        collateralTypes_ = s.collateralTypes;
     }
 
     function aavegotchiNameAvailable(string memory _name) external view returns (bool available_) {
@@ -116,7 +117,7 @@ contract AavegotchiFacet {
     struct PortalAavegotchiTraits {
         uint256 randomNumber;
         uint8[7] numericTraits;
-        address collateral;
+        address collateralType;
     }
 
     function portalAavegotchiTraits(uint256 _tokenId) external view returns (PortalAavegotchiTraits[10] memory portalAavegotchiTraits_) {
@@ -128,7 +129,7 @@ contract AavegotchiFacet {
             for (uint256 j; j < 7; j++) {
                 portalAavegotchiTraits_[i].numericTraits[j] = uint8(randomNumberN >> (j * 8)) % 100;
             }
-            portalAavegotchiTraits_[i].collateral = s.collaterals[(randomNumberN >> 248) % s.collaterals.length];
+            portalAavegotchiTraits_[i].collateralType = s.collateralTypes[(randomNumberN >> 248) % s.collateralTypes.length];
         }
     }
 
@@ -140,7 +141,7 @@ contract AavegotchiFacet {
         for (uint256 j; j < 7; j++) {
             s.aavegotchis[_tokenId].numericTraits[j] = uint8(randomNumber >> (j * 8)) % 100;
         }
-        s.aavegotchis[_tokenId].collateral = s.collaterals[(randomNumber >> 248) % s.collaterals.length];
+        s.aavegotchis[_tokenId].collateralType = s.collateralTypes[(randomNumber >> 248) % s.collateralTypes.length];
         s.aavegotchis[_tokenId].status = 2;
     }
 
@@ -148,35 +149,52 @@ contract AavegotchiFacet {
         contract_ = s.ghstContract;
     }
 
+    function bytes3ToColorString(bytes3 _color) internal pure returns (string memory) {
+        bytes memory numbers = "0123456789ABCDEF";
+        bytes memory toString = new bytes(6);
+        uint256 pos = 0;
+        for (uint256 i; i < 3; i++) {
+            toString[pos] = numbers[uint8(_color[i] >> 4)];
+            pos++;
+            toString[pos] = numbers[uint8(_color[i] & 0x0f)];
+            pos++;
+        }
+        return string(toString);
+    }
+
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
     function getAavegotchiSVG(uint256 _tokenId) public view returns (string memory ag_) {
+        require(s.aavegotchis[_tokenId].owner != address(0), "AavegotchiFacet: _tokenId does not exist");
         bytes memory svg;
-
-        if (s.aavegotchis[_tokenId].status == 0) {
-            // is a portal
+        uint8 status = s.aavegotchis[_tokenId].status;
+        if (status == 0) {
+            // sealed closed portal
             svg = LibSVG.getSVG(s.itemsSVG, 0);
+        } else if (status == 1) {
+            // open portal
+            svg = LibSVG.getSVG(s.itemsSVG, 1);
         } else {
-            // bytes32 traits = s.aavegotchis[_tokenId].traits;
-            // require(traits != 0, "AavegotchiNFT: _tokenId does not exist");
-            // uint256 svgId;
-            // // Find and get up to 16 SVG layers
-            // for (uint256 i; i < 16; i++) {
-            //     svgId = uint256((traits << (i * 16)) >> 240);
-            //     if (svgId > 0) {
-            //         svg = abi.encodePacked(svg, LibSVG.getSVG(s.aavegotchiLayersSVG, svgId));
-            //     }
-            // }
-            // // add any wearables here
-            // uint256 count = s.wearablesSVG.length;
-            // for (uint256 i = 0; i < count; i++) {
-            //     if (s.nftBalances[address(this)][_tokenId][i << 240] > 0) {
-            //         svg = abi.encodePacked(svg, LibSVG.getSVG(s.wearablesSVG, i));
-            //     }
-            // }
+            // add fix standard layers
+            for (uint256 i; i < 5; i++) {
+                svg = abi.encodePacked(svg, LibSVG.getSVG(s.aavegotchiLayersSVG, i));
+            }
         }
-        bytes memory header = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">';
-        bytes memory footer = "</svg>";
-        ag_ = string(abi.encodePacked(header, svg, footer));
+        address collateralType = s.aavegotchis[_tokenId].collateralType;
+        string memory primaryColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].primaryColor);
+        string memory secondaryColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].secondaryColor);
+
+        ag_ = string(
+            abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">',
+                "<style>.primaryColor{fill:#",
+                primaryColor,
+                ";}.secondaryColor{fill:#",
+                secondaryColor,
+                ";}</style>",
+                svg,
+                "</svg>"
+            )
+        );
     }
 
     // get the first Aavegotchi that someone uses. This function is for demo purposes.
@@ -229,7 +247,7 @@ contract AavegotchiFacet {
         aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
         aavegotchiInfo_.numericTraits = s.aavegotchis[_tokenId].numericTraits;
-        aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateral;
+        aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
         return aavegotchiInfo_;
     }
 

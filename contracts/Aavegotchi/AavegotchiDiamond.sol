@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.3;
 pragma experimental ABIEncoderV2;
 
 /******************************************************************************\
@@ -9,7 +9,7 @@ pragma experimental ABIEncoderV2;
 /******************************************************************************/
 
 import "../shared/facets/OwnershipFacet.sol";
-import "./libraries/AppStorage.sol";
+import "./libraries/LibAppStorage.sol";
 import "../shared/facets/DiamondCutFacet.sol";
 import "../shared/facets/DiamondLoupeFacet.sol";
 import "../shared/interfaces/IERC165.sol";
@@ -21,26 +21,29 @@ import "./facets/WearablesFacet.sol";
 import "../shared/libraries/LibDiamond.sol";
 
 contract AavegotchiDiamond {
-    AppStorage s;
+    using LibAppStorage for AppStorage;
+    AppStorage internal s;
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    constructor(IDiamondCut.FacetCut[] memory _diamondCut, address _owner, address _ghstContract, address[] memory _collaterals) {
+    constructor(
+        IDiamondCut.FacetCut[] memory _diamondCut, 
+        address _owner, 
+        address _ghstContract, 
+        LibAppStorage.AavegotchiCollateralTypeInput[] memory _collateralTypes
+    ) {
         LibDiamond.diamondCut(_diamondCut, address(0), new bytes(0));
         s.contractOwner = _owner;
         s.wearablesSVG.push();
-        
-        s.collaterals = _collaterals;
+
+        s.addCollateralTypes(_collateralTypes);
 
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();      
 
         // adding ERC165 data
-        ds.supportedInterfaces[IERC165.supportsInterface.selector] = true;
-        ds.supportedInterfaces[IDiamondCut.diamondCut.selector] = true;
-        bytes4 interfaceID = IDiamondLoupe.facets.selector ^
-            IDiamondLoupe.facetFunctionSelectors.selector ^
-            IDiamondLoupe.facetAddresses.selector ^
-            IDiamondLoupe.facetAddress.selector;
-        ds.supportedInterfaces[interfaceID] = true;
+        ds.supportedInterfaces[type(IERC165).interfaceId] = true;
+        ds.supportedInterfaces[type(IDiamondCut).interfaceId] = true;        
+        ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
+        ds.supportedInterfaces[type(IERC173).interfaceId] = true;
         
         s.ghstContract = _ghstContract;
     }

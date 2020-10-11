@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.3;
 
 /*
 Numeric traits by possition in the array:
@@ -22,7 +22,7 @@ struct Aavegotchi {
     // track status of aavegotchi
     // 0 == portal, 1 = open portal, 2 = Aavegotchi
     uint8 status;
-    address collateral;
+    address collateralType;
 }
 
 struct SVGLayer {
@@ -31,9 +31,15 @@ struct SVGLayer {
     uint16 size;
 }
 
+struct AavegotchiCollateralTypeInfo {
+    bytes3 primaryColor;
+    bytes3 secondaryColor;
+}
+
 struct AppStorage {
-    address[] collaterals;
-    mapping(address => uint256) collateralIndexes;
+    address[] collateralTypes;
+    mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
+    mapping(address => uint256) collateralTypeIndexes;
     SVGLayer[] aavegotchiLayersSVG;
     SVGLayer[] wearablesSVG;
     SVGLayer[] itemsSVG;
@@ -53,4 +59,27 @@ struct AppStorage {
     address contractOwner;
     uint32 totalSupply;
     address ghstContract;
+}
+
+library LibAppStorage {
+    function diamondStorage() internal pure returns (AppStorage storage ds) {        
+        assembly {
+            ds.slot := 0
+        }
+    }
+
+    struct AavegotchiCollateralTypeInput {
+        address collateralType;
+        bytes3 primaryColor;
+        bytes3 secondaryColor;
+    }
+
+    function addCollateralTypes(AppStorage storage s, AavegotchiCollateralTypeInput[] memory _collateralTypes) internal {
+        for (uint256 i; i < _collateralTypes.length; i++) {
+            address collateralType = _collateralTypes[i].collateralType;
+            s.collateralTypes.push(collateralType);
+            s.collateralTypeInfo[collateralType].primaryColor = _collateralTypes[i].primaryColor;
+            s.collateralTypeInfo[collateralType].secondaryColor = _collateralTypes[i].secondaryColor;
+        }
+    }
 }
