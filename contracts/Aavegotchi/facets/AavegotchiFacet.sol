@@ -139,7 +139,8 @@ contract AavegotchiFacet {
         uint256 randomNumber = uint256(keccak256(abi.encodePacked(s.aavegotchis[_tokenId].randomNumber, _option)));
         s.aavegotchis[_tokenId].randomNumber = randomNumber;
         for (uint256 j; j < 7; j++) {
-            s.aavegotchis[_tokenId].numericTraits[j] = uint8(randomNumber >> (j * 8)) % 100;
+            //s.aavegotchis[_tokenId].numericTraits[j] = uint8(randomNumber >> (j * 8)) % 100;
+            s.aavegotchis[_tokenId].numericTraits.push(uint8(randomNumber >> (j * 8)) % 100);
         }
         s.aavegotchis[_tokenId].collateralType = s.collateralTypes[(randomNumber >> 248) % s.collateralTypes.length];
         s.aavegotchis[_tokenId].status = 2;
