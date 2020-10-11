@@ -1,6 +1,6 @@
+/* global describe it before */
 const { expect } = require('chai')
-const { idText } = require('typescript')
-/* global describe it ethers before */
+// const { idText } = require('typescript')
 
 // eslint-disable-next-line no-unused-vars
 // const { expect } = require('chai')
@@ -8,16 +8,18 @@ const { idText } = require('typescript')
 // import ERC721 from '../artifacts/ERC721.json'
 // import { ethers } from 'ethers'
 
-const { deployProject } = require('../scripts/deploy-ganache.js')
+// const { deployProject } = require('../scripts/deploy-ganache.js')
+
+const { deployProject } = require('../scripts/deploy.js')
 
 describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
-  let svgStorage
+  // let svgStorage
   // let ghstDiamond
   let aavegotchiDiamond
-  let ghstLoupeFacet
+  let ghstDiamond
   let aavegotchiFacet
   let account
-  //let erc721
+  // let erc721
   // let account
 
   before(async function () {
@@ -25,25 +27,25 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     account = deployVars.account
     aavegotchiDiamond = deployVars.aavegotchiDiamond
     aavegotchiFacet = deployVars.aavegotchiFacet
-    ghstLoupeFacet = deployVars.ghstLoupeFacet
+    ghstDiamond = deployVars.ghstDiamond
   })
 
   it('Should mint 10,000 GHST tokens', async function () {
-    await ghstLoupeFacet.mint()
-    const balance = await ghstLoupeFacet.balanceOf(account)
-    expect(balance).to.equal("10000000000000000000000")
+    await ghstDiamond.mint()
+    const balance = await ghstDiamond.balanceOf(account)
+    expect(balance).to.equal('10000000000000000000000')
   })
 
-  it("Should purchase one portal", async function () {
-    const balance = await ghstLoupeFacet.balanceOf(account)
-    await ghstLoupeFacet.approve(aavegotchiDiamond.address, balance)
+  it('Should purchase one portal', async function () {
+    const balance = await ghstDiamond.balanceOf(account)
+    await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
     await aavegotchiFacet.buyPortals(buyAmount)
-    let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(1)
   })
 
-  it("Should open the portal", async function () {
+  it('Should open the portal', async function () {
     let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals[0].status).to.equal(0)
     const portalId = myPortals[0].tokenId
@@ -52,16 +54,16 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(myPortals[0].status).to.equal(1)
   })
 
-  it("Should contain 10 random ghosts in the portal", async function () {
+  it('Should contain 10 random ghosts in the portal', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-    let ghosts = await aavegotchiFacet.portalAavegotchiTraits(myPortals[0].tokenId)
+    const ghosts = await aavegotchiFacet.portalAavegotchiTraits(myPortals[0].tokenId)
     expect(ghosts.length).to.equal(10)
   })
 
-  it("Should claim a ghost", async function () {
-    let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-    let tokenId = myPortals[0].tokenId
-    let ghosts = await aavegotchiFacet.portalAavegotchiTraits(tokenId)
+  it('Should claim a ghost', async function () {
+    const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    const tokenId = myPortals[0].tokenId
+    const ghosts = await aavegotchiFacet.portalAavegotchiTraits(tokenId)
     const selectedGhost = ghosts[4]
     await aavegotchiFacet.claimAavegotchiFromPortal(tokenId, 4)
 
@@ -71,17 +73,16 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(aavegotchi.status).to.equal(2)
   })
 
-  it("Should set a name", async function () {
-    let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-    let tokenId = myPortals[0].tokenId
-    await aavegotchiFacet.setAavegotchiName(tokenId, "Beavis")
+  it('Should set a name', async function () {
+    const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    const tokenId = myPortals[0].tokenId
+    await aavegotchiFacet.setAavegotchiName(tokenId, 'Beavis')
     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
-    expect(aavegotchi.name).to.equal("Beavis")
+    expect(aavegotchi.name).to.equal('Beavis')
   })
 
-  //Add a test to check if we can name another Aavegotchi Beavis
-  //Add some tests to check different svg layers
-
+  // Add a test to check if we can name another Aavegotchi Beavis
+  // Add some tests to check different svg layers
 
   // it('Add SVG Layers', async function () {
   //   let svgs = [

@@ -1,4 +1,4 @@
-/* global ethers bre */
+/* global ethers */
 
 // We require the Buidler Runtime Environment explicitly here. This is optional
 // but useful for running the script in a standalone fashion through `node <script>`.
@@ -7,9 +7,8 @@
 // eslint-disable-next-line no-unused-vars
 const bre = require('@nomiclabs/buidler')
 
-// const util = require('./diamond-util.js')
-
 const diamond = require('diamond-util')
+// const { ethers } = require('ethers')
 const { getCollaterals } = require('./collaterals.js')
 
 async function main () {
@@ -23,15 +22,30 @@ async function main () {
   console.log('Account: ' + account)
   console.log('---')
 
-  // ethereum mainnet
-  // const ghstContractAddress = 'x3F382DbD960E3a9bbCeaE22651E88158d2791550'
-
-  // kovan:
-  const ghstContractAddress = '0x3F382DbD960E3a9bbCeaE22651E88158d2791550'
-
   const DiamondLoupeFacetFactory = await ethers.getContractFactory('DiamondLoupeFacet')
   const diamondLoupeFacet = await DiamondLoupeFacetFactory.deploy()
   await diamondLoupeFacet.deployed()
+
+  let ghstDiamond
+  let ghstContractAddress
+  if (bre.network.name === 'kovan') {
+    ghstContractAddress = '0x3F382DbD960E3a9bbCeaE22651E88158d2791550'
+  } else if (bre.network.name === 'mainnet' || bre.network.name === 'buidlerevm') {
+    ghstDiamond = await diamond.deploy({
+      diamondName: 'GHSTDiamond',
+      facets: [
+        'DiamondCutFacet',
+        ['DiamondLoupeFacet', diamondLoupeFacet],
+        'OwnershipFacet',
+        'GHSTFacet'
+      ],
+      owner: account,
+      otherArgs: []
+    })
+    ghstDiamond = await ethers.getContractAt('GHSTFacet', ghstDiamond.address)
+    console.log('GHST diamond address:' + ghstDiamond.address)
+    ghstContractAddress = ghstDiamond.address
+  }
 
   // eslint-disable-next-line no-unused-vars
   const aavegotchiDiamond = await diamond.deploy({
@@ -47,7 +61,7 @@ async function main () {
     owner: account,
     otherArgs: [ghstContractAddress, getCollaterals(bre.network.name)]
   })
-  console.log('Diamond address:' + aavegotchiDiamond.address)
+  console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
   // ----------------------------------------------------------------
   // Upload SVG layers
@@ -99,6 +113,15 @@ async function main () {
   console.log('Uploading Items SVG...')
   await svgStorageFacet.storeItemsSVG(svgs, sizes)
   console.log('Uploaded Items SVG')
+
+  const aavegotchiFacet = await ethers.getContractAt('AavegotchiFacet', aavegotchiDiamond.address)
+
+  return {
+    account: account,
+    aavegotchiDiamond: aavegotchiDiamond,
+    ghstDiamond: ghstDiamond,
+    aavegotchiFacet: aavegotchiFacet
+  }
 
   // ----------------------------------------------------------------
   // Mint Aavegotchi with SVG Layers
