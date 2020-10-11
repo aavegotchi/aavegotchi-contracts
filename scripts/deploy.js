@@ -27,9 +27,9 @@ async function main () {
   await diamondLoupeFacet.deployed()
 
   let ghstDiamond
-  let ghstContractAddress
   if (bre.network.name === 'kovan') {
-    ghstContractAddress = '0x3F382DbD960E3a9bbCeaE22651E88158d2791550'
+    ghstDiamond = await ethers.getContractAt('GHSTFacet', '0x3F382DbD960E3a9bbCeaE22651E88158d2791550')
+    console.log('GHST diamond address:' + ghstDiamond.address)
   } else if (bre.network.name === 'mainnet' || bre.network.name === 'buidlerevm') {
     ghstDiamond = await diamond.deploy({
       diamondName: 'GHSTDiamond',
@@ -44,7 +44,6 @@ async function main () {
     })
     ghstDiamond = await ethers.getContractAt('GHSTFacet', ghstDiamond.address)
     console.log('GHST diamond address:' + ghstDiamond.address)
-    ghstContractAddress = ghstDiamond.address
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -59,7 +58,7 @@ async function main () {
       'WearablesFacet'
     ],
     owner: account,
-    otherArgs: [ghstContractAddress, getCollaterals(bre.network.name)]
+    otherArgs: [ghstDiamond.address, getCollaterals(bre.network.name)]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
