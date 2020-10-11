@@ -123,6 +123,7 @@ contract AavegotchiFacet {
         address collateralType;
     }
 
+    //Should only be called once, during the openPortal() function
     function portalAavegotchiTraits(uint256 _tokenId) public view returns (PortalAavegotchiTraits[10] memory portalAavegotchiTraits_) {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
@@ -139,6 +140,8 @@ contract AavegotchiFacet {
     function claimAavegotchiFromPortal(uint256 _tokenId, uint256 _option) external {
         require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
+
+        //Shouldn't need to generate another random number. Just set the token status to 2. Also need to update an integer showing which Aavegotchi has been selected from the portal
         uint256 randomNumber = uint256(keccak256(abi.encodePacked(s.aavegotchis[_tokenId].randomNumber, _option)));
         s.aavegotchis[_tokenId].randomNumber = randomNumber;
         for (uint256 j; j < 7; j++) {
