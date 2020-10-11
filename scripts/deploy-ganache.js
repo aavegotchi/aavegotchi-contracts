@@ -109,29 +109,16 @@ async function main() {
 
     /*Functions*/
     //Mint some GHST
-    await ghstLoupeFacet.mint()
-    const balance = await ghstLoupeFacet.balanceOf(account)
-    console.log('balance:', balance / Math.pow(10, 18))
-
 
     const aavegotchiFacet = await ethers.getContractAt('AavegotchiFacet', aavegotchiDiamond.address)
 
-    //Buy a portal
+    return {
+        account: account,
+        aavegotchiDiamond: aavegotchiDiamond,
+        ghstLoupeFacet: ghstLoupeFacet,
+        aavegotchiFacet: aavegotchiFacet
+    }
 
-    //Approve GHST to be spent by aavegotchi facet
-    await ghstLoupeFacet.approve(aavegotchiDiamond.address, balance)
-
-    const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-
-    await aavegotchiFacet.buyPortals(buyAmount)
-    let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-    const portalId = myPortals[0].tokenId
-    await aavegotchiFacet.openPortal(portalId)
-
-    //  let traits = await aavegotchiFacet.portalAavegotchiTraits(portalId)
-    //  console.log('traits:', traits)
-    myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-    console.log('After opening:', myPortals)
 
     //Traits should already be set
 

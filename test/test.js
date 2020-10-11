@@ -1,3 +1,4 @@
+const { expect } = require('chai')
 const { idText } = require('typescript')
 /* global describe it ethers before */
 
@@ -7,23 +8,72 @@ const { idText } = require('typescript')
 // import ERC721 from '../artifacts/ERC721.json'
 // import { ethers } from 'ethers'
 
-const { deployProject } = require('../scripts/deploy.js')
+const { deployProject } = require('../scripts/deploy-ganache.js')
 
 describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   let svgStorage
   // let ghstDiamond
   let aavegotchiDiamond
-  let erc721
+  let ghstLoupeFacet
+  let aavegotchiFacet
+  let account
+  //let erc721
   // let account
 
   before(async function () {
     console.log('getting started')
-    await deployProject()
+    const deployVars = await deployProject()
+    account = deployVars.account
+
+    console.log('account:', account)
+
+    aavegotchiDiamond = deployVars.aavegotchiDiamond
+    aavegotchiFacet = deployVars.aavegotchiFacet
+    ghstLoupeFacet = deployVars.ghstLoupeFacet
   })
 
-  it('First test here', async function () {
-    console.log('test done')
+  it('Should mint 10,000 GHST tokens', async function () {
+    await ghstLoupeFacet.mint()
+    const balance = await ghstLoupeFacet.balanceOf(account)
+    expect(balance).to.equal("10000000000000000000000")
   })
+
+  it("Should purchase one portal", async function () {
+    const balance = await ghstLoupeFacet.balanceOf(account)
+    await ghstLoupeFacet.approve(aavegotchiDiamond.address, balance)
+    const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
+    await aavegotchiFacet.buyPortals(buyAmount)
+    let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    expect(myPortals.length).to.equal(1)
+  })
+
+  it("Should open the portal", async function () {
+    let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    expect(myPortals[0].status).to.equal(0)
+    const portalId = myPortals[0].tokenId
+    await aavegotchiFacet.openPortal(portalId)
+    myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    expect(myPortals[0].status).to.equal(1)
+  })
+
+  it("Should contain 10 random ghosts in the portal", async function () {
+    const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    let ghosts = await aavegotchiFacet.portalAavegotchiTraits(myPortals[0].tokenId)
+    expect(ghosts.length).to.equal(10)
+  })
+
+  it("Should claim a ghost", async function () {
+    let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    let tokenId = myPortals[0].tokenId
+    let ghosts = await aavegotchiFacet.portalAavegotchiTraits(tokenId)
+    const selectedGhost = ghosts[4]
+    console.log('selected ghost:', selectedGhost)
+    await aavegotchiFacet.claimAavegotchiFromPortal(tokenId, 4)
+    myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    const collateral = myPortals[0].collateralType
+    console.log('collateral:', collateral)
+  })
+
 
   // it('Deploying SVG contract and Aavegotchi diamond', async function () {
   //   const SVGStorage = await ethers.getContractFactory('SVGStorage')
