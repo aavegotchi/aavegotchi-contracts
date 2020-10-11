@@ -22,12 +22,7 @@ struct Aavegotchi {
     // track status of aavegotchi
     // 0 == portal, 1 = open portal, 2 = Aavegotchi
     uint8 status;
-
-    //Each of the 10 Aavegotchis has a different collateral type. But only one remains after being selected
-    uint256 selectedAavegotchi; //The Aavegotchi ID selected in claimAavegotchi()
     address collateralType;
-
-
 }
 
 struct SVGLayer {

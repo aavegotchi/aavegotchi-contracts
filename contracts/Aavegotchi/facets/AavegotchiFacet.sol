@@ -112,9 +112,6 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(block.timestamp)));
         // status is open portal
         s.aavegotchis[_tokenId].status = 1;
-
-        //Call portalAavegotchiTraits here?
-        portalAavegotchiTraits(_tokenId);
     }
 
     struct PortalAavegotchiTraits {
@@ -123,8 +120,7 @@ contract AavegotchiFacet {
         address collateralType;
     }
 
-    //Should only be called once, during the openPortal() function
-    function portalAavegotchiTraits(uint256 _tokenId) public view returns (PortalAavegotchiTraits[10] memory portalAavegotchiTraits_) {
+    function portalAavegotchiTraits(uint256 _tokenId) external view returns (PortalAavegotchiTraits[10] memory portalAavegotchiTraits_) {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
         for (uint256 i; i < 10; i++) {
@@ -140,19 +136,12 @@ contract AavegotchiFacet {
     function claimAavegotchiFromPortal(uint256 _tokenId, uint256 _option) external {
         require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
-
-        //Shouldn't need to generate another random number. Just set the token status to 2. Also need to update an integer showing which Aavegotchi has been selected from the portal
         uint256 randomNumber = uint256(keccak256(abi.encodePacked(s.aavegotchis[_tokenId].randomNumber, _option)));
         s.aavegotchis[_tokenId].randomNumber = randomNumber;
         for (uint256 j; j < 7; j++) {
             s.aavegotchis[_tokenId].numericTraits[j] = uint8(randomNumber >> (j * 8)) % 100;
         }
-
-        //The selected collateral should align with whichever Aavegotchi was claimed
         s.aavegotchis[_tokenId].collateralType = s.collateralTypes[(randomNumber >> 248) % s.collateralTypes.length];
-
-        //Need to store which Aavegotchi was selected
-        s.aavegotchis[_tokenId].selectedAavegotchi = _option;
         s.aavegotchis[_tokenId].status = 2;
     }
 
