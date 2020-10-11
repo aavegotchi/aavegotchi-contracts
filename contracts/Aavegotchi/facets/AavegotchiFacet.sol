@@ -148,8 +148,11 @@ contract AavegotchiFacet {
             s.aavegotchis[_tokenId].numericTraits[j] = uint8(randomNumber >> (j * 8)) % 100;
         }
 
-        //looks like traits are being finalized here? but actually the traits should have already been set in openPortal()
+        //The selected collateral should align with whichever Aavegotchi was claimed
         s.aavegotchis[_tokenId].collateralType = s.collateralTypes[(randomNumber >> 248) % s.collateralTypes.length];
+
+        //Need to store which Aavegotchi was selected
+        s.aavegotchis[_tokenId].selectedAavegotchi = _option;
         s.aavegotchis[_tokenId].status = 2;
     }
 
