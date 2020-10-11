@@ -21,12 +21,8 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   // let account
 
   before(async function () {
-    console.log('getting started')
     const deployVars = await deployProject()
     account = deployVars.account
-
-    console.log('account:', account)
-
     aavegotchiDiamond = deployVars.aavegotchiDiamond
     aavegotchiFacet = deployVars.aavegotchiFacet
     ghstLoupeFacet = deployVars.ghstLoupeFacet
@@ -67,23 +63,25 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     let tokenId = myPortals[0].tokenId
     let ghosts = await aavegotchiFacet.portalAavegotchiTraits(tokenId)
     const selectedGhost = ghosts[4]
-    console.log('selected ghost:', selectedGhost)
     await aavegotchiFacet.claimAavegotchiFromPortal(tokenId, 4)
-    myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-    const collateral = myPortals[0].collateralType
-    console.log('collateral:', collateral)
+
+    const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
+    const collateral = aavegotchi.collateral
+    expect(selectedGhost.collateralType).to.equal(collateral)
+    expect(aavegotchi.status).to.equal(2)
   })
 
+  it("Should set a name", async function () {
+    let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    let tokenId = myPortals[0].tokenId
+    await aavegotchiFacet.setAavegotchiName(tokenId, "Beavis")
+    const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
+    expect(aavegotchi.name).to.equal("Beavis")
+  })
 
-  // it('Deploying SVG contract and Aavegotchi diamond', async function () {
-  //   const SVGStorage = await ethers.getContractFactory('SVGStorage')
-  //   svgStorage = await SVGStorage.deploy()
-  //   await svgStorage.deployed()
+  //Add a test to check if we can name another Aavegotchi Beavis
+  //Add some tests to check different svg layers
 
-  //   const AavegotchiDiamond = await ethers.getContractFactory('Aavegotchi')
-  //   aavegotchiDiamond = await AavegotchiDiamond.deploy(svgStorage.address)
-  //   await aavegotchiDiamond.deployed()
-  // })
 
   // it('Add SVG Layers', async function () {
   //   let svgs = [
