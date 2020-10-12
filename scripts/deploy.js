@@ -28,7 +28,7 @@ async function main () {
 
   let ghstDiamond
   if (bre.network.name === 'kovan') {
-    ghstDiamond = await ethers.getContractAt('GHSTFacet', '0x3F382DbD960E3a9bbCeaE22651E88158d2791550')
+    ghstDiamond = await ethers.getContractAt('GHSTFacet', '0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5')
     console.log('GHST diamond address:' + ghstDiamond.address)
   } else if (bre.network.name === 'mainnet' || bre.network.name === 'buidlerevm') {
     ghstDiamond = await diamond.deploy({
