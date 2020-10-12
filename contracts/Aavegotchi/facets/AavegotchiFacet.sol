@@ -165,6 +165,7 @@ contract AavegotchiFacet {
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
     function getAavegotchiSVG(uint256 _tokenId) public view returns (string memory ag_) {
         require(s.aavegotchis[_tokenId].owner != address(0), "AavegotchiFacet: _tokenId does not exist");
+        address collateralType = s.aavegotchis[_tokenId].collateralType;
         bytes memory svg;
         uint8 status = s.aavegotchis[_tokenId].status;
         if (status == 0) {
@@ -178,8 +179,9 @@ contract AavegotchiFacet {
             for (uint256 i; i < 5; i++) {
                 svg = abi.encodePacked(svg, LibSVG.getSVG(s.aavegotchiLayersSVG, i));
             }
+            // add collateral type layer
+            svg = abi.encodePacked(svg, LibSVG.getSVG(s.itemsSVG, s.collateralTypeInfo[collateralType].svgId));
         }
-        address collateralType = s.aavegotchis[_tokenId].collateralType;
         string memory primaryColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].primaryColor);
         string memory secondaryColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].secondaryColor);
         string memory cheekColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].cheekColor);

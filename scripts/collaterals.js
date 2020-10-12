@@ -5,7 +5,8 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#64438E',
     secondaryColor: '#EDD3FD',
-    cheekColor: '#f696c6'
+    cheekColor: '#f696c6',
+    svgId: 3
   },
   {
     name: 'aDAI',
@@ -13,7 +14,8 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#FF7D00',
     secondaryColor: '#F9D792',
-    cheekColor: '#f4af24'
+    cheekColor: '#f4af24',
+    svgId: 2
   },
   {
     name: 'aUSDC',
@@ -21,7 +23,8 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#2664BA',
     secondaryColor: '#D4E0F1',
-    cheekColor: '#f696c6'
+    cheekColor: '#f696c6',
+    svgId: 9
   },
   {
     name: 'aSNX',
@@ -29,7 +32,8 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#0E0C15',
     secondaryColor: '#DCDCDC',
-    cheekColor: '#f696c6'
+    cheekColor: '#f696c6',
+    svgId: 7
   },
   {
     name: 'aTUSD',
@@ -37,7 +41,8 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#282473',
     secondaryColor: '#B6D9FC',
-    cheekColor: '#f696c6'
+    cheekColor: '#f696c6',
+    svgId: 8
   },
   /* {
          name: "aUSDT",
@@ -45,6 +50,8 @@ const collaterals = [
          mainnetAddress: "",
          primaryColor: "",
          secondaryColor: "",
+    cheekColor: '#f696c6',
+    svgId:
      },
      */
   /* {
@@ -53,6 +60,8 @@ const collaterals = [
          mainnetAddress: "",
          primaryColor: "",
          secondaryColor: "",
+    cheekColor: '#f696c6',
+    svgId:
      },
      */
   {
@@ -61,7 +70,8 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#0000B9',
     secondaryColor: '#D4DEF8',
-    cheekColor: '#f696c6'
+    cheekColor: '#f696c6',
+    svgId: 5
   },
   {
     name: 'aLEND',
@@ -69,7 +79,8 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#0FA9C9',
     secondaryColor: '#CFEEF4',
-    cheekColor: '#f696c6'
+    cheekColor: '#f696c6',
+    svgId: 4
   }
 
   // Mainnet only
@@ -79,6 +90,8 @@ const collaterals = [
         mainnetAddress:"0x12e51E77DAAA58aA0E9247db7510Ea4B46F9bEAd",
         primaryColor:"#0074F9",
         secondaryColor:"#C8E1FD",
+    cheekColor: '#f696c6',
+    svgId: 10
     }
     */
 ]
@@ -92,7 +105,8 @@ function getCollaterals (network) {
       secondaryColor:
       '0x' + collateralType.secondaryColor.slice(1),
       cheekColor:
-      '0x' + collateralType.cheekColor.slice(1)
+      '0x' + collateralType.cheekColor.slice(1),
+      svgId: collateralType.svgId
     }
     if (network === 'kovan' || network === 'buidlerevm') {
       item.collateralType = collateralType.kovanAddress
