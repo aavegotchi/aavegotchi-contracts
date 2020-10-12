@@ -5,7 +5,7 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#64438E',
     secondaryColor: '#EDD3FD',
-    cheekColor: '#3f696c6'
+    cheekColor: '#f696c6'
   },
   {
     name: 'aDAI',
@@ -21,7 +21,7 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#2664BA',
     secondaryColor: '#D4E0F1',
-    cheekColor: '#3f696c6'
+    cheekColor: '#f696c6'
   },
   {
     name: 'aSNX',
@@ -29,7 +29,7 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#0E0C15',
     secondaryColor: '#DCDCDC',
-    cheekColor: '#3f696c6'
+    cheekColor: '#f696c6'
   },
   {
     name: 'aTUSD',
@@ -37,7 +37,7 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#282473',
     secondaryColor: '#B6D9FC',
-    cheekColor: '#3f696c6'
+    cheekColor: '#f696c6'
   },
   /* {
          name: "aUSDT",
@@ -61,7 +61,7 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#0000B9',
     secondaryColor: '#D4DEF8',
-    cheekColor: '#3f696c6'
+    cheekColor: '#f696c6'
   },
   {
     name: 'aLEND',
@@ -69,7 +69,7 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#0FA9C9',
     secondaryColor: '#CFEEF4',
-    cheekColor: '#3f696c6'
+    cheekColor: '#f696c6'
   }
 
   // Mainnet only
@@ -90,7 +90,9 @@ function getCollaterals (network) {
       primaryColor:
       '0x' + collateralType.primaryColor.slice(1),
       secondaryColor:
-      '0x' + collateralType.secondaryColor.slice(1)
+      '0x' + collateralType.secondaryColor.slice(1),
+      cheekColor:
+      '0x' + collateralType.cheekColor.slice(1)
     }
     if (network === 'kovan' || network === 'buidlerevm') {
       item.collateralType = collateralType.kovanAddress
