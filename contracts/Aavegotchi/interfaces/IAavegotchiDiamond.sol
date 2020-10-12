@@ -73,4 +73,6 @@ interface IAavegotchiDiamond {
     function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_);
 
     function allAavegotchisOfOwner(address _owner) external view returns (AavegotchiFacet.AavegotchiInfo[] memory aavegotchiInfos_);
+
+    function portalAavegotchisSVG(uint256 _tokenId) external view returns (string[] memory svg_);
 }

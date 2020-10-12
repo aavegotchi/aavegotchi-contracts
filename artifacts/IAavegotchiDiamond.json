@@ -438,6 +438,25 @@
     {
       "inputs": [
         {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "portalAavegotchisSVG",
+      "outputs": [
+        {
+          "internalType": "string[]",
+          "name": "svg_",
+          "type": "string[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "address",
           "name": "_collateralType",
           "type": "address"
