@@ -4,6 +4,84 @@
     {
       "inputs": [
         {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        }
+      ],
+      "name": "aavegotchiNameAvailable",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "available_",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "collateralType",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes3",
+              "name": "primaryColor",
+              "type": "bytes3"
+            },
+            {
+              "internalType": "bytes3",
+              "name": "secondaryColor",
+              "type": "bytes3"
+            },
+            {
+              "internalType": "bytes3",
+              "name": "cheekColor",
+              "type": "bytes3"
+            },
+            {
+              "internalType": "uint8",
+              "name": "svgId",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct LibAppStorage.AavegotchiCollateralTypeInput[]",
+          "name": "_collateralTypes",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "addCollateralTypes",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "allAavegotchiIdsOfOwner",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "tokenIds_",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "address",
           "name": "_owner",
           "type": "address"
@@ -12,9 +90,51 @@
       "name": "allAavegotchisOfOwner",
       "outputs": [
         {
-          "internalType": "uint256[]",
-          "name": "tokenIds",
-          "type": "uint256[]"
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "randomNumber",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8[]",
+              "name": "numericTraits",
+              "type": "uint8[]"
+            },
+            {
+              "internalType": "address",
+              "name": "collateral",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "stakedAmount",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct AavegotchiFacet.AavegotchiInfo[]",
+          "name": "aavegotchiInfos_",
+          "type": "tuple[]"
         }
       ],
       "stateMutability": "view",
@@ -68,6 +188,103 @@
       "name": "buyPortals",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_option",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_stakeAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "claimAavegotchiFromPortal",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "collaterals",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "collateralTypes_",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getAavegotchi",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "randomNumber",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8[]",
+              "name": "numericTraits",
+              "type": "uint8[]"
+            },
+            {
+              "internalType": "address",
+              "name": "collateral",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "stakedAmount",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct AavegotchiFacet.AavegotchiInfo",
+          "name": "aavegotchiInfo_",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -153,6 +370,19 @@
           "type": "uint256"
         }
       ],
+      "name": "openPortal",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
       "name": "ownerOf",
       "outputs": [
         {
@@ -162,6 +392,60 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "portalAavegotchiTraits",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "randomNumber",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8[7]",
+              "name": "numericTraits",
+              "type": "uint8[7]"
+            },
+            {
+              "internalType": "address",
+              "name": "collateralType",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minimumStake",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct AavegotchiFacet.PortalAavegotchiTraits[10]",
+          "name": "portalAavegotchiTraits_",
+          "type": "tuple[10]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_collateralType",
+          "type": "address"
+        }
+      ],
+      "name": "removeCollateralType",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -211,6 +495,24 @@
         }
       ],
       "name": "safeTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        }
+      ],
+      "name": "setAavegotchiName",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

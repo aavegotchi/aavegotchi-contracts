@@ -6,6 +6,7 @@ import "../libraries/LibAppStorage.sol";
 import "../../shared/interfaces/IERC20.sol";
 import "../libraries/LibSVG.sol";
 import "../../shared/libraries/LibDiamond.sol";
+import "../../shared/libraries/LibERC20.sol";
 
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
 interface ERC721TokenReceiver {
@@ -118,6 +119,7 @@ contract AavegotchiFacet {
         uint256 randomNumber;
         uint8[7] numericTraits;
         address collateralType;
+        uint256 minimumStake;
     }
 
     function portalAavegotchiTraits(uint256 _tokenId) external view returns (PortalAavegotchiTraits[10] memory portalAavegotchiTraits_) {
@@ -129,11 +131,17 @@ contract AavegotchiFacet {
             for (uint256 j; j < 7; j++) {
                 portalAavegotchiTraits_[i].numericTraits[j] = uint8(randomNumberN >> (j * 8)) % 100;
             }
-            portalAavegotchiTraits_[i].collateralType = s.collateralTypes[(randomNumberN >> 248) % s.collateralTypes.length];
+            address collateralType = s.collateralTypes[(randomNumberN >> 248) % s.collateralTypes.length];
+            portalAavegotchiTraits_[i].collateralType = collateralType;
+            portalAavegotchiTraits_[i].minimumStake = 10**IERC20(collateralType).decimals();
         }
     }
 
-    function claimAavegotchiFromPortal(uint256 _tokenId, uint256 _option) external {
+    function claimAavegotchiFromPortal(
+        uint256 _tokenId,
+        uint256 _option,
+        uint256 _stakeAmount
+    ) external {
         require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
         uint256 randomNumber = uint256(keccak256(abi.encodePacked(s.aavegotchis[_tokenId].randomNumber, _option)));
@@ -141,8 +149,13 @@ contract AavegotchiFacet {
         for (uint256 j; j < 7; j++) {
             s.aavegotchis[_tokenId].numericTraits.push(uint8(randomNumber >> (j * 8)) % 100);
         }
-        s.aavegotchis[_tokenId].collateralType = s.collateralTypes[(randomNumber >> 248) % s.collateralTypes.length];
+        address collateralType = s.collateralTypes[(randomNumber >> 248) % s.collateralTypes.length];
+        s.aavegotchis[_tokenId].collateralType = collateralType;
         s.aavegotchis[_tokenId].status = 2;
+        uint256 minimumStake = 10**IERC20(collateralType).decimals();
+        require(_stakeAmount >= minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
+        s.aavegotchis[_tokenId].stakedAmount = uint128(_stakeAmount);
+        LibERC20.transferFrom(collateralType, msg.sender, address(this), _stakeAmount);
     }
 
     function ghstAddress() external view returns (address contract_) {
@@ -175,7 +188,7 @@ contract AavegotchiFacet {
             // open portal
             svg = LibSVG.getSVG(s.itemsSVG, 1);
         } else {
-            // add fix standard layers
+            // add standard layers
             for (uint256 i; i < 5; i++) {
                 svg = abi.encodePacked(svg, LibSVG.getSVG(s.aavegotchiLayersSVG, i));
             }
@@ -243,6 +256,7 @@ contract AavegotchiFacet {
         uint8 status;
         uint8[] numericTraits;
         address collateral;
+        uint256 stakedAmount;
     }
 
     function getAavegotchi(uint256 _tokenId) public view returns (AavegotchiInfo memory aavegotchiInfo_) {
@@ -253,6 +267,7 @@ contract AavegotchiFacet {
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
         aavegotchiInfo_.numericTraits = s.aavegotchis[_tokenId].numericTraits;
         aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
+        aavegotchiInfo_.stakedAmount = s.aavegotchis[_tokenId].stakedAmount;
         return aavegotchiInfo_;
     }
 

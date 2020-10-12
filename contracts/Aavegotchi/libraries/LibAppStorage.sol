@@ -23,6 +23,7 @@ struct Aavegotchi {
     // 0 == portal, 1 = open portal, 2 = Aavegotchi
     uint8 status;
     address collateralType;
+    uint128 stakedAmount;
 }
 
 struct SVGLayer {

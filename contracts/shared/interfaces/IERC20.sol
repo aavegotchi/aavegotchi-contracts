@@ -9,4 +9,6 @@ interface IERC20 {
     ) external returns (bool success);
 
     function transfer(address _to, uint256 _value) external returns (bool success);
+
+    function decimals() external view returns (uint8);
 }
