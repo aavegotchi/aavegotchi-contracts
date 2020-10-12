@@ -34,6 +34,7 @@ struct SVGLayer {
 struct AavegotchiCollateralTypeInfo {
     bytes3 primaryColor;
     bytes3 secondaryColor;
+    bytes3 cheekColor;
 }
 
 struct AppStorage {
@@ -72,6 +73,7 @@ library LibAppStorage {
         address collateralType;
         bytes3 primaryColor;
         bytes3 secondaryColor;
+        bytes3 cheekColor;
     }
 
     function addCollateralTypes(AppStorage storage s, AavegotchiCollateralTypeInput[] memory _collateralTypes) internal {
@@ -80,6 +82,7 @@ library LibAppStorage {
             s.collateralTypes.push(collateralType);
             s.collateralTypeInfo[collateralType].primaryColor = _collateralTypes[i].primaryColor;
             s.collateralTypeInfo[collateralType].secondaryColor = _collateralTypes[i].secondaryColor;
+            s.collateralTypeInfo[collateralType].cheekColor = _collateralTypes[i].cheekColor;
         }
     }
 }

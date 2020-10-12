@@ -182,6 +182,7 @@ contract AavegotchiFacet {
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         string memory primaryColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].primaryColor);
         string memory secondaryColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].secondaryColor);
+        string memory cheekColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].cheekColor);
 
         ag_ = string(
             abi.encodePacked(
@@ -190,6 +191,8 @@ contract AavegotchiFacet {
                 primaryColor,
                 ";}.secondaryColor{fill:#",
                 secondaryColor,
+                ";}.cheekColor{fill:#",
+                cheekColor,
                 ";}</style>",
                 svg,
                 "</svg>"

@@ -4,35 +4,40 @@ const collaterals = [
     kovanAddress: '0xD483B49F2d55D2c53D32bE6efF735cB001880F79',
     mainnetAddress: '',
     primaryColor: '#64438E',
-    secondaryColor: '#EDD3FD'
+    secondaryColor: '#EDD3FD',
+    cheekColor: '#3f696c6'
   },
   {
     name: 'aDAI',
     kovanAddress: '0x58AD4cB396411B691A9AAb6F74545b2C5217FE6a',
     mainnetAddress: '',
     primaryColor: '#FF7D00',
-    secondaryColor: '#F9D792'
+    secondaryColor: '#F9D792',
+    cheekColor: '#f4af24'
   },
   {
     name: 'aUSDC',
     kovanAddress: '0x02F626c6ccb6D2ebC071c068DC1f02Bf5693416a',
     mainnetAddress: '',
     primaryColor: '#2664BA',
-    secondaryColor: '#D4E0F1'
+    secondaryColor: '#D4E0F1',
+    cheekColor: '#3f696c6'
   },
   {
     name: 'aSNX',
     kovanAddress: '0xb4D480f963f4F685F1D51d2B6159D126658B1dA8',
     mainnetAddress: '',
     primaryColor: '#0E0C15',
-    secondaryColor: '#DCDCDC'
+    secondaryColor: '#DCDCDC',
+    cheekColor: '#3f696c6'
   },
   {
     name: 'aTUSD',
     kovanAddress: '0xA79383e0d2925527ba5Ec1c1bcaA13c28EE00314',
     mainnetAddress: '',
     primaryColor: '#282473',
-    secondaryColor: '#B6D9FC'
+    secondaryColor: '#B6D9FC',
+    cheekColor: '#3f696c6'
   },
   /* {
          name: "aUSDT",
@@ -55,14 +60,16 @@ const collaterals = [
     kovanAddress: '0xEC23855Ff01012E1823807CE19a790CeBc4A64dA',
     mainnetAddress: '',
     primaryColor: '#0000B9',
-    secondaryColor: '#D4DEF8'
+    secondaryColor: '#D4DEF8',
+    cheekColor: '#3f696c6'
   },
   {
     name: 'aLEND',
     kovanAddress: '0xa2facD0F9Ef0Bb75cFc64Ad692F79378b5C3673a',
     mainnetAddress: '',
     primaryColor: '#0FA9C9',
-    secondaryColor: '#CFEEF4'
+    secondaryColor: '#CFEEF4',
+    cheekColor: '#3f696c6'
   }
 
   // Mainnet only

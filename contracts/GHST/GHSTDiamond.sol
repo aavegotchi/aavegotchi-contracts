@@ -24,26 +24,11 @@ contract GHSTDiamond {
 
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 
-       // adding ERC165 data
-        // ERC165
-        ds.supportedInterfaces[IERC165.supportsInterface.selector] = true;
-
-        // DiamondCut
-        ds.supportedInterfaces[IDiamondCut.diamondCut.selector] = true;
-
-        // DiamondLoupe
-        ds.supportedInterfaces[
-            IDiamondLoupe.facets.selector ^
-            IDiamondLoupe.facetFunctionSelectors.selector ^
-            IDiamondLoupe.facetAddresses.selector ^
-            IDiamondLoupe.facetAddress.selector
-        ] = true;
-
-        // ERC173
-        ds.supportedInterfaces[
-            IERC173.transferOwnership.selector ^ 
-            IERC173.owner.selector
-        ] = true;
+        // adding ERC165 data
+        ds.supportedInterfaces[type(IERC165).interfaceId] = true;
+        ds.supportedInterfaces[type(IDiamondCut).interfaceId] = true;        
+        ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
+        ds.supportedInterfaces[type(IERC173).interfaceId] = true;
     }
 
     // Find facet for function that is called and execute the
