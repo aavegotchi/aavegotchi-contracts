@@ -137,6 +137,18 @@ contract AavegotchiFacet {
         }
     }
 
+    function portalAavegotchisSVG(uint256 _tokenId) external view returns (string[] memory svg_) {
+        uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
+        require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
+        for (uint256 i; i < 10; i++) {
+            uint256 randomNumberN = uint256(keccak256(abi.encodePacked(randomNumber, i)));
+            address collateralType = s.collateralTypes[(randomNumberN >> 248) % s.collateralTypes.length];
+            svg_[i] = string(
+                abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', getAavegotchiSVGLayers(collateralType), "</svg>")
+            );
+        }
+    }
+
     function claimAavegotchiFromPortal(
         uint256 _tokenId,
         uint256 _option,
@@ -175,6 +187,28 @@ contract AavegotchiFacet {
         return string(toString);
     }
 
+    function getAavegotchiSVGLayers(address _collateralType) internal view returns (bytes memory svg_) {
+        string memory primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
+        string memory secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
+        string memory cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
+        // add standard layers
+        for (uint256 i; i < 5; i++) {
+            svg_ = abi.encodePacked(svg_, LibSVG.getSVG(s.aavegotchiLayersSVG, i));
+        }
+        svg_ = abi.encodePacked(
+            "<style>.primaryColor{fill:#",
+            primaryColor,
+            ";}.secondaryColor{fill:#",
+            secondaryColor,
+            ";}.cheekColor{fill:#",
+            cheekColor,
+            ";}</style>",
+            svg_,
+            // add collateral type layer
+            LibSVG.getSVG(s.itemsSVG, s.collateralTypeInfo[_collateralType].svgId)
+        );
+    }
+
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
     function getAavegotchiSVG(uint256 _tokenId) public view returns (string memory ag_) {
         require(s.aavegotchis[_tokenId].owner != address(0), "AavegotchiFacet: _tokenId does not exist");
@@ -188,31 +222,9 @@ contract AavegotchiFacet {
             // open portal
             svg = LibSVG.getSVG(s.itemsSVG, 1);
         } else {
-            // add standard layers
-            for (uint256 i; i < 5; i++) {
-                svg = abi.encodePacked(svg, LibSVG.getSVG(s.aavegotchiLayersSVG, i));
-            }
-            // add collateral type layer
-            svg = abi.encodePacked(svg, LibSVG.getSVG(s.itemsSVG, s.collateralTypeInfo[collateralType].svgId));
+            svg = getAavegotchiSVGLayers(collateralType);
         }
-        string memory primaryColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].primaryColor);
-        string memory secondaryColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].secondaryColor);
-        string memory cheekColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].cheekColor);
-
-        ag_ = string(
-            abi.encodePacked(
-                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">',
-                "<style>.primaryColor{fill:#",
-                primaryColor,
-                ";}.secondaryColor{fill:#",
-                secondaryColor,
-                ";}.cheekColor{fill:#",
-                cheekColor,
-                ";}</style>",
-                svg,
-                "</svg>"
-            )
-        );
+        ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg, "</svg>"));
     }
 
     // get the first Aavegotchi that someone uses. This function is for demo purposes.
