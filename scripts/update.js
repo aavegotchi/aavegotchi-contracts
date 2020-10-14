@@ -29,48 +29,24 @@ async function main () {
   // Function: 0x3878bcdc portalAavegotchisSVG(uint256)
   // const diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', aavegotchiDiamondAddress)
   // console.log(await diamondLoupeFacet.facets())
-  // const ownershipFacet = await ethers.getContractAt('OwnershipFacet', aavegotchiDiamondAddress)
-  // console.log(await ownershipFacet.owner())
+  const aavegotchiFacet = await ethers.getContractAt('AavegotchiFacet', aavegotchiDiamondAddress)
+  console.log(await aavegotchiFacet.collaterals())
 
-  // mainnet
-  // const ghstContractAddress = '0x3F382DbD960E3a9bbCeaE22651E88158d2791550'
-
-  // eslint-disable-next-line no-unused-vars
-  //   await diamond.upgrade({
-  //     diamondAddress: aavegotchiDiamondAddress,
-  //     diamondCut: [
-  //       [
-  //         'AavegotchiFacet',
-  //         diamond.FacetCutAction.Replace,
-  //         [
-  //           'portalAavegotchisSVG(uint256)'
-  //         ]
-  //       ]
-  //     ],
-  //     txArgs: { gasLimit: 500000 }
-  //   })
-  await diamond.upgrade({
-    diamondAddress: aavegotchiDiamondAddress,
-    diamondCut: [
-      [
-        'AavegotchiFacet',
-        diamond.FacetCutAction.Replace,
-        [
-          'getAavegotchiSVG(uint256)'
-        ]
-      ],
-      [
-        'AavegotchiFacet',
-        diamond.FacetCutAction.Add,
-        [
-          'portalAavegotchisSVG(uint256)'
-        ]
-      ]
-    ],
-    txArgs: { gasLimit: 500000 }
-  })
+  const oldAddress = '0xa2facD0F9Ef0Bb75cFc64Ad692F79378b5C3673a'
+//   const newAddress = '0xcba131c7fb05fe3c9720375cd86c99773faabf23'
+//   const result = await aavegotchiFacet.removeCollateralType(oldAddress, { gasLimit: 500000 })
+//   console.log(await result.wait())
+  // console.log(result)
+//   const result = await aavegotchiFacet.addCollateralTypes([
+//     {
+//         collateralType: 'newAddress',
+//         primaryColor: '0x0FA9C9',
+//         secondaryColor: '0xCFEEF4',
+//         cheekColor: '0xf696c6',
+//         svgId: 4
+//     }
+//   ])
 }
-
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main()

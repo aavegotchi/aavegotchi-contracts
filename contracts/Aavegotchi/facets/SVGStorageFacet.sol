@@ -2,6 +2,7 @@
 pragma solidity 0.7.3;
 //pragma experimental ABIEncoderV2;
 import {AppStorage, SVGLayer} from "../libraries/LibAppStorage.sol";
+import "../../shared/libraries/LibDiamond.sol";
 
 // This contract was added as a facet to the diamond
 contract SVGStorageFacet {
@@ -10,6 +11,7 @@ contract SVGStorageFacet {
     // Stores aavegotchi layers
     // The id for an SVG is the same as its position in the aavegotchiLayersSVG array
     function storeAavegotchiLayersSVG(string calldata _svgLayers, uint256[] calldata sizes) external {
+        LibDiamond.enforceIsContractOwner();
         address svgContract = storeSVG(_svgLayers);
         uint256 offset = 0;
         for (uint256 i; i < sizes.length; i++) {
@@ -21,6 +23,7 @@ contract SVGStorageFacet {
     // Stores wearable SVGs
     // The id for a wearable is the same as its position in the wearablesSVG array
     function storeWearablesSVG(string calldata _svgLayers, uint256[] calldata sizes) external {
+        LibDiamond.enforceIsContractOwner();
         address svgContract = storeSVG(_svgLayers);
         uint256 offset = 0;
         for (uint256 i; i < sizes.length; i++) {
@@ -30,8 +33,8 @@ contract SVGStorageFacet {
     }
 
     function storeItemsSVG(string calldata _svgLayers, uint256[] calldata sizes) external {
+        LibDiamond.enforceIsContractOwner();
         address svgContract = storeSVG(_svgLayers);
-
         uint256 offset = 0;
         for (uint256 i; i < sizes.length; i++) {
             s.itemsSVG.push(SVGLayer(svgContract, uint16(offset), uint16(sizes[i])));

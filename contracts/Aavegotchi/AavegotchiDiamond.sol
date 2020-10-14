@@ -32,7 +32,7 @@ contract AavegotchiDiamond {
         LibAppStorage.AavegotchiCollateralTypeInput[] memory _collateralTypes
     ) {
         LibDiamond.diamondCut(_diamondCut, address(0), new bytes(0));
-        s.contractOwner = _owner;
+        LibDiamond.setContractOwner(_owner);
         s.wearablesSVG.push();
 
         s.addCollateralTypes(_collateralTypes);

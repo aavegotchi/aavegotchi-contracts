@@ -54,6 +54,7 @@ contract AavegotchiFacet {
     }
 
     function removeCollateralType(address _collateralType) external {
+        LibDiamond.enforceIsContractOwner();
         uint256 index = s.collateralTypeIndexes[_collateralType];
         require(index > 0, "Aavegotchi: _collateral does not exist");
         index--;
@@ -137,7 +138,7 @@ contract AavegotchiFacet {
         }
     }
 
-    function portalAavegotchisSVG(uint256 _tokenId) external view returns (string[] memory svg_) {
+    function portalAavegotchisSVG(uint256 _tokenId) external view returns (string[10] memory svg_) {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
         for (uint256 i; i < 10; i++) {

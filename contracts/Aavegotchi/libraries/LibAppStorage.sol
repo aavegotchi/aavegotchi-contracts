@@ -58,8 +58,7 @@ struct AppStorage {
     mapping(uint256 => address) approved;
     mapping(string => bool) aavegotchiNamesUsed;
     bytes32[1000] emptySlots;
-    // owner of the contract
-    address contractOwner;
+    // owner of the contract    
     uint32 totalSupply;
     address ghstContract;
 }
@@ -83,6 +82,7 @@ library LibAppStorage {
         for (uint256 i; i < _collateralTypes.length; i++) {
             address collateralType = _collateralTypes[i].collateralType;
             s.collateralTypes.push(collateralType);
+            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
             s.collateralTypeInfo[collateralType].primaryColor = _collateralTypes[i].primaryColor;
             s.collateralTypeInfo[collateralType].secondaryColor = _collateralTypes[i].secondaryColor;
             s.collateralTypeInfo[collateralType].cheekColor = _collateralTypes[i].cheekColor;

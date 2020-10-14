@@ -75,7 +75,7 @@ const collaterals = [
   },
   {
     name: 'aLEND',
-    kovanAddress: '0xa2facD0F9Ef0Bb75cFc64Ad692F79378b5C3673a',
+    kovanAddress: '0xcba131c7fb05fe3c9720375cd86c99773faabf23',
     mainnetAddress: '',
     primaryColor: '#0FA9C9',
     secondaryColor: '#CFEEF4',
