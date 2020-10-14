@@ -63,8 +63,8 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   it('Should show SVGs', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
-    //  const svgs = await aavegotchiFacet.portalAavegotchisSVG(tokenId)
-    // console.log('svgs', svgs)
+    const svgs = await aavegotchiFacet.portalAavegotchisSVG(tokenId)
+    console.log('svgs', svgs)
   })
 
   it('Should claim a ghost', async function () {
@@ -80,6 +80,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const collateral = aavegotchi.collateral
     expect(selectedGhost.collateralType).to.equal(collateral)
     expect(aavegotchi.status).to.equal(2)
+    expect(aavegotchi.stakedAmount).to.equal(amount)
   })
 
   it('Should set a name', async function () {

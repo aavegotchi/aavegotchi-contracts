@@ -137,9 +137,11 @@ contract AavegotchiFacet {
         }
     }
 
-    function portalAavegotchisSVG(uint256 _tokenId) external view returns (string[] memory svg_) {
+    function portalAavegotchisSVG(uint256 _tokenId) external view returns (string[] memory) {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
+
+        string[] memory svg_ = new string[](10);
         for (uint256 i; i < 10; i++) {
             uint256 randomNumberN = uint256(keccak256(abi.encodePacked(randomNumber, i)));
             address collateralType = s.collateralTypes[(randomNumberN >> 248) % s.collateralTypes.length];
@@ -147,6 +149,7 @@ contract AavegotchiFacet {
                 abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', getAavegotchiSVGLayers(collateralType), "</svg>")
             );
         }
+        return svg_;
     }
 
     function claimAavegotchiFromPortal(
