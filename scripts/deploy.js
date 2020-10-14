@@ -13,8 +13,7 @@ const { farmerSVGs } = require('../svgs/farmer.js')
 const { itemSVGs } = require('../svgs/items.js')
 const { getCollaterals } = require('./collaterals.js')
 
-async function main() {
-
+async function main () {
   const accounts = await ethers.getSigners()
   const account = await accounts[0].getAddress()
   console.log('Account: ' + account)

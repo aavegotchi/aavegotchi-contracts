@@ -126,7 +126,7 @@ contract AavegotchiFacet {
     function portalAavegotchiTraits(uint256 _tokenId) external view returns (PortalAavegotchiTraits[10] memory portalAavegotchiTraits_) {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
-        for (uint256 i; i < 10; i++) {
+        for (uint256 i; i < portalAavegotchiTraits_.length; i++) {
             uint256 randomNumberN = uint256(keccak256(abi.encodePacked(randomNumber, i)));
             portalAavegotchiTraits_[i].randomNumber = randomNumberN;
             for (uint256 j; j < 7; j++) {
@@ -141,7 +141,7 @@ contract AavegotchiFacet {
     function portalAavegotchisSVG(uint256 _tokenId) external view returns (string[10] memory svg_) {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
-        for (uint256 i; i < 10; i++) {
+        for (uint256 i; i < svg_.length; i++) {
             uint256 randomNumberN = uint256(keccak256(abi.encodePacked(randomNumber, i)));
             address collateralType = s.collateralTypes[(randomNumberN >> 248) % s.collateralTypes.length];
             svg_[i] = string(

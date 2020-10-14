@@ -96,7 +96,7 @@ const collaterals = [
     */
 ]
 
-function getCollaterals(network, ghstAddress) {
+function getCollaterals (network, ghstAddress) {
   const collateralTypes = []
   for (const collateralType of collaterals) {
     const item = {
@@ -110,11 +110,9 @@ function getCollaterals(network, ghstAddress) {
     }
     if (network === 'kovan') {
       item.collateralType = collateralType.kovanAddress
-    }
-    else if (network === 'buidlerevm') {
+    } else if (network === 'buidlerevm') {
       item.collateralType = ghstAddress
-    }
-    else if (network === 'mainnet') {
+    } else if (network === 'mainnet') {
       item.collateralType = collateralType.mainnetAddress
     }
     collateralTypes.push(item)
