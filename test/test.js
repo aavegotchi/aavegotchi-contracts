@@ -60,12 +60,15 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(ghosts.length).to.equal(10)
   })
 
+  /* Won't work on Buidler because the GHST collateral is not listed
   it('Should show SVGs', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
     const svgs = await aavegotchiFacet.portalAavegotchisSVG(tokenId)
-    console.log('svgs', svgs)
+    console.log('svs:', svgs)
+    //  expect(svgs.length).to.equal(10)
   })
+  */
 
   it('Should claim a ghost', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
