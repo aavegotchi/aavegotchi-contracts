@@ -11,7 +11,7 @@ const diamond = require('diamond-util')
 // const { ethers } = require('ethers')
 const { getCollaterals } = require('./collaterals.js')
 
-async function main () {
+async function main() {
   // Buidler always runs the compile task when running scripts through it.
   // If this runs in a standalone fashion you may want to call compile manually
   // to make sure everything is compiled
@@ -58,7 +58,7 @@ async function main () {
       'WearablesFacet'
     ],
     owner: account,
-    otherArgs: [ghstDiamond.address, getCollaterals(bre.network.name)]
+    otherArgs: [ghstDiamond.address, getCollaterals(bre.network.name, ghstDiamond.address)]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 

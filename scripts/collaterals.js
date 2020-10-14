@@ -96,21 +96,25 @@ const collaterals = [
     */
 ]
 
-function getCollaterals (network) {
+function getCollaterals(network, ghstAddress) {
   const collateralTypes = []
   for (const collateralType of collaterals) {
     const item = {
       primaryColor:
-      '0x' + collateralType.primaryColor.slice(1),
+        '0x' + collateralType.primaryColor.slice(1),
       secondaryColor:
-      '0x' + collateralType.secondaryColor.slice(1),
+        '0x' + collateralType.secondaryColor.slice(1),
       cheekColor:
-      '0x' + collateralType.cheekColor.slice(1),
+        '0x' + collateralType.cheekColor.slice(1),
       svgId: collateralType.svgId
     }
-    if (network === 'kovan' || network === 'buidlerevm') {
+    if (network === 'kovan') {
       item.collateralType = collateralType.kovanAddress
-    } else if (network === 'mainnet') {
+    }
+    else if (network === 'buidlerevm') {
+      item.collateralType = ghstAddress
+    }
+    else if (network === 'mainnet') {
       item.collateralType = collateralType.mainnetAddress
     }
     collateralTypes.push(item)
