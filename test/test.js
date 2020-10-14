@@ -60,17 +60,30 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(ghosts.length).to.equal(10)
   })
 
+  /* Won't work on Buidler because the GHST collateral is not listed
+  it('Should show SVGs', async function () {
+    const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    const tokenId = myPortals[0].tokenId
+    const svgs = await aavegotchiFacet.portalAavegotchisSVG(tokenId)
+    console.log('svs:', svgs)
+    //  expect(svgs.length).to.equal(10)
+  })
+  */
+
   it('Should claim a ghost', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
     const ghosts = await aavegotchiFacet.portalAavegotchiTraits(tokenId)
     const selectedGhost = ghosts[4]
-    await aavegotchiFacet.claimAavegotchiFromPortal(tokenId, 4)
+
+    const amount = (1 * Math.pow(10, 18)).toFixed()
+    await aavegotchiFacet.claimAavegotchiFromPortal(tokenId, 4, amount)
 
     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
     const collateral = aavegotchi.collateral
     expect(selectedGhost.collateralType).to.equal(collateral)
     expect(aavegotchi.status).to.equal(2)
+    expect(aavegotchi.stakedAmount).to.equal(amount)
   })
 
   it('Should set a name', async function () {

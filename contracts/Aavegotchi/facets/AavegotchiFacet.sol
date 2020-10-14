@@ -148,6 +148,7 @@ contract AavegotchiFacet {
                 abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', getAavegotchiSVGLayers(collateralType), "</svg>")
             );
         }
+        return svg_;
     }
 
     function claimAavegotchiFromPortal(
