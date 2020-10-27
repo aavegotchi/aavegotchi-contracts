@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.3;
+pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
 import "../libraries/LibAppStorage.sol";
@@ -34,6 +34,7 @@ contract AavegotchiFacet {
     using LibAppStorage for AppStorage;
     AppStorage internal s;
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
+    uint256 internal constant NUMERIC_TRAITS_NUM = 6;
 
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
@@ -113,23 +114,23 @@ contract AavegotchiFacet {
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
         s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(block.timestamp)));
         // status is open portal
-        s.aavegotchis[_tokenId].status = 1;
+        s.aavegotchis[_tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
     }
 
     struct PortalAavegotchiTraits {
         uint256 randomNumber;
-        uint8[7] numericTraits;
+        uint8[NUMERIC_TRAITS_NUM] numericTraits;
         address collateralType;
         uint256 minimumStake;
     }
 
     function portalAavegotchiTraits(uint256 _tokenId) external view returns (PortalAavegotchiTraits[10] memory portalAavegotchiTraits_) {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
-        require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
+        require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         for (uint256 i; i < portalAavegotchiTraits_.length; i++) {
             uint256 randomNumberN = uint256(keccak256(abi.encodePacked(randomNumber, i)));
             portalAavegotchiTraits_[i].randomNumber = randomNumberN;
-            for (uint256 j; j < 7; j++) {
+            for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
                 portalAavegotchiTraits_[i].numericTraits[j] = uint8(randomNumberN >> (j * 8)) % 100;
             }
             address collateralType = s.collateralTypes[(randomNumberN >> 248) % s.collateralTypes.length];
@@ -140,7 +141,7 @@ contract AavegotchiFacet {
 
     function portalAavegotchisSVG(uint256 _tokenId) external view returns (string[10] memory svg_) {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
-        require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
+        require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         for (uint256 i; i < svg_.length; i++) {
             uint256 randomNumberN = uint256(keccak256(abi.encodePacked(randomNumber, i)));
             address collateralType = s.collateralTypes[(randomNumberN >> 248) % s.collateralTypes.length];
@@ -156,16 +157,16 @@ contract AavegotchiFacet {
         uint256 _option,
         uint256 _stakeAmount
     ) external {
-        require(s.aavegotchis[_tokenId].status == 1, "AavegotchiFacet: Portal not open");
+        require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
         uint256 randomNumber = uint256(keccak256(abi.encodePacked(s.aavegotchis[_tokenId].randomNumber, _option)));
         s.aavegotchis[_tokenId].randomNumber = randomNumber;
-        for (uint256 j; j < 7; j++) {
+        for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
             s.aavegotchis[_tokenId].numericTraits.push(uint8(randomNumber >> (j * 8)) % 100);
         }
         address collateralType = s.collateralTypes[(randomNumber >> 248) % s.collateralTypes.length];
         s.aavegotchis[_tokenId].collateralType = collateralType;
-        s.aavegotchis[_tokenId].status = 2;
+        s.aavegotchis[_tokenId].status = LibAppStorage.STATUS_AAVEGOTCHI;
         uint256 minimumStake = 10**IERC20(collateralType).decimals();
         require(_stakeAmount >= minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
         s.aavegotchis[_tokenId].stakedAmount = uint128(_stakeAmount);
@@ -217,13 +218,13 @@ contract AavegotchiFacet {
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         bytes memory svg;
         uint8 status = s.aavegotchis[_tokenId].status;
-        if (status == 0) {
+        if (status == LibAppStorage.STATUS_CLOSED_PORTAL) {
             // sealed closed portal
             svg = LibSVG.getSVG(s.itemsSVG, 0);
-        } else if (status == 1) {
+        } else if (status == LibAppStorage.STATUS_OPEN_PORTAL) {
             // open portal
             svg = LibSVG.getSVG(s.itemsSVG, 1);
-        } else {
+        } else if (status == LibAppStorage.STATUS_AAVEGOTCHI) {
             svg = getAavegotchiSVGLayers(collateralType);
         }
         ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg, "</svg>"));

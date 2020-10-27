@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity 0.7.3;
+pragma solidity 0.7.4;
 //pragma experimental ABIEncoderV2;
 import {AppStorage, SVGLayer} from "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";

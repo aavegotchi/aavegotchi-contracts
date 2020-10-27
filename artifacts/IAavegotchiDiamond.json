@@ -412,9 +412,9 @@
               "type": "uint256"
             },
             {
-              "internalType": "uint8[7]",
+              "internalType": "uint8[6]",
               "name": "numericTraits",
-              "type": "uint8[7]"
+              "type": "uint8[6]"
             },
             {
               "internalType": "address",

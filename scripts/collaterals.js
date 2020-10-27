@@ -37,7 +37,7 @@ const collaterals = [
   },
   {
     name: 'aTUSD',
-    kovanAddress: '0xA79383e0d2925527ba5Ec1c1bcaA13c28EE00314',
+    kovanAddress: '0x4c76f1b48316489e8a3304db21cdaec271cf6ec3',
     mainnetAddress: '',
     primaryColor: '#282473',
     secondaryColor: '#B6D9FC',

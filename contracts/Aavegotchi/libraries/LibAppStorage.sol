@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.3;
+pragma solidity 0.7.4;
 
 /*
 Numeric traits by possition in the array:
 energy
 aggressiveeness
 spookiness
-ethereality
 brainSize
 eyeShape
 eyeColor
@@ -58,13 +57,17 @@ struct AppStorage {
     mapping(uint256 => address) approved;
     mapping(string => bool) aavegotchiNamesUsed;
     bytes32[1000] emptySlots;
-    // owner of the contract    
+    // owner of the contract
     uint32 totalSupply;
     address ghstContract;
 }
 
 library LibAppStorage {
-    function diamondStorage() internal pure returns (AppStorage storage ds) {        
+    uint8 internal constant STATUS_CLOSED_PORTAL = 0;
+    uint8 internal constant STATUS_OPEN_PORTAL = 1;
+    uint8 internal constant STATUS_AAVEGOTCHI = 2;
+
+    function diamondStorage() internal pure returns (AppStorage storage ds) {
         assembly {
             ds.slot := 0
         }

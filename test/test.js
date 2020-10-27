@@ -69,7 +69,6 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     //  expect(svgs.length).to.equal(10)
   })
 
-
   it('Should claim a ghost', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
