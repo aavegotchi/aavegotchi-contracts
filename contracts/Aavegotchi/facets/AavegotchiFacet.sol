@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "../libraries/LibAppStorage.sol";
 import "../../shared/interfaces/IERC20.sol";
-import "../libraries/LibSVG.sol";
+import "../libraries/LibSvg.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
 
@@ -208,7 +208,7 @@ contract AavegotchiFacet {
             ";}</style>",
             svg_,
             // add collateral type layer
-            LibSvg.getSvg("collateral", s.collateralTypeInfo[_collateralType].svgId)
+            LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId)
         );
     }
 

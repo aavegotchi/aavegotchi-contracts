@@ -3,3 +3,4 @@ node_modules
 .secret2
 cache
 bin
+.env

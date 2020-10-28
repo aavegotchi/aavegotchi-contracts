@@ -110,7 +110,7 @@ function getCollaterals (network, ghstAddress) {
     }
     if (network === 'kovan') {
       item.collateralType = collateralType.kovanAddress
-    } else if (network === 'buidlerevm') {
+    } else if (network === 'hardhat') {
       item.collateralType = ghstAddress
     } else if (network === 'mainnet') {
       item.collateralType = collateralType.mainnetAddress

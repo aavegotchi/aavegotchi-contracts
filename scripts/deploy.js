@@ -1,11 +1,4 @@
-/* global ethers */
-
-// We require the Buidler Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-// When running the script with `buidler run <script>` you'll find the Buidler
-// Runtime Environment's members available in the global scope.
-// eslint-disable-next-line no-unused-vars
-const bre = require('@nomiclabs/buidler')
+/* global ethers hre */
 
 const diamond = require('diamond-util')
 const { aavegotchiSvgs } = require('../svgs/aavegotchi.js')
@@ -24,10 +17,10 @@ async function main () {
   await diamondLoupeFacet.deployed()
 
   let ghstDiamond
-  if (bre.network.name === 'kovan') {
+  if (hre.network.name === 'kovan') {
     ghstDiamond = await ethers.getContractAt('GHSTFacet', '0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5')
     console.log('GHST diamond address:' + ghstDiamond.address)
-  } else if (bre.network.name === 'mainnet' || bre.network.name === 'buidlerevm') {
+  } else if (hre.network.name === 'mainnet' || hre.network.name === 'hardhat') {
     ghstDiamond = await diamond.deploy({
       diamondName: 'GHSTDiamond',
       facets: [
@@ -55,7 +48,7 @@ async function main () {
       'WearablesFacet'
     ],
     owner: account,
-    otherArgs: [ghstDiamond.address, getCollaterals(bre.network.name, ghstDiamond.address)]
+    otherArgs: [ghstDiamond.address, getCollaterals(hre.network.name, ghstDiamond.address)]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
