@@ -8,9 +8,9 @@
 const bre = require('@nomiclabs/buidler')
 
 const diamond = require('diamond-util')
-const { aavegotchiSVGs } = require('../svgs/aavegotchi.js')
-const { farmerSVGs } = require('../svgs/farmer.js')
-const { itemSVGs } = require('../svgs/items.js')
+const { aavegotchiSvgs } = require('../svgs/aavegotchi.js')
+const { wearablesSvgs } = require('../svgs/wearables.js')
+const { collateralsSvgs } = require('../svgs/collaterals.js')
 const { getCollaterals } = require('./collaterals.js')
 
 async function main () {
@@ -51,7 +51,7 @@ async function main () {
       ['DiamondLoupeFacet', diamondLoupeFacet],
       'OwnershipFacet',
       'AavegotchiFacet',
-      'SVGStorageFacet',
+      'SvgStorageFacet',
       'WearablesFacet'
     ],
     owner: account,
@@ -60,31 +60,42 @@ async function main () {
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
   // ----------------------------------------------------------------
-  // Upload SVG layers
-  let sizes
-  let svgs
-  const svgStorageFacet = await ethers.getContractAt('SVGStorageFacet', aavegotchiDiamond.address)
+  // Upload Svg layers
+  const svgStorageFacet = await ethers.getContractAt('SvgStorageFacet', aavegotchiDiamond.address)
 
-  svgs = aavegotchiSVGs
-  sizes = svgs.map(value => value.length)
-  svgs = svgs.join('')
-  console.log('Uploading Aavegotchi SVG Layers...')
-  await svgStorageFacet.storeAavegotchiLayersSVG(svgs, sizes)
-  console.log('Uploaded Aavegotchi SVG Layers')
+  function setupSvg (...svgData) {
+    const svgTypesAndSizes = []
+    const svgs = []
+    for (const [svgType, svg] of svgData) {
+      svgs.push(svg.join(''))
+      svgTypesAndSizes.push([ethers.utils.formatBytes32String(svgType), svg.map(value => value.length)])
+    }
+    return [svgs.join(''), svgTypesAndSizes]
+  }
 
-  svgs = farmerSVGs
-  sizes = svgs.map(value => value.length)
-  svgs = svgs.join('')
-  console.log('Uploading Wearables SVG...')
-  await svgStorageFacet.storeWearablesSVG(svgs, sizes)
-  console.log('Uploaded Wearables SVG')
+  // eslint-disable-next-line no-unused-vars
+  function printSizeInfo (svgTypesAndSizes) {
+    console.log('------------- SVG Size Info ---------------')
+    let sizes = 0
+    for (const [svgType, size] of svgTypesAndSizes) {
+      console.log(ethers.utils.parseBytes32String(svgType) + ':' + size)
+      for (const nextSize of size) {
+        sizes += nextSize
+      }
+    }
+    console.log('Total sizes:' + sizes)
+    console.log('-------------------------------------------')
+  }
+  console.log('Uploading Svgs')
+  const [svg, svgTypesAndSizes] = setupSvg(
+    ['aavegotchi', aavegotchiSvgs],
+    ['collaterals', collateralsSvgs],
+    ['wearables', wearablesSvgs]
+  )
 
-  svgs = itemSVGs
-  sizes = svgs.map((value) => value.length)
-  svgs = svgs.join('')
-  console.log('Uploading Items SVG...')
-  await svgStorageFacet.storeItemsSVG(svgs, sizes)
-  console.log('Uploaded Items SVG')
+  // printSizeInfo(svgTypesAndSizes)
+  await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
+  console.log('Uploaded SVGs')
 
   const aavegotchiFacet = await ethers.getContractAt('AavegotchiFacet', aavegotchiDiamond.address)
 
@@ -96,7 +107,7 @@ async function main () {
   }
 
   // ----------------------------------------------------------------
-  // Mint Aavegotchi with SVG Layers
+  // Mint Aavegotchi with Svg Layers
 
   // let svgLayers = [0, 1, 2, 3]
   // svgLayers = svgLayers.map(value => {
@@ -109,7 +120,7 @@ async function main () {
   // })
   // svgLayers = '0x' + svgLayers.join('').padEnd(64, '0')
   // await aavegotchiNFT.mintAavegotchi(svgLayers)
-  // console.log('Mint Aavegotchi with SVG Layers')
+  // console.log('Mint Aavegotchi with Svg Layers')
 
   // ----------------------------------------------------------------
   // Mint Wearables
@@ -138,10 +149,10 @@ async function main () {
   // })
 
   // ----------------------------------------------------------------
-  // Get the combined SVG of an Aavegotchi.
+  // Get the combined Svg of an Aavegotchi.
 
-  // const svg = await aavegotchiNFT.getAavegotchiSVG(0)
-  // console.log('Get the combined SVG of an Aavegotchi.')
+  // const svg = await aavegotchiNFT.getAavegotchiSvg(0)
+  // console.log('Get the combined Svg of an Aavegotchi.')
   // console.log()
   // console.log(svg)
 }

@@ -25,7 +25,7 @@ struct Aavegotchi {
     uint128 stakedAmount;
 }
 
-struct SVGLayer {
+struct SvgLayer {
     address svgLayersContract;
     uint16 offset;
     uint16 size;
@@ -42,9 +42,11 @@ struct AppStorage {
     address[] collateralTypes;
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
-    SVGLayer[] aavegotchiLayersSVG;
-    SVGLayer[] wearablesSVG;
-    SVGLayer[] itemsSVG;
+    // Svgtype => SvgLayer[]
+    mapping(bytes32 => SvgLayer[]) svgLayers;
+    // SvgLayer[] aavegotchiLayersSvg;
+    // SvgLayer[] wearablesSvg;
+    // SvgLayer[] itemsSvg;
     // contractAddress => nftId  => id => balance
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) nftBalances;
     // owner => (id => balance)

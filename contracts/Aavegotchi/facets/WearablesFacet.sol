@@ -114,7 +114,7 @@ contract WearablesFacet {
     // How many wearables there are is determined by how many wearable SVG files have been uploaded.
     // The wearbles are minted to the account that calls this function
     function mintWearables() external {
-        uint256 count = s.wearablesSVG.length;
+        uint256 count = s.svgLayers["wearables"].length;
         for (uint256 i = 1; i < count; i++) {
             uint256 id = i << 240;
             s.wearables[msg.sender][id]++;
@@ -124,7 +124,7 @@ contract WearablesFacet {
 
     // Returns balance for each wearable that exists for an account
     function wearablesBalances(address _account) external view returns (uint256[] memory bals) {
-        uint256 count = s.wearablesSVG.length;
+        uint256 count = s.svgLayers["wearables"].length;
         bals = new uint256[](count - 1);
         for (uint256 i = 1; i < count; i++) {
             uint256 id = i << 240;

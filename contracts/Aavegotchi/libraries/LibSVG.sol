@@ -1,19 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.4;
 
-import {SVGLayer} from "./LibAppStorage.sol";
+import "./LibAppStorage.sol";
 
-library LibSVG {
-    function getSVG(SVGLayer[] storage items, uint256 _id) internal view returns (bytes memory) {
-        require(_id < items.length, "SVG id does not exist.");
-        SVGLayer storage svgLayer = items[_id];
+library LibSvg {
+    function getSvg(bytes32 svgType, uint256 _id) internal view returns (bytes memory svg_) {
+        AppStorage storage s = LibAppStorage.diamondStorage();        
+        SvgLayer[] storage svgLayers = s.svgLayers[svgType];
+        svg_ = getSvg(svgLayers, _id);
+    }
+
+    function getSvg(SvgLayer[] storage svgLayers, uint256 _id) internal view returns (bytes memory svg_) {
+        require(_id < svgLayers.length, "LibSvg: SVG type or id does not exist");
+        SvgLayer storage svgLayer = svgLayers[_id];
         address svgContract = svgLayer.svgLayersContract;
         uint256 size = svgLayer.size;
         uint256 offset = svgLayer.offset;
-        bytes memory data = new bytes(size);
+        svg_ = new bytes(size);
         assembly {
-            extcodecopy(svgContract, add(data, 32), offset, size)
-        }
-        return data;
+            extcodecopy(svgContract, add(svg_, 32), offset, size)
+        }        
     }
 }

@@ -16,7 +16,7 @@ import "../shared/interfaces/IERC165.sol";
 import "../shared/interfaces/IDiamondCut.sol";
 import "../shared/interfaces/IDiamondLoupe.sol";
 import "./facets/AavegotchiFacet.sol";
-import "./facets/SVGStorageFacet.sol";
+import "./facets/SvgStorageFacet.sol";
 import "./facets/WearablesFacet.sol";
 import "../shared/libraries/LibDiamond.sol";
 
@@ -33,7 +33,7 @@ contract AavegotchiDiamond {
     ) {
         LibDiamond.diamondCut(_diamondCut, address(0), new bytes(0));
         LibDiamond.setContractOwner(_owner);
-        s.wearablesSVG.push();
+        s.svgLayers["wearables"].push();
 
         s.addCollateralTypes(_collateralTypes);
 

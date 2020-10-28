@@ -146,7 +146,7 @@ contract AavegotchiFacet {
             uint256 randomNumberN = uint256(keccak256(abi.encodePacked(randomNumber, i)));
             address collateralType = s.collateralTypes[(randomNumberN >> 248) % s.collateralTypes.length];
             svg_[i] = string(
-                abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', getAavegotchiSVGLayers(collateralType), "</svg>")
+                abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', getAavegotchiSvgLayers(collateralType), "</svg>")
             );
         }
         return svg_;
@@ -190,14 +190,14 @@ contract AavegotchiFacet {
         return string(toString);
     }
 
-    function getAavegotchiSVGLayers(address _collateralType) internal view returns (bytes memory svg_) {
+    function getAavegotchiSvgLayers(address _collateralType) internal view returns (bytes memory svg_) {
         string memory primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
         string memory secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
         string memory cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
-        // add standard layers
-        for (uint256 i; i < 5; i++) {
-            svg_ = abi.encodePacked(svg_, LibSVG.getSVG(s.aavegotchiLayersSVG, i));
-        }
+
+        // aavagotchi body
+        svg_ = LibSvg.getSvg("aavegotchi", 2);
+
         svg_ = abi.encodePacked(
             "<style>.primaryColor{fill:#",
             primaryColor,
@@ -208,36 +208,26 @@ contract AavegotchiFacet {
             ";}</style>",
             svg_,
             // add collateral type layer
-            LibSVG.getSVG(s.itemsSVG, s.collateralTypeInfo[_collateralType].svgId)
+            LibSvg.getSvg("collateral", s.collateralTypeInfo[_collateralType].svgId)
         );
     }
 
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
-    function getAavegotchiSVG(uint256 _tokenId) public view returns (string memory ag_) {
+    function getAavegotchiSvg(uint256 _tokenId) public view returns (string memory ag_) {
         require(s.aavegotchis[_tokenId].owner != address(0), "AavegotchiFacet: _tokenId does not exist");
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         bytes memory svg;
         uint8 status = s.aavegotchis[_tokenId].status;
         if (status == LibAppStorage.STATUS_CLOSED_PORTAL) {
             // sealed closed portal
-            svg = LibSVG.getSVG(s.itemsSVG, 0);
+            svg = LibSvg.getSvg("aavegotchi", 0);
         } else if (status == LibAppStorage.STATUS_OPEN_PORTAL) {
             // open portal
-            svg = LibSVG.getSVG(s.itemsSVG, 1);
+            svg = LibSvg.getSvg("aavegotchi", 1);
         } else if (status == LibAppStorage.STATUS_AAVEGOTCHI) {
-            svg = getAavegotchiSVGLayers(collateralType);
+            svg = getAavegotchiSvgLayers(collateralType);
         }
         ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg, "</svg>"));
-    }
-
-    // get the first Aavegotchi that someone uses. This function is for demo purposes.
-    function getFirstAavegotchi(address _owner) external view returns (uint256 tokenId_, string memory svg_) {
-        require(_owner != address(0), "Aavegotchi: Owner can't be zero address");
-        uint256 bal = s.aavegotchiOwnerEnumeration[_owner].length;
-        if (bal > 0) {
-            tokenId_ = s.aavegotchiOwnerEnumeration[_owner][0];
-            svg_ = getAavegotchiSVG(tokenId_);
-        }
     }
 
     /// @notice Count all NFTs assigned to an owner
