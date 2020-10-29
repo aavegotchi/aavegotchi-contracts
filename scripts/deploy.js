@@ -4,6 +4,7 @@ const diamond = require('diamond-util')
 const { aavegotchiSvgs } = require('../svgs/aavegotchi.js')
 const { wearablesSvgs } = require('../svgs/wearables.js')
 const { collateralsSvgs } = require('../svgs/collaterals.js')
+const { eyeShapeSvgs } = require('../svgs/eyeShapes.js')
 const { getCollaterals } = require('./collaterals.js')
 
 async function main () {
@@ -79,13 +80,20 @@ async function main () {
     console.log('Total sizes:' + sizes)
     console.log('-------------------------------------------')
   }
-  console.log('Uploading Svgs')
-  const [svg, svgTypesAndSizes] = setupSvg(
+  console.log('Uploading aavegotchi and wearable Svgs')
+  let [svg, svgTypesAndSizes] = setupSvg(
     ['aavegotchi', aavegotchiSvgs],
-    ['collaterals', collateralsSvgs],
     ['wearables', wearablesSvgs]
   )
+  // printSizeInfo(svgTypesAndSizes)
+  await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
+  console.log('Uploaded SVGs')
 
+  console.log('Uploading collaterals and eyeShapes')
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['collaterals', collateralsSvgs],
+    ['eyeShapes', eyeShapeSvgs]
+  )
   // printSizeInfo(svgTypesAndSizes)
   await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded SVGs')

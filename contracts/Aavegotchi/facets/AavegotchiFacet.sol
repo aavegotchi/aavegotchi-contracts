@@ -35,6 +35,7 @@ contract AavegotchiFacet {
     AppStorage internal s;
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
     uint256 internal constant NUMERIC_TRAITS_NUM = 6;
+    uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
@@ -124,7 +125,11 @@ contract AavegotchiFacet {
         uint256 minimumStake;
     }
 
-    function portalAavegotchiTraits(uint256 _tokenId) external view returns (PortalAavegotchiTraits[10] memory portalAavegotchiTraits_) {
+    function portalAavegotchiTraits(uint256 _tokenId)
+        public
+        view
+        returns (PortalAavegotchiTraits[PORTAL_AAVEGOTCHIS_NUM] memory portalAavegotchiTraits_)
+    {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         for (uint256 i; i < portalAavegotchiTraits_.length; i++) {
@@ -139,17 +144,20 @@ contract AavegotchiFacet {
         }
     }
 
-    function portalAavegotchisSVG(uint256 _tokenId) external view returns (string[10] memory svg_) {
-        uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
+    function portalAavegotchisSVG(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
+        PortalAavegotchiTraits[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
-            uint256 randomNumberN = uint256(keccak256(abi.encodePacked(randomNumber, i)));
-            address collateralType = s.collateralTypes[(randomNumberN >> 248) % s.collateralTypes.length];
+            address collateralType = l_portalAavegotchiTraits[i].collateralType;
+            uint8[NUMERIC_TRAITS_NUM] memory numericTraits = l_portalAavegotchiTraits[i].numericTraits;
             svg_[i] = string(
-                abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', getAavegotchiSvgLayers(collateralType), "</svg>")
+                abi.encodePacked(
+                    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">',
+                    getAavegotchiSvgLayers(collateralType, numericTraits),
+                    "</svg>"
+                )
             );
         }
-        return svg_;
     }
 
     function claimAavegotchiFromPortal(
@@ -190,28 +198,31 @@ contract AavegotchiFacet {
         return string(toString);
     }
 
-    function getAavegotchiSvgLayers(uint256 _tokenId) internal view returns (bytes memory svg_) {
-        address collateralType = s.aavegotchis[_tokenId].collateralType;
-        string memory primaryColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].primaryColor);
-        string memory secondaryColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].secondaryColor);
-        string memory cheekColor = bytes3ToColorString(s.collateralTypeInfo[collateralType].cheekColor);
+    function getAavegotchiSvgLayers(address _collateralType, uint8[NUMERIC_TRAITS_NUM] memory _numericTraits)
+        internal
+        view
+        returns (bytes memory svg_)
+    {
+        string memory primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
+        string memory secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
+        string memory cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
 
         // aavagotchi body
         svg_ = LibSvg.getSvg("aavegotchi", 2);
-        bytes memory collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[collateralType].svgId);
+        bytes memory collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
-        uint8 eyeShapeTrait = s.aavegotchis[_tokenId].numericTraits[4];
+        uint8 eyeShapeTrait = _numericTraits[4];
         bytes memory eyeShape;
         uint8[18] memory eyeShapeTraitRanges = [0, 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
         for (uint256 i; i < eyeShapeTraitRanges.length - 1; i++) {
             if (eyeShapeTrait >= eyeShapeTraitRanges[i] && eyeShapeTrait < eyeShapeTraitRanges[i + 1]) {
-                eyeShape = LibSvg.getSvg("eyeShape", i);
+                eyeShape = LibSvg.getSvg("eyeShapes", i);
                 break;
             }
         }
         // eyeShapeTrait is 98 or 99
         if (eyeShape.length == 0) {
-            eyeShape = collateral;
+            eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
         }
 
         svg_ = abi.encodePacked(
@@ -226,6 +237,14 @@ contract AavegotchiFacet {
             collateral,
             eyeShape
         );
+    }
+
+    function getAavegotchiSvgLayers(uint256 _tokenId) internal view returns (bytes memory svg_) {
+        uint8[NUMERIC_TRAITS_NUM] memory numericTraits;
+        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
+            numericTraits[i] = s.aavegotchis[_tokenId].numericTraits[i];
+        }
+        svg_ = getAavegotchiSvgLayers(s.aavegotchis[_tokenId].collateralType, numericTraits);
     }
 
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
