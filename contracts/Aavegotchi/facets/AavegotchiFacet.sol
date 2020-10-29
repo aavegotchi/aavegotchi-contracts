@@ -198,18 +198,22 @@ contract AavegotchiFacet {
 
         // aavagotchi body
         svg_ = LibSvg.getSvg("aavegotchi", 2);
-        /*
+        bytes memory collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[collateralType].svgId);
 
         uint8 eyeShapeTrait = s.aavegotchis[_tokenId].numericTraits[4];
         bytes memory eyeShape;
-        uint8[4] memory eyeShapeTraitRanges = [25, 42, 58, 75];
+        uint8[18] memory eyeShapeTraitRanges = [0, 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
         for (uint256 i; i < eyeShapeTraitRanges.length - 1; i++) {
             if (eyeShapeTrait >= eyeShapeTraitRanges[i] && eyeShapeTrait < eyeShapeTraitRanges[i + 1]) {
                 eyeShape = LibSvg.getSvg("eyeShape", i);
                 break;
             }
         }
-        */
+        // eyeShapeTrait is 98 or 99
+        if (eyeShape.length == 0) {
+            eyeShape = collateral;
+        }
+
         svg_ = abi.encodePacked(
             "<style>.primary{fill:#",
             primaryColor,
@@ -219,8 +223,8 @@ contract AavegotchiFacet {
             cheekColor,
             ";}</style>",
             svg_,
-            // add collateral type layer
-            LibSvg.getSvg("collaterals", s.collateralTypeInfo[collateralType].svgId)
+            collateral,
+            eyeShape
         );
     }
 
