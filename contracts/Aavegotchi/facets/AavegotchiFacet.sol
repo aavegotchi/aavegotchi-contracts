@@ -211,11 +211,11 @@ contract AavegotchiFacet {
         svg_ = LibSvg.getSvg("aavegotchi", 2);
         bytes memory collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
-        uint8 eyeShapeTrait = _numericTraits[4];
+        uint8 trait = _numericTraits[4];
         bytes memory eyeShape;
-        uint8[18] memory eyeShapeTraitRanges = [0, 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
-        for (uint256 i; i < eyeShapeTraitRanges.length - 1; i++) {
-            if (eyeShapeTrait >= eyeShapeTraitRanges[i] && eyeShapeTrait < eyeShapeTraitRanges[i + 1]) {
+        uint8[18] memory eyeShapeTraitRange = [0, 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
+        for (uint256 i; i < eyeShapeTraitRange.length - 1; i++) {
+            if (trait >= eyeShapeTraitRange[i] && trait < eyeShapeTraitRange[i + 1]) {
                 eyeShape = LibSvg.getSvg("eyeShapes", i);
                 break;
             }
@@ -225,6 +225,25 @@ contract AavegotchiFacet {
             eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
         }
 
+        trait = _numericTraits[5];
+        string memory eyeColor;
+        uint8[8] memory eyeColorTraitRanges = [0, 2, 10, 25, 75, 90, 98, 100];
+        string[7] memory eyeColors = [
+            "FF00FF", // mythical_low
+            "0064FF", // rare_low
+            "5D24BF", // uncommon_low
+            primaryColor, // common
+            "36818E", // uncommon_high
+            "EA8C27", // rare_high
+            "1E661E" // mythical_high
+        ];
+        for (uint256 i; i < eyeColorTraitRanges.length - 1; i++) {
+            if (trait >= eyeColorTraitRanges[i] && trait < eyeColorTraitRanges[i + 1]) {
+                eyeColor = eyeColors[i];
+                break;
+            }
+        }
+
         svg_ = abi.encodePacked(
             "<style>.primary{fill:#",
             primaryColor,
@@ -232,6 +251,8 @@ contract AavegotchiFacet {
             secondaryColor,
             ";}.cheek{fill:#",
             cheekColor,
+            ";}.eyeColor{fill:#",
+            eyeColor,
             ";}</style>",
             svg_,
             collateral,
