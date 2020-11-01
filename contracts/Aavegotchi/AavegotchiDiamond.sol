@@ -16,7 +16,7 @@ import "../shared/interfaces/IERC165.sol";
 import "../shared/interfaces/IDiamondCut.sol";
 import "../shared/interfaces/IDiamondLoupe.sol";
 import "./facets/AavegotchiFacet.sol";
-import "./facets/SVGStorageFacet.sol";
+import "./facets/SvgStorageFacet.sol";
 import "./facets/WearablesFacet.sol";
 import "../shared/libraries/LibDiamond.sol";
 
@@ -26,9 +26,9 @@ contract AavegotchiDiamond {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     constructor(
-        IDiamondCut.FacetCut[] memory _diamondCut, 
-        address _owner, 
-        address _ghstContract, 
+        IDiamondCut.FacetCut[] memory _diamondCut,
+        address _owner,
+        address _ghstContract,
         LibAppStorage.AavegotchiCollateralTypeInput[] memory _collateralTypes
     ) {
         LibDiamond.diamondCut(_diamondCut, address(0), new bytes(0));
@@ -37,14 +37,14 @@ contract AavegotchiDiamond {
 
         s.addCollateralTypes(_collateralTypes);
 
-        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();      
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 
         // adding ERC165 data
         ds.supportedInterfaces[type(IERC165).interfaceId] = true;
-        ds.supportedInterfaces[type(IDiamondCut).interfaceId] = true;        
+        ds.supportedInterfaces[type(IDiamondCut).interfaceId] = true;
         ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
         ds.supportedInterfaces[type(IERC173).interfaceId] = true;
-        
+
         s.ghstContract = _ghstContract;
     }
 
@@ -52,10 +52,10 @@ contract AavegotchiDiamond {
     // function if a facet is found and return any value.
     fallback() external payable {
         LibDiamond.DiamondStorage storage ds;
-        bytes32 position = LibDiamond.DIAMOND_STORAGE_POSITION;                
+        bytes32 position = LibDiamond.DIAMOND_STORAGE_POSITION;
         assembly {
             ds.slot := position
-        }         
+        }
         address facet = address(bytes20(ds.facets[msg.sig]));
         require(facet != address(0), "Diamond: Function does not exist");
         assembly {
@@ -69,8 +69,8 @@ contract AavegotchiDiamond {
                 default {
                     return(0, returndatasize())
                 }
-        }        
+        }
     }
-     
+
     receive() external payable {}
 }
