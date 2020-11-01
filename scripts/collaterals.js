@@ -1,14 +1,17 @@
+// 0, DAI Collateral
+// 1, ETH Collateral
+// 2, LEND Collateral
+// 3, LINK Collateral
+// 4, SNX Collateral
+// 5, TUSD Collateral
+// 6, USDC Collateral
+// 7, YFI Collateral
+// 8, REN Collateral
+
+//Total length: 9
+
+
 const collaterals = [
-  {
-    name: 'aETH',
-    kovanAddress: '0xD483B49F2d55D2c53D32bE6efF735cB001880F79',
-    mainnetAddress: '',
-    primaryColor: '#64438E',
-    secondaryColor: '#EDD3FD',
-    cheekColor: '#F696C6',
-    svgId: 0,
-    eyeShapeSvgId: 17
-  },
   {
     name: 'aDAI',
     kovanAddress: '0x58AD4cB396411B691A9AAb6F74545b2C5217FE6a',
@@ -16,19 +19,41 @@ const collaterals = [
     primaryColor: '#FF7D00',
     secondaryColor: '#F9D792',
     cheekColor: '#F4AF24',
-    svgId: 1,
+    svgId: 0,
     eyeShapeSvgId: 16
   },
   {
-    name: 'aUSDC',
-    kovanAddress: '0x02F626c6ccb6D2ebC071c068DC1f02Bf5693416a',
+    name: 'aETH',
+    kovanAddress: '0xD483B49F2d55D2c53D32bE6efF735cB001880F79',
     mainnetAddress: '',
-    primaryColor: '#2664BA',
-    secondaryColor: '#D4E0F1',
+    primaryColor: '#64438E',
+    secondaryColor: '#EDD3FD',
+    cheekColor: '#F696C6',
+    svgId: 1,
+    eyeShapeSvgId: 17
+  },
+  {
+    name: 'aLEND',
+    kovanAddress: '0xcba131c7fb05fe3c9720375cd86c99773faabf23',
+    mainnetAddress: '',
+    primaryColor: '#0FA9C9',
+    secondaryColor: '#CFEEF4',
     cheekColor: '#F696C6',
     svgId: 2,
-    eyeShapeSvgId: 23
+    eyeShapeSvgId: 18
   },
+
+  {
+    name: 'aLINK',
+    kovanAddress: '0xEC23855Ff01012E1823807CE19a790CeBc4A64dA',
+    mainnetAddress: '',
+    primaryColor: '#0000B9',
+    secondaryColor: '#D4DEF8',
+    cheekColor: '#F696C6',
+    svgId: 3,
+    eyeShapeSvgId: 19
+  },
+
   {
     name: 'aSNX',
     kovanAddress: '0xb4D480f963f4F685F1D51d2B6159D126658B1dA8',
@@ -36,9 +61,10 @@ const collaterals = [
     primaryColor: '#0E0C15',
     secondaryColor: '#DCDCDC',
     cheekColor: '#F696C6',
-    svgId: 3,
+    svgId: 4,
     eyeShapeSvgId: 21
   },
+
   {
     name: 'aTUSD',
     kovanAddress: '0x4c76f1b48316489e8a3304db21cdaec271cf6ec3',
@@ -46,9 +72,36 @@ const collaterals = [
     primaryColor: '#282473',
     secondaryColor: '#B6D9FC',
     cheekColor: '#F696C6',
-    svgId: 4,
+    svgId: 5,
     eyeShapeSvgId: 22
   },
+
+  {
+    name: 'aUSDC',
+    kovanAddress: '0x02F626c6ccb6D2ebC071c068DC1f02Bf5693416a',
+    mainnetAddress: '',
+    primaryColor: '#2664BA',
+    secondaryColor: '#D4E0F1',
+    cheekColor: '#F696C6',
+    svgId: 6,
+    eyeShapeSvgId: 23
+  },
+
+
+  /* REN
+{
+  name: 'aLINK',
+  kovanAddress: '0xEC23855Ff01012E1823807CE19a790CeBc4A64dA',
+  mainnetAddress: '',
+  primaryColor: '#0000B9',
+  secondaryColor: '#D4DEF8',
+  cheekColor: '#F696C6',
+  svgId: 3,
+  eyeShapeSvgId: 19
+},
+*/
+
+
   /* {
          name: "aUSDT",
          kovanAddress: "0xA01bA9fB493b851F4Ac5093A324CB081A909C34B",
@@ -71,26 +124,8 @@ const collaterals = [
     eyeShapeSvgId:
      },
      */
-  {
-    name: 'aLINK',
-    kovanAddress: '0xEC23855Ff01012E1823807CE19a790CeBc4A64dA',
-    mainnetAddress: '',
-    primaryColor: '#0000B9',
-    secondaryColor: '#D4DEF8',
-    cheekColor: '#F696C6',
-    svgId: 5,
-    eyeShapeSvgId: 19
-  },
-  {
-    name: 'aLEND',
-    kovanAddress: '0xcba131c7fb05fe3c9720375cd86c99773faabf23',
-    mainnetAddress: '',
-    primaryColor: '#0FA9C9',
-    secondaryColor: '#CFEEF4',
-    cheekColor: '#F696C6',
-    svgId: 6,
-    eyeShapeSvgId: 18
-  }
+
+
 
   // Mainnet only
   /* {

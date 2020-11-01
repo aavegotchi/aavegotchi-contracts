@@ -211,7 +211,6 @@ contract AavegotchiFacet {
         svg_ = LibSvg.getSvg("aavegotchi", 2);
         bytes memory collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
-        /*
         uint8 trait = _numericTraits[4];
         bytes memory eyeShape;
         uint8[18] memory eyeShapeTraitRange = [0, 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
@@ -244,7 +243,6 @@ contract AavegotchiFacet {
                 break;
             }
         }
-        */
 
         svg_ = abi.encodePacked(
             "<style>.primary{fill:#",
@@ -254,11 +252,11 @@ contract AavegotchiFacet {
             ";}.cheek{fill:#",
             cheekColor,
             ";}.eyeColor{fill:#",
-            "FF00FF", //eyeColor
+            eyeColor,
             ";}</style>",
             svg_,
-            collateral
-            //  eyeShape
+            collateral,
+            eyeShape
         );
     }
 
