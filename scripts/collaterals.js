@@ -5,8 +5,8 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#64438E',
     secondaryColor: '#EDD3FD',
-    cheekColor: '#f696c6',
-    svgId: 3,
+    cheekColor: '#F696C6',
+    svgId: 0,
     eyeShapeSvgId: 17
   },
   {
@@ -15,8 +15,8 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#FF7D00',
     secondaryColor: '#F9D792',
-    cheekColor: '#f4af24',
-    svgId: 2,
+    cheekColor: '#F4AF24',
+    svgId: 1,
     eyeShapeSvgId: 16
   },
   {
@@ -25,8 +25,8 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#2664BA',
     secondaryColor: '#D4E0F1',
-    cheekColor: '#f696c6',
-    svgId: 9,
+    cheekColor: '#F696C6',
+    svgId: 2,
     eyeShapeSvgId: 23
   },
   {
@@ -35,8 +35,8 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#0E0C15',
     secondaryColor: '#DCDCDC',
-    cheekColor: '#f696c6',
-    svgId: 7,
+    cheekColor: '#F696C6',
+    svgId: 3,
     eyeShapeSvgId: 21
   },
   {
@@ -45,8 +45,8 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#282473',
     secondaryColor: '#B6D9FC',
-    cheekColor: '#f696c6',
-    svgId: 8,
+    cheekColor: '#F696C6',
+    svgId: 4,
     eyeShapeSvgId: 22
   },
   /* {
@@ -55,7 +55,7 @@ const collaterals = [
          mainnetAddress: "",
          primaryColor: "",
          secondaryColor: "",
-    cheekColor: '#f696c6',
+    cheekColor: '#F696C6',
     svgId:,
     eyeShapeSvgId:
      },
@@ -66,7 +66,7 @@ const collaterals = [
          mainnetAddress: "",
          primaryColor: "",
          secondaryColor: "",
-    cheekColor: '#f696c6',
+    cheekColor: '#F696C6',
     svgId:,
     eyeShapeSvgId:
      },
@@ -77,7 +77,7 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#0000B9',
     secondaryColor: '#D4DEF8',
-    cheekColor: '#f696c6',
+    cheekColor: '#F696C6',
     svgId: 5,
     eyeShapeSvgId: 19
   },
@@ -87,8 +87,8 @@ const collaterals = [
     mainnetAddress: '',
     primaryColor: '#0FA9C9',
     secondaryColor: '#CFEEF4',
-    cheekColor: '#f696c6',
-    svgId: 4,
+    cheekColor: '#F696C6',
+    svgId: 6,
     eyeShapeSvgId: 18
   }
 
@@ -99,14 +99,14 @@ const collaterals = [
         mainnetAddress:"0x12e51E77DAAA58aA0E9247db7510Ea4B46F9bEAd",
         primaryColor:"#0074F9",
         secondaryColor:"#C8E1FD",
-    cheekColor: '#f696c6',
+    cheekColor: '#F696C6',
     svgId: 10,
     eyeShapeSvgId:
     }
     */
 ]
 
-function getCollaterals (network, ghstAddress) {
+function getCollaterals(network, ghstAddress) {
   const collateralTypes = []
   for (const collateralType of collaterals) {
     const item = {
