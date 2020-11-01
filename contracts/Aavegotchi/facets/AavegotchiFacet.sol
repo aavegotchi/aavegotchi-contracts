@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "../libraries/LibAppStorage.sol";
 import "../../shared/interfaces/IERC20.sol";
-import "../libraries/LibSvg.sol";
+import "../libraries/LibSVG.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
 
