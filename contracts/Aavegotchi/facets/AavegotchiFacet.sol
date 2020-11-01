@@ -153,7 +153,7 @@ contract AavegotchiFacet {
             svg_[i] = string(
                 abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">',
-                    //getAavegotchiSvgLayers(collateralType, numericTraits),
+                    getAavegotchiSvgLayers(collateralType, numericTraits),
                     "</svg>"
                 )
             );
@@ -213,6 +213,7 @@ contract AavegotchiFacet {
 
         uint8 trait = _numericTraits[4];
         bytes memory eyeShape;
+        /*
         uint8[18] memory eyeShapeTraitRange = [0, 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
         for (uint256 i; i < eyeShapeTraitRange.length - 1; i++) {
             if (trait >= eyeShapeTraitRange[i] && trait < eyeShapeTraitRange[i + 1]) {
@@ -220,11 +221,13 @@ contract AavegotchiFacet {
                 break;
             }
         }
+        
         // eyeShapeTrait is 98 or 99
         if (eyeShape.length == 0) {
             eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
         }
-
+        
+        // netxt to test
         trait = _numericTraits[5];
         string memory eyeColor;
         uint8[8] memory eyeColorTraitRanges = [0, 2, 10, 25, 75, 90, 98, 100];
@@ -237,13 +240,16 @@ contract AavegotchiFacet {
             "EA8C27", // rare_high
             "1E661E" // mythical_high
         ];
+        
         for (uint256 i; i < eyeColorTraitRanges.length - 1; i++) {
             if (trait >= eyeColorTraitRanges[i] && trait < eyeColorTraitRanges[i + 1]) {
                 eyeColor = eyeColors[i];
                 break;
             }
         }
-
+        */
+        svg_ = abi.encodePacked("stuff");
+        /*
         svg_ = abi.encodePacked(
             "<style>.primary{fill:#",
             primaryColor,
@@ -258,6 +264,7 @@ contract AavegotchiFacet {
             collateral,
             eyeShape
         );
+        */
     }
 
     function getAavegotchiSvgLayers(uint256 _tokenId) internal view returns (bytes memory svg_) {
