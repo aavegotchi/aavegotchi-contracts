@@ -64,7 +64,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
     const svgs = await aavegotchiFacet.portalAavegotchisSvg(tokenId)
-    // console.log('svgs:', svgs[0])
+    console.log('svgs:', svgs[0])
     expect(svgs.length).to.equal(10)
   })
 

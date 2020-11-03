@@ -235,7 +235,7 @@ contract AavegotchiFacet {
             primaryColor, // common
             "36818E", // uncommon_high
             "EA8C27", // rare_high
-            "51FFA8" // mythical_high
+            "1E661E" // mythical_high
         ];
         for (uint256 i; i < eyeColorTraitRanges.length - 1; i++) {
             if (trait >= eyeColorTraitRanges[i] && trait < eyeColorTraitRanges[i + 1]) {
