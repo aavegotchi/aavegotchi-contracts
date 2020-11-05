@@ -23,6 +23,7 @@ struct Aavegotchi {
     uint8 status;
     address collateralType;
     uint128 stakedAmount;
+    uint256 minimumStake; //The minimum amount of collateral that must be staked. Set upon creation.
 }
 
 struct SvgLayer {
@@ -37,6 +38,9 @@ struct AavegotchiCollateralTypeInfo {
     bytes3 cheekColor;
     uint8 svgId;
     uint8 eyeShapeSvgId;
+    int8[] modifiers;  //Trait modifiers for each collateral. Can be 2, 1, -1, or -2
+    uint16 conversionRate; //Current conversionRate for the price of this collateral in relation to 1 USD. Can be updated by the DAO
+
 }
 
 struct AppStorage {
@@ -83,6 +87,8 @@ library LibAppStorage {
         bytes3 cheekColor;
         uint8 svgId;
         uint8 eyeShapeSvgId;
+        int8[] modifiers;
+        uint16 conversionRate;
     }
 
     function addCollateralTypes(AppStorage storage s, AavegotchiCollateralTypeInput[] memory _collateralTypes) internal {
@@ -95,6 +101,8 @@ library LibAppStorage {
             s.collateralTypeInfo[collateralType].cheekColor = _collateralTypes[i].cheekColor;
             s.collateralTypeInfo[collateralType].svgId = _collateralTypes[i].svgId;
             s.collateralTypeInfo[collateralType].eyeShapeSvgId = _collateralTypes[i].eyeShapeSvgId;
+            s.collateralTypeInfo[collateralType].modifiers = _collateralTypes[i].modifiers;
+            s.collateralTypeInfo[collateralType].conversionRate = _collateralTypes[i].conversionRate;
         }
     }
 }

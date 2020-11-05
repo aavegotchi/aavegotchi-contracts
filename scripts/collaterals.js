@@ -20,7 +20,9 @@ const collaterals = [
     secondaryColor: '#F9D792',
     cheekColor: '#F4AF24',
     svgId: 0,
-    eyeShapeSvgId: 16
+    eyeShapeSvgId: 16,
+    modifiers: [1, 0, 0, 0],
+    conversionRate: 1 //1 DAI equals 1 DAI
   },
   {
     name: 'aETH',
@@ -30,7 +32,9 @@ const collaterals = [
     secondaryColor: '#EDD3FD',
     cheekColor: '#F696C6',
     svgId: 1,
-    eyeShapeSvgId: 17
+    eyeShapeSvgId: 17,
+    modifiers: [0, 1, 0, 0],
+    conversionRate: 3000 //3000 DAI = 1 ETH
   },
   {
     name: 'aLEND',
@@ -40,7 +44,9 @@ const collaterals = [
     secondaryColor: '#CFEEF4',
     cheekColor: '#F696C6',
     svgId: 2,
-    eyeShapeSvgId: 18
+    eyeShapeSvgId: 18,
+    modifiers: [0, 0, 1, 0],
+    conversionRate: 30 //30 DAI = 1 LEND
   },
 
   {
@@ -51,7 +57,9 @@ const collaterals = [
     secondaryColor: '#D4DEF8',
     cheekColor: '#F696C6',
     svgId: 3,
-    eyeShapeSvgId: 19
+    eyeShapeSvgId: 19,
+    modifiers: [0, 0, 0, 1],
+    conversionRate: 1000
   },
 
   {
@@ -62,7 +70,9 @@ const collaterals = [
     secondaryColor: '#DCDCDC',
     cheekColor: '#F696C6',
     svgId: 4,
-    eyeShapeSvgId: 21
+    eyeShapeSvgId: 21,
+    modifiers: [-1, 0, 0, 0],
+    conversionRate: 30
   },
 
   {
@@ -73,7 +83,9 @@ const collaterals = [
     secondaryColor: '#B6D9FC',
     cheekColor: '#F696C6',
     svgId: 5,
-    eyeShapeSvgId: 22
+    eyeShapeSvgId: 22,
+    modifiers: [0, -1, 0, 0],
+    conversionRate: 100
   },
 
   {
@@ -84,7 +96,9 @@ const collaterals = [
     secondaryColor: '#D4E0F1',
     cheekColor: '#F696C6',
     svgId: 6,
-    eyeShapeSvgId: 23
+    eyeShapeSvgId: 23,
+    modifiers: [0, 0, -1, 0],
+    conversionRate: 500 //500 DAI = 1 USDC
   },
 
 
@@ -152,7 +166,9 @@ function getCollaterals(network, ghstAddress) {
       cheekColor:
         '0x' + collateralType.cheekColor.slice(1),
       svgId: collateralType.svgId,
-      eyeShapeSvgId: collateralType.eyeShapeSvgId
+      eyeShapeSvgId: collateralType.eyeShapeSvgId,
+      modifiers: collateralType.modifiers,
+      conversionRate: collateralType.conversionRate
     }
     if (network === 'kovan') {
       item.collateralType = collateralType.kovanAddress
@@ -163,6 +179,7 @@ function getCollaterals(network, ghstAddress) {
     }
     collateralTypes.push(item)
   }
+
   return collateralTypes
 }
 

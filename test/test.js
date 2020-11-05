@@ -36,6 +36,15 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(balance).to.equal('10000000000000000000000')
   })
 
+  it('Should show all whitelisted collaterals', async function () {
+    const collaterals = await aavegotchiFacet.getCollateralInfo()
+    const collateral = collaterals[0]
+    expect(collateral.conversionRate).to.equal(500)
+    expect(collaterals.length).to.equal(7)
+    expect(collateral.modifiers[2]).to.equal(-1)
+  })
+
+
   it('Should purchase one portal', async function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
@@ -57,24 +66,35 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   it('Should contain 10 random ghosts in the portal', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const ghosts = await aavegotchiFacet.portalAavegotchiTraits(myPortals[0].tokenId)
+    ghosts.forEach(async (ghost) => {
+      const rarityScore = await aavegotchiFacet.calculateRarityScore(ghost.numericTraits)
+      expect(Number(rarityScore)).to.greaterThan(300)
+      expect(Number(rarityScore)).to.lessThan(600)
+    });
     expect(ghosts.length).to.equal(10)
+
   })
 
   it('Should show SVGs', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
     const svgs = await aavegotchiFacet.portalAavegotchisSvg(tokenId)
-    console.log('svgs:', svgs[0])
+    //  console.log('svgs:', svgs[0])
     expect(svgs.length).to.equal(10)
   })
 
   it('Should claim an Aavegotchi', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    //  console.log('my portals:', myPortals)
     const tokenId = myPortals[0].tokenId
     const ghosts = await aavegotchiFacet.portalAavegotchiTraits(tokenId)
     const selectedGhost = ghosts[4]
+    console.log('selected ghost:', selectedGhost)
+    const minStake = selectedGhost.minimumStake
+    console.log('min stake:', minStake.toString())
 
-    const amount = (1 * Math.pow(10, 18)).toFixed()
+
+    const amount = ("50000000000000000")
     await aavegotchiFacet.claimAavegotchiFromPortal(tokenId, 4, amount)
 
     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
@@ -90,6 +110,15 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     await aavegotchiFacet.setAavegotchiName(tokenId, 'Beavis')
     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
     expect(aavegotchi.name).to.equal('Beavis')
+  })
+
+  it('Should show correct rarity score', async function () {
+    const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    const tokenId = myPortals[0].tokenId
+    const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
+    const score = await aavegotchiFacet.calculateRarityScore(aavegotchi.numericTraits)
+
+    console.log('score:', score.toString())
   })
 
   // Add a test to check if we can name another Aavegotchi Beavis

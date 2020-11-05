@@ -7,6 +7,7 @@ import "../../shared/interfaces/IERC20.sol";
 import "../libraries/LibSvg.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
+import "hardhat/console.sol";
 
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
 interface ERC721TokenReceiver {
@@ -75,6 +76,23 @@ contract AavegotchiFacet {
         collateralTypes_ = s.collateralTypes;
     }
 
+    struct CollateralInfo {
+        address collateral;
+        int8 modifiers;
+    }
+
+    function getCollateralInfo() external view returns (AavegotchiCollateralTypeInfo[] memory collateralInfo) {
+        address[] memory collateralTypes_ = s.collateralTypes;
+
+        collateralInfo = new AavegotchiCollateralTypeInfo[](collateralTypes_.length);
+
+        for (uint8 index = 0; index < collateralTypes_.length; index++) {
+            address collateral = collateralTypes_[index];
+            AavegotchiCollateralTypeInfo memory info = s.collateralTypeInfo[collateral];
+            collateralInfo[index] = info;
+        }
+    }
+
     function aavegotchiNameAvailable(string memory _name) external view returns (bool available_) {
         available_ = s.aavegotchiNamesUsed[_name];
     }
@@ -140,7 +158,18 @@ contract AavegotchiFacet {
             }
             address collateralType = s.collateralTypes[(randomNumberN >> 248) % s.collateralTypes.length];
             portalAavegotchiTraits_[i].collateralType = collateralType;
-            portalAavegotchiTraits_[i].minimumStake = 10**IERC20(collateralType).decimals();
+
+            AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
+            uint16 conversionRate = collateralInfo.conversionRate;
+
+            //Get rarity multiplier
+            uint256 rarityMultiplier = calculateRarityMultiplier(portalAavegotchiTraits_[i].numericTraits);
+
+            //First we get the base price of our collateral in terms of DAI
+            uint256 collateralDAIPrice = ((10**IERC20(collateralType).decimals()) / conversionRate);
+
+            //Then multiply by the rarity multiplier
+            portalAavegotchiTraits_[i].minimumStake = collateralDAIPrice * rarityMultiplier;
         }
     }
 
@@ -165,6 +194,7 @@ contract AavegotchiFacet {
         uint256 _option,
         uint256 _stakeAmount
     ) external {
+        console.log("status:", s.aavegotchis[_tokenId].status);
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
         uint256 randomNumber = uint256(keccak256(abi.encodePacked(s.aavegotchis[_tokenId].randomNumber, _option)));
@@ -174,9 +204,21 @@ contract AavegotchiFacet {
         }
         address collateralType = s.collateralTypes[(randomNumber >> 248) % s.collateralTypes.length];
         s.aavegotchis[_tokenId].collateralType = collateralType;
-        s.aavegotchis[_tokenId].status = LibAppStorage.STATUS_AAVEGOTCHI;
-        uint256 minimumStake = 10**IERC20(collateralType).decimals();
+
+        //***We may need to access the PortalAavegotchiTraits here but it'll cost more gas***
+        PortalAavegotchiTraits[10] memory portalAavegotchis = portalAavegotchiTraits(_tokenId);
+        PortalAavegotchiTraits memory option = portalAavegotchis[_option];
+
+        uint256 minimumStake = option.minimumStake;
+        //10**IERC20(collateralType).decimals();
+
+        console.log("stake amount:", _stakeAmount);
+        console.log("min stake:", minimumStake);
+
         require(_stakeAmount >= minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
+
+        s.aavegotchis[_tokenId].status = LibAppStorage.STATUS_AAVEGOTCHI;
+
         s.aavegotchis[_tokenId].stakedAmount = uint128(_stakeAmount);
         LibERC20.transferFrom(collateralType, msg.sender, address(this), _stakeAmount);
     }
@@ -330,6 +372,28 @@ contract AavegotchiFacet {
         aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
         aavegotchiInfo_.stakedAmount = s.aavegotchis[_tokenId].stakedAmount;
         return aavegotchiInfo_;
+    }
+
+    function calculateRarityMultiplier(uint8[6] memory numericTraits) public pure returns (uint256 rarityMultiplier) {
+        uint256 rarityScore = calculateRarityScore(numericTraits);
+        if (rarityScore < 300) return 10;
+        else if (rarityScore >= 300 && rarityScore < 450) return 10;
+        else if (rarityScore >= 450 && rarityScore <= 525) return 25;
+        else if (rarityScore >= 526 && rarityScore <= 580) return 100;
+        else if (rarityScore >= 581) return 1000;
+    }
+
+    function calculateRarityScore(uint8[6] memory numericTraits) public pure returns (uint256 rarityScore) {
+        uint256 score = 0;
+        for (uint8 index = 0; index < numericTraits.length; index++) {
+            uint256 number = numericTraits[index];
+            if (number >= 50) {
+                score = score + number;
+            } else {
+                score = score + (100 - number);
+            }
+        }
+        return score;
     }
 
     function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
