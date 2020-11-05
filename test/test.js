@@ -1,5 +1,6 @@
 /* global describe it before */
 const { expect } = require('chai')
+const { BigNumber } = require('ethers')
 // const { idText } = require('typescript')
 
 // eslint-disable-next-line no-unused-vars
@@ -75,13 +76,14 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
   })
 
+  /*
   it('Should show SVGs', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
     const svgs = await aavegotchiFacet.portalAavegotchisSvg(tokenId)
     //  console.log('svgs:', svgs[0])
     expect(svgs.length).to.equal(10)
-  })
+  })*/
 
   it('Should claim an Aavegotchi', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
@@ -89,19 +91,14 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const tokenId = myPortals[0].tokenId
     const ghosts = await aavegotchiFacet.portalAavegotchiTraits(tokenId)
     const selectedGhost = ghosts[4]
-    console.log('selected ghost:', selectedGhost)
     const minStake = selectedGhost.minimumStake
-    console.log('min stake:', minStake.toString())
-
-
-    const amount = ("50000000000000000")
-    await aavegotchiFacet.claimAavegotchiFromPortal(tokenId, 4, amount)
+    await aavegotchiFacet.claimAavegotchiFromPortal(tokenId, 4, minStake)
 
     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
     const collateral = aavegotchi.collateral
     expect(selectedGhost.collateralType).to.equal(collateral)
     expect(aavegotchi.status).to.equal(2)
-    expect(aavegotchi.stakedAmount).to.equal(amount)
+    expect(aavegotchi.stakedAmount).to.equal(minStake)
   })
 
   it('Should set a name', async function () {
@@ -118,7 +115,43 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
     const score = await aavegotchiFacet.calculateRarityScore(aavegotchi.numericTraits)
 
-    console.log('score:', score.toString())
+    //Todo: Clientside calculate what the rarity score should be
+  })
+
+  it('Can increase stake', async function () {
+    let aavegotchi = await aavegotchiFacet.getAavegotchi("0")
+    let currentStake = BigNumber.from(aavegotchi.stakedAmount)
+
+    //Let's double the stake
+    await aavegotchiFacet.increaseStake("0", currentStake.toString())
+    aavegotchi = await aavegotchiFacet.getAavegotchi("0")
+    const finalStake = BigNumber.from(aavegotchi.stakedAmount)
+    expect(finalStake).to.equal(currentStake.add(currentStake))
+
+    //Todo: Balance check
+
+  })
+
+  it('Can decrease stake, but not below minimum', async function () {
+    let aavegotchi = await aavegotchiFacet.getAavegotchi("0")
+    let currentStake = BigNumber.from(aavegotchi.stakedAmount)
+    let minimumStake = BigNumber.from(aavegotchi.minimumStake)
+
+    let available = currentStake.sub(minimumStake)
+    await aavegotchiFacet.decreaseStake("0", available)
+
+    aavegotchi = await aavegotchiFacet.getAavegotchi("0")
+    currentStake = BigNumber.from(aavegotchi.stakedAmount)
+
+    expect(currentStake).to.equal(minimumStake)
+
+    //Todo: Below min stake Revert check
+    //Todo: Balance check
+
+  })
+
+  it('Can decrease stake and destroy Aavegotchi', async function () {
+    //TBD
   })
 
   // Add a test to check if we can name another Aavegotchi Beavis

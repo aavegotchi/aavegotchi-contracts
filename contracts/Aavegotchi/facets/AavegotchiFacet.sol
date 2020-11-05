@@ -194,33 +194,67 @@ contract AavegotchiFacet {
         uint256 _option,
         uint256 _stakeAmount
     ) external {
-        console.log("status:", s.aavegotchis[_tokenId].status);
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
-        uint256 randomNumber = uint256(keccak256(abi.encodePacked(s.aavegotchis[_tokenId].randomNumber, _option)));
-        s.aavegotchis[_tokenId].randomNumber = randomNumber;
-        for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
-            s.aavegotchis[_tokenId].numericTraits.push(uint8(randomNumber >> (j * 8)) % 100);
-        }
-        address collateralType = s.collateralTypes[(randomNumber >> 248) % s.collateralTypes.length];
-        s.aavegotchis[_tokenId].collateralType = collateralType;
 
-        //***We may need to access the PortalAavegotchiTraits here but it'll cost more gas***
         PortalAavegotchiTraits[10] memory portalAavegotchis = portalAavegotchiTraits(_tokenId);
         PortalAavegotchiTraits memory option = portalAavegotchis[_option];
+        uint256 randomNumber = option.randomNumber;
+        s.aavegotchis[_tokenId].numericTraits = option.numericTraits;
+        s.aavegotchis[_tokenId].randomNumber = randomNumber;
+        s.aavegotchis[_tokenId].collateralType = option.collateralType;
+        s.aavegotchis[_tokenId].minimumStake = option.minimumStake;
+
+        //***NOT calculating random number again here because it seems repetitive? Also it was mutating the values that had previously been set */
+        /*uint256(keccak256(abi.encodePacked(s.aavegotchis[_tokenId].randomNumber, _option)));*/
+
+        /* for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
+            s.aavegotchis[_tokenId].numericTraits.push(uint8(randomNumber >> (j * 8)) % 100);
+        }
+        */
+        //  address collateralType = s.collateralTypes[(randomNumber >> 248) % s.collateralTypes.length];
+
+        //***We need to access the PortalAavegotchiTraits here but it'll cost more gas. Maybe there's a way to avoif?***
 
         uint256 minimumStake = option.minimumStake;
-        //10**IERC20(collateralType).decimals();
-
-        console.log("stake amount:", _stakeAmount);
-        console.log("min stake:", minimumStake);
-
         require(_stakeAmount >= minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
 
         s.aavegotchis[_tokenId].status = LibAppStorage.STATUS_AAVEGOTCHI;
 
         s.aavegotchis[_tokenId].stakedAmount = uint128(_stakeAmount);
+        LibERC20.transferFrom(option.collateralType, msg.sender, address(this), _stakeAmount);
+    }
+
+    function increaseStake(uint256 _tokenId, uint128 _stakeAmount) external {
+        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
+        uint128 currentStake = s.aavegotchis[_tokenId].stakedAmount;
+        address collateralType = s.aavegotchis[_tokenId].collateralType;
+        s.aavegotchis[_tokenId].stakedAmount = currentStake + _stakeAmount;
         LibERC20.transferFrom(collateralType, msg.sender, address(this), _stakeAmount);
+    }
+
+    function decreaseStake(uint256 _tokenId, uint128 _reduceAmount) external {
+        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can decrease stake");
+        uint128 currentStake = s.aavegotchis[_tokenId].stakedAmount;
+        uint256 minimumStake = s.aavegotchis[_tokenId].minimumStake;
+
+        // ***CHECK for underflow here? ***
+        require(currentStake - _reduceAmount >= minimumStake, "AavegotchiFacet: Cannot reduce below minimum stake");
+        address collateralType = s.aavegotchis[_tokenId].collateralType;
+        s.aavegotchis[_tokenId].stakedAmount = currentStake - _reduceAmount;
+        LibERC20.transferFrom(collateralType, address(this), msg.sender, _reduceAmount);
+    }
+
+    function decreaseAndDestroy(uint256 _tokenId) external {
+        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can decrease stake");
+        uint128 currentStake = s.aavegotchis[_tokenId].stakedAmount;
+        address collateralType = s.aavegotchis[_tokenId].collateralType;
+
+        //Check that all wearables have been removed from inventory before burning
+
+        LibERC20.transferFrom(collateralType, address(this), msg.sender, currentStake);
+
+        //Burn the Aavegotchi
     }
 
     function ghstAddress() external view returns (address contract_) {
@@ -360,6 +394,7 @@ contract AavegotchiFacet {
         uint8[] numericTraits;
         address collateral;
         uint256 stakedAmount;
+        uint256 minimumStake;
     }
 
     function getAavegotchi(uint256 _tokenId) public view returns (AavegotchiInfo memory aavegotchiInfo_) {
@@ -371,6 +406,7 @@ contract AavegotchiFacet {
         aavegotchiInfo_.numericTraits = s.aavegotchis[_tokenId].numericTraits;
         aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
         aavegotchiInfo_.stakedAmount = s.aavegotchis[_tokenId].stakedAmount;
+        aavegotchiInfo_.minimumStake = s.aavegotchis[_tokenId].minimumStake;
         return aavegotchiInfo_;
     }
 
