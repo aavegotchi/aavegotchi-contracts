@@ -26,9 +26,12 @@ struct Aavegotchi {
     uint256 minimumStake; //The minimum amount of collateral that must be staked. Set upon creation.
 
     //New traits
-    uint256 kinship; //The kinship value of this Aavegotchi. Default is 50.
     uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
     uint256 level; //The level of this Aavegotchi begins at 1.
+    uint256 claimTime; //The block timestamp when this Aavegotchi was claimed
+    uint256 lastInteracted; //The last time this Aavegotchi was interacted with
+    int256 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
+    uint256 interactionMultiplier; 
 }
 
 struct Wearable {
