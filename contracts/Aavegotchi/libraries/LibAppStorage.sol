@@ -24,13 +24,31 @@ struct Aavegotchi {
     address collateralType;
     uint128 stakedAmount;
     uint256 minimumStake; //The minimum amount of collateral that must be staked. Set upon creation.
+
+    //New traits
+    uint256 kinship; //The kinship value of this Aavegotchi. Default is 50.
+    uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
+    uint256 level; //The level of this Aavegotchi begins at 1.
 }
 
 struct Wearable {
-   int8[6] traitModifiers; //How much the wearable modifies each trait. Should not be more than +-2 total
-   uint8 maxQuantity; //Total number that can be minted of this wearable. Can calculate the rarity level from this number.
-   uint8 rarityScoreModifier; //Number from 1-50. 
-   uint8 setId; 
+    int8[6] traitModifiers; //How much the wearable modifies each trait. Should not be more than +-2 total
+    uint8 maxQuantity; //Total number that can be minted of this wearable. Can calculate the rarity level from this number.
+    uint8 rarityScoreModifier; //Number from 1-50. 
+    uint8 setId; //The id of the set. Zero is no set
+    uint8[] slots; //The allowed slots that this wearable can be added to.
+    uint256 svgId; //The svgId of the wearable 
+
+    //Allowed Slots
+    //0 Head
+    //1 Face
+    //2 Eyes
+    //3 Body / Feet
+    //4 Hand (left)
+    //5 Hand (right)
+    //6 Hands (both)
+    //7 Pet 
+
 }
 
 struct WearableSet {
@@ -67,6 +85,8 @@ struct AppStorage {
     // contractAddress => nftId  => id => balance
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) nftBalances;
     // owner => (id => balance)
+    Wearable[] createdWearables;
+    WearableSet[] wearableSets;
     mapping(address => mapping(uint256 => uint256)) wearables;
     // owner => aavegotchiOwnerEnumeration
     mapping(address => uint256[]) aavegotchiOwnerEnumeration;

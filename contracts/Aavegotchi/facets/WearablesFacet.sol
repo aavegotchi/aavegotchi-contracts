@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.4;
+pragma experimental ABIEncoderV2;
 
 import "../libraries/LibAppStorage.sol";
+import "../../shared/libraries/LibDiamond.sol";
 
 /**
     Note: The ERC-165 identifier for this interface is 0x4e2312e0.
@@ -109,6 +111,39 @@ contract WearablesFacet {
         The URI MUST point to a JSON file that conforms to the "ERC-1155 Metadata URI JSON Schema".
     */
     event URI(string _value, uint256 indexed _id);
+
+    function createWearableSet(WearableSet memory _wearableSet) external {
+        LibDiamond.enforceIsContractOwner();
+        s.wearableSets.push(_wearableSet);
+    }
+
+    struct WearableInput {
+        int8[6] traitModifiers;
+        uint8 maxQuantity;
+        uint8 rarityScoreModifier;
+        uint8 setId;
+        uint8[] slots;
+    }
+
+    function createWearableType(WearableInput memory _wearableInput, bytes memory _svg) external {
+        LibDiamond.enforceIsContractOwner();
+        require(_wearableInput.slots.length > 0, "WearablesFacet: Wearable slots cannot be empty");
+
+        Wearable memory wearable = Wearable(
+            _wearableInput.traitModifiers,
+            _wearableInput.maxQuantity,
+            _wearableInput.rarityScoreModifier,
+            _wearableInput.setId,
+            _wearableInput.slots,
+            s.svgLayers["wearables"].length //***Check this ***/
+        );
+
+        s.createdWearables.push(wearable);
+
+        //To do: Upload the bytes to svgLayers and assign the svgIdß
+        // uint256 count = s.svgLayers["wearables"].length;
+        // s.svgLayers["wearables"][count] = _svg;
+    }
 
     // Mint a set of wearables.
     // How many wearables there are is determined by how many wearable SVG files have been uploaded.

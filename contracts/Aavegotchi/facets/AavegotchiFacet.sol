@@ -206,6 +206,11 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].collateralType = option.collateralType;
         s.aavegotchis[_tokenId].minimumStake = option.minimumStake;
 
+        //New traits
+        s.aavegotchis[_tokenId].kinship = 50;
+        s.aavegotchis[_tokenId].experience = 0;
+        s.aavegotchis[_tokenId].level = 1;
+
         //***NOT calculating random number again here because it seems repetitive? Also it was mutating the values that had previously been set */
         /*uint256(keccak256(abi.encodePacked(s.aavegotchis[_tokenId].randomNumber, _option)));*/
 
@@ -398,6 +403,10 @@ contract AavegotchiFacet {
         address collateral;
         uint256 stakedAmount;
         uint256 minimumStake;
+        //New
+        uint256 kinship; //The kinship value of this Aavegotchi. Default is 50.
+        uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
+        uint256 level; //The level of this Aavegotchi begins at 1.
     }
 
     function getAavegotchi(uint256 _tokenId) public view returns (AavegotchiInfo memory aavegotchiInfo_) {
@@ -410,6 +419,12 @@ contract AavegotchiFacet {
         aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
         aavegotchiInfo_.stakedAmount = s.aavegotchis[_tokenId].stakedAmount;
         aavegotchiInfo_.minimumStake = s.aavegotchis[_tokenId].minimumStake;
+
+        //New
+        aavegotchiInfo_.kinship = s.aavegotchis[_tokenId].kinship;
+        aavegotchiInfo_.experience = s.aavegotchis[_tokenId].experience;
+        aavegotchiInfo_.level = s.aavegotchis[_tokenId].level;
+
         return aavegotchiInfo_;
     }
 
