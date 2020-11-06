@@ -114,6 +114,8 @@ contract WearablesFacet {
     // How many wearables there are is determined by how many wearable SVG files have been uploaded.
     // The wearbles are minted to the account that calls this function
     function mintWearables() external {
+        //To do: Only by contract owner (and eventually DAO)
+
         uint256 count = s.svgLayers["wearables"].length;
         for (uint256 i = 1; i < count; i++) {
             uint256 id = i << 240;

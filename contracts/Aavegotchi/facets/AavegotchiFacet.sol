@@ -286,6 +286,7 @@ contract AavegotchiFacet {
 
         // aavagotchi body
         svg_ = LibSvg.getSvg("aavegotchi", 2);
+        bytes memory background_ = LibSvg.getSvg("aavegotchi", 3);
         bytes memory collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
         uint8 trait = _numericTraits[4];
@@ -331,6 +332,7 @@ contract AavegotchiFacet {
             ";}.eyeColor{fill:#",
             eyeColor,
             ";}</style>",
+            background_,
             svg_,
             collateral,
             eyeShape

@@ -26,6 +26,18 @@ struct Aavegotchi {
     uint256 minimumStake; //The minimum amount of collateral that must be staked. Set upon creation.
 }
 
+struct Wearable {
+   int8[6] traitModifiers; //How much the wearable modifies each trait. Should not be more than +-2 total
+   uint8 maxQuantity; //Total number that can be minted of this wearable. Can calculate the rarity level from this number.
+   uint8 rarityScoreModifier; //Number from 1-50. 
+   uint8 setId; 
+}
+
+struct WearableSet {
+    uint8[] pieces; //The tokenIdS of each piece of the set
+    uint8 fullSetBonus; //How much equipping a full set increases the Aavegotchi's rarity score
+}
+
 struct SvgLayer {
     address svgLayersContract;
     uint16 offset;
