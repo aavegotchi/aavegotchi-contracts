@@ -68,9 +68,9 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const ghosts = await aavegotchiFacet.portalAavegotchiTraits(myPortals[0].tokenId)
     ghosts.forEach(async (ghost) => {
-      const rarityScore = await aavegotchiFacet.calculateRarityScore(ghost.numericTraits)
-      expect(Number(rarityScore)).to.greaterThan(300)
-      expect(Number(rarityScore)).to.lessThan(600)
+      const rarityScore = await aavegotchiFacet.calculateBaseRarityScore(ghost.numericTraits, ghost.collateralType)
+      expect(Number(rarityScore)).to.greaterThan(298)
+      expect(Number(rarityScore)).to.lessThan(602)
     });
     expect(ghosts.length).to.equal(10)
 
@@ -113,7 +113,11 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
-    const score = await aavegotchiFacet.calculateRarityScore(aavegotchi.numericTraits)
+    let score = await aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
+    expect(score).to.equal(599)
+
+    const multiplier = await aavegotchiFacet.calculateRarityMultiplier([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
+    expect(multiplier).to.equal(1000)
 
     //Todo: Clientside calculate what the rarity score should be
   })
@@ -150,8 +154,25 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
   })
 
+  it('Contract Owner (Later DAO) can update collateral modifiers', async function () {
+    const aavegotchi = await aavegotchiFacet.getAavegotchi("0")
+    let score = await aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
+    expect(score).to.equal(599)
+    await aavegotchiFacet.updateCollateralModifiers(aavegotchi.collateral, [2, 0, 0, 0, 0, 0])
+    score = await aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
+    expect(score).to.equal(602)
+  })
+
   it('Can decrease stake and destroy Aavegotchi', async function () {
-    //TBD
+    //To do: burn Aavegotchi
+  })
+
+  it('Can equip/de-equip wearables', async function () {
+
+  })
+
+  it('Wearables can alter traits and increase base rarity score', async function () {
+
   })
 
   // Add a test to check if we can name another Aavegotchi Beavis

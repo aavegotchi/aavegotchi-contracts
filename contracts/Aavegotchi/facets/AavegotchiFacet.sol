@@ -56,6 +56,12 @@ contract AavegotchiFacet {
         s.addCollateralTypes(_collateralTypes);
     }
 
+    function updateCollateralModifiers(address _collateralType, int8[NUMERIC_TRAITS_NUM] memory _modifiers) external {
+        //To do: Can only be called by DAO
+        LibDiamond.enforceIsContractOwner();
+        s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
+    }
+
     function removeCollateralType(address _collateralType) external {
         LibDiamond.enforceIsContractOwner();
         uint256 index = s.collateralTypeIndexes[_collateralType];
@@ -74,11 +80,6 @@ contract AavegotchiFacet {
 
     function collaterals() external view returns (address[] memory collateralTypes_) {
         collateralTypes_ = s.collateralTypes;
-    }
-
-    struct CollateralInfo {
-        address collateral;
-        int8 modifiers;
     }
 
     function getCollateralInfo() external view returns (AavegotchiCollateralTypeInfo[] memory collateralInfo) {
@@ -163,7 +164,7 @@ contract AavegotchiFacet {
             uint16 conversionRate = collateralInfo.conversionRate;
 
             //Get rarity multiplier
-            uint256 rarityMultiplier = calculateRarityMultiplier(portalAavegotchiTraits_[i].numericTraits);
+            uint256 rarityMultiplier = calculateRarityMultiplier(portalAavegotchiTraits_[i].numericTraits, collateralType);
 
             //First we get the base price of our collateral in terms of DAI
             uint256 collateralDAIPrice = ((10**IERC20(collateralType).decimals()) / conversionRate);
@@ -391,7 +392,7 @@ contract AavegotchiFacet {
         address owner;
         uint256 randomNumber;
         uint8 status;
-        uint8[] numericTraits;
+        uint8[NUMERIC_TRAITS_NUM] numericTraits;
         address collateral;
         uint256 stakedAmount;
         uint256 minimumStake;
@@ -410,8 +411,12 @@ contract AavegotchiFacet {
         return aavegotchiInfo_;
     }
 
-    function calculateRarityMultiplier(uint8[6] memory numericTraits) public pure returns (uint256 rarityMultiplier) {
-        uint256 rarityScore = calculateRarityScore(numericTraits);
+    function calculateRarityMultiplier(uint8[NUMERIC_TRAITS_NUM] memory numericTraits, address collateralType)
+        public
+        view
+        returns (uint256 rarityMultiplier)
+    {
+        int256 rarityScore = calculateBaseRarityScore(numericTraits, collateralType);
         if (rarityScore < 300) return 10;
         else if (rarityScore >= 300 && rarityScore < 450) return 10;
         else if (rarityScore >= 450 && rarityScore <= 525) return 25;
@@ -419,17 +424,36 @@ contract AavegotchiFacet {
         else if (rarityScore >= 581) return 1000;
     }
 
-    function calculateRarityScore(uint8[6] memory numericTraits) public pure returns (uint256 rarityScore) {
-        uint256 score = 0;
+    //Calculates the base rarity score, including collateral modifier
+    function calculateBaseRarityScore(uint8[NUMERIC_TRAITS_NUM] memory numericTraits, address collateralType)
+        public
+        view
+        returns (int256 rarityScore)
+    {
+        AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
+
+        int8[6] memory modifiers = collateralInfo.modifiers;
+
+        int256 score = 0;
         for (uint8 index = 0; index < numericTraits.length; index++) {
-            uint256 number = numericTraits[index];
+            int256 number = numericTraits[index];
+            int8 mod = modifiers[index];
+
             if (number >= 50) {
-                score = score + number;
+                score = score + number + mod;
             } else {
-                score = score + (100 - number);
+                score = score + (100 - number) + mod;
             }
         }
         return score;
+    }
+
+    //Only valid for claimed Aavegotchis
+    function calculateModifiedRarityScore(uint8 _tokenId) external view returns (int256 rarityScore) {
+        //To do: Add wearables
+        address collateral = s.aavegotchis[_tokenId].collateralType;
+        uint8[NUMERIC_TRAITS_NUM] memory numericTraits = s.aavegotchis[_tokenId].numericTraits;
+        rarityScore = calculateBaseRarityScore(numericTraits, collateral);
     }
 
     function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {

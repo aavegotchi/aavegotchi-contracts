@@ -21,7 +21,7 @@ const collaterals = [
     cheekColor: '#F4AF24',
     svgId: 0,
     eyeShapeSvgId: 16,
-    modifiers: [1, 0, 0, 0],
+    modifiers: [1, 0, 0, 0, 0, 0],
     conversionRate: 1 //1 DAI equals 1 DAI
   },
   {
@@ -33,7 +33,7 @@ const collaterals = [
     cheekColor: '#F696C6',
     svgId: 1,
     eyeShapeSvgId: 17,
-    modifiers: [0, 1, 0, 0],
+    modifiers: [0, 1, 0, 0, 0, 0],
     conversionRate: 3000 //3000 DAI = 1 ETH
   },
   {
@@ -45,7 +45,7 @@ const collaterals = [
     cheekColor: '#F696C6',
     svgId: 2,
     eyeShapeSvgId: 18,
-    modifiers: [0, 0, 1, 0],
+    modifiers: [0, 0, 1, 0, 0, 0],
     conversionRate: 30 //30 DAI = 1 LEND
   },
 
@@ -58,7 +58,7 @@ const collaterals = [
     cheekColor: '#F696C6',
     svgId: 3,
     eyeShapeSvgId: 19,
-    modifiers: [0, 0, 0, 1],
+    modifiers: [0, 0, 0, 1, 0, 0],
     conversionRate: 1000
   },
 
@@ -71,7 +71,7 @@ const collaterals = [
     cheekColor: '#F696C6',
     svgId: 4,
     eyeShapeSvgId: 21,
-    modifiers: [-1, 0, 0, 0],
+    modifiers: [-1, 0, 0, 0, 0, 0],
     conversionRate: 30
   },
 
@@ -84,7 +84,7 @@ const collaterals = [
     cheekColor: '#F696C6',
     svgId: 5,
     eyeShapeSvgId: 22,
-    modifiers: [0, -1, 0, 0],
+    modifiers: [0, -1, 0, 0, 0, 0],
     conversionRate: 100
   },
 
@@ -97,7 +97,7 @@ const collaterals = [
     cheekColor: '#F696C6',
     svgId: 6,
     eyeShapeSvgId: 23,
-    modifiers: [0, 0, -1, 0],
+    modifiers: [0, 0, -1, 0, 0, 0],
     conversionRate: 500 //500 DAI = 1 USDC
   },
 

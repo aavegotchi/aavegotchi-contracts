@@ -13,7 +13,7 @@ eyeColor
 
 struct Aavegotchi {
     string name;
-    uint8[] numericTraits;
+    uint8[6] numericTraits;
     uint256 randomNumber;
     bytes32[1000] emptySlots;
     address owner;
@@ -38,7 +38,7 @@ struct AavegotchiCollateralTypeInfo {
     bytes3 cheekColor;
     uint8 svgId;
     uint8 eyeShapeSvgId;
-    int8[] modifiers;  //Trait modifiers for each collateral. Can be 2, 1, -1, or -2
+    int8[6] modifiers;  //Trait modifiers for each collateral. Can be 2, 1, -1, or -2
     uint16 conversionRate; //Current conversionRate for the price of this collateral in relation to 1 USD. Can be updated by the DAO
 
 }
@@ -87,7 +87,7 @@ library LibAppStorage {
         bytes3 cheekColor;
         uint8 svgId;
         uint8 eyeShapeSvgId;
-        int8[] modifiers;
+        int8[6] modifiers;
         uint16 conversionRate;
     }
 
