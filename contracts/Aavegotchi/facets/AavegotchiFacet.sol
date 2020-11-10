@@ -492,6 +492,7 @@ contract AavegotchiFacet {
         rarityScore = calculateBaseRarityScore(numericTraits, collateral);
     }
 
+
     function calculateKinship(uint256 _tokenId) external view returns (int256 kinship) {
         //The initial value of Kinship is always 50
         //Players can boost their kinship by interacting with their Aavegotchi.
@@ -503,58 +504,32 @@ contract AavegotchiFacet {
 
         //This may not work with decimals
         int256 daysSinceInteraction = int256(interval) / 86400;
-        uint256 adjustedDaysSinceInteraction = 0;
-
-        //   if (daysSinceInteraction > 20) {
-        //      adjustedDaysSinceInteraction =
-        //  }
-
-        //console.log("Calculate Kinship: days since:", daysSinceInteraction);
-
         int256 baseKinship = 50;
 
-        //Reduce kinship score by the days since interaction
+        uint256 streak = aavegotchi.streak;
+        int256 streakBonus = 0;
 
-        uint256 streakBonus = 0;
+        if (streak >= 5) streakBonus = 1;
+        if (streak >= 10) streakBonus = 2;
+        if (streak >= 30) streakBonus = 5;
+        if (streak >= 60) streakBonus = 10;
+        if (streak >= 90) streakBonus = 20;
 
-        //Reduce their streak count by the number of days since interaction
-        int256 adjustedInteractionCount = interactionCount - int256(daysSinceInteraction);
+        // console.log("steak bonus:");
+        //  console.logInt(streakBonus);
 
-        console.log("Adjudted Interaction count");
-        console.logInt(adjustedInteractionCount);
+        //Calculate Kinship: Uses onnchain data (lastTimeInteracted) and (interactionModifier) to calculate.
 
-        //Add the number of times they've interacted, minus the days it's been since they have interacted
-        baseKinship = baseKinship + adjustedInteractionCount;
+        //Kinship starts at 50
+        //Every time a user interacts within a 24hr period, their interactionModifier goes up by one.
+        //If a day elapses before they interact, their interactionModifier is increased by one (because of the interaction) but also reduced by the number of days it's been since they interacted.
 
-        //Grace period
-        //Goes down slow, but comes back normal
+        //This has the problem that kinship would not be reduced if they never interact and make the interactionModifier negative.
 
-        //Take 10 pts off when transfer
-        //More importance on streak
+        int256 kinshipScore = baseKinship + interactionCount - daysSinceInteraction + streakBonus;
 
-        //Low K
-        //Certain categories of votes
-
-        /*  if (adjustedInteractionCount >= 0 && adjustedInteractionCount < 5) streakBonus = 0;
-        else if (adjustedInteractionCount >= 5 && adjustedInteractionCount <= 10) streakBonus = 1;
-        else if (adjustedInteractionCount > 10 && adjustedInteractionCount <= 30) streakBonus = 3;
-        else streakBonus = 5;
-        */
-
-        //console.log("adjusted interaction count:", adjustedInteractionCount);
-        // console.log("streak bonus:", streakBonus);
-
-        return baseKinship; //+ int256(streakBonus);
-
-        //For every day you don't interact with your Aavegotchi, its Kinship score goes down by one until it reaches the minimum of 1.
-
-        //When you interact with it, the lastInteraction timer is reset, and interactionCount goes up by one.
-
-        //However, if you let your score go down too much, it takes exponentially more interactions to bring it back.
-
-        //On the flip side, interacting with your Aavegotchi every day increases kinship exponentially faster, until it reaches the max of 100.
-
-        //This is managed by the interactionMultiplier property
+        // if (kinshipScore > 100) return 100;
+        return kinshipScore;
     }
 
     function interact(uint256 _tokenId) public {
@@ -563,25 +538,47 @@ contract AavegotchiFacet {
 
         //Was the last interaction within 24 hours? If so, add to interaction count. If not, reset it.
         uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
+        int256 interactionCount = s.aavegotchis[_tokenId].interactionCount;
         uint256 interval = block.timestamp - lastInteracted;
         // console.log("Interact: block timestamp:", block.timestamp);
-        uint256 daysSinceInteraction = interval / 86400;
+        int256 daysSinceInteraction = int256(interval) / 86400;
+        int256 baseKinship = 50;
 
-        console.log("Interact: days since interaction:", daysSinceInteraction);
-        int256 interactionCount = s.aavegotchis[_tokenId].interactionCount;
+        int256 kinshipScore = baseKinship + interactionCount - daysSinceInteraction;
+
+        // console.log("kinship score");
+        // console.logInt(kinshipScore);
+
+        //If your Aavegotchi hates you and you finally pet it, you get a bonus
+        int256 hateBonus = 0;
+
+        if (kinshipScore < 40) {
+            hateBonus = 2;
+        }
 
         //If it's been a day or more since last interaction
         if (daysSinceInteraction > 0) {
-            //Reduce the interaction count by the
-            s.aavegotchis[_tokenId].interactionCount = interactionCount - int256(daysSinceInteraction);
+            // console.log("interaction count before");
+            // console.logInt(s.aavegotchis[_tokenId].interactionCount);
+
+            //console.log("days since interaction");
+            // console.logInt(daysSinceInteraction);
+
+            s.aavegotchis[_tokenId].interactionCount = interactionCount - int256(daysSinceInteraction) + hateBonus;
+            // console.log("interaction count after");
+            // console.logInt(s.aavegotchis[_tokenId].interactionCount);
+
+            s.aavegotchis[_tokenId].streak = 0;
 
             //Increase interaction
         } else {
-            s.aavegotchis[_tokenId].interactionCount++;
+            s.aavegotchis[_tokenId].interactionCount = interactionCount + 1 + hateBonus;
+            s.aavegotchis[_tokenId].streak++;
         }
 
         s.aavegotchis[_tokenId].lastInteracted = block.timestamp;
     }
+   
 
     function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
         tokenIds_ = s.aavegotchiOwnerEnumeration[_owner];
