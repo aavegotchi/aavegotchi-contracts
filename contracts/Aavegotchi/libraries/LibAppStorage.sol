@@ -31,7 +31,7 @@ struct Aavegotchi {
     uint256 claimTime; //The block timestamp when this Aavegotchi was claimed
     uint256 lastInteracted; //The last time this Aavegotchi was interacted with
     int256 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
-    uint256 interactionMultiplier; 
+    uint256 streak; //The streak bonus
 }
 
 struct Wearable {

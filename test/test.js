@@ -78,6 +78,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
 
 
+  /*
   it('Should show SVGs', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
@@ -85,6 +86,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     console.log('svgs:', svgs[0])
     expect(svgs.length).to.equal(10)
   })
+  */
 
 
   it('Should claim an Aavegotchi', async function () {
@@ -177,20 +179,20 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
   })
 
-  /*
+
   it('Can calculate kinship according to formula', async function () {
 
     //First interact 
+
     await aavegotchiFacet.interact("0")
     await aavegotchiFacet.interact("0")
     await aavegotchiFacet.interact("0")
     await aavegotchiFacet.interact("0")
     await aavegotchiFacet.interact("0")
     let kinship = await aavegotchiFacet.calculateKinship("0")
+    console.log('* 5 initial Interactions, kinship is:', kinship.toString())
     //5 interactions + 1 streak bonus
-    console.log('5 Interactions')
-    console.log('kinship:', kinship.toString())
-    expect(kinship).to.equal(55)
+    //expect(kinship).to.equal(55)
 
 
     //Go 3 days without interacting
@@ -199,9 +201,9 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
     kinship = await aavegotchiFacet.calculateKinship("0")
     //Took three days off and lost streak bonus
-    console.log('Took three days off, no streak bonus')
-    console.log('kinship:', kinship.toString())
-    expect(kinship).to.equal(49)
+    console.log('* 3 days w/ no interaction, kinship is:', kinship.toString())
+
+    //  expect(kinship).to.equal(49)
 
     //await aavegotchiFacet.interact("0")
     // kinship = await aavegotchiFacet.calculateKinship("0")
@@ -212,40 +214,60 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     ethers.provider.send('evm_increaseTime', [14 * 86400])
     ethers.provider.send("evm_mine")
 
-    console.log('17 days since last interaction, no streak bonus')
     kinship = await aavegotchiFacet.calculateKinship("0")
-    console.log('kinship:', kinship.toString())
-    expect(kinship).to.equal(33)
+    console.log('* Another 14 days since last interaction, total 17 days. Kinship is', kinship.toString())
+
+
 
     ethers.provider.send('evm_increaseTime', [20 * 86400])
     ethers.provider.send("evm_mine")
-
-    console.log('37 days since last interaction, no streak bonus')
     kinship = await aavegotchiFacet.calculateKinship("0")
-    console.log('kinship:', kinship.toString())
-    expect(kinship).to.equal(13)
+    console.log('* 37 days since last interaction, kinship is:', kinship.toString())
+    // expect(kinship).to.equal(13)
+
+    await aavegotchiFacet.interact("0")
+    kinship = await aavegotchiFacet.calculateKinship("0")
+    console.log('* Kinship after first interaction is:', kinship.toString())
 
 
     await aavegotchiFacet.interact("0")
     kinship = await aavegotchiFacet.calculateKinship("0")
-    console.log('kinship:', kinship.toString())
+    console.log('* Kinship after second interaction is:', kinship.toString())
 
 
-    //Then interact
     await aavegotchiFacet.interact("0")
-
-    const aavegotchi2 = await aavegotchiFacet.getAavegotchi("0")
-    console.log('interactions:', aavegotchi2.interactionCount.toString())
-    const kinship3 = await aavegotchiFacet.calculateKinship("0")
-    console.log('kinship:', kinship3.toString())
+    kinship = await aavegotchiFacet.calculateKinship("0")
+    console.log('* Kinship after third interaction is:', kinship.toString())
 
 
+    console.log('* Interact 120 times')
 
+    for (let index = 0; index < 120; index++) {
+      await aavegotchiFacet.interact("0")
+    }
+
+    kinship = await aavegotchiFacet.calculateKinship("0")
+    console.log('* Kinship is:', kinship.toString())
+
+    ethers.provider.send('evm_increaseTime', [80 * 86400])
+    ethers.provider.send("evm_mine")
+    kinship = await aavegotchiFacet.calculateKinship("0")
+
+    let aavegotchi = await aavegotchiFacet.getAavegotchi("0")
+
+    console.log('* Go away for 80 days. Kinship is: ', kinship.toString())
+    console.log('Interaction count is:', aavegotchi.interactionCount.toString())
+
+    await aavegotchiFacet.interact("0")
+    kinship = await aavegotchiFacet.calculateKinship("0")
+    console.log('* Interact after 80 days. Kinship is: ', kinship.toString())
+    aavegotchi = await aavegotchiFacet.getAavegotchi("0")
+    console.log('Interaction count is:', aavegotchi.interactionCount.toString())
 
 
     // expect(aavegotchi.interactionCount).to.equal(4)
   })
-  */
+
 
   // Add a test to check if we can name another Aavegotchi Beavis
   // Add some tests to check different svg layers
