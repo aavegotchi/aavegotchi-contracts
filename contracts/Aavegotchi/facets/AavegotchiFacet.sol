@@ -284,67 +284,81 @@ contract AavegotchiFacet {
         return string(toString);
     }
 
+    struct SvgLayerDetails {
+        string primaryColor;
+        string secondaryColor;
+        string cheekColor;
+        bytes background;
+        bytes collateral;
+        uint8 trait;
+        uint8[18] eyeShapeTraitRange;
+        bytes eyeShape;
+        string eyeColor;
+        uint8[8] eyeColorTraitRanges;
+        string[7] eyeColors;
+    }
+
     function getAavegotchiSvgLayers(address _collateralType, uint8[NUMERIC_TRAITS_NUM] memory _numericTraits)
         internal
         view
         returns (bytes memory svg_)
     {
-        string memory primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
-        string memory secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
-        string memory cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
+        SvgLayerDetails memory details;
+        details.primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
+        details.secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
+        details.cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
 
         // aavagotchi body
         svg_ = LibSvg.getSvg("aavegotchi", 2);
-        bytes memory background_ = LibSvg.getSvg("aavegotchi", 3);
-        bytes memory collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
+        details.background = LibSvg.getSvg("aavegotchi", 3);
+        details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
-        uint8 trait = _numericTraits[4];
-        bytes memory eyeShape;
-        uint8[18] memory eyeShapeTraitRange = [0, 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
-        for (uint256 i; i < eyeShapeTraitRange.length - 1; i++) {
-            if (trait >= eyeShapeTraitRange[i] && trait < eyeShapeTraitRange[i + 1]) {
-                eyeShape = LibSvg.getSvg("eyeShapes", i);
+        details.trait = _numericTraits[4];
+        details.eyeShape;
+        details.eyeShapeTraitRange = [0, 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
+        for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
+            if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
+                details.eyeShape = LibSvg.getSvg("eyeShapes", i);
                 break;
             }
         }
         // eyeShapeTrait is 98 or 99
-        if (eyeShape.length == 0) {
-            eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
+        if (details.eyeShape.length == 0) {
+            details.eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
         }
 
-        trait = _numericTraits[5];
-        string memory eyeColor;
-        uint8[8] memory eyeColorTraitRanges = [0, 2, 10, 25, 75, 90, 98, 100];
-        string[7] memory eyeColors = [
+        details.trait = _numericTraits[5];
+        details.eyeColorTraitRanges = [0, 2, 10, 25, 75, 90, 98, 100];
+        details.eyeColors = [
             "FF00FF", // mythical_low
             "0064FF", // rare_low
             "5D24BF", // uncommon_low
-            primaryColor, // common
+            details.primaryColor, // common
             "36818E", // uncommon_high
             "EA8C27", // rare_high
             "51FFA8" // mythical_high
         ];
-        for (uint256 i; i < eyeColorTraitRanges.length - 1; i++) {
-            if (trait >= eyeColorTraitRanges[i] && trait < eyeColorTraitRanges[i + 1]) {
-                eyeColor = eyeColors[i];
+        for (uint256 i; i < details.eyeColorTraitRanges.length - 1; i++) {
+            if (details.trait >= details.eyeColorTraitRanges[i] && details.trait < details.eyeColorTraitRanges[i + 1]) {
+                details.eyeColor = details.eyeColors[i];
                 break;
             }
         }
 
         svg_ = abi.encodePacked(
             "<style>.primary{fill:#",
-            primaryColor,
+            details.primaryColor,
             ";}.secondary{fill:#",
-            secondaryColor,
+            details.secondaryColor,
             ";}.cheek{fill:#",
-            cheekColor,
+            details.cheekColor,
             ";}.eyeColor{fill:#",
-            eyeColor,
+            details.eyeColor,
             ";}</style>",
-            //  background_,
+            details.background,
             svg_,
-            collateral,
-            eyeShape
+            details.collateral,
+            details.eyeShape
         );
     }
 
@@ -489,32 +503,58 @@ contract AavegotchiFacet {
 
         //This may not work with decimals
         int256 daysSinceInteraction = int256(interval) / 86400;
+        uint256 adjustedDaysSinceInteraction = 0;
+
+        //   if (daysSinceInteraction > 20) {
+        //      adjustedDaysSinceInteraction =
+        //  }
+
+        //console.log("Calculate Kinship: days since:", daysSinceInteraction);
+
         int256 baseKinship = 50;
 
-        uint256 streak = aavegotchi.streak;
-        int256 streakBonus = 0;
+        //Reduce kinship score by the days since interaction
 
-        if (streak >= 5) streakBonus = 1;
-        if (streak >= 10) streakBonus = 2;
-        if (streak >= 30) streakBonus = 5;
-        if (streak >= 60) streakBonus = 10;
-        if (streak >= 90) streakBonus = 20;
+        uint256 streakBonus = 0;
 
-        // console.log("steak bonus:");
-        //  console.logInt(streakBonus);
+        //Reduce their streak count by the number of days since interaction
+        int256 adjustedInteractionCount = interactionCount - int256(daysSinceInteraction);
 
-        //Calculate Kinship: Uses onnchain data (lastTimeInteracted) and (interactionModifier) to calculate.
+        console.log("Adjudted Interaction count");
+        console.logInt(adjustedInteractionCount);
 
-        //Kinship starts at 50
-        //Every time a user interacts within a 24hr period, their interactionModifier goes up by one.
-        //If a day elapses before they interact, their interactionModifier is increased by one (because of the interaction) but also reduced by the number of days it's been since they interacted.
+        //Add the number of times they've interacted, minus the days it's been since they have interacted
+        baseKinship = baseKinship + adjustedInteractionCount;
 
-        //This has the problem that kinship would not be reduced if they never interact and make the interactionModifier negative.
+        //Grace period
+        //Goes down slow, but comes back normal
 
-        int256 kinshipScore = baseKinship + interactionCount - daysSinceInteraction + streakBonus;
+        //Take 10 pts off when transfer
+        //More importance on streak
 
-        // if (kinshipScore > 100) return 100;
-        return kinshipScore;
+        //Low K
+        //Certain categories of votes
+
+        /*  if (adjustedInteractionCount >= 0 && adjustedInteractionCount < 5) streakBonus = 0;
+        else if (adjustedInteractionCount >= 5 && adjustedInteractionCount <= 10) streakBonus = 1;
+        else if (adjustedInteractionCount > 10 && adjustedInteractionCount <= 30) streakBonus = 3;
+        else streakBonus = 5;
+        */
+
+        //console.log("adjusted interaction count:", adjustedInteractionCount);
+        // console.log("streak bonus:", streakBonus);
+
+        return baseKinship; //+ int256(streakBonus);
+
+        //For every day you don't interact with your Aavegotchi, its Kinship score goes down by one until it reaches the minimum of 1.
+
+        //When you interact with it, the lastInteraction timer is reset, and interactionCount goes up by one.
+
+        //However, if you let your score go down too much, it takes exponentially more interactions to bring it back.
+
+        //On the flip side, interacting with your Aavegotchi every day increases kinship exponentially faster, until it reaches the max of 100.
+
+        //This is managed by the interactionMultiplier property
     }
 
     function interact(uint256 _tokenId) public {
@@ -523,42 +563,21 @@ contract AavegotchiFacet {
 
         //Was the last interaction within 24 hours? If so, add to interaction count. If not, reset it.
         uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
-        int256 interactionCount = s.aavegotchis[_tokenId].interactionCount;
         uint256 interval = block.timestamp - lastInteracted;
         // console.log("Interact: block timestamp:", block.timestamp);
-        int256 daysSinceInteraction = int256(interval) / 86400;
-        int256 baseKinship = 50;
+        uint256 daysSinceInteraction = interval / 86400;
 
-        int256 kinshipScore = baseKinship + interactionCount - daysSinceInteraction;
-
-        // console.log("kinship score");
-        // console.logInt(kinshipScore);
-
-        //If your Aavegotchi hates you and you finally pet it, you get a bonus
-        int256 hateBonus = 0;
-
-        if (kinshipScore < 40) {
-            hateBonus = 2;
-        }
+        console.log("Interact: days since interaction:", daysSinceInteraction);
+        int256 interactionCount = s.aavegotchis[_tokenId].interactionCount;
 
         //If it's been a day or more since last interaction
         if (daysSinceInteraction > 0) {
-            // console.log("interaction count before");
-            // console.logInt(s.aavegotchis[_tokenId].interactionCount);
-
-            //console.log("days since interaction");
-            // console.logInt(daysSinceInteraction);
-
-            s.aavegotchis[_tokenId].interactionCount = interactionCount - int256(daysSinceInteraction) + hateBonus;
-            // console.log("interaction count after");
-            // console.logInt(s.aavegotchis[_tokenId].interactionCount);
-
-            s.aavegotchis[_tokenId].streak = 0;
+            //Reduce the interaction count by the
+            s.aavegotchis[_tokenId].interactionCount = interactionCount - int256(daysSinceInteraction);
 
             //Increase interaction
         } else {
-            s.aavegotchis[_tokenId].interactionCount = interactionCount + 1 + hateBonus;
-            s.aavegotchis[_tokenId].streak++;
+            s.aavegotchis[_tokenId].interactionCount++;
         }
 
         s.aavegotchis[_tokenId].lastInteracted = block.timestamp;
