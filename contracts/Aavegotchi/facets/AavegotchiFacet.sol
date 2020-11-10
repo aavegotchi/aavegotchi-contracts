@@ -284,67 +284,81 @@ contract AavegotchiFacet {
         return string(toString);
     }
 
+    struct SvgLayerDetails {
+        string primaryColor;
+        string secondaryColor;
+        string cheekColor;
+        bytes background;
+        bytes collateral;
+        uint8 trait;
+        uint8[18] eyeShapeTraitRange;
+        bytes eyeShape;
+        string eyeColor;
+        uint8[8] eyeColorTraitRanges;
+        string[7] eyeColors;
+    }
+
     function getAavegotchiSvgLayers(address _collateralType, uint8[NUMERIC_TRAITS_NUM] memory _numericTraits)
         internal
         view
         returns (bytes memory svg_)
     {
-        string memory primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
-        string memory secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
-        string memory cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
+        SvgLayerDetails memory details;
+        details.primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
+        details.secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
+        details.cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
 
         // aavagotchi body
         svg_ = LibSvg.getSvg("aavegotchi", 2);
-        bytes memory background_ = LibSvg.getSvg("aavegotchi", 3);
-        bytes memory collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
+        details.background = LibSvg.getSvg("aavegotchi", 3);
+        details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
-        uint8 trait = _numericTraits[4];
-        bytes memory eyeShape;
-        uint8[18] memory eyeShapeTraitRange = [0, 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
-        for (uint256 i; i < eyeShapeTraitRange.length - 1; i++) {
-            if (trait >= eyeShapeTraitRange[i] && trait < eyeShapeTraitRange[i + 1]) {
-                eyeShape = LibSvg.getSvg("eyeShapes", i);
+        details.trait = _numericTraits[4];
+        details.eyeShape;
+        details.eyeShapeTraitRange = [0, 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
+        for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
+            if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
+                details.eyeShape = LibSvg.getSvg("eyeShapes", i);
                 break;
             }
         }
         // eyeShapeTrait is 98 or 99
-        if (eyeShape.length == 0) {
-            eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
+        if (details.eyeShape.length == 0) {
+            details.eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
         }
 
-        trait = _numericTraits[5];
-        string memory eyeColor;
-        uint8[8] memory eyeColorTraitRanges = [0, 2, 10, 25, 75, 90, 98, 100];
-        string[7] memory eyeColors = [
+        details.trait = _numericTraits[5];
+        details.eyeColorTraitRanges = [0, 2, 10, 25, 75, 90, 98, 100];
+        details.eyeColors = [
             "FF00FF", // mythical_low
             "0064FF", // rare_low
             "5D24BF", // uncommon_low
-            primaryColor, // common
+            details.primaryColor, // common
             "36818E", // uncommon_high
             "EA8C27", // rare_high
             "51FFA8" // mythical_high
         ];
-        for (uint256 i; i < eyeColorTraitRanges.length - 1; i++) {
-            if (trait >= eyeColorTraitRanges[i] && trait < eyeColorTraitRanges[i + 1]) {
-                eyeColor = eyeColors[i];
+        for (uint256 i; i < details.eyeColorTraitRanges.length - 1; i++) {
+            if (details.trait >= details.eyeColorTraitRanges[i] && details.trait < details.eyeColorTraitRanges[i + 1]) {
+                details.eyeColor = details.eyeColors[i];
                 break;
             }
         }
 
         svg_ = abi.encodePacked(
             "<style>.primary{fill:#",
-            primaryColor,
+            details.primaryColor,
             ";}.secondary{fill:#",
-            secondaryColor,
+            details.secondaryColor,
             ";}.cheek{fill:#",
-            cheekColor,
+            details.cheekColor,
             ";}.eyeColor{fill:#",
-            eyeColor,
+            details.eyeColor,
             ";}</style>",
-            background_,
+            details.background,
             svg_,
-            collateral,
-            eyeShape
+            details.collateral,
+            details.eyeShape
         );
     }
 
