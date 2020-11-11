@@ -39,7 +39,8 @@ struct Wearable {
     uint8 maxQuantity; //Total number that can be minted of this wearable. Can calculate the rarity level from this number.
     uint8 rarityScoreModifier; //Number from 1-50. 
     uint8 setId; //The id of the set. Zero is no set
-    uint8[] slots; //The allowed slots that this wearable can be added to.
+    uint8[] allowedSlots; //The allowed slots that this wearable can be added to.
+    uint8[] usedSlots; //The slots that this wearable takes up when it's equipped
     uint256 svgId; //The svgId of the wearable 
 
     //Allowed Slots

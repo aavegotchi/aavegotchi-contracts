@@ -264,7 +264,7 @@ contract AavegotchiFacet {
 
         LibERC20.transferFrom(collateralType, address(this), msg.sender, currentStake);
 
-        //Burn the Aavegotchi
+        //To do: Burn the Aavegotchi
     }
 
     function ghstAddress() external view returns (address contract_) {
