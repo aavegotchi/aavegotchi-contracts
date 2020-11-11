@@ -24,7 +24,6 @@ struct Aavegotchi {
     address collateralType;
     uint128 stakedAmount;
     uint256 minimumStake; //The minimum amount of collateral that must be staked. Set upon creation.
-
     //New traits
     uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
     uint256 level; //The level of this Aavegotchi begins at 1.
@@ -34,13 +33,13 @@ struct Aavegotchi {
     uint256 streak; //The streak bonus
 }
 
-struct Wearable {
+struct WearableType {
     int8[6] traitModifiers; //How much the wearable modifies each trait. Should not be more than +-2 total
-    uint8 maxQuantity; //Total number that can be minted of this wearable. Can calculate the rarity level from this number.
-    uint8 rarityScoreModifier; //Number from 1-50. 
+    uint32 maxQuantity; //Total number that can be minted of this wearable. Can calculate the rarity level from this number.
+    uint8 rarityScoreModifier; //Number from 1-50.
     uint8 setId; //The id of the set. Zero is no set
     uint8[] slots; //The allowed slots that this wearable can be added to.
-    uint256 svgId; //The svgId of the wearable 
+    uint256 svgId; //The svgId of the wearable
 
     //Allowed Slots
     //0 Head
@@ -50,8 +49,7 @@ struct Wearable {
     //4 Hand (left)
     //5 Hand (right)
     //6 Hands (both)
-    //7 Pet 
-
+    //7 Pet
 }
 
 struct WearableSet {
@@ -71,9 +69,8 @@ struct AavegotchiCollateralTypeInfo {
     bytes3 cheekColor;
     uint8 svgId;
     uint8 eyeShapeSvgId;
-    int8[6] modifiers;  //Trait modifiers for each collateral. Can be 2, 1, -1, or -2
+    int8[6] modifiers; //Trait modifiers for each collateral. Can be 2, 1, -1, or -2
     uint16 conversionRate; //Current conversionRate for the price of this collateral in relation to 1 USD. Can be updated by the DAO
-
 }
 
 struct AppStorage {
@@ -88,7 +85,7 @@ struct AppStorage {
     // contractAddress => nftId  => id => balance
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) nftBalances;
     // owner => (id => balance)
-    Wearable[] createdWearables;
+    WearableType[] wearableTypes;
     WearableSet[] wearableSets;
     mapping(address => mapping(uint256 => uint256)) wearables;
     // owner => aavegotchiOwnerEnumeration
@@ -102,6 +99,7 @@ struct AppStorage {
     // owner of the contract
     uint32 totalSupply;
     address ghstContract;
+    address dao;
 }
 
 library LibAppStorage {
@@ -115,29 +113,5 @@ library LibAppStorage {
         }
     }
 
-    struct AavegotchiCollateralTypeInput {
-        address collateralType;
-        bytes3 primaryColor;
-        bytes3 secondaryColor;
-        bytes3 cheekColor;
-        uint8 svgId;
-        uint8 eyeShapeSvgId;
-        int8[6] modifiers;
-        uint16 conversionRate;
-    }
-
-    function addCollateralTypes(AppStorage storage s, AavegotchiCollateralTypeInput[] memory _collateralTypes) internal {
-        for (uint256 i; i < _collateralTypes.length; i++) {
-            address collateralType = _collateralTypes[i].collateralType;
-            s.collateralTypes.push(collateralType);
-            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
-            s.collateralTypeInfo[collateralType].primaryColor = _collateralTypes[i].primaryColor;
-            s.collateralTypeInfo[collateralType].secondaryColor = _collateralTypes[i].secondaryColor;
-            s.collateralTypeInfo[collateralType].cheekColor = _collateralTypes[i].cheekColor;
-            s.collateralTypeInfo[collateralType].svgId = _collateralTypes[i].svgId;
-            s.collateralTypeInfo[collateralType].eyeShapeSvgId = _collateralTypes[i].eyeShapeSvgId;
-            s.collateralTypeInfo[collateralType].modifiers = _collateralTypes[i].modifiers;
-            s.collateralTypeInfo[collateralType].conversionRate = _collateralTypes[i].conversionRate;
-        }
-    }
+    function addWearableTypes(AppStorage storage s, WearableType[] memory _wearableTypes) internal {}
 }

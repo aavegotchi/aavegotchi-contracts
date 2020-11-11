@@ -45,7 +45,7 @@ interface IAavegotchiDiamond {
 
     function isApprovedForAll(address _owner, address _operator) external view returns (bool approved);
 
-    function addCollateralTypes(LibAppStorage.AavegotchiCollateralTypeInput[] memory _collateralTypes) external;
+    function addCollateralTypes(AavegotchiFacet.AavegotchiCollateralTypeIO[] calldata _collateralTypes) external;
 
     function removeCollateralType(address _collateralType) external;
 

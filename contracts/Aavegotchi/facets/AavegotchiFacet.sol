@@ -32,7 +32,7 @@ interface ERC721TokenReceiver {
 }
 
 contract AavegotchiFacet {
-    using LibAppStorage for AppStorage;
+    // using LibAppStorage for AppStorage;
     AppStorage internal s;
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
     uint256 internal constant NUMERIC_TRAITS_NUM = 6;
@@ -40,6 +40,18 @@ contract AavegotchiFacet {
 
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
+    event DaoTransferred(address indexed previousDao, address indexed newDao);
+
+    modifier onlyDao {
+        require(msg.sender == s.dao, "Only DAO can call this function");
+        _;
+    }
+
+    function setDao(address _newDao) external {
+        require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access");
+        emit DaoTransferred(s.dao, _newDao);
+        s.dao = _newDao;
+    }
 
     /// @dev This emits when the approved address for an NFT is changed or
     ///  reaffirmed. The zero address indicates there is no approved address.
@@ -51,13 +63,22 @@ contract AavegotchiFacet {
     ///  The operator can manage all NFTs of the owner.
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
-    function addCollateralTypes(LibAppStorage.AavegotchiCollateralTypeInput[] memory _collateralTypes) external {
-        LibDiamond.enforceIsContractOwner();
-        s.addCollateralTypes(_collateralTypes);
+    struct AavegotchiCollateralTypeIO {
+        address collateralType;
+        AavegotchiCollateralTypeInfo collateralTypeInfo;
     }
 
-    function updateCollateralModifiers(address _collateralType, int8[NUMERIC_TRAITS_NUM] memory _modifiers) external {
-        //To do: Can only be called by DAO
+    function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external {
+        LibDiamond.enforceIsContractOwner();
+        for (uint256 i; i < _collateralTypes.length; i++) {
+            address collateralType = _collateralTypes[i].collateralType;
+            s.collateralTypes.push(collateralType);
+            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
+            s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
+        }
+    }
+
+    function updateCollateralModifiers(address _collateralType, int8[NUMERIC_TRAITS_NUM] memory _modifiers) external onlyDao {
         LibDiamond.enforceIsContractOwner();
         s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
     }
@@ -87,10 +108,9 @@ contract AavegotchiFacet {
 
         collateralInfo = new AavegotchiCollateralTypeInfo[](collateralTypes_.length);
 
-        for (uint8 index = 0; index < collateralTypes_.length; index++) {
-            address collateral = collateralTypes_[index];
-            AavegotchiCollateralTypeInfo memory info = s.collateralTypeInfo[collateral];
-            collateralInfo[index] = info;
+        for (uint256 i; i < collateralTypes_.length; i++) {
+            address collateral = collateralTypes_[i];
+            collateralInfo[i] = s.collateralTypeInfo[collateral];
         }
     }
 
@@ -492,7 +512,6 @@ contract AavegotchiFacet {
         rarityScore = calculateBaseRarityScore(numericTraits, collateral);
     }
 
-
     function calculateKinship(uint256 _tokenId) external view returns (int256 kinship) {
         //The initial value of Kinship is always 50
         //Players can boost their kinship by interacting with their Aavegotchi.
@@ -578,7 +597,6 @@ contract AavegotchiFacet {
 
         s.aavegotchis[_tokenId].lastInteracted = block.timestamp;
     }
-   
 
     function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
         tokenIds_ = s.aavegotchiOwnerEnumeration[_owner];
