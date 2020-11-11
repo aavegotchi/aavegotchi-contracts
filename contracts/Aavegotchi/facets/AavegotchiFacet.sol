@@ -152,45 +152,53 @@ contract AavegotchiFacet {
     function openPortal(uint256 _tokenId) external {
         require(s.aavegotchis[_tokenId].status == 0, "AavegotchiFacet: Portal is not closed");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
-        s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(block.timestamp)));
+        s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(block.blockhash(block.number-1), _tokenId)));
         // status is open portal
         s.aavegotchis[_tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
     }
 
-    struct PortalAavegotchiTraits {
+    struct PortalAavegotchiTraitsIO {
         uint256 randomNumber;
         uint8[NUMERIC_TRAITS_NUM] numericTraits;
         address collateralType;
         uint256 minimumStake;
     }
 
-    function portalAavegotchiTraits(uint256 _tokenId)
-        public
+    function singlePortalAavegotchiTraits(uint256 _randomNumber, uint256 _option)
+        internal
         view
-        returns (PortalAavegotchiTraits[PORTAL_AAVEGOTCHIS_NUM] memory portalAavegotchiTraits_)
+        returns (PortalAavegotchiTraitsIO singlePortalAavegotchiTraits_)
+    {
+        uint256 randomNumberN = uint256(keccak256(abi.encodePacked(_randomNumber, _option)));
+        singlePortalAavegotchiTraits_.randomNumber = randomNumberN;
+        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
+            singlePortalAavegotchiTraits_.numericTraits[i] = uint256(keccak256(abi.encodePacked(randomNumberN, i))) % 100;
+        }
+        address collateralType = s.collateralTypes[randomNumberN % s.collateralTypes.length];
+        singlePortalAavegotchiTraits_.collateralType = collateralType;
+
+        AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
+        uint16 conversionRate = collateralInfo.conversionRate;
+
+        //Get rarity multiplier
+        uint256 rarityMultiplier = calculateRarityMultiplier(singlePortalAavegotchiTraits_.numericTraits, collateralType);
+
+        //First we get the base price of our collateral in terms of DAI
+        uint256 collateralDAIPrice = ((10**IERC20(collateralType).decimals()) / conversionRate);
+
+        //Then multiply by the rarity multiplier
+        singlePortalAavegotchiTraits_.minimumStake = collateralDAIPrice * rarityMultiplier;
+    }
+
+    function portalAavegotchiTraits(uint256 _tokenId)
+        external
+        view
+        returns (PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory portalAavegotchiTraits_)
     {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         for (uint256 i; i < portalAavegotchiTraits_.length; i++) {
-            uint256 randomNumberN = uint256(keccak256(abi.encodePacked(randomNumber, i)));
-            portalAavegotchiTraits_[i].randomNumber = randomNumberN;
-            for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
-                portalAavegotchiTraits_[i].numericTraits[j] = uint8(randomNumberN >> (j * 8)) % 100;
-            }
-            address collateralType = s.collateralTypes[(randomNumberN >> 248) % s.collateralTypes.length];
-            portalAavegotchiTraits_[i].collateralType = collateralType;
-
-            AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
-            uint16 conversionRate = collateralInfo.conversionRate;
-
-            //Get rarity multiplier
-            uint256 rarityMultiplier = calculateRarityMultiplier(portalAavegotchiTraits_[i].numericTraits, collateralType);
-
-            //First we get the base price of our collateral in terms of DAI
-            uint256 collateralDAIPrice = ((10**IERC20(collateralType).decimals()) / conversionRate);
-
-            //Then multiply by the rarity multiplier
-            portalAavegotchiTraits_[i].minimumStake = collateralDAIPrice * rarityMultiplier;
+            portalAavegotchiTraits_[i] = singlePortalAavegotchiTraits(randomNumber, i)
         }
     }
 
@@ -217,12 +225,10 @@ contract AavegotchiFacet {
     ) external {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
-
-        PortalAavegotchiTraits[10] memory portalAavegotchis = portalAavegotchiTraits(_tokenId);
-        PortalAavegotchiTraits memory option = portalAavegotchis[_option];
-        uint256 randomNumber = option.randomNumber;
+        
+        PortalAavegotchiTraits memory option = singlePortalAavegotchiTraits(s.aavegotchis[_tokenId].randomNumber, _option);        
         s.aavegotchis[_tokenId].numericTraits = option.numericTraits;
-        s.aavegotchis[_tokenId].randomNumber = randomNumber;
+        s.aavegotchis[_tokenId].randomNumber = option.randomNumber;
         s.aavegotchis[_tokenId].collateralType = option.collateralType;
         s.aavegotchis[_tokenId].minimumStake = option.minimumStake;
 
@@ -409,7 +415,7 @@ contract AavegotchiFacet {
     }
 
     /// @notice Count all NFTs assigned to an owner
-    /// @dev NFTs assigned to the zero address are considered invalid, and this
+    /// @dev NFTs assigned to the zero address are considered invalid, and this.
     ///  function throws for queries about the zero address.
     /// @param _owner An address for whom to query the balance
     /// @return balance_ The number of NFTs owned by `_owner`, possibly zero
