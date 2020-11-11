@@ -152,7 +152,8 @@ contract AavegotchiFacet {
     function openPortal(uint256 _tokenId) external {
         require(s.aavegotchis[_tokenId].status == 0, "AavegotchiFacet: Portal is not closed");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
-        s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(block.blockhash(block.number-1), _tokenId)));
+        //s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), _tokenId)));
+        s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(_tokenId)));
         // status is open portal
         s.aavegotchis[_tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
     }
@@ -167,12 +168,12 @@ contract AavegotchiFacet {
     function singlePortalAavegotchiTraits(uint256 _randomNumber, uint256 _option)
         internal
         view
-        returns (PortalAavegotchiTraitsIO singlePortalAavegotchiTraits_)
+        returns (PortalAavegotchiTraitsIO memory singlePortalAavegotchiTraits_)
     {
         uint256 randomNumberN = uint256(keccak256(abi.encodePacked(_randomNumber, _option)));
         singlePortalAavegotchiTraits_.randomNumber = randomNumberN;
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-            singlePortalAavegotchiTraits_.numericTraits[i] = uint256(keccak256(abi.encodePacked(randomNumberN, i))) % 100;
+            singlePortalAavegotchiTraits_.numericTraits[i] = uint8(uint256(keccak256(abi.encodePacked(randomNumberN, i))) % 100);
         }
         address collateralType = s.collateralTypes[randomNumberN % s.collateralTypes.length];
         singlePortalAavegotchiTraits_.collateralType = collateralType;
@@ -191,20 +192,20 @@ contract AavegotchiFacet {
     }
 
     function portalAavegotchiTraits(uint256 _tokenId)
-        external
+        public
         view
         returns (PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory portalAavegotchiTraits_)
     {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         for (uint256 i; i < portalAavegotchiTraits_.length; i++) {
-            portalAavegotchiTraits_[i] = singlePortalAavegotchiTraits(randomNumber, i)
+            portalAavegotchiTraits_[i] = singlePortalAavegotchiTraits(randomNumber, i);
         }
     }
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-        PortalAavegotchiTraits[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = portalAavegotchiTraits(_tokenId);
+        PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
             address collateralType = l_portalAavegotchiTraits[i].collateralType;
             uint8[NUMERIC_TRAITS_NUM] memory numericTraits = l_portalAavegotchiTraits[i].numericTraits;
@@ -225,8 +226,8 @@ contract AavegotchiFacet {
     ) external {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
-        
-        PortalAavegotchiTraits memory option = singlePortalAavegotchiTraits(s.aavegotchis[_tokenId].randomNumber, _option);        
+
+        PortalAavegotchiTraitsIO memory option = singlePortalAavegotchiTraits(s.aavegotchis[_tokenId].randomNumber, _option);
         s.aavegotchis[_tokenId].numericTraits = option.numericTraits;
         s.aavegotchis[_tokenId].randomNumber = option.randomNumber;
         s.aavegotchis[_tokenId].collateralType = option.collateralType;

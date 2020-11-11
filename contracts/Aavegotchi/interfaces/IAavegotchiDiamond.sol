@@ -60,7 +60,7 @@ interface IAavegotchiDiamond {
     function portalAavegotchiTraits(uint256 _tokenId)
         external
         view
-        returns (AavegotchiFacet.PortalAavegotchiTraits[10] memory portalAavegotchiTraits_);
+        returns (AavegotchiFacet.PortalAavegotchiTraitsIO[10] memory portalAavegotchiTraits_);
 
     function claimAavegotchiFromPortal(
         uint256 _tokenId,
