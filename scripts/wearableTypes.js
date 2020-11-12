@@ -15,8 +15,7 @@ const wearableTypes = [
     maxQuantity: 2000,
     rarityScoreModifier: 20,
     setId: 0,
-    allowedSlots: [WEARABLE_SLOT_BODY],
-    usedSlots: [WEARABLE_SLOT_BODY],
+    slots: [WEARABLE_SLOT_BODY],
     svgId: 1
   },
   {
@@ -24,8 +23,7 @@ const wearableTypes = [
     maxQuantity: 2000,
     rarityScoreModifier: 20,
     setId: 0,
-    allowedSlots: [WEARABLE_SLOT_BODY],
-    usedSlots: [WEARABLE_SLOT_BODY],
+    slots: [WEARABLE_SLOT_BODY],
     svgId: 1
   }
 
