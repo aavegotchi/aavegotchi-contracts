@@ -45,7 +45,6 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(collateral.modifiers[2]).to.equal(-1)
   })
 
-
   it('Should purchase one portal', async function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
@@ -71,13 +70,9 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
       const rarityScore = await aavegotchiFacet.calculateBaseRarityScore(ghost.numericTraits, ghost.collateralType)
       expect(Number(rarityScore)).to.greaterThan(298)
       expect(Number(rarityScore)).to.lessThan(602)
-    });
+    })
     expect(ghosts.length).to.equal(10)
-
   })
-
-
-
 
   it('Should show SVGs', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
@@ -86,8 +81,6 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     console.log('svgs:', svgs[0])
     expect(svgs.length).to.equal(10)
   })
-
-
 
   it('Should claim an Aavegotchi', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
@@ -117,49 +110,47 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
-    let score = await aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
+    const score = await aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(599)
 
     const multiplier = await aavegotchiFacet.calculateRarityMultiplier([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(multiplier).to.equal(1000)
 
-    //Todo: Clientside calculate what the rarity score should be
+    // Todo: Clientside calculate what the rarity score should be
   })
 
   it('Can increase stake', async function () {
-    let aavegotchi = await aavegotchiFacet.getAavegotchi("0")
-    let currentStake = BigNumber.from(aavegotchi.stakedAmount)
+    let aavegotchi = await aavegotchiFacet.getAavegotchi('0')
+    const currentStake = BigNumber.from(aavegotchi.stakedAmount)
 
-    //Let's double the stake
-    await aavegotchiFacet.increaseStake("0", currentStake.toString())
-    aavegotchi = await aavegotchiFacet.getAavegotchi("0")
+    // Let's double the stake
+    await aavegotchiFacet.increaseStake('0', currentStake.toString())
+    aavegotchi = await aavegotchiFacet.getAavegotchi('0')
     const finalStake = BigNumber.from(aavegotchi.stakedAmount)
     expect(finalStake).to.equal(currentStake.add(currentStake))
 
-    //Todo: Balance check
-
+    // Todo: Balance check
   })
 
   it('Can decrease stake, but not below minimum', async function () {
-    let aavegotchi = await aavegotchiFacet.getAavegotchi("0")
+    let aavegotchi = await aavegotchiFacet.getAavegotchi('0')
     let currentStake = BigNumber.from(aavegotchi.stakedAmount)
-    let minimumStake = BigNumber.from(aavegotchi.minimumStake)
+    const minimumStake = BigNumber.from(aavegotchi.minimumStake)
 
-    let available = currentStake.sub(minimumStake)
-    await aavegotchiFacet.decreaseStake("0", available)
+    const available = currentStake.sub(minimumStake)
+    await aavegotchiFacet.decreaseStake('0', available)
 
-    aavegotchi = await aavegotchiFacet.getAavegotchi("0")
+    aavegotchi = await aavegotchiFacet.getAavegotchi('0')
     currentStake = BigNumber.from(aavegotchi.stakedAmount)
 
     expect(currentStake).to.equal(minimumStake)
 
-    //Todo: Below min stake Revert check
-    //Todo: Balance check
-
+    // Todo: Below min stake Revert check
+    // Todo: Balance check
   })
 
   it('Contract Owner (Later DAO) can update collateral modifiers', async function () {
-    const aavegotchi = await aavegotchiFacet.getAavegotchi("0")
+    const aavegotchi = await aavegotchiFacet.getAavegotchi('0')
     let score = await aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(599)
     await aavegotchiFacet.updateCollateralModifiers(aavegotchi.collateral, [2, 0, 0, 0, 0, 0])
@@ -168,7 +159,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   })
 
   it('Can decrease stake and destroy Aavegotchi', async function () {
-    //To do: burn Aavegotchi
+    // To do: burn Aavegotchi
   })
 
   it('Can equip/de-equip wearables', async function () {
@@ -179,95 +170,85 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
   })
 
-
   it('Can calculate kinship according to formula', async function () {
+    // First interact
 
-    //First interact 
-
-    await aavegotchiFacet.interact("0")
-    await aavegotchiFacet.interact("0")
-    await aavegotchiFacet.interact("0")
-    await aavegotchiFacet.interact("0")
-    await aavegotchiFacet.interact("0")
-    let kinship = await aavegotchiFacet.calculateKinship("0")
+    await aavegotchiFacet.interact('0')
+    await aavegotchiFacet.interact('0')
+    await aavegotchiFacet.interact('0')
+    await aavegotchiFacet.interact('0')
+    await aavegotchiFacet.interact('0')
+    let kinship = await aavegotchiFacet.calculateKinship('0')
     console.log('* 5 initial Interactions, kinship is:', kinship.toString())
-    //5 interactions + 1 streak bonus
-    //expect(kinship).to.equal(55)
+    // 5 interactions + 1 streak bonus
+    // expect(kinship).to.equal(55)
 
-
-    //Go 3 days without interacting
+    // Go 3 days without interacting
     ethers.provider.send('evm_increaseTime', [3 * 86400])
-    ethers.provider.send("evm_mine")
+    ethers.provider.send('evm_mine')
 
-    kinship = await aavegotchiFacet.calculateKinship("0")
-    //Took three days off and lost streak bonus
+    kinship = await aavegotchiFacet.calculateKinship('0')
+    // Took three days off and lost streak bonus
     console.log('* 3 days w/ no interaction, kinship is:', kinship.toString())
 
     //  expect(kinship).to.equal(49)
 
-    //await aavegotchiFacet.interact("0")
+    // await aavegotchiFacet.interact("0")
     // kinship = await aavegotchiFacet.calculateKinship("0")
-    //expect(kinship).to.equal(53)
+    // expect(kinship).to.equal(53)
 
-    //Take a longggg break
+    // Take a longggg break
 
     ethers.provider.send('evm_increaseTime', [14 * 86400])
-    ethers.provider.send("evm_mine")
+    ethers.provider.send('evm_mine')
 
-    kinship = await aavegotchiFacet.calculateKinship("0")
+    kinship = await aavegotchiFacet.calculateKinship('0')
     console.log('* Another 14 days since last interaction, total 17 days. Kinship is', kinship.toString())
 
-
-
     ethers.provider.send('evm_increaseTime', [20 * 86400])
-    ethers.provider.send("evm_mine")
-    kinship = await aavegotchiFacet.calculateKinship("0")
+    ethers.provider.send('evm_mine')
+    kinship = await aavegotchiFacet.calculateKinship('0')
     console.log('* 37 days since last interaction, kinship is:', kinship.toString())
     // expect(kinship).to.equal(13)
 
-    await aavegotchiFacet.interact("0")
-    kinship = await aavegotchiFacet.calculateKinship("0")
+    await aavegotchiFacet.interact('0')
+    kinship = await aavegotchiFacet.calculateKinship('0')
     console.log('* Kinship after first interaction is:', kinship.toString())
 
-
-    await aavegotchiFacet.interact("0")
-    kinship = await aavegotchiFacet.calculateKinship("0")
+    await aavegotchiFacet.interact('0')
+    kinship = await aavegotchiFacet.calculateKinship('0')
     console.log('* Kinship after second interaction is:', kinship.toString())
 
-
-    await aavegotchiFacet.interact("0")
-    kinship = await aavegotchiFacet.calculateKinship("0")
+    await aavegotchiFacet.interact('0')
+    kinship = await aavegotchiFacet.calculateKinship('0')
     console.log('* Kinship after third interaction is:', kinship.toString())
-
 
     console.log('* Interact 120 times')
 
     for (let index = 0; index < 120; index++) {
-      await aavegotchiFacet.interact("0")
+      await aavegotchiFacet.interact('0')
     }
 
-    kinship = await aavegotchiFacet.calculateKinship("0")
+    kinship = await aavegotchiFacet.calculateKinship('0')
     console.log('* Kinship is:', kinship.toString())
 
     ethers.provider.send('evm_increaseTime', [80 * 86400])
-    ethers.provider.send("evm_mine")
-    kinship = await aavegotchiFacet.calculateKinship("0")
+    ethers.provider.send('evm_mine')
+    kinship = await aavegotchiFacet.calculateKinship('0')
 
-    let aavegotchi = await aavegotchiFacet.getAavegotchi("0")
+    let aavegotchi = await aavegotchiFacet.getAavegotchi('0')
 
     console.log('* Go away for 80 days. Kinship is: ', kinship.toString())
     console.log('Interaction count is:', aavegotchi.interactionCount.toString())
 
-    await aavegotchiFacet.interact("0")
-    kinship = await aavegotchiFacet.calculateKinship("0")
+    await aavegotchiFacet.interact('0')
+    kinship = await aavegotchiFacet.calculateKinship('0')
     console.log('* Interact after 80 days. Kinship is: ', kinship.toString())
-    aavegotchi = await aavegotchiFacet.getAavegotchi("0")
+    aavegotchi = await aavegotchiFacet.getAavegotchi('0')
     console.log('Interaction count is:', aavegotchi.interactionCount.toString())
-
 
     // expect(aavegotchi.interactionCount).to.equal(4)
   })
-
 
   // Add a test to check if we can name another Aavegotchi Beavis
   // Add some tests to check different svg layers

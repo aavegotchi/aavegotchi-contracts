@@ -8,8 +8,7 @@
 // 7, YFI Collateral
 // 8, REN Collateral
 
-//Total length: 9
-
+// Total length: 9
 
 const collaterals = [
   {
@@ -22,7 +21,7 @@ const collaterals = [
     svgId: 0,
     eyeShapeSvgId: 16,
     modifiers: [1, 0, 0, 0, 0, 0],
-    conversionRate: 1 //1 DAI equals 1 DAI
+    conversionRate: 1 // 1 DAI equals 1 DAI
   },
   {
     name: 'aETH',
@@ -34,7 +33,7 @@ const collaterals = [
     svgId: 1,
     eyeShapeSvgId: 17,
     modifiers: [0, 1, 0, 0, 0, 0],
-    conversionRate: 3000 //3000 DAI = 1 ETH
+    conversionRate: 3000 // 3000 DAI = 1 ETH
   },
   {
     name: 'aLEND',
@@ -46,7 +45,7 @@ const collaterals = [
     svgId: 2,
     eyeShapeSvgId: 18,
     modifiers: [0, 0, 1, 0, 0, 0],
-    conversionRate: 30 //30 DAI = 1 LEND
+    conversionRate: 30 // 30 DAI = 1 LEND
   },
 
   {
@@ -98,9 +97,8 @@ const collaterals = [
     svgId: 6,
     eyeShapeSvgId: 23,
     modifiers: [0, 0, -1, 0, 0, 0],
-    conversionRate: 500 //500 DAI = 1 USDC
-  },
-
+    conversionRate: 500 // 500 DAI = 1 USDC
+  }
 
   /* REN
 {
@@ -114,7 +112,6 @@ const collaterals = [
   eyeShapeSvgId: 19
 },
 */
-
 
   /* {
          name: "aUSDT",
@@ -139,8 +136,6 @@ const collaterals = [
      },
      */
 
-
-
   // Mainnet only
   /* {
         name:"aYFI",
@@ -155,10 +150,10 @@ const collaterals = [
     */
 ]
 
-function getCollaterals(network, ghstAddress) {
+function getCollaterals (network, ghstAddress) {
   const collateralTypes = []
   for (const collateralType of collaterals) {
-    const item = {
+    const collateralTypeInfo = {
       primaryColor:
         '0x' + collateralType.primaryColor.slice(1),
       secondaryColor:
@@ -170,6 +165,7 @@ function getCollaterals(network, ghstAddress) {
       modifiers: collateralType.modifiers,
       conversionRate: collateralType.conversionRate
     }
+    const item = {}
     if (network === 'kovan') {
       item.collateralType = collateralType.kovanAddress
     } else if (network === 'hardhat') {
@@ -177,6 +173,7 @@ function getCollaterals(network, ghstAddress) {
     } else if (network === 'mainnet') {
       item.collateralType = collateralType.mainnetAddress
     }
+    item.collateralTypeInfo = collateralTypeInfo
     collateralTypes.push(item)
   }
 

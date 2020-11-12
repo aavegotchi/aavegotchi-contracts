@@ -45,7 +45,7 @@ interface IAavegotchiDiamond {
 
     function isApprovedForAll(address _owner, address _operator) external view returns (bool approved);
 
-    function addCollateralTypes(LibAppStorage.AavegotchiCollateralTypeInput[] memory _collateralTypes) external;
+    function addCollateralTypes(AavegotchiFacet.AavegotchiCollateralTypeIO[] calldata _collateralTypes) external;
 
     function removeCollateralType(address _collateralType) external;
 
@@ -60,7 +60,7 @@ interface IAavegotchiDiamond {
     function portalAavegotchiTraits(uint256 _tokenId)
         external
         view
-        returns (AavegotchiFacet.PortalAavegotchiTraits[10] memory portalAavegotchiTraits_);
+        returns (AavegotchiFacet.PortalAavegotchiTraitsIO[10] memory portalAavegotchiTraits_);
 
     function claimAavegotchiFromPortal(
         uint256 _tokenId,

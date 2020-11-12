@@ -27,15 +27,14 @@ contract AavegotchiDiamond {
 
     constructor(
         IDiamondCut.FacetCut[] memory _diamondCut,
-        address _owner,
-        address _ghstContract,
-        LibAppStorage.AavegotchiCollateralTypeInput[] memory _collateralTypes
+        address _contractOwner,
+        address _dao,
+        address _ghstContract
     ) {
         LibDiamond.diamondCut(_diamondCut, address(0), new bytes(0));
-        LibDiamond.setContractOwner(_owner);
+        LibDiamond.setContractOwner(_contractOwner);
+        s.dao = _dao;
         s.svgLayers["wearables"].push();
-
-        s.addCollateralTypes(_collateralTypes);
 
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 

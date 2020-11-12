@@ -53,11 +53,12 @@ interface ERC1155TokenReceiver {
 }
 
 contract WearablesFacet {
+    using LibAppStorage for AppStorage;
     AppStorage internal s;
-    bytes4 public constant ERC1155_ERC165 = 0xd9b67a26; // ERC-165 identifier for the main token standard.
-    bytes4 public constant ERC1155_ERC165_TOKENRECEIVER = 0x4e2312e0; // ERC-165 identifier for the `ERC1155TokenReceiver` support (i.e. `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)")) ^ bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).
-    bytes4 public constant ERC1155_ACCEPTED = 0xf23a6e61; // Return value from `onERC1155Received` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`).
-    bytes4 public constant ERC1155_BATCH_ACCEPTED = 0xbc197c81; // Return value from `onERC1155BatchReceived` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).
+    bytes4 internal constant ERC1155_ERC165 = 0xd9b67a26; // ERC-165 identifier for the main token standard.
+    bytes4 internal constant ERC1155_ERC165_TOKENRECEIVER = 0x4e2312e0; // ERC-165 identifier for the `ERC1155TokenReceiver` support (i.e. `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)")) ^ bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).
+    bytes4 internal constant ERC1155_ACCEPTED = 0xf23a6e61; // Return value from `onERC1155Received` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`).
+    bytes4 internal constant ERC1155_BATCH_ACCEPTED = 0xbc197c81; // Return value from `onERC1155BatchReceived` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).
 
     /// @dev This emits when a token is transferred to an ERC721 token
     /// @param _toContract The contract the token is transferred to
@@ -112,37 +113,16 @@ contract WearablesFacet {
     */
     event URI(string _value, uint256 indexed _id);
 
-    function createWearableSet(WearableSet memory _wearableSet) external {
+    function createWearableSet(WearableSet calldata _wearableSet) external {
         LibDiamond.enforceIsContractOwner();
         s.wearableSets.push(_wearableSet);
     }
 
-    struct WearableInput {
-        int8[6] traitModifiers;
-        uint8 maxQuantity;
-        uint8 rarityScoreModifier;
-        uint8 setId;
-        uint8[] slots;
-    }
-
-    function createWearableType(WearableInput memory _wearableInput, bytes memory _svg) external {
+    function addWearableTypes(WearableType[] calldata _wearableTypes) external {
         LibDiamond.enforceIsContractOwner();
-        require(_wearableInput.slots.length > 0, "WearablesFacet: Wearable slots cannot be empty");
-
-        Wearable memory wearable = Wearable(
-            _wearableInput.traitModifiers,
-            _wearableInput.maxQuantity,
-            _wearableInput.rarityScoreModifier,
-            _wearableInput.setId,
-            _wearableInput.slots,
-            s.svgLayers["wearables"].length //***Check this ***/
-        );
-
-        s.createdWearables.push(wearable);
-
-        //To do: Upload the bytes to svgLayers and assign the svgIdß
-        // uint256 count = s.svgLayers["wearables"].length;
-        // s.svgLayers["wearables"][count] = _svg;
+        for (uint256 i; i < _wearableTypes.length; i++) {
+            s.wearableTypes.push(_wearableTypes[i]);
+        }
     }
 
     // Mint a set of wearables.

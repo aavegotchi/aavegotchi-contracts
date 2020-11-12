@@ -5,17 +5,63 @@ const { aavegotchiSvgs } = require('../svgs/aavegotchi.js')
 const { wearablesSvgs } = require('../svgs/wearables.js')
 const { collateralsSvgs } = require('../svgs/collaterals.js')
 const { eyeShapeSvgs } = require('../svgs/eyeShapes.js')
-const { getCollaterals } = require('./collaterals.js')
+const { getCollaterals } = require('./collateralTypes.js')
+const { wearableTypes } = require('./wearableTypes.js')
+
+function addCommas (nStr) {
+  nStr += ''
+  const x = nStr.split('.')
+  let x1 = x[0]
+  const x2 = x.length > 1 ? '.' + x[1] : ''
+  var rgx = /(\d+)(\d{3})/
+  while (rgx.test(x1)) {
+    x1 = x1.replace(rgx, '$1' + ',' + '$2')
+  }
+  return x1 + x2
+}
+
+function strDisplay (str) {
+  return addCommas(str.toString())
+}
 
 async function main () {
   const accounts = await ethers.getSigners()
   const account = await accounts[0].getAddress()
   console.log('Account: ' + account)
   console.log('---')
+  let tx
+  let totalGasUsed = ethers.BigNumber.from('0')
+  let receipt
 
-  const DiamondLoupeFacetFactory = await ethers.getContractFactory('DiamondLoupeFacet')
-  const diamondLoupeFacet = await DiamondLoupeFacetFactory.deploy()
-  await diamondLoupeFacet.deployed()
+  async function deployFacets (...facets) {
+    const instances = []
+    for (const facet of facets) {
+      const factory = await ethers.getContractFactory(facet)
+      const facetInstance = await factory.deploy()
+      await facetInstance.deployed()
+      const tx = facetInstance.deployTransaction
+      const receipt = await tx.wait()
+      console.log(`${facet} deploy gas used:` + strDisplay(receipt.gasUsed))
+      totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+      instances.push(facetInstance)
+    }
+    return instances
+  }
+  let [
+    diamondCutFacet,
+    diamondLoupeFacet,
+    ownershipFacet,
+    aavegotchiFacet,
+    svgStorageFacet,
+    wearablesFacet
+  ] = await deployFacets(
+    'DiamondCutFacet',
+    'DiamondLoupeFacet',
+    'OwnershipFacet',
+    'AavegotchiFacet',
+    'SvgStorageFacet',
+    'WearablesFacet'
+  )
 
   let ghstDiamond
   if (hre.network.name === 'kovan') {
@@ -25,9 +71,9 @@ async function main () {
     ghstDiamond = await diamond.deploy({
       diamondName: 'GHSTDiamond',
       facets: [
-        'DiamondCutFacet',
+        ['DiamondCutFacet', diamondCutFacet],
         ['DiamondLoupeFacet', diamondLoupeFacet],
-        'OwnershipFacet',
+        ['OwnershipFacet', ownershipFacet],
         'GHSTFacet'
       ],
       owner: account,
@@ -41,21 +87,44 @@ async function main () {
   const aavegotchiDiamond = await diamond.deploy({
     diamondName: 'AavegotchiDiamond',
     facets: [
-      'DiamondCutFacet',
+      ['DiamondCutFacet', diamondCutFacet],
       ['DiamondLoupeFacet', diamondLoupeFacet],
-      'OwnershipFacet',
-      'AavegotchiFacet',
-      'SvgStorageFacet',
-      'WearablesFacet'
+      ['OwnershipFacet', ownershipFacet],
+      ['AavegotchiFacet', aavegotchiFacet],
+      ['SvgStorageFacet', svgStorageFacet],
+      ['WearablesFacet', wearablesFacet]
     ],
     owner: account,
-    otherArgs: [ghstDiamond.address, getCollaterals(hre.network.name, ghstDiamond.address)]
+    otherArgs: [account, ghstDiamond.address]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
+  tx = aavegotchiDiamond.deployTransaction
+  receipt = await tx.wait()
+  console.log('Aavegotchi diamond deploy gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  aavegotchiFacet = await ethers.getContractAt('AavegotchiFacet', aavegotchiDiamond.address)
+
+  // add collateral info
+  console.log('Adding Collateral Types')
+  tx = await aavegotchiFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstDiamond.address))
+  receipt = await tx.wait()
+  console.log('Adding Collateral Types gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  wearablesFacet = await ethers.getContractAt('WearablesFacet', aavegotchiDiamond.address)
+
+  // add wearable types info
+  console.log('Adding Wearable Types')
+  tx = await wearablesFacet.addWearableTypes(wearableTypes)
+  receipt = await tx.wait()
+  console.log('Adding Wearable Types gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
   // ----------------------------------------------------------------
   // Upload Svg layers
-  const svgStorageFacet = await ethers.getContractAt('SvgStorageFacet', aavegotchiDiamond.address)
+  svgStorageFacet = await ethers.getContractAt('SvgStorageFacet', aavegotchiDiamond.address)
 
   function setupSvg (...svgData) {
     const svgTypesAndSizes = []
@@ -86,8 +155,11 @@ async function main () {
     ['wearables', wearablesSvgs]
   )
   // printSizeInfo(svgTypesAndSizes)
-  await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
+  tx = await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded SVGs')
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   console.log('Uploading collaterals and eyeShapes')
   ;[svg, svgTypesAndSizes] = setupSvg(
@@ -95,11 +167,13 @@ async function main () {
     ['eyeShapes', eyeShapeSvgs]
   )
   // printSizeInfo(svgTypesAndSizes)
-  await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
+  tx = await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded SVGs')
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-  const aavegotchiFacet = await ethers.getContractAt('AavegotchiFacet', aavegotchiDiamond.address)
-
+  console.log('Total gas used: ' + strDisplay(totalGasUsed))
   return {
     account: account,
     aavegotchiDiamond: aavegotchiDiamond,
