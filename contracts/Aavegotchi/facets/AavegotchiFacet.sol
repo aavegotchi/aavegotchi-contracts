@@ -153,6 +153,8 @@ contract AavegotchiFacet {
         require(s.aavegotchis[_tokenId].status == 0, "AavegotchiFacet: Portal is not closed");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
         //s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), _tokenId)));
+
+        //Why is the random number the _tokenId?
         s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(_tokenId)));
         // status is open portal
         s.aavegotchis[_tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
@@ -242,23 +244,14 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].lastInteracted = block.timestamp;
         s.aavegotchis[_tokenId].interactionCount = 0; //First interaction is claiming
 
-        //***NOT calculating random number again here because it seems repetitive? Also it was mutating the values that had previously been set */
-        /*uint256(keccak256(abi.encodePacked(s.aavegotchis[_tokenId].randomNumber, _option)));*/
-
-        /* for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
-            s.aavegotchis[_tokenId].numericTraits.push(uint8(randomNumber >> (j * 8)) % 100);
-        }
-        */
-        //  address collateralType = s.collateralTypes[(randomNumber >> 248) % s.collateralTypes.length];
-
-        //***We need to access the PortalAavegotchiTraits here but it'll cost more gas. Maybe there's a way to avoif?***
-
         uint256 minimumStake = option.minimumStake;
         require(_stakeAmount >= minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
 
         s.aavegotchis[_tokenId].status = LibAppStorage.STATUS_AAVEGOTCHI;
 
         s.aavegotchis[_tokenId].stakedAmount = uint128(_stakeAmount);
+
+        //To do: change this from address(this) to the Aavegotchi's personal escrow contract address
         LibERC20.transferFrom(option.collateralType, msg.sender, address(this), _stakeAmount);
     }
 
@@ -267,6 +260,8 @@ contract AavegotchiFacet {
         uint128 currentStake = s.aavegotchis[_tokenId].stakedAmount;
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         s.aavegotchis[_tokenId].stakedAmount = currentStake + _stakeAmount;
+
+        //To do: change this from address(this) to the Aavegotchi's personal escrow contract address
         LibERC20.transferFrom(collateralType, msg.sender, address(this), _stakeAmount);
     }
 
@@ -279,6 +274,8 @@ contract AavegotchiFacet {
         require(currentStake - _reduceAmount >= minimumStake, "AavegotchiFacet: Cannot reduce below minimum stake");
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         s.aavegotchis[_tokenId].stakedAmount = currentStake - _reduceAmount;
+
+        //To do: change this from address(this) to the Aavegotchi's personal escrow contract address
         LibERC20.transferFrom(collateralType, address(this), msg.sender, _reduceAmount);
     }
 
@@ -287,7 +284,9 @@ contract AavegotchiFacet {
         uint128 currentStake = s.aavegotchis[_tokenId].stakedAmount;
         address collateralType = s.aavegotchis[_tokenId].collateralType;
 
-        //Check that all wearables have been removed from inventory before burning
+        //To do: check that all wearables have been removed from inventory before burning
+
+        //To do: change this from address(this) to the Aavegotchi's personal escrow contract address
 
         LibERC20.transferFrom(collateralType, address(this), msg.sender, currentStake);
 
@@ -603,6 +602,66 @@ contract AavegotchiFacet {
         }
 
         s.aavegotchis[_tokenId].lastInteracted = block.timestamp;
+    }
+
+    function equipWearables(
+        uint256 _tokenId,
+        uint256[] memory _wearableIds,
+        uint256[] memory _slots
+    ) external {
+        require(_wearableIds.length == LibAppStorage.WEARABLE_SLOTS_TOTAL, "Aavegotochi Facet: Wearable ID length must match");
+
+        require(_wearableIds.length == _slots.length, "Aavegotchi Facet: Slots and Ids length must match");
+
+        //To do: Check if Aavegotchi has this wearable in its inventory.
+        //Option: Transfer from msg.sender (Aavegotchi owner) directly into inventory and equip?
+
+        //Possible improvement: Use a mapping instead of an array for equippedWearables to prevent looping?
+
+        for (uint256 index = 0; index < _slots.length; index++) {
+            require(wearableSlotAvailable(_tokenId, _slots[index]), "Slot not available");
+
+            uint256 slot = _slots[index];
+            uint256 wearableId = _wearableIds[index];
+            s.aavegotchis[_tokenId].equippedWearables[slot] = wearableId;
+        }
+
+        //To do: Update Aavegotchi equipped state variable
+
+        //To do in WearableFacet: Prevent wearable from being transferred if it's equipped
+    }
+
+    function wearableSlotAvailable(uint256 _tokenId, uint256 _slotId) internal view returns (bool _equipped) {
+        //To do: Check if slot is currently equipped
+        uint256[] storage equipped = s.aavegotchis[_tokenId].equippedWearables;
+
+        //Handle base case
+        if (equipped[_slotId] == 0) return false;
+
+        //Handle combination cases
+        if (_slotId == 7 && (equipped[4] != 0 || equipped[5] != 0)) return false;
+        if (_slotId == 8 && (equipped[0] != 0 || equipped[3] != 0)) return false;
+        if (_slotId == 9 && (equipped[0] != 0 || equipped[1] != 0)) return false;
+        if (_slotId == 10 && (equipped[1] != 0 || equipped[2] != 0)) return false;
+
+        return true;
+
+        //Check slotId and combinations
+
+        //Slots
+        //0 Head
+        //1 Face
+        //2 Eyes
+        //3 Body / Feet
+        //4 Hand (left)
+        //5 Hand (right)
+        //6 Pet
+
+        //Combination slots
+        //7 Hands (both)
+        //8 Head + Body
+        //9 Head + Face
+        //10 Face + Eyes
     }
 
     function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {

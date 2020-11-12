@@ -31,26 +31,41 @@ struct Aavegotchi {
     uint256 lastInteracted; //The last time this Aavegotchi was interacted with
     int256 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
     uint256 streak; //The streak bonus
+
+//There are 11 available slots. Maybe we should add a few more, just in case?
+    uint256[] equippedWearables; //The currently equipped wearables of the Aavegotchi
+    uint256[] inventory; //Wearables and consumables owned by this Aavegotchi (but not equipped)
 }
 
 struct WearableType {
-    int8[6] traitModifiers; //How much the wearable modifies each trait. Should not be more than +-2 total
+    int8[6] traitModifiers; //How much the wearable modifies each trait. Should not be more than +-5 total
     uint32 maxQuantity; //Total number that can be minted of this wearable. Can calculate the rarity level from this number.
     uint8 rarityScoreModifier; //Number from 1-50.
     uint8 setId; //The id of the set. Zero is no set
-    uint8[] allowedSlots; //The allowed slots that this wearable can be added to.
-    uint8[] usedSlots; //The slots that this wearable takes up when equipped
+    uint8[] slots; //The slots that this wearable can be added to.
     uint256 svgId; //The svgId of the wearable
 
-    //Allowed Slots
+    //A hand wearable can be equipped in left hand, right hand, both hands
+    //So its allowedSlots are 4,5, and 7. 
+
+    //A hoodie would be equipped to Slot 8 because it takes up Hands + Body. 
+
+    //Slots
     //0 Head
     //1 Face
     //2 Eyes
     //3 Body / Feet
     //4 Hand (left)
     //5 Hand (right)
-    //6 Hands (both)
-    //7 Pet
+    //6 Pet
+
+    //Combination slots
+    //7 Hands (both)
+    //8 Head + Body
+    //9 Head + Face
+    //10 Face + Eyes
+
+
 }
 
 struct WearableSet {
@@ -86,6 +101,9 @@ struct AppStorage {
     // contractAddress => nftId  => id => balance
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) nftBalances;
     // owner => (id => balance)
+
+
+    //Maybe should begin at 1, so we can use 0 in the equippedWearables array?
     WearableType[] wearableTypes;
     WearableSet[] wearableSets;
     mapping(address => mapping(uint256 => uint256)) wearables;
@@ -108,6 +126,18 @@ library LibAppStorage {
     uint8 internal constant STATUS_OPEN_PORTAL = 1;
     uint8 internal constant STATUS_AAVEGOTCHI = 2;
 
+    uint8 internal constant WEARABLE_SLOT_HEAD = 0;
+    uint8 internal constant WEARABLE_SLOT_FACE = 1;
+    uint8 internal constant WEARABLE_SLOT_EYES = 2;
+    uint8 internal constant WEARABLE_SLOT_BODY = 3;
+    uint8 internal constant WEARABLE_SLOT_HAND_LEFT = 4;
+    uint8 internal constant WEARABLE_SLOT_HAND_RIGHT = 5;
+    uint8 internal constant WEARABLE_SLOT_HANDS_BOTH = 6;
+    uint8 internal constant WEARABLE_SLOT_PET = 7;
+
+//Can we update this with a diamond upgrade?
+    uint8 internal constant WEARABLE_SLOTS_TOTAL = 11;
+    
     function diamondStorage() internal pure returns (AppStorage storage ds) {
         assembly {
             ds.slot := 0
