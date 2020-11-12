@@ -244,6 +244,9 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].lastInteracted = block.timestamp;
         s.aavegotchis[_tokenId].interactionCount = 0; //First interaction is claiming
 
+        //Empty equipped wearables array
+        s.aavegotchis[_tokenId].equippedWearables = new uint256[](LibAppStorage.WEARABLE_SLOTS_TOTAL);
+
         uint256 minimumStake = option.minimumStake;
         require(_stakeAmount >= minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
 
@@ -515,7 +518,20 @@ contract AavegotchiFacet {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         address collateral = s.aavegotchis[_tokenId].collateralType;
         uint8[NUMERIC_TRAITS_NUM] memory numericTraits = s.aavegotchis[_tokenId].numericTraits;
-        rarityScore = calculateBaseRarityScore(numericTraits, collateral);
+
+        uint256[] memory wearables = s.aavegotchis[_tokenId].equippedWearables;
+
+        int256 wearableBonus = 0;
+
+        for (uint256 i = 0; i < wearables.length; i++) {
+            uint256 wearableId;
+            if (wearableId != 0) {
+                WearableType memory wearable = s.wearableTypes[wearableId];
+                wearableBonus = wearableBonus + wearable.rarityScoreModifier;
+            }
+        }
+
+        rarityScore = calculateBaseRarityScore(numericTraits, collateral) + wearableBonus;
     }
 
     function calculateKinship(uint256 _tokenId) external view returns (int256 kinship) {
@@ -602,79 +618,6 @@ contract AavegotchiFacet {
         }
 
         s.aavegotchis[_tokenId].lastInteracted = block.timestamp;
-    }
-
-    function equipWearables(
-        uint256 _tokenId,
-        uint256[] memory _wearableIds,
-        uint256[] memory _slots
-    ) external {
-        require(_wearableIds.length == LibAppStorage.WEARABLE_SLOTS_TOTAL, "Aavegotochi Facet: Wearable ID length must match");
-
-        require(_wearableIds.length == _slots.length, "Aavegotchi Facet: Slots and Ids length must match");
-
-        //To do: Check that balance of wearable held by Aavegotchi tokenId is > 0
-
-        //Option: Transfer from msg.sender (Aavegotchi owner) directly into inventory and equip?
-
-        //Possible improvement: Use a mapping instead of an array for equippedWearables to prevent looping?
-
-        for (uint256 index = 0; index < _slots.length; index++) {
-            require(wearableSlotAvailable(_tokenId, _slots[index]), "Slot not available");
-
-            uint256 slot = _slots[index];
-            uint256 wearableId = _wearableIds[index];
-            s.aavegotchis[_tokenId].equippedWearables[slot] = wearableId;
-        }
-
-        //To do: Update Aavegotchi equipped state variable
-
-        //To do in WearableFacet: Prevent wearable from being transferred if it's equipped
-    }
-
-    function wearableSlotAvailable(uint256 _tokenId, uint256 _slotId) internal view returns (bool _equipped) {
-        //To do: Check if slot is currently equipped
-        uint256[] storage equipped = s.aavegotchis[_tokenId].equippedWearables;
-
-        //Handle base case
-        if (equipped[_slotId] == 0) return false;
-
-        //Handle combination cases
-        if (_slotId == 7 && (equipped[4] != 0 || equipped[5] != 0)) return false;
-        if (_slotId == 8 && (equipped[0] != 0 || equipped[3] != 0)) return false;
-        if (_slotId == 9 && (equipped[0] != 0 || equipped[1] != 0)) return false;
-        if (_slotId == 10 && (equipped[1] != 0 || equipped[2] != 0)) return false;
-
-        return true;
-
-        //Check slotId and combinations
-
-        //Slots
-        //0 Head
-        //1 Face
-        //2 Eyes
-        //3 Body / Feet
-        //4 Hand (left)
-        //5 Hand (right)
-        //6 Pet
-
-        //Combination slots
-        //7 Hands (both)
-        //8 Head + Body
-        //9 Head + Face
-        //10 Face + Eyes
-    }
-
-    function unequipWearables(uint256 _tokenId, uint256[] memory _wearableIds) public {
-        uint256[] storage equipped = s.aavegotchis[_tokenId].equippedWearables;
-
-        require(_wearableIds.length == LibAppStorage.WEARABLE_SLOTS_TOTAL, "AavegotchiFacet: Incorrect Wearable Ids length");
-
-        for (uint256 i = 0; i < _wearableIds.length; i++) {
-            if (equipped[i] != 0) {
-                equipped[i] = 0;
-            }
-        }
     }
 
     function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
