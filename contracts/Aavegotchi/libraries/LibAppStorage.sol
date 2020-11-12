@@ -34,7 +34,7 @@ struct Aavegotchi {
 
 //There are 11 available slots. Maybe we should add a few more, just in case?
     uint256[] equippedWearables; //The currently equipped wearables of the Aavegotchi
-    uint256[] inventory; //Wearables and consumables owned by this Aavegotchi (but not equipped)
+   // uint256[] inventory; //Wearables and consumables owned by this Aavegotchi (but not equipped)
 }
 
 struct WearableType {

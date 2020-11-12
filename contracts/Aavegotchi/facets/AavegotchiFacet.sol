@@ -613,7 +613,8 @@ contract AavegotchiFacet {
 
         require(_wearableIds.length == _slots.length, "Aavegotchi Facet: Slots and Ids length must match");
 
-        //To do: Check if Aavegotchi has this wearable in its inventory.
+        //To do: Check that balance of wearable held by Aavegotchi tokenId is > 0
+
         //Option: Transfer from msg.sender (Aavegotchi owner) directly into inventory and equip?
 
         //Possible improvement: Use a mapping instead of an array for equippedWearables to prevent looping?
@@ -662,6 +663,18 @@ contract AavegotchiFacet {
         //8 Head + Body
         //9 Head + Face
         //10 Face + Eyes
+    }
+
+    function unequipWearables(uint256 _tokenId, uint256[] memory _wearableIds) public {
+        uint256[] storage equipped = s.aavegotchis[_tokenId].equippedWearables;
+
+        require(_wearableIds.length == LibAppStorage.WEARABLE_SLOTS_TOTAL, "AavegotchiFacet: Incorrect Wearable Ids length");
+
+        for (uint256 i = 0; i < _wearableIds.length; i++) {
+            if (equipped[i] != 0) {
+                equipped[i] = 0;
+            }
+        }
     }
 
     function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
