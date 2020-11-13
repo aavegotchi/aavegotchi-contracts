@@ -447,7 +447,7 @@ contract WearablesFacet {
 
             uint256 slot = _slots[index];
             uint256 wearableId = _wearableIds[index];
-            s.aavegotchis[_tokenId].equippedWearables[slot] = wearableId;
+            s.aavegotchis[_tokenId].equippedWearables[slot] = uint16(wearableId);
         }
 
         //To do: Update Aavegotchi equipped state variable
@@ -457,7 +457,7 @@ contract WearablesFacet {
 
     function wearableSlotAvailable(uint256 _tokenId, uint256 _slotId) internal view returns (bool _equipped) {
         //To do: Check if slot is currently equipped
-        uint256[] storage equipped = s.aavegotchis[_tokenId].equippedWearables;
+        uint16[] memory equipped = s.aavegotchis[_tokenId].equippedWearables;
 
         //Handle base case
         if (equipped[_slotId] == 0) return false;
@@ -489,7 +489,7 @@ contract WearablesFacet {
     }
 
     function unequipWearables(uint256 _tokenId, uint256[] memory _wearableIds) public {
-        uint256[] storage equipped = s.aavegotchis[_tokenId].equippedWearables;
+        uint16[] storage equipped = s.aavegotchis[_tokenId].equippedWearables;
 
         require(_wearableIds.length == LibAppStorage.WEARABLE_SLOTS_TOTAL, "AavegotchiFacet: Incorrect Wearable Ids length");
 
