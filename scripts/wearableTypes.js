@@ -15,15 +15,15 @@ const wearableTypes = [
     maxQuantity: 2000,
     rarityScoreModifier: 20,
     setId: 0,
-    slots: [WEARABLE_SLOT_BODY],
+    slots: [3],
     svgId: 1
   },
   {
-    traitModifiers: [-1, 0, 2, 1, , 0],
+    traitModifiers: [-1, 0, 2, 1, 0, 0],
     maxQuantity: 2000,
     rarityScoreModifier: 20,
     setId: 0,
-    slots: [WEARABLE_SLOT_BODY],
+    slots: [3],
     svgId: 1
   }
 
