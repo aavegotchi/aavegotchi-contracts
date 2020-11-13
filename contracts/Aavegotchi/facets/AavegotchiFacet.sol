@@ -233,34 +233,34 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].numericTraits = option.numericTraits;
         s.aavegotchis[_tokenId].randomNumber = option.randomNumber;
         s.aavegotchis[_tokenId].collateralType = option.collateralType;
-        s.aavegotchis[_tokenId].minimumStake = option.minimumStake;
+        s.aavegotchis[_tokenId].minimumStake = uint88(option.minimumStake);
 
         //New traits
         s.aavegotchis[_tokenId].experience = 0;
         s.aavegotchis[_tokenId].level = 1;
 
         //Kinship
-        s.aavegotchis[_tokenId].claimTime = block.timestamp;
-        s.aavegotchis[_tokenId].lastInteracted = block.timestamp;
+        s.aavegotchis[_tokenId].claimTime = uint40(block.timestamp);
+        s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
         s.aavegotchis[_tokenId].interactionCount = 0; //First interaction is claiming
 
         //Empty equipped wearables array
-        s.aavegotchis[_tokenId].equippedWearables = new uint256[](LibAppStorage.WEARABLE_SLOTS_TOTAL);
+        s.aavegotchis[_tokenId].equippedWearables = new uint16[](LibAppStorage.WEARABLE_SLOTS_TOTAL);
 
         uint256 minimumStake = option.minimumStake;
         require(_stakeAmount >= minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
 
         s.aavegotchis[_tokenId].status = LibAppStorage.STATUS_AAVEGOTCHI;
 
-        s.aavegotchis[_tokenId].stakedAmount = uint128(_stakeAmount);
+        s.aavegotchis[_tokenId].stakedAmount = uint96(_stakeAmount);
 
         //To do: change this from address(this) to the Aavegotchi's personal escrow contract address
         LibERC20.transferFrom(option.collateralType, msg.sender, address(this), _stakeAmount);
     }
 
-    function increaseStake(uint256 _tokenId, uint128 _stakeAmount) external {
+    function increaseStake(uint256 _tokenId, uint96 _stakeAmount) external {
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
-        uint128 currentStake = s.aavegotchis[_tokenId].stakedAmount;
+        uint96 currentStake = s.aavegotchis[_tokenId].stakedAmount;
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         s.aavegotchis[_tokenId].stakedAmount = currentStake + _stakeAmount;
 
@@ -268,9 +268,9 @@ contract AavegotchiFacet {
         LibERC20.transferFrom(collateralType, msg.sender, address(this), _stakeAmount);
     }
 
-    function decreaseStake(uint256 _tokenId, uint128 _reduceAmount) external {
+    function decreaseStake(uint256 _tokenId, uint96 _reduceAmount) external {
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can decrease stake");
-        uint128 currentStake = s.aavegotchis[_tokenId].stakedAmount;
+        uint96 currentStake = s.aavegotchis[_tokenId].stakedAmount;
         uint256 minimumStake = s.aavegotchis[_tokenId].minimumStake;
 
         // ***CHECK for underflow here? ***
@@ -492,24 +492,23 @@ contract AavegotchiFacet {
     function calculateBaseRarityScore(uint8[NUMERIC_TRAITS_NUM] memory numericTraits, address collateralType)
         public
         view
-        returns (int256 rarityScore)
+        returns (int256 _rarityScore)
     {
         AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
 
         int8[6] memory modifiers = collateralInfo.modifiers;
 
-        int256 score = 0;
         for (uint8 index = 0; index < numericTraits.length; index++) {
             int256 number = numericTraits[index];
             int8 mod = modifiers[index];
 
             if (number >= 50) {
-                score = score + number + mod;
+                _rarityScore = _rarityScore + number + mod;
             } else {
-                score = score + (100 - number) + mod;
+                _rarityScore = _rarityScore + (100 - number) + mod;
             }
         }
-        return score;
+        return _rarityScore;
     }
 
     //Only valid for claimed Aavegotchis
@@ -519,7 +518,7 @@ contract AavegotchiFacet {
         address collateral = s.aavegotchis[_tokenId].collateralType;
         uint8[NUMERIC_TRAITS_NUM] memory numericTraits = s.aavegotchis[_tokenId].numericTraits;
 
-        uint256[] memory wearables = s.aavegotchis[_tokenId].equippedWearables;
+        uint16[] memory wearables = s.aavegotchis[_tokenId].equippedWearables;
 
         int256 wearableBonus = 0;
 
@@ -579,10 +578,13 @@ contract AavegotchiFacet {
 
         //Was the last interaction within 24 hours? If so, add to interaction count. If not, reset it.
         uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
-        int256 interactionCount = s.aavegotchis[_tokenId].interactionCount;
+        int16 interactionCount = s.aavegotchis[_tokenId].interactionCount;
         uint256 interval = block.timestamp - lastInteracted;
         // console.log("Interact: block timestamp:", block.timestamp);
         int256 daysSinceInteraction = int256(interval) / 86400;
+        if (daysSinceInteraction > 3000) {
+            daysSinceInteraction = 3000;
+        }
         int256 baseKinship = 50;
 
         int256 kinshipScore = baseKinship + interactionCount - daysSinceInteraction;
@@ -591,7 +593,7 @@ contract AavegotchiFacet {
         // console.logInt(kinshipScore);
 
         //If your Aavegotchi hates you and you finally pet it, you get a bonus
-        int256 hateBonus = 0;
+        int16 hateBonus = 0;
 
         if (kinshipScore < 40) {
             hateBonus = 2;
@@ -605,7 +607,7 @@ contract AavegotchiFacet {
             //console.log("days since interaction");
             // console.logInt(daysSinceInteraction);
 
-            s.aavegotchis[_tokenId].interactionCount = interactionCount - int256(daysSinceInteraction) + hateBonus;
+            s.aavegotchis[_tokenId].interactionCount = interactionCount - int16(daysSinceInteraction) + hateBonus;
             // console.log("interaction count after");
             // console.logInt(s.aavegotchis[_tokenId].interactionCount);
 
@@ -617,7 +619,7 @@ contract AavegotchiFacet {
             s.aavegotchis[_tokenId].streak++;
         }
 
-        s.aavegotchis[_tokenId].lastInteracted = block.timestamp;
+        s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
     }
 
     function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
