@@ -496,8 +496,6 @@ contract WearablesFacet {
     function slotIsAvailable(uint256 _tokenId, uint16 _slot) internal view returns (bool available) {
         //Any way we can make this more efficient?
 
-        console.log("slot:", _slot);
-
         //First handle base case
         if (s.aavegotchis[_tokenId].equippedWearables[_slot] != 0) return false;
 
@@ -513,6 +511,8 @@ contract WearablesFacet {
             if (s.aavegotchis[_tokenId].equippedWearables[1] != 0) return false;
             if (s.aavegotchis[_tokenId].equippedWearables[2] != 0) return false;
         }
+
+        //To do: Handle combination cases when checking for one piece of a combination set. For example, when checking for HEAD, if HEAD_BODY is equipped it will also return false.
 
         return true;
 
