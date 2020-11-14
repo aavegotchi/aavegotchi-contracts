@@ -245,7 +245,8 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].interactionCount = 0; //First interaction is claiming
 
         //Empty equipped wearables array
-        s.aavegotchis[_tokenId].equippedWearables = new uint16[](LibAppStorage.WEARABLE_SLOTS_TOTAL);
+        //  s.aavegotchis[_tokenId].wearableKeys = new uint256[];
+        // s.aavegotchis[_tokenId].equippedWearables = new uint16[](LibAppStorage.WEARABLE_SLOTS_TOTAL);
 
         uint256 minimumStake = option.minimumStake;
         require(_stakeAmount >= minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
@@ -374,6 +375,11 @@ contract AavegotchiFacet {
             }
         }
 
+        //Wearables
+        for (uint16 index = 0; index < 11; index++) {
+            // s.aavegotchis[_tokenId].equippedWearables[index];
+        }
+
         svg_ = abi.encodePacked(
             "<style>.primary{fill:#",
             details.primaryColor,
@@ -396,6 +402,7 @@ contract AavegotchiFacet {
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             numericTraits[i] = s.aavegotchis[_tokenId].numericTraits[i];
         }
+
         svg_ = getAavegotchiSvgLayers(s.aavegotchis[_tokenId].collateralType, numericTraits);
     }
 
@@ -518,19 +525,21 @@ contract AavegotchiFacet {
         address collateral = s.aavegotchis[_tokenId].collateralType;
         uint8[NUMERIC_TRAITS_NUM] memory numericTraits = s.aavegotchis[_tokenId].numericTraits;
 
-        uint16[] memory wearables = s.aavegotchis[_tokenId].equippedWearables;
-
         int256 wearableBonus = 0;
 
-        for (uint256 i = 0; i < wearables.length; i++) {
-            uint256 wearableId;
+        //First get equipped wearables
+        //To do: Make 11 dynamic
+        for (uint16 index = 0; index < 11; index++) {
+            uint256 wearableId = s.aavegotchis[_tokenId].equippedWearables[index];
+
             if (wearableId != 0) {
                 WearableType memory wearable = s.wearableTypes[wearableId];
                 wearableBonus = wearableBonus + wearable.rarityScoreModifier;
             }
         }
 
-        rarityScore = calculateBaseRarityScore(numericTraits, collateral) + wearableBonus;
+        int256 baseRarity = calculateBaseRarityScore(numericTraits, collateral);
+        rarityScore = baseRarity + wearableBonus;
     }
 
     function calculateKinship(uint256 _tokenId) external view returns (int256 kinship) {

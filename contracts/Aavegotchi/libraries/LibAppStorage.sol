@@ -31,8 +31,7 @@ struct Aavegotchi {
     int16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
     uint16 streak; //The streak bonus
     //There are 11 available slots. Maybe we should add a few more, just in case?
-    uint16[] equippedWearables; //The currently equipped wearables of the Aavegotchi
-    // uint256[] inventory; //Wearables and consumables owned by this Aavegotchi (but not equipped)
+    mapping(uint16 => uint256) equippedWearables; //The currently equipped wearables of the Aavegotchi
 }
 
 struct WearableType {
@@ -42,6 +41,7 @@ struct WearableType {
     uint8 setId; //The id of the set. Zero is no set
     uint8[] slots; //The slots that this wearable can be added to.
     uint256 svgId; //The svgId of the wearable
+    uint256 totalQuantity; //The total quantity of this wearable minted so far
 
     //A hand wearable can be equipped in left hand, right hand, both hands
     //So its allowedSlots are 4,5, and 7.
