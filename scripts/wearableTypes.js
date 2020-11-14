@@ -7,6 +7,10 @@ const WEARABLE_SLOT_HAND_LEFT = 4
 const WEARABLE_SLOT_HAND_RIGHT = 5
 const WEARABLE_SLOT_HANDS_BOTH = 6
 const WEARABLE_SLOT_PET = 7
+const WEARABLE_SLOT_HEAD_BODY = 8
+const WEARABLE_SLOT_HEAD_FACE = 9
+const WEARABLE_SLOT_HEAD_FACE_EYES = 10
+
 
 const wearableTypes = [
 
@@ -36,7 +40,7 @@ const wearableTypes = [
     maxQuantity: 2000,
     rarityScoreModifier: 20,
     setId: 0,
-    slots: [3],
+    slots: [9],
     svgId: 2,
     totalQuantity: 0,
   }

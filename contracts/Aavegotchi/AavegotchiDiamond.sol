@@ -35,6 +35,7 @@ contract AavegotchiDiamond {
         LibDiamond.setContractOwner(_contractOwner);
         s.dao = _dao;
         s.svgLayers["wearables"].push();
+        s.wearableSlotsLength = 11;
 
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 

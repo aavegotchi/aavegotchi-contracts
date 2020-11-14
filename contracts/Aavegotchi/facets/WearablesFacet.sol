@@ -114,6 +114,12 @@ contract WearablesFacet {
     */
     event URI(string _value, uint256 indexed _id);
 
+    function setWearableSlotsLength(uint16 _length) external {
+        LibDiamond.enforceIsContractOwner();
+        //To do: Allow DAO access
+        s.wearableSlotsLength = _length;
+    }
+
     function createWearableSet(WearableSet calldata _wearableSet) external {
         LibDiamond.enforceIsContractOwner();
         s.wearableSets.push(_wearableSet);
@@ -456,12 +462,10 @@ contract WearablesFacet {
     ) external {
         require(_wearableIds.length == _slots.length, "Aavegotchi Facet: Slots and Ids length must match");
 
-        //To do: Check that balance of wearable held by Aavegotchi tokenId is > 0
-
         for (uint256 index = 0; index < _slots.length; index++) {
             //First check if slot is available
             uint16 slot = _slots[index];
-            require(s.aavegotchis[_tokenId].equippedWearables[slot] == 0, "Slot not available");
+            require(slotIsAvailable(_tokenId, slot) == true, "Slot not available");
 
             //Then check if wearable can be equipped in this slot
             uint256 wearableId = _wearableIds[index];
@@ -478,7 +482,7 @@ contract WearablesFacet {
 
             require(canBeEquipped == true, "WearablesFacet: Cannot be equipped in this slot");
 
-            //Then heck if this wearable is in the Aavegotchis inventory
+            //Then check if this wearable is in the Aavegotchis inventory
 
             uint256 balance = s.nftBalances[address(this)][_tokenId][wearableId];
             require(balance > 0, "WearablesFacet: Wearable is not in Aavegotchi inventory");
@@ -486,9 +490,47 @@ contract WearablesFacet {
             s.aavegotchis[_tokenId].equippedWearables[slot] = uint16(wearableId);
         }
 
-        //To do: Update Aavegotchi equipped state variable
-
         //To do in WearableFacet: Prevent wearable from being transferred if it's equipped
+    }
+
+    function slotIsAvailable(uint256 _tokenId, uint16 _slot) internal view returns (bool available) {
+        //Any way we can make this more efficient?
+
+        console.log("slot:", _slot);
+
+        //First handle base case
+        if (s.aavegotchis[_tokenId].equippedWearables[_slot] != 0) return false;
+
+        //Handle combination cases
+        if (_slot == 8) {
+            if (s.aavegotchis[_tokenId].equippedWearables[0] != 0) return false;
+            if (s.aavegotchis[_tokenId].equippedWearables[3] != 0) return false;
+        } else if (_slot == 9) {
+            if (s.aavegotchis[_tokenId].equippedWearables[0] != 0) return false;
+            if (s.aavegotchis[_tokenId].equippedWearables[3] != 1) return false;
+        } else if (_slot == 10) {
+            if (s.aavegotchis[_tokenId].equippedWearables[0] != 0) return false;
+            if (s.aavegotchis[_tokenId].equippedWearables[1] != 0) return false;
+            if (s.aavegotchis[_tokenId].equippedWearables[2] != 0) return false;
+        }
+
+        return true;
+
+        /*
+
+
+const WEARABLE_SLOT_HEAD = 0
+const WEARABLE_SLOT_FACE = 1
+const WEARABLE_SLOT_EYES = 2
+const WEARABLE_SLOT_BODY = 3
+const WEARABLE_SLOT_HAND_LEFT = 4
+const WEARABLE_SLOT_HAND_RIGHT = 5
+const WEARABLE_SLOT_HANDS_BOTH = 6
+const WEARABLE_SLOT_PET = 7
+const WEARABLE_SLOT_HEAD_BODY = 8
+const WEARABLE_SLOT_HEAD_FACE = 9
+const WEARABLE_SLOT_HEAD_FACE_EYES = 10
+*/
     }
 
     function wearableSlotAvailable(uint256 _tokenId, uint16 _slotId) internal view returns (bool _equipped) {
@@ -528,9 +570,9 @@ contract WearablesFacet {
     }
 
     function equippedWearables(uint256 _tokenId) external view returns (uint256[] memory equipped) {
-        equipped = new uint256[](11);
+        equipped = new uint256[](s.wearableSlotsLength);
 
-        for (uint16 index = 0; index < 11; index++) {
+        for (uint16 index = 0; index < s.wearableSlotsLength; index++) {
             equipped[index] = s.aavegotchis[_tokenId].equippedWearables[index];
         }
 

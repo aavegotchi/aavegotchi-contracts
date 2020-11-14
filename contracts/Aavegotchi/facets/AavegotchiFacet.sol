@@ -376,7 +376,7 @@ contract AavegotchiFacet {
         }
 
         //Wearables
-        for (uint16 index = 0; index < 11; index++) {
+        for (uint16 index = 0; index < s.wearableSlotsLength; index++) {
             // s.aavegotchis[_tokenId].equippedWearables[index];
         }
 
@@ -528,8 +528,7 @@ contract AavegotchiFacet {
         int256 wearableBonus = 0;
 
         //First get equipped wearables
-        //To do: Make 11 dynamic
-        for (uint16 index = 0; index < 11; index++) {
+        for (uint16 index = 0; index < s.wearableSlotsLength; index++) {
             uint256 wearableId = s.aavegotchis[_tokenId].equippedWearables[index];
 
             if (wearableId != 0) {

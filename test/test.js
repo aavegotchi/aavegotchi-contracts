@@ -243,6 +243,19 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(augmentedScore).to.equal(Number(originalScore) + 20)
   })
 
+  it('Can equip multi-slot wearables', async function () {
+    const multiSlotWearableId = "2"
+    await wearablesFacet.mintWearables([multiSlotWearableId], ["10"])
+
+    await wearablesFacet.transferToParent(
+      account, aavegotchiFacet.address, testAavegotchiId, multiSlotWearableId, "10")
+    await wearablesFacet.equipWearables(testAavegotchiId, [multiSlotWearableId], ["9"])
+    const equipped = await wearablesFacet.equippedWearables(testAavegotchiId)
+
+    //This wearable gets equipped in the ninth slot, which takes up 0&1 slots
+    expect(equipped[9]).to.equal("2")
+
+  })
 
   /*
 

@@ -99,6 +99,7 @@ struct AppStorage {
     // owner => (id => balance)
 
     //Maybe should begin at 1, so we can use 0 in the equippedWearables array?
+    uint16 wearableSlotsLength;
     WearableType[] wearableTypes;
     WearableSet[] wearableSets;
     mapping(address => mapping(uint256 => uint256)) wearables;
