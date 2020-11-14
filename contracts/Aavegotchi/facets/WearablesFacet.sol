@@ -443,7 +443,7 @@ contract WearablesFacet {
         //Possible improvement: Use a mapping instead of an array for equippedWearables to prevent looping?
 
         for (uint256 index = 0; index < _slots.length; index++) {
-            require(wearableSlotAvailable(_tokenId, _slots[index]), "Slot not available");
+            require(wearableSlotAvailable(_tokenId, _slots[index]), "WearablesFacet: Slot not available");
 
             uint256 slot = _slots[index];
             uint256 wearableId = _wearableIds[index];
