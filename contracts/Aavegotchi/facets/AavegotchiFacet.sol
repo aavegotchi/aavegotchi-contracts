@@ -49,6 +49,7 @@ contract AavegotchiFacet {
     }
 
     function setDao(address _newDao) external {
+        //Maybe we should make a DAO Facet?
         require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access");
         emit DaoTransferred(s.dao, _newDao);
         s.dao = _newDao;
@@ -63,57 +64,6 @@ contract AavegotchiFacet {
     /// @dev This emits when an operator is enabled or disabled for an owner.
     ///  The operator can manage all NFTs of the owner.
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
-
-    struct AavegotchiCollateralTypeIO {
-        address collateralType;
-        AavegotchiCollateralTypeInfo collateralTypeInfo;
-    }
-
-    function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external {
-        LibDiamond.enforceIsContractOwner();
-        for (uint256 i; i < _collateralTypes.length; i++) {
-            address collateralType = _collateralTypes[i].collateralType;
-            s.collateralTypes.push(collateralType);
-            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
-            s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
-        }
-    }
-
-    function updateCollateralModifiers(address _collateralType, int8[NUMERIC_TRAITS_NUM] memory _modifiers) external onlyDao {
-        LibDiamond.enforceIsContractOwner();
-        s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
-    }
-
-    function removeCollateralType(address _collateralType) external {
-        LibDiamond.enforceIsContractOwner();
-        uint256 index = s.collateralTypeIndexes[_collateralType];
-        require(index > 0, "Aavegotchi: _collateral does not exist");
-        index--;
-        uint256 lastIndex = s.collateralTypes.length - 1;
-        if (index != lastIndex) {
-            address lastCollateral = s.collateralTypes[lastIndex];
-            s.collateralTypes[index] = lastCollateral;
-            s.collateralTypeIndexes[lastCollateral] = index + 1;
-        }
-        s.collateralTypes.pop();
-        delete s.collateralTypeIndexes[_collateralType];
-        delete s.collateralTypeInfo[_collateralType];
-    }
-
-    function collaterals() external view returns (address[] memory collateralTypes_) {
-        collateralTypes_ = s.collateralTypes;
-    }
-
-    function getCollateralInfo() external view returns (AavegotchiCollateralTypeInfo[] memory collateralInfo) {
-        address[] memory collateralTypes_ = s.collateralTypes;
-
-        collateralInfo = new AavegotchiCollateralTypeInfo[](collateralTypes_.length);
-
-        for (uint256 i; i < collateralTypes_.length; i++) {
-            address collateral = collateralTypes_[i];
-            collateralInfo[i] = s.collateralTypeInfo[collateral];
-        }
-    }
 
     function aavegotchiNameAvailable(string memory _name) external view returns (bool available_) {
         available_ = s.aavegotchiNamesUsed[_name];
@@ -257,44 +207,6 @@ contract AavegotchiFacet {
         address collateralAddress = address(new CollateralEscrow(option.collateralType));
         s.aavegotchis[_tokenId].collateralAddress = collateralAddress;
         LibERC20.transferFrom(option.collateralType, msg.sender, collateralAddress, _stakeAmount);
-    }
-
-    function increaseStake(uint256 _tokenId, uint96 _stakeAmount) external {
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
-        uint96 currentStake = s.aavegotchis[_tokenId].stakedAmount;
-        address collateralType = s.aavegotchis[_tokenId].collateralType;
-        s.aavegotchis[_tokenId].stakedAmount = currentStake + _stakeAmount;
-
-        //To do: change this from address(this) to the Aavegotchi's personal escrow contract address
-        LibERC20.transferFrom(collateralType, msg.sender, address(this), _stakeAmount);
-    }
-
-    function decreaseStake(uint256 _tokenId, uint96 _reduceAmount) external {
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can decrease stake");
-        uint96 currentStake = s.aavegotchis[_tokenId].stakedAmount;
-        uint256 minimumStake = s.aavegotchis[_tokenId].minimumStake;
-
-        // ***CHECK for underflow here? ***
-        require(currentStake - _reduceAmount >= minimumStake, "AavegotchiFacet: Cannot reduce below minimum stake");
-        address collateralType = s.aavegotchis[_tokenId].collateralType;
-        s.aavegotchis[_tokenId].stakedAmount = currentStake - _reduceAmount;
-
-        //To do: change this from address(this) to the Aavegotchi's personal escrow contract address
-        LibERC20.transferFrom(collateralType, address(this), msg.sender, _reduceAmount);
-    }
-
-    function decreaseAndDestroy(uint256 _tokenId) external {
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can decrease stake");
-        uint128 currentStake = s.aavegotchis[_tokenId].stakedAmount;
-        address collateralType = s.aavegotchis[_tokenId].collateralType;
-
-        //To do: check that all wearables have been removed from inventory before burning
-
-        //To do: change this from address(this) to the Aavegotchi's personal escrow contract address
-
-        LibERC20.transferFrom(collateralType, address(this), msg.sender, currentStake);
-
-        //To do: Burn the Aavegotchi
     }
 
     function ghstAddress() external view returns (address contract_) {
@@ -487,7 +399,13 @@ contract AavegotchiFacet {
         view
         returns (uint256 rarityMultiplier)
     {
-        int256 rarityScore = calculateBaseRarityScore(numericTraits, collateralType);
+        int8[] memory numericTraitsConverted = new int8[](NUMERIC_TRAITS_NUM);
+
+        for (uint8 i = 0; i < NUMERIC_TRAITS_NUM; i++) {
+            numericTraitsConverted[i] = int8(numericTraits[i]);
+        }
+
+        int256 rarityScore = calculateBaseRarityScore(numericTraitsConverted, collateralType);
         if (rarityScore < 300) return 10;
         else if (rarityScore >= 300 && rarityScore < 450) return 10;
         else if (rarityScore >= 450 && rarityScore <= 525) return 25;
@@ -496,17 +414,14 @@ contract AavegotchiFacet {
     }
 
     //Calculates the base rarity score, including collateral modifier
-    function calculateBaseRarityScore(uint8[NUMERIC_TRAITS_NUM] memory numericTraits, address collateralType)
-        public
-        view
-        returns (int256 _rarityScore)
-    {
+    function calculateBaseRarityScore(int8[] memory numericTraits, address collateralType) public view returns (int256 _rarityScore) {
         AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
 
         int8[6] memory modifiers = collateralInfo.modifiers;
 
         for (uint8 index = 0; index < numericTraits.length; index++) {
             int256 number = numericTraits[index];
+
             int8 mod = modifiers[index];
 
             if (number >= 50) {
@@ -515,15 +430,21 @@ contract AavegotchiFacet {
                 _rarityScore = _rarityScore + (100 - number) + mod;
             }
         }
+
         return _rarityScore;
     }
 
     //Only valid for claimed Aavegotchis
     function calculateModifiedRarityScore(uint256 _tokenId) external view returns (int256 rarityScore) {
-        //To do: Add wearables
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         address collateral = s.aavegotchis[_tokenId].collateralType;
-        uint8[NUMERIC_TRAITS_NUM] memory numericTraits = s.aavegotchis[_tokenId].numericTraits;
+
+        //Recast uint8s into int8s for numeric traits
+        int8[] memory numericTraits = new int8[](NUMERIC_TRAITS_NUM);
+        for (uint8 i = 0; i < NUMERIC_TRAITS_NUM; i++) {
+            int8 traitValue = int8(s.aavegotchis[_tokenId].numericTraits[i]);
+            numericTraits[i] = traitValue;
+        }
 
         int256 wearableBonus = 0;
 
@@ -531,9 +452,19 @@ contract AavegotchiFacet {
         for (uint16 index = 0; index < s.wearableSlotsLength; index++) {
             uint256 wearableId = s.aavegotchis[_tokenId].equippedWearables[index];
 
+            //wearable is equipped
             if (wearableId != 0) {
                 WearableType memory wearable = s.wearableTypes[wearableId];
-                wearableBonus = wearableBonus + wearable.rarityScoreModifier;
+
+                //Add on rarity score bonus
+                wearableBonus += wearable.rarityScoreModifier;
+
+                //Add on trait modifiers
+                int8[NUMERIC_TRAITS_NUM] memory modifiers = wearable.traitModifiers;
+
+                for (uint8 i = 0; i < NUMERIC_TRAITS_NUM; i++) {
+                    numericTraits[i] += modifiers[i];
+                }
             }
         }
 
