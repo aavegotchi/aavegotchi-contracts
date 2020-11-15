@@ -8,7 +8,7 @@ const { eyeShapeSvgs } = require('../svgs/eyeShapes.js')
 const { getCollaterals } = require('./collateralTypes.js')
 const { wearableTypes } = require('./wearableTypes.js')
 
-function addCommas (nStr) {
+function addCommas(nStr) {
   nStr += ''
   const x = nStr.split('.')
   let x1 = x[0]
@@ -20,11 +20,11 @@ function addCommas (nStr) {
   return x1 + x2
 }
 
-function strDisplay (str) {
+function strDisplay(str) {
   return addCommas(str.toString())
 }
 
-async function main () {
+async function main() {
   const accounts = await ethers.getSigners()
   const account = await accounts[0].getAddress()
   console.log('Account: ' + account)
@@ -33,7 +33,7 @@ async function main () {
   let totalGasUsed = ethers.BigNumber.from('0')
   let receipt
 
-  async function deployFacets (...facets) {
+  async function deployFacets(...facets) {
     const instances = []
     for (const facet of facets) {
       const factory = await ethers.getContractFactory(facet)
@@ -126,7 +126,7 @@ async function main () {
   // Upload Svg layers
   svgStorageFacet = await ethers.getContractAt('SvgStorageFacet', aavegotchiDiamond.address)
 
-  function setupSvg (...svgData) {
+  function setupSvg(...svgData) {
     const svgTypesAndSizes = []
     const svgs = []
     for (const [svgType, svg] of svgData) {
@@ -137,7 +137,7 @@ async function main () {
   }
 
   // eslint-disable-next-line no-unused-vars
-  function printSizeInfo (svgTypesAndSizes) {
+  function printSizeInfo(svgTypesAndSizes) {
     console.log('------------- SVG Size Info ---------------')
     let sizes = 0
     for (const [svgType, size] of svgTypesAndSizes) {
@@ -162,10 +162,10 @@ async function main () {
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   console.log('Uploading collaterals and eyeShapes')
-  ;[svg, svgTypesAndSizes] = setupSvg(
-    ['collaterals', collateralsSvgs],
-    ['eyeShapes', eyeShapeSvgs]
-  )
+    ;[svg, svgTypesAndSizes] = setupSvg(
+      ['collaterals', collateralsSvgs],
+      ['eyeShapes', eyeShapeSvgs]
+    )
   // printSizeInfo(svgTypesAndSizes)
   tx = await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded SVGs')
@@ -178,6 +178,7 @@ async function main () {
     account: account,
     aavegotchiDiamond: aavegotchiDiamond,
     ghstDiamond: ghstDiamond,
+    wearablesFacet: wearablesFacet,
     aavegotchiFacet: aavegotchiFacet
   }
 

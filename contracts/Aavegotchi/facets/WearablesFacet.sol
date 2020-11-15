@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";
+import "hardhat/console.sol";
 
 /**
     Note: The ERC-165 identifier for this interface is 0x4e2312e0.
@@ -113,6 +114,12 @@ contract WearablesFacet {
     */
     event URI(string _value, uint256 indexed _id);
 
+    function setWearableSlotsLength(uint16 _length) external {
+        LibDiamond.enforceIsContractOwner();
+        //To do: Allow DAO access
+        s.wearableSlotsLength = _length;
+    }
+
     function createWearableSet(WearableSet calldata _wearableSet) external {
         LibDiamond.enforceIsContractOwner();
         s.wearableSets.push(_wearableSet);
@@ -128,20 +135,36 @@ contract WearablesFacet {
     // Mint a set of wearables.
     // How many wearables there are is determined by how many wearable SVG files have been uploaded.
     // The wearbles are minted to the account that calls this function
-    function mintWearables() external {
+    function mintWearables(uint256[] memory _wearableIds, uint256[] memory _quantities) external {
         //To do: Only by contract owner (and eventually DAO)
+        LibDiamond.enforceIsContractOwner();
+        require(_wearableIds.length == _quantities.length, "WearablesFacet: Ids and quantities length must match");
 
-        uint256 count = s.svgLayers["wearables"].length;
-        for (uint256 i = 1; i < count; i++) {
-            uint256 id = i << 240;
-            s.wearables[msg.sender][id]++;
-            emit TransferSingle(msg.sender, address(0), msg.sender, id, 1);
+        //  uint256 count = s.svgLayers["wearables"].length;
+        for (uint256 i = 0; i < _wearableIds.length; i++) {
+            uint256 wearableId = _wearableIds[i];
+
+            require(s.wearableTypes.length > wearableId, "WearablesFacet: Wearable does not exist");
+
+            uint256 quantity = _quantities[i];
+
+            require(
+                (s.wearableTypes[wearableId].totalQuantity += quantity) <= s.wearableTypes[wearableId].maxQuantity,
+                "WearablesFacet: Total quantity exceeds max quantity"
+            );
+
+            //What's this line do?
+            //uint256 id = i << 240;
+
+            s.wearables[msg.sender][wearableId] += quantity;
+            s.wearableTypes[wearableId].totalQuantity += quantity;
+            emit TransferSingle(msg.sender, address(0), msg.sender, wearableId, quantity);
         }
     }
 
     // Returns balance for each wearable that exists for an account
     function wearablesBalances(address _account) external view returns (uint256[] memory bals) {
-        uint256 count = s.svgLayers["wearables"].length;
+        uint256 count = s.wearableTypes.length;
         bals = new uint256[](count - 1);
         for (uint256 i = 1; i < count; i++) {
             uint256 id = i << 240;
@@ -151,9 +174,10 @@ contract WearablesFacet {
 
     // The category id for an aavegotchi tokenid is 0
     // So this checks to see if a token id is an Aavegotchi or not
-    function isAavegotchi(uint256 _id) internal pure returns (bool) {
+    /* function isAavegotchi(uint256 _id) internal pure returns (bool) {
         return _id >> 240 == 0;
     }
+    */
 
     /**
         @notice Transfers `_value` amount of an `_id` from the `_from` address to the `_to` address specified (with safety call).
@@ -178,7 +202,7 @@ contract WearablesFacet {
     ) external {
         require(_to != address(0), "Wearables: Can't transfer to 0 address");
         require(msg.sender == _from || s.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
-        if (isAavegotchi(_id)) {
+        /* if (isAavegotchi(_id)) {
             require(_value == 1, "Wearables: Can only transfer 1 aavegotchi");
             address owner = s.aavegotchis[_id].owner;
             uint256 index = s.aavegotchis[_id].ownerEnumerationIndex;
@@ -201,11 +225,12 @@ contract WearablesFacet {
             }
             emit Transfer(_from, _to, _id);
         } else {
-            uint256 bal = s.wearables[_from][_id];
-            require(_value <= bal, "Wearables: Doesn't have that many to transfer");
-            s.wearables[_from][_id] = bal - _value;
-            s.wearables[_to][_id] += _value;
-        }
+            */
+        uint256 bal = s.wearables[_from][_id];
+        require(_value <= bal, "Wearables: Doesn't have that many to transfer");
+        s.wearables[_from][_id] = bal - _value;
+        s.wearables[_to][_id] += _value;
+        // }
         emit TransferSingle(msg.sender, _from, _to, _id, _value);
         uint256 size;
         assembly {
@@ -258,7 +283,7 @@ contract WearablesFacet {
             v.id = _ids[i];
             v.value = _values[i];
             v.bal = s.wearables[_from][_ids[i]];
-            if (isAavegotchi(v.id)) {
+            /*if (isAavegotchi(v.id)) {
                 v.owner = s.aavegotchis[v.id].owner;
                 v.index = s.aavegotchis[v.id].ownerEnumerationIndex;
                 require(v.owner != address(0), "Wearables: Invalid tokenId or can't be transferred");
@@ -280,10 +305,11 @@ contract WearablesFacet {
                 }
                 emit Transfer(_from, _to, v.id);
             } else {
-                require(v.value <= v.bal, "Wearables: Doesn't have that many to transfer");
-                s.wearables[_from][v.id] = v.bal - v.value;
-                s.wearables[_to][v.id] += v.value;
-            }
+                */
+            require(v.value <= v.bal, "Wearables: Doesn't have that many to transfer");
+            s.wearables[_from][v.id] = v.bal - v.value;
+            s.wearables[_to][v.id] += v.value;
+            // }
         }
         emit TransferBatch(msg.sender, _from, _to, _ids, _values);
         uint256 size;
@@ -313,7 +339,7 @@ contract WearablesFacet {
     ) external {
         require(_toContract != address(0), "Wearables: Can't transfer to 0 address");
         require(msg.sender == _from || s.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
-        require(!isAavegotchi(_id), "Wearables: Cannot transfer aavegotchi to token");
+        //    require(!isAavegotchi(_id), "Wearables: Cannot transfer aavegotchi to token");
 
         uint256 bal = s.wearables[_from][_id];
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
@@ -339,7 +365,7 @@ contract WearablesFacet {
         require(_to != address(0), "Wearables: Can't transfer to 0 address");
         address owner = s.aavegotchis[_fromTokenId].owner;
         require(msg.sender == owner || s.operators[owner][msg.sender], "Wearables: Not owner and not approved to transfer");
-        require(!isAavegotchi(_id), "Wearables: Cannot transfer aavegotchi to token");
+        //  require(!isAavegotchi(_id), "Wearables: Cannot transfer aavegotchi to token");
         uint256 bal = s.nftBalances[_fromContract][_fromTokenId][_id];
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal - _value;
@@ -382,13 +408,14 @@ contract WearablesFacet {
         @return bal    The _owner's balance of the token type requested
      */
     function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal) {
-        if (isAavegotchi(_id)) {
+        /*   if (isAavegotchi(_id)) {
             if (s.aavegotchis[_id].owner == _owner) {
                 bal = 1;
             }
         } else {
-            bal = s.wearables[_owner][_id];
-        }
+            */
+        bal = s.wearables[_owner][_id];
+        //  }
     }
 
     /// @notice Get the balance of a non-fungible parent token
@@ -416,13 +443,14 @@ contract WearablesFacet {
             uint256 bal;
             uint256 id = _ids[i];
             address owner = _owners[i];
-            if (isAavegotchi(id)) {
+            /*   if (isAavegotchi(id)) {
                 if (s.aavegotchis[id].owner == owner) {
                     bal = 1;
                 }
             } else {
-                bal = s.wearables[owner][id];
-            }
+                */
+            bal = s.wearables[owner][id];
+            // }
             bals[i] = bal;
         }
     }
@@ -430,45 +458,98 @@ contract WearablesFacet {
     function equipWearables(
         uint256 _tokenId,
         uint256[] memory _wearableIds,
-        uint256[] memory _slots
+        uint16[] memory _slots
     ) external {
-        require(_wearableIds.length == LibAppStorage.WEARABLE_SLOTS_TOTAL, "Aavegotochi Facet: Wearable ID length must match");
-
         require(_wearableIds.length == _slots.length, "Aavegotchi Facet: Slots and Ids length must match");
 
-        //To do: Check that balance of wearable held by Aavegotchi tokenId is > 0
-
-        //Option: Transfer from msg.sender (Aavegotchi owner) directly into inventory and equip?
-
-        //Possible improvement: Use a mapping instead of an array for equippedWearables to prevent looping?
-
         for (uint256 index = 0; index < _slots.length; index++) {
-            require(wearableSlotAvailable(_tokenId, _slots[index]), "WearablesFacet: Slot not available");
+            //First check if slot is available
+            uint16 slot = _slots[index];
+            require(slotIsAvailable(_tokenId, slot) == true, "Slot not available");
 
-            uint256 slot = _slots[index];
+            //Then check if wearable can be equipped in this slot
             uint256 wearableId = _wearableIds[index];
+            uint8[] memory allowedSlots = s.wearableTypes[wearableId].slots;
+
+            bool canBeEquipped = false;
+
+            for (uint8 i = 0; i < allowedSlots.length; i++) {
+                if (allowedSlots[i] == slot) {
+                    canBeEquipped = true;
+                    break;
+                }
+            }
+
+            require(canBeEquipped == true, "WearablesFacet: Cannot be equipped in this slot");
+
+            //Then check if this wearable is in the Aavegotchis inventory
+
+            uint256 balance = s.nftBalances[address(this)][_tokenId][wearableId];
+            require(balance > 0, "WearablesFacet: Wearable is not in Aavegotchi inventory");
+
             s.aavegotchis[_tokenId].equippedWearables[slot] = uint16(wearableId);
         }
-
-        //To do: Update Aavegotchi equipped state variable
 
         //To do in WearableFacet: Prevent wearable from being transferred if it's equipped
     }
 
-    function wearableSlotAvailable(uint256 _tokenId, uint256 _slotId) internal view returns (bool _equipped) {
+    function slotIsAvailable(uint256 _tokenId, uint16 _slot) internal view returns (bool available) {
+        //Any way we can make this more efficient?
+
+        //First handle base case
+        if (s.aavegotchis[_tokenId].equippedWearables[_slot] != 0) return false;
+
+        //Handle combination cases
+        if (_slot == 8) {
+            if (s.aavegotchis[_tokenId].equippedWearables[0] != 0) return false;
+            if (s.aavegotchis[_tokenId].equippedWearables[3] != 0) return false;
+        } else if (_slot == 9) {
+            if (s.aavegotchis[_tokenId].equippedWearables[0] != 0) return false;
+            if (s.aavegotchis[_tokenId].equippedWearables[3] != 1) return false;
+        } else if (_slot == 10) {
+            if (s.aavegotchis[_tokenId].equippedWearables[0] != 0) return false;
+            if (s.aavegotchis[_tokenId].equippedWearables[1] != 0) return false;
+            if (s.aavegotchis[_tokenId].equippedWearables[2] != 0) return false;
+        }
+
+        //To do: Handle combination cases when checking for one piece of a combination set. For example, when checking for HEAD, if HEAD_BODY is equipped it will also return false.
+
+        return true;
+
+        /*
+
+
+const WEARABLE_SLOT_HEAD = 0
+const WEARABLE_SLOT_FACE = 1
+const WEARABLE_SLOT_EYES = 2
+const WEARABLE_SLOT_BODY = 3
+const WEARABLE_SLOT_HAND_LEFT = 4
+const WEARABLE_SLOT_HAND_RIGHT = 5
+const WEARABLE_SLOT_HANDS_BOTH = 6
+const WEARABLE_SLOT_PET = 7
+const WEARABLE_SLOT_HEAD_BODY = 8
+const WEARABLE_SLOT_HEAD_FACE = 9
+const WEARABLE_SLOT_HEAD_FACE_EYES = 10
+*/
+    }
+
+    function wearableSlotAvailable(uint256 _tokenId, uint16 _slotId) internal view returns (bool _equipped) {
         //To do: Check if slot is currently equipped
-        uint16[] memory equipped = s.aavegotchis[_tokenId].equippedWearables;
+        // uint16[] memory equipped = s.aavegotchis[_tokenId].equippedWearables;
+
+        uint256 equipped = s.aavegotchis[_tokenId].equippedWearables[_slotId];
 
         //Handle base case
-        if (equipped[_slotId] == 0) return false;
+        if (equipped == 0) return true;
+        return false;
 
+        /*
         //Handle combination cases
         if (_slotId == 7 && (equipped[4] != 0 || equipped[5] != 0)) return false;
         if (_slotId == 8 && (equipped[0] != 0 || equipped[3] != 0)) return false;
         if (_slotId == 9 && (equipped[0] != 0 || equipped[1] != 0)) return false;
         if (_slotId == 10 && (equipped[1] != 0 || equipped[2] != 0)) return false;
-
-        return true;
+        */
 
         //Check slotId and combinations
 
@@ -488,15 +569,22 @@ contract WearablesFacet {
         //10 Face + Eyes
     }
 
-    function unequipWearables(uint256 _tokenId, uint256[] memory _wearableIds) public {
-        uint16[] storage equipped = s.aavegotchis[_tokenId].equippedWearables;
+    function equippedWearables(uint256 _tokenId) external view returns (uint256[] memory equipped) {
+        equipped = new uint256[](s.wearableSlotsLength);
 
-        require(_wearableIds.length == LibAppStorage.WEARABLE_SLOTS_TOTAL, "AavegotchiFacet: Incorrect Wearable Ids length");
+        for (uint16 index = 0; index < s.wearableSlotsLength; index++) {
+            equipped[index] = s.aavegotchis[_tokenId].equippedWearables[index];
+        }
 
-        for (uint256 i = 0; i < _wearableIds.length; i++) {
-            if (equipped[i] != 0) {
-                equipped[i] = 0;
-            }
+        return equipped;
+    }
+
+    function unequipWearables(uint256 _tokenId, uint16[] memory _slotIds) public {
+        for (uint256 i = 0; i < _slotIds.length; i++) {
+            uint16 slotId = _slotIds[i];
+            require(s.aavegotchis[_tokenId].equippedWearables[slotId] != 0, "WearablesFacet: Slot has not been equipped!");
+
+            s.aavegotchis[_tokenId].equippedWearables[slotId] = 0;
         }
     }
 }
