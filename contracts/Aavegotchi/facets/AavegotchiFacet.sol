@@ -8,6 +8,7 @@ import "../libraries/LibSvg.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
 import "hardhat/console.sol";
+import "../CollateralEscrow.sol";
 
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
 interface ERC721TokenReceiver {
@@ -141,7 +142,6 @@ contract AavegotchiFacet {
             s.aavegotchis[tokenId].owner = msg.sender;
             s.aavegotchis[tokenId].ownerEnumerationIndex = ownerIndex;
             emit Transfer(address(0), msg.sender, tokenId);
-            emit TransferSingle(msg.sender, address(0), msg.sender, tokenId, 1);
         }
         uint256 amount = _ghst - (_ghst % 100e18);
         uint256 burnAmount = amount / 10;
@@ -248,15 +248,15 @@ contract AavegotchiFacet {
         //  s.aavegotchis[_tokenId].wearableKeys = new uint256[];
         // s.aavegotchis[_tokenId].equippedWearables = new uint16[](LibAppStorage.WEARABLE_SLOTS_TOTAL);
 
-        uint256 minimumStake = option.minimumStake;
-        require(_stakeAmount >= minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
+        require(_stakeAmount >= option.minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
 
         s.aavegotchis[_tokenId].status = LibAppStorage.STATUS_AAVEGOTCHI;
 
         s.aavegotchis[_tokenId].stakedAmount = uint96(_stakeAmount);
 
-        //To do: change this from address(this) to the Aavegotchi's personal escrow contract address
-        LibERC20.transferFrom(option.collateralType, msg.sender, address(this), _stakeAmount);
+        address collateralAddress = address(new CollateralEscrow(option.collateralType));
+        s.aavegotchis[_tokenId].collateralAddress = collateralAddress;
+        LibERC20.transferFrom(option.collateralType, msg.sender, collateralAddress, _stakeAmount);
     }
 
     function increaseStake(uint256 _tokenId, uint96 _stakeAmount) external {
@@ -756,7 +756,6 @@ contract AavegotchiFacet {
             emit Approval(owner, address(0), _tokenId);
         }
         emit Transfer(_from, _to, _tokenId);
-        emit TransferSingle(msg.sender, _from, _to, _tokenId, 1);
     }
 
     /// @notice Change or reaffirm the approved address for an NFT

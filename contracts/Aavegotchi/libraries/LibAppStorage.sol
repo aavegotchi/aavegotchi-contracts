@@ -12,6 +12,8 @@ eyeColor
 */
 
 struct Aavegotchi {
+    //There are 11 available slots. Maybe we should add a few more, just in case?
+    mapping(uint16 => uint256) equippedWearables; //The currently equipped wearables of the Aavegotchi
     string name;
     uint256 randomNumber;
     uint8[6] numericTraits;
@@ -30,8 +32,7 @@ struct Aavegotchi {
     uint40 lastInteracted; //The last time this Aavegotchi was interacted with
     int16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
     uint16 streak; //The streak bonus
-    //There are 11 available slots. Maybe we should add a few more, just in case?
-    mapping(uint16 => uint256) equippedWearables; //The currently equipped wearables of the Aavegotchi
+    address collateralAddress;
 }
 
 struct WearableType {

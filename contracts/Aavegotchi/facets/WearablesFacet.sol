@@ -202,30 +202,6 @@ contract WearablesFacet {
     ) external {
         require(_to != address(0), "Wearables: Can't transfer to 0 address");
         require(msg.sender == _from || s.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
-        /* if (isAavegotchi(_id)) {
-            require(_value == 1, "Wearables: Can only transfer 1 aavegotchi");
-            address owner = s.aavegotchis[_id].owner;
-            uint256 index = s.aavegotchis[_id].ownerEnumerationIndex;
-            require(owner != address(0), "Wearables: Invalid tokenId or can't be transferred");
-            require(_from == owner, "Wearable: _from is not owner, transfer failed");
-            s.aavegotchis[_id].owner = _to;
-            s.aavegotchis[_id].ownerEnumerationIndex = uint32(s.aavegotchiOwnerEnumeration[_to].length);
-            s.aavegotchiOwnerEnumeration[_to].push(_id);
-
-            uint256 lastIndex = s.aavegotchiOwnerEnumeration[_from].length - 1;
-            if (index != lastIndex) {
-                uint256 lastTokenId = s.aavegotchiOwnerEnumeration[_from][lastIndex];
-                s.aavegotchiOwnerEnumeration[_from][index] = lastTokenId;
-                s.aavegotchis[lastTokenId].ownerEnumerationIndex = uint32(index);
-            }
-            s.aavegotchiOwnerEnumeration[_from].pop();
-            if (s.approved[_id] != address(0)) {
-                delete s.approved[_id];
-                emit Approval(owner, address(0), _id);
-            }
-            emit Transfer(_from, _to, _id);
-        } else {
-            */
         uint256 bal = s.wearables[_from][_id];
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
         s.wearables[_from][_id] = bal - _value;
@@ -242,15 +218,6 @@ contract WearablesFacet {
                 "Wearables: Transfer rejected/failed by _to"
             );
         }
-    }
-
-    struct BatchVars {
-        uint256 id;
-        uint256 value;
-        uint256 bal;
-        address owner;
-        uint256 index;
-        uint256 lastIndex;
     }
 
     /**
@@ -279,37 +246,12 @@ contract WearablesFacet {
         require(_to != address(0), "Wearables: Can't transfer to 0 address");
         require(msg.sender == _from || s.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
         for (uint256 i; i < _ids.length; i++) {
-            BatchVars memory v;
-            v.id = _ids[i];
-            v.value = _values[i];
-            v.bal = s.wearables[_from][_ids[i]];
-            /*if (isAavegotchi(v.id)) {
-                v.owner = s.aavegotchis[v.id].owner;
-                v.index = s.aavegotchis[v.id].ownerEnumerationIndex;
-                require(v.owner != address(0), "Wearables: Invalid tokenId or can't be transferred");
-                require(_from == v.owner, "Wearables: _from is not owner, transfer failed");
-                s.aavegotchis[v.id].owner = _to;
-                s.aavegotchis[v.id].ownerEnumerationIndex = uint32(s.aavegotchiOwnerEnumeration[_to].length);
-                s.aavegotchiOwnerEnumeration[_to].push(v.id);
-
-                v.lastIndex = s.aavegotchiOwnerEnumeration[_from].length - 1;
-                if (v.index != v.lastIndex) {
-                    uint256 lastTokenId = s.aavegotchiOwnerEnumeration[_from][v.lastIndex];
-                    s.aavegotchiOwnerEnumeration[_from][v.index] = lastTokenId;
-                    s.aavegotchis[lastTokenId].ownerEnumerationIndex = uint32(v.index);
-                }
-                s.aavegotchiOwnerEnumeration[_from].pop();
-                if (s.approved[v.id] != address(0)) {
-                    delete s.approved[v.id];
-                    emit Approval(v.owner, address(0), v.id);
-                }
-                emit Transfer(_from, _to, v.id);
-            } else {
-                */
-            require(v.value <= v.bal, "Wearables: Doesn't have that many to transfer");
-            s.wearables[_from][v.id] = v.bal - v.value;
-            s.wearables[_to][v.id] += v.value;
-            // }
+            uint256 id = _ids[i];
+            uint256 value = _values[i];
+            uint256 bal = s.wearables[_from][id];
+            require(value <= bal, "Wearables: Doesn't have that many to transfer");
+            s.wearables[_from][id] = bal - value;
+            s.wearables[_to][id] += value;
         }
         emit TransferBatch(msg.sender, _from, _to, _ids, _values);
         uint256 size;
@@ -345,7 +287,6 @@ contract WearablesFacet {
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
         s.wearables[_from][_id] = bal - _value;
         s.nftBalances[_toContract][_toTokenId][_id] += _value;
-        emit TransferSingle(msg.sender, _from, _toContract, _id, _value);
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
     }
 
@@ -370,7 +311,6 @@ contract WearablesFacet {
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal - _value;
         s.wearables[_to][_id] += _value;
-        emit TransferSingle(msg.sender, _fromContract, _to, _id, _value);
         emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
     }
 
@@ -396,7 +336,6 @@ contract WearablesFacet {
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal - _value;
         s.nftBalances[_toContract][_toTokenId][_id] += _value;
-        emit TransferSingle(msg.sender, _fromContract, _toContract, _id, _value);
         emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
     }
@@ -407,15 +346,8 @@ contract WearablesFacet {
         @param _id     ID of the token
         @return bal    The _owner's balance of the token type requested
      */
-    function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal) {
-        /*   if (isAavegotchi(_id)) {
-            if (s.aavegotchis[_id].owner == _owner) {
-                bal = 1;
-            }
-        } else {
-            */
-        bal = s.wearables[_owner][_id];
-        //  }
+    function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal_) {
+        bal_ = s.wearables[_owner][_id];
     }
 
     /// @notice Get the balance of a non-fungible parent token
@@ -443,14 +375,7 @@ contract WearablesFacet {
             uint256 bal;
             uint256 id = _ids[i];
             address owner = _owners[i];
-            /*   if (isAavegotchi(id)) {
-                if (s.aavegotchis[id].owner == owner) {
-                    bal = 1;
-                }
-            } else {
-                */
             bal = s.wearables[owner][id];
-            // }
             bals[i] = bal;
         }
     }
@@ -492,6 +417,8 @@ contract WearablesFacet {
 
         //To do in WearableFacet: Prevent wearable from being transferred if it's equipped
     }
+
+    // -function getEquippedSlots() external returns (bool[16] memory equippedSlots)
 
     function slotIsAvailable(uint256 _tokenId, uint16 _slot) internal view returns (bool available) {
         //Any way we can make this more efficient?
