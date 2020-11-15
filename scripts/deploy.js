@@ -55,6 +55,7 @@ async function main() {
     svgStorageFacet,
     wearablesFacet,
     escrowFacet,
+    shopFacet,
   ] = await deployFacets(
     'DiamondCutFacet',
     'DiamondLoupeFacet',
@@ -62,7 +63,8 @@ async function main() {
     'AavegotchiFacet',
     'SvgStorageFacet',
     'WearablesFacet',
-    'EscrowFacet'
+    'EscrowFacet',
+    'ShopFacet'
   )
 
   let ghstDiamond
@@ -95,7 +97,8 @@ async function main() {
       ['AavegotchiFacet', aavegotchiFacet],
       ['SvgStorageFacet', svgStorageFacet],
       ['WearablesFacet', wearablesFacet],
-      ['EscrowFacet', escrowFacet]
+      ['EscrowFacet', escrowFacet],
+      ['ShopFacet', shopFacet]
     ],
     owner: account,
     otherArgs: [account, ghstDiamond.address]
@@ -185,7 +188,8 @@ async function main() {
     ghstDiamond: ghstDiamond,
     wearablesFacet: wearablesFacet,
     aavegotchiFacet: aavegotchiFacet,
-    escrowFacet: escrowFacet
+    escrowFacet: escrowFacet,
+    shopFacet: shopFacet
   }
 
   // ----------------------------------------------------------------
