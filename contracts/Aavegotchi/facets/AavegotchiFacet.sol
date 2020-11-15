@@ -561,7 +561,7 @@ contract AavegotchiFacet {
         tokenIds_ = s.aavegotchiOwnerEnumeration[_owner];
     }
 
-    function allAavegotchisOfOwner(address _owner) external view returns (AavegotchiInfo[] memory aavegotchiInfos_) {
+    function allAavegotchisOfOwner(address _owner) public view returns (AavegotchiInfo[] memory aavegotchiInfos_) {
         //Haven't tested but should work -- yes sir
         uint256[] memory tokenIds = s.aavegotchiOwnerEnumeration[_owner];
         aavegotchiInfos_ = new AavegotchiInfo[](tokenIds.length);
