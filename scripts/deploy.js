@@ -53,14 +53,16 @@ async function main() {
     ownershipFacet,
     aavegotchiFacet,
     svgStorageFacet,
-    wearablesFacet
+    wearablesFacet,
+    escrowFacet,
   ] = await deployFacets(
     'DiamondCutFacet',
     'DiamondLoupeFacet',
     'OwnershipFacet',
     'AavegotchiFacet',
     'SvgStorageFacet',
-    'WearablesFacet'
+    'WearablesFacet',
+    'EscrowFacet'
   )
 
   let ghstDiamond
@@ -92,7 +94,8 @@ async function main() {
       ['OwnershipFacet', ownershipFacet],
       ['AavegotchiFacet', aavegotchiFacet],
       ['SvgStorageFacet', svgStorageFacet],
-      ['WearablesFacet', wearablesFacet]
+      ['WearablesFacet', wearablesFacet],
+      ['EscrowFacet', escrowFacet]
     ],
     owner: account,
     otherArgs: [account, ghstDiamond.address]
@@ -106,9 +109,11 @@ async function main() {
 
   aavegotchiFacet = await ethers.getContractAt('AavegotchiFacet', aavegotchiDiamond.address)
 
+  escrowFacet = await ethers.getContractAt('EscrowFacet', aavegotchiDiamond.address)
+
   // add collateral info
   console.log('Adding Collateral Types')
-  tx = await aavegotchiFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstDiamond.address))
+  tx = await escrowFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstDiamond.address))
   receipt = await tx.wait()
   console.log('Adding Collateral Types gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
@@ -179,7 +184,8 @@ async function main() {
     aavegotchiDiamond: aavegotchiDiamond,
     ghstDiamond: ghstDiamond,
     wearablesFacet: wearablesFacet,
-    aavegotchiFacet: aavegotchiFacet
+    aavegotchiFacet: aavegotchiFacet,
+    escrowFacet: escrowFacet
   }
 
   // ----------------------------------------------------------------

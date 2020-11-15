@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "../libraries/LibAppStorage.sol";
 import "../facets/AavegotchiFacet.sol";
+import "../facets/EscrowFacet.sol";
 
 interface IAavegotchiDiamond {
     function buyPortals(uint256 _ghst) external;
@@ -45,7 +46,7 @@ interface IAavegotchiDiamond {
 
     function isApprovedForAll(address _owner, address _operator) external view returns (bool approved);
 
-    function addCollateralTypes(AavegotchiFacet.AavegotchiCollateralTypeIO[] calldata _collateralTypes) external;
+    function addCollateralTypes(EscrowFacet.AavegotchiCollateralTypeIO[] calldata _collateralTypes) external;
 
     function removeCollateralType(address _collateralType) external;
 

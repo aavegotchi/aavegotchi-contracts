@@ -13,6 +13,7 @@ const truffleAssert = require('truffle-assertions')
 // const { deployProject } = require('../scripts/deploy-ganache.js')
 
 const { deployProject } = require('../scripts/deploy.js')
+const { wearableTypes } = require('../scripts/wearableTypes.js')
 
 describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   // let svgStorage
@@ -21,6 +22,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   let ghstDiamond
   let aavegotchiFacet
   let wearablesFacet
+  let escrowFacet
   let account
 
   let testAavegotchiId = "0"
@@ -35,6 +37,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     aavegotchiDiamond = deployVars.aavegotchiDiamond
     aavegotchiFacet = deployVars.aavegotchiFacet
     wearablesFacet = deployVars.wearablesFacet
+    escrowFacet = deployVars.escrowFacet
     ghstDiamond = deployVars.ghstDiamond
   })
 
@@ -45,7 +48,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   })
 
   it('Should show all whitelisted collaterals', async function () {
-    const collaterals = await aavegotchiFacet.getCollateralInfo()
+    const collaterals = await escrowFacet.getCollateralInfo()
     const collateral = collaterals[0]
     expect(collateral.conversionRate).to.equal(500)
     expect(collaterals.length).to.equal(7)
@@ -133,7 +136,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const currentStake = BigNumber.from(aavegotchi.stakedAmount)
 
     // Let's double the stake
-    await aavegotchiFacet.increaseStake('0', currentStake.toString())
+    await escrowFacet.increaseStake('0', currentStake.toString())
     aavegotchi = await aavegotchiFacet.getAavegotchi('0')
     const finalStake = BigNumber.from(aavegotchi.stakedAmount)
     expect(finalStake).to.equal(currentStake.add(currentStake))
@@ -147,7 +150,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const minimumStake = BigNumber.from(aavegotchi.minimumStake)
 
     const available = currentStake.sub(minimumStake)
-    await aavegotchiFacet.decreaseStake('0', available)
+    await escrowFacet.decreaseStake('0', available)
 
     aavegotchi = await aavegotchiFacet.getAavegotchi('0')
     currentStake = BigNumber.from(aavegotchi.stakedAmount)
@@ -162,7 +165,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const aavegotchi = await aavegotchiFacet.getAavegotchi('0')
     let score = await aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(599)
-    await aavegotchiFacet.updateCollateralModifiers(aavegotchi.collateral, [2, 0, 0, 0, 0, 0])
+    await escrowFacet.updateCollateralModifiers(aavegotchi.collateral, [2, 0, 0, 0, 0, 0])
     score = await aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(602)
   })
@@ -236,11 +239,24 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   })
 
   it('Equipping Wearables alters base rarity score', async function () {
+
+    //Wearables sanity check
+    let equipped = await wearablesFacet.equippedWearables(testAavegotchiId)
+    expect(equipped[testSlot]).to.equal(0)
     let originalScore = await aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
+
+    //Equip a wearable
     await wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], [testSlot])
+
+    //Calculate bonuses
+    const modifiers = wearableTypes[testWearableId].traitModifiers
+    let wearableTraitsBonus = 0
+    const rarityScoreModifier = wearableTypes[testWearableId].rarityScoreModifier
+    modifiers.forEach((val) => { wearableTraitsBonus += val });
+
+    //Retrieve the final score
     let augmentedScore = await aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
-    //Wearable increases rarity by 20
-    expect(augmentedScore).to.equal(Number(originalScore) + 20)
+    expect(augmentedScore).to.equal(Number(originalScore) + rarityScoreModifier + wearableTraitsBonus)
   })
 
   it('Can equip multi-slot wearables', async function () {
