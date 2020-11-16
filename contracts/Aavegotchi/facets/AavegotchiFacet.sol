@@ -285,11 +285,6 @@ contract AavegotchiFacet {
             }
         }
 
-        //Wearables
-        for (uint16 index = 0; index < s.wearableSlotsLength; index++) {
-            // s.aavegotchis[_tokenId].equippedWearables[index];
-        }
-
         svg_ = abi.encodePacked(
             "<style>.primary{fill:#",
             details.primaryColor,
@@ -312,8 +307,30 @@ contract AavegotchiFacet {
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             numericTraits[i] = s.aavegotchis[_tokenId].numericTraits[i];
         }
-
         svg_ = getAavegotchiSvgLayers(s.aavegotchis[_tokenId].collateralType, numericTraits);
+
+        //Wearables
+        bytes memory wearablesSvg;
+        for (uint16 slotPosition; slotPosition < s.wearableSlotsLength; slotPosition++) {
+            uint256 wearableId = s.aavegotchis[_tokenId].equippedWearables[slotPosition];
+            if (wearableId > 0) {
+                WearableType storage wearableType = s.wearableTypes[wearableId];
+                // right hand, then flip the wearable
+                if (slotPosition == 5) {
+                    wearablesSvg = abi.encodePacked(
+                        wearablesSvg,
+                        '<g transform="scale(-1, 1) translate(-64, 0)">',
+                        LibSvg.getSvg("wearables", wearableType.svgId),
+                        "</g>"
+                    );
+                } else {
+                    wearablesSvg = abi.encodePacked(wearablesSvg, LibSvg.getSvg("wearables", wearableType.svgId));
+                }
+            }
+        }
+        if (wearablesSvg.length > 0) {
+            svg_ = abi.encodePacked(svg_, wearablesSvg);
+        }
     }
 
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables

@@ -98,10 +98,11 @@ struct AppStorage {
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) nftBalances;
     // owner => (id => balance)
 
-    //Maybe should begin at 1, so we can use 0 in the equippedWearables array?
+    //Maybe should begin at 1, so we can use 0 in the equippedWearables array?   Use it for what?
     uint16 wearableSlotsLength;
     WearableType[] wearableTypes;
     WearableSet[] wearableSets;
+    // owner => (wearableId => quantity)
     mapping(address => mapping(uint256 => uint256)) wearables;
     // owner => aavegotchiOwnerEnumeration
     mapping(address => uint32[]) aavegotchiOwnerEnumeration;

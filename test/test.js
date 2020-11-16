@@ -86,15 +86,13 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(ghosts.length).to.equal(10)
   })
 
-  /*
   it('Should show SVGs', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
     const svgs = await aavegotchiFacet.portalAavegotchisSvg(tokenId)
-    console.log('svgs:', svgs[0])
+    // console.log('svgs:', svgs[0])
     expect(svgs.length).to.equal(10)
   })
-  */
 
   it('Should claim an Aavegotchi', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
@@ -225,6 +223,11 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(equipped.length).to.equal(11)
     // First item in array is 1 because that wearable has been equipped
     expect(equipped[testSlot]).to.equal(testWearableId)
+  })
+
+  it('Can display aavegotchi with wearables', async function () {
+    const svg = await aavegotchiFacet.getAavegotchiSvg(testAavegotchiId)
+    // console.log(svg)
   })
 
   it('Cannot equip wearables in the wrong slot', async function () {

@@ -139,6 +139,7 @@ contract WearablesFacet {
 
     function addWearableTypes(WearableType[] calldata _wearableTypes) external {
         LibDiamond.enforceIsContractOwner();
+        // wearable ids start at 1.  0 means no wearable
         for (uint256 i; i < _wearableTypes.length; i++) {
             uint256 wearableId = s.wearableTypes.length;
             s.wearableTypes.push(_wearableTypes[i]);
