@@ -383,14 +383,15 @@ contract AavegotchiFacet {
         aavegotchiInfo_.numericTraits = s.aavegotchis[_tokenId].numericTraits;
         aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
         aavegotchiInfo_.escrow = s.aavegotchis[_tokenId].escrow;
-        aavegotchiInfo_.stakedAmount = IERC20(aavegotchiInfo_.collateral).balanceOf(aavegotchiInfo_.escrow);
+        if (aavegotchiInfo_.collateral == address(0)) {
+            aavegotchiInfo_.stakedAmount = 0;
+        } else {
+            aavegotchiInfo_.stakedAmount = IERC20(aavegotchiInfo_.collateral).balanceOf(aavegotchiInfo_.escrow);
+        }
         aavegotchiInfo_.minimumStake = s.aavegotchis[_tokenId].minimumStake;
-
-        //New
         aavegotchiInfo_.interactionCount = s.aavegotchis[_tokenId].interactionCount;
         aavegotchiInfo_.experience = s.aavegotchis[_tokenId].experience;
         aavegotchiInfo_.level = s.aavegotchis[_tokenId].level;
-
         return aavegotchiInfo_;
     }
 
@@ -569,7 +570,6 @@ contract AavegotchiFacet {
         //Haven't tested but should work -- yes sir
         uint32[] memory tokenIds = s.aavegotchiOwnerEnumeration[_owner];
         aavegotchiInfos_ = new AavegotchiInfo[](tokenIds.length);
-
         for (uint256 index; index < tokenIds.length; index++) {
             aavegotchiInfos_[index] = getAavegotchi(tokenIds[index]);
         }

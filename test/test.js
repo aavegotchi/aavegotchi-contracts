@@ -23,11 +23,12 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   let aavegotchiFacet
   let wearablesFacet
   let escrowFacet
+  let collateralFacet
   let account
 
-  let testAavegotchiId = "0"
-  let testWearableId = "1"
-  let testSlot = "3"
+  const testAavegotchiId = '0'
+  const testWearableId = '1'
+  const testSlot = '3'
   // let erc721
   // let account
 
@@ -37,6 +38,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     aavegotchiDiamond = deployVars.aavegotchiDiamond
     aavegotchiFacet = deployVars.aavegotchiFacet
     wearablesFacet = deployVars.wearablesFacet
+    collateralFacet = deployVars.collateralFacet
     escrowFacet = deployVars.escrowFacet
     ghstDiamond = deployVars.ghstDiamond
   })
@@ -48,7 +50,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   })
 
   it('Should show all whitelisted collaterals', async function () {
-    const collaterals = await escrowFacet.getCollateralInfo()
+    const collaterals = await collateralFacet.getCollateralInfo()
     const collateral = collaterals[0]
     expect(collateral.conversionRate).to.equal(500)
     expect(collaterals.length).to.equal(7)
@@ -165,7 +167,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const aavegotchi = await aavegotchiFacet.getAavegotchi('0')
     let score = await aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(599)
-    await escrowFacet.updateCollateralModifiers(aavegotchi.collateral, [2, 0, 0, 0, 0, 0])
+    await collateralFacet.updateCollateralModifiers(aavegotchi.collateral, [2, 0, 0, 0, 0, 0])
     score = await aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(602)
   })
@@ -177,23 +179,22 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   */
 
   it('Can mint wearables', async function () {
-
-    let balance = await wearablesFacet.balanceOf(account, "0")
+    let balance = await wearablesFacet.balanceOf(account, '0')
     expect(balance).to.equal(0)
-    await truffleAssert.reverts(wearablesFacet.mintWearables(["3"], ["10"]), "WearablesFacet: Wearable does not exist")
-    await truffleAssert.reverts(wearablesFacet.mintWearables(["0"], ["10"]), "WearablesFacet: Total quantity exceeds max quantity")
-    await wearablesFacet.mintWearables([testWearableId], ["10"])
+    await truffleAssert.reverts(wearablesFacet.mintWearables(['3'], ['10']), 'WearablesFacet: Wearable does not exist')
+    await truffleAssert.reverts(wearablesFacet.mintWearables(['0'], ['10']), 'WearablesFacet: Total quantity exceeds max quantity')
+    await wearablesFacet.mintWearables([testWearableId], ['10'])
     balance = await wearablesFacet.balanceOf(account, testWearableId)
     expect(balance).to.equal(10)
   })
 
   it('Can transfer wearables to Aavegotchi', async function () {
     await wearablesFacet.transferToParent(
-      account,  //address _from,
+      account, // address _from,
       aavegotchiFacet.address, // address _toContract,
-      testAavegotchiId,  //uint256 _toTokenId,
+      testAavegotchiId, // uint256 _toTokenId,
       testWearableId, // uint256 _id,
-      "10" // uint256 _value
+      '10' // uint256 _value
     )
     const balance = await wearablesFacet.balanceOfToken(aavegotchiFacet.address, testAavegotchiId, testWearableId)
     expect(balance).to.equal(10)
@@ -201,33 +202,33 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
   it('Can transfer wearables from Aavegotchi back to owner', async function () {
     await wearablesFacet.transferFromParent(
-      aavegotchiFacet.address, //address _fromContract,
-      testAavegotchiId, //uint256 _fromTokenId,
-      account, //address _to,
-      testWearableId, //uint256 _id,
-      "10" //uint256 _value
+      aavegotchiFacet.address, // address _fromContract,
+      testAavegotchiId, // uint256 _fromTokenId,
+      account, // address _to,
+      testWearableId, // uint256 _id,
+      '10' // uint256 _value
     )
     const balance = await wearablesFacet.balanceOf(account, testWearableId)
     expect(balance).to.equal(10)
   })
 
   it('Can equip wearables', async function () {
-    //First transfer wearables to parent Aavegotchi
+    // First transfer wearables to parent Aavegotchi
     await wearablesFacet.transferToParent(
-      account, aavegotchiFacet.address, testAavegotchiId, testWearableId, "10")
+      account, aavegotchiFacet.address, testAavegotchiId, testWearableId, '10')
     expect(await wearablesFacet.balanceOfToken(aavegotchiFacet.address, testAavegotchiId, testWearableId)).to.equal(10)
 
-    //Now let's equip
+    // Now let's equip
     await wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], [testSlot])
     const equipped = await wearablesFacet.equippedWearables(testAavegotchiId)
 
     expect(equipped.length).to.equal(11)
-    //First item in array is 1 because that wearable has been equipped
+    // First item in array is 1 because that wearable has been equipped
     expect(equipped[testSlot]).to.equal(testWearableId)
   })
 
   it('Cannot equip wearables in the wrong slot', async function () {
-    await truffleAssert.reverts(wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], ["4"]), "WearablesFacet: Cannot be equipped in this slot")
+    await truffleAssert.reverts(wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], ['4']), 'WearablesFacet: Cannot be equipped in this slot')
   })
 
   it('Can de-equip wearables', async function () {
@@ -239,38 +240,36 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   })
 
   it('Equipping Wearables alters base rarity score', async function () {
-
-    //Wearables sanity check
-    let equipped = await wearablesFacet.equippedWearables(testAavegotchiId)
+    // Wearables sanity check
+    const equipped = await wearablesFacet.equippedWearables(testAavegotchiId)
     expect(equipped[testSlot]).to.equal(0)
-    let originalScore = await aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
+    const originalScore = await aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
 
-    //Equip a wearable
+    // Equip a wearable
     await wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], [testSlot])
 
-    //Calculate bonuses
+    // Calculate bonuses
     const modifiers = wearableTypes[testWearableId].traitModifiers
     let wearableTraitsBonus = 0
     const rarityScoreModifier = wearableTypes[testWearableId].rarityScoreModifier
-    modifiers.forEach((val) => { wearableTraitsBonus += val });
+    modifiers.forEach((val) => { wearableTraitsBonus += val })
 
-    //Retrieve the final score
-    let augmentedScore = await aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
+    // Retrieve the final score
+    const augmentedScore = await aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
     expect(augmentedScore).to.equal(Number(originalScore) + rarityScoreModifier + wearableTraitsBonus)
   })
 
   it('Can equip multi-slot wearables', async function () {
-    const multiSlotWearableId = "2"
-    await wearablesFacet.mintWearables([multiSlotWearableId], ["10"])
+    const multiSlotWearableId = '2'
+    await wearablesFacet.mintWearables([multiSlotWearableId], ['10'])
 
     await wearablesFacet.transferToParent(
-      account, aavegotchiFacet.address, testAavegotchiId, multiSlotWearableId, "10")
-    await wearablesFacet.equipWearables(testAavegotchiId, [multiSlotWearableId], ["9"])
+      account, aavegotchiFacet.address, testAavegotchiId, multiSlotWearableId, '10')
+    await wearablesFacet.equipWearables(testAavegotchiId, [multiSlotWearableId], ['9'])
     const equipped = await wearablesFacet.equippedWearables(testAavegotchiId)
 
-    //This wearable gets equipped in the ninth slot, which takes up 0&1 slots
-    expect(equipped[9]).to.equal("2")
-
+    // This wearable gets equipped in the ninth slot, which takes up 0&1 slots
+    expect(equipped[9]).to.equal('2')
   })
 
   /*
@@ -354,7 +353,6 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
     // expect(aavegotchi.interactionCount).to.equal(4)
   })
-
 
   */
 })
