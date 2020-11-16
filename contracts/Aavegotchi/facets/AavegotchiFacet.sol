@@ -88,7 +88,7 @@ contract AavegotchiFacet {
         for (uint256 i; i < _ghst / 100e18; i++) {
             uint256 tokenId = s.totalSupply++;
             uint32 ownerIndex = uint32(s.aavegotchiOwnerEnumeration[msg.sender].length);
-            s.aavegotchiOwnerEnumeration[msg.sender].push(tokenId);
+            s.aavegotchiOwnerEnumeration[msg.sender].push(uint32(tokenId));
             s.aavegotchis[tokenId].owner = msg.sender;
             s.aavegotchis[tokenId].ownerEnumerationIndex = ownerIndex;
             emit Transfer(address(0), msg.sender, tokenId);
@@ -202,11 +202,9 @@ contract AavegotchiFacet {
 
         s.aavegotchis[_tokenId].status = LibAppStorage.STATUS_AAVEGOTCHI;
 
-        s.aavegotchis[_tokenId].stakedAmount = uint96(_stakeAmount);
-
-        address collateralAddress = address(new CollateralEscrow(option.collateralType));
-        s.aavegotchis[_tokenId].collateralAddress = collateralAddress;
-        LibERC20.transferFrom(option.collateralType, msg.sender, collateralAddress, _stakeAmount);
+        address escrow = address(new CollateralEscrow(option.collateralType));
+        s.aavegotchis[_tokenId].escrow = escrow;
+        LibERC20.transferFrom(option.collateralType, msg.sender, escrow, _stakeAmount);
     }
 
     function ghstAddress() external view returns (address contract_) {
@@ -367,6 +365,7 @@ contract AavegotchiFacet {
         uint8 status;
         uint8[NUMERIC_TRAITS_NUM] numericTraits;
         address collateral;
+        address escrow;
         uint256 stakedAmount;
         uint256 minimumStake;
         //New
@@ -383,7 +382,8 @@ contract AavegotchiFacet {
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
         aavegotchiInfo_.numericTraits = s.aavegotchis[_tokenId].numericTraits;
         aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
-        aavegotchiInfo_.stakedAmount = s.aavegotchis[_tokenId].stakedAmount;
+        aavegotchiInfo_.escrow = s.aavegotchis[_tokenId].escrow;
+        aavegotchiInfo_.stakedAmount = IERC20(aavegotchiInfo_.collateral).balanceOf(aavegotchiInfo_.escrow);
         aavegotchiInfo_.minimumStake = s.aavegotchis[_tokenId].minimumStake;
 
         //New
@@ -561,13 +561,13 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
     }
 
-    function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
+    function allAavegotchiIdsOfOwner(address _owner) external view returns (uint32[] memory tokenIds_) {
         tokenIds_ = s.aavegotchiOwnerEnumeration[_owner];
     }
 
     function allAavegotchisOfOwner(address _owner) external view returns (AavegotchiInfo[] memory aavegotchiInfos_) {
         //Haven't tested but should work -- yes sir
-        uint256[] memory tokenIds = s.aavegotchiOwnerEnumeration[_owner];
+        uint32[] memory tokenIds = s.aavegotchiOwnerEnumeration[_owner];
         aavegotchiInfos_ = new AavegotchiInfo[](tokenIds.length);
 
         for (uint256 index; index < tokenIds.length; index++) {
@@ -602,7 +602,7 @@ contract AavegotchiFacet {
         uint256 _tokenId,
         bytes calldata _data
     ) external {
-        transferFromInternal(_from, _to, _tokenId);
+        internalTransferFrom(_from, _to, _tokenId);
         uint256 size;
         assembly {
             size := extcodesize(_to)
@@ -626,7 +626,7 @@ contract AavegotchiFacet {
         address _to,
         uint256 _tokenId
     ) external {
-        transferFromInternal(_from, _to, _tokenId);
+        internalTransferFrom(_from, _to, _tokenId);
         uint256 size;
         assembly {
             size := extcodesize(_to)
@@ -654,11 +654,11 @@ contract AavegotchiFacet {
         address _to,
         uint256 _tokenId
     ) external {
-        transferFromInternal(_from, _to, _tokenId);
+        internalTransferFrom(_from, _to, _tokenId);
     }
 
     // This function is used by transfer functions
-    function transferFromInternal(
+    function internalTransferFrom(
         address _from,
         address _to,
         uint256 _tokenId
@@ -674,11 +674,11 @@ contract AavegotchiFacet {
         require(_from == owner, "ERC721: _from is not owner, transfer failed");
         s.aavegotchis[_tokenId].owner = _to;
         s.aavegotchis[_tokenId].ownerEnumerationIndex = uint32(s.aavegotchiOwnerEnumeration[_to].length);
-        s.aavegotchiOwnerEnumeration[_to].push(_tokenId);
+        s.aavegotchiOwnerEnumeration[_to].push(uint32(_tokenId));
         uint256 lastIndex = s.aavegotchiOwnerEnumeration[_from].length - 1;
         if (index != lastIndex) {
             uint256 lastTokenId = s.aavegotchiOwnerEnumeration[_from][lastIndex];
-            s.aavegotchiOwnerEnumeration[_from][index] = lastTokenId;
+            s.aavegotchiOwnerEnumeration[_from][index] = uint32(lastTokenId);
             s.aavegotchis[lastTokenId].ownerEnumerationIndex = uint32(index);
         }
         s.aavegotchiOwnerEnumeration[_from].pop();

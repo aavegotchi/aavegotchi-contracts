@@ -140,7 +140,9 @@ contract WearablesFacet {
     function addWearableTypes(WearableType[] calldata _wearableTypes) external {
         LibDiamond.enforceIsContractOwner();
         for (uint256 i; i < _wearableTypes.length; i++) {
+            uint256 wearableId = s.wearableTypes.length;
             s.wearableTypes.push(_wearableTypes[i]);
+            emit TransferSingle(msg.sender, address(0), address(0), wearableId, 0);
         }
     }
 
@@ -172,12 +174,11 @@ contract WearablesFacet {
     }
 
     // Returns balance for each wearable that exists for an account
-    function wearablesBalances(address _account) external view returns (uint256[] memory bals) {
+    function wearablesBalances(address _account) external view returns (uint256[] memory bals_) {
         uint256 count = s.wearableTypes.length;
-        bals = new uint256[](count - 1);
-        for (uint256 i = 1; i < count; i++) {
-            uint256 id = i << 240;
-            bals[i - 1] = s.wearables[_account][id];
+        bals_ = new uint256[](count);
+        for (uint256 id = 0; id < count; id++) {
+            bals_[id] = s.wearables[_account][id];
         }
     }
 

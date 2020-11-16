@@ -24,7 +24,6 @@ struct Aavegotchi {
     uint8 status;
     uint16 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
     address collateralType;
-    uint96 stakedAmount;
     uint88 minimumStake; //The minimum amount of collateral that must be staked. Set upon creation.
     //New traits
     uint16 level; //The level of this Aavegotchi begins at 1.
@@ -32,7 +31,7 @@ struct Aavegotchi {
     uint40 lastInteracted; //The last time this Aavegotchi was interacted with
     int16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
     uint16 streak; //The streak bonus
-    address collateralAddress;
+    address escrow;
 }
 
 struct WearableType {
@@ -105,7 +104,7 @@ struct AppStorage {
     WearableSet[] wearableSets;
     mapping(address => mapping(uint256 => uint256)) wearables;
     // owner => aavegotchiOwnerEnumeration
-    mapping(address => uint256[]) aavegotchiOwnerEnumeration;
+    mapping(address => uint32[]) aavegotchiOwnerEnumeration;
     mapping(uint256 => Aavegotchi) aavegotchis;
     // owner => (operator => bool)
     mapping(address => mapping(address => bool)) operators;

@@ -1,12 +1,17 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
 import "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 import "../../shared/libraries/LibERC20.sol";
+import "../../shared/interfaces/IERC20.sol";
 
 contract EscrowFacet {
+    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
+    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
+
     AppStorage internal s;
 
     struct AavegotchiCollateralTypeIO {
@@ -19,87 +24,77 @@ contract EscrowFacet {
         _;
     }
 
-    function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external {
-        LibDiamond.enforceIsContractOwner();
-        for (uint256 i; i < _collateralTypes.length; i++) {
-            address collateralType = _collateralTypes[i].collateralType;
-            s.collateralTypes.push(collateralType);
-            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
-            s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
-        }
+    function collateralBalance(uint256 _tokenId)
+        external
+        view
+        returns (
+            address collateralType_,
+            address escrow_,
+            uint256 balance_
+        )
+    {
+        escrow_ = s.aavegotchis[_tokenId].escrow;
+        require(escrow_ != address(0), "EscrowFacet: Does not have an escrow");
+        collateralType_ = s.aavegotchis[_tokenId].collateralType;
+        balance_ = IERC20(collateralType_).balanceOf(escrow_);
     }
 
-    function updateCollateralModifiers(address _collateralType, int8[6] memory _modifiers) external onlyDao {
-        LibDiamond.enforceIsContractOwner();
-        s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
-    }
-
-    function removeCollateralType(address _collateralType) external {
-        LibDiamond.enforceIsContractOwner();
-        uint256 index = s.collateralTypeIndexes[_collateralType];
-        require(index > 0, "Aavegotchi: _collateral does not exist");
-        index--;
-        uint256 lastIndex = s.collateralTypes.length - 1;
-        if (index != lastIndex) {
-            address lastCollateral = s.collateralTypes[lastIndex];
-            s.collateralTypes[index] = lastCollateral;
-            s.collateralTypeIndexes[lastCollateral] = index + 1;
-        }
-        s.collateralTypes.pop();
-        delete s.collateralTypeIndexes[_collateralType];
-        delete s.collateralTypeInfo[_collateralType];
-    }
-
-    function collaterals() external view returns (address[] memory collateralTypes_) {
-        collateralTypes_ = s.collateralTypes;
-    }
-
-    function getCollateralInfo() external view returns (AavegotchiCollateralTypeInfo[] memory collateralInfo) {
-        address[] memory collateralTypes_ = s.collateralTypes;
-
-        collateralInfo = new AavegotchiCollateralTypeInfo[](collateralTypes_.length);
-
-        for (uint256 i; i < collateralTypes_.length; i++) {
-            address collateral = collateralTypes_[i];
-            collateralInfo[i] = s.collateralTypeInfo[collateral];
-        }
-    }
-
-    function increaseStake(uint256 _tokenId, uint96 _stakeAmount) external {
+    function increaseStake(uint256 _tokenId, uint256 _stakeAmount) external {
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
-        uint96 currentStake = s.aavegotchis[_tokenId].stakedAmount;
+        address escrow = s.aavegotchis[_tokenId].escrow;
+        require(escrow != address(0), "EscrowFacet: Does not have an escrow");
         address collateralType = s.aavegotchis[_tokenId].collateralType;
-        s.aavegotchis[_tokenId].stakedAmount = currentStake + _stakeAmount;
-
-        //To do: change this from address(this) to the Aavegotchi's personal escrow contract address
-        LibERC20.transferFrom(collateralType, msg.sender, address(this), _stakeAmount);
+        LibERC20.transferFrom(collateralType, msg.sender, escrow, _stakeAmount);
     }
 
     function decreaseStake(uint256 _tokenId, uint96 _reduceAmount) external {
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can decrease stake");
-        uint96 currentStake = s.aavegotchis[_tokenId].stakedAmount;
+        address escrow = s.aavegotchis[_tokenId].escrow;
+        require(escrow != address(0), "EscrowFacet: Does not have an escrow");
+
+        address collateralType = s.aavegotchis[_tokenId].collateralType;
+        uint256 currentStake = IERC20(collateralType).balanceOf(escrow);
         uint256 minimumStake = s.aavegotchis[_tokenId].minimumStake;
 
-        // ***CHECK for underflow here? ***
-        require(currentStake - _reduceAmount >= minimumStake, "AavegotchiFacet: Cannot reduce below minimum stake");
-        address collateralType = s.aavegotchis[_tokenId].collateralType;
-        s.aavegotchis[_tokenId].stakedAmount = currentStake - _reduceAmount;
-
-        //To do: change this from address(this) to the Aavegotchi's personal escrow contract address
-        LibERC20.transferFrom(collateralType, address(this), msg.sender, _reduceAmount);
+        require(currentStake - _reduceAmount >= minimumStake, "EscrowFacet: Cannot reduce below minimum stake");
+        LibERC20.transferFrom(collateralType, escrow, msg.sender, _reduceAmount);
     }
 
     function decreaseAndDestroy(uint256 _tokenId) external {
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can decrease stake");
-        uint128 currentStake = s.aavegotchis[_tokenId].stakedAmount;
+        address escrow = s.aavegotchis[_tokenId].escrow;
+        require(escrow != address(0), "EscrowFacet: Does not have an escrow");
+
+        // check that all wearables have been removed from inventory before burning
+        uint256 wearableTypesLength = s.wearableTypes.length;
+        for (uint256 wearableTypeId; wearableTypeId < wearableTypesLength; wearableTypeId++) {
+            require(s.nftBalances[address(this)][_tokenId][wearableTypeId] == 0, "EscrowFacet: Can't burn aavegotchi with wearables");
+        }
+
+        // remove from owner enumeration storage
+        uint256 index = s.aavegotchis[_tokenId].ownerEnumerationIndex;
+        uint256 lastIndex = s.aavegotchiOwnerEnumeration[msg.sender].length - 1;
+        if (index != lastIndex) {
+            uint256 lastTokenId = s.aavegotchiOwnerEnumeration[msg.sender][lastIndex];
+            s.aavegotchiOwnerEnumeration[msg.sender][index] = uint32(lastTokenId);
+            s.aavegotchis[lastTokenId].ownerEnumerationIndex = uint32(index);
+        }
+        s.aavegotchiOwnerEnumeration[msg.sender].pop();
+
+        // delete token approval if any
+        if (s.approved[_tokenId] != address(0)) {
+            delete s.approved[_tokenId];
+            emit Approval(msg.sender, address(0), _tokenId);
+        }
+
+        // transfer all collateral to msg.sender
         address collateralType = s.aavegotchis[_tokenId].collateralType;
+        LibERC20.transferFrom(collateralType, escrow, msg.sender, IERC20(collateralType).balanceOf(escrow));
 
-        //To do: check that all wearables have been removed from inventory before burning
+        // delete aavegotchi info
+        delete s.aavegotchiNamesUsed[s.aavegotchis[_tokenId].name];
+        delete s.aavegotchis[_tokenId];
 
-        //To do: change this from address(this) to the Aavegotchi's personal escrow contract address
-
-        LibERC20.transferFrom(collateralType, address(this), msg.sender, currentStake);
-
-        //To do: Burn the Aavegotchi
+        emit Transfer(msg.sender, address(0), _tokenId);
     }
 }
