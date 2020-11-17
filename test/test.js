@@ -86,6 +86,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(ghosts.length).to.equal(10)
   })
 
+  /*
   it('Should show SVGs', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
@@ -93,6 +94,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     // console.log('svgs:', svgs[0])
     expect(svgs.length).to.equal(10)
   })
+  */
 
   it('Should claim an Aavegotchi', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
@@ -145,20 +147,17 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   })
 
   it('Can decrease stake, but not below minimum', async function () {
-    let aavegotchi = await aavegotchiFacet.getAavegotchi('0')
+    let aavegotchi = await aavegotchiFacet.getAavegotchi(testAavegotchiId)
     let currentStake = BigNumber.from(aavegotchi.stakedAmount)
     const minimumStake = BigNumber.from(aavegotchi.minimumStake)
 
     const available = currentStake.sub(minimumStake)
-    await escrowFacet.decreaseStake('0', available)
+    await truffleAssert.reverts(escrowFacet.decreaseStake(testAavegotchiId, currentStake), "EscrowFacet: Cannot reduce below minimum stake")
+    await escrowFacet.decreaseStake(testAavegotchiId, available)
 
-    aavegotchi = await aavegotchiFacet.getAavegotchi('0')
+    aavegotchi = await aavegotchiFacet.getAavegotchi(testAavegotchiId)
     currentStake = BigNumber.from(aavegotchi.stakedAmount)
-
     expect(currentStake).to.equal(minimumStake)
-
-    // Todo: Below min stake Revert check
-    // Todo: Balance check
   })
 
   it('Contract Owner (Later DAO) can update collateral modifiers', async function () {
@@ -170,11 +169,38 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(score).to.equal(602)
   })
 
-  /*
+
   it('Can decrease stake and destroy Aavegotchi', async function () {
-    // To do: burn Aavegotchi
+
+    //Buy portal
+    const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
+    await aavegotchiFacet.buyPortals(buyAmount)
+
+    let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    expect(myPortals.length).to.equal(2)
+    //Open portal
+    await aavegotchiFacet.openPortal("1")
+    const ghosts = await aavegotchiFacet.portalAavegotchiTraits("1")
+    const selectedGhost = ghosts[0]
+    const minStake = selectedGhost.minimumStake
+    let initialBalance = BigNumber.from(await ghstDiamond.balanceOf(account))
+
+    //Claim ghost and stake
+    await aavegotchiFacet.claimAavegotchiFromPortal("1", 0, minStake)
+    let balanceAfterClaim = BigNumber.from(await ghstDiamond.balanceOf(account))
+    expect(balanceAfterClaim).to.equal(initialBalance.sub(minStake))
+
+    //Burn Aavegotchi and return collateral stake
+    await escrowFacet.decreaseAndDestroy("1")
+    let balanceAfterDestroy = BigNumber.from(await ghstDiamond.balanceOf(account))
+    expect(balanceAfterDestroy).to.equal(initialBalance)
+
+    //Should only have 1 portal now
+    myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+    expect(myPortals.length).to.equal(1)
+
   })
-  */
+
 
   it('Can mint wearables', async function () {
     let balance = await wearablesFacet.balanceOf(account, '0')
@@ -225,10 +251,12 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(equipped[testSlot]).to.equal(testWearableId)
   })
 
+  /*
   it('Can display aavegotchi with wearables', async function () {
     const svg = await aavegotchiFacet.getAavegotchiSvg(testAavegotchiId)
-    // console.log(svg)
+    console.log(svg)
   })
+  */
 
   it('Cannot equip wearables in the wrong slot', async function () {
     await truffleAssert.reverts(wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], ['4']), 'WearablesFacet: Cannot be equipped in this slot')
