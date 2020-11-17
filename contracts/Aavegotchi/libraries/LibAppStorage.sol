@@ -13,10 +13,14 @@ eyeColor
 
 struct Aavegotchi {
     //There are 11 available slots. Maybe we should add a few more, just in case?
-    mapping(uint16 => uint256) equippedWearables; //The currently equipped wearables of the Aavegotchi
+    // This 256 bit value is broken up into 16 16-bit slots for storing wearableIds
+    // See helper function that converts this value into a uint16[16] memory equipedWearables
+    uint256 equippedWearables; //The currently equipped wearables of the Aavegotchi
     string name;
     uint256 randomNumber;
-    uint8[6] numericTraits;
+    // each byte is used as an individual trait
+    // see trait helper functions below
+    // uint256 numericTraits;
     address owner;
     uint32 ownerEnumerationIndex;
     // track status of aavegotchi
@@ -141,5 +145,5 @@ library LibAppStorage {
         }
     }
 
-    function addWearableTypes(AppStorage storage s, WearableType[] memory _wearableTypes) internal {}
+    function storeNumericTraits(uint8[6] memory _numericTraits) internal {}
 }

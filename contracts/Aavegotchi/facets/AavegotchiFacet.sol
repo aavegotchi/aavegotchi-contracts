@@ -37,6 +37,7 @@ contract AavegotchiFacet {
     AppStorage internal s;
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
     uint256 internal constant NUMERIC_TRAITS_NUM = 6;
+    uint256 internal constant EQUIPPED_WEARABLE_SLOTS = 16;
     uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
@@ -112,9 +113,50 @@ contract AavegotchiFacet {
 
     struct PortalAavegotchiTraitsIO {
         uint256 randomNumber;
-        uint8[NUMERIC_TRAITS_NUM] numericTraits;
+        int256[NUMERIC_TRAITS_NUM] numericTraits;
         address collateralType;
         uint256 minimumStake;
+    }
+
+    function toNumericTraits(uint256 _randomNumber) internal pure returns (int256[NUMERIC_TRAITS_NUM] memory numericTraits_) {
+        for (uint256 i; i < numericTraits_.length; i++) {
+            uint256 value = uint8(_randomNumber >> (i * 8));
+            if (value > 99) {
+                value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
+            }
+            numericTraits_[i] = int256(value);
+        }
+    }
+
+    function getNumericTraits(uint256 _tokenId) public view returns (int256[NUMERIC_TRAITS_NUM] memory numericTraits_, int256 wearableBonus_) {
+        uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
+        require(randomNumber != 0, "AavegotchiFacet: Aavegotchi not claimed yet");
+        for (uint256 i; i < numericTraits_.length; i++) {
+            uint256 value = uint8(randomNumber >> (i * 8));
+            if (value > 99) {
+                value = uint256(keccak256(abi.encodePacked(randomNumber, i))) % 100;
+            }
+            numericTraits_[i] = int256(value);
+        }
+        //First get equipped wearables
+        uint256 equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+        for (uint256 i; i < EQUIPPED_WEARABLE_SLOTS; i++) {
+            uint256 wearableId = uint16(equippedWearables >> (i * 16));
+            //wearable is equipped
+            if (wearableId != 0) {
+                WearableType storage wearable = s.wearableTypes[wearableId];
+
+                //Add on rarity score bonus
+                wearableBonus_ += wearable.rarityScoreModifier;
+
+                //Add on trait modifiers
+                int8[NUMERIC_TRAITS_NUM] memory modifiers = wearable.traitModifiers;
+
+                for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
+                    numericTraits_[j] += modifiers[j];
+                }
+            }
+        }
     }
 
     function singlePortalAavegotchiTraits(uint256 _randomNumber, uint256 _option)
@@ -124,9 +166,7 @@ contract AavegotchiFacet {
     {
         uint256 randomNumberN = uint256(keccak256(abi.encodePacked(_randomNumber, _option)));
         singlePortalAavegotchiTraits_.randomNumber = randomNumberN;
-        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-            singlePortalAavegotchiTraits_.numericTraits[i] = uint8(uint256(keccak256(abi.encodePacked(randomNumberN, i))) % 100);
-        }
+        singlePortalAavegotchiTraits_.numericTraits = toNumericTraits(randomNumberN);
         address collateralType = s.collateralTypes[randomNumberN % s.collateralTypes.length];
         singlePortalAavegotchiTraits_.collateralType = collateralType;
 
@@ -160,7 +200,7 @@ contract AavegotchiFacet {
         PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
             address collateralType = l_portalAavegotchiTraits[i].collateralType;
-            uint8[NUMERIC_TRAITS_NUM] memory numericTraits = l_portalAavegotchiTraits[i].numericTraits;
+            int256[NUMERIC_TRAITS_NUM] memory numericTraits = l_portalAavegotchiTraits[i].numericTraits;
             svg_[i] = string(
                 abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">',
@@ -180,7 +220,6 @@ contract AavegotchiFacet {
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
 
         PortalAavegotchiTraitsIO memory option = singlePortalAavegotchiTraits(s.aavegotchis[_tokenId].randomNumber, _option);
-        s.aavegotchis[_tokenId].numericTraits = option.numericTraits;
         s.aavegotchis[_tokenId].randomNumber = option.randomNumber;
         s.aavegotchis[_tokenId].collateralType = option.collateralType;
         s.aavegotchis[_tokenId].minimumStake = uint88(option.minimumStake);
@@ -230,15 +269,15 @@ contract AavegotchiFacet {
         string cheekColor;
         bytes background;
         bytes collateral;
-        uint8 trait;
-        uint8[18] eyeShapeTraitRange;
+        int256 trait;
+        int256[18] eyeShapeTraitRange;
         bytes eyeShape;
         string eyeColor;
-        uint8[8] eyeColorTraitRanges;
+        int256[8] eyeColorTraitRanges;
         string[7] eyeColors;
     }
 
-    function getAavegotchiSvgLayers(address _collateralType, uint8[NUMERIC_TRAITS_NUM] memory _numericTraits)
+    function getAavegotchiSvgLayers(address _collateralType, int256[NUMERIC_TRAITS_NUM] memory _numericTraits)
         internal
         view
         returns (bytes memory svg_)
@@ -255,7 +294,7 @@ contract AavegotchiFacet {
 
         details.trait = _numericTraits[4];
         details.eyeShape;
-        details.eyeShapeTraitRange = [0, 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
+        details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
         for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
             if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
                 details.eyeShape = LibSvg.getSvg("eyeShapes", i);
@@ -268,7 +307,7 @@ contract AavegotchiFacet {
         }
 
         details.trait = _numericTraits[5];
-        details.eyeColorTraitRanges = [0, 2, 10, 25, 75, 90, 98, 100];
+        details.eyeColorTraitRanges = [int256(0), 2, 10, 25, 75, 90, 98, 100];
         details.eyeColors = [
             "FF00FF", // mythical_low
             "0064FF", // rare_low
@@ -303,16 +342,14 @@ contract AavegotchiFacet {
     }
 
     function getAavegotchiSvgLayers(uint256 _tokenId) internal view returns (bytes memory svg_) {
-        uint8[NUMERIC_TRAITS_NUM] memory numericTraits;
-        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-            numericTraits[i] = s.aavegotchis[_tokenId].numericTraits[i];
-        }
+        (int256[NUMERIC_TRAITS_NUM] memory numericTraits, ) = getNumericTraits(_tokenId);
         svg_ = getAavegotchiSvgLayers(s.aavegotchis[_tokenId].collateralType, numericTraits);
 
         //Wearables
+        uint256 equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
         bytes memory wearablesSvg;
-        for (uint16 slotPosition; slotPosition < s.wearableSlotsLength; slotPosition++) {
-            uint256 wearableId = s.aavegotchis[_tokenId].equippedWearables[slotPosition];
+        for (uint256 slotPosition; slotPosition < EQUIPPED_WEARABLE_SLOTS; slotPosition++) {
+            uint256 wearableId = uint16(equippedWearables >> (slotPosition * 16));
             if (wearableId > 0) {
                 WearableType storage wearableType = s.wearableTypes[wearableId];
                 // right hand, then flip the wearable
@@ -380,7 +417,7 @@ contract AavegotchiFacet {
         address owner;
         uint256 randomNumber;
         uint8 status;
-        uint8[NUMERIC_TRAITS_NUM] numericTraits;
+        int256[NUMERIC_TRAITS_NUM] numericTraits;
         address collateral;
         address escrow;
         uint256 stakedAmount;
@@ -397,7 +434,9 @@ contract AavegotchiFacet {
         aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
         aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
-        aavegotchiInfo_.numericTraits = s.aavegotchis[_tokenId].numericTraits;
+        if (aavegotchiInfo_.randomNumber > 0) {
+            (aavegotchiInfo_.numericTraits, ) = getNumericTraits(_tokenId);
+        }
         aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
         aavegotchiInfo_.escrow = s.aavegotchis[_tokenId].escrow;
         if (aavegotchiInfo_.collateral == address(0)) {
@@ -412,18 +451,12 @@ contract AavegotchiFacet {
         return aavegotchiInfo_;
     }
 
-    function calculateRarityMultiplier(uint8[NUMERIC_TRAITS_NUM] memory numericTraits, address collateralType)
+    function calculateRarityMultiplier(int256[NUMERIC_TRAITS_NUM] memory _numericTraits, address _collateralType)
         public
         view
         returns (uint256 rarityMultiplier)
     {
-        int8[] memory numericTraitsConverted = new int8[](NUMERIC_TRAITS_NUM);
-
-        for (uint8 i = 0; i < NUMERIC_TRAITS_NUM; i++) {
-            numericTraitsConverted[i] = int8(numericTraits[i]);
-        }
-
-        int256 rarityScore = calculateBaseRarityScore(numericTraitsConverted, collateralType);
+        int256 rarityScore = calculateBaseRarityScore(_numericTraits, _collateralType);
         if (rarityScore < 300) return 10;
         else if (rarityScore >= 300 && rarityScore < 450) return 10;
         else if (rarityScore >= 450 && rarityScore <= 525) return 25;
@@ -432,13 +465,17 @@ contract AavegotchiFacet {
     }
 
     //Calculates the base rarity score, including collateral modifier
-    function calculateBaseRarityScore(int8[] memory numericTraits, address collateralType) public view returns (int256 _rarityScore) {
+    function calculateBaseRarityScore(int256[NUMERIC_TRAITS_NUM] memory _numericTraits, address collateralType)
+        public
+        view
+        returns (int256 _rarityScore)
+    {
         AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
 
         int8[6] memory modifiers = collateralInfo.modifiers;
 
-        for (uint8 index = 0; index < numericTraits.length; index++) {
-            int256 number = numericTraits[index];
+        for (uint8 index = 0; index < _numericTraits.length; index++) {
+            int256 number = _numericTraits[index];
 
             int8 mod = modifiers[index];
 
@@ -457,34 +494,7 @@ contract AavegotchiFacet {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         address collateral = s.aavegotchis[_tokenId].collateralType;
 
-        //Recast uint8s into int8s for numeric traits
-        int8[] memory numericTraits = new int8[](NUMERIC_TRAITS_NUM);
-        for (uint8 i = 0; i < NUMERIC_TRAITS_NUM; i++) {
-            int8 traitValue = int8(s.aavegotchis[_tokenId].numericTraits[i]);
-            numericTraits[i] = traitValue;
-        }
-
-        int256 wearableBonus = 0;
-
-        //First get equipped wearables
-        for (uint16 index = 0; index < s.wearableSlotsLength; index++) {
-            uint256 wearableId = s.aavegotchis[_tokenId].equippedWearables[index];
-
-            //wearable is equipped
-            if (wearableId != 0) {
-                WearableType memory wearable = s.wearableTypes[wearableId];
-
-                //Add on rarity score bonus
-                wearableBonus += wearable.rarityScoreModifier;
-
-                //Add on trait modifiers
-                int8[NUMERIC_TRAITS_NUM] memory modifiers = wearable.traitModifiers;
-
-                for (uint8 i = 0; i < NUMERIC_TRAITS_NUM; i++) {
-                    numericTraits[i] += modifiers[i];
-                }
-            }
-        }
+        (int256[NUMERIC_TRAITS_NUM] memory numericTraits, int256 wearableBonus) = getNumericTraits(_tokenId);
 
         int256 baseRarity = calculateBaseRarityScore(numericTraits, collateral);
         rarityScore = baseRarity + wearableBonus;

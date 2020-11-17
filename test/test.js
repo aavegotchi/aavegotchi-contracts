@@ -78,6 +78,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   it('Should contain 10 random ghosts in the portal', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const ghosts = await aavegotchiFacet.portalAavegotchiTraits(myPortals[0].tokenId)
+    // console.log(JSON.stringify(ghosts, null, 4))
     ghosts.forEach(async (ghost) => {
       const rarityScore = await aavegotchiFacet.calculateBaseRarityScore(ghost.numericTraits, ghost.collateralType)
       expect(Number(rarityScore)).to.greaterThan(298)
@@ -152,7 +153,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const minimumStake = BigNumber.from(aavegotchi.minimumStake)
 
     const available = currentStake.sub(minimumStake)
-    await truffleAssert.reverts(escrowFacet.decreaseStake(testAavegotchiId, currentStake), "EscrowFacet: Cannot reduce below minimum stake")
+    await truffleAssert.reverts(escrowFacet.decreaseStake(testAavegotchiId, currentStake), 'EscrowFacet: Cannot reduce below minimum stake')
     await escrowFacet.decreaseStake(testAavegotchiId, available)
 
     aavegotchi = await aavegotchiFacet.getAavegotchi(testAavegotchiId)
@@ -169,38 +170,34 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(score).to.equal(602)
   })
 
-
   it('Can decrease stake and destroy Aavegotchi', async function () {
-
-    //Buy portal
+    // Buy portal
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
     await aavegotchiFacet.buyPortals(buyAmount)
 
     let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(2)
-    //Open portal
-    await aavegotchiFacet.openPortal("1")
-    const ghosts = await aavegotchiFacet.portalAavegotchiTraits("1")
+    // Open portal
+    await aavegotchiFacet.openPortal('1')
+    const ghosts = await aavegotchiFacet.portalAavegotchiTraits('1')
     const selectedGhost = ghosts[0]
     const minStake = selectedGhost.minimumStake
-    let initialBalance = BigNumber.from(await ghstDiamond.balanceOf(account))
+    const initialBalance = BigNumber.from(await ghstDiamond.balanceOf(account))
 
-    //Claim ghost and stake
-    await aavegotchiFacet.claimAavegotchiFromPortal("1", 0, minStake)
-    let balanceAfterClaim = BigNumber.from(await ghstDiamond.balanceOf(account))
+    // Claim ghost and stake
+    await aavegotchiFacet.claimAavegotchiFromPortal('1', 0, minStake)
+    const balanceAfterClaim = BigNumber.from(await ghstDiamond.balanceOf(account))
     expect(balanceAfterClaim).to.equal(initialBalance.sub(minStake))
 
-    //Burn Aavegotchi and return collateral stake
-    await escrowFacet.decreaseAndDestroy("1")
-    let balanceAfterDestroy = BigNumber.from(await ghstDiamond.balanceOf(account))
+    // Burn Aavegotchi and return collateral stake
+    await escrowFacet.decreaseAndDestroy('1')
+    const balanceAfterDestroy = BigNumber.from(await ghstDiamond.balanceOf(account))
     expect(balanceAfterDestroy).to.equal(initialBalance)
 
-    //Should only have 1 portal now
+    // Should only have 1 portal now
     myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(1)
-
   })
-
 
   it('Can mint wearables', async function () {
     let balance = await wearablesFacet.balanceOf(account, '0')
@@ -246,7 +243,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     await wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], [testSlot])
     const equipped = await wearablesFacet.equippedWearables(testAavegotchiId)
 
-    expect(equipped.length).to.equal(11)
+    expect(equipped.length).to.equal(16)
     // First item in array is 1 because that wearable has been equipped
     expect(equipped[testSlot]).to.equal(testWearableId)
   })
@@ -266,7 +263,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     await wearablesFacet.unequipWearables(testAavegotchiId, [testSlot])
     const equipped = await wearablesFacet.equippedWearables(testAavegotchiId)
 
-    expect(equipped.length).to.equal(11)
+    expect(equipped.length).to.equal(16)
     expect(equipped[testSlot]).to.equal(0)
   })
 
