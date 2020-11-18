@@ -122,7 +122,10 @@ contract AavegotchiFacet {
         for (uint256 i; i < numericTraits_.length; i++) {
             uint256 value = uint8(_randomNumber >> (i * 8));
             if (value > 99) {
-                value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
+                value /= 2;
+                if (value > 99) {
+                    value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
+                }
             }
             numericTraits_[i] = int256(value);
         }
@@ -134,7 +137,10 @@ contract AavegotchiFacet {
         for (uint256 i; i < numericTraits_.length; i++) {
             uint256 value = uint8(randomNumber >> (i * 8));
             if (value > 99) {
-                value = uint256(keccak256(abi.encodePacked(randomNumber, i))) % 100;
+                value /= 2;
+                if (value > 99) {
+                    value = uint256(keccak256(abi.encodePacked(randomNumber, i))) % 100;
+                }
             }
             numericTraits_[i] = int256(value);
         }
