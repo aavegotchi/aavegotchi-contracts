@@ -87,6 +87,8 @@ contract AavegotchiFacet {
 
     function buyPortals(uint256 _ghst) external {
         (uint256 nextBatchId, bool vrfPending) = LibVrf.getVrfInfo();
+        // prevent frontrunning buying portals when VRF response is in the mempool
+        // by making new portals use a greater batchId
         if (vrfPending) {
             nextBatchId++;
         }
