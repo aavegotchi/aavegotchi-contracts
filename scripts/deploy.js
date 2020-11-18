@@ -32,12 +32,43 @@ async function main () {
   let tx
   let totalGasUsed = ethers.BigNumber.from('0')
   let receipt
+  let vrfCoordinator
+  let linkAddress
+  let linkContract
+  let keyHash
+  let fee
+
+  if (hre.network.name === 'hardhat') {
+    const LinkTokenMock = await ethers.getContractFactory('LinkTokenMock')
+    linkContract = await LinkTokenMock.deploy()
+    await linkContract.deployed()
+    linkAddress = linkContract.address
+    vrfCoordinator = account
+    keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
+    fee = ethers.utils.parseEther('0.1')
+  } else if (hre.network.name === 'mainnet') {
+    vrfCoordinator = '0xf0d54349aDdcf704F77AE15b96510dEA15cb7952'
+    linkAddress = '0x514910771AF9Ca656af840dff83E8264EcF986CA'
+    keyHash = '0xAA77729D3466CA35AE8D28B3BBAC7CC36A5031EFDC430821C02BC31A238AF445'
+    fee = ethers.utils.parseEther('2')
+  } else if (hre.network.name === 'kovan') {
+    vrfCoordinator = '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9'
+    linkAddress = '0xa36085F69e2889c224210F603D836748e7dC0088'
+    keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
+    fee = ethers.utils.parseEther('0.1')
+  } else {
+    throw Error('No network settings for ' + hre.network.name)
+  }
 
   async function deployFacets (...facets) {
     const instances = []
-    for (const facet of facets) {
+    for (let facet of facets) {
+      let constructorArgs = []
+      if (Array.isArray(facet)) {
+        ;[facet, constructorArgs] = facet
+      }
       const factory = await ethers.getContractFactory(facet)
-      const facetInstance = await factory.deploy()
+      const facetInstance = await factory.deploy(...constructorArgs)
       await facetInstance.deployed()
       const tx = facetInstance.deployTransaction
       const receipt = await tx.wait()
@@ -56,6 +87,7 @@ async function main () {
     wearablesFacet,
     collateralFacet,
     escrowFacet,
+    vrfFacet,
     shopFacet
   ] = await deployFacets(
     'DiamondCutFacet',
@@ -66,6 +98,7 @@ async function main () {
     'WearablesFacet',
     'CollateralFacet',
     'EscrowFacet',
+    ['VrfFacet', [vrfCoordinator, linkAddress]],
     'ShopFacet'
   )
 
@@ -73,7 +106,7 @@ async function main () {
   if (hre.network.name === 'kovan') {
     ghstDiamond = await ethers.getContractAt('GHSTFacet', '0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5')
     console.log('GHST diamond address:' + ghstDiamond.address)
-  } else if (hre.network.name === 'mainnet' || hre.network.name === 'hardhat') {
+  } else if (hre.network.name === 'hardhat') {
     ghstDiamond = await diamond.deploy({
       diamondName: 'GHSTDiamond',
       facets: [
@@ -82,8 +115,7 @@ async function main () {
         ['OwnershipFacet', ownershipFacet],
         'GHSTFacet'
       ],
-      owner: account,
-      otherArgs: []
+      args: [account]
     })
     ghstDiamond = await ethers.getContractAt('GHSTFacet', ghstDiamond.address)
     console.log('GHST diamond address:' + ghstDiamond.address)
@@ -100,11 +132,11 @@ async function main () {
       ['SvgStorageFacet', svgStorageFacet],
       ['WearablesFacet', wearablesFacet],
       ['CollateralFacet', collateralFacet],
-      ['EscrowFacet', escrowFacet]
+      ['EscrowFacet', escrowFacet],
+      ['VrfFacet', vrfFacet]
       // ['ShopFacet', shopFacet]
     ],
-    owner: account,
-    otherArgs: [account, ghstDiamond.address]
+    args: [account, account, ghstDiamond.address, keyHash, fee]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
@@ -113,8 +145,8 @@ async function main () {
   console.log('Aavegotchi diamond deploy gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
+  vrfFacet = await ethers.getContractAt('VrfFacet', aavegotchiDiamond.address)
   aavegotchiFacet = await ethers.getContractAt('AavegotchiFacet', aavegotchiDiamond.address)
-
   escrowFacet = await ethers.getContractAt('EscrowFacet', aavegotchiDiamond.address)
   collateralFacet = await ethers.getContractAt('CollateralFacet', aavegotchiDiamond.address)
 
@@ -194,7 +226,10 @@ async function main () {
     aavegotchiFacet: aavegotchiFacet,
     collateralFacet: collateralFacet,
     escrowFacet: escrowFacet,
-    shopFacet: shopFacet
+    vrfFacet: vrfFacet,
+    shopFacet: shopFacet,
+    linkAddress: linkAddress,
+    linkContract: linkContract
   }
 
   // ----------------------------------------------------------------

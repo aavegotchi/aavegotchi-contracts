@@ -9,6 +9,7 @@ import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
 import "hardhat/console.sol";
 import "../CollateralEscrow.sol";
+import "../libraries/LibVrf.sol";
 
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
 interface ERC721TokenReceiver {
@@ -85,6 +86,10 @@ contract AavegotchiFacet {
     }
 
     function buyPortals(uint256 _ghst) external {
+        (uint256 nextBatchId, bool vrfPending) = LibVrf.getVrfInfo();
+        if (vrfPending) {
+            nextBatchId++;
+        }
         require(_ghst >= 100e18, "AavegotchiNFT: Not enough GHST to buy portal");
         for (uint256 i; i < _ghst / 100e18; i++) {
             uint256 tokenId = s.totalSupply++;
@@ -92,6 +97,7 @@ contract AavegotchiFacet {
             s.aavegotchiOwnerEnumeration[msg.sender].push(uint32(tokenId));
             s.aavegotchis[tokenId].owner = msg.sender;
             s.aavegotchis[tokenId].ownerEnumerationIndex = ownerIndex;
+            s.aavegotchis[tokenId].batchId = uint32(nextBatchId);
             emit Transfer(address(0), msg.sender, tokenId);
         }
         uint256 amount = _ghst - (_ghst % 100e18);
@@ -103,10 +109,9 @@ contract AavegotchiFacet {
     function openPortal(uint256 _tokenId) external {
         require(s.aavegotchis[_tokenId].status == 0, "AavegotchiFacet: Portal is not closed");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
-        //s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), _tokenId)));
+        uint256 batchRandomNumber = LibVrf.getBatchRandomNumber(s.aavegotchis[_tokenId].batchId);
 
-        //Why is the random number the _tokenId?
-        s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(_tokenId)));
+        s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(batchRandomNumber, _tokenId)));
         // status is open portal
         s.aavegotchis[_tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
     }

@@ -13,7 +13,7 @@ pragma experimental ABIEncoderV2;
 import "../interfaces/IDiamondCut.sol";
 
 library LibDiamond {
-        bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
+    bytes32 constant internal DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
 
     struct DiamondStorage {
         // maps function selectors to the facets that execute the functions.

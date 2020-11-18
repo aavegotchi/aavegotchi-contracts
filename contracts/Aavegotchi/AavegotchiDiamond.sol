@@ -19,21 +19,25 @@ import "./facets/AavegotchiFacet.sol";
 import "./facets/SvgStorageFacet.sol";
 import "./facets/WearablesFacet.sol";
 import "../shared/libraries/LibDiamond.sol";
+import "./libraries/LibVrf.sol";
 
 contract AavegotchiDiamond {
     using LibAppStorage for AppStorage;
     AppStorage internal s;
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    constructor(
-        IDiamondCut.FacetCut[] memory _diamondCut,
-        address _contractOwner,
-        address _dao,
-        address _ghstContract
-    ) {
+    struct ConstructorArgs {
+        address contractOwner;
+        address dao;
+        address ghstContract;
+        bytes32 chainlinkKeyHash;
+        uint256 chainlinkFee;
+    }
+
+    constructor(IDiamondCut.FacetCut[] memory _diamondCut, ConstructorArgs memory _args) {
         LibDiamond.diamondCut(_diamondCut, address(0), new bytes(0));
-        LibDiamond.setContractOwner(_contractOwner);
-        s.dao = _dao;
+        LibDiamond.setContractOwner(_args.contractOwner);
+        s.dao = _args.dao;
         s.svgLayers["wearables"].push();
         s.wearableSlotsLength = 11;
 
@@ -45,7 +49,10 @@ contract AavegotchiDiamond {
         ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
         ds.supportedInterfaces[type(IERC173).interfaceId] = true;
 
-        s.ghstContract = _ghstContract;
+        s.ghstContract = _args.ghstContract;
+        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
+        vrf_ds.keyHash = _args.chainlinkKeyHash;
+        vrf_ds.fee = uint176(_args.chainlinkFee);
     }
 
     // Find facet for function that is called and execute the

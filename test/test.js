@@ -1,4 +1,4 @@
-/* global describe it before */
+/* global describe it before ethers */
 const { expect } = require('chai')
 const { BigNumber } = require('ethers')
 const truffleAssert = require('truffle-assertions')
@@ -23,6 +23,11 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   let aavegotchiFacet
   let wearablesFacet
   let escrowFacet
+  let vrfFacet
+  // eslint-disable-next-line no-unused-vars
+  let linkAddress
+  // eslint-disable-next-line no-unused-vars
+  let linkContract
   let collateralFacet
   let account
 
@@ -41,6 +46,9 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     collateralFacet = deployVars.collateralFacet
     escrowFacet = deployVars.escrowFacet
     ghstDiamond = deployVars.ghstDiamond
+    vrfFacet = deployVars.vrfFacet
+    linkAddress = deployVars.linkAddress
+    linkContract = deployVars.linkContract
   })
 
   it('Should mint 10,000 GHST tokens', async function () {
@@ -64,6 +72,12 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     await aavegotchiFacet.buyPortals(buyAmount)
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(1)
+  })
+
+  it('Should receive VRF call', async function () {
+    await vrfFacet.drawRandomNumber()
+    const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
+    await vrfFacet.rawFulfillRandomness('0x0000000000000000000000000000000000000000000000000000000000000000', randomness)
   })
 
   it('Should open the portal', async function () {
@@ -174,6 +188,11 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     // Buy portal
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
     await aavegotchiFacet.buyPortals(buyAmount)
+    ethers.provider.send('evm_increaseTime', [18 * 3600])
+    ethers.provider.send('evm_mine')
+    await vrfFacet.drawRandomNumber()
+    const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
+    await vrfFacet.rawFulfillRandomness('0x0000000000000000000000000000000000000000000000000000000000000000', randomness)
 
     let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(2)
@@ -284,6 +303,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
     // Retrieve the final score
     const augmentedScore = await aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
+    // console.log(originalScore.toString(), augmentedScore.toString())
     expect(augmentedScore).to.equal(Number(originalScore) + rarityScoreModifier + wearableTraitsBonus)
   })
 
