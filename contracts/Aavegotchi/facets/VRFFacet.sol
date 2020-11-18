@@ -80,7 +80,7 @@ import "../../shared/libraries/LibDiamond.sol";
  */
 
 contract VrfFacet {
-    event VrfBatchRandomNumber(uint256 indexed batchId, uint256 randomNumber);
+    event VrfBatchRandomNumber(uint256 indexed batchId, uint256 randomNumber, uint256 _vrfTime);
     ILink internal immutable im_link;
     address internal immutable im_vrfCoordinator;
 
@@ -136,7 +136,7 @@ contract VrfFacet {
         vrf_ds.batchIdToRandomNumber[currentBatchId] = _randomNumber;
         vrf_ds.nextBatchId = uint32(currentBatchId + 1);
         vrf_ds.nextVrfCallTime = uint40(block.timestamp + 18 hours);
-        emit VrfBatchRandomNumber(currentBatchId, _randomNumber);
+        emit VrfBatchRandomNumber(currentBatchId, _randomNumber, block.timestamp);
     }
 
     // Change the fee amount that is paid for VRF random numbers
