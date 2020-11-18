@@ -80,7 +80,7 @@ import "../../shared/libraries/LibDiamond.sol";
  */
 
 contract VrfFacet {
-    event VrfBatchRandomNumber(uint256 indexed batchId, uint256 randomNumber, uint256 _vrfTime);
+    event VrfBatchRandomNumber(uint256 indexed batchId, uint256 randomNumber, uint256 _vrfTimeSet);
     ILink internal immutable im_link;
     address internal immutable im_vrfCoordinator;
 
