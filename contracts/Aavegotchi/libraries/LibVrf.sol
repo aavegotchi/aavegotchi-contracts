@@ -10,7 +10,8 @@ library LibVrf {
         bool vrfPending;
         uint40 nextVrfCallTime;
         uint32 nextBatchId;
-        uint176 fee;
+        uint32 batchCount;
+        uint144 fee;
     }
 
     function diamondStorage() internal pure returns (Storage storage ds) {
@@ -20,14 +21,7 @@ library LibVrf {
         }
     }
 
-    function getVrfInfo() internal view returns (uint256 nextBatchId_, bool vrfPending_) {
-        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
-        nextBatchId_ = vrf_ds.nextBatchId;
-        vrfPending_ = vrf_ds.vrfPending;
-    }
-
     function getBatchRandomNumber(uint256 _batchId) internal view returns (uint256 randomNumber_) {
         randomNumber_ = diamondStorage().batchIdToRandomNumber[_batchId];
-        require(randomNumber_ != 0, "LibVrf: No random number for this batch yet");
     }
 }

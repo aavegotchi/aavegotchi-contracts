@@ -52,7 +52,8 @@ contract AavegotchiDiamond {
         s.ghstContract = _args.ghstContract;
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
         vrf_ds.keyHash = _args.chainlinkKeyHash;
-        vrf_ds.fee = uint176(_args.chainlinkFee);
+        vrf_ds.fee = uint144(_args.chainlinkFee);
+        vrf_ds.nextBatchId = 1;
     }
 
     // Find facet for function that is called and execute the
