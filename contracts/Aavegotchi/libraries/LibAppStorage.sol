@@ -16,8 +16,11 @@ struct Aavegotchi {
     // This 256 bit value is broken up into 16 16-bit slots for storing wearableIds
     // See helper function that converts this value into a uint16[16] memory equipedWearables
     uint256 equippedWearables; //The currently equipped wearables of the Aavegotchi
+    uint256 wearableBonus;
     string name;
     uint256 randomNumber;
+    // Sixteen 16 bit ints
+    int256 numericTraits;
     // each byte is used as an individual trait
     // see trait helper functions below
     // uint256 numericTraits;
@@ -40,7 +43,8 @@ struct Aavegotchi {
 }
 
 struct WearableType {
-    int8[6] traitModifiers; //How much the wearable modifies each trait. Should not be more than +-5 total
+    // treated as six 8 ints array
+    uint256 traitModifiers; //How much the wearable modifies each trait. Should not be more than +-5 total
     uint32 maxQuantity; //Total number that can be minted of this wearable. Can calculate the rarity level from this number.
     uint8 rarityScoreModifier; //Number from 1-50.
     uint8 setId; //The id of the set. Zero is no set
@@ -86,7 +90,8 @@ struct AavegotchiCollateralTypeInfo {
     bytes3 cheekColor;
     uint8 svgId;
     uint8 eyeShapeSvgId;
-    int8[6] modifiers; //Trait modifiers for each collateral. Can be 2, 1, -1, or -2
+    // treated as an arary of int8
+    uint256 modifiers; //Trait modifiers for each collateral. Can be 2, 1, -1, or -2
     uint16 conversionRate; //Current conversionRate for the price of this collateral in relation to 1 USD. Can be updated by the DAO
 }
 

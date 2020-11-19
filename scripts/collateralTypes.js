@@ -1,3 +1,4 @@
+/* global ethers */
 // 0, DAI Collateral
 // 1, ETH Collateral
 // 2, LEND Collateral
@@ -150,6 +151,15 @@ const collaterals = [
     */
 ]
 
+function eightBitArrayToUint (array) {
+  const uint = []
+  for (const num of array) {
+    const value = ethers.BigNumber.from(num).toTwos(8)
+    uint.unshift(value.toHexString().slice(2))
+  }
+  return ethers.BigNumber.from('0x' + uint.join(''))
+}
+
 function getCollaterals (network, ghstAddress) {
   const collateralTypes = []
   for (const collateralType of collaterals) {
@@ -162,7 +172,7 @@ function getCollaterals (network, ghstAddress) {
         '0x' + collateralType.cheekColor.slice(1),
       svgId: collateralType.svgId,
       eyeShapeSvgId: collateralType.eyeShapeSvgId,
-      modifiers: collateralType.modifiers,
+      modifiers: eightBitArrayToUint(collateralType.modifiers),
       conversionRate: collateralType.conversionRate
     }
     const item = {}

@@ -30,7 +30,7 @@ contract CollateralFacet {
         }
     }
 
-    function updateCollateralModifiers(address _collateralType, int8[6] memory _modifiers) external onlyDao {
+    function updateCollateralModifiers(address _collateralType, uint256 _modifiers) external onlyDao {
         LibDiamond.enforceIsContractOwner();
         s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
     }

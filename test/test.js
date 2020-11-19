@@ -15,6 +15,15 @@ const truffleAssert = require('truffle-assertions')
 const { deployProject } = require('../scripts/deploy.js')
 const { wearableTypes } = require('../scripts/wearableTypes.js')
 
+function uintToIntArray (uint, numBytes) {
+  uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
+  const array = []
+  for (let i = 0; i < uint.length; i += 2) {
+    array.unshift(ethers.BigNumber.from('0x' + uint.substr(i, 2)).fromTwos(8).toNumber())
+  }
+  return array
+}
+
 describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   // let svgStorage
   // let ghstDiamond
@@ -62,7 +71,8 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const collateral = collaterals[0]
     expect(collateral.conversionRate).to.equal(500)
     expect(collaterals.length).to.equal(7)
-    expect(collateral.modifiers[2]).to.equal(-1)
+    const modifiers = uintToIntArray(collateral.modifiers, 6)
+    expect(modifiers[2]).to.equal(-1)
   })
 
   it('Should purchase one portal', async function () {
@@ -84,7 +94,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals[0].status).to.equal(0)
     const portalId = myPortals[0].tokenId
-    await aavegotchiFacet.openPortal(portalId)
+    await aavegotchiFacet.openPortals([portalId])
     myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals[0].status).to.equal(1)
   })
@@ -197,7 +207,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(2)
     // Open portal
-    await aavegotchiFacet.openPortal('1')
+    await aavegotchiFacet.openPortals(['1'])
     const ghosts = await aavegotchiFacet.portalAavegotchiTraits('1')
     const selectedGhost = ghosts[0]
     const minStake = selectedGhost.minimumStake
@@ -296,11 +306,10 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     await wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], [testSlot])
 
     // Calculate bonuses
-    const modifiers = wearableTypes[testWearableId].traitModifiers
+    const modifiers = uintToIntArray(wearableTypes[testWearableId].traitModifiers, 6)
     let wearableTraitsBonus = 0
     const rarityScoreModifier = wearableTypes[testWearableId].rarityScoreModifier
     modifiers.forEach((val) => { wearableTraitsBonus += val })
-
     // Retrieve the final score
     const augmentedScore = await aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
     // console.log(originalScore.toString(), augmentedScore.toString())

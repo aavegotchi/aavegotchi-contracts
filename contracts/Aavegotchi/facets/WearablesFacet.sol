@@ -79,6 +79,7 @@ contract WearablesFacet {
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
+    uint256 internal constant NUMERIC_TRAITS_NUM = 6;
     uint16 internal constant SLOT_HEAD = 0;
     uint16 internal constant SLOT_FACE = 1;
     uint16 internal constant SLOT_EYES = 2;
@@ -126,12 +127,6 @@ contract WearablesFacet {
         The URI MUST point to a JSON file that conforms to the "ERC-1155 Metadata URI JSON Schema".
     */
     event URI(string _value, uint256 indexed _id);
-
-    function setWearableSlotsLength(uint16 _length) external {
-        LibDiamond.enforceIsContractOwner();
-        //To do: Allow DAO access
-        s.wearableSlotsLength = _length;
-    }
 
     function createWearableSet(WearableSet calldata _wearableSet) external {
         LibDiamond.enforceIsContractOwner();
@@ -389,20 +384,22 @@ contract WearablesFacet {
         uint8[] memory _slots
     ) external {
         require(_wearableIds.length == _slots.length, "Aavegotchi Facet: Slots and Ids length must match");
-        uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+        Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
+        uint256 l_equippedWearables = aavegotchi.equippedWearables;
+        int256 numericTraits = aavegotchi.numericTraits;
+        uint256 wearableBonus = aavegotchi.wearableBonus;
 
         for (uint256 index = 0; index < _slots.length; index++) {
             //First check if slot is available
             uint16 slot = _slots[index];
-            require(slotIsAvailable(l_equippedWearables, slot) == true, "Slot not available");
+            require(slotIsAvailable(l_equippedWearables, slot) == true, "Aavegotchi Facet: Slot not available");
 
             //Then check if wearable can be equipped in this slot
             uint256 wearableId = _wearableIds[index];
-            uint8[] memory allowedSlots = s.wearableTypes[wearableId].slots;
-
+            WearableType storage wearableType = s.wearableTypes[wearableId];
+            uint8[] memory allowedSlots = wearableType.slots;
             bool canBeEquipped = false;
-
-            for (uint8 i = 0; i < allowedSlots.length; i++) {
+            for (uint256 i; i < allowedSlots.length; i++) {
                 if (allowedSlots[i] == slot) {
                     canBeEquipped = true;
                     break;
@@ -412,17 +409,31 @@ contract WearablesFacet {
             require(canBeEquipped == true, "WearablesFacet: Cannot be equipped in this slot");
 
             //Then check if this wearable is in the Aavegotchis inventory
-
             uint256 balance = s.nftBalances[address(this)][_tokenId][wearableId];
             require(balance > 0, "WearablesFacet: Wearable is not in Aavegotchi inventory");
 
-            //s.aavegotchis[_tokenId].equippedWearables[slot] = uint16(wearableId);
+            //Add on trait modifiers
+            uint256 traitModifiers = wearableType.traitModifiers;
+            uint256 newNumericTraits;
+            for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
+                int256 number = int16(numericTraits >> (j * 16));
+                int256 traitModifier = int8(traitModifiers >> (j * 8));
+                number += traitModifier;
+                // clear bits first then assign
+                newNumericTraits |= (uint256(number) & 0xffff) << (j * 16);
+            }
+            numericTraits = int256(newNumericTraits);
+
+            wearableBonus += wearableType.rarityScoreModifier;
+
             // clear slot bits
             l_equippedWearables &= ~(uint256(0xffff) << (16 * slot));
             // set slot
             l_equippedWearables |= wearableId << (16 * slot);
         }
-        s.aavegotchis[_tokenId].equippedWearables = l_equippedWearables;
+        aavegotchi.equippedWearables = l_equippedWearables;
+        aavegotchi.wearableBonus = wearableBonus;
+        aavegotchi.numericTraits = numericTraits;
 
         //To do in WearableFacet: Prevent wearable from being transferred if it's equipped
     }
