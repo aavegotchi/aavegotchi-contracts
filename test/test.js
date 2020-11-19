@@ -74,6 +74,18 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(myPortals.length).to.equal(1)
   })
 
+  it('Cannot call VRF while pending')
+
+  it('Cannot call VRF before waiting period is over')
+
+  it('Batch count should increase when Portals are purchased')
+
+  it('Should not fire VRF if there are no portals in batch')
+
+  it('Should allow opting out of VRF batch')
+
+  it('Should send transaction to opt-in to batch')
+
   it('Should receive VRF call', async function () {
     await vrfFacet.drawRandomNumber()
     const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
