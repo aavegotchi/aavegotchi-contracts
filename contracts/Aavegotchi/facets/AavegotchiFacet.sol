@@ -85,12 +85,13 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].name = _name;
     }
 
-    function buyPortals(uint256 _ghst) external {
-        (uint256 nextBatchId, bool vrfPending) = LibVrf.getVrfInfo();
-        // prevent frontrunning buying portals when VRF response is in the mempool
-        // by making new portals use a greater batchId
-        if (vrfPending) {
-            nextBatchId++;
+    function buyPortals(uint256 _ghst, bool _setBatchId) external {
+        uint32 nextBatchId;
+        uint32 batchCount;
+        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
+        if (_setBatchId) {
+            nextBatchId = vrf_ds.nextBatchId;
+            batchCount = vrf_ds.batchCount;
         }
         require(_ghst >= 100e18, "AavegotchiNFT: Not enough GHST to buy portal");
         for (uint256 i; i < _ghst / 100e18; i++) {
@@ -99,8 +100,14 @@ contract AavegotchiFacet {
             s.aavegotchiOwnerEnumeration[msg.sender].push(uint32(tokenId));
             s.aavegotchis[tokenId].owner = msg.sender;
             s.aavegotchis[tokenId].ownerEnumerationIndex = ownerIndex;
-            s.aavegotchis[tokenId].batchId = uint32(nextBatchId);
+            if (_setBatchId) {
+                s.aavegotchis[tokenId].batchId = nextBatchId;
+                batchCount++;
+            }
             emit Transfer(address(0), msg.sender, tokenId);
+        }
+        if (_setBatchId) {
+            vrf_ds.batchCount = batchCount;
         }
         uint256 amount = _ghst - (_ghst % 100e18);
         uint256 burnAmount = amount / 10;
@@ -108,10 +115,19 @@ contract AavegotchiFacet {
         IERC20(s.ghstContract).transferFrom(msg.sender, address(this), amount - burnAmount);
     }
 
+    function setBatchId(uint256 _tokenId) external {
+        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can set a batchId");
+        require(s.aavegotchis[_tokenId].batchId == 0, "AavegotchiFacet: batchId already set");
+        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
+        s.aavegotchis[_tokenId].batchId = vrf_ds.nextBatchId;
+        vrf_ds.batchCount++;
+    }
+
     function openPortal(uint256 _tokenId) external {
         require(s.aavegotchis[_tokenId].status == 0, "AavegotchiFacet: Portal is not closed");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
         uint256 batchRandomNumber = LibVrf.getBatchRandomNumber(s.aavegotchis[_tokenId].batchId);
+        require(batchRandomNumber != 0, "AavegotchiFacet: No random number for this portal");
 
         s.aavegotchis[_tokenId].randomNumber = uint256(keccak256(abi.encodePacked(batchRandomNumber, _tokenId)));
         // status is open portal

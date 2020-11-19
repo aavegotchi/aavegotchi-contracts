@@ -91,11 +91,14 @@ contract VrfFacet {
 
     function drawRandomNumber() external {
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
+        require(vrf_ds.batchCount > 0, "VrfFacet: Can't call VRF with none in batch");
         require(block.timestamp >= vrf_ds.nextVrfCallTime, "VrfFacet: Waiting period to call VRF not over yet");
         require(vrf_ds.vrfPending == false, "VrfFacet: VRF call is pending");
         vrf_ds.vrfPending = true;
+        vrf_ds.batchCount = 0;
+        vrf_ds.nextBatchId++;
         // Use Chainlink VRF to generate random number
-        require(im_link.balanceOf(address(this)) >= vrf_ds.fee, "Not enough LINK");
+        require(im_link.balanceOf(address(this)) >= vrf_ds.fee, "VrfFacet: Not enough LINK");
         im_link.transferAndCall(im_vrfCoordinator, vrf_ds.fee, abi.encode(vrf_ds.keyHash, 0));
     }
 
@@ -105,13 +108,15 @@ contract VrfFacet {
         returns (
             uint256 nextBatchId_,
             uint256 nextVrfCallTime_,
-            bool vrfPending_
+            bool vrfPending_,
+            uint256 batchCount_
         )
     {
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
         nextBatchId_ = vrf_ds.nextBatchId;
         nextVrfCallTime_ = vrf_ds.nextVrfCallTime;
         vrfPending_ = vrf_ds.vrfPending;
+        batchCount_ = vrf_ds.batchCount;
     }
 
     /**
@@ -132,9 +137,8 @@ contract VrfFacet {
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
         require(vrf_ds.vrfPending == true, "VrfFacet: VRF is not pending");
         vrf_ds.vrfPending = false;
-        uint256 currentBatchId = vrf_ds.nextBatchId;
+        uint256 currentBatchId = vrf_ds.nextBatchId - 1;
         vrf_ds.batchIdToRandomNumber[currentBatchId] = _randomNumber;
-        vrf_ds.nextBatchId = uint32(currentBatchId + 1);
         vrf_ds.nextVrfCallTime = uint40(block.timestamp + 18 hours);
         emit VrfBatchRandomNumber(currentBatchId, _randomNumber, block.timestamp);
     }
