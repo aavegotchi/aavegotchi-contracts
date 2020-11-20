@@ -15,7 +15,7 @@ const truffleAssert = require('truffle-assertions')
 const { deployProject } = require('../scripts/deploy.js')
 const { wearableTypes } = require('../scripts/wearableTypes.js')
 
-function uintToIntArray (uint, numBytes) {
+function uintToIntArray(uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -75,32 +75,88 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(modifiers[2]).to.equal(-1)
   })
 
+  it('Should not fire VRF if there are no portals in batch', async function () {
+    await truffleAssert.reverts(vrfFacet.drawRandomNumber(), "VrfFacet: Can't call VRF with none in batch")
+  })
+
+  it("Portal should cost 100 GHST", async function () {
+    const balance = await ghstDiamond.balanceOf(account)
+    await ghstDiamond.approve(aavegotchiDiamond.address, balance)
+    const buyAmount = (50 * Math.pow(10, 18)).toFixed() // 1 portal
+    await truffleAssert.reverts(aavegotchiFacet.buyPortals(buyAmount, true), "AavegotchiFacet: Not enough GHST to buy portal")
+  })
+
   it('Should purchase one portal', async function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
     await aavegotchiFacet.buyPortals(buyAmount, true)
+
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(1)
   })
 
-  it('Cannot call VRF while pending')
+  it('Batch count should be 1', async function () {
+    const vrfInfo = await vrfFacet.vrfInfo()
+    expect(vrfInfo.batchCount_).to.equal(1)
+  })
 
-  it('Cannot call VRF before waiting period is over')
+  it('Should allow opting out of VRF batch', async function () {
+    const balance = await ghstDiamond.balanceOf(account)
+    await ghstDiamond.approve(aavegotchiDiamond.address, balance)
+    const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
+    await aavegotchiFacet.buyPortals(buyAmount, false)
+  })
 
-  it('Batch count should increase when Portals are purchased')
+  it('Should opt into next batch', async function () {
+    await truffleAssert.reverts(aavegotchiFacet.setBatchId(["0"]), "AavegotchiFacet: batchId already set")
+    await aavegotchiFacet.setBatchId(["1"])
 
-  it('Should not fire VRF if there are no portals in batch')
+    const vrfInfo = await vrfFacet.vrfInfo()
+    expect(vrfInfo.batchCount_).to.equal(2)
+  })
 
-  it('Should allow opting out of VRF batch')
-
-  it('Should send transaction to opt-in to batch')
 
   it('Should receive VRF call', async function () {
     await vrfFacet.drawRandomNumber()
     const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
     await vrfFacet.rawFulfillRandomness('0x0000000000000000000000000000000000000000000000000000000000000000', randomness)
   })
+
+  it('Should reset batch to 0 after calling VRF', async function () {
+    await truffleAssert.reverts(vrfFacet.drawRandomNumber(), "VrfFacet: Can't call VRF with none in batch")
+    const vrfInfo = await vrfFacet.vrfInfo()
+    expect(vrfInfo.batchCount_).to.equal(0)
+  })
+
+  it('Should wait 18 hours before next VRF call', async function () {
+    const balance = await ghstDiamond.balanceOf(account)
+    await ghstDiamond.approve(aavegotchiDiamond.address, balance)
+    const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
+    await aavegotchiFacet.buyPortals(buyAmount, true)
+    await truffleAssert.reverts(vrfFacet.drawRandomNumber(), "VrfFacet: Waiting period to call VRF not over yet")
+
+    ethers.provider.send('evm_increaseTime', [18 * 3600])
+    ethers.provider.send('evm_mine')
+    await vrfFacet.drawRandomNumber()
+
+    const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
+    await vrfFacet.rawFulfillRandomness('0x0000000000000000000000000000000000000000000000000000000000000000', randomness)
+    const vrfInfo = await vrfFacet.vrfInfo()
+    expect(vrfInfo.batchCount_).to.equal(0)
+
+
+
+  })
+
+  it('', async function () {
+    const balance = await ghstDiamond.balanceOf(account)
+    await ghstDiamond.approve(aavegotchiDiamond.address, balance)
+    const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
+    await aavegotchiFacet.buyPortals(buyAmount, true)
+    await truffleAssert.reverts(vrfFacet.drawRandomNumber(), "VrfFacet: Waiting period to call VRF not over yet")
+  })
+
 
   it('Should open the portal', async function () {
     let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
@@ -146,6 +202,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const collateral = aavegotchi.collateral
     expect(selectedGhost.collateralType).to.equal(collateral)
     expect(aavegotchi.status).to.equal(2)
+    expect(aavegotchi.hauntId).to.equal(0)
     expect(aavegotchi.stakedAmount).to.equal(minStake)
   })
 
@@ -212,12 +269,14 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     await aavegotchiFacet.buyPortals(buyAmount, true)
     ethers.provider.send('evm_increaseTime', [18 * 3600])
     ethers.provider.send('evm_mine')
+
+    //Call VRF
     await vrfFacet.drawRandomNumber()
     const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
     await vrfFacet.rawFulfillRandomness('0x0000000000000000000000000000000000000000000000000000000000000000', randomness)
 
     let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-    expect(myPortals.length).to.equal(2)
+    expect(myPortals.length).to.equal(5)
     // Open portal
     await aavegotchiFacet.openPortals(['1'])
     const ghosts = await aavegotchiFacet.portalAavegotchiTraits('1')
@@ -237,7 +296,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
     // Should only have 1 portal now
     myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-    expect(myPortals.length).to.equal(1)
+    expect(myPortals.length).to.equal(4)
   })
 
   it('Can mint wearables', async function () {
