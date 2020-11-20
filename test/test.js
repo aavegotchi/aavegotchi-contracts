@@ -39,6 +39,8 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   let linkContract
   let collateralFacet
   let account
+  let bob
+  // let bobAavegotchi
 
   const testAavegotchiId = '0'
   const testWearableId = '1'
@@ -58,6 +60,12 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     vrfFacet = deployVars.vrfFacet
     linkAddress = deployVars.linkAddress
     linkContract = deployVars.linkContract
+
+    // const accounts = await ethers.getSigners()
+    // bob = await accounts[1].getAddress()
+    // bobAavegotchi = aavegotchiFacet.connect(bob)
+
+    //    console.log('bob:', bob)
   })
 
   it('Should mint 100,000 GHST tokens', async function () {
@@ -107,6 +115,10 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
     await aavegotchiFacet.buyPortals(buyAmount, false)
   })
+
+  // it('Only owner can set batch id', async function () {
+  //  await bobAavegotchi.setBatchId(["0"])
+  //})
 
   it('Should opt into next batch', async function () {
     await truffleAssert.reverts(aavegotchiFacet.setBatchId(["0"]), "AavegotchiFacet: batchId already set")
@@ -209,9 +221,14 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   it('Should set a name', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
+    await truffleAssert.reverts(aavegotchiFacet.setAavegotchiName(tokenId, "ThisIsLongerThan25CharsSoItWillRevert"), "AavegotchiFacet: _name can't be greater than 25 characters")
     await aavegotchiFacet.setAavegotchiName(tokenId, 'Beavis')
     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
     expect(aavegotchi.name).to.equal('Beavis')
+  })
+
+  it('Can only set name on claimed Aavegotchi', async function () {
+    await truffleAssert.reverts(aavegotchiFacet.setAavegotchiName("1", 'Portal'), "AavegotchiFacet: Must choose Aavegotchi before setting name")
   })
 
   it('Should show correct rarity score', async function () {
@@ -407,9 +424,14 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     console.log('balance:', Number(balance) / Math.pow(10, 18))
     for (let index = 0; index < 10; index++) {
       //1000 portals
-      const tenThousandPortals = "100000000000000000000000"
+      const tenThousandPortals = "1000000000000000000000" //00"
       await aavegotchiFacet.buyPortals(tenThousandPortals, true)
     }
+  })
+
+  it('Cannot create new haunt until first is finished', async function () {
+    const oneHundred = "100000000000000000000"
+    await truffleAssert.reverts(aavegotchiFacet.createHaunt("10000", oneHundred), "AavegotchiFacet: Haunt must be full before creating new")
   })
 
   /*

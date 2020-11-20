@@ -73,6 +73,7 @@ contract AavegotchiFacet {
 
     function setAavegotchiName(uint256 _tokenId, string memory _name) external {
         require(bytes(_name).length > 0, "AavegotchiFacet: _name can't be empty");
+        require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must choose Aavegotchi before setting name");
         require(bytes(_name).length < 26, "AavegotchiFacet: _name can't be greater than 25 characters");
         require(s.aavegotchiNamesUsed[_name] == false, "AavegotchiFacet: Aavegotchi name used already");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can set the name");
@@ -87,6 +88,7 @@ contract AavegotchiFacet {
 
     function createHaunt(uint24 _maxAavegotchis, uint96 _aavegotchiPortalPrice) external returns (uint256 hauntId_) {
         require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access to create haunt");
+        require(s.hauntCount == 10000, "AavegotchiFacet: Haunt must be full before creating new");
         hauntId_ = s.currentHauntId + 1;
         s.currentHauntId = uint16(hauntId_);
         s.hauntCount = 0;
@@ -97,10 +99,11 @@ contract AavegotchiFacet {
     function buyPortals(uint256 _ghst, bool _setBatchId) external {
         uint256 aavegotchiPortalPrice = s.aavegotchiPortalPrice;
         require(_ghst >= aavegotchiPortalPrice, "AavegotchiFacet: Not enough GHST to buy portal");
+        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
+        require(ghstBalance > _ghst, "AavegotchiFacet: Not enough GHST!");
+
         uint16 hauntId = s.currentHauntId;
         uint256 numAavegotchisToPurchase = _ghst / aavegotchiPortalPrice;
-        console.log("haunt count:", s.hauntCount);
-        console.log("will purchase this many aavogthis:", numAavegotchisToPurchase);
         uint256 hauntCount = s.hauntCount + numAavegotchisToPurchase;
         require(hauntCount <= s.hauntMaxSize, "AavegotchiFacet: Exceeded max number of aavegotchis for this haunt");
         s.hauntCount = uint24(hauntCount);
