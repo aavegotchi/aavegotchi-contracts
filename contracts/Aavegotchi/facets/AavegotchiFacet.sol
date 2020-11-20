@@ -440,6 +440,7 @@ contract AavegotchiFacet {
         uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
         uint256 level; //The level of this Aavegotchi begins at 1.
         uint256 batchId;
+        uint256 hauntId;
     }
 
     function getAavegotchi(uint256 _tokenId) public view returns (AavegotchiInfo memory aavegotchiInfo_) {
@@ -461,6 +462,7 @@ contract AavegotchiFacet {
         aavegotchiInfo_.experience = s.aavegotchis[_tokenId].experience;
         aavegotchiInfo_.level = s.aavegotchis[_tokenId].level;
         aavegotchiInfo_.batchId = s.aavegotchis[_tokenId].batchId;
+        aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
         return aavegotchiInfo_;
     }
 
