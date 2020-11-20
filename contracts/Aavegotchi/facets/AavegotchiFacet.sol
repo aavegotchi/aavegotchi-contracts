@@ -85,7 +85,23 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].name = _name;
     }
 
+    function createHaunt(uint24 _maxAavegotchis, uint96 _aavegotchiPortalPrice) external returns (uint256 hauntId_) {
+        require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access to create haunt");
+        hauntId_ = s.currentHauntId + 1;
+        s.currentHauntId = uint16(hauntId_);
+        s.hauntCount = 0;
+        s.hauntMaxSize = _maxAavegotchis;
+        s.aavegotchiPortalPrice = _aavegotchiPortalPrice;
+    }
+
     function buyPortals(uint256 _ghst, bool _setBatchId) external {
+        uint256 aavegotchiPortalPrice = s.aavegotchiPortalPrice;
+        require(_ghst >= aavegotchiPortalPrice, "AavegotchiFacet: Not enough GHST to buy portal");
+        uint16 hauntId = s.currentHauntId;
+        uint256 numAavegotchisToPurchase = _ghst / aavegotchiPortalPrice;
+        uint256 hauntCount = s.hauntCount + numAavegotchisToPurchase;
+        require(hauntCount <= s.hauntMaxSize, "AavegotchiFacet: Exceeded max number of aavegotchis for this haunt");
+        s.hauntCount = uint24(hauntCount);
         uint32 nextBatchId;
         uint32 batchCount;
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
@@ -93,15 +109,16 @@ contract AavegotchiFacet {
             nextBatchId = vrf_ds.nextBatchId;
             batchCount = vrf_ds.batchCount;
         }
-        require(_ghst >= 100e18, "AavegotchiNFT: Not enough GHST to buy portal");
-        for (uint256 i; i < _ghst / 100e18; i++) {
+        for (uint256 i; i < numAavegotchisToPurchase; i++) {
             uint256 tokenId = s.totalSupply++;
+            Aavegotchi storage aavegotchi = s.aavegotchis[tokenId];
             uint32 ownerIndex = uint32(s.aavegotchiOwnerEnumeration[msg.sender].length);
             s.aavegotchiOwnerEnumeration[msg.sender].push(uint32(tokenId));
-            s.aavegotchis[tokenId].owner = msg.sender;
-            s.aavegotchis[tokenId].ownerEnumerationIndex = ownerIndex;
+            aavegotchi.owner = msg.sender;
+            aavegotchi.ownerEnumerationIndex = ownerIndex;
+            aavegotchi.hauntId = hauntId;
             if (_setBatchId) {
-                s.aavegotchis[tokenId].batchId = nextBatchId;
+                aavegotchi.batchId = nextBatchId;
                 batchCount++;
             }
             emit Transfer(address(0), msg.sender, tokenId);
@@ -109,7 +126,7 @@ contract AavegotchiFacet {
         if (_setBatchId) {
             vrf_ds.batchCount = batchCount;
         }
-        uint256 amount = _ghst - (_ghst % 100e18);
+        uint256 amount = _ghst - (_ghst % aavegotchiPortalPrice);
         uint256 burnAmount = amount / 10;
         IERC20(s.ghstContract).transferFrom(msg.sender, address(0), burnAmount);
         IERC20(s.ghstContract).transferFrom(msg.sender, address(this), amount - burnAmount);
@@ -422,6 +439,7 @@ contract AavegotchiFacet {
         int256 interactionCount; //The kinship value of this Aavegotchi. Default is 50.
         uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
         uint256 level; //The level of this Aavegotchi begins at 1.
+        uint256 batchId;
     }
 
     function getAavegotchi(uint256 _tokenId) public view returns (AavegotchiInfo memory aavegotchiInfo_) {
@@ -442,6 +460,7 @@ contract AavegotchiFacet {
         aavegotchiInfo_.interactionCount = s.aavegotchis[_tokenId].interactionCount;
         aavegotchiInfo_.experience = s.aavegotchis[_tokenId].experience;
         aavegotchiInfo_.level = s.aavegotchis[_tokenId].level;
+        aavegotchiInfo_.batchId = s.aavegotchis[_tokenId].batchId;
         return aavegotchiInfo_;
     }
 

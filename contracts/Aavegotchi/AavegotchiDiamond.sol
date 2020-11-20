@@ -54,10 +54,11 @@ contract AavegotchiDiamond {
         vrf_ds.keyHash = _args.chainlinkKeyHash;
         vrf_ds.fee = uint144(_args.chainlinkFee);
         vrf_ds.nextBatchId = 1;
+
+        s.hauntMaxSize = 10_000;
+        s.aavegotchiPortalPrice = 100e18;
     }
 
-    // Find facet for function that is called and execute the
-    // function if a facet is found and return any value.
     fallback() external payable {
         LibDiamond.DiamondStorage storage ds;
         bytes32 position = LibDiamond.DIAMOND_STORAGE_POSITION;

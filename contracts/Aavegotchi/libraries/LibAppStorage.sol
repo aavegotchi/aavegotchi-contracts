@@ -40,6 +40,7 @@ struct Aavegotchi {
     uint16 streak; //The streak bonus
     address escrow;
     uint32 batchId;
+    uint16 hauntId;
 }
 
 struct WearableType {
@@ -126,6 +127,10 @@ struct AppStorage {
     uint32 totalSupply;
     address ghstContract;
     address dao;
+    uint16 currentHauntId;
+    uint24 hauntCount;
+    uint24 hauntMaxSize;
+    uint96 aavegotchiPortalPrice;
 }
 
 library LibAppStorage {
