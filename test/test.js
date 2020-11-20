@@ -128,6 +128,10 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(vrfInfo.batchCount_).to.equal(2)
   })
 
+  it('Cannot open portal without first calling VRF', async function () {
+    await truffleAssert.reverts(aavegotchiFacet.openPortals(["0"]), "AavegotchiFacet: No random number for this portal")
+  })
+
 
   it('Should receive VRF call', async function () {
     await vrfFacet.drawRandomNumber()

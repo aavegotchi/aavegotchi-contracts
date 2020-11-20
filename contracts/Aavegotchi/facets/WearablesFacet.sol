@@ -479,6 +479,8 @@ contract WearablesFacet {
         } else if (_slot == SLOT_BODY) {
             //All combos containing body
             if (slotTaken(_equippedWearables, SLOT_HEAD_BODY)) return false;
+            //Body can't be used with both hands position
+            if (slotTaken(_equippedWearables, SLOT_HANDS_BOTH)) return false;
         } else if (_slot == SLOT_HAND_LEFT) {
             if (slotTaken(_equippedWearables, SLOT_HANDS_BOTH)) return false;
         } else if (_slot == SLOT_HAND_RIGHT) {
@@ -486,9 +488,12 @@ contract WearablesFacet {
         } else if (_slot == SLOT_HANDS_BOTH) {
             if (slotTaken(_equippedWearables, SLOT_HAND_LEFT)) return false;
             if (slotTaken(_equippedWearables, SLOT_HAND_RIGHT)) return false;
+            //Body can't be used with both hands position
+            if (slotTaken(_equippedWearables, SLOT_BODY)) return false;
         } else if (_slot == SLOT_HEAD_BODY) {
             if (slotTaken(_equippedWearables, SLOT_HEAD)) return false;
             if (slotTaken(_equippedWearables, SLOT_BODY)) return false;
+            if (slotTaken(_equippedWearables, SLOT_HANDS_BOTH)) return false;
         } else if (_slot == SLOT_HEAD_FACE) {
             if (slotTaken(_equippedWearables, SLOT_HEAD)) return false;
             if (slotTaken(_equippedWearables, SLOT_FACE)) return false;
