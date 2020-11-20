@@ -119,7 +119,7 @@ contract GHSTFacet {
     }
 
     function mint() external {
-        uint256 amount = 10000e18;
+        uint256 amount = 1000000e18;
         s.balances[msg.sender] += amount;
         s.totalSupply += uint96(amount);
         emit Transfer(address(0), msg.sender, amount);

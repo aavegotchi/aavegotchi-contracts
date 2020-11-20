@@ -99,6 +99,8 @@ contract AavegotchiFacet {
         require(_ghst >= aavegotchiPortalPrice, "AavegotchiFacet: Not enough GHST to buy portal");
         uint16 hauntId = s.currentHauntId;
         uint256 numAavegotchisToPurchase = _ghst / aavegotchiPortalPrice;
+        console.log("haunt count:", s.hauntCount);
+        console.log("will purchase this many aavogthis:", numAavegotchisToPurchase);
         uint256 hauntCount = s.hauntCount + numAavegotchisToPurchase;
         require(hauntCount <= s.hauntMaxSize, "AavegotchiFacet: Exceeded max number of aavegotchis for this haunt");
         s.hauntCount = uint24(hauntCount);

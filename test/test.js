@@ -60,10 +60,10 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     linkContract = deployVars.linkContract
   })
 
-  it('Should mint 10,000 GHST tokens', async function () {
+  it('Should mint 100,000 GHST tokens', async function () {
     await ghstDiamond.mint()
     const balance = await ghstDiamond.balanceOf(account)
-    expect(balance).to.equal('10000000000000000000000')
+    expect(balance).to.equal('1000000000000000000000000')
   })
 
   it('Should show all whitelisted collaterals', async function () {
@@ -398,6 +398,18 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
     // This wearable gets equipped in the ninth slot, which takes up 0&1 slots
     expect(equipped[9]).to.equal('2')
+  })
+
+  it('Cannot exceed max haunt size', async function () {
+    //Reverting for unknown reason. Probably gas related?
+    const balance = await ghstDiamond.balanceOf(account)
+    console.log('balance:', balance.toString())
+    console.log('balance:', Number(balance) / Math.pow(10, 18))
+    for (let index = 0; index < 10; index++) {
+      //1000 portals
+      const tenThousandPortals = "100000000000000000000000"
+      await aavegotchiFacet.buyPortals(tenThousandPortals, true)
+    }
   })
 
   /*
