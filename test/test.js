@@ -426,8 +426,8 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
       // const tenThousandPortals = '10000000000000000000000' // 00"
       const tenThousandPortals = ethers.utils.parseEther('10000')
       const tx = await aavegotchiFacet.buyPortals(tenThousandPortals, true)
-      // const receipt = await tx.wait()
-      // console.log('gas used:' + receipt.gasUsed)
+      const receipt = await tx.wait()
+      console.log('gas used:' + receipt.gasUsed)
     }
   })
 

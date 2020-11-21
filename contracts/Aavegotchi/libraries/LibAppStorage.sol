@@ -20,11 +20,7 @@ struct Aavegotchi {
     uint256 randomNumber;
     // Sixteen 16 bit ints
     int256 numericTraits;
-    // each byte is used as an individual trait
-    // see trait helper functions below
-    // uint256 numericTraits;
     address owner;
-    uint32 ownerEnumerationIndex;
     uint32 batchId;
     uint16 hauntId;
     // track status of aavegotchi
@@ -107,13 +103,12 @@ struct AppStorage {
     // SvgLayer[] itemsSvg;
     // contractAddress => nftId  => id => balance
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) nftBalances;
+    mapping(address => uint256) aavegotchiBalance;
     // owner => (id => balance)
     WearableType[] wearableTypes;
     WearableSet[] wearableSets;
     // owner => (wearableId => quantity)
     mapping(address => mapping(uint256 => uint256)) wearables;
-    // owner => aavegotchiOwnerEnumeration
-    mapping(address => uint32[]) aavegotchiOwnerEnumeration;
     mapping(uint256 => Aavegotchi) aavegotchis;
     // owner => (operator => bool)
     mapping(address => mapping(address => bool)) operators;

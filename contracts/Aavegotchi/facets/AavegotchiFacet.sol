@@ -108,32 +108,23 @@ contract AavegotchiFacet {
         require(hauntCount <= s.hauntMaxSize, "AavegotchiFacet: Exceeded max number of aavegotchis for this haunt");
         s.hauntCount = uint24(hauntCount);
         uint32 nextBatchId;
-        uint32 batchCount;
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
         if (_setBatchId) {
             nextBatchId = vrf_ds.nextBatchId;
-            batchCount = vrf_ds.batchCount;
         }
-        uint32 totalSupply = s.totalSupply;
-        uint32 ownerIndex = uint32(s.aavegotchiOwnerEnumeration[msg.sender].length);
+        uint256 tokenId = s.totalSupply;
         for (uint256 i; i < numAavegotchisToPurchase; i++) {
-            uint256 tokenId = totalSupply++;
-            Aavegotchi storage aavegotchi = s.aavegotchis[tokenId];
-            s.aavegotchiOwnerEnumeration[msg.sender].push(uint32(tokenId));
-            aavegotchi.owner = msg.sender;
-            aavegotchi.ownerEnumerationIndex = ownerIndex;
-            ownerIndex++;
-            aavegotchi.hauntId = hauntId;
-            if (_setBatchId) {
-                aavegotchi.batchId = nextBatchId;
-                batchCount++;
-            }
+            s.aavegotchis[tokenId].owner = msg.sender;
+            s.aavegotchis[tokenId].hauntId = hauntId;
+            s.aavegotchis[tokenId].batchId = nextBatchId;
             emit Transfer(address(0), msg.sender, tokenId);
+            tokenId++;
         }
         if (_setBatchId) {
-            vrf_ds.batchCount = batchCount;
+            vrf_ds.batchCount += uint32(numAavegotchisToPurchase);
         }
-        s.totalSupply = totalSupply;
+        s.aavegotchiBalance[msg.sender] += numAavegotchisToPurchase;
+        s.totalSupply = uint32(tokenId);
         uint256 amount = _ghst - (_ghst % aavegotchiPortalPrice);
         uint256 burnAmount = amount / 10;
         IERC20(s.ghstContract).transferFrom(msg.sender, address(0), burnAmount);
@@ -415,21 +406,7 @@ contract AavegotchiFacet {
     /// @param _owner An address for whom to query the balance
     /// @return balance_ The number of NFTs owned by `_owner`, possibly zero
     function balanceOf(address _owner) external view returns (uint256 balance_) {
-        balance_ = s.aavegotchiOwnerEnumeration[_owner].length;
-    }
-
-    /// @notice Enumerate NFTs assigned to an owner
-    /// @dev Throws if `_index` >= `balanceOf(_owner)` or if
-    ///  `_owner` is the zero address, representing invalid NFTs.
-    /// @param _owner An address where we are interested in NFTs owned by them
-    /// @param _index A counter less than `balanceOf(_owner)`
-    /// @return tokenId_ The token identifier for the `_index`th NFT assigned to `_owner`,
-    ///   (sort order not specified)
-    function tokenOfOwnerByIndex(address _owner, uint256 _index) external view returns (uint256 tokenId_) {
-        uint256 balance = s.aavegotchiOwnerEnumeration[_owner].length;
-        require(_index < balance, "AavegotchiNFT: Does not have token at index");
-        require(_owner != address(0), "AavegotchiNFT:Owner can't be address(0");
-        tokenId_ = s.aavegotchiOwnerEnumeration[_owner][_index];
+        balance_ = s.aavegotchiBalance[_owner];
     }
 
     struct AavegotchiInfo {
@@ -596,16 +573,27 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
     }
 
-    function allAavegotchiIdsOfOwner(address _owner) external view returns (uint32[] memory tokenIds_) {
-        tokenIds_ = s.aavegotchiOwnerEnumeration[_owner];
+    function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
+        tokenIds_ = new uint256[](s.aavegotchiBalance[_owner]);
+        uint256 totalSupply = s.totalSupply;
+        uint256 ownerIndex;
+        for (uint256 tokenId; tokenId < totalSupply; tokenId++) {
+            if (_owner == s.aavegotchis[tokenId].owner) {
+                tokenIds_[ownerIndex] = tokenId;
+                ownerIndex++;
+            }
+        }
     }
 
     function allAavegotchisOfOwner(address _owner) external view returns (AavegotchiInfo[] memory aavegotchiInfos_) {
-        //Haven't tested but should work -- yes sir
-        uint32[] memory tokenIds = s.aavegotchiOwnerEnumeration[_owner];
-        aavegotchiInfos_ = new AavegotchiInfo[](tokenIds.length);
-        for (uint256 index; index < tokenIds.length; index++) {
-            aavegotchiInfos_[index] = getAavegotchi(tokenIds[index]);
+        aavegotchiInfos_ = new AavegotchiInfo[](s.aavegotchiBalance[_owner]);
+        uint256 totalSupply = s.totalSupply;
+        uint256 ownerIndex;
+        for (uint256 tokenId; tokenId < totalSupply; tokenId++) {
+            if (_owner == s.aavegotchis[tokenId].owner) {
+                aavegotchiInfos_[ownerIndex] = getAavegotchi(tokenId);
+                ownerIndex++;
+            }
         }
     }
 
@@ -699,7 +687,6 @@ contract AavegotchiFacet {
     ) internal {
         require(_to != address(0), "ER721: Can't transfer to 0 address");
         address owner = s.aavegotchis[_tokenId].owner;
-        uint256 index = s.aavegotchis[_tokenId].ownerEnumerationIndex;
         require(owner != address(0), "ERC721: Invalid tokenId or can't be transferred");
         require(
             msg.sender == owner || s.operators[owner][msg.sender] || s.approved[_tokenId] == msg.sender,
@@ -707,15 +694,8 @@ contract AavegotchiFacet {
         );
         require(_from == owner, "ERC721: _from is not owner, transfer failed");
         s.aavegotchis[_tokenId].owner = _to;
-        s.aavegotchis[_tokenId].ownerEnumerationIndex = uint32(s.aavegotchiOwnerEnumeration[_to].length);
-        s.aavegotchiOwnerEnumeration[_to].push(uint32(_tokenId));
-        uint256 lastIndex = s.aavegotchiOwnerEnumeration[_from].length - 1;
-        if (index != lastIndex) {
-            uint256 lastTokenId = s.aavegotchiOwnerEnumeration[_from][lastIndex];
-            s.aavegotchiOwnerEnumeration[_from][index] = uint32(lastTokenId);
-            s.aavegotchis[lastTokenId].ownerEnumerationIndex = uint32(index);
-        }
-        s.aavegotchiOwnerEnumeration[_from].pop();
+        s.aavegotchiBalance[_from]--;
+        s.aavegotchiBalance[_to]++;
         if (s.approved[_tokenId] != address(0)) {
             delete s.approved[_tokenId];
             emit Approval(owner, address(0), _tokenId);

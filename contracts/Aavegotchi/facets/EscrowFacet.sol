@@ -71,16 +71,7 @@ contract EscrowFacet {
             require(s.nftBalances[address(this)][_tokenId][wearableTypeId] == 0, "EscrowFacet: Can't burn aavegotchi with wearables");
         }
 
-        // remove from owner enumeration storage
-        uint256 index = s.aavegotchis[_tokenId].ownerEnumerationIndex;
-        uint256 lastIndex = s.aavegotchiOwnerEnumeration[msg.sender].length - 1;
-        if (index != lastIndex) {
-            uint256 lastTokenId = s.aavegotchiOwnerEnumeration[msg.sender][lastIndex];
-            s.aavegotchiOwnerEnumeration[msg.sender][index] = uint32(lastTokenId);
-            s.aavegotchis[lastTokenId].ownerEnumerationIndex = uint32(index);
-        }
-        s.aavegotchiOwnerEnumeration[msg.sender].pop();
-
+        s.aavegotchiBalance[msg.sender]--;
         // delete token approval if any
         if (s.approved[_tokenId] != address(0)) {
             delete s.approved[_tokenId];
