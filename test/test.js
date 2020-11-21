@@ -15,7 +15,7 @@ const truffleAssert = require('truffle-assertions')
 const { deployProject } = require('../scripts/deploy.js')
 const { wearableTypes } = require('../scripts/wearableTypes.js')
 
-function uintToIntArray(uint, numBytes) {
+function uintToIntArray (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -87,11 +87,11 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     await truffleAssert.reverts(vrfFacet.drawRandomNumber(), "VrfFacet: Can't call VRF with none in batch")
   })
 
-  it("Portal should cost 100 GHST", async function () {
+  it('Portal should cost 100 GHST', async function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (50 * Math.pow(10, 18)).toFixed() // 1 portal
-    await truffleAssert.reverts(aavegotchiFacet.buyPortals(buyAmount, true), "AavegotchiFacet: Not enough GHST to buy portal")
+    await truffleAssert.reverts(aavegotchiFacet.buyPortals(buyAmount, true), 'AavegotchiFacet: Not enough GHST to buy portal')
   })
 
   it('Should purchase one portal', async function () {
@@ -118,21 +118,20 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
   // it('Only owner can set batch id', async function () {
   //  await bobAavegotchi.setBatchId(["0"])
-  //})
+  // })
 
   it('Should opt into next batch', async function () {
-    await truffleAssert.reverts(aavegotchiFacet.setBatchId(["0"]), "AavegotchiFacet: batchId already set")
-    await aavegotchiFacet.setBatchId(["1"])
+    await truffleAssert.reverts(aavegotchiFacet.setBatchId(['0']), 'AavegotchiFacet: batchId already set')
+    await aavegotchiFacet.setBatchId(['1'])
 
     const vrfInfo = await vrfFacet.vrfInfo()
     expect(vrfInfo.batchCount_).to.equal(2)
   })
 
-
   it('Should receive VRF call', async function () {
     await vrfFacet.drawRandomNumber()
     const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
-    await vrfFacet.rawFulfillRandomness('0x0000000000000000000000000000000000000000000000000000000000000000', randomness)
+    await vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
   })
 
   it('Should reset batch to 0 after calling VRF', async function () {
@@ -146,19 +145,16 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
     await aavegotchiFacet.buyPortals(buyAmount, true)
-    await truffleAssert.reverts(vrfFacet.drawRandomNumber(), "VrfFacet: Waiting period to call VRF not over yet")
+    await truffleAssert.reverts(vrfFacet.drawRandomNumber(), 'VrfFacet: Waiting period to call VRF not over yet')
 
     ethers.provider.send('evm_increaseTime', [18 * 3600])
     ethers.provider.send('evm_mine')
     await vrfFacet.drawRandomNumber()
 
     const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
-    await vrfFacet.rawFulfillRandomness('0x0000000000000000000000000000000000000000000000000000000000000000', randomness)
+    await vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
     const vrfInfo = await vrfFacet.vrfInfo()
     expect(vrfInfo.batchCount_).to.equal(0)
-
-
-
   })
 
   it('', async function () {
@@ -166,9 +162,8 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
     await aavegotchiFacet.buyPortals(buyAmount, true)
-    await truffleAssert.reverts(vrfFacet.drawRandomNumber(), "VrfFacet: Waiting period to call VRF not over yet")
+    await truffleAssert.reverts(vrfFacet.drawRandomNumber(), 'VrfFacet: Waiting period to call VRF not over yet')
   })
-
 
   it('Should open the portal', async function () {
     let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
@@ -221,14 +216,14 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   it('Should set a name', async function () {
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
-    await truffleAssert.reverts(aavegotchiFacet.setAavegotchiName(tokenId, "ThisIsLongerThan25CharsSoItWillRevert"), "AavegotchiFacet: _name can't be greater than 25 characters")
+    await truffleAssert.reverts(aavegotchiFacet.setAavegotchiName(tokenId, 'ThisIsLongerThan25CharsSoItWillRevert'), "AavegotchiFacet: _name can't be greater than 25 characters")
     await aavegotchiFacet.setAavegotchiName(tokenId, 'Beavis')
     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
     expect(aavegotchi.name).to.equal('Beavis')
   })
 
   it('Can only set name on claimed Aavegotchi', async function () {
-    await truffleAssert.reverts(aavegotchiFacet.setAavegotchiName("1", 'Portal'), "AavegotchiFacet: Must choose Aavegotchi before setting name")
+    await truffleAssert.reverts(aavegotchiFacet.setAavegotchiName('1', 'Portal'), 'AavegotchiFacet: Must choose Aavegotchi before setting name')
   })
 
   it('Should show correct rarity score', async function () {
@@ -287,10 +282,10 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     ethers.provider.send('evm_increaseTime', [18 * 3600])
     ethers.provider.send('evm_mine')
 
-    //Call VRF
+    // Call VRF
     await vrfFacet.drawRandomNumber()
     const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
-    await vrfFacet.rawFulfillRandomness('0x0000000000000000000000000000000000000000000000000000000000000000', randomness)
+    await vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
 
     let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(5)
@@ -418,20 +413,23 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   })
 
   it('Cannot exceed max haunt size', async function () {
-    //Reverting for unknown reason. Probably gas related?
+    // Reverting for unknown reason. Probably gas related?
     const balance = await ghstDiamond.balanceOf(account)
     console.log('balance:', balance.toString())
     console.log('balance:', Number(balance) / Math.pow(10, 18))
     for (let index = 0; index < 10; index++) {
-      //1000 portals
-      const tenThousandPortals = "1000000000000000000000" //00"
-      await aavegotchiFacet.buyPortals(tenThousandPortals, true)
+      // 1000 portals
+      // const tenThousandPortals = '10000000000000000000000' // 00"
+      const tenThousandPortals = ethers.utils.parseEther('10000')
+      const tx = await aavegotchiFacet.buyPortals(tenThousandPortals, true)
+      // const receipt = await tx.wait()
+      // console.log('gas used:' + receipt.gasUsed)
     }
   })
 
   it('Cannot create new haunt until first is finished', async function () {
-    const oneHundred = "100000000000000000000"
-    await truffleAssert.reverts(aavegotchiFacet.createHaunt("10000", oneHundred), "AavegotchiFacet: Haunt must be full before creating new")
+    const oneHundred = '100000000000000000000'
+    await truffleAssert.reverts(aavegotchiFacet.createHaunt('10000', oneHundred), 'AavegotchiFacet: Haunt must be full before creating new')
   })
 
   /*

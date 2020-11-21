@@ -86,13 +86,13 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].name = _name;
     }
 
-    function createHaunt(uint24 _maxAavegotchis, uint96 _aavegotchiPortalPrice) external returns (uint256 hauntId_) {
+    function createHaunt(uint24 _hauntMaxSize, uint96 _aavegotchiPortalPrice) external returns (uint256 hauntId_) {
         require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access to create haunt");
-        require(s.hauntCount == 10000, "AavegotchiFacet: Haunt must be full before creating new");
+        require(s.hauntCount == s.hauntMaxSize, "AavegotchiFacet: Haunt must be full before creating new");
         hauntId_ = s.currentHauntId + 1;
         s.currentHauntId = uint16(hauntId_);
         s.hauntCount = 0;
-        s.hauntMaxSize = _maxAavegotchis;
+        s.hauntMaxSize = _hauntMaxSize;
         s.aavegotchiPortalPrice = _aavegotchiPortalPrice;
     }
 
@@ -100,7 +100,7 @@ contract AavegotchiFacet {
         uint256 aavegotchiPortalPrice = s.aavegotchiPortalPrice;
         require(_ghst >= aavegotchiPortalPrice, "AavegotchiFacet: Not enough GHST to buy portal");
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
-        require(ghstBalance > _ghst, "AavegotchiFacet: Not enough GHST!");
+        require(ghstBalance >= _ghst, "AavegotchiFacet: Not enough GHST!");
 
         uint16 hauntId = s.currentHauntId;
         uint256 numAavegotchisToPurchase = _ghst / aavegotchiPortalPrice;
@@ -114,13 +114,15 @@ contract AavegotchiFacet {
             nextBatchId = vrf_ds.nextBatchId;
             batchCount = vrf_ds.batchCount;
         }
+        uint32 totalSupply = s.totalSupply;
+        uint32 ownerIndex = uint32(s.aavegotchiOwnerEnumeration[msg.sender].length);
         for (uint256 i; i < numAavegotchisToPurchase; i++) {
-            uint256 tokenId = s.totalSupply++;
+            uint256 tokenId = totalSupply++;
             Aavegotchi storage aavegotchi = s.aavegotchis[tokenId];
-            uint32 ownerIndex = uint32(s.aavegotchiOwnerEnumeration[msg.sender].length);
             s.aavegotchiOwnerEnumeration[msg.sender].push(uint32(tokenId));
             aavegotchi.owner = msg.sender;
             aavegotchi.ownerEnumerationIndex = ownerIndex;
+            ownerIndex++;
             aavegotchi.hauntId = hauntId;
             if (_setBatchId) {
                 aavegotchi.batchId = nextBatchId;
@@ -131,6 +133,7 @@ contract AavegotchiFacet {
         if (_setBatchId) {
             vrf_ds.batchCount = batchCount;
         }
+        s.totalSupply = totalSupply;
         uint256 amount = _ghst - (_ghst % aavegotchiPortalPrice);
         uint256 burnAmount = amount / 10;
         IERC20(s.ghstContract).transferFrom(msg.sender, address(0), burnAmount);
@@ -151,7 +154,7 @@ contract AavegotchiFacet {
     function openPortals(uint256[] calldata _tokenIds) external {
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
-            require(s.aavegotchis[tokenId].status == 0, "AavegotchiFacet: Portal is not closed");
+            require(s.aavegotchis[tokenId].status == LibAppStorage.STATUS_CLOSED_PORTAL, "AavegotchiFacet: Portal is not closed");
             require(msg.sender == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
             uint256 batchRandomNumber = LibVrf.getBatchRandomNumber(s.aavegotchis[tokenId].batchId);
             require(batchRandomNumber != 0, "AavegotchiFacet: No random number for this portal");

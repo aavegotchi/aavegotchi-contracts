@@ -37,12 +37,18 @@ async function main () {
   let linkContract
   let keyHash
   let fee
+  let vouchersContractAddress
+  let vouchersContract
 
   if (hre.network.name === 'hardhat') {
     const LinkTokenMock = await ethers.getContractFactory('LinkTokenMock')
     linkContract = await LinkTokenMock.deploy()
     await linkContract.deployed()
     linkAddress = linkContract.address
+    const VouchersContract = await ethers.getContractFactory('VouchersContract')
+    vouchersContract = await VouchersContract.deploy(account)
+    await vouchersContract.deployed()
+    vouchersContractAddress = vouchersContract.address
     vrfCoordinator = account
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     fee = ethers.utils.parseEther('0.1')
@@ -51,11 +57,13 @@ async function main () {
     linkAddress = '0x514910771AF9Ca656af840dff83E8264EcF986CA'
     keyHash = '0xAA77729D3466CA35AE8D28B3BBAC7CC36A5031EFDC430821C02BC31A238AF445'
     fee = ethers.utils.parseEther('2')
+    vouchersContractAddress = '0xe54891774EED9277236bac10d82788aee0Aed313'
   } else if (hre.network.name === 'kovan') {
     vrfCoordinator = '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9'
     linkAddress = '0xa36085F69e2889c224210F603D836748e7dC0088'
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     fee = ethers.utils.parseEther('0.1')
+    vouchersContractAddress = ''
   } else {
     throw Error('No network settings for ' + hre.network.name)
   }
@@ -133,10 +141,10 @@ async function main () {
       ['WearablesFacet', wearablesFacet],
       ['CollateralFacet', collateralFacet],
       ['EscrowFacet', escrowFacet],
-      ['VrfFacet', vrfFacet]
-      // ['ShopFacet', shopFacet]
+      ['VrfFacet', vrfFacet],
+      ['ShopFacet', shopFacet]
     ],
-    args: [account, account, ghstDiamond.address, keyHash, fee]
+    args: [account, account, ghstDiamond.address, keyHash, fee, vouchersContractAddress]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
@@ -149,6 +157,7 @@ async function main () {
   aavegotchiFacet = await ethers.getContractAt('AavegotchiFacet', aavegotchiDiamond.address)
   escrowFacet = await ethers.getContractAt('EscrowFacet', aavegotchiDiamond.address)
   collateralFacet = await ethers.getContractAt('CollateralFacet', aavegotchiDiamond.address)
+  shopFacet = await ethers.getContractAt('ShopFacet', aavegotchiDiamond.address)
 
   // add collateral info
   console.log('Adding Collateral Types')

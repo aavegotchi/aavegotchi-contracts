@@ -32,14 +32,14 @@ contract AavegotchiDiamond {
         address ghstContract;
         bytes32 chainlinkKeyHash;
         uint256 chainlinkFee;
+        address vouchersContract;
     }
 
     constructor(IDiamondCut.FacetCut[] memory _diamondCut, ConstructorArgs memory _args) {
         LibDiamond.diamondCut(_diamondCut, address(0), new bytes(0));
         LibDiamond.setContractOwner(_args.contractOwner);
         s.dao = _args.dao;
-        s.svgLayers["wearables"].push();
-        s.wearableSlotsLength = 11;
+        // s.svgLayers["wearables"].push();
 
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 
@@ -57,6 +57,7 @@ contract AavegotchiDiamond {
 
         s.hauntMaxSize = 10_000;
         s.aavegotchiPortalPrice = 100e18;
+        s.vouchersContract = _args.vouchersContract;
     }
 
     fallback() external payable {

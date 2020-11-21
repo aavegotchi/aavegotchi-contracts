@@ -136,8 +136,9 @@ contract WearablesFacet {
     function addWearableTypes(WearableType[] calldata _wearableTypes) external {
         LibDiamond.enforceIsContractOwner();
         // wearable ids start at 1.  0 means no wearable
+        uint256 wearableTypesLength = s.wearableTypes.length;
         for (uint256 i; i < _wearableTypes.length; i++) {
-            uint256 wearableId = s.wearableTypes.length;
+            uint256 wearableId = wearableTypesLength++;
             s.wearableTypes.push(_wearableTypes[i]);
             emit TransferSingle(msg.sender, address(0), address(0), wearableId, 0);
         }
@@ -152,10 +153,11 @@ contract WearablesFacet {
         require(_wearableIds.length == _quantities.length, "WearablesFacet: Ids and quantities length must match");
 
         //  uint256 count = s.svgLayers["wearables"].length;
+        uint256 wearableTypesLength = s.wearableTypes.length;
         for (uint256 i = 0; i < _wearableIds.length; i++) {
             uint256 wearableId = _wearableIds[i];
 
-            require(s.wearableTypes.length > wearableId, "WearablesFacet: Wearable does not exist");
+            require(wearableTypesLength > wearableId, "WearablesFacet: Wearable does not exist");
 
             uint256 quantity = _quantities[i];
 
@@ -432,7 +434,7 @@ contract WearablesFacet {
             l_equippedWearables |= wearableId << (16 * slot);
         }
         aavegotchi.equippedWearables = l_equippedWearables;
-        aavegotchi.wearableBonus = wearableBonus;
+        aavegotchi.wearableBonus = uint16(wearableBonus);
         aavegotchi.numericTraits = numericTraits;
 
         //To do in WearableFacet: Prevent wearable from being transferred if it's equipped

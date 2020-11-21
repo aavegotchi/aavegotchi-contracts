@@ -16,7 +16,6 @@ struct Aavegotchi {
     // This 256 bit value is broken up into 16 16-bit slots for storing wearableIds
     // See helper function that converts this value into a uint16[16] memory equipedWearables
     uint256 equippedWearables; //The currently equipped wearables of the Aavegotchi
-    uint256 wearableBonus;
     string name;
     uint256 randomNumber;
     // Sixteen 16 bit ints
@@ -26,6 +25,8 @@ struct Aavegotchi {
     // uint256 numericTraits;
     address owner;
     uint32 ownerEnumerationIndex;
+    uint32 batchId;
+    uint16 hauntId;
     // track status of aavegotchi
     // 0 == portal, 1 = open portal, 2 = Aavegotchi
     uint8 status;
@@ -39,8 +40,7 @@ struct Aavegotchi {
     int16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
     uint16 streak; //The streak bonus
     address escrow;
-    uint32 batchId;
-    uint16 hauntId;
+    uint16 wearableBonus;
 }
 
 struct WearableType {
@@ -108,9 +108,6 @@ struct AppStorage {
     // contractAddress => nftId  => id => balance
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) nftBalances;
     // owner => (id => balance)
-
-    //Maybe should begin at 1, so we can use 0 in the equippedWearables array?   Use it for what?
-    uint16 wearableSlotsLength;
     WearableType[] wearableTypes;
     WearableSet[] wearableSets;
     // owner => (wearableId => quantity)
@@ -131,6 +128,7 @@ struct AppStorage {
     uint24 hauntCount;
     uint24 hauntMaxSize;
     uint96 aavegotchiPortalPrice;
+    address vouchersContract;
 }
 
 library LibAppStorage {
