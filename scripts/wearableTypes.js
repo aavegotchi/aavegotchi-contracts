@@ -23,7 +23,9 @@ const wearableTypes = [
     setId: 0,
     slots: [0],
     svgId: 0,
-    totalQuantity: 0
+    totalQuantity: 0,
+    ghstPrice: 10,
+    canPurchaseWithGhst: true
   },
 
   {
@@ -34,7 +36,10 @@ const wearableTypes = [
     setId: 0,
     slots: [2, 3],
     svgId: 1,
-    totalQuantity: 0
+    totalQuantity: 0,
+    ghstPrice: 10,
+    canPurchaseWithGhst: true
+
   },
   {
     traitModifiers: [-1, 0, 2, 1, 0, 0],
@@ -43,7 +48,9 @@ const wearableTypes = [
     setId: 0,
     slots: [9],
     svgId: 2,
-    totalQuantity: 0
+    totalQuantity: 0,
+    ghstPrice: 10,
+    canPurchaseWithGhst: true
   }
 
 ]

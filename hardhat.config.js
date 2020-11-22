@@ -20,7 +20,8 @@ task('accounts', 'Prints the list of accounts', async () => {
 module.exports = {
   networks: {
     hardhat: {
-      blockGasLimit: 10000000
+      blockGasLimit: 135000000,
+      gas: 13000000
     },
     kovan: {
       url: process.env.KOVAN_URL,

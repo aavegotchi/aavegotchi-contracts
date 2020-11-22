@@ -96,12 +96,15 @@ contract AavegotchiFacet {
         s.aavegotchiPortalPrice = _aavegotchiPortalPrice;
     }
 
-    function buyPortals(uint256 _ghst, bool _setBatchId) external {
+    function buyPortals(
+        address _to,
+        uint256 _ghst,
+        bool _setBatchId
+    ) external {
         uint256 aavegotchiPortalPrice = s.aavegotchiPortalPrice;
         require(_ghst >= aavegotchiPortalPrice, "AavegotchiFacet: Not enough GHST to buy portal");
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
         require(ghstBalance >= _ghst, "AavegotchiFacet: Not enough GHST!");
-
         uint16 hauntId = s.currentHauntId;
         uint256 numAavegotchisToPurchase = _ghst / aavegotchiPortalPrice;
         uint256 hauntCount = s.hauntCount + numAavegotchisToPurchase;
@@ -114,16 +117,16 @@ contract AavegotchiFacet {
         }
         uint256 tokenId = s.totalSupply;
         for (uint256 i; i < numAavegotchisToPurchase; i++) {
-            s.aavegotchis[tokenId].owner = msg.sender;
-            s.aavegotchis[tokenId].hauntId = hauntId;
+            s.aavegotchis[tokenId].owner = _to;
             s.aavegotchis[tokenId].batchId = nextBatchId;
-            emit Transfer(address(0), msg.sender, tokenId);
+            s.aavegotchis[tokenId].hauntId = hauntId;
+            emit Transfer(address(0), _to, tokenId);
             tokenId++;
         }
         if (_setBatchId) {
             vrf_ds.batchCount += uint32(numAavegotchisToPurchase);
         }
-        s.aavegotchiBalance[msg.sender] += numAavegotchisToPurchase;
+        s.aavegotchiBalance[_to] += numAavegotchisToPurchase;
         s.totalSupply = uint32(tokenId);
         uint256 amount = _ghst - (_ghst % aavegotchiPortalPrice);
         uint256 burnAmount = amount / 10;

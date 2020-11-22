@@ -91,14 +91,14 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (50 * Math.pow(10, 18)).toFixed() // 1 portal
-    await truffleAssert.reverts(aavegotchiFacet.buyPortals(buyAmount, true), 'AavegotchiFacet: Not enough GHST to buy portal')
+    await truffleAssert.reverts(aavegotchiFacet.buyPortals(account, buyAmount, true), 'AavegotchiFacet: Not enough GHST to buy portal')
   })
 
   it('Should purchase one portal', async function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await aavegotchiFacet.buyPortals(buyAmount, true)
+    await aavegotchiFacet.buyPortals(account, buyAmount, true)
 
     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(1)
@@ -113,7 +113,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await aavegotchiFacet.buyPortals(buyAmount, false)
+    await aavegotchiFacet.buyPortals(account, buyAmount, false)
   })
 
   // it('Only owner can set batch id', async function () {
@@ -148,7 +148,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await aavegotchiFacet.buyPortals(buyAmount, true)
+    await aavegotchiFacet.buyPortals(account, buyAmount, true)
     await truffleAssert.reverts(vrfFacet.drawRandomNumber(), 'VrfFacet: Waiting period to call VRF not over yet')
 
     ethers.provider.send('evm_increaseTime', [18 * 3600])
@@ -165,7 +165,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await aavegotchiFacet.buyPortals(buyAmount, true)
+    await aavegotchiFacet.buyPortals(account, buyAmount, true)
     await truffleAssert.reverts(vrfFacet.drawRandomNumber(), 'VrfFacet: Waiting period to call VRF not over yet')
   })
 
@@ -282,7 +282,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   it('Can decrease stake and destroy Aavegotchi', async function () {
     // Buy portal
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await aavegotchiFacet.buyPortals(buyAmount, true)
+    await aavegotchiFacet.buyPortals(account, buyAmount, true)
     ethers.provider.send('evm_increaseTime', [18 * 3600])
     ethers.provider.send('evm_mine')
 
@@ -425,7 +425,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
       // 1000 portals
       // const tenThousandPortals = '10000000000000000000000' // 00"
       const tenThousandPortals = ethers.utils.parseEther('10000')
-      const tx = await aavegotchiFacet.buyPortals(tenThousandPortals, true)
+      const tx = await aavegotchiFacet.buyPortals(account, tenThousandPortals, true)
       const receipt = await tx.wait()
       console.log('gas used:' + receipt.gasUsed)
     }

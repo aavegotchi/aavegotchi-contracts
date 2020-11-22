@@ -48,6 +48,8 @@ struct WearableType {
     uint8[] slots; //The slots that this wearable can be added to.
     uint256 svgId; //The svgId of the wearable
     uint256 totalQuantity; //The total quantity of this wearable minted so far
+    uint96 ghstPrice;
+    bool canPurchaseWithGhst;
 
     //A hand wearable can be equipped in left hand, right hand, both hands
     //So its allowedSlots are 4,5, and 7.
