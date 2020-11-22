@@ -295,6 +295,15 @@ contract WearablesFacet {
         value = s.nftBalances[_tokenContract][_tokenId][_id];
     }
 
+    // returns the balances for all wearables for a token
+    function wearablesBalancesOfToken(address _tokenContract, uint256 _tokenId) external view returns (uint256[] memory bals_) {
+        uint256 count = s.wearableTypes.length;
+        bals_ = new uint256[](count);
+        for (uint256 id = 0; id < count; id++) {
+            bals_[id] = s.nftBalances[_tokenContract][_tokenId][id];
+        }
+    }
+
     /**
         @notice Get the balance of multiple account/token pairs
         @param _owners The addresses of the token holders

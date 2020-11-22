@@ -15,11 +15,21 @@ const truffleAssert = require('truffle-assertions')
 const { deployProject } = require('../scripts/deploy.js')
 const { wearableTypes } = require('../scripts/wearableTypes.js')
 
+// numBytes is how many bytes of the uint that we care about
 function uintToIntArray (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
     array.unshift(ethers.BigNumber.from('0x' + uint.substr(i, 2)).fromTwos(8).toNumber())
+  }
+  return array
+}
+
+function uintToWearableIds (uint) {
+  uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
+  const array = []
+  for (let i = 0; i < uint.length; i += 4) {
+    array.unshift(ethers.BigNumber.from('0x' + uint.substr(i, 4)).fromTwos(16).toNumber())
   }
   return array
 }
@@ -210,6 +220,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     await aavegotchiFacet.claimAavegotchiFromPortal(tokenId, 4, minStake)
 
     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
+
     const collateral = aavegotchi.collateral
     expect(selectedGhost.collateralType).to.equal(collateral)
     expect(aavegotchi.status).to.equal(2)
@@ -412,23 +423,26 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     await wearablesFacet.equipWearables(testAavegotchiId, [multiSlotWearableId], ['9'])
     const equipped = await wearablesFacet.equippedWearables(testAavegotchiId)
 
+    // const aavegotchi = await aavegotchiFacet.getAavegotchi(testAavegotchiId)
+    // console.log(aavegotchi.equippedWearables)
+
     // This wearable gets equipped in the ninth slot, which takes up 0&1 slots
     expect(equipped[9]).to.equal('2')
   })
 
   it('Cannot exceed max haunt size', async function () {
     // Reverting for unknown reason. Probably gas related?
-    const balance = await ghstDiamond.balanceOf(account)
-    console.log('balance:', balance.toString())
-    console.log('balance:', Number(balance) / Math.pow(10, 18))
-    for (let index = 0; index < 10; index++) {
-      // 1000 portals
-      // const tenThousandPortals = '10000000000000000000000' // 00"
-      const tenThousandPortals = ethers.utils.parseEther('10000')
-      const tx = await aavegotchiFacet.buyPortals(account, tenThousandPortals, true)
-      const receipt = await tx.wait()
-      console.log('gas used:' + receipt.gasUsed)
-    }
+    // const balance = await ghstDiamond.balanceOf(account)
+    // console.log('balance:', balance.toString())
+    // console.log('balance:', Number(balance) / Math.pow(10, 18))
+    // for (let index = 0; index < 10; index++) {
+    //   // 1000 portals
+    //   // const tenThousandPortals = '10000000000000000000000' // 00"
+    //   const tenThousandPortals = ethers.utils.parseEther('10000')
+    //   const tx = await aavegotchiFacet.buyPortals(account, tenThousandPortals, true)
+    //   const receipt = await tx.wait()
+    //   console.log('gas used:' + receipt.gasUsed)
+    // }
   })
 
   it('Cannot create new haunt until first is finished', async function () {

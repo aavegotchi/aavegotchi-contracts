@@ -419,6 +419,7 @@ contract AavegotchiFacet {
         uint256 randomNumber;
         uint8 status;
         int256 numericTraits;
+        uint256[EQUIPPED_WEARABLE_SLOTS] equippedWearables;
         address collateral;
         address escrow;
         uint256 stakedAmount;
@@ -438,6 +439,10 @@ contract AavegotchiFacet {
         aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
         aavegotchiInfo_.numericTraits = s.aavegotchis[_tokenId].numericTraits;
+        uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+        for (uint16 i; i < EQUIPPED_WEARABLE_SLOTS; i++) {
+            aavegotchiInfo_.equippedWearables[i] = uint16(l_equippedWearables >> (i * 16));
+        }
         aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
         aavegotchiInfo_.escrow = s.aavegotchis[_tokenId].escrow;
         if (aavegotchiInfo_.collateral == address(0)) {
