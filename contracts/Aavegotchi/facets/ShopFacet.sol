@@ -22,15 +22,32 @@ contract ShopFacet {
 
     //To do: Allow users to purchase items from store using GHST
     //Purchasing items should distribute an amount of GHST to various addresses, while burning the rest
-    /*
-    function purchaseWearablesWithGhst(uint256[] calldata _wearableIds, uint256[] calldata _quantities) external {
+
+    function purchaseWearablesWithGhst(
+        address _to,
+        uint256[] calldata _wearableIds,
+        uint256[] calldata _quantities
+    ) external {
         require(_wearableIds.length == _quantities.length, "ShopFacet: _wearableIds not same length as _quantities");
+        uint256 totalPrice;
         for (uint256 i; i < _wearableIds.length; i++) {
             uint256 wearableId = _wearableIds[i];
             uint256 quantity = _quantities[i];
+            WearableType storage wearableType = s.wearableTypes[wearableId];
+            require(wearableType.canPurchaseWithGhst, "ShopFacet: Can't purchase wearable type with GHST");
+            uint256 totalQuantity = wearableType.totalQuantity + quantity;
+            require(totalQuantity <= wearableType.maxQuantity, "ShopFacet: Total wearable type quantity exceeds max quantity");
+            wearableType.totalQuantity = uint32(totalQuantity);
+            totalPrice += quantity * wearableType.ghstPrice;
+            s.wearables[_to][wearableId] += quantity;
         }
+        LibERC1155.onERC1155BatchReceived(msg.sender, _to, _wearableIds, _quantities, "");
+        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
+        require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
+        uint256 burnAmount = totalPrice / 10;
+        LibERC20.transferFrom(s.ghstContract, msg.sender, address(0), burnAmount);
+        LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), totalPrice - burnAmount);
     }
-    */
 
     //To do: Allow users to convert vouchers for same-Id wearables
     //Burn the voucher
@@ -43,14 +60,12 @@ contract ShopFacet {
         IERC1155(im_vouchersContract).safeBatchTransferFrom(msg.sender, address(this), _voucherIds, _quantities, "");
         require(_voucherIds.length == _quantities.length, "ShopFacet: _voucherIds not same length as _quantities");
         for (uint256 i; i < _voucherIds.length; i++) {
-            uint256 wearableId = _voucherIds[i];
+            uint256 wearableId = _voucherIds[i] + 1;
             uint256 quantity = _quantities[i];
-            require(
-                (s.wearableTypes[wearableId].totalQuantity += quantity) <= s.wearableTypes[wearableId].maxQuantity,
-                "ShopFacet: Total quantity exceeds max quantity"
-            );
+            uint256 totalQuantity = s.wearableTypes[wearableId].totalQuantity + quantity;
+            require(totalQuantity <= s.wearableTypes[wearableId].maxQuantity, "ShopFacet: Total wearable type quantity exceeds max quantity");
             s.wearables[_to][wearableId] += quantity;
-            s.wearableTypes[wearableId].totalQuantity += quantity;
+            s.wearableTypes[wearableId].totalQuantity = uint32(totalQuantity);
         }
         LibERC1155.onERC1155BatchReceived(msg.sender, _to, _voucherIds, _quantities, "");
     }

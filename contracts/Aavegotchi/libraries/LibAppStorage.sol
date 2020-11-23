@@ -47,7 +47,7 @@ struct WearableType {
     uint8 setId; //The id of the set. Zero is no set
     uint8[] slots; //The slots that this wearable can be added to.
     uint256 svgId; //The svgId of the wearable
-    uint256 totalQuantity; //The total quantity of this wearable minted so far
+    uint32 totalQuantity; //The total quantity of this wearable minted so far
     uint96 ghstPrice;
     bool canPurchaseWithGhst;
 

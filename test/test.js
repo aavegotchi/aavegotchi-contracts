@@ -337,9 +337,9 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   it('Can mint wearables', async function () {
     let balance = await wearablesFacet.balanceOf(account, '0')
     expect(balance).to.equal(0)
-    await truffleAssert.reverts(wearablesFacet.mintWearables(['3'], ['10']), 'WearablesFacet: Wearable does not exist')
-    await truffleAssert.reverts(wearablesFacet.mintWearables(['0'], ['10']), 'WearablesFacet: Total quantity exceeds max quantity')
-    await wearablesFacet.mintWearables([testWearableId], ['10'])
+    await truffleAssert.reverts(wearablesFacet.mintWearables(account, ['3'], ['10']), 'WearablesFacet: Wearable does not exist')
+    await truffleAssert.reverts(wearablesFacet.mintWearables(account, ['0'], ['10']), 'WearablesFacet: Total wearable type quantity exceeds max quantity')
+    await wearablesFacet.mintWearables(account, [testWearableId], ['10'])
     balance = await wearablesFacet.balanceOf(account, testWearableId)
     expect(balance).to.equal(10)
   })
@@ -424,7 +424,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
   it('Can equip multi-slot wearables', async function () {
     const multiSlotWearableId = '2'
-    await wearablesFacet.mintWearables([multiSlotWearableId], ['10'])
+    await wearablesFacet.mintWearables(account, [multiSlotWearableId], ['10'])
 
     await wearablesFacet.transferToParent(
       account, aavegotchiFacet.address, testAavegotchiId, multiSlotWearableId, '10')

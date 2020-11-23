@@ -130,8 +130,8 @@ contract AavegotchiFacet {
         s.totalSupply = uint32(tokenId);
         uint256 amount = _ghst - (_ghst % aavegotchiPortalPrice);
         uint256 burnAmount = amount / 10;
-        IERC20(s.ghstContract).transferFrom(msg.sender, address(0), burnAmount);
-        IERC20(s.ghstContract).transferFrom(msg.sender, address(this), amount - burnAmount);
+        LibERC20.transferFrom(s.ghstContract, msg.sender, address(0), burnAmount);
+        LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), amount - burnAmount);
     }
 
     function setBatchId(uint256[] calldata _tokenIds) external {

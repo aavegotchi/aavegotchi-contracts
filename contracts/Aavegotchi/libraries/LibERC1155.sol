@@ -98,8 +98,8 @@ library LibERC1155 {
     function onERC1155BatchReceived(
         address _from,
         address _to,
-        uint256[] memory _ids,
-        uint256[] memory _values,
+        uint256[] calldata _ids,
+        uint256[] calldata _values,
         bytes memory _data
     ) internal {
         emit TransferBatch(msg.sender, _from, _to, _ids, _values);
