@@ -5,3 +5,5 @@ cache
 bin
 .env
 artifacts
+coverage.json
+coverage

@@ -16,7 +16,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { wearableTypes } = require('../scripts/wearableTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray (uint, numBytes) {
+function uintToIntArray(uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -25,7 +25,7 @@ function uintToIntArray (uint, numBytes) {
   return array
 }
 
-function uintToWearableIds (uint) {
+function uintToWearableIds(uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -78,10 +78,11 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     //    console.log('bob:', bob)
   })
 
-  it('Should mint 100,000 GHST tokens', async function () {
+  it('Should mint 10,000,000 GHST tokens', async function () {
     await ghstDiamond.mint()
     const balance = await ghstDiamond.balanceOf(account)
-    expect(balance).to.equal('1000000000000000000000000')
+    const oneMillion = ethers.utils.parseEther('10000000')
+    expect(balance).to.equal(oneMillion)
   })
 
   it('Should show all whitelisted collaterals', async function () {
@@ -430,20 +431,22 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     expect(equipped[9]).to.equal('2')
   })
 
+  /*
   it('Cannot exceed max haunt size', async function () {
     // Reverting for unknown reason. Probably gas related?
-    // const balance = await ghstDiamond.balanceOf(account)
-    // console.log('balance:', balance.toString())
-    // console.log('balance:', Number(balance) / Math.pow(10, 18))
-    // for (let index = 0; index < 10; index++) {
-    //   // 1000 portals
-    //   // const tenThousandPortals = '10000000000000000000000' // 00"
-    //   const tenThousandPortals = ethers.utils.parseEther('10000')
-    //   const tx = await aavegotchiFacet.buyPortals(account, tenThousandPortals, true)
-    //   const receipt = await tx.wait()
-    //   console.log('gas used:' + receipt.gasUsed)
+    const balance = await ghstDiamond.balanceOf(account)
+    console.log('balance:', balance.toString())
+    console.log('balance:', Number(balance) / Math.pow(10, 18))
+
+
+    //Still getting the "Transaction reverted for an unrecognized reason. Please report this to help us improve Hardhat."" issue, even with just 100 portals
+    const oneHundredPortals = ethers.utils.parseEther('100000')
+    const tx = await aavegotchiFacet.buyPortals(account, oneHundredPortals, true)
+    const receipt = await tx.wait()
+    console.log('gas used:' + receipt.gasUsed)
     // }
   })
+  */
 
   it('Cannot create new haunt until first is finished', async function () {
     const oneHundred = '100000000000000000000'
