@@ -125,7 +125,6 @@ struct AppStorage {
     uint24 hauntCount;
     uint24 hauntMaxSize;
     uint96 aavegotchiPortalPrice;
-    address vouchersContract;
 }
 
 library LibAppStorage {

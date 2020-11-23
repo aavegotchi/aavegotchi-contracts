@@ -16,7 +16,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { wearableTypes } = require('../scripts/wearableTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray(uint, numBytes) {
+function uintToIntArray (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -25,7 +25,7 @@ function uintToIntArray(uint, numBytes) {
   return array
 }
 
-function uintToWearableIds(uint) {
+function uintToWearableIds (uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -45,6 +45,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   let vrfFacet
   let shopFacet
   let vouchersContract
+  let diamondLoupeFacet
 
   // eslint-disable-next-line no-unused-vars
   let linkAddress
@@ -69,12 +70,13 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     wearablesFacet = deployVars.wearablesFacet
     collateralFacet = deployVars.collateralFacet
     escrowFacet = deployVars.escrowFacet
-    shopFacet = deployVars.shopFacet,
-      ghstDiamond = deployVars.ghstDiamond
+    shopFacet = deployVars.shopFacet
+    ghstDiamond = deployVars.ghstDiamond
     vrfFacet = deployVars.vrfFacet
     linkAddress = deployVars.linkAddress
     linkContract = deployVars.linkContract
     vouchersContract = deployVars.vouchersContract
+    diamondLoupeFacet = deployVars.diamondLoupeFacet
 
     // const accounts = await ethers.getSigners()
     // bob = await accounts[1].getAddress()
@@ -443,7 +445,6 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     console.log('balance:', balance.toString())
     console.log('balance:', Number(balance) / Math.pow(10, 18))
 
-
     //Still getting the "Transaction reverted for an unrecognized reason. Please report this to help us improve Hardhat."" issue, even with just 100 portals
     const oneHundredPortals = ethers.utils.parseEther('100000')
     const tx = await aavegotchiFacet.buyPortals(account, oneHundredPortals, true)
@@ -459,7 +460,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   })
 
   it('Should create vouchers', async function () {
-    await vouchersContract.createVoucherTypes(account, ["10", "20", "30", "40", "50", "60"], [])
+    await vouchersContract.createVoucherTypes(account, ['10', '20', '30', '40', '50', '60'], [])
     const supply = await vouchersContract.totalSupplies()
     console.log('spply:', supply)
   })
@@ -470,15 +471,19 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
     await vouchersContract.setApprovalForAll(shopFacet.address, true)
 
-    await shopFacet.purchaseWearablesWithVouchers(account, ["0", "1", "2", "3", "4", "5"], ["10", "10", "10", "10", "10", "10"])
+    const result = await diamondLoupeFacet.facetAddress('0xa8ca9043')
+    console.log(result)
+    console.log(diamondLoupeFacet.address)
+    console.log(shopFacet.address)
 
-    //Getting "Diamond: Function does not exist" error 
+    await shopFacet.purchaseWearablesWithVouchers(account, [0, 1, 2, 3, 4, 5], [10, 10, 10, 10, 10, 10])
+    // const tx = await shopFacet.populateTransaction.purchaseWearablesWithVouchers(account, ['0', '1', '2', '3', '4', '5'], ['10', '10', '10', '10', '10', '10'])
+    // console.log(tx.data)
+
+    // Getting "Diamond: Function does not exist" error
     const wearablesBalance = await wearablesFacet.wearablesBalances(account)
-    expect(wearablesBalance[0].to.equal(10))
-
+    expect(wearablesBalance[0]).to.equal(10)
   })
-
-  /*
 
   it('Can calculate kinship according to formula', async function () {
     // First interact
@@ -559,6 +564,4 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
     // expect(aavegotchi.interactionCount).to.equal(4)
   })
-
-  */
 })

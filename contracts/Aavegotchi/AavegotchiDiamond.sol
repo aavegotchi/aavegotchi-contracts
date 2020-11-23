@@ -32,7 +32,6 @@ contract AavegotchiDiamond {
         address ghstContract;
         bytes32 chainlinkKeyHash;
         uint256 chainlinkFee;
-        address vouchersContract;
     }
 
     constructor(IDiamondCut.FacetCut[] memory _diamondCut, ConstructorArgs memory _args) {
@@ -57,7 +56,6 @@ contract AavegotchiDiamond {
 
         s.hauntMaxSize = 10_000;
         s.aavegotchiPortalPrice = 100e18;
-        s.vouchersContract = _args.vouchersContract;
     }
 
     fallback() external payable {
