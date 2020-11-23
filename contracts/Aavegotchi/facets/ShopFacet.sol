@@ -82,6 +82,7 @@ contract ShopFacet {
         _values;
         _data;
         require(msg.sender == im_vouchersContract, "ShopFacet: Only accepts ERC1155 tokens from VoucherContract");
+        require(_ids.length > 0, "ShopFacet: Can't receive 0 vouchers");
         return ERC1155_BATCH_ACCEPTED;
     }
 }

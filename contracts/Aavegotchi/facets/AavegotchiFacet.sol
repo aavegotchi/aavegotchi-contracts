@@ -505,6 +505,7 @@ contract AavegotchiFacet {
         int256 daysSinceInteraction = int256(interval) / 86400;
         int256 baseKinship = 50;
 
+        /*
         uint256 streak = aavegotchi.streak;
         int256 streakBonus = 0;
 
@@ -513,7 +514,7 @@ contract AavegotchiFacet {
         if (streak >= 30) streakBonus = 5;
         if (streak >= 60) streakBonus = 10;
         if (streak >= 90) streakBonus = 20;
-
+        */
         // console.log("steak bonus:");
         //  console.logInt(streakBonus);
 
@@ -525,10 +526,8 @@ contract AavegotchiFacet {
 
         //This has the problem that kinship would not be reduced if they never interact and make the interactionModifier negative.
 
-        int256 kinshipScore = baseKinship + interactionCount - daysSinceInteraction + streakBonus;
-
-        // if (kinshipScore > 100) return 100;
-        return kinshipScore;
+        //int256 kinshipScore = baseKinship + interactionCount - daysSinceInteraction + streakBonus;
+        kinship = baseKinship + interactionCount - daysSinceInteraction;
     }
 
     function interact(uint256 _tokenId) public {
@@ -546,7 +545,7 @@ contract AavegotchiFacet {
         }
         int256 baseKinship = 50;
 
-        int256 kinshipScore = baseKinship + interactionCount - daysSinceInteraction;
+        int256 kinship = baseKinship + interactionCount - daysSinceInteraction;
 
         // console.log("kinship score");
         // console.logInt(kinshipScore);
@@ -554,7 +553,7 @@ contract AavegotchiFacet {
         //If your Aavegotchi hates you and you finally pet it, you get a bonus
         int16 hateBonus = 0;
 
-        if (kinshipScore < 40) {
+        if (kinship < 40) {
             hateBonus = 2;
         }
 
@@ -566,7 +565,7 @@ contract AavegotchiFacet {
             //console.log("days since interaction");
             // console.logInt(daysSinceInteraction);
 
-            s.aavegotchis[_tokenId].interactionCount = interactionCount - int16(daysSinceInteraction) + hateBonus;
+            s.aavegotchis[_tokenId].interactionCount = interactionCount - int16(daysSinceInteraction) + hateBonus + 1;
             // console.log("interaction count after");
             // console.logInt(s.aavegotchis[_tokenId].interactionCount);
 
@@ -574,7 +573,15 @@ contract AavegotchiFacet {
 
             //Increase interaction
         } else {
-            s.aavegotchis[_tokenId].interactionCount = interactionCount + 1 + hateBonus;
+            uint256 streak = s.aavegotchis[_tokenId].streak;
+            int16 streakBonus = 0;
+
+            if (streak >= 5) streakBonus = 1;
+            if (streak >= 10) streakBonus = 2;
+            if (streak >= 30) streakBonus = 5;
+            if (streak >= 60) streakBonus = 10;
+            if (streak >= 90) streakBonus = 20;
+            s.aavegotchis[_tokenId].interactionCount = interactionCount + 1 + hateBonus + streakBonus;
             s.aavegotchis[_tokenId].streak++;
         }
 
