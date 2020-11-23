@@ -1,6 +1,7 @@
 /* global task ethers */
 require('@nomiclabs/hardhat-waffle')
 require('@nomiclabs/hardhat-ethers')
+require('hardhat-contract-sizer')
 require('dotenv').config()
 
 // This is a sample Buidler task. To learn how to create your own go to
@@ -36,7 +37,8 @@ module.exports = {
   },
   contractSizer: {
     alphaSort: false,
-    runOnCompile: false
+    runOnCompile: false,
+    disambiguatePaths: false
   },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
