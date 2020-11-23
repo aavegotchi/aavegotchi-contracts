@@ -43,6 +43,9 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   let wearablesFacet
   let escrowFacet
   let vrfFacet
+  let shopFacet
+  let vouchersContract
+
   // eslint-disable-next-line no-unused-vars
   let linkAddress
   // eslint-disable-next-line no-unused-vars
@@ -66,10 +69,12 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
     wearablesFacet = deployVars.wearablesFacet
     collateralFacet = deployVars.collateralFacet
     escrowFacet = deployVars.escrowFacet
-    ghstDiamond = deployVars.ghstDiamond
+    shopFacet = deployVars.shopFacet,
+      ghstDiamond = deployVars.ghstDiamond
     vrfFacet = deployVars.vrfFacet
     linkAddress = deployVars.linkAddress
     linkContract = deployVars.linkContract
+    vouchersContract = deployVars.vouchersContract
 
     // const accounts = await ethers.getSigners()
     // bob = await accounts[1].getAddress()
@@ -451,6 +456,26 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   it('Cannot create new haunt until first is finished', async function () {
     const oneHundred = '100000000000000000000'
     await truffleAssert.reverts(aavegotchiFacet.createHaunt('10000', oneHundred), 'AavegotchiFacet: Haunt must be full before creating new')
+  })
+
+  it('Should create vouchers', async function () {
+    await vouchersContract.createVoucherTypes(account, ["10", "20", "30", "40", "50", "60"], [])
+    const supply = await vouchersContract.totalSupplies()
+    console.log('spply:', supply)
+  })
+
+  it('Should convert vouchers into wearables', async function () {
+    const balance = await vouchersContract.balanceOfAll(account)
+    console.log('balance:', balance)
+
+    await vouchersContract.setApprovalForAll(shopFacet.address, true)
+
+    await shopFacet.purchaseWearablesWithVouchers(account, ["0", "1", "2", "3", "4", "5"], ["10", "10", "10", "10", "10", "10"])
+
+    //Getting "Diamond: Function does not exist" error 
+    const wearablesBalance = await wearablesFacet.wearablesBalances(account)
+    expect(wearablesBalance[0].to.equal(10))
+
   })
 
   /*
