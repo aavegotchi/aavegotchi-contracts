@@ -32,6 +32,7 @@ contract AavegotchiDiamond {
         address ghstContract;
         bytes32 chainlinkKeyHash;
         uint256 chainlinkFee;
+        uint24 initialHauntSize;
     }
 
     constructor(IDiamondCut.FacetCut[] memory _diamondCut, ConstructorArgs memory _args) {
@@ -54,7 +55,8 @@ contract AavegotchiDiamond {
         vrf_ds.fee = uint144(_args.chainlinkFee);
         vrf_ds.nextBatchId = 1;
 
-        s.hauntMaxSize = 10_000;
+        //To do: Set this as a constructor argument so we can be flexible in tests
+        s.hauntMaxSize = _args.initialHauntSize; //10_000; 
         s.aavegotchiPortalPrice = 100e18;
     }
 

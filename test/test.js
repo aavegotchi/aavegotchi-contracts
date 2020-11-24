@@ -440,27 +440,37 @@ describe("Wearables", async function () {
 
 describe("Haunts", async function () {
 
-  /*
-it('Cannot exceed max haunt size', async function () {
-  // Reverting for unknown reason. Probably gas related?
-  const balance = await ghstDiamond.balanceOf(account)
-  console.log('balance:', balance.toString())
-  console.log('balance:', Number(balance) / Math.pow(10, 18))
-
-  //Still getting the "Transaction reverted for an unrecognized reason. Please report this to help us improve Hardhat."" issue, even with just 100 portals
-  const oneHundredPortals = ethers.utils.parseEther('100000')
-  const tx = await global.aavegotchiFacet.buyPortals(account, oneHundredPortals, true)
-  const receipt = await tx.wait()
-  console.log('gas used:' + receipt.gasUsed)
-  // }
-})
-*/
-
 
   it('Cannot create new haunt until first is finished', async function () {
     const oneHundred = '100000000000000000000'
     await truffleAssert.reverts(aavegotchiFacet.createHaunt('10000', oneHundred), 'AavegotchiFacet: Haunt must be full before creating new')
   })
+
+
+  it('Cannot exceed max haunt size', async function () {
+    // Reverting for unknown reason. Probably gas related?
+    //  const balance = await ghstDiamond.balanceOf(account)
+    const oneHundredPortals = ethers.utils.parseEther('9500')
+    let tx = await global.aavegotchiFacet.buyPortals(account, oneHundredPortals, true)
+
+    const singlePortal = ethers.utils.parseEther('100')
+    await truffleAssert.reverts(global.aavegotchiFacet.buyPortals(account, singlePortal, true), "AavegotchiFacet: Exceeded max number of aavegotchis for this haunt")
+
+    const receipt = await tx.wait()
+    // console.log('gas used:' + receipt.gasUsed)
+  })
+
+
+  it('Can create new Haunt', async function () {
+    let currentHaunt = await aavegotchiFacet.currentHaunt()
+    expect(currentHaunt).to.equal(0)
+    await aavegotchiFacet.createHaunt("10000", ethers.utils.parseEther("100"))
+    currentHaunt = await aavegotchiFacet.currentHaunt()
+    expect(currentHaunt).to.equal(1)
+  })
+
+
+  //To do: Test allowing DAO to create haunt
 
 })
 

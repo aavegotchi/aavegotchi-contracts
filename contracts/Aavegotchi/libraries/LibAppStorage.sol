@@ -81,6 +81,13 @@ struct WearableSet {
     uint8 fullSetBonus; //How much equipping a full set increases the Aavegotchi's rarity score
 }
 
+struct Haunt {
+    uint24 hauntMaxSize; //The max size of the Haunt
+    uint96 portalPrice; 
+    bytes3 bodyColor;
+    uint24 totalCount;
+}
+
 struct SvgLayer {
     address svgLayersContract;
     uint16 offset;
@@ -113,6 +120,9 @@ struct AppStorage {
     // owner => (id => balance)
     WearableType[] wearableTypes;
     WearableSet[] wearableSets;
+
+    mapping (uint256 => Haunt) haunts;
+
     // owner => (wearableId => quantity)
     mapping(address => mapping(uint256 => uint256)) wearables;
     mapping(uint256 => Aavegotchi) aavegotchis;

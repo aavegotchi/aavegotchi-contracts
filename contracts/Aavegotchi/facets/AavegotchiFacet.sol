@@ -94,6 +94,16 @@ contract AavegotchiFacet {
         s.hauntCount = 0;
         s.hauntMaxSize = _hauntMaxSize;
         s.aavegotchiPortalPrice = _aavegotchiPortalPrice;
+
+        //To do: Would be nice to store Haunts in their own mapping, instead of just as individual state variables.
+
+        //I created the Haunt struct and a Haunts mapping if you think this is a good idea.
+    }
+
+    function currentHaunt() public view returns (uint16 hauntId) {
+        return s.currentHauntId;
+
+        //To do: return Haunt mapping instead of just the Id
     }
 
     function buyPortals(
