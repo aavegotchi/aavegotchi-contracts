@@ -51,11 +51,67 @@ const wearableTypes = [
     totalQuantity: 0,
     ghstPrice: 10,
     canPurchaseWithGhst: true
+  },
+  {
+    traitModifiers: [-1, 0, 2, 1, 0, 0],
+    maxQuantity: 2000,
+    rarityScoreModifier: 20,
+    setId: 0,
+    slots: [9],
+    svgId: 2,
+    totalQuantity: 0,
+    ghstPrice: 10,
+    canPurchaseWithGhst: true
+  },
+  {
+    traitModifiers: [-1, 0, 2, 1, 0, 0],
+    maxQuantity: 2000,
+    rarityScoreModifier: 20,
+    setId: 0,
+    slots: [9],
+    svgId: 2,
+    totalQuantity: 0,
+    ghstPrice: 10,
+    canPurchaseWithGhst: true
+  },
+  {
+    traitModifiers: [-1, 0, 2, 1, 0, 0],
+    maxQuantity: 2000,
+    rarityScoreModifier: 20,
+    setId: 0,
+    slots: [9],
+    svgId: 2,
+    totalQuantity: 0,
+    ghstPrice: 10,
+    canPurchaseWithGhst: true
+  },
+  {
+    traitModifiers: [-1, 0, 2, 1, 0, 0],
+    maxQuantity: 2000,
+    rarityScoreModifier: 20,
+    setId: 0,
+    slots: [9],
+    svgId: 2,
+    totalQuantity: 0,
+    ghstPrice: 10,
+    canPurchaseWithGhst: true
+  },
+  {
+    traitModifiers: [-1, 0, 2, 1, 0, 0],
+    maxQuantity: 2000,
+    rarityScoreModifier: 20,
+    setId: 0,
+    slots: [9],
+    svgId: 2,
+    totalQuantity: 0,
+    ghstPrice: 10,
+    canPurchaseWithGhst: true
   }
+
 
 ]
 
-function eightBitArrayToUint (array) {
+function eightBitArrayToUint(array) {
   const uint = []
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8)
@@ -64,7 +120,7 @@ function eightBitArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function getWearableTypes () {
+function getWearableTypes() {
   const result = []
   for (const wearableType of wearableTypes) {
     wearableType.traitModifiers = eightBitArrayToUint(wearableType.traitModifiers)

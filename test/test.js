@@ -16,7 +16,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { wearableTypes } = require('../scripts/wearableTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray (uint, numBytes) {
+function uintToIntArray(uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -25,7 +25,7 @@ function uintToIntArray (uint, numBytes) {
   return array
 }
 
-function uintToWearableIds (uint) {
+function uintToWearableIds(uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -337,7 +337,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   it('Can mint wearables', async function () {
     let balance = await wearablesFacet.balanceOf(account, '0')
     expect(balance).to.equal(0)
-    await truffleAssert.reverts(wearablesFacet.mintWearables(account, ['3'], ['10']), 'WearablesFacet: Wearable does not exist')
+    await truffleAssert.reverts(wearablesFacet.mintWearables(account, ['8'], ['10']), 'WearablesFacet: Wearable does not exist')
     await truffleAssert.reverts(wearablesFacet.mintWearables(account, ['0'], ['10']), 'WearablesFacet: Total wearable type quantity exceeds max quantity')
     await wearablesFacet.mintWearables(account, [testWearableId], ['10'])
     balance = await wearablesFacet.balanceOf(account, testWearableId)
@@ -345,6 +345,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   })
 
   it('Can transfer wearables to Aavegotchi', async function () {
+
     await wearablesFacet.transferToParent(
       account, // address _from,
       aavegotchiFacet.address, // address _toContract,
@@ -462,29 +463,29 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
   it('Should create vouchers', async function () {
     await vouchersContract.createVoucherTypes(account, ['10', '20', '30', '40', '50', '60'], [])
     const supply = await vouchersContract.totalSupplies()
-    console.log('spply:', supply)
+    expect(supply[5]).to.equal(60)
   })
 
   it('Should convert vouchers into wearables', async function () {
-    const balance = await vouchersContract.balanceOfAll(account)
-    console.log('balance:', balance)
 
     await vouchersContract.setApprovalForAll(shopFacet.address, true)
-
-    const result = await diamondLoupeFacet.facetAddress('0xa8ca9043')
-    console.log(result)
-    console.log(diamondLoupeFacet.address)
-    console.log(shopFacet.address)
-
-    await shopFacet.purchaseWearablesWithVouchers(account, [0, 1, 2, 3, 4, 5], [10, 10, 10, 10, 10, 10])
-    // const tx = await shopFacet.populateTransaction.purchaseWearablesWithVouchers(account, ['0', '1', '2', '3', '4', '5'], ['10', '10', '10', '10', '10', '10'])
-    // console.log(tx.data)
-
-    // Getting "Diamond: Function does not exist" error
+    await shopFacet.purchaseWearablesWithVouchers(account, [0, 1, 2, 3, 4, 5], [10, 10, 10, 10, 10, 60])
     const wearablesBalance = await wearablesFacet.wearablesBalances(account)
-    expect(wearablesBalance[0]).to.equal(10)
+    expect(wearablesBalance[6]).to.equal(60)
   })
 
+  it('Should purchase wearables using GHST', async function () {
+    let balances = await wearablesFacet.wearablesBalances(account)
+    //  console.log('ba;ances:', balances)
+
+    //Start at 1 because 0 is always empty
+    expect(balances[1]).to.equal(10)
+    await shopFacet.purchaseWearablesWithGhst(account, ["1"], ["10"])
+    balances = await wearablesFacet.wearablesBalances(account)
+    expect(balances[1]).to.equal(20)
+  })
+
+  /*
   it('Can calculate kinship according to formula', async function () {
     // First interact
 
@@ -564,4 +565,5 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', function () {
 
     // expect(aavegotchi.interactionCount).to.equal(4)
   })
+  */
 })

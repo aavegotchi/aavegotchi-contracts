@@ -29,6 +29,8 @@ contract ShopFacet {
         uint256[] calldata _quantities
     ) external {
         require(_wearableIds.length == _quantities.length, "ShopFacet: _wearableIds not same length as _quantities");
+
+        //To do: Use 10E18 price for GHST in wearableTypes.js, or convert it here in the function
         uint256 totalPrice;
         for (uint256 i; i < _wearableIds.length; i++) {
             uint256 wearableId = _wearableIds[i];
@@ -41,6 +43,7 @@ contract ShopFacet {
             totalPrice += quantity * wearableType.ghstPrice;
             s.wearables[_to][wearableId] += quantity;
         }
+
         LibERC1155.onERC1155BatchReceived(msg.sender, _to, _wearableIds, _quantities, "");
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
         require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
@@ -60,6 +63,7 @@ contract ShopFacet {
         IERC1155(im_vouchersContract).safeBatchTransferFrom(msg.sender, address(this), _voucherIds, _quantities, "");
         require(_voucherIds.length == _quantities.length, "ShopFacet: _voucherIds not same length as _quantities");
         for (uint256 i; i < _voucherIds.length; i++) {
+            //Wearables start at ID 1, but vouchers start at ID 0
             uint256 wearableId = _voucherIds[i] + 1;
             uint256 quantity = _quantities[i];
             uint256 totalQuantity = s.wearableTypes[wearableId].totalQuantity + quantity;
