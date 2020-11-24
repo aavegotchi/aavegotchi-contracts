@@ -378,6 +378,12 @@ contract WearablesFacet {
         aavegotchi.numericTraits = numericTraits;
 
         //To do in WearableFacet: Prevent wearable from being transferred if it's equipped
+
+        //To do: Check Aavegotchi's level and see if wearable's minLevel is <= Aavegotchi's current level
+
+        //To do: Increase the bonuses if the equipped wearable is part of a set. The frontend can send which sets the current wearables are part of, and the contract can check if they are valid or not.
+
+        //To do: Check if wearable has any requiredCollaterals. If yes, check if the current Aavegotchi is the correct collateral.
     }
 
     // -function getEquippedSlots() external returns (bool[16] memory equippedSlots)

@@ -52,6 +52,8 @@ struct WearableType {
     uint32 totalQuantity; //The total quantity of this wearable minted so far
     uint96 ghstPrice;
     bool canPurchaseWithGhst;
+    uint16[] allowedCollaterals; //The collaterals this wearable can be equipped to. An empty array is "any"
+    uint8 minLevel; //The minimum Aavegotchi level required to equip this wearable. Default is 1.
 
     //A hand wearable can be equipped in left hand, right hand, both hands
     //So its allowedSlots are 4,5, and 7.

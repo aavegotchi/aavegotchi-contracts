@@ -26,7 +26,9 @@ const wearableTypes = [
         slots: [],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
-        totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
+
 
     },
 
@@ -41,7 +43,8 @@ const wearableTypes = [
         slots: [0, 3],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
-        totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
 
     },
     {
@@ -55,6 +58,8 @@ const wearableTypes = [
         slots: [0, 9],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
 
     },
     {
@@ -68,6 +73,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 4,
@@ -80,6 +87,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 5,
@@ -92,6 +101,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 6,
@@ -104,6 +115,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 7,
@@ -116,6 +129,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 8,
@@ -128,6 +143,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 9,
@@ -140,6 +157,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 10,
@@ -152,6 +171,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 11,
@@ -164,6 +185,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 12,
@@ -176,6 +199,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 13,
@@ -188,6 +213,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 14,
@@ -200,6 +227,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 15,
@@ -212,6 +241,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 16,
@@ -224,6 +255,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 17,
@@ -236,6 +269,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 18,
@@ -248,6 +283,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 19,
@@ -260,6 +297,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 20,
@@ -272,6 +311,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 21,
@@ -284,6 +325,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 22,
@@ -296,6 +339,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 23,
@@ -308,6 +353,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 24,
@@ -320,6 +367,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 25,
@@ -332,6 +381,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 26,
@@ -344,6 +395,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 27,
@@ -356,6 +409,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 28,
@@ -368,6 +423,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 29,
@@ -380,6 +437,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 30,
@@ -392,6 +451,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 31,
@@ -404,6 +465,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 32,
@@ -416,6 +479,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 33,
@@ -428,6 +493,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 34,
@@ -440,6 +507,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     },
     {
         svgId: 35,
@@ -452,6 +521,8 @@ const wearableTypes = [
         slots: [0],
         canPurchaseWithGhst: true,
         totalQuantity: 0,
+        allowedCollaterals: [],
+        minLevel: 1
     }
 ]
 
