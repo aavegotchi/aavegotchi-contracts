@@ -577,10 +577,10 @@ contract AavegotchiFacet {
             int16 streakBonus = 0;
 
             if (streak >= 5) streakBonus = 1;
-            if (streak >= 10) streakBonus = 2;
-            if (streak >= 30) streakBonus = 5;
-            if (streak >= 60) streakBonus = 10;
-            if (streak >= 90) streakBonus = 20;
+            if (streak >= 10) streakBonus = 3;
+            if (streak >= 30) streakBonus = 4;
+            if (streak >= 60) streakBonus = 5;
+            if (streak >= 90) streakBonus = 10;
             s.aavegotchis[_tokenId].interactionCount = interactionCount + 1 + hateBonus + streakBonus;
             s.aavegotchis[_tokenId].streak++;
         }
