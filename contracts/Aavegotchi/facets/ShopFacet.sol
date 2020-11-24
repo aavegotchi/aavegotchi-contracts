@@ -48,6 +48,8 @@ contract ShopFacet {
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
         require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
         uint256 burnAmount = totalPrice / 10;
+        
+        //To do: Decide on GHST allocation for burning, DAO, rarity farming, governance, Pixelcraft
         LibERC20.transferFrom(s.ghstContract, msg.sender, address(0), burnAmount);
         LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), totalPrice - burnAmount);
     }

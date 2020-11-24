@@ -531,14 +531,13 @@ contract AavegotchiFacet {
     }
 
     function interact(uint256 _tokenId) public {
-        //To do: Only owner can interact
+        //To do: Only owner or caretaker can interact
         //To do: only update once per day
 
         //Was the last interaction within 24 hours? If so, add to interaction count. If not, reset it.
         uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
         int16 interactionCount = s.aavegotchis[_tokenId].interactionCount;
         uint256 interval = block.timestamp - lastInteracted;
-        // console.log("Interact: block timestamp:", block.timestamp);
         int256 daysSinceInteraction = int256(interval) / 86400;
         if (daysSinceInteraction > 3000) {
             daysSinceInteraction = 3000;
@@ -546,9 +545,6 @@ contract AavegotchiFacet {
         int256 baseKinship = 50;
 
         int256 kinship = baseKinship + interactionCount - daysSinceInteraction;
-
-        // console.log("kinship score");
-        // console.logInt(kinshipScore);
 
         //If your Aavegotchi hates you and you finally pet it, you get a bonus
         int16 hateBonus = 0;
@@ -559,16 +555,7 @@ contract AavegotchiFacet {
 
         //If it's been a day or more since last interaction
         if (daysSinceInteraction > 0) {
-            // console.log("interaction count before");
-            // console.logInt(s.aavegotchis[_tokenId].interactionCount);
-
-            //console.log("days since interaction");
-            // console.logInt(daysSinceInteraction);
-
             s.aavegotchis[_tokenId].interactionCount = interactionCount - int16(daysSinceInteraction) + hateBonus + 1;
-            // console.log("interaction count after");
-            // console.logInt(s.aavegotchis[_tokenId].interactionCount);
-
             s.aavegotchis[_tokenId].streak = 0;
 
             //Increase interaction

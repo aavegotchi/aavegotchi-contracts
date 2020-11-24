@@ -84,7 +84,7 @@ contract WearablesFacet {
         s.wearableSets.push(_wearableSet);
     }
 
-    function addWearableTypes(WearableType[] calldata _wearableTypes) external {
+    function addWearableTypes(WearableType[] memory _wearableTypes) external {
         LibDiamond.enforceIsContractOwner();
         // wearable ids start at 1.  0 means no wearable
         uint256 wearableTypesLength = s.wearableTypes.length;
