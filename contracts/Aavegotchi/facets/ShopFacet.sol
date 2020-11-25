@@ -20,7 +20,7 @@ contract ShopFacet {
         im_vouchersContract = _vouchersContract;
     }
 
-    //To do: Allow users to purchase items from store using GHST
+    //To do (to do): Allow users to purchase items from store using GHST
     //Purchasing items should distribute an amount of GHST to various addresses, while burning the rest
 
     function purchaseWearablesWithGhst(
@@ -54,7 +54,7 @@ contract ShopFacet {
         LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), totalPrice - burnAmount);
     }
 
-    //To do: Allow users to convert vouchers for same-Id wearables
+    //To do (done): Allow users to convert vouchers for same-Id wearables
     //Burn the voucher
     //Mint the wearable and transfer to user
     function purchaseWearablesWithVouchers(

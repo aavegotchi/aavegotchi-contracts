@@ -103,8 +103,8 @@ contract WearablesFacet {
         uint256[] calldata _wearableIds,
         uint256[] calldata _quantities
     ) external {
-        //To do: Only by contract owner (and eventually DAO)
-        LibDiamond.enforceIsContractOwner();
+        //To do (done): Only by contract owner (and eventually DAO)
+        require(msg.sender == LibDiamond.contractOwner() || msg.sender == s.dao, "WearablesFacet: Does not have permission");
         require(_wearableIds.length == _quantities.length, "WearablesFacet: Ids and quantities length must match");
 
         //  uint256 count = s.svgLayers["wearables"].length;
