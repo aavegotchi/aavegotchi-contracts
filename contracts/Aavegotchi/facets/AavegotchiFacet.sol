@@ -525,6 +525,9 @@ contract AavegotchiFacet {
         int256 baseKinship = 50;
 
         kinship = baseKinship + interactionCount - daysSinceInteraction;
+        if (daysSinceInteraction > 0 && kinship > 100) {
+            kinship -= (kinship - 100) / 3;
+        }
     }
 
     function interact(uint256 _tokenId) public {
@@ -552,6 +555,9 @@ contract AavegotchiFacet {
 
         //If it's been a day or more since last interaction
         if (daysSinceInteraction > 0) {
+            if (kinship > 100) {
+                interactionCount -= int16((kinship - 100) / 3);
+            }
             s.aavegotchis[_tokenId].interactionCount = interactionCount - int16(daysSinceInteraction) + hateBonus + 1;
             s.aavegotchis[_tokenId].streak = 0;
 
@@ -566,7 +572,7 @@ contract AavegotchiFacet {
             if (streak >= 60) streakBonus = 5;
             if (streak >= 90) streakBonus = 10;
             s.aavegotchis[_tokenId].interactionCount = interactionCount + 1 + hateBonus + streakBonus;
-            s.aavegotchis[_tokenId].streak++;
+            s.aavegotchis[_tokenId].streak = uint16(streak + 1);
         }
 
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);

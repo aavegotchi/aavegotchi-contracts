@@ -30,7 +30,7 @@ contract ShopFacet {
     ) external {
         require(_wearableIds.length == _quantities.length, "ShopFacet: _wearableIds not same length as _quantities");
 
-        //To do: Use 10E18 price for GHST in wearableTypes.js, or convert it here in the function
+        //To do(done, using wearableType.ghstPrice): Use 10E18 price for GHST in wearableTypes.js, or convert it here in the function
         uint256 totalPrice;
         for (uint256 i; i < _wearableIds.length; i++) {
             uint256 wearableId = _wearableIds[i];
@@ -48,7 +48,7 @@ contract ShopFacet {
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
         require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
         uint256 burnAmount = totalPrice / 10;
-        
+
         //To do: Decide on GHST allocation for burning, DAO, rarity farming, governance, Pixelcraft
         LibERC20.transferFrom(s.ghstContract, msg.sender, address(0), burnAmount);
         LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), totalPrice - burnAmount);
