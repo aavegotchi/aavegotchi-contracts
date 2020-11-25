@@ -515,28 +515,6 @@ contract AavegotchiFacet {
         int256 daysSinceInteraction = int256(interval) / 86400;
         int256 baseKinship = 50;
 
-        /*
-        uint256 streak = aavegotchi.streak;
-        int256 streakBonus = 0;
-
-        if (streak >= 5) streakBonus = 1;
-        if (streak >= 10) streakBonus = 2;
-        if (streak >= 30) streakBonus = 5;
-        if (streak >= 60) streakBonus = 10;
-        if (streak >= 90) streakBonus = 20;
-        */
-        // console.log("steak bonus:");
-        //  console.logInt(streakBonus);
-
-        //Calculate Kinship: Uses onnchain data (lastTimeInteracted) and (interactionModifier) to calculate.
-
-        //Kinship starts at 50
-        //Every time a user interacts within a 24hr period, their interactionModifier goes up by one.
-        //If a day elapses before they interact, their interactionModifier is increased by one (because of the interaction) but also reduced by the number of days it's been since they interacted.
-
-        //This has the problem that kinship would not be reduced if they never interact and make the interactionModifier negative.
-
-        //int256 kinshipScore = baseKinship + interactionCount - daysSinceInteraction + streakBonus;
         kinship = baseKinship + interactionCount - daysSinceInteraction;
     }
 
