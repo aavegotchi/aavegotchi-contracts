@@ -86,24 +86,32 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].name = _name;
     }
 
-    function createHaunt(uint24 _hauntMaxSize, uint96 _aavegotchiPortalPrice) external returns (uint256 hauntId_) {
+    function createHaunt(
+        uint24 _hauntMaxSize,
+        uint96 _portalPrice,
+        bytes3 _bodyColor
+    ) external returns (uint256 hauntId_) {
         require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access to create haunt");
-        require(s.hauntCount == s.hauntMaxSize, "AavegotchiFacet: Haunt must be full before creating new");
-        hauntId_ = s.currentHauntId + 1;
+        uint256 currentHauntId = s.currentHauntId;
+        require(
+            s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
+            "AavegotchiFacet: Haunt must be full before creating new"
+        );
+        hauntId_ = currentHauntId + 1;
         s.currentHauntId = uint16(hauntId_);
-        s.hauntCount = 0;
-        s.hauntMaxSize = _hauntMaxSize;
-        s.aavegotchiPortalPrice = _aavegotchiPortalPrice;
+        s.haunts[hauntId_].hauntMaxSize = _hauntMaxSize;
+        s.haunts[hauntId_].portalPrice = _portalPrice;
+        s.haunts[hauntId_].bodyColor = _bodyColor;
 
-        //To do: Would be nice to store Haunts in their own mapping, instead of just as individual state variables.
+        //To do (done): Would be nice to store Haunts in their own mapping, instead of just as individual state variables.
 
         //I created the Haunt struct and a Haunts mapping if you think this is a good idea.
     }
 
-    function currentHaunt() public view returns (uint16 hauntId) {
-        return s.currentHauntId;
-
-        //To do: return Haunt mapping instead of just the Id
+    function currentHaunt() public view returns (uint16 hauntId_, Haunt memory haunt_) {
+        hauntId_ = s.currentHauntId;
+        haunt_ = s.haunts[hauntId_];
+        //To do (done): return Haunt mapping instead of just the Id
     }
 
     function buyPortals(
@@ -111,15 +119,16 @@ contract AavegotchiFacet {
         uint256 _ghst,
         bool _setBatchId
     ) external {
-        uint256 aavegotchiPortalPrice = s.aavegotchiPortalPrice;
-        require(_ghst >= aavegotchiPortalPrice, "AavegotchiFacet: Not enough GHST to buy portal");
+        uint256 currentHauntId = s.currentHauntId;
+        Haunt memory haunt = s.haunts[currentHauntId];
+        require(_ghst >= haunt.portalPrice, "AavegotchiFacet: Not enough GHST to buy portal");
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
         require(ghstBalance >= _ghst, "AavegotchiFacet: Not enough GHST!");
         uint16 hauntId = s.currentHauntId;
-        uint256 numAavegotchisToPurchase = _ghst / aavegotchiPortalPrice;
-        uint256 hauntCount = s.hauntCount + numAavegotchisToPurchase;
-        require(hauntCount <= s.hauntMaxSize, "AavegotchiFacet: Exceeded max number of aavegotchis for this haunt");
-        s.hauntCount = uint24(hauntCount);
+        uint256 numAavegotchisToPurchase = _ghst / haunt.portalPrice;
+        uint256 hauntCount = haunt.totalCount + numAavegotchisToPurchase;
+        require(hauntCount <= haunt.hauntMaxSize, "AavegotchiFacet: Exceeded max number of aavegotchis for this haunt");
+        s.haunts[currentHauntId].totalCount = uint24(hauntCount);
         uint32 nextBatchId;
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
         if (_setBatchId) {
@@ -138,7 +147,7 @@ contract AavegotchiFacet {
         }
         s.aavegotchiBalance[_to] += numAavegotchisToPurchase;
         s.totalSupply = uint32(tokenId);
-        uint256 amount = _ghst - (_ghst % aavegotchiPortalPrice);
+        uint256 amount = _ghst - (_ghst % haunt.portalPrice);
         uint256 burnAmount = amount / 10;
         LibERC20.transferFrom(s.ghstContract, msg.sender, address(0), burnAmount);
         LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), amount - burnAmount);

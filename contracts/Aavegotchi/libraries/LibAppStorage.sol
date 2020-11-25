@@ -41,7 +41,7 @@ struct Aavegotchi {
 
 struct WearableType {
     // treated as six 8 ints array
-  
+
     uint256 traitModifiers; //How much the wearable modifies each trait. Should not be more than +-5 total
     string name; //The name of the wearable
     uint32 maxQuantity; //Total number that can be minted of this wearable. Can calculate the rarity level from this number.
@@ -83,7 +83,7 @@ struct WearableSet {
 
 struct Haunt {
     uint24 hauntMaxSize; //The max size of the Haunt
-    uint96 portalPrice; 
+    uint96 portalPrice;
     bytes3 bodyColor;
     uint24 totalCount;
 }
@@ -120,9 +120,7 @@ struct AppStorage {
     // owner => (id => balance)
     WearableType[] wearableTypes;
     WearableSet[] wearableSets;
-
-    mapping (uint256 => Haunt) haunts;
-
+    mapping(uint256 => Haunt) haunts;
     // owner => (wearableId => quantity)
     mapping(address => mapping(uint256 => uint256)) wearables;
     mapping(uint256 => Aavegotchi) aavegotchis;
@@ -136,9 +134,6 @@ struct AppStorage {
     address ghstContract;
     address dao;
     uint16 currentHauntId;
-    uint24 hauntCount;
-    uint24 hauntMaxSize;
-    uint96 aavegotchiPortalPrice;
 }
 
 library LibAppStorage {

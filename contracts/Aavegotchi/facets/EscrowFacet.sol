@@ -70,7 +70,7 @@ contract EscrowFacet {
         for (uint256 wearableTypeId; wearableTypeId < wearableTypesLength; wearableTypeId++) {
             require(s.nftBalances[address(this)][_tokenId][wearableTypeId] == 0, "EscrowFacet: Can't burn aavegotchi with wearables");
         }
-
+ 
         s.aavegotchiBalance[msg.sender]--;
         // delete token approval if any
         if (s.approved[_tokenId] != address(0)) {

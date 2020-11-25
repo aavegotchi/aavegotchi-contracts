@@ -16,7 +16,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { wearableTypes } = require('../scripts/wearableTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray(uint, numBytes) {
+function uintToIntArray (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -25,7 +25,7 @@ function uintToIntArray(uint, numBytes) {
   return array
 }
 
-function uintToWearableIds(uint) {
+function uintToWearableIds (uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -38,9 +38,7 @@ const testAavegotchiId = '0'
 const testWearableId = '1'
 const testSlot = '3'
 
-
 describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
-
   before(async function () {
     const deployVars = await deployProject()
     global.set = true
@@ -66,8 +64,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
   })
 })
 
-describe("Buying Portals, VRF", function () {
-
+describe('Buying Portals, VRF', function () {
   it('Should not fire VRF if there are no portals in batch', async function () {
     await truffleAssert.reverts(vrfFacet.drawRandomNumber(), "VrfFacet: Can't call VRF with none in batch")
   })
@@ -153,11 +150,9 @@ describe("Buying Portals, VRF", function () {
     await global.aavegotchiFacet.buyPortals(account, buyAmount, true)
     await truffleAssert.reverts(vrfFacet.drawRandomNumber(), 'VrfFacet: Waiting period to call VRF not over yet')
   })
-
 })
 
-describe("Opening Portals", async function () {
-
+describe('Opening Portals', async function () {
   it('Should open the portal', async function () {
     let myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals[0].status).to.equal(0)
@@ -189,7 +184,6 @@ describe("Opening Portals", async function () {
   })
   */
 
-
   it('Should claim an Aavegotchi', async function () {
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     //  console.log('my portals:', myPortals)
@@ -207,11 +201,9 @@ describe("Opening Portals", async function () {
     expect(aavegotchi.hauntId).to.equal(0)
     expect(aavegotchi.stakedAmount).to.equal(minStake)
   })
-
 })
 
-describe("Aavegotchi Metadata", async function () {
-
+describe('Aavegotchi Metadata', async function () {
   it('Should set a name', async function () {
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
@@ -237,11 +229,9 @@ describe("Aavegotchi Metadata", async function () {
 
     // Todo: Clientside calculate what the rarity score should be
   })
-
 })
 
-describe("Collaterals and escrow", async function () {
-
+describe('Collaterals and escrow', async function () {
   it('Should show all whitelisted collaterals', async function () {
     const collaterals = await global.collateralFacet.getCollateralInfo()
     const collateral = collaterals[0]
@@ -322,15 +312,13 @@ describe("Collaterals and escrow", async function () {
     myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(4)
   })
-
 })
 
-describe("Wearables", async function () {
-
+describe('Wearables', async function () {
   it('Can mint wearables', async function () {
     let balance = await global.wearablesFacet.balanceOf(account, '0')
     expect(balance).to.equal(0)
-    //To do: Get max length of wearables array
+    // To do: Get max length of wearables array
 
     //  await truffleAssert.reverts(wearablesFacet.mintWearables(account, ['8'], ['10']), 'WearablesFacet: Wearable does not exist')
     await truffleAssert.reverts(wearablesFacet.mintWearables(account, ['0'], ['10']), 'WearablesFacet: Total wearable type quantity exceeds max quantity')
@@ -340,7 +328,6 @@ describe("Wearables", async function () {
   })
 
   it('Can transfer wearables to Aavegotchi', async function () {
-
     await global.wearablesFacet.transferToParent(
       global.account, // address _from,
       global.aavegotchiFacet.address, // address _toContract,
@@ -379,14 +366,12 @@ describe("Wearables", async function () {
     expect(equipped[testSlot]).to.equal(testWearableId)
   })
 
-
   /*
   it('Can display aavegotchi with wearables', async function () {
     const svg = await global.aavegotchiFacet.getAavegotchiSvg(testAavegotchiId)
     console.log(svg)
   })
   */
-
 
   it('Cannot equip wearables in the wrong slot', async function () {
     await truffleAssert.reverts(wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], ['4']), 'WearablesFacet: Cannot be equipped in this slot')
@@ -435,47 +420,39 @@ describe("Wearables", async function () {
     // This wearable gets equipped in the ninth slot, which takes up 0&1 slots
     expect(equipped[9]).to.equal('2')
   })
-
 })
 
-describe("Haunts", async function () {
-
-
+describe('Haunts', async function () {
   it('Cannot create new haunt until first is finished', async function () {
     const oneHundred = '100000000000000000000'
-    await truffleAssert.reverts(aavegotchiFacet.createHaunt('10000', oneHundred), 'AavegotchiFacet: Haunt must be full before creating new')
+    await truffleAssert.reverts(aavegotchiFacet.createHaunt('10000', oneHundred, '0x000000'), 'AavegotchiFacet: Haunt must be full before creating new')
   })
-
 
   it('Cannot exceed max haunt size', async function () {
     // Reverting for unknown reason. Probably gas related?
     //  const balance = await ghstDiamond.balanceOf(account)
     const oneHundredPortals = ethers.utils.parseEther('9500')
-    let tx = await global.aavegotchiFacet.buyPortals(account, oneHundredPortals, true)
+    const tx = await global.aavegotchiFacet.buyPortals(account, oneHundredPortals, true)
 
     const singlePortal = ethers.utils.parseEther('100')
-    await truffleAssert.reverts(global.aavegotchiFacet.buyPortals(account, singlePortal, true), "AavegotchiFacet: Exceeded max number of aavegotchis for this haunt")
+    await truffleAssert.reverts(global.aavegotchiFacet.buyPortals(account, singlePortal, true), 'AavegotchiFacet: Exceeded max number of aavegotchis for this haunt')
 
     const receipt = await tx.wait()
     // console.log('gas used:' + receipt.gasUsed)
   })
 
-
   it('Can create new Haunt', async function () {
     let currentHaunt = await aavegotchiFacet.currentHaunt()
-    expect(currentHaunt).to.equal(0)
-    await aavegotchiFacet.createHaunt("10000", ethers.utils.parseEther("100"))
+    expect(currentHaunt.hauntId_).to.equal(0)
+    await aavegotchiFacet.createHaunt('10000', ethers.utils.parseEther('100'), '0x000000')
     currentHaunt = await aavegotchiFacet.currentHaunt()
-    expect(currentHaunt).to.equal(1)
+    expect(currentHaunt.hauntId_).to.equal(1)
   })
 
-
-  //To do: Test allowing DAO to create haunt
-
+  // To do: Test allowing DAO to create haunt
 })
 
-describe("Shop and Vouchers", async function () {
-
+describe('Shop and Vouchers', async function () {
   it('Should create vouchers', async function () {
     await global.vouchersContract.createVoucherTypes(account, ['10', '20', '30', '40', '50', '60'], [])
     const supply = await global.vouchersContract.totalSupplies()
@@ -483,7 +460,6 @@ describe("Shop and Vouchers", async function () {
   })
 
   it('Should convert vouchers into wearables', async function () {
-
     await global.vouchersContract.setApprovalForAll(shopFacet.address, true)
     await global.shopFacet.purchaseWearablesWithVouchers(account, [0, 1, 2, 3, 4, 5], [10, 10, 10, 10, 10, 60])
     const wearablesBalance = await global.wearablesFacet.wearablesBalances(account)
@@ -492,15 +468,13 @@ describe("Shop and Vouchers", async function () {
 
   it('Should purchase wearables using GHST', async function () {
     let balances = await global.wearablesFacet.wearablesBalances(account)
-    //Start at 1 because 0 is always empty
+    // Start at 1 because 0 is always empty
     expect(balances[1]).to.equal(10)
-    await global.shopFacet.purchaseWearablesWithGhst(account, ["1"], ["10"])
+    await global.shopFacet.purchaseWearablesWithGhst(account, ['1'], ['10'])
     balances = await global.wearablesFacet.wearablesBalances(account)
     expect(balances[1]).to.equal(20)
   })
-
 })
-
 
 /*
 it('Can calculate kinship according to formula', async function () {
