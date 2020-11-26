@@ -526,7 +526,14 @@ contract AavegotchiFacet {
     }
 
     function interact(uint256 _tokenId) public {
-        //To do: Only owner or caretaker can interact
+        //To do (done): Only owner or caretaker can interact
+        address owner = s.aavegotchis[_tokenId].owner;
+        require(owner != address(0), "AavegotchiFacet: Invalid tokenId, is not owned or doesn't exist");
+        require(
+            msg.sender == owner || s.operators[owner][msg.sender] || s.approved[_tokenId] == msg.sender,
+            "AavegotchiFacet: Not owner of token or approved"
+        );
+
         //To do: only update once per day
 
         //Was the last interaction within 24 hours? If so, add to interaction count. If not, reset it.
@@ -677,7 +684,7 @@ contract AavegotchiFacet {
         require(owner != address(0), "ERC721: Invalid tokenId or can't be transferred");
         require(
             msg.sender == owner || s.operators[owner][msg.sender] || s.approved[_tokenId] == msg.sender,
-            "ERC721: Not owner or approved to transfer"
+            "AavegotchiFacet: Not owner or approved to transfer"
         );
         require(_from == owner, "ERC721: _from is not owner, transfer failed");
         s.aavegotchis[_tokenId].owner = _to;
