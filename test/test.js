@@ -583,6 +583,14 @@ describe("Kinship", async function () {
       console.log(`* Go away for ${days} days. Kinship is: `, kinship.toString())
     }
 
+
+    console.log('* Interact 120 times')
+    for (let index = 0; index < 120; index++) {
+      await global.aavegotchiFacet.interact('0')
+    }
+
+    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    console.log('* Kinship is:', kinship.toString())
   })
 
 

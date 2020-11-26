@@ -512,44 +512,20 @@ contract AavegotchiFacet {
 
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 lastInteracted = aavegotchi.lastInteracted;
-        uint256 interactionCount = uint256(aavegotchi.interactionCount);
+        int16 interactionCount = int16(aavegotchi.interactionCount);
         uint256 interval = block.timestamp - lastInteracted;
 
         //This may not work with decimals
-        uint256 daysSinceInteraction = uint256(interval) / 86400;
-        uint256 baseKinship = 50;
+        int16 daysSinceInteraction = int16(interval / 86400);
+        int16 baseKinship = 50;
 
-        kinship = baseKinship + interactionCount - daysSinceInteraction;
+        // console.log('')
 
-        if (daysSinceInteraction > 0 && kinship > 100) {
-            uint256 mod = calculateDeteriorationModifier(kinship);
-            uint256 deteriorationAmount = uint256(mod * daysSinceInteraction);
-
-            if (kinship - deteriorationAmount <= 100) {
-                console.log("mod", mod);
-                uint256 difference = 100 - (kinship - deteriorationAmount);
-
-                console.log("difference:", difference);
-                //Equal it out to 100
-                kinship = kinship - deteriorationAmount + difference;
-
-                //Then subtract the difference
-                kinship = kinship - (difference / mod);
-            } else {
-                kinship -= deteriorationAmount;
-            }
+        if (daysSinceInteraction > baseKinship + interactionCount) {
+            kinship = 0;
+        } else {
+            kinship = uint256(baseKinship + interactionCount - daysSinceInteraction);
         }
-    }
-
-    function calculateDeteriorationModifier(uint256 kinship_) internal pure returns (uint16) {
-        if (kinship_ <= 100) return 1;
-        else if (kinship_ > 100 && kinship_ <= 300) {
-            return 3;
-        } else if (kinship_ > 300 && kinship_ <= 1000) {
-            return 4;
-        } else if (kinship_ > 1000 && kinship_ <= 2000) {
-            return 5;
-        } else return 10;
     }
 
     function interact(uint256 _tokenId) public {
@@ -566,40 +542,22 @@ contract AavegotchiFacet {
         }
         int16 baseKinship = 50;
 
-        uint256 kinship = uint256(baseKinship + interactionCount - daysSinceInteraction);
-
-        if (daysSinceInteraction > 0 && kinship > 100) {
-            int16 det = int16(calculateDeteriorationModifier(kinship));
-
-            // uint256 deteriorationAmount = det * daysSinceInteraction;
-
-            kinship -= uint256(det * daysSinceInteraction);
-        }
+        //Interaction count can't go below -50 otherwise the kinship will be negative
+        if (interactionCount < -50) interactionCount = -50;
 
         //If your Aavegotchi hates you and you finally pet it, you get a bonus
+        uint256 kinship = uint256(baseKinship + interactionCount - daysSinceInteraction);
         int16 hateBonus = 0;
 
         if (kinship < 40) {
             hateBonus = 2;
         }
 
-        //If it's been a day or more since last interaction
+        //Update the interactionCount
         if (daysSinceInteraction > 0) {
-            s.aavegotchis[_tokenId].interactionCount = int16(kinship - uint256(baseKinship)) + 1 + hateBonus;
-            s.aavegotchis[_tokenId].streak = 0;
-
-            //Increase interaction
+            s.aavegotchis[_tokenId].interactionCount = interactionCount - int16(daysSinceInteraction) + hateBonus + 1;
         } else {
-            uint16 streak = uint16(s.aavegotchis[_tokenId].streak);
-            int16 streakBonus = 0;
-
-            if (streak >= 5) streakBonus = 1;
-            if (streak >= 10) streakBonus = 3;
-            if (streak >= 30) streakBonus = 4;
-            if (streak >= 60) streakBonus = 5;
-            if (streak >= 90) streakBonus = 10;
-            s.aavegotchis[_tokenId].interactionCount = int16(interactionCount + 1 + hateBonus + streakBonus);
-            s.aavegotchis[_tokenId].streak = uint16(streak + 1);
+            s.aavegotchis[_tokenId].interactionCount = int16(interactionCount + 1 + hateBonus);
         }
 
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
