@@ -102,16 +102,11 @@ contract AavegotchiFacet {
         s.haunts[hauntId_].hauntMaxSize = _hauntMaxSize;
         s.haunts[hauntId_].portalPrice = _portalPrice;
         s.haunts[hauntId_].bodyColor = _bodyColor;
-
-        //To do (done): Would be nice to store Haunts in their own mapping, instead of just as individual state variables.
-
-        //I created the Haunt struct and a Haunts mapping if you think this is a good idea.
     }
 
     function currentHaunt() public view returns (uint16 hauntId_, Haunt memory haunt_) {
         hauntId_ = s.currentHauntId;
         haunt_ = s.haunts[hauntId_];
-        //To do (done): return Haunt mapping instead of just the Id
     }
 
     function buyPortals(
@@ -511,23 +506,50 @@ contract AavegotchiFacet {
         rarityScore = baseRarity + int256(s.aavegotchis[_tokenId].wearableBonus);
     }
 
-    function calculateKinship(uint256 _tokenId) external view returns (int256 kinship) {
+    function calculateKinship(uint256 _tokenId) external view returns (uint256 kinship) {
         //The initial value of Kinship is always 50
         //Players can boost their kinship by interacting with their Aavegotchi.
 
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 lastInteracted = aavegotchi.lastInteracted;
-        int256 interactionCount = aavegotchi.interactionCount;
+        uint256 interactionCount = uint256(aavegotchi.interactionCount);
         uint256 interval = block.timestamp - lastInteracted;
 
         //This may not work with decimals
-        int256 daysSinceInteraction = int256(interval) / 86400;
-        int256 baseKinship = 50;
+        uint256 daysSinceInteraction = uint256(interval) / 86400;
+        uint256 baseKinship = 50;
 
         kinship = baseKinship + interactionCount - daysSinceInteraction;
+
         if (daysSinceInteraction > 0 && kinship > 100) {
-            kinship -= (kinship - 100) / 3;
+            uint256 mod = calculateDeteriorationModifier(kinship);
+            uint256 deteriorationAmount = uint256(mod * daysSinceInteraction);
+
+            if (kinship - deteriorationAmount <= 100) {
+                console.log("mod", mod);
+                uint256 difference = 100 - (kinship - deteriorationAmount);
+
+                console.log("difference:", difference);
+                //Equal it out to 100
+                kinship = kinship - deteriorationAmount + difference;
+
+                //Then subtract the difference
+                kinship = kinship - (difference / mod);
+            } else {
+                kinship -= deteriorationAmount;
+            }
         }
+    }
+
+    function calculateDeteriorationModifier(uint256 kinship_) internal pure returns (uint16) {
+        if (kinship_ <= 100) return 1;
+        else if (kinship_ > 100 && kinship_ <= 300) {
+            return 3;
+        } else if (kinship_ > 300 && kinship_ <= 1000) {
+            return 4;
+        } else if (kinship_ > 1000 && kinship_ <= 2000) {
+            return 5;
+        } else return 10;
     }
 
     function interact(uint256 _tokenId) public {
@@ -538,13 +560,21 @@ contract AavegotchiFacet {
         uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
         int16 interactionCount = s.aavegotchis[_tokenId].interactionCount;
         uint256 interval = block.timestamp - lastInteracted;
-        int256 daysSinceInteraction = int256(interval) / 86400;
+        int16 daysSinceInteraction = int16(interval / 86400);
         if (daysSinceInteraction > 3000) {
             daysSinceInteraction = 3000;
         }
-        int256 baseKinship = 50;
+        int16 baseKinship = 50;
 
-        int256 kinship = baseKinship + interactionCount - daysSinceInteraction;
+        uint256 kinship = uint256(baseKinship + interactionCount - daysSinceInteraction);
+
+        if (daysSinceInteraction > 0 && kinship > 100) {
+            int16 det = int16(calculateDeteriorationModifier(kinship));
+
+            // uint256 deteriorationAmount = det * daysSinceInteraction;
+
+            kinship -= uint256(det * daysSinceInteraction);
+        }
 
         //If your Aavegotchi hates you and you finally pet it, you get a bonus
         int16 hateBonus = 0;
@@ -555,15 +585,12 @@ contract AavegotchiFacet {
 
         //If it's been a day or more since last interaction
         if (daysSinceInteraction > 0) {
-            if (kinship > 100) {
-                interactionCount -= int16((kinship - 100) / 3);
-            }
-            s.aavegotchis[_tokenId].interactionCount = interactionCount - int16(daysSinceInteraction) + hateBonus + 1;
+            s.aavegotchis[_tokenId].interactionCount = int16(kinship - uint256(baseKinship)) + 1 + hateBonus;
             s.aavegotchis[_tokenId].streak = 0;
 
             //Increase interaction
         } else {
-            uint256 streak = s.aavegotchis[_tokenId].streak;
+            uint16 streak = uint16(s.aavegotchis[_tokenId].streak);
             int16 streakBonus = 0;
 
             if (streak >= 5) streakBonus = 1;
@@ -571,7 +598,7 @@ contract AavegotchiFacet {
             if (streak >= 30) streakBonus = 4;
             if (streak >= 60) streakBonus = 5;
             if (streak >= 90) streakBonus = 10;
-            s.aavegotchis[_tokenId].interactionCount = interactionCount + 1 + hateBonus + streakBonus;
+            s.aavegotchis[_tokenId].interactionCount = int16(interactionCount + 1 + hateBonus + streakBonus);
             s.aavegotchis[_tokenId].streak = uint16(streak + 1);
         }
 

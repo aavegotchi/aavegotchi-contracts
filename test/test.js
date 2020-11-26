@@ -16,7 +16,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { wearableTypes } = require('../scripts/wearableTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray (uint, numBytes) {
+function uintToIntArray(uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -25,7 +25,7 @@ function uintToIntArray (uint, numBytes) {
   return array
 }
 
-function uintToWearableIds (uint) {
+function uintToWearableIds(uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -476,84 +476,115 @@ describe('Shop and Vouchers', async function () {
   })
 })
 
-/*
-it('Can calculate kinship according to formula', async function () {
-  // First interact
+describe("Kinship", async function () {
 
-  await global.aavegotchiFacet.interact('0')
-  await global.aavegotchiFacet.interact('0')
-  await global.aavegotchiFacet.interact('0')
-  await global.aavegotchiFacet.interact('0')
-  await global.aavegotchiFacet.interact('0')
-  let kinship = await global.aavegotchiFacet.calculateKinship('0')
-  console.log('* 5 initial Interactions, kinship is:', kinship.toString())
-  // 5 interactions + 1 streak bonus
-  // expect(kinship).to.equal(55)
+  it('Can calculate kinship according to formula', async function () {
+    // First interact
 
-  // Go 3 days without interacting
-  ethers.provider.send('evm_increaseTime', [3 * 86400])
-  ethers.provider.send('evm_mine')
-
-  kinship = await global.aavegotchiFacet.calculateKinship('0')
-  // Took three days off and lost streak bonus
-  console.log('* 3 days w/ no interaction, kinship is:', kinship.toString())
-
-  //  expect(kinship).to.equal(49)
-
-  // await global.aavegotchiFacet.interact("0")
-  // kinship = await global.aavegotchiFacet.calculateKinship("0")
-  // expect(kinship).to.equal(53)
-
-  // Take a longggg break
-
-  ethers.provider.send('evm_increaseTime', [14 * 86400])
-  ethers.provider.send('evm_mine')
-
-  kinship = await global.aavegotchiFacet.calculateKinship('0')
-  console.log('* Another 14 days since last interaction, total 17 days. Kinship is', kinship.toString())
-
-  ethers.provider.send('evm_increaseTime', [20 * 86400])
-  ethers.provider.send('evm_mine')
-  kinship = await global.aavegotchiFacet.calculateKinship('0')
-  console.log('* 37 days since last interaction, kinship is:', kinship.toString())
-  // expect(kinship).to.equal(13)
-
-  await global.aavegotchiFacet.interact('0')
-  kinship = await global.aavegotchiFacet.calculateKinship('0')
-  console.log('* Kinship after first interaction is:', kinship.toString())
-
-  await global.aavegotchiFacet.interact('0')
-  kinship = await global.aavegotchiFacet.calculateKinship('0')
-  console.log('* Kinship after second interaction is:', kinship.toString())
-
-  await global.aavegotchiFacet.interact('0')
-  kinship = await global.aavegotchiFacet.calculateKinship('0')
-  console.log('* Kinship after third interaction is:', kinship.toString())
-
-  console.log('* Interact 120 times')
-
-  for (let index = 0; index < 120; index++) {
     await global.aavegotchiFacet.interact('0')
-  }
+    await global.aavegotchiFacet.interact('0')
+    await global.aavegotchiFacet.interact('0')
+    await global.aavegotchiFacet.interact('0')
+    await global.aavegotchiFacet.interact('0')
+    let kinship = await global.aavegotchiFacet.calculateKinship('0')
+    console.log('* 5 initial Interactions, kinship is:', kinship.toString())
+    // 5 interactions + 1 streak bonus
+    // expect(kinship).to.equal(55)
 
-  kinship = await global.aavegotchiFacet.calculateKinship('0')
-  console.log('* Kinship is:', kinship.toString())
+    // Go 3 days without interacting
+    ethers.provider.send('evm_increaseTime', [3 * 86400])
+    ethers.provider.send('evm_mine')
 
-  ethers.provider.send('evm_increaseTime', [80 * 86400])
-  ethers.provider.send('evm_mine')
-  kinship = await global.aavegotchiFacet.calculateKinship('0')
+    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    // Took three days off and lost streak bonus
+    console.log('* 3 days w/ no interaction, kinship is:', kinship.toString())
 
-  let aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
+    //  expect(kinship).to.equal(49)
 
-  console.log('* Go away for 80 days. Kinship is: ', kinship.toString())
-  console.log('Interaction count is:', aavegotchi.interactionCount.toString())
+    // await global.aavegotchiFacet.interact("0")
+    // kinship = await global.aavegotchiFacet.calculateKinship("0")
+    // expect(kinship).to.equal(53)
 
-  await global.aavegotchiFacet.interact('0')
-  kinship = await global.aavegotchiFacet.calculateKinship('0')
-  console.log('* Interact after 80 days. Kinship is: ', kinship.toString())
-  aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
-  console.log('Interaction count is:', aavegotchi.interactionCount.toString())
+    // Take a longggg break
 
-  // expect(aavegotchi.interactionCount).to.equal(4)
+    ethers.provider.send('evm_increaseTime', [14 * 86400])
+    ethers.provider.send('evm_mine')
+
+    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    console.log('* Another 14 days since last interaction, total 17 days. Kinship is', kinship.toString())
+
+    ethers.provider.send('evm_increaseTime', [20 * 86400])
+    ethers.provider.send('evm_mine')
+    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    console.log('* 37 days since last interaction, kinship is:', kinship.toString())
+    // expect(kinship).to.equal(13)
+
+    await global.aavegotchiFacet.interact('0')
+    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    console.log('* Kinship after first interaction is:', kinship.toString())
+
+    await global.aavegotchiFacet.interact('0')
+    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    console.log('* Kinship after second interaction is:', kinship.toString())
+
+    await global.aavegotchiFacet.interact('0')
+    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    console.log('* Kinship after third interaction is:', kinship.toString())
+
+    console.log('* Interact 120 times')
+
+    for (let index = 0; index < 120; index++) {
+      await global.aavegotchiFacet.interact('0')
+    }
+
+    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    console.log('* Kinship is:', kinship.toString())
+
+    // ethers.provider.send('evm_increaseTime', [10 * 86400])
+    // ethers.provider.send('evm_mine')
+    // kinship = await global.aavegotchiFacet.calculateKinship('0')
+
+    let aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
+
+    let daysSinceInteraction = 0
+    for (let index = 0; index < 12; index++) {
+
+      let days = 10
+      daysSinceInteraction += days
+
+      ethers.provider.send('evm_increaseTime', [days * 86400])
+      ethers.provider.send('evm_mine')
+      kinship = await global.aavegotchiFacet.calculateKinship('0')
+
+      aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
+
+      console.log(`* Go away for ${days} days. Kinship is: `, kinship.toString())
+    }
+
+
+    await global.aavegotchiFacet.interact('0')
+    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    console.log(`* Interact after ${daysSinceInteraction} days. Kinship is: `, kinship.toString())
+    aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
+
+
+    daysSinceInteraction = 0
+    for (let index = 0; index < 5; index++) {
+
+      let days = 10
+      daysSinceInteraction += days
+
+      ethers.provider.send('evm_increaseTime', [days * 86400])
+      ethers.provider.send('evm_mine')
+      kinship = await global.aavegotchiFacet.calculateKinship('0')
+
+      aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
+
+      console.log(`* Go away for ${days} days. Kinship is: `, kinship.toString())
+    }
+
+  })
+
+
 })
-*/
+

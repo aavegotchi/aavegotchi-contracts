@@ -55,7 +55,6 @@ contract AavegotchiDiamond {
         vrf_ds.fee = uint144(_args.chainlinkFee);
         vrf_ds.nextBatchId = 1;
 
-        //To do (done): Set this as a constructor argument so we can be flexible in tests
         uint256 currentHauntId = s.currentHauntId;
         s.haunts[currentHauntId].hauntMaxSize = _args.initialHauntSize; //10_000;
         s.haunts[currentHauntId].portalPrice = 100e18;

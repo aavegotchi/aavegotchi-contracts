@@ -53,8 +53,7 @@ contract ShopFacet {
         LibERC20.transferFrom(s.ghstContract, msg.sender, address(0), burnAmount);
         LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), totalPrice - burnAmount);
     }
-
-    //To do (done): Allow users to convert vouchers for same-Id wearables
+    
     //Burn the voucher
     //Mint the wearable and transfer to user
     function purchaseWearablesWithVouchers(
