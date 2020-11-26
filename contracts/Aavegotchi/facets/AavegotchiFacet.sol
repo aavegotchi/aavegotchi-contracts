@@ -515,11 +515,8 @@ contract AavegotchiFacet {
         int16 interactionCount = int16(aavegotchi.interactionCount);
         uint256 interval = block.timestamp - lastInteracted;
 
-        //This may not work with decimals
         int16 daysSinceInteraction = int16(interval / 86400);
         int16 baseKinship = 50;
-
-        // console.log('')
 
         if (daysSinceInteraction > baseKinship + interactionCount) {
             kinship = 0;

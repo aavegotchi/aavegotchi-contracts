@@ -499,12 +499,6 @@ describe("Kinship", async function () {
     // Took three days off and lost streak bonus
     console.log('* 3 days w/ no interaction, kinship is:', kinship.toString())
 
-    //  expect(kinship).to.equal(49)
-
-    // await global.aavegotchiFacet.interact("0")
-    // kinship = await global.aavegotchiFacet.calculateKinship("0")
-    // expect(kinship).to.equal(53)
-
     // Take a longggg break
 
     ethers.provider.send('evm_increaseTime', [14 * 86400])
