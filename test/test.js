@@ -36,6 +36,15 @@ function sixteenBitArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
+function uintToWearableIds (uint) {
+  uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
+  const array = []
+  for (let i = 0; i < uint.length; i += 4) {
+    array.unshift(ethers.BigNumber.from('0x' + uint.substr(i, 4)).fromTwos(16).toNumber())
+  }
+  return array
+}
+
 const testAavegotchiId = '0'
 const testWearableId = '1'
 const testSlot = '0'
@@ -423,9 +432,9 @@ describe('Wearables', async function () {
   //     // const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
   //     // console.log(aavegotchi.equippedWearables)
 
-//     // This wearable gets equipped in the ninth slot, which takes up 0&1 slots
-//     expect(equipped[9]).to.equal('2')
-//   })
+  //     // This wearable gets equipped in the ninth slot, which takes up 0&1 slots
+  //     expect(equipped[9]).to.equal('2')
+  //   })
 })
 
 describe('Haunts', async function () {
@@ -483,6 +492,8 @@ describe('Shop and Vouchers', async function () {
 })
 
 describe('Kinship', async function () {
+
+  /*
   it('Can calculate kinship according to formula', async function () {
     // First interact
 
@@ -586,4 +597,6 @@ describe('Kinship', async function () {
     kinship = await global.aavegotchiFacet.calculateKinship('0')
     console.log('* Kinship is:', kinship.toString())
   })
+  */
+
 })
