@@ -499,6 +499,9 @@ contract AavegotchiFacet {
 
     //Only valid for claimed Aavegotchis
     function calculateModifiedRarityScore(uint256 _tokenId) external view returns (int256 rarityScore) {
+        //To do: Should return final rarity score inlcuding wearables + sets
+        //To do: Can also return the final numericTraits including wearable modifiers + set modifiers
+
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         address collateral = s.aavegotchis[_tokenId].collateralType;
 
