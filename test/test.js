@@ -1,6 +1,5 @@
 /* global describe it before ethers */
 const { expect } = require('chai')
-const { BigNumber } = require('ethers')
 const truffleAssert = require('truffle-assertions')
 // const { idText } = require('typescript')
 
@@ -25,6 +24,18 @@ function uintToIntArray(uint, numBytes) {
   return array
 }
 
+function sixteenBitArrayToUint(array) {
+  const uint = []
+  for (let item of array) {
+    if (typeof item === 'string') {
+      item = parseInt(item)
+    }
+    uint.push(item.toString(16).padStart(4, '0'))
+  }
+  console.log(uint.join(''))
+  return ethers.BigNumber.from('0x' + uint.join(''))
+}
+
 function uintToWearableIds(uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
@@ -36,7 +47,7 @@ function uintToWearableIds(uint) {
 
 const testAavegotchiId = '0'
 const testWearableId = '1'
-const testSlot = '3'
+const testSlot = '0'
 
 describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
   before(async function () {
@@ -243,12 +254,12 @@ describe('Collaterals and escrow', async function () {
 
   it('Can increase stake', async function () {
     let aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
-    const currentStake = BigNumber.from(aavegotchi.stakedAmount)
+    const currentStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
 
     // Let's double the stake
     await global.escrowFacet.increaseStake('0', currentStake.toString())
     aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
-    const finalStake = BigNumber.from(aavegotchi.stakedAmount)
+    const finalStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
     expect(finalStake).to.equal(currentStake.add(currentStake))
 
     // Todo: Balance check
@@ -256,15 +267,15 @@ describe('Collaterals and escrow', async function () {
 
   it('Can decrease stake, but not below minimum', async function () {
     let aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
-    let currentStake = BigNumber.from(aavegotchi.stakedAmount)
-    const minimumStake = BigNumber.from(aavegotchi.minimumStake)
+    let currentStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
+    const minimumStake = ethers.BigNumber.from(aavegotchi.minimumStake)
 
     const available = currentStake.sub(minimumStake)
     await truffleAssert.reverts(escrowFacet.decreaseStake(testAavegotchiId, currentStake), 'EscrowFacet: Cannot reduce below minimum stake')
     await global.escrowFacet.decreaseStake(testAavegotchiId, available)
 
     aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
-    currentStake = BigNumber.from(aavegotchi.stakedAmount)
+    currentStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
     expect(currentStake).to.equal(minimumStake)
   })
 
@@ -296,16 +307,16 @@ describe('Collaterals and escrow', async function () {
     const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits('1')
     const selectedGhost = ghosts[0]
     const minStake = selectedGhost.minimumStake
-    const initialBalance = BigNumber.from(await ghstDiamond.balanceOf(account))
+    const initialBalance = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
 
     // Claim ghost and stake
     await global.aavegotchiFacet.claimAavegotchiFromPortal('1', 0, minStake)
-    const balanceAfterClaim = BigNumber.from(await ghstDiamond.balanceOf(account))
+    const balanceAfterClaim = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
     expect(balanceAfterClaim).to.equal(initialBalance.sub(minStake))
 
     // Burn Aavegotchi and return collateral stake
     await global.escrowFacet.decreaseAndDestroy('1')
-    const balanceAfterDestroy = BigNumber.from(await ghstDiamond.balanceOf(account))
+    const balanceAfterDestroy = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
     expect(balanceAfterDestroy).to.equal(initialBalance)
 
     // Should only have 1 portal now
@@ -358,7 +369,11 @@ describe('Wearables', async function () {
     expect(await global.wearablesFacet.balanceOfToken(aavegotchiFacet.address, testAavegotchiId, testWearableId)).to.equal(10)
 
     // Now let's equip
-    await global.wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], [testSlot])
+    // console.log('WearableId: ' + testWearableId)
+
+    const wearableIds = sixteenBitArrayToUint([testWearableId])
+    console.log(wearableIds.toString())
+    await global.wearablesFacet.equipWearables(testAavegotchiId, wearableIds)
     const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
 
     expect(equipped.length).to.equal(16)
@@ -374,52 +389,52 @@ describe('Wearables', async function () {
   */
 
   it('Cannot equip wearables in the wrong slot', async function () {
-    await truffleAssert.reverts(wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], ['4']), 'WearablesFacet: Cannot be equipped in this slot')
+    await truffleAssert.reverts(wearablesFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([testWearableId, 0, 0])), 'WearablesFacet: Wearable cannot be equipped in this slot')
   })
 
-  it('Can de-equip wearables', async function () {
-    await global.wearablesFacet.unequipWearables(testAavegotchiId, [testSlot])
-    const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
+  //   it('Can de-equip wearables', async function () {
+  //     await global.wearablesFacet.unequipWearables(testAavegotchiId, [testSlot])
+  //     const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
 
-    expect(equipped.length).to.equal(16)
-    expect(equipped[testSlot]).to.equal(0)
-  })
+  //     expect(equipped.length).to.equal(16)
+  //     expect(equipped[testSlot]).to.equal(0)
+  //   })
 
-  it('Equipping Wearables alters base rarity score', async function () {
-    // Wearables sanity check
-    const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
-    expect(equipped[testSlot]).to.equal(0)
-    const originalScore = await global.aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
+  //   it('Equipping Wearables alters base rarity score', async function () {
+  //     // Wearables sanity check
+  //     const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
+  //     expect(equipped[testSlot]).to.equal(0)
+  //     const originalScore = await global.aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
 
-    // Equip a wearable
-    await global.wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], [testSlot])
+  //     // Equip a wearable
+  //     await global.wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], [testSlot])
 
-    // Calculate bonuses
-    const modifiers = uintToIntArray(wearableTypes[testWearableId].traitModifiers, 6)
-    let wearableTraitsBonus = 0
-    const rarityScoreModifier = wearableTypes[testWearableId].rarityScoreModifier
-    modifiers.forEach((val) => { wearableTraitsBonus += val })
-    // Retrieve the final score
-    const augmentedScore = await global.aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
-    // console.log(originalScore.toString(), augmentedScore.toString())
-    expect(augmentedScore).to.equal(Number(originalScore) + rarityScoreModifier + wearableTraitsBonus)
-  })
+  //     // Calculate bonuses
+  //     const modifiers = uintToIntArray(wearableTypes[testWearableId].traitModifiers, 6)
+  //     let wearableTraitsBonus = 0
+  //     const rarityScoreModifier = wearableTypes[testWearableId].rarityScoreModifier
+  //     modifiers.forEach((val) => { wearableTraitsBonus += val })
+  //     // Retrieve the final score
+  //     const augmentedScore = await global.aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
+  //     // console.log(originalScore.toString(), augmentedScore.toString())
+  //     expect(augmentedScore).to.equal(Number(originalScore) + rarityScoreModifier + wearableTraitsBonus)
+  //   })
 
-  it('Can equip multi-slot wearables', async function () {
-    const multiSlotWearableId = '2'
-    await global.wearablesFacet.mintWearables(account, [multiSlotWearableId], ['10'])
+  //   it('Can equip multi-slot wearables', async function () {
+  //     const multiSlotWearableId = '2'
+  //     await global.wearablesFacet.mintWearables(account, [multiSlotWearableId], ['10'])
 
-    await global.wearablesFacet.transferToParent(
-      global.account, global.aavegotchiFacet.address, testAavegotchiId, multiSlotWearableId, '10')
-    await global.wearablesFacet.equipWearables(testAavegotchiId, [multiSlotWearableId], ['9'])
-    const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
+  //     await global.wearablesFacet.transferToParent(
+  //       global.account, global.aavegotchiFacet.address, testAavegotchiId, multiSlotWearableId, '10')
+  //     await global.wearablesFacet.equipWearables(testAavegotchiId, [multiSlotWearableId], ['9'])
+  //     const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
 
-    // const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
-    // console.log(aavegotchi.equippedWearables)
+  //     // const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
+  //     // console.log(aavegotchi.equippedWearables)
 
-    // This wearable gets equipped in the ninth slot, which takes up 0&1 slots
-    expect(equipped[9]).to.equal('2')
-  })
+  //     // This wearable gets equipped in the ninth slot, which takes up 0&1 slots
+  //     expect(equipped[9]).to.equal('2')
+  //   })
 })
 
 describe('Haunts', async function () {
@@ -543,8 +558,7 @@ describe("Kinship", async function () {
 
     let daysSinceInteraction = 0
     for (let index = 0; index < 12; index++) {
-
-      let days = 10
+      const days = 10
       daysSinceInteraction += days
 
       ethers.provider.send('evm_increaseTime', [days * 86400])
@@ -555,18 +569,15 @@ describe("Kinship", async function () {
 
       console.log(`* Go away for ${days} days. Kinship is: `, kinship.toString())
     }
-
 
     await global.aavegotchiFacet.interact('0')
     kinship = await global.aavegotchiFacet.calculateKinship('0')
     console.log(`* Interact after ${daysSinceInteraction} days. Kinship is: `, kinship.toString())
     aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
 
-
     daysSinceInteraction = 0
     for (let index = 0; index < 5; index++) {
-
-      let days = 10
+      const days = 10
       daysSinceInteraction += days
 
       ethers.provider.send('evm_increaseTime', [days * 86400])
@@ -577,7 +588,6 @@ describe("Kinship", async function () {
 
       console.log(`* Go away for ${days} days. Kinship is: `, kinship.toString())
     }
-
 
     console.log('* Interact 120 times')
     for (let index = 0; index < 120; index++) {
@@ -593,4 +603,3 @@ describe("Kinship", async function () {
 
 
 })
-

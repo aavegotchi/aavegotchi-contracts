@@ -41,17 +41,20 @@ struct Aavegotchi {
 struct WearableType {
     // treated as six 8 ints array
 
-    uint256 traitModifiers; //How much the wearable modifies each trait. Should not be more than +-5 total
+    int256 traitModifiers; //How much the wearable modifies each trait. Should not be more than +-5 total
     string name; //The name of the wearable
     uint32 maxQuantity; //Total number that can be minted of this wearable. Can calculate the rarity level from this number.
     uint8 rarityScoreModifier; //Number from 1-50.
     uint8 setId; //The id of the set. Zero is no set
-    uint8[] slots; //The slots that this wearable can be added to.
+    // used as a sixteen 16 bits array
+    uint256 slotPositions; //The slots that this wearable can be added to.
     uint256 svgId; //The svgId of the wearable
     uint32 totalQuantity; //The total quantity of this wearable minted so far
     uint96 ghstPrice;
     bool canPurchaseWithGhst;
-    uint16[] allowedCollaterals; //The collaterals this wearable can be equipped to. An empty array is "any"
+    // used as a sixteen 16 bits array
+    // index into the collateralTypes array
+    uint256 allowedCollaterals; //The collaterals this wearable can be equipped to. An empty array is "any"
     uint8 minLevel; //The minimum Aavegotchi level required to equip this wearable. Default is 1.
 
     //A hand wearable can be equipped in left hand, right hand, both hands
@@ -76,9 +79,8 @@ struct WearableType {
 }
 
 struct WearableSet {
-    uint8[] pieces; //The tokenIdS of each piece of the set
-    uint8 rarityBonus; //How much equipping a full set increases the Aavegotchi's rarity score
-    int8[] traitModifiers; //Trait modifiers when a set is equipped
+    uint256 wearableIds; // The tokenIdS of each piece of the set
+    uint256 traitsfullSetBonus; // How much equipping a full set increases the Aavegotchi's rarity score
 }
 
 struct Haunt {

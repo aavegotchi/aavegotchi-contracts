@@ -525,6 +525,10 @@ contract AavegotchiFacet {
         }
     }
 
+    // function nextInteractTime((uint256 _tokenId) external view returns (uint256 ) {
+
+    // }
+
     function interact(uint256 _tokenId) public {
         //To do (done): Only owner or caretaker can interact
         address owner = s.aavegotchis[_tokenId].owner;
