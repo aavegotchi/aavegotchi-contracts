@@ -318,6 +318,123 @@ contract WearablesFacet {
         }
     }
 
+    function wearableIdToSlotPositions(uint256 _wearableIds, uint256 _wearableId) internal pure returns (uint256 wearableIdSlotPositions_) {
+        for (uint256 slot; slot < 16; slot++) {
+            uint256 wearableId = uint16(_wearableIds >> (16 * slot));
+            if (wearableId == _wearableId) {
+                wearableIdSlotPositions_ |= 1 << (1 * slot);
+            }
+        }
+    }
+
+    struct EquipWearableLocals {
+        int256 numericTraits;
+        uint256 newNumericTraits;
+        int256 traitModifiers;
+        uint256 wearableBonus;
+        uint256 existingWearableIds;
+        uint256 wearableId;
+        uint256 existingWearableId;
+    }
+
+    function equipWearables(uint256 _tokenId, uint256 _wearableIds) external {
+        EquipWearableLocals memory l;
+        Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
+        l.numericTraits = aavegotchi.numericTraits;
+        l.wearableBonus = aavegotchi.wearableBonus;
+        l.existingWearableIds = aavegotchi.equippedWearables;
+        for (uint256 slot; slot < 16; slot++) {
+            uint256 traitModifiers;
+            uint256 newNumericTraits;
+            WearableType storage wearableType;
+            l.wearableId = uint16(_wearableIds >> (16 * slot));
+            l.existingWearableId = uint16(l.existingWearableIds >> (16 * slot));
+            if (l.wearableId == l.existingWearableId) {
+                continue;
+            } else if (l.existingWearableId != 0) {
+                wearableType = s.wearableTypes[l.wearableId];
+                l.traitModifiers = wearableType.traitModifiers;
+                newNumericTraits = 0;
+                for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
+                    int256 number = int16(l.numericTraits >> (j * 16));
+                    int256 traitModifier = int8(traitModifiers >> (j * 8));
+                    number -= traitModifier;
+                    // clear bits first then assign
+                    newNumericTraits |= (uint256(number) & 0xffff) << (j * 16);
+                }
+                l.numericTraits = int256(newNumericTraits);
+                l.wearableBonus -= wearableType.rarityScoreModifier;
+            }
+            if (l.wearableId == 0) {
+                continue;
+            }
+            uint256 wearableIdSlotPositions;
+            for (uint256 slotPosition; slotPosition < 16; slotPosition++) {
+                uint256 slotWearableId = uint16(_wearableIds >> (16 * slotPosition));
+                if (slotWearableId == l.wearableId) {
+                    // if wearableId already proccessed
+                    if (slotPosition < slot) {
+                        wearableIdSlotPositions = 0;
+                        break;
+                    }
+                    wearableIdSlotPositions |= 1 << (1 * slot);
+                }
+            }
+            // if wearableId already proccessed
+            if (wearableIdSlotPositions == 0) {
+                continue;
+            }
+            console.log("wearableIdSlotPositions");
+            console.log(wearableIdSlotPositions);
+            wearableType = s.wearableTypes[l.wearableId];
+            require(aavegotchi.level >= wearableType.minLevel, "WearablesFacet: Aavegotchi level lower than minLevel");
+            uint256 possibleSlotPositions = wearableType.slotPositions;
+            bool canBeEquipped = false;
+            for (uint256 i; i < 16; i++) {
+                uint256 slotPositions = uint16(possibleSlotPositions >> (16 * i));
+                console.log(slotPositions);
+                if (slotPositions == wearableIdSlotPositions) {
+                    canBeEquipped = true;
+                    break;
+                }
+            }
+            require(canBeEquipped == true, "WearablesFacet: Wearable cannot be equipped in this slot");
+            canBeEquipped = false;
+            uint256 allowedCollaterals = wearableType.allowedCollaterals;
+            if (allowedCollaterals > 0) {
+                uint256 collateralIndex = s.collateralTypeIndexes[aavegotchi.collateralType];
+                for (uint256 i; i < 16; i++) {
+                    if (collateralIndex == uint16(allowedCollaterals >> (16 * slot))) {
+                        canBeEquipped = true;
+                    }
+                }
+                require(canBeEquipped == true, "WearablesFacet: Wearable cannot be equipped in this collateral type");
+            }
+
+            //Then check if this wearable is in the Aavegotchis inventory
+            uint256 balance = s.nftBalances[address(this)][_tokenId][l.wearableId];
+            require(balance > 0, "WearablesFacet: Wearable is not in Aavegotchi inventory");
+
+            //Add on trait modifiers
+            l.traitModifiers = wearableType.traitModifiers;
+            newNumericTraits = 0;
+            for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
+                int256 number = int16(l.numericTraits >> (j * 16));
+                int256 traitModifier = int8(traitModifiers >> (j * 8));
+                number += traitModifier;
+                // clear bits first then assign
+                newNumericTraits |= (uint256(number) & 0xffff) << (j * 16);
+            }
+            l.numericTraits = int256(newNumericTraits);
+            l.wearableBonus += wearableType.rarityScoreModifier;
+        }
+        aavegotchi.equippedWearables = _wearableIds;
+        aavegotchi.wearableBonus = uint16(l.wearableBonus);
+        aavegotchi.numericTraits = l.numericTraits;
+    }
+
+    /*
+
     function equipWearables(
         uint256 _tokenId,
         uint16[] memory _wearableIds,
@@ -383,73 +500,74 @@ contract WearablesFacet {
 
         //To do: Check if wearable has any requiredCollaterals. If yes, check if the current Aavegotchi is the correct collateral.
     }
+    */
 
     // -function getEquippedSlots() external returns (bool[16] memory equippedSlots)
 
-    function slotTaken(uint256 _equippedWearables, uint256 _slot) internal pure returns (bool) {
-        return uint16(_equippedWearables >> (16 * _slot)) != 0;
-    }
+    // function slotTaken(uint256 _equippedWearables, uint256 _slot) internal pure returns (bool) {
+    //     return uint16(_equippedWearables >> (16 * _slot)) != 0;
+    // }
 
-    function slotIsAvailable(uint256 _equippedWearables, uint256 _slot) internal pure returns (bool available) {
-        //First handle base case
+    // function slotIsAvailable(uint256 _equippedWearables, uint256 _slot) internal pure returns (bool available) {
+    //     //First handle base case
 
-        /*
-        const SLOT_HEAD = 0
-        const SLOT_FACE = 1
-        const SLOT_EYES = 2
-        const SLOT_BODY = 3
-        const SLOT_HAND_LEFT = 4
-        const SLOT_HAND_RIGHT = 5
-        const SLOT_HANDS_BOTH = 6
-        const SLOT_PET = 7
-        const SLOT_HEAD_BODY = 8
-        const SLOT_HEAD_FACE = 9
-        const SLOT_HEAD_FACE_EYES = 10
-        */
+    //     /*
+    //     const SLOT_HEAD = 0
+    //     const SLOT_FACE = 1
+    //     const SLOT_EYES = 2
+    //     const SLOT_BODY = 3
+    //     const SLOT_HAND_LEFT = 4
+    //     const SLOT_HAND_RIGHT = 5
+    //     const SLOT_HANDS_BOTH = 6
+    //     const SLOT_PET = 7
+    //     const SLOT_HEAD_BODY = 8
+    //     const SLOT_HEAD_FACE = 9
+    //     const SLOT_HEAD_FACE_EYES = 10
+    //     */
 
-        //Then handle each slot combination case
+    //     //Then handle each slot combination case
 
-        // mapping(uint16 => uint256) storage equipped = s.aavegotchis[_tokenId].equippedWearables;
-        if (_slot == SLOT_HEAD) {
-            //All combos containing head
-            if (slotTaken(_equippedWearables, SLOT_HEAD_BODY)) return false;
-            if (slotTaken(_equippedWearables, SLOT_HEAD_FACE)) return false;
-            if (slotTaken(_equippedWearables, SLOT_HEAD_FACE_EYES)) return false;
-        } else if (_slot == SLOT_FACE) {
-            //All combos containing face
-            if (slotTaken(_equippedWearables, SLOT_HEAD_FACE)) return false;
-            if (slotTaken(_equippedWearables, SLOT_HEAD_FACE_EYES)) return false;
-        } else if (_slot == SLOT_EYES) {
-            //All combos containing eyes
-            if (slotTaken(_equippedWearables, SLOT_HEAD_FACE_EYES)) return false;
-        } else if (_slot == SLOT_BODY) {
-            //All combos containing body
-            if (slotTaken(_equippedWearables, SLOT_HEAD_BODY)) return false;
-            //Body can't be used with both hands position
-            if (slotTaken(_equippedWearables, SLOT_HANDS_BOTH)) return false;
-        } else if (_slot == SLOT_HAND_LEFT) {
-            if (slotTaken(_equippedWearables, SLOT_HANDS_BOTH)) return false;
-        } else if (_slot == SLOT_HAND_RIGHT) {
-            if (slotTaken(_equippedWearables, SLOT_HANDS_BOTH)) return false;
-        } else if (_slot == SLOT_HANDS_BOTH) {
-            if (slotTaken(_equippedWearables, SLOT_HAND_LEFT)) return false;
-            if (slotTaken(_equippedWearables, SLOT_HAND_RIGHT)) return false;
-            //Body can't be used with both hands position
-            if (slotTaken(_equippedWearables, SLOT_BODY)) return false;
-        } else if (_slot == SLOT_HEAD_BODY) {
-            if (slotTaken(_equippedWearables, SLOT_HEAD)) return false;
-            if (slotTaken(_equippedWearables, SLOT_BODY)) return false;
-            if (slotTaken(_equippedWearables, SLOT_HANDS_BOTH)) return false;
-        } else if (_slot == SLOT_HEAD_FACE) {
-            if (slotTaken(_equippedWearables, SLOT_HEAD)) return false;
-            if (slotTaken(_equippedWearables, SLOT_FACE)) return false;
-        } else if (_slot == SLOT_HEAD_FACE_EYES) {
-            if (slotTaken(_equippedWearables, SLOT_HEAD)) return false;
-            if (slotTaken(_equippedWearables, SLOT_FACE)) return false;
-            if (slotTaken(_equippedWearables, SLOT_EYES)) return false;
-        }
-        return true;
-    }
+    //     // mapping(uint16 => uint256) storage equipped = s.aavegotchis[_tokenId].equippedWearables;
+    //     if (_slot == SLOT_HEAD) {
+    //         //All combos containing head
+    //         if (slotTaken(_equippedWearables, SLOT_HEAD_BODY)) return false;
+    //         if (slotTaken(_equippedWearables, SLOT_HEAD_FACE)) return false;
+    //         if (slotTaken(_equippedWearables, SLOT_HEAD_FACE_EYES)) return false;
+    //     } else if (_slot == SLOT_FACE) {
+    //         //All combos containing face
+    //         if (slotTaken(_equippedWearables, SLOT_HEAD_FACE)) return false;
+    //         if (slotTaken(_equippedWearables, SLOT_HEAD_FACE_EYES)) return false;
+    //     } else if (_slot == SLOT_EYES) {
+    //         //All combos containing eyes
+    //         if (slotTaken(_equippedWearables, SLOT_HEAD_FACE_EYES)) return false;
+    //     } else if (_slot == SLOT_BODY) {
+    //         //All combos containing body
+    //         if (slotTaken(_equippedWearables, SLOT_HEAD_BODY)) return false;
+    //         //Body can't be used with both hands position
+    //         if (slotTaken(_equippedWearables, SLOT_HANDS_BOTH)) return false;
+    //     } else if (_slot == SLOT_HAND_LEFT) {
+    //         if (slotTaken(_equippedWearables, SLOT_HANDS_BOTH)) return false;
+    //     } else if (_slot == SLOT_HAND_RIGHT) {
+    //         if (slotTaken(_equippedWearables, SLOT_HANDS_BOTH)) return false;
+    //     } else if (_slot == SLOT_HANDS_BOTH) {
+    //         if (slotTaken(_equippedWearables, SLOT_HAND_LEFT)) return false;
+    //         if (slotTaken(_equippedWearables, SLOT_HAND_RIGHT)) return false;
+    //         //Body can't be used with both hands position
+    //         if (slotTaken(_equippedWearables, SLOT_BODY)) return false;
+    //     } else if (_slot == SLOT_HEAD_BODY) {
+    //         if (slotTaken(_equippedWearables, SLOT_HEAD)) return false;
+    //         if (slotTaken(_equippedWearables, SLOT_BODY)) return false;
+    //         if (slotTaken(_equippedWearables, SLOT_HANDS_BOTH)) return false;
+    //     } else if (_slot == SLOT_HEAD_FACE) {
+    //         if (slotTaken(_equippedWearables, SLOT_HEAD)) return false;
+    //         if (slotTaken(_equippedWearables, SLOT_FACE)) return false;
+    //     } else if (_slot == SLOT_HEAD_FACE_EYES) {
+    //         if (slotTaken(_equippedWearables, SLOT_HEAD)) return false;
+    //         if (slotTaken(_equippedWearables, SLOT_FACE)) return false;
+    //         if (slotTaken(_equippedWearables, SLOT_EYES)) return false;
+    //     }
+    //     return true;
+    // }
 
     function equippedWearables(uint256 _tokenId) external view returns (uint256[EQUIPPED_WEARABLE_SLOTS] memory wearableIds_) {
         uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
@@ -458,15 +576,15 @@ contract WearablesFacet {
         }
     }
 
-    function unequipWearables(uint256 _tokenId, uint8[] memory _slotIds) public {
-        uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
-        for (uint256 i = 0; i < _slotIds.length; i++) {
-            uint8 slotId = _slotIds[i];
-            uint256 wearableId = uint16(l_equippedWearables >> (slotId * 16));
-            require(wearableId != 0, "WearablesFacet: Slot has not been equipped!");
-            // clear slot bits
-            l_equippedWearables &= ~(uint256(0xffff) << (16 * slotId));
-        }
-        s.aavegotchis[_tokenId].equippedWearables = l_equippedWearables;
-    }
+    // function unequipWearables(uint256 _tokenId, uint8[] memory _slotIds) public {
+    //     uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+    //     for (uint256 i = 0; i < _slotIds.length; i++) {
+    //         uint8 slotId = _slotIds[i];
+    //         uint256 wearableId = uint16(l_equippedWearables >> (slotId * 16));
+    //         require(wearableId != 0, "WearablesFacet: Slot has not been equipped!");
+    //         // clear slot bits
+    //         l_equippedWearables &= ~(uint256(0xffff) << (16 * slotId));
+    //     }
+    //     s.aavegotchis[_tokenId].equippedWearables = l_equippedWearables;
+    // }
 }
