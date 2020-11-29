@@ -478,6 +478,7 @@ describe('Shop and Vouchers', async function () {
 
 describe("Kinship", async function () {
 
+  /*
   it('Can calculate kinship according to formula', async function () {
     // First interact
 
@@ -586,6 +587,9 @@ describe("Kinship", async function () {
     kinship = await global.aavegotchiFacet.calculateKinship('0')
     console.log('* Kinship is:', kinship.toString())
   })
+  */
+
+
 
 
 })

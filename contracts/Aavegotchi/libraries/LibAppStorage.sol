@@ -77,7 +77,8 @@ struct WearableType {
 
 struct WearableSet {
     uint8[] pieces; //The tokenIdS of each piece of the set
-    uint8 fullSetBonus; //How much equipping a full set increases the Aavegotchi's rarity score
+    uint8 rarityBonus; //How much equipping a full set increases the Aavegotchi's rarity score
+    int8[] traitModifiers; //Trait modifiers when a set is equipped
 }
 
 struct Haunt {
