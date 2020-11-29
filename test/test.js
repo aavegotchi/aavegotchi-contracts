@@ -32,17 +32,8 @@ function sixteenBitArrayToUint (array) {
     }
     uint.push(item.toString(16).padStart(4, '0'))
   }
-  console.log(uint.join(''))
+  // console.log(uint.join(''))
   return ethers.BigNumber.from('0x' + uint.join(''))
-}
-
-function uintToWearableIds (uint) {
-  uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
-  const array = []
-  for (let i = 0; i < uint.length; i += 4) {
-    array.unshift(ethers.BigNumber.from('0x' + uint.substr(i, 4)).fromTwos(16).toNumber())
-  }
-  return array
 }
 
 const testAavegotchiId = '0'
