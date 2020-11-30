@@ -41,7 +41,7 @@ contract WearablesFacet {
     uint16 internal constant SLOT_PET = 6;
 
     modifier onlyUnlocked(uint256 _tokenId) {
-        require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "Only callable on unlocked Aavegotchis");
+        require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "AavegotchiFacet: Only callable on unlocked Aavegotchis");
         _;
     }
 
@@ -352,7 +352,13 @@ contract WearablesFacet {
             //Then check if this wearable is in the Aavegotchis inventory
             //To do: If not in inventory, then transfer from Owner's inventory
             uint256 balance = s.nftBalances[address(this)][_tokenId][wearableId];
-            require(balance > 0, "WearablesFacet: Wearable is not in Aavegotchi inventory");
+            if (balance == 0) {
+                balance = s.wearables[msg.sender][wearableId];
+                require(balance > 0, "WearablesFacet: Wearable is not in inventories");
+                s.wearables[msg.sender][wearableId] = balance - 1;
+                s.nftBalances[address(this)][wearableId][wearableId] += 1;
+                emit TransferToParent(address(this), _tokenId, wearableId, 1);
+            }
         }
         aavegotchi.equippedWearables = _equippedWearables;
     }
