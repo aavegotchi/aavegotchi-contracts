@@ -234,7 +234,7 @@ contract AavegotchiFacet {
 
         //New traits
         aavegotchi.experience = 0;
-        aavegotchi.level = 1;
+        aavegotchi.usedSkillPoints = 0;
 
         //Kinship
         aavegotchi.claimTime = uint40(block.timestamp);
@@ -410,7 +410,8 @@ contract AavegotchiFacet {
         //New
         int256 interactionCount; //The kinship value of this Aavegotchi. Default is 50.
         uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
-        uint256 level; //The level of this Aavegotchi begins at 1.
+        uint256 usedSkillPoints; //number of skill points used
+        uint32 level; //the current aavegotchi level
         uint256 batchId;
         uint256 hauntId;
     }
@@ -436,10 +437,88 @@ contract AavegotchiFacet {
         aavegotchiInfo_.minimumStake = s.aavegotchis[_tokenId].minimumStake;
         aavegotchiInfo_.interactionCount = s.aavegotchis[_tokenId].interactionCount;
         aavegotchiInfo_.experience = s.aavegotchis[_tokenId].experience;
-        aavegotchiInfo_.level = s.aavegotchis[_tokenId].level;
+        aavegotchiInfo_.level = calculateAavegotchiLevel(s.aavegotchis[_tokenId].experience);
+        aavegotchiInfo_.usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
         aavegotchiInfo_.batchId = s.aavegotchis[_tokenId].batchId;
         aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
         return aavegotchiInfo_;
+    }
+
+    function availableSkillPoints(uint256 _tokenId) public view returns (uint32) {
+        //To do: calculate Aavegotchi level
+       uint32 level = calculateAavegotchiLevel(s.aavegotchis[_tokenId].experience);
+        return (level / 3) - s.aavegotchis[_tokenId].usedSkillPoints;
+    }
+
+    function abs(int8 x) private pure returns (int8) {
+        return x >= 0 ? x : -x;
+    }
+
+    function spendSkillPoints(uint256 _tokenId, int8[4] calldata _values) external {
+        uint32 available = availableSkillPoints(_tokenId);
+        console.log('available:',available);
+
+        uint16 totalUsed = 0;
+        for (uint8 index = 0; index < _values.length; index++) {
+            uint16 usedSkillPoints = uint16(abs(_values[index]));
+       
+            //To do: Prevent underflow (is this ok?)
+            int32 remaining = int32(available);
+            require(remaining - usedSkillPoints >= 0, "AavegotchiFacet: Not enough skill points!");
+           
+            available -= usedSkillPoints;
+            totalUsed += usedSkillPoints;
+
+            //To do: Modify Aavegotchi numericTraits
+            //s.aavegotchis[_tokenId].numericTraits[index] += _values[index];
+
+            //To do: Don't allow last 2 to be updated (they are fixed)
+        }
+
+        //Increment used skill points
+        s.aavegotchis[_tokenId].usedSkillPoints += totalUsed;
+
+        //  require(available >= required, "AavegotchiFacet: Not enough skill points!");
+        //To do: Check if Aavegotchi has enough available skill points
+    }
+
+    function calculateAavegotchiLevel(uint32 _experience) public pure returns (uint32 level) {
+      
+        //To do: Confirm these values, maybe simplify the calculation?
+        if (_experience <= 100) return 1;
+
+            //Levels 1-10 require 100 XP each
+        else if (_experience > 100 && _experience <= 1001)
+            level = _experience / 100;
+
+            //Levels 11 - 20 require 150 XP each
+        else if (_experience > 1001 && _experience <= 3001)
+            level = _experience / 150;
+
+            //Levels 21 - 40 require 200 XP each
+        else if (_experience > 3001 && _experience <= 8001)
+            level = _experience / 200;
+
+            //Levels 41 - 60 require 300 XP each
+        else if (_experience > 8001 && _experience <= 18001)
+            level = _experience / 300;
+
+            //Levels 61 - 80 require 500 XP each
+        else if (_experience > 18001 && _experience <= 40001)
+            level = _experience / 500;
+
+            //Levels 81 - 90 require 750 XP each
+        else if (_experience > 40001 && _experience <= 67501)
+            level = _experience / 750;
+
+            //Levels 91 - 99 require 1000 XP each
+        else if (_experience > 67501 && _experience <= 98001) level = _experience / 1000;
+        else level = 98;
+        
+            //Add on 1 for the initial level
+            level += 1;
+
+        // return level;
     }
 
     function calculateRarityMultiplier(int256 _numericTraits, address _collateralType) public view returns (uint256 rarityMultiplier) {

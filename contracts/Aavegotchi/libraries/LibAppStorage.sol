@@ -30,7 +30,7 @@ struct Aavegotchi {
     address collateralType;
     uint88 minimumStake; //The minimum amount of collateral that must be staked. Set upon creation.
     //New traits
-    uint16 level; //The level of this Aavegotchi begins at 1.
+    uint16 usedSkillPoints; //The number of skill points this aavegotchi has already used
     uint40 claimTime; //The block timestamp when this Aavegotchi was claimed
     uint40 lastInteracted; //The last time this Aavegotchi was interacted with
     int16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.

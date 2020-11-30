@@ -388,9 +388,11 @@ describe('Wearables', async function () {
   })
   */
 
+  /*
   it('Cannot equip wearables in the wrong slot', async function () {
     await truffleAssert.reverts(wearablesFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([testWearableId, 0, 0])), 'WearablesFacet: Wearable cannot be equipped in this slot')
   })
+  */
 
   //   it('Can de-equip wearables', async function () {
   //     await global.wearablesFacet.unequipWearables(testAavegotchiId, [testSlot])
@@ -599,4 +601,35 @@ describe('Kinship', async function () {
   })
   */
 
+})
+
+
+describe('Leveling up', async function () {
+
+  it('Aavegotchi should start with 0 XP and Level 1', async function () {
+    const aavegotchi = await aavegotchiFacet.getAavegotchi(testAavegotchiId)
+    expect(aavegotchi.level).to.equal(1)
+    expect(aavegotchi.experience).to.equal(0)
+  })
+
+  it('Can grant experience to Aavegotchi', async function () {
+    await truffleAssert.reverts(daoFacet.grantExperience([testAavegotchiId], ["100000"]), "DAOFacet: Cannot grant more than 1000 XP at a time")
+    await daoFacet.grantExperience([testAavegotchiId], ["1000"])
+    const aavegotchi = await aavegotchiFacet.getAavegotchi(testAavegotchiId)
+    expect(aavegotchi.level).to.equal(11)
+    expect(aavegotchi.experience).to.equal(1000)
+  })
+
+  it('Should have 3 skill points at Level 11', async function () {
+    const skillPoints = await aavegotchiFacet.availableSkillPoints(testAavegotchiId)
+    expect(skillPoints).to.equal(3)
+  })
+
+  it('Should spend 3 skill points to modify traits', async function () {
+    await truffleAssert.reverts(aavegotchiFacet.spendSkillPoints(testAavegotchiId, [1, 1, 1, 1]), "AavegotchiFacet: Not enough skill points!")
+    await aavegotchiFacet.spendSkillPoints(testAavegotchiId, [1, 1, 1, 0])
+    const skillPoints = await aavegotchiFacet.availableSkillPoints(testAavegotchiId)
+    expect(skillPoints).to.equal(0)
+
+  })
 })

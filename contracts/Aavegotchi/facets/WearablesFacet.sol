@@ -314,6 +314,9 @@ contract WearablesFacet {
     function equipWearables(uint256 _tokenId, uint256 _equippedWearables) external {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
 
+        //To do: Add in actual dynamic level
+        uint32 aavegotchiLevel = 0; //calculateAavegotchiLevel(aavegotchi.experience);
+
         for (uint256 slot; slot < 16; slot++) {
             uint256 wearableId = uint16(_equippedWearables >> (16 * slot));
             if (wearableId == 0) {
@@ -321,7 +324,7 @@ contract WearablesFacet {
             }
             require(slotIsAvailable(_equippedWearables, slot) == true, "WearablesFacet: Slot not available");
             WearableType storage wearableType = s.wearableTypes[wearableId];
-            require(aavegotchi.level >= wearableType.minLevel, "WearablesFacet: Aavegotchi level lower than minLevel");
+            require(aavegotchiLevel >= wearableType.minLevel, "WearablesFacet: Aavegotchi level lower than minLevel");
             uint256 slotPositions = uint240(wearableType.slotPositions);
             bool canBeEquipped;
             for (uint256 i; i < 16; i++) {

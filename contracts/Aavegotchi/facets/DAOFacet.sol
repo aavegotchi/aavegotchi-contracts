@@ -25,15 +25,17 @@ contract DAOFacet {
         _;
     }
 
-    function setDao(address _newDao) external {
-        //Maybe we should make a DAO Facet?
+    modifier onlyDaoOrOwner {
         require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access");
+        _;
+    }
+
+    function setDao(address _newDao) external onlyDaoOrOwner {
         emit DaoTransferred(s.dao, _newDao);
         s.dao = _newDao;
     }
 
-    function updateCollateralModifiers(address _collateralType, uint256 _modifiers) external onlyDao {
-        LibDiamond.enforceIsContractOwner();
+    function updateCollateralModifiers(address _collateralType, uint256 _modifiers) external onlyDaoOrOwner {
         s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
     }
 
@@ -41,8 +43,7 @@ contract DAOFacet {
         uint24 _hauntMaxSize,
         uint96 _portalPrice,
         bytes3 _bodyColor
-    ) external returns (uint256 hauntId_) {
-        require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access to create haunt");
+    ) external onlyDaoOrOwner returns (uint256 hauntId_) {
         uint256 currentHauntId = s.currentHauntId;
         require(
             s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
@@ -77,5 +78,18 @@ contract DAOFacet {
             s.wearableTypes[wearableId].totalQuantity = uint32(totalQuantity);
         }
         LibERC1155.onERC1155BatchReceived(msg.sender, _to, _wearableIds, _quantities, "");
+    }
+
+    function grantExperience(uint256[] calldata _tokenIds, uint32[] calldata _xpValues) external onlyDaoOrOwner {
+        require(_tokenIds.length == _xpValues.length, "DAOFacet: IDs must match XP array length");
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            uint256 tokenId = _tokenIds[i];
+            uint32 xp = _xpValues[i];
+
+            //To do: Deal with overflow here?
+
+            require(xp <= 1000, "DAOFacet: Cannot grant more than 1000 XP at a time");
+            s.aavegotchis[tokenId].experience += xp;
+        }
     }
 }
