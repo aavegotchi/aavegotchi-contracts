@@ -8,7 +8,7 @@ const { eyeShapeSvgs } = require('../svgs/eyeShapes.js')
 const { getCollaterals } = require('./collateralTypes.js')
 const { wearableTypes } = require('./wearableTypes.js')
 
-function addCommas (nStr) {
+function addCommas(nStr) {
   nStr += ''
   const x = nStr.split('.')
   let x1 = x[0]
@@ -20,11 +20,11 @@ function addCommas (nStr) {
   return x1 + x2
 }
 
-function strDisplay (str) {
+function strDisplay(str) {
   return addCommas(str.toString())
 }
 
-async function main () {
+async function main() {
   const accounts = await ethers.getSigners()
   const account = await accounts[0].getAddress()
   console.log('Account: ' + account)
@@ -72,7 +72,7 @@ async function main () {
     throw Error('No network settings for ' + hre.network.name)
   }
 
-  async function deployFacets (...facets) {
+  async function deployFacets(...facets) {
     const instances = []
     for (let facet of facets) {
       let constructorArgs = []
@@ -98,7 +98,6 @@ async function main () {
     svgStorageFacet,
     wearablesFacet,
     collateralFacet,
-    escrowFacet,
     vrfFacet,
     shopFacet
   ] = await deployFacets(
@@ -109,7 +108,6 @@ async function main () {
     'SvgStorageFacet',
     'WearablesFacet',
     'CollateralFacet',
-    'EscrowFacet',
     ['VrfFacet', [vrfCoordinator, linkAddress]],
     ['ShopFacet', [vouchersContractAddress]]
   )
@@ -144,7 +142,6 @@ async function main () {
       ['SvgStorageFacet', svgStorageFacet],
       ['WearablesFacet', wearablesFacet],
       ['CollateralFacet', collateralFacet],
-      ['EscrowFacet', escrowFacet],
       ['VrfFacet', vrfFacet],
       ['ShopFacet', shopFacet]
     ],
@@ -160,7 +157,6 @@ async function main () {
   diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', aavegotchiDiamond.address)
   vrfFacet = await ethers.getContractAt('VrfFacet', aavegotchiDiamond.address)
   aavegotchiFacet = await ethers.getContractAt('AavegotchiFacet', aavegotchiDiamond.address)
-  escrowFacet = await ethers.getContractAt('EscrowFacet', aavegotchiDiamond.address)
   collateralFacet = await ethers.getContractAt('CollateralFacet', aavegotchiDiamond.address)
   shopFacet = await ethers.getContractAt('ShopFacet', aavegotchiDiamond.address)
 
@@ -184,7 +180,7 @@ async function main () {
   // Upload Svg layers
   svgStorageFacet = await ethers.getContractAt('SvgStorageFacet', aavegotchiDiamond.address)
 
-  function setupSvg (...svgData) {
+  function setupSvg(...svgData) {
     const svgTypesAndSizes = []
     const svgs = []
     for (const [svgType, svg] of svgData) {
@@ -195,7 +191,7 @@ async function main () {
   }
 
   // eslint-disable-next-line no-unused-vars
-  function printSizeInfo (svgTypesAndSizes) {
+  function printSizeInfo(svgTypesAndSizes) {
     console.log('------------- SVG Size Info ---------------')
     let sizes = 0
     for (const [svgType, size] of svgTypesAndSizes) {
@@ -210,9 +206,9 @@ async function main () {
   console.log('Uploading aavegotchi and wearable Svgs')
   let svg, svgTypesAndSizes
   console.log('length:' + wearablesSvgs.length)
-  ;[svg, svgTypesAndSizes] = setupSvg(
-    ['wearables', wearablesSvgs.slice(0, 18)]
-  )
+    ;[svg, svgTypesAndSizes] = setupSvg(
+      ['wearables', wearablesSvgs.slice(0, 18)]
+    )
   printSizeInfo(svgTypesAndSizes)
   tx = await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded first 18 wearable SVGs')
@@ -220,9 +216,9 @@ async function main () {
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-  ;[svg, svgTypesAndSizes] = setupSvg(
-    ['wearables', wearablesSvgs.slice(18)]
-  )
+    ;[svg, svgTypesAndSizes] = setupSvg(
+      ['wearables', wearablesSvgs.slice(18)]
+    )
   printSizeInfo(svgTypesAndSizes)
   tx = await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded last wearable SVGs')
@@ -230,9 +226,9 @@ async function main () {
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-  ;[svg, svgTypesAndSizes] = setupSvg(
-    ['aavegotchi', aavegotchiSvgs]
-  )
+    ;[svg, svgTypesAndSizes] = setupSvg(
+      ['aavegotchi', aavegotchiSvgs]
+    )
   printSizeInfo(svgTypesAndSizes)
   tx = await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded aavegotchi SVGs')
@@ -241,10 +237,10 @@ async function main () {
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   console.log('Uploading collaterals and eyeShapes')
-  ;[svg, svgTypesAndSizes] = setupSvg(
-    ['collaterals', collateralsSvgs],
-    ['eyeShapes', eyeShapeSvgs]
-  )
+    ;[svg, svgTypesAndSizes] = setupSvg(
+      ['collaterals', collateralsSvgs],
+      ['eyeShapes', eyeShapeSvgs]
+    )
   // printSizeInfo(svgTypesAndSizes)
   tx = await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded SVGs')
@@ -261,7 +257,6 @@ async function main () {
     wearablesFacet: wearablesFacet,
     aavegotchiFacet: aavegotchiFacet,
     collateralFacet: collateralFacet,
-    escrowFacet: escrowFacet,
     vrfFacet: vrfFacet,
     vouchersContract: vouchersContract,
     shopFacet: shopFacet,

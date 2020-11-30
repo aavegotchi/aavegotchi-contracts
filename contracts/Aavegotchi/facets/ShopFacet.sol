@@ -50,6 +50,13 @@ contract ShopFacet {
         uint256 burnAmount = totalPrice / 10;
 
         //To do: Decide on GHST allocation for burning, DAO, rarity farming, governance, Pixelcraft
+
+        //Transfer ratios:
+        //33% to burn address
+        //17% to Pixelcraft wallet
+        //40% to rarity farming rewards
+        //10% to DAO address
+
         LibERC20.transferFrom(s.ghstContract, msg.sender, address(0), burnAmount);
         LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), totalPrice - burnAmount);
     }

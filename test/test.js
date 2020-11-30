@@ -15,7 +15,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { wearableTypes } = require('../scripts/wearableTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray (uint, numBytes) {
+function uintToIntArray(uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -24,7 +24,7 @@ function uintToIntArray (uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint (array) {
+function sixteenBitArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -36,7 +36,7 @@ function sixteenBitArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function uintToWearableIds (uint) {
+function uintToWearableIds(uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -58,7 +58,6 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.aavegotchiFacet = deployVars.aavegotchiFacet
     global.wearablesFacet = deployVars.wearablesFacet
     global.collateralFacet = deployVars.collateralFacet
-    global.escrowFacet = deployVars.escrowFacet
     global.shopFacet = deployVars.shopFacet
     global.ghstDiamond = deployVars.ghstDiamond
     global.vrfFacet = deployVars.vrfFacet
@@ -257,7 +256,7 @@ describe('Collaterals and escrow', async function () {
     const currentStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
 
     // Let's double the stake
-    await global.escrowFacet.increaseStake('0', currentStake.toString())
+    await global.collateralFacet.increaseStake('0', currentStake.toString())
     aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
     const finalStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
     expect(finalStake).to.equal(currentStake.add(currentStake))
@@ -271,8 +270,8 @@ describe('Collaterals and escrow', async function () {
     const minimumStake = ethers.BigNumber.from(aavegotchi.minimumStake)
 
     const available = currentStake.sub(minimumStake)
-    await truffleAssert.reverts(escrowFacet.decreaseStake(testAavegotchiId, currentStake), 'EscrowFacet: Cannot reduce below minimum stake')
-    await global.escrowFacet.decreaseStake(testAavegotchiId, available)
+    await truffleAssert.reverts(collateralFacet.decreaseStake(testAavegotchiId, currentStake), 'CollateralFacet: Cannot reduce below minimum stake')
+    await global.collateralFacet.decreaseStake(testAavegotchiId, available)
 
     aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
     currentStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
@@ -315,7 +314,7 @@ describe('Collaterals and escrow', async function () {
     expect(balanceAfterClaim).to.equal(initialBalance.sub(minStake))
 
     // Burn Aavegotchi and return collateral stake
-    await global.escrowFacet.decreaseAndDestroy('1')
+    await global.collateralFacet.decreaseAndDestroy('1')
     const balanceAfterDestroy = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
     expect(balanceAfterDestroy).to.equal(initialBalance)
 
