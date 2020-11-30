@@ -31,17 +31,17 @@ contract WearablesFacet {
     event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
     uint256 internal constant NUMERIC_TRAITS_NUM = 6;
-    uint16 internal constant SLOT_HEAD = 0;
-    uint16 internal constant SLOT_FACE = 1;
-    uint16 internal constant SLOT_EYES = 2;
+    uint16 internal constant SLOT_FACE = 0;
+    uint16 internal constant SLOT_EYES = 1;
+    uint16 internal constant SLOT_HEAD = 2;
     uint16 internal constant SLOT_BODY = 3;
     uint16 internal constant SLOT_HAND_LEFT = 4;
     uint16 internal constant SLOT_HAND_RIGHT = 5;
-    uint16 internal constant SLOT_HANDS_BOTH = 6;
-    uint16 internal constant SLOT_PET = 7;
-    uint16 internal constant SLOT_HEAD_BODY = 8;
-    uint16 internal constant SLOT_HEAD_FACE = 9;
-    uint16 internal constant SLOT_HEAD_FACE_EYES = 10;
+    //  uint16 internal constant SLOT_HANDS_BOTH = 6;
+    uint16 internal constant SLOT_PET = 6;
+    // uint16 internal constant SLOT_HEAD_BODY = 8;
+    // uint16 internal constant SLOT_HEAD_FACE = 9;
+    // uint16 internal constant SLOT_HEAD_FACE_EYES = 10;
 
     /**
         @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
@@ -382,25 +382,26 @@ contract WearablesFacet {
     }
 
     function slotIsAvailable(uint256 _equippedWearables, uint256 _slot) internal pure returns (bool available) {
+        if (slotTaken(_equippedWearables, _slot)) return false;
+        return true;
+
         //First handle base case
 
         /*
-        const SLOT_HEAD = 0
-        const SLOT_FACE = 1
-        const SLOT_EYES = 2
+          const SLOT_FACE = 0
+           const SLOT_EYES = 1
+        const SLOT_HEAD = 2
         const SLOT_BODY = 3
         const SLOT_HAND_LEFT = 4
         const SLOT_HAND_RIGHT = 5
-        const SLOT_HANDS_BOTH = 6
-        const SLOT_PET = 7
-        const SLOT_HEAD_BODY = 8
-        const SLOT_HEAD_FACE = 9
-        const SLOT_HEAD_FACE_EYES = 10
+        const SLOT_PET = 6
+       
         */
 
         //Then handle each slot combination case
 
         // mapping(uint16 => uint256) storage equipped = s.aavegotchis[_tokenId].equippedWearables;
+        /*
         if (_slot == SLOT_HEAD) {
             //All combos containing head
             if (slotTaken(_equippedWearables, SLOT_HEAD_BODY)) return false;
@@ -440,6 +441,7 @@ contract WearablesFacet {
             if (slotTaken(_equippedWearables, SLOT_EYES)) return false;
         }
         return true;
+        */
     }
 
     function equippedWearables(uint256 _tokenId) external view returns (uint256[EQUIPPED_WEARABLE_equippedWearables] memory wearableIds_) {

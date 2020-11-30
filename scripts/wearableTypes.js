@@ -1,17 +1,18 @@
 
 /* global ethers */
-const WEARABLE_SLOT_HEAD = 0
-const WEARABLE_SLOT_FACE = 1
-const WEARABLE_SLOT_EYES = 2
+const WEARABLE_SLOT_FACE = 0
+const WEARABLE_SLOT_EYES = 1
+const WEARABLE_SLOT_HEAD = 2
 const WEARABLE_SLOT_BODY = 3
-const WEARABLE_SLOT_HEAD_BODY = 4
+/*const WEARABLE_SLOT_HEAD_BODY = 4
 const WEARABLE_SLOT_HEAD_FACE = 5
 const WEARABLE_SLOT_HEAD_FACE_EYES = 6
 const WEARABLE_SLOT_HEAD_EYES = 7
-const WEARABLE_SLOT_HAND_LEFT = 8
-const WEARABLE_SLOT_HAND_RIGHT = 9
-const WEARABLE_SLOT_HANDS_BOTH = 10
-const WEARABLE_SLOT_PET = 11
+const WEARABLE_SLOT_FACE_EYES = 8*/
+const WEARABLE_SLOT_HAND_LEFT = 4
+const WEARABLE_SLOT_HAND_RIGHT = 5
+//const WEARABLE_SLOT_HANDS_BOTH = 11
+const WEARABLE_SLOT_PET = 6
 
 const wearableTypes = [
 
@@ -525,7 +526,7 @@ const wearableTypes = [
   }
 ]
 
-function eightBitIntArrayToUint (array) {
+function eightBitIntArrayToUint(array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -537,7 +538,7 @@ function eightBitIntArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function eightBitUintArrayToUint (array) {
+function eightBitUintArrayToUint(array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -549,7 +550,7 @@ function eightBitUintArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function getWearableTypes () {
+function getWearableTypes() {
   const result = []
   for (const wearableType of wearableTypes) {
     wearableType.traitModifiers = eightBitIntArrayToUint(wearableType.traitModifiers)
