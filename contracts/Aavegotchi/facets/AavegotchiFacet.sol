@@ -54,31 +54,28 @@ contract AavegotchiFacet {
     ///  The operator can manage all NFTs of the owner.
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
-     modifier onlyUnlocked(uint256 _tokenId) {
+    modifier onlyUnlocked(uint256 _tokenId) {
         require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "Only callable on unlocked Aavegotchis");
         _;
     }
 
-      modifier onlyAavegotchiOwner(uint256 _tokenId) {
+    modifier onlyAavegotchiOwner(uint256 _tokenId) {
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
         _;
     }
 
-
-     /***********************************|
+    /***********************************|
    |             View Functions           |
    |__________________________________*/
-
 
     function aavegotchiNameAvailable(string memory _name) external view returns (bool available_) {
         available_ = s.aavegotchiNamesUsed[_name];
     }
 
-     function currentHaunt() public view returns (uint16 hauntId_, Haunt memory haunt_) {
+    function currentHaunt() public view returns (uint16 hauntId_, Haunt memory haunt_) {
         hauntId_ = s.currentHauntId;
         haunt_ = s.haunts[hauntId_];
     }
-
 
     struct PortalAavegotchiTraitsIO {
         uint256 randomNumber;
@@ -155,7 +152,7 @@ contract AavegotchiFacet {
         }
     }
 
-      function ghstAddress() external view returns (address contract_) {
+    function ghstAddress() external view returns (address contract_) {
         contract_ = s.ghstContract;
     }
 
@@ -277,6 +274,7 @@ contract AavegotchiFacet {
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
 
     //To do: would be great if we could move this to SvgStorageFacet
+    // question: Should we also move the SVG functions like getAavegotchiSvgLayers to SvgStorageFacet?
 
     function getAavegotchiSvg(uint256 _tokenId) public view returns (string memory ag_) {
         require(s.aavegotchis[_tokenId].owner != address(0), "AavegotchiFacet: _tokenId does not exist");
@@ -353,56 +351,21 @@ contract AavegotchiFacet {
         return aavegotchiInfo_;
     }
 
-    function availableSkillPoints(uint256 _tokenId) public view returns (uint32) {
-
-       uint32 level = calculateAavegotchiLevel(s.aavegotchis[_tokenId].experience);
-       //1 skill point per 3 levels. To do: Check if this underflows
-        return (level / 3) - s.aavegotchis[_tokenId].usedSkillPoints;
+    function availableSkillPoints(uint256 _tokenId) public view returns (uint256) {
+        uint256 level = calculateAavegotchiLevel(s.aavegotchis[_tokenId].experience);
+        uint256 skillPoints = (level / 3);
+        uint256 usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
+        //1 skill point per 3 levels. To do (done): Check if this underflows
+        require(skillPoints >= usedSkillPoints, "AavegotchiFacet: Used skill points is greater than skill points");
+        return skillPoints - usedSkillPoints;
     }
 
-    function abs(int8 x) private pure returns (int8) {
-        return x >= 0 ? x : -x;
+    function abs(int8 x) private pure returns (uint256) {
+        return uint256(x >= 0 ? x : -x);
     }
 
-
-
-    function calculateAavegotchiLevel(uint32 _experience) public pure returns (uint32 level) {
-      
-        //To do: Confirm these values, maybe simplify the calculation?
-        if (_experience <= 100) return 1;
-
-            //Levels 1-10 require 100 XP each
-        else if (_experience > 100 && _experience <= 1001)
-            level = _experience / 100;
-
-            //Levels 11 - 20 require 150 XP each
-        else if (_experience > 1001 && _experience <= 3001)
-            level = _experience / 150;
-
-            //Levels 21 - 40 require 200 XP each
-        else if (_experience > 3001 && _experience <= 8001)
-            level = _experience / 200;
-
-            //Levels 41 - 60 require 300 XP each
-        else if (_experience > 8001 && _experience <= 18001)
-            level = _experience / 300;
-
-            //Levels 61 - 80 require 500 XP each
-        else if (_experience > 18001 && _experience <= 40001)
-            level = _experience / 500;
-
-            //Levels 81 - 90 require 750 XP each
-        else if (_experience > 40001 && _experience <= 67501)
-            level = _experience / 750;
-
-            //Levels 91 - 99 require 1000 XP each
-        else if (_experience > 67501 && _experience <= 98001) level = _experience / 1000;
-        else level = 98;
-        
-            //Add on 1 for the initial level
-            level += 1;
-
-        // return level;
+    function calculateAavegotchiLevel(uint32 _experience) public pure returns (uint32 level_) {
+        level_ = LibAppStorage.calculateAavegotchiLevel(_experience);
     }
 
     function calculateRarityMultiplier(int256 _numericTraits, address _collateralType) public view returns (uint256 rarityMultiplier) {
@@ -430,15 +393,45 @@ contract AavegotchiFacet {
     }
 
     //Only valid for claimed Aavegotchis
-    function calculateModifiedRarityScore(uint256 _tokenId) external view returns (int256 rarityScore) {
-        //To do: Should return final rarity score inlcuding wearables (but not sets)
-        //To do: Can also return the final numericTraits including wearable modifiers 
+    function calculateModifiedRarityScore(uint256 _tokenId)
+        external
+        view
+        returns (int256 rarityScore_, int256[NUMERIC_TRAITS_NUM] memory numericTraits_)
+    {
+        //To do (done): Should return final rarity score inlcuding wearables (but not sets)
+        //To do (done): Can also return the final numericTraits including wearable modifiers
 
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
+        Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
+        uint256 equippedWearables = aavegotchi.equippedWearables;
+        int256 numericTraits = aavegotchi.numericTraits;
+        int256 wearableBonus;
+        for (uint256 slot; slot < 16; slot++) {
+            uint256 wearableId = uint16(equippedWearables >> (16 * slot));
+            if (wearableId == 0) {
+                continue;
+            }
+            WearableType storage wearableType = s.wearableTypes[wearableId];
+            //Add on trait modifiers
+            int256 traitModifiers = wearableType.traitModifiers;
+            uint256 newNumericTraits;
+            for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
+                int256 number = int16(numericTraits >> (j * 16));
+                int256 traitModifier = int8(traitModifiers >> (j * 8));
+                number += traitModifier;
+                // clear bits first then assign
+                newNumericTraits |= (uint256(number) & 0xffff) << (j * 16);
+            }
+            numericTraits = int256(newNumericTraits);
+            wearableBonus += wearableType.rarityScoreModifier;
+        }
         address collateral = s.aavegotchis[_tokenId].collateralType;
-
-        int256 baseRarity = calculateBaseRarityScore(s.aavegotchis[_tokenId].numericTraits, collateral);
-        rarityScore = baseRarity + int256(s.aavegotchis[_tokenId].wearableBonus);
+        int256 baseRarity = calculateBaseRarityScore(numericTraits, collateral);
+        rarityScore_ = baseRarity + wearableBonus;
+        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
+            int256 number = int16(numericTraits >> (i * 16));
+            numericTraits_[i] = number;
+        }
     }
 
     function calculateKinship(uint256 _tokenId) external view returns (uint256 kinship) {
@@ -459,7 +452,6 @@ contract AavegotchiFacet {
             kinship = uint256(baseKinship + interactionCount - daysSinceInteraction);
         }
     }
-
 
     function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
         tokenIds_ = new uint256[](s.aavegotchiBalance[_owner]);
@@ -485,7 +477,6 @@ contract AavegotchiFacet {
         }
     }
 
-
     /// @notice Find the owner of an NFT
     /// @dev NFTs assigned to zero address are considered invalid, and queries
     ///  about them do throw.
@@ -495,7 +486,7 @@ contract AavegotchiFacet {
         owner_ = s.aavegotchis[_tokenId].owner;
     }
 
-     /// @notice Get the approved address for a single NFT
+    /// @notice Get the approved address for a single NFT
     /// @dev Throws if `_tokenId` is not a valid NFT.
     /// @param _tokenId The NFT to find the approved address for
     /// @return approved_ The approved address for this NFT, or the zero address if there is none
@@ -512,9 +503,7 @@ contract AavegotchiFacet {
         approved_ = s.operators[_owner][_operator];
     }
 
-
-
-     /***********************************|
+    /***********************************|
    |             Only owner             |
    |__________________________________*/
 
@@ -531,7 +520,7 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].name = _name;
     }
 
-      function setBatchId(uint256[] calldata _tokenIds) external {
+    function setBatchId(uint256[] calldata _tokenIds) external {
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             require(msg.sender == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can set a batchId");
@@ -542,7 +531,7 @@ contract AavegotchiFacet {
         }
     }
 
-     function openPortals(uint256[] calldata _tokenIds) external {
+    function openPortals(uint256[] calldata _tokenIds) external {
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             require(s.aavegotchis[tokenId].status == LibAppStorage.STATUS_CLOSED_PORTAL, "AavegotchiFacet: Portal is not closed");
@@ -556,30 +545,29 @@ contract AavegotchiFacet {
         }
     }
 
-      function spendSkillPoints(uint256 _tokenId, int8[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId)  {
-        uint32 available = availableSkillPoints(_tokenId);
-
-        uint16 totalUsed = 0;
+    function spendSkillPoints(uint256 _tokenId, int8[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+        int256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
+        //To do (done): Prevent underflow (is this ok?), see require below
+        uint256 totalUsed = 0;
         for (uint8 index = 0; index < _values.length; index++) {
-            uint16 usedSkillPoints = uint16(abs(_values[index]));
-       
-            //To do: Prevent underflow (is this ok?)
-            int32 remaining = int32(available);
-            require(remaining - usedSkillPoints >= 0, "AavegotchiFacet: Not enough skill points!");
-           
-            available -= usedSkillPoints;
-            totalUsed += usedSkillPoints;
+            totalUsed += abs(_values[index]);
 
-            //To do: Modify Aavegotchi numericTraits
-            //s.aavegotchis[_tokenId].numericTraits[index] += _values[index];
+            //To do (done): Modify Aavegotchi numericTraits
+            uint256 position = index * 16;
+            // get trait
+            int256 trait = int16(numericTraits >> position);
+            trait += _values[index];
+            // clear trait value
+            numericTraits &= ~(int256(0xffff) << position);
+            // set trait value
+            numericTraits |= trait << position;
         }
-
+        // handles underflow
+        require(availableSkillPoints(_tokenId) >= totalUsed, "AavegotchiFacet: Not enough skill points");
+        s.aavegotchis[_tokenId].numericTraits = numericTraits;
         //Increment used skill points
-        s.aavegotchis[_tokenId].usedSkillPoints += totalUsed;
+        s.aavegotchis[_tokenId].usedSkillPoints += uint16(totalUsed);
     }
-
-
-   
 
     function buyPortals(
         address _to,
@@ -616,13 +604,9 @@ contract AavegotchiFacet {
         s.totalSupply = uint32(tokenId);
         uint256 amount = _ghst - (_ghst % haunt.portalPrice);
         uint256 burnAmount = amount / 10;
-        LibERC20.transferFrom(s.ghstContract, msg.sender, address(0), burnAmount);
+        LibERC20.transferFrom(s.ghstContract, msg.sender, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnAmount);
         LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), amount - burnAmount);
     }
-
-  
-
-   
 
     function claimAavegotchiFromPortal(
         uint256 _tokenId,
@@ -631,7 +615,7 @@ contract AavegotchiFacet {
     ) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-       // require(msg.sender == aavegotchi.owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
+        // require(msg.sender == aavegotchi.owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
 
         PortalAavegotchiTraitsIO memory option = singlePortalAavegotchiTraits(aavegotchi.randomNumber, _option);
         aavegotchi.randomNumber = option.randomNumber;
@@ -656,14 +640,19 @@ contract AavegotchiFacet {
         LibERC20.transferFrom(option.collateralType, msg.sender, escrow, _stakeAmount);
     }
 
-  
-
-
     // function nextInteractTime((uint256 _tokenId) external view returns (uint256 ) {
 
     // }
 
     function interact(uint256 _tokenId) public {
+        //To do: only update once per day
+        //To do (done): Only allow 2 interactions per day
+        uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
+        // 43200 seconds is 12 hours
+        // if interacted less than 12 hours ago
+        if (block.timestamp < lastInteracted + 43200) {
+            return;
+        }
         address owner = s.aavegotchis[_tokenId].owner;
         require(owner != address(0), "AavegotchiFacet: Invalid tokenId, is not owned or doesn't exist");
         require(
@@ -671,9 +660,6 @@ contract AavegotchiFacet {
             "AavegotchiFacet: Not owner of token or approved"
         );
 
-        //To do: only update once per day
-        //To do: Only allow 2 interactions per day 
-        uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
         int16 interactionCount = s.aavegotchis[_tokenId].interactionCount;
         uint256 interval = block.timestamp - lastInteracted;
         int16 daysSinceInteraction = int16(interval / 86400);
@@ -703,13 +689,12 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
     }
 
-    //Prevnts assets and wearables from being moved from Aavegotchi during lock period, except by gameManager. 
-    function lockAavegotchi(uint256 _tokenId, uint256 _lockDuration) external  {
+    //Prevnts assets and wearables from being moved from Aavegotchi during lock period, except by gameManager.
+    function lockAavegotchi(uint256 _tokenId, uint256 _lockDuration) external {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
         s.aavegotchis[_tokenId].unlockTime = block.timestamp + _lockDuration;
     }
-
 
     /// @notice Transfers the ownership of an NFT from one address to another address
     /// @dev Throws unless `msg.sender` is the current owner, an authorized

@@ -15,7 +15,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { wearableTypes } = require('../scripts/wearableTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray(uint, numBytes) {
+function uintToIntArray (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -24,7 +24,7 @@ function uintToIntArray(uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint(array) {
+function sixteenBitArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -36,7 +36,7 @@ function sixteenBitArrayToUint(array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function uintToWearableIds(uint) {
+function uintToWearableIds (uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -601,9 +601,7 @@ describe('Kinship', async function () {
 
 })
 
-
 describe('Leveling up', async function () {
-
   it('Aavegotchi should start with 0 XP and Level 1', async function () {
     const aavegotchi = await aavegotchiFacet.getAavegotchi(testAavegotchiId)
     expect(aavegotchi.level).to.equal(1)
@@ -611,8 +609,8 @@ describe('Leveling up', async function () {
   })
 
   it('Can grant experience to Aavegotchi', async function () {
-    await truffleAssert.reverts(daoFacet.grantExperience([testAavegotchiId], ["100000"]), "DAOFacet: Cannot grant more than 1000 XP at a time")
-    await daoFacet.grantExperience([testAavegotchiId], ["1000"])
+    await truffleAssert.reverts(daoFacet.grantExperience([testAavegotchiId], ['100000']), 'DAOFacet: Cannot grant more than 1000 XP at a time')
+    await daoFacet.grantExperience([testAavegotchiId], ['1000'])
     const aavegotchi = await aavegotchiFacet.getAavegotchi(testAavegotchiId)
     expect(aavegotchi.level).to.equal(11)
     expect(aavegotchi.experience).to.equal(1000)
@@ -624,10 +622,9 @@ describe('Leveling up', async function () {
   })
 
   it('Should spend 3 skill points to modify traits', async function () {
-    await truffleAssert.reverts(aavegotchiFacet.spendSkillPoints(testAavegotchiId, [1, 1, 1, 1]), "AavegotchiFacet: Not enough skill points!")
+    await truffleAssert.reverts(aavegotchiFacet.spendSkillPoints(testAavegotchiId, [1, 1, 1, 1]), 'AavegotchiFacet: Not enough skill points')
     await aavegotchiFacet.spendSkillPoints(testAavegotchiId, [1, 1, 1, 0])
     const skillPoints = await aavegotchiFacet.availableSkillPoints(testAavegotchiId)
     expect(skillPoints).to.equal(0)
-
   })
 })

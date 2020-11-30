@@ -35,7 +35,6 @@ struct Aavegotchi {
     uint40 lastInteracted; //The last time this Aavegotchi was interacted with
     int16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
     address escrow;
-    uint16 wearableBonus;
     uint256 unlockTime;
 }
 
@@ -137,6 +136,7 @@ struct AppStorage {
     address ghstContract;
     address dao;
     uint16 currentHauntId;
+    address gameManager;
 }
 
 library LibAppStorage {
@@ -163,4 +163,41 @@ library LibAppStorage {
     }
 
     function storeNumericTraits(uint8[6] memory _numericTraits) internal {}
+
+    function calculateAavegotchiLevel(uint32 _experience) internal pure returns (uint32 level) {
+        //To do: Confirm these values, maybe simplify the calculation? (I looked into simplifying, I don't have suggestions about it.)
+        if (_experience <= 100) return 1;
+        //Levels 1-10 require 100 XP each
+        else if (_experience > 100 && _experience <= 1001)
+            level = _experience / 100;
+
+            //Levels 11 - 20 require 150 XP each
+        else if (_experience > 1001 && _experience <= 3001)
+            level = _experience / 150;
+
+            //Levels 21 - 40 require 200 XP each
+        else if (_experience > 3001 && _experience <= 8001)
+            level = _experience / 200;
+
+            //Levels 41 - 60 require 300 XP each
+        else if (_experience > 8001 && _experience <= 18001)
+            level = _experience / 300;
+
+            //Levels 61 - 80 require 500 XP each
+        else if (_experience > 18001 && _experience <= 40001)
+            level = _experience / 500;
+
+            //Levels 81 - 90 require 750 XP each
+        else if (_experience > 40001 && _experience <= 67501)
+            level = _experience / 750;
+
+            //Levels 91 - 99 require 1000 XP each
+        else if (_experience > 67501 && _experience <= 98001) level = _experience / 1000;
+        else level = 98;
+
+        //Add on 1 for the initial level
+        level += 1;
+
+        // return level;
+    }
 }

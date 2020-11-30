@@ -27,7 +27,7 @@ contract ShopFacet {
         uint256[] calldata _quantities
     ) external {
         require(_wearableIds.length == _quantities.length, "ShopFacet: _wearableIds not same length as _quantities");
-        
+
         uint256 totalPrice;
         for (uint256 i; i < _wearableIds.length; i++) {
             uint256 wearableId = _wearableIds[i];
@@ -44,20 +44,30 @@ contract ShopFacet {
         LibERC1155.onERC1155BatchReceived(msg.sender, _to, _wearableIds, _quantities, "");
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
         require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
-        uint256 burnAmount = totalPrice / 10;
 
         //To do: Decide on GHST allocation for burning, DAO, rarity farming, governance, Pixelcraft
 
         //Transfer ratios:
-        //33% to burn address
-        //17% to Pixelcraft wallet
-        //40% to rarity farming rewards
-        //10% to DAO address
 
-        LibERC20.transferFrom(s.ghstContract, msg.sender, address(0), burnAmount);
-        LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), totalPrice - burnAmount);
+        // Using 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF as burn address.
+        // GHST token contract does not allow transferring to address(0) address: https://etherscan.io/address/0x3F382DbD960E3a9bbCeaE22651E88158d2791550#code
+        uint256 lastAmount = totalPrice;
+        //33% to burn address
+        uint256 transferAmount = (totalPrice * 10e50) / 303030303030303030303030303030303030303030303030303;
+        LibERC20.transferFrom(s.ghstContract, msg.sender, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), transferAmount);
+        lastAmount -= transferAmount;
+        //17% to Pixelcraft wallet
+        transferAmount = (totalPrice * 10e50) / 588235294117647058823529411764705882352941176470588;
+        LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), transferAmount);
+        lastAmount -= transferAmount;
+        //40% to rarity farming rewards
+        transferAmount = (totalPrice * 10) / 25;
+        LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), transferAmount);
+        lastAmount -= transferAmount;
+        //10% to DAO address
+        LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), lastAmount);
     }
-    
+
     //Burn the voucher
     //Mint the wearable and transfer to user
     function purchaseWearablesWithVouchers(
