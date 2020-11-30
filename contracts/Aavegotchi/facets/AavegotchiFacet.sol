@@ -64,6 +64,9 @@ contract AavegotchiFacet {
         _;
     }
 
+
+
+
     function aavegotchiNameAvailable(string memory _name) external view returns (bool available_) {
         available_ = s.aavegotchiNamesUsed[_name];
     }
@@ -73,9 +76,7 @@ contract AavegotchiFacet {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must choose Aavegotchi before setting name");
         require(bytes(_name).length < 26, "AavegotchiFacet: _name can't be greater than 25 characters");
         require(s.aavegotchiNamesUsed[_name] == false, "AavegotchiFacet: Aavegotchi name used already");
-      //  require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can set the name");
         string memory existingName = s.aavegotchis[_tokenId].name;
-        // require(bytes(s.aavegotchis[_tokenId].name).length == 0, "AavegotchiFacet: Aavegotchi name already set");
         if (bytes(existingName).length > 0) {
             delete s.aavegotchiNamesUsed[existingName];
         }
@@ -455,8 +456,9 @@ contract AavegotchiFacet {
     }
 
     function availableSkillPoints(uint256 _tokenId) public view returns (uint32) {
-        //To do: calculate Aavegotchi level
+
        uint32 level = calculateAavegotchiLevel(s.aavegotchis[_tokenId].experience);
+       //1 skill point per 3 levels. To do: Check if this underflows
         return (level / 3) - s.aavegotchis[_tokenId].usedSkillPoints;
     }
 
@@ -480,8 +482,6 @@ contract AavegotchiFacet {
 
             //To do: Modify Aavegotchi numericTraits
             //s.aavegotchis[_tokenId].numericTraits[index] += _values[index];
-
-            //To do: Don't allow last 2 to be updated (they are fixed)
         }
 
         //Increment used skill points
@@ -553,8 +553,8 @@ contract AavegotchiFacet {
 
     //Only valid for claimed Aavegotchis
     function calculateModifiedRarityScore(uint256 _tokenId) external view returns (int256 rarityScore) {
-        //To do: Should return final rarity score inlcuding wearables + sets
-        //To do: Can also return the final numericTraits including wearable modifiers + set modifiers
+        //To do: Should return final rarity score inlcuding wearables (but not sets)
+        //To do: Can also return the final numericTraits including wearable modifiers 
 
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         address collateral = s.aavegotchis[_tokenId].collateralType;
@@ -587,7 +587,6 @@ contract AavegotchiFacet {
     // }
 
     function interact(uint256 _tokenId) public {
-        //To do (done): Only owner or caretaker can interact
         address owner = s.aavegotchis[_tokenId].owner;
         require(owner != address(0), "AavegotchiFacet: Invalid tokenId, is not owned or doesn't exist");
         require(
@@ -596,8 +595,7 @@ contract AavegotchiFacet {
         );
 
         //To do: only update once per day
-
-        //Was the last interaction within 24 hours? If so, add to interaction count. If not, reset it.
+        //To do: Only allow 2 interactions per day 
         uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
         int16 interactionCount = s.aavegotchis[_tokenId].interactionCount;
         uint256 interval = block.timestamp - lastInteracted;

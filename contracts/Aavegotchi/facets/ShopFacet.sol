@@ -20,17 +20,14 @@ contract ShopFacet {
         im_vouchersContract = _vouchersContract;
     }
 
-    //To do (to do): Allow users to purchase items from store using GHST
-    //Purchasing items should distribute an amount of GHST to various addresses, while burning the rest
-
+    //To do: Purchasing items should distribute an amount of GHST to various addresses, while burning the rest
     function purchaseWearablesWithGhst(
         address _to,
         uint256[] calldata _wearableIds,
         uint256[] calldata _quantities
     ) external {
         require(_wearableIds.length == _quantities.length, "ShopFacet: _wearableIds not same length as _quantities");
-
-        //To do(done, using wearableType.ghstPrice): Use 10E18 price for GHST in wearableTypes.js, or convert it here in the function
+        
         uint256 totalPrice;
         for (uint256 i; i < _wearableIds.length; i++) {
             uint256 wearableId = _wearableIds[i];

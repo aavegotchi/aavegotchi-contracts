@@ -177,11 +177,9 @@ contract WearablesFacet {
         uint256 _toTokenId,
         uint256 _id,
         uint256 _value
-    ) external {
+    ) external onlyUnlocked(_id) {
         require(_toContract != address(0), "Wearables: Can't transfer to 0 address");
         require(msg.sender == _from || s.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
-        //    require(!isAavegotchi(_id), "Wearables: Cannot transfer aavegotchi to token");
-
         uint256 bal = s.wearables[_from][_id];
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
         s.wearables[_from][_id] = bal - _value;

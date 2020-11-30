@@ -465,8 +465,6 @@ describe('Haunts', async function () {
     currentHaunt = await aavegotchiFacet.currentHaunt()
     expect(currentHaunt.hauntId_).to.equal(1)
   })
-
-  // To do: Test allowing DAO to create haunt
 })
 
 describe('Shop and Vouchers', async function () {
