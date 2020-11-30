@@ -43,19 +43,6 @@ contract AavegotchiFacet {
 
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
-    event DaoTransferred(address indexed previousDao, address indexed newDao);
-
-    modifier onlyDao {
-        require(msg.sender == s.dao, "Only DAO can call this function");
-        _;
-    }
-
-    function setDao(address _newDao) external {
-        //Maybe we should make a DAO Facet?
-        require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access");
-        emit DaoTransferred(s.dao, _newDao);
-        s.dao = _newDao;
-    }
 
     /// @dev This emits when the approved address for an NFT is changed or
     ///  reaffirmed. The zero address indicates there is no approved address.
@@ -84,24 +71,6 @@ contract AavegotchiFacet {
         }
         s.aavegotchiNamesUsed[_name] = true;
         s.aavegotchis[_tokenId].name = _name;
-    }
-
-    function createHaunt(
-        uint24 _hauntMaxSize,
-        uint96 _portalPrice,
-        bytes3 _bodyColor
-    ) external returns (uint256 hauntId_) {
-        require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access to create haunt");
-        uint256 currentHauntId = s.currentHauntId;
-        require(
-            s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
-            "AavegotchiFacet: Haunt must be full before creating new"
-        );
-        hauntId_ = currentHauntId + 1;
-        s.currentHauntId = uint16(hauntId_);
-        s.haunts[hauntId_].hauntMaxSize = _hauntMaxSize;
-        s.haunts[hauntId_].portalPrice = _portalPrice;
-        s.haunts[hauntId_].bodyColor = _bodyColor;
     }
 
     function currentHaunt() public view returns (uint16 hauntId_, Haunt memory haunt_) {

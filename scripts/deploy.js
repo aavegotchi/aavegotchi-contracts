@@ -98,6 +98,7 @@ async function main() {
     svgStorageFacet,
     wearablesFacet,
     collateralFacet,
+    daoFacet,
     vrfFacet,
     shopFacet
   ] = await deployFacets(
@@ -108,6 +109,7 @@ async function main() {
     'SvgStorageFacet',
     'WearablesFacet',
     'CollateralFacet',
+    'DAOFacet',
     ['VrfFacet', [vrfCoordinator, linkAddress]],
     ['ShopFacet', [vouchersContractAddress]]
   )
@@ -142,6 +144,7 @@ async function main() {
       ['SvgStorageFacet', svgStorageFacet],
       ['WearablesFacet', wearablesFacet],
       ['CollateralFacet', collateralFacet],
+      ['DAOFacet', daoFacet],
       ['VrfFacet', vrfFacet],
       ['ShopFacet', shopFacet]
     ],
@@ -159,6 +162,7 @@ async function main() {
   aavegotchiFacet = await ethers.getContractAt('AavegotchiFacet', aavegotchiDiamond.address)
   collateralFacet = await ethers.getContractAt('CollateralFacet', aavegotchiDiamond.address)
   shopFacet = await ethers.getContractAt('ShopFacet', aavegotchiDiamond.address)
+  daoFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamond.address)
 
   // add collateral info
   console.log('Adding Collateral Types')
@@ -258,6 +262,7 @@ async function main() {
     aavegotchiFacet: aavegotchiFacet,
     collateralFacet: collateralFacet,
     vrfFacet: vrfFacet,
+    daoFacet: daoFacet,
     vouchersContract: vouchersContract,
     shopFacet: shopFacet,
     linkAddress: linkAddress,

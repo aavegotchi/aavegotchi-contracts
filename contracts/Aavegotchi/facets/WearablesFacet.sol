@@ -95,29 +95,6 @@ contract WearablesFacet {
     // Mint a set of wearables.
     // How many wearables there are is determined by how many wearable SVG files have been uploaded.
     // The wearbles are minted to the account that calls this function
-    function mintWearables(
-        address _to,
-        uint256[] calldata _wearableIds,
-        uint256[] calldata _quantities
-    ) external {
-        require(msg.sender == LibDiamond.contractOwner() || msg.sender == s.dao, "WearablesFacet: Does not have permission");
-        require(_wearableIds.length == _quantities.length, "WearablesFacet: Ids and quantities length must match");
-
-        uint256 wearableTypesLength = s.wearableTypes.length;
-        for (uint256 i = 0; i < _wearableIds.length; i++) {
-            uint256 wearableId = _wearableIds[i];
-
-            require(wearableTypesLength > wearableId, "WearablesFacet: Wearable does not exist");
-
-            uint256 quantity = _quantities[i];
-            uint256 totalQuantity = s.wearableTypes[wearableId].totalQuantity + quantity;
-            require(totalQuantity <= s.wearableTypes[wearableId].maxQuantity, "WearablesFacet: Total wearable type quantity exceeds max quantity");
-
-            s.wearables[_to][wearableId] += quantity;
-            s.wearableTypes[wearableId].totalQuantity = uint32(totalQuantity);
-        }
-        LibERC1155.onERC1155BatchReceived(msg.sender, _to, _wearableIds, _quantities, "");
-    }
 
     // Returns balance for each wearable that exists for an account
     function wearablesBalances(address _account) external view returns (uint256[] memory bals_) {

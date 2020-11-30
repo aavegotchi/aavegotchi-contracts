@@ -26,7 +26,7 @@ struct Aavegotchi {
     // track status of aavegotchi
     // 0 == portal, 1 = open portal, 2 = Aavegotchi
     uint8 status;
-    uint16 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
+    uint32 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
     address collateralType;
     uint88 minimumStake; //The minimum amount of collateral that must be staked. Set upon creation.
     //New traits

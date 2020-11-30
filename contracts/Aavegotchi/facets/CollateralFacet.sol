@@ -20,11 +20,6 @@ contract CollateralFacet {
         AavegotchiCollateralTypeInfo collateralTypeInfo;
     }
 
-    modifier onlyDao {
-        require(msg.sender == s.dao, "Only DAO can call this function");
-        _;
-    }
-
     function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external {
         LibDiamond.enforceIsContractOwner();
         for (uint256 i; i < _collateralTypes.length; i++) {
@@ -33,11 +28,6 @@ contract CollateralFacet {
             s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
             s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
         }
-    }
-
-    function updateCollateralModifiers(address _collateralType, uint256 _modifiers) external onlyDao {
-        LibDiamond.enforceIsContractOwner();
-        s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
     }
 
     function collaterals() external view returns (address[] memory collateralTypes_) {

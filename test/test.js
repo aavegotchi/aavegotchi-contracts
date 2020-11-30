@@ -59,6 +59,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.wearablesFacet = deployVars.wearablesFacet
     global.collateralFacet = deployVars.collateralFacet
     global.shopFacet = deployVars.shopFacet
+    global.daoFacet = deployVars.daoFacet
     global.ghstDiamond = deployVars.ghstDiamond
     global.vrfFacet = deployVars.vrfFacet
     global.linkAddress = deployVars.linkAddress
@@ -282,7 +283,7 @@ describe('Collaterals and escrow', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
     let score = await global.aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(599)
-    await global.collateralFacet.updateCollateralModifiers(aavegotchi.collateral, [2, 0, 0, 0, 0, 0])
+    await global.daoFacet.updateCollateralModifiers(aavegotchi.collateral, [2, 0, 0, 0, 0, 0])
     score = await global.aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(602)
   })
@@ -331,8 +332,8 @@ describe('Wearables', async function () {
     // To do: Get max length of wearables array
 
     //  await truffleAssert.reverts(wearablesFacet.mintWearables(account, ['8'], ['10']), 'WearablesFacet: Wearable does not exist')
-    await truffleAssert.reverts(wearablesFacet.mintWearables(account, ['0'], ['10']), 'WearablesFacet: Total wearable type quantity exceeds max quantity')
-    await global.wearablesFacet.mintWearables(account, [testWearableId], ['10'])
+    await truffleAssert.reverts(daoFacet.mintWearables(account, ['0'], ['10']), 'WearablesFacet: Total wearable type quantity exceeds max quantity')
+    await global.daoFacet.mintWearables(account, [testWearableId], ['10'])
     balance = await global.wearablesFacet.balanceOf(account, testWearableId)
     expect(balance).to.equal(10)
   })
@@ -439,7 +440,7 @@ describe('Wearables', async function () {
 describe('Haunts', async function () {
   it('Cannot create new haunt until first is finished', async function () {
     const oneHundred = '100000000000000000000'
-    await truffleAssert.reverts(aavegotchiFacet.createHaunt('10000', oneHundred, '0x000000'), 'AavegotchiFacet: Haunt must be full before creating new')
+    await truffleAssert.reverts(daoFacet.createHaunt('10000', oneHundred, '0x000000'), 'AavegotchiFacet: Haunt must be full before creating new')
   })
 
   it('Cannot exceed max haunt size', async function () {
@@ -458,7 +459,7 @@ describe('Haunts', async function () {
   it('Can create new Haunt', async function () {
     let currentHaunt = await aavegotchiFacet.currentHaunt()
     expect(currentHaunt.hauntId_).to.equal(0)
-    await aavegotchiFacet.createHaunt('10000', ethers.utils.parseEther('100'), '0x000000')
+    await daoFacet.createHaunt('10000', ethers.utils.parseEther('100'), '0x000000')
     currentHaunt = await aavegotchiFacet.currentHaunt()
     expect(currentHaunt.hauntId_).to.equal(1)
   })
