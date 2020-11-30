@@ -20,14 +20,14 @@ contract CollateralFacet {
         AavegotchiCollateralTypeInfo collateralTypeInfo;
     }
 
-    function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external {
-        LibDiamond.enforceIsContractOwner();
-        for (uint256 i; i < _collateralTypes.length; i++) {
-            address collateralType = _collateralTypes[i].collateralType;
-            s.collateralTypes.push(collateralType);
-            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
-            s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
-        }
+    modifier onlyUnlocked(uint256 _tokenId) {
+        require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "Only callable on unlocked Aavegotchis");
+        _;
+    }
+
+    modifier onlyAavegotchiOwner(uint256 _tokenId) {
+        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
+        _;
     }
 
     function collaterals() external view returns (address[] memory collateralTypes_) {
@@ -60,16 +60,14 @@ contract CollateralFacet {
         balance_ = IERC20(collateralType_).balanceOf(escrow_);
     }
 
-    function increaseStake(uint256 _tokenId, uint256 _stakeAmount) external {
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
+    function increaseStake(uint256 _tokenId, uint256 _stakeAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         LibERC20.transferFrom(collateralType, msg.sender, escrow, _stakeAmount);
     }
 
-    function decreaseStake(uint256 _tokenId, uint96 _reduceAmount) external {
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can decrease stake");
+    function decreaseStake(uint256 _tokenId, uint96 _reduceAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 
@@ -81,8 +79,7 @@ contract CollateralFacet {
         LibERC20.transferFrom(collateralType, escrow, msg.sender, _reduceAmount);
     }
 
-    function decreaseAndDestroy(uint256 _tokenId) external {
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can decrease stake");
+    function decreaseAndDestroy(uint256 _tokenId) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 

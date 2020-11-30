@@ -54,16 +54,26 @@ contract AavegotchiFacet {
     ///  The operator can manage all NFTs of the owner.
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
+     modifier onlyUnlocked(uint256 _tokenId) {
+        require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "Only callable on unlocked Aavegotchis");
+        _;
+    }
+
+      modifier onlyAavegotchiOwner(uint256 _tokenId) {
+        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
+        _;
+    }
+
     function aavegotchiNameAvailable(string memory _name) external view returns (bool available_) {
         available_ = s.aavegotchiNamesUsed[_name];
     }
 
-    function setAavegotchiName(uint256 _tokenId, string memory _name) external {
+    function setAavegotchiName(uint256 _tokenId, string memory _name) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         require(bytes(_name).length > 0, "AavegotchiFacet: _name can't be empty");
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must choose Aavegotchi before setting name");
         require(bytes(_name).length < 26, "AavegotchiFacet: _name can't be greater than 25 characters");
         require(s.aavegotchiNamesUsed[_name] == false, "AavegotchiFacet: Aavegotchi name used already");
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can set the name");
+      //  require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can set the name");
         string memory existingName = s.aavegotchis[_tokenId].name;
         // require(bytes(s.aavegotchis[_tokenId].name).length == 0, "AavegotchiFacet: Aavegotchi name already set");
         if (bytes(existingName).length > 0) {
@@ -221,10 +231,10 @@ contract AavegotchiFacet {
         uint256 _tokenId,
         uint256 _option,
         uint256 _stakeAmount
-    ) external {
+    ) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-        require(msg.sender == aavegotchi.owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
+       // require(msg.sender == aavegotchi.owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
 
         PortalAavegotchiTraitsIO memory option = singlePortalAavegotchiTraits(aavegotchi.randomNumber, _option);
         aavegotchi.randomNumber = option.randomNumber;
@@ -454,9 +464,8 @@ contract AavegotchiFacet {
         return x >= 0 ? x : -x;
     }
 
-    function spendSkillPoints(uint256 _tokenId, int8[4] calldata _values) external {
+    function spendSkillPoints(uint256 _tokenId, int8[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId)  {
         uint32 available = availableSkillPoints(_tokenId);
-        console.log('available:',available);
 
         uint16 totalUsed = 0;
         for (uint8 index = 0; index < _values.length; index++) {
@@ -477,9 +486,6 @@ contract AavegotchiFacet {
 
         //Increment used skill points
         s.aavegotchis[_tokenId].usedSkillPoints += totalUsed;
-
-        //  require(available >= required, "AavegotchiFacet: Not enough skill points!");
-        //To do: Check if Aavegotchi has enough available skill points
     }
 
     function calculateAavegotchiLevel(uint32 _experience) public pure returns (uint32 level) {
@@ -620,6 +626,13 @@ contract AavegotchiFacet {
         }
 
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
+    }
+
+    //Prevnts assets and wearables from being moved from Aavegotchi during lock period, except by gameManager. 
+    function lockAavegotchi(uint256 _tokenId, uint256 _lockDuration) external  {
+        require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
+        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
+        s.aavegotchis[_tokenId].unlockTime = block.timestamp + _lockDuration;
     }
 
     function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {

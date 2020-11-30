@@ -166,7 +166,7 @@ async function main() {
 
   // add collateral info
   console.log('Adding Collateral Types')
-  tx = await collateralFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstDiamond.address))
+  tx = await daoFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstDiamond.address))
   receipt = await tx.wait()
   console.log('Adding Collateral Types gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
@@ -175,7 +175,7 @@ async function main() {
 
   // add wearable types info
   console.log('Adding Wearable Types')
-  tx = await wearablesFacet.addWearableTypes(wearableTypes)
+  tx = await daoFacet.addWearableTypes(wearableTypes)
   receipt = await tx.wait()
   console.log('Adding Wearable Types gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)

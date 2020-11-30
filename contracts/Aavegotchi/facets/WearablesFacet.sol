@@ -40,6 +40,16 @@ contract WearablesFacet {
     uint16 internal constant SLOT_HAND_RIGHT = 5;
     uint16 internal constant SLOT_PET = 6;
 
+    modifier onlyUnlocked(uint256 _tokenId) {
+        require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "Only callable on unlocked Aavegotchis");
+        _;
+    }
+
+    modifier onlyAavegotchiOwner(uint256 _tokenId) {
+        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
+        _;
+    }
+
     /**
         @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
         The `_operator` argument MUST be the address of an account/contract that is approved to make the transfer (SHOULD be msg.sender).
@@ -75,22 +85,6 @@ contract WearablesFacet {
         The URI MUST point to a JSON file that conforms to the "ERC-1155 Metadata URI JSON Schema".
     */
     event URI(string _value, uint256 indexed _id);
-
-    function createWearableSet(WearableSet calldata _wearableSet) external {
-        LibDiamond.enforceIsContractOwner();
-        s.wearableSets.push(_wearableSet);
-    }
-
-    function addWearableTypes(WearableType[] memory _wearableTypes) external {
-        LibDiamond.enforceIsContractOwner();
-        // wearable ids start at 1.  0 means no wearable
-        uint256 wearableTypesLength = s.wearableTypes.length;
-        for (uint256 i; i < _wearableTypes.length; i++) {
-            uint256 wearableId = wearableTypesLength++;
-            s.wearableTypes.push(_wearableTypes[i]);
-            emit TransferSingle(msg.sender, address(0), address(0), wearableId, 0);
-        }
-    }
 
     // Mint a set of wearables.
     // How many wearables there are is determined by how many wearable SVG files have been uploaded.
@@ -207,7 +201,11 @@ contract WearablesFacet {
         address _to,
         uint256 _id,
         uint256 _value
-    ) external {
+    )
+        external
+        //Can only transfer wearables if Aavegotchi is unlocked
+        onlyUnlocked(_id)
+    {
         require(_to != address(0), "Wearables: Can't transfer to 0 address");
         address owner = s.aavegotchis[_fromTokenId].owner;
         require(msg.sender == owner || s.operators[owner][msg.sender], "Wearables: Not owner and not approved to transfer");
@@ -233,7 +231,11 @@ contract WearablesFacet {
         uint256 _toTokenId,
         uint256 _id,
         uint256 _value
-    ) external {
+    )
+        external
+        //Can only transfer wearables if Aavegotchi is unlocked
+        onlyUnlocked(_id)
+    {
         require(_toContract != address(0), "Wearables: Can't transfer to 0 address");
         address owner = s.aavegotchis[_fromTokenId].owner;
         require(msg.sender == owner || s.operators[owner][msg.sender], "Wearables: Not owner and not approved to transfer");

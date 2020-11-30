@@ -14,6 +14,7 @@ contract DAOFacet {
     AppStorage internal s;
 
     event DaoTransferred(address indexed previousDao, address indexed newDao);
+    event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
 
     struct AavegotchiCollateralTypeIO {
         address collateralType;
@@ -33,6 +34,15 @@ contract DAOFacet {
     function setDao(address _newDao) external onlyDaoOrOwner {
         emit DaoTransferred(s.dao, _newDao);
         s.dao = _newDao;
+    }
+
+    function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyDaoOrOwner {
+        for (uint256 i; i < _collateralTypes.length; i++) {
+            address collateralType = _collateralTypes[i].collateralType;
+            s.collateralTypes.push(collateralType);
+            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
+            s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
+        }
     }
 
     function updateCollateralModifiers(address _collateralType, uint256 _modifiers) external onlyDaoOrOwner {
@@ -90,6 +100,22 @@ contract DAOFacet {
 
             require(xp <= 1000, "DAOFacet: Cannot grant more than 1000 XP at a time");
             s.aavegotchis[tokenId].experience += xp;
+        }
+    }
+
+    function createWearableSet(WearableSet calldata _wearableSet) external onlyDaoOrOwner() {
+        // LibDiamond.enforceIsContractOwner();
+        s.wearableSets.push(_wearableSet);
+    }
+
+    function addWearableTypes(WearableType[] memory _wearableTypes) external onlyDaoOrOwner() {
+        // LibDiamond.enforceIsContractOwner();
+        // wearable ids start at 1.  0 means no wearable
+        uint256 wearableTypesLength = s.wearableTypes.length;
+        for (uint256 i; i < _wearableTypes.length; i++) {
+            uint256 wearableId = wearableTypesLength++;
+            s.wearableTypes.push(_wearableTypes[i]);
+            emit TransferSingle(msg.sender, address(0), address(0), wearableId, 0);
         }
     }
 }

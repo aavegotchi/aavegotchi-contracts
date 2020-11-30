@@ -36,6 +36,7 @@ struct Aavegotchi {
     int16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
     address escrow;
     uint16 wearableBonus;
+    uint256 unlockTime;
 }
 
 struct WearableType {
