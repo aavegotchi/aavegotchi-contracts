@@ -363,6 +363,7 @@ contract WearablesFacet {
         aavegotchi.equippedWearables = _equippedWearables;
     }
 
+    //To do: merge slotTaken and slotIsAvailable
     function slotTaken(uint256 _equippedWearables, uint256 _slot) internal pure returns (bool) {
         return uint16(_equippedWearables >> (16 * _slot)) != 0;
     }
