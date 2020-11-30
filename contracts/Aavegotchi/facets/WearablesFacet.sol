@@ -325,6 +325,8 @@ contract WearablesFacet {
             require(slotIsAvailable(_equippedWearables, slot) == true, "WearablesFacet: Slot not available");
             WearableType storage wearableType = s.wearableTypes[wearableId];
             require(aavegotchiLevel >= wearableType.minLevel, "WearablesFacet: Aavegotchi level lower than minLevel");
+
+            //Check if the wearable can be equipped in this position
             uint256 slotPositions = uint240(wearableType.slotPositions);
             bool canBeEquipped;
             for (uint256 i; i < 16; i++) {
@@ -348,6 +350,7 @@ contract WearablesFacet {
             }
 
             //Then check if this wearable is in the Aavegotchis inventory
+            //To do: If not in inventory, then transfer from Owner's inventory
             uint256 balance = s.nftBalances[address(this)][_tokenId][wearableId];
             require(balance > 0, "WearablesFacet: Wearable is not in Aavegotchi inventory");
         }
@@ -427,6 +430,8 @@ contract WearablesFacet {
             wearableIds_[i] = uint16(l_equippedWearables >> (i * 16));
         }
     }
+
+    //To do: Finish unequip wearables function
 
     // function unequipWearables(uint256 _tokenId, uint8[] memory _slotIds) public {
     //     uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;

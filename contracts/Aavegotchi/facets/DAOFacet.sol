@@ -118,4 +118,10 @@ contract DAOFacet {
             emit TransferSingle(msg.sender, address(0), address(0), wearableId, 0);
         }
     }
+
+    function setGameManager(address _gameManager) external {
+        require(msg.sender == LibDiamond.contractOwner(), "DAOFacet: Only contract owner can set game manager");
+        //To do: Set gameManager
+        //s.gameManager = _gameManager;
+    }
 }
