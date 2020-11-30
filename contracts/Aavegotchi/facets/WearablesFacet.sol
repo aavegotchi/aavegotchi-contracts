@@ -31,17 +31,14 @@ contract WearablesFacet {
     event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
     uint256 internal constant NUMERIC_TRAITS_NUM = 6;
-    uint16 internal constant SLOT_FACE = 0;
-    uint16 internal constant SLOT_EYES = 1;
-    uint16 internal constant SLOT_HEAD = 2;
-    uint16 internal constant SLOT_BODY = 3;
+
+    uint16 internal constant SLOT_BODY = 0;
+    uint16 internal constant SLOT_FACE = 1;
+    uint16 internal constant SLOT_EYES = 2;
+    uint16 internal constant SLOT_HEAD = 3;
     uint16 internal constant SLOT_HAND_LEFT = 4;
     uint16 internal constant SLOT_HAND_RIGHT = 5;
-    //  uint16 internal constant SLOT_HANDS_BOTH = 6;
     uint16 internal constant SLOT_PET = 6;
-    // uint16 internal constant SLOT_HEAD_BODY = 8;
-    // uint16 internal constant SLOT_HEAD_FACE = 9;
-    // uint16 internal constant SLOT_HEAD_FACE_EYES = 10;
 
     /**
         @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
