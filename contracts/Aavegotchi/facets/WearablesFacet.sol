@@ -358,4 +358,11 @@ contract WearablesFacet {
         }
         aavegotchi.equippedWearables = _equippedWearables;
     }
+
+    function equippedWearables(uint256 _tokenId) external view returns (uint256[EQUIPPED_WEARABLE_equippedWearables] memory wearableIds_) {
+        uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+        for (uint16 i; i < EQUIPPED_WEARABLE_equippedWearables; i++) {
+            wearableIds_[i] = uint16(l_equippedWearables >> (i * 16));
+        }
+    }
 }
