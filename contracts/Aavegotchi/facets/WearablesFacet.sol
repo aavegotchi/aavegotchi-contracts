@@ -311,7 +311,7 @@ contract WearablesFacet {
     function equipWearables(uint256 _tokenId, uint256 _equippedWearables) external {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
 
-        //To do (done): Add in actual dynamic level
+        //To test (Dan): Add in actual dynamic level
         uint32 aavegotchiLevel = LibAppStorage.calculateAavegotchiLevel(aavegotchi.experience);
 
         for (uint256 slot; slot < 16; slot++) {
@@ -346,7 +346,7 @@ contract WearablesFacet {
             }
 
             //Then check if this wearable is in the Aavegotchis inventory
-            //To do (done): If not in inventory, then transfer from Owner's inventory
+            //To test (Dan): If not in inventory, then transfer from Owner's inventory
             uint256 balance = s.nftBalances[address(this)][_tokenId][wearableId];
             if (balance == 0) {
                 balance = s.wearables[msg.sender][wearableId];
@@ -359,10 +359,12 @@ contract WearablesFacet {
         aavegotchi.equippedWearables = _equippedWearables;
     }
 
+    /*
     function equippedWearables(uint256 _tokenId) external view returns (uint256[EQUIPPED_WEARABLE_equippedWearables] memory wearableIds_) {
         uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
         for (uint16 i; i < EQUIPPED_WEARABLE_equippedWearables; i++) {
             wearableIds_[i] = uint16(l_equippedWearables >> (i * 16));
         }
     }
+    */
 }

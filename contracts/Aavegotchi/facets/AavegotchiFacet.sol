@@ -77,6 +77,17 @@ contract AavegotchiFacet {
         haunt_ = s.haunts[hauntId_];
     }
 
+    struct RevenueSharesIO {
+        address burnAddress;
+        address daoAddress;
+        address rarityFarming;
+        address pixelCraft;
+    }
+
+    function revenueShares() external view returns (RevenueSharesIO memory) {
+        return RevenueSharesIO(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, s.dao, s.rarityFarming, s.pixelCraft);
+    }
+
     struct PortalAavegotchiTraitsIO {
         uint256 randomNumber;
         int256 numericTraits;
@@ -136,6 +147,7 @@ contract AavegotchiFacet {
         }
     }
 
+    /*
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = portalAavegotchiTraits(_tokenId);
@@ -151,6 +163,7 @@ contract AavegotchiFacet {
             );
         }
     }
+    */
 
     function ghstAddress() external view returns (address contract_) {
         contract_ = s.ghstContract;
@@ -273,8 +286,10 @@ contract AavegotchiFacet {
 
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
 
-    //To do: would be great if we could move this to SvgStorageFacet
+    //To do (Nick): would be great if we could move this to SvgStorageFacet
     // question: Should we also move the SVG functions like getAavegotchiSvgLayers to SvgStorageFacet?
+
+    //yes we will need to move SVG functions to another facet, otherwise contract size is too large
 
     function getAavegotchiSvg(uint256 _tokenId) public view returns (string memory ag_) {
         require(s.aavegotchis[_tokenId].owner != address(0), "AavegotchiFacet: _tokenId does not exist");
@@ -308,7 +323,7 @@ contract AavegotchiFacet {
         address owner;
         uint256 randomNumber;
         uint8 status;
-        int256 numericTraits;
+        int256[] numericTraits;
         uint256[EQUIPPED_WEARABLE_SLOTS] equippedWearables;
         address collateral;
         address escrow;
@@ -329,7 +344,14 @@ contract AavegotchiFacet {
         aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
         aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
-        aavegotchiInfo_.numericTraits = s.aavegotchis[_tokenId].numericTraits;
+
+        int256[] memory traits = new int256[](NUMERIC_TRAITS_NUM);
+        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
+            int256 number = int16(s.aavegotchis[_tokenId].numericTraits >> (i * 16));
+            traits[i] = number;
+        }
+
+        aavegotchiInfo_.numericTraits = traits; //s.aavegotchis[_tokenId].numericTraits;
         uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
         for (uint16 i; i < EQUIPPED_WEARABLE_SLOTS; i++) {
             aavegotchiInfo_.equippedWearables[i] = uint16(l_equippedWearables >> (i * 16));
@@ -398,8 +420,8 @@ contract AavegotchiFacet {
         view
         returns (int256 rarityScore_, int256[NUMERIC_TRAITS_NUM] memory numericTraits_)
     {
-        //To do (done): Should return final rarity score inlcuding wearables (but not sets)
-        //To do (done): Can also return the final numericTraits including wearable modifiers
+        //To test (Dan): Should return final rarity score inlcuding wearables (but not sets)
+        //To test (Dan): Can also return the final numericTraits including wearable modifiers
 
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
@@ -547,12 +569,11 @@ contract AavegotchiFacet {
 
     function spendSkillPoints(uint256 _tokenId, int8[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         int256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
-        //To do (done): Prevent underflow (is this ok?), see require below
+        //To test (Dan): Prevent underflow (is this ok?), see require below
         uint256 totalUsed = 0;
         for (uint8 index = 0; index < _values.length; index++) {
             totalUsed += abs(_values[index]);
 
-            //To do (done): Modify Aavegotchi numericTraits
             uint256 position = index * 16;
             // get trait
             int256 trait = int16(numericTraits >> position);
@@ -602,18 +623,29 @@ contract AavegotchiFacet {
         }
         s.aavegotchiBalance[_to] += numAavegotchisToPurchase;
         s.totalSupply = uint32(tokenId);
-        uint256 amount = _ghst - (_ghst % haunt.portalPrice);
-        uint256 burnAmount = amount / 10;
-        LibERC20.transferFrom(s.ghstContract, msg.sender, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnAmount);
-        LibERC20.transferFrom(s.ghstContract, msg.sender, address(this), amount - burnAmount);
 
-         //To do: Decide on GHST allocation for burning, DAO, rarity farming, governance, Pixelcraft
+        uint256 totalPrice = _ghst - (_ghst % haunt.portalPrice);
 
-        //Transfer ratios:
+        //To do (Nick): Confirm these calculations are correct?
+
         //33% to burn address
+        uint256 burnShare = (totalPrice * 33) / 100;
+
         //17% to Pixelcraft wallet
+        uint256 companyShare = (totalPrice * 17) / 100;
+
         //40% to rarity farming rewards
-        //10% to DAO address
+        uint256 rarityFarmShare = (totalPrice * 2) / 5;
+
+        //10% to DAO
+        uint256 daoShare = (totalPrice - burnShare - companyShare - rarityFarmShare);
+
+        // Using 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF as burn address.
+        // GHST token contract does not allow transferring to address(0) address: https://etherscan.io/address/0x3F382DbD960E3a9bbCeaE22651E88158d2791550#code
+        LibERC20.transferFrom(s.ghstContract, msg.sender, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
+        LibERC20.transferFrom(s.ghstContract, msg.sender, s.pixelCraft, companyShare);
+        LibERC20.transferFrom(s.ghstContract, msg.sender, s.rarityFarming, rarityFarmShare);
+        LibERC20.transferFrom(s.ghstContract, msg.sender, s.dao, daoShare);
     }
 
     function claimAavegotchiFromPortal(
@@ -653,8 +685,7 @@ contract AavegotchiFacet {
     // }
 
     function interact(uint256 _tokenId) public {
-        //To do: only update once per day
-        //To do (done): Only allow 2 interactions per day
+        //To test (Dan): Only allow 2 interactions per day
         uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
         // 43200 seconds is 12 hours
         // if interacted less than 12 hours ago

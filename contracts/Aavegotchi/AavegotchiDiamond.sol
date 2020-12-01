@@ -29,6 +29,8 @@ contract AavegotchiDiamond {
     struct ConstructorArgs {
         address contractOwner;
         address dao;
+        address pixelCraft;
+        address rarityFarming;
         address ghstContract;
         bytes32 chainlinkKeyHash;
         uint256 chainlinkFee;
@@ -39,7 +41,8 @@ contract AavegotchiDiamond {
         LibDiamond.diamondCut(_diamondCut, address(0), new bytes(0));
         LibDiamond.setContractOwner(_args.contractOwner);
         s.dao = _args.dao;
-        // s.svgLayers["wearables"].push();
+        s.rarityFarming = _args.rarityFarming;
+        s.pixelCraft = _args.pixelCraft;
 
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 

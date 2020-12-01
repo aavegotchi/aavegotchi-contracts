@@ -41,6 +41,10 @@ async function main() {
   let vouchersContract
   let initialHauntSize
 
+  let dao
+  let rarityFarming
+  let pixelCraft
+
   if (hre.network.name === 'hardhat') {
     const LinkTokenMock = await ethers.getContractFactory('LinkTokenMock')
     linkContract = await LinkTokenMock.deploy()
@@ -54,6 +58,11 @@ async function main() {
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     fee = ethers.utils.parseEther('0.1')
     initialHauntSize = '100'
+
+    dao = await accounts[1].getAddress()
+    rarityFarming = await accounts[2].getAddress()
+    pixelCraft = await accounts[3].getAddress()
+
   } else if (hre.network.name === 'mainnet') {
     vrfCoordinator = '0xf0d54349aDdcf704F77AE15b96510dEA15cb7952'
     linkAddress = '0x514910771AF9Ca656af840dff83E8264EcF986CA'
@@ -61,6 +70,11 @@ async function main() {
     fee = ethers.utils.parseEther('2')
     vouchersContractAddress = '0xe54891774EED9277236bac10d82788aee0Aed313'
     initialHauntSize = '10000'
+
+    dao = "todo" //await accounts[1].getAddress()
+    rarityFarming = "todo" //await accounts[2].getAddress()
+    pixelCraft = "todo" //await accounts[3].getAddress()
+
   } else if (hre.network.name === 'kovan') {
     vrfCoordinator = '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9'
     linkAddress = '0xa36085F69e2889c224210F603D836748e7dC0088'
@@ -68,6 +82,11 @@ async function main() {
     fee = ethers.utils.parseEther('0.1')
     vouchersContractAddress = ''
     initialHauntSize = '10000'
+
+    dao = "todo" //await accounts[1].getAddress()
+    rarityFarming = "todo" //await accounts[2].getAddress()
+    pixelCraft = "todo" //await accounts[3].getAddress()
+
   } else {
     throw Error('No network settings for ' + hre.network.name)
   }
@@ -133,6 +152,8 @@ async function main() {
     console.log('GHST diamond address:' + ghstDiamond.address)
   }
 
+
+
   // eslint-disable-next-line no-unused-vars
   const aavegotchiDiamond = await diamond.deploy({
     diamondName: 'AavegotchiDiamond',
@@ -148,7 +169,7 @@ async function main() {
       ['VrfFacet', vrfFacet],
       ['ShopFacet', shopFacet]
     ],
-    args: [account, account, ghstDiamond.address, keyHash, fee, initialHauntSize]
+    args: [account, dao, pixelCraft, rarityFarming, ghstDiamond.address, keyHash, fee, initialHauntSize]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 

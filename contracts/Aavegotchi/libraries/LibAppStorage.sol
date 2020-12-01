@@ -133,10 +133,15 @@ struct AppStorage {
     bytes32[1000] emptySlots;
     // owner of the contract
     uint32 totalSupply;
-    address ghstContract;
-    address dao;
+  
     uint16 currentHauntId;
+ 
+    //Addresses
+    address ghstContract;
     address gameManager;
+    address dao;
+    address pixelCraft;
+    address rarityFarming;
 }
 
 library LibAppStorage {
@@ -165,7 +170,7 @@ library LibAppStorage {
     function storeNumericTraits(uint8[6] memory _numericTraits) internal {}
 
     function calculateAavegotchiLevel(uint32 _experience) internal pure returns (uint32 level) {
-        //To do: Confirm these values, maybe simplify the calculation? (I looked into simplifying, I don't have suggestions about it.)
+        //To do (Dan): Confirm final experience numbers
         if (_experience <= 100) return 1;
         //Levels 1-10 require 100 XP each
         else if (_experience > 100 && _experience <= 1001)

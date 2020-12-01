@@ -97,7 +97,7 @@ contract DAOFacet {
             uint32 xp = _xpValues[i];
             require(xp <= 1000, "DAOFacet: Cannot grant more than 1000 XP at a time");
 
-            //To do (done): Deal with overflow here? - Handling it just in case
+            //To test (Dan): Deal with overflow here? - Handling it just in case
             uint32 experience = s.aavegotchis[tokenId].experience;
             uint32 increasedExperience = experience + xp;
             require(increasedExperience >= experience, "DAOFacet: Experience overflow");
@@ -123,7 +123,10 @@ contract DAOFacet {
 
     function setGameManager(address _gameManager) external {
         require(msg.sender == LibDiamond.contractOwner(), "DAOFacet: Only contract owner can set game manager");
-        //To do (done): Set gameManager
         s.gameManager = _gameManager;
+    }
+
+    function gameManager() external view returns (address) {
+        return s.gameManager;
     }
 }
