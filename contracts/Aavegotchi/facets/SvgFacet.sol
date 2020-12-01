@@ -5,12 +5,14 @@ pragma experimental ABIEncoderV2;
 import {AppStorage, SvgLayer} from "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../libraries/LibSvg.sol";
+import "./AavegotchiFacet.sol";
 
 // This contract was added as a facet to the diamond
 contract SvgFacet {
     AppStorage internal s;
 
     uint256 internal constant EQUIPPED_WEARABLE_SLOTS = 16;
+    uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
     struct SvgTypeAndSizes {
         bytes32 svgType;
@@ -188,10 +190,10 @@ contract SvgFacet {
         ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg, "</svg>"));
     }
 
-    /*
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-        PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = portalAavegotchiTraits(_tokenId);
+        AavegotchiFacet.PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits =
+            AavegotchiFacet(address(this)).portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
             address collateralType = l_portalAavegotchiTraits[i].collateralType;
             int256 numericTraits = l_portalAavegotchiTraits[i].numericTraits;
@@ -204,5 +206,4 @@ contract SvgFacet {
             );
         }
     }
-    */
 }
