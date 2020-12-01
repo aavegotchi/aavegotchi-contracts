@@ -626,26 +626,7 @@ contract AavegotchiFacet {
 
         uint256 totalPrice = _ghst - (_ghst % haunt.portalPrice);
 
-        //To do (Nick): Confirm these calculations are correct?
-
-        //33% to burn address
-        uint256 burnShare = (totalPrice * 33) / 100;
-
-        //17% to Pixelcraft wallet
-        uint256 companyShare = (totalPrice * 17) / 100;
-
-        //40% to rarity farming rewards
-        uint256 rarityFarmShare = (totalPrice * 2) / 5;
-
-        //10% to DAO
-        uint256 daoShare = (totalPrice - burnShare - companyShare - rarityFarmShare);
-
-        // Using 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF as burn address.
-        // GHST token contract does not allow transferring to address(0) address: https://etherscan.io/address/0x3F382DbD960E3a9bbCeaE22651E88158d2791550#code
-        LibERC20.transferFrom(s.ghstContract, msg.sender, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
-        LibERC20.transferFrom(s.ghstContract, msg.sender, s.pixelCraft, companyShare);
-        LibERC20.transferFrom(s.ghstContract, msg.sender, s.rarityFarming, rarityFarmShare);
-        LibERC20.transferFrom(s.ghstContract, msg.sender, s.dao, daoShare);
+        LibAppStorage.purchase(totalPrice);
     }
 
     function claimAavegotchiFromPortal(

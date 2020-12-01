@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.4;
-
+import "../../shared/libraries/LibERC20.sol";
 /*
 Numeric traits by possition in the array:
 energy
@@ -133,9 +133,7 @@ struct AppStorage {
     bytes32[1000] emptySlots;
     // owner of the contract
     uint32 totalSupply;
-  
     uint16 currentHauntId;
- 
     //Addresses
     address ghstContract;
     address gameManager;
@@ -167,7 +165,28 @@ library LibAppStorage {
         }
     }
 
-    function storeNumericTraits(uint8[6] memory _numericTraits) internal {}
+    function purchase(uint256 _ghst) internal {
+        //To do (Nick): Maybe make exception if the amount of GHST is less than a certain amount?
+        AppStorage storage s = diamondStorage();
+        //33% to burn address
+        uint256 burnShare = (_ghst * 33) / 100;
+
+        //17% to Pixelcraft wallet
+        uint256 companyShare = (_ghst * 17) / 100;
+
+        //40% to rarity farming rewards
+        uint256 rarityFarmShare = (_ghst * 2) / 5;
+
+        //10% to DAO
+        uint256 daoShare = (_ghst - burnShare - companyShare - rarityFarmShare);
+
+        // Using 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF as burn address.
+        // GHST token contract does not allow transferring to address(0) address: https://etherscan.io/address/0x3F382DbD960E3a9bbCeaE22651E88158d2791550#code
+        LibERC20.transferFrom(s.ghstContract, msg.sender, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
+        LibERC20.transferFrom(s.ghstContract, msg.sender, s.pixelCraft, companyShare);
+        LibERC20.transferFrom(s.ghstContract, msg.sender, s.rarityFarming, rarityFarmShare);
+        LibERC20.transferFrom(s.ghstContract, msg.sender, s.dao, daoShare);
+    }
 
     function calculateAavegotchiLevel(uint32 _experience) internal pure returns (uint32 level) {
         //To do (Dan): Confirm final experience numbers

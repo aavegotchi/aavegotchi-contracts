@@ -11,7 +11,6 @@ import "../libraries/LibERC1155.sol";
 contract WearablesFacet {
     using LibAppStorage for AppStorage;
     AppStorage internal s;
-    uint256 internal constant EQUIPPED_WEARABLE_equippedWearables = 16;
 
     /// @dev This emits when a token is transferred to an ERC721 token
     /// @param _toContract The contract the token is transferred to
@@ -184,6 +183,7 @@ contract WearablesFacet {
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
         s.wearables[_from][_id] = bal - _value;
         s.nftBalances[_toContract][_toTokenId][_id] += _value;
+        emit TransferSingle(msg.sender, _from, _toContract, _id, _value);
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
     }
 
@@ -212,6 +212,7 @@ contract WearablesFacet {
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal - _value;
         s.wearables[_to][_id] += _value;
+        emit TransferSingle(msg.sender, _fromContract, _to, _id, _value);
         emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
     }
 
@@ -241,6 +242,7 @@ contract WearablesFacet {
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal - _value;
         s.nftBalances[_toContract][_toTokenId][_id] += _value;
+        emit TransferSingle(msg.sender, _fromContract, _toContract, _id, _value);
         emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
     }
@@ -301,9 +303,9 @@ contract WearablesFacet {
         }
     }
 
-    function equippedWearables(uint256 _tokenId) external view returns (uint256[EQUIPPED_WEARABLE_equippedWearables] memory wearableIds_) {
+    function equippedWearables(uint256 _tokenId) external view returns (uint256[16] memory wearableIds_) {
         uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
-        for (uint16 i; i < EQUIPPED_WEARABLE_equippedWearables; i++) {
+        for (uint16 i; i < 16; i++) {
             wearableIds_[i] = uint16(l_equippedWearables >> (i * 16));
         }
     }
@@ -358,13 +360,4 @@ contract WearablesFacet {
         }
         aavegotchi.equippedWearables = _equippedWearables;
     }
-
-    /*
-    function equippedWearables(uint256 _tokenId) external view returns (uint256[EQUIPPED_WEARABLE_equippedWearables] memory wearableIds_) {
-        uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
-        for (uint16 i; i < EQUIPPED_WEARABLE_equippedWearables; i++) {
-            wearableIds_[i] = uint16(l_equippedWearables >> (i * 16));
-        }
-    }
-    */
 }
