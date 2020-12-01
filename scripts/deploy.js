@@ -7,6 +7,7 @@ const { collateralsSvgs } = require('../svgs/collaterals.js')
 const { eyeShapeSvgs } = require('../svgs/eyeShapes.js')
 const { getCollaterals } = require('./collateralTypes.js')
 const { wearableTypes } = require('./wearableTypes.js')
+const { wearableSets } = require('./wearableSets.js')
 
 function addCommas (nStr) {
   nStr += ''
@@ -194,6 +195,13 @@ async function main () {
   tx = await daoFacet.addWearableTypes(wearableTypes)
   receipt = await tx.wait()
   console.log('Adding Wearable Types gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  // add wearable types info
+  console.log('Adding Wearable Sets')
+  tx = await daoFacet.addWearableSets(wearableSets)
+  receipt = await tx.wait()
+  console.log('Adding Wearable Sets gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   // ----------------------------------------------------------------

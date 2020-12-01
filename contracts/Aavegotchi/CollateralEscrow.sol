@@ -4,11 +4,10 @@ pragma experimental ABIEncoderV2;
 
 import "../shared/interfaces/IERC20.sol";
 
-struct AppStorage {
-    address owner;
-}
-
 contract CollateralEscrow {
+    struct AppStorage {
+        address owner;
+    }
     AppStorage internal s;
 
     constructor(address _aTokenContract) {

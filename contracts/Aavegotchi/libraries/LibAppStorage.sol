@@ -80,7 +80,7 @@ struct WearableType {
 
 struct WearableSet {
     uint256 wearableIds; // The tokenIdS of each piece of the set
-    uint256 traitsfullSetBonus; // How much equipping a full set increases the Aavegotchi's rarity score
+    uint256 traitsBonuses;
 }
 
 struct Haunt {
@@ -223,5 +223,21 @@ library LibAppStorage {
         level += 1;
 
         // return level;
+    }
+
+    function uintToSixteenBitArray(uint256 _data) internal pure returns (uint256[] memory array_) {
+        uint256 length = 16;
+        array_ = new uint256[](length);
+        for (uint256 i; i < length; i++) {
+            uint256 item = uint16(_data >> (16 * i));
+            if (item == 0) {
+                length = i;
+                break;
+            }
+            array_[i] = item;
+        }
+        assembly {
+            mstore(array_, length)
+        }
     }
 }

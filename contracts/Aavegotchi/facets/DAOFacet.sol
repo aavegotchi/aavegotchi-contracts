@@ -105,11 +105,6 @@ contract DAOFacet {
         }
     }
 
-    function createWearableSet(WearableSet calldata _wearableSet) external onlyDaoOrOwner() {
-        // LibDiamond.enforceIsContractOwner();
-        s.wearableSets.push(_wearableSet);
-    }
-
     function addWearableTypes(WearableType[] memory _wearableTypes) external onlyDaoOrOwner() {
         // LibDiamond.enforceIsContractOwner();
         // wearable ids start at 1.  0 means no wearable
@@ -118,6 +113,12 @@ contract DAOFacet {
             uint256 wearableId = wearableTypesLength++;
             s.wearableTypes.push(_wearableTypes[i]);
             emit TransferSingle(msg.sender, address(0), address(0), wearableId, 0);
+        }
+    }
+
+    function addWearableSets(WearableSet[] calldata _wearableSets) external onlyDaoOrOwner() {
+        for (uint256 i; i < _wearableSets.length; i++) {
+            s.wearableSets.push(_wearableSets[i]);
         }
     }
 

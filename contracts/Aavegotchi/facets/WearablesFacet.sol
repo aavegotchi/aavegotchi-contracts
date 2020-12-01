@@ -360,4 +360,29 @@ contract WearablesFacet {
         }
         aavegotchi.equippedWearables = _equippedWearables;
     }
+
+    struct WearableSetIO {
+        uint256[] wearableIds;
+        uint256[] traitsBonuses;
+    }
+
+    // Called by off chain software so not too concerned about gas costs
+    function getWearableSets() external view returns (WearableSetIO[] memory wearableSets_) {
+        uint256 length = s.wearableSets.length;
+        wearableSets_ = new WearableSetIO[](length);
+        for (uint256 i; i < length; i++) {
+            wearableSets_[i] = getWearableSet(i);
+        }
+    }
+
+    function getWearableSet(uint256 _index) public view returns (WearableSetIO memory wearableSet_) {
+        uint256 length = s.wearableSets.length;
+        require(_index < length, "WearablesFacet: Wearable set does not exist");
+        wearableSet_.wearableIds = LibAppStorage.uintToSixteenBitArray(s.wearableSets[_index].wearableIds);
+        wearableSet_.traitsBonuses = LibAppStorage.uintToSixteenBitArray(s.wearableSets[_index].traitsBonuses);
+    }
+
+    function totalWearableSets() external view returns (uint256) {
+        return s.wearableSets.length;
+    }
 }
