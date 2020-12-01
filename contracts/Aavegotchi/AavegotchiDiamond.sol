@@ -16,7 +16,7 @@ import "../shared/interfaces/IERC165.sol";
 import "../shared/interfaces/IDiamondCut.sol";
 import "../shared/interfaces/IDiamondLoupe.sol";
 import "./facets/AavegotchiFacet.sol";
-import "./facets/SvgStorageFacet.sol";
+import "./facets/SvgFacet.sol";
 import "./facets/WearablesFacet.sol";
 import "../shared/libraries/LibDiamond.sol";
 import "./libraries/LibVrf.sol";

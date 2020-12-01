@@ -8,7 +8,7 @@ const { eyeShapeSvgs } = require('../svgs/eyeShapes.js')
 const { getCollaterals } = require('./collateralTypes.js')
 const { wearableTypes } = require('./wearableTypes.js')
 
-function addCommas(nStr) {
+function addCommas (nStr) {
   nStr += ''
   const x = nStr.split('.')
   let x1 = x[0]
@@ -20,11 +20,11 @@ function addCommas(nStr) {
   return x1 + x2
 }
 
-function strDisplay(str) {
+function strDisplay (str) {
   return addCommas(str.toString())
 }
 
-async function main() {
+async function main () {
   const accounts = await ethers.getSigners()
   const account = await accounts[0].getAddress()
   console.log('Account: ' + account)
@@ -62,7 +62,6 @@ async function main() {
     dao = await accounts[1].getAddress()
     rarityFarming = await accounts[2].getAddress()
     pixelCraft = await accounts[3].getAddress()
-
   } else if (hre.network.name === 'mainnet') {
     vrfCoordinator = '0xf0d54349aDdcf704F77AE15b96510dEA15cb7952'
     linkAddress = '0x514910771AF9Ca656af840dff83E8264EcF986CA'
@@ -71,10 +70,9 @@ async function main() {
     vouchersContractAddress = '0xe54891774EED9277236bac10d82788aee0Aed313'
     initialHauntSize = '10000'
 
-    dao = "todo" //await accounts[1].getAddress()
-    rarityFarming = "todo" //await accounts[2].getAddress()
-    pixelCraft = "todo" //await accounts[3].getAddress()
-
+    dao = 'todo' // await accounts[1].getAddress()
+    rarityFarming = 'todo' // await accounts[2].getAddress()
+    pixelCraft = 'todo' // await accounts[3].getAddress()
   } else if (hre.network.name === 'kovan') {
     vrfCoordinator = '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9'
     linkAddress = '0xa36085F69e2889c224210F603D836748e7dC0088'
@@ -83,15 +81,14 @@ async function main() {
     vouchersContractAddress = ''
     initialHauntSize = '10000'
 
-    dao = "todo" //await accounts[1].getAddress()
-    rarityFarming = "todo" //await accounts[2].getAddress()
-    pixelCraft = "todo" //await accounts[3].getAddress()
-
+    dao = 'todo' // await accounts[1].getAddress()
+    rarityFarming = 'todo' // await accounts[2].getAddress()
+    pixelCraft = 'todo' // await accounts[3].getAddress()
   } else {
     throw Error('No network settings for ' + hre.network.name)
   }
 
-  async function deployFacets(...facets) {
+  async function deployFacets (...facets) {
     const instances = []
     for (let facet of facets) {
       let constructorArgs = []
@@ -114,7 +111,7 @@ async function main() {
     diamondLoupeFacet,
     ownershipFacet,
     aavegotchiFacet,
-    svgStorageFacet,
+    svgFacet,
     wearablesFacet,
     collateralFacet,
     daoFacet,
@@ -125,7 +122,7 @@ async function main() {
     'DiamondLoupeFacet',
     'OwnershipFacet',
     'AavegotchiFacet',
-    'SvgStorageFacet',
+    'SvgFacet',
     'WearablesFacet',
     'CollateralFacet',
     'DAOFacet',
@@ -152,8 +149,6 @@ async function main() {
     console.log('GHST diamond address:' + ghstDiamond.address)
   }
 
-
-
   // eslint-disable-next-line no-unused-vars
   const aavegotchiDiamond = await diamond.deploy({
     diamondName: 'AavegotchiDiamond',
@@ -162,7 +157,7 @@ async function main() {
       ['DiamondLoupeFacet', diamondLoupeFacet],
       ['OwnershipFacet', ownershipFacet],
       ['AavegotchiFacet', aavegotchiFacet],
-      ['SvgStorageFacet', svgStorageFacet],
+      ['SvgFacet', svgFacet],
       ['WearablesFacet', wearablesFacet],
       ['CollateralFacet', collateralFacet],
       ['DAOFacet', daoFacet],
@@ -203,9 +198,9 @@ async function main() {
 
   // ----------------------------------------------------------------
   // Upload Svg layers
-  svgStorageFacet = await ethers.getContractAt('SvgStorageFacet', aavegotchiDiamond.address)
+  svgFacet = await ethers.getContractAt('SvgFacet', aavegotchiDiamond.address)
 
-  function setupSvg(...svgData) {
+  function setupSvg (...svgData) {
     const svgTypesAndSizes = []
     const svgs = []
     for (const [svgType, svg] of svgData) {
@@ -216,7 +211,7 @@ async function main() {
   }
 
   // eslint-disable-next-line no-unused-vars
-  function printSizeInfo(svgTypesAndSizes) {
+  function printSizeInfo (svgTypesAndSizes) {
     console.log('------------- SVG Size Info ---------------')
     let sizes = 0
     for (const [svgType, size] of svgTypesAndSizes) {
@@ -231,43 +226,43 @@ async function main() {
   console.log('Uploading aavegotchi and wearable Svgs')
   let svg, svgTypesAndSizes
   console.log('length:' + wearablesSvgs.length)
-    ;[svg, svgTypesAndSizes] = setupSvg(
-      ['wearables', wearablesSvgs.slice(0, 18)]
-    )
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['wearables', wearablesSvgs.slice(0, 18)]
+  )
   printSizeInfo(svgTypesAndSizes)
-  tx = await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded first 18 wearable SVGs')
   receipt = await tx.wait()
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-    ;[svg, svgTypesAndSizes] = setupSvg(
-      ['wearables', wearablesSvgs.slice(18)]
-    )
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['wearables', wearablesSvgs.slice(18)]
+  )
   printSizeInfo(svgTypesAndSizes)
-  tx = await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded last wearable SVGs')
   receipt = await tx.wait()
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-    ;[svg, svgTypesAndSizes] = setupSvg(
-      ['aavegotchi', aavegotchiSvgs]
-    )
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['aavegotchi', aavegotchiSvgs]
+  )
   printSizeInfo(svgTypesAndSizes)
-  tx = await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded aavegotchi SVGs')
   receipt = await tx.wait()
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   console.log('Uploading collaterals and eyeShapes')
-    ;[svg, svgTypesAndSizes] = setupSvg(
-      ['collaterals', collateralsSvgs],
-      ['eyeShapes', eyeShapeSvgs]
-    )
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['collaterals', collateralsSvgs],
+    ['eyeShapes', eyeShapeSvgs]
+  )
   // printSizeInfo(svgTypesAndSizes)
-  tx = await svgStorageFacet.storeSvg(svg, svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded SVGs')
   receipt = await tx.wait()
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
