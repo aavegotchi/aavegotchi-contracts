@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 import "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "hardhat/console.sol";
+import "../interfaces/IERC721.sol";
 // import "../interfaces/IERC1155TokenReceiver.sol";
 import "../libraries/LibERC1155.sol";
 
@@ -205,12 +206,31 @@ contract WearablesFacet {
         onlyUnlocked(_id)
     {
         require(_to != address(0), "Wearables: Can't transfer to 0 address");
-        address owner = s.aavegotchis[_fromTokenId].owner;
-        require(msg.sender == owner || s.operators[owner][msg.sender], "Wearables: Not owner and not approved to transfer");
-        //  require(!isAavegotchi(_id), "Wearables: Cannot transfer aavegotchi to token");
+        if (_fromContract == address(this)) {
+            address owner = s.aavegotchis[_fromTokenId].owner;
+            require(
+                msg.sender == owner || s.operators[owner][msg.sender] || msg.sender == s.approved[_fromTokenId],
+                "Wearables: Not owner and not approved to transfer"
+            );
+        } else {
+            address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
+            require(
+                owner == msg.sender ||
+                    IERC721(_fromContract).getApproved(_fromTokenId) == msg.sender ||
+                    IERC721(_fromContract).isApprovedForAll(owner, msg.sender),
+                "Wearables: Not owner and not approved to transfer"
+            );
+        }
         uint256 bal = s.nftBalances[_fromContract][_fromTokenId][_id];
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
-        s.nftBalances[_fromContract][_fromTokenId][_id] = bal - _value;
+        bal -= _value;
+        if (bal == 0 && _fromContract == address(this)) {
+            uint256 l_equippedWearables = s.aavegotchis[_fromTokenId].equippedWearables;
+            for (uint256 i; i < 16; i++) {
+                require(uint16(l_equippedWearables >> (i * 16)) != _id, "Wearables: Cannot transfer wearable that is equipped");
+            }
+        }
+        s.nftBalances[_fromContract][_fromTokenId][_id] = bal;
         s.wearables[_to][_id] += _value;
         emit TransferSingle(msg.sender, _fromContract, _to, _id, _value);
         emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
@@ -236,11 +256,31 @@ contract WearablesFacet {
         onlyUnlocked(_id)
     {
         require(_toContract != address(0), "Wearables: Can't transfer to 0 address");
-        address owner = s.aavegotchis[_fromTokenId].owner;
-        require(msg.sender == owner || s.operators[owner][msg.sender], "Wearables: Not owner and not approved to transfer");
+        if (_fromContract == address(this)) {
+            address owner = s.aavegotchis[_fromTokenId].owner;
+            require(
+                msg.sender == owner || s.operators[owner][msg.sender] || msg.sender == s.approved[_fromTokenId],
+                "Wearables: Not owner and not approved to transfer"
+            );
+        } else {
+            address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
+            require(
+                owner == msg.sender ||
+                    IERC721(_fromContract).getApproved(_fromTokenId) == msg.sender ||
+                    IERC721(_fromContract).isApprovedForAll(owner, msg.sender),
+                "Wearables: Not owner and not approved to transfer"
+            );
+        }
         uint256 bal = s.nftBalances[_fromContract][_fromTokenId][_id];
         require(_value <= bal, "Wearables: Doesn't have that many to transfer");
-        s.nftBalances[_fromContract][_fromTokenId][_id] = bal - _value;
+        bal -= _value;
+        if (bal == 0 && _fromContract == address(this)) {
+            uint256 l_equippedWearables = s.aavegotchis[_fromTokenId].equippedWearables;
+            for (uint256 i; i < 16; i++) {
+                require(uint16(l_equippedWearables >> (i * 16)) != _id, "Wearables: Cannot transfer wearable that is equipped");
+            }
+        }
+        s.nftBalances[_fromContract][_fromTokenId][_id] = bal;
         s.nftBalances[_toContract][_toTokenId][_id] += _value;
         emit TransferSingle(msg.sender, _fromContract, _toContract, _id, _value);
         emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
@@ -294,15 +334,6 @@ contract WearablesFacet {
         }
     }
 
-    function wearableIdToSlotPositions(uint256 _wearableIds, uint256 _wearableId) internal pure returns (uint256 wearableIdSlotPositions_) {
-        for (uint256 slot; slot < 16; slot++) {
-            uint256 wearableId = uint16(_wearableIds >> (16 * slot));
-            if (wearableId == _wearableId) {
-                wearableIdSlotPositions_ |= 1 << (1 * slot);
-            }
-        }
-    }
-
     function equippedWearables(uint256 _tokenId) external view returns (uint256[16] memory wearableIds_) {
         uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
         for (uint16 i; i < 16; i++) {
@@ -328,19 +359,9 @@ contract WearablesFacet {
 
             //To do (Nick): Verify that slots are being calculated properly
 
-            uint256 slotPositions = uint240(wearableType.slotPositions);
+            uint256 slotPosition = (wearableType.slotPositions >> slot) & 1;
+            require(slotPosition == 1, "WearablesFacet: Wearable cannot be equipped in this slot");
             bool canBeEquipped;
-            for (uint256 i; i < 16; i++) {
-                uint256 slotPosition = uint8(slotPositions >> (8 * i));
-                console.log("slot position:", slotPosition);
-                console.log("slot:", slot);
-                if (slotPosition == slot) {
-                    canBeEquipped = true;
-                    // break;
-                }
-            }
-            require(canBeEquipped == true, "WearablesFacet: Wearable cannot be equipped in this slot");
-            canBeEquipped = false;
             uint256 allowedCollaterals = wearableType.allowedCollaterals;
             if (allowedCollaterals > 0) {
                 uint256 collateralIndex = s.collateralTypeIndexes[aavegotchi.collateralType];
@@ -367,8 +388,9 @@ contract WearablesFacet {
     }
 
     struct WearableSetIO {
+        string name;
         uint256[] wearableIds;
-        uint256[] traitsBonuses;
+        int256[5] traitsBonuses;
     }
 
     // Called by off chain software so not too concerned about gas costs
@@ -383,8 +405,12 @@ contract WearablesFacet {
     function getWearableSet(uint256 _index) public view returns (WearableSetIO memory wearableSet_) {
         uint256 length = s.wearableSets.length;
         require(_index < length, "WearablesFacet: Wearable set does not exist");
+        wearableSet_.name = s.wearableSets[_index].name;
         wearableSet_.wearableIds = LibAppStorage.uintToSixteenBitArray(s.wearableSets[_index].wearableIds);
-        wearableSet_.traitsBonuses = LibAppStorage.uintToSixteenBitArray(s.wearableSets[_index].traitsBonuses);
+        int256 traitsBonuses = s.wearableSets[_index].traitsBonuses;
+        for (uint256 i; i < 5; i++) {
+            wearableSet_.traitsBonuses[i] = int16(traitsBonuses >> (16 * i));
+        }
     }
 
     function totalWearableSets() external view returns (uint256) {

@@ -8,7 +8,6 @@ const WEARABLE_SLOT_HAND_LEFT = 4
 const WEARABLE_SLOT_HAND_RIGHT = 5
 const WEARABLE_SLOT_PET = 6
 
-
 const wearableTypes = [
 
   {
@@ -23,7 +22,9 @@ const wearableTypes = [
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
 
   },
 
@@ -35,11 +36,13 @@ const wearableTypes = [
     traitModifiers: [0, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0, 1],
+    slotPositions: [true, true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
 
   },
   {
@@ -50,11 +53,13 @@ const wearableTypes = [
     traitModifiers: [0, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0, 9],
+    slotPositions: [true, false, false, false, false, false, false, false, false, true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
 
   },
   {
@@ -65,11 +70,13 @@ const wearableTypes = [
     traitModifiers: [0, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 4,
@@ -79,11 +86,13 @@ const wearableTypes = [
     traitModifiers: [0, 1, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 5,
@@ -93,11 +102,13 @@ const wearableTypes = [
     traitModifiers: [0, 1, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 6,
@@ -107,11 +118,13 @@ const wearableTypes = [
     traitModifiers: [0, 2, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 7,
@@ -121,11 +134,13 @@ const wearableTypes = [
     traitModifiers: [0, 2, 0, 1, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 8,
@@ -135,11 +150,13 @@ const wearableTypes = [
     traitModifiers: [0, 2, 0, 1, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 9,
@@ -149,11 +166,13 @@ const wearableTypes = [
     traitModifiers: [1, 0, 1, 1, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 10,
@@ -163,11 +182,13 @@ const wearableTypes = [
     traitModifiers: [0, 2, 0, 2, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 11,
@@ -177,11 +198,13 @@ const wearableTypes = [
     traitModifiers: [0, 2, 0, 2, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 12,
@@ -191,11 +214,13 @@ const wearableTypes = [
     traitModifiers: [2, 0, 0, -2, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 13,
@@ -205,11 +230,13 @@ const wearableTypes = [
     traitModifiers: [-1, -1, 0, 3, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 14,
@@ -219,11 +246,13 @@ const wearableTypes = [
     traitModifiers: [0, 0, 1, 4, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 15,
@@ -233,11 +262,13 @@ const wearableTypes = [
     traitModifiers: [3, 2, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 16,
@@ -247,11 +278,13 @@ const wearableTypes = [
     traitModifiers: [-4, -2, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 17,
@@ -261,11 +294,13 @@ const wearableTypes = [
     traitModifiers: [0, 0, 0, 6, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 18,
@@ -275,11 +310,13 @@ const wearableTypes = [
     traitModifiers: [0, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 19,
@@ -289,11 +326,13 @@ const wearableTypes = [
     traitModifiers: [0, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 20,
@@ -303,11 +342,13 @@ const wearableTypes = [
     traitModifiers: [0, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 21,
@@ -317,11 +358,13 @@ const wearableTypes = [
     traitModifiers: [1, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 22,
@@ -331,11 +374,13 @@ const wearableTypes = [
     traitModifiers: [1, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 23,
@@ -345,11 +390,13 @@ const wearableTypes = [
     traitModifiers: [2, 0, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 24,
@@ -359,11 +406,13 @@ const wearableTypes = [
     traitModifiers: [2, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 25,
@@ -373,11 +422,13 @@ const wearableTypes = [
     traitModifiers: [2, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 26,
@@ -387,11 +438,13 @@ const wearableTypes = [
     traitModifiers: [3, 0, 0, 1, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 27,
@@ -401,11 +454,13 @@ const wearableTypes = [
     traitModifiers: [2, 2, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 28,
@@ -415,11 +470,13 @@ const wearableTypes = [
     traitModifiers: [2, 2, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 29,
@@ -429,11 +486,13 @@ const wearableTypes = [
     traitModifiers: [0, 0, 0, -4, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 30,
@@ -443,11 +502,13 @@ const wearableTypes = [
     traitModifiers: [0, -2, 3, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 31,
@@ -457,11 +518,13 @@ const wearableTypes = [
     traitModifiers: [-3, 0, 1, 1, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 32,
@@ -471,11 +534,13 @@ const wearableTypes = [
     traitModifiers: [0, -2, 3, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 33,
@@ -485,11 +550,13 @@ const wearableTypes = [
     traitModifiers: [0, -3, 0, 3, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 34,
@@ -499,11 +566,13 @@ const wearableTypes = [
     traitModifiers: [3, -3, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   },
   {
     svgId: 35,
@@ -513,15 +582,17 @@ const wearableTypes = [
     traitModifiers: [0, -6, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0
   }
 ]
 
-function eightBitIntArrayToUint(array) {
+function eightBitIntArrayToUint (array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -533,7 +604,7 @@ function eightBitIntArrayToUint(array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function eightBitUintArrayToUint(array) {
+function eightBitUintArrayToUint (array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -545,13 +616,25 @@ function eightBitUintArrayToUint(array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function getWearableTypes() {
+function boolsArrayToUint16 (bools) {
+  const uint = []
+  for (const b of bools) {
+    if (b) {
+      uint.unshift('1')
+    } else {
+      uint.unshift('0')
+    }
+  }
+  return parseInt(uint.join('').padStart(16, '0'), 2)
+}
+
+function getWearableTypes () {
   const result = []
   for (const wearableType of wearableTypes) {
     wearableType.traitModifiers = eightBitIntArrayToUint(wearableType.traitModifiers)
     // console.log(wearableType.slotPositions)
     // console.log(slotPositionsToUint(wearableType.slotPositions).toString())
-    wearableType.slotPositions = eightBitUintArrayToUint(wearableType.slotPositions)
+    wearableType.slotPositions = boolsArrayToUint16(wearableType.slotPositions)
     wearableType.allowedCollaterals = 0
     result.push(wearableType)
   }

@@ -15,7 +15,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { wearableTypes } = require('../scripts/wearableTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray(uint, numBytes) {
+function uintToIntArray (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -24,7 +24,7 @@ function uintToIntArray(uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint(array) {
+function sixteenBitArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -36,7 +36,7 @@ function sixteenBitArrayToUint(array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function uintToWearableIds(uint) {
+function uintToWearableIds (uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -368,7 +368,7 @@ describe('Wearables', async function () {
     expect(await global.wearablesFacet.balanceOfToken(aavegotchiFacet.address, testAavegotchiId, testWearableId)).to.equal(10)
 
     const wearableIds = sixteenBitArrayToUint([testWearableId])
-    console.log(wearableIds.toString())
+    // console.log(wearableIds.toString())
     await global.wearablesFacet.equipWearables(testAavegotchiId, wearableIds)
     const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
 
@@ -385,13 +385,13 @@ describe('Wearables', async function () {
 
   })
 
-
   it('Cannot equip wearables in the wrong slot', async function () {
-
     const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
-    console.log('equipped:', equipped)
+    // console.log('equipped:', equipped)
+    // console.log('wearableId: ' + testWearableId)
 
-    const wearableIds = sixteenBitArrayToUint([0, 0, 0, testWearableId])
+    const wearableIds = sixteenBitArrayToUint([testWearableId, 0, 0, 0])
+    // console.log('wearableId: ' + wearableIds)
 
     await truffleAssert.reverts(wearablesFacet.equipWearables(testAavegotchiId, wearableIds), 'WearablesFacet: Wearable cannot be equipped in this slot')
   })
@@ -412,14 +412,14 @@ describe('Wearables', async function () {
     let wearableIds = sixteenBitArrayToUint([0])
     await global.wearablesFacet.equipWearables(testAavegotchiId, wearableIds)
     const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
-    expect(equipped[testSlot]).to.equal("0")
+    expect(equipped[testSlot]).to.equal('0')
 
-    //Get score before equipping
+    // Get score before equipping
     const originalScore = (await global.aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)).rarityScore_.toString()
 
     // Equip a wearable
     wearableIds = sixteenBitArrayToUint([testWearableId])
-    console.log(wearableIds.toString())
+    // console.log(wearableIds.toString())
     await global.wearablesFacet.equipWearables(testAavegotchiId, wearableIds)
 
     // Calculate bonuses
@@ -466,26 +466,25 @@ describe('Haunts', async function () {
   })
 })
 
-describe("Revenue transfers", async function () {
+describe('Revenue transfers', async function () {
   it('Buying portals should send revenue to 4 wallets', async function () {
-
-    //0 = burn (33%)
-    //1 = dao (10%)
-    //2 = rarity (40%)
-    //3 = pixelcraft (17%)
+    // 0 = burn (33%)
+    // 1 = dao (10%)
+    // 2 = rarity (40%)
+    // 3 = pixelcraft (17%)
 
     let revenueShares = await global.aavegotchiFacet.revenueShares()
-    let beforeBalances = []
+    const beforeBalances = []
     for (let index = 0; index < 4; index++) {
-      const address = revenueShares[index];
+      const address = revenueShares[index]
       const balance = await global.ghstDiamond.balanceOf(address)
       beforeBalances[index] = balance
     }
 
-    //Buy 10 Portals
+    // Buy 10 Portals
     await global.aavegotchiFacet.buyPortals(account, ethers.utils.parseEther('1000'), true)
 
-    //Calculate shares from 100 Portals
+    // Calculate shares from 100 Portals
     const burnShare = ethers.utils.parseEther('330')
     const daoShare = ethers.utils.parseEther('100')
     const rarityShare = ethers.utils.parseEther('400')
@@ -493,17 +492,15 @@ describe("Revenue transfers", async function () {
     const shares = [burnShare, daoShare, rarityShare, pixelCraftShare]
     revenueShares = await global.aavegotchiFacet.revenueShares()
 
-    //Verify the new balances
+    // Verify the new balances
     for (let index = 0; index < 4; index++) {
-      const address = revenueShares[index];
+      const address = revenueShares[index]
 
       const beforeBalance = ethers.BigNumber.from(beforeBalances[index])
       const afterBalance = ethers.BigNumber.from(await global.ghstDiamond.balanceOf(address))
       expect(afterBalance).to.equal(beforeBalance.add(shares[index]))
     }
-
   })
-
 })
 
 describe('Shop and Vouchers', async function () {
@@ -661,31 +658,28 @@ describe('Leveling up', async function () {
   })
 
   it('Should spend 3 skill points to modify traits', async function () {
-
-    let oldAavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
+    const oldAavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
 
     await truffleAssert.reverts(aavegotchiFacet.spendSkillPoints(testAavegotchiId, [1, 1, 1, 1]), 'AavegotchiFacet: Not enough skill points')
     await global.aavegotchiFacet.spendSkillPoints(testAavegotchiId, [1, 1, 1, 0])
     const skillPoints = await global.aavegotchiFacet.availableSkillPoints(testAavegotchiId)
     expect(skillPoints).to.equal(0)
 
-    let newAavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
+    const newAavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
 
-    //Check if numericTraits were modified
-    let skillArray = [1, 1, 1, 0, 0, 0]
+    // Check if numericTraits were modified
+    const skillArray = [1, 1, 1, 0, 0, 0]
     for (let index = 0; index < oldAavegotchi.numericTraits.length; index++) {
-      const oldTrait = Number(oldAavegotchi.numericTraits[index]);
-      let newTrait = Number(newAavegotchi.numericTraits[index])
+      const oldTrait = Number(oldAavegotchi.numericTraits[index])
+      const newTrait = Number(newAavegotchi.numericTraits[index])
       expect(newTrait).to.equal(oldTrait + skillArray[index])
     }
-
-
   })
 })
 
-describe("Game manager", async function () {
+describe('Game manager', async function () {
   it('Only admin can set game manager', async function () {
-    //To do: Check revert using another account
+    // To do: Check revert using another account
     await daoFacet.setGameManager(account)
     const gameManager = await daoFacet.gameManager()
     expect(gameManager).to.equal(account)

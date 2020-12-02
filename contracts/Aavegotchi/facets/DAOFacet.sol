@@ -116,7 +116,7 @@ contract DAOFacet {
         }
     }
 
-    function addWearableSets(WearableSet[] calldata _wearableSets) external onlyDaoOrOwner() {
+    function addWearableSets(WearableSet[] memory _wearableSets) external onlyDaoOrOwner() {
         for (uint256 i; i < _wearableSets.length; i++) {
             s.wearableSets.push(_wearableSets[i]);
         }

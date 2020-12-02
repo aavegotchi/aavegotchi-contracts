@@ -42,20 +42,22 @@ struct WearableType {
     // treated as six 8 ints array
 
     int256 traitModifiers; //How much the wearable modifies each trait. Should not be more than +-5 total
+    uint256 allowedCollaterals; //The collaterals this wearable can be equipped to. An empty array is "any"
     string name; //The name of the wearable
+    uint96 ghstPrice;
+    uint32 svgId; //The svgId of the wearable
     uint32 maxQuantity; //Total number that can be minted of this wearable. Can calculate the rarity level from this number.
     uint8 rarityScoreModifier; //Number from 1-50.
     uint8 setId; //The id of the set. Zero is no set
-    // used as a sixteen 16 bits array
-    uint256 slotPositions; //The slots that this wearable can be added to.
-    uint256 svgId; //The svgId of the wearable
-    uint32 totalQuantity; //The total quantity of this wearable minted so far
-    uint96 ghstPrice;
+    // Each bit is a slot position. 1 is true, 0 is false
+    uint16 slotPositions; //The slots that this wearable can be added to.
     bool canPurchaseWithGhst;
+    uint32 totalQuantity; //The total quantity of this wearable minted so far
+    uint8 minLevel; //The minimum Aavegotchi level required to equip this wearable. Default is 1.
+    bool canBeTransferred;
+    uint8 category; // 0 is wearable, 1 is badge, 2 is consumable
     // used as a sixteen 16 bits array
     // index into the collateralTypes array
-    uint256 allowedCollaterals; //The collaterals this wearable can be equipped to. An empty array is "any"
-    uint8 minLevel; //The minimum Aavegotchi level required to equip this wearable. Default is 1.
 
     //A hand wearable can be equipped in left hand, right hand, both hands
     //So its allowedSlots are 4,5, and 7.
@@ -79,8 +81,9 @@ struct WearableType {
 }
 
 struct WearableSet {
+    string name;
     uint256 wearableIds; // The tokenIdS of each piece of the set
-    uint256 traitsBonuses;
+    int256 traitsBonuses;
 }
 
 struct Haunt {
