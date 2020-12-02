@@ -390,7 +390,7 @@ describe('Wearables', async function () {
     // console.log('equipped:', equipped)
     // console.log('wearableId: ' + testWearableId)
 
-    const wearableIds = sixteenBitArrayToUint([testWearableId, 0, 0, 0])
+    const wearableIds = sixteenBitArrayToUint([testWearableId, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
     // console.log('wearableId: ' + wearableIds)
 
     await truffleAssert.reverts(wearablesFacet.equipWearables(testAavegotchiId, wearableIds), 'WearablesFacet: Wearable cannot be equipped in this slot')

@@ -29,6 +29,7 @@ contract WearablesFacet {
 
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
+    uint256 internal constant WEARABLE_CATEGORY = 0;
 
     uint256 internal constant NUMERIC_TRAITS_NUM = 6;
 
@@ -354,6 +355,7 @@ contract WearablesFacet {
             }
             WearableType storage wearableType = s.wearableTypes[wearableId];
             require(aavegotchiLevel >= wearableType.minLevel, "WearablesFacet: Aavegotchi level lower than minLevel");
+            require(wearableType.category == WEARABLE_CATEGORY, "WearableFacet: Only wearables can be equippped");
 
             //Check if the wearable can be equipped in this position
 
