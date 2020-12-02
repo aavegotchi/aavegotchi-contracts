@@ -387,14 +387,18 @@ describe('Wearables', async function () {
 
 
   it('Cannot equip wearables in the wrong slot', async function () {
-    //  await truffleAssert.reverts(wearablesFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([testWearableId, 0, 0])), 'WearablesFacet: Wearable cannot be equipped in this slot')
+
+    const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
+    console.log('equipped:', equipped)
+
+    const wearableIds = sixteenBitArrayToUint([0, 0, 0, testWearableId])
+
+    await truffleAssert.reverts(wearablesFacet.equipWearables(testAavegotchiId, wearableIds), 'WearablesFacet: Wearable cannot be equipped in this slot')
   })
 
   it('Can equip wearables from owners inventory', async function () {
 
   })
-
-
 
   /*
   it('Can display aavegotchi with wearables', async function () {
@@ -402,16 +406,6 @@ describe('Wearables', async function () {
     console.log(svg)
   })
   */
-
-
-
-  //   it('Can de-equip wearables', async function () {
-  //     await global.wearablesFacet.unequipWearables(testAavegotchiId, [testSlot])
-  //     const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
-
-  //     expect(equipped.length).to.equal(16)
-  //     expect(equipped[testSlot]).to.equal(0)
-  //   })
 
   it('Equipping Wearables alters base rarity score', async function () {
     // Unequip all wearables

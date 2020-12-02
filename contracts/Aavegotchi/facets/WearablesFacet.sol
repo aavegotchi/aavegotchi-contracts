@@ -325,13 +325,18 @@ contract WearablesFacet {
             require(aavegotchiLevel >= wearableType.minLevel, "WearablesFacet: Aavegotchi level lower than minLevel");
 
             //Check if the wearable can be equipped in this position
+
+            //To do (Nick): Verify that slots are being calculated properly
+
             uint256 slotPositions = uint240(wearableType.slotPositions);
             bool canBeEquipped;
             for (uint256 i; i < 16; i++) {
                 uint256 slotPosition = uint8(slotPositions >> (8 * i));
+                console.log("slot position:", slotPosition);
+                console.log("slot:", slot);
                 if (slotPosition == slot) {
                     canBeEquipped = true;
-                    break;
+                    // break;
                 }
             }
             require(canBeEquipped == true, "WearablesFacet: Wearable cannot be equipped in this slot");
