@@ -171,7 +171,6 @@ contract SvgFacet {
         }
     }
 
-    //To do (done): would be great if we could move this to SvgStorageFacet
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
     function getAavegotchiSvg(uint256 _tokenId) public view returns (string memory ag_) {
         require(s.aavegotchis[_tokenId].owner != address(0), "AavegotchiFacet: _tokenId does not exist");
@@ -192,8 +191,8 @@ contract SvgFacet {
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-        AavegotchiFacet.PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits =
-            AavegotchiFacet(address(this)).portalAavegotchiTraits(_tokenId);
+        AavegotchiFacet.PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = AavegotchiFacet(address(this))
+            .portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
             address collateralType = l_portalAavegotchiTraits[i].collateralType;
             int256 numericTraits = l_portalAavegotchiTraits[i].numericTraits;

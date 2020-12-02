@@ -7,7 +7,7 @@ import "../../shared/interfaces/IERC20.sol";
 import "../libraries/LibSvg.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
-// import "hardhat/console.sol";
+//import "hardhat/console.sol";
 import "../CollateralEscrow.sol";
 import "../libraries/LibVrf.sol";
 
@@ -249,6 +249,7 @@ contract AavegotchiFacet {
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(_numericTraits >> (i * 16));
             int256 mod = int8(modifiers >> (i * 8));
+
             if (number >= 50) {
                 _rarityScore = _rarityScore + number + mod;
             } else {
@@ -257,11 +258,17 @@ contract AavegotchiFacet {
         }
     }
 
+    struct ModifiedRarityScore {
+        int256 rarityScore_;
+        int256[NUMERIC_TRAITS_NUM] numericTraits_;
+    }
+
     //Only valid for claimed Aavegotchis
     function calculateModifiedRarityScore(uint256 _tokenId)
         external
         view
-        returns (int256 rarityScore_, int256[NUMERIC_TRAITS_NUM] memory numericTraits_)
+        returns (ModifiedRarityScore memory info_)
+    // returns (ModifiedRarityScore(int256 rarityScore_, int256[NUMERIC_TRAITS_NUM] memory numericTraits_))
     {
         //To test (Dan): Should return final rarity score inlcuding wearables (but not sets)
         //To test (Dan): Can also return the final numericTraits including wearable modifiers
@@ -287,15 +294,16 @@ contract AavegotchiFacet {
                 // clear bits first then assign
                 newNumericTraits |= (uint256(number) & 0xffff) << (j * 16);
             }
+
             numericTraits = int256(newNumericTraits);
             wearableBonus += wearableType.rarityScoreModifier;
         }
         address collateral = s.aavegotchis[_tokenId].collateralType;
         int256 baseRarity = calculateBaseRarityScore(numericTraits, collateral);
-        rarityScore_ = baseRarity + wearableBonus;
+        info_.rarityScore_ = baseRarity + wearableBonus;
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(numericTraits >> (i * 16));
-            numericTraits_[i] = number;
+            info_.numericTraits_[i] = number;
         }
     }
 

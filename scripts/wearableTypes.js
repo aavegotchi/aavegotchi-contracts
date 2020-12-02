@@ -7,13 +7,6 @@ const WEARABLE_SLOT_HEAD = 3
 const WEARABLE_SLOT_HAND_LEFT = 4
 const WEARABLE_SLOT_HAND_RIGHT = 5
 const WEARABLE_SLOT_PET = 6
-/*const WEARABLE_SLOT_HEAD_BODY = 4
-const WEARABLE_SLOT_HEAD_FACE = 5
-const WEARABLE_SLOT_HEAD_FACE_EYES = 6
-const WEARABLE_SLOT_HEAD_EYES = 7
-const WEARABLE_SLOT_FACE_EYES = 8*/
-
-//const WEARABLE_SLOT_HANDS_BOTH = 11
 
 
 const wearableTypes = [
@@ -42,7 +35,7 @@ const wearableTypes = [
     traitModifiers: [0, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [0, 3],
+    slotPositions: [0, 1],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],

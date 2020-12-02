@@ -413,41 +413,35 @@ describe('Wearables', async function () {
   //     expect(equipped[testSlot]).to.equal(0)
   //   })
 
-  //   it('Equipping Wearables alters base rarity score', async function () {
-  //     // Wearables sanity check
-  //     const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
-  //     expect(equipped[testSlot]).to.equal(0)
-  //     const originalScore = await global.aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
+  it('Equipping Wearables alters base rarity score', async function () {
+    // Unequip all wearables
+    let wearableIds = sixteenBitArrayToUint([0])
+    await global.wearablesFacet.equipWearables(testAavegotchiId, wearableIds)
+    const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
+    expect(equipped[testSlot]).to.equal("0")
 
-  //     // Equip a wearable
-  //     await global.wearablesFacet.equipWearables(testAavegotchiId, [testWearableId], [testSlot])
+    //Get score before equipping
+    const originalScore = (await global.aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)).rarityScore_.toString()
 
-  //     // Calculate bonuses
-  //     const modifiers = uintToIntArray(wearableTypes[testWearableId].traitModifiers, 6)
-  //     let wearableTraitsBonus = 0
-  //     const rarityScoreModifier = wearableTypes[testWearableId].rarityScoreModifier
-  //     modifiers.forEach((val) => { wearableTraitsBonus += val })
-  //     // Retrieve the final score
-  //     const augmentedScore = await global.aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)
-  //     // console.log(originalScore.toString(), augmentedScore.toString())
-  //     expect(augmentedScore).to.equal(Number(originalScore) + rarityScoreModifier + wearableTraitsBonus)
-  //   })
+    // Equip a wearable
+    wearableIds = sixteenBitArrayToUint([testWearableId])
+    console.log(wearableIds.toString())
+    await global.wearablesFacet.equipWearables(testAavegotchiId, wearableIds)
 
-  //   it('Can equip multi-slot wearables', async function () {
-  //     const multiSlotWearableId = '2'
-  //     await global.wearablesFacet.mintWearables(account, [multiSlotWearableId], ['10'])
+    // Calculate bonuses
+    const modifiers = uintToIntArray(wearableTypes[testWearableId].traitModifiers, 6)
+    let wearableTraitsBonus = 0
+    const rarityScoreModifier = wearableTypes[testWearableId].rarityScoreModifier
+    modifiers.forEach((val) => {
+      wearableTraitsBonus += val
+    })
 
-  //     await global.wearablesFacet.transferToParent(
-  //       global.account, global.aavegotchiFacet.address, testAavegotchiId, multiSlotWearableId, '10')
-  //     await global.wearablesFacet.equipWearables(testAavegotchiId, [multiSlotWearableId], ['9'])
-  //     const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
+    // Retrieve the final score
+    const augmentedScore = (await global.aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)).rarityScore_.toString()
 
-  //     // const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
-  //     // console.log(aavegotchi.equippedWearables)
-
-  //     // This wearable gets equipped in the ninth slot, which takes up 0&1 slots
-  //     expect(equipped[9]).to.equal('2')
-  //   })
+    const finalScore = Number(originalScore) + Number(rarityScoreModifier) + Number(wearableTraitsBonus)
+    expect(Number(augmentedScore)).to.equal(finalScore)
+  })
 })
 
 describe('Haunts', async function () {

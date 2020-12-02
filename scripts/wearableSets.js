@@ -1,5 +1,11 @@
 /* global ethers */
 
+//Rarity bonus
+//nrg
+//agg
+//spk
+//brn
+
 const wearableSetArrays = [
   // 0, camo infantry
   { wearableIds: [1, 2, 3], traitsBonuses: [1, 0, 1, 0, 0] },
@@ -18,7 +24,7 @@ const wearableSetArrays = [
 
 ]
 
-function sixteenBitArrayToUint (array) {
+function sixteenBitArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
