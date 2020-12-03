@@ -430,4 +430,16 @@ contract ItemsFacet {
         }
         emit TransferBatch(msg.sender, msg.sender, address(0), _itemIds, _amounts);
     }
+
+    function getItemType(uint256 _itemId) public view returns (ItemType memory itemType_) {
+        require(_itemId < s.itemTypes.length, "ItemsFacet: Item type doesn't exist");
+        itemType_ = s.itemTypes[_itemId];
+    }
+
+    function getItemTypes() external view returns (ItemType[] memory itemTypes_) {
+        uint256 length = s.itemTypes.length;
+        for (uint256 i; i < length; i++) {
+            itemTypes_[i] = getItemType(i);
+        }
+    }
 }
