@@ -350,7 +350,7 @@ contract ItemsFacet {
             }
             ItemType storage itemType = s.itemTypes[wearableId];
             require(aavegotchiLevel >= itemType.minLevel, "ItemsFacet: Aavegotchi level lower than minLevel");
-            require(itemType.category == LibAppStorage.WEARABLE_CATEGORY, "ItemsFacet: Only wearables can be equippped");
+            require(itemType.category == LibAppStorage.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
 
             // bitmask and bitwise operators used here. Info on them: https://code.tutsplus.com/articles/understanding-bitwise-operators--active-11301
             uint256 slotAllowed = (itemType.slotPositions >> slot) & 1;
@@ -409,5 +409,25 @@ contract ItemsFacet {
 
     function totalWearableSets() external view returns (uint256) {
         return s.wearableSets.length;
+    }
+
+    function useConsumables(
+        uint256 _tokenId,
+        uint256[] calldata _itemIds,
+        uint256[] calldata _amounts
+    ) external {
+        require(_itemIds.length == _amounts.length, "ItemsFacet: _itemIds length does not match _amounts length");
+        for (uint256 i; i < _itemIds.length; i++) {
+            uint256 consumableId = _itemIds[i];
+            ItemType storage itemType = s.itemTypes[consumableId];
+            require(itemType.category == LibAppStorage.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
+            uint256 amount = _amounts[i];
+            uint256 bal = s.items[msg.sender][consumableId];
+            require(amount <= bal, "Items: Do not have that many to consume");
+            s.items[msg.sender][consumableId] = bal - amount;
+            s.aavegotchis[_tokenId].interactionCount += itemType.kinshipBonus;
+            itemType.totalQuantity -= uint32(bal);
+        }
+        emit TransferBatch(msg.sender, msg.sender, address(0), _itemIds, _amounts);
     }
 }

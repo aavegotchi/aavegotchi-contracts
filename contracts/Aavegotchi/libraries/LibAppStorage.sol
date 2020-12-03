@@ -40,8 +40,8 @@ struct Aavegotchi {
 
 struct ItemType {
     // treated as six 8 ints array
-
     int256 traitModifiers; //How much the wearable modifies each trait. Should not be more than +-5 total
+    // this is an array of uint indexes into the collateralTypes array
     uint256 allowedCollaterals; //The collaterals this wearable can be equipped to. An empty array is "any"
     string name; //The name of the wearable
     uint96 ghstPrice;
@@ -56,6 +56,7 @@ struct ItemType {
     uint8 minLevel; //The minimum Aavegotchi level required to equip this wearable. Default is 1.
     bool canBeTransferred;
     uint8 category; // 0 is wearable, 1 is badge, 2 is consumable
+    uint8 kinshipBonus;
     // used as a sixteen 16 bits array
     // index into the collateralTypes array
 
@@ -159,7 +160,9 @@ library LibAppStorage {
     uint8 internal constant WEARABLE_SLOT_HANDS_BOTH = 6;
     uint8 internal constant WEARABLE_SLOT_PET = 7;
 
-    uint256 internal constant WEARABLE_CATEGORY = 0;
+    uint256 internal constant ITEM_CATEGORY_WEARABLE = 0;
+    uint256 internal constant ITEM_CATEGORY_BADGE = 1;
+    uint256 internal constant ITEM_CATEGORY_CONSUMABLE = 2;
 
     //Can we update this with a diamond upgrade?
     uint8 internal constant WEARABLE_SLOTS_TOTAL = 11;

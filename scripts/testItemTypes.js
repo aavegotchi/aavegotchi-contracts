@@ -17,7 +17,8 @@ const itemTypes = [
     allowedCollaterals: [],
     minLevel: 1,
     canBeTransferred: true,
-    category: 0
+    category: 0,
+    kinshipBonus: 0
   },
 
   {
@@ -34,7 +35,8 @@ const itemTypes = [
     allowedCollaterals: [],
     minLevel: 1,
     canBeTransferred: true,
-    category: 0
+    category: 0,
+    kinshipBonus: 0
   },
   {
     svgId: 2,
@@ -50,7 +52,8 @@ const itemTypes = [
     allowedCollaterals: [],
     minLevel: 1,
     canBeTransferred: true,
-    category: 0
+    category: 0,
+    kinshipBonus: 0
 
   },
   {
@@ -67,7 +70,8 @@ const itemTypes = [
     allowedCollaterals: [],
     minLevel: 1,
     canBeTransferred: true,
-    category: 0
+    category: 0,
+    kinshipBonus: 0
   },
   {
     svgId: 4,
@@ -83,7 +87,8 @@ const itemTypes = [
     allowedCollaterals: [],
     minLevel: 1,
     canBeTransferred: true,
-    category: 0
+    category: 0,
+    kinshipBonus: 0
   },
   {
     svgId: 5,
@@ -99,7 +104,8 @@ const itemTypes = [
     allowedCollaterals: [],
     minLevel: 1,
     canBeTransferred: true,
-    category: 0
+    category: 0,
+    kinshipBonus: 0
   },
   {
     svgId: 6,
@@ -115,7 +121,8 @@ const itemTypes = [
     allowedCollaterals: [],
     minLevel: 1,
     canBeTransferred: true,
-    category: 0
+    category: 0,
+    kinshipBonus: 0
   }
 ]
 
