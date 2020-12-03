@@ -17,7 +17,7 @@ import "../shared/interfaces/IDiamondCut.sol";
 import "../shared/interfaces/IDiamondLoupe.sol";
 import "./facets/AavegotchiFacet.sol";
 import "./facets/SvgFacet.sol";
-import "./facets/WearablesFacet.sol";
+import "./facets/ItemsFacet.sol";
 import "../shared/libraries/LibDiamond.sol";
 import "./libraries/LibVrf.sol";
 

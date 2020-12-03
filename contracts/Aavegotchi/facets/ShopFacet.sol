@@ -20,27 +20,27 @@ contract ShopFacet {
         im_vouchersContract = _vouchersContract;
     }
 
-    function purchaseWearablesWithGhst(
+    function purchaseItemsWithGhst(
         address _to,
-        uint256[] calldata _wearableIds,
+        uint256[] calldata _itemIds,
         uint256[] calldata _quantities
     ) external {
-        require(_wearableIds.length == _quantities.length, "ShopFacet: _wearableIds not same length as _quantities");
+        require(_itemIds.length == _quantities.length, "ShopFacet: _itemIds not same length as _quantities");
 
         uint256 totalPrice;
-        for (uint256 i; i < _wearableIds.length; i++) {
-            uint256 wearableId = _wearableIds[i];
+        for (uint256 i; i < _itemIds.length; i++) {
+            uint256 itemId = _itemIds[i];
             uint256 quantity = _quantities[i];
-            WearableType storage wearableType = s.wearableTypes[wearableId];
-            require(wearableType.canPurchaseWithGhst, "ShopFacet: Can't purchase wearable type with GHST");
-            uint256 totalQuantity = wearableType.totalQuantity + quantity;
-            require(totalQuantity <= wearableType.maxQuantity, "ShopFacet: Total wearable type quantity exceeds max quantity");
-            wearableType.totalQuantity = uint32(totalQuantity);
-            totalPrice += quantity * wearableType.ghstPrice;
-            s.wearables[_to][wearableId] += quantity;
+            ItemType storage itemType = s.itemTypes[itemId];
+            require(itemType.canPurchaseWithGhst, "ShopFacet: Can't purchase item type with GHST");
+            uint256 totalQuantity = itemType.totalQuantity + quantity;
+            require(totalQuantity <= itemType.maxQuantity, "ShopFacet: Total item type quantity exceeds max quantity");
+            itemType.totalQuantity = uint32(totalQuantity);
+            totalPrice += quantity * itemType.ghstPrice;
+            s.items[_to][itemId] += quantity;
         }
 
-        LibERC1155.onERC1155BatchReceived(msg.sender, _to, _wearableIds, _quantities, "");
+        LibERC1155.onERC1155BatchReceived(msg.sender, _to, _itemIds, _quantities, "");
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
         require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
 
@@ -49,7 +49,7 @@ contract ShopFacet {
 
     //Burn the voucher
     //Mint the wearable and transfer to user
-    function purchaseWearablesWithVouchers(
+    function purchaseItemsWithVouchers(
         address _to,
         uint256[] calldata _voucherIds,
         uint256[] calldata _quantities
@@ -57,13 +57,13 @@ contract ShopFacet {
         IERC1155(im_vouchersContract).safeBatchTransferFrom(msg.sender, address(this), _voucherIds, _quantities, "");
         require(_voucherIds.length == _quantities.length, "ShopFacet: _voucherIds not same length as _quantities");
         for (uint256 i; i < _voucherIds.length; i++) {
-            //Wearables start at ID 1, but vouchers start at ID 0
-            uint256 wearableId = _voucherIds[i] + 1;
+            //Item types start at ID 1, but vouchers start at ID 0
+            uint256 itemId = _voucherIds[i] + 1;
             uint256 quantity = _quantities[i];
-            uint256 totalQuantity = s.wearableTypes[wearableId].totalQuantity + quantity;
-            require(totalQuantity <= s.wearableTypes[wearableId].maxQuantity, "ShopFacet: Total wearable type quantity exceeds max quantity");
-            s.wearables[_to][wearableId] += quantity;
-            s.wearableTypes[wearableId].totalQuantity = uint32(totalQuantity);
+            uint256 totalQuantity = s.itemTypes[itemId].totalQuantity + quantity;
+            require(totalQuantity <= s.itemTypes[itemId].maxQuantity, "ShopFacet: Total item type quantity exceeds max quantity");
+            s.items[_to][itemId] += quantity;
+            s.itemTypes[itemId].totalQuantity = uint32(totalQuantity);
         }
         LibERC1155.onERC1155BatchReceived(msg.sender, _to, _voucherIds, _quantities, "");
     }

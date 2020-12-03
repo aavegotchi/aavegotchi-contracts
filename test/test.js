@@ -12,10 +12,10 @@ const truffleAssert = require('truffle-assertions')
 // const { deployProject } = require('../scripts/deploy-ganache.js')
 
 const { deployProject } = require('../scripts/deploy.js')
-const { wearableTypes } = require('../scripts/wearableTypes.js')
+const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray(uint, numBytes) {
+function uintToIntArray (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -24,7 +24,7 @@ function uintToIntArray(uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint(array) {
+function sixteenBitArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -35,10 +35,9 @@ function sixteenBitArrayToUint(array) {
 
   if (array.length > 0) return ethers.BigNumber.from('0x' + uint.join(''))
   return ethers.BigNumber.from(0)
-
 }
 
-function uintToWearableIds(uint) {
+function uintToItemIds (uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -58,7 +57,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.account = deployVars.account
     global.aavegotchiDiamond = deployVars.aavegotchiDiamond
     global.aavegotchiFacet = deployVars.aavegotchiFacet
-    global.wearablesFacet = deployVars.wearablesFacet
+    global.itemsFacet = deployVars.itemsFacet
     global.collateralFacet = deployVars.collateralFacet
     global.shopFacet = deployVars.shopFacet
     global.daoFacet = deployVars.daoFacet
@@ -326,53 +325,53 @@ describe('Collaterals and escrow', async function () {
   })
 })
 
-describe('Wearables', async function () {
-  it('Can mint wearables', async function () {
-    let balance = await global.wearablesFacet.balanceOf(account, '0')
+describe('Items & Wearables', async function () {
+  it('Can mint items', async function () {
+    let balance = await global.itemsFacet.balanceOf(account, '0')
     expect(balance).to.equal(0)
     // To do: Get max length of wearables array
 
-    //  await truffleAssert.reverts(wearablesFacet.mintWearables(account, ['8'], ['10']), 'WearablesFacet: Wearable does not exist')
-    await truffleAssert.reverts(daoFacet.mintWearables(account, ['0'], ['10']), 'WearablesFacet: Total wearable type quantity exceeds max quantity')
-    await global.daoFacet.mintWearables(account, [testWearableId], ['10'])
-    balance = await global.wearablesFacet.balanceOf(account, testWearableId)
+    //  await truffleAssert.reverts(itemsFacet.mintItems(account, ['8'], ['10']), 'itemsFacet: Wearable does not exist')
+    await truffleAssert.reverts(daoFacet.mintItems(account, ['0'], ['10']), 'DAOFacet: Total item type quantity exceeds max quantity')
+    await global.daoFacet.mintItems(account, [testWearableId], ['10'])
+    balance = await global.itemsFacet.balanceOf(account, testWearableId)
     expect(balance).to.equal(10)
   })
 
   it('Can transfer wearables to Aavegotchi', async function () {
-    await global.wearablesFacet.transferToParent(
+    await global.itemsFacet.transferToParent(
       global.account, // address _from,
       global.aavegotchiFacet.address, // address _toContract,
       testAavegotchiId, // uint256 _toTokenId,
       testWearableId, // uint256 _id,
       '10' // uint256 _value
     )
-    const balance = await global.wearablesFacet.balanceOfToken(aavegotchiFacet.address, testAavegotchiId, testWearableId)
+    const balance = await global.itemsFacet.balanceOfToken(aavegotchiFacet.address, testAavegotchiId, testWearableId)
     expect(balance).to.equal(10)
   })
 
   it('Can transfer wearables from Aavegotchi back to owner', async function () {
-    await global.wearablesFacet.transferFromParent(
+    await global.itemsFacet.transferFromParent(
       global.aavegotchiFacet.address, // address _fromContract,
       testAavegotchiId, // uint256 _fromTokenId,
       global.account, // address _to,
       testWearableId, // uint256 _id,
       '10' // uint256 _value
     )
-    const balance = await global.wearablesFacet.balanceOf(account, testWearableId)
+    const balance = await global.itemsFacet.balanceOf(account, testWearableId)
     expect(balance).to.equal(10)
   })
 
   it('Can equip wearables', async function () {
     // First transfer wearables to parent Aavegotchi
-    await global.wearablesFacet.transferToParent(
+    await global.itemsFacet.transferToParent(
       global.account, global.aavegotchiFacet.address, testAavegotchiId, testWearableId, '10')
-    expect(await global.wearablesFacet.balanceOfToken(aavegotchiFacet.address, testAavegotchiId, testWearableId)).to.equal(10)
+    expect(await global.itemsFacet.balanceOfToken(aavegotchiFacet.address, testAavegotchiId, testWearableId)).to.equal(10)
 
     const wearableIds = sixteenBitArrayToUint([testWearableId])
     // console.log(wearableIds.toString())
-    await global.wearablesFacet.equipWearables(testAavegotchiId, wearableIds)
-    const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
+    await global.itemsFacet.equipWearables(testAavegotchiId, wearableIds)
+    const equipped = await global.itemsFacet.equippedWearables(testAavegotchiId)
 
     expect(equipped.length).to.equal(16)
     // First item in array is 1 because that wearable has been equipped
@@ -388,29 +387,27 @@ describe('Wearables', async function () {
   })
 
   it('Cannot equip wearables in the wrong slot', async function () {
-    const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
+    const equipped = await global.itemsFacet.equippedWearables(testAavegotchiId)
     console.log('equipped:', equipped)
     // console.log('wearableId: ' + testWearableId)
 
     const wearableIds = sixteenBitArrayToUint([testWearableId, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
     // console.log('wearableId: ' + wearableIds)
 
-    await truffleAssert.reverts(wearablesFacet.equipWearables(testAavegotchiId, wearableIds), 'WearablesFacet: Wearable cannot be equipped in this slot')
+    await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), 'ItemsFacet: Wearable cannot be equipped in this slot')
   })
 
   it('Can unequip all wearables with empty array', async function () {
-    let equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
+    let equipped = await global.itemsFacet.equippedWearables(testAavegotchiId)
     expect(equipped[0]).to.equal(1)
 
-    //Unequip all wearables
-    await wearablesFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([]))
-    equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
+    // Unequip all wearables
+    await itemsFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([]))
+    equipped = await global.itemsFacet.equippedWearables(testAavegotchiId)
     expect(equipped[0]).to.equal(0)
 
-    //Put wearable back on
-    await wearablesFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([testWearableId]))
-
-
+    // Put wearable back on
+    await itemsFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([testWearableId]))
   })
 
   it('Can equip wearables from owners inventory', async function () {
@@ -427,8 +424,8 @@ describe('Wearables', async function () {
   it('Equipping Wearables alters base rarity score', async function () {
     // Unequip all wearables
     let wearableIds = sixteenBitArrayToUint([0])
-    await global.wearablesFacet.equipWearables(testAavegotchiId, wearableIds)
-    const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
+    await global.itemsFacet.equipWearables(testAavegotchiId, wearableIds)
+    const equipped = await global.itemsFacet.equippedWearables(testAavegotchiId)
     expect(equipped[testSlot]).to.equal('0')
 
     // Get score before equipping
@@ -437,12 +434,12 @@ describe('Wearables', async function () {
     // Equip a wearable
     wearableIds = sixteenBitArrayToUint([testWearableId])
     // console.log(wearableIds.toString())
-    await global.wearablesFacet.equipWearables(testAavegotchiId, wearableIds)
+    await global.itemsFacet.equipWearables(testAavegotchiId, wearableIds)
 
     // Calculate bonuses
-    const modifiers = uintToIntArray(wearableTypes[testWearableId].traitModifiers, 6)
+    const modifiers = uintToIntArray(itemTypes[testWearableId].traitModifiers, 6)
     let wearableTraitsBonus = 0
-    const rarityScoreModifier = wearableTypes[testWearableId].rarityScoreModifier
+    const rarityScoreModifier = itemTypes[testWearableId].rarityScoreModifier
     modifiers.forEach((val) => {
       wearableTraitsBonus += val
     })
@@ -526,17 +523,17 @@ describe('Shop and Vouchers', async function () {
 
   it('Should convert vouchers into wearables', async function () {
     await global.vouchersContract.setApprovalForAll(shopFacet.address, true)
-    await global.shopFacet.purchaseWearablesWithVouchers(account, [0, 1, 2, 3, 4, 5], [10, 10, 10, 10, 10, 60])
-    const wearablesBalance = await global.wearablesFacet.wearablesBalances(account)
-    expect(wearablesBalance[6]).to.equal(60)
+    await global.shopFacet.purchaseItemsWithVouchers(account, [0, 1, 2, 3, 4, 5], [10, 10, 10, 10, 10, 60])
+    const itemsBalance = await global.itemsFacet.itemBalances(account)
+    expect(itemsBalance[6]).to.equal(60)
   })
 
-  it('Should purchase wearables using GHST', async function () {
-    let balances = await global.wearablesFacet.wearablesBalances(account)
+  it('Should purchase items using GHST', async function () {
+    let balances = await global.itemsFacet.itemBalances(account)
     // Start at 1 because 0 is always empty
     expect(balances[1]).to.equal(10)
-    await global.shopFacet.purchaseWearablesWithGhst(account, ['1'], ['10'])
-    balances = await global.wearablesFacet.wearablesBalances(account)
+    await global.shopFacet.purchaseItemsWithGhst(account, ['1'], ['10'])
+    balances = await global.itemsFacet.itemBalances(account)
     expect(balances[1]).to.equal(20)
   })
 })

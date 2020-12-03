@@ -38,7 +38,7 @@ struct Aavegotchi {
     uint256 unlockTime;
 }
 
-struct WearableType {
+struct ItemType {
     // treated as six 8 ints array
 
     int256 traitModifiers; //How much the wearable modifies each trait. Should not be more than +-5 total
@@ -123,11 +123,11 @@ struct AppStorage {
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) nftBalances;
     mapping(address => uint256) aavegotchiBalance;
     // owner => (id => balance)
-    WearableType[] wearableTypes;
+    ItemType[] itemTypes;
     WearableSet[] wearableSets;
     mapping(uint256 => Haunt) haunts;
     // owner => (wearableId => quantity)
-    mapping(address => mapping(uint256 => uint256)) wearables;
+    mapping(address => mapping(uint256 => uint256)) items;
     mapping(uint256 => Aavegotchi) aavegotchis;
     // owner => (operator => bool)
     mapping(address => mapping(address => bool)) operators;
@@ -158,6 +158,8 @@ library LibAppStorage {
     uint8 internal constant WEARABLE_SLOT_HAND_RIGHT = 5;
     uint8 internal constant WEARABLE_SLOT_HANDS_BOTH = 6;
     uint8 internal constant WEARABLE_SLOT_PET = 7;
+
+    uint256 internal constant WEARABLE_CATEGORY = 0;
 
     //Can we update this with a diamond upgrade?
     uint8 internal constant WEARABLE_SLOTS_TOTAL = 11;

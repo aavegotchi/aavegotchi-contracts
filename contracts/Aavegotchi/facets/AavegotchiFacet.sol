@@ -283,9 +283,9 @@ contract AavegotchiFacet {
             if (wearableId == 0) {
                 continue;
             }
-            WearableType storage wearableType = s.wearableTypes[wearableId];
+            ItemType storage itemType = s.itemTypes[wearableId];
             //Add on trait modifiers
-            int256 traitModifiers = wearableType.traitModifiers;
+            int256 traitModifiers = itemType.traitModifiers;
             uint256 newNumericTraits;
             for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
                 int256 number = int16(numericTraits >> (j * 16));
@@ -296,7 +296,7 @@ contract AavegotchiFacet {
             }
 
             numericTraits = int256(newNumericTraits);
-            wearableBonus += wearableType.rarityScoreModifier;
+            wearableBonus += itemType.rarityScoreModifier;
         }
         address collateral = s.aavegotchis[_tokenId].collateralType;
         int256 baseRarity = calculateBaseRarityScore(numericTraits, collateral);
@@ -560,7 +560,7 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
     }
 
-    //Prevnts assets and wearables from being moved from Aavegotchi during lock period, except by gameManager.
+    //Prevnts assets and items from being moved from Aavegotchi during lock period, except by gameManager.
     function lockAavegotchi(uint256 _tokenId, uint256 _lockDuration) external {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");

@@ -152,7 +152,7 @@ contract SvgFacet {
         for (uint256 slotPosition; slotPosition < EQUIPPED_WEARABLE_SLOTS; slotPosition++) {
             uint256 wearableId = uint16(equippedWearables >> (slotPosition * 16));
             if (wearableId > 0) {
-                WearableType storage wearableType = s.wearableTypes[wearableId];
+                ItemType storage wearableType = s.itemTypes[wearableId];
                 // right hand, then flip the wearable
                 if (slotPosition == 5) {
                     wearablesSvg = abi.encodePacked(
@@ -191,8 +191,8 @@ contract SvgFacet {
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-        AavegotchiFacet.PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = AavegotchiFacet(address(this))
-            .portalAavegotchiTraits(_tokenId);
+        AavegotchiFacet.PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits =
+            AavegotchiFacet(address(this)).portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
             address collateralType = l_portalAavegotchiTraits[i].collateralType;
             int256 numericTraits = l_portalAavegotchiTraits[i].numericTraits;

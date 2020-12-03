@@ -9,7 +9,7 @@ import "../interfaces/IERC721.sol";
 // import "../interfaces/IERC1155TokenReceiver.sol";
 import "../libraries/LibERC1155.sol";
 
-contract WearablesFacet {
+contract ItemsFacet {
     using LibAppStorage for AppStorage;
     AppStorage internal s;
 
@@ -29,7 +29,6 @@ contract WearablesFacet {
 
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
-    uint256 internal constant WEARABLE_CATEGORY = 0;
 
     uint256 internal constant NUMERIC_TRAITS_NUM = 6;
 
@@ -87,16 +86,12 @@ contract WearablesFacet {
     */
     event URI(string _value, uint256 indexed _id);
 
-    // Mint a set of wearables.
-    // How many wearables there are is determined by how many wearable SVG files have been uploaded.
-    // The wearbles are minted to the account that calls this function
-
-    // Returns balance for each wearable that exists for an account
-    function wearablesBalances(address _account) external view returns (uint256[] memory bals_) {
-        uint256 count = s.wearableTypes.length;
+    // Returns balance for each item that exists for an account
+    function itemBalances(address _account) external view returns (uint256[] memory bals_) {
+        uint256 count = s.itemTypes.length;
         bals_ = new uint256[](count);
         for (uint256 id = 0; id < count; id++) {
-            bals_[id] = s.wearables[_account][id];
+            bals_[id] = s.items[_account][id];
         }
     }
 
@@ -121,12 +116,12 @@ contract WearablesFacet {
         uint256 _value,
         bytes calldata _data
     ) external {
-        require(_to != address(0), "Wearables: Can't transfer to 0 address");
-        require(msg.sender == _from || s.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
-        uint256 bal = s.wearables[_from][_id];
-        require(_value <= bal, "Wearables: Doesn't have that many to transfer");
-        s.wearables[_from][_id] = bal - _value;
-        s.wearables[_to][_id] += _value;
+        require(_to != address(0), "Items: Can't transfer to 0 address");
+        require(msg.sender == _from || s.operators[_from][msg.sender], "Items: Not owner and not approved to transfer");
+        uint256 bal = s.items[_from][_id];
+        require(_value <= bal, "Items: Doesn't have that many to transfer");
+        s.items[_from][_id] = bal - _value;
+        s.items[_to][_id] += _value;
         LibERC1155.onERC1155Received(_from, _to, _id, _value, _data);
     }
 
@@ -153,15 +148,15 @@ contract WearablesFacet {
         uint256[] calldata _values,
         bytes calldata _data
     ) external {
-        require(_to != address(0), "Wearables: Can't transfer to 0 address");
-        require(msg.sender == _from || s.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
+        require(_to != address(0), "Items: Can't transfer to 0 address");
+        require(msg.sender == _from || s.operators[_from][msg.sender], "Items: Not owner and not approved to transfer");
         for (uint256 i; i < _ids.length; i++) {
             uint256 id = _ids[i];
             uint256 value = _values[i];
-            uint256 bal = s.wearables[_from][id];
-            require(value <= bal, "Wearables: Doesn't have that many to transfer");
-            s.wearables[_from][id] = bal - value;
-            s.wearables[_to][id] += value;
+            uint256 bal = s.items[_from][id];
+            require(value <= bal, "Items: Doesn't have that many to transfer");
+            s.items[_from][id] = bal - value;
+            s.items[_to][id] += value;
         }
         LibERC1155.onERC1155BatchReceived(_from, _to, _ids, _values, _data);
     }
@@ -179,11 +174,11 @@ contract WearablesFacet {
         uint256 _id,
         uint256 _value
     ) external onlyUnlocked(_id) {
-        require(_toContract != address(0), "Wearables: Can't transfer to 0 address");
-        require(msg.sender == _from || s.operators[_from][msg.sender], "Wearables: Not owner and not approved to transfer");
-        uint256 bal = s.wearables[_from][_id];
-        require(_value <= bal, "Wearables: Doesn't have that many to transfer");
-        s.wearables[_from][_id] = bal - _value;
+        require(_toContract != address(0), "Items: Can't transfer to 0 address");
+        require(msg.sender == _from || s.operators[_from][msg.sender], "Items: Not owner and not approved to transfer");
+        uint256 bal = s.items[_from][_id];
+        require(_value <= bal, "Items: Doesn't have that many to transfer");
+        s.items[_from][_id] = bal - _value;
         s.nftBalances[_toContract][_toTokenId][_id] += _value;
         emit TransferSingle(msg.sender, _from, _toContract, _id, _value);
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
@@ -203,15 +198,15 @@ contract WearablesFacet {
         uint256 _value
     )
         external
-        //Can only transfer wearables if Aavegotchi is unlocked
+        //Can only transfer items if Aavegotchi is unlocked
         onlyUnlocked(_id)
     {
-        require(_to != address(0), "Wearables: Can't transfer to 0 address");
+        require(_to != address(0), "Items: Can't transfer to 0 address");
         if (_fromContract == address(this)) {
             address owner = s.aavegotchis[_fromTokenId].owner;
             require(
                 msg.sender == owner || s.operators[owner][msg.sender] || msg.sender == s.approved[_fromTokenId],
-                "Wearables: Not owner and not approved to transfer"
+                "Items: Not owner and not approved to transfer"
             );
         } else {
             address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
@@ -219,20 +214,20 @@ contract WearablesFacet {
                 owner == msg.sender ||
                     IERC721(_fromContract).getApproved(_fromTokenId) == msg.sender ||
                     IERC721(_fromContract).isApprovedForAll(owner, msg.sender),
-                "Wearables: Not owner and not approved to transfer"
+                "Items: Not owner and not approved to transfer"
             );
         }
         uint256 bal = s.nftBalances[_fromContract][_fromTokenId][_id];
-        require(_value <= bal, "Wearables: Doesn't have that many to transfer");
+        require(_value <= bal, "Items: Doesn't have that many to transfer");
         bal -= _value;
         if (bal == 0 && _fromContract == address(this)) {
             uint256 l_equippedWearables = s.aavegotchis[_fromTokenId].equippedWearables;
             for (uint256 i; i < 16; i++) {
-                require(uint16(l_equippedWearables >> (i * 16)) != _id, "Wearables: Cannot transfer wearable that is equipped");
+                require(uint16(l_equippedWearables >> (i * 16)) != _id, "Items: Cannot transfer wearable that is equipped");
             }
         }
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal;
-        s.wearables[_to][_id] += _value;
+        s.items[_to][_id] += _value;
         emit TransferSingle(msg.sender, _fromContract, _to, _id, _value);
         emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
     }
@@ -253,15 +248,15 @@ contract WearablesFacet {
         uint256 _value
     )
         external
-        //Can only transfer wearables if Aavegotchi is unlocked
+        //Can only transfer items if Aavegotchi is unlocked
         onlyUnlocked(_id)
     {
-        require(_toContract != address(0), "Wearables: Can't transfer to 0 address");
+        require(_toContract != address(0), "Items: Can't transfer to 0 address");
         if (_fromContract == address(this)) {
             address owner = s.aavegotchis[_fromTokenId].owner;
             require(
                 msg.sender == owner || s.operators[owner][msg.sender] || msg.sender == s.approved[_fromTokenId],
-                "Wearables: Not owner and not approved to transfer"
+                "Items: Not owner and not approved to transfer"
             );
         } else {
             address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
@@ -269,16 +264,16 @@ contract WearablesFacet {
                 owner == msg.sender ||
                     IERC721(_fromContract).getApproved(_fromTokenId) == msg.sender ||
                     IERC721(_fromContract).isApprovedForAll(owner, msg.sender),
-                "Wearables: Not owner and not approved to transfer"
+                "Items: Not owner and not approved to transfer"
             );
         }
         uint256 bal = s.nftBalances[_fromContract][_fromTokenId][_id];
-        require(_value <= bal, "Wearables: Doesn't have that many to transfer");
+        require(_value <= bal, "Items: Doesn't have that many to transfer");
         bal -= _value;
         if (bal == 0 && _fromContract == address(this)) {
             uint256 l_equippedWearables = s.aavegotchis[_fromTokenId].equippedWearables;
             for (uint256 i; i < 16; i++) {
-                require(uint16(l_equippedWearables >> (i * 16)) != _id, "Wearables: Cannot transfer wearable that is equipped");
+                require(uint16(l_equippedWearables >> (i * 16)) != _id, "Items: Cannot transfer wearable that is equipped");
             }
         }
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal;
@@ -295,7 +290,7 @@ contract WearablesFacet {
         @return bal_    The _owner's balance of the token type requested
      */
     function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal_) {
-        bal_ = s.wearables[_owner][_id];
+        bal_ = s.items[_owner][_id];
     }
 
     /// @notice Get the balance of a non-fungible parent token
@@ -311,9 +306,9 @@ contract WearablesFacet {
         value = s.nftBalances[_tokenContract][_tokenId][_id];
     }
 
-    // returns the balances for all wearables for a token
-    function wearablesBalancesOfToken(address _tokenContract, uint256 _tokenId) external view returns (uint256[] memory bals_) {
-        uint256 count = s.wearableTypes.length;
+    // returns the balances for all items for a token
+    function itemBalancesOfToken(address _tokenContract, uint256 _tokenId) external view returns (uint256[] memory bals_) {
+        uint256 count = s.itemTypes.length;
         bals_ = new uint256[](count);
         for (uint256 id = 0; id < count; id++) {
             bals_[id] = s.nftBalances[_tokenContract][_tokenId][id];
@@ -331,7 +326,7 @@ contract WearablesFacet {
         for (uint256 i; i < 0; i++) {
             uint256 id = _ids[i];
             address owner = _owners[i];
-            bals[i] = s.wearables[owner][id];
+            bals[i] = s.items[owner][id];
         }
     }
 
@@ -353,15 +348,15 @@ contract WearablesFacet {
             if (wearableId == 0) {
                 continue;
             }
-            WearableType storage wearableType = s.wearableTypes[wearableId];
-            require(aavegotchiLevel >= wearableType.minLevel, "WearablesFacet: Aavegotchi level lower than minLevel");
-            require(wearableType.category == WEARABLE_CATEGORY, "WearableFacet: Only wearables can be equippped");
+            ItemType storage itemType = s.itemTypes[wearableId];
+            require(aavegotchiLevel >= itemType.minLevel, "ItemsFacet: Aavegotchi level lower than minLevel");
+            require(itemType.category == LibAppStorage.WEARABLE_CATEGORY, "ItemsFacet: Only wearables can be equippped");
 
-            //To do (Nick): Should this be a bool instead?
-            uint256 slotAllowed = (wearableType.slotPositions >> slot) & 1;
-            require(slotAllowed == 1, "WearablesFacet: Wearable cannot be equipped in this slot");
+            // bitmask and bitwise operators used here. Info on them: https://code.tutsplus.com/articles/understanding-bitwise-operators--active-11301
+            uint256 slotAllowed = (itemType.slotPositions >> slot) & 1;
+            require(slotAllowed == 1, "ItemsFacet: Wearable cannot be equipped in this slot");
             bool canBeEquipped;
-            uint256 allowedCollaterals = wearableType.allowedCollaterals;
+            uint256 allowedCollaterals = itemType.allowedCollaterals;
             if (allowedCollaterals > 0) {
                 uint256 collateralIndex = s.collateralTypeIndexes[aavegotchi.collateralType];
                 for (uint256 i; i < 16; i++) {
@@ -369,16 +364,16 @@ contract WearablesFacet {
                         canBeEquipped = true;
                     }
                 }
-                require(canBeEquipped == true, "WearablesFacet: Wearable cannot be equipped in this collateral type");
+                require(canBeEquipped == true, "ItemsFacet: Wearable cannot be equipped in this collateral type");
             }
 
             //Then check if this wearable is in the Aavegotchis inventory
             //To test (Dan): If not in inventory, then transfer from Owner's inventory
             uint256 balance = s.nftBalances[address(this)][_tokenId][wearableId];
             if (balance == 0) {
-                balance = s.wearables[msg.sender][wearableId];
-                require(balance > 0, "WearablesFacet: Wearable is not in inventories");
-                s.wearables[msg.sender][wearableId] = balance - 1;
+                balance = s.items[msg.sender][wearableId];
+                require(balance > 0, "ItemsFacet: Wearable is not in inventories");
+                s.items[msg.sender][wearableId] = balance - 1;
                 s.nftBalances[address(this)][_tokenId][wearableId] += 1;
                 emit TransferToParent(address(this), _tokenId, wearableId, 1);
             }
@@ -403,7 +398,7 @@ contract WearablesFacet {
 
     function getWearableSet(uint256 _index) public view returns (WearableSetIO memory wearableSet_) {
         uint256 length = s.wearableSets.length;
-        require(_index < length, "WearablesFacet: Wearable set does not exist");
+        require(_index < length, "ItemsFacet: Wearable set does not exist");
         wearableSet_.name = s.wearableSets[_index].name;
         wearableSet_.wearableIds = LibAppStorage.uintToSixteenBitArray(s.wearableSets[_index].wearableIds);
         int256 traitsBonuses = s.wearableSets[_index].traitsBonuses;

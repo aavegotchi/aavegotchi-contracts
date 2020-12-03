@@ -66,28 +66,28 @@ contract DAOFacet {
         s.haunts[hauntId_].bodyColor = _bodyColor;
     }
 
-    function mintWearables(
+    function mintItems(
         address _to,
-        uint256[] calldata _wearableIds,
+        uint256[] calldata _itemIds,
         uint256[] calldata _quantities
     ) external {
-        require(msg.sender == LibDiamond.contractOwner() || msg.sender == s.dao, "WearablesFacet: Does not have permission");
-        require(_wearableIds.length == _quantities.length, "WearablesFacet: Ids and quantities length must match");
+        require(msg.sender == LibDiamond.contractOwner() || msg.sender == s.dao, "DAOFacet: Does not have permission");
+        require(_itemIds.length == _quantities.length, "DAOFacet: Ids and quantities length must match");
 
-        uint256 wearableTypesLength = s.wearableTypes.length;
-        for (uint256 i = 0; i < _wearableIds.length; i++) {
-            uint256 wearableId = _wearableIds[i];
+        uint256 itemTypesLength = s.itemTypes.length;
+        for (uint256 i = 0; i < _itemIds.length; i++) {
+            uint256 itemId = _itemIds[i];
 
-            require(wearableTypesLength > wearableId, "WearablesFacet: Wearable does not exist");
+            require(itemTypesLength > itemId, "DAOFacet: Item type does not exist");
 
             uint256 quantity = _quantities[i];
-            uint256 totalQuantity = s.wearableTypes[wearableId].totalQuantity + quantity;
-            require(totalQuantity <= s.wearableTypes[wearableId].maxQuantity, "WearablesFacet: Total wearable type quantity exceeds max quantity");
+            uint256 totalQuantity = s.itemTypes[itemId].totalQuantity + quantity;
+            require(totalQuantity <= s.itemTypes[itemId].maxQuantity, "DAOFacet: Total item type quantity exceeds max quantity");
 
-            s.wearables[_to][wearableId] += quantity;
-            s.wearableTypes[wearableId].totalQuantity = uint32(totalQuantity);
+            s.items[_to][itemId] += quantity;
+            s.itemTypes[itemId].totalQuantity = uint32(totalQuantity);
         }
-        LibERC1155.onERC1155BatchReceived(msg.sender, _to, _wearableIds, _quantities, "");
+        LibERC1155.onERC1155BatchReceived(msg.sender, _to, _itemIds, _quantities, "");
     }
 
     function grantExperience(uint256[] calldata _tokenIds, uint32[] calldata _xpValues) external onlyDaoOrOwner {
@@ -105,14 +105,14 @@ contract DAOFacet {
         }
     }
 
-    function addWearableTypes(WearableType[] memory _wearableTypes) external onlyDaoOrOwner() {
+    function addItemTypes(ItemType[] memory _itemTypes) external onlyDaoOrOwner() {
         // LibDiamond.enforceIsContractOwner();
-        // wearable ids start at 1.  0 means no wearable
-        uint256 wearableTypesLength = s.wearableTypes.length;
-        for (uint256 i; i < _wearableTypes.length; i++) {
-            uint256 wearableId = wearableTypesLength++;
-            s.wearableTypes.push(_wearableTypes[i]);
-            emit TransferSingle(msg.sender, address(0), address(0), wearableId, 0);
+        // item ids start at 1.  0 means no item
+        uint256 itemTypesLength = s.itemTypes.length;
+        for (uint256 i; i < _itemTypes.length; i++) {
+            uint256 itemId = itemTypesLength++;
+            s.itemTypes.push(_itemTypes[i]);
+            emit TransferSingle(msg.sender, address(0), address(0), itemId, 0);
         }
     }
 

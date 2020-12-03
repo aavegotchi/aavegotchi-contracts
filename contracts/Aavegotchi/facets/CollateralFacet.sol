@@ -84,9 +84,11 @@ contract CollateralFacet {
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 
         // check that all wearables have been removed from inventory before burning
-        uint256 wearableTypesLength = s.wearableTypes.length;
-        for (uint256 wearableTypeId; wearableTypeId < wearableTypesLength; wearableTypeId++) {
-            require(s.nftBalances[address(this)][_tokenId][wearableTypeId] == 0, "CollateralFacet: Can't burn aavegotchi with wearables");
+        uint256 itemTypesLength = s.itemTypes.length;
+        for (uint256 itemTypeId; itemTypeId < itemTypesLength; itemTypeId++) {
+            if (s.itemTypes[itemTypeId].category == LibAppStorage.WEARABLE_CATEGORY) {
+                require(s.nftBalances[address(this)][_tokenId][itemTypeId] == 0, "CollateralFacet: Can't burn aavegotchi with wearables");
+            }
         }
 
         s.aavegotchiBalance[msg.sender]--;

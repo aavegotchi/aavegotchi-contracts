@@ -1,7 +1,7 @@
 
 /* global ethers */
 
-const wearableTypes = [
+const itemTypes = [
 
   {
     svgId: 0,
@@ -119,7 +119,7 @@ const wearableTypes = [
   }
 ]
 
-function eightBitIntArrayToUint(array) {
+function eightBitIntArrayToUint (array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -131,7 +131,7 @@ function eightBitIntArrayToUint(array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function eightBitUintArrayToUint(array) {
+function eightBitUintArrayToUint (array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -143,7 +143,7 @@ function eightBitUintArrayToUint(array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function boolsArrayToUint16(bools) {
+function boolsArrayToUint16 (bools) {
   const uint = []
   for (const b of bools) {
     if (b) {
@@ -155,17 +155,17 @@ function boolsArrayToUint16(bools) {
   return parseInt(uint.join('').padStart(16, '0'), 2)
 }
 
-function getWearableTypes() {
+function getItemTypes () {
   const result = []
-  for (const wearableType of wearableTypes) {
-    wearableType.traitModifiers = eightBitIntArrayToUint(wearableType.traitModifiers)
-    // console.log(wearableType.slotPositions)
-    // console.log(slotPositionsToUint(wearableType.slotPositions).toString())
-    wearableType.slotPositions = boolsArrayToUint16(wearableType.slotPositions)
-    wearableType.allowedCollaterals = 0
-    result.push(wearableType)
+  for (const itemType of itemTypes) {
+    itemType.traitModifiers = eightBitIntArrayToUint(itemType.traitModifiers)
+    // console.log(itemType.slotPositions)
+    // console.log(slotPositionsToUint(itemType.slotPositions).toString())
+    itemType.slotPositions = boolsArrayToUint16(itemType.slotPositions)
+    itemType.allowedCollaterals = 0
+    result.push(itemType)
   }
   return result
 }
 
-exports.wearableTypes = getWearableTypes()
+exports.itemTypes = getItemTypes()

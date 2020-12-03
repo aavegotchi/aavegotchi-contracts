@@ -8,7 +8,7 @@ const WEARABLE_SLOT_HAND_LEFT = 4
 const WEARABLE_SLOT_HAND_RIGHT = 5
 const WEARABLE_SLOT_PET = 6
 
-const wearableTypes = [
+const itemTypes = [
 
   {
     svgId: 0,
@@ -628,17 +628,17 @@ function boolsArrayToUint16 (bools) {
   return parseInt(uint.join('').padStart(16, '0'), 2)
 }
 
-function getWearableTypes () {
+function getItemTypes () {
   const result = []
-  for (const wearableType of wearableTypes) {
-    wearableType.traitModifiers = eightBitIntArrayToUint(wearableType.traitModifiers)
-    // console.log(wearableType.slotPositions)
-    // console.log(slotPositionsToUint(wearableType.slotPositions).toString())
-    wearableType.slotPositions = boolsArrayToUint16(wearableType.slotPositions)
-    wearableType.allowedCollaterals = 0
-    result.push(wearableType)
+  for (const itemType of itemTypes) {
+    itemType.traitModifiers = eightBitIntArrayToUint(itemType.traitModifiers)
+    // console.log(itemType.slotPositions)
+    // console.log(slotPositionsToUint(itemType.slotPositions).toString())
+    itemType.slotPositions = boolsArrayToUint16(itemType.slotPositions)
+    itemType.allowedCollaterals = 0
+    result.push(itemType)
   }
   return result
 }
 
-exports.wearableTypes = getWearableTypes()
+exports.itemTypes = getItemTypes()
