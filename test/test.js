@@ -15,7 +15,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { wearableTypes } = require('../scripts/wearableTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray (uint, numBytes) {
+function uintToIntArray(uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -24,7 +24,7 @@ function uintToIntArray (uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint (array) {
+function sixteenBitArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -32,11 +32,13 @@ function sixteenBitArrayToUint (array) {
     }
     uint.push(item.toString(16).padStart(4, '0'))
   }
-  // console.log(uint.join(''))
-  return ethers.BigNumber.from('0x' + uint.join(''))
+
+  if (array.length > 0) return ethers.BigNumber.from('0x' + uint.join(''))
+  return ethers.BigNumber.from(0)
+
 }
 
-function uintToWearableIds (uint) {
+function uintToWearableIds(uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -387,13 +389,28 @@ describe('Wearables', async function () {
 
   it('Cannot equip wearables in the wrong slot', async function () {
     const equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
-    // console.log('equipped:', equipped)
+    console.log('equipped:', equipped)
     // console.log('wearableId: ' + testWearableId)
 
     const wearableIds = sixteenBitArrayToUint([testWearableId, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
     // console.log('wearableId: ' + wearableIds)
 
     await truffleAssert.reverts(wearablesFacet.equipWearables(testAavegotchiId, wearableIds), 'WearablesFacet: Wearable cannot be equipped in this slot')
+  })
+
+  it('Can unequip all wearables with empty array', async function () {
+    let equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
+    expect(equipped[0]).to.equal(1)
+
+    //Unequip all wearables
+    await wearablesFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([]))
+    equipped = await global.wearablesFacet.equippedWearables(testAavegotchiId)
+    expect(equipped[0]).to.equal(0)
+
+    //Put wearable back on
+    await wearablesFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([testWearableId]))
+
+
   })
 
   it('Can equip wearables from owners inventory', async function () {
@@ -445,16 +462,13 @@ describe('Haunts', async function () {
   })
 
   it('Cannot exceed max haunt size', async function () {
-    // Reverting for unknown reason. Probably gas related?
-    //  const balance = await ghstDiamond.balanceOf(account)
     const oneHundredPortals = ethers.utils.parseEther('9500')
     const tx = await global.aavegotchiFacet.buyPortals(account, oneHundredPortals, true)
 
     const singlePortal = ethers.utils.parseEther('100')
     await truffleAssert.reverts(global.aavegotchiFacet.buyPortals(account, singlePortal, true), 'AavegotchiFacet: Exceeded max number of aavegotchis for this haunt')
 
-    const receipt = await tx.wait()
-    // console.log('gas used:' + receipt.gasUsed)
+    //  const receipt = await tx.wait()
   })
 
   it('Can create new Haunt', async function () {

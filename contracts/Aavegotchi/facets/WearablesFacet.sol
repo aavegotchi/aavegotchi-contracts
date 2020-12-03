@@ -357,12 +357,9 @@ contract WearablesFacet {
             require(aavegotchiLevel >= wearableType.minLevel, "WearablesFacet: Aavegotchi level lower than minLevel");
             require(wearableType.category == WEARABLE_CATEGORY, "WearableFacet: Only wearables can be equippped");
 
-            //Check if the wearable can be equipped in this position
-
-            //To do (Nick): Verify that slots are being calculated properly
-
-            uint256 slotPosition = (wearableType.slotPositions >> slot) & 1;
-            require(slotPosition == 1, "WearablesFacet: Wearable cannot be equipped in this slot");
+            //To do (Nick): Should this be a bool instead?
+            uint256 slotAllowed = (wearableType.slotPositions >> slot) & 1;
+            require(slotAllowed == 1, "WearablesFacet: Wearable cannot be equipped in this slot");
             bool canBeEquipped;
             uint256 allowedCollaterals = wearableType.allowedCollaterals;
             if (allowedCollaterals > 0) {

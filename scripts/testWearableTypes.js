@@ -28,7 +28,7 @@ const wearableTypes = [
     traitModifiers: [0, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [true, true],
+    slotPositions: [true, true, true, false],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -119,7 +119,7 @@ const wearableTypes = [
   }
 ]
 
-function eightBitIntArrayToUint (array) {
+function eightBitIntArrayToUint(array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -131,7 +131,7 @@ function eightBitIntArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function eightBitUintArrayToUint (array) {
+function eightBitUintArrayToUint(array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -143,7 +143,7 @@ function eightBitUintArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function boolsArrayToUint16 (bools) {
+function boolsArrayToUint16(bools) {
   const uint = []
   for (const b of bools) {
     if (b) {
@@ -155,7 +155,7 @@ function boolsArrayToUint16 (bools) {
   return parseInt(uint.join('').padStart(16, '0'), 2)
 }
 
-function getWearableTypes () {
+function getWearableTypes() {
   const result = []
   for (const wearableType of wearableTypes) {
     wearableType.traitModifiers = eightBitIntArrayToUint(wearableType.traitModifiers)
