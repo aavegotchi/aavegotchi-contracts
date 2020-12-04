@@ -243,11 +243,15 @@ describe('Aavegotchi Metadata', async function () {
 })
 
 describe('Collaterals and escrow', async function () {
+  it('First collateral should be blank/empty', async function () {
+
+  })
+
   it('Should show all whitelisted collaterals', async function () {
     const collaterals = await global.collateralFacet.getCollateralInfo()
-    const collateral = collaterals[0]
+    const collateral = collaterals[1]
     expect(collateral.conversionRate).to.equal(500)
-    expect(collaterals.length).to.equal(7)
+    expect(collaterals.length).to.equal(8)
     const modifiers = uintToIntArray(collateral.modifiers, 6)
     expect(modifiers[2]).to.equal(-1)
   })

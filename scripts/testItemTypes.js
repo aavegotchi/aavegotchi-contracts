@@ -18,7 +18,8 @@ const itemTypes = [
     minLevel: 1,
     canBeTransferred: true,
     category: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
+    experienceBonus: 0
   },
 
   {
@@ -36,7 +37,8 @@ const itemTypes = [
     minLevel: 1,
     canBeTransferred: true,
     category: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
+    experienceBonus: 0
   },
   {
     svgId: 2,
@@ -53,7 +55,8 @@ const itemTypes = [
     minLevel: 5,
     canBeTransferred: true,
     category: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
+    experienceBonus: 0
 
   },
   {
@@ -71,7 +74,8 @@ const itemTypes = [
     minLevel: 1,
     canBeTransferred: true,
     category: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
+    experienceBonus: 0
   },
   {
     svgId: 4,
@@ -88,7 +92,8 @@ const itemTypes = [
     minLevel: 1,
     canBeTransferred: true,
     category: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
+    experienceBonus: 0
   },
   {
     svgId: 5,
@@ -105,7 +110,8 @@ const itemTypes = [
     minLevel: 1,
     canBeTransferred: true,
     category: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
+    experienceBonus: 0
   },
   {
     svgId: 6,
@@ -122,7 +128,8 @@ const itemTypes = [
     minLevel: 1,
     canBeTransferred: true,
     category: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
+    experienceBonus: 0
   }
 ]
 

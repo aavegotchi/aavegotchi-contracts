@@ -12,6 +12,19 @@
 // Total length: 9
 
 const collaterals = [
+
+  { // first collateral item is empty
+    name: '',
+    kovanAddress: '',
+    mainnetAddress: '',
+    primaryColor: '#000000',
+    secondaryColor: '#000000',
+    cheekColor: '#000000',
+    svgId: 0,
+    eyeShapeSvgId: 0,
+    modifiers: [0, 0, 0, 0, 0, 0],
+    conversionRate: 0
+  },
   {
     name: 'aDAI',
     kovanAddress: '0x58AD4cB396411B691A9AAb6F74545b2C5217FE6a',
