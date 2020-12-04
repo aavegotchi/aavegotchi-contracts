@@ -126,7 +126,7 @@ const itemTypes = [
   }
 ]
 
-function eightBitIntArrayToUint(array) {
+function eightBitIntArrayToUint (array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -138,7 +138,7 @@ function eightBitIntArrayToUint(array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function eightBitUintArrayToUint(array) {
+function eightBitUintArrayToUint (array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -150,7 +150,7 @@ function eightBitUintArrayToUint(array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function boolsArrayToUint16(bools) {
+function boolsArrayToUint16 (bools) {
   const uint = []
   for (const b of bools) {
     if (b) {
@@ -162,14 +162,26 @@ function boolsArrayToUint16(bools) {
   return parseInt(uint.join('').padStart(16, '0'), 2)
 }
 
-function getItemTypes() {
+function sixteenBitArrayToUint (array) {
+  const uint = []
+  for (let item of array) {
+    if (typeof item === 'string') {
+      item = parseInt(item)
+    }
+    uint.unshift(item.toString(16).padStart(4, '0'))
+  }
+  if (array.length > 0) return ethers.BigNumber.from('0x' + uint.join(''))
+  return ethers.BigNumber.from(0)
+}
+
+function getItemTypes () {
   const result = []
   for (const itemType of itemTypes) {
     itemType.traitModifiers = eightBitIntArrayToUint(itemType.traitModifiers)
     // console.log(itemType.slotPositions)
     // console.log(slotPositionsToUint(itemType.slotPositions).toString())
     itemType.slotPositions = boolsArrayToUint16(itemType.slotPositions)
-    itemType.allowedCollaterals = 0
+    itemType.allowedCollaterals = sixteenBitArrayToUint(itemType.allowedCollaterals)
     result.push(itemType)
   }
   return result

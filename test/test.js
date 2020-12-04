@@ -15,7 +15,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray(uint, numBytes) {
+function uintToIntArray (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -24,7 +24,7 @@ function uintToIntArray(uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint(array) {
+function sixteenBitArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -32,12 +32,11 @@ function sixteenBitArrayToUint(array) {
     }
     uint.push(item.toString(16).padStart(4, '0'))
   }
-
   if (array.length > 0) return ethers.BigNumber.from('0x' + uint.join(''))
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds(uint) {
+function uintToItemIds (uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -379,26 +378,23 @@ describe('Items & Wearables', async function () {
   })
 
   it('Cannot equip wearables that require a higher level', async function () {
-
-    //This item requires level 5
-    const unequippableItem = "2"
+    // This item requires level 5
+    const unequippableItem = '2'
     const wearableIds = sixteenBitArrayToUint([unequippableItem, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
-    await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), "ItemsFacet: Aavegotchi level lower than minLevel")
-
+    await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), 'ItemsFacet: Aavegotchi level lower than minLevel')
   })
 
   it('Cannot equip wearables that require a different collateral', async function () {
-    //Can only be equipped by collateraltype 8
-    const unequippableItem = "3"
+    // Can only be equipped by collateraltype 8
+    const unequippableItem = '3'
     const wearable = await itemsFacet.getItemType(unequippableItem)
     console.log('wearable:', wearable)
     const wearableIds = sixteenBitArrayToUint([unequippableItem, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
-    await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), "ItemsFacet: Wearable cannot be equipped in this collateral type")
+    await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), 'ItemsFacet: Wearable cannot be equipped in this collateral type')
   })
 
   it('Cannot equip wearables in the wrong slot', async function () {
-
-    //This wearable can't be equipped in the 4th slot
+    // This wearable can't be equipped in the 4th slot
     const wearableIds = sixteenBitArrayToUint([testWearableId, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
     await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), 'ItemsFacet: Wearable cannot be equipped in this slot')
   })
