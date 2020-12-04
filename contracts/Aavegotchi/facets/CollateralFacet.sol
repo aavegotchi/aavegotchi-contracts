@@ -86,7 +86,7 @@ contract CollateralFacet {
         // check that all wearables have been removed from inventory before burning
         uint256 itemTypesLength = s.itemTypes.length;
         for (uint256 itemTypeId; itemTypeId < itemTypesLength; itemTypeId++) {
-            if (s.itemTypes[itemTypeId].category == LibAppStorage.WEARABLE_CATEGORY) {
+            if (s.itemTypes[itemTypeId].category == LibAppStorage.ITEM_CATEGORY_WEARABLE) {
                 require(s.nftBalances[address(this)][_tokenId][itemTypeId] == 0, "CollateralFacet: Can't burn aavegotchi with wearables");
             }
         }

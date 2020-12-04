@@ -337,7 +337,7 @@ contract ItemsFacet {
         }
     }
 
-    function equipWearables(uint256 _tokenId, uint256 _equippedWearables) external {
+    function equipWearables(uint256 _tokenId, uint256 _equippedWearables) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
 
         //To test (Dan): Add in actual dynamic level
@@ -415,7 +415,7 @@ contract ItemsFacet {
         uint256 _tokenId,
         uint256[] calldata _itemIds,
         uint256[] calldata _amounts
-    ) external {
+    ) external onlyAavegotchiOwner(_tokenId) {
         require(_itemIds.length == _amounts.length, "ItemsFacet: _itemIds length does not match _amounts length");
         for (uint256 i; i < _itemIds.length; i++) {
             uint256 consumableId = _itemIds[i];

@@ -40,45 +40,24 @@ struct Aavegotchi {
 
 struct ItemType {
     // treated as six 8 ints array
-    int256 traitModifiers; //How much the wearable modifies each trait. Should not be more than +-5 total
+    int256 traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
     // this is an array of uint indexes into the collateralTypes array
-    uint256 allowedCollaterals; //The collaterals this wearable can be equipped to. An empty array is "any"
-    string name; //The name of the wearable
-    uint96 ghstPrice;
-    uint32 svgId; //The svgId of the wearable
-    uint32 maxQuantity; //Total number that can be minted of this wearable. Can calculate the rarity level from this number.
+    uint256 allowedCollaterals; //[WEARABLE ONLY] The collaterals this wearable can be equipped to. An empty array is "any"
+    string name; //The name of the item
+    uint96 ghstPrice; //How much GHST this item costs
+    uint32 svgId; //The svgId of the item
+    uint32 maxQuantity; //Total number that can be minted of this item. 
     uint8 rarityScoreModifier; //Number from 1-50.
     uint8 setId; //The id of the set. Zero is no set
     // Each bit is a slot position. 1 is true, 0 is false
-    uint16 slotPositions; //The slots that this wearable can be added to.
+    uint16 slotPositions; //[WEARABLE ONLY] The slots that this wearable can be added to.
     bool canPurchaseWithGhst;
-    uint32 totalQuantity; //The total quantity of this wearable minted so far
-    uint8 minLevel; //The minimum Aavegotchi level required to equip this wearable. Default is 1.
+    uint32 totalQuantity; //The total quantity of this item minted so far
+    uint8 minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
     bool canBeTransferred;
     uint8 category; // 0 is wearable, 1 is badge, 2 is consumable
-    uint8 kinshipBonus;
-    // used as a sixteen 16 bits array
-    // index into the collateralTypes array
+    int8 kinshipBonus; //[CONSUMABLE ONLY] How much this consumable boosts (or reduces) kinship score
 
-    //A hand wearable can be equipped in left hand, right hand, both hands
-    //So its allowedSlots are 4,5, and 7.
-
-    //A hoodie would be equipped to Slot 8 because it takes up Hands + Body.
-
-    //Slots
-    //0 Head
-    //1 Face
-    //2 Eyes
-    //3 Body / Feet
-    //4 Hand (left)
-    //5 Hand (right)
-    //6 Pet
-
-    //Combination slots
-    //7 Hands (both)
-    //8 Head + Body
-    //9 Head + Face
-    //10 Face + Eyes
 }
 
 struct WearableSet {
