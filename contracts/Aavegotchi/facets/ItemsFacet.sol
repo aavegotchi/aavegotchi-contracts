@@ -456,6 +456,10 @@ contract ItemsFacet {
             require(amount <= bal, "Items: Do not have that many to consume");
             s.items[msg.sender][consumableId] = bal - amount;
             s.aavegotchis[_tokenId].interactionCount += itemType.kinshipBonus;
+
+            //To do: Add experience
+            s.aavegotchis[_tokenId].experience += itemType.experienceBonus;
+
             itemType.totalQuantity -= uint32(bal);
         }
         emit TransferBatch(msg.sender, msg.sender, address(0), _itemIds, _amounts);

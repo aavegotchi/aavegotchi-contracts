@@ -57,6 +57,7 @@ struct ItemType {
     bool canBeTransferred;
     uint8 category; // 0 is wearable, 1 is badge, 2 is consumable
     int8 kinshipBonus; //[CONSUMABLE ONLY] How much this consumable boosts (or reduces) kinship score
+    uint32 experienceBonus; //[CONSUMABLE ONLY]
 
 }
 
