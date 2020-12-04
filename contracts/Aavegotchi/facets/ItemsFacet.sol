@@ -8,6 +8,7 @@ import "hardhat/console.sol";
 import "../interfaces/IERC721.sol";
 // import "../interfaces/IERC1155TokenReceiver.sol";
 import "../libraries/LibERC1155.sol";
+import "./AavegotchiFacet.sol";
 
 contract ItemsFacet {
     using LibAppStorage for AppStorage;
@@ -433,6 +434,7 @@ contract ItemsFacet {
             }
         }
         aavegotchi.equippedWearables = _equippedWearables;
+        LibAppStorage.interact(_tokenId);
     }
 
     struct WearableSetIO {
@@ -463,5 +465,6 @@ contract ItemsFacet {
             itemType.totalQuantity -= uint32(bal);
         }
         emit TransferBatch(msg.sender, msg.sender, address(0), _itemIds, _amounts);
+        LibAppStorage.interact(_tokenId);
     }
 }

@@ -509,47 +509,13 @@ contract AavegotchiFacet {
     }
 
     function interact(uint256 _tokenId) public {
-        //To test (Dan): Only allow 2 interactions per day
-        uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
-        // 43200 seconds is 12 hours
-        // if interacted less than 12 hours ago
-        if (block.timestamp < lastInteracted + 43200) {
-            return;
-        }
         address owner = s.aavegotchis[_tokenId].owner;
         require(owner != address(0), "AavegotchiFacet: Invalid tokenId, is not owned or doesn't exist");
         require(
             msg.sender == owner || s.operators[owner][msg.sender] || s.approved[_tokenId] == msg.sender,
             "AavegotchiFacet: Not owner of token or approved"
         );
-
-        int16 interactionCount = s.aavegotchis[_tokenId].interactionCount;
-        uint256 interval = block.timestamp - lastInteracted;
-        int16 daysSinceInteraction = int16(interval / 86400);
-        if (daysSinceInteraction > 3000) {
-            daysSinceInteraction = 3000;
-        }
-        int16 baseKinship = 50;
-
-        //Interaction count can't go below -50 otherwise the kinship will be negative
-        if (interactionCount < -50) interactionCount = -50;
-
-        //If your Aavegotchi hates you and you finally pet it, you get a bonus
-        uint256 kinship = uint256(baseKinship + interactionCount - daysSinceInteraction);
-        int16 hateBonus = 0;
-
-        if (kinship < 40) {
-            hateBonus = 2;
-        }
-
-        //Update the interactionCount
-        if (daysSinceInteraction > 0) {
-            s.aavegotchis[_tokenId].interactionCount = interactionCount - int16(daysSinceInteraction) + hateBonus + 1;
-        } else {
-            s.aavegotchis[_tokenId].interactionCount = int16(interactionCount + 1 + hateBonus);
-        }
-
-        s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
+        LibAppStorage.interact(_tokenId);
     }
 
     //Prevnts assets and items from being moved from Aavegotchi during lock period, except by gameManager.

@@ -46,7 +46,7 @@ struct ItemType {
     string name; //The name of the item
     uint96 ghstPrice; //How much GHST this item costs
     uint32 svgId; //The svgId of the item
-    uint32 maxQuantity; //Total number that can be minted of this item. 
+    uint32 maxQuantity; //Total number that can be minted of this item.
     uint8 rarityScoreModifier; //Number from 1-50.
     uint8 setId; //The id of the set. Zero is no set
     // Each bit is a slot position. 1 is true, 0 is false
@@ -58,7 +58,6 @@ struct ItemType {
     uint8 category; // 0 is wearable, 1 is badge, 2 is consumable
     int8 kinshipBonus; //[CONSUMABLE ONLY] How much this consumable boosts (or reduces) kinship score
     uint32 experienceBonus; //[CONSUMABLE ONLY]
-
 }
 
 struct WearableSet {
@@ -227,5 +226,43 @@ library LibAppStorage {
         assembly {
             mstore(array_, length)
         }
+    }
+
+    function interact(uint256 _tokenId) internal {
+        AppStorage storage s = diamondStorage();
+        //To test (Dan): Only allow 2 interactions per day
+        uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
+        // 43200 seconds is 12 hours
+        // if interacted less than 12 hours ago
+        if (block.timestamp < lastInteracted + 43200) {
+            return;
+        }
+
+        int16 interactionCount = s.aavegotchis[_tokenId].interactionCount;
+        uint256 interval = block.timestamp - lastInteracted;
+        int16 daysSinceInteraction = int16(interval / 86400);
+        if (daysSinceInteraction > 3000) {
+            daysSinceInteraction = 3000;
+        }
+        int16 baseKinship = 50;
+
+        //Interaction count can't go below -50 otherwise the kinship will be negative
+        if (interactionCount < -50) interactionCount = -50;
+
+        //If your Aavegotchi hates you and you finally pet it, you get a bonus
+        uint256 kinship = uint256(baseKinship + interactionCount - daysSinceInteraction);
+        int16 hateBonus = 0;
+
+        if (kinship < 40) {
+            hateBonus = 2;
+        }
+
+        //Update the interactionCount
+        if (daysSinceInteraction > 0) {
+            s.aavegotchis[_tokenId].interactionCount = interactionCount - int16(daysSinceInteraction) + hateBonus + 1;
+        } else {
+            s.aavegotchis[_tokenId].interactionCount = int16(interactionCount + 1 + hateBonus);
+        }
+        s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
     }
 }
