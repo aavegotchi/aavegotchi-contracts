@@ -380,10 +380,20 @@ describe('Items & Wearables', async function () {
 
   it('Cannot equip wearables that require a higher level', async function () {
 
+    //This item requires level 5
+    const unequippableItem = "2"
+    const wearableIds = sixteenBitArrayToUint([unequippableItem, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
+    await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), "ItemsFacet: Aavegotchi level lower than minLevel")
+
   })
 
   it('Cannot equip wearables that require a different collateral', async function () {
-
+    //Can only be equipped by collateraltype 8
+    const unequippableItem = "3"
+    const wearable = await itemsFacet.getItemType(unequippableItem)
+    console.log('wearable:', wearable)
+    const wearableIds = sixteenBitArrayToUint([unequippableItem, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
+    await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), "ItemsFacet: Wearable cannot be equipped in this collateral type")
   })
 
   it('Cannot equip wearables in the wrong slot', async function () {

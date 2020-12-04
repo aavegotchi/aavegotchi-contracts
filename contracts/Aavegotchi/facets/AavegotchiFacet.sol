@@ -41,6 +41,10 @@ contract AavegotchiFacet {
     uint256 internal constant EQUIPPED_WEARABLE_SLOTS = 16;
     uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
+    /***********************************|
+   |             Events                |
+   |__________________________________*/
+
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
 
@@ -53,6 +57,10 @@ contract AavegotchiFacet {
     /// @dev This emits when an operator is enabled or disabled for an owner.
     ///  The operator can manage all NFTs of the owner.
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+
+    /***********************************|
+   |             Modifiers              |
+   |__________________________________*/
 
     modifier onlyUnlocked(uint256 _tokenId) {
         require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "Only callable on unlocked Aavegotchis");
@@ -264,15 +272,7 @@ contract AavegotchiFacet {
     }
 
     //Only valid for claimed Aavegotchis
-    function calculateModifiedRarityScore(uint256 _tokenId)
-        external
-        view
-        returns (ModifiedRarityScore memory info_)
-    // returns (ModifiedRarityScore(int256 rarityScore_, int256[NUMERIC_TRAITS_NUM] memory numericTraits_))
-    {
-        //To test (Dan): Should return final rarity score inlcuding wearables (but not sets)
-        //To test (Dan): Can also return the final numericTraits including wearable modifiers
-
+    function calculateModifiedRarityScore(uint256 _tokenId) external view returns (ModifiedRarityScore memory info_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 equippedWearables = aavegotchi.equippedWearables;
@@ -308,9 +308,6 @@ contract AavegotchiFacet {
     }
 
     function calculateKinship(uint256 _tokenId) external view returns (uint256 kinship) {
-        //The initial value of Kinship is always 50
-        //Players can boost their kinship by interacting with their Aavegotchi.
-
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 lastInteracted = aavegotchi.lastInteracted;
         int16 interactionCount = int16(aavegotchi.interactionCount);
@@ -487,7 +484,6 @@ contract AavegotchiFacet {
     ) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-        // require(msg.sender == aavegotchi.owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
 
         PortalAavegotchiTraitsIO memory option = singlePortalAavegotchiTraits(aavegotchi.randomNumber, _option);
         aavegotchi.randomNumber = option.randomNumber;
@@ -511,10 +507,6 @@ contract AavegotchiFacet {
         aavegotchi.escrow = escrow;
         LibERC20.transferFrom(option.collateralType, msg.sender, escrow, _stakeAmount);
     }
-
-    // function nextInteractTime((uint256 _tokenId) external view returns (uint256 ) {
-
-    // }
 
     function interact(uint256 _tokenId) public {
         //To test (Dan): Only allow 2 interactions per day

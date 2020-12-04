@@ -46,11 +46,11 @@ const itemTypes = [
     traitModifiers: [0, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [true, false, false, false, false, false, false, false, false, true],
+    slotPositions: [true, true, true, true, true, true, true, true, true, true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1,
+    minLevel: 5,
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0
@@ -64,10 +64,10 @@ const itemTypes = [
     traitModifiers: [0, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [true],
+    slotPositions: [true, true, true, true, true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
-    allowedCollaterals: [],
+    allowedCollaterals: [8],
     minLevel: 1,
     canBeTransferred: true,
     category: 0,
@@ -126,7 +126,7 @@ const itemTypes = [
   }
 ]
 
-function eightBitIntArrayToUint (array) {
+function eightBitIntArrayToUint(array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -138,7 +138,7 @@ function eightBitIntArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function eightBitUintArrayToUint (array) {
+function eightBitUintArrayToUint(array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -150,7 +150,7 @@ function eightBitUintArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function boolsArrayToUint16 (bools) {
+function boolsArrayToUint16(bools) {
   const uint = []
   for (const b of bools) {
     if (b) {
@@ -162,7 +162,7 @@ function boolsArrayToUint16 (bools) {
   return parseInt(uint.join('').padStart(16, '0'), 2)
 }
 
-function getItemTypes () {
+function getItemTypes() {
   const result = []
   for (const itemType of itemTypes) {
     itemType.traitModifiers = eightBitIntArrayToUint(itemType.traitModifiers)

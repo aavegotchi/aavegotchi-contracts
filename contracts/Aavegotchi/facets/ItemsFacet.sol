@@ -40,6 +40,10 @@ contract ItemsFacet {
     uint16 internal constant SLOT_HAND_RIGHT = 5;
     uint16 internal constant SLOT_PET = 6;
 
+    /***********************************|
+   |             Modifiers              |
+   |__________________________________*/
+
     modifier onlyUnlocked(uint256 _tokenId) {
         require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "AavegotchiFacet: Only callable on unlocked Aavegotchis");
         _;
@@ -49,6 +53,10 @@ contract ItemsFacet {
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
         _;
     }
+
+    /***********************************|
+   |             Events                  |
+   |__________________________________*/
 
     /**
         @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
@@ -86,6 +94,10 @@ contract ItemsFacet {
     */
     event URI(string _value, uint256 indexed _id);
 
+    /***********************************|
+   |             View Functions           |
+   |__________________________________*/
+
     // Returns balance for each item that exists for an account
     function itemBalances(address _account) external view returns (uint256[] memory bals_) {
         uint256 count = s.itemTypes.length;
@@ -94,6 +106,100 @@ contract ItemsFacet {
             bals_[id] = s.items[_account][id];
         }
     }
+
+    /**
+        @notice Get the balance of an account's tokens.
+        @param _owner  The address of the token holder
+        @param _id     ID of the token
+        @return bal_    The _owner's balance of the token type requested
+     */
+    function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal_) {
+        bal_ = s.items[_owner][_id];
+    }
+
+    /// @notice Get the balance of a non-fungible parent token
+    /// @param _tokenContract The contract tracking the parent token
+    /// @param _tokenId The ID of the parent token
+    /// @param _id     ID of the token
+    /// @return value The balance of the token
+    function balanceOfToken(
+        address _tokenContract,
+        uint256 _tokenId,
+        uint256 _id
+    ) external view returns (uint256 value) {
+        value = s.nftBalances[_tokenContract][_tokenId][_id];
+    }
+
+    // returns the balances for all items for a token
+    function itemBalancesOfToken(address _tokenContract, uint256 _tokenId) external view returns (uint256[] memory bals_) {
+        uint256 count = s.itemTypes.length;
+        bals_ = new uint256[](count);
+        for (uint256 id = 0; id < count; id++) {
+            bals_[id] = s.nftBalances[_tokenContract][_tokenId][id];
+        }
+    }
+
+    /**
+        @notice Get the balance of multiple account/token pairs
+        @param _owners The addresses of the token holders
+        @param _ids    ID of the tokens
+        @return bals   The _owner's balance of the token types requested (i.e. balance for each (owner, id) pair)
+     */
+    function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory bals) {
+        bals = new uint256[](_owners.length);
+        for (uint256 i; i < 0; i++) {
+            uint256 id = _ids[i];
+            address owner = _owners[i];
+            bals[i] = s.items[owner][id];
+        }
+    }
+
+    function equippedWearables(uint256 _tokenId) external view returns (uint256[16] memory wearableIds_) {
+        uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+        for (uint16 i; i < 16; i++) {
+            wearableIds_[i] = uint16(l_equippedWearables >> (i * 16));
+        }
+    }
+
+    // Called by off chain software so not too concerned about gas costs
+    function getWearableSets() external view returns (WearableSetIO[] memory wearableSets_) {
+        uint256 length = s.wearableSets.length;
+        wearableSets_ = new WearableSetIO[](length);
+        for (uint256 i; i < length; i++) {
+            wearableSets_[i] = getWearableSet(i);
+        }
+    }
+
+    function getWearableSet(uint256 _index) public view returns (WearableSetIO memory wearableSet_) {
+        uint256 length = s.wearableSets.length;
+        require(_index < length, "ItemsFacet: Wearable set does not exist");
+        wearableSet_.name = s.wearableSets[_index].name;
+        wearableSet_.wearableIds = LibAppStorage.uintToSixteenBitArray(s.wearableSets[_index].wearableIds);
+        int256 traitsBonuses = s.wearableSets[_index].traitsBonuses;
+        for (uint256 i; i < 5; i++) {
+            wearableSet_.traitsBonuses[i] = int16(traitsBonuses >> (16 * i));
+        }
+    }
+
+    function totalWearableSets() external view returns (uint256) {
+        return s.wearableSets.length;
+    }
+
+    function getItemType(uint256 _itemId) public view returns (ItemType memory itemType_) {
+        require(_itemId < s.itemTypes.length, "ItemsFacet: Item type doesn't exist");
+        itemType_ = s.itemTypes[_itemId];
+    }
+
+    function getItemTypes() external view returns (ItemType[] memory itemTypes_) {
+        uint256 length = s.itemTypes.length;
+        for (uint256 i; i < length; i++) {
+            itemTypes_[i] = getItemType(i);
+        }
+    }
+
+    /***********************************|
+   |             Set Functions           |
+   |__________________________________*/
 
     /**
         @notice Transfers `_value` amount of an `_id` from the `_from` address to the `_to` address specified (with safety call).
@@ -283,60 +389,6 @@ contract ItemsFacet {
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
     }
 
-    /**
-        @notice Get the balance of an account's tokens.
-        @param _owner  The address of the token holder
-        @param _id     ID of the token
-        @return bal_    The _owner's balance of the token type requested
-     */
-    function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal_) {
-        bal_ = s.items[_owner][_id];
-    }
-
-    /// @notice Get the balance of a non-fungible parent token
-    /// @param _tokenContract The contract tracking the parent token
-    /// @param _tokenId The ID of the parent token
-    /// @param _id     ID of the token
-    /// @return value The balance of the token
-    function balanceOfToken(
-        address _tokenContract,
-        uint256 _tokenId,
-        uint256 _id
-    ) external view returns (uint256 value) {
-        value = s.nftBalances[_tokenContract][_tokenId][_id];
-    }
-
-    // returns the balances for all items for a token
-    function itemBalancesOfToken(address _tokenContract, uint256 _tokenId) external view returns (uint256[] memory bals_) {
-        uint256 count = s.itemTypes.length;
-        bals_ = new uint256[](count);
-        for (uint256 id = 0; id < count; id++) {
-            bals_[id] = s.nftBalances[_tokenContract][_tokenId][id];
-        }
-    }
-
-    /**
-        @notice Get the balance of multiple account/token pairs
-        @param _owners The addresses of the token holders
-        @param _ids    ID of the tokens
-        @return bals   The _owner's balance of the token types requested (i.e. balance for each (owner, id) pair)
-     */
-    function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory bals) {
-        bals = new uint256[](_owners.length);
-        for (uint256 i; i < 0; i++) {
-            uint256 id = _ids[i];
-            address owner = _owners[i];
-            bals[i] = s.items[owner][id];
-        }
-    }
-
-    function equippedWearables(uint256 _tokenId) external view returns (uint256[16] memory wearableIds_) {
-        uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
-        for (uint16 i; i < 16; i++) {
-            wearableIds_[i] = uint16(l_equippedWearables >> (i * 16));
-        }
-    }
-
     function equipWearables(uint256 _tokenId, uint256 _equippedWearables) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
 
@@ -357,8 +409,10 @@ contract ItemsFacet {
             require(slotAllowed == 1, "ItemsFacet: Wearable cannot be equipped in this slot");
             bool canBeEquipped;
             uint256 allowedCollaterals = itemType.allowedCollaterals;
+            console.log("allowd:", allowedCollaterals);
             if (allowedCollaterals > 0) {
                 uint256 collateralIndex = s.collateralTypeIndexes[aavegotchi.collateralType];
+                console.log("colateral type:", collateralIndex);
                 for (uint256 i; i < 16; i++) {
                     if (collateralIndex == uint16(allowedCollaterals >> (16 * slot))) {
                         canBeEquipped = true;
@@ -387,30 +441,6 @@ contract ItemsFacet {
         int256[5] traitsBonuses;
     }
 
-    // Called by off chain software so not too concerned about gas costs
-    function getWearableSets() external view returns (WearableSetIO[] memory wearableSets_) {
-        uint256 length = s.wearableSets.length;
-        wearableSets_ = new WearableSetIO[](length);
-        for (uint256 i; i < length; i++) {
-            wearableSets_[i] = getWearableSet(i);
-        }
-    }
-
-    function getWearableSet(uint256 _index) public view returns (WearableSetIO memory wearableSet_) {
-        uint256 length = s.wearableSets.length;
-        require(_index < length, "ItemsFacet: Wearable set does not exist");
-        wearableSet_.name = s.wearableSets[_index].name;
-        wearableSet_.wearableIds = LibAppStorage.uintToSixteenBitArray(s.wearableSets[_index].wearableIds);
-        int256 traitsBonuses = s.wearableSets[_index].traitsBonuses;
-        for (uint256 i; i < 5; i++) {
-            wearableSet_.traitsBonuses[i] = int16(traitsBonuses >> (16 * i));
-        }
-    }
-
-    function totalWearableSets() external view returns (uint256) {
-        return s.wearableSets.length;
-    }
-
     function useConsumables(
         uint256 _tokenId,
         uint256[] calldata _itemIds,
@@ -419,7 +449,7 @@ contract ItemsFacet {
         require(_itemIds.length == _amounts.length, "ItemsFacet: _itemIds length does not match _amounts length");
         for (uint256 i; i < _itemIds.length; i++) {
             uint256 consumableId = _itemIds[i];
-            ItemType storage itemType = s.itemTypes[consumableId];
+            ItemType memory itemType = s.itemTypes[consumableId];
             require(itemType.category == LibAppStorage.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
             uint256 amount = _amounts[i];
             uint256 bal = s.items[msg.sender][consumableId];
@@ -429,17 +459,5 @@ contract ItemsFacet {
             itemType.totalQuantity -= uint32(bal);
         }
         emit TransferBatch(msg.sender, msg.sender, address(0), _itemIds, _amounts);
-    }
-
-    function getItemType(uint256 _itemId) public view returns (ItemType memory itemType_) {
-        require(_itemId < s.itemTypes.length, "ItemsFacet: Item type doesn't exist");
-        itemType_ = s.itemTypes[_itemId];
-    }
-
-    function getItemTypes() external view returns (ItemType[] memory itemTypes_) {
-        uint256 length = s.itemTypes.length;
-        for (uint256 i; i < length; i++) {
-            itemTypes_[i] = getItemType(i);
-        }
     }
 }

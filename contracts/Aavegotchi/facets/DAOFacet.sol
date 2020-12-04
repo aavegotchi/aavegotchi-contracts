@@ -21,6 +21,10 @@ contract DAOFacet {
         AavegotchiCollateralTypeInfo collateralTypeInfo;
     }
 
+    /***********************************|
+   |             Modifiers              |
+   |__________________________________*/
+
     modifier onlyDao {
         require(msg.sender == s.dao, "Only DAO can call this function");
         _;
@@ -30,6 +34,22 @@ contract DAOFacet {
         require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access");
         _;
     }
+
+    /***********************************|
+   |             Events                  |
+   |__________________________________*/
+
+    /***********************************|
+   |             View Functions         |
+   |__________________________________*/
+
+    function gameManager() external view returns (address) {
+        return s.gameManager;
+    }
+
+    /***********************************|
+   |             Set Functions          |
+   |__________________________________*/
 
     function setDao(address _newDao) external onlyDaoOrOwner {
         emit DaoTransferred(s.dao, _newDao);
@@ -125,9 +145,5 @@ contract DAOFacet {
     function setGameManager(address _gameManager) external {
         require(msg.sender == LibDiamond.contractOwner(), "DAOFacet: Only contract owner can set game manager");
         s.gameManager = _gameManager;
-    }
-
-    function gameManager() external view returns (address) {
-        return s.gameManager;
     }
 }
