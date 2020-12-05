@@ -7,7 +7,7 @@ import "../../shared/interfaces/IERC20.sol";
 import "../libraries/LibSvg.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
-//import "hardhat/console.sol";
+import "hardhat/console.sol";
 import "../CollateralEscrow.sol";
 import "../libraries/LibVrf.sol";
 
@@ -134,7 +134,7 @@ contract AavegotchiFacet {
         uint16 conversionRate = collateralInfo.conversionRate;
 
         //Get rarity multiplier
-        uint256 rarityMultiplier = calculateRarityMultiplier(singlePortalAavegotchiTraits_.numericTraits, collateralType);
+        uint256 rarityMultiplier = rarityMultiplier(singlePortalAavegotchiTraits_.numericTraits, collateralType);
 
         //First we get the base price of our collateral in terms of DAI
         uint256 collateralDAIPrice = ((10**IERC20(collateralType).decimals()) / conversionRate);
@@ -239,7 +239,7 @@ contract AavegotchiFacet {
         aavegotchiInfo_.interactionCount = s.aavegotchis[_tokenId].interactionCount;
         aavegotchiInfo_.lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
         aavegotchiInfo_.experience = s.aavegotchis[_tokenId].experience;
-        aavegotchiInfo_.level = calculateAavegotchiLevel(s.aavegotchis[_tokenId].experience);
+        aavegotchiInfo_.level = aavegotchiLevel(s.aavegotchis[_tokenId].experience);
         aavegotchiInfo_.usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
         aavegotchiInfo_.batchId = s.aavegotchis[_tokenId].batchId;
         aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
@@ -247,7 +247,7 @@ contract AavegotchiFacet {
     }
 
     function availableSkillPoints(uint256 _tokenId) public view returns (uint256) {
-        uint256 level = calculateAavegotchiLevel(s.aavegotchis[_tokenId].experience);
+        uint256 level = aavegotchiLevel(s.aavegotchis[_tokenId].experience);
         uint256 skillPoints = (level / 3);
         uint256 usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
         //1 skill point per 3 levels. To do (done): Check if this underflows
@@ -259,12 +259,12 @@ contract AavegotchiFacet {
         return uint256(x >= 0 ? x : -x);
     }
 
-    function calculateAavegotchiLevel(uint32 _experience) public pure returns (uint32 level_) {
-        level_ = LibAppStorage.calculateAavegotchiLevel(_experience);
+    function aavegotchiLevel(uint32 _experience) public pure returns (uint32 level_) {
+        level_ = LibAppStorage.aavegotchiLevel(_experience);
     }
 
-    function calculateRarityMultiplier(int256 _numericTraits, address _collateralType) public view returns (uint256 rarityMultiplier) {
-        int256 rarityScore = calculateBaseRarityScore(_numericTraits, _collateralType);
+    function rarityMultiplier(int256 _numericTraits, address _collateralType) public view returns (uint256 multiplier) {
+        int256 rarityScore = baseRarityScore(_numericTraits, _collateralType);
         if (rarityScore < 300) return 10;
         else if (rarityScore >= 300 && rarityScore < 450) return 10;
         else if (rarityScore >= 450 && rarityScore <= 525) return 25;
@@ -273,7 +273,7 @@ contract AavegotchiFacet {
     }
 
     //Calculates the base rarity score, including collateral modifier
-    function calculateBaseRarityScore(int256 _numericTraits, address collateralType) public view returns (int256 _rarityScore) {
+    function baseRarityScore(int256 _numericTraits, address collateralType) public view returns (int256 _rarityScore) {
         AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
         uint256 modifiers = collateralInfo.modifiers;
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
@@ -294,7 +294,7 @@ contract AavegotchiFacet {
     }
 
     //Only valid for claimed Aavegotchis
-    function calculateModifiedRarityScore(uint256 _tokenId) external view returns (ModifiedRarityScore memory info_) {
+    function modifiedRarityScore(uint256 _tokenId) external view returns (ModifiedRarityScore memory info_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 equippedWearables = aavegotchi.equippedWearables;
@@ -321,7 +321,7 @@ contract AavegotchiFacet {
             wearableBonus += itemType.rarityScoreModifier;
         }
         address collateral = s.aavegotchis[_tokenId].collateralType;
-        int256 baseRarity = calculateBaseRarityScore(numericTraits, collateral);
+        int256 baseRarity = baseRarityScore(numericTraits, collateral);
         info_.rarityScore_ = baseRarity + wearableBonus;
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(numericTraits >> (i * 16));
@@ -329,7 +329,7 @@ contract AavegotchiFacet {
         }
     }
 
-    function calculateKinship(uint256 _tokenId) external view returns (uint256 kinship) {
+    function kinship(uint256 _tokenId) external view returns (uint256 kinship) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 lastInteracted = aavegotchi.lastInteracted;
         int16 interactionCount = int16(aavegotchi.interactionCount);
@@ -460,46 +460,7 @@ contract AavegotchiFacet {
         s.aavegotchis[_tokenId].usedSkillPoints += uint16(totalUsed);
     }
 
-    function buyPortals(
-        address _to,
-        uint256 _ghst,
-        bool _setBatchId
-    ) external {
-        uint256 currentHauntId = s.currentHauntId;
-        Haunt memory haunt = s.haunts[currentHauntId];
-        require(_ghst >= haunt.portalPrice, "AavegotchiFacet: Not enough GHST to buy portal");
-        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
-        require(ghstBalance >= _ghst, "AavegotchiFacet: Not enough GHST!");
-        uint16 hauntId = s.currentHauntId;
-        uint256 numAavegotchisToPurchase = _ghst / haunt.portalPrice;
-        uint256 hauntCount = haunt.totalCount + numAavegotchisToPurchase;
-        require(hauntCount <= haunt.hauntMaxSize, "AavegotchiFacet: Exceeded max number of aavegotchis for this haunt");
-        s.haunts[currentHauntId].totalCount = uint24(hauntCount);
-        uint32 nextBatchId;
-        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
-        if (_setBatchId) {
-            nextBatchId = vrf_ds.nextBatchId;
-        }
-        uint256 tokenId = s.totalSupply;
-        for (uint256 i; i < numAavegotchisToPurchase; i++) {
-            s.aavegotchis[tokenId].owner = _to;
-            s.aavegotchis[tokenId].batchId = nextBatchId;
-            s.aavegotchis[tokenId].hauntId = hauntId;
-            emit Transfer(address(0), _to, tokenId);
-            tokenId++;
-        }
-        if (_setBatchId) {
-            vrf_ds.batchCount += uint32(numAavegotchisToPurchase);
-        }
-        s.aavegotchiBalance[_to] += numAavegotchisToPurchase;
-        s.totalSupply = uint32(tokenId);
-
-        uint256 totalPrice = _ghst - (_ghst % haunt.portalPrice);
-
-        LibAppStorage.purchase(totalPrice);
-    }
-
-    function claimAavegotchiFromPortal(
+    function claimAavegotchi(
         uint256 _tokenId,
         uint256 _option,
         uint256 _stakeAmount

@@ -394,7 +394,7 @@ contract ItemsFacet {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
 
         //To test (Dan): Add in actual dynamic level
-        uint32 aavegotchiLevel = LibAppStorage.calculateAavegotchiLevel(aavegotchi.experience);
+        uint32 aavegotchiLevel = LibAppStorage.aavegotchiLevel(aavegotchi.experience);
 
         for (uint256 slot; slot < 16; slot++) {
             uint256 wearableId = uint16(_equippedWearables >> (16 * slot));

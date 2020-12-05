@@ -182,7 +182,7 @@ library LibAppStorage {
         LibERC20.transferFrom(s.ghstContract, msg.sender, s.dao, daoShare);
     }
 
-    function calculateAavegotchiLevel(uint32 _experience) internal pure returns (uint32 level) {
+    function aavegotchiLevel(uint32 _experience) internal pure returns (uint32 level) {
         //To do (Dan): Confirm final experience numbers
         if (_experience <= 100) return 1;
         //Levels 1-10 require 100 XP each

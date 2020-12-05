@@ -84,14 +84,14 @@ describe('Buying Portals, VRF', function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (50 * Math.pow(10, 18)).toFixed() // 1 portal
-    await truffleAssert.reverts(aavegotchiFacet.buyPortals(account, buyAmount, true), 'AavegotchiFacet: Not enough GHST to buy portal')
+    await truffleAssert.reverts(shopFacet.buyPortals(account, buyAmount, true), 'AavegotchiFacet: Not enough GHST to buy portal')
   })
 
   it('Should purchase one portal', async function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await global.aavegotchiFacet.buyPortals(account, buyAmount, true)
+    await global.shopFacet.buyPortals(account, buyAmount, true)
 
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(1)
@@ -106,7 +106,7 @@ describe('Buying Portals, VRF', function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await global.aavegotchiFacet.buyPortals(account, buyAmount, false)
+    await global.shopFacet.buyPortals(account, buyAmount, false)
   })
 
   // it('Only owner can set batch id', async function () {
@@ -141,7 +141,7 @@ describe('Buying Portals, VRF', function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await global.aavegotchiFacet.buyPortals(account, buyAmount, true)
+    await global.shopFacet.buyPortals(account, buyAmount, true)
     await truffleAssert.reverts(vrfFacet.drawRandomNumber(), 'VrfFacet: Waiting period to call VRF not over yet')
 
     ethers.provider.send('evm_increaseTime', [18 * 3600])
@@ -158,7 +158,7 @@ describe('Buying Portals, VRF', function () {
     const balance = await ghstDiamond.balanceOf(account)
     await ghstDiamond.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await global.aavegotchiFacet.buyPortals(account, buyAmount, true)
+    await global.shopFacet.buyPortals(account, buyAmount, true)
     await truffleAssert.reverts(vrfFacet.drawRandomNumber(), 'VrfFacet: Waiting period to call VRF not over yet')
   })
 })
@@ -178,7 +178,7 @@ describe('Opening Portals', async function () {
     const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(myPortals[0].tokenId)
     // console.log(JSON.stringify(ghosts, null, 4))
     ghosts.forEach(async (ghost) => {
-      const rarityScore = await global.aavegotchiFacet.calculateBaseRarityScore(ghost.numericTraits, ghost.collateralType)
+      const rarityScore = await global.aavegotchiFacet.baseRarityScore(ghost.numericTraits, ghost.collateralType)
       expect(Number(rarityScore)).to.greaterThan(298)
       expect(Number(rarityScore)).to.lessThan(602)
     })
@@ -202,7 +202,7 @@ describe('Opening Portals', async function () {
     const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(tokenId)
     const selectedGhost = ghosts[4]
     const minStake = selectedGhost.minimumStake
-    await global.aavegotchiFacet.claimAavegotchiFromPortal(tokenId, 4, minStake)
+    await global.aavegotchiFacet.claimAavegotchi(tokenId, 4, minStake)
 
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(tokenId)
 
@@ -232,10 +232,10 @@ describe('Aavegotchi Metadata', async function () {
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(tokenId)
-    const score = await global.aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
+    const score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(599)
 
-    const multiplier = await global.aavegotchiFacet.calculateRarityMultiplier([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
+    const multiplier = await global.aavegotchiFacet.rarityMultiplier([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(multiplier).to.equal(1000)
 
     // Todo: Clientside calculate what the rarity score should be
@@ -244,7 +244,11 @@ describe('Aavegotchi Metadata', async function () {
 
 describe('Collaterals and escrow', async function () {
   it('First collateral should be blank/empty', async function () {
+    const collaterals = await global.collateralFacet.getCollateralInfo()
+    const collateral = collaterals[0]
 
+    expect(collateral.conversionRate).to.equal(0)
+    console.log('collateral:', collateral)
   })
 
   it('Should show all whitelisted collaterals', async function () {
@@ -284,17 +288,17 @@ describe('Collaterals and escrow', async function () {
 
   it('Contract Owner (Later DAO) can update collateral modifiers', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
-    let score = await global.aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
+    let score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(599)
     await global.daoFacet.updateCollateralModifiers(aavegotchi.collateral, [2, 0, 0, 0, 0, 0])
-    score = await global.aavegotchiFacet.calculateBaseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
+    score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(602)
   })
 
   it('Can decrease stake and destroy Aavegotchi', async function () {
     // Buy portal
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await global.aavegotchiFacet.buyPortals(account, buyAmount, true)
+    await global.shopFacet.buyPortals(account, buyAmount, true)
     ethers.provider.send('evm_increaseTime', [18 * 3600])
     ethers.provider.send('evm_mine')
 
@@ -351,7 +355,7 @@ async function openAndClaim(tokenIds) {
     const initialBalance = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
 
     // Claim ghost and stake
-    await global.aavegotchiFacet.claimAavegotchiFromPortal(id, 0, minStake)
+    await global.aavegotchiFacet.claimAavegotchi(id, 0, minStake)
     const balanceAfterClaim = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
     expect(balanceAfterClaim).to.equal(initialBalance.sub(minStake))
 
@@ -466,7 +470,7 @@ describe('Items & Wearables', async function () {
     expect(equipped[testSlot]).to.equal('0')
 
     // Get score before equipping
-    const originalScore = (await global.aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)).rarityScore_.toString()
+    const originalScore = (await global.aavegotchiFacet.modifiedRarityScore(testAavegotchiId)).rarityScore_.toString()
 
     // Equip a wearable
     wearableIds = sixteenBitArrayToUint([testWearableId])
@@ -482,7 +486,7 @@ describe('Items & Wearables', async function () {
     })
 
     // Retrieve the final score
-    const augmentedScore = (await global.aavegotchiFacet.calculateModifiedRarityScore(testAavegotchiId)).rarityScore_.toString()
+    const augmentedScore = (await global.aavegotchiFacet.modifiedRarityScore(testAavegotchiId)).rarityScore_.toString()
 
     const finalScore = Number(originalScore) + Number(rarityScoreModifier) + Number(wearableTraitsBonus)
     expect(Number(augmentedScore)).to.equal(finalScore)
@@ -497,10 +501,10 @@ describe('Haunts', async function () {
 
   it('Cannot exceed max haunt size', async function () {
     const oneHundredPortals = ethers.utils.parseEther('9500')
-    const tx = await global.aavegotchiFacet.buyPortals(account, oneHundredPortals, true)
+    const tx = await global.shopFacet.buyPortals(account, oneHundredPortals, true)
 
     const singlePortal = ethers.utils.parseEther('100')
-    await truffleAssert.reverts(global.aavegotchiFacet.buyPortals(account, singlePortal, true), 'AavegotchiFacet: Exceeded max number of aavegotchis for this haunt')
+    await truffleAssert.reverts(global.shopFacet.buyPortals(account, singlePortal, true), 'AavegotchiFacet: Exceeded max number of aavegotchis for this haunt')
 
     //  const receipt = await tx.wait()
   })
@@ -530,7 +534,7 @@ describe('Revenue transfers', async function () {
     }
 
     // Buy 10 Portals
-    await global.aavegotchiFacet.buyPortals(account, ethers.utils.parseEther('1000'), true)
+    await global.shopFacet.buyPortals(account, ethers.utils.parseEther('1000'), true)
 
     // Calculate shares from 100 Portals
     const burnShare = ethers.utils.parseEther('330')
@@ -586,7 +590,7 @@ describe('Kinship', async function () {
     await global.aavegotchiFacet.interact('0')
     await global.aavegotchiFacet.interact('0')
     await global.aavegotchiFacet.interact('0')
-    let kinship = await global.aavegotchiFacet.calculateKinship('0')
+    let kinship = await global.aavegotchiFacet.kinship('0')
     console.log('* 5 initial Interactions, kinship is:', kinship.toString())
     // 5 interactions + 1 streak bonus
     // expect(kinship).to.equal(55)
@@ -595,7 +599,7 @@ describe('Kinship', async function () {
     ethers.provider.send('evm_increaseTime', [3 * 86400])
     ethers.provider.send('evm_mine')
 
-    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    kinship = await global.aavegotchiFacet.kinship('0')
     // Took three days off and lost streak bonus
     console.log('* 3 days w/ no interaction, kinship is:', kinship.toString())
 
@@ -604,25 +608,25 @@ describe('Kinship', async function () {
     ethers.provider.send('evm_increaseTime', [14 * 86400])
     ethers.provider.send('evm_mine')
 
-    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    kinship = await global.aavegotchiFacet.kinship('0')
     console.log('* Another 14 days since last interaction, total 17 days. Kinship is', kinship.toString())
 
     ethers.provider.send('evm_increaseTime', [20 * 86400])
     ethers.provider.send('evm_mine')
-    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    kinship = await global.aavegotchiFacet.kinship('0')
     console.log('* 37 days since last interaction, kinship is:', kinship.toString())
     // expect(kinship).to.equal(13)
 
     await global.aavegotchiFacet.interact('0')
-    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    kinship = await global.aavegotchiFacet.kinship('0')
     console.log('* Kinship after first interaction is:', kinship.toString())
 
     await global.aavegotchiFacet.interact('0')
-    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    kinship = await global.aavegotchiFacet.kinship('0')
     console.log('* Kinship after second interaction is:', kinship.toString())
 
     await global.aavegotchiFacet.interact('0')
-    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    kinship = await global.aavegotchiFacet.kinship('0')
     console.log('* Kinship after third interaction is:', kinship.toString())
 
     console.log('* Interact 120 times')
@@ -631,12 +635,12 @@ describe('Kinship', async function () {
       await global.aavegotchiFacet.interact('0')
     }
 
-    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    kinship = await global.aavegotchiFacet.kinship('0')
     console.log('* Kinship is:', kinship.toString())
 
     // ethers.provider.send('evm_increaseTime', [10 * 86400])
     // ethers.provider.send('evm_mine')
-    // kinship = await global.aavegotchiFacet.calculateKinship('0')
+    // kinship = await global.aavegotchiFacet.kinship('0')
 
     let aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
 
@@ -647,7 +651,7 @@ describe('Kinship', async function () {
 
       ethers.provider.send('evm_increaseTime', [days * 86400])
       ethers.provider.send('evm_mine')
-      kinship = await global.aavegotchiFacet.calculateKinship('0')
+      kinship = await global.aavegotchiFacet.kinship('0')
 
       aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
 
@@ -655,7 +659,7 @@ describe('Kinship', async function () {
     }
 
     await global.aavegotchiFacet.interact('0')
-    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    kinship = await global.aavegotchiFacet.kinship('0')
     console.log(`* Interact after ${daysSinceInteraction} days. Kinship is: `, kinship.toString())
     aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
 
@@ -666,7 +670,7 @@ describe('Kinship', async function () {
 
       ethers.provider.send('evm_increaseTime', [days * 86400])
       ethers.provider.send('evm_mine')
-      kinship = await global.aavegotchiFacet.calculateKinship('0')
+      kinship = await global.aavegotchiFacet.kinship('0')
 
       aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
 
@@ -678,7 +682,7 @@ describe('Kinship', async function () {
       await global.aavegotchiFacet.interact('0')
     }
 
-    kinship = await global.aavegotchiFacet.calculateKinship('0')
+    kinship = await global.aavegotchiFacet.kinship('0')
     console.log('* Kinship is:', kinship.toString())
   })
   */
@@ -729,9 +733,9 @@ describe('Using Consumables', async function () {
   it('Using Kinship Potion increases kinship by 10', async function () {
     const kinshipPotion = await itemsFacet.getItemType("6")
     expect(kinshipPotion.kinshipBonus).to.equal(10)
-    let originalScore = await aavegotchiFacet.calculateKinship(testAavegotchiId)
+    let originalScore = await aavegotchiFacet.kinship(testAavegotchiId)
     await itemsFacet.useConsumable(testAavegotchiId, "6")
-    let boostedScore = await aavegotchiFacet.calculateKinship(testAavegotchiId)
+    let boostedScore = await aavegotchiFacet.kinship(testAavegotchiId)
     expect(boostedScore).to.equal(Number(originalScore) + Number(kinshipPotion.kinshipBonus))
   })
 

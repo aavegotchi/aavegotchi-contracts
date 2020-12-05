@@ -8,17 +8,62 @@ import "hardhat/console.sol";
 import "../../shared/libraries/LibERC20.sol";
 import "../interfaces/IERC1155.sol";
 import "../libraries/LibERC1155.sol";
+import "../libraries/LibVrf.sol";
 
 contract ShopFacet {
     AppStorage internal s;
     event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
     bytes4 internal constant ERC1155_BATCH_ACCEPTED = 0xbc197c81; // Return value from `onERC1155BatchReceived` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).
 
+     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
+
     address internal immutable im_vouchersContract;
 
     constructor(address _vouchersContract) {
         im_vouchersContract = _vouchersContract;
     }
+
+
+      function buyPortals(
+        address _to,
+        uint256 _ghst,
+        bool _setBatchId
+    ) external {
+        uint256 currentHauntId = s.currentHauntId;
+        Haunt memory haunt = s.haunts[currentHauntId];
+        require(_ghst >= haunt.portalPrice, "AavegotchiFacet: Not enough GHST to buy portal");
+        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
+        require(ghstBalance >= _ghst, "AavegotchiFacet: Not enough GHST!");
+        uint16 hauntId = s.currentHauntId;
+        uint256 numAavegotchisToPurchase = _ghst / haunt.portalPrice;
+        uint256 hauntCount = haunt.totalCount + numAavegotchisToPurchase;
+        require(hauntCount <= haunt.hauntMaxSize, "AavegotchiFacet: Exceeded max number of aavegotchis for this haunt");
+        s.haunts[currentHauntId].totalCount = uint24(hauntCount);
+        uint32 nextBatchId;
+        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
+        if (_setBatchId) {
+            nextBatchId = vrf_ds.nextBatchId;
+        }
+        uint256 tokenId = s.totalSupply;
+        for (uint256 i; i < numAavegotchisToPurchase; i++) {
+            s.aavegotchis[tokenId].owner = _to;
+            s.aavegotchis[tokenId].batchId = nextBatchId;
+            s.aavegotchis[tokenId].hauntId = hauntId;
+            emit Transfer(address(0), _to, tokenId);
+            tokenId++;
+        }
+        if (_setBatchId) {
+            vrf_ds.batchCount += uint32(numAavegotchisToPurchase);
+        }
+        s.aavegotchiBalance[_to] += numAavegotchisToPurchase;
+        s.totalSupply = uint32(tokenId);
+
+        uint256 totalPrice = _ghst - (_ghst % haunt.portalPrice);
+
+        LibAppStorage.purchase(totalPrice);
+    }
+
+
 
     function purchaseItemsWithGhst(
         address _to,
