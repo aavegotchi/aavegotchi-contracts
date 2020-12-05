@@ -443,28 +443,27 @@ contract ItemsFacet {
         int256[5] traitsBonuses;
     }
 
-    function useConsumables(
-        uint256 _tokenId,
-        uint256[] calldata _itemIds,
-        uint256[] calldata _amounts
-    ) external onlyAavegotchiOwner(_tokenId) {
-        require(_itemIds.length == _amounts.length, "ItemsFacet: _itemIds length does not match _amounts length");
+    function useConsumables(uint256[] calldata _tokenIds, uint256[] calldata _itemIds) external {
+        require(_itemIds.length == _tokenIds.length, "ItemsFacet: _itemIds length does not match _tokenIds length");
+        uint256[] memory amounts = new uint256[](_itemIds.length);
         for (uint256 i; i < _itemIds.length; i++) {
+            amounts[i] = 1;
+            uint256 tokenId = _tokenIds[i];
+            require(block.timestamp >= s.aavegotchis[tokenId].lastTemporaryBoost + 24 hours, "ItemsFacet: Last consumable has not expired");
             uint256 consumableId = _itemIds[i];
             ItemType memory itemType = s.itemTypes[consumableId];
             require(itemType.category == LibAppStorage.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
-            uint256 amount = _amounts[i];
             uint256 bal = s.items[msg.sender][consumableId];
-            require(amount <= bal, "Items: Do not have that many to consume");
-            s.items[msg.sender][consumableId] = bal - amount;
-            s.aavegotchis[_tokenId].interactionCount += itemType.kinshipBonus;
-
+            require(1 <= bal, "Items: Do not have that many to consume");
+            s.items[msg.sender][consumableId] = bal - 1;
+            s.aavegotchis[tokenId].interactionCount += itemType.kinshipBonus;
+            s.aavegotchis[tokenId].lastTemporaryBoost = uint40(block.timestamp);
+            s.aavegotchis[tokenId].temporaryTraitBoosts = itemType.traitModifiers;
             //To do: Add experience
-            s.aavegotchis[_tokenId].experience += itemType.experienceBonus;
-
-            itemType.totalQuantity -= uint32(bal);
+            s.aavegotchis[tokenId].experience += itemType.experienceBonus;
+            itemType.totalQuantity -= 1;
+            LibAppStorage.interact(tokenId);
         }
-        emit TransferBatch(msg.sender, msg.sender, address(0), _itemIds, _amounts);
-        LibAppStorage.interact(_tokenId);
+        emit TransferBatch(msg.sender, msg.sender, address(0), _itemIds, amounts);
     }
 }

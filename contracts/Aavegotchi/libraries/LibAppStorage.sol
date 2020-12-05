@@ -18,7 +18,11 @@ struct Aavegotchi {
     uint256 equippedWearables; //The currently equipped wearables of the Aavegotchi
     string name;
     uint256 randomNumber;
+    // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
+    int256 temporaryTraitBoosts;
+    uint40 lastTemporaryBoost;
     // Sixteen 16 bit ints
+    // [Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     int256 numericTraits;
     address owner;
     uint32 batchId;
@@ -38,8 +42,11 @@ struct Aavegotchi {
     uint256 unlockTime;
 }
 
+// to
+
 struct ItemType {
-    // treated as six 8 ints array
+    // treated as int8s array
+    // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     int256 traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
     // this is an array of uint indexes into the collateralTypes array
     uint256 allowedCollaterals; //[WEARABLE ONLY] The collaterals this wearable can be equipped to. An empty array is "any"

@@ -196,12 +196,24 @@ contract AavegotchiFacet {
         aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
 
+        int256 boostDecay = int256((block.timestamp - s.aavegotchis[_tokenId].lastTemporaryBoost) / 24 hours);
+        int256 temporaryTraitBoosts = s.aavegotchis[_tokenId].temporaryTraitBoosts;
+        int256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
         int256[] memory traits = new int256[](NUMERIC_TRAITS_NUM);
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-            int256 number = int16(s.aavegotchis[_tokenId].numericTraits >> (i * 16));
+            int256 number = int16(numericTraits >> (i * 16));
+            int256 boost = int16(temporaryTraitBoosts >> (i * 16));
+            if (boost > 0) {
+                if (boost > boostDecay) {
+                    number += boost - boostDecay;
+                }
+            } else {
+                if ((boost * -1) > boostDecay) {
+                    number += boost + boostDecay;
+                }
+            }
             traits[i] = number;
         }
-
         aavegotchiInfo_.numericTraits = traits; //s.aavegotchis[_tokenId].numericTraits;
         uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
         for (uint16 i; i < EQUIPPED_WEARABLE_SLOTS; i++) {
