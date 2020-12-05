@@ -449,18 +449,33 @@ contract ItemsFacet {
         for (uint256 i; i < _itemIds.length; i++) {
             amounts[i] = 1;
             uint256 tokenId = _tokenIds[i];
-            require(block.timestamp >= s.aavegotchis[tokenId].lastTemporaryBoost + 24 hours, "ItemsFacet: Last consumable has not expired");
             uint256 consumableId = _itemIds[i];
             ItemType memory itemType = s.itemTypes[consumableId];
             require(itemType.category == LibAppStorage.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
             uint256 bal = s.items[msg.sender][consumableId];
             require(1 <= bal, "Items: Do not have that many to consume");
             s.items[msg.sender][consumableId] = bal - 1;
-            s.aavegotchis[tokenId].interactionCount += itemType.kinshipBonus;
-            s.aavegotchis[tokenId].lastTemporaryBoost = uint40(block.timestamp);
-            s.aavegotchis[tokenId].temporaryTraitBoosts = itemType.traitModifiers;
+
+            //Increase kinship permanently
+            if (itemType.kinshipBonus > 0) {
+                s.aavegotchis[tokenId].interactionCount += itemType.kinshipBonus;
+            }
+
+            //Boost traits and reset clock
+            if (itemType.traitModifiers != 0) {
+                s.aavegotchis[tokenId].lastTemporaryBoost = uint40(block.timestamp);
+                s.aavegotchis[tokenId].temporaryTraitBoosts = itemType.traitModifiers;
+            }
+
+            //  require(block.timestamp >= s.aavegotchis[tokenId].lastTemporaryBoost + 24 hours, "ItemsFacet: Last consumable has not expired");
+
+            //Increase experience
+            if (itemType.experienceBonus > 0) {
+                s.aavegotchis[tokenId].experience += itemType.experienceBonus;
+            }
+
             //To do: Add experience
-            s.aavegotchis[tokenId].experience += itemType.experienceBonus;
+
             itemType.totalQuantity -= 1;
             LibAppStorage.interact(tokenId);
         }

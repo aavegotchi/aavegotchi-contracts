@@ -97,10 +97,10 @@ const itemTypes = [
   },
   {
     svgId: 5,
-    name: 'Snow Camo Pants',
+    name: 'Test Consumable',
     ghstPrice: 0,
     maxQuantity: 500,
-    traitModifiers: [0, 1, 1, 0, 0, 0],
+    traitModifiers: [],
     rarityScoreModifier: 0,
     setId: 0,
     slotPositions: [true],
@@ -133,7 +133,7 @@ const itemTypes = [
   }
 ]
 
-function eightBitIntArrayToUint (array) {
+function eightBitIntArrayToUint(array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -145,7 +145,7 @@ function eightBitIntArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function eightBitUintArrayToUint (array) {
+function eightBitUintArrayToUint(array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -157,7 +157,7 @@ function eightBitUintArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function boolsArrayToUint16 (bools) {
+function boolsArrayToUint16(bools) {
   const uint = []
   for (const b of bools) {
     if (b) {
@@ -169,7 +169,7 @@ function boolsArrayToUint16 (bools) {
   return parseInt(uint.join('').padStart(16, '0'), 2)
 }
 
-function sixteenBitArrayToUint (array) {
+function sixteenBitArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -181,7 +181,7 @@ function sixteenBitArrayToUint (array) {
   return ethers.BigNumber.from(0)
 }
 
-function getItemTypes () {
+function getItemTypes() {
   const result = []
   for (const itemType of itemTypes) {
     itemType.traitModifiers = eightBitIntArrayToUint(itemType.traitModifiers)
