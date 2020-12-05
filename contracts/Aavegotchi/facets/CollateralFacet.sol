@@ -67,7 +67,7 @@ contract CollateralFacet {
         LibERC20.transferFrom(collateralType, msg.sender, escrow, _stakeAmount);
     }
 
-    function decreaseStake(uint256 _tokenId, uint96 _reduceAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function decreaseStake(uint256 _tokenId, uint256 _reduceAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 

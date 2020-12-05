@@ -134,13 +134,13 @@ contract AavegotchiFacet {
         uint16 conversionRate = collateralInfo.conversionRate;
 
         //Get rarity multiplier
-        uint256 rarityMultiplier = rarityMultiplier(singlePortalAavegotchiTraits_.numericTraits, collateralType);
+        uint256 multiplier = rarityMultiplier(singlePortalAavegotchiTraits_.numericTraits, collateralType);
 
         //First we get the base price of our collateral in terms of DAI
         uint256 collateralDAIPrice = ((10**IERC20(collateralType).decimals()) / conversionRate);
 
         //Then multiply by the rarity multiplier
-        singlePortalAavegotchiTraits_.minimumStake = collateralDAIPrice * rarityMultiplier;
+        singlePortalAavegotchiTraits_.minimumStake = collateralDAIPrice * multiplier;
     }
 
     function portalAavegotchiTraits(uint256 _tokenId)
@@ -329,7 +329,7 @@ contract AavegotchiFacet {
         }
     }
 
-    function kinship(uint256 _tokenId) external view returns (uint256 kinship) {
+    function kinship(uint256 _tokenId) external view returns (uint256 score) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 lastInteracted = aavegotchi.lastInteracted;
         int16 interactionCount = int16(aavegotchi.interactionCount);
@@ -339,9 +339,9 @@ contract AavegotchiFacet {
         int16 baseKinship = 50;
 
         if (daysSinceInteraction > baseKinship + interactionCount) {
-            kinship = 0;
+            score = 0;
         } else {
-            kinship = uint256(baseKinship + interactionCount - daysSinceInteraction);
+            score = uint256(baseKinship + interactionCount - daysSinceInteraction);
         }
     }
 
