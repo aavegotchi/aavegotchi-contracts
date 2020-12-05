@@ -182,6 +182,7 @@ contract AavegotchiFacet {
         uint256 minimumStake;
         //New
         int256 interactionCount; //The kinship value of this Aavegotchi. Default is 50.
+        uint40 lastInteracted;
         uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
         uint256 usedSkillPoints; //number of skill points used
         uint32 level; //the current aavegotchi level
@@ -196,6 +197,7 @@ contract AavegotchiFacet {
         aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
 
+        //Check if trait boosts from consumables are still valid
         int256 boostDecay = int256((block.timestamp - s.aavegotchis[_tokenId].lastTemporaryBoost) / 24 hours);
         int256 temporaryTraitBoosts = s.aavegotchis[_tokenId].temporaryTraitBoosts;
         int256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
@@ -203,6 +205,13 @@ contract AavegotchiFacet {
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(numericTraits >> (i * 16));
             int256 boost = int16(temporaryTraitBoosts >> (i * 16));
+
+            if (boost > 0) {
+                console.log("i:", i);
+                console.log("boost");
+                console.logInt(boost);
+            }
+
             if (boost > 0) {
                 if (boost > boostDecay) {
                     number += boost - boostDecay;
@@ -228,6 +237,7 @@ contract AavegotchiFacet {
         }
         aavegotchiInfo_.minimumStake = s.aavegotchis[_tokenId].minimumStake;
         aavegotchiInfo_.interactionCount = s.aavegotchis[_tokenId].interactionCount;
+        aavegotchiInfo_.lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
         aavegotchiInfo_.experience = s.aavegotchis[_tokenId].experience;
         aavegotchiInfo_.level = calculateAavegotchiLevel(s.aavegotchis[_tokenId].experience);
         aavegotchiInfo_.usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;

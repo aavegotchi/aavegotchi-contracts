@@ -79,7 +79,7 @@ contract CollateralFacet {
         LibERC20.transferFrom(collateralType, escrow, msg.sender, _reduceAmount);
     }
 
-    function decreaseAndDestroy(uint256 _tokenId) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function decreaseAndDestroy(uint256 _tokenId, uint256 _toId) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 
@@ -89,6 +89,11 @@ contract CollateralFacet {
             if (s.itemTypes[itemTypeId].category == LibAppStorage.ITEM_CATEGORY_WEARABLE) {
                 require(s.nftBalances[address(this)][_tokenId][itemTypeId] == 0, "CollateralFacet: Can't burn aavegotchi with wearables");
             }
+        }
+
+        //If the toId is different from the tokenId, then perform an essence transfer
+        if (_tokenId != _toId) {
+            s.aavegotchis[_toId].experience += s.aavegotchis[_tokenId].experience;
         }
 
         s.aavegotchiBalance[msg.sender]--;

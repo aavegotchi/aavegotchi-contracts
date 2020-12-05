@@ -15,7 +15,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray (uint, numBytes) {
+function uintToIntArray(uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -24,7 +24,7 @@ function uintToIntArray (uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint (array) {
+function sixteenBitArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -36,7 +36,7 @@ function sixteenBitArrayToUint (array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds (uint) {
+function uintToItemIds(uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -306,19 +306,12 @@ describe('Collaterals and escrow', async function () {
     let myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(5)
     // Open portal
-    await global.aavegotchiFacet.openPortals(['1'])
-    const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits('1')
-    const selectedGhost = ghosts[0]
-    const minStake = selectedGhost.minimumStake
-    const initialBalance = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
 
-    // Claim ghost and stake
-    await global.aavegotchiFacet.claimAavegotchiFromPortal('1', 0, minStake)
-    const balanceAfterClaim = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
-    expect(balanceAfterClaim).to.equal(initialBalance.sub(minStake))
+    const initialBalance = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
+    await openAndClaim(["1"])
 
     // Burn Aavegotchi and return collateral stake
-    await global.collateralFacet.decreaseAndDestroy('1')
+    await global.collateralFacet.decreaseAndDestroy('1', '1')
     const balanceAfterDestroy = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
     expect(balanceAfterDestroy).to.equal(initialBalance)
 
@@ -326,7 +319,46 @@ describe('Collaterals and escrow', async function () {
     myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(4)
   })
+
+  it('Can destroy Aavegotchi and transfer XP to another', async function () {
+
+    const burnId = "2"
+    const receiveId = "3"
+
+    await openAndClaim([burnId, receiveId])
+    const initialExperience = (await aavegotchiFacet.getAavegotchi(receiveId)).experience
+    expect(initialExperience).to.equal(0)
+
+    //Give some experience to the burned one
+    await daoFacet.grantExperience([burnId], ["1000"])
+
+    //Perform essence transfer
+    await global.collateralFacet.decreaseAndDestroy(burnId, receiveId)
+    const finalExperience = (await aavegotchiFacet.getAavegotchi(receiveId)).experience
+    expect(finalExperience).to.equal(1000)
+  })
 })
+
+async function openAndClaim(tokenIds) {
+
+  for (let index = 0; index < tokenIds.length; index++) {
+    const id = tokenIds[index];
+
+    await global.aavegotchiFacet.openPortals([id])
+    const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
+    const selectedGhost = ghosts[0]
+    const minStake = selectedGhost.minimumStake
+    const initialBalance = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
+
+    // Claim ghost and stake
+    await global.aavegotchiFacet.claimAavegotchiFromPortal(id, 0, minStake)
+    const balanceAfterClaim = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
+    expect(balanceAfterClaim).to.equal(initialBalance.sub(minStake))
+
+
+  }
+
+}
 
 describe('Items & Wearables', async function () {
   it('Can mint items', async function () {
@@ -391,8 +423,7 @@ describe('Items & Wearables', async function () {
   it('Cannot equip wearables that require a different collateral', async function () {
     // Can only be equipped by collateraltype 8
     const unequippableItem = '3'
-    const wearable = await itemsFacet.getItemType(unequippableItem)
-    console.log('wearable:', wearable)
+    // const wearable = await itemsFacet.getItemType(unequippableItem)
     const wearableIds = sixteenBitArrayToUint([unequippableItem, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
     await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), 'ItemsFacet: Wearable cannot be equipped in this collateral type')
   })
@@ -522,14 +553,14 @@ describe('Revenue transfers', async function () {
 
 describe('Shop and Vouchers', async function () {
   it('Should create vouchers', async function () {
-    await global.vouchersContract.createVoucherTypes(account, ['10', '20', '30', '40', '50', '60'], [])
+    await global.vouchersContract.createVoucherTypes(account, ['10', '20', '30', '40', '50', '60', '70'], [])
     const supply = await global.vouchersContract.totalSupplies()
     expect(supply[5]).to.equal(60)
   })
 
   it('Should convert vouchers into wearables', async function () {
     await global.vouchersContract.setApprovalForAll(shopFacet.address, true)
-    await global.shopFacet.purchaseItemsWithVouchers(account, [0, 1, 2, 3, 4, 5], [10, 10, 10, 10, 10, 60])
+    await global.shopFacet.purchaseItemsWithVouchers(account, [0, 1, 2, 3, 4, 5, 6], [10, 10, 10, 10, 10, 60, 70])
     const itemsBalance = await global.itemsFacet.itemBalances(account)
     expect(itemsBalance[6]).to.equal(60)
   })
@@ -693,6 +724,63 @@ describe('Leveling up', async function () {
     }
   })
 })
+
+describe('Using Consumables', async function () {
+  it('Using Kinship Potion increases kinship by 10', async function () {
+    const kinshipPotion = await itemsFacet.getItemType("6")
+    expect(kinshipPotion.kinshipBonus).to.equal(10)
+    let originalScore = await aavegotchiFacet.calculateKinship(testAavegotchiId)
+    await itemsFacet.useConsumable(testAavegotchiId, "6")
+    let boostedScore = await aavegotchiFacet.calculateKinship(testAavegotchiId)
+    expect(boostedScore).to.equal(Number(originalScore) + Number(kinshipPotion.kinshipBonus))
+  })
+
+  it('Using Experience potion increases XP by 200', async function () {
+    let beforeXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
+
+    //XP Potion
+    await itemsFacet.useConsumable(testAavegotchiId, "5")
+    let afterXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
+    expect(afterXP).to.equal(Number(beforeXP) + 200)
+  })
+
+  it('Using Trait Potion increases NRG by 1', async function () {
+    let beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+
+
+    //Trait potion
+    await itemsFacet.useConsumable(testAavegotchiId, "4")
+
+    let afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    console.log('after traits:', afterTraits[0].toString())
+    expect(afterTraits[0]).to.equal(Number(beforeTraits[0]) + 1)
+  })
+
+
+  it('Can replace trait bonuses', async function () {
+    let beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    console.log('before trats:', beforeTraits[0].toString())
+    //Trait potion
+    await itemsFacet.useConsumable(testAavegotchiId, "7")
+
+    let afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    console.log('after traits:', afterTraits[0].toString())
+    expect(afterTraits[0]).to.equal(Number(beforeTraits[0]) + 1)
+  })
+
+
+
+  it('Trait bonuses should disappear after 24 hours', async function () {
+    let beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    ethers.provider.send('evm_increaseTime', [25 * 3600])
+    ethers.provider.send('evm_mine')
+    let afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    expect(afterTraits[0]).to.equal(Number(beforeTraits[0]) - 1)
+  })
+
+})
+
+
 
 describe('Game manager', async function () {
   it('Only admin can set game manager', async function () {

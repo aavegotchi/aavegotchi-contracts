@@ -410,10 +410,9 @@ contract ItemsFacet {
             require(slotAllowed == 1, "ItemsFacet: Wearable cannot be equipped in this slot");
             bool canBeEquipped;
             uint256 allowedCollaterals = itemType.allowedCollaterals;
-            console.log("allowd:", allowedCollaterals);
             if (allowedCollaterals > 0) {
                 uint256 collateralIndex = s.collateralTypeIndexes[aavegotchi.collateralType];
-                console.log("colateral type:", collateralIndex);
+
                 for (uint256 i; i < 16; i++) {
                     if (collateralIndex == uint16(allowedCollaterals >> (16 * slot))) {
                         canBeEquipped = true;
@@ -443,42 +442,37 @@ contract ItemsFacet {
         int256[5] traitsBonuses;
     }
 
-    function useConsumables(uint256[] calldata _tokenIds, uint256[] calldata _itemIds) external {
-        require(_itemIds.length == _tokenIds.length, "ItemsFacet: _itemIds length does not match _tokenIds length");
-        uint256[] memory amounts = new uint256[](_itemIds.length);
-        for (uint256 i; i < _itemIds.length; i++) {
-            amounts[i] = 1;
-            uint256 tokenId = _tokenIds[i];
-            uint256 consumableId = _itemIds[i];
-            ItemType memory itemType = s.itemTypes[consumableId];
-            require(itemType.category == LibAppStorage.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
-            uint256 bal = s.items[msg.sender][consumableId];
-            require(1 <= bal, "Items: Do not have that many to consume");
-            s.items[msg.sender][consumableId] = bal - 1;
+    function useConsumable(uint256 _tokenId, uint256 _itemId) external {
+        // require(_itemIds.length == _values.length, "ItemsFacet: _itemIds length does not match _tokenIds length");
+        // for (uint256 i; i < _itemIds.length; i++) {
+        //  uint256 value = _values[i];
+        // uint256 consumableId = _itemIds[i];
+        ItemType memory itemType = s.itemTypes[_itemId];
+        require(itemType.category == LibAppStorage.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
+        uint256 bal = s.items[msg.sender][_itemId];
 
-            //Increase kinship permanently
-            if (itemType.kinshipBonus > 0) {
-                s.aavegotchis[tokenId].interactionCount += itemType.kinshipBonus;
-            }
+        require(1 <= bal, "Items: Do not have that many to consume");
+        s.items[msg.sender][_itemId] = bal - 1;
 
-            //Boost traits and reset clock
-            if (itemType.traitModifiers != 0) {
-                s.aavegotchis[tokenId].lastTemporaryBoost = uint40(block.timestamp);
-                s.aavegotchis[tokenId].temporaryTraitBoosts = itemType.traitModifiers;
-            }
-
-            //  require(block.timestamp >= s.aavegotchis[tokenId].lastTemporaryBoost + 24 hours, "ItemsFacet: Last consumable has not expired");
-
-            //Increase experience
-            if (itemType.experienceBonus > 0) {
-                s.aavegotchis[tokenId].experience += itemType.experienceBonus;
-            }
-
-            //To do: Add experience
-
-            itemType.totalQuantity -= 1;
-            LibAppStorage.interact(tokenId);
+        //Increase kinship permanently
+        if (itemType.kinshipBonus > 0) {
+            s.aavegotchis[_tokenId].interactionCount += itemType.kinshipBonus;
         }
-        emit TransferBatch(msg.sender, msg.sender, address(0), _itemIds, amounts);
+
+        //Boost traits and reset clock
+        if (itemType.traitModifiers != 0) {
+            s.aavegotchis[_tokenId].lastTemporaryBoost = uint40(block.timestamp);
+            s.aavegotchis[_tokenId].temporaryTraitBoosts = itemType.traitModifiers;
+        }
+
+        //Increase experience
+        if (itemType.experienceBonus > 0) {
+            s.aavegotchis[_tokenId].experience += itemType.experienceBonus;
+        }
+
+        itemType.totalQuantity -= 1;
+        LibAppStorage.interact(_tokenId);
+
+        emit TransferSingle(msg.sender, msg.sender, address(0), _itemId, 1);
     }
 }
