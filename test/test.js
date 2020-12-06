@@ -806,7 +806,7 @@ describe('DAO Functions', async function () {
     console.log('info:', collateralInfo)
   })
 
-  it('Contract Owner (Later DAO) can update collateral modifiers', async function () {
+  it('Contract Owner (or DAO) can update collateral modifiers', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
     let score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(599)
