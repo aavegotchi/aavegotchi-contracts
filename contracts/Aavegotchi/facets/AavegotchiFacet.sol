@@ -190,18 +190,11 @@ contract AavegotchiFacet {
         uint256 hauntId;
     }
 
-    function getAavegotchi(uint256 _tokenId) public view returns (AavegotchiInfo memory aavegotchiInfo_) {
-        aavegotchiInfo_.tokenId = _tokenId;
-        aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
-        aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
-        aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
-        aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
-
+    function getNumericTraits(uint256 _tokenId) public view returns (int256 numericTraits_) {
         //Check if trait boosts from consumables are still valid
         int256 boostDecay = int256((block.timestamp - s.aavegotchis[_tokenId].lastTemporaryBoost) / 24 hours);
         int256 temporaryTraitBoosts = s.aavegotchis[_tokenId].temporaryTraitBoosts;
         int256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
-        int256[] memory traits = new int256[](NUMERIC_TRAITS_NUM);
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(numericTraits >> (i * 16));
             int256 boost = int16(temporaryTraitBoosts >> (i * 16));
@@ -221,9 +214,22 @@ contract AavegotchiFacet {
                     number += boost + boostDecay;
                 }
             }
-            traits[i] = number;
+            numericTraits_ |= number << (i * 16);
         }
-        aavegotchiInfo_.numericTraits = traits; //s.aavegotchis[_tokenId].numericTraits;
+    }
+
+    function getAavegotchi(uint256 _tokenId) public view returns (AavegotchiInfo memory aavegotchiInfo_) {
+        aavegotchiInfo_.tokenId = _tokenId;
+        aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
+        aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
+        aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
+        aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
+        int256 numericTraits = getNumericTraits(_tokenId);
+        aavegotchiInfo_.numericTraits = new int256[](NUMERIC_TRAITS_NUM);
+        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
+            int256 number = int16(numericTraits >> (i * 16));
+            aavegotchiInfo_.numericTraits[i] = number;
+        }
         uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
         for (uint16 i; i < EQUIPPED_WEARABLE_SLOTS; i++) {
             aavegotchiInfo_.equippedWearables[i] = uint16(l_equippedWearables >> (i * 16));
@@ -298,7 +304,7 @@ contract AavegotchiFacet {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 equippedWearables = aavegotchi.equippedWearables;
-        int256 numericTraits = aavegotchi.numericTraits;
+        int256 numericTraits = getNumericTraits(_tokenId);
         int256 wearableBonus;
         for (uint256 slot; slot < 16; slot++) {
             uint256 wearableId = uint16(equippedWearables >> (16 * slot));
