@@ -26,8 +26,8 @@ let aavegotchiDiamond = new web3.eth.Contract(
 );
 ```
 
-## Deployment
+## Local Deployment
 
 ```console
-npx buidler run scripts/deploy.js
+npx hardhat run scripts/deploy.js
 ```
