@@ -56,9 +56,13 @@ contract DAOFacet {
     function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyDaoOrOwner {
         for (uint256 i; i < _collateralTypes.length; i++) {
             address collateralType = _collateralTypes[i].collateralType;
-            s.collateralTypes.push(collateralType);
-            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
-            s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
+
+            //Prevent the same collateral from being added multiple types
+            if (s.collateralTypeInfo[collateralType].primaryColor == 0) {
+                s.collateralTypes.push(collateralType);
+                s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
+                s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
+            }
         }
     }
 

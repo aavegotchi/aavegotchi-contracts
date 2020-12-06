@@ -1,6 +1,7 @@
 /* global describe it before ethers */
 const { expect } = require('chai')
 const truffleAssert = require('truffle-assertions')
+const { getCollaterals } = require('../scripts/collateralTypes.js')
 // const { idText } = require('typescript')
 
 // eslint-disable-next-line no-unused-vars
@@ -292,17 +293,6 @@ describe('Collaterals and escrow', async function () {
     //  console.log('score:', score.toString())
     //  expect(score).to.equal(599)
   })
-
-  it('Contract Owner (Later DAO) can update collateral modifiers', async function () {
-    const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
-    let score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
-    expect(score).to.equal(599)
-    await global.daoFacet.updateCollateralModifiers(aavegotchi.collateral, [2, 0, 0, 0, 0, 0])
-    score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
-    expect(score).to.equal(602)
-  })
-
-
 
   it('Can decrease stake and destroy Aavegotchi', async function () {
     // Buy portal
@@ -784,11 +774,31 @@ describe('Using Consumables', async function () {
   })
 })
 
-describe('Game manager', async function () {
-  it('Only admin can set game manager', async function () {
+describe('DAO Functions', async function () {
+  it('Only DAO or admin can set game manager', async function () {
     // To do: Check revert using another account
     await daoFacet.setGameManager(account)
     const gameManager = await daoFacet.gameManager()
     expect(gameManager).to.equal(account)
   })
+
+  it('Can add collateral types', async function () {
+    let collateralInfo = await collateralFacet.collaterals()
+    console.log('info:', collateralInfo)
+    await daoFacet.addCollateralTypes(getCollaterals("hardhat", ghstDiamond.address))
+
+    collateralInfo = await collateralFacet.collaterals()
+    console.log('info:', collateralInfo)
+  })
+
+  it('Contract Owner (Later DAO) can update collateral modifiers', async function () {
+    const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
+    let score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
+    expect(score).to.equal(599)
+    await global.daoFacet.updateCollateralModifiers(aavegotchi.collateral, [2, 0, 0, 0, 0, 0])
+    score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
+    expect(score).to.equal(602)
+  })
+
 })
+
