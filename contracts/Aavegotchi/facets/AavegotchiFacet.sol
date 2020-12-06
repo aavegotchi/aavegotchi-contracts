@@ -197,13 +197,13 @@ contract AavegotchiFacet {
         int256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(numericTraits >> (i * 16));
-            int256 boost = int16(temporaryTraitBoosts >> (i * 16));
+            int256 boost = int8(temporaryTraitBoosts >> (i * 8));
 
-            if (boost > 0) {
-                console.log("i:", i);
-                console.log("boost");
-                console.logInt(boost);
-            }
+            // if (boost > 0) {
+            //     console.log("i:", i);
+            //     console.log("boost");
+            //     console.logInt(boost);
+            // }
 
             if (boost > 0) {
                 if (boost > boostDecay) {

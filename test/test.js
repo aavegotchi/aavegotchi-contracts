@@ -15,7 +15,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray(uint, numBytes) {
+function uintToIntArray (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -24,7 +24,7 @@ function uintToIntArray(uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint(array) {
+function sixteenBitArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -36,7 +36,7 @@ function sixteenBitArrayToUint(array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds(uint) {
+function uintToItemIds (uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -312,7 +312,7 @@ describe('Collaterals and escrow', async function () {
     // Open portal
 
     const initialBalance = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
-    await openAndClaim(["1"])
+    await openAndClaim(['1'])
 
     // Burn Aavegotchi and return collateral stake
     await global.collateralFacet.decreaseAndDestroy('1', '1')
@@ -325,28 +325,26 @@ describe('Collaterals and escrow', async function () {
   })
 
   it('Can destroy Aavegotchi and transfer XP to another', async function () {
-
-    const burnId = "2"
-    const receiveId = "3"
+    const burnId = '2'
+    const receiveId = '3'
 
     await openAndClaim([burnId, receiveId])
     const initialExperience = (await aavegotchiFacet.getAavegotchi(receiveId)).experience
     expect(initialExperience).to.equal(0)
 
-    //Give some experience to the burned one
-    await daoFacet.grantExperience([burnId], ["1000"])
+    // Give some experience to the burned one
+    await daoFacet.grantExperience([burnId], ['1000'])
 
-    //Perform essence transfer
+    // Perform essence transfer
     await global.collateralFacet.decreaseAndDestroy(burnId, receiveId)
     const finalExperience = (await aavegotchiFacet.getAavegotchi(receiveId)).experience
     expect(finalExperience).to.equal(1000)
   })
 })
 
-async function openAndClaim(tokenIds) {
-
+async function openAndClaim (tokenIds) {
   for (let index = 0; index < tokenIds.length; index++) {
-    const id = tokenIds[index];
+    const id = tokenIds[index]
 
     await global.aavegotchiFacet.openPortals([id])
     const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
@@ -358,10 +356,7 @@ async function openAndClaim(tokenIds) {
     await global.aavegotchiFacet.claimAavegotchi(id, 0, minStake)
     const balanceAfterClaim = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
     expect(balanceAfterClaim).to.equal(initialBalance.sub(minStake))
-
-
   }
-
 }
 
 describe('Items & Wearables', async function () {
@@ -731,60 +726,54 @@ describe('Leveling up', async function () {
 
 describe('Using Consumables', async function () {
   it('Using Kinship Potion increases kinship by 10', async function () {
-    const kinshipPotion = await itemsFacet.getItemType("6")
+    const kinshipPotion = await itemsFacet.getItemType('6')
     expect(kinshipPotion.kinshipBonus).to.equal(10)
-    let originalScore = await aavegotchiFacet.kinship(testAavegotchiId)
-    await itemsFacet.useConsumable(testAavegotchiId, "6")
-    let boostedScore = await aavegotchiFacet.kinship(testAavegotchiId)
+    const originalScore = await aavegotchiFacet.kinship(testAavegotchiId)
+    await itemsFacet.useConsumable(testAavegotchiId, '6')
+    const boostedScore = await aavegotchiFacet.kinship(testAavegotchiId)
     expect(boostedScore).to.equal(Number(originalScore) + Number(kinshipPotion.kinshipBonus))
   })
 
   it('Using Experience potion increases XP by 200', async function () {
-    let beforeXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
+    const beforeXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
 
-    //XP Potion
-    await itemsFacet.useConsumable(testAavegotchiId, "5")
-    let afterXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
+    // XP Potion
+    await itemsFacet.useConsumable(testAavegotchiId, '5')
+    const afterXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
     expect(afterXP).to.equal(Number(beforeXP) + 200)
   })
 
   it('Using Trait Potion increases NRG by 1', async function () {
-    let beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    const beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    // console.log('before traits:', beforeTraits[0].toString())
 
+    // Trait potion
+    await itemsFacet.useConsumable(testAavegotchiId, '4')
 
-    //Trait potion
-    await itemsFacet.useConsumable(testAavegotchiId, "4")
-
-    let afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
-    console.log('after traits:', afterTraits[0].toString())
+    const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    // console.log('after traits:', afterTraits[0].toString())
     expect(afterTraits[0]).to.equal(Number(beforeTraits[0]) + 1)
   })
-
 
   it('Can replace trait bonuses', async function () {
-    let beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
-    console.log('before trats:', beforeTraits[0].toString())
-    //Trait potion
-    await itemsFacet.useConsumable(testAavegotchiId, "7")
+    const beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    // console.log('before traits:', beforeTraits[0].toString())
+    // Trait potion
+    await itemsFacet.useConsumable(testAavegotchiId, '7')
 
-    let afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
-    console.log('after traits:', afterTraits[0].toString())
+    const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    // console.log('after traits:', afterTraits[0].toString())
     expect(afterTraits[0]).to.equal(Number(beforeTraits[0]) + 1)
   })
 
-
-
   it('Trait bonuses should disappear after 24 hours', async function () {
-    let beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    const beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
     ethers.provider.send('evm_increaseTime', [25 * 3600])
     ethers.provider.send('evm_mine')
-    let afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
     expect(afterTraits[0]).to.equal(Number(beforeTraits[0]) - 1)
   })
-
 })
-
-
 
 describe('Game manager', async function () {
   it('Only admin can set game manager', async function () {
