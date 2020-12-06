@@ -43,6 +43,9 @@ function sixteenBitIntArrayToUint (array) {
     if (typeof item === 'string') {
       item = parseInt(item)
     }
+    if (item < 0) {
+      item = (1 << 16) + item
+    }
     console.log(item.toString(16))
     uint.push(item.toString(16).padStart(4, '0'))
   }
@@ -302,9 +305,8 @@ describe('Collaterals and escrow', async function () {
 
   it('Base rarity score can handle negative numbers', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
-    console.log('Testing stuff here')
-    console.log(sixteenBitIntArrayToUint([-1, -1, 0, 0, 0, 0]).toHexString())
-    const score = await global.aavegotchiFacet.baseRarityScore([-1, -1, 0, 0, 0, 0], aavegotchi.collateral)
+    // console.log(sixteenBitIntArrayToUint([-1, -1, 0, 0, 0, 0]).toHexString())
+    const score = await global.aavegotchiFacet.baseRarityScore(sixteenBitIntArrayToUint([-1, -1, 0, 0, 0, 0]), aavegotchi.collateral)
     //  console.log('score:', score.toString())
     //  expect(score).to.equal(599)
   })
