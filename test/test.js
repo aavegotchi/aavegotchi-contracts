@@ -16,7 +16,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray(uint, numBytes) {
+function uintToInt8Array (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -25,7 +25,7 @@ function uintToIntArray(uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint(array) {
+function sixteenBitArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -37,7 +37,20 @@ function sixteenBitArrayToUint(array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds(uint) {
+function sixteenBitIntArrayToUint (array) {
+  const uint = []
+  for (let item of array) {
+    if (typeof item === 'string') {
+      item = parseInt(item)
+    }
+    console.log(item.toString(16))
+    uint.push(item.toString(16).padStart(4, '0'))
+  }
+  if (array.length > 0) return ethers.BigNumber.from('0x' + uint.join(''))
+  return ethers.BigNumber.from(0)
+}
+
+function uintToItemIds (uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -257,7 +270,7 @@ describe('Collaterals and escrow', async function () {
     const collateral = collaterals[1]
     expect(collateral.conversionRate).to.equal(500)
     expect(collaterals.length).to.equal(8)
-    const modifiers = uintToIntArray(collateral.modifiers, 6)
+    const modifiers = uintToInt8Array(collateral.modifiers, 6)
     expect(modifiers[2]).to.equal(-1)
   })
 
@@ -289,7 +302,9 @@ describe('Collaterals and escrow', async function () {
 
   it('Base rarity score can handle negative numbers', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
-    let score = await global.aavegotchiFacet.baseRarityScore([-1, -1, 0, 0, 0, 0], aavegotchi.collateral)
+    console.log('Testing stuff here')
+    console.log(sixteenBitIntArrayToUint([-1, -1, 0, 0, 0, 0]).toHexString())
+    const score = await global.aavegotchiFacet.baseRarityScore([-1, -1, 0, 0, 0, 0], aavegotchi.collateral)
     //  console.log('score:', score.toString())
     //  expect(score).to.equal(599)
   })
@@ -341,7 +356,7 @@ describe('Collaterals and escrow', async function () {
   })
 })
 
-async function openAndClaim(tokenIds) {
+async function openAndClaim (tokenIds) {
   for (let index = 0; index < tokenIds.length; index++) {
     const id = tokenIds[index]
 
@@ -472,7 +487,7 @@ describe('Items & Wearables', async function () {
     await global.itemsFacet.equipWearables(testAavegotchiId, wearableIds)
 
     // Calculate bonuses
-    const modifiers = uintToIntArray(itemTypes[testWearableId].traitModifiers, 6)
+    const modifiers = uintToInt8Array(itemTypes[testWearableId].traitModifiers, 6)
     let wearableTraitsBonus = 0
     const rarityScoreModifier = itemTypes[testWearableId].rarityScoreModifier
     modifiers.forEach((val) => {
@@ -785,7 +800,7 @@ describe('DAO Functions', async function () {
   it('Can add collateral types', async function () {
     let collateralInfo = await collateralFacet.collaterals()
     console.log('info:', collateralInfo)
-    await daoFacet.addCollateralTypes(getCollaterals("hardhat", ghstDiamond.address))
+    await daoFacet.addCollateralTypes(getCollaterals('hardhat', ghstDiamond.address))
 
     collateralInfo = await collateralFacet.collaterals()
     console.log('info:', collateralInfo)
@@ -799,6 +814,4 @@ describe('DAO Functions', async function () {
     score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(602)
   })
-
 })
-
