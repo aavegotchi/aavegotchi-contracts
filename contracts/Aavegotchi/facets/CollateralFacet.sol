@@ -9,29 +9,13 @@ import "../../shared/interfaces/IERC20.sol";
 
 // import "hardhat/console.sol";
 
-contract CollateralFacet {
-    AppStorage internal s;
-
+contract CollateralFacet is LibAppStorageModifiers {
     event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
 
     struct AavegotchiCollateralTypeIO {
         address collateralType;
         AavegotchiCollateralTypeInfo collateralTypeInfo;
-    }
-
-    /***********************************|
-   |             Modifiers              |
-   |__________________________________*/
-
-    modifier onlyUnlocked(uint256 _tokenId) {
-        require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "Only callable on unlocked Aavegotchis");
-        _;
-    }
-
-    modifier onlyAavegotchiOwner(uint256 _tokenId) {
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
-        _;
     }
 
     /***********************************|

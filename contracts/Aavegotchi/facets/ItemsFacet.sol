@@ -10,9 +10,8 @@ import "../interfaces/IERC721.sol";
 import "../libraries/LibERC1155.sol";
 import "./AavegotchiFacet.sol";
 
-contract ItemsFacet {
+contract ItemsFacet is LibAppStorageModifiers {
     using LibAppStorage for AppStorage;
-    AppStorage internal s;
 
     /// @dev This emits when a token is transferred to an ERC721 token
     /// @param _toContract The contract the token is transferred to
@@ -40,20 +39,6 @@ contract ItemsFacet {
     uint16 internal constant SLOT_HAND_LEFT = 4;
     uint16 internal constant SLOT_HAND_RIGHT = 5;
     uint16 internal constant SLOT_PET = 6;
-
-    /***********************************|
-   |             Modifiers              |
-   |__________________________________*/
-
-    modifier onlyUnlocked(uint256 _tokenId) {
-        require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "AavegotchiFacet: Only callable on unlocked Aavegotchis");
-        _;
-    }
-
-    modifier onlyAavegotchiOwner(uint256 _tokenId) {
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
-        _;
-    }
 
     /***********************************|
    |             Events                  |

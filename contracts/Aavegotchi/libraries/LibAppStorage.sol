@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.4;
 import "../../shared/libraries/LibERC20.sol";
+import "../../shared/libraries/LibDiamond.sol";
 
 struct Aavegotchi {
     // This 256 bit value is broken up into 16 16-bit slots for storing wearableIds
@@ -11,12 +12,11 @@ struct Aavegotchi {
     // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     int256 temporaryTraitBoosts;
     uint40 lastTemporaryBoost;
-
     int256 numericTraits; // Sixteen 16 bit ints.  [Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     address owner;
     uint32 batchId;
     uint16 hauntId;
-    uint8 status;  // 0 == portal, 1 = open portal, 2 = Aavegotchi
+    uint8 status; // 0 == portal, 1 = open portal, 2 = Aavegotchi
     uint32 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
     address collateralType;
     uint88 minimumStake; //The minimum amount of collateral that must be staked. Set upon creation.
@@ -71,10 +71,9 @@ struct SvgLayer {
 }
 
 struct SvgTypeAndSizes {
-        bytes32 svgType;
-        uint256[] sizes;
+    bytes32 svgType;
+    uint256[] sizes;
 }
-
 
 struct AavegotchiCollateralTypeInfo {
     bytes3 primaryColor;
@@ -88,7 +87,6 @@ struct AavegotchiCollateralTypeInfo {
 }
 
 struct AppStorage {
-
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
     mapping(bytes32 => SvgLayer[]) svgLayers;
@@ -134,6 +132,11 @@ library LibAppStorage {
 
     uint8 internal constant WEARABLE_SLOTS_TOTAL = 11;
 
+    modifier onlyAavegotchiOwner(uint256 _tokenId) {
+        require(msg.sender == diamondStorage().aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
+        _;
+    }
+
     function diamondStorage() internal pure returns (AppStorage storage ds) {
         assembly {
             ds.slot := 0
@@ -141,7 +144,6 @@ library LibAppStorage {
     }
 
     function purchase(uint256 _ghst) internal {
-      
         AppStorage storage s = diamondStorage();
         //33% to burn address
         uint256 burnShare = (_ghst * 33) / 100;
@@ -252,5 +254,26 @@ library LibAppStorage {
             s.aavegotchis[_tokenId].interactionCount = int16(interactionCount + 1 + hateBonus);
         }
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
+    }
+}
+
+contract LibAppStorageModifiers {
+    AppStorage internal s;
+    modifier onlyAavegotchiOwner(uint256 _tokenId) {
+        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
+        _;
+    }
+    modifier onlyUnlocked(uint256 _tokenId) {
+        require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "Only callable on unlocked Aavegotchis");
+        _;
+    }
+    modifier onlyDao {
+        require(msg.sender == s.dao, "Only DAO can call this function");
+        _;
+    }
+
+    modifier onlyDaoOrOwner {
+        require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access");
+        _;
     }
 }

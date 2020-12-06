@@ -11,29 +11,13 @@ import "./SvgFacet.sol";
 
 // import "hardhat/console.sol";
 
-contract DAOFacet {
-    AppStorage internal s;
-
+contract DAOFacet is LibAppStorageModifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
 
     struct AavegotchiCollateralTypeIO {
         address collateralType;
         AavegotchiCollateralTypeInfo collateralTypeInfo;
-    }
-
-    /***********************************|
-   |             Modifiers              |
-   |__________________________________*/
-
-    modifier onlyDao {
-        require(msg.sender == s.dao, "Only DAO can call this function");
-        _;
-    }
-
-    modifier onlyDaoOrOwner {
-        require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access");
-        _;
     }
 
     /***********************************|
