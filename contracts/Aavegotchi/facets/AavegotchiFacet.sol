@@ -403,19 +403,7 @@ contract AavegotchiFacet {
    |             Write Functions        |
    |__________________________________*/
 
-    function setAavegotchiName(uint256 _tokenId, string memory _name) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
-        require(bytes(_name).length > 0, "AavegotchiFacet: _name can't be empty");
-        require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must choose Aavegotchi before setting name");
-        require(bytes(_name).length < 26, "AavegotchiFacet: _name can't be greater than 25 characters");
-        require(s.aavegotchiNamesUsed[_name] == false, "AavegotchiFacet: Aavegotchi name used already");
-        string memory existingName = s.aavegotchis[_tokenId].name;
-        if (bytes(existingName).length > 0) {
-            delete s.aavegotchiNamesUsed[existingName];
-        }
-        s.aavegotchiNamesUsed[_name] = true;
-        s.aavegotchis[_tokenId].name = _name;
-    }
-
+    /**@notice Called if user opted out of next batch in buyPortals */
     function setBatchId(uint256[] calldata _tokenIds) external {
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
@@ -439,29 +427,6 @@ contract AavegotchiFacet {
             // status is open portal
             s.aavegotchis[tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
         }
-    }
-
-    function spendSkillPoints(uint256 _tokenId, int8[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
-        int256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
-        //To test (Dan): Prevent underflow (is this ok?), see require below
-        uint256 totalUsed = 0;
-        for (uint8 index = 0; index < _values.length; index++) {
-            totalUsed += abs(_values[index]);
-
-            uint256 position = index * 16;
-            // get trait
-            int256 trait = int16(numericTraits >> position);
-            trait += _values[index];
-            // clear trait value
-            numericTraits &= ~(int256(0xffff) << position);
-            // set trait value
-            numericTraits |= trait << position;
-        }
-        // handles underflow
-        require(availableSkillPoints(_tokenId) >= totalUsed, "AavegotchiFacet: Not enough skill points");
-        s.aavegotchis[_tokenId].numericTraits = numericTraits;
-        //Increment used skill points
-        s.aavegotchis[_tokenId].usedSkillPoints += uint16(totalUsed);
     }
 
     function claimAavegotchi(
@@ -491,6 +456,19 @@ contract AavegotchiFacet {
         LibERC20.transferFrom(option.collateralType, msg.sender, escrow, _stakeAmount);
     }
 
+    function setAavegotchiName(uint256 _tokenId, string memory _name) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+        require(bytes(_name).length > 0, "AavegotchiFacet: _name can't be empty");
+        require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must choose Aavegotchi before setting name");
+        require(bytes(_name).length < 26, "AavegotchiFacet: _name can't be greater than 25 characters");
+        require(s.aavegotchiNamesUsed[_name] == false, "AavegotchiFacet: Aavegotchi name used already");
+        string memory existingName = s.aavegotchis[_tokenId].name;
+        if (bytes(existingName).length > 0) {
+            delete s.aavegotchiNamesUsed[existingName];
+        }
+        s.aavegotchiNamesUsed[_name] = true;
+        s.aavegotchis[_tokenId].name = _name;
+    }
+
     function interact(uint256 _tokenId) public {
         address owner = s.aavegotchis[_tokenId].owner;
         require(owner != address(0), "AavegotchiFacet: Invalid tokenId, is not owned or doesn't exist");
@@ -501,7 +479,30 @@ contract AavegotchiFacet {
         LibAppStorage.interact(_tokenId);
     }
 
-    //Prevnts assets and items from being moved from Aavegotchi during lock period, except by gameManager.
+    function spendSkillPoints(uint256 _tokenId, int8[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+        int256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
+        //To test (Dan): Prevent underflow (is this ok?), see require below
+        uint256 totalUsed = 0;
+        for (uint8 index = 0; index < _values.length; index++) {
+            totalUsed += abs(_values[index]);
+
+            uint256 position = index * 16;
+            // get trait
+            int256 trait = int16(numericTraits >> position);
+            trait += _values[index];
+            // clear trait value
+            numericTraits &= ~(int256(0xffff) << position);
+            // set trait value
+            numericTraits |= trait << position;
+        }
+        // handles underflow
+        require(availableSkillPoints(_tokenId) >= totalUsed, "AavegotchiFacet: Not enough skill points");
+        s.aavegotchis[_tokenId].numericTraits = numericTraits;
+        //Increment used skill points
+        s.aavegotchis[_tokenId].usedSkillPoints += uint16(totalUsed);
+    }
+
+    /**@notice Prevnts assets and items from being moved from Aavegotchi during lock period, except by gameManager. */
     function lockAavegotchi(uint256 _tokenId, uint256 _lockDuration) external {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
