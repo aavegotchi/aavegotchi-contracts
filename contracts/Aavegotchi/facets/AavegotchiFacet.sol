@@ -73,7 +73,7 @@ contract AavegotchiFacet {
     }
 
     /***********************************|
-   |             View Functions           |
+   |             Read Functions         |
    |__________________________________*/
 
     function aavegotchiNameAvailable(string memory _name) external view returns (bool available_) {
@@ -199,12 +199,6 @@ contract AavegotchiFacet {
             int256 number = int16(numericTraits >> (i * 16));
             int256 boost = int8(temporaryTraitBoosts >> (i * 8));
 
-            // if (boost > 0) {
-            //     console.log("i:", i);
-            //     console.log("boost");
-            //     console.logInt(boost);
-            // }
-
             if (boost > 0) {
                 if (boost > boostDecay) {
                     number += boost - boostDecay;
@@ -256,7 +250,6 @@ contract AavegotchiFacet {
         uint256 level = aavegotchiLevel(s.aavegotchis[_tokenId].experience);
         uint256 skillPoints = (level / 3);
         uint256 usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
-        //1 skill point per 3 levels. To do (done): Check if this underflows
         require(skillPoints >= usedSkillPoints, "AavegotchiFacet: Used skill points is greater than skill points");
         return skillPoints - usedSkillPoints;
     }
@@ -280,6 +273,11 @@ contract AavegotchiFacet {
 
     //Calculates the base rarity score, including collateral modifier
     function baseRarityScore(int256 _numericTraits, address collateralType) public view returns (int256 _rarityScore) {
+        if (_numericTraits == 0) {
+            console.log("numeric traits");
+            console.logInt(_numericTraits);
+        }
+
         AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
         uint256 modifiers = collateralInfo.modifiers;
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
@@ -402,7 +400,7 @@ contract AavegotchiFacet {
     }
 
     /***********************************|
-   |             Only owner             |
+   |             Write Functions        |
    |__________________________________*/
 
     function setAavegotchiName(uint256 _tokenId, string memory _name) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
@@ -479,12 +477,8 @@ contract AavegotchiFacet {
         aavegotchi.numericTraits = option.numericTraits;
         aavegotchi.collateralType = option.collateralType;
         aavegotchi.minimumStake = uint88(option.minimumStake);
-
-        //New traits
         aavegotchi.experience = 0;
         aavegotchi.usedSkillPoints = 0;
-
-        //Kinship
         aavegotchi.claimTime = uint40(block.timestamp);
         aavegotchi.lastInteracted = uint40(block.timestamp);
 

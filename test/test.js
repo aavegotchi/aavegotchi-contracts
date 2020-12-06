@@ -15,7 +15,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToIntArray (uint, numBytes) {
+function uintToIntArray(uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -24,7 +24,7 @@ function uintToIntArray (uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint (array) {
+function sixteenBitArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -36,7 +36,7 @@ function sixteenBitArrayToUint (array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds (uint) {
+function uintToItemIds(uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -286,6 +286,13 @@ describe('Collaterals and escrow', async function () {
     expect(currentStake).to.equal(minimumStake)
   })
 
+  it('Base rarity score can handle negative numbers', async function () {
+    const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
+    let score = await global.aavegotchiFacet.baseRarityScore([-1, -1, 0, 0, 0, 0], aavegotchi.collateral)
+    //  console.log('score:', score.toString())
+    //  expect(score).to.equal(599)
+  })
+
   it('Contract Owner (Later DAO) can update collateral modifiers', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
     let score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
@@ -294,6 +301,8 @@ describe('Collaterals and escrow', async function () {
     score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(602)
   })
+
+
 
   it('Can decrease stake and destroy Aavegotchi', async function () {
     // Buy portal
@@ -342,7 +351,7 @@ describe('Collaterals and escrow', async function () {
   })
 })
 
-async function openAndClaim (tokenIds) {
+async function openAndClaim(tokenIds) {
   for (let index = 0; index < tokenIds.length; index++) {
     const id = tokenIds[index]
 

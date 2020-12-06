@@ -7,6 +7,7 @@ import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
 import "../../shared/interfaces/IERC20.sol";
 import "../libraries/LibERC1155.sol";
+import "./SvgFacet.sol";
 
 // import "hardhat/console.sol";
 
@@ -36,11 +37,7 @@ contract DAOFacet {
     }
 
     /***********************************|
-   |             Events                  |
-   |__________________________________*/
-
-    /***********************************|
-   |             View Functions         |
+   |             Read Functions         |
    |__________________________________*/
 
     function gameManager() external view returns (address) {
@@ -48,7 +45,7 @@ contract DAOFacet {
     }
 
     /***********************************|
-   |             Set Functions          |
+   |             Write Functions        |
    |__________________________________*/
 
     function setDao(address _newDao) external onlyDaoOrOwner {
@@ -126,12 +123,28 @@ contract DAOFacet {
     }
 
     function addItemTypes(ItemType[] memory _itemTypes) external onlyDaoOrOwner() {
-        // LibDiamond.enforceIsContractOwner();
         // item ids start at 1.  0 means no item
+        insertItemTypes(_itemTypes);
+    }
+
+    function addItemTypesAndSvgs(
+        ItemType[] memory _itemTypes,
+        string calldata _svg,
+        SvgTypeAndSizes[] memory _typesAndSizes
+    ) external onlyDaoOrOwner() {
+        // item ids start at 1.  0 means no item
+        insertItemTypes(_itemTypes);
+
+        //Also store the SVGs
+        SvgFacet(address(this)).storeSvg(_svg, _typesAndSizes);
+    }
+
+    function insertItemTypes(ItemType[] memory _itemTypes) internal {
         uint256 itemTypesLength = s.itemTypes.length;
         for (uint256 i; i < _itemTypes.length; i++) {
             uint256 itemId = itemTypesLength++;
             s.itemTypes.push(_itemTypes[i]);
+
             emit TransferSingle(msg.sender, address(0), address(0), itemId, 0);
         }
     }

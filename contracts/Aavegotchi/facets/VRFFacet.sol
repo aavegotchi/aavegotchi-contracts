@@ -89,18 +89,9 @@ contract VrfFacet {
         im_link = ILink(_link);
     }
 
-    function drawRandomNumber() external {
-        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
-        require(vrf_ds.batchCount > 0, "VrfFacet: Can't call VRF with none in batch");
-        require(block.timestamp >= vrf_ds.nextVrfCallTime, "VrfFacet: Waiting period to call VRF not over yet");
-        require(vrf_ds.vrfPending == false, "VrfFacet: VRF call is pending");
-        vrf_ds.vrfPending = true;
-        vrf_ds.batchCount = 0;
-        vrf_ds.nextBatchId++;
-        // Use Chainlink VRF to generate random number
-        require(im_link.balanceOf(address(this)) >= vrf_ds.fee, "VrfFacet: Not enough LINK");
-        im_link.transferAndCall(im_vrfCoordinator, vrf_ds.fee, abi.encode(vrf_ds.keyHash, 0));
-    }
+      /***********************************|
+   |            Read Functions          |
+   |__________________________________*/
 
     function vrfInfo()
         external
@@ -118,6 +109,30 @@ contract VrfFacet {
         vrfPending_ = vrf_ds.vrfPending;
         batchCount_ = vrf_ds.batchCount;
     }
+
+     function linkBalance() external view returns (uint256 linkBalance_) {
+        linkBalance_ = im_link.balanceOf(address(this));
+    }
+
+
+     /***********************************|
+   |            Write Functions        |
+   |__________________________________*/
+
+    function drawRandomNumber() external {
+        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
+        require(vrf_ds.batchCount > 0, "VrfFacet: Can't call VRF with none in batch");
+        require(block.timestamp >= vrf_ds.nextVrfCallTime, "VrfFacet: Waiting period to call VRF not over yet");
+        require(vrf_ds.vrfPending == false, "VrfFacet: VRF call is pending");
+        vrf_ds.vrfPending = true;
+        vrf_ds.batchCount = 0;
+        vrf_ds.nextBatchId++;
+        // Use Chainlink VRF to generate random number
+        require(im_link.balanceOf(address(this)) >= vrf_ds.fee, "VrfFacet: Not enough LINK");
+        im_link.transferAndCall(im_vrfCoordinator, vrf_ds.fee, abi.encode(vrf_ds.keyHash, 0));
+    }
+
+   
 
     /**
      * @notice fulfillRandomness handles the VRF response. Your contract must
@@ -157,7 +172,5 @@ contract VrfFacet {
         im_link.transfer(_to, _value);
     }
 
-    function linkBalance() external view returns (uint256 linkBalance_) {
-        linkBalance_ = im_link.balanceOf(address(this));
-    }
+   
 }

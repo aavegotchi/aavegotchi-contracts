@@ -96,7 +96,7 @@ contract ItemsFacet {
     event URI(string _value, uint256 indexed _id);
 
     /***********************************|
-   |             View Functions           |
+   |             Read Functions         |
    |__________________________________*/
 
     // Returns balance for each item that exists for an account
@@ -199,7 +199,7 @@ contract ItemsFacet {
     }
 
     /***********************************|
-   |             Set Functions           |
+   |             Write Functions        |
    |__________________________________*/
 
     /**

@@ -14,47 +14,9 @@ contract SvgFacet {
     uint256 internal constant EQUIPPED_WEARABLE_SLOTS = 16;
     uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
-    struct SvgTypeAndSizes {
-        bytes32 svgType;
-        uint256[] sizes;
-    }
-
-    function storeSvg(string calldata _svg, SvgTypeAndSizes[] calldata _typesAndSizes) external {
-        LibDiamond.enforceIsContractOwner();
-        address svgContract = storeSvgInContract(_svg);
-        uint256 offset = 0;
-        for (uint256 i; i < _typesAndSizes.length; i++) {
-            SvgTypeAndSizes calldata svgTypeAndSizes = _typesAndSizes[i];
-            for (uint256 j; j < svgTypeAndSizes.sizes.length; j++) {
-                uint256 size = svgTypeAndSizes.sizes[j];
-                s.svgLayers[svgTypeAndSizes.svgType].push(SvgLayer(svgContract, uint16(offset), uint16(size)));
-                offset += size;
-            }
-        }
-    }
-
-    function storeSvgInContract(string calldata _svg) internal returns (address svgContract) {
-        require(bytes(_svg).length < 24576, "SvgStorage: Exceeded 24KB max contract size");
-        // 61_00_00 -- PUSH2 (size)
-        // 60_00 -- PUSH1 (code position)
-        // 60_00 -- PUSH1 (mem position)
-        // 39 CODECOPY
-        // 61_00_00 PUSH2 (size)
-        // 60_00 PUSH1 (mem position)
-        // f3 RETURN
-        bytes memory init = hex"610000_600e_6000_39_610000_6000_f3";
-        bytes1 size1 = bytes1(uint8(bytes(_svg).length));
-        bytes1 size2 = bytes1(uint8(bytes(_svg).length >> 8));
-        init[2] = size1;
-        init[1] = size2;
-        init[10] = size1;
-        init[9] = size2;
-        bytes memory code = abi.encodePacked(init, _svg);
-
-        assembly {
-            svgContract := create(0, add(code, 32), mload(code))
-        }
-    }
+    /***********************************|
+   |             Read Functions         |
+   |__________________________________*/
 
     function bytes3ToColorString(bytes3 _color) internal pure returns (string memory) {
         bytes memory numbers = "0123456789ABCDEF";
@@ -191,8 +153,8 @@ contract SvgFacet {
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-        AavegotchiFacet.PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits =
-            AavegotchiFacet(address(this)).portalAavegotchiTraits(_tokenId);
+        AavegotchiFacet.PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = AavegotchiFacet(address(this))
+            .portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
             address collateralType = l_portalAavegotchiTraits[i].collateralType;
             int256 numericTraits = l_portalAavegotchiTraits[i].numericTraits;
@@ -203,6 +165,47 @@ contract SvgFacet {
                     "</svg>"
                 )
             );
+        }
+    }
+
+    /***********************************|
+   |             Write Functions        |
+   |__________________________________*/
+
+    function storeSvg(string calldata _svg, SvgTypeAndSizes[] calldata _typesAndSizes) public {
+        LibDiamond.enforceIsContractOwner();
+        address svgContract = storeSvgInContract(_svg);
+        uint256 offset = 0;
+        for (uint256 i; i < _typesAndSizes.length; i++) {
+            SvgTypeAndSizes calldata svgTypeAndSizes = _typesAndSizes[i];
+            for (uint256 j; j < svgTypeAndSizes.sizes.length; j++) {
+                uint256 size = svgTypeAndSizes.sizes[j];
+                s.svgLayers[svgTypeAndSizes.svgType].push(SvgLayer(svgContract, uint16(offset), uint16(size)));
+                offset += size;
+            }
+        }
+    }
+
+    function storeSvgInContract(string calldata _svg) internal returns (address svgContract) {
+        require(bytes(_svg).length < 24576, "SvgStorage: Exceeded 24KB max contract size");
+        // 61_00_00 -- PUSH2 (size)
+        // 60_00 -- PUSH1 (code position)
+        // 60_00 -- PUSH1 (mem position)
+        // 39 CODECOPY
+        // 61_00_00 PUSH2 (size)
+        // 60_00 PUSH1 (mem position)
+        // f3 RETURN
+        bytes memory init = hex"610000_600e_6000_39_610000_6000_f3";
+        bytes1 size1 = bytes1(uint8(bytes(_svg).length));
+        bytes1 size2 = bytes1(uint8(bytes(_svg).length >> 8));
+        init[2] = size1;
+        init[1] = size2;
+        init[10] = size1;
+        init[9] = size2;
+        bytes memory code = abi.encodePacked(init, _svg);
+
+        assembly {
+            svgContract := create(0, add(code, 32), mload(code))
         }
     }
 }

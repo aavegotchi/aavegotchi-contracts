@@ -1,18 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.4;
 import "../../shared/libraries/LibERC20.sol";
-/*
-Numeric traits by possition in the array:
-energy
-aggressiveeness
-spookiness
-brainSize
-eyeShape
-eyeColor
-*/
 
 struct Aavegotchi {
-    //There are 11 available slots. Maybe we should add a few more, just in case?
     // This 256 bit value is broken up into 16 16-bit slots for storing wearableIds
     // See helper function that converts this value into a uint16[16] memory equipedWearables
     uint256 equippedWearables; //The currently equipped wearables of the Aavegotchi
@@ -21,28 +11,22 @@ struct Aavegotchi {
     // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     int256 temporaryTraitBoosts;
     uint40 lastTemporaryBoost;
-    // Sixteen 16 bit ints
-    // [Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
-    int256 numericTraits;
+
+    int256 numericTraits; // Sixteen 16 bit ints.  [Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     address owner;
     uint32 batchId;
     uint16 hauntId;
-    // track status of aavegotchi
-    // 0 == portal, 1 = open portal, 2 = Aavegotchi
-    uint8 status;
+    uint8 status;  // 0 == portal, 1 = open portal, 2 = Aavegotchi
     uint32 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
     address collateralType;
     uint88 minimumStake; //The minimum amount of collateral that must be staked. Set upon creation.
-    //New traits
     uint16 usedSkillPoints; //The number of skill points this aavegotchi has already used
     uint40 claimTime; //The block timestamp when this Aavegotchi was claimed
     uint40 lastInteracted; //The last time this Aavegotchi was interacted with
     int16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
-    address escrow;
+    address escrow; //The escrow address this Aavegotchi manages.
     uint256 unlockTime;
 }
-
-// to
 
 struct ItemType {
     // treated as int8s array
@@ -86,6 +70,12 @@ struct SvgLayer {
     uint16 size;
 }
 
+struct SvgTypeAndSizes {
+        bytes32 svgType;
+        uint256[] sizes;
+}
+
+
 struct AavegotchiCollateralTypeInfo {
     bytes3 primaryColor;
     bytes3 secondaryColor;
@@ -98,33 +88,25 @@ struct AavegotchiCollateralTypeInfo {
 }
 
 struct AppStorage {
-    address[] collateralTypes;
+
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
-    // Svgtype => SvgLayer[]
     mapping(bytes32 => SvgLayer[]) svgLayers;
-    // SvgLayer[] aavegotchiLayersSvg;
-    // SvgLayer[] wearablesSvg;
-    // SvgLayer[] itemsSvg;
-    // contractAddress => nftId  => id => balance
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) nftBalances;
     mapping(address => uint256) aavegotchiBalance;
-    // owner => (id => balance)
     ItemType[] itemTypes;
     WearableSet[] wearableSets;
     mapping(uint256 => Haunt) haunts;
-    // owner => (wearableId => quantity)
     mapping(address => mapping(uint256 => uint256)) items;
     mapping(uint256 => Aavegotchi) aavegotchis;
-    // owner => (operator => bool)
     mapping(address => mapping(address => bool)) operators;
     mapping(uint256 => address) approved;
     mapping(string => bool) aavegotchiNamesUsed;
     bytes32[1000] emptySlots;
-    // owner of the contract
     uint32 totalSupply;
     uint16 currentHauntId;
     //Addresses
+    address[] collateralTypes;
     address ghstContract;
     address gameManager;
     address dao;
@@ -150,7 +132,6 @@ library LibAppStorage {
     uint256 internal constant ITEM_CATEGORY_BADGE = 1;
     uint256 internal constant ITEM_CATEGORY_CONSUMABLE = 2;
 
-    //Can we update this with a diamond upgrade?
     uint8 internal constant WEARABLE_SLOTS_TOTAL = 11;
 
     function diamondStorage() internal pure returns (AppStorage storage ds) {
@@ -160,7 +141,7 @@ library LibAppStorage {
     }
 
     function purchase(uint256 _ghst) internal {
-        //To do (Nick): Maybe make exception if the amount of GHST is less than a certain amount?
+      
         AppStorage storage s = diamondStorage();
         //33% to burn address
         uint256 burnShare = (_ghst * 33) / 100;

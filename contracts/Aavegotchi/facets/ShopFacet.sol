@@ -15,6 +15,10 @@ contract ShopFacet {
     event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
     bytes4 internal constant ERC1155_BATCH_ACCEPTED = 0xbc197c81; // Return value from `onERC1155BatchReceived` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).
 
+     /***********************************|
+   |             Events         |
+   |__________________________________*/
+
      event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
 
     address internal immutable im_vouchersContract;
@@ -22,6 +26,10 @@ contract ShopFacet {
     constructor(address _vouchersContract) {
         im_vouchersContract = _vouchersContract;
     }
+
+     /***********************************|
+   |             Write Functions        |
+   |__________________________________*/
 
 
       function buyPortals(
@@ -63,8 +71,6 @@ contract ShopFacet {
         LibAppStorage.purchase(totalPrice);
     }
 
-
-
     function purchaseItemsWithGhst(
         address _to,
         uint256[] calldata _itemIds,
@@ -92,8 +98,6 @@ contract ShopFacet {
         LibAppStorage.purchase(totalPrice);
     }
 
-    //Burn the voucher
-    //Mint the wearable and transfer to user
     function purchaseItemsWithVouchers(
         address _to,
         uint256[] calldata _voucherIds,

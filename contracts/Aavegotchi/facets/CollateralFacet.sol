@@ -20,6 +20,10 @@ contract CollateralFacet {
         AavegotchiCollateralTypeInfo collateralTypeInfo;
     }
 
+    /***********************************|
+   |             Modifiers              |
+   |__________________________________*/
+
     modifier onlyUnlocked(uint256 _tokenId) {
         require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "Only callable on unlocked Aavegotchis");
         _;
@@ -29,6 +33,10 @@ contract CollateralFacet {
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
         _;
     }
+
+    /***********************************|
+   |             Read Functions         |
+   |__________________________________*/
 
     function collaterals() external view returns (address[] memory collateralTypes_) {
         collateralTypes_ = s.collateralTypes;
@@ -59,6 +67,10 @@ contract CollateralFacet {
         collateralType_ = s.aavegotchis[_tokenId].collateralType;
         balance_ = IERC20(collateralType_).balanceOf(escrow_);
     }
+
+    /***********************************|
+   |             Write Functions        |
+   |__________________________________*/
 
     function increaseStake(uint256 _tokenId, uint256 _stakeAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         address escrow = s.aavegotchis[_tokenId].escrow;
