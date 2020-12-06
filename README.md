@@ -4,7 +4,7 @@
 
 Kovan:
 
-- Aavegotchi diamond: 0xF70406a9a17d8262E6de256D51cAF58Af8BBa8A2
+- Aavegotchi diamond: 0x10225cc1ea2435E53E7661E84D36Fb4E9e20a9DB
 - GHST diamond: 0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5
 
 The ABI files for the diamonds are in the artifacts directory:
