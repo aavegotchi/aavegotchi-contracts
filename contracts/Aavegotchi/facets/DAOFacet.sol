@@ -41,12 +41,13 @@ contract DAOFacet is LibAppStorageModifiers {
         for (uint256 i; i < _collateralTypes.length; i++) {
             address collateralType = _collateralTypes[i].collateralType;
 
+            require(s.collateralTypeInfo[collateralType].cheekColor == 0, "DAOFacet: Collateral already added");
+
             //Prevent the same collateral from being added multiple times
-            if (s.collateralTypeInfo[collateralType].primaryColor == 0) {
-                s.collateralTypes.push(collateralType);
-                s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
-                s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
-            }
+
+            s.collateralTypes.push(collateralType);
+            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length - 1;
+            s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
         }
     }
 

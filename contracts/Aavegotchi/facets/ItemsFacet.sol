@@ -394,13 +394,14 @@ contract ItemsFacet is LibAppStorageModifiers {
             uint256 slotAllowed = (itemType.slotPositions >> slot) & 1;
             require(slotAllowed == 1, "ItemsFacet: Wearable cannot be equipped in this slot");
             bool canBeEquipped;
-            uint256 allowedCollaterals = itemType.allowedCollaterals;
-            if (allowedCollaterals > 0) {
+            uint8[] memory allowedCollaterals = itemType.allowedCollaterals;
+            if (allowedCollaterals.length > 0) {
                 uint256 collateralIndex = s.collateralTypeIndexes[aavegotchi.collateralType];
 
-                for (uint256 i; i < 16; i++) {
-                    if (collateralIndex == uint16(allowedCollaterals >> (16 * slot))) {
+                for (uint256 i; i < allowedCollaterals.length; i++) {
+                    if (collateralIndex == allowedCollaterals[i]) {
                         canBeEquipped = true;
+                        break;
                     }
                 }
                 require(canBeEquipped == true, "ItemsFacet: Wearable cannot be equipped in this collateral type");

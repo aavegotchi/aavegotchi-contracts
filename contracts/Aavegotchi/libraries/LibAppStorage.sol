@@ -33,7 +33,9 @@ struct ItemType {
     // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     int256 traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
     // this is an array of uint indexes into the collateralTypes array
-    uint256 allowedCollaterals; //[WEARABLE ONLY] The collaterals this wearable can be equipped to. An empty array is "any"
+
+    uint8[] allowedCollaterals; //[WEARABLE ONLY] The collaterals this wearable can be equipped to. An empty array is "any"
+
     string name; //The name of the item
     uint96 ghstPrice; //How much GHST this item costs
     uint32 svgId; //The svgId of the item

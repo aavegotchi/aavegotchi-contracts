@@ -13,6 +13,7 @@
 
 const collaterals = [
 
+  /*
   { // first collateral item is empty
     name: '',
     kovanAddress: '',
@@ -25,6 +26,7 @@ const collaterals = [
     modifiers: [0, 0, 0, 0, 0, 0],
     conversionRate: 0
   },
+  */
   {
     name: 'aDAI',
     kovanAddress: '0x58AD4cB396411B691A9AAb6F74545b2C5217FE6a',

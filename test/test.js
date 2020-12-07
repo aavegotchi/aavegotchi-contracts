@@ -16,7 +16,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToInt8Array (uint, numBytes) {
+function uintToInt8Array(uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -25,7 +25,7 @@ function uintToInt8Array (uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint (array) {
+function sixteenBitArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -37,7 +37,7 @@ function sixteenBitArrayToUint (array) {
   return ethers.BigNumber.from(0)
 }
 
-function sixteenBitIntArrayToUint (array) {
+function sixteenBitIntArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -53,7 +53,7 @@ function sixteenBitIntArrayToUint (array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds (uint) {
+function uintToItemIds(uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -260,19 +260,12 @@ describe('Aavegotchi Metadata', async function () {
 })
 
 describe('Collaterals and escrow', async function () {
-  it('First collateral should be blank/empty', async function () {
-    const collaterals = await global.collateralFacet.getCollateralInfo()
-    const collateral = collaterals[0]
-
-    expect(collateral.conversionRate).to.equal(0)
-    console.log('collateral:', collateral)
-  })
 
   it('Should show all whitelisted collaterals', async function () {
     const collaterals = await global.collateralFacet.getCollateralInfo()
-    const collateral = collaterals[1]
-    expect(collateral.conversionRate).to.equal(500)
-    expect(collaterals.length).to.equal(8)
+    const collateral = collaterals[0]
+    expect(collateral.conversionRate).to.equal(1)
+    expect(collaterals.length).to.equal(1)
     const modifiers = uintToInt8Array(collateral.modifiers, 6)
     expect(modifiers[2]).to.equal(-1)
   })
@@ -306,9 +299,9 @@ describe('Collaterals and escrow', async function () {
   it('Base rarity score can handle negative numbers', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
     // console.log(sixteenBitIntArrayToUint([-1, -1, 0, 0, 0, 0]).toHexString())
-    const score = await global.aavegotchiFacet.baseRarityScore(sixteenBitIntArrayToUint([-1, -1, 0, 0, 0, 0]), aavegotchi.collateral)
-    //  console.log('score:', score.toString())
-    //  expect(score).to.equal(599)
+    const score = await global.aavegotchiFacet.baseRarityScore(sixteenBitIntArrayToUint([-10, -10, 0, 0, 0, 0]), aavegotchi.collateral)
+    console.log('score:', score.toString())
+    expect(score).to.equal(619)
   })
 
   it('Can decrease stake and destroy Aavegotchi', async function () {
@@ -358,7 +351,7 @@ describe('Collaterals and escrow', async function () {
   })
 })
 
-async function openAndClaim (tokenIds) {
+async function openAndClaim(tokenIds) {
   for (let index = 0; index < tokenIds.length; index++) {
     const id = tokenIds[index]
 
@@ -433,6 +426,10 @@ describe('Items & Wearables', async function () {
     const unequippableItem = '2'
     const wearableIds = sixteenBitArrayToUint([unequippableItem, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
     await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), 'ItemsFacet: Aavegotchi level lower than minLevel')
+  })
+
+  it('Can equip wearables that allow this collateral', async function () {
+
   })
 
   it('Cannot equip wearables that require a different collateral', async function () {
@@ -799,13 +796,34 @@ describe('DAO Functions', async function () {
     expect(gameManager).to.equal(account)
   })
 
+  it("Cannot add the same collateral twice", async function () {
+    await truffleAssert.reverts(daoFacet.addCollateralTypes(getCollaterals('hardhat', ghstDiamond.address)), "DAOFacet: Collateral already added")
+  })
+
   it('Can add collateral types', async function () {
     let collateralInfo = await collateralFacet.collaterals()
-    console.log('info:', collateralInfo)
-    await daoFacet.addCollateralTypes(getCollaterals('hardhat', ghstDiamond.address))
 
+    //Deploy an extra TEST contract
+    const erc20TokenContract = await ethers.getContractFactory('ERC20Token')
+    let testToken = await erc20TokenContract.deploy()
+    await testToken.deployed()
+
+    const collateralTypeInfo = [
+      testToken.address,
+      {
+        primaryColor: '0x' + "FFFFFF",
+        secondaryColor: '0x' + "FFFFFF",
+        cheekColor: '0x' + "FFFFFF",
+        svgId: "1",
+        eyeShapeSvgId: "2",
+        modifiers: eightBitArrayToUint([0, 0, 0, 0, 0, 0]),
+        conversionRate: 10,
+      }
+    ]
+    await daoFacet.addCollateralTypes([collateralTypeInfo])
     collateralInfo = await collateralFacet.collaterals()
-    console.log('info:', collateralInfo)
+    expect(collateralInfo[1]).to.equal(testToken.address)
+
   })
 
   it('Contract Owner (or DAO) can update collateral modifiers', async function () {
@@ -817,3 +835,13 @@ describe('DAO Functions', async function () {
     expect(score).to.equal(602)
   })
 })
+
+
+function eightBitArrayToUint(array) {
+  const uint = []
+  for (const num of array) {
+    const value = ethers.BigNumber.from(num).toTwos(8)
+    uint.unshift(value.toHexString().slice(2))
+  }
+  return ethers.BigNumber.from('0x' + uint.join(''))
+}

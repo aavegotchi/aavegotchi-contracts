@@ -1,6 +1,4 @@
 
-/* global ethers */
-
 const itemTypes = [
 
   {
@@ -33,7 +31,7 @@ const itemTypes = [
     slotPositions: [true, true, true, false],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
-    allowedCollaterals: [],
+    allowedCollaterals: [0],
     minLevel: 1,
     canBeTransferred: true,
     category: 0,
@@ -148,7 +146,7 @@ const itemTypes = [
     category: 2,
     kinshipBonus: 0,
     experienceBonus: 0
-  }
+  },
 
 
 ]
@@ -208,7 +206,8 @@ function getItemTypes() {
     // console.log(itemType.slotPositions)
     // console.log(slotPositionsToUint(itemType.slotPositions).toString())
     itemType.slotPositions = boolsArrayToUint16(itemType.slotPositions)
-    itemType.allowedCollaterals = sixteenBitArrayToUint(itemType.allowedCollaterals)
+    // itemType.allowedCollaterals = sixteenBitArrayToUint(itemType.allowedCollaterals)
+    // itemType.allowedCollaterals = item
     result.push(itemType)
   }
   return result
