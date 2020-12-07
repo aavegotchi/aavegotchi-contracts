@@ -476,26 +476,43 @@ describe('Items & Wearables', async function () {
     const equipped = await global.itemsFacet.equippedWearables(testAavegotchiId)
     expect(equipped[testSlot]).to.equal('0')
 
-    // Get score before equipping
-    const originalScore = (await global.aavegotchiFacet.modifiedRarityScore(testAavegotchiId)).rarityScore_.toString()
+    const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
 
     // Equip a wearable
     wearableIds = sixteenBitArrayToUint([testWearableId])
-    // console.log(wearableIds.toString())
     await global.itemsFacet.equipWearables(testAavegotchiId, wearableIds)
 
     // Calculate bonuses
     const modifiers = uintToInt8Array(itemTypes[testWearableId].traitModifiers, 6)
-    let wearableTraitsBonus = 0
-    const rarityScoreModifier = itemTypes[testWearableId].rarityScoreModifier
-    modifiers.forEach((val) => {
-      wearableTraitsBonus += val
+
+    const collateral = (await global.collateralFacet.getCollateralInfo())[0]
+    const collateralModifiers = uintToInt8Array(collateral.modifiers)
+
+    let finalScore = 0;
+
+    modifiers.forEach((val, index) => {
+
+      let traitValue = Number(aavegotchi.numericTraits[index])
+      let collateralMod = collateralModifiers[index]
+
+      //Collateral modifiers array only has 3 entries but there are 6 traits
+      if (index < collateralModifiers.length) {
+        traitValue += collateralMod
+      }
+      traitValue += val
+
+      if (traitValue >= 50) {
+        finalScore += traitValue
+      }
+      else {
+        finalScore += (100 - traitValue)
+      }
     })
 
     // Retrieve the final score
     const augmentedScore = (await global.aavegotchiFacet.modifiedRarityScore(testAavegotchiId)).rarityScore_.toString()
 
-    const finalScore = Number(originalScore) + Number(rarityScoreModifier) + Number(wearableTraitsBonus)
+    //Check the math
     expect(Number(augmentedScore)).to.equal(finalScore)
   })
 })
@@ -635,7 +652,6 @@ describe('Using Consumables', async function () {
     await itemsFacet.useConsumable(testAavegotchiId, '6')
     const boostedScore = await aavegotchiFacet.kinship(testAavegotchiId)
     expect(boostedScore).to.equal(Number(originalScore) + Number(kinshipPotion.kinshipBonus))
-    console.log('boostes kinship:', boostedScore.toString())
   })
 
   it('Using Experience potion increases XP by 200', async function () {
@@ -707,7 +723,7 @@ describe('DAO Functions', async function () {
         cheekColor: '0x' + "FFFFFF",
         svgId: "1",
         eyeShapeSvgId: "2",
-        modifiers: eightBitArrayToUint([0, 0, 0, 0, 0, 0]),
+        modifiers: eightBitArrayToUint([0, 0, -1, 0, 0, 0]),
         conversionRate: 10,
       }
     ]
@@ -727,7 +743,7 @@ describe('DAO Functions', async function () {
   })
 })
 
-
+/*
 describe('Kinship', async function () {
 
 
@@ -826,6 +842,9 @@ describe('Kinship', async function () {
 
 
 })
+
+*/
+
 
 async function neglectAavegotchi(days) {
   daysSinceInteraction = 0
