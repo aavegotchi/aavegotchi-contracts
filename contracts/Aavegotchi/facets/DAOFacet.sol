@@ -112,7 +112,6 @@ contract DAOFacet is LibAppStorageModifiers {
     }
 
     function addItemTypes(ItemType[] memory _itemTypes) external onlyDaoOrOwner() {
-        // item ids start at 1.  0 means no item
         insertItemTypes(_itemTypes);
     }
 
@@ -121,9 +120,7 @@ contract DAOFacet is LibAppStorageModifiers {
         string calldata _svg,
         SvgTypeAndSizes[] memory _typesAndSizes
     ) external onlyDaoOrOwner() {
-        // item ids start at 1.  0 means no item
         insertItemTypes(_itemTypes);
-
         //Also store the SVGs
         SvgFacet(address(this)).storeSvg(_svg, _typesAndSizes);
     }

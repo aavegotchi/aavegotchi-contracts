@@ -79,6 +79,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.daoFacet = deployVars.daoFacet
     global.ghstDiamond = deployVars.ghstDiamond
     global.vrfFacet = deployVars.vrfFacet
+    global.svgFacet = deployVars.svgFacet
     global.linkAddress = deployVars.linkAddress
     global.linkContract = deployVars.linkContract
     global.vouchersContract = deployVars.vouchersContract
@@ -462,12 +463,14 @@ describe('Items & Wearables', async function () {
 
   })
 
-  /*
+
+
   it('Can display aavegotchi with wearables', async function () {
-    const svg = await global.aavegotchiFacet.getAavegotchiSvg(testAavegotchiId)
+    const svg = await global.svgFacet.getAavegotchiSvg(testAavegotchiId)
     console.log(svg)
   })
-  */
+
+
 
   it('Equipping Wearables alters base rarity score', async function () {
     // Unequip all wearables
@@ -740,6 +743,18 @@ describe('DAO Functions', async function () {
     await global.daoFacet.updateCollateralModifiers(aavegotchi.collateral, [2, 0, 0, 0, 0, 0])
     score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(602)
+  })
+
+  it('Contract owner (or DAO) can add new item types with corresponding SVGs', async function () {
+
+    const itemsToAdd = [itemTypes[1]]
+    const itemSvg = require('../svgs/testItem.js')
+
+    const itemTypeAndSizes = []
+
+    //To do (Nick) add in itemTypeAndSizes
+
+    await global.daoFacet.addItemTypesAndSvgs(itemsToAdd, itemSvg, itemTypeAndSizes)
   })
 })
 

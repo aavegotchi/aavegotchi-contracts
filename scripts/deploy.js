@@ -304,6 +304,7 @@ async function main() {
     collateralFacet: collateralFacet,
     vrfFacet: vrfFacet,
     daoFacet: daoFacet,
+    svgFacet: svgFacet,
     vouchersContract: vouchersContract,
     shopFacet: shopFacet,
     linkAddress: linkAddress,
