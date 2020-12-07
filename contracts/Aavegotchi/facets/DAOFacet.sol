@@ -57,7 +57,7 @@ contract DAOFacet {
         for (uint256 i; i < _collateralTypes.length; i++) {
             address collateralType = _collateralTypes[i].collateralType;
 
-            //Prevent the same collateral from being added multiple types
+            //Prevent the same collateral from being added multiple times
             if (s.collateralTypeInfo[collateralType].primaryColor == 0) {
                 s.collateralTypes.push(collateralType);
                 s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
