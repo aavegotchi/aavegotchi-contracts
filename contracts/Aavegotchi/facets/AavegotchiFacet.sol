@@ -33,9 +33,7 @@ interface ERC721TokenReceiver {
     ) external returns (bytes4);
 }
 
-contract AavegotchiFacet {
-    // using LibAppStorage for AppStorage;
-    AppStorage internal s;
+contract AavegotchiFacet is LibAppStorageModifiers {
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
     uint256 internal constant NUMERIC_TRAITS_NUM = 6;
     uint256 internal constant EQUIPPED_WEARABLE_SLOTS = 16;
@@ -57,20 +55,6 @@ contract AavegotchiFacet {
     /// @dev This emits when an operator is enabled or disabled for an owner.
     ///  The operator can manage all NFTs of the owner.
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
-
-    /***********************************|
-   |             Modifiers              |
-   |__________________________________*/
-
-    modifier onlyUnlocked(uint256 _tokenId) {
-        require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "Only callable on unlocked Aavegotchis");
-        _;
-    }
-
-    modifier onlyAavegotchiOwner(uint256 _tokenId) {
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
-        _;
-    }
 
     /***********************************|
    |             Read Functions         |
