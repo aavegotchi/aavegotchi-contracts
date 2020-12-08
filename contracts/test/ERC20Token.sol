@@ -24,11 +24,11 @@ contract ERC20Token {
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
     function name() external pure returns (string memory) {
-        return "GHST";
+        return "TEST";
     }
 
     function symbol() external pure returns (string memory) {
-        return "GHST";
+        return "TEST";
     }
 
     function decimals() external pure returns (uint8) {

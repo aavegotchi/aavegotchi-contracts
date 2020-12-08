@@ -257,11 +257,6 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
     //Calculates the base rarity score, including collateral modifier
     function baseRarityScore(int256 _numericTraits, address collateralType) public view returns (int256 _rarityScore) {
-        if (_numericTraits == 0) {
-            console.log("numeric traits");
-            console.logInt(_numericTraits);
-        }
-
         AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
         uint256 modifiers = collateralInfo.modifiers;
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {

@@ -46,7 +46,7 @@ function sixteenBitIntArrayToUint (array) {
     if (item < 0) {
       item = (1 << 16) + item
     }
-    console.log(item.toString(16))
+    // console.log(item.toString(16))
     uint.push(item.toString(16).padStart(4, '0'))
   }
   if (array.length > 0) return ethers.BigNumber.from('0x' + uint.join(''))
@@ -79,6 +79,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.daoFacet = deployVars.daoFacet
     global.ghstTokenContract = deployVars.ghstTokenContract
     global.vrfFacet = deployVars.vrfFacet
+    global.svgFacet = deployVars.svgFacet
     global.linkAddress = deployVars.linkAddress
     global.linkContract = deployVars.linkContract
     global.vouchersContract = deployVars.vouchersContract
@@ -260,19 +261,11 @@ describe('Aavegotchi Metadata', async function () {
 })
 
 describe('Collaterals and escrow', async function () {
-  it('First collateral should be blank/empty', async function () {
-    const collaterals = await global.collateralFacet.getCollateralInfo()
-    const collateral = collaterals[0]
-
-    expect(collateral.conversionRate).to.equal(0)
-    console.log('collateral:', collateral)
-  })
-
   it('Should show all whitelisted collaterals', async function () {
     const collaterals = await global.collateralFacet.getCollateralInfo()
-    const collateral = collaterals[1]
-    expect(collateral.conversionRate).to.equal(500)
-    expect(collaterals.length).to.equal(8)
+    const collateral = collaterals[0]
+    expect(collateral.conversionRate).to.equal(1)
+    expect(collaterals.length).to.equal(1)
     const modifiers = uintToInt8Array(collateral.modifiers, 6)
     expect(modifiers[2]).to.equal(-1)
   })
@@ -306,9 +299,8 @@ describe('Collaterals and escrow', async function () {
   it('Base rarity score can handle negative numbers', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
     // console.log(sixteenBitIntArrayToUint([-1, -1, 0, 0, 0, 0]).toHexString())
-    const score = await global.aavegotchiFacet.baseRarityScore(sixteenBitIntArrayToUint([-1, -1, 0, 0, 0, 0]), aavegotchi.collateral)
-    //  console.log('score:', score.toString())
-    //  expect(score).to.equal(599)
+    const score = await global.aavegotchiFacet.baseRarityScore(sixteenBitIntArrayToUint([-10, -10, 0, 0, 0, 0]), aavegotchi.collateral)
+    expect(score).to.equal(619)
   })
 
   it('Can decrease stake and destroy Aavegotchi', async function () {
@@ -435,6 +427,10 @@ describe('Items & Wearables', async function () {
     await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), 'ItemsFacet: Aavegotchi level lower than minLevel')
   })
 
+  it('Can equip wearables that allow this collateral', async function () {
+
+  })
+
   it('Cannot equip wearables that require a different collateral', async function () {
     // Can only be equipped by collateraltype 8
     const unequippableItem = '3'
@@ -466,12 +462,10 @@ describe('Items & Wearables', async function () {
 
   })
 
-  /*
   it('Can display aavegotchi with wearables', async function () {
-    const svg = await global.aavegotchiFacet.getAavegotchiSvg(testAavegotchiId)
+    const svg = await global.svgFacet.getAavegotchiSvg(testAavegotchiId)
     console.log(svg)
   })
-  */
 
   it('Equipping Wearables alters base rarity score', async function () {
     // Unequip all wearables
@@ -480,26 +474,41 @@ describe('Items & Wearables', async function () {
     const equipped = await global.itemsFacet.equippedWearables(testAavegotchiId)
     expect(equipped[testSlot]).to.equal('0')
 
-    // Get score before equipping
-    const originalScore = (await global.aavegotchiFacet.modifiedRarityScore(testAavegotchiId)).rarityScore_.toString()
+    const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
 
     // Equip a wearable
     wearableIds = sixteenBitArrayToUint([testWearableId])
-    // console.log(wearableIds.toString())
     await global.itemsFacet.equipWearables(testAavegotchiId, wearableIds)
 
     // Calculate bonuses
     const modifiers = uintToInt8Array(itemTypes[testWearableId].traitModifiers, 6)
-    let wearableTraitsBonus = 0
-    const rarityScoreModifier = itemTypes[testWearableId].rarityScoreModifier
-    modifiers.forEach((val) => {
-      wearableTraitsBonus += val
+
+    const collateral = (await global.collateralFacet.getCollateralInfo())[0]
+    const collateralModifiers = uintToInt8Array(collateral.modifiers)
+
+    let finalScore = 0
+
+    modifiers.forEach((val, index) => {
+      let traitValue = Number(aavegotchi.numericTraits[index])
+      const collateralMod = collateralModifiers[index]
+
+      // Collateral modifiers array only has 3 entries but there are 6 traits
+      if (index < collateralModifiers.length) {
+        traitValue += collateralMod
+      }
+      traitValue += val
+
+      if (traitValue >= 50) {
+        finalScore += traitValue
+      } else {
+        finalScore += (100 - traitValue)
+      }
     })
 
     // Retrieve the final score
     const augmentedScore = (await global.aavegotchiFacet.modifiedRarityScore(testAavegotchiId)).rarityScore_.toString()
 
-    const finalScore = Number(originalScore) + Number(rarityScoreModifier) + Number(wearableTraitsBonus)
+    // Check the math
     expect(Number(augmentedScore)).to.equal(finalScore)
   })
 })
@@ -588,116 +597,6 @@ describe('Shop and Vouchers', async function () {
     balances = await global.itemsFacet.itemBalances(account)
     expect(balances[1]).to.equal(20)
   })
-})
-
-describe('Kinship', async function () {
-
-  /*
-  it('Can calculate kinship according to formula', async function () {
-    // First interact
-
-    await global.aavegotchiFacet.interact('0')
-    await global.aavegotchiFacet.interact('0')
-    await global.aavegotchiFacet.interact('0')
-    await global.aavegotchiFacet.interact('0')
-    await global.aavegotchiFacet.interact('0')
-    let kinship = await global.aavegotchiFacet.kinship('0')
-    console.log('* 5 initial Interactions, kinship is:', kinship.toString())
-    // 5 interactions + 1 streak bonus
-    // expect(kinship).to.equal(55)
-
-    // Go 3 days without interacting
-    ethers.provider.send('evm_increaseTime', [3 * 86400])
-    ethers.provider.send('evm_mine')
-
-    kinship = await global.aavegotchiFacet.kinship('0')
-    // Took three days off and lost streak bonus
-    console.log('* 3 days w/ no interaction, kinship is:', kinship.toString())
-
-    // Take a longggg break
-
-    ethers.provider.send('evm_increaseTime', [14 * 86400])
-    ethers.provider.send('evm_mine')
-
-    kinship = await global.aavegotchiFacet.kinship('0')
-    console.log('* Another 14 days since last interaction, total 17 days. Kinship is', kinship.toString())
-
-    ethers.provider.send('evm_increaseTime', [20 * 86400])
-    ethers.provider.send('evm_mine')
-    kinship = await global.aavegotchiFacet.kinship('0')
-    console.log('* 37 days since last interaction, kinship is:', kinship.toString())
-    // expect(kinship).to.equal(13)
-
-    await global.aavegotchiFacet.interact('0')
-    kinship = await global.aavegotchiFacet.kinship('0')
-    console.log('* Kinship after first interaction is:', kinship.toString())
-
-    await global.aavegotchiFacet.interact('0')
-    kinship = await global.aavegotchiFacet.kinship('0')
-    console.log('* Kinship after second interaction is:', kinship.toString())
-
-    await global.aavegotchiFacet.interact('0')
-    kinship = await global.aavegotchiFacet.kinship('0')
-    console.log('* Kinship after third interaction is:', kinship.toString())
-
-    console.log('* Interact 120 times')
-
-    for (let index = 0; index < 120; index++) {
-      await global.aavegotchiFacet.interact('0')
-    }
-
-    kinship = await global.aavegotchiFacet.kinship('0')
-    console.log('* Kinship is:', kinship.toString())
-
-    // ethers.provider.send('evm_increaseTime', [10 * 86400])
-    // ethers.provider.send('evm_mine')
-    // kinship = await global.aavegotchiFacet.kinship('0')
-
-    let aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
-
-    let daysSinceInteraction = 0
-    for (let index = 0; index < 12; index++) {
-      const days = 10
-      daysSinceInteraction += days
-
-      ethers.provider.send('evm_increaseTime', [days * 86400])
-      ethers.provider.send('evm_mine')
-      kinship = await global.aavegotchiFacet.kinship('0')
-
-      aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
-
-      console.log(`* Go away for ${days} days. Kinship is: `, kinship.toString())
-    }
-
-    await global.aavegotchiFacet.interact('0')
-    kinship = await global.aavegotchiFacet.kinship('0')
-    console.log(`* Interact after ${daysSinceInteraction} days. Kinship is: `, kinship.toString())
-    aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
-
-    daysSinceInteraction = 0
-    for (let index = 0; index < 5; index++) {
-      const days = 10
-      daysSinceInteraction += days
-
-      ethers.provider.send('evm_increaseTime', [days * 86400])
-      ethers.provider.send('evm_mine')
-      kinship = await global.aavegotchiFacet.kinship('0')
-
-      aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
-
-      console.log(`* Go away for ${days} days. Kinship is: `, kinship.toString())
-    }
-
-    console.log('* Interact 120 times')
-    for (let index = 0; index < 120; index++) {
-      await global.aavegotchiFacet.interact('0')
-    }
-
-    kinship = await global.aavegotchiFacet.kinship('0')
-    console.log('* Kinship is:', kinship.toString())
-  })
-  */
-
 })
 
 describe('Leveling up', async function () {
@@ -799,13 +698,35 @@ describe('DAO Functions', async function () {
     expect(gameManager).to.equal(account)
   })
 
+  it('Cannot add the same collateral twice', async function () {
+    await truffleAssert.reverts(daoFacet.addCollateralTypes(getCollaterals('hardhat', ghstDiamond.address)), 'DAOFacet: Collateral already added')
+  })
+
   it('Can add collateral types', async function () {
     let collateralInfo = await collateralFacet.collaterals()
     console.log('info:', collateralInfo)
     await daoFacet.addCollateralTypes(getCollaterals('hardhat', ghstTokenContract.address))
 
+    // Deploy an extra TEST contract
+    const erc20TokenContract = await ethers.getContractFactory('ERC20Token')
+    const testToken = await erc20TokenContract.deploy()
+    await testToken.deployed()
+
+    const collateralTypeInfo = [
+      testToken.address,
+      {
+        primaryColor: '0x' + 'FFFFFF',
+        secondaryColor: '0x' + 'FFFFFF',
+        cheekColor: '0x' + 'FFFFFF',
+        svgId: '1',
+        eyeShapeSvgId: '2',
+        modifiers: eightBitArrayToUint([0, 0, -1, 0, 0, 0]),
+        conversionRate: 10
+      }
+    ]
+    await daoFacet.addCollateralTypes([collateralTypeInfo])
     collateralInfo = await collateralFacet.collaterals()
-    console.log('info:', collateralInfo)
+    expect(collateralInfo[1]).to.equal(testToken.address)
   })
 
   it('Contract Owner (or DAO) can update collateral modifiers', async function () {
@@ -816,4 +737,140 @@ describe('DAO Functions', async function () {
     score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(score).to.equal(602)
   })
+
+  it('Contract owner (or DAO) can add new item types with corresponding SVGs', async function () {
+    const itemsToAdd = [itemTypes[1]]
+    const itemSvg = require('../svgs/testItem.js')
+
+    const itemTypeAndSizes = []
+
+    // To do (Nick) add in itemTypeAndSizes
+
+    await global.daoFacet.addItemTypesAndSvgs(itemsToAdd, itemSvg, itemTypeAndSizes)
+  })
 })
+
+/*
+describe('Kinship', async function () {
+
+  it('Can calculate kinship according to formula', async function () {
+
+    let kinship = await global.aavegotchiFacet.kinship('0')
+    console.log('* Initial Kinship:', kinship.toString())
+    //Use a kinship potion earlier then waited 24hrs
+    expect(kinship).to.equal(60)
+
+    await interactAndUpdateTime()
+    await interactAndUpdateTime()
+    await interactAndUpdateTime()
+    await interactAndUpdateTime()
+    await interactAndUpdateTime()
+
+    kinship = await global.aavegotchiFacet.kinship('0')
+    expect(kinship).to.equal(65)
+    console.log('* After 5 Interactions, kinship is:', kinship.toString())
+    // 5 interactions + 1 streak bonus
+
+    // Go 3 days without interacting
+    ethers.provider.send('evm_increaseTime', [3 * 86400])
+    ethers.provider.send('evm_mine')
+
+    kinship = await global.aavegotchiFacet.kinship('0')
+    // Took three days off and lost streak bonus
+    console.log('* 3 days w/ no interaction, kinship is:', kinship.toString())
+    expect(kinship).to.equal(62)
+
+    // Take a longggg break
+
+    ethers.provider.send('evm_increaseTime', [14 * 86400])
+    ethers.provider.send('evm_mine')
+    kinship = await global.aavegotchiFacet.kinship('0')
+    console.log('* Another 14 days since last interaction, total 17 days. Kinship is', kinship.toString())
+    expect(kinship).to.equal(48)
+
+    ethers.provider.send('evm_increaseTime', [20 * 86400])
+    ethers.provider.send('evm_mine')
+    kinship = await global.aavegotchiFacet.kinship('0')
+    console.log('* 37 days since last interaction, kinship is:', kinship.toString())
+    expect(kinship).to.equal(28)
+
+    for (let index = 1; index < 4; index++) {
+      await interactAndUpdateTime()
+      kinship = await global.aavegotchiFacet.kinship('0')
+      console.log(`* Kinship after interaction ${index} is:`, kinship.toString())
+      expect(kinship).to.equal(28 + (3 * index))
+    }
+
+    console.log('* Interact 120 times')
+
+    for (let index = 0; index < 120; index++) {
+      await interactAndUpdateTime()
+    }
+
+    kinship = await global.aavegotchiFacet.kinship('0')
+    console.log('* Kinship is:', kinship.toString())
+    //37 + 3, +119
+    expect(kinship).to.equal(159)
+
+    //Neglect for 120 days
+    neglectAavegotchi(120)
+    kinship = await global.aavegotchiFacet.kinship('0')
+    expect(kinship).to.equal(39)
+
+    await interactAndUpdateTime()
+    kinship = await global.aavegotchiFacet.kinship('0')
+    console.log(`* Interact after 120 days. Kinship should be 42`)
+    expect(kinship).to.equal(42)
+
+    //Neglect for another 120 days
+    neglectAavegotchi(120)
+    console.log('* Neglect for another 120 days. Kinship should be 0')
+    kinship = await global.aavegotchiFacet.kinship('0')
+    expect(kinship).to.equal(0)
+
+    console.log('* Interact 2 times')
+    await interactAndUpdateTime()
+    kinship = await global.aavegotchiFacet.kinship('0')
+    console.log('kinship:', kinship.toString())
+    //   expect(kinship).to.equal(3)
+
+    await interactAndUpdateTime()
+    kinship = await global.aavegotchiFacet.kinship('0')
+    console.log('kinship:', kinship.toString())
+    expect(kinship).to.equal(3)
+    // expect(kinship).to.equal(6)
+
+    //Seems to be an issue when the interactionCount is much lower than 0. It takes two interactions to set it from negative to zero.
+
+    console.log('* Kinship should be 6:', kinship.toString())
+  })
+
+})
+
+*/
+
+async function neglectAavegotchi (days) {
+  daysSinceInteraction = 0
+  for (let index = 0; index < days; index++) {
+    daysSinceInteraction += days
+    ethers.provider.send('evm_increaseTime', [86400])
+    ethers.provider.send('evm_mine')
+  }
+
+  console.log(`* Neglect Gotchi for ${days} days`)
+}
+
+async function interactAndUpdateTime () {
+  await global.aavegotchiFacet.interact('0')
+  ethers.provider.send('evm_increaseTime', [86400 / 2])
+  ethers.provider.send('evm_mine')
+}
+
+function eightBitArrayToUint (array) {
+  const uint = []
+  for (const num of array) {
+    const value = ethers.BigNumber.from(num).toTwos(8)
+    uint.unshift(value.toHexString().slice(2))
+  }
+  return ethers.BigNumber.from('0x' + uint.join(''))
+}

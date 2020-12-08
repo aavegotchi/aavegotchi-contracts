@@ -5,7 +5,6 @@ const { aavegotchiSvgs } = require('../svgs/aavegotchi.js')
 const { wearablesSvgs } = require('../svgs/wearables.js')
 const { collateralsSvgs } = require('../svgs/collaterals.js')
 const { eyeShapeSvgs } = require('../svgs/eyeShapes.js')
-const { getCollaterals } = require('./collateralTypes.js')
 const { wearableSets } = require('./wearableSets.js')
 
 function addCommas (nStr) {
@@ -182,25 +181,33 @@ async function main () {
   daoFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamond.address)
 
   // add collateral info
+
   console.log('Adding Collateral Types')
-  tx = await daoFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstTokenContract.address))
+
+  if (hre.network.name === 'hardhat') {
+    const { getCollaterals } = require('./testCollateralTypes.js')
+    tx = await daoFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstTokenContract.address))
+  } else {
+    const { getCollaterals } = require('./collateralTypes.js')
+    tx = await daoFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstTokenContract.address))
+  }
   receipt = await tx.wait()
   console.log('Adding Collateral Types gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-  itemsFacet = await ethers.getContractAt('ItemsFacet', aavegotchiDiamond.address)
-
   console.log('Adding Item Types')
+  itemsFacet = await ethers.getContractAt('ItemsFacet', aavegotchiDiamond.address)
 
   if (hre.network.name === 'hardhat') {
     const { itemTypes } = require('./testItemTypes.js')
     tx = await daoFacet.addItemTypes(itemTypes)
+    receipt = await tx.wait()
   } else {
     const { itemTypes } = require('./itemTypes.js')
     tx = await daoFacet.addItemTypes(itemTypes)
+    receipt = await tx.wait()
   }
 
-  receipt = await tx.wait()
   console.log('Adding Item Types gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
@@ -294,6 +301,7 @@ async function main () {
     collateralFacet: collateralFacet,
     vrfFacet: vrfFacet,
     daoFacet: daoFacet,
+    svgFacet: svgFacet,
     vouchersContract: vouchersContract,
     shopFacet: shopFacet,
     linkAddress: linkAddress,

@@ -41,12 +41,13 @@ contract DAOFacet is LibAppStorageModifiers {
         for (uint256 i; i < _collateralTypes.length; i++) {
             address collateralType = _collateralTypes[i].collateralType;
 
+            require(s.collateralTypeInfo[collateralType].cheekColor == 0, "DAOFacet: Collateral already added");
+
             //Prevent the same collateral from being added multiple times
-            if (s.collateralTypeInfo[collateralType].primaryColor == 0) {
-                s.collateralTypes.push(collateralType);
-                s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
-                s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
-            }
+
+            s.collateralTypes.push(collateralType);
+            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length - 1;
+            s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
         }
     }
 
@@ -111,7 +112,6 @@ contract DAOFacet is LibAppStorageModifiers {
     }
 
     function addItemTypes(ItemType[] memory _itemTypes) external onlyDaoOrOwner() {
-        // item ids start at 1.  0 means no item
         insertItemTypes(_itemTypes);
     }
 
@@ -120,9 +120,7 @@ contract DAOFacet is LibAppStorageModifiers {
         string calldata _svg,
         SvgTypeAndSizes[] memory _typesAndSizes
     ) external onlyDaoOrOwner() {
-        // item ids start at 1.  0 means no item
         insertItemTypes(_itemTypes);
-
         //Also store the SVGs
         SvgFacet(address(this)).storeSvg(_svg, _typesAndSizes);
     }
