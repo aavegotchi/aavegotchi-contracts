@@ -3,8 +3,8 @@
 ## Contract Addresses
 
 Kovan:
-
-- Aavegotchi diamond: 0x10225cc1ea2435E53E7661E84D36Fb4E9e20a9DB
+- Aavegothic diamond: 0x243D0E444BCaE6BD0645b6Bf4960cc6a925167E0
+- Old Aavegotchi diamond: 0x10225cc1ea2435E53E7661E84D36Fb4E9e20a9DB
 - GHST diamond: 0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5
 
 The ABI files for the diamonds are in the artifacts directory:
