@@ -77,7 +77,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.collateralFacet = deployVars.collateralFacet
     global.shopFacet = deployVars.shopFacet
     global.daoFacet = deployVars.daoFacet
-    global.ghstDiamond = deployVars.ghstDiamond
+    global.ghstTokenContract = deployVars.ghstTokenContract
     global.vrfFacet = deployVars.vrfFacet
     global.linkAddress = deployVars.linkAddress
     global.linkContract = deployVars.linkContract
@@ -85,8 +85,8 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.diamondLoupeFacet = deployVars.diamondLoupeFacet
   })
   it('Should mint 10,000,000 GHST tokens', async function () {
-    await global.ghstDiamond.mint()
-    const balance = await global.ghstDiamond.balanceOf(global.account)
+    await global.ghstTokenContract.mint()
+    const balance = await global.ghstTokenContract.balanceOf(global.account)
     const oneMillion = ethers.utils.parseEther('10000000')
     expect(balance).to.equal(oneMillion)
   })
@@ -98,15 +98,15 @@ describe('Buying Portals, VRF', function () {
   })
 
   it('Portal should cost 100 GHST', async function () {
-    const balance = await ghstDiamond.balanceOf(account)
-    await ghstDiamond.approve(aavegotchiDiamond.address, balance)
+    const balance = await ghstTokenContract.balanceOf(account)
+    await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (50 * Math.pow(10, 18)).toFixed() // 1 portal
     await truffleAssert.reverts(shopFacet.buyPortals(account, buyAmount, true), 'AavegotchiFacet: Not enough GHST to buy portal')
   })
 
   it('Should purchase one portal', async function () {
-    const balance = await ghstDiamond.balanceOf(account)
-    await ghstDiamond.approve(aavegotchiDiamond.address, balance)
+    const balance = await ghstTokenContract.balanceOf(account)
+    await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
     await global.shopFacet.buyPortals(account, buyAmount, true)
 
@@ -120,8 +120,8 @@ describe('Buying Portals, VRF', function () {
   })
 
   it('Should allow opting out of VRF batch', async function () {
-    const balance = await ghstDiamond.balanceOf(account)
-    await ghstDiamond.approve(aavegotchiDiamond.address, balance)
+    const balance = await ghstTokenContract.balanceOf(account)
+    await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
     await global.shopFacet.buyPortals(account, buyAmount, false)
   })
@@ -155,8 +155,8 @@ describe('Buying Portals, VRF', function () {
   })
 
   it('Should wait 18 hours before next VRF call', async function () {
-    const balance = await ghstDiamond.balanceOf(account)
-    await ghstDiamond.approve(aavegotchiDiamond.address, balance)
+    const balance = await ghstTokenContract.balanceOf(account)
+    await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
     await global.shopFacet.buyPortals(account, buyAmount, true)
     await truffleAssert.reverts(vrfFacet.drawRandomNumber(), 'VrfFacet: Waiting period to call VRF not over yet')
@@ -172,8 +172,8 @@ describe('Buying Portals, VRF', function () {
   })
 
   it('Cannot call VRF before it is ready', async function () {
-    const balance = await ghstDiamond.balanceOf(account)
-    await ghstDiamond.approve(aavegotchiDiamond.address, balance)
+    const balance = await ghstTokenContract.balanceOf(account)
+    await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
     await global.shopFacet.buyPortals(account, buyAmount, true)
     await truffleAssert.reverts(vrfFacet.drawRandomNumber(), 'VrfFacet: Waiting period to call VRF not over yet')
@@ -327,12 +327,12 @@ describe('Collaterals and escrow', async function () {
     expect(myPortals.length).to.equal(5)
     // Open portal
 
-    const initialBalance = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
+    const initialBalance = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
     await openAndClaim(['1'])
 
     // Burn Aavegotchi and return collateral stake
     await global.collateralFacet.decreaseAndDestroy('1', '1')
-    const balanceAfterDestroy = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
+    const balanceAfterDestroy = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
     expect(balanceAfterDestroy).to.equal(initialBalance)
 
     // Should only have 1 portal now
@@ -366,11 +366,11 @@ async function openAndClaim (tokenIds) {
     const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
     const selectedGhost = ghosts[0]
     const minStake = selectedGhost.minimumStake
-    const initialBalance = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
+    const initialBalance = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
 
     // Claim ghost and stake
     await global.aavegotchiFacet.claimAavegotchi(id, 0, minStake)
-    const balanceAfterClaim = ethers.BigNumber.from(await ghstDiamond.balanceOf(account))
+    const balanceAfterClaim = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
     expect(balanceAfterClaim).to.equal(initialBalance.sub(minStake))
   }
 }
@@ -540,7 +540,7 @@ describe('Revenue transfers', async function () {
     const beforeBalances = []
     for (let index = 0; index < 4; index++) {
       const address = revenueShares[index]
-      const balance = await global.ghstDiamond.balanceOf(address)
+      const balance = await global.ghstTokenContract.balanceOf(address)
       beforeBalances[index] = balance
     }
 
@@ -560,7 +560,7 @@ describe('Revenue transfers', async function () {
       const address = revenueShares[index]
 
       const beforeBalance = ethers.BigNumber.from(beforeBalances[index])
-      const afterBalance = ethers.BigNumber.from(await global.ghstDiamond.balanceOf(address))
+      const afterBalance = ethers.BigNumber.from(await global.ghstTokenContract.balanceOf(address))
       expect(afterBalance).to.equal(beforeBalance.add(shares[index]))
     }
   })
@@ -802,7 +802,7 @@ describe('DAO Functions', async function () {
   it('Can add collateral types', async function () {
     let collateralInfo = await collateralFacet.collaterals()
     console.log('info:', collateralInfo)
-    await daoFacet.addCollateralTypes(getCollaterals('hardhat', ghstDiamond.address))
+    await daoFacet.addCollateralTypes(getCollaterals('hardhat', ghstTokenContract.address))
 
     collateralInfo = await collateralFacet.collaterals()
     console.log('info:', collateralInfo)

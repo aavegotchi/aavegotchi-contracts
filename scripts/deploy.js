@@ -40,7 +40,7 @@ async function main () {
   let vouchersContractAddress
   let vouchersContract
   let initialHauntSize
-
+  let ghstTokenContract
   let dao
   let rarityFarming
   let pixelCraft
@@ -59,6 +59,7 @@ async function main () {
     fee = ethers.utils.parseEther('0.1')
     initialHauntSize = '100'
 
+    // ghstTokenContract = set below
     dao = await accounts[1].getAddress()
     rarityFarming = await accounts[2].getAddress()
     pixelCraft = await accounts[3].getAddress()
@@ -69,6 +70,7 @@ async function main () {
     fee = ethers.utils.parseEther('2')
     vouchersContractAddress = '0xe54891774EED9277236bac10d82788aee0Aed313'
     initialHauntSize = '10000'
+    ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x3F382DbD960E3a9bbCeaE22651E88158d2791550')
 
     dao = 'todo' // await accounts[1].getAddress()
     rarityFarming = 'todo' // await accounts[2].getAddress()
@@ -78,12 +80,15 @@ async function main () {
     linkAddress = '0xa36085F69e2889c224210F603D836748e7dC0088'
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     fee = ethers.utils.parseEther('0.1')
-    vouchersContractAddress = ''
+    vouchersContractAddress = '0x9d038aed3BEDbb143B4F3414Af6119231b77ACFC'
     initialHauntSize = '10000'
 
-    dao = 'todo' // await accounts[1].getAddress()
-    rarityFarming = 'todo' // await accounts[2].getAddress()
-    pixelCraft = 'todo' // await accounts[3].getAddress()
+    ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5')
+    // console.log('GHST diamond address:' + ghstDiamond.address)
+
+    dao = account // 'todo' // await accounts[1].getAddress()
+    rarityFarming = account // 'todo' // await accounts[2].getAddress()
+    pixelCraft = account // 'todo' // await accounts[3].getAddress()
   } else {
     throw Error('No network settings for ' + hre.network.name)
   }
@@ -130,12 +135,8 @@ async function main () {
     ['ShopFacet', [vouchersContractAddress]]
   )
 
-  let ghstDiamond
-  if (hre.network.name === 'kovan') {
-    ghstDiamond = await ethers.getContractAt('GHSTFacet', '0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5')
-    console.log('GHST diamond address:' + ghstDiamond.address)
-  } else if (hre.network.name === 'hardhat') {
-    ghstDiamond = await diamond.deploy({
+  if (hre.network.name === 'hardhat') {
+    ghstTokenContract = await diamond.deploy({
       diamondName: 'GHSTDiamond',
       facets: [
         ['DiamondCutFacet', diamondCutFacet],
@@ -145,8 +146,8 @@ async function main () {
       ],
       args: [account]
     })
-    ghstDiamond = await ethers.getContractAt('GHSTFacet', ghstDiamond.address)
-    console.log('GHST diamond address:' + ghstDiamond.address)
+    ghstTokenContract = await ethers.getContractAt('GHSTFacet', ghstTokenContract.address)
+    console.log('GHST diamond address:' + ghstTokenContract.address)
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -164,7 +165,7 @@ async function main () {
       ['VrfFacet', vrfFacet],
       ['ShopFacet', shopFacet]
     ],
-    args: [account, dao, pixelCraft, rarityFarming, ghstDiamond.address, keyHash, fee, initialHauntSize]
+    args: [account, dao, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, initialHauntSize]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
@@ -182,7 +183,7 @@ async function main () {
 
   // add collateral info
   console.log('Adding Collateral Types')
-  tx = await daoFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstDiamond.address))
+  tx = await daoFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstTokenContract.address))
   receipt = await tx.wait()
   console.log('Adding Collateral Types gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
@@ -287,7 +288,7 @@ async function main () {
     account: account,
     aavegotchiDiamond: aavegotchiDiamond,
     diamondLoupeFacet: diamondLoupeFacet,
-    ghstDiamond: ghstDiamond,
+    ghstTokenContract: ghstTokenContract,
     itemsFacet: itemsFacet,
     aavegotchiFacet: aavegotchiFacet,
     collateralFacet: collateralFacet,
