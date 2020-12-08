@@ -28,7 +28,6 @@ const itemTypes = [
     kinshipBonus: 0,
     experienceBonus: 0
   },
-
   {
     svgId: 1,
     name: 'Camo Hat',
@@ -715,10 +714,8 @@ function getItemTypes () {
   const result = []
   for (const itemType of itemTypes) {
     itemType.traitModifiers = eightBitIntArrayToUint(itemType.traitModifiers)
-    // console.log(itemType.slotPositions)
-    // console.log(slotPositionsToUint(itemType.slotPositions).toString())
     itemType.slotPositions = boolsArrayToUint16(itemType.slotPositions)
-    itemType.allowedCollaterals = sixteenBitArrayToUint(itemType.allowedCollaterals)
+    // itemType.allowedCollaterals = sixteenBitArrayToUint(itemType.allowedCollaterals)
     result.push(itemType)
   }
   return result
