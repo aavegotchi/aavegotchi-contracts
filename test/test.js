@@ -699,7 +699,7 @@ describe('DAO Functions', async function () {
   })
 
   it('Cannot add the same collateral twice', async function () {
-    await truffleAssert.reverts(daoFacet.addCollateralTypes(getCollaterals('hardhat', ghstDiamond.address)), 'DAOFacet: Collateral already added')
+    await truffleAssert.reverts(daoFacet.addCollateralTypes(getCollaterals('hardhat', ghstTokenContract.address)), 'DAOFacet: Collateral already added')
   })
 
   it('Can add collateral types', async function () {
