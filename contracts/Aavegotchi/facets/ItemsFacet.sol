@@ -442,7 +442,7 @@ contract ItemsFacet is LibAppStorageModifiers {
 
         //Increase kinship permanently
         if (itemType.kinshipBonus > 0) {
-            s.aavegotchis[_tokenId].interactionCount += itemType.kinshipBonus;
+            s.aavegotchis[_tokenId].interactionCount += uint16(itemType.kinshipBonus);
         }
 
         //Boost traits and reset clock

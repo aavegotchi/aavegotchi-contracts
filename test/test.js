@@ -221,6 +221,7 @@ describe('Opening Portals', async function () {
     const selectedGhost = ghosts[4]
     const minStake = selectedGhost.minimumStake
     await global.aavegotchiFacet.claimAavegotchi(tokenId, 4, minStake)
+    const kinship = await global.aavegotchiFacet.kinship(tokenId)
 
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(tokenId)
 
@@ -229,6 +230,7 @@ describe('Opening Portals', async function () {
     expect(aavegotchi.status).to.equal(2)
     expect(aavegotchi.hauntId).to.equal(0)
     expect(aavegotchi.stakedAmount).to.equal(minStake)
+    expect(kinship).to.equal(50)
   })
 })
 
@@ -751,14 +753,11 @@ describe('DAO Functions', async function () {
   })
 })
 
-/*
 describe('Kinship', async function () {
-
   it('Can calculate kinship according to formula', async function () {
-
     let kinship = await global.aavegotchiFacet.kinship('0')
     console.log('* Initial Kinship:', kinship.toString())
-    //Use a kinship potion earlier then waited 24hrs
+    // Use a kinship potion earlier then waited 24hrs
     expect(kinship).to.equal(60)
 
     await interactAndUpdateTime()
@@ -810,20 +809,20 @@ describe('Kinship', async function () {
 
     kinship = await global.aavegotchiFacet.kinship('0')
     console.log('* Kinship is:', kinship.toString())
-    //37 + 3, +119
+    // 37 + 3, +119
     expect(kinship).to.equal(159)
 
-    //Neglect for 120 days
+    // Neglect for 120 days
     neglectAavegotchi(120)
     kinship = await global.aavegotchiFacet.kinship('0')
     expect(kinship).to.equal(39)
 
     await interactAndUpdateTime()
     kinship = await global.aavegotchiFacet.kinship('0')
-    console.log(`* Interact after 120 days. Kinship should be 42`)
+    console.log('* Interact after 120 days. Kinship should be 42')
     expect(kinship).to.equal(42)
 
-    //Neglect for another 120 days
+    // Neglect for another 120 days
     neglectAavegotchi(120)
     console.log('* Neglect for another 120 days. Kinship should be 0')
     kinship = await global.aavegotchiFacet.kinship('0')
@@ -833,30 +832,28 @@ describe('Kinship', async function () {
     await interactAndUpdateTime()
     kinship = await global.aavegotchiFacet.kinship('0')
     console.log('kinship:', kinship.toString())
-    //   expect(kinship).to.equal(3)
+    expect(kinship).to.equal(3)
 
     await interactAndUpdateTime()
     kinship = await global.aavegotchiFacet.kinship('0')
     console.log('kinship:', kinship.toString())
-    expect(kinship).to.equal(3)
-    // expect(kinship).to.equal(6)
+    expect(kinship).to.equal(6)
 
-    //Seems to be an issue when the interactionCount is much lower than 0. It takes two interactions to set it from negative to zero.
+    // Seems to be an issue when the interactionCount is much lower than 0. It takes two interactions to set it from negative to zero.
 
     console.log('* Kinship should be 6:', kinship.toString())
   })
-
 })
 
-*/
-
 async function neglectAavegotchi (days) {
-  daysSinceInteraction = 0
-  for (let index = 0; index < days; index++) {
-    daysSinceInteraction += days
-    ethers.provider.send('evm_increaseTime', [86400])
-    ethers.provider.send('evm_mine')
-  }
+  ethers.provider.send('evm_increaseTime', [86400 * days])
+  ethers.provider.send('evm_mine')
+  // daysSinceInteraction = 0
+  // for (let index = 0; index < days; index++) {
+  //   daysSinceInteraction += days
+  //   ethers.provider.send('evm_increaseTime', [86400])
+  //   ethers.provider.send('evm_mine')
+  // }
 
   console.log(`* Neglect Gotchi for ${days} days`)
 }

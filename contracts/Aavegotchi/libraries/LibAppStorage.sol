@@ -2,6 +2,7 @@
 pragma solidity 0.7.4;
 import "../../shared/libraries/LibERC20.sol";
 import "../../shared/libraries/LibDiamond.sol";
+import "hardhat/console.sol";
 
 struct Aavegotchi {
     // This 256 bit value is broken up into 16 16-bit slots for storing wearableIds
@@ -23,7 +24,7 @@ struct Aavegotchi {
     uint16 usedSkillPoints; //The number of skill points this aavegotchi has already used
     uint40 claimTime; //The block timestamp when this Aavegotchi was claimed
     uint40 lastInteracted; //The last time this Aavegotchi was interacted with
-    int16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
+    uint16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
     address escrow; //The escrow address this Aavegotchi manages.
     uint256 unlockTime;
 }
@@ -230,31 +231,21 @@ library LibAppStorage {
             return;
         }
 
-        int16 interactionCount = s.aavegotchis[_tokenId].interactionCount;
+        uint256 interactionCount = s.aavegotchis[_tokenId].interactionCount;
         uint256 interval = block.timestamp - lastInteracted;
-        int16 daysSinceInteraction = int16(interval / 86400);
-        if (daysSinceInteraction > 3000) {
-            daysSinceInteraction = 3000;
+        uint256 daysSinceInteraction = interval / 86400;
+        uint256 kinship;
+        if (interactionCount > daysSinceInteraction) {
+            kinship = interactionCount - daysSinceInteraction;
         }
-        int16 baseKinship = 50;
 
-        //Interaction count can't go below -50 otherwise the kinship will be negative
-        if (interactionCount < -50) interactionCount = -50;
-
-        //If your Aavegotchi hates you and you finally pet it, you get a bonus
-        uint256 kinship = uint256(baseKinship + interactionCount - daysSinceInteraction);
-        int16 hateBonus = 0;
+        uint256 hateBonus;
 
         if (kinship < 40) {
             hateBonus = 2;
         }
+        s.aavegotchis[_tokenId].interactionCount = uint16(kinship + 1 + hateBonus);
 
-        //Update the interactionCount
-        if (daysSinceInteraction > 0) {
-            s.aavegotchis[_tokenId].interactionCount = interactionCount - int16(daysSinceInteraction) + hateBonus + 1;
-        } else {
-            s.aavegotchis[_tokenId].interactionCount = int16(interactionCount + 1 + hateBonus);
-        }
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
     }
 }

@@ -165,7 +165,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         uint256 stakedAmount;
         uint256 minimumStake;
         //New
-        int256 interactionCount; //The kinship value of this Aavegotchi. Default is 50.
+        uint256 interactionCount; //The kinship value of this Aavegotchi. Default is 50.
         uint40 lastInteracted;
         uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
         uint256 usedSkillPoints; //number of skill points used
@@ -315,16 +315,13 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     function kinship(uint256 _tokenId) external view returns (uint256 score) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 lastInteracted = aavegotchi.lastInteracted;
-        int16 interactionCount = int16(aavegotchi.interactionCount);
+        uint256 interactionCount = aavegotchi.interactionCount;
         uint256 interval = block.timestamp - lastInteracted;
 
-        int16 daysSinceInteraction = int16(interval / 86400);
-        int16 baseKinship = 50;
+        uint256 daysSinceInteraction = interval / 86400;
 
-        if (daysSinceInteraction > baseKinship + interactionCount) {
-            score = 0;
-        } else {
-            score = uint256(baseKinship + interactionCount - daysSinceInteraction);
+        if (interactionCount > daysSinceInteraction) {
+            score = interactionCount - daysSinceInteraction;
         }
     }
 
@@ -421,10 +418,9 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         aavegotchi.numericTraits = option.numericTraits;
         aavegotchi.collateralType = option.collateralType;
         aavegotchi.minimumStake = uint88(option.minimumStake);
-        aavegotchi.experience = 0;
-        aavegotchi.usedSkillPoints = 0;
-        aavegotchi.claimTime = uint40(block.timestamp);
         aavegotchi.lastInteracted = uint40(block.timestamp);
+        aavegotchi.interactionCount = 50;
+        aavegotchi.claimTime = uint40(block.timestamp);
 
         require(_stakeAmount >= option.minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
 
