@@ -35,7 +35,6 @@ struct ItemType {
     // this is an array of uint indexes into the collateralTypes array
 
     uint8[] allowedCollaterals; //[WEARABLE ONLY] The collaterals this wearable can be equipped to. An empty array is "any"
-
     string name; //The name of the item
     uint96 ghstPrice; //How much GHST this item costs
     uint32 svgId; //The svgId of the item
@@ -78,14 +77,15 @@ struct SvgTypeAndSizes {
 }
 
 struct AavegotchiCollateralTypeInfo {
+    // treated as an arary of int8
+    uint256 modifiers; //Trait modifiers for each collateral. Can be 2, 1, -1, or -2
     bytes3 primaryColor;
     bytes3 secondaryColor;
     bytes3 cheekColor;
     uint8 svgId;
     uint8 eyeShapeSvgId;
-    // treated as an arary of int8
-    uint256 modifiers; //Trait modifiers for each collateral. Can be 2, 1, -1, or -2
     uint16 conversionRate; //Current conversionRate for the price of this collateral in relation to 1 USD. Can be updated by the DAO
+    bool delisted;
 }
 
 struct AppStorage {

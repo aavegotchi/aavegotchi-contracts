@@ -12,25 +12,10 @@
 // Total length: 9
 
 const collaterals = [
-
-  /*
-  { // first collateral item is empty
-    name: '',
-    kovanAddress: '0x0000000000000000000000000000000000000000',
-    mainnetAddress: '',
-    primaryColor: '#000000',
-    secondaryColor: '#000000',
-    cheekColor: '#000000',
-    svgId: 0,
-    eyeShapeSvgId: 0,
-    modifiers: [0, 0, 0, 0, 0, 0],
-    conversionRate: 0
-  },
-  */
   {
     name: 'aDAI',
-    kovanAddress: '0x58AD4cB396411B691A9AAb6F74545b2C5217FE6a',
-    mainnetAddress: '',
+    kovanAddress: '0x6dDFD6364110E9580292D9eCC745F75deA7e72c8',
+    mainnetAddress: '0x028171bCA77440897B824Ca71D1c56caC55b68A3',
     primaryColor: '#FF7D00',
     secondaryColor: '#F9D792',
     cheekColor: '#F4AF24',
@@ -40,9 +25,9 @@ const collaterals = [
     conversionRate: 1 // 1 DAI equals 1 DAI
   },
   {
-    name: 'aETH',
-    kovanAddress: '0xD483B49F2d55D2c53D32bE6efF735cB001880F79',
-    mainnetAddress: '',
+    name: 'aWETH',
+    kovanAddress: '0xe2735Adf49D06fBC2C09D9c0CFfbA5EF5bA35649',
+    mainnetAddress: '0x030bA81f1c18d280636F32af80b9AAd02Cf0854e',
     primaryColor: '#64438E',
     secondaryColor: '#EDD3FD',
     cheekColor: '#F696C6',
@@ -52,9 +37,9 @@ const collaterals = [
     conversionRate: 3000 // 3000 DAI = 1 ETH
   },
   {
-    name: 'aLEND',
-    kovanAddress: '0xcba131c7fb05fe3c9720375cd86c99773faabf23',
-    mainnetAddress: '',
+    name: 'aAAVE',
+    kovanAddress: '0x76c6D190639a946E894D4A480806EB1D18391E01',
+    mainnetAddress: '0xFFC97d72E13E01096502Cb8Eb52dEe56f74DAD7B',
     primaryColor: '#0FA9C9',
     secondaryColor: '#CFEEF4',
     cheekColor: '#F696C6',
@@ -66,8 +51,8 @@ const collaterals = [
 
   {
     name: 'aLINK',
-    kovanAddress: '0xEC23855Ff01012E1823807CE19a790CeBc4A64dA',
-    mainnetAddress: '',
+    kovanAddress: '0x9246CF386f1D38b80C92245c1bA2A3d0a013ceE0',
+    mainnetAddress: '0xa06bC25B5805d5F8d82847D191Cb4Af5A3e873E0',
     primaryColor: '#0000B9',
     secondaryColor: '#D4DEF8',
     cheekColor: '#F696C6',
@@ -77,23 +62,23 @@ const collaterals = [
     conversionRate: 1000
   },
 
-  {
-    name: 'aSNX',
-    kovanAddress: '0xb4D480f963f4F685F1D51d2B6159D126658B1dA8',
-    mainnetAddress: '',
-    primaryColor: '#0E0C15',
-    secondaryColor: '#DCDCDC',
-    cheekColor: '#F696C6',
-    svgId: 4,
-    eyeShapeSvgId: 21,
-    modifiers: [-1, 0, 0, 0, 0, 0],
-    conversionRate: 30
-  },
+  // {
+  //   name: 'aSNX',
+  //   kovanAddress: '',
+  //   mainnetAddress: '',
+  //   primaryColor: '#0E0C15',
+  //   secondaryColor: '#DCDCDC',
+  //   cheekColor: '#F696C6',
+  //   svgId: 4,
+  //   eyeShapeSvgId: 21,
+  //   modifiers: [-1, 0, 0, 0, 0, 0],
+  //   conversionRate: 30
+  // },
 
   {
-    name: 'aTUSD',
-    kovanAddress: '0x4c76f1b48316489e8a3304db21cdaec271cf6ec3',
-    mainnetAddress: '',
+    name: 'aUSDT',
+    kovanAddress: '0x29a63BE19cC7e1e6bfbeDeC08961b4A3285579C8',
+    mainnetAddress: '0x3Ed3B47Dd13EC9a98b44e6204A523E766B225811',
     primaryColor: '#282473',
     secondaryColor: '#B6D9FC',
     cheekColor: '#F696C6',
@@ -105,8 +90,8 @@ const collaterals = [
 
   {
     name: 'aUSDC',
-    kovanAddress: '0x02F626c6ccb6D2ebC071c068DC1f02Bf5693416a',
-    mainnetAddress: '',
+    kovanAddress: '0x32A4f93ffbb63213fB8c57b0b0E8Ea09698F3741',
+    mainnetAddress: '0xBcca60bB61934080951369a648Fb03DF4F96263C',
     primaryColor: '#2664BA',
     secondaryColor: '#D4E0F1',
     cheekColor: '#F696C6',
@@ -188,7 +173,8 @@ function getCollaterals (network, ghstAddress) {
       svgId: collateralType.svgId,
       eyeShapeSvgId: collateralType.eyeShapeSvgId,
       modifiers: eightBitArrayToUint(collateralType.modifiers),
-      conversionRate: collateralType.conversionRate
+      conversionRate: collateralType.conversionRate,
+      delisted: false
     }
     const item = {}
     if (network === 'kovan') {
