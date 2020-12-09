@@ -270,12 +270,15 @@ contract LibAppStorageModifiers {
         _;
     }
     modifier onlyDao {
-        require(msg.sender == s.dao, "Only DAO can call this function");
+        require(msg.sender == s.dao || msg.sender == address(this), "Only DAO can call this function");
         _;
     }
 
     modifier onlyDaoOrOwner {
-        require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner(), "AavegotchiFacet: Do not have access");
+        require(
+            msg.sender == s.dao || msg.sender == LibDiamond.contractOwner() || msg.sender == address(this),
+            "AavegotchiFacet: Do not have access"
+        );
         _;
     }
 }

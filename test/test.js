@@ -704,8 +704,8 @@ describe('DAO Functions', async function () {
 
   it('Can add collateral types', async function () {
     let collateralInfo = await collateralFacet.collaterals()
-    console.log('info:', collateralInfo)
-    await daoFacet.addCollateralTypes(getCollaterals('hardhat', ghstTokenContract.address))
+    // console.log('info:', collateralInfo)
+    // await daoFacet.addCollateralTypes(getCollaterals('hardhat', ghstTokenContract.address))
 
     // Deploy an extra TEST contract
     const erc20TokenContract = await ethers.getContractFactory('ERC20Token')
@@ -721,7 +721,8 @@ describe('DAO Functions', async function () {
         svgId: '1',
         eyeShapeSvgId: '2',
         modifiers: eightBitArrayToUint([0, 0, -1, 0, 0, 0]),
-        conversionRate: 10
+        conversionRate: 10,
+        delisted: false
       }
     ]
     await daoFacet.addCollateralTypes([collateralTypeInfo])
@@ -746,7 +747,7 @@ describe('DAO Functions', async function () {
 
     // To do (Nick) add in itemTypeAndSizes
 
-    await global.daoFacet.addItemTypesAndSvgs(itemsToAdd, itemSvg, itemTypeAndSizes)
+    await daoFacet.addItemTypesAndSvgs(itemsToAdd, itemSvg, itemTypeAndSizes)
   })
 })
 

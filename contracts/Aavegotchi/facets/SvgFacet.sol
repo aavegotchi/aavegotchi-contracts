@@ -8,9 +8,7 @@ import "../libraries/LibSvg.sol";
 import "./AavegotchiFacet.sol";
 
 // This contract was added as a facet to the diamond
-contract SvgFacet {
-    AppStorage internal s;
-
+contract SvgFacet is LibAppStorageModifiers {
     uint256 internal constant EQUIPPED_WEARABLE_SLOTS = 16;
     uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
@@ -153,8 +151,8 @@ contract SvgFacet {
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-        AavegotchiFacet.PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = AavegotchiFacet(address(this))
-            .portalAavegotchiTraits(_tokenId);
+        AavegotchiFacet.PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits =
+            AavegotchiFacet(address(this)).portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
             address collateralType = l_portalAavegotchiTraits[i].collateralType;
             int256 numericTraits = l_portalAavegotchiTraits[i].numericTraits;
@@ -172,8 +170,7 @@ contract SvgFacet {
    |             Write Functions        |
    |__________________________________*/
 
-    function storeSvg(string calldata _svg, SvgTypeAndSizes[] calldata _typesAndSizes) public {
-        LibDiamond.enforceIsContractOwner();
+    function storeSvg(string calldata _svg, SvgTypeAndSizes[] calldata _typesAndSizes) public onlyDaoOrOwner {
         address svgContract = storeSvgInContract(_svg);
         uint256 offset = 0;
         for (uint256 i; i < _typesAndSizes.length; i++) {
