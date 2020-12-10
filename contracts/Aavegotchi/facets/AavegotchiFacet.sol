@@ -244,7 +244,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     }
 
     function rarityMultiplier(uint256 _numericTraits, address _collateralType) public view returns (uint256 multiplier) {
-        int256 rarityScore = baseRarityScore(_numericTraits, _collateralType);
+        uint256 rarityScore = baseRarityScore(_numericTraits, _collateralType);
         if (rarityScore < 300) return 10;
         else if (rarityScore >= 300 && rarityScore < 450) return 10;
         else if (rarityScore >= 450 && rarityScore <= 525) return 25;
@@ -253,17 +253,17 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     }
 
     //Calculates the base rarity score, including collateral modifier
-    function baseRarityScore(uint256 _numericTraits, address collateralType) public view returns (int256 _rarityScore) {
+    function baseRarityScore(uint256 _numericTraits, address collateralType) public view returns (uint256 _rarityScore) {
         AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
         uint256 modifiers = collateralInfo.modifiers;
         for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(_numericTraits >> (i * 16));
             int256 mod = int8(modifiers >> (i * 8));
-
+            number += mod;
             if (number >= 50) {
-                _rarityScore = _rarityScore + number + mod;
+                _rarityScore += uint256(number);
             } else {
-                _rarityScore = _rarityScore + (100 - number) + mod;
+                _rarityScore += uint256(int256(100) - number);
             }
         }
     }
@@ -302,8 +302,8 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             wearableBonus += itemType.rarityScoreModifier;
         }
         address collateral = s.aavegotchis[_tokenId].collateralType;
-        int256 baseRarity = baseRarityScore(numericTraits, collateral);
-        info_.rarityScore_ = baseRarity + wearableBonus;
+        uint256 baseRarity = baseRarityScore(numericTraits, collateral);
+        info_.rarityScore_ = int256(baseRarity) + wearableBonus;
         for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(numericTraits >> (i * 16));
             info_.numericTraits_[i] = number;
