@@ -3,7 +3,8 @@
 ## Contract Addresses
 
 Kovan:
-- Aavegothic diamond: 0x243D0E444BCaE6BD0645b6Bf4960cc6a925167E0
+- Aavegothic diamond: 0x16a2BA2F8d91f0D5e3B9dBAd7E716DaA428fBA85
+- Old Aavegothic diamond: 0x243D0E444BCaE6BD0645b6Bf4960cc6a925167E0
 - Old Aavegotchi diamond: 0x10225cc1ea2435E53E7661E84D36Fb4E9e20a9DB
 - GHST diamond: 0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5
 
