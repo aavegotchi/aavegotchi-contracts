@@ -118,7 +118,7 @@ contract DAOFacet is LibAppStorageModifiers {
     function addItemTypesAndSvgs(
         ItemType[] memory _itemTypes,
         string calldata _svg,
-        SvgTypeAndSizes[] memory _typesAndSizes
+        LibSvg.SvgTypeAndSizes[] memory _typesAndSizes
     ) external onlyDaoOrOwner() {
         insertItemTypes(_itemTypes);
         //Also store the SVGs

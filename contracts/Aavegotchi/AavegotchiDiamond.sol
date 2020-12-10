@@ -3,7 +3,7 @@ pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
 /******************************************************************************\
-* Author: Nick Mudge
+* Authors: Nick Mudge (mudgen), 
 *
 * Implementation of an example of a diamond.
 /******************************************************************************/

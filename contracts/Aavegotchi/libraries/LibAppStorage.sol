@@ -11,9 +11,9 @@ struct Aavegotchi {
     string name;
     uint256 randomNumber;
     // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
-    int256 temporaryTraitBoosts;
+    uint256 temporaryTraitBoosts;
     uint40 lastTemporaryBoost;
-    int256 numericTraits; // Sixteen 16 bit ints.  [Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
+    uint256 numericTraits; // Sixteen 16 bit ints.  [Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     address owner;
     uint32 batchId;
     uint16 hauntId;
@@ -32,7 +32,7 @@ struct Aavegotchi {
 struct ItemType {
     // treated as int8s array
     // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
-    int256 traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
+    uint256 traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
     // this is an array of uint indexes into the collateralTypes array
 
     uint8[] allowedCollaterals; //[WEARABLE ONLY] The collaterals this wearable can be equipped to. An empty array is "any"
@@ -56,7 +56,7 @@ struct ItemType {
 struct WearableSet {
     string name;
     uint256 wearableIds; // The tokenIdS of each piece of the set
-    int256 traitsBonuses;
+    uint256 traitsBonuses;
 }
 
 struct Haunt {
@@ -70,11 +70,6 @@ struct SvgLayer {
     address svgLayersContract;
     uint16 offset;
     uint16 size;
-}
-
-struct SvgTypeAndSizes {
-    bytes32 svgType;
-    uint256[] sizes;
 }
 
 struct AavegotchiCollateralTypeInfo {
@@ -116,6 +111,8 @@ struct AppStorage {
 }
 
 library LibAppStorage {
+    uint256 internal constant NUMERIC_TRAITS_NUM = 6;
+
     uint8 internal constant STATUS_CLOSED_PORTAL = 0;
     uint8 internal constant STATUS_OPEN_PORTAL = 1;
     uint8 internal constant STATUS_AAVEGOTCHI = 2;

@@ -7,7 +7,7 @@ import "../../shared/interfaces/IERC20.sol";
 import "../libraries/LibSvg.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 import "../CollateralEscrow.sol";
 import "../libraries/LibVrf.sol";
 
@@ -35,7 +35,6 @@ interface ERC721TokenReceiver {
 
 contract AavegotchiFacet is LibAppStorageModifiers {
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
-    uint256 internal constant NUMERIC_TRAITS_NUM = 6;
     uint256 internal constant EQUIPPED_WEARABLE_SLOTS = 16;
     uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
@@ -82,14 +81,13 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
     struct PortalAavegotchiTraitsIO {
         uint256 randomNumber;
-        int256 numericTraits;
+        uint256 numericTraits;
         address collateralType;
         uint256 minimumStake;
     }
 
-    function toNumericTraits(uint256 _randomNumber) internal pure returns (int256 numericTraits_) {
-        uint256 numericTraits;
-        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
+    function toNumericTraits(uint256 _randomNumber) internal pure returns (uint256 numericTraits_) {
+        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
             uint256 value = uint8(_randomNumber >> (i * 8));
             if (value > 99) {
                 value /= 2;
@@ -98,9 +96,8 @@ contract AavegotchiFacet is LibAppStorageModifiers {
                 }
             }
             // set slot
-            numericTraits |= value << (16 * i);
+            numericTraits_ |= value << (16 * i);
         }
-        numericTraits_ = int256(numericTraits);
     }
 
     function singlePortalAavegotchiTraits(uint256 _randomNumber, uint256 _option)
@@ -174,12 +171,12 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         uint256 hauntId;
     }
 
-    function getNumericTraits(uint256 _tokenId) public view returns (int256 numericTraits_) {
+    function getNumericTraits(uint256 _tokenId) public view returns (uint256 numericTraits_) {
         //Check if trait boosts from consumables are still valid
         int256 boostDecay = int256((block.timestamp - s.aavegotchis[_tokenId].lastTemporaryBoost) / 24 hours);
-        int256 temporaryTraitBoosts = s.aavegotchis[_tokenId].temporaryTraitBoosts;
-        int256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
-        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
+        uint256 temporaryTraitBoosts = s.aavegotchis[_tokenId].temporaryTraitBoosts;
+        uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
+        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(numericTraits >> (i * 16));
             int256 boost = int8(temporaryTraitBoosts >> (i * 8));
 
@@ -192,7 +189,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
                     number += boost + boostDecay;
                 }
             }
-            numericTraits_ |= number << (i * 16);
+            numericTraits_ |= uint256(number) << (i * 16);
         }
     }
 
@@ -202,9 +199,9 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
         aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
-        int256 numericTraits = getNumericTraits(_tokenId);
-        aavegotchiInfo_.numericTraits = new int256[](NUMERIC_TRAITS_NUM);
-        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
+        uint256 numericTraits = getNumericTraits(_tokenId);
+        aavegotchiInfo_.numericTraits = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
+        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(numericTraits >> (i * 16));
             aavegotchiInfo_.numericTraits[i] = number;
         }
@@ -246,7 +243,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         level_ = LibAppStorage.aavegotchiLevel(_experience);
     }
 
-    function rarityMultiplier(int256 _numericTraits, address _collateralType) public view returns (uint256 multiplier) {
+    function rarityMultiplier(uint256 _numericTraits, address _collateralType) public view returns (uint256 multiplier) {
         int256 rarityScore = baseRarityScore(_numericTraits, _collateralType);
         if (rarityScore < 300) return 10;
         else if (rarityScore >= 300 && rarityScore < 450) return 10;
@@ -256,10 +253,10 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     }
 
     //Calculates the base rarity score, including collateral modifier
-    function baseRarityScore(int256 _numericTraits, address collateralType) public view returns (int256 _rarityScore) {
+    function baseRarityScore(uint256 _numericTraits, address collateralType) public view returns (int256 _rarityScore) {
         AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
         uint256 modifiers = collateralInfo.modifiers;
-        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
+        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(_numericTraits >> (i * 16));
             int256 mod = int8(modifiers >> (i * 8));
 
@@ -273,15 +270,16 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
     struct ModifiedRarityScore {
         int256 rarityScore_;
-        int256[NUMERIC_TRAITS_NUM] numericTraits_;
+        int256[] numericTraits_;
     }
 
     //Only valid for claimed Aavegotchis
     function modifiedRarityScore(uint256 _tokenId) external view returns (ModifiedRarityScore memory info_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
+        info_.numericTraits_ = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 equippedWearables = aavegotchi.equippedWearables;
-        int256 numericTraits = getNumericTraits(_tokenId);
+        uint256 numericTraits = getNumericTraits(_tokenId);
         int256 wearableBonus;
         for (uint256 slot; slot < 16; slot++) {
             uint256 wearableId = uint16(equippedWearables >> (16 * slot));
@@ -290,9 +288,9 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             }
             ItemType storage itemType = s.itemTypes[wearableId];
             //Add on trait modifiers
-            int256 traitModifiers = itemType.traitModifiers;
+            uint256 traitModifiers = itemType.traitModifiers;
             uint256 newNumericTraits;
-            for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
+            for (uint256 j; j < LibAppStorage.NUMERIC_TRAITS_NUM; j++) {
                 int256 number = int16(numericTraits >> (j * 16));
                 int256 traitModifier = int8(traitModifiers >> (j * 8));
                 number += traitModifier;
@@ -300,13 +298,13 @@ contract AavegotchiFacet is LibAppStorageModifiers {
                 newNumericTraits |= (uint256(number) & 0xffff) << (j * 16);
             }
 
-            numericTraits = int256(newNumericTraits);
+            numericTraits = newNumericTraits;
             wearableBonus += itemType.rarityScoreModifier;
         }
         address collateral = s.aavegotchis[_tokenId].collateralType;
         int256 baseRarity = baseRarityScore(numericTraits, collateral);
         info_.rarityScore_ = baseRarity + wearableBonus;
-        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
+        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(numericTraits >> (i * 16));
             info_.numericTraits_[i] = number;
         }
@@ -455,7 +453,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     }
 
     function spendSkillPoints(uint256 _tokenId, int8[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
-        int256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
+        uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
         //To test (Dan): Prevent underflow (is this ok?), see require below
         uint256 totalUsed = 0;
         for (uint8 index = 0; index < _values.length; index++) {
@@ -466,9 +464,9 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             int256 trait = int16(numericTraits >> position);
             trait += _values[index];
             // clear trait value
-            numericTraits &= ~(int256(0xffff) << position);
+            numericTraits &= ~(uint256(0xffff) << position);
             // set trait value
-            numericTraits |= trait << position;
+            numericTraits |= uint256(trait) << position;
         }
         // handles underflow
         require(availableSkillPoints(_tokenId) >= totalUsed, "AavegotchiFacet: Not enough skill points");

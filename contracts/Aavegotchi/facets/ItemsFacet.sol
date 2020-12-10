@@ -30,8 +30,6 @@ contract ItemsFacet is LibAppStorageModifiers {
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
-    uint256 internal constant NUMERIC_TRAITS_NUM = 6;
-
     uint16 internal constant SLOT_BODY = 0;
     uint16 internal constant SLOT_FACE = 1;
     uint16 internal constant SLOT_EYES = 2;
@@ -161,7 +159,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         require(_index < length, "ItemsFacet: Wearable set does not exist");
         wearableSet_.name = s.wearableSets[_index].name;
         wearableSet_.wearableIds = LibAppStorage.uintToSixteenBitArray(s.wearableSets[_index].wearableIds);
-        int256 traitsBonuses = s.wearableSets[_index].traitsBonuses;
+        uint256 traitsBonuses = s.wearableSets[_index].traitsBonuses;
         for (uint256 i; i < 5; i++) {
             wearableSet_.traitsBonuses[i] = int16(traitsBonuses >> (16 * i));
         }

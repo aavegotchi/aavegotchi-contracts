@@ -43,7 +43,7 @@ contract SvgFacet is LibAppStorageModifiers {
         string[7] eyeColors;
     }
 
-    function getAavegotchiSvgLayers(address _collateralType, int256 _numericTraits) internal view returns (bytes memory svg_) {
+    function getAavegotchiSvgLayers(address _collateralType, uint256 _numericTraits) internal view returns (bytes memory svg_) {
         SvgLayerDetails memory details;
         details.primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
         details.secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
@@ -155,7 +155,7 @@ contract SvgFacet is LibAppStorageModifiers {
             AavegotchiFacet(address(this)).portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
             address collateralType = l_portalAavegotchiTraits[i].collateralType;
-            int256 numericTraits = l_portalAavegotchiTraits[i].numericTraits;
+            uint256 numericTraits = l_portalAavegotchiTraits[i].numericTraits;
             svg_[i] = string(
                 abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">',
@@ -170,11 +170,11 @@ contract SvgFacet is LibAppStorageModifiers {
    |             Write Functions        |
    |__________________________________*/
 
-    function storeSvg(string calldata _svg, SvgTypeAndSizes[] calldata _typesAndSizes) public onlyDaoOrOwner {
+    function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) public onlyDaoOrOwner {
         address svgContract = storeSvgInContract(_svg);
         uint256 offset = 0;
         for (uint256 i; i < _typesAndSizes.length; i++) {
-            SvgTypeAndSizes calldata svgTypeAndSizes = _typesAndSizes[i];
+            LibSvg.SvgTypeAndSizes calldata svgTypeAndSizes = _typesAndSizes[i];
             for (uint256 j; j < svgTypeAndSizes.sizes.length; j++) {
                 uint256 size = svgTypeAndSizes.sizes[j];
                 s.svgLayers[svgTypeAndSizes.svgType].push(SvgLayer(svgContract, uint16(offset), uint16(size)));
