@@ -252,8 +252,9 @@ describe('Aavegotchi Metadata', async function () {
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(tokenId)
+    console.log('collateral:' + aavegotchi.collateral)
     const score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
-    expect(score).to.equal(599)
+    expect(score).to.equal(601)
 
     const multiplier = await global.aavegotchiFacet.rarityMultiplier([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
     expect(multiplier).to.equal(1000)
@@ -302,7 +303,7 @@ describe('Collaterals and escrow', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
     // console.log(sixteenBitIntArrayToUint([-1, -1, 0, 0, 0, 0]).toHexString())
     const score = await global.aavegotchiFacet.baseRarityScore(sixteenBitIntArrayToUint([-10, -10, 0, 0, 0, 0]), aavegotchi.collateral)
-    expect(score).to.equal(619)
+    expect(score).to.equal(621)
   })
 
   it('Can decrease stake and destroy Aavegotchi', async function () {
@@ -735,10 +736,10 @@ describe('DAO Functions', async function () {
   it('Contract Owner (or DAO) can update collateral modifiers', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
     let score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
-    expect(score).to.equal(599)
+    expect(score).to.equal(601)
     await global.daoFacet.updateCollateralModifiers(aavegotchi.collateral, [2, 0, 0, 0, 0, 0])
     score = await global.aavegotchiFacet.baseRarityScore([0, 0, 0, 0, 0, 0], aavegotchi.collateral)
-    expect(score).to.equal(602)
+    expect(score).to.equal(598)
   })
 
   it('Contract owner (or DAO) can add new item types with corresponding SVGs', async function () {
