@@ -167,41 +167,59 @@ library LibAppStorage {
         LibERC20.transferFrom(s.ghstContract, msg.sender, s.dao, daoShare);
     }
 
+    struct LevelInfo {
+        uint8 levelBoost;
+        uint16 levelAmount;
+        uint32 low;
+        uint32 high;
+    }
+
     function aavegotchiLevel(uint32 _experience) internal pure returns (uint256 level_) {
         //To do (Dan): Confirm final experience numbers
+
         if (_experience <= 100) return 1;
+
         //Levels 1-10 require 100 XP each
-        else if (_experience > 100 && _experience <= 1001)
+        else if (_experience > 100 && _experience <= 999)
             level_ = _experience / 100;
 
-            //Levels 11 - 20 require 150 XP each
-        else if (_experience > 1001 && _experience <= 3001)
-            level_ = _experience / 150;
+        //Levels 11 - 20 require 150 XP each
+        else if (_experience >= 1000 && _experience <= 2999) 
+          level_ = calculateLevel(10, 150, 1000, _experience);
+        
+        //Levels 21 - 40 require 200 XP each
+        else if (_experience >= 3000 && _experience <= 7999) 
+             level_ = calculateLevel(20, 200, 3000, _experience);
+       
+        //Levels 41 - 60 require 300 XP each
+        else if (_experience >= 8000 && _experience <= 17999)
+            level_ = calculateLevel(40, 300, 8000, _experience);
 
-            //Levels 21 - 40 require 200 XP each
-        else if (_experience > 3001 && _experience <= 8001)
-            level_ = _experience / 200;
-
-            //Levels 41 - 60 require 300 XP each
-        else if (_experience > 8001 && _experience <= 18001)
-            level_ = _experience / 300;
-
-            //Levels 61 - 80 require 500 XP each
-        else if (_experience > 18001 && _experience <= 40001)
-            level_ = _experience / 500;
-
-            //Levels 81 - 90 require 750 XP each
-        else if (_experience > 40001 && _experience <= 67501)
-            level_ = _experience / 750;
-
-            //Levels 91 - 99 require 1000 XP each
-        else if (_experience > 67501 && _experience <= 98001) level_ = _experience / 1000;
+        //Levels 61 - 80 require 500 XP each
+        else if (_experience >= 18000 && _experience <= 39999) 
+              level_ = calculateLevel(60, 500, 18000, _experience);
+         
+        //Levels 81 - 90 require 750 XP each
+        else if (_experience >= 40000 && _experience <= 67499) 
+              level_ = calculateLevel(80, 750, 40000, _experience);
+         
+        //Levels 91 - 99 require 1000 XP each
+        else if (_experience >= 67500 && _experience <= 97999) 
+             level_ = calculateLevel(90, 1000, 67500, _experience);
+        
         else level_ = 98;
 
         //Add on 1 for the initial level
         level_ += 1;
 
         // return level;
+    }
+
+    function calculateLevel(uint16 _initial, uint16 _perLevel, uint32 _lowRange, uint32 _experience) internal pure returns(uint32 level_) {
+            level_ = _initial;
+            uint32 difference = _experience - _lowRange;
+            uint32 additionalLevel = difference / _perLevel;
+            level_ += additionalLevel;
     }
 
     function uintToSixteenBitArray(uint256 _data) internal pure returns (uint256[] memory array_) {
