@@ -132,6 +132,8 @@ library LibAppStorage {
 
     uint8 internal constant WEARABLE_SLOTS_TOTAL = 11;
 
+    event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
+
     modifier onlyAavegotchiOwner(uint256 _tokenId) {
         require(msg.sender == diamondStorage().aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
         _;
@@ -165,39 +167,39 @@ library LibAppStorage {
         LibERC20.transferFrom(s.ghstContract, msg.sender, s.dao, daoShare);
     }
 
-    function aavegotchiLevel(uint32 _experience) internal pure returns (uint32 level) {
+    function aavegotchiLevel(uint32 _experience) internal pure returns (uint256 level_) {
         //To do (Dan): Confirm final experience numbers
         if (_experience <= 100) return 1;
         //Levels 1-10 require 100 XP each
         else if (_experience > 100 && _experience <= 1001)
-            level = _experience / 100;
+            level_ = _experience / 100;
 
             //Levels 11 - 20 require 150 XP each
         else if (_experience > 1001 && _experience <= 3001)
-            level = _experience / 150;
+            level_ = _experience / 150;
 
             //Levels 21 - 40 require 200 XP each
         else if (_experience > 3001 && _experience <= 8001)
-            level = _experience / 200;
+            level_ = _experience / 200;
 
             //Levels 41 - 60 require 300 XP each
         else if (_experience > 8001 && _experience <= 18001)
-            level = _experience / 300;
+            level_ = _experience / 300;
 
             //Levels 61 - 80 require 500 XP each
         else if (_experience > 18001 && _experience <= 40001)
-            level = _experience / 500;
+            level_ = _experience / 500;
 
             //Levels 81 - 90 require 750 XP each
         else if (_experience > 40001 && _experience <= 67501)
-            level = _experience / 750;
+            level_ = _experience / 750;
 
             //Levels 91 - 99 require 1000 XP each
-        else if (_experience > 67501 && _experience <= 98001) level = _experience / 1000;
-        else level = 98;
+        else if (_experience > 67501 && _experience <= 98001) level_ = _experience / 1000;
+        else level_ = 98;
 
         //Add on 1 for the initial level
-        level += 1;
+        level_ += 1;
 
         // return level;
     }
@@ -241,9 +243,11 @@ library LibAppStorage {
         if (kinship < 40) {
             hateBonus = 2;
         }
-        s.aavegotchis[_tokenId].interactionCount = uint16(kinship + 1 + hateBonus);
+        kinship += 1 + hateBonus;
+        s.aavegotchis[_tokenId].interactionCount = uint16(kinship);
 
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
+        emit AavegotchiInteract(_tokenId, kinship);
     }
 }
 
@@ -254,7 +258,11 @@ contract LibAppStorageModifiers {
         _;
     }
     modifier onlyUnlocked(uint256 _tokenId) {
-        require(s.aavegotchis[_tokenId].unlockTime <= block.timestamp, "Only callable on unlocked Aavegotchis");
+        require(s.aavegotchis[_tokenId].unlockTime < block.timestamp, "Only callable on unlocked Aavegotchis");
+        _;
+    }
+    modifier onlyLocked(uint256 _tokenId) {
+        require(s.aavegotchis[_tokenId].unlockTime > block.timestamp, "Only callable on unlocked Aavegotchis");
         _;
     }
     modifier onlyDao {

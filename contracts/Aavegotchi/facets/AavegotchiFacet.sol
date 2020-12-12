@@ -42,6 +42,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
    |             Events                |
    |__________________________________*/
 
+    // event AavegotchiBatched(uint256 indexed _batchId, uint256[] tokenIds);
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
 
@@ -54,6 +55,14 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     /// @dev This emits when an operator is enabled or disabled for an owner.
     ///  The operator can manage all NFTs of the owner.
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+
+    event OpenPortals(uint256[] _tokenIds);
+
+    event ClaimAavegotchi(uint256 indexed _tokenId);
+
+    event SetAavegotchiName(uint256 indexed _tokenId, string _oldName, string _newName);
+
+    event SetBatchId(uint256 indexed _batchId, uint256[] tokenIds);
 
     /***********************************|
    |             Read Functions         |
@@ -154,7 +163,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         string name;
         address owner;
         uint256 randomNumber;
-        uint8 status;
+        uint256 status;
         int256[] numericTraits;
         uint256[EQUIPPED_WEARABLE_SLOTS] equippedWearables;
         address collateral;
@@ -163,10 +172,10 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         uint256 minimumStake;
         //New
         uint256 interactionCount; //The kinship value of this Aavegotchi. Default is 50.
-        uint40 lastInteracted;
+        uint256 lastInteracted;
         uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
         uint256 usedSkillPoints; //number of skill points used
-        uint32 level; //the current aavegotchi level
+        uint256 level; //the current aavegotchi level
         uint256 batchId;
         uint256 hauntId;
     }
@@ -220,7 +229,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         aavegotchiInfo_.interactionCount = s.aavegotchis[_tokenId].interactionCount;
         aavegotchiInfo_.lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
         aavegotchiInfo_.experience = s.aavegotchis[_tokenId].experience;
-        aavegotchiInfo_.level = aavegotchiLevel(s.aavegotchis[_tokenId].experience);
+        aavegotchiInfo_.level = LibAppStorage.aavegotchiLevel(s.aavegotchis[_tokenId].experience);
         aavegotchiInfo_.usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
         aavegotchiInfo_.batchId = s.aavegotchis[_tokenId].batchId;
         aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
@@ -228,7 +237,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     }
 
     function availableSkillPoints(uint256 _tokenId) public view returns (uint256) {
-        uint256 level = aavegotchiLevel(s.aavegotchis[_tokenId].experience);
+        uint256 level = LibAppStorage.aavegotchiLevel(s.aavegotchis[_tokenId].experience);
         uint256 skillPoints = (level / 3);
         uint256 usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
         require(skillPoints >= usedSkillPoints, "AavegotchiFacet: Used skill points is greater than skill points");
@@ -239,7 +248,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         return uint256(x >= 0 ? x : -x);
     }
 
-    function aavegotchiLevel(uint32 _experience) public pure returns (uint32 level_) {
+    function aavegotchiLevel(uint32 _experience) external pure returns (uint256 level_) {
         level_ = LibAppStorage.aavegotchiLevel(_experience);
     }
 
@@ -269,7 +278,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     }
 
     struct ModifiedRarityScore {
-        int256 rarityScore_;
+        uint256 rarityScore_;
         int256[] numericTraits_;
     }
 
@@ -280,8 +289,8 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 equippedWearables = aavegotchi.equippedWearables;
         uint256 numericTraits = getNumericTraits(_tokenId);
-        int256 wearableBonus;
-        for (uint256 slot; slot < 16; slot++) {
+        uint256 wearableBonus;
+        for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             uint256 wearableId = uint16(equippedWearables >> (16 * slot));
             if (wearableId == 0) {
                 continue;
@@ -303,23 +312,23 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         }
         address collateral = s.aavegotchis[_tokenId].collateralType;
         uint256 baseRarity = baseRarityScore(numericTraits, collateral);
-        info_.rarityScore_ = int256(baseRarity) + wearableBonus;
+        info_.rarityScore_ = baseRarity + wearableBonus;
         for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(numericTraits >> (i * 16));
             info_.numericTraits_[i] = number;
         }
     }
 
-    function kinship(uint256 _tokenId) external view returns (uint256 score) {
+    function kinship(uint256 _tokenId) external view returns (uint256 score_) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 lastInteracted = aavegotchi.lastInteracted;
         uint256 interactionCount = aavegotchi.interactionCount;
         uint256 interval = block.timestamp - lastInteracted;
 
-        uint256 daysSinceInteraction = interval / 86400;
+        uint256 daysSinceInteraction = interval / 24 hours;
 
         if (interactionCount > daysSinceInteraction) {
-            score = interactionCount - daysSinceInteraction;
+            score_ = interactionCount - daysSinceInteraction;
         }
     }
 
@@ -379,14 +388,18 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
     /**@notice Called if user opted out of next batch in buyPortals */
     function setBatchId(uint256[] calldata _tokenIds) external {
+        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
+        uint32 batchId = vrf_ds.nextBatchId;
+        uint256 batchCount = vrf_ds.batchCount;
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             require(msg.sender == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can set a batchId");
             require(s.aavegotchis[tokenId].batchId == 0, "AavegotchiFacet: batchId already set");
-            LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
-            s.aavegotchis[tokenId].batchId = vrf_ds.nextBatchId;
-            vrf_ds.batchCount++;
+            s.aavegotchis[tokenId].batchId = batchId;
+            batchCount++;
         }
+        vrf_ds.batchCount = uint32(batchCount);
+        emit SetBatchId(batchId, _tokenIds);
     }
 
     function openPortals(uint256[] calldata _tokenIds) external {
@@ -401,6 +414,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             // status is open portal
             s.aavegotchis[tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
         }
+        emit OpenPortals(_tokenIds);
     }
 
     function claimAavegotchi(
@@ -423,6 +437,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         require(_stakeAmount >= option.minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
 
         aavegotchi.status = LibAppStorage.STATUS_AAVEGOTCHI;
+        emit ClaimAavegotchi(_tokenId);
 
         address escrow = address(new CollateralEscrow(option.collateralType));
         aavegotchi.escrow = escrow;
@@ -440,6 +455,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         }
         s.aavegotchiNamesUsed[_name] = true;
         s.aavegotchis[_tokenId].name = _name;
+        emit SetAavegotchiName(_tokenId, existingName, _name);
     }
 
     function interact(uint256 _tokenId) public {
@@ -476,9 +492,9 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     }
 
     /**@notice Prevnts assets and items from being moved from Aavegotchi during lock period, except by gameManager. */
-    function lockAavegotchi(uint256 _tokenId, uint256 _lockDuration) external {
+    function lockAavegotchi(uint256 _tokenId, uint256 _lockDuration) external onlyUnlocked(_tokenId) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can claim aavegotchi from a portal");
+        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only owner can lock aavegotchi");
         s.aavegotchis[_tokenId].unlockTime = block.timestamp + _lockDuration;
     }
 

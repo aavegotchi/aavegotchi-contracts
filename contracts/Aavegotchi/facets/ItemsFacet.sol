@@ -30,6 +30,10 @@ contract ItemsFacet is LibAppStorageModifiers {
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
+    event EquipWearables(uint256 indexed _tokenId, uint256 _oldWearables, uint256 _newWearables);
+
+    event UseConsumable(uint256 indexed _tokenId, uint256 indexed _itemId);
+
     uint16 internal constant SLOT_BODY = 0;
     uint16 internal constant SLOT_FACE = 1;
     uint16 internal constant SLOT_EYES = 2;
@@ -263,7 +267,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint256 _toTokenId,
         uint256 _id,
         uint256 _value
-    ) external onlyUnlocked(_id) {
+    ) external {
         require(_toContract != address(0), "Items: Can't transfer to 0 address");
         require(msg.sender == _from || s.operators[_from][msg.sender], "Items: Not owner and not approved to transfer");
         uint256 bal = s.items[_from][_id];
@@ -286,11 +290,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         address _to,
         uint256 _id,
         uint256 _value
-    )
-        external
-        //Can only transfer items if Aavegotchi is unlocked
-        onlyUnlocked(_id)
-    {
+    ) external {
         require(_to != address(0), "Items: Can't transfer to 0 address");
         if (_fromContract == address(this)) {
             address owner = s.aavegotchis[_fromTokenId].owner;
@@ -298,6 +298,7 @@ contract ItemsFacet is LibAppStorageModifiers {
                 msg.sender == owner || s.operators[owner][msg.sender] || msg.sender == s.approved[_fromTokenId],
                 "Items: Not owner and not approved to transfer"
             );
+            require(s.aavegotchis[_fromTokenId].unlockTime < block.timestamp, "Items: Only callable on unlocked Aavegotchis");
         } else {
             address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
             require(
@@ -336,11 +337,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint256 _toTokenId,
         uint256 _id,
         uint256 _value
-    )
-        external
-        //Can only transfer items if Aavegotchi is unlocked
-        onlyUnlocked(_id)
-    {
+    ) external {
         require(_toContract != address(0), "Items: Can't transfer to 0 address");
         if (_fromContract == address(this)) {
             address owner = s.aavegotchis[_fromTokenId].owner;
@@ -348,6 +345,7 @@ contract ItemsFacet is LibAppStorageModifiers {
                 msg.sender == owner || s.operators[owner][msg.sender] || msg.sender == s.approved[_fromTokenId],
                 "Items: Not owner and not approved to transfer"
             );
+            require(s.aavegotchis[_fromTokenId].unlockTime <= block.timestamp, "Items: Only callable on unlocked Aavegotchis");
         } else {
             address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
             require(
@@ -373,11 +371,11 @@ contract ItemsFacet is LibAppStorageModifiers {
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
     }
 
-    function equipWearables(uint256 _tokenId, uint256 _equippedWearables) external onlyAavegotchiOwner(_tokenId) {
+    function equipWearables(uint256 _tokenId, uint256 _equippedWearables) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
 
         //To test (Dan): Add in actual dynamic level
-        uint32 aavegotchiLevel = LibAppStorage.aavegotchiLevel(aavegotchi.experience);
+        uint256 aavegotchiLevel = LibAppStorage.aavegotchiLevel(aavegotchi.experience);
 
         for (uint256 slot; slot < 16; slot++) {
             uint256 wearableId = uint16(_equippedWearables >> (16 * slot));
@@ -416,6 +414,7 @@ contract ItemsFacet is LibAppStorageModifiers {
                 emit TransferToParent(address(this), _tokenId, wearableId, 1);
             }
         }
+        emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _equippedWearables);
         aavegotchi.equippedWearables = _equippedWearables;
         LibAppStorage.interact(_tokenId);
     }
@@ -426,7 +425,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         int256[5] traitsBonuses;
     }
 
-    function useConsumable(uint256 _tokenId, uint256 _itemId) external {
+    function useConsumable(uint256 _tokenId, uint256 _itemId) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         // require(_itemIds.length == _values.length, "ItemsFacet: _itemIds length does not match _tokenIds length");
         // for (uint256 i; i < _itemIds.length; i++) {
         //  uint256 value = _values[i];
@@ -456,7 +455,7 @@ contract ItemsFacet is LibAppStorageModifiers {
 
         itemType.totalQuantity -= 1;
         LibAppStorage.interact(_tokenId);
-
+        emit UseConsumable(_tokenId, _itemId);
         emit TransferSingle(msg.sender, msg.sender, address(0), _itemId, 1);
     }
 }

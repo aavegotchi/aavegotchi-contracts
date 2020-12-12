@@ -21,6 +21,8 @@ contract ShopFacet {
 
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
 
+    event BuyPortals(uint256 _tokenId, uint256 _numAavegotchisToPurchase, uint256 _batchId, uint256 _totalPrice);
+
     address internal immutable im_vouchersContract;
 
     constructor(address _vouchersContract) {
@@ -52,6 +54,8 @@ contract ShopFacet {
             nextBatchId = vrf_ds.nextBatchId;
         }
         uint256 tokenId = s.totalSupply;
+        uint256 totalPrice = _ghst - (_ghst % haunt.portalPrice);
+        emit BuyPortals(tokenId, numAavegotchisToPurchase, nextBatchId, totalPrice);
         for (uint256 i; i < numAavegotchisToPurchase; i++) {
             s.aavegotchis[tokenId].owner = _to;
             s.aavegotchis[tokenId].batchId = nextBatchId;
@@ -64,9 +68,6 @@ contract ShopFacet {
         }
         s.aavegotchiBalance[_to] += numAavegotchisToPurchase;
         s.totalSupply = uint32(tokenId);
-
-        uint256 totalPrice = _ghst - (_ghst % haunt.portalPrice);
-
         LibAppStorage.purchase(totalPrice);
     }
 
