@@ -778,14 +778,20 @@ describe('DAO Functions', async function () {
   })
 
   it('Contract owner (or DAO) can add new item types with corresponding SVGs', async function () {
+
+    let items = await itemsFacet.getItemTypes()
+    console.log('length:', items.length)
+
     const itemsToAdd = [itemTypes[1]]
     const itemSvg = require('../svgs/testItem.js')
 
     const itemTypeAndSizes = []
 
     // To do (Nick) add in itemTypeAndSizes
-
     await daoFacet.addItemTypesAndSvgs(itemsToAdd, itemSvg, itemTypeAndSizes)
+
+    /// items = await itemsFacet.getItemTypes()
+    // console.log('length:', items.length)
   })
 })
 
