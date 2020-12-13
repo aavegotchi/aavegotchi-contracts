@@ -665,6 +665,27 @@ describe('Leveling up', async function () {
     expect(aavegotchi.level).to.equal(26)
   })
 
+  it('Should be level ? with 39999 XP ', async function () {
+    // adding 35999 experience
+    for (let i = 0; i < 35; i++) {
+      await daoFacet.grantExperience([testAavegotchiId], ['1000'])
+    }
+    await daoFacet.grantExperience([testAavegotchiId], ['999'])
+
+    let aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
+    console.log('experience:', aavegotchi.experience.toString())
+    console.log('level:', aavegotchi.level.toString())
+
+    await daoFacet.grantExperience([testAavegotchiId], ['1'])
+    aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
+    console.log('experience:', aavegotchi.experience.toString())
+    console.log('level:', aavegotchi.level.toString())
+
+    expect(aavegotchi.experience).to.equal(39999)
+    // expect(aavegotchi.level).to.equal(26)
+  })
+
+
   it('Should be level 91 with 67500 XP ', async function () {
     for (let i = 0; i < 63; i++) {
       await daoFacet.grantExperience([testAavegotchiId], ['1000'])
