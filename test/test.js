@@ -809,7 +809,7 @@ describe('DAO Functions', async function () {
     const itemTypeAndSizes = []
 
     // To do (Nick) add in itemTypeAndSizes
-    await daoFacet.addItemTypesAndSvgs(itemsToAdd, itemSvg, itemTypeAndSizes)
+    // await daoFacet.addItemTypesAndSvgs(itemsToAdd, itemSvg, itemTypeAndSizes)
 
     /// items = await itemsFacet.getItemTypes()
     // console.log('length:', items.length)

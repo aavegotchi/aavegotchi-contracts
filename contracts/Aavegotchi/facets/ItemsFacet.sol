@@ -180,6 +180,7 @@ contract ItemsFacet is LibAppStorageModifiers {
 
     function getItemTypes() external view returns (ItemType[] memory itemTypes_) {
         uint256 length = s.itemTypes.length;
+        itemTypes_ = new ItemType[](length);
         for (uint256 i; i < length; i++) {
             itemTypes_[i] = getItemType(i);
         }

@@ -118,7 +118,7 @@ contract DAOFacet is LibAppStorageModifiers {
     function addItemTypesAndSvgs(
         ItemType[] memory _itemTypes,
         string calldata _svg,
-        LibSvg.SvgTypeAndSizes[] memory _typesAndSizes
+        LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes
     ) external onlyDaoOrOwner() {
         insertItemTypes(_itemTypes);
         //Also store the SVGs
@@ -130,7 +130,6 @@ contract DAOFacet is LibAppStorageModifiers {
         for (uint256 i; i < _itemTypes.length; i++) {
             uint256 itemId = itemTypesLength++;
             s.itemTypes.push(_itemTypes[i]);
-
             emit TransferSingle(msg.sender, address(0), address(0), itemId, 0);
         }
     }
