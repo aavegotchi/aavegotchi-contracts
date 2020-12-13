@@ -11,7 +11,7 @@ import "../libraries/LibERC1155.sol";
 import "./AavegotchiFacet.sol";
 
 contract ItemsFacet is LibAppStorageModifiers {
-    using LibAppStorage for AppStorage;
+    //using LibAppStorage for AppStorage;
 
     /// @dev This emits when a token is transferred to an ERC721 token
     /// @param _toContract The contract the token is transferred to

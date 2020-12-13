@@ -14,11 +14,16 @@ import "./SvgFacet.sol";
 contract DAOFacet is LibAppStorageModifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
-
+    event UpdateCollateralModifiers(uint256 _oldModifiers, uint256 _newModifiers);
     struct AavegotchiCollateralTypeIO {
         address collateralType;
         AavegotchiCollateralTypeInfo collateralTypeInfo;
     }
+    event AddCollateralTypes(AavegotchiCollateralTypeIO[] _collateralTypes);
+    event CreateHaunt(uint256 indexed _hauntId, uint256 _hauntMaxSize, uint256 _portalPrice, bytes32 _bodyColor);
+    event GrantExperience(uint256[] _tokenIds, uint32[] _xpValues);
+    event AddWearableSets(WearableSet[] _wearableSets);
+    event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
 
     /***********************************|
    |             Read Functions         |
@@ -41,17 +46,18 @@ contract DAOFacet is LibAppStorageModifiers {
         for (uint256 i; i < _collateralTypes.length; i++) {
             address collateralType = _collateralTypes[i].collateralType;
 
+            //Prevent the same collateral from being added multiple times
             require(s.collateralTypeInfo[collateralType].cheekColor == 0, "DAOFacet: Collateral already added");
 
-            //Prevent the same collateral from being added multiple times
-
+            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
             s.collateralTypes.push(collateralType);
-            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length - 1;
             s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
         }
+        emit AddCollateralTypes(_collateralTypes);
     }
 
     function updateCollateralModifiers(address _collateralType, uint256 _modifiers) external onlyDaoOrOwner {
+        emit UpdateCollateralModifiers(s.collateralTypeInfo[_collateralType].modifiers, _modifiers);
         s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
     }
 
@@ -70,14 +76,14 @@ contract DAOFacet is LibAppStorageModifiers {
         s.haunts[hauntId_].hauntMaxSize = _hauntMaxSize;
         s.haunts[hauntId_].portalPrice = _portalPrice;
         s.haunts[hauntId_].bodyColor = _bodyColor;
+        emit CreateHaunt(hauntId_, _hauntMaxSize, _portalPrice, _bodyColor);
     }
 
     function mintItems(
         address _to,
         uint256[] calldata _itemIds,
         uint256[] calldata _quantities
-    ) external {
-        require(msg.sender == LibDiamond.contractOwner() || msg.sender == s.dao, "DAOFacet: Does not have permission");
+    ) external onlyDaoOrOwner {
         require(_itemIds.length == _quantities.length, "DAOFacet: Ids and quantities length must match");
 
         uint256 itemTypesLength = s.itemTypes.length;
@@ -109,6 +115,7 @@ contract DAOFacet is LibAppStorageModifiers {
             require(increasedExperience >= experience, "DAOFacet: Experience overflow");
             s.aavegotchis[tokenId].experience = increasedExperience;
         }
+        emit GrantExperience(_tokenIds, _xpValues);
     }
 
     function addItemTypes(ItemType[] memory _itemTypes) external onlyDaoOrOwner() {
@@ -134,14 +141,15 @@ contract DAOFacet is LibAppStorageModifiers {
         }
     }
 
-    function addWearableSets(WearableSet[] memory _wearableSets) external onlyDaoOrOwner() {
+    function addWearableSets(WearableSet[] memory _wearableSets) external onlyDaoOrOwner {
         for (uint256 i; i < _wearableSets.length; i++) {
             s.wearableSets.push(_wearableSets[i]);
         }
+        emit AddWearableSets(_wearableSets);
     }
 
-    function setGameManager(address _gameManager) external {
-        require(msg.sender == LibDiamond.contractOwner(), "DAOFacet: Only contract owner can set game manager");
+    function setGameManager(address _gameManager) external onlyDaoOrOwner {
+        GameManagerTransferred(s.gameManager, _gameManager);
         s.gameManager = _gameManager;
     }
 }
