@@ -248,7 +248,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         return uint256(x >= 0 ? x : -x);
     }
 
-    function aavegotchiLevel(uint32 _experience) external pure returns (uint256 level_) {
+    function aavegotchiLevel(uint32 _experience) external view returns (uint256 level_) {
         level_ = LibAppStorage.aavegotchiLevel(_experience);
     }
 
