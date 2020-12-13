@@ -185,19 +185,18 @@ library LibAppStorage {
 
         //Levels 11 - 20 require 200 XP each
         else if (_experience >= 1000 && _experience <= 2999) {
-  level_ = 10;
+            level_ = 10;
             uint32 difference = _experience - 1000;
             uint32 additionalLevel = difference / 200;
             level_ += additionalLevel;
         }
 
             
-
          // level_ = calculateLevel(10, 150, 1000, _experience);
         
         //Levels 21 - 40 require 200 XP each
         else if (_experience >= 3000 && _experience <= 7999) {
-                 level_ = 20;
+            level_ = 20;
             uint32 difference = _experience - 3000;
          
             uint32 additionalLevel = difference / 250;

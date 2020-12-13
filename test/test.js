@@ -16,7 +16,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToInt8Array(uint, numBytes) {
+function uintToInt8Array (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -25,7 +25,7 @@ function uintToInt8Array(uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint(array) {
+function sixteenBitArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -37,7 +37,7 @@ function sixteenBitArrayToUint(array) {
   return ethers.BigNumber.from(0)
 }
 
-function sixteenBitIntArrayToUint(array) {
+function sixteenBitIntArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -53,7 +53,7 @@ function sixteenBitIntArrayToUint(array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds(uint) {
+function uintToItemIds (uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -267,9 +267,9 @@ describe('Collaterals and escrow', async function () {
   it('Should show all whitelisted collaterals', async function () {
     const collaterals = await global.collateralFacet.getCollateralInfo()
     const collateral = collaterals[0]
-    expect(collateral.conversionRate).to.equal(1)
+    expect(collateral.collateralTypeInfo.conversionRate).to.equal(1)
     expect(collaterals.length).to.equal(1)
-    const modifiers = uintToInt8Array(collateral.modifiers, 6)
+    const modifiers = uintToInt8Array(collateral.collateralTypeInfo.modifiers, 6)
     expect(modifiers[2]).to.equal(-1)
   })
 
@@ -353,7 +353,7 @@ describe('Collaterals and escrow', async function () {
   })
 })
 
-async function openAndClaim(tokenIds) {
+async function openAndClaim (tokenIds) {
   for (let index = 0; index < tokenIds.length; index++) {
     const id = tokenIds[index]
 
@@ -487,7 +487,7 @@ describe('Items & Wearables', async function () {
     const modifiers = uintToInt8Array(itemTypes[testWearableId].traitModifiers, 6)
 
     const collateral = (await global.collateralFacet.getCollateralInfo())[0]
-    const collateralModifiers = uintToInt8Array(collateral.modifiers)
+    const collateralModifiers = uintToInt8Array(collateral.collateralTypeInfo.modifiers)
 
     let finalScore = 0
 
@@ -641,9 +641,7 @@ describe('Leveling up', async function () {
     }
   })
 
-
   it('Should be level 21 with 3000 XP', async function () {
-
     await daoFacet.grantExperience([testAavegotchiId], ['1000'])
     await daoFacet.grantExperience([testAavegotchiId], ['1000'])
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
@@ -652,7 +650,6 @@ describe('Leveling up', async function () {
 
     expect(aavegotchi.experience).to.equal(3000)
     expect(aavegotchi.level).to.equal(21)
-
   })
 
   it('Should be level 25 with 4000 XP ', async function () {
@@ -685,10 +682,8 @@ describe('Leveling up', async function () {
 
     expect(aavegotchi.experience).to.equal(40000)
 
-
     // expect(aavegotchi.level).to.equal(26)
   })
-
 
   it('Should be level 91 with 67500 XP ', async function () {
     for (let i = 0; i < 63; i++) {
@@ -803,8 +798,7 @@ describe('DAO Functions', async function () {
   })
 
   it('Contract owner (or DAO) can add new item types with corresponding SVGs', async function () {
-
-    let items = await itemsFacet.getItemTypes()
+    const items = await itemsFacet.getItemTypes()
     console.log('length:', items.length)
 
     const itemsToAdd = [itemTypes[1]]
@@ -914,7 +908,7 @@ describe('Kinship', async function () {
   */
 })
 
-async function neglectAavegotchi(days) {
+async function neglectAavegotchi (days) {
   ethers.provider.send('evm_increaseTime', [86400 * days])
   ethers.provider.send('evm_mine')
   // daysSinceInteraction = 0
@@ -927,13 +921,13 @@ async function neglectAavegotchi(days) {
   console.log(`* Neglect Gotchi for ${days} days`)
 }
 
-async function interactAndUpdateTime() {
+async function interactAndUpdateTime () {
   await global.aavegotchiFacet.interact('0')
   ethers.provider.send('evm_increaseTime', [86400 / 2])
   ethers.provider.send('evm_mine')
 }
 
-function eightBitArrayToUint(array) {
+function eightBitArrayToUint (array) {
   const uint = []
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8)
