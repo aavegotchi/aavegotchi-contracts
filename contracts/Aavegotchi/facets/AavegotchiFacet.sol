@@ -64,6 +64,10 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
     event SetBatchId(uint256 indexed _batchId, uint256[] tokenIds);
 
+    event SpendSkillpoints(uint256 indexed _tokenId, int8[4] _values);
+
+    event LockAavegotchi(uint256 indexed _tokenId, uint256 _lockDuration);
+
     /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -489,6 +493,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         s.aavegotchis[_tokenId].numericTraits = numericTraits;
         //Increment used skill points
         s.aavegotchis[_tokenId].usedSkillPoints += uint16(totalUsed);
+        emit SpendSkillpoints(_tokenId, _values);
     }
 
     /**@notice Prevnts assets and items from being moved from Aavegotchi during lock period, except by gameManager. */
@@ -496,6 +501,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only owner can lock aavegotchi");
         s.aavegotchis[_tokenId].unlockTime = block.timestamp + _lockDuration;
+        emit LockAavegotchi(_tokenId, _lockDuration);
     }
 
     /// @notice Transfers the ownership of an NFT from one address to another address

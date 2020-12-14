@@ -13,6 +13,10 @@ contract CollateralFacet is LibAppStorageModifiers {
     event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
 
+    event IncreaseStake(uint256 indexed _tokenId, uint256 _stakeAmount);
+    event DecreaseStake(uint256 indexed _tokenId, uint256 _reduceAmount);
+    event ExperienceTransfer(uint256 indexed _fromTokenId, uint256 indexed _toTokenId, uint256 experience);
+
     struct AavegotchiCollateralTypeIO {
         address collateralType;
         AavegotchiCollateralTypeInfo collateralTypeInfo;
@@ -61,6 +65,7 @@ contract CollateralFacet is LibAppStorageModifiers {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
         address collateralType = s.aavegotchis[_tokenId].collateralType;
+        emit IncreaseStake(_tokenId, _stakeAmount);
         LibERC20.transferFrom(collateralType, msg.sender, escrow, _stakeAmount);
     }
 
@@ -73,6 +78,7 @@ contract CollateralFacet is LibAppStorageModifiers {
         uint256 minimumStake = s.aavegotchis[_tokenId].minimumStake;
 
         require(currentStake - _reduceAmount >= minimumStake, "CollateralFacet: Cannot reduce below minimum stake");
+        emit DecreaseStake(_tokenId, _reduceAmount);
         LibERC20.transferFrom(collateralType, escrow, msg.sender, _reduceAmount);
     }
 
@@ -90,7 +96,9 @@ contract CollateralFacet is LibAppStorageModifiers {
 
         //If the toId is different from the tokenId, then perform an essence transfer
         if (_tokenId != _toId) {
-            s.aavegotchis[_toId].experience += s.aavegotchis[_tokenId].experience;
+            uint32 experience = s.aavegotchis[_tokenId].experience;
+            emit ExperienceTransfer(_tokenId, _toId, experience);
+            s.aavegotchis[_toId].experience += experience;
         }
 
         s.aavegotchiBalance[msg.sender]--;
@@ -102,7 +110,9 @@ contract CollateralFacet is LibAppStorageModifiers {
 
         // transfer all collateral to msg.sender
         address collateralType = s.aavegotchis[_tokenId].collateralType;
-        LibERC20.transferFrom(collateralType, escrow, msg.sender, IERC20(collateralType).balanceOf(escrow));
+        uint256 reduceAmount = IERC20(collateralType).balanceOf(escrow);
+        emit DecreaseStake(_tokenId, reduceAmount);
+        LibERC20.transferFrom(collateralType, escrow, msg.sender, reduceAmount);
 
         // delete aavegotchi info
         delete s.aavegotchiNamesUsed[s.aavegotchis[_tokenId].name];

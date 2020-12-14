@@ -21,7 +21,18 @@ contract ShopFacet {
 
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
 
-    event BuyPortals(uint256 _tokenId, uint256 _numAavegotchisToPurchase, uint256 _batchId, uint256 _totalPrice);
+    event BuyPortals(
+        address indexed _from,
+        address indexed _to,
+        uint256 indexed _batchId,
+        uint256 _tokenId,
+        uint256 _numAavegotchisToPurchase,
+        uint256 _totalPrice
+    );
+
+    event PurchaseItemsWithGhst(address indexed _from, address indexed _to, uint256[] _itemIds, uint256[] _quantities, uint256 _totalPrice);
+
+    event PurchaseItemsWithVouchers(address indexed _from, address indexed _to, uint256[] _itemIds, uint256[] _quantities);
 
     address internal immutable im_vouchersContract;
 
@@ -55,7 +66,7 @@ contract ShopFacet {
         }
         uint256 tokenId = s.totalSupply;
         uint256 totalPrice = _ghst - (_ghst % haunt.portalPrice);
-        emit BuyPortals(tokenId, numAavegotchisToPurchase, nextBatchId, totalPrice);
+        emit BuyPortals(msg.sender, _to, tokenId, nextBatchId, numAavegotchisToPurchase, totalPrice);
         for (uint256 i; i < numAavegotchisToPurchase; i++) {
             s.aavegotchis[tokenId].owner = _to;
             s.aavegotchis[tokenId].batchId = nextBatchId;
@@ -90,7 +101,7 @@ contract ShopFacet {
             totalPrice += quantity * itemType.ghstPrice;
             s.items[_to][itemId] += quantity;
         }
-
+        emit PurchaseItemsWithGhst(msg.sender, _to, _itemIds, _quantities, totalPrice);
         LibERC1155.onERC1155BatchReceived(msg.sender, _to, _itemIds, _quantities, "");
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
         require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
@@ -114,6 +125,7 @@ contract ShopFacet {
             s.items[_to][itemId] += quantity;
             s.itemTypes[itemId].totalQuantity = uint32(totalQuantity);
         }
+        emit PurchaseItemsWithVouchers(msg.sender, _to, _voucherIds, _quantities);
         LibERC1155.onERC1155BatchReceived(msg.sender, _to, _voucherIds, _quantities, "");
     }
 

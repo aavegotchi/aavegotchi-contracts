@@ -12,6 +12,8 @@ contract SvgFacet is LibAppStorageModifiers {
     uint256 internal constant EQUIPPED_WEARABLE_SLOTS = 16;
     uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
+    event StoreSvg(LibSvg.SvgTypeAndSizes[] _typesAndSizes);
+
     /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -171,6 +173,7 @@ contract SvgFacet is LibAppStorageModifiers {
    |__________________________________*/
 
     function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) public onlyDaoOrOwner {
+        emit StoreSvg(_typesAndSizes);
         address svgContract = storeSvgInContract(_svg);
         uint256 offset = 0;
         for (uint256 i; i < _typesAndSizes.length; i++) {
