@@ -200,6 +200,7 @@ async function main () {
 
   if (hre.network.name === 'hardhat') {
     const { itemTypes } = require('./testItemTypes.js')
+    // const { itemTypes } = require('./itemTypes.js')
     tx = await daoFacet.addItemTypes(itemTypes)
     receipt = await tx.wait()
   } else {
@@ -259,11 +260,21 @@ async function main () {
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   ;[svg, svgTypesAndSizes] = setupSvg(
-    ['wearables', wearablesSvgs.slice(18)]
+    ['wearables', wearablesSvgs.slice(18, 36)]
   )
   printSizeInfo(svgTypesAndSizes)
   tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  console.log('Uploaded last wearable SVGs')
+  console.log('Uploaded 18 to 35 wearable SVGs')
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['wearables', wearablesSvgs.slice(36)]
+  )
+  printSizeInfo(svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  console.log('Uploaded rest of wearable SVGs')
   receipt = await tx.wait()
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)

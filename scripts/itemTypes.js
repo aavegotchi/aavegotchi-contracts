@@ -55,7 +55,7 @@ const itemTypes = [
     traitModifiers: [0, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [true, false, false, false, false, false, false, false, false, true],
+    slotPositions: [true],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -660,6 +660,25 @@ const itemTypes = [
     kinshipBonus: 0,
     experienceBonus: 0
   }
+  // {
+  //   svgId: 36,
+  //   name: 'Chemise Hawaienne Shirt',
+  //   ghstPrice: 0,
+  //   maxQuantity: 5,
+  //   traitModifiers: [0, -6, 0, 0, 0, 0],
+  //   rarityScoreModifier: 0,
+  //   setId: 0,
+  //   slotPositions: [true],
+  //   canPurchaseWithGhst: true,
+  //   totalQuantity: 0,
+  //   allowedCollaterals: [],
+  //   minLevel: 1,
+  //   canBeTransferred: true,
+  //   category: 0,
+  //   kinshipBonus: 0,
+  //   experienceBonus: 0
+  // }
+
 ]
 
 function eightBitIntArrayToUint (array) {

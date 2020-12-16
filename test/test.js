@@ -16,7 +16,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToInt8Array(uint, numBytes) {
+function uintToInt8Array (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -25,7 +25,7 @@ function uintToInt8Array(uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint(array) {
+function sixteenBitArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -37,7 +37,7 @@ function sixteenBitArrayToUint(array) {
   return ethers.BigNumber.from(0)
 }
 
-function sixteenBitIntArrayToUint(array) {
+function sixteenBitIntArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -53,7 +53,7 @@ function sixteenBitIntArrayToUint(array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds(uint) {
+function uintToItemIds (uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -64,6 +64,7 @@ function uintToItemIds(uint) {
 
 const testAavegotchiId = '0'
 const testWearableId = '1'
+const test2WearableId = '36'
 const testSlot = '0'
 
 describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
@@ -353,7 +354,7 @@ describe('Collaterals and escrow', async function () {
   })
 })
 
-async function openAndClaim(tokenIds) {
+async function openAndClaim (tokenIds) {
   for (let index = 0; index < tokenIds.length; index++) {
     const id = tokenIds[index]
 
@@ -466,6 +467,7 @@ describe('Items & Wearables', async function () {
   })
 
   it('Can display aavegotchi with wearables', async function () {
+    // await itemsFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([test2WearableId]))
     const svg = await global.svgFacet.getAavegotchiSvg(testAavegotchiId)
     console.log(svg)
   })
@@ -641,15 +643,12 @@ describe('Leveling up', async function () {
     }
   })
 
-
   it('Should be level 21 with 3000 XP', async function () {
-
     await daoFacet.grantExperience([testAavegotchiId], ['1000'])
     await daoFacet.grantExperience([testAavegotchiId], ['1000'])
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
     expect(aavegotchi.experience).to.equal(3000)
     expect(aavegotchi.level).to.equal(21)
-
   })
 
   it('Should be level 25 with 4000 XP ', async function () {
@@ -677,7 +676,6 @@ describe('Leveling up', async function () {
     expect(aavegotchi.experience).to.equal(40000)
     expect(aavegotchi.level).to.equal(81)
   })
-
 
   it('Should be level 99 with 103500 XP ', async function () {
     for (let i = 0; i < 63; i++) {
@@ -792,8 +790,7 @@ describe('DAO Functions', async function () {
   })
 
   it('Contract owner (or DAO) can add new item types with corresponding SVGs', async function () {
-
-    let items = await itemsFacet.getItemTypes()
+    const items = await itemsFacet.getItemTypes()
     console.log('length:', items.length)
 
     const itemsToAdd = [itemTypes[1]]
@@ -900,7 +897,7 @@ describe('Kinship', async function () {
   */
 })
 
-async function neglectAavegotchi(days) {
+async function neglectAavegotchi (days) {
   ethers.provider.send('evm_increaseTime', [86400 * days])
   ethers.provider.send('evm_mine')
   // daysSinceInteraction = 0
@@ -913,13 +910,13 @@ async function neglectAavegotchi(days) {
   console.log(`* Neglect Gotchi for ${days} days`)
 }
 
-async function interactAndUpdateTime() {
+async function interactAndUpdateTime () {
   await global.aavegotchiFacet.interact('0')
   ethers.provider.send('evm_increaseTime', [86400 / 2])
   ethers.provider.send('evm_mine')
 }
 
-function eightBitArrayToUint(array) {
+function eightBitArrayToUint (array) {
   const uint = []
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8)

@@ -97,7 +97,7 @@ contract SvgFacet is LibAppStorageModifiers {
             details.cheekColor,
             ";}.eyeColor{fill:#",
             details.eyeColor,
-            ";}.hidden{display:none;}</style>",
+            ";}#sleevesUp{display:none;}</style>",
             details.background,
             svg_,
             details.collateral,
