@@ -372,7 +372,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
     }
 
-    function equipWearables(uint256 _tokenId, uint256 _equippedWearables) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function equipWearables(uint256 _tokenId, uint256 _equippedWearables) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
 
         //To test (Dan): Add in actual dynamic level

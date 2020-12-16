@@ -61,7 +61,7 @@ contract CollateralFacet is LibAppStorageModifiers {
    |             Write Functions        |
    |__________________________________*/
 
-    function increaseStake(uint256 _tokenId, uint256 _stakeAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function increaseStake(uint256 _tokenId, uint256 _stakeAmount) external onlyAavegotchiOwner(_tokenId) {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
         address collateralType = s.aavegotchis[_tokenId].collateralType;

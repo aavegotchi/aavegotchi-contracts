@@ -111,6 +111,14 @@ contract SvgFacet is LibAppStorageModifiers {
         //Wearables
         uint256 equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
         bytes memory wearablesSvg;
+        // if there is a wearable in the body or left or right hand
+        if (uint16(equippedWearables) != 0 || uint16(equippedWearables >> (4 * 16)) != 0 || uint16(equippedWearables >> (5 * 16)) != 0) {
+            // show hands down and open
+            wearablesSvg = LibSvg.getSvg("aavegotchi", 4);
+        } else {
+            // show hands down and closed
+            wearablesSvg = LibSvg.getSvg("aavegotchi", 3);
+        }
         for (uint256 slotPosition; slotPosition < EQUIPPED_WEARABLE_SLOTS; slotPosition++) {
             uint256 wearableId = uint16(equippedWearables >> (slotPosition * 16));
             if (wearableId > 0) {
