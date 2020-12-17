@@ -8,6 +8,10 @@ const WEARABLE_SLOT_HAND_LEFT = 4
 const WEARABLE_SLOT_HAND_RIGHT = 5
 const WEARABLE_SLOT_PET = 6
 
+// all arrays that are converted into uint have their items ordeded like this:
+// [etc, third item, second item, first item]
+// This applies to traitModifiers, slotPositions
+
 const itemTypes = [
 
   {
@@ -36,7 +40,7 @@ const itemTypes = [
     traitModifiers: [0, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [true, true],
+    slotPositions: [true, false, false, false],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -659,25 +663,97 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0
+  },
+  {
+    svgId: 36,
+    name: 'Chemise Hawaienne Shirt',
+    ghstPrice: 0,
+    maxQuantity: 50,
+    traitModifiers: [0, -6, 0, 0, 0, 0],
+    rarityScoreModifier: 0,
+    setId: 0,
+    slotPositions: [true],
+    canPurchaseWithGhst: true,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0
+  },
+  {
+    svgId: 37,
+    name: 'Trait Potion',
+    ghstPrice: 0,
+    maxQuantity: 500,
+    traitModifiers: [1, 1, 0, 0, 0, 0],
+    rarityScoreModifier: 0,
+    setId: 0,
+    slotPositions: [],
+    canPurchaseWithGhst: true,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 2,
+    kinshipBonus: 0,
+    experienceBonus: 0
+  },
+  {
+    svgId: 38,
+    name: 'Experience Potion',
+    ghstPrice: 0,
+    maxQuantity: 500,
+    traitModifiers: [],
+    rarityScoreModifier: 0,
+    setId: 0,
+    slotPositions: [],
+    canPurchaseWithGhst: true,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 2,
+    kinshipBonus: 0,
+    experienceBonus: 200
+  },
+  {
+    svgId: 39,
+    name: 'Greater Kinship Potion',
+    ghstPrice: 0,
+    maxQuantity: 500,
+    traitModifiers: [],
+    rarityScoreModifier: 0,
+    setId: 0,
+    slotPositions: [],
+    canPurchaseWithGhst: true,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 2,
+    kinshipBonus: 10,
+    experienceBonus: 0
+  },
+  {
+    svgId: 40,
+    name: 'Greater Trait Potion',
+    ghstPrice: 0,
+    maxQuantity: 500,
+    traitModifiers: [2, 2, 0, 0, 0, 0],
+    rarityScoreModifier: 0,
+    setId: 0,
+    slotPositions: [],
+    canPurchaseWithGhst: true,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 2,
+    kinshipBonus: 0,
+    experienceBonus: 0
   }
-  // {
-  //   svgId: 36,
-  //   name: 'Chemise Hawaienne Shirt',
-  //   ghstPrice: 0,
-  //   maxQuantity: 5,
-  //   traitModifiers: [0, -6, 0, 0, 0, 0],
-  //   rarityScoreModifier: 0,
-  //   setId: 0,
-  //   slotPositions: [true],
-  //   canPurchaseWithGhst: true,
-  //   totalQuantity: 0,
-  //   allowedCollaterals: [],
-  //   minLevel: 1,
-  //   canBeTransferred: true,
-  //   category: 0,
-  //   kinshipBonus: 0,
-  //   experienceBonus: 0
-  // }
 
 ]
 
@@ -709,11 +785,15 @@ function boolsArrayToUint16 (bools) {
   const uint = []
   for (const b of bools) {
     if (b) {
-      uint.unshift('1')
+      uint.push('1')
     } else {
-      uint.unshift('0')
+      uint.push('0')
     }
   }
+  // console.log(bools)
+  // console.log(uint.join(''))
+  // console.log(uint.join('').padStart(16, '0'))
+  // console.log('-------------')
   return parseInt(uint.join('').padStart(16, '0'), 2)
 }
 

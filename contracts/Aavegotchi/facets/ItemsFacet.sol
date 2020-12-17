@@ -383,7 +383,6 @@ contract ItemsFacet is LibAppStorageModifiers {
             if (wearableId == 0) {
                 continue;
             }
-            console.logUint(wearableId);
             ItemType storage itemType = s.itemTypes[wearableId];
             require(aavegotchiLevel >= itemType.minLevel, "ItemsFacet: Aavegotchi level lower than minLevel");
             require(itemType.category == LibAppStorage.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");

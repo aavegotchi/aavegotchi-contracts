@@ -185,6 +185,7 @@ async function main () {
   console.log('Adding Collateral Types')
 
   if (hre.network.name === 'hardhat') {
+    // const { getCollaterals } = require('./collateralTypes.js')
     const { getCollaterals } = require('./testCollateralTypes.js')
     tx = await daoFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstTokenContract.address))
   } else {
@@ -199,8 +200,8 @@ async function main () {
   itemsFacet = await ethers.getContractAt('ItemsFacet', aavegotchiDiamond.address)
 
   if (hre.network.name === 'hardhat') {
-    const { itemTypes } = require('./testItemTypes.js')
-    // const { itemTypes } = require('./itemTypes.js')
+    // const { itemTypes } = require('./testItemTypes.js')
+    const { itemTypes } = require('./itemTypes.js')
     tx = await daoFacet.addItemTypes(itemTypes)
     receipt = await tx.wait()
   } else {
