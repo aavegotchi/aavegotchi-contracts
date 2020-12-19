@@ -14,7 +14,7 @@
 const collaterals = [
   {
     name: 'aDAI',
-    kovanAddress: '0x6dDFD6364110E9580292D9eCC745F75deA7e72c8',
+    kovanAddress: '0xdcf0af9e59c002fa3aa091a46196b37530fd48a8',
     mainnetAddress: '0x028171bCA77440897B824Ca71D1c56caC55b68A3',
     primaryColor: '#FF7D00',
     secondaryColor: '#F9D792',
@@ -34,7 +34,7 @@ const collaterals = [
     svgId: 1,
     eyeShapeSvgId: 17,
     modifiers: [0, 1, 0, 0, 0, 0],
-    conversionRate: 3000 // 3000 DAI = 1 ETH
+    conversionRate: 647 // 647 DAI = 1 ETH
   },
   {
     name: 'aAAVE',
@@ -46,7 +46,7 @@ const collaterals = [
     svgId: 2,
     eyeShapeSvgId: 18,
     modifiers: [0, 0, 1, 0, 0, 0],
-    conversionRate: 30 // 30 DAI = 1 LEND
+    conversionRate: 85 // 30 DAI = 1 LEND
   },
 
   {
@@ -59,7 +59,7 @@ const collaterals = [
     svgId: 3,
     eyeShapeSvgId: 19,
     modifiers: [0, 0, 0, 1, 0, 0],
-    conversionRate: 1000
+    conversionRate: 13
   },
 
   // {
@@ -85,7 +85,7 @@ const collaterals = [
     svgId: 5,
     eyeShapeSvgId: 22,
     modifiers: [0, -1, 0, 0, 0, 0],
-    conversionRate: 100
+    conversionRate: 1
   },
 
   {
@@ -98,7 +98,7 @@ const collaterals = [
     svgId: 6,
     eyeShapeSvgId: 23,
     modifiers: [0, 0, -1, 0, 0, 0],
-    conversionRate: 500 // 500 DAI = 1 USDC
+    conversionRate: 1 // 1 DAI = 1 USDC
   }
 
   /* REN

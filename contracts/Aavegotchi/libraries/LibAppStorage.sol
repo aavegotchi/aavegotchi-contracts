@@ -223,19 +223,10 @@ library LibAppStorage {
         level_ += additionalLevel;
     }
 
-    function uintToSixteenBitArray(uint256 _data) internal pure returns (uint256[] memory array_) {
-        uint256 length = 16;
-        array_ = new uint256[](length);
-        for (uint256 i; i < length; i++) {
+    function uintToSixteenBitArray(uint256 _data) internal pure returns (uint256[16] memory array_) {
+        for (uint256 i; i < 16; i++) {
             uint256 item = uint16(_data >> (16 * i));
-            if (item == 0) {
-                length = i;
-                break;
-            }
             array_[i] = item;
-        }
-        assembly {
-            mstore(array_, length)
         }
     }
 

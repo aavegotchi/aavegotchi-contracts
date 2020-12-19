@@ -422,7 +422,7 @@ contract ItemsFacet is LibAppStorageModifiers {
 
     struct WearableSetIO {
         string name;
-        uint256[] wearableIds;
+        uint256[16] wearableIds;
         int256[5] traitsBonuses;
     }
 

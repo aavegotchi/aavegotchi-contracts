@@ -53,7 +53,7 @@ contract SvgFacet is LibAppStorageModifiers {
 
         // aavagotchi body
         svg_ = LibSvg.getSvg("aavegotchi", 2);
-        details.background = LibSvg.getSvg("aavegotchi", 3);
+        details.background = LibSvg.getSvg("aavegotchi", 5);
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
         details.trait = uint16(_numericTraits >> (4 * 16));
