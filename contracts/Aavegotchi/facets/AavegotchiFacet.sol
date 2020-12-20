@@ -72,6 +72,10 @@ contract AavegotchiFacet is LibAppStorageModifiers {
    |             Read Functions         |
    |__________________________________*/
 
+    function totalSupply() external view returns (uint256 totalSupply_) {
+        totalSupply_ = s.totalSupply;
+    }
+
     function aavegotchiNameAvailable(string memory _name) external view returns (bool available_) {
         available_ = s.aavegotchiNamesUsed[_name];
     }
@@ -92,7 +96,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         return RevenueSharesIO(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, s.dao, s.rarityFarming, s.pixelCraft);
     }
 
-    struct PortalAavegotchiTraitsIO {
+    struct InternalPortalAavegotchiTraitsIO {
         uint256 randomNumber;
         uint256 numericTraits;
         address collateralType;
@@ -116,7 +120,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     function singlePortalAavegotchiTraits(uint256 _randomNumber, uint256 _option)
         internal
         view
-        returns (PortalAavegotchiTraitsIO memory singlePortalAavegotchiTraits_)
+        returns (InternalPortalAavegotchiTraitsIO memory singlePortalAavegotchiTraits_)
     {
         uint256 randomNumberN = uint256(keccak256(abi.encodePacked(_randomNumber, _option)));
         singlePortalAavegotchiTraits_.randomNumber = randomNumberN;
@@ -137,15 +141,31 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         singlePortalAavegotchiTraits_.minimumStake = collateralDAIPrice * multiplier;
     }
 
+    struct PortalAavegotchiTraitsIO {
+        uint256 randomNumber;
+        int256[] numericTraits;
+        uint256 numericTraitsUint;
+        address collateralType;
+        uint256 minimumStake;
+    }
+
     function portalAavegotchiTraits(uint256 _tokenId)
-        public
+        external
         view
         returns (PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory portalAavegotchiTraits_)
     {
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         for (uint256 i; i < portalAavegotchiTraits_.length; i++) {
-            portalAavegotchiTraits_[i] = singlePortalAavegotchiTraits(randomNumber, i);
+            InternalPortalAavegotchiTraitsIO memory single = singlePortalAavegotchiTraits(randomNumber, i);
+            portalAavegotchiTraits_[i].randomNumber = single.randomNumber;
+            portalAavegotchiTraits_[i].collateralType = single.collateralType;
+            portalAavegotchiTraits_[i].minimumStake = single.minimumStake;
+            portalAavegotchiTraits_[i].numericTraitsUint = single.numericTraits;
+            portalAavegotchiTraits_[i].numericTraits = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
+            for (uint256 j; j < LibAppStorage.NUMERIC_TRAITS_NUM; j++) {
+                portalAavegotchiTraits_[i].numericTraits[j] = int16(single.numericTraits >> (j * 16));
+            }
         }
     }
 
@@ -338,9 +358,9 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
     function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
         tokenIds_ = new uint256[](s.aavegotchiBalance[_owner]);
-        uint256 totalSupply = s.totalSupply;
+        uint256 l_totalSupply = s.totalSupply;
         uint256 ownerIndex;
-        for (uint256 tokenId; tokenId < totalSupply; tokenId++) {
+        for (uint256 tokenId; tokenId < l_totalSupply; tokenId++) {
             if (_owner == s.aavegotchis[tokenId].owner) {
                 tokenIds_[ownerIndex] = tokenId;
                 ownerIndex++;
@@ -350,9 +370,9 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
     function allAavegotchisOfOwner(address _owner) external view returns (AavegotchiInfo[] memory aavegotchiInfos_) {
         aavegotchiInfos_ = new AavegotchiInfo[](s.aavegotchiBalance[_owner]);
-        uint256 totalSupply = s.totalSupply;
+        uint256 l_totalSupply = s.totalSupply;
         uint256 ownerIndex;
-        for (uint256 tokenId; tokenId < totalSupply; tokenId++) {
+        for (uint256 tokenId; tokenId < l_totalSupply; tokenId++) {
             if (_owner == s.aavegotchis[tokenId].owner) {
                 aavegotchiInfos_[ownerIndex] = getAavegotchi(tokenId);
                 ownerIndex++;
@@ -429,7 +449,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
 
-        PortalAavegotchiTraitsIO memory option = singlePortalAavegotchiTraits(aavegotchi.randomNumber, _option);
+        InternalPortalAavegotchiTraitsIO memory option = singlePortalAavegotchiTraits(aavegotchi.randomNumber, _option);
         aavegotchi.randomNumber = option.randomNumber;
         aavegotchi.numericTraits = option.numericTraits;
         aavegotchi.collateralType = option.collateralType;

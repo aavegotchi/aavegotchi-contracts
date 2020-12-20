@@ -197,7 +197,7 @@ describe('Opening Portals', async function () {
     const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(myPortals[0].tokenId)
     // console.log(JSON.stringify(ghosts, null, 4))
     ghosts.forEach(async (ghost) => {
-      const rarityScore = await global.aavegotchiFacet.baseRarityScore(ghost.numericTraits, ghost.collateralType)
+      const rarityScore = await global.aavegotchiFacet.baseRarityScore(ghost.numericTraitsUint, ghost.collateralType)
       expect(Number(rarityScore)).to.greaterThan(298)
       expect(Number(rarityScore)).to.lessThan(602)
     })
@@ -528,13 +528,18 @@ describe('Items & Wearables', async function () {
 
 describe('Haunts', async function () {
   it('Cannot create new haunt until first is finished', async function () {
-    const oneHundred = '100000000000000000000'
-    await truffleAssert.reverts(daoFacet.createHaunt('10000', oneHundred, '0x000000'), 'AavegotchiFacet: Haunt must be full before creating new')
+    const purchaseNumber = ethers.utils.parseEther('100')
+    await truffleAssert.reverts(daoFacet.createHaunt('10000', purchaseNumber, '0x000000'), 'AavegotchiFacet: Haunt must be full before creating new')
   })
 
   it('Cannot exceed max haunt size', async function () {
-    const oneHundredPortals = ethers.utils.parseEther('9500')
-    const tx = await global.shopFacet.buyPortals(account, oneHundredPortals, true)
+    let purchaseNumber = ethers.utils.parseEther('5000')
+    let tx = await global.shopFacet.buyPortals(account, purchaseNumber, true)
+    // const totalSupply = await global.aavegotchiFacet.totalSupply()
+    // console.log('total supply:' + totalSupply)
+
+    purchaseNumber = ethers.utils.parseEther('4500')
+    tx = await global.shopFacet.buyPortals(account, purchaseNumber, true)
 
     const singlePortal = ethers.utils.parseEther('100')
     await truffleAssert.reverts(global.shopFacet.buyPortals(account, singlePortal, true), 'AavegotchiFacet: Exceeded max number of aavegotchis for this haunt')

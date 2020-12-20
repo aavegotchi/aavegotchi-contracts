@@ -165,7 +165,7 @@ contract SvgFacet is LibAppStorageModifiers {
             AavegotchiFacet(address(this)).portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
             address collateralType = l_portalAavegotchiTraits[i].collateralType;
-            uint256 numericTraits = l_portalAavegotchiTraits[i].numericTraits;
+            uint256 numericTraits = l_portalAavegotchiTraits[i].numericTraitsUint;
             svg_[i] = string(
                 abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">',
