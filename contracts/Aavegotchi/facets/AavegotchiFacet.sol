@@ -436,7 +436,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         aavegotchi.minimumStake = uint88(option.minimumStake);
         aavegotchi.lastInteracted = uint40(block.timestamp);
         aavegotchi.interactionCount = 50;
-        aavegotchi.claimTime = uint40(block.timestamp);
+        aavegotchi.claimTime = uint40(block.timestamp - 12 hours);
 
         require(_stakeAmount >= option.minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
 
