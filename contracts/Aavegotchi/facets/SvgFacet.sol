@@ -53,7 +53,7 @@ contract SvgFacet is LibAppStorageModifiers {
 
         // aavagotchi body
         svg_ = LibSvg.getSvg("aavegotchi", 2);
-        details.background = LibSvg.getSvg("aavegotchi", 5);
+        details.background = LibSvg.getSvg("aavegotchi", 3);
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
         details.trait = uint16(_numericTraits >> (4 * 16));
@@ -89,15 +89,18 @@ contract SvgFacet is LibAppStorageModifiers {
         }
 
         svg_ = abi.encodePacked(
-            "<style>.primary{fill:#",
+            "<style>.gotchi-primary{fill:#",
             details.primaryColor,
-            ";}.secondary{fill:#",
+            ";}.gotchi-secondary{fill:#",
             details.secondaryColor,
-            ";}.cheek{fill:#",
+            ";}.gotchi-cheek{fill:#",
             details.cheekColor,
-            ";}.eyeColor{fill:#",
+            ";}.gotchi-eyeColor{fill:#",
             details.eyeColor,
-            ";}#sleevesUp{display:none;}</style>",
+            ";}.gotchi-sleevesUp{display:none;}",
+            ".gotchi-handsUp{display:none;}",
+            ".gotchi-handsDownOpen{display:none;}",
+            "</style>",
             details.background,
             svg_,
             details.collateral,
@@ -114,10 +117,7 @@ contract SvgFacet is LibAppStorageModifiers {
         // if there is a wearable in the body or left or right hand
         if (uint16(equippedWearables) != 0 || uint16(equippedWearables >> (4 * 16)) != 0 || uint16(equippedWearables >> (5 * 16)) != 0) {
             // show hands down and open
-            wearablesSvg = LibSvg.getSvg("aavegotchi", 4);
-        } else {
-            // show hands down and closed
-            wearablesSvg = LibSvg.getSvg("aavegotchi", 3);
+            wearablesSvg = "<style>.gotchi-handsDownOpen{display:block;}.gotchi-handsDownClosed{display:none;}</style>";
         }
         for (uint256 slotPosition; slotPosition < EQUIPPED_WEARABLE_SLOTS; slotPosition++) {
             uint256 wearableId = uint16(equippedWearables >> (slotPosition * 16));
