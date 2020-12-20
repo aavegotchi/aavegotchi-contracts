@@ -28,7 +28,7 @@ module.exports = {
     kovan: {
       url: process.env.KOVAN_URL,
       accounts: [process.env.SECRET],
-      gasPrice: 20000000000
+      gasPrice: 5000000000
     }
   },
   gasReporter: {

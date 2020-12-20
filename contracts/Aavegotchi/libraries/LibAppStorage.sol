@@ -234,9 +234,8 @@ library LibAppStorage {
         AppStorage storage s = diamondStorage();
         //To test (Dan): Only allow 2 interactions per day
         uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
-        // 43200 seconds is 12 hours
         // if interacted less than 12 hours ago
-        if (block.timestamp < lastInteracted + 43200) {
+        if (block.timestamp < lastInteracted + 12 hours) {
             return;
         }
 

@@ -26,7 +26,7 @@ const collaterals = [
   },
   {
     name: 'aWETH',
-    kovanAddress: '0xe2735Adf49D06fBC2C09D9c0CFfbA5EF5bA35649',
+    kovanAddress: '0x87b1f4cf9bd63f7bbd3ee1ad04e8f52540349347',
     mainnetAddress: '0x030bA81f1c18d280636F32af80b9AAd02Cf0854e',
     primaryColor: '#64438E',
     secondaryColor: '#EDD3FD',
@@ -38,9 +38,9 @@ const collaterals = [
   },
   {
     name: 'aAAVE',
-    kovanAddress: '0x76c6D190639a946E894D4A480806EB1D18391E01',
+    kovanAddress: '0x6d93ef8093f067f19d33c2360ce17b20a8c45cd7',
     mainnetAddress: '0xFFC97d72E13E01096502Cb8Eb52dEe56f74DAD7B',
-    primaryColor: '#0FA9C9',
+    primaryColor: '#B6509E',
     secondaryColor: '#CFEEF4',
     cheekColor: '#F696C6',
     svgId: 2,
@@ -51,7 +51,7 @@ const collaterals = [
 
   {
     name: 'aLINK',
-    kovanAddress: '0x9246CF386f1D38b80C92245c1bA2A3d0a013ceE0',
+    kovanAddress: '0xed9044ca8f7cace8eaccd40367cf2bee39ed1b04',
     mainnetAddress: '0xa06bC25B5805d5F8d82847D191Cb4Af5A3e873E0',
     primaryColor: '#0000B9',
     secondaryColor: '#D4DEF8',
@@ -77,7 +77,7 @@ const collaterals = [
 
   {
     name: 'aUSDT',
-    kovanAddress: '0x29a63BE19cC7e1e6bfbeDeC08961b4A3285579C8',
+    kovanAddress: '0xff3c8bc103682fa918c954e84f5056ab4dd5189d',
     mainnetAddress: '0x3Ed3B47Dd13EC9a98b44e6204A523E766B225811',
     primaryColor: '#282473',
     secondaryColor: '#B6D9FC',
@@ -90,7 +90,7 @@ const collaterals = [
 
   {
     name: 'aUSDC',
-    kovanAddress: '0x32A4f93ffbb63213fB8c57b0b0E8Ea09698F3741',
+    kovanAddress: '0xe12afec5aa12cf614678f9bfeeb98ca9bb95b5b0',
     mainnetAddress: '0xBcca60bB61934080951369a648Fb03DF4F96263C',
     primaryColor: '#2664BA',
     secondaryColor: '#D4E0F1',
