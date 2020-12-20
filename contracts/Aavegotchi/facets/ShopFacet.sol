@@ -56,6 +56,7 @@ contract ShopFacet {
         require(ghstBalance >= _ghst, "AavegotchiFacet: Not enough GHST!");
         uint16 hauntId = s.currentHauntId;
         uint256 numAavegotchisToPurchase = _ghst / haunt.portalPrice;
+        require(numAavegotchisToPurchase <= 50, "AavegotchiFacet: Cannot buy more than 50 portals at a time");
         uint256 hauntCount = haunt.totalCount + numAavegotchisToPurchase;
         require(hauntCount <= haunt.hauntMaxSize, "AavegotchiFacet: Exceeded max number of aavegotchis for this haunt");
         s.haunts[currentHauntId].totalCount = uint24(hauntCount);
