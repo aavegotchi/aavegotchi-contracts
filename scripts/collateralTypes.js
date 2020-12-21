@@ -82,7 +82,7 @@ const collaterals = [
     primaryColor: '#282473',
     secondaryColor: '#B6D9FC',
     cheekColor: '#F696C6',
-    svgId: 5,
+    svgId: 4,
     eyeShapeSvgId: 22,
     modifiers: [0, -1, 0, 0, 0, 0],
     conversionRate: 1
@@ -95,7 +95,7 @@ const collaterals = [
     primaryColor: '#2664BA',
     secondaryColor: '#D4E0F1',
     cheekColor: '#F696C6',
-    svgId: 6,
+    svgId: 5,
     eyeShapeSvgId: 23,
     modifiers: [0, 0, -1, 0, 0, 0],
     conversionRate: 1 // 1 DAI = 1 USDC
