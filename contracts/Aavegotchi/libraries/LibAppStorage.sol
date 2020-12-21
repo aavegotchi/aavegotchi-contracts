@@ -145,6 +145,7 @@ library LibAppStorage {
         }
     }
 
+    // Need to ensure there is no overflow of _ghst
     function purchase(uint256 _ghst) internal {
         AppStorage storage s = diamondStorage();
         //33% to burn address

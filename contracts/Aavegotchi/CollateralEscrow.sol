@@ -17,6 +17,6 @@ contract CollateralEscrow {
 
     function approveAavegotchiDiamond(address _aTokenContract) public {
         require(msg.sender == s.owner, "CollateralEscrow: Not owner of contract");
-        IERC20(_aTokenContract).approve(s.owner, type(uint256).max);
+        require(IERC20(_aTokenContract).approve(s.owner, type(uint256).max), "CollateralEscrow: token not approved for transfer");
     }
 }
