@@ -127,6 +127,69 @@ contract ItemsFacet is LibAppStorageModifiers {
         }
     }
 
+    function slotPositionsToArray(uint256 _itemId) internal view returns (uint256[] memory slotPositions_) {
+        uint256 slotPositions = s.itemTypes[_itemId].slotPositions;
+        slotPositions_ = new uint256[](16);
+        uint256 numSlots;
+        for (uint256 i; i < 16; i++) {
+            if ((slotPositions >> i) & 1 == 1) {
+                slotPositions_[numSlots] = i;
+                numSlots++;
+            }
+        }
+        assembly {
+            mstore(slotPositions_, numSlots)
+        }
+    }
+
+    struct ItemBalanceWithSlotsIO {
+        uint256 itemId;
+        uint256 balance;
+        uint256[] slotPositions;
+    }
+
+    function itemBalancesOfTokenWithSlots(address _tokenContract, uint256 _tokenId)
+        external
+        view
+        returns (ItemBalanceWithSlotsIO[] memory itemBalanceWithSlots_)
+    {
+        uint256 count = s.itemTypes.length;
+        itemBalanceWithSlots_ = new ItemBalanceWithSlotsIO[](count);
+        uint256 numItems;
+        for (uint256 id = 0; id < count; id++) {
+            uint256 bal = s.nftBalances[_tokenContract][_tokenId][id];
+            if (bal == 0) {
+                continue;
+            }
+            itemBalanceWithSlots_[numItems].itemId = id;
+            itemBalanceWithSlots_[numItems].balance = bal;
+            itemBalanceWithSlots_[numItems].slotPositions = slotPositionsToArray(id);
+            numItems++;
+        }
+        assembly {
+            mstore(itemBalanceWithSlots_, numItems)
+        }
+    }
+
+    function itemBalancesWithSlots(address _owner) external view returns (ItemBalanceWithSlotsIO[] memory itemBalanceWithSlots_) {
+        uint256 count = s.itemTypes.length;
+        itemBalanceWithSlots_ = new ItemBalanceWithSlotsIO[](count);
+        uint256 numItems;
+        for (uint256 id = 0; id < count; id++) {
+            uint256 bal = s.items[_owner][id];
+            if (bal == 0) {
+                continue;
+            }
+            itemBalanceWithSlots_[numItems].itemId = id;
+            itemBalanceWithSlots_[numItems].balance = bal;
+            itemBalanceWithSlots_[numItems].slotPositions = slotPositionsToArray(id);
+            numItems++;
+        }
+        assembly {
+            mstore(itemBalanceWithSlots_, numItems)
+        }
+    }
+
     /**
         @notice Get the balance of multiple account/token pairs
         @param _owners The addresses of the token holders
