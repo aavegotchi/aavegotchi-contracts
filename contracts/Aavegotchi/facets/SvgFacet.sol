@@ -195,7 +195,7 @@ contract SvgFacet is LibAppStorageModifiers {
     }
 
     function storeSvgInContract(string calldata _svg) internal returns (address svgContract) {
-        require(bytes(_svg).length < 24576, "SvgStorage: Exceeded 24KB max contract size");
+        require(bytes(_svg).length < 24576, "SvgStorage: Exceeded 24,576 bytes max contract size");
         // 61_00_00 -- PUSH2 (size)
         // 60_00 -- PUSH1 (code position)
         // 60_00 -- PUSH1 (mem position)
