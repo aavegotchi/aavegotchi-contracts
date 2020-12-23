@@ -1,3 +1,4 @@
+const { isThrowStatement } = require('typescript')
 
 /* global ethers */
 const WEARABLE_SLOT_BODY = 0
@@ -23,7 +24,7 @@ const itemTypes = [
     traitModifiers: [0, 0, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [],
+    slotPositions: '',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -41,7 +42,7 @@ const itemTypes = [
     traitModifiers: [0, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "head",
+    slotPositions: 'head',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -60,7 +61,7 @@ const itemTypes = [
     traitModifiers: [0, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "body",
+    slotPositions: 'body',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -79,7 +80,7 @@ const itemTypes = [
     traitModifiers: [0, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "hands",
+    slotPositions: 'hands',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -97,7 +98,7 @@ const itemTypes = [
     traitModifiers: [0, 1, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "hands",
+    slotPositions: 'hands',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -115,7 +116,7 @@ const itemTypes = [
     traitModifiers: [0, 1, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "body",
+    slotPositions: 'body',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -133,7 +134,7 @@ const itemTypes = [
     traitModifiers: [0, 2, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "hands",
+    slotPositions: 'hands',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -151,7 +152,7 @@ const itemTypes = [
     traitModifiers: [0, 2, 0, 1, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "head",
+    slotPositions: 'head',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -169,7 +170,7 @@ const itemTypes = [
     traitModifiers: [0, 2, 0, 1, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "body",
+    slotPositions: 'body',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -187,7 +188,7 @@ const itemTypes = [
     traitModifiers: [1, 0, 1, 1, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "hands",
+    slotPositions: 'hands',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -205,7 +206,7 @@ const itemTypes = [
     traitModifiers: [0, 2, 0, 2, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "head",
+    slotPositions: 'head',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -223,7 +224,7 @@ const itemTypes = [
     traitModifiers: [0, 2, 0, 2, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "body",
+    slotPositions: 'body',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -241,7 +242,7 @@ const itemTypes = [
     traitModifiers: [2, 0, 0, -2, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "hands",
+    slotPositions: 'hands',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -259,7 +260,7 @@ const itemTypes = [
     traitModifiers: [-1, -1, 0, 3, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "face",
+    slotPositions: 'face',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -277,7 +278,7 @@ const itemTypes = [
     traitModifiers: [0, 0, 1, 4, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "eyes",
+    slotPositions: 'eyes',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -295,7 +296,7 @@ const itemTypes = [
     traitModifiers: [3, 2, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "body",
+    slotPositions: 'body',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -313,7 +314,7 @@ const itemTypes = [
     traitModifiers: [-4, -2, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "body",
+    slotPositions: 'body',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -331,7 +332,7 @@ const itemTypes = [
     traitModifiers: [0, 0, 0, 6, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "hands",
+    slotPositions: 'hands',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -349,7 +350,7 @@ const itemTypes = [
     traitModifiers: [0, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "face",
+    slotPositions: 'face',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -367,7 +368,7 @@ const itemTypes = [
     traitModifiers: [0, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "body",
+    slotPositions: 'body',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -385,7 +386,7 @@ const itemTypes = [
     traitModifiers: [0, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "hands",
+    slotPositions: 'hands',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -403,7 +404,7 @@ const itemTypes = [
     traitModifiers: [1, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "face",
+    slotPositions: 'face',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -421,7 +422,7 @@ const itemTypes = [
     traitModifiers: [1, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "body",
+    slotPositions: 'body',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -439,7 +440,7 @@ const itemTypes = [
     traitModifiers: [2, 0, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "hands",
+    slotPositions: 'hands',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -457,7 +458,7 @@ const itemTypes = [
     traitModifiers: [2, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "head",
+    slotPositions: 'head',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -475,7 +476,7 @@ const itemTypes = [
     traitModifiers: [2, 0, 1, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "body",
+    slotPositions: 'body',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -493,7 +494,7 @@ const itemTypes = [
     traitModifiers: [3, 0, 0, 1, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "hands",
+    slotPositions: 'hands',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -511,7 +512,7 @@ const itemTypes = [
     traitModifiers: [2, 2, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "head",
+    slotPositions: 'head',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -529,7 +530,7 @@ const itemTypes = [
     traitModifiers: [2, 2, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "body",
+    slotPositions: 'body',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -547,7 +548,7 @@ const itemTypes = [
     traitModifiers: [0, 0, 0, -4, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "hands",
+    slotPositions: 'hands',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -565,7 +566,7 @@ const itemTypes = [
     traitModifiers: [0, -2, 3, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "head",
+    slotPositions: 'head',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -583,7 +584,7 @@ const itemTypes = [
     traitModifiers: [-3, 0, 1, 1, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "body",
+    slotPositions: 'body',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -601,7 +602,7 @@ const itemTypes = [
     traitModifiers: [0, -2, 3, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "hands",
+    slotPositions: 'hands',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -619,7 +620,7 @@ const itemTypes = [
     traitModifiers: [0, -3, 0, 3, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "head",
+    slotPositions: 'head',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -637,7 +638,7 @@ const itemTypes = [
     traitModifiers: [3, -3, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "body",
+    slotPositions: 'body',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -655,7 +656,7 @@ const itemTypes = [
     traitModifiers: [0, -6, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "pet",
+    slotPositions: 'pet',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -673,7 +674,7 @@ const itemTypes = [
     traitModifiers: [0, -6, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "body",
+    slotPositions: 'body',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -691,7 +692,7 @@ const itemTypes = [
     traitModifiers: [1, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [],
+    slotPositions: '',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -709,7 +710,7 @@ const itemTypes = [
     traitModifiers: [],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [],
+    slotPositions: '',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -727,7 +728,7 @@ const itemTypes = [
     traitModifiers: [],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [],
+    slotPositions: '',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -745,7 +746,7 @@ const itemTypes = [
     traitModifiers: [2, 2, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [],
+    slotPositions: '',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -758,7 +759,7 @@ const itemTypes = [
 
 ]
 
-function eightBitIntArrayToUint(array) {
+function eightBitIntArrayToUint (array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -770,7 +771,7 @@ function eightBitIntArrayToUint(array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function eightBitUintArrayToUint(array) {
+function eightBitUintArrayToUint (array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -782,7 +783,7 @@ function eightBitUintArrayToUint(array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function boolsArrayToUint16(bools) {
+function boolsArrayToUint16 (bools) {
   const uint = []
   for (const b of bools) {
     if (b) {
@@ -798,7 +799,7 @@ function boolsArrayToUint16(bools) {
   return parseInt(uint.join('').padStart(16, '0'), 2)
 }
 
-function sixteenBitArrayToUint(array) {
+function sixteenBitArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -810,11 +811,40 @@ function sixteenBitArrayToUint(array) {
   return ethers.BigNumber.from(0)
 }
 
-function getItemTypes() {
+// const WEARABLE_SLOT_BODY = 0
+// const WEARABLE_SLOT_FACE = 1
+// const WEARABLE_SLOT_EYES = 2
+// const WEARABLE_SLOT_HEAD = 3
+// const WEARABLE_SLOT_HAND_LEFT = 4
+// const WEARABLE_SLOT_HAND_RIGHT = 5
+// const WEARABLE_SLOT_PET = 6
+// const WEARABLE_SLOT_BG = 7
+
+function stringToSlotPositions (str) {
+  if (str.length === 0) {
+    return 0
+  } else if (str === 'head') {
+    return boolsArrayToUint16([true, false, false, false])
+  } else if (str === 'body') {
+    return boolsArrayToUint16([true])
+  } else if (str === 'hands') {
+    return boolsArrayToUint16([true, true, false, false, false, false])
+  } else if (str === 'face') {
+    return boolsArrayToUint16([true, false])
+  } else if (str === 'pet') {
+    return boolsArrayToUint16([true, false, false, false, false, false, false])
+  } else if (str === 'eyes') {
+    return boolsArrayToUint16([true, false, false])
+  } else {
+    throw (Error('Wrong slot string: ' + str))
+  }
+}
+
+function getItemTypes () {
   const result = []
   for (const itemType of itemTypes) {
     itemType.traitModifiers = eightBitIntArrayToUint(itemType.traitModifiers)
-    itemType.slotPositions = boolsArrayToUint16(itemType.slotPositions)
+    itemType.slotPositions = stringToSlotPositions(itemType.slotPositions)
     // itemType.allowedCollaterals = sixteenBitArrayToUint(itemType.allowedCollaterals)
     result.push(itemType)
   }
