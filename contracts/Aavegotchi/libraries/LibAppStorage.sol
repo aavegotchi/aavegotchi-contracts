@@ -175,6 +175,15 @@ library LibAppStorage {
         uint32 high;
     }
 
+    function xpUntilNextLevel(uint32 _experience) internal pure returns (uint256 requiredXp_) {
+        //Calculate how much experience is required for the next level. 
+
+        //
+    }
+
+    
+
+
     function aavegotchiLevel(uint32 _experience) internal pure returns (uint256 level_) {
         //To do (Dan): Confirm final experience numbers
 
@@ -195,15 +204,15 @@ library LibAppStorage {
         else if (_experience >= 8000 && _experience <= 17999) {
             level_ = calculateLevel(40, 500, 8000, _experience);
         }
-        //Levels 61 - 80 require 500 XP each
+        //Levels 61 - 80 require 1100 XP each
         else if (_experience >= 18000 && _experience <= 39999) {
             level_ = calculateLevel(60, 1100, 18000, _experience);
         }
-        //Levels 81 - 90 require 750 XP each
+        //Levels 81 - 90 require 2500 XP each
         else if (_experience >= 40000 && _experience <= 65000) {
             level_ = calculateLevel(80, 2500, 40000, _experience);
         }
-        //Levels 91 - 99 require 1000 XP each
+        //Levels 91 - 99 require 3889 XP each
         else if (_experience >= 65000 && _experience <= 99999) level_ = calculateLevel(90, 3889, 65000, _experience);
 
         if (_experience >= 100000) level_ = 98;

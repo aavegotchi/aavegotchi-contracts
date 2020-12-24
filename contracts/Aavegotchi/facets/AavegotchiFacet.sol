@@ -202,6 +202,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         uint256 level; //the current aavegotchi level
         uint256 batchId;
         uint256 hauntId;
+        uint256 rarityScore;
     }
 
     function getNumericTraits(uint256 _tokenId) public view returns (uint256 numericTraits_) {
@@ -257,6 +258,11 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         aavegotchiInfo_.usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
         aavegotchiInfo_.batchId = s.aavegotchis[_tokenId].batchId;
         aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
+
+        s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI
+            ? aavegotchiInfo_.rarityScore = modifiedRarityScore(_tokenId).rarityScore_
+            : 0;
+
         return aavegotchiInfo_;
     }
 
@@ -307,7 +313,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     }
 
     //Only valid for claimed Aavegotchis
-    function modifiedRarityScore(uint256 _tokenId) external view returns (ModifiedRarityScore memory info_) {
+    function modifiedRarityScore(uint256 _tokenId) public view returns (ModifiedRarityScore memory info_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         info_.numericTraits_ = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];

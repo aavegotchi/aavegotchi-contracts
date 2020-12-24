@@ -13,10 +13,10 @@ const { getCollaterals } = require('../scripts/collateralTypes.js')
 // const { deployProject } = require('../scripts/deploy-ganache.js')
 
 const { deployProject } = require('../scripts/deploy.js')
-const { itemTypes } = require('../scripts/itemTypes.js')
+const { itemTypes } = require('../scripts/testItemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToInt8Array (uint, numBytes) {
+function uintToInt8Array(uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -25,7 +25,7 @@ function uintToInt8Array (uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint (array) {
+function sixteenBitArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -37,7 +37,7 @@ function sixteenBitArrayToUint (array) {
   return ethers.BigNumber.from(0)
 }
 
-function sixteenBitIntArrayToUint (array) {
+function sixteenBitIntArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -53,7 +53,7 @@ function sixteenBitIntArrayToUint (array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds (uint) {
+function uintToItemIds(uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -354,7 +354,7 @@ describe('Collaterals and escrow', async function () {
   })
 })
 
-async function openAndClaim (tokenIds) {
+async function openAndClaim(tokenIds) {
   for (let index = 0; index < tokenIds.length; index++) {
     const id = tokenIds[index]
 
@@ -415,7 +415,7 @@ describe('Items & Wearables', async function () {
     expect(await global.itemsFacet.balanceOfToken(aavegotchiFacet.address, testAavegotchiId, testWearableId)).to.equal(10)
 
     const wearableIds = sixteenBitArrayToUint([testWearableId])
-    // console.log(wearableIds.toString())
+    console.log(wearableIds.toString())
     await global.itemsFacet.equipWearables(testAavegotchiId, wearableIds)
     const equipped = await global.itemsFacet.equippedWearables(testAavegotchiId)
 
@@ -897,7 +897,7 @@ describe('Kinship', async function () {
   */
 })
 
-async function neglectAavegotchi (days) {
+async function neglectAavegotchi(days) {
   ethers.provider.send('evm_increaseTime', [86400 * days])
   ethers.provider.send('evm_mine')
   // daysSinceInteraction = 0
@@ -910,13 +910,13 @@ async function neglectAavegotchi (days) {
   console.log(`* Neglect Gotchi for ${days} days`)
 }
 
-async function interactAndUpdateTime () {
+async function interactAndUpdateTime() {
   await global.aavegotchiFacet.interact('0')
   ethers.provider.send('evm_increaseTime', [86400 / 2])
   ethers.provider.send('evm_mine')
 }
 
-function eightBitArrayToUint (array) {
+function eightBitArrayToUint(array) {
   const uint = []
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8)
