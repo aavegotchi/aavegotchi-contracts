@@ -183,54 +183,23 @@ library LibAppStorage {
 
     
 
+    function sqrt(uint x) internal pure returns (uint y) {
+    uint z = (x + 1) / 2;
+    y = x;
+    while (z < y) {
+        y = z;
+        z = (x / z + z) / 2;
+    }
+}
 
     function aavegotchiLevel(uint32 _experience) internal pure returns (uint256 level_) {
-        //To do (Dan): Confirm final experience numbers
 
-        if (_experience <= 100) return 1;
-        //Levels 1-10 require 100 XP each
-        else if (_experience > 100 && _experience <= 999)
-            level_ = _experience / 100;
-
-            //Levels 11 - 20 require 200 XP each
-        else if (_experience >= 1000 && _experience <= 2999) {
-            level_ = calculateLevel(10, 200, 1000, _experience);
-        }
-        //Levels 21 - 40 require 250 XP each
-        else if (_experience >= 3000 && _experience <= 7999) {
-            level_ = calculateLevel(20, 250, 3000, _experience);
-        }
-        //Levels 41 - 60 require 500 XP each
-        else if (_experience >= 8000 && _experience <= 17999) {
-            level_ = calculateLevel(40, 500, 8000, _experience);
-        }
-        //Levels 61 - 80 require 1100 XP each
-        else if (_experience >= 18000 && _experience <= 39999) {
-            level_ = calculateLevel(60, 1100, 18000, _experience);
-        }
-        //Levels 81 - 90 require 2500 XP each
-        else if (_experience >= 40000 && _experience <= 65000) {
-            level_ = calculateLevel(80, 2500, 40000, _experience);
-        }
-        //Levels 91 - 99 require 3889 XP each
-        else if (_experience >= 65000 && _experience <= 99999) level_ = calculateLevel(90, 3889, 65000, _experience);
-
-        if (_experience >= 100000) level_ = 98;
-
-        //Add on 1 for the initial level
-        level_ += 1;
+    if (_experience > 490050) {
+        return 99;
     }
-
-    function calculateLevel(
-        uint16 _initial,
-        uint16 _perLevel,
-        uint32 _lowRange,
-        uint32 _experience
-    ) internal pure returns (uint32 level_) {
-        level_ = _initial;
-        uint32 difference = _experience - _lowRange;
-        uint32 additionalLevel = difference / _perLevel;
-        level_ += additionalLevel;
+    
+    level_ = (sqrt(2 * _experience) / 10);
+        return level_ + 1;
     }
 
     function uintToSixteenBitArray(uint256 _data) internal pure returns (uint256[16] memory array_) {

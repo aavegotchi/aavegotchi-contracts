@@ -16,7 +16,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToInt8Array (uint, numBytes) {
+function uintToInt8Array(uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -25,7 +25,7 @@ function uintToInt8Array (uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint (array) {
+function sixteenBitArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -37,7 +37,7 @@ function sixteenBitArrayToUint (array) {
   return ethers.BigNumber.from(0)
 }
 
-function sixteenBitIntArrayToUint (array) {
+function sixteenBitIntArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -53,7 +53,7 @@ function sixteenBitIntArrayToUint (array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds (uint) {
+function uintToItemIds(uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -354,7 +354,7 @@ describe('Collaterals and escrow', async function () {
   })
 })
 
-async function openAndClaim (tokenIds) {
+async function openAndClaim(tokenIds) {
   for (let index = 0; index < tokenIds.length; index++) {
     const id = tokenIds[index]
 
@@ -628,27 +628,27 @@ describe('Leveling up', async function () {
     await truffleAssert.reverts(daoFacet.grantExperience([testAavegotchiId], ['100000']), 'DAOFacet: Cannot grant more than 1000 XP at a time')
     await daoFacet.grantExperience([testAavegotchiId], ['1000'])
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
-    expect(aavegotchi.level).to.equal(11)
+    expect(aavegotchi.level).to.equal(5)
     expect(aavegotchi.experience).to.equal(1000)
   })
 
-  it('Should have 3 skill points at Level 11', async function () {
+  it('Should have 3 skill points at Level 5', async function () {
     const skillPoints = await global.aavegotchiFacet.availableSkillPoints(testAavegotchiId)
-    expect(skillPoints).to.equal(3)
+    expect(skillPoints).to.equal(1)
   })
 
   it('Should spend 3 skill points to modify traits', async function () {
     const oldAavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
 
     await truffleAssert.reverts(aavegotchiFacet.spendSkillPoints(testAavegotchiId, [1, 1, 1, 1]), 'AavegotchiFacet: Not enough skill points')
-    await global.aavegotchiFacet.spendSkillPoints(testAavegotchiId, [1, 1, 1, 0])
+    await global.aavegotchiFacet.spendSkillPoints(testAavegotchiId, [1, 0, 0, 0])
     const skillPoints = await global.aavegotchiFacet.availableSkillPoints(testAavegotchiId)
     expect(skillPoints).to.equal(0)
 
     const newAavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
 
     // Check if numericTraits were modified
-    const skillArray = [1, 1, 1, 0, 0, 0]
+    const skillArray = [1, 0, 0, 0, 0, 0]
     for (let index = 0; index < oldAavegotchi.numericTraits.length; index++) {
       const oldTrait = Number(oldAavegotchi.numericTraits[index])
       const newTrait = Number(newAavegotchi.numericTraits[index])
@@ -656,19 +656,19 @@ describe('Leveling up', async function () {
     }
   })
 
-  it('Should be level 21 with 3000 XP', async function () {
+  it('Should be level 8 with 3000 XP', async function () {
     await daoFacet.grantExperience([testAavegotchiId], ['1000'])
     await daoFacet.grantExperience([testAavegotchiId], ['1000'])
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
     expect(aavegotchi.experience).to.equal(3000)
-    expect(aavegotchi.level).to.equal(21)
+    expect(aavegotchi.level).to.equal(8)
   })
 
-  it('Should be level 25 with 4000 XP ', async function () {
+  it('Should be level 9 with 4000 XP ', async function () {
     await daoFacet.grantExperience([testAavegotchiId], ['1000'])
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
     expect(aavegotchi.experience).to.equal(4000)
-    expect(aavegotchi.level).to.equal(25)
+    expect(aavegotchi.level).to.equal(9)
   })
 
   it('Should be level 79 with 39999 XP ', async function () {
@@ -681,16 +681,15 @@ describe('Leveling up', async function () {
     let aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
 
     expect(aavegotchi.experience).to.equal(39999)
-    expect(aavegotchi.level).to.equal(80)
+    expect(aavegotchi.level).to.equal(29)
 
     await daoFacet.grantExperience([testAavegotchiId], ['1'])
     aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
 
-    expect(aavegotchi.experience).to.equal(40000)
-    expect(aavegotchi.level).to.equal(81)
+
   })
 
-  it('Should be level 99 with 103500 XP ', async function () {
+  it('Should be level 46 with 103500 XP ', async function () {
     for (let i = 0; i < 63; i++) {
       await daoFacet.grantExperience([testAavegotchiId], ['1000'])
     }
@@ -698,6 +697,28 @@ describe('Leveling up', async function () {
 
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
     expect(aavegotchi.experience).to.equal(103500)
+    expect(aavegotchi.level).to.equal(46)
+  })
+
+  it('Should be level 98 with 474000 XP', async function () {
+    for (let i = 0; i < 370; i++) {
+      await daoFacet.grantExperience([testAavegotchiId], ['1000'])
+    }
+    await daoFacet.grantExperience([testAavegotchiId], ['500'])
+
+    const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
+    expect(aavegotchi.experience).to.equal(474000)
+    expect(aavegotchi.level).to.equal(98)
+  })
+
+
+  it('Should be level 99 with 500000 XP ', async function () {
+    for (let i = 0; i < 26; i++) {
+      await daoFacet.grantExperience([testAavegotchiId], ['1000'])
+    }
+
+    const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
+    expect(aavegotchi.experience).to.equal(500000)
     expect(aavegotchi.level).to.equal(99)
   })
 })
@@ -910,7 +931,7 @@ describe('Kinship', async function () {
   */
 })
 
-async function neglectAavegotchi (days) {
+async function neglectAavegotchi(days) {
   ethers.provider.send('evm_increaseTime', [86400 * days])
   ethers.provider.send('evm_mine')
   // daysSinceInteraction = 0
@@ -923,13 +944,13 @@ async function neglectAavegotchi (days) {
   console.log(`* Neglect Gotchi for ${days} days`)
 }
 
-async function interactAndUpdateTime () {
+async function interactAndUpdateTime() {
   await global.aavegotchiFacet.interact('0')
   ethers.provider.send('evm_increaseTime', [86400 / 2])
   ethers.provider.send('evm_mine')
 }
 
-function eightBitArrayToUint (array) {
+function eightBitArrayToUint(array) {
   const uint = []
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8)
