@@ -175,32 +175,24 @@ library LibAppStorage {
         uint32 high;
     }
 
-    function xpUntilNextLevel(uint32 _experience) internal pure returns (uint256 requiredXp_) {
-        //Calculate how much experience is required for the next level. 
-
-        //
-    }
-
-    
-
     function sqrt(uint x) internal pure returns (uint y) {
-    uint z = (x + 1) / 2;
-    y = x;
-    while (z < y) {
-        y = z;
-        z = (x / z + z) / 2;
+        uint z = (x + 1) / 2;
+        y = x;
+        while (z < y) {
+            y = z;
+            z = (x / z + z) / 2;
+        }
     }
-}
 
     function aavegotchiLevel(uint32 _experience) internal pure returns (uint256 level_) {
-
     if (_experience > 490050) {
         return 99;
     }
-    
+
     level_ = (sqrt(2 * _experience) / 10);
         return level_ + 1;
     }
+
 
     function uintToSixteenBitArray(uint256 _data) internal pure returns (uint256[16] memory array_) {
         for (uint256 i; i < 16; i++) {

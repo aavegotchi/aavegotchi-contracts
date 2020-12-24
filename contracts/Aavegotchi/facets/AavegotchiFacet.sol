@@ -198,6 +198,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         uint256 kinship; //The kinship value of this Aavegotchi. Default is 50.
         uint256 lastInteracted;
         uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
+        uint256 toNextLevel;
         uint256 usedSkillPoints; //number of skill points used
         uint256 level; //the current aavegotchi level
         uint256 batchId;
@@ -254,6 +255,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         aavegotchiInfo_.kinship = kinship(_tokenId);
         aavegotchiInfo_.lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
         aavegotchiInfo_.experience = s.aavegotchis[_tokenId].experience;
+        aavegotchiInfo_.toNextLevel = xpUntilNextLevel(s.aavegotchis[_tokenId].experience);
         aavegotchiInfo_.level = LibAppStorage.aavegotchiLevel(s.aavegotchis[_tokenId].experience);
         aavegotchiInfo_.usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
         aavegotchiInfo_.batchId = s.aavegotchis[_tokenId].batchId;
@@ -278,8 +280,13 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         return uint256(x >= 0 ? x : -x);
     }
 
-    function aavegotchiLevel(uint32 _experience) external pure returns (uint256 level_) {
+    function aavegotchiLevel(uint32 _experience) public pure returns (uint256 level_) {
         level_ = LibAppStorage.aavegotchiLevel(_experience);
+    }
+
+    function xpUntilNextLevel(uint32 _experience) public pure returns (uint256 requiredXp_) {
+        uint256 currentLevel = aavegotchiLevel(_experience);
+        requiredXp_ = (((currentLevel)**2) * 50) - _experience;
     }
 
     function rarityMultiplier(uint256 _numericTraits, address _collateralType) public view returns (uint256 multiplier) {
