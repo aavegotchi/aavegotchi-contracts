@@ -28,7 +28,7 @@ const itemTypes = [
     traitModifiers: [0, 1, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: [],
+    slotPositions: [true, true, true, false],
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [0],

@@ -525,8 +525,10 @@ describe('Haunts', async function () {
   })
 
   it('Cannot exceed max haunt size', async function () {
-    const oneHundredPortals = ethers.utils.parseEther('9500')
-    const tx = await global.shopFacet.buyPortals(account, oneHundredPortals, true)
+    const fiftyPortals = ethers.utils.parseEther('5000')
+    await global.shopFacet.buyPortals(account, fiftyPortals, true)
+    const fortyFivePortals = ethers.utils.parseEther('4500')
+    await global.shopFacet.buyPortals(account, fortyFivePortals, true)
 
     const singlePortal = ethers.utils.parseEther('100')
     await truffleAssert.reverts(global.shopFacet.buyPortals(account, singlePortal, true), 'AavegotchiFacet: Exceeded max number of aavegotchis for this haunt')
