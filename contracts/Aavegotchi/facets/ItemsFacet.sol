@@ -443,6 +443,8 @@ contract ItemsFacet is LibAppStorageModifiers {
 
         for (uint256 slot; slot < 16; slot++) {
             uint256 wearableId = uint16(_equippedWearables >> (16 * slot));
+
+            console.log("wearable id:", wearableId);
             if (wearableId == 0) {
                 continue;
             }
@@ -452,6 +454,10 @@ contract ItemsFacet is LibAppStorageModifiers {
 
             // bitmask and bitwise operators used here. Info on them: https://code.tutsplus.com/articles/understanding-bitwise-operators--active-11301
             uint256 slotAllowed = (itemType.slotPositions >> slot) & 1;
+
+            console.log("current slot:", slot);
+            console.log("slot allowed:", slotAllowed);
+
             require(slotAllowed == 1, "ItemsFacet: Wearable cannot be equipped in this slot");
             bool canBeEquipped;
             uint8[] memory allowedCollaterals = itemType.allowedCollaterals;

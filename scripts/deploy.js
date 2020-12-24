@@ -201,7 +201,6 @@ async function main() {
 
   if (hre.network.name === 'hardhat') {
     const { itemTypes } = require('./testItemTypes.js')
-    // const { itemTypes } = require('./itemTypes.js')
     tx = await daoFacet.addItemTypes(itemTypes)
     receipt = await tx.wait()
   } else {
