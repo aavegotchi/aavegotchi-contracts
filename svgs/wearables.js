@@ -1,5 +1,6 @@
+const fs = require('fs')
+
 const wearablesSvgs = [
-  // 0,
   wearable("0_Void"),
   wearable("1_CamoHat"),
   wearable("2_CamoPants"), //body but doesn't have sleeves
@@ -40,48 +41,6 @@ const wearablesSvgs = [
   wearable("37_FarmerHat"),
   wearable("38_FarmerPants"), //body but no sleeves
   wearable("39_FarmerStick")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ]
 
 function stripSvg(svg) {
@@ -106,6 +65,5 @@ function bodyWearable(body, sleevesUp, sleevesDown) {
   sleevesDown = '<g class="gotchi-sleevesDown">' + sleevesDown + '</g>'
   return body + sleevesUp + sleevesDown
 }
-
 
 exports.wearablesSvgs = wearablesSvgs
