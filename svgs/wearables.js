@@ -9,35 +9,35 @@ const wearablesSvgs = [
   wearable("5_SnowCamoPants"), //body but no sleeves
   wearable("6_M67Grenade"),
   wearable("7_MarineCap"),
-  bodyWearable("8_MarineJacket"),
+  wearable("8_MarineJacket"), // bodyWearable("8_MarineJacket"),
   wearable("9_WalkieTalkie"),
   wearable("10_LinkWhiteHat"),
-  bodyWearable("11_MessDress"),
+  wearable("11_MessDress"), // bodyWearable("11_MessDress"),
   wearable("12_LinkBubbly"),
   wearable("13_SergeyBeard"),
   wearable("14_SergeyEyes"),
-  bodyWearable("15_RedPlaid"),
-  bodyWearable("16_BluePlaid"),
+  wearable("15_RedPlaid"), // bodyWearable("15_RedPlaid"),
+  wearable("16_BluePlaid"),  //  bodyWearable("16_BluePlaid"),
   wearable("17_LinkCube"),
   wearable("18_AaveHeroMask"),
-  bodyWearable("19_AaveHeroShirt"),
+  wearable("19_AaveHeroShirt"), //bodyWearable("19_AaveHeroShirt"),
   wearable("20_AavePlush"),
   wearable("21_CaptainAaveMask"),
-  bodyWearable("22_CaptainAaveSuit"),
+  wearable("22_CaptainAaveSuit"), //bodyWearable("22_CaptainAaveSuit"),
   wearable("23_CaptainAaveShield"),
   wearable("24_ThaaveHelmet"),
-  bodyWearable("25_ThaaveSuit"),
+  wearable("25_ThaaveSuit"),//bodyWearable("25_ThaaveSuit"),
   wearable("26_ThaaveHammer"),
   wearable("27_MarcHair"),
-  bodyWearable("28_MarcOutfit"),
+  wearable("28_MarcOutfit"), //bodyWearable("28_MarcOutfit"),
   wearable("29_REKTSign"),
   wearable("30_JordanHair"),
-  bodyWearable("31_JordanSuit"),
+  wearable("31_JordanSuit"),//bodyWearable("31_JordanSuit"),
   wearable("32_AaveFlag"),
   wearable("33_StaniHair"),
-  bodyWearable("34_StaniVest"),
+  wearable("34_StaniVest"), //bodyWearable("34_StaniVest"),
   wearable("35_AaveBoat"),
-  bodyWearable("36_HawaiianShirt"),
+  wearable("36_HawaiianShirt"), //bodyWearable("36_HawaiianShirt"),
   wearable("37_FarmerHat"),
   wearable("38_FarmerPants"), //body but no sleeves
   wearable("39_FarmerStick")
@@ -57,13 +57,13 @@ function wearable(name) {
   return '<g class="gotchi-wearable">' + readSvg(name) + '</g>'
 }
 
-function bodyWearable(body, sleevesUp, sleevesDown) {
-  body = readSvg(body)
+function bodyWearable(name, sleevesUp, sleevesDown) {
+  body = readSvg(name)
   sleevesUp = readSvg(sleevesUp)
   sleevesUp = '<g class="gotchi-sleevesUp">' + sleevesUp + '</g>'
   sleevesDown = readSvg(sleevesDown)
   sleevesDown = '<g class="gotchi-sleevesDown">' + sleevesDown + '</g>'
-  return body + sleevesUp + sleevesDown
+  return '<g class="gotchi-wearable">' + body + sleevesUp + sleevesDown + '</g>'
 }
 
 exports.wearablesSvgs = wearablesSvgs
