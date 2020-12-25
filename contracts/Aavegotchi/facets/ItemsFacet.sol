@@ -96,6 +96,26 @@ contract ItemsFacet is LibAppStorageModifiers {
         }
     }
 
+    struct BalanceItemTypeIO {
+        uint256[] balances;
+        ItemType[] itemTypes;
+    }
+
+    function balancesWithItemTypes(address _account) external view returns (BalanceItemTypeIO memory output_) {
+        uint256 count = s.itemTypes.length;
+        uint256[] memory bals_ = new uint256[](count);
+        ItemType[] memory itemTypes_ = new ItemType[](count);
+        for (uint256 id = 0; id < count; id++) {
+            bals_[id] = s.items[_account][id];
+            itemTypes_[id] = s.itemTypes[id];
+        }
+
+        output_.balances = bals_;
+        output_.itemTypes = itemTypes_;
+
+        return output_;
+    }
+
     /**
         @notice Get the balance of an account's tokens.
         @param _owner  The address of the token holder
@@ -147,6 +167,8 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint256 itemId;
         uint256 balance;
         uint256[] slotPositions;
+        string name;
+        uint256 traitModifiers;
     }
 
     function itemBalancesOfTokenWithSlots(address _tokenContract, uint256 _tokenId)
@@ -162,6 +184,8 @@ contract ItemsFacet is LibAppStorageModifiers {
             if (bal == 0) {
                 continue;
             }
+            itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
+            itemBalanceWithSlots_[numItems].traitModifiers = s.itemTypes[id].traitModifiers;
             itemBalanceWithSlots_[numItems].itemId = id;
             itemBalanceWithSlots_[numItems].balance = bal;
             itemBalanceWithSlots_[numItems].slotPositions = slotPositionsToArray(id);
@@ -181,6 +205,9 @@ contract ItemsFacet is LibAppStorageModifiers {
             if (bal == 0) {
                 continue;
             }
+
+            itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
+            itemBalanceWithSlots_[numItems].traitModifiers = s.itemTypes[id].traitModifiers;
             itemBalanceWithSlots_[numItems].itemId = id;
             itemBalanceWithSlots_[numItems].balance = bal;
             itemBalanceWithSlots_[numItems].slotPositions = slotPositionsToArray(id);
@@ -466,7 +493,6 @@ contract ItemsFacet is LibAppStorageModifiers {
         for (uint256 slot; slot < 16; slot++) {
             uint256 wearableId = uint16(_equippedWearables >> (16 * slot));
 
-            console.log("wearable id:", wearableId);
             if (wearableId == 0) {
                 continue;
             }
@@ -476,9 +502,6 @@ contract ItemsFacet is LibAppStorageModifiers {
 
             // bitmask and bitwise operators used here. Info on them: https://code.tutsplus.com/articles/understanding-bitwise-operators--active-11301
             uint256 slotAllowed = (itemType.slotPositions >> slot) & 1;
-
-            console.log("current slot:", slot);
-            console.log("slot allowed:", slotAllowed);
 
             require(slotAllowed == 1, "ItemsFacet: Wearable cannot be equipped in this slot");
             bool canBeEquipped;

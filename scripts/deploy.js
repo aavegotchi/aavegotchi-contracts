@@ -23,7 +23,10 @@ function strDisplay(str) {
   return addCommas(str.toString())
 }
 
-async function main() {
+async function main(scriptName) {
+
+  console.log('SCRIPT NAME:', scriptName)
+
   const accounts = await ethers.getSigners()
   const account = await accounts[0].getAddress()
   console.log('Account: ' + account)
@@ -200,9 +203,22 @@ async function main() {
   itemsFacet = await ethers.getContractAt('ItemsFacet', aavegotchiDiamond.address)
 
   if (hre.network.name === 'hardhat') {
-    const { itemTypes } = require('./testItemTypes.js')
-    tx = await daoFacet.addItemTypes(itemTypes)
-    receipt = await tx.wait()
+
+    //Deploy test, use the real item types
+    if (scriptName === "deployTest") {
+      const { itemTypes } = require('./itemTypes.js')
+      tx = await daoFacet.addItemTypes(itemTypes)
+      receipt = await tx.wait()
+    }
+
+    //Development test, use development items
+    else {
+      const { itemTypes } = require('./testItemTypes.js')
+      tx = await daoFacet.addItemTypes(itemTypes)
+      receipt = await tx.wait()
+    }
+
+
   } else {
     const { itemTypes } = require('./itemTypes.js')
     tx = await daoFacet.addItemTypes(itemTypes)

@@ -666,19 +666,23 @@ const itemTypes = [
     kinshipBonus: 0,
     experienceBonus: 0
   },
+
+  //For testing only
+
+
   {
     svgId: 36,
     name: 'Chemise Hawaienne Shirt',
     ghstPrice: 0,
-    maxQuantity: 50,
+    maxQuantity: 1000,
     traitModifiers: [0, -6, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
     slotPositions: 'body',
-    canPurchaseWithGhst: false,
+    canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
-    minLevel: 1,
+    minLevel: 5,
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
@@ -693,7 +697,7 @@ const itemTypes = [
     rarityScoreModifier: 0,
     setId: 0,
     slotPositions: '',
-    canPurchaseWithGhst: false,
+    canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
     minLevel: 1,
@@ -711,7 +715,7 @@ const itemTypes = [
     rarityScoreModifier: 0,
     setId: 0,
     slotPositions: '',
-    canPurchaseWithGhst: false,
+    canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
     minLevel: 1,
@@ -729,7 +733,7 @@ const itemTypes = [
     rarityScoreModifier: 0,
     setId: 0,
     slotPositions: '',
-    canPurchaseWithGhst: false,
+    canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
     minLevel: 1,
@@ -740,6 +744,43 @@ const itemTypes = [
   },
   {
     svgId: 40,
+    name: 'SantaGotchi Hat',
+    ghstPrice: 0,
+    maxQuantity: 1000,
+    traitModifiers: [2, 2, 0, 0, 0, 0],
+    rarityScoreModifier: 0,
+    setId: 0,
+    slotPositions: "head",
+    canPurchaseWithGhst: true,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0
+  },
+
+  {
+    svgId: 41,
+    name: 'Collateral 8 Hat',
+    ghstPrice: 0,
+    maxQuantity: 1000,
+    traitModifiers: [2, 2, 0, 0, 0, 0],
+    rarityScoreModifier: 0,
+    setId: 0,
+    slotPositions: "head",
+    canPurchaseWithGhst: true,
+    totalQuantity: 0,
+    allowedCollaterals: [8],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0
+  },
+  {
+    svgId: 42,
     name: 'Greater Trait Potion',
     ghstPrice: 0,
     maxQuantity: 500,
@@ -747,7 +788,7 @@ const itemTypes = [
     rarityScoreModifier: 0,
     setId: 0,
     slotPositions: '',
-    canPurchaseWithGhst: false,
+    canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
     minLevel: 1,
@@ -757,9 +798,10 @@ const itemTypes = [
     experienceBonus: 0
   }
 
+
 ]
 
-function eightBitIntArrayToUint (array) {
+function eightBitIntArrayToUint(array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -771,7 +813,7 @@ function eightBitIntArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function eightBitUintArrayToUint (array) {
+function eightBitUintArrayToUint(array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -783,7 +825,7 @@ function eightBitUintArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function boolsArrayToUint16 (bools) {
+function boolsArrayToUint16(bools) {
   const uint = []
   for (const b of bools) {
     if (b) {
@@ -799,7 +841,7 @@ function boolsArrayToUint16 (bools) {
   return parseInt(uint.join('').padStart(16, '0'), 2)
 }
 
-function sixteenBitArrayToUint (array) {
+function sixteenBitArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -820,7 +862,7 @@ function sixteenBitArrayToUint (array) {
 // const WEARABLE_SLOT_PET = 6
 // const WEARABLE_SLOT_BG = 7
 
-function stringToSlotPositions (str) {
+function stringToSlotPositions(str) {
   if (str.length === 0) {
     return 0
   } else if (str === 'head') {
@@ -840,7 +882,7 @@ function stringToSlotPositions (str) {
   }
 }
 
-function getItemTypes () {
+function getItemTypes() {
   const result = []
   for (const itemType of itemTypes) {
     itemType.traitModifiers = eightBitIntArrayToUint(itemType.traitModifiers)

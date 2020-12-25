@@ -37,10 +37,13 @@ const wearablesSvgs = [
   wearable("33_StaniHair"),
   wearable("34_StaniVest"), //bodyWearable("34_StaniVest"),
   wearable("35_AaveBoat"),
+
+  //For testing only
   wearable("36_HawaiianShirt"), //bodyWearable("36_HawaiianShirt"),
   wearable("37_FarmerHat"),
   wearable("38_FarmerPants"), //body but no sleeves
-  wearable("39_FarmerStick")
+  wearable("39_FarmerStick"),
+  wearable("40_SantaGotchiHat")
 ]
 
 function stripSvg(svg) {

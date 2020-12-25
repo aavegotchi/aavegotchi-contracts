@@ -69,7 +69,7 @@ const testSlot = '0'
 
 describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
   before(async function () {
-    const deployVars = await deployProject()
+    const deployVars = await deployProject("test")
     global.set = true
     global.account = deployVars.account
     global.aavegotchiDiamond = deployVars.aavegotchiDiamond

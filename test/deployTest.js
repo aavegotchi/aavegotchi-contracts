@@ -69,7 +69,7 @@ const testSlot = '3'
 
 describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
   before(async function () {
-    const deployVars = await deployProject()
+    const deployVars = await deployProject("deployTest")
     global.set = true
     global.account = deployVars.account
     global.aavegotchiDiamond = deployVars.aavegotchiDiamond
@@ -380,7 +380,8 @@ describe('Items & Wearables', async function () {
 
   it('Returns item SVG', async function () {
     const svg = await global.svgFacet.getItemSvg(testWearableId)
-    console.log('svg:', svg)
+    // console.log('svg:', svg)
+    expect(svg).not.to.equal("")
   })
 
   it('Can mint items', async function () {
@@ -437,7 +438,7 @@ describe('Items & Wearables', async function () {
 
   it('Cannot equip wearables that require a higher level', async function () {
     // This item requires level 5
-    const unequippableItem = '2'
+    const unequippableItem = '36'
     const wearableIds = sixteenBitArrayToUint([unequippableItem, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
     await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), 'ItemsFacet: Aavegotchi level lower than minLevel')
   })
@@ -448,7 +449,7 @@ describe('Items & Wearables', async function () {
 
   it('Cannot equip wearables that require a different collateral', async function () {
     // Can only be equipped by collateraltype 8
-    const unequippableItem = '3'
+    const unequippableItem = '41'
     // const wearable = await itemsFacet.getItemType(unequippableItem)
     const wearableIds = sixteenBitArrayToUint([unequippableItem, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
     await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), 'ItemsFacet: Wearable cannot be equipped in this collateral type')
@@ -478,18 +479,23 @@ describe('Items & Wearables', async function () {
   })
 
   it('Can display aavegotchi with wearables', async function () {
-    await global.daoFacet.mintItems(account, [test2WearableId], ['10'])
+    const santaHat = "40"
+
+    await global.daoFacet.mintItems(account, [santaHat], ['10'])
     await global.itemsFacet.transferToParent(
       global.account, // address _from,
       global.aavegotchiFacet.address, // address _toContract,
       testAavegotchiId, // uint256 _toTokenId,
-      test2WearableId, // uint256 _id,
+      santaHat, // uint256 _id,
       '10' // uint256 _value
     )
-    await itemsFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([testWearableId, 0, 0, test2WearableId]))
+
+    await itemsFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([santaHat, 0, 0, 0]))
     const svg = await global.svgFacet.getAavegotchiSvg(testAavegotchiId)
     console.log(svg)
   })
+
+
 
   it('Equipping Wearables alters base rarity score', async function () {
     // Unequip all wearables
@@ -618,13 +624,20 @@ describe('Shop and Vouchers', async function () {
     expect(itemsBalance[6]).to.equal(60)
   })
 
+  it('Should return balances and item types', async function () {
+    const itemsAndBalances = await global.itemsFacet.balancesWithItemTypes(account)
+    //console.log('items and balances:', itemsAndBalances.balances)
+  })
+
   it('Should purchase items using GHST', async function () {
     let balances = await global.itemsFacet.itemBalances(account)
     // Start at 1 because 0 is always empty
-    expect(balances[1]).to.equal(10)
-    await global.shopFacet.purchaseItemsWithGhst(account, ['1', '39'], ['10', '100'])
+    expect(balances[36]).to.equal(0)
+
+    //Hawaiian Shirt and SantaHat
+    await global.shopFacet.purchaseItemsWithGhst(account, ['36', '37', '38', '39', '40', '41', '42'], ['10', '10', '10', '100', '10', '10', '10'])
     balances = await global.itemsFacet.itemBalances(account)
-    expect(balances[1]).to.equal(20)
+    expect(balances[36]).to.equal(10)
   })
 })
 
@@ -750,6 +763,7 @@ describe('Using Consumables', async function () {
   it('Using Kinship Potion increases kinship by 10', async function () {
     const kinshipPotion = await itemsFacet.getItemType('39')
     expect(kinshipPotion.kinshipBonus).to.equal(10)
+
     const originalScore = await aavegotchiFacet.kinship(testAavegotchiId)
     await itemsFacet.useConsumable(testAavegotchiId, '39')
     const boostedScore = await aavegotchiFacet.kinship(testAavegotchiId)
@@ -760,7 +774,8 @@ describe('Using Consumables', async function () {
     const beforeXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
 
     // XP Potion
-    await itemsFacet.useConsumable(testAavegotchiId, '5')
+    const xpPotion = "38"
+    await itemsFacet.useConsumable(testAavegotchiId, xpPotion)
     const afterXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
     expect(afterXP).to.equal(Number(beforeXP) + 200)
   })
@@ -770,7 +785,8 @@ describe('Using Consumables', async function () {
     // console.log('before traits:', beforeTraits[0].toString())
 
     // Trait potion
-    await itemsFacet.useConsumable(testAavegotchiId, '4')
+    const traitPotion = "37"
+    await itemsFacet.useConsumable(testAavegotchiId, traitPotion)
 
     const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
     // console.log('after traits:', afterTraits[0].toString())
@@ -781,7 +797,8 @@ describe('Using Consumables', async function () {
     const beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
     // console.log('before traits:', beforeTraits[0].toString())
     // Trait potion
-    await itemsFacet.useConsumable(testAavegotchiId, '7')
+    const greaterTraitpotion = "42"
+    await itemsFacet.useConsumable(testAavegotchiId, greaterTraitpotion)
 
     const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
     // console.log('after traits:', afterTraits[0].toString())
@@ -794,6 +811,11 @@ describe('Using Consumables', async function () {
     ethers.provider.send('evm_mine')
     const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
     expect(afterTraits[0]).to.equal(Number(beforeTraits[0]) - 1)
+  })
+
+  it('Should show item balances with slots', async function () {
+    const balances = await global.itemsFacet.itemBalancesWithSlots(account)
+    console.log('balances:', balances)
   })
 })
 
