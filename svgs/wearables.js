@@ -81,4 +81,28 @@ const wearablesSvgs = [
   '<path d="M12 58H8v1h1v1h3v-1h1v-1z" opacity=".25"/><g fill="#935628"><path d="M11 30v-6h-1v6H8v1h2v24h1V31h2v-1h-1z"/><path d="M8 28v-4H7v6h1v-1zm5-4v6h1v-6z"/></g>'
 ]
 
+function stripSvg(svg) {
+  svg = svg.replace('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"  xmlns:v="https://vecta.io/nano">', '')
+  svg = svg.replace('</svg>', '')
+  return svg
+}
+
+function readSvg(name) {
+  return stripSvg(fs.readFileSync(`./svgs/svgItems/${name}.svg`, 'utf8'))
+}
+
+function wearable(name) {
+  return '<g class="gotchi-wearable">' + readSvg(name) + '</g>'
+}
+
+function bodyWearable(body, sleevesUp, sleevesDown) {
+  body = readSvg(body)
+  sleevesUp = readSvg(sleevesUp)
+  sleevesUp = '<g class="gotchi-sleevesUp">' + sleevesUp + '</g>'
+  sleevesDown = readSvg(sleevesDown)
+  sleevesDown = '<g class="gotchi-sleevesDown">' + sleevesDown + '</g>'
+  return body + sleevesUp + sleevesDown
+}
+
+
 exports.wearablesSvgs = wearablesSvgs
