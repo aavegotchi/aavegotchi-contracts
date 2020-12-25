@@ -255,7 +255,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         @return URI for token type
     */
     function uri(uint256 _id) external view returns (string memory) {
-        require(_id < s.itemTypes.length, "_id not found for  ticket");
+        require(_id < s.itemTypes.length, "ItemsFacet: _id not found for item");
         return string(abi.encodePacked(s.itemsBaseUri, LibStrings.uintStr(_id)));
     }
 
@@ -263,7 +263,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         @notice Set the base url for all voucher types
         @param _value The new base url        
     */
-    function setBaseURI(string memory _value) external {
+    function setBaseURI(string memory _value) external onlyDaoOrOwner {
         // require(msg.sender == s.contractOwner, "ItemsFacet: Must be contract owner");
         s.itemsBaseUri = _value;
         for (uint256 i; i < s.itemTypes.length; i++) {

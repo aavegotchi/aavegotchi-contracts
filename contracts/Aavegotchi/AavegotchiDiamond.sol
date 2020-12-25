@@ -43,6 +43,7 @@ contract AavegotchiDiamond {
         s.dao = _args.dao;
         s.rarityFarming = _args.rarityFarming;
         s.pixelCraft = _args.pixelCraft;
+        s.itemsBaseUri = "https://aavegotchi.com/metadata/items/";
 
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 

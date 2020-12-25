@@ -372,6 +372,17 @@ async function openAndClaim(tokenIds) {
 }
 
 describe('Items & Wearables', async function () {
+
+  it("Shows item URI", async function () {
+    let uri = await global.itemsFacet.uri(testWearableId)
+    expect(uri).to.equal("https://aavegotchi.com/metadata/items/1")
+  })
+
+  it('Returns item SVG', async function () {
+    const svg = await global.svgFacet.getItemSvg(testWearableId)
+    console.log('svg:', svg)
+  })
+
   it('Can mint items', async function () {
     let balance = await global.itemsFacet.balanceOf(account, '0')
     expect(balance).to.equal(0)
