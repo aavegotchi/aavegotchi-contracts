@@ -108,6 +108,7 @@ struct AppStorage {
     address dao;
     address pixelCraft;
     address rarityFarming;
+    string itemsBaseUri;
 }
 
 library LibAppStorage {

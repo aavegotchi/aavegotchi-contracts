@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";
+import "../libraries/LibStrings.sol";
 import "hardhat/console.sol";
 import "../interfaces/IERC721.sol";
 // import "../interfaces/IERC1155TokenReceiver.sol";
@@ -246,6 +247,27 @@ contract ItemsFacet is LibAppStorageModifiers {
         itemTypes_ = new ItemType[](length);
         for (uint256 i; i < length; i++) {
             itemTypes_[i] = getItemType(i);
+        }
+    }
+
+    /**
+        @notice Get the URI for a voucher type
+        @return URI for token type
+    */
+    function uri(uint256 _id) external view returns (string memory) {
+        require(_id < s.itemTypes.length, "_id not found for  ticket");
+        return string(abi.encodePacked(s.itemsBaseUri, LibStrings.uintStr(_id)));
+    }
+
+    /**
+        @notice Set the base url for all voucher types
+        @param _value The new base url        
+    */
+    function setBaseURI(string memory _value) external {
+        // require(msg.sender == s.contractOwner, "ItemsFacet: Must be contract owner");
+        s.itemsBaseUri = _value;
+        for (uint256 i; i < s.itemTypes.length; i++) {
+            emit URI(string(abi.encodePacked(_value, LibStrings.uintStr(i))), i);
         }
     }
 
