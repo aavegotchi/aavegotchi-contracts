@@ -20,7 +20,7 @@ const collaterals = [
     secondaryColor: '#F9D792',
     cheekColor: '#F4AF24',
     svgId: 0,
-    eyeShapeSvgId: 16,
+    eyeShapeSvgId: 18,
     modifiers: [1, 0, 0, 0, 0, 0],
     conversionRate: 1 // 1 DAI equals 1 DAI
   },
@@ -32,7 +32,7 @@ const collaterals = [
     secondaryColor: '#EDD3FD',
     cheekColor: '#F696C6',
     svgId: 1,
-    eyeShapeSvgId: 17,
+    eyeShapeSvgId: 19,
     modifiers: [0, 1, 0, 0, 0, 0],
     conversionRate: 647 // 647 DAI = 1 ETH
   },
@@ -44,7 +44,7 @@ const collaterals = [
     secondaryColor: '#CFEEF4',
     cheekColor: '#F696C6',
     svgId: 2,
-    eyeShapeSvgId: 18,
+    eyeShapeSvgId: 17,
     modifiers: [0, 0, 1, 0, 0, 0],
     conversionRate: 85 // 30 DAI = 1 LEND
   },
@@ -57,7 +57,7 @@ const collaterals = [
     secondaryColor: '#D4DEF8',
     cheekColor: '#F696C6',
     svgId: 3,
-    eyeShapeSvgId: 19,
+    eyeShapeSvgId: 20,
     modifiers: [0, 0, 0, 1, 0, 0],
     conversionRate: 13
   },
@@ -83,7 +83,7 @@ const collaterals = [
     secondaryColor: '#B6D9FC',
     cheekColor: '#F696C6',
     svgId: 4,
-    eyeShapeSvgId: 22,
+    eyeShapeSvgId: 0,
     modifiers: [0, -1, 0, 0, 0, 0],
     conversionRate: 1
   },
@@ -96,7 +96,7 @@ const collaterals = [
     secondaryColor: '#D4E0F1',
     cheekColor: '#F696C6',
     svgId: 5,
-    eyeShapeSvgId: 23,
+    eyeShapeSvgId: 21,
     modifiers: [0, 0, -1, 0, 0, 0],
     conversionRate: 1 // 1 DAI = 1 USDC
   }
