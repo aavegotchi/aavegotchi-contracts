@@ -486,14 +486,17 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         emit SetAavegotchiName(_tokenId, existingName, _name);
     }
 
-    function interact(uint256 _tokenId) public {
-        address owner = s.aavegotchis[_tokenId].owner;
-        require(owner != address(0), "AavegotchiFacet: Invalid tokenId, is not owned or doesn't exist");
-        require(
-            msg.sender == owner || s.operators[owner][msg.sender] || s.approved[_tokenId] == msg.sender,
-            "AavegotchiFacet: Not owner of token or approved"
-        );
-        LibAppStorage.interact(_tokenId);
+    function interact(uint256[] calldata _tokenIds) external {
+        for (uint256 i; i < _tokenIds.length; i++) {
+            uint256 tokenId = _tokenIds[i];
+            address owner = s.aavegotchis[tokenId].owner;
+            require(owner != address(0), "AavegotchiFacet: Invalid tokenId, is not owned or doesn't exist");
+            require(
+                msg.sender == owner || s.operators[owner][msg.sender] || s.approved[tokenId] == msg.sender,
+                "AavegotchiFacet: Not owner of token or approved"
+            );
+            LibAppStorage.interact(tokenId);
+        }
     }
 
     function spendSkillPoints(uint256 _tokenId, int8[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
