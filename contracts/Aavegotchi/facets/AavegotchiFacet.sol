@@ -114,7 +114,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             }
             int256 mod = int8(_modifiers >> (i * 8));
             // set slot
-            numericTraits_ |= uint256(int256(value) + mod) << (16 * i);
+            numericTraits_ |= uint256((int256(value) + mod) & 0xffff) << (16 * i);
         }
     }
 
@@ -190,6 +190,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         uint256 randomNumber;
         uint256 status;
         int256[] numericTraits;
+        int256[] modifiedNumericTraits;
         uint256[EQUIPPED_WEARABLE_SLOTS] equippedWearables;
         address collateral;
         address escrow;
@@ -225,47 +226,41 @@ contract AavegotchiFacet is LibAppStorageModifiers {
                     number += boost + boostDecay;
                 }
             }
-            numericTraits_ |= uint256(number) << (i * 16);
+            numericTraits_ |= uint256(number & 0xffff) << (i * 16);
         }
     }
 
     function getAavegotchi(uint256 _tokenId) public view returns (AavegotchiInfo memory aavegotchiInfo_) {
         aavegotchiInfo_.tokenId = _tokenId;
-        aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
         aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
         aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
-        uint256 numericTraits = getNumericTraits(_tokenId);
-        aavegotchiInfo_.numericTraits = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
-        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
-            int256 number = int16(numericTraits >> (i * 16));
-            aavegotchiInfo_.numericTraits[i] = number;
-        }
-        uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
-        for (uint16 i; i < EQUIPPED_WEARABLE_SLOTS; i++) {
-            aavegotchiInfo_.equippedWearables[i] = uint16(l_equippedWearables >> (i * 16));
-        }
-        aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
-        aavegotchiInfo_.escrow = s.aavegotchis[_tokenId].escrow;
-        if (aavegotchiInfo_.collateral == address(0)) {
-            aavegotchiInfo_.stakedAmount = 0;
-        } else {
-            aavegotchiInfo_.stakedAmount = IERC20(aavegotchiInfo_.collateral).balanceOf(aavegotchiInfo_.escrow);
-        }
-        aavegotchiInfo_.minimumStake = s.aavegotchis[_tokenId].minimumStake;
-        aavegotchiInfo_.kinship = kinship(_tokenId);
-        aavegotchiInfo_.lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
-        aavegotchiInfo_.experience = s.aavegotchis[_tokenId].experience;
-        aavegotchiInfo_.toNextLevel = xpUntilNextLevel(s.aavegotchis[_tokenId].experience);
-        aavegotchiInfo_.level = LibAppStorage.aavegotchiLevel(s.aavegotchis[_tokenId].experience);
-        aavegotchiInfo_.usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
         aavegotchiInfo_.batchId = s.aavegotchis[_tokenId].batchId;
         aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
+        if (aavegotchiInfo_.status == LibAppStorage.STATUS_AAVEGOTCHI) {
+            aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
+            uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+            for (uint16 i; i < EQUIPPED_WEARABLE_SLOTS; i++) {
+                aavegotchiInfo_.equippedWearables[i] = uint16(l_equippedWearables >> (i * 16));
+            }
+            aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
+            aavegotchiInfo_.escrow = s.aavegotchis[_tokenId].escrow;
+            aavegotchiInfo_.stakedAmount = IERC20(aavegotchiInfo_.collateral).balanceOf(aavegotchiInfo_.escrow);
+            aavegotchiInfo_.minimumStake = s.aavegotchis[_tokenId].minimumStake;
+            aavegotchiInfo_.kinship = kinship(_tokenId);
+            aavegotchiInfo_.lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
+            aavegotchiInfo_.experience = s.aavegotchis[_tokenId].experience;
+            aavegotchiInfo_.toNextLevel = xpUntilNextLevel(s.aavegotchis[_tokenId].experience);
+            aavegotchiInfo_.level = LibAppStorage.aavegotchiLevel(s.aavegotchis[_tokenId].experience);
+            aavegotchiInfo_.usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
+            uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
+            aavegotchiInfo_.numericTraits = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
+            for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
+                aavegotchiInfo_.numericTraits[i] = int16(numericTraits >> (i * 16));
+            }
 
-        s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI
-            ? aavegotchiInfo_.rarityScore = modifiedRarityScore(_tokenId).rarityScore_
-            : 0;
-
+            (aavegotchiInfo_.modifiedNumericTraits, aavegotchiInfo_.rarityScore) = modifiedTraitsAndRarityScore(_tokenId);
+        }
         return aavegotchiInfo_;
     }
 
@@ -311,18 +306,13 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         }
     }
 
-    struct ModifiedRarityScore {
-        uint256 rarityScore_;
-        int256[] numericTraits_;
-    }
-
     //Only valid for claimed Aavegotchis
-    function modifiedRarityScore(uint256 _tokenId) public view returns (ModifiedRarityScore memory info_) {
+    function modifiedTraitsAndRarityScore(uint256 _tokenId) public view returns (int256[] memory numericTraits_, uint256 rarityScore_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
-        info_.numericTraits_ = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
+        numericTraits_ = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 equippedWearables = aavegotchi.equippedWearables;
-        uint256 numericTraits = getNumericTraits(_tokenId);
+        uint256 numericTraitsUint = getNumericTraits(_tokenId);
         uint256 wearableBonus;
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             uint256 wearableId = uint16(equippedWearables >> (16 * slot));
@@ -334,21 +324,21 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             uint256 traitModifiers = itemType.traitModifiers;
             uint256 newNumericTraits;
             for (uint256 j; j < LibAppStorage.NUMERIC_TRAITS_NUM; j++) {
-                int256 number = int16(numericTraits >> (j * 16));
+                int256 number = int16(numericTraitsUint >> (j * 16));
                 int256 traitModifier = int8(traitModifiers >> (j * 8));
                 number += traitModifier;
                 // clear bits first then assign
                 newNumericTraits |= (uint256(number) & 0xffff) << (j * 16);
             }
 
-            numericTraits = newNumericTraits;
+            numericTraitsUint = newNumericTraits;
             wearableBonus += itemType.rarityScoreModifier;
         }
-        uint256 baseRarity = baseRarityScore(numericTraits);
-        info_.rarityScore_ = baseRarity + wearableBonus;
+        uint256 baseRarity = baseRarityScore(numericTraitsUint);
+        rarityScore_ = baseRarity + wearableBonus;
         for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
-            int256 number = int16(numericTraits >> (i * 16));
-            info_.numericTraits_[i] = number;
+            int256 number = int16(numericTraitsUint >> (i * 16));
+            numericTraits_[i] = number;
         }
     }
 
@@ -515,7 +505,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             // clear trait value
             numericTraits &= ~(uint256(0xffff) << position);
             // set trait value
-            numericTraits |= uint256(trait) << position;
+            numericTraits |= uint256(trait & 0xffff) << position;
         }
         // handles underflow
         require(availableSkillPoints(_tokenId) >= totalUsed, "AavegotchiFacet: Not enough skill points");

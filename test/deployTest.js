@@ -533,7 +533,7 @@ describe('Items & Wearables', async function () {
     })
 
     // Retrieve the final score
-    const augmentedScore = (await global.aavegotchiFacet.modifiedRarityScore(testAavegotchiId)).rarityScore_.toString()
+    const augmentedScore = (await global.aavegotchiFacet.modifiedTraitsAndRarityScore(testAavegotchiId))[1].toString()
 
     // Check the math
     expect(Number(augmentedScore)).to.equal(finalScore)
@@ -775,35 +775,35 @@ describe('Using Consumables', async function () {
   })
 
   it('Using Trait Potion increases NRG by 1', async function () {
-    const beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    const beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
     // console.log('before traits:', beforeTraits[0].toString())
 
     // Trait potion
     const traitPotion = '37'
     await itemsFacet.useConsumable(testAavegotchiId, traitPotion)
 
-    const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
     // console.log('after traits:', afterTraits[0].toString())
     expect(afterTraits[0]).to.equal(Number(beforeTraits[0]) + 1)
   })
 
   it('Can replace trait bonuses', async function () {
-    const beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    const beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
     // console.log('before traits:', beforeTraits[0].toString())
     // Trait potion
     const greaterTraitpotion = '42'
     await itemsFacet.useConsumable(testAavegotchiId, greaterTraitpotion)
 
-    const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
     // console.log('after traits:', afterTraits[0].toString())
     expect(afterTraits[0]).to.equal(Number(beforeTraits[0]) + 1)
   })
 
   it('Trait bonuses should disappear after 24 hours', async function () {
-    const beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    const beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
     ethers.provider.send('evm_increaseTime', [25 * 3600])
     ethers.provider.send('evm_mine')
-    const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).numericTraits
+    const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
     expect(afterTraits[0]).to.equal(Number(beforeTraits[0]) - 1)
   })
 
