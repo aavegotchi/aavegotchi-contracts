@@ -197,7 +197,7 @@ describe('Opening Portals', async function () {
     const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(myPortals[0].tokenId)
     // console.log(JSON.stringify(ghosts, null, 4))
     ghosts.forEach(async (ghost) => {
-      const rarityScore = await global.aavegotchiFacet.baseRarityScore(ghost.numericTraitsUint, ghost.collateralType)
+      const rarityScore = await global.aavegotchiFacet.baseRarityScore(ghost.numericTraitsUint)
       expect(Number(rarityScore)).to.greaterThan(298)
       expect(Number(rarityScore)).to.lessThan(602)
     })
@@ -522,12 +522,7 @@ describe('Items & Wearables', async function () {
 
     modifiers.forEach((val, index) => {
       let traitValue = Number(aavegotchi.numericTraits[index])
-      const collateralMod = collateralModifiers[index]
 
-      // Collateral modifiers array only has 3 entries but there are 6 traits
-      if (index < collateralModifiers.length) {
-        traitValue += collateralMod
-      }
       traitValue += val
 
       if (traitValue >= 50) {
