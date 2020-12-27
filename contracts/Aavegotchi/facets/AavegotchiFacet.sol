@@ -206,6 +206,8 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         uint256 batchId;
         uint256 hauntId;
         uint256 rarityScore;
+        bool locked;
+        uint256 unlockTime;
     }
 
     function getNumericTraits(uint256 _tokenId) public view returns (uint256 numericTraits_) {
@@ -258,8 +260,11 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
                 aavegotchiInfo_.numericTraits[i] = int16(numericTraits >> (i * 16));
             }
-
             (aavegotchiInfo_.modifiedNumericTraits, aavegotchiInfo_.rarityScore) = modifiedTraitsAndRarityScore(_tokenId);
+            aavegotchiInfo_.locked = s.aavegotchis[_tokenId].unlockTime >= block.timestamp;
+            if (aavegotchiInfo_.locked) {
+                aavegotchiInfo_.unlockTime = s.aavegotchis[_tokenId].unlockTime;
+            }
         }
         return aavegotchiInfo_;
     }
