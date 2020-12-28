@@ -35,13 +35,13 @@ async function main () {
   await diamond.upgrade({
     diamondAddress: aavegotchiDiamondAddress,
     diamondCut: [
+      // AavegotchiFacet -----------------------------------
       [
         'AavegotchiFacet',
         diamond.FacetCutAction.Add,
         [
           'modifiedTraitsAndRarityScore(uint256)',
-          'interact(uint256[])',
-          'availableSkillPoints(uint256)'
+          'interact(uint256[])'
         ]
       ],
       [
@@ -49,13 +49,26 @@ async function main () {
         diamond.FacetCutAction.Replace,
         [
           'getAavegotchi(uint256)',
-          'portalAavegotchiTraits(uint256)'
+          'portalAavegotchiTraits(uint256)',
+          'availableSkillPoints(uint256)'
         ]
       ],
+      /// ///////////////////////////////////////////////////
+      // ItemsFacet
       [
-        'AavegotchiFacet',
+        'ItemsFacet',
+        diamond.FacetCutAction.Add,
+        [
+          'useConsumable(uint256,uint256[],uint256[])'
+        ]
+      ],
+      /// ///////////////////////////////////////////////////
+      // Remove functions
+      [
+        '',
         diamond.FacetCutAction.Remove,
         [
+          'useConsumable(uint256,uint256)',
           'interact(uint256)',
           'modifiedRarityScore(uint256)'
         ]
