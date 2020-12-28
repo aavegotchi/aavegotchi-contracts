@@ -759,7 +759,7 @@ describe('Using Consumables', async function () {
     expect(kinshipPotion.kinshipBonus).to.equal(10)
 
     const originalScore = await aavegotchiFacet.kinship(testAavegotchiId)
-    await itemsFacet.useConsumable(testAavegotchiId, '39')
+    await itemsFacet.useConsumable(testAavegotchiId, ['39'], ['1'])
     const boostedScore = await aavegotchiFacet.kinship(testAavegotchiId)
     expect(boostedScore).to.equal(Number(originalScore) + Number(kinshipPotion.kinshipBonus))
   })
@@ -769,7 +769,7 @@ describe('Using Consumables', async function () {
 
     // XP Potion
     const xpPotion = '38'
-    await itemsFacet.useConsumable(testAavegotchiId, xpPotion)
+    await itemsFacet.useConsumable(testAavegotchiId, [xpPotion], ['1'])
     const afterXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
     expect(afterXP).to.equal(Number(beforeXP) + 200)
   })
@@ -780,7 +780,7 @@ describe('Using Consumables', async function () {
 
     // Trait potion
     const traitPotion = '37'
-    await itemsFacet.useConsumable(testAavegotchiId, traitPotion)
+    await itemsFacet.useConsumable(testAavegotchiId, [traitPotion], ['1'])
 
     const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
     // console.log('after traits:', afterTraits[0].toString())
@@ -792,7 +792,7 @@ describe('Using Consumables', async function () {
     // console.log('before traits:', beforeTraits[0].toString())
     // Trait potion
     const greaterTraitpotion = '42'
-    await itemsFacet.useConsumable(testAavegotchiId, greaterTraitpotion)
+    await itemsFacet.useConsumable(testAavegotchiId, [greaterTraitpotion], ['1'])
 
     const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
     // console.log('after traits:', afterTraits[0].toString())

@@ -33,7 +33,7 @@ contract ItemsFacet is LibAppStorageModifiers {
 
     event EquipWearables(uint256 indexed _tokenId, uint256 _oldWearables, uint256 _newWearables);
 
-    event UseConsumable(uint256 indexed _tokenId, uint256 indexed _itemId);
+    event UseConsumable(uint256 indexed _tokenId, uint256[] _itemIds, uint256[] _quanities);
 
     uint16 internal constant SLOT_BODY = 0;
     uint16 internal constant SLOT_FACE = 1;
@@ -540,37 +540,46 @@ contract ItemsFacet is LibAppStorageModifiers {
         int256[5] traitsBonuses;
     }
 
-    function useConsumable(uint256 _tokenId, uint256 _itemId) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
-        // require(_itemIds.length == _values.length, "ItemsFacet: _itemIds length does not match _tokenIds length");
-        // for (uint256 i; i < _itemIds.length; i++) {
-        //  uint256 value = _values[i];
-        // uint256 consumableId = _itemIds[i];
-        ItemType memory itemType = s.itemTypes[_itemId];
-        require(itemType.category == LibAppStorage.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
-        uint256 bal = s.items[msg.sender][_itemId];
+    function useConsumable(
+        uint256 _tokenId,
+        uint256[] calldata _itemIds,
+        uint256[] calldata _quantities
+    ) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+        require(_itemIds.length == _quantities.length, "ItemsFacet: _itemIds length does not match _quantities length");
+        for (uint256 i; i < _itemIds.length; i++) {
+            uint256 itemId = _itemIds[i];
+            uint256 quantity = _quantities[i];
+            ItemType memory itemType = s.itemTypes[itemId];
+            require(itemType.category == LibAppStorage.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
+            uint256 bal = s.items[msg.sender][itemId];
 
-        require(1 <= bal, "Items: Do not have that many to consume");
-        s.items[msg.sender][_itemId] = bal - 1;
+            require(quantity <= bal, "Items: Do not have that many to consume");
+            s.items[msg.sender][itemId] = bal - quantity;
 
-        //Increase kinship permanently
-        if (itemType.kinshipBonus > 0) {
-            s.aavegotchis[_tokenId].interactionCount += uint16(itemType.kinshipBonus);
+            //Increase kinship permanently
+            if (itemType.kinshipBonus > 0) {
+                uint256 kinship = (uint256(itemType.kinshipBonus) * quantity) + s.aavegotchis[_tokenId].interactionCount;
+                require(kinship <= type(uint16).max, "ItemsFacet: kinship beyond max value");
+                s.aavegotchis[_tokenId].interactionCount = uint16(kinship);
+            }
+
+            //Boost traits and reset clock
+            if (itemType.traitModifiers != 0) {
+                s.aavegotchis[_tokenId].lastTemporaryBoost = uint40(block.timestamp);
+                s.aavegotchis[_tokenId].temporaryTraitBoosts = itemType.traitModifiers;
+            }
+
+            //Increase experience
+            if (itemType.experienceBonus > 0) {
+                uint256 experience = (uint256(itemType.experienceBonus) * quantity) + s.aavegotchis[_tokenId].experience;
+                require(experience <= type(uint32).max, "ItemsFacet: Experience beyond max value");
+                s.aavegotchis[_tokenId].experience = uint32(experience);
+            }
+
+            itemType.totalQuantity -= uint32(quantity);
+            LibAppStorage.interact(_tokenId);
         }
-
-        //Boost traits and reset clock
-        if (itemType.traitModifiers != 0) {
-            s.aavegotchis[_tokenId].lastTemporaryBoost = uint40(block.timestamp);
-            s.aavegotchis[_tokenId].temporaryTraitBoosts = itemType.traitModifiers;
-        }
-
-        //Increase experience
-        if (itemType.experienceBonus > 0) {
-            s.aavegotchis[_tokenId].experience += itemType.experienceBonus;
-        }
-
-        itemType.totalQuantity -= 1;
-        LibAppStorage.interact(_tokenId);
-        emit UseConsumable(_tokenId, _itemId);
-        emit TransferSingle(msg.sender, msg.sender, address(0), _itemId, 1);
+        emit UseConsumable(_tokenId, _itemIds, _quantities);
+        emit TransferBatch(msg.sender, msg.sender, address(0), _itemIds, _quantities);
     }
 }

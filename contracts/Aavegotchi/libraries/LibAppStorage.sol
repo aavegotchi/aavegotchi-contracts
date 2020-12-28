@@ -176,8 +176,8 @@ library LibAppStorage {
         uint32 high;
     }
 
-    function sqrt(uint x) internal pure returns (uint y) {
-        uint z = (x + 1) / 2;
+    function sqrt(uint256 x) internal pure returns (uint256 y) {
+        uint256 z = (x + 1) / 2;
         y = x;
         while (z < y) {
             y = z;
@@ -186,14 +186,13 @@ library LibAppStorage {
     }
 
     function aavegotchiLevel(uint32 _experience) internal pure returns (uint256 level_) {
-    if (_experience > 490050) {
-        return 99;
-    }
+        if (_experience > 490050) {
+            return 99;
+        }
 
-    level_ = (sqrt(2 * _experience) / 10);
+        level_ = (sqrt(2 * _experience) / 10);
         return level_ + 1;
     }
-
 
     function uintToSixteenBitArray(uint256 _data) internal pure returns (uint256[16] memory array_) {
         for (uint256 i; i < 16; i++) {
@@ -235,11 +234,11 @@ library LibAppStorage {
 contract LibAppStorageModifiers {
     AppStorage internal s;
     modifier onlyAavegotchiOwner(uint256 _tokenId) {
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
+        require(msg.sender == s.aavegotchis[_tokenId].owner, "LibAppStorage: Only aavegotchi owner can call this function");
         _;
     }
     modifier onlyUnlocked(uint256 _tokenId) {
-        require(s.aavegotchis[_tokenId].unlockTime < block.timestamp, "Only callable on unlocked Aavegotchis");
+        require(s.aavegotchis[_tokenId].unlockTime < block.timestamp, "LibAppStorage: Only callable on unlocked Aavegotchis");
         _;
     }
     // modifier onlyLocked(uint256 _tokenId) {
