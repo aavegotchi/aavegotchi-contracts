@@ -25,45 +25,39 @@ async function main () {
   console.log('---')
 
   // kovan
-  const aavegotchiDiamondAddress = '0xF70406a9a17d8262E6de256D51cAF58Af8BBa8A2'
+  const aavegotchiDiamondAddress = '0xDdC64462aEBA340cBE52E2B64eef20D0B23B5126'
   // Function: 0x3878bcdc portalAavegotchisSVG(uint256)
   // const diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', aavegotchiDiamondAddress)
   // console.log(await diamondLoupeFacet.facets())
   // const ownershipFacet = await ethers.getContractAt('OwnershipFacet', aavegotchiDiamondAddress)
   // console.log(await ownershipFacet.owner())
 
-  // mainnet
-  // const ghstContractAddress = '0x3F382DbD960E3a9bbCeaE22651E88158d2791550'
-
-  // eslint-disable-next-line no-unused-vars
-  //   await diamond.upgrade({
-  //     diamondAddress: aavegotchiDiamondAddress,
-  //     diamondCut: [
-  //       [
-  //         'AavegotchiFacet',
-  //         diamond.FacetCutAction.Replace,
-  //         [
-  //           'portalAavegotchisSVG(uint256)'
-  //         ]
-  //       ]
-  //     ],
-  //     txArgs: { gasLimit: 500000 }
-  //   })
   await diamond.upgrade({
     diamondAddress: aavegotchiDiamondAddress,
     diamondCut: [
       [
         'AavegotchiFacet',
-        diamond.FacetCutAction.Replace,
+        diamond.FacetCutAction.Add,
         [
-          'getAavegotchiSVG(uint256)'
+          'modifiedTraitsAndRarityScore(uint256)',
+          'interact(uint256[])',
+          'availableSkillPoints(uint256)'
         ]
       ],
       [
         'AavegotchiFacet',
-        diamond.FacetCutAction.Add,
+        diamond.FacetCutAction.Replace,
         [
-          'portalAavegotchisSVG(uint256)'
+          'getAavegotchi(uint256)',
+          'portalAavegotchiTraits(uint256)'
+        ]
+      ],
+      [
+        'AavegotchiFacet',
+        diamond.FacetCutAction.Remove,
+        [
+          'interact(uint256)',
+          'modifiedRarityScore(uint256)'
         ]
       ]
     ],
