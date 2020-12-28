@@ -7,7 +7,7 @@ const { collateralsSvgs } = require('../svgs/collaterals.js')
 const { eyeShapeSvgs } = require('../svgs/eyeShapes.js')
 const { wearableSets } = require('./wearableSets.js')
 
-function addCommas(nStr) {
+function addCommas (nStr) {
   nStr += ''
   const x = nStr.split('.')
   let x1 = x[0]
@@ -19,12 +19,11 @@ function addCommas(nStr) {
   return x1 + x2
 }
 
-function strDisplay(str) {
+function strDisplay (str) {
   return addCommas(str.toString())
 }
 
-async function main(scriptName) {
-
+async function main (scriptName) {
   console.log('SCRIPT NAME:', scriptName)
 
   const accounts = await ethers.getSigners()
@@ -95,7 +94,7 @@ async function main(scriptName) {
     throw Error('No network settings for ' + hre.network.name)
   }
 
-  async function deployFacets(...facets) {
+  async function deployFacets (...facets) {
     const instances = []
     for (let facet of facets) {
       let constructorArgs = []
@@ -203,22 +202,20 @@ async function main(scriptName) {
   itemsFacet = await ethers.getContractAt('ItemsFacet', aavegotchiDiamond.address)
 
   if (hre.network.name === 'hardhat') {
-
-    //Deploy test, use the real item types
-    if (scriptName === "deployTest") {
+    // Deploy test, use the real item types
+    if (scriptName === 'deployTest') {
       const { itemTypes } = require('./itemTypes.js')
       tx = await daoFacet.addItemTypes(itemTypes)
       receipt = await tx.wait()
     }
 
-    //Development test, use development items
+    // Development test, use development items
     else {
-      const { itemTypes } = require('./testItemTypes.js')
+      // const { itemTypes } = require('./testItemTypes.js')
+      const { itemTypes } = require('./itemTypes.js')
       tx = await daoFacet.addItemTypes(itemTypes)
       receipt = await tx.wait()
     }
-
-
   } else {
     const { itemTypes } = require('./itemTypes.js')
     tx = await daoFacet.addItemTypes(itemTypes)
@@ -239,7 +236,7 @@ async function main(scriptName) {
   // Upload Svg layers
   svgFacet = await ethers.getContractAt('SvgFacet', aavegotchiDiamond.address)
 
-  function setupSvg(...svgData) {
+  function setupSvg (...svgData) {
     const svgTypesAndSizes = []
     const svgs = []
     for (const [svgType, svg] of svgData) {
@@ -250,7 +247,7 @@ async function main(scriptName) {
   }
 
   // eslint-disable-next-line no-unused-vars
-  function printSizeInfo(svgTypesAndSizes) {
+  function printSizeInfo (svgTypesAndSizes) {
     console.log('------------- SVG Size Info ---------------')
     let sizes = 0
     for (const [svgType, size] of svgTypesAndSizes) {
@@ -265,9 +262,9 @@ async function main(scriptName) {
   console.log('Uploading aavegotchi and wearable Svgs')
   let svg, svgTypesAndSizes
   console.log('length:' + wearablesSvgs.length)
-    ;[svg, svgTypesAndSizes] = setupSvg(
-      ['wearables', wearablesSvgs.slice(0, 17)]
-    )
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['wearables', wearablesSvgs.slice(0, 17)]
+  )
   printSizeInfo(svgTypesAndSizes)
   tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded first 17 wearable SVGs')
@@ -275,9 +272,9 @@ async function main(scriptName) {
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-    ;[svg, svgTypesAndSizes] = setupSvg(
-      ['wearables', wearablesSvgs.slice(17, 36)]
-    )
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['wearables', wearablesSvgs.slice(17, 36)]
+  )
   printSizeInfo(svgTypesAndSizes)
   tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded 18 to 35 wearable SVGs')
@@ -285,9 +282,9 @@ async function main(scriptName) {
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-    ;[svg, svgTypesAndSizes] = setupSvg(
-      ['wearables', wearablesSvgs.slice(36)]
-    )
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['wearables', wearablesSvgs.slice(36)]
+  )
   printSizeInfo(svgTypesAndSizes)
   tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded rest of wearable SVGs')
@@ -295,9 +292,9 @@ async function main(scriptName) {
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-    ;[svg, svgTypesAndSizes] = setupSvg(
-      ['aavegotchi', aavegotchiSvgs]
-    )
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['aavegotchi', aavegotchiSvgs]
+  )
   printSizeInfo(svgTypesAndSizes)
   tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded aavegotchi SVGs')
@@ -306,10 +303,10 @@ async function main(scriptName) {
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   console.log('Uploading collaterals and eyeShapes')
-    ;[svg, svgTypesAndSizes] = setupSvg(
-      ['collaterals', collateralsSvgs],
-      ['eyeShapes', eyeShapeSvgs]
-    )
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['collaterals', collateralsSvgs],
+    ['eyeShapes', eyeShapeSvgs]
+  )
   // printSizeInfo(svgTypesAndSizes)
   tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded SVGs')

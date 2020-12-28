@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 import {AppStorage, SvgLayer} from "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../libraries/LibSvg.sol";
+import "../libraries/LibStrings.sol";
 import "./AavegotchiFacet.sol";
 
 // This contract was added as a facet to the diamond
@@ -123,16 +124,27 @@ contract SvgFacet is LibAppStorageModifiers {
             uint256 wearableId = uint16(equippedWearables >> (slotPosition * 16));
             if (wearableId > 0) {
                 ItemType storage wearableType = s.itemTypes[wearableId];
+                uint256 dimensions = wearableType.dimensions;
+                wearablesSvg = abi.encodePacked(
+                    wearablesSvg,
+                    '<svg class="gotchi-wearable" x="',
+                    // x
+                    LibStrings.uintStr(uint8(dimensions)),
+                    '" y="',
+                    // y
+                    LibStrings.uintStr(uint8(dimensions >> 8)),
+                    '">'
+                );
                 // right hand, then flip the wearable
                 if (slotPosition == 5) {
                     wearablesSvg = abi.encodePacked(
                         wearablesSvg,
                         '<g transform="scale(-1, 1) translate(-64, 0)">',
                         LibSvg.getSvg("wearables", wearableType.svgId),
-                        "</g>"
+                        "</g></svg>"
                     );
                 } else {
-                    wearablesSvg = abi.encodePacked(wearablesSvg, LibSvg.getSvg("wearables", wearableType.svgId));
+                    wearablesSvg = abi.encodePacked(wearablesSvg, LibSvg.getSvg("wearables", wearableType.svgId), "</svg>");
                 }
             }
         }
@@ -161,8 +173,8 @@ contract SvgFacet is LibAppStorageModifiers {
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-        AavegotchiFacet.PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = AavegotchiFacet(address(this))
-            .portalAavegotchiTraits(_tokenId);
+        AavegotchiFacet.PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits =
+            AavegotchiFacet(address(this)).portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
             address collateralType = l_portalAavegotchiTraits[i].collateralType;
             uint256 numericTraits = l_portalAavegotchiTraits[i].numericTraitsUint;
@@ -180,7 +192,20 @@ contract SvgFacet is LibAppStorageModifiers {
         require(_itemId < s.itemTypes.length, "ItemsFacet: _id not found for item");
         bytes memory svg;
         svg = LibSvg.getSvg("wearables", _itemId);
-        ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg, "</svg>"));
+        uint256 dimensions = s.itemTypes[_itemId].dimensions;
+        ag_ = string(
+            abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ',
+                // width
+                LibStrings.uintStr(uint8(dimensions >> (2 * 8))),
+                " ",
+                // height
+                LibStrings.uintStr(uint8(dimensions >> (3 * 8))),
+                '">',
+                svg,
+                "</svg>"
+            )
+        );
     }
 
     /***********************************|

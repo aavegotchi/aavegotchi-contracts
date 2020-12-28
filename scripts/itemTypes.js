@@ -32,7 +32,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 1,
@@ -50,8 +51,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
-
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 2,
@@ -69,7 +70,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
 
   },
   {
@@ -88,7 +90,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 4,
@@ -106,7 +109,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 5,
@@ -124,7 +128,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 6,
@@ -142,7 +147,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 7,
@@ -160,7 +166,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 8,
@@ -178,7 +185,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 9,
@@ -196,7 +204,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 10,
@@ -214,7 +223,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 11,
@@ -232,7 +242,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 12,
@@ -250,7 +261,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 13,
@@ -268,7 +280,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 14,
@@ -286,7 +299,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 15,
@@ -304,7 +318,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 16,
@@ -322,7 +337,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 17,
@@ -340,7 +356,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 18,
@@ -358,7 +375,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 19,
@@ -376,7 +394,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 20,
@@ -394,7 +413,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 21,
@@ -412,7 +432,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 22,
@@ -430,7 +451,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 23,
@@ -448,7 +470,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 24,
@@ -466,7 +489,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 25,
@@ -484,7 +508,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 26,
@@ -502,7 +527,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 27,
@@ -520,7 +546,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 28,
@@ -538,7 +565,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 29,
@@ -556,7 +584,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 30,
@@ -574,7 +603,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 31,
@@ -592,7 +622,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 32,
@@ -610,7 +641,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 33,
@@ -628,7 +660,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 34,
@@ -646,7 +679,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 35,
@@ -664,11 +698,11 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
 
-  //For testing only
-
+  // For testing only
 
   {
     svgId: 36,
@@ -686,7 +720,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 37,
@@ -704,7 +739,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 2,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 38,
@@ -722,7 +758,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 2,
     kinshipBonus: 0,
-    experienceBonus: 200
+    experienceBonus: 200,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 39,
@@ -740,7 +777,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 2,
     kinshipBonus: 10,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 40,
@@ -750,7 +788,7 @@ const itemTypes = [
     traitModifiers: [2, 2, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "head",
+    slotPositions: 'head',
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -758,7 +796,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
 
   {
@@ -769,7 +808,7 @@ const itemTypes = [
     traitModifiers: [2, 2, 0, 0, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: "head",
+    slotPositions: 'head',
     canPurchaseWithGhst: true,
     totalQuantity: 0,
     allowedCollaterals: [8],
@@ -777,7 +816,8 @@ const itemTypes = [
     canBeTransferred: true,
     category: 0,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
     svgId: 42,
@@ -795,13 +835,13 @@ const itemTypes = [
     canBeTransferred: true,
     category: 2,
     kinshipBonus: 0,
-    experienceBonus: 0
+    experienceBonus: 0,
+    dimensions: { x: 0, y: 0, width: 0, height: 0 }
   }
-
 
 ]
 
-function eightBitIntArrayToUint(array) {
+function eightBitIntArrayToUint (array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -813,7 +853,7 @@ function eightBitIntArrayToUint(array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function eightBitUintArrayToUint(array) {
+function eightBitUintArrayToUint (array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -825,7 +865,7 @@ function eightBitUintArrayToUint(array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function boolsArrayToUint16(bools) {
+function boolsArrayToUint16 (bools) {
   const uint = []
   for (const b of bools) {
     if (b) {
@@ -841,7 +881,7 @@ function boolsArrayToUint16(bools) {
   return parseInt(uint.join('').padStart(16, '0'), 2)
 }
 
-function sixteenBitArrayToUint(array) {
+function sixteenBitArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -851,6 +891,15 @@ function sixteenBitArrayToUint(array) {
   }
   if (array.length > 0) return ethers.BigNumber.from('0x' + uint.join(''))
   return ethers.BigNumber.from(0)
+}
+function dimensions ({ x, y, width, height }) {
+  const result = []
+  for (const v of [x, y, width, height]) {
+    result.unshift(v.toString(16).padStart(2, '0'))
+  }
+  // console.log('dimensions:')
+  // console.log(ethers.BigNumber.from('0x' + result.join('')))
+  return ethers.BigNumber.from('0x' + result.join(''))
 }
 
 // const WEARABLE_SLOT_BODY = 0
@@ -862,7 +911,7 @@ function sixteenBitArrayToUint(array) {
 // const WEARABLE_SLOT_PET = 6
 // const WEARABLE_SLOT_BG = 7
 
-function stringToSlotPositions(str) {
+function stringToSlotPositions (str) {
   if (str.length === 0) {
     return 0
   } else if (str === 'head') {
@@ -882,11 +931,12 @@ function stringToSlotPositions(str) {
   }
 }
 
-function getItemTypes() {
+function getItemTypes () {
   const result = []
   for (const itemType of itemTypes) {
     itemType.traitModifiers = eightBitIntArrayToUint(itemType.traitModifiers)
     itemType.slotPositions = stringToSlotPositions(itemType.slotPositions)
+    itemType.dimensions = dimensions(itemType.dimensions)
     // itemType.allowedCollaterals = sixteenBitArrayToUint(itemType.allowedCollaterals)
     result.push(itemType)
   }

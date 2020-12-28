@@ -1001,6 +1001,11 @@
               "internalType": "uint32",
               "name": "experienceBonus",
               "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "dimensions",
+              "type": "uint32"
             }
           ],
           "internalType": "struct ItemType[]",
@@ -1095,6 +1100,11 @@
             {
               "internalType": "uint32",
               "name": "experienceBonus",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "dimensions",
               "type": "uint32"
             }
           ],
@@ -2022,6 +2032,11 @@
               "internalType": "uint32",
               "name": "experienceBonus",
               "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "dimensions",
+              "type": "uint32"
             }
           ],
           "internalType": "struct ItemType",
@@ -2116,6 +2131,11 @@
             {
               "internalType": "uint32",
               "name": "experienceBonus",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "dimensions",
               "type": "uint32"
             }
           ],
