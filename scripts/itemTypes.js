@@ -14,6 +14,8 @@ const WEARABLE_SLOT_BG = 7
 // [etc, third item, second item, first item]
 // This applies to traitModifiers, slotPositions
 
+// traitModifiers = [Energy, Aggressiveness, Spookiness, Brain Size, Eye Shape, Eye Color]
+
 const itemTypes = [
 
   {
