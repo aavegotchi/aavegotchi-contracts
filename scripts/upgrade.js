@@ -13,7 +13,7 @@ const diamond = require('diamond-util')
 
 // const diamond = require('./diamond-util.js')
 
-async function main () {
+async function main() {
   // Buidler always runs the compile task when running scripts through it.
   // If this runs in a standalone fashion you may want to call compile manually
   // to make sure everything is compiled
@@ -44,22 +44,23 @@ async function main () {
       //     'interact(uint256[])'
       //   ]
       // ],
-      [
-        'AavegotchiFacet',
-        diamond.FacetCutAction.Replace,
-        [
-          'allAavegotchisOfOwner(address)'
-        ]
-      ]
+      // [
+      //  'AavegotchiFacet',
+      //  diamond.FacetCutAction.Replace,
+      //  [
+      //    'allAavegotchisOfOwner(address)'
+      //  ]
+      //]
+
       /// ///////////////////////////////////////////////////
       // ItemsFacet
-      // [
-      //   'ItemsFacet',
-      //   diamond.FacetCutAction.Add,
-      //   [
-      //     'useConsumable(uint256,uint256[],uint256[])'
-      //   ]
-      // ],
+      [
+        'ItemsFacet',
+        diamond.FacetCutAction.Replace,
+        [
+          'getItemTypes()'
+        ]
+      ],
       /// ///////////////////////////////////////////////////
       // Remove functions
       // [
