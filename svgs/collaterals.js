@@ -9,8 +9,8 @@ const collateralsSvgs = [
   '<g class="gotchi-collateral" fill="#a73796"><path d="M30.5 15h1v-2h-1z"/><path d="M31.5 12h1v1h-1z"/><path d="M33.5 13h-1v2h1zm-4 3h-2v1h1v2h1v-2h2v-1h-1v-1h-1z"/><path d="M34.5 15h-1v2h1z"/><path d="M35.5 17h-1v2h1zm-8 4h1v-2h-1z"/><path d="M35.5 19v2h1v-2z"/></g>',
   // 3, LINK Collateral
   '<g class="gotchi-collateral"><path d="M34 13v-1h-4v1h-1v1h-1v1h-1v4h1v1h1v1h1v1h4v-1h1v-1h1v-1h1v-4h-1v-1h-1v-1h-1zm-2 1h1v1h1v1h1v2h-1v1h-1v1h-2v-1h-1v-1h-1v-2h1v-1h1v-1h1z" fill="#0000b9"/></g>',
-  // 4, TUSD Collateral
-  '<g class="gotchi-collateral"><g fill="#282473"><path d="M37 18v-3h-1v4h1zm-3 2h1v1h-1z"/><path d="M35 19h1v1h-1zm-6 1h1v1h-1z"/><path d="M31 22h3v-1h-4v1z"/></g><g fill="#489ff8"><path d="M31.5 15h-1v1h1v3h1v-3h1v-1h-1zm1.5-3h-3v1h4v-1z"/><path d="M34 13h1v1h-1zm-7 3v3h1v-4h-1zm2-3h1v1h-1z"/><path d="M28 14h1v1h-1z"/></g></g>',
+  // 4, USDT Collateral
+  '<g class="gotchi-collateral" fill="#26a17b"><path d="M31 19h2v3h-2zm0-2v1h2v-1h3v-1h-3v-1h2v-2h-6v2h2v1h-3v1z"/><path d="M27 17h1v1h-1z"/><path d="M28 18h3v1h-3zm8-1h1v1h-1z"/><path d="M33 18h3v1h-3z"/></g>',
   // 5, USDC Collateral
   '<g class="gotchi-collateral" fill="#2664ba"><path d="M30 15v2h3v1h-3v1h1.5v1h1v-1H34v-3h-3v-1h3v-1h-1.5v-1h-1v1H30zm4 5h1v1h-1z"/><path d="M35 19h1v1h-1z"/><path d="M36 16v3h1v-5h-1v1zm-2-4h1v1h-1z"/><path d="M35 13h1v1h-1zm-7 5v-4h-1v5h1zm1 2h1v1h-1z"/><path d="M28 19h1v1h-1zm1-7h1v1h-1z"/><path d="M28 13h1v1h-1z"/></g>'
   // 7, YFI Collateral

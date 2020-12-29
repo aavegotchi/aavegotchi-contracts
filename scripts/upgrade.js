@@ -36,43 +36,41 @@ async function main () {
     diamondAddress: aavegotchiDiamondAddress,
     diamondCut: [
       // AavegotchiFacet -----------------------------------
-      [
-        'AavegotchiFacet',
-        diamond.FacetCutAction.Add,
-        [
-          'modifiedTraitsAndRarityScore(uint256)',
-          'interact(uint256[])'
-        ]
-      ],
+      // [
+      //   'AavegotchiFacet',
+      //   diamond.FacetCutAction.Add,
+      //   [
+      //     'modifiedTraitsAndRarityScore(uint256)',
+      //     'interact(uint256[])'
+      //   ]
+      // ],
       [
         'AavegotchiFacet',
         diamond.FacetCutAction.Replace,
         [
-          'getAavegotchi(uint256)',
-          'portalAavegotchiTraits(uint256)',
-          'availableSkillPoints(uint256)'
-        ]
-      ],
-      /// ///////////////////////////////////////////////////
-      // ItemsFacet
-      [
-        'ItemsFacet',
-        diamond.FacetCutAction.Add,
-        [
-          'useConsumable(uint256,uint256[],uint256[])'
-        ]
-      ],
-      /// ///////////////////////////////////////////////////
-      // Remove functions
-      [
-        '',
-        diamond.FacetCutAction.Remove,
-        [
-          'useConsumable(uint256,uint256)',
-          'interact(uint256)',
-          'modifiedRarityScore(uint256)'
+          'allAavegotchisOfOwner(address)'
         ]
       ]
+      /// ///////////////////////////////////////////////////
+      // ItemsFacet
+      // [
+      //   'ItemsFacet',
+      //   diamond.FacetCutAction.Add,
+      //   [
+      //     'useConsumable(uint256,uint256[],uint256[])'
+      //   ]
+      // ],
+      /// ///////////////////////////////////////////////////
+      // Remove functions
+      // [
+      //   '',
+      //   diamond.FacetCutAction.Remove,
+      //   [
+      //     'useConsumable(uint256,uint256)',
+      //     'interact(uint256)',
+      //     'modifiedRarityScore(uint256)'
+      //   ]
+      // ]
     ],
     txArgs: { gasLimit: 500000 }
   })
