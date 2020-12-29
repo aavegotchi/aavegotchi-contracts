@@ -33,7 +33,7 @@ contract ItemsFacet is LibAppStorageModifiers {
 
     event EquipWearables(uint256 indexed _tokenId, uint256 _oldWearables, uint256 _newWearables);
 
-    event UseConsumable(uint256 indexed _tokenId, uint256[] _itemIds, uint256[] _quanities);
+    event UseConsumables(uint256 indexed _tokenId, uint256[] _itemIds, uint256[] _quantities);
 
     uint16 internal constant SLOT_BODY = 0;
     uint16 internal constant SLOT_FACE = 1;
@@ -540,7 +540,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         int256[5] traitsBonuses;
     }
 
-    function useConsumable(
+    function useConsumables(
         uint256 _tokenId,
         uint256[] calldata _itemIds,
         uint256[] calldata _quantities
@@ -579,7 +579,7 @@ contract ItemsFacet is LibAppStorageModifiers {
             itemType.totalQuantity -= uint32(quantity);
             LibAppStorage.interact(_tokenId);
         }
-        emit UseConsumable(_tokenId, _itemIds, _quantities);
+        emit UseConsumables(_tokenId, _itemIds, _quantities);
         emit TransferBatch(msg.sender, msg.sender, address(0), _itemIds, _quantities);
     }
 }
