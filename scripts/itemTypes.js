@@ -578,7 +578,7 @@ const itemTypes = [
     traitModifiers: [0, 0, 0, -4, 0, 0],
     rarityScoreModifier: 0,
     setId: 0,
-    slotPositions: 'hands',
+    slotPositions: 'handLeft',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -922,6 +922,10 @@ function stringToSlotPositions (str) {
     return boolsArrayToUint16([true])
   } else if (str === 'hands') {
     return boolsArrayToUint16([true, true, false, false, false, false])
+  } else if (str === 'handLeft') {
+    return boolsArrayToUint16([true, false, false, false, false])
+  } else if (str === 'handRight') {
+    return boolsArrayToUint16([true, false, false, false, false, false])
   } else if (str === 'face') {
     return boolsArrayToUint16([true, false])
   } else if (str === 'pet') {
