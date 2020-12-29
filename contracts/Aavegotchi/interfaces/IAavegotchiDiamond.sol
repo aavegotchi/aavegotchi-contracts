@@ -61,7 +61,8 @@ interface IAavegotchiDiamond {
         uint256 minimumStake;
     }
 
-    function portalAavegotchiTraits(uint256 _tokenId) external view returns (PortalAavegotchiTraitsIO[10] memory portalAavegotchiTraits_);
+    /* function portalAavegotchiTraits(uint256 _tokenId) external view returns (PortalAavegotchiTraitsIO[10] memory portalAavegotchiTraits_);
+     */
 
     function ghstAddress() external view returns (address contract_);
 
@@ -112,9 +113,9 @@ interface IAavegotchiDiamond {
 
     function kinship(uint256 _tokenId) external view returns (uint256 score_);
 
-    function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_);
+    /*function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_);*/
 
-    function allAavegotchisOfOwner(address _owner) external view returns (AavegotchiInfo[] memory aavegotchiInfos_);
+    /*function allAavegotchisOfOwner(address _owner) external view returns (AavegotchiInfo[] memory aavegotchiInfos_);*/
 
     function ownerOf(uint256 _tokenId) external view returns (address owner_);
 
@@ -178,9 +179,9 @@ interface IAavegotchiDiamond {
         AavegotchiCollateralTypeInfo collateralTypeInfo;
     }
 
-    function collaterals() external view returns (address[] memory collateralTypes_);
+    /* function collaterals() external view returns (address[] memory collateralTypes_);*/
 
-    function getCollateralInfo() external view returns (AavegotchiCollateralTypeIO[] memory collateralInfo_);
+    /* function getCollateralInfo() external view returns (AavegotchiCollateralTypeIO[] memory collateralInfo_);*/
 
     function collateralBalance(uint256 _tokenId)
         external
@@ -204,17 +205,17 @@ interface IAavegotchiDiamond {
     /////////////////////////////////////////////////////////////////////////////////////////////
     event DaoTransferred(address indexed previousDao, address indexed newDao);
     event UpdateCollateralModifiers(uint256 _oldModifiers, uint256 _newModifiers);
-    event AddCollateralTypes(AavegotchiCollateralTypeIO[] _collateralTypes);
+    // event AddCollateralTypes(AavegotchiCollateralTypeIO[] _collateralTypes);
     event CreateHaunt(uint256 indexed _hauntId, uint256 _hauntMaxSize, uint256 _portalPrice, bytes32 _bodyColor);
     event GrantExperience(uint256[] _tokenIds, uint32[] _xpValues);
-    event AddWearableSets(WearableSet[] _wearableSets);
+    //event AddWearableSets(WearableSet[] _wearableSets);
     event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
 
     function gameManager() external view returns (address);
 
     function setDao(address _newDao) external;
 
-    function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external;
+    /* function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external;*/
 
     function updateCollateralModifiers(address _collateralType, uint256 _modifiers) external;
 
@@ -232,15 +233,17 @@ interface IAavegotchiDiamond {
 
     function grantExperience(uint256[] calldata _tokenIds, uint32[] calldata _xpValues) external;
 
-    function addItemTypes(ItemType[] memory _itemTypes) external;
+    //function addItemTypes(ItemType[] memory _itemTypes) external;
 
-    function addItemTypesAndSvgs(
+    /* function addItemTypesAndSvgs(
         ItemType[] memory _itemTypes,
         string calldata _svg,
         LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes
     ) external;
 
-    function addWearableSets(WearableSet[] memory _wearableSets) external;
+*/
+
+    /*  function addWearableSets(WearableSet[] memory _wearableSets) external;*/
 
     function setGameManager(address _gameManager) external;
 
@@ -278,18 +281,19 @@ interface IAavegotchiDiamond {
         uint256[] slotPositions;
     }
 
-    function itemBalancesOfTokenWithSlots(address _tokenContract, uint256 _tokenId)
+    /*  function itemBalancesOfTokenWithSlots(address _tokenContract, uint256 _tokenId)
         external
         view
         returns (ItemBalanceWithSlotsIO[] memory itemBalanceWithSlots_);
+        */
 
-    function itemBalancesWithSlots(address _owner) external view returns (ItemBalanceWithSlotsIO[] memory itemBalanceWithSlots_);
+    /* function itemBalancesWithSlots(address _owner) external view returns (ItemBalanceWithSlotsIO[] memory itemBalanceWithSlots_);*/
 
     function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory bals);
 
     function equippedWearables(uint256 _tokenId) external view returns (uint256[16] memory wearableIds_);
 
-    function getWearableSets() external view returns (WearableSetIO[] memory wearableSets_);
+    /*  function getWearableSets() external view returns (WearableSetIO[] memory wearableSets_);*/
 
     function getWearableSet(uint256 _index) external view returns (WearableSetIO memory wearableSet_);
 
@@ -297,7 +301,7 @@ interface IAavegotchiDiamond {
 
     function getItemType(uint256 _itemId) external view returns (ItemType memory itemType_);
 
-    function getItemTypes() external view returns (ItemType[] memory itemTypes_);
+    //function getItemTypes() external view returns (ItemType[] memory itemTypes_);
 
     function safeTransferFrom(
         address _from,
@@ -401,8 +405,7 @@ interface IAavegotchiDiamond {
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
 
-    event StoreSvg(LibSvg.SvgTypeAndSizes[] _typesAndSizes);
-
+    /* event StoreSvg(LibSvg.SvgTypeAndSizes[] _typesAndSizes);*/
     struct SvgLayerDetails {
         string primaryColor;
         string secondaryColor;
@@ -422,7 +425,7 @@ interface IAavegotchiDiamond {
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[10] memory svg_);
 
-    function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) external;
+    /* function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) external;*/
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
