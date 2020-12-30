@@ -188,7 +188,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 0, width: 0, height: 0 }
+    dimensions: { x: 32, y: 43.5, width: 40, height: 23 }
   },
   {
     svgId: 9,
@@ -245,7 +245,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 0, width: 0, height: 0 }
+    dimensions: { x: 32, y: 43.5, width: 40, height: 23 }
   },
   {
     svgId: 12,
