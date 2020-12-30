@@ -155,8 +155,9 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         view
         returns (PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory portalAavegotchiTraits_)
     {
-        uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
+        uint256 batchRandomNumber = LibVrf.getBatchRandomNumber(s.aavegotchis[_tokenId].batchId);
+        uint256 randomNumber = uint256(keccak256(abi.encodePacked(batchRandomNumber, _tokenId)));
         for (uint256 i; i < portalAavegotchiTraits_.length; i++) {
             InternalPortalAavegotchiTraitsIO memory single = singlePortalAavegotchiTraits(randomNumber, i);
             portalAavegotchiTraits_[i].randomNumber = single.randomNumber;
@@ -436,10 +437,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             require(s.aavegotchis[tokenId].status == LibAppStorage.STATUS_CLOSED_PORTAL, "AavegotchiFacet: Portal is not closed");
             require(msg.sender == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
             uint256 batchRandomNumber = LibVrf.getBatchRandomNumber(s.aavegotchis[tokenId].batchId);
-            require(batchRandomNumber != 0, "AavegotchiFacet: No random number for this portal");
-
-            s.aavegotchis[tokenId].randomNumber = uint256(keccak256(abi.encodePacked(batchRandomNumber, tokenId)));
-            // status is open portal
+            require(batchRandomNumber > 0, "AavegotchiFacet: No random number for this portal");
             s.aavegotchis[tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
         }
         emit OpenPortals(_tokenIds);
@@ -452,8 +450,9 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     ) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-
-        InternalPortalAavegotchiTraitsIO memory option = singlePortalAavegotchiTraits(aavegotchi.randomNumber, _option);
+        uint256 batchRandomNumber = LibVrf.getBatchRandomNumber(s.aavegotchis[_tokenId].batchId);
+        uint256 randomNumber = uint256(keccak256(abi.encodePacked(batchRandomNumber, _tokenId)));
+        InternalPortalAavegotchiTraitsIO memory option = singlePortalAavegotchiTraits(randomNumber, _option);
         aavegotchi.randomNumber = option.randomNumber;
         aavegotchi.numericTraits = option.numericTraits;
         aavegotchi.collateralType = option.collateralType;

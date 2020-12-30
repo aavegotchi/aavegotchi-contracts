@@ -51,14 +51,14 @@ contract ShopFacet {
     ) external {
         uint256 currentHauntId = s.currentHauntId;
         Haunt memory haunt = s.haunts[currentHauntId];
-        require(_ghst >= haunt.portalPrice, "AavegotchiFacet: Not enough GHST to buy portal");
+        require(_ghst >= haunt.portalPrice, "ShopFacet: Not enough GHST to buy portal");
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
-        require(ghstBalance >= _ghst, "AavegotchiFacet: Not enough GHST!");
+        require(ghstBalance >= _ghst, "ShopFacet: Not enough GHST!");
         uint16 hauntId = s.currentHauntId;
         uint256 numAavegotchisToPurchase = _ghst / haunt.portalPrice;
-        require(numAavegotchisToPurchase <= 50, "AavegotchiFacet: Cannot buy more than 50 portals at a time");
+        require(numAavegotchisToPurchase <= 50, "ShopFacet: Cannot buy more than 50 portals at a time");
         uint256 hauntCount = haunt.totalCount + numAavegotchisToPurchase;
-        require(hauntCount <= haunt.hauntMaxSize, "AavegotchiFacet: Exceeded max number of aavegotchis for this haunt");
+        require(hauntCount <= haunt.hauntMaxSize, "ShopFacet: Exceeded max number of aavegotchis for this haunt");
         s.haunts[currentHauntId].totalCount = uint24(hauntCount);
         uint32 nextBatchId;
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();

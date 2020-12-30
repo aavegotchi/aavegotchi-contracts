@@ -16,7 +16,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToInt8Array(uint, numBytes) {
+function uintToInt8Array (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -25,7 +25,7 @@ function uintToInt8Array(uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint(array) {
+function sixteenBitArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -37,7 +37,7 @@ function sixteenBitArrayToUint(array) {
   return ethers.BigNumber.from(0)
 }
 
-function sixteenBitIntArrayToUint(array) {
+function sixteenBitIntArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -53,7 +53,7 @@ function sixteenBitIntArrayToUint(array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds(uint) {
+function uintToItemIds (uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -103,7 +103,7 @@ describe('Buying Portals, VRF', function () {
     const balance = await ghstTokenContract.balanceOf(account)
     await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (50 * Math.pow(10, 18)).toFixed() // 1 portal
-    await truffleAssert.reverts(shopFacet.buyPortals(account, buyAmount, true), 'AavegotchiFacet: Not enough GHST to buy portal')
+    await truffleAssert.reverts(shopFacet.buyPortals(account, buyAmount, true), 'ShopFacet: Not enough GHST to buy portal')
   })
 
   it('Should purchase one portal', async function () {
@@ -359,7 +359,7 @@ describe('Collaterals and escrow', async function () {
   })
 })
 
-async function openAndClaim(tokenIds) {
+async function openAndClaim (tokenIds) {
   for (let index = 0; index < tokenIds.length; index++) {
     const id = tokenIds[index]
 
@@ -556,7 +556,7 @@ describe('Haunts', async function () {
     tx = await global.shopFacet.buyPortals(account, purchaseNumber, true)
 
     const singlePortal = ethers.utils.parseEther('100')
-    await truffleAssert.reverts(global.shopFacet.buyPortals(account, singlePortal, true), 'AavegotchiFacet: Exceeded max number of aavegotchis for this haunt')
+    await truffleAssert.reverts(global.shopFacet.buyPortals(account, singlePortal, true), 'ShopFacet: Exceeded max number of aavegotchis for this haunt')
 
     //  const receipt = await tx.wait()
   })
@@ -970,7 +970,7 @@ describe('Kinship', async function () {
   })
 })
 
-async function neglectAavegotchi(days) {
+async function neglectAavegotchi (days) {
   ethers.provider.send('evm_increaseTime', [86400 * days])
   ethers.provider.send('evm_mine')
   // daysSinceInteraction = 0
@@ -983,13 +983,13 @@ async function neglectAavegotchi(days) {
   console.log(`* Neglect Gotchi for ${days} days`)
 }
 
-async function interactAndUpdateTime() {
+async function interactAndUpdateTime () {
   await global.aavegotchiFacet.interact(['0'])
   ethers.provider.send('evm_increaseTime', [86400 / 2])
   ethers.provider.send('evm_mine')
 }
 
-function eightBitArrayToUint(array) {
+function eightBitArrayToUint (array) {
   const uint = []
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8)

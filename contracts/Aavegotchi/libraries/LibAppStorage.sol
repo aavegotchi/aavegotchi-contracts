@@ -2,7 +2,8 @@
 pragma solidity 0.7.4;
 import "../../shared/libraries/LibERC20.sol";
 import "../../shared/libraries/LibDiamond.sol";
-import "hardhat/console.sol";
+import "../libraries/LibVrf.sol";
+// import "hardhat/console.sol";
 
 struct Aavegotchi {
     // This 256 bit value is broken up into 16 16-bit slots for storing wearableIds

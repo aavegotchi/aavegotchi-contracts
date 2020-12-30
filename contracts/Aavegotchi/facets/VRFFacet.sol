@@ -89,7 +89,7 @@ contract VrfFacet {
         im_link = ILink(_link);
     }
 
-      /***********************************|
+    /***********************************|
    |            Read Functions          |
    |__________________________________*/
 
@@ -110,12 +110,11 @@ contract VrfFacet {
         batchCount_ = vrf_ds.batchCount;
     }
 
-     function linkBalance() external view returns (uint256 linkBalance_) {
+    function linkBalance() external view returns (uint256 linkBalance_) {
         linkBalance_ = im_link.balanceOf(address(this));
     }
 
-
-     /***********************************|
+    /***********************************|
    |            Write Functions        |
    |__________________________________*/
 
@@ -131,8 +130,6 @@ contract VrfFacet {
         require(im_link.balanceOf(address(this)) >= vrf_ds.fee, "VrfFacet: Not enough LINK");
         im_link.transferAndCall(im_vrfCoordinator, vrf_ds.fee, abi.encode(vrf_ds.keyHash, 0));
     }
-
-   
 
     /**
      * @notice fulfillRandomness handles the VRF response. Your contract must
@@ -171,6 +168,4 @@ contract VrfFacet {
         require(msg.sender == LibDiamond.contractOwner(), "VrfFacet: Must be contract owner");
         im_link.transfer(_to, _value);
     }
-
-   
 }
