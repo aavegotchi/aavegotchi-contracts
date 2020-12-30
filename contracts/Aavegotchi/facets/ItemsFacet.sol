@@ -264,14 +264,72 @@ contract ItemsFacet is LibAppStorageModifiers {
         return s.wearableSets.length;
     }
 
-    function getItemType(uint256 _itemId) public view returns (ItemType memory itemType_) {
-        require(_itemId < s.itemTypes.length, "ItemsFacet: Item type doesn't exist");
-        itemType_ = s.itemTypes[_itemId];
+    struct ItemTypeIO {
+        // treated as int8s array
+        // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
+        int256[] traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
+        // this is an array of uint indexes into the collateralTypes array
+
+        uint8[] allowedCollaterals; //[WEARABLE ONLY] The collaterals this wearable can be equipped to. An empty array is "any"
+        string name; //The name of the item
+        uint96 ghstPrice; //How much GHST this item costs
+        uint32 svgId; //The svgId of the item
+        uint32 maxQuantity; //Total number that can be minted of this item.
+        uint8 rarityScoreModifier; //Number from 1-50.
+        uint8 setId; //The id of the set. Zero is no set
+        // Each bit is a slot position. 1 is true, 0 is false
+        bool[] slotPositions; //[WEARABLE ONLY] The slots that this wearable can be added to.
+        bool canPurchaseWithGhst;
+        uint32 totalQuantity; //The total quantity of this item minted so far
+        uint8 minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
+        bool canBeTransferred;
+        uint8 category; // 0 is wearable, 1 is badge, 2 is consumable
+        int8 kinshipBonus; //[CONSUMABLE ONLY] How much this consumable boosts (or reduces) kinship score
+        uint32 experienceBonus; //[CONSUMABLE ONLY]
+        uint256 x;
+        uint256 y;
+        uint256 width;
+        uint256 height;
     }
 
-    function getItemTypes() external view returns (ItemType[] memory itemTypes_) {
+    function getItemType(uint256 _itemId) public view returns (ItemTypeIO memory itemType_) {
+        require(_itemId < s.itemTypes.length, "ItemsFacet: Item type doesn't exist");
+        ItemType storage itemType = s.itemTypes[_itemId];
+        uint256 traitModifiers = itemType.traitModifiers;
+        itemType_.traitModifiers = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
+        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
+            itemType_.traitModifiers[i] = int8(traitModifiers >> (i * 8));
+        }
+        itemType_.allowedCollaterals = itemType.allowedCollaterals;
+        itemType_.name = itemType.name;
+        itemType_.ghstPrice = itemType.ghstPrice;
+        itemType_.svgId = itemType.svgId;
+        itemType_.maxQuantity = itemType.maxQuantity;
+        itemType_.rarityScoreModifier = itemType.rarityScoreModifier;
+        itemType_.setId = itemType.setId;
+        itemType_.slotPositions = new bool[](16);
+        for (uint256 i; i < 16; i++) {
+            itemType_.slotPositions[i] = ((itemType.slotPositions >> i) & 1) == 1;
+        }
+        itemType_.canPurchaseWithGhst = itemType.canPurchaseWithGhst;
+        itemType_.totalQuantity = itemType.totalQuantity;
+        itemType_.minLevel = itemType.minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
+        itemType_.canBeTransferred = itemType.canBeTransferred;
+        itemType_.category = itemType.category;
+        itemType_.kinshipBonus = itemType.kinshipBonus;
+        itemType_.category = itemType.category;
+        itemType_.kinshipBonus = itemType.kinshipBonus;
+        itemType_.experienceBonus = itemType.experienceBonus;
+        uint256 dimensions = itemType.dimensions;
+        itemType_.x = uint8(dimensions);
+        itemType_.y = uint8(dimensions >> 8);
+        itemType_.width = uint8(dimensions >> 16);
+        itemType_.height = uint8(dimensions >> 24);
+    }
+
+    function getItemTypes() external view returns (ItemTypeIO[] memory itemTypes_) {
         uint256 length = s.itemTypes.length;
-        itemTypes_ = new ItemType[](length);
+        itemTypes_ = new ItemTypeIO[](length);
         for (uint256 i; i < length; i++) {
             itemTypes_[i] = getItemType(i);
         }
