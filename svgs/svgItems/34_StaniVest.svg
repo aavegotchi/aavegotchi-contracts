@@ -1,1 +1,24 @@
-<g><path d="M44 40h-2v1h3v-1z" fill="#fff"/><g fill="#f3410a"><path d="M29 41v6h1v-7h-1z"/><path d="M28 47h1v1h-1z"/><path d="M26 48h-9v1h11v-1h-1zm9-1h1v1h-1z"/><path d="M35 45v-5h-1v7h1v-1zm-19 0V34h1v1h2v1h2v1h2v1h2v1h2v1h2v-1h-1v-1h-2v-1h-2v-1h-2v-1h-2v-1h-2v-1h-3v14h1v-1z"/><path d="M48 33h-2v1h-2v1h-2v1h-2v1h-2v1h-2v1h-1v1h2v-1h2v-1h2v-1h2v-1h2v-1h2v-1h1v13h1V33zM16 47h1v1h-1z"/><path d="M47 47h1v1h-1z"/><path d="M45 48h-9v1h11v-1h-1z"/></g><path d="M27 40v-1h-2v-1h-2v-1h-2v-1h-2v-1h-2v-1h-1v13h1v1h11v-1h1v-7h-1zm20-6v1h-2v1h-2v1h-2v1h-2v1h-2v1h-2v7h1v1h11v-1h1V34h-1zm-4 6h2v1h-3v-1h1zm-11 4h-2v2h4v-2h-1zm0-3h-2v2h4v-2h-1z"/></g>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 25.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns:v="https://vecta.io/nano"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 34 16"
+	 style="enable-background:new 0 0 34 16;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+	.st1{fill:#F3410A;}
+</style>
+<g>
+	<path class="st0" d="M27,7v1h3V7H27z"/>
+	<g>
+		<path class="st1" d="M14,14h1V7h-1V14z"/>
+		<path class="st1" d="M13,14h1v1h-1V14z"/>
+		<path class="st1" d="M2,15v1h11v-1H2z M20,14h1v1h-1V14z"/>
+		<path class="st1" d="M20,7h-1v7h1V7z M1,1h1v1h2v1h2v1h2v1h2v1h2v1h2V6h-1V5h-2V4H9V3H7V2H5V1H3V0H0v14h1V1z"/>
+		<path class="st1" d="M31,0v1h-2v1h-2v1h-2v1h-2v1h-2v1h-1v1h2V6h2V5h2V4h2V3h2V2h2V1h1v13h1V0H31z M1,14h1v1H1V14z"/>
+		<path class="st1" d="M32,14h1v1h-1V14z"/>
+		<path class="st1" d="M21,15v1h11v-1H21z"/>
+	</g>
+	<path d="M12,7V6h-2V5H8V4H6V3H4V2H2V1H1v13h1v1h11v-1h1V7H12z M32,1v1h-2v1h-2v1h-2v1h-2v1h-2v1h-2v7h1v1h11v-1h1V1H32z M30,7v1h-3
+		V7H30z M15,11v2h4v-2H15z M15,8v2h4V8H15z"/>
+</g>
+</svg>
