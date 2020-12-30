@@ -450,6 +450,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     ) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
+        require(_option < PORTAL_AAVEGOTCHIS_NUM, "AavegotchiFacet: Only 10 aavegotchi options available");
         uint256 batchRandomNumber = LibVrf.getBatchRandomNumber(s.aavegotchis[_tokenId].batchId);
         uint256 randomNumber = uint256(keccak256(abi.encodePacked(batchRandomNumber, _tokenId)));
         InternalPortalAavegotchiTraitsIO memory option = singlePortalAavegotchiTraits(randomNumber, _option);

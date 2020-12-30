@@ -208,6 +208,8 @@ contract SvgFacet is LibAppStorageModifiers {
                 abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">',
                     getAavegotchiSvgLayers(collateralType, numericTraits),
+                    // get hands
+                    LibSvg.getSvg("aavegotchi", 3),
                     "</svg>"
                 )
             );
