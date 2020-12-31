@@ -24,6 +24,7 @@ contract DAOFacet is LibAppStorageModifiers {
     event GrantExperience(uint256[] _tokenIds, uint32[] _xpValues);
     event AddWearableSets(WearableSet[] _wearableSets);
     event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
+    event ItemTypeMaxQuantity(uint256[] _itemIds, uint32[] _maxQuanities);
 
     /***********************************|
    |             Read Functions         |
@@ -59,6 +60,17 @@ contract DAOFacet is LibAppStorageModifiers {
     function updateCollateralModifiers(address _collateralType, uint256 _modifiers) external onlyDaoOrOwner {
         emit UpdateCollateralModifiers(s.collateralTypeInfo[_collateralType].modifiers, _modifiers);
         s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
+    }
+
+    function updateItemTypeMaxQuantity(uint256[] calldata _itemIds, uint32[] calldata _maxQuantities) external onlyDaoOrOwner {
+        require(_itemIds.length == _maxQuantities.length, "DAOFacet: _itemIds length not the same as _newQuantities length");
+        for (uint256 i; i < _itemIds.length; i++) {
+            uint256 itemId = _itemIds[i];
+            uint32 maxQuantity = _maxQuantities[i];
+            require(maxQuantity >= s.itemTypes[itemId].totalQuantity, "DAOFacet: maxQuantity is greater than existing quantity");
+            s.itemTypes[itemId].maxQuantity = maxQuantity;
+        }
+        emit ItemTypeMaxQuantity(_itemIds, _maxQuantities);
     }
 
     function createHaunt(
