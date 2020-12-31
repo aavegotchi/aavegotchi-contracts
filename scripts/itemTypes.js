@@ -54,7 +54,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 12, width: 34, height: 20 }
+    dimensions: { x: 15, y: 2, width: 34, height: 20 }
   },
   {
     svgId: 2,
@@ -73,7 +73,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 48, width: 34, height: 14 }
+    dimensions: { x: 15, y: 41, width: 34, height: 14 }
 
   },
   {
@@ -93,7 +93,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 9, y: 36.5, width: 8, height: 11 }
+    dimensions: { x: 5, y: 31, width: 8, height: 11 }
   },
   {
     svgId: 4,
@@ -112,7 +112,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 12, width: 34, height: 20 }
+    dimensions: { x: 15, y: 2, width: 34, height: 20 }
   },
   {
     svgId: 5,
@@ -131,7 +131,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 48, width: 34, height: 14 }
+    dimensions: { x: 15, y: 41, width: 34, height: 14 }
   },
   {
     svgId: 6,
@@ -150,7 +150,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 8.5, y: 36.5, width: 9, height: 11 }
+    dimensions: { x: 4, y: 31, width: 9, height: 11 }
   },
   {
     svgId: 7,
@@ -169,7 +169,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 31.5, y: 14.5, width: 39, height: 27 }
+    dimensions: { x: 12, y: 1, width: 39, height: 27 }
   },
   {
     svgId: 8,
@@ -188,7 +188,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 43.5, width: 40, height: 23 }
+    dimensions: { x: 12, y: 32, width: 40, height: 23 }
   },
   {
     svgId: 9,
@@ -207,7 +207,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 6.5, y: 38.5, width: 7, height: 15 }
+    dimensions: { x: 3, y: 31, width: 7, height: 15 }
   },
   {
     svgId: 10,
@@ -226,7 +226,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 11, width: 46, height: 20 }
+    dimensions: { x: 9, y: 1, width: 46, height: 20 }
   },
   {
     svgId: 11,
@@ -245,7 +245,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 43.5, width: 40, height: 23 }
+    dimensions: { x: 12, y: 32, width: 40, height: 23 }
   },
   {
     svgId: 12,
@@ -264,7 +264,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 7.5, y: 34.5, width: 5, height: 19 }
+    dimensions: { x: 5, y: 25, width: 5, height: 19 }
   },
   {
     svgId: 13,
@@ -283,7 +283,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 23, width: 34, height: 34 }
+    dimensions: { x: 15, y: 6, width: 34, height: 34 }
   },
   {
     svgId: 14,
@@ -302,7 +302,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 26, width: 20, height: 8 }
+    dimensions: { x: 22, y: 22, width: 20, height: 8 }
   },
   {
     svgId: 15,
@@ -321,7 +321,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 44, width: 40, height: 23 }
+    dimensions: { x: 12, y: 33, width: 40, height: 23 }
   },
   {
     svgId: 16,
@@ -340,7 +340,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 44, width: 40, height: 23 }
+    dimensions: { x: 12, y: 33, width: 40, height: 23 }
   },
   {
     svgId: 17,
@@ -359,7 +359,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 7, y: 39, width: 12, height:16 }
+    dimensions: { x: 1, y: 31, width: 12, height: 16 }
   },
   {
     svgId: 18,
@@ -378,7 +378,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 34, y: 25.5, width: 38, height: 13 }
+    dimensions: { x: 15, y: 19, width: 38, height: 13 }
   },
   {
     svgId: 19,
@@ -397,7 +397,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 41.5, width: 40, height: 19 }
+    dimensions: { x: 12, y: 32, width: 40, height: 19 }
   },
   {
     svgId: 20,
@@ -416,7 +416,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 7.5, y: 38.5, width: 13, height: 13 }
+    dimensions: { x: 1, y: 32, width: 13, height: 13 }
   },
   {
     svgId: 21,
@@ -435,7 +435,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 20, width: 42, height: 28 }
+    dimensions: { x: 11, y: 6, width: 42, height: 28 }
   },
   {
     svgId: 22,
@@ -454,7 +454,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y:44, width: 50, height: 24 }
+    dimensions: { x: 7, y: 34, width: 50, height: 24 }
   },
   {
     svgId: 23,
@@ -473,7 +473,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 13, y: 42, width: 20, height: 20 }
+    dimensions: { x: 3, y: 32, width: 20, height: 20 }
   },
   {
     svgId: 24,
@@ -492,7 +492,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 18, width: 46, height: 24 }
+    dimensions: { x: 9, y: 6, width: 46, height: 24 }
   },
   {
     svgId: 25,
@@ -511,7 +511,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 44, width: 46, height: 22 }
+    dimensions: { x: 9, y: 33, width: 46, height: 22 }
   },
   {
     svgId: 26,
@@ -530,7 +530,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 7, y: 35, width: 14, height: 14 }
+    dimensions: { x: 0, y: 28, width: 14, height: 14 }
   },
   {
     svgId: 27,
@@ -549,7 +549,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 16, width: 34, height: 20 }
+    dimensions: { x: 15, y: 6, width: 34, height: 20 }
   },
   {
     svgId: 28,
@@ -568,7 +568,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 44, width: 40, height: 23 }
+    dimensions: { x: 12, y: 33, width: 40, height: 23 }
   },
   {
     svgId: 29,
@@ -587,7 +587,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 8.5, y: 35.5, width: 17, height: 23 }
+    dimensions: { x: 0, y: 24, width: 17, height: 23 }
   },
   {
     svgId: 30,
@@ -606,7 +606,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 17, width: 50, height: 34 }
+    dimensions: { x: 7, y: 0, width: 50, height: 34 }
   },
   {
     svgId: 31,
@@ -625,7 +625,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 44, width: 40, height: 23 }
+    dimensions: { x: 12, y: 33, width: 40, height: 23 }
   },
   {
     svgId: 32,
@@ -644,7 +644,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 6, y: 36.5, width: 12, height: 25 }
+    dimensions: { x: 0, y: 24, width: 12, height: 25 }
   },
   {
     svgId: 33,
@@ -663,7 +663,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 15, width: 34, height: 18 }
+    dimensions: { x: 15, y: 6, width: 34, height: 18 }
   },
   {
     svgId: 34,
@@ -682,7 +682,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 32, y: 41, width: 34, height: 16 }
+    dimensions: { x: 15, y: 33, width: 34, height: 16 }
   },
   {
     svgId: 35,
@@ -701,7 +701,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 33.5, y: 53.5, width: 57, height: 15 }
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
   },
 
   // For testing only

@@ -263,17 +263,17 @@ async function main (scriptName) {
   let svg, svgTypesAndSizes
   console.log('length:' + wearablesSvgs.length)
   ;[svg, svgTypesAndSizes] = setupSvg(
-    ['wearables', wearablesSvgs.slice(0, 17)]
+    ['wearables', wearablesSvgs.slice(0, 16)]
   )
   printSizeInfo(svgTypesAndSizes)
   tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  console.log('Uploaded first 17 wearable SVGs')
+  console.log('Uploaded first 16 wearable SVGs')
   receipt = await tx.wait()
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   ;[svg, svgTypesAndSizes] = setupSvg(
-    ['wearables', wearablesSvgs.slice(17, 36)]
+    ['wearables', wearablesSvgs.slice(16, 36)]
   )
   printSizeInfo(svgTypesAndSizes)
   tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)

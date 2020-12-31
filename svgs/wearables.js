@@ -9,30 +9,30 @@ const wearablesSvgs = [
   wearable('5_SnowCamoPants'), // body but no sleeves
   wearable('6_M67Grenade'),
   wearable('7_MarineCap'),
-  wearable('8_MarineJacket'), // bodyWearable("8_MarineJacket"),
+  bodyWearable('8_MarineJacket'), // bodyWearable("8_MarineJacket"),
   wearable('9_WalkieTalkie'),
   wearable('10_LinkWhiteHat'),
-  wearable('11_MessDress'), // bodyWearable("11_MessDress"),
+  bodyWearable('11_MessDress'), // bodyWearable("11_MessDress"),
   wearable('12_LinkBubbly'),
   wearable('13_SergeyBeard'),
   wearable('14_SergeyEyes'),
-  wearable('15_RedPlaid'), // bodyWearable("15_RedPlaid"),
-  wearable('16_BluePlaid'), //  bodyWearable("16_BluePlaid"),
+  bodyWearable('15_RedPlaid'), // bodyWearable("15_RedPlaid"),
+  bodyWearable('16_BluePlaid'), //  bodyWearable("16_BluePlaid"),
   wearable('17_LinkCube'),
   wearable('18_AaveHeroMask'),
-  wearable('19_AaveHeroShirt'), // bodyWearable("19_AaveHeroShirt"),
+  bodyWearable('19_AaveHeroShirt'), // bodyWearable("19_AaveHeroShirt"),
   wearable('20_AavePlush'),
   wearable('21_CaptainAaveMask'),
-  wearable('22_CaptainAaveSuit'), // bodyWearable("22_CaptainAaveSuit"),
+  bodyWearable('22_CaptainAaveSuit'), // bodyWearable("22_CaptainAaveSuit"),
   wearable('23_CaptainAaveShield'),
   wearable('24_ThaaveHelmet'),
   wearable('25_ThaaveSuit'), // bodyWearable("25_ThaaveSuit"),
   wearable('26_ThaaveHammer'),
   wearable('27_MarcHair'),
-  wearable('28_MarcOutfit'), // bodyWearable("28_MarcOutfit"),
+  bodyWearable('28_MarcOutfit'), // bodyWearable("28_MarcOutfit"),
   wearable('29_REKTSign'),
   wearable('30_JordanHair'),
-  wearable('31_JordanSuit'), // bodyWearable("31_JordanSuit"),
+  bodyWearable('31_JordanSuit'), // bodyWearable("31_JordanSuit"),
   wearable('32_AaveFlag'),
   wearable('33_StaniHair'),
   wearable('34_StaniVest'), // bodyWearable("34_StaniVest"),
@@ -47,8 +47,10 @@ const wearablesSvgs = [
 ]
 
 function stripSvg (svg) {
-  svg = svg.replace('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"  xmlns:v="https://vecta.io/nano">', '')
-  svg = svg.replace('</svg>', '')
+  // removes svg tag
+  if (svg.includes('viewBox')) {
+    svg = svg.slice(svg.indexOf('>') + 1)
+  }
   return svg
 }
 
@@ -57,16 +59,19 @@ function readSvg (name) {
 }
 
 function wearable (name) {
-  return readSvg(name)
+  let svg = readSvg(name)
+  svg = `<g>${svg}</g>`
+  return svg
 }
 
-function bodyWearable (name, sleevesUp, sleevesDown) {
-  body = readSvg(name)
-  sleevesUp = readSvg(sleevesUp)
-  sleevesUp = '<g class="gotchi-sleevesUp">' + sleevesUp + '</g>'
-  sleevesDown = readSvg(sleevesDown)
-  sleevesDown = '<g class="gotchi-sleevesDown">' + sleevesDown + '</g>'
-  return body + sleevesUp + sleevesDown
+function bodyWearable (name) {
+  let svg = readSvg(name)
+  const leftSleevesUp = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-up">' + readSvg(`${name}LeftUp`) + '</g>'
+  const leftSleeves = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' + readSvg(`${name}Left`) + '</g>'
+  const rightSleevesUp = '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-up">' + readSvg(`${name}RightUp`) + '</g>'
+  const rightSleeves = '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-down">' + readSvg(`${name}Right`) + '</g>'
+  svg = '<g>' + svg + leftSleevesUp + leftSleeves + rightSleevesUp + rightSleeves + '</g>'
+  return svg
 }
 
 exports.wearablesSvgs = wearablesSvgs

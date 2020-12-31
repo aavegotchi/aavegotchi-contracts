@@ -98,7 +98,7 @@ contract SvgFacet is LibAppStorageModifiers {
             details.cheekColor,
             ";}.gotchi-eyeColor{fill:#",
             details.eyeColor,
-            ";}.gotchi-sleevesUp{display:none;}",
+            ";}.gotchi-sleeves-up{display:none;}",
             ".gotchi-handsUp{display:none;}",
             ".gotchi-handsDownOpen{display:none;}",
             "</style>",
@@ -124,7 +124,9 @@ contract SvgFacet is LibAppStorageModifiers {
         if (_slotPosition == 5) {
             svg_ = abi.encodePacked(
                 svg_,
-                '<g transform="scale(-1, 1) translate(-64, 0)">',
+                '<g transform="scale(-1, 1) translate(-',
+                LibStrings.uintStr(64 - (uint8(dimensions) * 2)),
+                ', 0)">',
                 LibSvg.getSvg("wearables", wearableType.svgId),
                 "</g></svg>"
             );
