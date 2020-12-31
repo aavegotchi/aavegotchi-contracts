@@ -24,7 +24,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: '',
     canPurchaseWithGhst: false,
@@ -43,7 +43,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 1, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -62,7 +62,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 1, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -82,7 +82,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 1, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -101,7 +101,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [0, 1, 1, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -120,7 +120,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [0, 1, 1, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -139,7 +139,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [0, 2, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -158,7 +158,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 300,
     traitModifiers: [0, 2, 0, 1, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -177,7 +177,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 300,
     traitModifiers: [0, 2, 0, 1, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -196,7 +196,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 300,
     traitModifiers: [1, 0, 1, 1, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -215,7 +215,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 150,
     traitModifiers: [0, 2, 0, 2, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -234,7 +234,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 150,
     traitModifiers: [0, 2, 0, 2, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -253,7 +253,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 150,
     traitModifiers: [2, 0, 0, -2, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -272,7 +272,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [-1, -1, 0, 3, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'face',
     canPurchaseWithGhst: false,
@@ -291,7 +291,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [0, 0, 1, 4, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'eyes',
     canPurchaseWithGhst: false,
@@ -310,7 +310,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [3, 2, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -329,7 +329,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 5,
     traitModifiers: [-4, -2, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -348,7 +348,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 5,
     traitModifiers: [0, 0, 0, 6, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -367,7 +367,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 0, 1, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'face',
     canPurchaseWithGhst: false,
@@ -386,7 +386,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 0, 1, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -405,7 +405,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 0, 1, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -424,7 +424,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [1, 0, 1, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'face',
     canPurchaseWithGhst: false,
@@ -443,7 +443,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [1, 0, 1, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -462,7 +462,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [2, 0, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -481,7 +481,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 250,
     traitModifiers: [2, 0, 1, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -500,7 +500,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 250,
     traitModifiers: [2, 0, 1, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -519,7 +519,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 250,
     traitModifiers: [3, 0, 0, 1, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -538,7 +538,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 100,
     traitModifiers: [2, 2, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -557,7 +557,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 100,
     traitModifiers: [2, 2, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -576,7 +576,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 100,
     traitModifiers: [0, 0, 0, -4, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'handLeft',
     canPurchaseWithGhst: false,
@@ -595,7 +595,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [0, -2, 3, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -614,7 +614,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [-3, 0, 1, 1, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -633,7 +633,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [0, -2, 3, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -652,7 +652,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 5,
     traitModifiers: [0, -3, 0, 3, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -671,7 +671,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 5,
     traitModifiers: [3, -3, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -690,7 +690,7 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 5,
     traitModifiers: [0, -6, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'pet',
     canPurchaseWithGhst: false,
@@ -704,15 +704,363 @@ const itemTypes = [
     dimensions: { x: 5, y: 46, width: 57, height: 15 }
   },
 
-  // For testing only
+
+  //ETHEREUM RAFFLE
 
   {
     svgId: 36,
+    name: 'ETH Logo Glasses',
+    ghstPrice: 0,
+    maxQuantity: 1000,
+    traitModifiers: [0,0,0,-1,0,0],
+    
+    setId: 0,
+    slotPositions: 'head',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 37,
+    name: 'ETH T-Shirt',
+    ghstPrice: 0,
+    maxQuantity: 1000,
+    traitModifiers: [0,0,0,-1,0,0],
+    
+    setId: 0,
+    slotPositions: 'body',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 38,
+    name: '32 ETH Coin',
+    ghstPrice: 0,
+    maxQuantity: 1000,
+    traitModifiers: [0,0,0,-1,0,0],
+    
+    setId: 0,
+    slotPositions: 'handLeft',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 39,
+    name: 'Foxy Mask',
+    ghstPrice: 0,
+    maxQuantity: 500,
+    traitModifiers: [0,-2,0,0,0,0],
+    
+    setId: 0,
+    slotPositions: 'head',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 40,
+    name: 'Foxy Tail',
+    ghstPrice: 0,
+    maxQuantity: 500,
+    traitModifiers: [0,-1,-1,0,0,0],
+    
+    setId: 0,
+    slotPositions: 'pet',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 41,
+    name: 'Trezor Wallet',
+    ghstPrice: 0,
+    maxQuantity: 500,
+    traitModifiers: [-1,-1,0,0,0,0],
+    
+    setId: 0,
+    slotPositions: 'hands',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 42,
+    name: 'Eagle Mask',
+    ghstPrice: 0,
+    maxQuantity: 250,
+    traitModifiers: [1,0,2,0,0,0],
+    
+    setId: 0,
+    slotPositions: 'head',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 43,
+    name: 'Eagle Armor',
+    ghstPrice: 0,
+    maxQuantity: 250,
+    traitModifiers: [2,0,1,0,0,0],
+    
+    setId: 0,
+    slotPositions: 'body',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 44,
+    name: 'DAO Egg',
+    ghstPrice: 0,
+    maxQuantity: 250,
+    traitModifiers: [1,0,0,2,0,0],
+    
+    setId: 0,
+    slotPositions: 'handLeft',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 45,
+    name: 'Ape Mask',
+    ghstPrice: 0,
+    maxQuantity: 100,
+    traitModifiers: [0,1,0,-3,0,0],
+    
+    setId: 0,
+    slotPositions: 'head',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 46,
+    name: '#HalkRekt Shirt',
+    ghstPrice: 0,
+    maxQuantity: 100,
+    traitModifiers: [1,1,0,-2,0,0],
+    
+    setId: 0,
+    slotPositions: 'body',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 47,
+    name: 'Waifu Pillow',
+    ghstPrice: 0,
+    maxQuantity: 100,
+    traitModifiers: [0,0,0,-4,0,0],
+    
+    setId: 0,
+    slotPositions: 'hands',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 48,
+    name: 'Xibot Mohawk',
+    ghstPrice: 0,
+    maxQuantity: 50,
+    traitModifiers: [5,0,0,0,0,0],
+    
+    setId: 0,
+    slotPositions: 'head',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 49,
+    name: 'Coderdan Shades',
+    ghstPrice: 0,
+    maxQuantity: 50,
+    traitModifiers: [0,5,0,0,0,0],
+    
+    setId: 0,
+    slotPositions: 'eyes',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 50,
+    name: 'GldnXross Robe',
+    ghstPrice: 0,
+    maxQuantity: 50,
+    traitModifiers: [0,0,5,0,0,0],
+    
+    setId: 0,
+    slotPositions: 'body',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 51,
+    name: 'Mudgen Diamond',
+    ghstPrice: 0,
+    maxQuantity: 50,
+    traitModifiers: [0,0,0,5,0,0],
+    
+    setId: 0,
+    slotPositions: 'hands',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 52,
+    name: 'Galaxy Brain',
+    ghstPrice: 0,
+    maxQuantity: 5,
+    traitModifiers: [0,0,0,6,0,0],
+    
+    setId: 0,
+    slotPositions: 'head',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 53,
+    name: 'All-Seeing Eyes',
+    ghstPrice: 0,
+    maxQuantity: 5,
+    traitModifiers: [-6,0,0,0,0,0],
+    
+    setId: 0,
+    slotPositions: 'eyes',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  }, {
+    svgId: 54,
+    name: 'Llamacorn Shirt',
+    ghstPrice: 0,
+    maxQuantity: 5,
+    traitModifiers: [-3,-3,0,0,0,0],
+    
+    setId: 0,
+    slotPositions: 'body',
+    canPurchaseWithGhst: false,
+    totalQuantity: 0,
+    allowedCollaterals: [],
+    minLevel: 1,
+    canBeTransferred: true,
+    category: 0,
+    kinshipBonus: 0,
+    experienceBonus: 0,
+    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+  },
+
+
+  // For testing only
+
+  {
+    svgId: 55,
     name: 'Chemise Hawaienne Shirt',
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, -6, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: true,
@@ -726,12 +1074,12 @@ const itemTypes = [
     dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
-    svgId: 37,
+    svgId: 56,
     name: 'Trait Potion',
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [1, 1, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: '',
     canPurchaseWithGhst: true,
@@ -745,12 +1093,12 @@ const itemTypes = [
     dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
-    svgId: 38,
+    svgId: 57,
     name: 'Experience Potion',
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: '',
     canPurchaseWithGhst: true,
@@ -764,12 +1112,12 @@ const itemTypes = [
     dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
-    svgId: 39,
+    svgId: 58,
     name: 'Greater Kinship Potion',
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: '',
     canPurchaseWithGhst: true,
@@ -783,12 +1131,12 @@ const itemTypes = [
     dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
-    svgId: 40,
+    svgId: 59,
     name: 'SantaGotchi Hat',
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [2, 2, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: true,
@@ -803,12 +1151,12 @@ const itemTypes = [
   },
 
   {
-    svgId: 41,
+    svgId: 60,
     name: 'Collateral 8 Hat',
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [2, 2, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: true,
@@ -822,12 +1170,12 @@ const itemTypes = [
     dimensions: { x: 0, y: 0, width: 0, height: 0 }
   },
   {
-    svgId: 42,
+    svgId: 61,
     name: 'Greater Trait Potion',
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [2, 2, 0, 0, 0, 0],
-    rarityScoreModifier: 0,
+    
     setId: 0,
     slotPositions: '',
     canPurchaseWithGhst: true,
@@ -937,12 +1285,23 @@ function stringToSlotPositions (str) {
   }
 }
 
+function calculateRarityScoreModifier(maxQuantity) {
+  if (maxQuantity >= 1000) return 1;
+  if (maxQuantity >= 500) return 2;
+  if (maxQuantity >= 250) return 5;
+  if (maxQuantity >= 100) return 10;
+  if (maxQuantity >= 10) return 20;
+  if (maxQuantity >= 1) return 50;
+  return 0; 
+}
+
 function getItemTypes () {
   const result = []
   for (const itemType of itemTypes) {
     itemType.traitModifiers = eightBitIntArrayToUint(itemType.traitModifiers)
     itemType.slotPositions = stringToSlotPositions(itemType.slotPositions)
     itemType.dimensions = dimensions(itemType.dimensions)
+    itemType.rarityScoreModifier = calculateRarityScoreModifier(itemType.maxQuantity)
     // itemType.allowedCollaterals = sixteenBitArrayToUint(itemType.allowedCollaterals)
     result.push(itemType)
   }

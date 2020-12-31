@@ -442,7 +442,7 @@ describe('Items & Wearables', async function () {
 
   it('Cannot equip wearables that require a higher level', async function () {
     // This item requires level 5
-    const unequippableItem = '36'
+    const unequippableItem = '55'
     const wearableIds = sixteenBitArrayToUint([unequippableItem, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
     await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), 'ItemsFacet: Aavegotchi level lower than minLevel')
   })
@@ -453,7 +453,7 @@ describe('Items & Wearables', async function () {
 
   it('Cannot equip wearables that require a different collateral', async function () {
     // Can only be equipped by collateraltype 8
-    const unequippableItem = '41'
+    const unequippableItem = '60'
     // const wearable = await itemsFacet.getItemType(unequippableItem)
     const wearableIds = sixteenBitArrayToUint([unequippableItem, 0, 0, 0]) // fourth slot, third slot, second slot, first slot
     await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), 'ItemsFacet: Wearable cannot be equipped in this collateral type')
@@ -483,7 +483,7 @@ describe('Items & Wearables', async function () {
   })
 
   it('Can display aavegotchi with wearables', async function () {
-    const santaHat = '40'
+    const santaHat = '59'
 
     await global.daoFacet.mintItems(account, [santaHat], ['10'])
     await global.itemsFacet.transferToParent(
@@ -632,7 +632,7 @@ describe('Shop and Vouchers', async function () {
     expect(balances[36]).to.equal(0)
 
     // Hawaiian Shirt and SantaHat
-    await global.shopFacet.purchaseItemsWithGhst(account, ['36', '37', '38', '39', '40', '41', '42'], ['10', '10', '10', '100', '10', '10', '10'])
+    await global.shopFacet.purchaseItemsWithGhst(account, ['55', '56', '57', '58', '59', '60', '61'], ['10', '10', '10', '100', '10', '10', '10'])
     balances = await global.itemsFacet.itemBalances(account)
     expect(balances[36]).to.equal(10)
   })
@@ -755,11 +755,11 @@ describe('Leveling up', async function () {
 
 describe('Using Consumables', async function () {
   it('Using Kinship Potion increases kinship by 10', async function () {
-    const kinshipPotion = await itemsFacet.getItemType('39')
+    const kinshipPotion = await itemsFacet.getItemType('58')
     expect(kinshipPotion.kinshipBonus).to.equal(10)
 
     const originalScore = await aavegotchiFacet.kinship(testAavegotchiId)
-    await itemsFacet.useConsumables(testAavegotchiId, ['39'], ['1'])
+    await itemsFacet.useConsumables(testAavegotchiId, ['58'], ['1'])
     const boostedScore = await aavegotchiFacet.kinship(testAavegotchiId)
     expect(boostedScore).to.equal(Number(originalScore) + Number(kinshipPotion.kinshipBonus))
   })
@@ -768,7 +768,7 @@ describe('Using Consumables', async function () {
     const beforeXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
 
     // XP Potion
-    const xpPotion = '38'
+    const xpPotion = '57'
     await itemsFacet.useConsumables(testAavegotchiId, [xpPotion], ['1'])
     const afterXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
     expect(afterXP).to.equal(Number(beforeXP) + 200)
@@ -779,7 +779,7 @@ describe('Using Consumables', async function () {
     // console.log('before traits:', beforeTraits[0].toString())
 
     // Trait potion
-    const traitPotion = '37'
+    const traitPotion = '56'
     await itemsFacet.useConsumables(testAavegotchiId, [traitPotion], ['1'])
 
     const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
@@ -791,7 +791,7 @@ describe('Using Consumables', async function () {
     const beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
     // console.log('before traits:', beforeTraits[0].toString())
     // Trait potion
-    const greaterTraitpotion = '42'
+    const greaterTraitpotion = '61'
     await itemsFacet.useConsumables(testAavegotchiId, [greaterTraitpotion], ['1'])
 
     const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
@@ -809,7 +809,7 @@ describe('Using Consumables', async function () {
 
   it('Should show item balances with slots', async function () {
     const balances = await global.itemsFacet.itemBalancesWithSlots(account)
-    console.log('balances:', balances)
+  //  console.log('balances:', balances)
   })
 })
 
