@@ -37,13 +37,32 @@ const wearablesSvgs = [
   wearable('33_StaniHair'),
   wearable('34_StaniVest'), // bodyWearable("34_StaniVest"),
   wearable('35_AaveBoat'),
+  wearable('36_ETHMaxiGlasses'),
+  bodyWearable('37_ETHTShirt'),
+  wearable('38_32ETHCoin'),
+  wearable('39_FoxyMask'),
+  wearable('40_FoxyTail'),
+  wearable('41_TrezorWallet'),
+  wearable('42_NogaraEagleMask'),
+  bodyWearable('43_NogaraEagleArmor'),
+  wearable('44_DAOEgg'),
+  wearable('45_ApeMask'),
+  bodyWearable('46_HalfRektShirt'),
+  wearable('47_WaifuPillow'),
+  wearable('48_XibotMohawk'),
+  wearable('49_CoderdanShades'),
+  bodyWearable('50_GldnXrossRobe'),
+  wearable('51_MudgenDiamond'),
+  wearable('52_GalaxyBrain'),
+  wearable('53_AllSeeingEyes'),
+  bodyWearable('54_LlamacornShirt'),
 
   // For testing only
-  wearable('36_HawaiianShirt'), // bodyWearable("36_HawaiianShirt"),
-  wearable('37_FarmerHat'),
-  wearable('38_FarmerPants'), // body but no sleeves
-  wearable('39_FarmerStick'),
-  wearable('40_SantaGotchiHat')
+  wearable('55_HawaiianShirt'), // bodyWearable("36_HawaiianShirt"),
+  //wearable('37_FarmerHat'),
+ // wearable('38_FarmerPants'), // body but no sleeves
+ // wearable('39_FarmerStick'),
+  wearable('59_SantaGotchiHat')
 ]
 
 function stripSvg (svg) {
