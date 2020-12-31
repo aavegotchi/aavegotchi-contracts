@@ -625,6 +625,10 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             delete s.approved[_tokenId];
             emit Approval(owner, address(0), _tokenId);
         }
+        // unlock if locked
+        if (s.aavegotchis[_tokenId].unlockTime >= block.timestamp) {
+            s.aavegotchis[_tokenId].unlockTime = block.timestamp - 1;
+        }
         emit Transfer(_from, _to, _tokenId);
     }
 
