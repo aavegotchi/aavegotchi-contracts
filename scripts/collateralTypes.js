@@ -62,19 +62,6 @@ const collaterals = [
     conversionRate: 13
   },
 
-  // {
-  //   name: 'aSNX',
-  //   kovanAddress: '',
-  //   mainnetAddress: '',
-  //   primaryColor: '#0E0C15',
-  //   secondaryColor: '#DCDCDC',
-  //   cheekColor: '#F696C6',
-  //   svgId: 4,
-  //   eyeShapeSvgId: 21,
-  //   modifiers: [-1, 0, 0, 0, 0, 0],
-  //   conversionRate: 30
-  // },
-
   {
     name: 'aUSDT',
     kovanAddress: '0xff3c8bc103682fa918c954e84f5056ab4dd5189d',
@@ -99,56 +86,48 @@ const collaterals = [
     eyeShapeSvgId: 21,
     modifiers: [0, 0, -1, 0, 0, 0],
     conversionRate: 1 // 1 DAI = 1 USDC
+  },
+
+  {
+    name: 'aTUSD',
+    kovanAddress: '',
+    mainnetAddress: '',
+    primaryColor: '#2664BA',
+    secondaryColor: '#D4E0F1',
+    cheekColor: '#F696C6',
+    svgId: 5,
+    eyeShapeSvgId: 21,
+    modifiers: [0, 0, -1, 0, 0, 0],
+    conversionRate: 1 // 1 DAI = 1 USDC
+  },
+
+  {
+    name: 'aUNI',
+    kovanAddress: '',
+    mainnetAddress: '',
+    primaryColor: '#2664BA',
+    secondaryColor: '#D4E0F1',
+    cheekColor: '#F696C6',
+    svgId: 5,
+    eyeShapeSvgId: 21,
+    modifiers: [0, 0, -1, 0, 0, 0],
+    conversionRate: 1 // 1 DAI = 1 USDC
+  },
+  {
+    name: 'aYFI',
+    kovanAddress: '',
+    mainnetAddress: '',
+    primaryColor: '#2664BA',
+    secondaryColor: '#D4E0F1',
+    cheekColor: '#F696C6',
+    svgId: 5,
+    eyeShapeSvgId: 21,
+    modifiers: [0, 0, -1, 0, 0, 0],
+    conversionRate: 1 // 1 DAI = 1 USDC
   }
 
-  /* REN
-{
-  name: 'aLINK',
-  kovanAddress: '0xEC23855Ff01012E1823807CE19a790CeBc4A64dA',
-  mainnetAddress: '',
-  primaryColor: '#0000B9',
-  secondaryColor: '#D4DEF8',
-  cheekColor: '#F696C6',
-  svgId: 3,
-  eyeShapeSvgId: 19
-},
-*/
 
-  /* {
-         name: "aUSDT",
-         kovanAddress: "0xA01bA9fB493b851F4Ac5093A324CB081A909C34B",
-         mainnetAddress: "",
-         primaryColor: "",
-         secondaryColor: "",
-    cheekColor: '#F696C6',
-    svgId:,
-    eyeShapeSvgId:
-     },
-     */
-  /* {
-         name: "aBAT",
-         kovanAddress: "0x5ad67de6Fb697e92a7dE99d991F7CdB77EdF5F74",
-         mainnetAddress: "",
-         primaryColor: "",
-         secondaryColor: "",
-    cheekColor: '#F696C6',
-    svgId:,
-    eyeShapeSvgId:
-     },
-     */
-
-  // Mainnet only
-  /* {
-        name:"aYFI",
-        kovanAddress:"",
-        mainnetAddress:"0x12e51E77DAAA58aA0E9247db7510Ea4B46F9bEAd",
-        primaryColor:"#0074F9",
-        secondaryColor:"#C8E1FD",
-    cheekColor: '#F696C6',
-    svgId: 10,
-    eyeShapeSvgId:
-    }
-    */
+ 
 ]
 
 function eightBitArrayToUint (array) {
