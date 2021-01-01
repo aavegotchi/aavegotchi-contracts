@@ -168,7 +168,8 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint256 balance;
         uint256[] slotPositions;
         string name;
-        uint256 traitModifiers;
+        int256[] traitModifiers;
+        uint256 minLevel;
     }
 
     function itemBalancesOfTokenWithSlots(address _tokenContract, uint256 _tokenId)
@@ -184,11 +185,16 @@ contract ItemsFacet is LibAppStorageModifiers {
             if (bal == 0) {
                 continue;
             }
-            itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
-            itemBalanceWithSlots_[numItems].traitModifiers = s.itemTypes[id].traitModifiers;
             itemBalanceWithSlots_[numItems].itemId = id;
             itemBalanceWithSlots_[numItems].balance = bal;
             itemBalanceWithSlots_[numItems].slotPositions = slotPositionsToArray(id);
+            itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
+            uint256 traitModifiers = s.itemTypes[id].traitModifiers;
+            itemBalanceWithSlots_[numItems].traitModifiers = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
+            for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
+                itemBalanceWithSlots_[numItems].traitModifiers[i] = int8(traitModifiers >> (i * 8));
+            }
+            itemBalanceWithSlots_[numItems].minLevel = s.itemTypes[id].minLevel;
             numItems++;
         }
         assembly {
@@ -205,12 +211,16 @@ contract ItemsFacet is LibAppStorageModifiers {
             if (bal == 0) {
                 continue;
             }
-
-            itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
-            itemBalanceWithSlots_[numItems].traitModifiers = s.itemTypes[id].traitModifiers;
             itemBalanceWithSlots_[numItems].itemId = id;
             itemBalanceWithSlots_[numItems].balance = bal;
             itemBalanceWithSlots_[numItems].slotPositions = slotPositionsToArray(id);
+            itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
+            uint256 traitModifiers = s.itemTypes[id].traitModifiers;
+            itemBalanceWithSlots_[numItems].traitModifiers = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
+            for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
+                itemBalanceWithSlots_[numItems].traitModifiers[i] = int8(traitModifiers >> (i * 8));
+            }
+            itemBalanceWithSlots_[numItems].minLevel = s.itemTypes[id].minLevel;
             numItems++;
         }
         assembly {

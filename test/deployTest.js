@@ -483,7 +483,7 @@ describe('Items & Wearables', async function () {
   })
 
   it('Can display aavegotchi with wearables', async function () {
-    const santaHat = '59'
+    const santaHat = '56'
 
     await global.daoFacet.mintItems(account, [santaHat], ['10'])
     await global.itemsFacet.transferToParent(
@@ -503,7 +503,8 @@ describe('Items & Wearables', async function () {
     // Unequip all wearables
     let wearableIds = sixteenBitArrayToUint([0])
     await global.itemsFacet.equipWearables(testAavegotchiId, wearableIds)
-    const equipped = await global.itemsFacet.equippedWearables(testAavegotchiId)
+    let equipped = await global.itemsFacet.equippedWearables(testAavegotchiId)
+    // console.log('equipped:' + equipped)
     expect(equipped[testSlot]).to.equal('0')
 
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
@@ -511,14 +512,19 @@ describe('Items & Wearables', async function () {
     // Equip a wearable
     wearableIds = sixteenBitArrayToUint([testWearableId, 0, 0, 0])
     await global.itemsFacet.equipWearables(testAavegotchiId, wearableIds)
+    equipped = await global.itemsFacet.equippedWearables(testAavegotchiId)
+    // console.log('equipped:' + equipped)
+
+    // const [modifiedTraits, augmentedScore] = await global.aavegotchiFacet.modifiedTraitsAndRarityScore(testAavegotchiId)
+    // console.log(modifiedTraits)
+    // console.log(augmentedScore.toString())
 
     // Calculate bonuses
     const modifiers = uintToInt8Array(itemTypes[testWearableId].traitModifiers, 6)
+    const rarityScoreModifier = itemTypes[testWearableId].rarityScoreModifier
+    // console.log('Modifiers: ' + modifiers)
 
-    const collateral = (await global.collateralFacet.getCollateralInfo())[0].collateralTypeInfo
-    const collateralModifiers = uintToInt8Array(collateral.modifiers, 6)
-
-    let finalScore = 0
+    let finalScore = rarityScoreModifier
 
     modifiers.forEach((val, index) => {
       let traitValue = Number(aavegotchi.numericTraits[index])
@@ -533,7 +539,9 @@ describe('Items & Wearables', async function () {
     })
 
     // Retrieve the final score
-    const augmentedScore = (await global.aavegotchiFacet.modifiedTraitsAndRarityScore(testAavegotchiId))[1].toString()
+    const [modifiedTraits, augmentedScore] = await global.aavegotchiFacet.modifiedTraitsAndRarityScore(testAavegotchiId)
+    // console.log('numericTraits:' + aavegotchi.modifiedNumericTraits)
+    // console.log('Modified traits:' + modifiedTraits)
 
     // Check the math
     expect(Number(augmentedScore)).to.equal(finalScore)
@@ -629,12 +637,12 @@ describe('Shop and Vouchers', async function () {
   it('Should purchase items using GHST', async function () {
     let balances = await global.itemsFacet.itemBalances(account)
     // Start at 1 because 0 is always empty
-    expect(balances[36]).to.equal(0)
+    expect(balances[57]).to.equal(0)
 
     // Hawaiian Shirt and SantaHat
     await global.shopFacet.purchaseItemsWithGhst(account, ['55', '56', '57', '58', '59', '60', '61'], ['10', '10', '10', '100', '10', '10', '10'])
     balances = await global.itemsFacet.itemBalances(account)
-    expect(balances[36]).to.equal(10)
+    expect(balances[57]).to.equal(10)
   })
 })
 
@@ -755,11 +763,11 @@ describe('Leveling up', async function () {
 
 describe('Using Consumables', async function () {
   it('Using Kinship Potion increases kinship by 10', async function () {
-    const kinshipPotion = await itemsFacet.getItemType('58')
+    const kinshipPotion = await itemsFacet.getItemType('59')
     expect(kinshipPotion.kinshipBonus).to.equal(10)
 
     const originalScore = await aavegotchiFacet.kinship(testAavegotchiId)
-    await itemsFacet.useConsumables(testAavegotchiId, ['58'], ['1'])
+    await itemsFacet.useConsumables(testAavegotchiId, ['59'], ['1'])
     const boostedScore = await aavegotchiFacet.kinship(testAavegotchiId)
     expect(boostedScore).to.equal(Number(originalScore) + Number(kinshipPotion.kinshipBonus))
   })
@@ -768,7 +776,7 @@ describe('Using Consumables', async function () {
     const beforeXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
 
     // XP Potion
-    const xpPotion = '57'
+    const xpPotion = '58'
     await itemsFacet.useConsumables(testAavegotchiId, [xpPotion], ['1'])
     const afterXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
     expect(afterXP).to.equal(Number(beforeXP) + 200)
@@ -779,7 +787,7 @@ describe('Using Consumables', async function () {
     // console.log('before traits:', beforeTraits[0].toString())
 
     // Trait potion
-    const traitPotion = '56'
+    const traitPotion = '57'
     await itemsFacet.useConsumables(testAavegotchiId, [traitPotion], ['1'])
 
     const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
