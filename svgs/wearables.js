@@ -69,6 +69,7 @@ function stripSvg (svg) {
   // removes svg tag
   if (svg.includes('viewBox')) {
     svg = svg.slice(svg.indexOf('>') + 1)
+    svg = svg.replace('</svg>', '')
   }
   return svg
 }
@@ -78,8 +79,8 @@ function readSvg (name) {
 }
 
 function wearable (name) {
-  let svg = readSvg(name)
-  svg = `<g>${svg}</g>`
+  const svg = readSvg(name)
+  // svg = `<g>${svg}</g>`
   return svg
 }
 
