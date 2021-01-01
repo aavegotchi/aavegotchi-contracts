@@ -113,10 +113,6 @@ interface IAavegotchiDiamond {
 
     function kinship(uint256 _tokenId) external view returns (uint256 score_);
 
-    /*function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_);*/
-
-    /*function allAavegotchisOfOwner(address _owner) external view returns (AavegotchiInfo[] memory aavegotchiInfos_);*/
-
     function ownerOf(uint256 _tokenId) external view returns (address owner_);
 
     function getApproved(uint256 _tokenId) external view returns (address approved_);
@@ -179,9 +175,7 @@ interface IAavegotchiDiamond {
         AavegotchiCollateralTypeInfo collateralTypeInfo;
     }
 
-    /* function collaterals() external view returns (address[] memory collateralTypes_);*/
-
-    /* function getCollateralInfo() external view returns (AavegotchiCollateralTypeIO[] memory collateralInfo_);*/
+    function collateralInfo(uint256 _collateralId) external view returns (AavegotchiCollateralTypeIO memory collateralInfo_);
 
     function collateralBalance(uint256 _tokenId)
         external
@@ -205,17 +199,18 @@ interface IAavegotchiDiamond {
     /////////////////////////////////////////////////////////////////////////////////////////////
     event DaoTransferred(address indexed previousDao, address indexed newDao);
     event UpdateCollateralModifiers(uint256 _oldModifiers, uint256 _newModifiers);
-    // event AddCollateralTypes(AavegotchiCollateralTypeIO[] _collateralTypes);
+    event AddCollateralType(AavegotchiCollateralTypeIO _collateralType);
     event CreateHaunt(uint256 indexed _hauntId, uint256 _hauntMaxSize, uint256 _portalPrice, bytes32 _bodyColor);
     event GrantExperience(uint256[] _tokenIds, uint32[] _xpValues);
-    //event AddWearableSets(WearableSet[] _wearableSets);
+    event AddWearableSet(WearableSet _wearableSet);
+    event AddItemType(ItemType _itemType);
     event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
+
+    event ItemTypeMaxQuantity(uint256[] _itemIds, uint32[] _maxQuanities);
 
     function gameManager() external view returns (address);
 
     function setDao(address _newDao) external;
-
-    /* function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external;*/
 
     function updateCollateralModifiers(address _collateralType, uint256 _modifiers) external;
 
@@ -233,18 +228,6 @@ interface IAavegotchiDiamond {
 
     function grantExperience(uint256[] calldata _tokenIds, uint32[] calldata _xpValues) external;
 
-    //function addItemTypes(ItemType[] memory _itemTypes) external;
-
-    /* function addItemTypesAndSvgs(
-        ItemType[] memory _itemTypes,
-        string calldata _svg,
-        LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes
-    ) external;
-
-*/
-
-    /*  function addWearableSets(WearableSet[] memory _wearableSets) external;*/
-
     function setGameManager(address _gameManager) external;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -256,7 +239,8 @@ interface IAavegotchiDiamond {
     event TransferToParent(address indexed _toContract, uint256 indexed _toTokenId, uint256 indexed _tokenTypeId, uint256 _value);
     event TransferFromParent(address indexed _fromContract, uint256 indexed _fromTokenId, uint256 indexed _tokenTypeId, uint256 _value);
     event EquipWearables(uint256 indexed _tokenId, uint256 _oldWearables, uint256 _newWearables);
-    event UseConsumable(uint256 indexed _tokenId, uint256 indexed _itemId);
+
+    event UseConsumables(uint256 indexed _tokenId, uint256[] _itemIds, uint256[] _quantities);
 
     event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
 
@@ -281,27 +265,15 @@ interface IAavegotchiDiamond {
         uint256[] slotPositions;
     }
 
-    /*  function itemBalancesOfTokenWithSlots(address _tokenContract, uint256 _tokenId)
-        external
-        view
-        returns (ItemBalanceWithSlotsIO[] memory itemBalanceWithSlots_);
-        */
-
-    /* function itemBalancesWithSlots(address _owner) external view returns (ItemBalanceWithSlotsIO[] memory itemBalanceWithSlots_);*/
-
     function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory bals);
 
     function equippedWearables(uint256 _tokenId) external view returns (uint256[16] memory wearableIds_);
-
-    /*  function getWearableSets() external view returns (WearableSetIO[] memory wearableSets_);*/
 
     function getWearableSet(uint256 _index) external view returns (WearableSetIO memory wearableSet_);
 
     function totalWearableSets() external view returns (uint256);
 
     function getItemType(uint256 _itemId) external view returns (ItemType memory itemType_);
-
-    //function getItemTypes() external view returns (ItemType[] memory itemTypes_);
 
     function safeTransferFrom(
         address _from,
@@ -352,7 +324,11 @@ interface IAavegotchiDiamond {
         int256[5] traitsBonuses;
     }
 
-    function useConsumable(uint256 _tokenId, uint256 _itemId) external;
+    function useConsumables(
+        uint256 _tokenId,
+        uint256[] calldata _itemIds,
+        uint256[] calldata _quantities
+    ) external;
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////

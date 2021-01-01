@@ -19,10 +19,11 @@ contract DAOFacet is LibAppStorageModifiers {
         address collateralType;
         AavegotchiCollateralTypeInfo collateralTypeInfo;
     }
-    event AddCollateralTypes(AavegotchiCollateralTypeIO[] _collateralTypes);
+    event AddCollateralType(AavegotchiCollateralTypeIO _collateralType);
+    event AddItemType(ItemType _itemType);
     event CreateHaunt(uint256 indexed _hauntId, uint256 _hauntMaxSize, uint256 _portalPrice, bytes32 _bodyColor);
     event GrantExperience(uint256[] _tokenIds, uint32[] _xpValues);
-    event AddWearableSets(WearableSet[] _wearableSets);
+    event AddWearableSet(WearableSet _wearableSet);
     event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
     event ItemTypeMaxQuantity(uint256[] _itemIds, uint32[] _maxQuanities);
 
@@ -53,8 +54,8 @@ contract DAOFacet is LibAppStorageModifiers {
             s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
             s.collateralTypes.push(collateralType);
             s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
+            emit AddCollateralType(_collateralTypes[i]);
         }
-        emit AddCollateralTypes(_collateralTypes);
     }
 
     function updateCollateralModifiers(address _collateralType, uint256 _modifiers) external onlyDaoOrOwner {
@@ -149,6 +150,7 @@ contract DAOFacet is LibAppStorageModifiers {
         for (uint256 i; i < _itemTypes.length; i++) {
             uint256 itemId = itemTypesLength++;
             s.itemTypes.push(_itemTypes[i]);
+            emit AddItemType(_itemTypes[i]);
             emit TransferSingle(msg.sender, address(0), address(0), itemId, 0);
         }
     }
@@ -156,8 +158,8 @@ contract DAOFacet is LibAppStorageModifiers {
     function addWearableSets(WearableSet[] memory _wearableSets) external onlyDaoOrOwner {
         for (uint256 i; i < _wearableSets.length; i++) {
             s.wearableSets.push(_wearableSets[i]);
+            emit AddWearableSet(_wearableSets[i]);
         }
-        emit AddWearableSets(_wearableSets);
     }
 
     function setGameManager(address _gameManager) external onlyDaoOrOwner {

@@ -30,6 +30,12 @@ contract CollateralFacet is LibAppStorageModifiers {
         collateralTypes_ = s.collateralTypes;
     }
 
+    function collateralInfo(uint256 _collateralId) external view returns (AavegotchiCollateralTypeIO memory collateralInfo_) {
+        address collateral = s.collateralTypes[_collateralId];
+        collateralInfo_ = AavegotchiCollateralTypeIO(collateral, s.collateralTypeInfo[collateral]);
+        return collateralInfo_;
+    }
+
     function getCollateralInfo() external view returns (AavegotchiCollateralTypeIO[] memory collateralInfo_) {
         address[] memory collateralTypes = s.collateralTypes;
 
