@@ -721,7 +721,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 15, y: 19, width: 34, height: 13 }
   }, {
     svgId: 37,
     name: 'ETH T-Shirt',
@@ -739,7 +739,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 12, y: 32, width: 40, height: 19 }
   }, {
     svgId: 38,
     name: '32 ETH Coin',
@@ -757,7 +757,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 1, y: 31, width: 14, height: 14 }
   }, {
     svgId: 39,
     name: 'Foxy Mask',
@@ -775,7 +775,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 15, y: 2, width: 34, height: 40 }
   }, {
     svgId: 40,
     name: 'Foxy Tail',
@@ -793,7 +793,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 49, y: 22, width: 15, height: 28 }
   }, {
     svgId: 41,
     name: 'Trezor Wallet',
@@ -811,7 +811,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 4, y: 31, width: 9, height: 14 }
   }, {
     svgId: 42,
     name: 'Eagle Mask',
@@ -829,7 +829,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 5, y: 6, width: 54, height: 27 }
   }, {
     svgId: 43,
     name: 'Eagle Armor',
@@ -847,7 +847,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 12, y: 33, width: 40, height: 23 }
   }, {
     svgId: 44,
     name: 'DAO Egg',
@@ -865,7 +865,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 0, y: 27, width: 16, height: 22 }
   }, {
     svgId: 45,
     name: 'Ape Mask',
@@ -883,7 +883,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 11, y: 6, width: 42, height: 35 }
   }, {
     svgId: 46,
     name: '#HalkRekt Shirt',
@@ -901,7 +901,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 12, y: 32, width: 40, height: 19 }
   }, {
     svgId: 47,
     name: 'Waifu Pillow',
@@ -919,7 +919,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 0, y: 23, width: 17, height: 30 }
   }, {
     svgId: 48,
     name: 'Xibot Mohawk',
@@ -937,7 +937,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 27, y: 0, width: 10, height: 22 }
   }, {
     svgId: 49,
     name: 'Coderdan Shades',
@@ -955,7 +955,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 15, y: 19, width: 34, height: 12 }
   }, {
     svgId: 50,
     name: 'GldnXross Robe',
@@ -973,7 +973,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 10, y: 33, width: 44, height: 24 }
   }, {
     svgId: 51,
     name: 'Mudgen Diamond',
@@ -991,7 +991,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 2, y: 33, width: 13, height: 10 }
   }, {
     svgId: 52,
     name: 'Galaxy Brain',
@@ -1009,7 +1009,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 11, y: 1, width: 42, height: 22 }
   }, {
     svgId: 53,
     name: 'All-Seeing Eyes',
@@ -1027,7 +1027,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 18, y: 19, width: 28, height: 12 }
   }, {
     svgId: 54,
     name: 'Llamacorn Shirt',
@@ -1045,7 +1045,7 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 12, y: 32, width: 40, height: 21 }
   },
 
   // For testing only
