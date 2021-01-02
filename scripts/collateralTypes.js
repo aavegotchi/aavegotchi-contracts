@@ -121,7 +121,7 @@ const collaterals = [
     secondaryColor: '#C8E1FD',
     cheekColor: '#F696C6',
     svgId: 7,
-    eyeShapeSvgId: 21,
+    eyeShapeSvgId: 22,
     modifiers: [0, 0, -1, 0, 0, 0],
     conversionRate: 21772 // 1 DAI = 1 USDC
   }
