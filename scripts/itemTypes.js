@@ -35,7 +35,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 0, width: 0, height: 0 }
+    dimensions: { x: 0, y: 0, width: 0, height: 0 },
+    description: '',
+    author: ''
   },
   {
     svgId: 1,
@@ -53,7 +55,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 15, y: 2, width: 34, height: 20 }
+    dimensions: { x: 15, y: 2, width: 34, height: 20 },
+    description: '',
+    author: ''
   },
   {
     svgId: 2,
@@ -61,7 +65,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 1, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -72,8 +75,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 15, y: 41, width: 34, height: 14 }
-
+    dimensions: { x: 15, y: 41, width: 34, height: 14 },
+    description: '',
+    author: ''
   },
   {
     svgId: 3,
@@ -81,7 +85,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 1, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -92,7 +95,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 31, width: 8, height: 11 }
+    dimensions: { x: 5, y: 31, width: 8, height: 11 },
+    description: '',
+    author: ''
   },
   {
     svgId: 4,
@@ -100,7 +105,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [0, 1, 1, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -111,7 +115,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 15, y: 2, width: 34, height: 20 }
+    dimensions: { x: 15, y: 2, width: 34, height: 20 },
+    description: '',
+    author: ''
   },
   {
     svgId: 5,
@@ -119,7 +125,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [0, 1, 1, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -130,7 +135,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 15, y: 41, width: 34, height: 14 }
+    dimensions: { x: 15, y: 41, width: 34, height: 14 },
+    description: '',
+    author: ''
   },
   {
     svgId: 6,
@@ -138,7 +145,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [0, 2, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -149,7 +155,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 4, y: 31, width: 9, height: 11 }
+    dimensions: { x: 4, y: 31, width: 9, height: 11 },
+    description: '',
+    author: ''
   },
   {
     svgId: 7,
@@ -157,7 +165,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 300,
     traitModifiers: [0, 2, 0, 1, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -168,7 +175,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 12, y: 1, width: 39, height: 27 }
+    dimensions: { x: 12, y: 1, width: 39, height: 27 },
+    description: '',
+    author: ''
   },
   {
     svgId: 8,
@@ -176,7 +185,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 300,
     traitModifiers: [0, 2, 0, 1, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -187,7 +195,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 12, y: 32, width: 40, height: 23 }
+    dimensions: { x: 12, y: 32, width: 40, height: 23 },
+    description: '',
+    author: ''
   },
   {
     svgId: 9,
@@ -195,7 +205,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 300,
     traitModifiers: [1, 0, 1, 1, 0, 0],
-
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -206,7 +215,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 3, y: 31, width: 7, height: 15 }
+    dimensions: { x: 3, y: 31, width: 7, height: 15 },
+    description: '',
+    author: ''
   },
   {
     svgId: 10,
@@ -214,7 +225,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 150,
     traitModifiers: [0, 2, 0, 2, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -225,7 +235,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 9, y: 1, width: 46, height: 20 }
+    dimensions: { x: 9, y: 1, width: 46, height: 20 },
+    description: '',
+    author: ''
   },
   {
     svgId: 11,
@@ -233,7 +245,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 150,
     traitModifiers: [0, 2, 0, 2, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -244,7 +255,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 12, y: 32, width: 40, height: 23 }
+    dimensions: { x: 12, y: 32, width: 40, height: 23 },
+    description: '',
+    author: ''
   },
   {
     svgId: 12,
@@ -252,7 +265,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 150,
     traitModifiers: [2, 0, 0, -2, 0, 0],
-
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -263,7 +275,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 25, width: 5, height: 19 }
+    dimensions: { x: 5, y: 25, width: 5, height: 19 },
+    description: '',
+    author: ''
   },
   {
     svgId: 13,
@@ -271,7 +285,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [-1, -1, 0, 3, 0, 0],
-
     setId: 0,
     slotPositions: 'face',
     canPurchaseWithGhst: false,
@@ -282,7 +295,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 15, y: 6, width: 34, height: 34 }
+    dimensions: { x: 15, y: 6, width: 34, height: 34 },
+    description: '',
+    author: ''
   },
   {
     svgId: 14,
@@ -290,7 +305,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [0, 0, 1, 4, 0, 0],
-
     setId: 0,
     slotPositions: 'eyes',
     canPurchaseWithGhst: false,
@@ -301,7 +315,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 22, y: 22, width: 20, height: 8 }
+    dimensions: { x: 22, y: 22, width: 20, height: 8 },
+    description: '',
+    author: ''
   },
   {
     svgId: 15,
@@ -309,7 +325,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [3, 2, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -320,7 +335,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 12, y: 33, width: 40, height: 23 }
+    dimensions: { x: 12, y: 33, width: 40, height: 23 },
+    description: '',
+    author: ''
   },
   {
     svgId: 16,
@@ -328,7 +345,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 5,
     traitModifiers: [-4, -2, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -339,7 +355,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 12, y: 33, width: 40, height: 23 }
+    dimensions: { x: 12, y: 33, width: 40, height: 23 },
+    description: '',
+    author: ''
   },
   {
     svgId: 17,
@@ -347,7 +365,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 5,
     traitModifiers: [0, 0, 0, 6, 0, 0],
-
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -358,7 +375,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 1, y: 31, width: 12, height: 16 }
+    dimensions: { x: 1, y: 31, width: 12, height: 16 },
+    description: '',
+    author: ''
   },
   {
     svgId: 18,
@@ -366,7 +385,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 0, 1, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'face',
     canPurchaseWithGhst: false,
@@ -377,7 +395,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 15, y: 19, width: 38, height: 13 }
+    dimensions: { x: 15, y: 19, width: 38, height: 13 },
+    description: '',
+    author: ''
   },
   {
     svgId: 19,
@@ -385,7 +405,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 0, 1, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -396,7 +415,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 12, y: 32, width: 40, height: 19 }
+    dimensions: { x: 12, y: 32, width: 40, height: 19 },
+    description: '',
+    author: ''
   },
   {
     svgId: 20,
@@ -404,7 +425,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 0, 1, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -415,7 +435,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 1, y: 32, width: 13, height: 13 }
+    dimensions: { x: 1, y: 32, width: 13, height: 13 },
+    description: '',
+    author: ''
   },
   {
     svgId: 21,
@@ -423,7 +445,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [1, 0, 1, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'face',
     canPurchaseWithGhst: false,
@@ -434,7 +455,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 11, y: 6, width: 42, height: 28 }
+    dimensions: { x: 11, y: 6, width: 42, height: 28 },
+    description: '',
+    author: ''
   },
   {
     svgId: 22,
@@ -442,7 +465,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [1, 0, 1, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -453,7 +475,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 7, y: 34, width: 50, height: 24 }
+    dimensions: { x: 7, y: 34, width: 50, height: 24 },
+    description: '',
+    author: ''
   },
   {
     svgId: 23,
@@ -461,7 +485,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [2, 0, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -472,7 +495,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 3, y: 32, width: 20, height: 20 }
+    dimensions: { x: 3, y: 32, width: 20, height: 20 },
+    description: '',
+    author: ''
   },
   {
     svgId: 24,
@@ -480,7 +505,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 250,
     traitModifiers: [2, 0, 1, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -491,7 +515,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 9, y: 6, width: 46, height: 24 }
+    dimensions: { x: 9, y: 6, width: 46, height: 24 },
+    description: '',
+    author: ''
   },
   {
     svgId: 25,
@@ -499,7 +525,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 250,
     traitModifiers: [2, 0, 1, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -510,7 +535,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 9, y: 33, width: 46, height: 22 }
+    dimensions: { x: 9, y: 33, width: 46, height: 22 },
+    description: '',
+    author: ''
   },
   {
     svgId: 26,
@@ -518,7 +545,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 250,
     traitModifiers: [3, 0, 0, 1, 0, 0],
-
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -529,7 +555,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 28, width: 14, height: 14 }
+    dimensions: { x: 0, y: 28, width: 14, height: 14 },
+    description: '',
+    author: ''
   },
   {
     svgId: 27,
@@ -537,7 +565,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 100,
     traitModifiers: [2, 2, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -548,7 +575,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 15, y: 6, width: 34, height: 20 }
+    dimensions: { x: 15, y: 6, width: 34, height: 20 },
+    description: '',
+    author: ''
   },
   {
     svgId: 28,
@@ -556,7 +585,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 100,
     traitModifiers: [2, 2, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -567,7 +595,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 12, y: 33, width: 40, height: 23 }
+    dimensions: { x: 12, y: 33, width: 40, height: 23 },
+    description: '',
+    author: ''
   },
   {
     svgId: 29,
@@ -575,7 +605,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 100,
     traitModifiers: [0, 0, 0, -4, 0, 0],
-
     setId: 0,
     slotPositions: 'handLeft',
     canPurchaseWithGhst: false,
@@ -586,7 +615,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 24, width: 17, height: 23 }
+    dimensions: { x: 0, y: 24, width: 17, height: 23 },
+    description: '',
+    author: ''
   },
   {
     svgId: 30,
@@ -594,7 +625,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [0, -2, 3, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -605,7 +635,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 7, y: 0, width: 50, height: 34 }
+    dimensions: { x: 7, y: 0, width: 50, height: 34 },
+    description: '',
+    author: ''
   },
   {
     svgId: 31,
@@ -613,7 +645,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [-3, 0, 1, 1, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -624,7 +655,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 12, y: 33, width: 40, height: 23 }
+    dimensions: { x: 12, y: 33, width: 40, height: 23 },
+    description: '',
+    author: ''
   },
   {
     svgId: 32,
@@ -632,7 +665,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [0, -2, 3, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -643,7 +675,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 24, width: 12, height: 25 }
+    dimensions: { x: 0, y: 24, width: 12, height: 25 },
+    description: '',
+    author: ''
   },
   {
     svgId: 33,
@@ -651,7 +685,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 5,
     traitModifiers: [0, -3, 0, 3, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -662,7 +695,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 15, y: 6, width: 34, height: 18 }
+    dimensions: { x: 15, y: 6, width: 34, height: 18 },
+    description: '',
+    author: ''
   },
   {
     svgId: 34,
@@ -670,7 +705,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 5,
     traitModifiers: [3, -3, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -681,7 +715,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 15, y: 33, width: 34, height: 16 }
+    dimensions: { x: 15, y: 33, width: 34, height: 16 },
+    description: '',
+    author: ''
   },
   {
     svgId: 35,
@@ -689,7 +725,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 5,
     traitModifiers: [0, -6, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'petBack',
     canPurchaseWithGhst: false,
@@ -700,7 +735,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 46, width: 57, height: 15 }
+    dimensions: { x: 5, y: 46, width: 57, height: 15 },
+    description: '',
+    author: ''
   },
 
   // ETHEREUM RAFFLE
@@ -711,7 +748,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 0, 0, -1, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -722,14 +758,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 15, y: 19, width: 34, height: 13 }
-  }, {
+    dimensions: { x: 15, y: 19, width: 34, height: 13 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 37,
     name: 'ETH T-Shirt',
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 0, 0, -1, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -740,14 +778,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 12, y: 32, width: 40, height: 19 }
-  }, {
+    dimensions: { x: 12, y: 32, width: 40, height: 19 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 38,
     name: '32 ETH Coin',
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, 0, 0, -1, 0, 0],
-
     setId: 0,
     slotPositions: 'handLeft',
     canPurchaseWithGhst: false,
@@ -758,14 +798,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 1, y: 31, width: 14, height: 14 }
-  }, {
+    dimensions: { x: 1, y: 31, width: 14, height: 14 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 39,
     name: 'Foxy Mask',
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [0, -2, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -776,14 +818,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 15, y: 2, width: 34, height: 40 }
-  }, {
+    dimensions: { x: 15, y: 2, width: 34, height: 40 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 40,
     name: 'Foxy Tail',
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [0, -1, -1, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'petBack',
     canPurchaseWithGhst: false,
@@ -794,14 +838,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 49, y: 22, width: 15, height: 28 }
-  }, {
+    dimensions: { x: 49, y: 22, width: 15, height: 28 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 41,
     name: 'Trezor Wallet',
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [-1, -1, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -812,14 +858,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 4, y: 31, width: 9, height: 14 }
-  }, {
+    dimensions: { x: 4, y: 31, width: 9, height: 14 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 42,
     name: 'Eagle Mask',
     ghstPrice: 0,
     maxQuantity: 250,
     traitModifiers: [1, 0, 2, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -830,14 +878,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 5, y: 6, width: 54, height: 27 }
-  }, {
+    dimensions: { x: 5, y: 6, width: 54, height: 27 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 43,
     name: 'Eagle Armor',
     ghstPrice: 0,
     maxQuantity: 250,
     traitModifiers: [2, 0, 1, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -848,14 +898,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 12, y: 33, width: 40, height: 23 }
-  }, {
+    dimensions: { x: 12, y: 33, width: 40, height: 23 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 44,
     name: 'DAO Egg',
     ghstPrice: 0,
     maxQuantity: 250,
     traitModifiers: [1, 0, 0, 2, 0, 0],
-
     setId: 0,
     slotPositions: 'handLeft',
     canPurchaseWithGhst: false,
@@ -866,14 +918,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 27, width: 16, height: 22 }
-  }, {
+    dimensions: { x: 0, y: 27, width: 16, height: 22 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 45,
     name: 'Ape Mask',
     ghstPrice: 0,
     maxQuantity: 100,
     traitModifiers: [0, 1, 0, -3, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -884,14 +938,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 11, y: 6, width: 42, height: 35 }
-  }, {
+    dimensions: { x: 11, y: 6, width: 42, height: 35 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 46,
     name: '#HalkRekt Shirt',
     ghstPrice: 0,
     maxQuantity: 100,
     traitModifiers: [1, 1, 0, -2, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -902,14 +958,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 12, y: 32, width: 40, height: 19 }
-  }, {
+    dimensions: { x: 12, y: 32, width: 40, height: 19 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 47,
     name: 'Waifu Pillow',
     ghstPrice: 0,
     maxQuantity: 100,
     traitModifiers: [0, 0, 0, -4, 0, 0],
-
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -920,14 +978,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 23, width: 17, height: 30 }
-  }, {
+    dimensions: { x: 0, y: 23, width: 17, height: 30 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 48,
     name: 'Xibot Mohawk',
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [5, 0, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -938,14 +998,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 27, y: 0, width: 10, height: 22 }
-  }, {
+    dimensions: { x: 27, y: 0, width: 10, height: 22 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 49,
     name: 'Coderdan Shades',
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [0, 5, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'eyes',
     canPurchaseWithGhst: false,
@@ -956,14 +1018,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 15, y: 19, width: 34, height: 12 }
-  }, {
+    dimensions: { x: 15, y: 19, width: 34, height: 12 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 50,
     name: 'GldnXross Robe',
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [0, 0, 5, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -974,14 +1038,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 10, y: 33, width: 44, height: 24 }
-  }, {
+    dimensions: { x: 10, y: 33, width: 44, height: 24 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 51,
     name: 'Mudgen Diamond',
     ghstPrice: 0,
     maxQuantity: 50,
     traitModifiers: [0, 0, 0, 5, 0, 0],
-
     setId: 0,
     slotPositions: 'hands',
     canPurchaseWithGhst: false,
@@ -992,14 +1058,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 2, y: 33, width: 13, height: 10 }
-  }, {
+    dimensions: { x: 2, y: 33, width: 13, height: 10 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 52,
     name: 'Galaxy Brain',
     ghstPrice: 0,
     maxQuantity: 5,
     traitModifiers: [0, 0, 0, 6, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: false,
@@ -1010,14 +1078,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 11, y: 1, width: 42, height: 22 }
-  }, {
+    dimensions: { x: 11, y: 1, width: 42, height: 22 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 53,
     name: 'All-Seeing Eyes',
     ghstPrice: 0,
     maxQuantity: 5,
     traitModifiers: [-6, 0, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'eyes',
     canPurchaseWithGhst: false,
@@ -1028,14 +1098,16 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 18, y: 19, width: 28, height: 12 }
-  }, {
+    dimensions: { x: 18, y: 19, width: 28, height: 12 },
+    description: '',
+    author: ''
+  },
+  {
     svgId: 54,
     name: 'Llamacorn Shirt',
     ghstPrice: 0,
     maxQuantity: 5,
     traitModifiers: [-3, -3, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: false,
@@ -1046,7 +1118,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 12, y: 32, width: 40, height: 21 }
+    dimensions: { x: 12, y: 32, width: 40, height: 21 },
+    description: '',
+    author: ''
   },
 
   // For testing only
@@ -1057,7 +1131,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [0, -6, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'body',
     canPurchaseWithGhst: true,
@@ -1068,7 +1141,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 0, width: 0, height: 0 }
+    dimensions: { x: 0, y: 0, width: 0, height: 0 },
+    description: '',
+    author: ''
   },
   {
     svgId: 56,
@@ -1076,7 +1151,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [2, 2, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: true,
@@ -1087,7 +1161,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 0, width: 0, height: 0 }
+    dimensions: { x: 0, y: 0, width: 0, height: 0 },
+    description: '',
+    author: ''
   },
   {
     svgId: 57,
@@ -1095,7 +1171,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [1, 1, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: '',
     canPurchaseWithGhst: true,
@@ -1106,7 +1181,9 @@ const itemTypes = [
     category: 2,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 0, width: 0, height: 0 }
+    dimensions: { x: 0, y: 0, width: 0, height: 0 },
+    description: '',
+    author: ''
   },
   {
     svgId: 58,
@@ -1114,7 +1191,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [],
-
     setId: 0,
     slotPositions: '',
     canPurchaseWithGhst: true,
@@ -1125,7 +1201,9 @@ const itemTypes = [
     category: 2,
     kinshipBonus: 0,
     experienceBonus: 200,
-    dimensions: { x: 0, y: 0, width: 0, height: 0 }
+    dimensions: { x: 0, y: 0, width: 0, height: 0 },
+    description: '',
+    author: ''
   },
   {
     svgId: 59,
@@ -1133,7 +1211,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [],
-
     setId: 0,
     slotPositions: '',
     canPurchaseWithGhst: true,
@@ -1144,7 +1221,9 @@ const itemTypes = [
     category: 2,
     kinshipBonus: 10,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 0, width: 0, height: 0 }
+    dimensions: { x: 0, y: 0, width: 0, height: 0 },
+    description: '',
+    author: ''
   },
 
   {
@@ -1153,7 +1232,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 1000,
     traitModifiers: [2, 2, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: 'head',
     canPurchaseWithGhst: true,
@@ -1164,7 +1242,9 @@ const itemTypes = [
     category: 0,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 0, width: 0, height: 0 }
+    dimensions: { x: 0, y: 0, width: 0, height: 0 },
+    description: '',
+    author: ''
   },
   {
     svgId: 61,
@@ -1172,7 +1252,6 @@ const itemTypes = [
     ghstPrice: 0,
     maxQuantity: 500,
     traitModifiers: [2, 2, 0, 0, 0, 0],
-
     setId: 0,
     slotPositions: '',
     canPurchaseWithGhst: true,
@@ -1183,7 +1262,9 @@ const itemTypes = [
     category: 2,
     kinshipBonus: 0,
     experienceBonus: 0,
-    dimensions: { x: 0, y: 0, width: 0, height: 0 }
+    dimensions: { x: 0, y: 0, width: 0, height: 0 },
+    description: '',
+    author: ''
   }
 
 ]

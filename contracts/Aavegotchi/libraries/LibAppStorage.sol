@@ -31,6 +31,8 @@ struct Aavegotchi {
 }
 
 struct ItemType {
+    string description;
+    string author;
     // treated as int8s array
     // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     uint256 traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
@@ -254,17 +256,14 @@ contract LibAppStorageModifiers {
     }
 
     modifier onlyDaoOrOwner {
-        require(
-            msg.sender == s.dao || msg.sender == LibDiamond.contractOwner() || msg.sender == address(this),
-            "AavegotchiFacet: Do not have access"
-        );
+        require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner() || msg.sender == address(this), "LibAppStorage: Do not have access");
         _;
     }
 
     modifier onlyOwnerOrDaoOrGameManager {
         require(
             msg.sender == s.dao || msg.sender == LibDiamond.contractOwner() || msg.sender == address(this) || msg.sender == s.gameManager,
-            "AavegotchiFacet: Do not have access"
+            "LibAppStorage: Do not have access"
         );
         _;
     }

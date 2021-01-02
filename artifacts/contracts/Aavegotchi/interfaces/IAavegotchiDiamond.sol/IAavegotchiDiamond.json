@@ -76,6 +76,16 @@
         {
           "components": [
             {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "author",
+              "type": "string"
+            },
+            {
               "internalType": "uint256",
               "name": "traitModifiers",
               "type": "uint256"
@@ -1616,6 +1626,16 @@
       "outputs": [
         {
           "components": [
+            {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "author",
+              "type": "string"
+            },
             {
               "internalType": "uint256",
               "name": "traitModifiers",

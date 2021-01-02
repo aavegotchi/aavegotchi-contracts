@@ -105,7 +105,7 @@ const wearablesSvgs = [
   wearable('101_WitchHat'),
   bodyWearable('102_WitchCape'),
   wearable('103_WitchWand'),
-git 
+
   // For testing only
   wearable('105_HawaiianShirt') // bodyWearable("36_HawaiianShirt"),
   // wearable('37_FarmerHat'),

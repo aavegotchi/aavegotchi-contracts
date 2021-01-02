@@ -300,6 +300,8 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint256 y;
         uint256 width;
         uint256 height;
+        string description;
+        string author;
     }
 
     function getItemType(uint256 _itemId) public view returns (ItemTypeIO memory itemType_) {
@@ -335,6 +337,8 @@ contract ItemsFacet is LibAppStorageModifiers {
         itemType_.y = uint8(dimensions >> 8);
         itemType_.width = uint8(dimensions >> 16);
         itemType_.height = uint8(dimensions >> 24);
+        itemType_.description = itemType.description;
+        itemType_.author = itemType.author;
     }
 
     function getItemTypes() external view returns (ItemTypeIO[] memory itemTypes_) {
