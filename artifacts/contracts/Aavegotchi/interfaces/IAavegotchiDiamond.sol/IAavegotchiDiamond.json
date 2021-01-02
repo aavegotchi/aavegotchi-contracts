@@ -7,6 +7,203 @@
       "anonymous": false,
       "inputs": [
         {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "collateralType",
+              "type": "address"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "modifiers",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes3",
+                  "name": "primaryColor",
+                  "type": "bytes3"
+                },
+                {
+                  "internalType": "bytes3",
+                  "name": "secondaryColor",
+                  "type": "bytes3"
+                },
+                {
+                  "internalType": "bytes3",
+                  "name": "cheekColor",
+                  "type": "bytes3"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "svgId",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "eyeShapeSvgId",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint16",
+                  "name": "conversionRate",
+                  "type": "uint16"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "delisted",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct AavegotchiCollateralTypeInfo",
+              "name": "collateralTypeInfo",
+              "type": "tuple"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IAavegotchiDiamond.AavegotchiCollateralTypeIO",
+          "name": "_collateralType",
+          "type": "tuple"
+        }
+      ],
+      "name": "AddCollateralType",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "traitModifiers",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8[]",
+              "name": "allowedCollaterals",
+              "type": "uint8[]"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "uint96",
+              "name": "ghstPrice",
+              "type": "uint96"
+            },
+            {
+              "internalType": "uint32",
+              "name": "svgId",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "maxQuantity",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "rarityScoreModifier",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "setId",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint16",
+              "name": "slotPositions",
+              "type": "uint16"
+            },
+            {
+              "internalType": "bool",
+              "name": "canPurchaseWithGhst",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint32",
+              "name": "totalQuantity",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "minLevel",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bool",
+              "name": "canBeTransferred",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint8",
+              "name": "category",
+              "type": "uint8"
+            },
+            {
+              "internalType": "int8",
+              "name": "kinshipBonus",
+              "type": "int8"
+            },
+            {
+              "internalType": "uint32",
+              "name": "experienceBonus",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "dimensions",
+              "type": "uint32"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct ItemType",
+          "name": "_itemType",
+          "type": "tuple"
+        }
+      ],
+      "name": "AddItemType",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "wearableIds",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "traitsBonuses",
+              "type": "uint256"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct WearableSet",
+          "name": "_wearableSet",
+          "type": "tuple"
+        }
+      ],
+      "name": "AddWearableSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "internalType": "address",
           "name": "_owner",
@@ -283,6 +480,25 @@
         }
       ],
       "name": "IncreaseStake",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "_itemIds",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32[]",
+          "name": "_maxQuanities",
+          "type": "uint32[]"
+        }
+      ],
+      "name": "ItemTypeMaxQuantity",
       "type": "event"
     },
     {
@@ -657,13 +873,19 @@
           "type": "uint256"
         },
         {
-          "indexed": true,
-          "internalType": "uint256",
-          "name": "_itemId",
-          "type": "uint256"
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "_itemIds",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "_quantities",
+          "type": "uint256[]"
         }
       ],
-      "name": "UseConsumable",
+      "name": "UseConsumables",
       "type": "event"
     },
     {
@@ -974,6 +1196,79 @@
           "internalType": "uint256",
           "name": "balance_",
           "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_collateralId",
+          "type": "uint256"
+        }
+      ],
+      "name": "collateralInfo",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "collateralType",
+              "type": "address"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "modifiers",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes3",
+                  "name": "primaryColor",
+                  "type": "bytes3"
+                },
+                {
+                  "internalType": "bytes3",
+                  "name": "secondaryColor",
+                  "type": "bytes3"
+                },
+                {
+                  "internalType": "bytes3",
+                  "name": "cheekColor",
+                  "type": "bytes3"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "svgId",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "eyeShapeSvgId",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint16",
+                  "name": "conversionRate",
+                  "type": "uint16"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "delisted",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct AavegotchiCollateralTypeInfo",
+              "name": "collateralTypeInfo",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct IAavegotchiDiamond.AavegotchiCollateralTypeIO",
+          "name": "collateralInfo_",
+          "type": "tuple"
         }
       ],
       "stateMutability": "view",
@@ -2304,12 +2599,17 @@
           "type": "uint256"
         },
         {
-          "internalType": "uint256",
-          "name": "_itemId",
-          "type": "uint256"
+          "internalType": "uint256[]",
+          "name": "_itemIds",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_quantities",
+          "type": "uint256[]"
         }
       ],
-      "name": "useConsumable",
+      "name": "useConsumables",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

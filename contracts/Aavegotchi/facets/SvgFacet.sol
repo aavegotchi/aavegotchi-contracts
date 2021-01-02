@@ -113,7 +113,7 @@ contract SvgFacet is LibAppStorageModifiers {
         ItemType storage wearableType = s.itemTypes[_wearableId];
         uint256 dimensions = wearableType.dimensions;
         svg_ = abi.encodePacked(
-            '<svg class="gotchi-wearable" x="',
+            '<g class="gotchi-wearable"><svg x="',
             // x
             LibStrings.uintStr(uint8(dimensions)),
             '" y="',
@@ -128,10 +128,10 @@ contract SvgFacet is LibAppStorageModifiers {
                 LibStrings.uintStr(64 - (uint8(dimensions) * 2)),
                 ', 0)">',
                 LibSvg.getSvg("wearables", wearableType.svgId),
-                "</g></svg>"
+                "</g></svg></g>"
             );
         } else {
-            svg_ = abi.encodePacked(svg_, LibSvg.getSvg("wearables", wearableType.svgId), "</svg>");
+            svg_ = abi.encodePacked(svg_, LibSvg.getSvg("wearables", wearableType.svgId), "</svg></g>");
         }
     }
 
