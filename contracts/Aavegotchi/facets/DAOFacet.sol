@@ -66,7 +66,7 @@ contract DAOFacet is LibAppStorageModifiers {
         s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
     }
 
-    function updateItemTypeMaxQuantity(uint256[] calldata _itemIds, uint32[] calldata _maxQuantities) external onlyDaoOrOwner {
+    function updateItemTypeMaxQuantity(uint256[] calldata _itemIds, uint32[] calldata _maxQuantities) external onlyOwnerOrDaoOrGameManager {
         require(_itemIds.length == _maxQuantities.length, "DAOFacet: _itemIds length not the same as _newQuantities length");
         for (uint256 i; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
@@ -118,7 +118,7 @@ contract DAOFacet is LibAppStorageModifiers {
         LibERC1155.onERC1155BatchReceived(msg.sender, _to, _itemIds, _quantities, "");
     }
 
-    function grantExperience(uint256[] calldata _tokenIds, uint32[] calldata _xpValues) external onlyDaoOrOwner {
+    function grantExperience(uint256[] calldata _tokenIds, uint32[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {
         require(_tokenIds.length == _xpValues.length, "DAOFacet: IDs must match XP array length");
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];

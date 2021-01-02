@@ -260,4 +260,12 @@ contract LibAppStorageModifiers {
         );
         _;
     }
+
+    modifier onlyOwnerOrDaoOrGameManager {
+        require(
+            msg.sender == s.dao || msg.sender == LibDiamond.contractOwner() || msg.sender == address(this) || msg.sender == s.gameManager,
+            "AavegotchiFacet: Do not have access"
+        );
+        _;
+    }
 }
