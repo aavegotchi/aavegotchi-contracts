@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "../libraries/LibAppStorage.sol";
 import "../../shared/interfaces/IERC20.sol";
+import "../libraries/LibStrings.sol";
 import "../libraries/LibSvg.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
@@ -654,5 +655,23 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     function setApprovalForAll(address _operator, bool _approved) external {
         s.operators[msg.sender][_operator] = _approved;
         emit ApprovalForAll(msg.sender, _operator, _approved);
+    }
+
+    function name() external pure returns (string memory) {
+        return "Aavegotchi";
+    }
+
+    /// @notice An abbreviated name for NFTs in this contract
+    function symbol() external pure returns (string memory) {
+        return "GOTCHI";
+    }
+
+    /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
+    /// @dev Throws if `_tokenId` is not a valid NFT. URIs are defined in RFC
+    ///  3986. The URI may point to a JSON file that conforms to the "ERC721
+    ///  Metadata JSON Schema".
+    function tokenURI(uint256 _tokenId) external pure returns (string memory) {
+        string memory uid = LibStrings.uintStr(_tokenId);
+        return string(abi.encodePacked("https://aavegotchi.com/metadata/aavegotchis/", uid)); //Here is your URL!
     }
 }
