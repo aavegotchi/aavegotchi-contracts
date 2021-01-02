@@ -504,6 +504,50 @@ contract ItemsFacet is LibAppStorageModifiers {
         emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
     }
 
+    function batchTransferFromParent(
+        address _fromContract,
+        uint256 _fromTokenId,
+        address _to,
+        uint256[] calldata _ids,
+        uint256[] calldata _values
+    ) external {
+        require(_ids.length == _values.length, "Items: ids.length not the same as values.length");
+        require(_to != address(0), "Items: Can't transfer to 0 address");
+        if (_fromContract == address(this)) {
+            address owner = s.aavegotchis[_fromTokenId].owner;
+            require(
+                msg.sender == owner || s.operators[owner][msg.sender] || msg.sender == s.approved[_fromTokenId],
+                "Items: Not owner and not approved to transfer"
+            );
+            require(s.aavegotchis[_fromTokenId].unlockTime < block.timestamp, "Items: Only callable on unlocked Aavegotchis");
+        } else {
+            address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
+            require(
+                owner == msg.sender ||
+                    IERC721(_fromContract).getApproved(_fromTokenId) == msg.sender ||
+                    IERC721(_fromContract).isApprovedForAll(owner, msg.sender),
+                "Items: Not owner and not approved to transfer"
+            );
+        }
+        for (uint256 i; i < _ids.length; i++) {
+            uint256 id = _ids[i];
+            uint256 value = _values[i];
+            uint256 bal = s.nftBalances[_fromContract][_fromTokenId][id];
+            require(value <= bal, "Items: Doesn't have that many to transfer");
+            bal -= value;
+            if (bal == 0 && _fromContract == address(this)) {
+                uint256 l_equippedWearables = s.aavegotchis[_fromTokenId].equippedWearables;
+                for (uint256 j; j < 16; j++) {
+                    require(uint16(l_equippedWearables >> (j * 16)) != id, "Items: Cannot transfer wearable that is equipped");
+                }
+            }
+            s.nftBalances[_fromContract][_fromTokenId][id] = bal;
+            s.items[_to][id] += value;
+            emit TransferFromParent(_fromContract, _fromTokenId, id, value);
+        }
+        emit TransferBatch(msg.sender, _fromContract, _to, _ids, _values);
+    }
+
     /// @notice Transfer a token from a token to another token
     /// @param _fromContract The address of the owning contract
     /// @param _fromTokenId The owning token
@@ -595,6 +639,7 @@ contract ItemsFacet is LibAppStorageModifiers {
                 s.items[msg.sender][wearableId] = balance - 1;
                 s.nftBalances[address(this)][_tokenId][wearableId] += 1;
                 emit TransferToParent(address(this), _tokenId, wearableId, 1);
+                emit TransferSingle(msg.sender, msg.sender, address(this), wearableId, 1);
             }
         }
         emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _equippedWearables);
