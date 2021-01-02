@@ -198,6 +198,7 @@ interface IAavegotchiDiamond {
     /////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////
     event DaoTransferred(address indexed previousDao, address indexed newDao);
+    event DaoTreasuryTransferred(address indexed previousDaoTreasury, address indexed newDaoTreasury);
     event UpdateCollateralModifiers(uint256 _oldModifiers, uint256 _newModifiers);
     event AddCollateralType(AavegotchiCollateralTypeIO _collateralType);
     event CreateHaunt(uint256 indexed _hauntId, uint256 _hauntMaxSize, uint256 _portalPrice, bytes32 _bodyColor);

@@ -13,6 +13,7 @@ import "./SvgFacet.sol";
 
 contract DAOFacet is LibAppStorageModifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
+    event DaoTreasuryTransferred(address indexed previousDaoTreasury, address indexed newDaoTreasury);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
     event UpdateCollateralModifiers(uint256 _oldModifiers, uint256 _newModifiers);
     struct AavegotchiCollateralTypeIO {
@@ -39,9 +40,11 @@ contract DAOFacet is LibAppStorageModifiers {
    |             Write Functions        |
    |__________________________________*/
 
-    function setDao(address _newDao) external onlyDaoOrOwner {
+    function setDao(address _newDao, address _newDaoTreasury) external onlyDaoOrOwner {
         emit DaoTransferred(s.dao, _newDao);
+        emit DaoTreasuryTransferred(s.daoTreasury, _newDaoTreasury);
         s.dao = _newDao;
+        s.daoTreasury = _newDaoTreasury;
     }
 
     function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyDaoOrOwner {

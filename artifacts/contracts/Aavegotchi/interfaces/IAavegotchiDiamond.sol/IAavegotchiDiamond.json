@@ -361,6 +361,25 @@
       "inputs": [
         {
           "indexed": true,
+          "internalType": "address",
+          "name": "previousDaoTreasury",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newDaoTreasury",
+          "type": "address"
+        }
+      ],
+      "name": "DaoTreasuryTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
           "internalType": "uint256",
           "name": "_tokenId",
           "type": "uint256"

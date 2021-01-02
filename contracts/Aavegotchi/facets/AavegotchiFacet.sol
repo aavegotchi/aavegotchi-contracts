@@ -94,7 +94,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     }
 
     function revenueShares() external view returns (RevenueSharesIO memory) {
-        return RevenueSharesIO(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, s.dao, s.rarityFarming, s.pixelCraft);
+        return RevenueSharesIO(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, s.daoTreasury, s.rarityFarming, s.pixelCraft);
     }
 
     struct InternalPortalAavegotchiTraitsIO {

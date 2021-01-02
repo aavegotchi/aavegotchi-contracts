@@ -109,6 +109,7 @@ struct AppStorage {
     address ghstContract;
     address gameManager;
     address dao;
+    address daoTreasury;
     address pixelCraft;
     address rarityFarming;
     string itemsBaseUri;

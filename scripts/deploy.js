@@ -43,6 +43,7 @@ async function main (scriptName) {
   let initialHauntSize
   let ghstTokenContract
   let dao
+  let daoTreasury
   let rarityFarming
   let pixelCraft
 
@@ -62,6 +63,7 @@ async function main (scriptName) {
 
     // ghstTokenContract = set below
     dao = await accounts[1].getAddress()
+    daoTreasury = await accounts[1].getAddress()
     rarityFarming = await accounts[2].getAddress()
     pixelCraft = await accounts[3].getAddress()
   } else if (hre.network.name === 'mainnet') {
@@ -74,6 +76,7 @@ async function main (scriptName) {
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x3F382DbD960E3a9bbCeaE22651E88158d2791550')
 
     dao = 'todo' // await accounts[1].getAddress()
+    daoTreasury - 'todo' 
     rarityFarming = 'todo' // await accounts[2].getAddress()
     pixelCraft = 'todo' // await accounts[3].getAddress()
   } else if (hre.network.name === 'kovan') {
@@ -88,6 +91,7 @@ async function main (scriptName) {
     // console.log('GHST diamond address:' + ghstDiamond.address)
 
     dao = account // 'todo' // await accounts[1].getAddress()
+    daoTreasury = account
     rarityFarming = account // 'todo' // await accounts[2].getAddress()
     pixelCraft = account // 'todo' // await accounts[3].getAddress()
   } else {
@@ -166,7 +170,7 @@ async function main (scriptName) {
       ['VrfFacet', vrfFacet],
       ['ShopFacet', shopFacet]
     ],
-    args: [account, dao, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, initialHauntSize]
+    args: [account, dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, initialHauntSize]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
