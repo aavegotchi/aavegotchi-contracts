@@ -34,7 +34,7 @@ const collaterals = [
     svgId: 1,
     eyeShapeSvgId: 19,
     modifiers: [0, 1, 0, 0, 0, 0],
-    conversionRate: 647 // 647 DAI = 1 ETH
+    conversionRate: 731 // 647 DAI = 1 ETH
   },
   {
     name: 'aAAVE',
@@ -46,7 +46,7 @@ const collaterals = [
     svgId: 2,
     eyeShapeSvgId: 17,
     modifiers: [0, 0, 1, 0, 0, 0],
-    conversionRate: 85 // 30 DAI = 1 LEND
+    conversionRate: 87 // 30 DAI = 1 LEND
   },
 
   {
@@ -59,7 +59,7 @@ const collaterals = [
     svgId: 3,
     eyeShapeSvgId: 20,
     modifiers: [0, 0, 0, 1, 0, 0],
-    conversionRate: 13
+    conversionRate: 12
   },
 
   {
@@ -87,7 +87,7 @@ const collaterals = [
     modifiers: [0, 0, -1, 0, 0, 0],
     conversionRate: 1 // 1 DAI = 1 USDC
   },
-
+  /*
   {
     name: 'aTUSD',
     kovanAddress: '',
@@ -100,34 +100,32 @@ const collaterals = [
     modifiers: [0, 0, -1, 0, 0, 0],
     conversionRate: 1 // 1 DAI = 1 USDC
   },
-
+*/
   {
     name: 'aUNI',
     kovanAddress: '',
     mainnetAddress: '',
-    primaryColor: '#2664BA',
-    secondaryColor: '#D4E0F1',
+    primaryColor: '#FF2A7A',
+    secondaryColor: ' #FFC3DF',
     cheekColor: '#F696C6',
-    svgId: 5,
+    svgId: 6,
     eyeShapeSvgId: 21,
     modifiers: [0, 0, -1, 0, 0, 0],
-    conversionRate: 1 // 1 DAI = 1 USDC
+    conversionRate: 4 // 1 DAI = 1 USDC
   },
   {
     name: 'aYFI',
     kovanAddress: '',
     mainnetAddress: '',
-    primaryColor: '#2664BA',
-    secondaryColor: '#D4E0F1',
+    primaryColor: '#0074F9',
+    secondaryColor: '#C8E1FD',
     cheekColor: '#F696C6',
-    svgId: 5,
+    svgId: 7,
     eyeShapeSvgId: 21,
     modifiers: [0, 0, -1, 0, 0, 0],
-    conversionRate: 1 // 1 DAI = 1 USDC
+    conversionRate: 21772 // 1 DAI = 1 USDC
   }
 
-
- 
 ]
 
 function eightBitArrayToUint (array) {
