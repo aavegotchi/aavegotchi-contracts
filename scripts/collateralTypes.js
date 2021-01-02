@@ -103,10 +103,10 @@ const collaterals = [
 */
   {
     name: 'aUNI',
-    kovanAddress: '',
-    mainnetAddress: '',
+    kovanAddress: '0x54DB4508e4043af82d21501d0643D63F5eB4d12C',
+    mainnetAddress: '0xB9D7CB55f463405CDfBe4E90a6D2Df01C2B92BF1',
     primaryColor: '#FF2A7A',
-    secondaryColor: ' #FFC3DF',
+    secondaryColor: '#FFC3DF',
     cheekColor: '#F696C6',
     svgId: 6,
     eyeShapeSvgId: 21,

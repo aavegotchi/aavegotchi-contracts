@@ -56,71 +56,62 @@ const wearablesSvgs = [
   wearable('52_GalaxyBrain'),
   wearable('53_AllSeeingEyes'),
   bodyWearable('54_LlamacornShirt'),
-
-  /*
-  wearable("55_AagentHeadset"),
-  bodyWearable("56_AagentShirt"),
-  wearable("57_AagentShades"),
-  wearable("58_AagentPistol"),
-  wearable("59_AagentFedoraHat"),
-  wearable("60_WizardHat"),
-  wearable("61_WizardHatLegendary"),
-  wearable("62_WizardHatMythical"),
-  wearable("63_WizardHatGodlike"),
-  wearable("64_WizardStaff"),
-  wearable("65_WizardStaffLegendary"),
-  wearable("66_FutureWizardVisor"),
-  wearable("67_FarmerStrawHat"),
-  wearable("68_FarmerJeans"), //Body but no sleeves
-  wearable("69_FarmerPitchfork"),
-  wearable("70_FarmerHandsaw"),
-  wearable("71_SantagotchiHat"),
-  wearable("72_JaayHairpiece"),
-  wearable("73_JaayGlasses"),
-  bodyWearable("74_JaayHaoSuit"),
-  wearable("75_OKexSign"),
-  wearable("76_BigGHSTToken"),
-  wearable("77_BitcoinBeanie"),
-  wearable("78_SkaterJeans"), //Body but no sleeves
-  wearable("79_Skateboard"),
-  wearable("80_SushiHeadband"),
-  wearable("81_SushiRobe"), //Body but not sleeves
-  wearable("82_SushiRoll"),
-  wearable("83_SushiKnife"),
-  wearable("84_GentlemanHat"),
-  bodyWearable("85_GentlemanSuit"),
-  wearable("86_GentlemanMonocle"),
-  wearable("87_MinerHelmet"),
-  wearable("88_MinerJeans"), //Body but no sleeves
-  wearable("89_MinerPickaxe"),
-  wearable("90_PajamaHat"),
-  bodyWearable("91_PajamaPants"),
-  wearable("92_BedtimeMilk"),
-  wearable("93_FluffyBlanket"),
-  wearable("94_RunnerSweatband"),
-  wearable("95_RunnerShorts"), //Body but no sleeves
-  wearable("96_WaterBottle"),
-  wearable("97_PillboxHat"),
-  wearable("98_LadySkirt"), //Body but no sleeves
-  wearable("99_LadyParasol"),
-  wearable("100_LadyClutch"),
-  wearable("101_WitchHat"),
-  bodyWearable("102_WitchCape"),
-  wearable("103_WitchWand"),
-
-  */
-
-
-
-
-
-
+  wearable('55_AagentHeadset'),
+  bodyWearable('56_AagentShirt'),
+  wearable('57_AagentShades'),
+  wearable('58_AagentPistol'),
+  wearable('59_AagentFedoraHat'),
+  wearable('60_WizardHat'),
+  wearable('61_WizardHatLegendary'),
+  wearable('62_WizardHatMythical'),
+  wearable('63_WizardHatGodlike'),
+  wearable('64_WizardStaff'),
+  wearable('65_WizardStaffLegendary'),
+  wearable('66_FutureWizardVisor'),
+  wearable('67_FarmerStrawHat'),
+  wearable('68_FarmerJeans'), // Body but no sleeves
+  wearable('69_FarmerPitchfork'),
+  wearable('70_FarmerHandsaw'),
+  wearable('71_SantagotchiHat'),
+  wearable('72_JaayHairpiece'),
+  wearable('73_JaayGlasses'),
+  bodyWearable('74_JaayHaoSuit'),
+  wearable('75_OKexSign'),
+  wearable('76_BigGHSTToken'),
+  wearable('77_BitcoinBeanie'),
+  wearable('78_SkaterJeans'), // Body but no sleeves
+  wearable('79_Skateboard'),
+  wearable('80_SushiHeadband'),
+  wearable('81_SushiRobe'), // Body but not sleeves
+  wearable('82_SushiRoll'),
+  wearable('83_SushiKnife'),
+  wearable('84_GentlemanHat'),
+  bodyWearable('85_GentlemanSuit'),
+  wearable('86_GentlemanMonocle'),
+  wearable('87_MinerHelmet'),
+  wearable('88_MinerJeans'), // Body but no sleeves
+  wearable('89_MinerPickaxe'),
+  wearable('90_PajamaHat'),
+  bodyWearable('91_PajamaPants'),
+  wearable('92_BedtimeMilk'),
+  wearable('93_FluffyBlanket'),
+  wearable('94_RunnerSweatband'),
+  wearable('95_RunnerShorts'), // Body but no sleeves
+  wearable('96_WaterBottle'),
+  wearable('97_PillboxHat'),
+  wearable('98_LadySkirt'), // Body but no sleeves
+  wearable('99_LadyParasol'),
+  wearable('100_LadyClutch'),
+  wearable('101_WitchHat'),
+  bodyWearable('102_WitchCape'),
+  wearable('103_WitchWand'),
+git 
   // For testing only
-  wearable('105_HawaiianShirt'), // bodyWearable("36_HawaiianShirt"),
+  wearable('105_HawaiianShirt') // bodyWearable("36_HawaiianShirt"),
   // wearable('37_FarmerHat'),
   // wearable('38_FarmerPants'), // body but no sleeves
   // wearable('39_FarmerStick'),
- // wearable('71_SantaGotchiHat')
+  // wearable('71_SantaGotchiHat')
 ]
 
 function stripSvg (svg) {

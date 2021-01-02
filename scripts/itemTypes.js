@@ -1249,15 +1249,15 @@ function dimensions ({ x, y, width, height }) {
   return ethers.BigNumber.from('0x' + result.join(''))
 }
 
-const WEARABLE_SLOT_BODY = 0
-const WEARABLE_SLOT_FACE = 1
-const WEARABLE_SLOT_EYES = 2
-const WEARABLE_SLOT_HEAD = 3
-const WEARABLE_SLOT_HAND_LEFT = 4
-const WEARABLE_SLOT_HAND_RIGHT = 5
-const WEARABLE_SLOT_PET_FRONT = 6
-const WEARABLE_SLOT_PET_BACK = 7
-const WEARABLE_SLOT_BG = 8
+// const WEARABLE_SLOT_BODY = 0
+// const WEARABLE_SLOT_FACE = 1
+// const WEARABLE_SLOT_EYES = 2
+// const WEARABLE_SLOT_HEAD = 3
+// const WEARABLE_SLOT_HAND_LEFT = 4
+// const WEARABLE_SLOT_HAND_RIGHT = 5
+// const WEARABLE_SLOT_PET_FRONT = 6
+// const WEARABLE_SLOT_PET_BACK = 7
+// const WEARABLE_SLOT_BG = 8
 
 function stringToSlotPositions (str) {
   if (str.length === 0) {

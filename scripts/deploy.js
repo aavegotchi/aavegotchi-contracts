@@ -76,7 +76,7 @@ async function main (scriptName) {
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x3F382DbD960E3a9bbCeaE22651E88158d2791550')
 
     dao = 'todo' // await accounts[1].getAddress()
-    daoTreasury - 'todo' 
+    daoTreasury - 'todo'
     rarityFarming = 'todo' // await accounts[2].getAddress()
     pixelCraft = 'todo' // await accounts[3].getAddress()
   } else if (hre.network.name === 'kovan') {
@@ -261,83 +261,114 @@ async function main (scriptName) {
       }
     }
     console.log('Total sizes:' + sizes)
-    console.log('-------------------------------------------')
   }
-  console.log('Uploading aavegotchi and wearable Svgs')
+  console.log('Uploading Wearable Svgs')
   let svg, svgTypesAndSizes
-  console.log('number of wearables:' + wearablesSvgs.length)
-  ;[svg, svgTypesAndSizes] = setupSvg(
-    ['wearables', wearablesSvgs.slice(0, 16)]
-  )
-  printSizeInfo(svgTypesAndSizes)
-  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  console.log('Uploaded first 16 wearable SVGs')
-  receipt = await tx.wait()
-  console.log('Gas used:' + strDisplay(receipt.gasUsed))
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  console.log('Number of wearables:' + wearablesSvgs.length)
+  let svgItemsStart = 0
+  let svgItemsEnd = 0
+  while (true) {
+    let itemsSize = 0
+    while (true) {
+      if (svgItemsEnd === wearablesSvgs.length) {
+        break
+      }
+      itemsSize += wearablesSvgs[svgItemsEnd].length
+      if (itemsSize > 24576) {
+        break
+      }
+      svgItemsEnd++
+    }
+    ;[svg, svgTypesAndSizes] = setupSvg(
+      ['wearables', wearablesSvgs.slice(svgItemsStart, svgItemsEnd)]
+    )
+    console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`)
+    printSizeInfo(svgTypesAndSizes)
+    tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+    receipt = await tx.wait()
+    console.log('Gas used:' + strDisplay(receipt.gasUsed))
+    console.log('-------------------------------------------')
+    totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+    if (svgItemsEnd === wearablesSvgs.length) {
+      break
+    }
+    svgItemsStart = svgItemsEnd
+  }
 
-  ;[svg, svgTypesAndSizes] = setupSvg(
-    ['wearables', wearablesSvgs.slice(16, 36)]
-  )
-  printSizeInfo(svgTypesAndSizes)
-  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  console.log('Uploaded 16 to 35 wearable SVGs')
-  receipt = await tx.wait()
-  console.log('Gas used:' + strDisplay(receipt.gasUsed))
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  // ;[svg, svgTypesAndSizes] = setupSvg(
+  //   ['wearables', wearablesSvgs.slice(0, 16)]
+  // )
+  // printSizeInfo(svgTypesAndSizes)
+  // tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  // console.log('Uploaded first 16 wearable SVGs')
+  // receipt = await tx.wait()
+  // console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-  ;[svg, svgTypesAndSizes] = setupSvg(
-    ['wearables', wearablesSvgs.slice(36, 47)]
-  )
-  printSizeInfo(svgTypesAndSizes)
-  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  console.log('Uploaded 36 to 46 wearable SVGs')
-  receipt = await tx.wait()
-  console.log('Gas used:' + strDisplay(receipt.gasUsed))
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  // ;[svg, svgTypesAndSizes] = setupSvg(
+  //   ['wearables', wearablesSvgs.slice(16, 36)]
+  // )
+  // printSizeInfo(svgTypesAndSizes)
+  // tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  // console.log('Uploaded 16 to 35 wearable SVGs')
+  // receipt = await tx.wait()
+  // console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-  ;[svg, svgTypesAndSizes] = setupSvg(
-    ['wearables', wearablesSvgs.slice(47, 55)]
-  )
-  printSizeInfo(svgTypesAndSizes)
-  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  console.log('Uploaded from 47 to 54 wearable SVGs')
-  receipt = await tx.wait()
-  console.log('Gas used:' + strDisplay(receipt.gasUsed))
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  // ;[svg, svgTypesAndSizes] = setupSvg(
+  //   ['wearables', wearablesSvgs.slice(36, 47)]
+  // )
+  // printSizeInfo(svgTypesAndSizes)
+  // tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  // console.log('Uploaded 36 to 46 wearable SVGs')
+  // receipt = await tx.wait()
+  // console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-  ;[svg, svgTypesAndSizes] = setupSvg(
-    ['wearables', wearablesSvgs.slice(55)]
-  )
-  printSizeInfo(svgTypesAndSizes)
-  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  console.log('Uploaded from 55 to the rest of wearable SVGs')
-  receipt = await tx.wait()
-  console.log('Gas used:' + strDisplay(receipt.gasUsed))
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  // ;[svg, svgTypesAndSizes] = setupSvg(
+  //   ['wearables', wearablesSvgs.slice(47, 55)]
+  // )
+  // printSizeInfo(svgTypesAndSizes)
+  // tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  // console.log('Uploaded from 47 to 54 wearable SVGs')
+  // receipt = await tx.wait()
+  // console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  // ;[svg, svgTypesAndSizes] = setupSvg(
+  //   ['wearables', wearablesSvgs.slice(55)]
+  // )
+  // printSizeInfo(svgTypesAndSizes)
+  // tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  // console.log('Uploaded from 55 to the rest of wearable SVGs')
+  // receipt = await tx.wait()
+  // console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   // --------------------------------
+  console.log('Uploading aavegotchi SVGs')
   ;[svg, svgTypesAndSizes] = setupSvg(
     ['aavegotchi', aavegotchiSvgs]
   )
   printSizeInfo(svgTypesAndSizes)
   tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  console.log('Uploaded aavegotchi SVGs')
   receipt = await tx.wait()
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  console.log('-------------------------------------------')
 
   console.log('Uploading collaterals and eyeShapes')
   ;[svg, svgTypesAndSizes] = setupSvg(
     ['collaterals', collateralsSvgs],
     ['eyeShapes', eyeShapeSvgs]
   )
-  // printSizeInfo(svgTypesAndSizes)
+  printSizeInfo(svgTypesAndSizes)
   tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
   console.log('Uploaded SVGs')
   receipt = await tx.wait()
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  console.log('-------------------------------------------')
 
   if (hre.network.name !== 'hardhat') {
   // transfer ownership
