@@ -7,8 +7,9 @@ const WEARABLE_SLOT_EYES = 2
 const WEARABLE_SLOT_HEAD = 3
 const WEARABLE_SLOT_HAND_LEFT = 4
 const WEARABLE_SLOT_HAND_RIGHT = 5
-const WEARABLE_SLOT_PET = 6
-const WEARABLE_SLOT_BG = 7
+const WEARABLE_SLOT_PET_FRONT = 6
+const WEARABLE_SLOT_PET_BACK = 7
+const WEARABLE_SLOT_BG = 8
 
 // all arrays that are converted into uint have their items ordeded like this:
 // [etc, third item, second item, first item]
@@ -690,7 +691,7 @@ const itemTypes = [
     traitModifiers: [0, -6, 0, 0, 0, 0],
 
     setId: 0,
-    slotPositions: 'pet',
+    slotPositions: 'petBack',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -784,7 +785,7 @@ const itemTypes = [
     traitModifiers: [0, -1, -1, 0, 0, 0],
 
     setId: 0,
-    slotPositions: 'pet',
+    slotPositions: 'petBack',
     canPurchaseWithGhst: false,
     totalQuantity: 0,
     allowedCollaterals: [],
@@ -1248,14 +1249,15 @@ function dimensions ({ x, y, width, height }) {
   return ethers.BigNumber.from('0x' + result.join(''))
 }
 
-// const WEARABLE_SLOT_BODY = 0
-// const WEARABLE_SLOT_FACE = 1
-// const WEARABLE_SLOT_EYES = 2
-// const WEARABLE_SLOT_HEAD = 3
-// const WEARABLE_SLOT_HAND_LEFT = 4
-// const WEARABLE_SLOT_HAND_RIGHT = 5
-// const WEARABLE_SLOT_PET = 6
-// const WEARABLE_SLOT_BG = 7
+const WEARABLE_SLOT_BODY = 0
+const WEARABLE_SLOT_FACE = 1
+const WEARABLE_SLOT_EYES = 2
+const WEARABLE_SLOT_HEAD = 3
+const WEARABLE_SLOT_HAND_LEFT = 4
+const WEARABLE_SLOT_HAND_RIGHT = 5
+const WEARABLE_SLOT_PET_FRONT = 6
+const WEARABLE_SLOT_PET_BACK = 7
+const WEARABLE_SLOT_BG = 8
 
 function stringToSlotPositions (str) {
   if (str.length === 0) {
@@ -1272,7 +1274,9 @@ function stringToSlotPositions (str) {
     return boolsArrayToUint16([true, false, false, false, false, false])
   } else if (str === 'face') {
     return boolsArrayToUint16([true, false])
-  } else if (str === 'pet') {
+  } else if (str === 'petFront') {
+    return boolsArrayToUint16([true, false, false, false, false, false, false, false])
+  } else if (str === 'petBack') {
     return boolsArrayToUint16([true, false, false, false, false, false, false])
   } else if (str === 'eyes') {
     return boolsArrayToUint16([true, false, false])
