@@ -37,14 +37,12 @@ struct ItemType {
     // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     uint256 traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
     // this is an array of uint indexes into the collateralTypes array
-
     uint8[] allowedCollaterals; //[WEARABLE ONLY] The collaterals this wearable can be equipped to. An empty array is "any"
     string name; //The name of the item
     uint96 ghstPrice; //How much GHST this item costs
     uint32 svgId; //The svgId of the item
     uint32 maxQuantity; //Total number that can be minted of this item.
     uint8 rarityScoreModifier; //Number from 1-50.
-    uint8 setId; //The id of the set. Zero is no set
     // Each bit is a slot position. 1 is true, 0 is false
     uint16 slotPositions; //[WEARABLE ONLY] The slots that this wearable can be added to.
     bool canPurchaseWithGhst;

@@ -209,12 +209,10 @@ async function main (scriptName) {
     // Deploy test, use the real item types
     if (scriptName === 'deployTest') {
       const { itemTypes } = require('./itemTypes.js')
+      // console.log(itemTypes)
       tx = await daoFacet.addItemTypes(itemTypes)
       receipt = await tx.wait()
-    }
-
-    // Development test, use development items
-    else {
+    } else { // Development test, use development items
       // const { itemTypes } = require('./testItemTypes.js')
       const { itemTypes } = require('./itemTypes.js')
       tx = await daoFacet.addItemTypes(itemTypes)
@@ -294,56 +292,6 @@ async function main (scriptName) {
     }
     svgItemsStart = svgItemsEnd
   }
-
-  // ;[svg, svgTypesAndSizes] = setupSvg(
-  //   ['wearables', wearablesSvgs.slice(0, 16)]
-  // )
-  // printSizeInfo(svgTypesAndSizes)
-  // tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  // console.log('Uploaded first 16 wearable SVGs')
-  // receipt = await tx.wait()
-  // console.log('Gas used:' + strDisplay(receipt.gasUsed))
-  // totalGasUsed = totalGasUsed.add(receipt.gasUsed)
-
-  // ;[svg, svgTypesAndSizes] = setupSvg(
-  //   ['wearables', wearablesSvgs.slice(16, 36)]
-  // )
-  // printSizeInfo(svgTypesAndSizes)
-  // tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  // console.log('Uploaded 16 to 35 wearable SVGs')
-  // receipt = await tx.wait()
-  // console.log('Gas used:' + strDisplay(receipt.gasUsed))
-  // totalGasUsed = totalGasUsed.add(receipt.gasUsed)
-
-  // ;[svg, svgTypesAndSizes] = setupSvg(
-  //   ['wearables', wearablesSvgs.slice(36, 47)]
-  // )
-  // printSizeInfo(svgTypesAndSizes)
-  // tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  // console.log('Uploaded 36 to 46 wearable SVGs')
-  // receipt = await tx.wait()
-  // console.log('Gas used:' + strDisplay(receipt.gasUsed))
-  // totalGasUsed = totalGasUsed.add(receipt.gasUsed)
-
-  // ;[svg, svgTypesAndSizes] = setupSvg(
-  //   ['wearables', wearablesSvgs.slice(47, 55)]
-  // )
-  // printSizeInfo(svgTypesAndSizes)
-  // tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  // console.log('Uploaded from 47 to 54 wearable SVGs')
-  // receipt = await tx.wait()
-  // console.log('Gas used:' + strDisplay(receipt.gasUsed))
-  // totalGasUsed = totalGasUsed.add(receipt.gasUsed)
-
-  // ;[svg, svgTypesAndSizes] = setupSvg(
-  //   ['wearables', wearablesSvgs.slice(55)]
-  // )
-  // printSizeInfo(svgTypesAndSizes)
-  // tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  // console.log('Uploaded from 55 to the rest of wearable SVGs')
-  // receipt = await tx.wait()
-  // console.log('Gas used:' + strDisplay(receipt.gasUsed))
-  // totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   // --------------------------------
   console.log('Uploading aavegotchi SVGs')

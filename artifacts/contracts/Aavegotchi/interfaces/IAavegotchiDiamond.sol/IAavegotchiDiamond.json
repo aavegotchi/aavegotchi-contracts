@@ -121,11 +121,6 @@
               "type": "uint8"
             },
             {
-              "internalType": "uint8",
-              "name": "setId",
-              "type": "uint8"
-            },
-            {
               "internalType": "uint16",
               "name": "slotPositions",
               "type": "uint16"
@@ -1674,11 +1669,6 @@
             {
               "internalType": "uint8",
               "name": "rarityScoreModifier",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "setId",
               "type": "uint8"
             },
             {

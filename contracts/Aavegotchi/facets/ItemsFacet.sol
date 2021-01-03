@@ -266,7 +266,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         wearableSet_.wearableIds = LibAppStorage.uintToSixteenBitArray(s.wearableSets[_index].wearableIds);
         uint256 traitsBonuses = s.wearableSets[_index].traitsBonuses;
         for (uint256 i; i < 5; i++) {
-            wearableSet_.traitsBonuses[i] = int16(traitsBonuses >> (16 * i));
+            wearableSet_.traitsBonuses[i] = int16(traitsBonuses >> (8 * i));
         }
     }
 
@@ -286,7 +286,6 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint32 svgId; //The svgId of the item
         uint32 maxQuantity; //Total number that can be minted of this item.
         uint8 rarityScoreModifier; //Number from 1-50.
-        uint8 setId; //The id of the set. Zero is no set
         // Each bit is a slot position. 1 is true, 0 is false
         bool[] slotPositions; //[WEARABLE ONLY] The slots that this wearable can be added to.
         bool canPurchaseWithGhst;
@@ -318,7 +317,6 @@ contract ItemsFacet is LibAppStorageModifiers {
         itemType_.svgId = itemType.svgId;
         itemType_.maxQuantity = itemType.maxQuantity;
         itemType_.rarityScoreModifier = itemType.rarityScoreModifier;
-        itemType_.setId = itemType.setId;
         itemType_.slotPositions = new bool[](16);
         for (uint256 i; i < 16; i++) {
             itemType_.slotPositions[i] = ((itemType.slotPositions >> i) & 1) == 1;
