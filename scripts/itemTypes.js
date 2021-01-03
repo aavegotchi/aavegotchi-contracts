@@ -3234,7 +3234,7 @@ function calculateRarityScoreModifier (maxQuantity) {
 function getItemTypes () {
   const result = []
   for (const itemType of itemTypes) {
-    itemType.ghstPrice = ethers.utils.parseEther(itemType.ghstPrice)
+    itemType.ghstPrice = ethers.utils.parseEther(itemType.ghstPrice.toString())
     itemType.traitModifiers = eightBitIntArrayToUint(itemType.traitModifiers)
     itemType.slotPositions = stringToSlotPositions(itemType.slotPositions)
     if (itemType.dimensions === '' || itemType.dimensions === 0) {
