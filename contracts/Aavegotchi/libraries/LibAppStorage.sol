@@ -60,6 +60,7 @@ struct ItemType {
 
 struct WearableSet {
     string name;
+    uint8[] allowedCollaterals;
     uint256 wearableIds; // The tokenIdS of each piece of the set
     uint256 traitsBonuses;
 }

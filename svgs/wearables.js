@@ -105,13 +105,32 @@ const wearablesSvgs = [
   wearable('101_WitchHat'),
   bodyWearable('102_WitchCape'),
   wearable('103_WitchWand'),
-
-  // For testing only
-  wearable('105_HawaiianShirt') // bodyWearable("36_HawaiianShirt"),
-  // wearable('37_FarmerHat'),
-  // wearable('38_FarmerPants'), // body but no sleeves
-  // wearable('39_FarmerStick'),
-  // wearable('71_SantaGotchiHat')
+  wearable("104_PortalMageHelmet"),
+  bodyWearable("105_PortalMageArmor"),
+  wearable("106_PortalMageAxe"),
+  wearable("107_PortalMageBlackAxe"),
+  wearable("108_RastaDreds"),
+  bodyWearable("109_RastaShirt"),
+  wearable("110_JamaicanFlag"),
+  wearable("111_HazmatHood"),
+  bodyWearable("112_HazmatSuit"),
+  wearable("113_UraniumRod"),
+  bodyWearable("114_RedHawaiianShirt"),
+  bodyWearable("115_BlueHawaiianShirt"),
+  wearable("116_Coconut"),
+  wearable("117_DealWithItShades"),
+  wearable("118_WaterJug"),
+  wearable("119_BabyBottle"),
+  wearable("120_Martini"),
+  wearable("121_WineBottle"),
+  wearable("122_Milkshake"),
+  wearable("123_AppleJuice"),
+  wearable("124_BeerHelmet"),
+  wearable("125_TrackSuit"),
+  wearable("126_KinshipPotion"),
+  wearable("127_GreaterKinshipPotion"),
+  wearable("128_XPPotion"),
+  wearable("129_GreaterXPPotion")
 ]
 
 function stripSvg (svg) {

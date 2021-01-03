@@ -191,6 +191,11 @@
               "type": "string"
             },
             {
+              "internalType": "uint8[]",
+              "name": "allowedCollaterals",
+              "type": "uint8[]"
+            },
+            {
               "internalType": "uint256",
               "name": "wearableIds",
               "type": "uint256"
