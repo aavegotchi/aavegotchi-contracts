@@ -205,25 +205,9 @@ async function main (scriptName) {
   console.log('Adding Item Types')
   itemsFacet = await ethers.getContractAt('ItemsFacet', aavegotchiDiamond.address)
 
-  if (hre.network.name === 'hardhat') {
-    // Deploy test, use the real item types
-    if (scriptName === 'deployTest') {
-      const { itemTypes } = require('./itemTypes.js')
-      // console.log(itemTypes)
-      tx = await daoFacet.addItemTypes(itemTypes)
-      receipt = await tx.wait()
-    } else { // Development test, use development items
-      // const { itemTypes } = require('./testItemTypes.js')
-      const { itemTypes } = require('./itemTypes.js')
-      tx = await daoFacet.addItemTypes(itemTypes)
-      receipt = await tx.wait()
-    }
-  } else {
-    const { itemTypes } = require('./itemTypes.js')
-    tx = await daoFacet.addItemTypes(itemTypes)
-    receipt = await tx.wait()
-  }
-
+  const { itemTypes } = require('./itemTypes.js')
+  tx = await daoFacet.addItemTypes(itemTypes)
+  receipt = await tx.wait()
   console.log('Adding Item Types gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
@@ -348,56 +332,6 @@ async function main (scriptName) {
     linkAddress: linkAddress,
     linkContract: linkContract
   }
-
-  // ----------------------------------------------------------------
-  // Mint Aavegotchi with Svg Layers
-
-  // let svgLayers = [0, 1, 2, 3]
-  // svgLayers = svgLayers.map(value => {
-  //   value = ethers.utils.hexlify(value)
-  //   value = value.slice(2)
-  //   if (value.length === 2) {
-  //     value = '00' + value
-  //   }
-  //   return value
-  // })
-  // svgLayers = '0x' + svgLayers.join('').padEnd(64, '0')
-  // await aavegotchiNFT.mintAavegotchi(svgLayers)
-  // console.log('Mint Aavegotchi with Svg Layers')
-
-  // ----------------------------------------------------------------
-  // Mint Wearables
-  // await wearables.mintWearables()
-  // console.log('Minted one set of wearables')
-
-  // ----------------------------------------------------------------
-  // Add Wearables
-  // transferToParent(address _from, address _toContract, uint _toTokenId, uint _id, uint _value)
-  // function wearableId (id) {
-  //   return ethers.BigNumber.from(id).mul(ethers.BigNumber.from(2).pow(240))
-  // }
-  // const id1 = wearableId(1)
-  // const id2 = wearableId(2)
-  // const id3 = wearableId(3)
-  // await wearables.transferToParent(address, aavegotchiDiamond.address, 0, id1, 1)
-  // await wearables.transferToParent(address, aavegotchiDiamond.address, 0, id2, 1)
-  // await wearables.transferToParent(address, aavegotchiDiamond.address, 0, id3, 1)
-  // console.log('Added wearables')
-
-  // ----------------------------------------------------------------
-  // Send some ether
-  // const tx = accounts[0].sendTransaction({
-  //   to: '0x0b22380B7c423470979AC3eD7d3c07696773dEa1',
-  //   value: ethers.utils.parseEther('0.1')
-  // })
-
-  // ----------------------------------------------------------------
-  // Get the combined Svg of an Aavegotchi.
-
-  // const svg = await aavegotchiNFT.getAavegotchiSvg(0)
-  // console.log('Get the combined Svg of an Aavegotchi.')
-  // console.log()
-  // console.log(svg)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
