@@ -115,8 +115,8 @@ const collaterals = [
   },
   {
     name: 'aYFI',
-    kovanAddress: '',
-    mainnetAddress: '',
+    kovanAddress: '0xf6c7282943beac96f6c70252ef35501a6c1148fe',
+    mainnetAddress: '0x5165d24277cD063F5ac44Efd447B27025e888f37',
     primaryColor: '#0074F9',
     secondaryColor: '#C8E1FD',
     cheekColor: '#F696C6',
