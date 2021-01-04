@@ -106,11 +106,13 @@ describe('Buying Portals, VRF', function () {
     await truffleAssert.reverts(shopFacet.buyPortals(account, buyAmount, true), 'ShopFacet: Not enough GHST to buy portal')
   })
 
-  it('Should purchase one portal', async function () {
+  it('Should purchase portal', async function () {
     const balance = await ghstTokenContract.balanceOf(account)
     await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
-    const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await global.shopFacet.buyPortals(account, buyAmount, true)
+    const buyAmount = ethers.utils.parseEther('100') // 1 portals
+    const tx = await global.shopFacet.buyPortals(account, buyAmount, true)
+    const receipt = await tx.wait()
+    console.log('Buying portals cost :' + receipt.gasUsed.toString())
 
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals.length).to.equal(1)
@@ -438,6 +440,14 @@ describe('Items & Wearables', async function () {
     expect(equipped.length).to.equal(16)
     // First item in array is 1 because that wearable has been equipped
     expect(equipped[testSlot]).to.equal(testWearableId)
+  })
+
+  function getAavegotchiSets (tokenId) {
+
+  }
+
+  it('Get Set info', async function () {
+
   })
 
   it('Cannot equip wearables that require a higher level', async function () {

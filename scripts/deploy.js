@@ -206,7 +206,13 @@ async function main (scriptName) {
   itemsFacet = await ethers.getContractAt('ItemsFacet', aavegotchiDiamond.address)
 
   const { itemTypes } = require('./itemTypes.js')
-  tx = await daoFacet.addItemTypes(itemTypes)
+
+  tx = await daoFacet.addItemTypes(itemTypes.slice(0, itemTypes.length / 2))
+  receipt = await tx.wait()
+  console.log('Adding Item Types gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  tx = await daoFacet.addItemTypes(itemTypes.slice(itemTypes.length / 2))
   receipt = await tx.wait()
   console.log('Adding Item Types gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)

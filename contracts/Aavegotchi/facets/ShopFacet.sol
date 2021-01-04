@@ -9,6 +9,7 @@ import "../../shared/libraries/LibERC20.sol";
 import "../interfaces/IERC1155.sol";
 import "../libraries/LibERC1155.sol";
 import "../libraries/LibVrf.sol";
+import "../libraries/SafeMath.sol";
 
 contract ShopFacet {
     AppStorage internal s;
@@ -89,17 +90,17 @@ contract ShopFacet {
         uint256[] calldata _quantities
     ) external {
         require(_itemIds.length == _quantities.length, "ShopFacet: _itemIds not same length as _quantities");
-
         uint256 totalPrice;
         for (uint256 i; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
             uint256 quantity = _quantities[i];
+            require(quantity < 1_000_000, "ShopFacet: Cannot purchase so many items at the same time");
             ItemType storage itemType = s.itemTypes[itemId];
             require(itemType.canPurchaseWithGhst, "ShopFacet: Can't purchase item type with GHST");
             uint256 totalQuantity = itemType.totalQuantity + quantity;
             require(totalQuantity <= itemType.maxQuantity, "ShopFacet: Total item type quantity exceeds max quantity");
             itemType.totalQuantity = uint32(totalQuantity);
-            totalPrice += quantity * itemType.ghstPrice;
+            totalPrice = SafeMath.add(totalPrice, SafeMath.mul(quantity, itemType.ghstPrice));
             s.items[_to][itemId] += quantity;
         }
         emit PurchaseItemsWithGhst(msg.sender, _to, _itemIds, _quantities, totalPrice);
