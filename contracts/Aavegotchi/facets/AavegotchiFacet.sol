@@ -282,6 +282,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     }
 
     function abs(int8 x) private pure returns (uint256) {
+        require(x != -128, "AavegotchiFacet: x can't be -128");
         return uint256(x >= 0 ? x : -x);
     }
 

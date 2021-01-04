@@ -9,7 +9,6 @@ import "../../shared/libraries/LibERC20.sol";
 import "../interfaces/IERC1155.sol";
 import "../libraries/LibERC1155.sol";
 import "../libraries/LibVrf.sol";
-import "../libraries/SafeMath.sol";
 
 contract ShopFacet {
     AppStorage internal s;
@@ -100,7 +99,7 @@ contract ShopFacet {
             uint256 totalQuantity = itemType.totalQuantity + quantity;
             require(totalQuantity <= itemType.maxQuantity, "ShopFacet: Total item type quantity exceeds max quantity");
             itemType.totalQuantity = uint32(totalQuantity);
-            totalPrice = SafeMath.add(totalPrice, SafeMath.mul(quantity, itemType.ghstPrice));
+            totalPrice += quantity * itemType.ghstPrice;
             s.items[_to][itemId] += quantity;
         }
         emit PurchaseItemsWithGhst(msg.sender, _to, _itemIds, _quantities, totalPrice);
@@ -116,8 +115,8 @@ contract ShopFacet {
         uint256[] calldata _voucherIds,
         uint256[] calldata _quantities
     ) external {
-        IERC1155(im_vouchersContract).safeBatchTransferFrom(msg.sender, address(this), _voucherIds, _quantities, "");
         require(_voucherIds.length == _quantities.length, "ShopFacet: _voucherIds not same length as _quantities");
+        IERC1155(im_vouchersContract).safeBatchTransferFrom(msg.sender, address(this), _voucherIds, _quantities, "");
         for (uint256 i; i < _voucherIds.length; i++) {
             //Item types start at ID 1, but vouchers start at ID 0
             uint256 itemId = _voucherIds[i] + 1;
