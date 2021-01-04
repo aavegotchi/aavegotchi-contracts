@@ -9,7 +9,6 @@ import "../../shared/libraries/LibERC20.sol";
 import "../interfaces/IERC1155.sol";
 import "../libraries/LibERC1155.sol";
 import "../libraries/LibVrf.sol";
-import "../libraries/SafeMath.sol";
 
 contract ShopFacet {
     AppStorage internal s;
@@ -100,7 +99,7 @@ contract ShopFacet {
             uint256 totalQuantity = itemType.totalQuantity + quantity;
             require(totalQuantity <= itemType.maxQuantity, "ShopFacet: Total item type quantity exceeds max quantity");
             itemType.totalQuantity = uint32(totalQuantity);
-            totalPrice = SafeMath.add(totalPrice, SafeMath.mul(quantity, itemType.ghstPrice));
+            totalPrice += quantity * itemType.ghstPrice;
             s.items[_to][itemId] += quantity;
         }
         emit PurchaseItemsWithGhst(msg.sender, _to, _itemIds, _quantities, totalPrice);
