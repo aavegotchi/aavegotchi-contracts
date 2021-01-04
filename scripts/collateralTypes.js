@@ -120,13 +120,13 @@ const collaterals = [
     cheekColor: '#F696C6',
     svgId: 7,
     eyeShapeSvgId: 22,
-    modifiers: [0, 0, -1, 0, 0, 0],
+    modifiers: [0, 0, 0, 1, 0, 0],
     conversionRate: 21772 // 1 DAI = 1 USDC
   }
 
 ]
 
-function eightBitArrayToUint (array) {
+function eightBitArrayToUint(array) {
   const uint = []
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8)
@@ -135,7 +135,7 @@ function eightBitArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function getCollaterals (network, ghstAddress) {
+function getCollaterals(network, ghstAddress) {
   const collateralTypes = []
   for (const collateralType of collaterals) {
     const collateralTypeInfo = {
