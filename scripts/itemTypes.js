@@ -432,7 +432,7 @@ const itemTypes = [
     width: 12,
     height: 16,
     allowedCollaterals: [],
-    minLevel: 5,
+    minLevel: 1,
     ghstPrice: 0,
     maxQuantity: '5',
     traitModifiers: [0, 0, 0, 6, 0, 0],
@@ -3144,7 +3144,7 @@ const itemTypes = [
   }
 ]
 
-function eightBitIntArrayToUint (array) {
+function eightBitIntArrayToUint(array) {
   if (array.length === 0) {
     return ethers.BigNumber.from(0)
   }
@@ -3159,7 +3159,7 @@ function eightBitIntArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function boolsArrayToUint16 (bools) {
+function boolsArrayToUint16(bools) {
   const uint = []
   for (const b of bools) {
     if (b) {
@@ -3175,7 +3175,7 @@ function boolsArrayToUint16 (bools) {
   return parseInt(uint.join('').padStart(16, '0'), 2)
 }
 
-function dimensions ({ x, y, width, height }) {
+function dimensions({ x, y, width, height }) {
   const result = []
   for (const v of [x, y, width, height]) {
     result.unshift(v.toString(16).padStart(2, '0'))
@@ -3195,7 +3195,7 @@ function dimensions ({ x, y, width, height }) {
 // const WEARABLE_SLOT_PET_BACK = 7
 // const WEARABLE_SLOT_BG = 8
 
-function stringToSlotPositions (str) {
+function stringToSlotPositions(str) {
   if (str.length === 0) {
     return 0
   } else if (str === 'head') {
@@ -3221,7 +3221,7 @@ function stringToSlotPositions (str) {
   }
 }
 
-function calculateRarityScoreModifier (maxQuantity) {
+function calculateRarityScoreModifier(maxQuantity) {
   if (maxQuantity >= 1000) return 1
   if (maxQuantity >= 500) return 2
   if (maxQuantity >= 250) return 5
@@ -3231,7 +3231,7 @@ function calculateRarityScoreModifier (maxQuantity) {
   return 0
 }
 
-function getItemTypes () {
+function getItemTypes() {
   const result = []
   for (const itemType of itemTypes) {
     itemType.ghstPrice = ethers.utils.parseEther(itemType.ghstPrice.toString())
