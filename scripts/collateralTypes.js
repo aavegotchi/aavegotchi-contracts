@@ -87,20 +87,18 @@ const collaterals = [
     modifiers: [0, 0, -1, 0, 0, 0],
     conversionRate: 1 // 1 DAI = 1 USDC
   },
-  /*
   {
     name: 'aTUSD',
-    kovanAddress: '',
-    mainnetAddress: '',
-    primaryColor: '#2664BA',
-    secondaryColor: '#D4E0F1',
+    kovanAddress: '0x39914adbe5fdbc2b9adeede8bcd444b20b039204',
+    mainnetAddress: '0x101cc05f4A51C0319f570d5E146a8C625198e636',
+    primaryColor: '#282473',
+    secondaryColor: '#489ff8',
     cheekColor: '#F696C6',
-    svgId: 5,
-    eyeShapeSvgId: 21,
+    svgId: 8,
+    eyeShapeSvgId: 24,
     modifiers: [0, 0, -1, 0, 0, 0],
     conversionRate: 1 // 1 DAI = 1 USDC
   },
-*/
   {
     name: 'aUNI',
     kovanAddress: '0x54DB4508e4043af82d21501d0643D63F5eB4d12C',
