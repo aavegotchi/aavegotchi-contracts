@@ -115,8 +115,8 @@ contract ShopFacet {
         uint256[] calldata _voucherIds,
         uint256[] calldata _quantities
     ) external {
-        IERC1155(im_vouchersContract).safeBatchTransferFrom(msg.sender, address(this), _voucherIds, _quantities, "");
         require(_voucherIds.length == _quantities.length, "ShopFacet: _voucherIds not same length as _quantities");
+        IERC1155(im_vouchersContract).safeBatchTransferFrom(msg.sender, address(this), _voucherIds, _quantities, "");
         for (uint256 i; i < _voucherIds.length; i++) {
             //Item types start at ID 1, but vouchers start at ID 0
             uint256 itemId = _voucherIds[i] + 1;
