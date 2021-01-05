@@ -2,6 +2,7 @@
 const { expect } = require('chai')
 const truffleAssert = require('truffle-assertions')
 const { getCollaterals } = require('../scripts/collateralTypes.js')
+const { modifyWithAavegotchiSets } = require('../scripts/offchainProcessing.js')
 // const { idText } = require('typescript')
 
 // eslint-disable-next-line no-unused-vars
@@ -442,12 +443,42 @@ describe('Items & Wearables', async function () {
     expect(equipped[testSlot]).to.equal(testWearableId)
   })
 
-  function getAavegotchiSets (tokenId) {
+  it('Can modify aavegotchi traits with wearable sets', async function () {
+    // {
+    //   name: 'Socialite',
+    //   wearableIds: [97, 98, 99, 100],
+    //   traitsBonuses: [5, 2, 0, -1, 0],
+    //   allowedCollaterals: []
+    // },
+    await global.daoFacet.mintItems(account, [97, 98, 99, 100], [5, 5, 5, 5])
+    // fourth slot, third slot, second slot, first slot
+    const wearableIds = sixteenBitArrayToUint([100, 99, 97, 0, 0, 98])
+    await global.itemsFacet.equipWearables(testAavegotchiId, wearableIds)
 
-  }
+    const sets = await global.itemsFacet.getWearableSets()
+    const gotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
+    // console.log(gotchi.modifiedNumericTraits.map(v => Number(v)))
+    // console.log('From traits calc:' + calculateRarityScoreFromTraits(gotchi.modifiedNumericTraits.map(v => Number(v))))
+    // console.log('From modifiedRarityScore:' + Number(gotchi.modifiedRarityScore))
+    // console.log(gotchi.equippedWearables.map(v => Number(v)))
+    // console.log('---')
+    // console.log(gotchi.modifiedNumericTraits.map(v => Number(v)))
+    // console.log('---')
+    // console.log(Number(gotchi.modifiedRarityScore))
+    let [setData, traits, rarityScore] = modifyWithAavegotchiSets(sets, gotchi.equippedWearables, gotchi.modifiedNumericTraits, gotchi.modifiedRarityScore)
+    // console.log(setData)
 
-  it('Get Set info', async function () {
+    // console.log('--- results:')
+    // console.log(traits)
+    // console.log(rarityScore)
 
+    const equippedWearables = [98, 0, 0, 97, 99, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    const modifiedNumericTraits = [66, 20, 68, 53, 69, 83]
+    const modifiedRarityScore = 469
+
+    ;[, traits, rarityScore] = modifyWithAavegotchiSets(sets, equippedWearables, modifiedNumericTraits, modifiedRarityScore)
+    expect(rarityScore).to.equal(479)
+    expect(traits).to.have.ordered.members([68, 20, 63, 53, 69, 83])
   })
 
   it('Cannot equip wearables that require a higher level', async function () {
@@ -477,7 +508,7 @@ describe('Items & Wearables', async function () {
 
   it('Can unequip all wearables with empty array', async function () {
     let equipped = await global.itemsFacet.equippedWearables(testAavegotchiId)
-    expect(equipped[3]).to.equal(1)
+    expect(equipped[3]).to.equal(97)
 
     // Unequip all wearables
     await itemsFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([]))

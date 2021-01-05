@@ -58,17 +58,18 @@ contract SvgFacet is LibAppStorageModifiers {
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
         details.trait = uint16(_numericTraits >> (4 * 16));
-        details.eyeShape;
-        details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
-        for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
-            if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
-                details.eyeShape = LibSvg.getSvg("eyeShapes", i);
-                break;
-            }
-        }
-        // eyeShapeTrait is 98 or 99
-        if (details.eyeShape.length == 0) {
+        if (details.trait < 0) {
+            details.eyeShape = LibSvg.getSvg("eyeShapes", 0);
+        } else if (details.trait > 97) {
             details.eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
+        } else {
+            details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
+            for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
+                if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
+                    details.eyeShape = LibSvg.getSvg("eyeShapes", i);
+                    break;
+                }
+            }
         }
 
         details.trait = uint16(_numericTraits >> (5 * 16));
@@ -82,10 +83,16 @@ contract SvgFacet is LibAppStorageModifiers {
             "EA8C27", // rare_high
             "51FFA8" // mythical_high
         ];
-        for (uint256 i; i < details.eyeColorTraitRanges.length - 1; i++) {
-            if (details.trait >= details.eyeColorTraitRanges[i] && details.trait < details.eyeColorTraitRanges[i + 1]) {
-                details.eyeColor = details.eyeColors[i];
-                break;
+        if (details.trait < 0) {
+            details.eyeColor = "FF00FF";
+        } else if (details.trait > 99) {
+            details.eyeColor = "51FFA8";
+        } else {
+            for (uint256 i; i < details.eyeColorTraitRanges.length - 1; i++) {
+                if (details.trait >= details.eyeColorTraitRanges[i] && details.trait < details.eyeColorTraitRanges[i + 1]) {
+                    details.eyeColor = details.eyeColors[i];
+                    break;
+                }
             }
         }
 

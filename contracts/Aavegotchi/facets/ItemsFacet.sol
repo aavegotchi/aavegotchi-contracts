@@ -266,7 +266,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         wearableSet_.wearableIds = LibAppStorage.uintToSixteenBitArray(s.wearableSets[_index].wearableIds);
         uint256 traitsBonuses = s.wearableSets[_index].traitsBonuses;
         for (uint256 i; i < 5; i++) {
-            wearableSet_.traitsBonuses[i] = int16(traitsBonuses >> (8 * i));
+            wearableSet_.traitsBonuses[i] = int8(traitsBonuses >> (8 * i));
         }
     }
 
