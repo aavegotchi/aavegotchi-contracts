@@ -250,6 +250,13 @@ contract ItemsFacet is LibAppStorageModifiers {
         }
     }
 
+    struct WearableSetIO {
+        string name;
+        uint8[] allowedCollaterals;
+        uint256[16] wearableIds;
+        int256[5] traitsBonuses;
+    }
+
     // Called by off chain software so not too concerned about gas costs
     function getWearableSets() external view returns (WearableSetIO[] memory wearableSets_) {
         uint256 length = s.wearableSets.length;
@@ -263,6 +270,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint256 length = s.wearableSets.length;
         require(_index < length, "ItemsFacet: Wearable set does not exist");
         wearableSet_.name = s.wearableSets[_index].name;
+        wearableSet_.allowedCollaterals = s.wearableSets[_index].allowedCollaterals;
         wearableSet_.wearableIds = LibAppStorage.uintToSixteenBitArray(s.wearableSets[_index].wearableIds);
         uint256 traitsBonuses = s.wearableSets[_index].traitsBonuses;
         for (uint256 i; i < 5; i++) {
@@ -647,12 +655,6 @@ contract ItemsFacet is LibAppStorageModifiers {
         emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _equippedWearables);
         aavegotchi.equippedWearables = _equippedWearables;
         LibAppStorage.interact(_tokenId);
-    }
-
-    struct WearableSetIO {
-        string name;
-        uint256[16] wearableIds;
-        int256[5] traitsBonuses;
     }
 
     function useConsumables(

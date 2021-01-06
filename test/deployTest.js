@@ -456,7 +456,7 @@ describe('Items & Wearables', async function () {
 
     const sets = await global.itemsFacet.getWearableSets()
     const gotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
-    // console.log(gotchi.modifiedNumericTraits.map(v => Number(v)))
+    // console.log('From numeric traits:' + gotchi.modifiedNumericTraits.map(v => Number(v)))
     // console.log('From traits calc:' + calculateRarityScoreFromTraits(gotchi.modifiedNumericTraits.map(v => Number(v))))
     // console.log('From modifiedRarityScore:' + Number(gotchi.modifiedRarityScore))
     // console.log(gotchi.equippedWearables.map(v => Number(v)))
@@ -476,8 +476,8 @@ describe('Items & Wearables', async function () {
     const modifiedRarityScore = 469
 
     ;[, traits, rarityScore] = modifyWithAavegotchiSets(sets, equippedWearables, modifiedNumericTraits, modifiedRarityScore)
-    expect(rarityScore).to.equal(479)
-    expect(traits).to.have.ordered.members([68, 20, 63, 53, 69, 83])
+    expect(rarityScore).to.equal(475)
+    expect(traits).to.have.ordered.members([68, 20, 67, 53, 69, 83])
   })
 
   /*
