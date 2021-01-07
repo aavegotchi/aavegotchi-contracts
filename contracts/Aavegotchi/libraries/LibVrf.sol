@@ -5,12 +5,10 @@ library LibVrf {
     bytes32 internal constant DIAMOND_STORAGE_POSITION = keccak256("chainlink.VRF");
 
     struct Storage {
-        mapping(uint256 => uint256) batchIdToRandomNumber;
+        mapping(bytes32 => uint256) vrfRequestIdToTokenId;
+        mapping(bytes32 => uint256) nonces;
+        mapping(uint256 => bool) tokenIdToVrfPending;
         bytes32 keyHash;
-        bool vrfPending;
-        uint40 nextVrfCallTime;
-        uint32 nextBatchId;
-        uint32 batchCount;
         uint144 fee;
     }
 
@@ -19,9 +17,5 @@ library LibVrf {
         assembly {
             ds.slot := position
         }
-    }
-
-    function getBatchRandomNumber(uint256 _batchId) internal view returns (uint256 randomNumber_) {
-        randomNumber_ = diamondStorage().batchIdToRandomNumber[_batchId];
     }
 }

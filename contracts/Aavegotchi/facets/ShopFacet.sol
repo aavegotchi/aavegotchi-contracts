@@ -24,7 +24,7 @@ contract ShopFacet {
     event BuyPortals(
         address indexed _from,
         address indexed _to,
-        uint256 indexed _batchId,
+        // uint256 indexed _batchId,
         uint256 _tokenId,
         uint256 _numAavegotchisToPurchase,
         uint256 _totalPrice
@@ -44,11 +44,7 @@ contract ShopFacet {
    |             Write Functions        |
    |__________________________________*/
 
-    function buyPortals(
-        address _to,
-        uint256 _ghst,
-        bool _setBatchId
-    ) external {
+    function buyPortals(address _to, uint256 _ghst) external {
         uint256 currentHauntId = s.currentHauntId;
         Haunt memory haunt = s.haunts[currentHauntId];
         require(_ghst >= haunt.portalPrice, "ShopFacet: Not enough GHST to buy portal");
@@ -60,24 +56,17 @@ contract ShopFacet {
         uint256 hauntCount = haunt.totalCount + numAavegotchisToPurchase;
         require(hauntCount <= haunt.hauntMaxSize, "ShopFacet: Exceeded max number of aavegotchis for this haunt");
         s.haunts[currentHauntId].totalCount = uint24(hauntCount);
-        uint32 nextBatchId;
-        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
-        if (_setBatchId) {
-            nextBatchId = vrf_ds.nextBatchId;
-        }
+
         uint256 tokenId = s.totalSupply;
         uint256 totalPrice = _ghst - (_ghst % haunt.portalPrice);
-        emit BuyPortals(msg.sender, _to, tokenId, nextBatchId, numAavegotchisToPurchase, totalPrice);
+        emit BuyPortals(msg.sender, _to, tokenId, numAavegotchisToPurchase, totalPrice);
         for (uint256 i; i < numAavegotchisToPurchase; i++) {
             s.aavegotchis[tokenId].owner = _to;
-            s.aavegotchis[tokenId].batchId = nextBatchId;
             s.aavegotchis[tokenId].hauntId = hauntId;
             emit Transfer(address(0), _to, tokenId);
             tokenId++;
         }
-        if (_setBatchId) {
-            vrf_ds.batchCount += uint32(numAavegotchisToPurchase);
-        }
+
         s.aavegotchiBalance[_to] += numAavegotchisToPurchase;
         s.totalSupply = uint32(tokenId);
         LibAppStorage.purchase(totalPrice);
@@ -118,7 +107,6 @@ contract ShopFacet {
         require(_voucherIds.length == _quantities.length, "ShopFacet: _voucherIds not same length as _quantities");
         IERC1155(im_vouchersContract).safeBatchTransferFrom(msg.sender, address(this), _voucherIds, _quantities, "");
         for (uint256 i; i < _voucherIds.length; i++) {
-            //Item types start at ID 1, but vouchers start at ID 0
             uint256 itemId = _voucherIds[i] + 1;
             uint256 quantity = _quantities[i];
             uint256 totalQuantity = s.itemTypes[itemId].totalQuantity + quantity;
@@ -130,19 +118,6 @@ contract ShopFacet {
         LibERC1155.onERC1155BatchReceived(msg.sender, _to, _voucherIds, _quantities, "");
     }
 
-    /**
-        @notice Handle the receipt of multiple ERC1155 token types.
-        @dev An ERC1155-compliant smart contract MUST call this function on the token recipient contract, at the end of a `safeBatchTransferFrom` after the balances have been updated.        
-        This function MUST return `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))` (i.e. 0xbc197c81) if it accepts the transfer(s).
-        This function MUST revert if it rejects the transfer(s).
-        Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.
-        @param _operator  The address which initiated the batch transfer (i.e. msg.sender)
-        @param _from      The address which previously owned the token
-        @param _ids       An array containing ids of each token being transferred (order and length must match _values array)
-        @param _values    An array containing amounts of each token being transferred (order and length must match _ids array)
-        @param _data      Additional data with no specified format
-        @return           `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`
-    */
     function onERC1155BatchReceived(
         address _operator,
         address _from,
@@ -150,7 +125,6 @@ contract ShopFacet {
         uint256[] calldata _values,
         bytes calldata _data
     ) external view returns (bytes4) {
-        // placed here to prevent argument not used errors
         _operator;
         _from;
         _ids;

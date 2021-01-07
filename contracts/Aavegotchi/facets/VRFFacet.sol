@@ -4,6 +4,7 @@ pragma solidity 0.7.4;
 import "../libraries/LibVrf.sol";
 import "../interfaces/ILink.sol";
 import "../../shared/libraries/LibDiamond.sol";
+import "../libraries/LibAppStorage.sol";
 
 /** ****************************************************************************
  * @notice Interface for contracts using VRF randomness
@@ -80,7 +81,8 @@ import "../../shared/libraries/LibDiamond.sol";
  */
 
 contract VrfFacet {
-    event VrfBatchRandomNumber(uint256 indexed batchId, uint256 randomNumber, uint256 _vrfTimeSet);
+    event VrfRandomNumber(uint256 indexed tokenId, uint256 randomNumber, uint256 _vrfTimeSet);
+    AppStorage internal s;
     ILink internal immutable im_link;
     address internal immutable im_vrfCoordinator;
 
@@ -93,22 +95,23 @@ contract VrfFacet {
    |            Read Functions          |
    |__________________________________*/
 
-    function vrfInfo()
+    /*  function vrfInfo()
         external
         view
         returns (
-            uint256 nextBatchId_,
-            uint256 nextVrfCallTime_,
-            bool vrfPending_,
-            uint256 batchCount_
+            // uint256 nextBatchId_,
+            // uint256 nextVrfCallTime_,
+            bool vrfPending_
         )
+    // uint256 batchCount_
     {
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
-        nextBatchId_ = vrf_ds.nextBatchId;
-        nextVrfCallTime_ = vrf_ds.nextVrfCallTime;
-        vrfPending_ = vrf_ds.vrfPending;
-        batchCount_ = vrf_ds.batchCount;
+        //  nextBatchId_ = vrf_ds.nextBatchId;
+        //  nextVrfCallTime_ = vrf_ds.nextVrfCallTime;
+        vrfPending_ = vrf_ds;
+        //  batchCount_ = vrf_ds.batchCount;
     }
+    */
 
     function linkBalance() external view returns (uint256 linkBalance_) {
         linkBalance_ = im_link.balanceOf(address(this));
@@ -118,17 +121,47 @@ contract VrfFacet {
    |            Write Functions        |
    |__________________________________*/
 
-    function drawRandomNumber() external {
+    function drawRandomNumber(uint256 _tokenId) public {
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
-        require(vrf_ds.batchCount > 0, "VrfFacet: Can't call VRF with none in batch");
-        require(block.timestamp >= vrf_ds.nextVrfCallTime, "VrfFacet: Waiting period to call VRF not over yet");
-        require(vrf_ds.vrfPending == false, "VrfFacet: VRF call is pending");
-        vrf_ds.vrfPending = true;
-        vrf_ds.batchCount = 0;
-        vrf_ds.nextBatchId++;
-        // Use Chainlink VRF to generate random number
+        require(vrf_ds.tokenIdToVrfPending[_tokenId] == false, "VrfFacet: VRF call is pending");
+        vrf_ds.tokenIdToVrfPending[_tokenId] = true;
         require(im_link.balanceOf(address(this)) >= vrf_ds.fee, "VrfFacet: Not enough LINK");
-        im_link.transferAndCall(im_vrfCoordinator, vrf_ds.fee, abi.encode(vrf_ds.keyHash, 0));
+        bytes32 requestId = requestRandomness(vrf_ds.keyHash, vrf_ds.fee, 0);
+        vrf_ds.vrfRequestIdToTokenId[requestId] = _tokenId;
+    }
+
+    function requestRandomness(
+        bytes32 _keyHash,
+        uint256 _fee,
+        uint256 _seed
+    ) internal returns (bytes32 requestId) {
+        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
+        im_link.transferAndCall(im_vrfCoordinator, _fee, abi.encode(_keyHash, _seed));
+        // This is the seed passed to VRFCoordinator. The oracle will mix this with
+        // the hash of the block containing this request to obtain the seed/input
+        // which is finally passed to the VRF cryptographic machinery.
+        // So the seed doesn't actually do anything and is left over from an old API.
+        uint256 vRFSeed = makeVRFInputSeed(_keyHash, _seed, address(this), vrf_ds.nonces[_keyHash]);
+        // nonces[_keyHash] must stay in sync with
+        // VRFCoordinator.nonces[_keyHash][this], which was incremented by the above
+        // successful Link.transferAndCall (in VRFCoordinator.randomnessRequest).
+        // This provides protection against the user repeating their input
+        // seed, which would result in a predictable/duplicate output.
+        vrf_ds.nonces[_keyHash]++;
+        return makeRequestId(_keyHash, vRFSeed);
+    }
+
+    function makeRequestId(bytes32 _keyHash, uint256 _vRFInputSeed) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_keyHash, _vRFInputSeed));
+    }
+
+    function makeVRFInputSeed(
+        bytes32 _keyHash,
+        uint256 _userSeed,
+        address _requester,
+        uint256 _nonce
+    ) internal pure returns (uint256) {
+        return uint256(keccak256(abi.encode(_keyHash, _userSeed, _requester, _nonce)));
     }
 
     /**
@@ -145,14 +178,16 @@ contract VrfFacet {
      */
     function rawFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) external {
         _requestId; // mentioned here to remove unused variable warning
-        require(msg.sender == im_vrfCoordinator, "Only VRFCoordinator can fulfill");
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
-        require(vrf_ds.vrfPending == true, "VrfFacet: VRF is not pending");
-        vrf_ds.vrfPending = false;
-        uint256 currentBatchId = vrf_ds.nextBatchId - 1;
-        vrf_ds.batchIdToRandomNumber[currentBatchId] = _randomNumber;
-        vrf_ds.nextVrfCallTime = uint40(block.timestamp + 18 hours);
-        emit VrfBatchRandomNumber(currentBatchId, _randomNumber, block.timestamp);
+        uint256 tokenId = vrf_ds.vrfRequestIdToTokenId[_requestId];
+
+        require(msg.sender == im_vrfCoordinator, "Only VRFCoordinator can fulfill");
+
+        require(vrf_ds.tokenIdToVrfPending[tokenId] == true, "VrfFacet: VRF is not pending");
+        vrf_ds.tokenIdToVrfPending[tokenId] = false;
+
+        s.tokenIdToRandomNumber[tokenId] = _randomNumber;
+        emit VrfRandomNumber(tokenId, _randomNumber, block.timestamp);
     }
 
     // Change the fee amount that is paid for VRF random numbers

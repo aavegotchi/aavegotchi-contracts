@@ -8,6 +8,7 @@ import "../libraries/LibStrings.sol";
 import "../libraries/LibSvg.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
+import "./VrfFacet.sol";
 // import "hardhat/console.sol";
 import "../CollateralEscrow.sol";
 import "../libraries/LibVrf.sol";
@@ -157,8 +158,9 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         returns (PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory portalAavegotchiTraits_)
     {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-        uint256 batchRandomNumber = LibVrf.getBatchRandomNumber(s.aavegotchis[_tokenId].batchId);
-        uint256 randomNumber = uint256(keccak256(abi.encodePacked(batchRandomNumber, _tokenId)));
+
+        uint256 randomNumber = s.tokenIdToRandomNumber[_tokenId];
+
         for (uint256 i; i < portalAavegotchiTraits_.length; i++) {
             InternalPortalAavegotchiTraitsIO memory single = singlePortalAavegotchiTraits(randomNumber, i);
             portalAavegotchiTraits_[i].randomNumber = single.randomNumber;
@@ -205,7 +207,6 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         uint256 toNextLevel;
         uint256 usedSkillPoints; //number of skill points used
         uint256 level; //the current aavegotchi level
-        uint256 batchId;
         uint256 hauntId;
         uint256 baseRarityScore;
         uint256 modifiedRarityScore;
@@ -240,7 +241,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
         aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
-        aavegotchiInfo_.batchId = s.aavegotchis[_tokenId].batchId;
+        // aavegotchiInfo_.batchId = s.aavegotchis[_tokenId].batchId;
         aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
         if (aavegotchiInfo_.status == LibAppStorage.STATUS_AAVEGOTCHI) {
             aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
@@ -419,29 +420,13 @@ contract AavegotchiFacet is LibAppStorageModifiers {
    |             Write Functions        |
    |__________________________________*/
 
-    /**@notice Called if user opted out of next batch in buyPortals */
-    function setBatchId(uint256[] calldata _tokenIds) external {
-        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
-        uint32 batchId = vrf_ds.nextBatchId;
-        uint256 batchCount = vrf_ds.batchCount;
-        for (uint256 i; i < _tokenIds.length; i++) {
-            uint256 tokenId = _tokenIds[i];
-            require(msg.sender == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can set a batchId");
-            require(s.aavegotchis[tokenId].batchId == 0, "AavegotchiFacet: batchId already set");
-            s.aavegotchis[tokenId].batchId = batchId;
-            batchCount++;
-        }
-        vrf_ds.batchCount = uint32(batchCount);
-        emit SetBatchId(batchId, _tokenIds);
-    }
-
     function openPortals(uint256[] calldata _tokenIds) external {
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             require(s.aavegotchis[tokenId].status == LibAppStorage.STATUS_CLOSED_PORTAL, "AavegotchiFacet: Portal is not closed");
             require(msg.sender == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
-            uint256 batchRandomNumber = LibVrf.getBatchRandomNumber(s.aavegotchis[tokenId].batchId);
-            require(batchRandomNumber > 0, "AavegotchiFacet: No random number for this portal");
+
+            VrfFacet(address(this)).drawRandomNumber(tokenId);
             s.aavegotchis[tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
         }
         emit OpenPortals(_tokenIds);
@@ -455,8 +440,9 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         require(_option < PORTAL_AAVEGOTCHIS_NUM, "AavegotchiFacet: Only 10 aavegotchi options available");
-        uint256 batchRandomNumber = LibVrf.getBatchRandomNumber(s.aavegotchis[_tokenId].batchId);
-        uint256 randomNumber = uint256(keccak256(abi.encodePacked(batchRandomNumber, _tokenId)));
+
+        uint256 randomNumber = s.tokenIdToRandomNumber[_tokenId];
+
         InternalPortalAavegotchiTraitsIO memory option = singlePortalAavegotchiTraits(randomNumber, _option);
         aavegotchi.randomNumber = option.randomNumber;
         aavegotchi.numericTraits = option.numericTraits;

@@ -16,7 +16,7 @@ struct Aavegotchi {
     uint40 lastTemporaryBoost;
     uint256 numericTraits; // Sixteen 16 bit ints.  [Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     address owner;
-    uint32 batchId;
+    // uint32 batchId;
     uint16 hauntId;
     uint8 status; // 0 == portal, 1 = open portal, 2 = Aavegotchi
     uint32 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
@@ -98,6 +98,7 @@ struct AppStorage {
     WearableSet[] wearableSets;
     mapping(uint256 => Haunt) haunts;
     mapping(address => mapping(uint256 => uint256)) items;
+    mapping(uint256 => uint256) tokenIdToRandomNumber;
     mapping(uint256 => Aavegotchi) aavegotchis;
     mapping(address => mapping(address => bool)) operators;
     mapping(uint256 => address) approved;

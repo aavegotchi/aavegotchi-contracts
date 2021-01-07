@@ -59,7 +59,6 @@ contract AavegotchiDiamond {
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
         vrf_ds.keyHash = _args.chainlinkKeyHash;
         vrf_ds.fee = uint144(_args.chainlinkFee);
-        vrf_ds.nextBatchId = 1;
 
         uint256 currentHauntId = s.currentHauntId;
         s.haunts[currentHauntId].hauntMaxSize = _args.initialHauntSize; //10_000;

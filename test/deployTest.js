@@ -17,7 +17,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToInt8Array (uint, numBytes) {
+function uintToInt8Array(uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -26,7 +26,7 @@ function uintToInt8Array (uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint (array) {
+function sixteenBitArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -38,7 +38,7 @@ function sixteenBitArrayToUint (array) {
   return ethers.BigNumber.from(0)
 }
 
-function sixteenBitIntArrayToUint (array) {
+function sixteenBitIntArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -54,7 +54,7 @@ function sixteenBitIntArrayToUint (array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds (uint) {
+function uintToItemIds(uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -95,92 +95,23 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
 })
 
 describe('Buying Portals, VRF', function () {
-  it('Should not fire VRF if there are no portals in batch', async function () {
-    await truffleAssert.reverts(vrfFacet.drawRandomNumber(), "VrfFacet: Can't call VRF with none in batch")
-  })
 
   it('Portal should cost 100 GHST', async function () {
     const balance = await ghstTokenContract.balanceOf(account)
     await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
     const buyAmount = (50 * Math.pow(10, 18)).toFixed() // 1 portal
-    await truffleAssert.reverts(shopFacet.buyPortals(account, buyAmount, true), 'ShopFacet: Not enough GHST to buy portal')
+    await truffleAssert.reverts(shopFacet.buyPortals(account, buyAmount), 'ShopFacet: Not enough GHST to buy portal')
   })
 
   it('Should purchase portal', async function () {
     const balance = await ghstTokenContract.balanceOf(account)
     await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
-    const buyAmount = ethers.utils.parseEther('100') // 1 portals
-    const tx = await global.shopFacet.buyPortals(account, buyAmount, true)
+    const buyAmount = ethers.utils.parseEther('500') // 1 portals
+    const tx = await global.shopFacet.buyPortals(account, buyAmount)
     const receipt = await tx.wait()
-    console.log('Buying portals cost :' + receipt.gasUsed.toString())
 
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
-    expect(myPortals.length).to.equal(1)
-  })
-
-  it('Batch count should be 1', async function () {
-    const vrfInfo = await global.vrfFacet.vrfInfo()
-    expect(vrfInfo.batchCount_).to.equal(1)
-  })
-
-  it('Should allow opting out of VRF batch', async function () {
-    const balance = await ghstTokenContract.balanceOf(account)
-    await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
-    const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await global.shopFacet.buyPortals(account, buyAmount, false)
-  })
-
-  // it('Only owner can set batch id', async function () {
-  //  await bobAavegotchi.setBatchId(["0"])
-  // })
-
-  it('Should opt into next batch', async function () {
-    await truffleAssert.reverts(aavegotchiFacet.setBatchId(['0']), 'AavegotchiFacet: batchId already set')
-    await global.aavegotchiFacet.setBatchId(['1'])
-
-    const vrfInfo = await global.vrfFacet.vrfInfo()
-    expect(vrfInfo.batchCount_).to.equal(2)
-  })
-
-  it('Cannot open portal without first calling VRF', async function () {
-    await truffleAssert.reverts(aavegotchiFacet.openPortals(['0']), 'AavegotchiFacet: No random number for this portal')
-  })
-
-  it('Should receive VRF call', async function () {
-    await global.vrfFacet.drawRandomNumber()
-    const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
-    await global.vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
-  })
-
-  it('Should reset batch to 0 after calling VRF', async function () {
-    await truffleAssert.reverts(vrfFacet.drawRandomNumber(), "VrfFacet: Can't call VRF with none in batch")
-    const vrfInfo = await global.vrfFacet.vrfInfo()
-    expect(vrfInfo.batchCount_).to.equal(0)
-  })
-
-  it('Should wait 18 hours before next VRF call', async function () {
-    const balance = await ghstTokenContract.balanceOf(account)
-    await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
-    const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await global.shopFacet.buyPortals(account, buyAmount, true)
-    await truffleAssert.reverts(vrfFacet.drawRandomNumber(), 'VrfFacet: Waiting period to call VRF not over yet')
-
-    ethers.provider.send('evm_increaseTime', [18 * 3600])
-    ethers.provider.send('evm_mine')
-    await global.vrfFacet.drawRandomNumber()
-
-    const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
-    await global.vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
-    const vrfInfo = await global.vrfFacet.vrfInfo()
-    expect(vrfInfo.batchCount_).to.equal(0)
-  })
-
-  it('Cannot call VRF before it is ready', async function () {
-    const balance = await ghstTokenContract.balanceOf(account)
-    await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
-    const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await global.shopFacet.buyPortals(account, buyAmount, true)
-    await truffleAssert.reverts(vrfFacet.drawRandomNumber(), 'VrfFacet: Waiting period to call VRF not over yet')
+    expect(myPortals.length).to.equal(5)
   })
 })
 
@@ -188,8 +119,13 @@ describe('Opening Portals', async function () {
   it('Should open the portal', async function () {
     let myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals[0].status).to.equal(0)
-    const portalId = myPortals[0].tokenId
-    await global.aavegotchiFacet.openPortals([portalId])
+    //  const portalId = myPortals[0].tokenId
+    await global.aavegotchiFacet.openPortals(["0"])
+
+    const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
+
+    await global.vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
+
     myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals[0].status).to.equal(1)
   })
@@ -215,6 +151,10 @@ describe('Opening Portals', async function () {
     expect(svgs.length).to.equal(10)
   })
   */
+
+  it('Can only set name on claimed Aavegotchi', async function () {
+    await truffleAssert.reverts(aavegotchiFacet.setAavegotchiName('1', 'Portal'), 'AavegotchiFacet: Must choose Aavegotchi before setting name')
+  })
 
   it('Should claim an Aavegotchi', async function () {
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
@@ -245,10 +185,6 @@ describe('Aavegotchi Metadata', async function () {
     await global.aavegotchiFacet.setAavegotchiName(tokenId, 'Beavis')
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(tokenId)
     expect(aavegotchi.name).to.equal('Beavis')
-  })
-
-  it('Can only set name on claimed Aavegotchi', async function () {
-    await truffleAssert.reverts(aavegotchiFacet.setAavegotchiName('1', 'Portal'), 'AavegotchiFacet: Must choose Aavegotchi before setting name')
   })
 
   it('Should show correct rarity score', async function () {
@@ -317,17 +253,12 @@ describe('Collaterals and escrow', async function () {
   it('Can decrease stake and destroy Aavegotchi', async function () {
     // Buy portal
     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-    await global.shopFacet.buyPortals(account, buyAmount, true)
-    ethers.provider.send('evm_increaseTime', [18 * 3600])
-    ethers.provider.send('evm_mine')
-
-    // Call VRF
-    await global.vrfFacet.drawRandomNumber()
-    const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
-    await global.vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
+    await global.shopFacet.buyPortals(account, buyAmount)
 
     let myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
-    expect(myPortals.length).to.equal(5)
+    expect(myPortals.length).to.equal(6)
+
+    console.log('my portals:', myPortals.length)
     // Open portal
 
     const initialBalance = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
@@ -340,7 +271,7 @@ describe('Collaterals and escrow', async function () {
 
     // Should only have 1 portal now
     myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
-    expect(myPortals.length).to.equal(4)
+    expect(myPortals.length).to.equal(5)
   })
 
   it('Can destroy Aavegotchi and transfer XP to another', async function () {
@@ -361,7 +292,7 @@ describe('Collaterals and escrow', async function () {
   })
 })
 
-async function openAndClaim (tokenIds) {
+async function openAndClaim(tokenIds) {
   for (let index = 0; index < tokenIds.length; index++) {
     const id = tokenIds[index]
 
@@ -475,7 +406,7 @@ describe('Items & Wearables', async function () {
     const modifiedNumericTraits = [66, 20, 68, 53, 69, 83]
     const modifiedRarityScore = 469
 
-    ;[, traits, rarityScore] = modifyWithAavegotchiSets(sets, equippedWearables, modifiedNumericTraits, modifiedRarityScore)
+      ;[, traits, rarityScore] = modifyWithAavegotchiSets(sets, equippedWearables, modifiedNumericTraits, modifiedRarityScore)
     expect(rarityScore).to.equal(475)
     expect(traits).to.have.ordered.members([68, 20, 67, 53, 69, 83])
   })
@@ -542,7 +473,7 @@ describe('Items & Wearables', async function () {
 
     await itemsFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([santaHat, 0, 0, 0]))
     const svg = await global.svgFacet.getAavegotchiSvg(testAavegotchiId)
-    console.log(svg)
+    //console.log(svg)
   })
 
   it('Equipping Wearables alters base rarity score', async function () {
@@ -602,15 +533,14 @@ describe('Haunts', async function () {
 
   it('Cannot exceed max haunt size', async function () {
     let purchaseNumber = ethers.utils.parseEther('5000')
-    let tx = await global.shopFacet.buyPortals(account, purchaseNumber, true)
+    await global.shopFacet.buyPortals(account, purchaseNumber)
+
+    purchaseNumber = ethers.utils.parseEther('4400')
+    tx = await global.shopFacet.buyPortals(account, purchaseNumber)
+
     // const totalSupply = await global.aavegotchiFacet.totalSupply()
-    // console.log('total supply:' + totalSupply)
-
-    purchaseNumber = ethers.utils.parseEther('4500')
-    tx = await global.shopFacet.buyPortals(account, purchaseNumber, true)
-
     const singlePortal = ethers.utils.parseEther('100')
-    await truffleAssert.reverts(global.shopFacet.buyPortals(account, singlePortal, true), 'ShopFacet: Exceeded max number of aavegotchis for this haunt')
+    await truffleAssert.reverts(global.shopFacet.buyPortals(account, singlePortal), 'ShopFacet: Exceeded max number of aavegotchis for this haunt')
 
     //  const receipt = await tx.wait()
   })
@@ -640,7 +570,7 @@ describe('Revenue transfers', async function () {
     }
 
     // Buy 10 Portals
-    await global.shopFacet.buyPortals(account, ethers.utils.parseEther('1000'), true)
+    await global.shopFacet.buyPortals(account, ethers.utils.parseEther('1000'))
 
     // Calculate shares from 100 Portals
     const burnShare = ethers.utils.parseEther('330')
@@ -692,6 +622,7 @@ describe('Shop and Vouchers', async function () {
   })
 })
 
+/*
 describe('Leveling up', async function () {
   it('Aavegotchi should start with 0 XP and Level 1', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
@@ -806,6 +737,7 @@ describe('Leveling up', async function () {
     expect(aavegotchi.level).to.equal(99)
   })
 })
+*/
 
 describe('Using Consumables', async function () {
   it('Using Kinship Potion increases kinship by 2', async function () {
@@ -947,8 +879,15 @@ describe('DAO Functions', async function () {
 
 describe('Kinship', async function () {
   it('Can calculate kinship according to formula', async function () {
+
+    ethers.provider.send('evm_increaseTime', [86400])
+    ethers.provider.send('evm_mine')
+
     let kinship = await global.aavegotchiFacet.kinship('0')
     console.log('* Initial Kinship:', kinship.toString())
+
+
+
     // Use a kinship potion earlier then waited 24hrs
     expect(kinship).to.equal(52)
 
@@ -964,7 +903,7 @@ describe('Kinship', async function () {
     // 5 interactions + 1 streak bonus
 
     // Go 3 days without interacting
-    ethers.provider.send('evm_increaseTime', [3 * 86400])
+    ethers.provider.send('evm_increaseTime', [2 * 86400])
     ethers.provider.send('evm_mine')
 
     kinship = await global.aavegotchiFacet.kinship('0')
@@ -1039,7 +978,7 @@ describe('Kinship', async function () {
   })
 })
 
-async function neglectAavegotchi (days) {
+async function neglectAavegotchi(days) {
   ethers.provider.send('evm_increaseTime', [86400 * days])
   ethers.provider.send('evm_mine')
   // daysSinceInteraction = 0
@@ -1052,13 +991,13 @@ async function neglectAavegotchi (days) {
   console.log(`* Neglect Gotchi for ${days} days`)
 }
 
-async function interactAndUpdateTime () {
+async function interactAndUpdateTime() {
   await global.aavegotchiFacet.interact(['0'])
   ethers.provider.send('evm_increaseTime', [86400 / 2])
   ethers.provider.send('evm_mine')
 }
 
-function eightBitArrayToUint (array) {
+function eightBitArrayToUint(array) {
   const uint = []
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8)
