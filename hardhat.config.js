@@ -25,6 +25,12 @@ module.exports = {
       blockGasLimit: 1350000000,
       gas: 1300000000
     },
+    mumbai: {
+      url: 'https://rpc-mumbai.matic.today',
+      accounts: [process.env.SECRET],
+      blockGasLimit: 20000000,
+      gasPrice: 1000000000
+    },
     kovan: {
       url: process.env.KOVAN_URL,
       accounts: [process.env.SECRET],

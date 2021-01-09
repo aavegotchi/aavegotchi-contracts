@@ -120,14 +120,14 @@ describe('Opening Portals', async function () {
     let myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals[0].status).to.equal(0)
     //  const portalId = myPortals[0].tokenId
-    await global.aavegotchiFacet.openPortals(["0"])
+    await global.aavegotchiFacet.openPortals(["0", "1", "2", "3"])
 
     const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
 
     await global.vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
 
     myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
-    expect(myPortals[0].status).to.equal(1)
+    expect(myPortals[0].status).to.equal(2)
   })
 
   it('Should contain 10 random ghosts in the portal', async function () {
@@ -170,7 +170,7 @@ describe('Opening Portals', async function () {
 
     const collateral = aavegotchi.collateral
     expect(selectedGhost.collateralType).to.equal(collateral)
-    expect(aavegotchi.status).to.equal(2)
+    expect(aavegotchi.status).to.equal(3)
     expect(aavegotchi.hauntId).to.equal(0)
     expect(aavegotchi.stakedAmount).to.equal(minStake)
     expect(kinship).to.equal(50)
@@ -262,7 +262,18 @@ describe('Collaterals and escrow', async function () {
     // Open portal
 
     const initialBalance = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
-    await openAndClaim(['1'])
+    // await openAndClaim(['1'])
+
+    const id = "1"
+    const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
+    const selectedGhost = ghosts[0]
+    const minStake = selectedGhost.minimumStake
+    console.log('min stake:', minStake)
+
+
+    // Claim ghost and stake
+    await global.aavegotchiFacet.claimAavegotchi(id, 0, minStake)
+    //  await claimGotchis[id]
 
     // Burn Aavegotchi and return collateral stake
     await global.collateralFacet.decreaseAndDestroy('1', '1')
@@ -278,7 +289,24 @@ describe('Collaterals and escrow', async function () {
     const burnId = '2'
     const receiveId = '3'
 
-    await openAndClaim([burnId, receiveId])
+    let id = "2"
+    let ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
+    let selectedGhost = ghosts[0]
+    let minStake = selectedGhost.minimumStake
+    console.log('min stake:', minStake)
+    // Claim ghost and stake
+    await global.aavegotchiFacet.claimAavegotchi(id, 0, minStake)
+
+
+    id = "3"
+    ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
+    selectedGhost = ghosts[0]
+    minStake = selectedGhost.minimumStake
+    console.log('min stake:', minStake)
+    // Claim ghost and stake
+    await global.aavegotchiFacet.claimAavegotchi(id, 0, minStake)
+
+    //   await openAndClaim([burnId, receiveId])
     const initialExperience = (await aavegotchiFacet.getAavegotchi(receiveId)).experience
     expect(initialExperience).to.equal(0)
 
@@ -291,23 +319,6 @@ describe('Collaterals and escrow', async function () {
     expect(finalExperience).to.equal(1000)
   })
 })
-
-async function openAndClaim(tokenIds) {
-  for (let index = 0; index < tokenIds.length; index++) {
-    const id = tokenIds[index]
-
-    await global.aavegotchiFacet.openPortals([id])
-    const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
-    const selectedGhost = ghosts[0]
-    const minStake = selectedGhost.minimumStake
-    const initialBalance = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
-
-    // Claim ghost and stake
-    await global.aavegotchiFacet.claimAavegotchi(id, 0, minStake)
-    const balanceAfterClaim = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
-    expect(balanceAfterClaim).to.equal(initialBalance.sub(minStake))
-  }
-}
 
 describe('Items & Wearables', async function () {
   it('Shows item URI', async function () {
@@ -996,6 +1007,29 @@ async function interactAndUpdateTime() {
   ethers.provider.send('evm_increaseTime', [86400 / 2])
   ethers.provider.send('evm_mine')
 }
+
+async function claimGotchis(tokenIds) {
+
+  console.log('token ids:')
+
+  for (let index = 0; index < tokenIds.length; index++) {
+
+    console.log('fucker')
+
+    const id = tokenIds[index]
+    const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
+    const selectedGhost = ghosts[0]
+    const minStake = selectedGhost.minimumStake
+    console.log('min stake:', minStake)
+    const initialBalance = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
+
+    // Claim ghost and stake
+    await global.aavegotchiFacet.claimAavegotchi(id, 0, minStake)
+    const balanceAfterClaim = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
+    expect(balanceAfterClaim).to.equal(initialBalance.sub(minStake))
+  }
+}
+
 
 function eightBitArrayToUint(array) {
   const uint = []

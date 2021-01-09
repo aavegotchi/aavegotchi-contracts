@@ -241,7 +241,6 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
         aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
-        // aavegotchiInfo_.batchId = s.aavegotchis[_tokenId].batchId;
         aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
         if (aavegotchiInfo_.status == LibAppStorage.STATUS_AAVEGOTCHI) {
             aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
@@ -427,7 +426,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             require(msg.sender == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
 
             VrfFacet(address(this)).drawRandomNumber(tokenId);
-            s.aavegotchis[tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
+            s.aavegotchis[tokenId].status = LibAppStorage.STATUS_VRF_PENDING;
         }
         emit OpenPortals(_tokenIds);
     }

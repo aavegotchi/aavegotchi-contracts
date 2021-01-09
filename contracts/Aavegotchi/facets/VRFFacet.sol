@@ -6,6 +6,8 @@ import "../interfaces/ILink.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../libraries/LibAppStorage.sol";
 
+//import "hardhat/console.sol";
+
 /** ****************************************************************************
  * @notice Interface for contracts using VRF randomness
  * *****************************************************************************
@@ -82,6 +84,7 @@ import "../libraries/LibAppStorage.sol";
 
 contract VrfFacet {
     event VrfRandomNumber(uint256 indexed tokenId, uint256 randomNumber, uint256 _vrfTimeSet);
+    event PortalOpened(uint256 indexed tokenId);
     AppStorage internal s;
     ILink internal immutable im_link;
     address internal immutable im_vrfCoordinator;
@@ -177,9 +180,13 @@ contract VrfFacet {
      * @param _randomNumber the VRF output
      */
     function rawFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) external {
+        // console.log("bytes");
+        // console.logBytes32(_requestId);
         _requestId; // mentioned here to remove unused variable warning
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
         uint256 tokenId = vrf_ds.vrfRequestIdToTokenId[_requestId];
+
+        // console.log("token id:", tokenId);
 
         require(msg.sender == im_vrfCoordinator, "Only VRFCoordinator can fulfill");
 
@@ -187,6 +194,9 @@ contract VrfFacet {
         vrf_ds.tokenIdToVrfPending[tokenId] = false;
 
         s.tokenIdToRandomNumber[tokenId] = _randomNumber;
+        s.aavegotchis[tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
+
+        emit PortalOpened(tokenId);
         emit VrfRandomNumber(tokenId, _randomNumber, block.timestamp);
     }
 

@@ -121,8 +121,9 @@ library LibAppStorage {
     uint256 internal constant NUMERIC_TRAITS_NUM = 6;
 
     uint8 internal constant STATUS_CLOSED_PORTAL = 0;
-    uint8 internal constant STATUS_OPEN_PORTAL = 1;
-    uint8 internal constant STATUS_AAVEGOTCHI = 2;
+    uint8 internal constant STATUS_VRF_PENDING = 1;
+    uint8 internal constant STATUS_OPEN_PORTAL = 2;
+    uint8 internal constant STATUS_AAVEGOTCHI = 3;
 
     uint8 internal constant WEARABLE_SLOT_HEAD = 0;
     uint8 internal constant WEARABLE_SLOT_FACE = 1;

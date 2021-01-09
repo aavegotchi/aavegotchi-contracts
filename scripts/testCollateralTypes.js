@@ -6,6 +6,7 @@ const collaterals = [
     kovanAddress: '',
     mainnetAddress: '',
     hardhatAddress: '',
+    mumbaiAddress: '',
     primaryColor: '#FF7D00',
     secondaryColor: '#F9D792',
     cheekColor: '#F4AF24',
@@ -32,7 +33,7 @@ const collaterals = [
     */
 ]
 
-function eightBitArrayToUint (array) {
+function eightBitArrayToUint(array) {
   const uint = []
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8)
@@ -41,16 +42,16 @@ function eightBitArrayToUint (array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function getCollaterals (network, ghstAddress, testAddress) {
+function getCollaterals(network, ghstAddress, testAddress) {
   const collateralTypes = []
   for (const collateralType of collaterals) {
     const collateralTypeInfo = {
       primaryColor:
-                '0x' + collateralType.primaryColor.slice(1),
+        '0x' + collateralType.primaryColor.slice(1),
       secondaryColor:
-                '0x' + collateralType.secondaryColor.slice(1),
+        '0x' + collateralType.secondaryColor.slice(1),
       cheekColor:
-                '0x' + collateralType.cheekColor.slice(1),
+        '0x' + collateralType.cheekColor.slice(1),
       svgId: collateralType.svgId,
       eyeShapeSvgId: collateralType.eyeShapeSvgId,
       modifiers: eightBitArrayToUint(collateralType.modifiers),
