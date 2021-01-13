@@ -1853,7 +1853,7 @@ const itemTypes = [
     maxQuantity: '1000',
     traitModifiers: [0, 0, 0, 1, 0, 0],
     canPurchaseWithGhst: true,
-    slotPositions: 'hands',
+    slotPositions: 'handLeft',
     category: 0,
     canBeTransferred: true,
     totalQuantity: 0,
