@@ -142,15 +142,15 @@ describe('Opening Portals', async function () {
     expect(ghosts.length).to.equal(10)
   })
 
-  /*
+
   it('Should show SVGs', async function () {
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
-    const svgs = await global.aavegotchiFacet.portalAavegotchisSvg(tokenId)
-    // console.log('svgs:', svgs[0])
+    const svgs = await global.svgFacet.portalAavegotchisSvg(tokenId)
+    console.log('svgs:', svgs[0])
     expect(svgs.length).to.equal(10)
   })
-  */
+
 
   it('Can only set name on claimed Aavegotchi', async function () {
     await truffleAssert.reverts(aavegotchiFacet.setAavegotchiName('1', 'Portal'), 'AavegotchiFacet: Must choose Aavegotchi before setting name')
@@ -484,7 +484,7 @@ describe('Items & Wearables', async function () {
 
     await itemsFacet.equipWearables(testAavegotchiId, sixteenBitArrayToUint([santaHat, 0, 0, 0]))
     const svg = await global.svgFacet.getAavegotchiSvg(testAavegotchiId)
-    //console.log(svg)
+    console.log(svg)
   })
 
   it('Equipping Wearables alters base rarity score', async function () {
