@@ -126,7 +126,7 @@ contract SvgFacet is LibAppStorageModifiers {
         if (_tokenId == MAX_INT) {
             svg_ = abi.encodePacked(applyStyles(details, _tokenId), details.background, svg_, details.collateral, details.eyeShape);
         } else {
-            svg_ = abi.encodePacked(applyStyles(details, _tokenId), addWearableSvgLayers(svg_, details.eyeShape, _tokenId));
+            svg_ = abi.encodePacked(applyStyles(details, _tokenId), addBodyAndWearableSvgLayers(svg_, details, _tokenId));
         }
     }
 
@@ -202,9 +202,9 @@ contract SvgFacet is LibAppStorageModifiers {
         }
     }
 
-    function addWearableSvgLayers(
+    function addBodyAndWearableSvgLayers(
         bytes memory _body,
-        bytes memory _eyes,
+        SvgLayerDetails memory details,
         uint256 _tokenId
     ) internal view returns (bytes memory svg_) {
         //Wearables
@@ -222,7 +222,8 @@ contract SvgFacet is LibAppStorageModifiers {
             svg_ = abi.encodePacked(svg_, getWearable(wearableId, 6));
         }
 
-        svg_ = abi.encodePacked(_body, _eyes);
+        //background, body, eyes, collateral
+        svg_ = abi.encodePacked(details.background, _body, details.eyeShape, details.collateral);
 
         // petFront wearable
         wearableId = uint16(equippedWearables >> (7 * 16));
