@@ -135,9 +135,10 @@ contract SvgFacet is LibAppStorageModifiers {
         uint256 equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
 
         if (
-            _tokenId == 2**256 - 1 &&
+            _tokenId != 2**256 - 1 &&
             (uint16(equippedWearables) != 0 || uint16(equippedWearables >> (4 * 16)) != 0 || uint16(equippedWearables >> (5 * 16)) != 0)
         ) {
+            //Open-hands aavegotchi
             return
                 abi.encodePacked(
                     "<style>.gotchi-primary{fill:#",
@@ -155,6 +156,7 @@ contract SvgFacet is LibAppStorageModifiers {
                     "</style>"
                 );
         } else {
+            //Normal Aavegotchi, closed hands
             return
                 abi.encodePacked(
                     "<style>.gotchi-primary{fill:#",
