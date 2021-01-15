@@ -2634,7 +2634,7 @@ const itemTypes = [
     setId: [56, 70],
     author: 'Cawito',
     description: '',
-    dimensions: { x: 12, y: 32, width: 40, height: 19 },
+    dimensions: { x: 12, y: 33, width: 40, height: 19 },
     x: 12,
     y: 32,
     width: 40,
