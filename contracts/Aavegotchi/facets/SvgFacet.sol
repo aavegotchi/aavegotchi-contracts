@@ -176,11 +176,39 @@ contract SvgFacet is LibAppStorageModifiers {
         }
     }
 
+    function getWearableClass(uint256 _slotPosition) internal view returns (string memory className_) {
+        //Wearables
+        /*
+    uint8 internal constant WEARABLE_SLOT_BODY = 0;
+    uint8 internal constant WEARABLE_SLOT_FACE = 1;
+    uint8 internal constant WEARABLE_SLOT_EYES = 2;
+    uint8 internal constant WEARABLE_SLOT_HEAD = 3;
+    uint8 internal constant WEARABLE_SLOT_HAND_LEFT = 4;
+    uint8 internal constant WEARABLE_SLOT_HAND_RIGHT = 5;
+    uint8 internal constant WEARABLE_SLOT_PET = 6;
+    uint8 internal constant WEARABLE_SLOT_BG = 7;
+    */
+
+        if (_slotPosition == 0) className_ = "wearable-body";
+        if (_slotPosition == 1) className_ = "wearable-face";
+        if (_slotPosition == 2) className_ = "wearable-eyes";
+        if (_slotPosition == 3) className_ = "wearable-head";
+        if (_slotPosition == 4) className_ = "wearable-hand wearable-hand-left";
+        if (_slotPosition == 5) className_ = "wearable-hand wearable-hand-right";
+        if (_slotPosition == 6) className_ = "wearable-pet";
+        if (_slotPosition == 7) className_ = "wearable-bg";
+    }
+
     function getWearable(uint256 _wearableId, uint256 _slotPosition) internal view returns (bytes memory svg_) {
         ItemType storage wearableType = s.itemTypes[_wearableId];
         uint256 dimensions = wearableType.dimensions;
+
+        string memory wearableClass = getWearableClass(_slotPosition);
+
         svg_ = abi.encodePacked(
-            '<g class="gotchi-wearable"><svg x="',
+            '<g class="gotchi-wearable ',
+            wearableClass,
+            '"><svg x="',
             // x
             LibStrings.uintStr(uint8(dimensions)),
             '" y="',

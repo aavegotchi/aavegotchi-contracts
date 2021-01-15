@@ -143,6 +143,7 @@ describe('Opening Portals', async function () {
   })
 
 
+  /*
   it('Should show SVGs', async function () {
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
@@ -150,6 +151,7 @@ describe('Opening Portals', async function () {
     console.log('svgs:', svgs[0])
     expect(svgs.length).to.equal(10)
   })
+  */
 
 
   it('Can only set name on claimed Aavegotchi', async function () {
