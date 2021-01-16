@@ -2054,7 +2054,7 @@ const itemTypes = [
   },
   {
     svgId: 85,
-    name: 'Genteman Coat',
+    name: 'Gentleman Coat',
     setId: [41],
     author: 'Xibot',
     description: '',
