@@ -238,25 +238,13 @@ contract SvgFacet is LibAppStorageModifiers {
         //Wearables
         uint256 equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
 
-        // background wearable
+        // If background is equipped
         uint256 wearableId = uint16(equippedWearables >> (8 * 16));
         if (wearableId != 0) {
-            svg_ = abi.encodePacked(getWearable(wearableId, 7));
-        }
-
-        // petBack wearable
-        wearableId = uint16(equippedWearables >> (6 * 16));
-        if (wearableId != 0) {
-            svg_ = abi.encodePacked(svg_, getWearable(wearableId, 6));
-        }
-
-        //background, body, eyes, collateral
-        svg_ = abi.encodePacked(details.background, _body, details.eyeShape, details.collateral);
-
-        // petFront wearable
-        wearableId = uint16(equippedWearables >> (7 * 16));
-        if (wearableId != 0) {
-            svg_ = abi.encodePacked(svg_, getWearable(wearableId, 6));
+            svg_ = abi.encodePacked(getWearable(wearableId, 7), _body, details.eyeShape, details.collateral);
+        } else {
+            //background, body, eyes, collateral
+            svg_ = abi.encodePacked(details.background, _body, details.eyeShape, details.collateral);
         }
 
         // get hands
@@ -270,10 +258,14 @@ contract SvgFacet is LibAppStorageModifiers {
             }
             svg_ = abi.encodePacked(svg_, getWearable(wearableId, slotPosition));
         }
+
+        // pet wearable
+        wearableId = uint16(equippedWearables >> (7 * 16));
+        if (wearableId != 0) {
+            svg_ = abi.encodePacked(svg_, getWearable(wearableId, 6));
+        }
         // 1. background wearable
-        // 2. petFront wearable
         // 3. body
-        // 4. petBack wearable
         // 5. hands
         // 6. body wearable
         // 7. face wearable
@@ -281,6 +273,7 @@ contract SvgFacet is LibAppStorageModifiers {
         // 9. head wearable
         // 10. left hand wearable
         // 11. right hand wearable
+        // 4. pet wearable
     }
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
