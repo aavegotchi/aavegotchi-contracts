@@ -260,7 +260,7 @@ contract SvgFacet is LibAppStorageModifiers {
         }
 
         // pet wearable
-        wearableId = uint16(equippedWearables >> (7 * 16));
+        wearableId = uint16(equippedWearables >> (6 * 16));
         if (wearableId != 0) {
             svg_ = abi.encodePacked(svg_, getWearable(wearableId, 6));
         }
