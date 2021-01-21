@@ -32,6 +32,26 @@ contract SvgFacet is LibAppStorageModifiers {
         return string(toString);
     }
 
+    // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
+    function getAavegotchiSvg(uint256 _tokenId) public view returns (string memory ag_) {
+        require(s.aavegotchis[_tokenId].owner != address(0), "SvgFacet: _tokenId does not exist");
+
+        bytes memory svg;
+        uint8 status = s.aavegotchis[_tokenId].status;
+        if (status == LibAppStorage.STATUS_CLOSED_PORTAL) {
+            // sealed closed portal
+            svg = LibSvg.getSvg("aavegotchi", 0);
+        } else if (status == LibAppStorage.STATUS_OPEN_PORTAL) {
+            // open portal
+            svg = LibSvg.getSvg("aavegotchi", 1);
+        } else if (status == LibAppStorage.STATUS_AAVEGOTCHI) {
+            address collateralType = s.aavegotchis[_tokenId].collateralType;
+            uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
+            svg = getAavegotchiSvgLayers(collateralType, numericTraits, _tokenId);
+        }
+        ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg, "</svg>"));
+    }
+
     struct SvgLayerDetails {
         string primaryColor;
         string secondaryColor;
@@ -46,7 +66,11 @@ contract SvgFacet is LibAppStorageModifiers {
         string[7] eyeColors;
     }
 
-    function getAavegotchiSvgLayers(address _collateralType, uint256 _numericTraits) internal view returns (bytes memory svg_) {
+    function getAavegotchiSvgLayers(
+        address _collateralType,
+        uint256 _numericTraits,
+        uint256 _tokenId
+    ) internal view returns (bytes memory svg_) {
         SvgLayerDetails memory details;
         details.primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
         details.secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
@@ -96,31 +120,95 @@ contract SvgFacet is LibAppStorageModifiers {
             }
         }
 
-        svg_ = abi.encodePacked(
-            "<style>.gotchi-primary{fill:#",
-            details.primaryColor,
-            ";}.gotchi-secondary{fill:#",
-            details.secondaryColor,
-            ";}.gotchi-cheek{fill:#",
-            details.cheekColor,
-            ";}.gotchi-eyeColor{fill:#",
-            details.eyeColor,
-            ";}.gotchi-sleeves-up{display:none;}",
-            ".gotchi-handsUp{display:none;}",
-            ".gotchi-handsDownOpen{display:none;}",
-            "</style>",
-            details.background,
-            svg_,
-            details.collateral,
-            details.eyeShape
-        );
+        uint256 MAX_INT = 2**256 - 1;
+
+        //Add wearables if tokenId isn't MAX_INT
+        if (_tokenId == MAX_INT) {
+            svg_ = abi.encodePacked(applyStyles(details, _tokenId), details.background, svg_, details.collateral, details.eyeShape);
+        } else {
+            svg_ = abi.encodePacked(applyStyles(details, _tokenId), addBodyAndWearableSvgLayers(svg_, details, _tokenId));
+        }
+    }
+
+    //Apply styles based on the traits and wearables
+    function applyStyles(SvgLayerDetails memory _details, uint256 _tokenId) internal view returns (bytes memory) {
+        uint256 equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+
+        if (
+            _tokenId != 2**256 - 1 &&
+            (uint16(equippedWearables) != 0 || uint16(equippedWearables >> (4 * 16)) != 0 || uint16(equippedWearables >> (5 * 16)) != 0)
+        ) {
+            //Open-hands aavegotchi
+            return
+                abi.encodePacked(
+                    "<style>.gotchi-primary{fill:#",
+                    _details.primaryColor,
+                    ";}.gotchi-secondary{fill:#",
+                    _details.secondaryColor,
+                    ";}.gotchi-cheek{fill:#",
+                    _details.cheekColor,
+                    ";}.gotchi-eyeColor{fill:#",
+                    _details.eyeColor,
+                    ";}.gotchi-sleeves-up{display:none;}",
+                    ".gotchi-handsUp{display:none;}",
+                    ".gotchi-handsDownOpen{display:block;}",
+                    ".gotchi-handsDownClosed{display:none;}",
+                    "</style>"
+                );
+        } else {
+            //Normal Aavegotchi, closed hands
+            return
+                abi.encodePacked(
+                    "<style>.gotchi-primary{fill:#",
+                    _details.primaryColor,
+                    ";}.gotchi-secondary{fill:#",
+                    _details.secondaryColor,
+                    ";}.gotchi-cheek{fill:#",
+                    _details.cheekColor,
+                    ";}.gotchi-eyeColor{fill:#",
+                    _details.eyeColor,
+                    ";}.gotchi-sleeves-up{display:none;}",
+                    ".gotchi-handsUp{display:none;}",
+                    ".gotchi-handsDownOpen{display:none;}",
+                    ".gotchi-handsDownClosed{display:block}",
+                    "</style>"
+                );
+        }
+    }
+
+    function getWearableClass(uint256 _slotPosition) internal view returns (string memory className_) {
+        //Wearables
+        /*
+    uint8 internal constant WEARABLE_SLOT_BODY = 0;
+    uint8 internal constant WEARABLE_SLOT_FACE = 1;
+    uint8 internal constant WEARABLE_SLOT_EYES = 2;
+    uint8 internal constant WEARABLE_SLOT_HEAD = 3;
+    uint8 internal constant WEARABLE_SLOT_HAND_LEFT = 4;
+    uint8 internal constant WEARABLE_SLOT_HAND_RIGHT = 5;
+    uint8 internal constant WEARABLE_SLOT_PET = 6;
+    uint8 internal constant WEARABLE_SLOT_BG = 7;
+    */
+
+        if (_slotPosition == 0) className_ = "wearable-body";
+        if (_slotPosition == 1) className_ = "wearable-face";
+        if (_slotPosition == 2) className_ = "wearable-eyes";
+        if (_slotPosition == 3) className_ = "wearable-head";
+        if (_slotPosition == 4) className_ = "wearable-hand wearable-hand-left";
+        if (_slotPosition == 5) className_ = "wearable-hand wearable-hand-right";
+        if (_slotPosition == 6) className_ = "wearable-pet";
+        if (_slotPosition == 7) className_ = "wearable-bg";
     }
 
     function getWearable(uint256 _wearableId, uint256 _slotPosition) internal view returns (bytes memory svg_) {
         ItemType storage wearableType = s.itemTypes[_wearableId];
         uint256 dimensions = wearableType.dimensions;
+
+        string memory wearableClass = getWearableClass(_slotPosition);
+
         svg_ = abi.encodePacked(
-            '<g class="gotchi-wearable"><svg x="',
+            '<g class="gotchi-wearable ',
+            wearableClass,
+            '"><svg x="',
             // x
             LibStrings.uintStr(uint8(dimensions)),
             '" y="',
@@ -142,35 +230,21 @@ contract SvgFacet is LibAppStorageModifiers {
         }
     }
 
-    function getAavegotchiSvgLayers(uint256 _tokenId) internal view returns (bytes memory svg_) {
+    function addBodyAndWearableSvgLayers(
+        bytes memory _body,
+        SvgLayerDetails memory details,
+        uint256 _tokenId
+    ) internal view returns (bytes memory svg_) {
         //Wearables
         uint256 equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
 
-        // background wearable
+        // If background is equipped
         uint256 wearableId = uint16(equippedWearables >> (8 * 16));
         if (wearableId != 0) {
-            svg_ = abi.encodePacked(getWearable(wearableId, 7));
-        }
-
-        // petBack wearable
-        wearableId = uint16(equippedWearables >> (6 * 16));
-        if (wearableId != 0) {
-            svg_ = abi.encodePacked(svg_, getWearable(wearableId, 6));
-        }
-
-        // gets the body
-        svg_ = abi.encodePacked(svg_, getAavegotchiSvgLayers(s.aavegotchis[_tokenId].collateralType, s.aavegotchis[_tokenId].numericTraits));
-
-        // petFront wearable
-        wearableId = uint16(equippedWearables >> (7 * 16));
-        if (wearableId != 0) {
-            svg_ = abi.encodePacked(svg_, getWearable(wearableId, 6));
-        }
-
-        // if there is a wearable in the body or left or right hand
-        if (uint16(equippedWearables) != 0 || uint16(equippedWearables >> (4 * 16)) != 0 || uint16(equippedWearables >> (5 * 16)) != 0) {
-            // show hands down and open
-            svg_ = abi.encodePacked(svg_, "<style>.gotchi-handsDownOpen{display:block;}.gotchi-handsDownClosed{display:none;}</style>");
+            svg_ = abi.encodePacked(getWearable(wearableId, 7), _body, details.eyeShape, details.collateral);
+        } else {
+            //background, body, eyes, collateral
+            svg_ = abi.encodePacked(details.background, _body, details.eyeShape, details.collateral);
         }
 
         // get hands
@@ -184,10 +258,14 @@ contract SvgFacet is LibAppStorageModifiers {
             }
             svg_ = abi.encodePacked(svg_, getWearable(wearableId, slotPosition));
         }
+
+        // pet wearable
+        wearableId = uint16(equippedWearables >> (6 * 16));
+        if (wearableId != 0) {
+            svg_ = abi.encodePacked(svg_, getWearable(wearableId, 6));
+        }
         // 1. background wearable
-        // 2. petFront wearable
         // 3. body
-        // 4. petBack wearable
         // 5. hands
         // 6. body wearable
         // 7. face wearable
@@ -195,24 +273,7 @@ contract SvgFacet is LibAppStorageModifiers {
         // 9. head wearable
         // 10. left hand wearable
         // 11. right hand wearable
-    }
-
-    // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
-    function getAavegotchiSvg(uint256 _tokenId) public view returns (string memory ag_) {
-        require(s.aavegotchis[_tokenId].owner != address(0), "SvgFacet: _tokenId does not exist");
-
-        bytes memory svg;
-        uint8 status = s.aavegotchis[_tokenId].status;
-        if (status == LibAppStorage.STATUS_CLOSED_PORTAL) {
-            // sealed closed portal
-            svg = LibSvg.getSvg("aavegotchi", 0);
-        } else if (status == LibAppStorage.STATUS_OPEN_PORTAL) {
-            // open portal
-            svg = LibSvg.getSvg("aavegotchi", 1);
-        } else if (status == LibAppStorage.STATUS_AAVEGOTCHI) {
-            svg = getAavegotchiSvgLayers(_tokenId);
-        }
-        ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg, "</svg>"));
+        // 4. pet wearable
     }
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
@@ -225,7 +286,7 @@ contract SvgFacet is LibAppStorageModifiers {
             svg_[i] = string(
                 abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">',
-                    getAavegotchiSvgLayers(collateralType, numericTraits),
+                    getAavegotchiSvgLayers(collateralType, numericTraits, 2**256 - 1),
                     // get hands
                     LibSvg.getSvg("aavegotchi", 3),
                     "</svg>"

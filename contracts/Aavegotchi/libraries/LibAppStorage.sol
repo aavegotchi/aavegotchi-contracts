@@ -125,14 +125,15 @@ library LibAppStorage {
     uint8 internal constant STATUS_OPEN_PORTAL = 2;
     uint8 internal constant STATUS_AAVEGOTCHI = 3;
 
-    uint8 internal constant WEARABLE_SLOT_HEAD = 0;
+    //Wearables
+    uint8 internal constant WEARABLE_SLOT_BODY = 0;
     uint8 internal constant WEARABLE_SLOT_FACE = 1;
     uint8 internal constant WEARABLE_SLOT_EYES = 2;
-    uint8 internal constant WEARABLE_SLOT_BODY = 3;
+    uint8 internal constant WEARABLE_SLOT_HEAD = 3;
     uint8 internal constant WEARABLE_SLOT_HAND_LEFT = 4;
     uint8 internal constant WEARABLE_SLOT_HAND_RIGHT = 5;
-    uint8 internal constant WEARABLE_SLOT_HANDS_BOTH = 6;
-    uint8 internal constant WEARABLE_SLOT_PET = 7;
+    uint8 internal constant WEARABLE_SLOT_PET = 6;
+    uint8 internal constant WEARABLE_SLOT_BG = 7;
 
     uint256 internal constant ITEM_CATEGORY_WEARABLE = 0;
     uint256 internal constant ITEM_CATEGORY_BADGE = 1;

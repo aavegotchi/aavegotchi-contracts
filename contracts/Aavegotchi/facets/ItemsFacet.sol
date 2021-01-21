@@ -609,7 +609,6 @@ contract ItemsFacet is LibAppStorageModifiers {
     function equipWearables(uint256 _tokenId, uint256 _equippedWearables) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
 
-        //To test (Dan): Add in actual dynamic level
         uint256 aavegotchiLevel = LibAppStorage.aavegotchiLevel(aavegotchi.experience);
 
         for (uint256 slot; slot < 16; slot++) {
@@ -641,11 +640,14 @@ contract ItemsFacet is LibAppStorageModifiers {
             }
 
             //Then check if this wearable is in the Aavegotchis inventory
-            //To test (Dan): If not in inventory, then transfer from Owner's inventory
             uint256 balance = s.nftBalances[address(this)][_tokenId][wearableId];
+            //To do (Nick) prevent wearable from being equipped twice in the same transaction
+
             if (balance == 0) {
                 balance = s.items[msg.sender][wearableId];
                 require(balance > 0, "ItemsFacet: Wearable is not in inventories");
+
+                //Transfer to Aavegotchi
                 s.items[msg.sender][wearableId] = balance - 1;
                 s.nftBalances[address(this)][_tokenId][wearableId] += 1;
                 emit TransferToParent(address(this), _tokenId, wearableId, 1);

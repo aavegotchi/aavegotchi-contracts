@@ -869,7 +869,7 @@ const itemTypes = [
     maxQuantity: '5',
     traitModifiers: [0, -6, 0, 0, 0, 0],
     canPurchaseWithGhst: false,
-    slotPositions: 'petFront',
+    slotPositions: 'pet',
     category: 0,
     canBeTransferred: true,
     totalQuantity: 0,
@@ -989,7 +989,7 @@ const itemTypes = [
     maxQuantity: '500',
     traitModifiers: [0, -1, -1, 0, 0, 0],
     canPurchaseWithGhst: false,
-    slotPositions: 'petBack',
+    slotPositions: 'pet',
     category: 0,
     canBeTransferred: true,
     totalQuantity: 0,
@@ -1818,7 +1818,7 @@ const itemTypes = [
     setId: [36],
     author: 'Xibot',
     description: '',
-    dimensions: { x: 50, y: 24, width: 13, height: 22 },
+    dimensions: { x: 1, y: 24, width: 13, height: 22 },
     x: 50,
     y: 24,
     width: 13,
@@ -1853,7 +1853,7 @@ const itemTypes = [
     maxQuantity: '1000',
     traitModifiers: [0, 0, 0, 1, 0, 0],
     canPurchaseWithGhst: true,
-    slotPositions: 'hands',
+    slotPositions: 'handLeft',
     category: 0,
     canBeTransferred: true,
     totalQuantity: 0,
@@ -1986,7 +1986,7 @@ const itemTypes = [
     setId: [39, 40],
     author: 'Xibot',
     description: '',
-    dimensions: { x: 44, y: 29, width: 19, height: 15 },
+    dimensions: { x: 0, y: 29, width: 19, height: 15 },
     x: 44,
     y: 29,
     width: 19,
@@ -2054,7 +2054,7 @@ const itemTypes = [
   },
   {
     svgId: 85,
-    name: 'Genteman Coat',
+    name: 'Gentleman Coat',
     setId: [41],
     author: 'Xibot',
     description: '',
@@ -2250,7 +2250,7 @@ const itemTypes = [
     setId: [45],
     author: 'Xibot',
     description: '',
-    dimensions: { x: 50, y: 36, width: 11, height: 19 },
+    dimensions: { x: 3, y: 36, width: 11, height: 19 },
     x: 50,
     y: 36,
     width: 11,
@@ -2418,7 +2418,7 @@ const itemTypes = [
     setId: [50, 52],
     author: 'Xibot',
     description: '',
-    dimensions: { x: 51, y: 37, width: 9, height: 14 },
+    dimensions: { x: 4, y: 37, width: 9, height: 14 },
     x: 51,
     y: 37,
     width: 9,
@@ -2634,7 +2634,7 @@ const itemTypes = [
     setId: [56, 70],
     author: 'Cawito',
     description: '',
-    dimensions: { x: 12, y: 32, width: 40, height: 19 },
+    dimensions: { x: 12, y: 33, width: 40, height: 19 },
     x: 12,
     y: 32,
     width: 40,
@@ -2932,7 +2932,7 @@ const itemTypes = [
     setId: [],
     author: 'Cawito',
     description: '',
-    dimensions: { x: 51, y: 23, width: 7, height: 22 },
+    dimensions: { x: 6, y: 23, width: 7, height: 22 },
     x: 51,
     y: 23,
     width: 7,
@@ -3191,32 +3191,41 @@ function dimensions({ x, y, width, height }) {
 // const WEARABLE_SLOT_HEAD = 3
 // const WEARABLE_SLOT_HAND_LEFT = 4
 // const WEARABLE_SLOT_HAND_RIGHT = 5
-// const WEARABLE_SLOT_PET_FRONT = 6
-// const WEARABLE_SLOT_PET_BACK = 7
-// const WEARABLE_SLOT_BG = 8
+// const WEARABLE_SLOT_PET = 6
+// const WEARABLE_SLOT_BG = 7
 
 function stringToSlotPositions(str) {
   if (str.length === 0) {
     return 0
-  } else if (str === 'head') {
-    return boolsArrayToUint16([true, false, false, false])
-  } else if (str === 'body') {
-    return boolsArrayToUint16([true])
-  } else if (str === 'hands') {
-    return boolsArrayToUint16([true, true, false, false, false, false])
-  } else if (str === 'handLeft') {
-    return boolsArrayToUint16([true, false, false, false, false])
-  } else if (str === 'handRight') {
-    return boolsArrayToUint16([true, false, false, false, false, false])
-  } else if (str === 'face') {
-    return boolsArrayToUint16([true, false])
-  } else if (str === 'petFront') {
-    return boolsArrayToUint16([true, false, false, false, false, false, false, false])
-  } else if (str === 'petBack') {
-    return boolsArrayToUint16([true, false, false, false, false, false, false])
-  } else if (str === 'eyes') {
-    return boolsArrayToUint16([true, false, false])
-  } else {
+  }
+  //Slot 0 Body
+  else if (str === 'body') return boolsArrayToUint16([true])
+
+  //Slot 1 Face
+  else if (str === 'face') return boolsArrayToUint16([true, false])
+
+  //Slot 2 Eyes
+  else if (str === 'eyes') return boolsArrayToUint16([true, false, false])
+
+  //Slot 3 Head
+  else if (str === 'head') return boolsArrayToUint16([true, false, false, false])
+
+  //Slot 4/5 Either hand
+  else if (str === 'hands') return boolsArrayToUint16([true, true, false, false, false, false])
+
+  //Slot 4 Left hand
+  else if (str === 'handLeft') return boolsArrayToUint16([true, false, false, false, false])
+
+  //Slot 5 Right Hand
+  else if (str === 'handRight') return boolsArrayToUint16([true, false, false, false, false, false])
+
+  //Slot 6 Pet
+  else if (str === 'pet') return boolsArrayToUint16([true, false, false, false, false, false, false])
+
+  //Slot 7 Background
+  else if (str === 'background') return boolsArrayToUint16([true, false, false, false, false, false, false, false])
+
+  else {
     throw (Error('Wrong slot string: ' + str))
   }
 }
