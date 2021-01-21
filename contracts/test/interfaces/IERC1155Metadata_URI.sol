@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.4;
+pragma solidity 0.7.6;
 
 /**
     Note: The ERC-165 identifier for this interface is 0x0e89341c.

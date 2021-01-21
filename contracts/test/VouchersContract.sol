@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.4;
+pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "./interfaces/IERC1155.sol";
@@ -45,11 +45,11 @@ contract VouchersContract is IERC1155, IERC173, IERC165 {
         s.supportedInterfaces[type(IERC1155Metadata_URI).interfaceId] = true;
     }
 
-    function supportsInterface(bytes4 _interfaceId) external override view returns (bool) {
+    function supportsInterface(bytes4 _interfaceId) external view override returns (bool) {
         return s.supportedInterfaces[_interfaceId];
     }
 
-    function owner() external override view returns (address) {
+    function owner() external view override returns (address) {
         return s.contractOwner;
     }
 
@@ -287,7 +287,7 @@ contract VouchersContract is IERC1155, IERC173, IERC165 {
         @param _id       ID of the token
         @return balance_ The _owner's balance of the token type requested
     */
-    function balanceOf(address _owner, uint256 _id) external override view returns (uint256 balance_) {
+    function balanceOf(address _owner, uint256 _id) external view override returns (uint256 balance_) {
         require(_id < s.vouchers.length, "Vouchers: _id not found");
         balance_ = s.vouchers[_id].accountBalances[_owner];
     }
@@ -298,7 +298,7 @@ contract VouchersContract is IERC1155, IERC173, IERC165 {
         @param _ids       ID of the tokens
         @return balances_ The _owner's balance of the token types requested (i.e. balance for each (owner, id) pair)
      */
-    function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external override view returns (uint256[] memory balances_) {
+    function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view override returns (uint256[] memory balances_) {
         require(_owners.length == _ids.length, "Vouchers: _owners not same length as _ids");
         uint256 vouchersLength = s.vouchers.length;
         balances_ = new uint256[](_owners.length);
@@ -326,7 +326,7 @@ contract VouchersContract is IERC1155, IERC173, IERC165 {
         @param _operator  Address of authorized operator
         @return           True if the operator is approved, false if not
     */
-    function isApprovedForAll(address _owner, address _operator) external override view returns (bool) {
+    function isApprovedForAll(address _owner, address _operator) external view override returns (bool) {
         return s.approved[_owner][_operator];
     }
 }
