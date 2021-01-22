@@ -12,6 +12,7 @@ import "./VrfFacet.sol";
 // import "hardhat/console.sol";
 import "../CollateralEscrow.sol";
 import "../libraries/LibVrf.sol";
+import "../libraries/LibMeta.sol";
 
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
 interface ERC721TokenReceiver {
@@ -423,7 +424,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             require(s.aavegotchis[tokenId].status == LibAppStorage.STATUS_CLOSED_PORTAL, "AavegotchiFacet: Portal is not closed");
-            require(msg.sender == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
+            require(LibMeta.msgSender() == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
 
             VrfFacet(address(this)).drawRandomNumber(tokenId);
             s.aavegotchis[tokenId].status = LibAppStorage.STATUS_VRF_PENDING;
@@ -458,7 +459,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
         address escrow = address(new CollateralEscrow(option.collateralType));
         aavegotchi.escrow = escrow;
-        LibERC20.transferFrom(option.collateralType, msg.sender, escrow, _stakeAmount);
+        LibERC20.transferFrom(option.collateralType, LibMeta.msgSender(), escrow, _stakeAmount);
     }
 
     function setAavegotchiName(uint256 _tokenId, string memory _name) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
@@ -481,7 +482,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             address owner = s.aavegotchis[tokenId].owner;
             require(owner != address(0), "AavegotchiFacet: Invalid tokenId, is not owned or doesn't exist");
             require(
-                msg.sender == owner || s.operators[owner][msg.sender] || s.approved[tokenId] == msg.sender,
+                LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || s.approved[tokenId] == LibMeta.msgSender(),
                 "AavegotchiFacet: Not owner of token or approved"
             );
             LibAppStorage.interact(tokenId);
@@ -515,13 +516,13 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     /**@notice Prevnts assets and items from being moved from Aavegotchi during lock period, except by gameManager. */
     function lockAavegotchi(uint256 _tokenId, uint256 _lockDuration) external onlyUnlocked(_tokenId) {
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only owner can lock aavegotchi");
+        require(LibMeta.msgSender() == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only owner can lock aavegotchi");
         s.aavegotchis[_tokenId].unlockTime = block.timestamp + _lockDuration;
         emit LockAavegotchi(_tokenId, _lockDuration);
     }
 
     /// @notice Transfers the ownership of an NFT from one address to another address
-    /// @dev Throws unless `msg.sender` is the current owner, an authorized
+    /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
     ///  operator, or the approved address for this NFT. Throws if `_from` is
     ///  not the current owner. Throws if `_to` is the zero address. Throws if
     ///  `_tokenId` is not a valid NFT. When transfer is complete, this function
@@ -545,7 +546,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         }
         if (size > 0) {
             require(
-                ERC721_RECEIVED == ERC721TokenReceiver(_to).onERC721Received(msg.sender, _from, _tokenId, _data),
+                ERC721_RECEIVED == ERC721TokenReceiver(_to).onERC721Received(LibMeta.msgSender(), _from, _tokenId, _data),
                 "ERC721: Transfer rejected/failed by _to"
             );
         }
@@ -569,7 +570,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         }
         if (size > 0) {
             require(
-                ERC721_RECEIVED == ERC721TokenReceiver(_to).onERC721Received(msg.sender, _from, _tokenId, ""),
+                ERC721_RECEIVED == ERC721TokenReceiver(_to).onERC721Received(LibMeta.msgSender(), _from, _tokenId, ""),
                 "ERC721: Transfer rejected/failed by _to"
             );
         }
@@ -578,7 +579,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
     ///  TO CONFIRM THAT `_to` IS CAPABLE OF RECEIVING NFTS OR ELSE
     ///  THEY MAY BE PERMANENTLY LOST
-    /// @dev Throws unless `msg.sender` is the current owner, an authorized
+    /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
     ///  operator, or the approved address for this NFT. Throws if `_from` is
     ///  not the current owner. Throws if `_to` is the zero address. Throws if
     ///  `_tokenId` is not a valid NFT.
@@ -603,7 +604,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         address owner = s.aavegotchis[_tokenId].owner;
         require(owner != address(0), "ERC721: Invalid tokenId or can't be transferred");
         require(
-            msg.sender == owner || s.operators[owner][msg.sender] || s.approved[_tokenId] == msg.sender,
+            LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || s.approved[_tokenId] == LibMeta.msgSender(),
             "AavegotchiFacet: Not owner or approved to transfer"
         );
         require(_from == owner, "ERC721: _from is not owner, transfer failed");
@@ -623,26 +624,26 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
     /// @notice Change or reaffirm the approved address for an NFT
     /// @dev The zero address indicates there is no approved address.
-    ///  Throws unless `msg.sender` is the current NFT owner, or an authorized
+    ///  Throws unless `LibMeta.msgSender()` is the current NFT owner, or an authorized
     ///  operator of the current owner.
     /// @param _approved The new approved NFT controller
     /// @param _tokenId The NFT to approve
     function approve(address _approved, uint256 _tokenId) external {
         address owner = s.aavegotchis[_tokenId].owner;
-        require(owner == msg.sender || s.operators[owner][msg.sender], "ERC721: Not owner or operator of token.");
+        require(owner == LibMeta.msgSender() || s.operators[owner][LibMeta.msgSender()], "ERC721: Not owner or operator of token.");
         s.approved[_tokenId] = _approved;
         emit Approval(owner, _approved, _tokenId);
     }
 
     /// @notice Enable or disable approval for a third party ("operator") to manage
-    ///  all of `msg.sender`'s assets
+    ///  all of `LibMeta.msgSender()`'s assets
     /// @dev Emits the ApprovalForAll event. The contract MUST allow
     ///  multiple operators per owner.
     /// @param _operator Address to add to the set of authorized operators
     /// @param _approved True if the operator is approved, false to revoke approval
     function setApprovalForAll(address _operator, bool _approved) external {
-        s.operators[msg.sender][_operator] = _approved;
-        emit ApprovalForAll(msg.sender, _operator, _approved);
+        s.operators[LibMeta.msgSender()][_operator] = _approved;
+        emit ApprovalForAll(LibMeta.msgSender(), _operator, _approved);
     }
 
     function name() external pure returns (string memory) {

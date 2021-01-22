@@ -3,6 +3,7 @@ pragma solidity 0.7.6;
 import "../../shared/libraries/LibERC20.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../libraries/LibVrf.sol";
+import "../libraries/LibMeta.sol";
 // import "hardhat/console.sol";
 
 struct Aavegotchi {
@@ -103,6 +104,7 @@ struct AppStorage {
     mapping(address => mapping(address => bool)) operators;
     mapping(uint256 => address) approved;
     mapping(string => bool) aavegotchiNamesUsed;
+    mapping(address => uint256) metaNonces;
     bytes32[1000] emptySlots;
     uint32 totalSupply;
     uint16 currentHauntId;
@@ -115,6 +117,7 @@ struct AppStorage {
     address pixelCraft;
     address rarityFarming;
     string itemsBaseUri;
+    bytes32 domainSeperator;
 }
 
 library LibAppStorage {
@@ -144,7 +147,7 @@ library LibAppStorage {
     event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
 
     modifier onlyAavegotchiOwner(uint256 _tokenId) {
-        require(msg.sender == diamondStorage().aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
+        require(LibMeta.msgSender() == diamondStorage().aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
         _;
     }
 
@@ -171,10 +174,10 @@ library LibAppStorage {
 
         // Using 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF as burn address.
         // GHST token contract does not allow transferring to address(0) address: https://etherscan.io/address/0x3F382DbD960E3a9bbCeaE22651E88158d2791550#code
-        LibERC20.transferFrom(s.ghstContract, msg.sender, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
-        LibERC20.transferFrom(s.ghstContract, msg.sender, s.pixelCraft, companyShare);
-        LibERC20.transferFrom(s.ghstContract, msg.sender, s.rarityFarming, rarityFarmShare);
-        LibERC20.transferFrom(s.ghstContract, msg.sender, s.dao, daoShare);
+        LibERC20.transferFrom(s.ghstContract, LibMeta.msgSender(), address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
+        LibERC20.transferFrom(s.ghstContract, LibMeta.msgSender(), s.pixelCraft, companyShare);
+        LibERC20.transferFrom(s.ghstContract, LibMeta.msgSender(), s.rarityFarming, rarityFarmShare);
+        LibERC20.transferFrom(s.ghstContract, LibMeta.msgSender(), s.dao, daoShare);
     }
 
     struct LevelInfo {
@@ -241,7 +244,7 @@ library LibAppStorage {
 contract LibAppStorageModifiers {
     AppStorage internal s;
     modifier onlyAavegotchiOwner(uint256 _tokenId) {
-        require(msg.sender == s.aavegotchis[_tokenId].owner, "LibAppStorage: Only aavegotchi owner can call this function");
+        require(LibMeta.msgSender() == s.aavegotchis[_tokenId].owner, "LibAppStorage: Only aavegotchi owner can call this function");
         _;
     }
     modifier onlyUnlocked(uint256 _tokenId) {
@@ -253,18 +256,18 @@ contract LibAppStorageModifiers {
     //     _;
     // }
     modifier onlyDao {
-        require(msg.sender == s.dao || msg.sender == address(this), "Only DAO can call this function");
+        require(LibMeta.msgSender() == s.dao || LibMeta.msgSender() == address(this), "Only DAO can call this function");
         _;
     }
 
     modifier onlyDaoOrOwner {
-        require(msg.sender == s.dao || msg.sender == LibDiamond.contractOwner() || msg.sender == address(this), "LibAppStorage: Do not have access");
+        require(LibMeta.msgSender() == s.dao || LibMeta.msgSender() == LibDiamond.contractOwner() || LibMeta.msgSender() == address(this), "LibAppStorage: Do not have access");
         _;
     }
 
     modifier onlyOwnerOrDaoOrGameManager {
         require(
-            msg.sender == s.dao || msg.sender == LibDiamond.contractOwner() || msg.sender == address(this) || msg.sender == s.gameManager,
+            LibMeta.msgSender() == s.dao || LibMeta.msgSender() == LibDiamond.contractOwner() || LibMeta.msgSender() == address(this) || LibMeta.msgSender() == s.gameManager,
             "LibAppStorage: Do not have access"
         );
         _;

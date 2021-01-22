@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.4;
+pragma solidity 0.7.6;
 
 interface ILink {
     function allowance(address owner, address spender) external view returns (uint256 remaining);

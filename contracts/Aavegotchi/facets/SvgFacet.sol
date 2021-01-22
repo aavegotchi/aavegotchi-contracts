@@ -176,7 +176,7 @@ contract SvgFacet is LibAppStorageModifiers {
         }
     }
 
-    function getWearableClass(uint256 _slotPosition) internal view returns (string memory className_) {
+    function getWearableClass(uint256 _slotPosition) internal pure returns (string memory className_) {
         //Wearables
         /*
     uint8 internal constant WEARABLE_SLOT_BODY = 0;

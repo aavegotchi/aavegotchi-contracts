@@ -115,7 +115,7 @@ contract DAOFacet is LibAppStorageModifiers {
             s.items[_to][itemId] += quantity;
             s.itemTypes[itemId].totalQuantity = uint32(totalQuantity);
         }
-        LibERC1155.onERC1155BatchReceived(msg.sender, _to, _itemIds, _quantities, "");
+        LibERC1155.onERC1155BatchReceived(LibMeta.msgSender(), _to, _itemIds, _quantities, "");
     }
 
     function grantExperience(uint256[] calldata _tokenIds, uint32[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {
@@ -154,7 +154,7 @@ contract DAOFacet is LibAppStorageModifiers {
             uint256 itemId = itemTypesLength++;
             s.itemTypes.push(_itemTypes[i]);
             emit AddItemType(_itemTypes[i]);
-            emit TransferSingle(msg.sender, address(0), address(0), itemId, 0);
+            emit TransferSingle(LibMeta.msgSender(), address(0), address(0), itemId, 0);
         }
     }
 

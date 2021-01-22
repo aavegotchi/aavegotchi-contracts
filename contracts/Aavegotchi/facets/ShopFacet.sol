@@ -9,6 +9,7 @@ import "../../shared/libraries/LibERC20.sol";
 import "../interfaces/IERC1155.sol";
 import "../libraries/LibERC1155.sol";
 import "../libraries/LibVrf.sol";
+import "../libraries/LibMeta.sol";
 
 contract ShopFacet {
     AppStorage internal s;
@@ -48,7 +49,7 @@ contract ShopFacet {
         uint256 currentHauntId = s.currentHauntId;
         Haunt memory haunt = s.haunts[currentHauntId];
         require(_ghst >= haunt.portalPrice, "ShopFacet: Not enough GHST to buy portal");
-        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
+        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(LibMeta.msgSender());
         require(ghstBalance >= _ghst, "ShopFacet: Not enough GHST!");
         uint16 hauntId = s.currentHauntId;
         uint256 numAavegotchisToPurchase = _ghst / haunt.portalPrice;
@@ -59,7 +60,7 @@ contract ShopFacet {
 
         uint256 tokenId = s.totalSupply;
         uint256 totalPrice = _ghst - (_ghst % haunt.portalPrice);
-        emit BuyPortals(msg.sender, _to, tokenId, numAavegotchisToPurchase, totalPrice);
+        emit BuyPortals(LibMeta.msgSender(), _to, tokenId, numAavegotchisToPurchase, totalPrice);
         for (uint256 i; i < numAavegotchisToPurchase; i++) {
             s.aavegotchis[tokenId].owner = _to;
             s.aavegotchis[tokenId].hauntId = hauntId;
@@ -91,9 +92,9 @@ contract ShopFacet {
             totalPrice += quantity * itemType.ghstPrice;
             s.items[_to][itemId] += quantity;
         }
-        emit PurchaseItemsWithGhst(msg.sender, _to, _itemIds, _quantities, totalPrice);
-        LibERC1155.onERC1155BatchReceived(msg.sender, _to, _itemIds, _quantities, "");
-        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(msg.sender);
+        emit PurchaseItemsWithGhst(LibMeta.msgSender(), _to, _itemIds, _quantities, totalPrice);
+        LibERC1155.onERC1155BatchReceived(LibMeta.msgSender(), _to, _itemIds, _quantities, "");
+        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(LibMeta.msgSender());
         require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
 
         LibAppStorage.purchase(totalPrice);
@@ -105,7 +106,7 @@ contract ShopFacet {
         uint256[] calldata _quantities
     ) external {
         require(_voucherIds.length == _quantities.length, "ShopFacet: _voucherIds not same length as _quantities");
-        IERC1155(im_vouchersContract).safeBatchTransferFrom(msg.sender, address(this), _voucherIds, _quantities, "");
+        IERC1155(im_vouchersContract).safeBatchTransferFrom(LibMeta.msgSender(), address(this), _voucherIds, _quantities, "");
         for (uint256 i; i < _voucherIds.length; i++) {
             uint256 itemId = _voucherIds[i] + 1;
             uint256 quantity = _quantities[i];
@@ -114,8 +115,8 @@ contract ShopFacet {
             s.items[_to][itemId] += quantity;
             s.itemTypes[itemId].totalQuantity = uint32(totalQuantity);
         }
-        emit PurchaseItemsWithVouchers(msg.sender, _to, _voucherIds, _quantities);
-        LibERC1155.onERC1155BatchReceived(msg.sender, _to, _voucherIds, _quantities, "");
+        emit PurchaseItemsWithVouchers(LibMeta.msgSender(), _to, _voucherIds, _quantities);
+        LibERC1155.onERC1155BatchReceived(LibMeta.msgSender(), _to, _voucherIds, _quantities, "");
     }
 
     function onERC1155BatchReceived(
@@ -130,7 +131,7 @@ contract ShopFacet {
         _ids;
         _values;
         _data;
-        require(msg.sender == im_vouchersContract, "ShopFacet: Only accepts ERC1155 tokens from VoucherContract");
+        require(LibMeta.msgSender() == im_vouchersContract, "ShopFacet: Only accepts ERC1155 tokens from VoucherContract");
         require(_ids.length > 0, "ShopFacet: Can't receive 0 vouchers");
         return ERC1155_BATCH_ACCEPTED;
     }

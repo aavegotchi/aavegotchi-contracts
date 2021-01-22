@@ -49,7 +49,7 @@ contract ItemsFacet is LibAppStorageModifiers {
 
     /**
         @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
-        The `_operator` argument MUST be the address of an account/contract that is approved to make the transfer (SHOULD be msg.sender).
+        The `_operator` argument MUST be the address of an account/contract that is approved to make the transfer (SHOULD be LibMeta.msgSender()).
         The `_from` argument MUST be the address of the holder whose balance is decreased.
         The `_to` argument MUST be the address of the recipient whose balance is increased.
         The `_id` argument MUST be the token type being transferred.
@@ -61,7 +61,7 @@ contract ItemsFacet is LibAppStorageModifiers {
 
     /**
         @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).      
-        The `_operator` argument MUST be the address of an account/contract that is approved to make the transfer (SHOULD be msg.sender).
+        The `_operator` argument MUST be the address of an account/contract that is approved to make the transfer (SHOULD be LibMeta.msgSender()).
         The `_from` argument MUST be the address of the holder whose balance is decreased.
         The `_to` argument MUST be the address of the recipient whose balance is increased.
         The `_ids` argument MUST be the list of tokens being transferred.
@@ -369,7 +369,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         @param _value The new base url        
     */
     function setBaseURI(string memory _value) external onlyDaoOrOwner {
-        // require(msg.sender == s.contractOwner, "ItemsFacet: Must be contract owner");
+        // require(LibMeta.msgSender() == s.contractOwner, "ItemsFacet: Must be contract owner");
         s.itemsBaseUri = _value;
         for (uint256 i; i < s.itemTypes.length; i++) {
             emit URI(string(abi.encodePacked(_value, LibStrings.uintStr(i))), i);
@@ -402,7 +402,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         bytes calldata _data
     ) external {
         require(_to != address(0), "Items: Can't transfer to 0 address");
-        require(msg.sender == _from || s.operators[_from][msg.sender], "Items: Not owner and not approved to transfer");
+        require(LibMeta.msgSender() == _from || s.operators[_from][LibMeta.msgSender()], "Items: Not owner and not approved to transfer");
         uint256 bal = s.items[_from][_id];
         require(_value <= bal, "Items: Doesn't have that many to transfer");
         s.items[_from][_id] = bal - _value;
@@ -434,7 +434,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         bytes calldata _data
     ) external {
         require(_to != address(0), "Items: Can't transfer to 0 address");
-        require(msg.sender == _from || s.operators[_from][msg.sender], "Items: Not owner and not approved to transfer");
+        require(LibMeta.msgSender() == _from || s.operators[_from][LibMeta.msgSender()], "Items: Not owner and not approved to transfer");
         for (uint256 i; i < _ids.length; i++) {
             uint256 id = _ids[i];
             uint256 value = _values[i];
@@ -460,12 +460,12 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint256 _value
     ) external {
         require(_toContract != address(0), "Items: Can't transfer to 0 address");
-        require(msg.sender == _from || s.operators[_from][msg.sender], "Items: Not owner and not approved to transfer");
+        require(LibMeta.msgSender() == _from || s.operators[_from][LibMeta.msgSender()], "Items: Not owner and not approved to transfer");
         uint256 bal = s.items[_from][_id];
         require(_value <= bal, "Items: Doesn't have that many to transfer");
         s.items[_from][_id] = bal - _value;
         s.nftBalances[_toContract][_toTokenId][_id] += _value;
-        emit TransferSingle(msg.sender, _from, _toContract, _id, _value);
+        emit TransferSingle(LibMeta.msgSender(), _from, _toContract, _id, _value);
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
     }
 
@@ -486,16 +486,16 @@ contract ItemsFacet is LibAppStorageModifiers {
         if (_fromContract == address(this)) {
             address owner = s.aavegotchis[_fromTokenId].owner;
             require(
-                msg.sender == owner || s.operators[owner][msg.sender] || msg.sender == s.approved[_fromTokenId],
+                LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || LibMeta.msgSender() == s.approved[_fromTokenId],
                 "Items: Not owner and not approved to transfer"
             );
             require(s.aavegotchis[_fromTokenId].unlockTime < block.timestamp, "Items: Only callable on unlocked Aavegotchis");
         } else {
             address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
             require(
-                owner == msg.sender ||
-                    IERC721(_fromContract).getApproved(_fromTokenId) == msg.sender ||
-                    IERC721(_fromContract).isApprovedForAll(owner, msg.sender),
+                owner == LibMeta.msgSender() ||
+                    IERC721(_fromContract).getApproved(_fromTokenId) == LibMeta.msgSender() ||
+                    IERC721(_fromContract).isApprovedForAll(owner, LibMeta.msgSender()),
                 "Items: Not owner and not approved to transfer"
             );
         }
@@ -510,7 +510,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         }
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal;
         s.items[_to][_id] += _value;
-        emit TransferSingle(msg.sender, _fromContract, _to, _id, _value);
+        emit TransferSingle(LibMeta.msgSender(), _fromContract, _to, _id, _value);
         emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
     }
 
@@ -526,16 +526,16 @@ contract ItemsFacet is LibAppStorageModifiers {
         if (_fromContract == address(this)) {
             address owner = s.aavegotchis[_fromTokenId].owner;
             require(
-                msg.sender == owner || s.operators[owner][msg.sender] || msg.sender == s.approved[_fromTokenId],
+                LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || LibMeta.msgSender() == s.approved[_fromTokenId],
                 "Items: Not owner and not approved to transfer"
             );
             require(s.aavegotchis[_fromTokenId].unlockTime < block.timestamp, "Items: Only callable on unlocked Aavegotchis");
         } else {
             address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
             require(
-                owner == msg.sender ||
-                    IERC721(_fromContract).getApproved(_fromTokenId) == msg.sender ||
-                    IERC721(_fromContract).isApprovedForAll(owner, msg.sender),
+                owner == LibMeta.msgSender() ||
+                    IERC721(_fromContract).getApproved(_fromTokenId) == LibMeta.msgSender() ||
+                    IERC721(_fromContract).isApprovedForAll(owner, LibMeta.msgSender()),
                 "Items: Not owner and not approved to transfer"
             );
         }
@@ -555,7 +555,7 @@ contract ItemsFacet is LibAppStorageModifiers {
             s.items[_to][id] += value;
             emit TransferFromParent(_fromContract, _fromTokenId, id, value);
         }
-        emit TransferBatch(msg.sender, _fromContract, _to, _ids, _values);
+        emit TransferBatch(LibMeta.msgSender(), _fromContract, _to, _ids, _values);
     }
 
     /// @notice Transfer a token from a token to another token
@@ -577,16 +577,16 @@ contract ItemsFacet is LibAppStorageModifiers {
         if (_fromContract == address(this)) {
             address owner = s.aavegotchis[_fromTokenId].owner;
             require(
-                msg.sender == owner || s.operators[owner][msg.sender] || msg.sender == s.approved[_fromTokenId],
+                LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || LibMeta.msgSender() == s.approved[_fromTokenId],
                 "Items: Not owner and not approved to transfer"
             );
             require(s.aavegotchis[_fromTokenId].unlockTime <= block.timestamp, "Items: Only callable on unlocked Aavegotchis");
         } else {
             address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
             require(
-                owner == msg.sender ||
-                    IERC721(_fromContract).getApproved(_fromTokenId) == msg.sender ||
-                    IERC721(_fromContract).isApprovedForAll(owner, msg.sender),
+                owner == LibMeta.msgSender() ||
+                    IERC721(_fromContract).getApproved(_fromTokenId) == LibMeta.msgSender() ||
+                    IERC721(_fromContract).isApprovedForAll(owner, LibMeta.msgSender()),
                 "Items: Not owner and not approved to transfer"
             );
         }
@@ -601,7 +601,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         }
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal;
         s.nftBalances[_toContract][_toTokenId][_id] += _value;
-        emit TransferSingle(msg.sender, _fromContract, _toContract, _id, _value);
+        emit TransferSingle(LibMeta.msgSender(), _fromContract, _toContract, _id, _value);
         emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
     }
@@ -644,14 +644,14 @@ contract ItemsFacet is LibAppStorageModifiers {
             //To do (Nick) prevent wearable from being equipped twice in the same transaction
 
             if (balance == 0) {
-                balance = s.items[msg.sender][wearableId];
+                balance = s.items[LibMeta.msgSender()][wearableId];
                 require(balance > 0, "ItemsFacet: Wearable is not in inventories");
 
                 //Transfer to Aavegotchi
-                s.items[msg.sender][wearableId] = balance - 1;
+                s.items[LibMeta.msgSender()][wearableId] = balance - 1;
                 s.nftBalances[address(this)][_tokenId][wearableId] += 1;
                 emit TransferToParent(address(this), _tokenId, wearableId, 1);
-                emit TransferSingle(msg.sender, msg.sender, address(this), wearableId, 1);
+                emit TransferSingle(LibMeta.msgSender(), LibMeta.msgSender(), address(this), wearableId, 1);
             }
         }
         emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _equippedWearables);
@@ -670,10 +670,10 @@ contract ItemsFacet is LibAppStorageModifiers {
             uint256 quantity = _quantities[i];
             ItemType memory itemType = s.itemTypes[itemId];
             require(itemType.category == LibAppStorage.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
-            uint256 bal = s.items[msg.sender][itemId];
+            uint256 bal = s.items[LibMeta.msgSender()][itemId];
 
             require(quantity <= bal, "Items: Do not have that many to consume");
-            s.items[msg.sender][itemId] = bal - quantity;
+            s.items[LibMeta.msgSender()][itemId] = bal - quantity;
 
             //Increase kinship permanently
             if (itemType.kinshipBonus > 0) {
@@ -699,6 +699,6 @@ contract ItemsFacet is LibAppStorageModifiers {
             LibAppStorage.interact(_tokenId);
         }
         emit UseConsumables(_tokenId, _itemIds, _quantities);
-        emit TransferBatch(msg.sender, msg.sender, address(0), _itemIds, _quantities);
+        emit TransferBatch(LibMeta.msgSender(), LibMeta.msgSender(), address(0), _itemIds, _quantities);
     }
 }

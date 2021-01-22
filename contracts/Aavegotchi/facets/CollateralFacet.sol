@@ -6,6 +6,7 @@ import "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
 import "../../shared/interfaces/IERC20.sol";
+import "../libraries/LibMeta.sol";
 
 // import "hardhat/console.sol";
 
@@ -72,7 +73,7 @@ contract CollateralFacet is LibAppStorageModifiers {
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         emit IncreaseStake(_tokenId, _stakeAmount);
-        LibERC20.transferFrom(collateralType, msg.sender, escrow, _stakeAmount);
+        LibERC20.transferFrom(collateralType, LibMeta.msgSender(), escrow, _stakeAmount);
     }
 
     function decreaseStake(uint256 _tokenId, uint256 _reduceAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
@@ -85,7 +86,7 @@ contract CollateralFacet is LibAppStorageModifiers {
 
         require(currentStake - _reduceAmount >= minimumStake, "CollateralFacet: Cannot reduce below minimum stake");
         emit DecreaseStake(_tokenId, _reduceAmount);
-        LibERC20.transferFrom(collateralType, escrow, msg.sender, _reduceAmount);
+        LibERC20.transferFrom(collateralType, escrow, LibMeta.msgSender(), _reduceAmount);
     }
 
     function decreaseAndDestroy(uint256 _tokenId, uint256 _toId) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
@@ -107,23 +108,23 @@ contract CollateralFacet is LibAppStorageModifiers {
             s.aavegotchis[_toId].experience += experience;
         }
 
-        s.aavegotchiBalance[msg.sender]--;
+        s.aavegotchiBalance[LibMeta.msgSender()]--;
         // delete token approval if any
         if (s.approved[_tokenId] != address(0)) {
             delete s.approved[_tokenId];
-            emit Approval(msg.sender, address(0), _tokenId);
+            emit Approval(LibMeta.msgSender(), address(0), _tokenId);
         }
 
-        // transfer all collateral to msg.sender
+        // transfer all collateral to LibMeta.msgSender()
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         uint256 reduceAmount = IERC20(collateralType).balanceOf(escrow);
         emit DecreaseStake(_tokenId, reduceAmount);
-        LibERC20.transferFrom(collateralType, escrow, msg.sender, reduceAmount);
+        LibERC20.transferFrom(collateralType, escrow, LibMeta.msgSender(), reduceAmount);
 
         // delete aavegotchi info
         delete s.aavegotchiNamesUsed[s.aavegotchis[_tokenId].name];
         delete s.aavegotchis[_tokenId];
 
-        emit Transfer(msg.sender, address(0), _tokenId);
+        emit Transfer(LibMeta.msgSender(), address(0), _tokenId);
     }
 }

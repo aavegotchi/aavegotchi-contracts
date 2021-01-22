@@ -5,6 +5,7 @@ import "../libraries/LibVrf.sol";
 import "../interfaces/ILink.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../libraries/LibAppStorage.sol";
+import "../libraries/LibMeta.sol";
 
 //import "hardhat/console.sol";
 
@@ -188,7 +189,7 @@ contract VrfFacet {
 
         // console.log("token id:", tokenId);
 
-        require(msg.sender == im_vrfCoordinator, "Only VRFCoordinator can fulfill");
+        require(LibMeta.msgSender() == im_vrfCoordinator, "Only VRFCoordinator can fulfill");
 
         require(vrf_ds.tokenIdToVrfPending[tokenId] == true, "VrfFacet: VRF is not pending");
         vrf_ds.tokenIdToVrfPending[tokenId] = false;
@@ -202,7 +203,7 @@ contract VrfFacet {
 
     // Change the fee amount that is paid for VRF random numbers
     function changeVRFFee(uint256 _newFee, bytes32 _keyHash) external {
-        require(msg.sender == LibDiamond.contractOwner(), "VrfFacet: Must be contract owner");
+        require(LibMeta.msgSender() == LibDiamond.contractOwner(), "VrfFacet: Must be contract owner");
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
         vrf_ds.fee = uint96(_newFee);
         vrf_ds.keyHash = _keyHash;
@@ -210,7 +211,7 @@ contract VrfFacet {
 
     // Remove the LINK tokens from this contract that are used to pay for VRF random number fees
     function removeLinkTokens(address _to, uint256 _value) external {
-        require(msg.sender == LibDiamond.contractOwner(), "VrfFacet: Must be contract owner");
+        require(LibMeta.msgSender() == LibDiamond.contractOwner(), "VrfFacet: Must be contract owner");
         im_link.transfer(_to, _value);
     }
 }

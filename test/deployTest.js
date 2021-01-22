@@ -17,7 +17,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToInt8Array(uint, numBytes) {
+function uintToInt8Array (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -26,7 +26,7 @@ function uintToInt8Array(uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint(array) {
+function sixteenBitArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -38,7 +38,7 @@ function sixteenBitArrayToUint(array) {
   return ethers.BigNumber.from(0)
 }
 
-function sixteenBitIntArrayToUint(array) {
+function sixteenBitIntArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -54,7 +54,7 @@ function sixteenBitIntArrayToUint(array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds(uint) {
+function uintToItemIds (uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -85,6 +85,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.linkContract = deployVars.linkContract
     global.vouchersContract = deployVars.vouchersContract
     global.diamondLoupeFacet = deployVars.diamondLoupeFacet
+    global.metaTransactionsFacet = deployVars.metaTransactionsFacet
   })
   it('Should mint 10,000,000 GHST tokens', async function () {
     await global.ghstTokenContract.mint()
@@ -95,7 +96,6 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
 })
 
 describe('Buying Portals, VRF', function () {
-
   it('Portal should cost 100 GHST', async function () {
     const balance = await ghstTokenContract.balanceOf(account)
     await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
@@ -120,7 +120,7 @@ describe('Opening Portals', async function () {
     let myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals[0].status).to.equal(0)
     //  const portalId = myPortals[0].tokenId
-    await global.aavegotchiFacet.openPortals(["0", "1", "2", "3"])
+    await global.aavegotchiFacet.openPortals(['0', '1', '2', '3'])
 
     const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
 
@@ -142,7 +142,6 @@ describe('Opening Portals', async function () {
     expect(ghosts.length).to.equal(10)
   })
 
-
   /*
   it('Should show SVGs', async function () {
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
@@ -152,7 +151,6 @@ describe('Opening Portals', async function () {
     expect(svgs.length).to.equal(10)
   })
   */
-
 
   it('Can only set name on claimed Aavegotchi', async function () {
     await truffleAssert.reverts(aavegotchiFacet.setAavegotchiName('1', 'Portal'), 'AavegotchiFacet: Must choose Aavegotchi before setting name')
@@ -266,12 +264,11 @@ describe('Collaterals and escrow', async function () {
     const initialBalance = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
     // await openAndClaim(['1'])
 
-    const id = "1"
+    const id = '1'
     const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
     const selectedGhost = ghosts[0]
     const minStake = selectedGhost.minimumStake
     console.log('min stake:', minStake)
-
 
     // Claim ghost and stake
     await global.aavegotchiFacet.claimAavegotchi(id, 0, minStake)
@@ -291,7 +288,7 @@ describe('Collaterals and escrow', async function () {
     const burnId = '2'
     const receiveId = '3'
 
-    let id = "2"
+    let id = '2'
     let ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
     let selectedGhost = ghosts[0]
     let minStake = selectedGhost.minimumStake
@@ -299,8 +296,7 @@ describe('Collaterals and escrow', async function () {
     // Claim ghost and stake
     await global.aavegotchiFacet.claimAavegotchi(id, 0, minStake)
 
-
-    id = "3"
+    id = '3'
     ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
     selectedGhost = ghosts[0]
     minStake = selectedGhost.minimumStake
@@ -892,14 +888,11 @@ describe('DAO Functions', async function () {
 
 describe('Kinship', async function () {
   it('Can calculate kinship according to formula', async function () {
-
     ethers.provider.send('evm_increaseTime', [86400])
     ethers.provider.send('evm_mine')
 
     let kinship = await global.aavegotchiFacet.kinship('0')
     console.log('* Initial Kinship:', kinship.toString())
-
-
 
     // Use a kinship potion earlier then waited 24hrs
     expect(kinship).to.equal(52)
@@ -991,7 +984,7 @@ describe('Kinship', async function () {
   })
 })
 
-async function neglectAavegotchi(days) {
+async function neglectAavegotchi (days) {
   ethers.provider.send('evm_increaseTime', [86400 * days])
   ethers.provider.send('evm_mine')
   // daysSinceInteraction = 0
@@ -1004,18 +997,16 @@ async function neglectAavegotchi(days) {
   console.log(`* Neglect Gotchi for ${days} days`)
 }
 
-async function interactAndUpdateTime() {
+async function interactAndUpdateTime () {
   await global.aavegotchiFacet.interact(['0'])
   ethers.provider.send('evm_increaseTime', [86400 / 2])
   ethers.provider.send('evm_mine')
 }
 
-async function claimGotchis(tokenIds) {
-
+async function claimGotchis (tokenIds) {
   console.log('token ids:')
 
   for (let index = 0; index < tokenIds.length; index++) {
-
     console.log('fucker')
 
     const id = tokenIds[index]
@@ -1032,8 +1023,7 @@ async function claimGotchis(tokenIds) {
   }
 }
 
-
-function eightBitArrayToUint(array) {
+function eightBitArrayToUint (array) {
   const uint = []
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8)

@@ -20,6 +20,7 @@ import "./facets/SvgFacet.sol";
 import "./facets/ItemsFacet.sol";
 import "../shared/libraries/LibDiamond.sol";
 import "./libraries/LibVrf.sol";
+import "./libraries/LibMeta.sol";
 
 contract AavegotchiDiamond {
     using LibAppStorage for AppStorage;
@@ -46,6 +47,8 @@ contract AavegotchiDiamond {
         s.rarityFarming = _args.rarityFarming;
         s.pixelCraft = _args.pixelCraft;
         s.itemsBaseUri = "https://aavegotchi.com/metadata/items/";
+
+        s.domainSeperator = LibMeta.domainSeparator("AavegotchiDiamond", "V1");
 
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 
