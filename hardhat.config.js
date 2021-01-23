@@ -4,6 +4,7 @@ require('@nomiclabs/hardhat-ethers')
 require('hardhat-contract-sizer')
 require('dotenv').config()
 require('solidity-coverage')
+require('./tasks/generateDiamondABI.js')
 
 // This is a sample Buidler task. To learn how to create your own go to
 // https://buidler.dev/guides/create-task.html
@@ -24,6 +25,12 @@ module.exports = {
     hardhat: {
       blockGasLimit: 1350000000,
       gas: 1300000000
+    },
+    matic: {
+      url: 'https://rpc-mainnet.matic.network',
+      accounts: [process.env.SECRET],
+      blockGasLimit: 20000000,
+      gasPrice: 1000000000
     },
     mumbai: {
       url: 'https://rpc-mumbai.matic.today',

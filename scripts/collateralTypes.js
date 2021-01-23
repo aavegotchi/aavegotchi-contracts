@@ -126,7 +126,7 @@ const collaterals = [
 
 ]
 
-function eightBitArrayToUint(array) {
+function eightBitArrayToUint (array) {
   const uint = []
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8)
@@ -135,7 +135,7 @@ function eightBitArrayToUint(array) {
   return ethers.BigNumber.from('0x' + uint.join(''))
 }
 
-function getCollaterals(network, ghstAddress) {
+function getCollaterals (network, ghstAddress) {
   const collateralTypes = []
   for (const collateralType of collaterals) {
     const collateralTypeInfo = {
@@ -158,7 +158,10 @@ function getCollaterals(network, ghstAddress) {
       item.collateralType = ghstAddress
     } else if (network === 'mainnet') {
       item.collateralType = collateralType.mainnetAddress
+    } else if (network === 'mumbai') {
+      item.collateralType = collateralType.mainnetAddress
     }
+
     item.collateralTypeInfo = collateralTypeInfo
     collateralTypes.push(item)
   }
