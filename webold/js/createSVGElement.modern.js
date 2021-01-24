@@ -1,0 +1,2 @@
+function t(e,n){if("number"==typeof n||"bigint"==typeof n||n instanceof Date||n instanceof RegExp)e.append(String(n));else if(Array.isArray(n))for(const o of n)t(e,o);else null!=n&&"boolean"!=typeof n&&e.append(n)}export default function(e,n,...o){const r=document.createElementNS("http://www.w3.org/2000/svg",e);for(let t in n){let e=n[t];"string"==typeof e?t.startsWith("xlink:")?r.createAttributeNS("http://www.w3.org/1999/xlink",t,e):r.setAttribute(t,e):r[t]=e}for(const e of o)t(r,e);return r}
+//# sourceMappingURL=createSVGElement.modern.js.map
