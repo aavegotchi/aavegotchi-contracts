@@ -215,8 +215,8 @@ async function main (scriptName) {
   console.log('Adding Collateral Types')
 
   if (hre.network.name === 'hardhat' || hre.network.name === 'mumbai') {
-    // const { getCollaterals } = require('./collateralTypes.js')
-    const { getCollaterals } = require('./testCollateralTypes.js')
+    const { getCollaterals } = require('./collateralTypes.js')
+    // const { getCollaterals } = require('./testCollateralTypes.js')
     tx = await daoFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstTokenContract.address))
   } else {
     const { getCollaterals } = require('./collateralTypes.js')
@@ -332,7 +332,7 @@ async function main (scriptName) {
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
   console.log('-------------------------------------------')
 
-  if (hre.network.name !== 'hardhat') {
+  if (hre.network.name === 'matic') {
     // transfer ownership
     const newOwner = '0x94cb5C277FCC64C274Bd30847f0821077B231022'
     console.log('Transferring ownership of diamond: ' + aavegotchiDiamond.address)
