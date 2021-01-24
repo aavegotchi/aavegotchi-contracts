@@ -124,4 +124,11 @@ contract GHSTFacet {
         s.totalSupply += uint96(amount);
         emit Transfer(address(0), msg.sender, amount);
     }
+
+    function mintTo(address _user) external {
+        uint256 amount = 10000000e18;
+        s.balances[_user] += amount;
+        s.totalSupply += uint96(amount);
+        emit Transfer(address(0), _user, amount);
+    }
 }

@@ -107,7 +107,14 @@ async function main (scriptName) {
 
     initialHauntSize = '10000'
 
-    ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x658809Bb08595D15a59991d640Ed5f2c658eA284')
+    // ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x658809Bb08595D15a59991d640Ed5f2c658eA284')
+    ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x20d0A1ce31f8e8A77b291f25c5fbED007Adde932')
+    // const GhstTokenContract = await ethers.getContractFactory('GHSTFacet')
+    // ghstTokenContract = await GhstTokenContract.deploy()
+    // await ghstTokenContract.deployed()
+    // await ghstTokenContract.mintTo('0x0b22380B7c423470979AC3eD7d3c07696773dEa1')
+    // console.log('GHSTToken:' + ghstTokenContract.address)
+    // throw 'done here'
 
     dao = account // 'todo' // await accounts[1].getAddress()
     daoTreasury = account
