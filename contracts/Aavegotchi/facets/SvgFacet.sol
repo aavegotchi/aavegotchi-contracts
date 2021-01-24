@@ -265,15 +265,15 @@ contract SvgFacet is LibAppStorageModifiers {
             svg_ = abi.encodePacked(svg_, getWearable(wearableId, 6));
         }
         // 1. background wearable
-        // 3. body
-        // 5. hands
-        // 6. body wearable
-        // 7. face wearable
-        // 8. eyes wearable
-        // 9. head wearable
-        // 10. left hand wearable
-        // 11. right hand wearable
-        // 4. pet wearable
+        // 2. body
+        // 3. hands
+        // 4. body wearable
+        // 5. face wearable
+        // 6. eyes wearable
+        // 7. head wearable
+        // 8. left hand wearable
+        // 9. right hand wearable
+        // 10. pet wearable
     }
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
