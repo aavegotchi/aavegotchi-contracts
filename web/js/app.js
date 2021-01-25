@@ -17,11 +17,14 @@ if (window.Biconomy) {
 // A Web3Provider wraps a standard Web3 provider, which is
 // what Metamask injects as window.ethereum into each page
 // const provider = new ethers.providers.Web3Provider(biconomy)
-const provider = new ethers.providers.Web3Provider(window.ethereum)
+import Biconomy from "@biconomy/mexa";
+biconomy = new Biconomy(window.ethereum, { apiKey: 'ebjORzwPD.cd328a46-712c-4bdf-89f7-80ff90e942a3' })
+const provider = new ethers.providers.Web3Provider(biconomy)
 const signer = provider.getSigner()
 
 const abi = [
-  'function buyPortals(address _to, uint256 _ghst) external'
+  'function buyPortals(address _to, uint256 _ghst) external',
+  'function ghstAddress() external view returns (address contract_)'
 ]
 // const address = '0x201Df88D8d79ACA0AA6360F02eb9dD8aefdB1dfb'
 // const contractAddress = '0x187DffAef821d03055aC5eAa1524c53EBB36eA97'
@@ -73,6 +76,7 @@ async function main () {
             console.log('Address:', await signer.getAddress())
             const bal = await ghstr.balanceOf(await signer.getAddress())
             console.log('balance:', ethers.utils.formatEther(bal))
+            const ghstAdd = agr.
             await agw.buyPortals(await signer.getAddress(), ethers.utils.parseEther('10'))
             // await agw.mintWearables()
             // svgDiv.replaceWith(wait)
