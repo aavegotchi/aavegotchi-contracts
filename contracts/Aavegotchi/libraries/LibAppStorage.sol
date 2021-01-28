@@ -4,6 +4,7 @@ import "../../shared/libraries/LibERC20.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../libraries/LibVrf.sol";
 import "../libraries/LibMeta.sol";
+//import "../interfaces/IERC20.sol";
 // import "hardhat/console.sol";
 
 struct Aavegotchi {
@@ -89,6 +90,19 @@ struct AavegotchiCollateralTypeInfo {
     bool delisted;
 }
 
+struct Order {
+    // Order ID
+    bytes32 id;
+    // Owner of the NFT
+    address seller;
+    // NFT registry address
+    address nftAddress;
+    // Price (in wei) for the published item
+    uint256 price;
+    // Time when this sale ends
+    uint256 expiresAt;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -118,6 +132,13 @@ struct AppStorage {
     address rarityFarming;
     string itemsBaseUri;
     bytes32 domainSeperator;
+    // Marketplace
+    IERC20 acceptedToken;
+    // From ERC721 registry assetId to Order (to avoid asset collision)
+    mapping(address => mapping(uint256 => Order)) orderByAssetId;
+    uint256 ownerCutPerMillion;
+    uint256 publicationFeeInWei;
+    address legacyNFTAddress;
 }
 
 library LibAppStorage {
@@ -255,19 +276,31 @@ contract LibAppStorageModifiers {
     //     require(s.aavegotchis[_tokenId].unlockTime > block.timestamp, "Only callable on unlocked Aavegotchis");
     //     _;
     // }
+
+    modifier onlyOwner {
+        require(LibMeta.msgSender() == LibDiamond.contractOwner(), "Only owner can call this function");
+        _;
+    }
+
     modifier onlyDao {
         require(LibMeta.msgSender() == s.dao || LibMeta.msgSender() == address(this), "Only DAO can call this function");
         _;
     }
 
     modifier onlyDaoOrOwner {
-        require(LibMeta.msgSender() == s.dao || LibMeta.msgSender() == LibDiamond.contractOwner() || LibMeta.msgSender() == address(this), "LibAppStorage: Do not have access");
+        require(
+            LibMeta.msgSender() == s.dao || LibMeta.msgSender() == LibDiamond.contractOwner() || LibMeta.msgSender() == address(this),
+            "LibAppStorage: Do not have access"
+        );
         _;
     }
 
     modifier onlyOwnerOrDaoOrGameManager {
         require(
-            LibMeta.msgSender() == s.dao || LibMeta.msgSender() == LibDiamond.contractOwner() || LibMeta.msgSender() == address(this) || LibMeta.msgSender() == s.gameManager,
+            LibMeta.msgSender() == s.dao ||
+                LibMeta.msgSender() == LibDiamond.contractOwner() ||
+                LibMeta.msgSender() == address(this) ||
+                LibMeta.msgSender() == s.gameManager,
             "LibAppStorage: Do not have access"
         );
         _;

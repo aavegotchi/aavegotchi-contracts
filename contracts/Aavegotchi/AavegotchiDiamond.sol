@@ -68,13 +68,15 @@ contract AavegotchiDiamond {
         s.haunts[currentHauntId].portalPrice = 100e18;
     }
 
+    // Find facet for function that is called and execute the
+    // function if a facet is found and return any value.
     fallback() external payable {
         LibDiamond.DiamondStorage storage ds;
         bytes32 position = LibDiamond.DIAMOND_STORAGE_POSITION;
         assembly {
             ds.slot := position
         }
-        address facet = address(bytes20(ds.facets[msg.sig]));
+        address facet = ds.selectorToFacetAndPosition[msg.sig].facetAddress;
         require(facet != address(0), "Diamond: Function does not exist");
         assembly {
             calldatacopy(0, 0, calldatasize())
