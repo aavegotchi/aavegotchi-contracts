@@ -90,17 +90,17 @@ struct AavegotchiCollateralTypeInfo {
     bool delisted;
 }
 
-struct Order {
-    // Order ID
-    bytes32 id;
-    // Owner of the NFT
+struct ERC1155Listing {
+    bytes32 listingId;
     address seller;
-    // NFT registry address
-    address nftAddress;
-    // Price (in wei) for the published item
-    uint256 price;
-    // Time when this sale ends
-    uint256 expiresAt;
+    address erc1155TokenAddress;
+    uint256 erc1155TypeId;
+    uint256 category;
+    uint256 quantity;
+    uint256 priceInWei;
+    uint256 expires;
+    uint256 timeCreated;
+    uint256 timeLastPurchased;
 }
 
 struct AppStorage {
@@ -133,12 +133,17 @@ struct AppStorage {
     string itemsBaseUri;
     bytes32 domainSeperator;
     // Marketplace
-    IERC20 acceptedToken;
-    // From ERC721 registry assetId to Order (to avoid asset collision)
-    mapping(address => mapping(uint256 => Order)) orderByAssetId;
+    // erc1155 category => erc1155Order
+    //ERC1155Order[] erc1155MarketOrders;
+    mapping(bytes32 => ERC1155Listing) erc1155MarketListings;
+    // category => ("listing" or "sold" => listingIds)
+    mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
     uint256 ownerCutPerMillion;
-    uint256 publicationFeeInWei;
-    address legacyNFTAddress;
+    uint256 listingFeeInWei;
+    // erc1155Token => (erc1155TypeId => category)
+    mapping(address => mapping(uint256 => uint256)) erc1155Categories;
+    // userAddress => order[]
+    mapping(address => bytes32[]) userListingIds;
 }
 
 library LibAppStorage {

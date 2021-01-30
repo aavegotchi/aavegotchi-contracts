@@ -152,6 +152,7 @@ contract DAOFacet is LibAppStorageModifiers {
         uint256 itemTypesLength = s.itemTypes.length;
         for (uint256 i; i < _itemTypes.length; i++) {
             uint256 itemId = itemTypesLength++;
+            s.erc1155Categories[address(this)][itemId] = _itemTypes[i].category;
             s.itemTypes.push(_itemTypes[i]);
             emit AddItemType(_itemTypes[i]);
             emit TransferSingle(LibMeta.msgSender(), address(0), address(0), itemId, 0);

@@ -335,8 +335,6 @@ contract ItemsFacet is LibAppStorageModifiers {
         itemType_.canBeTransferred = itemType.canBeTransferred;
         itemType_.category = itemType.category;
         itemType_.kinshipBonus = itemType.kinshipBonus;
-        itemType_.category = itemType.category;
-        itemType_.kinshipBonus = itemType.kinshipBonus;
         itemType_.experienceBonus = itemType.experienceBonus;
         uint256 dimensions = itemType.dimensions;
         itemType_.x = uint8(dimensions);
@@ -402,7 +400,10 @@ contract ItemsFacet is LibAppStorageModifiers {
         bytes calldata _data
     ) external {
         require(_to != address(0), "Items: Can't transfer to 0 address");
-        require(LibMeta.msgSender() == _from || s.operators[_from][LibMeta.msgSender()], "Items: Not owner and not approved to transfer");
+        require(
+            LibMeta.msgSender() == _from || s.operators[_from][LibMeta.msgSender()] || LibMeta.msgSender() == address(this),
+            "Items: Not owner and not approved to transfer"
+        );
         uint256 bal = s.items[_from][_id];
         require(_value <= bal, "Items: Doesn't have that many to transfer");
         s.items[_from][_id] = bal - _value;

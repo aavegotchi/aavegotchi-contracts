@@ -66,6 +66,7 @@ contract AavegotchiDiamond {
         uint256 currentHauntId = s.currentHauntId;
         s.haunts[currentHauntId].hauntMaxSize = _args.initialHauntSize; //10_000;
         s.haunts[currentHauntId].portalPrice = 100e18;
+        s.listingFeeInWei = 1e17;
     }
 
     // Find facet for function that is called and execute the
