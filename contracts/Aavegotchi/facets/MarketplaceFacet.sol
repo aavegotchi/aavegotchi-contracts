@@ -55,6 +55,27 @@ contract Marketplace is LibAppStorageModifiers {
 
     event ChangedListingFee(uint256 listingFeeInWei);
 
+    function getERC1155Listings(
+        uint256 _category, // // 0 is wearable, 1 is badge, 2 is consumable
+        string _sort, // "listed" or "purchased"
+        uint256 _start, // 0 is the most recent listing
+        uint256 _length // how many items to get back or the rest available
+    ) external view returns (ERC1155Listing[] memory listings_) {
+        uint256[] storage listingIds = s.erc1155MarketListingIds[_category][_sort];
+        uint256 listingLength = listingIds.length;
+        require(listingLength > 0, "Marketplace: listing category and sort have no listings");
+        require(_start < listingLength, "Marketplace: _start can't be greater than or equal to listing length");
+        if (LibMath.add(_start, _length) > listingLength) {
+            _length = listingLength - _start;
+        }
+        uint256 listingEnd = listingIds.length - 1;
+
+        listings_ = new ERC1155Listing[]();
+        for (uint256 i; i < _length; i++) {
+            listings_[i] = s.erc1155MarketListings[listingIds[listingEnd - i]];
+        }
+    }
+
     function setListingFee(uint256 _listingFeeInWei) external onlyOwner {
         s.listingFeeInWei = _listingFeeInWei;
         emit ChangedListingFee(s.listingFeeInWei);
@@ -117,7 +138,7 @@ contract Marketplace is LibAppStorageModifiers {
 
         // category => ("listing" or "sold" => listingIds)
         // mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
-        s.erc1155MarketListingIds[category]["listing"].push(listingId);
+        s.erc1155MarketListingIds[category]["listed"].push(listingId);
 
         emit ERC1155ListingSet(listingId, LibMeta.msgSender(), _erc1155TokenAddress, _erc1155TypeId, category, _quantity, _priceInWei, _expires);
     }
@@ -175,6 +196,7 @@ contract Marketplace is LibAppStorageModifiers {
             IERC1155(listing.erc1155TokenAddress).safeTransferFrom(seller, buyer, listing.erc1155TypeId, _quantity, new bytes(0));
         }
         listing.timeLastPurchased = block.timestamp;
+        s.erc1155MarketListingIds[category]["purchased"].push(listingId);
         emit ERC1155ExecutedListing(
             _listingId,
             seller,
