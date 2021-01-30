@@ -27,31 +27,37 @@ contract Marketplace is LibAppStorageModifiers {
 
     // EVENTS
     event ERC1155ListingSet(
-        bytes32 listingId,
-        address seller,
+        bytes32 indexed listingId,
+        address indexed seller,
         address erc1155TokenAddress,
         uint256 erc1155TypeId,
-        uint256 category,
+        uint256 indexed category,
         uint256 quantity,
         uint256 priceInWei,
         uint256 expires
     );
 
-    event ERC1155ListingCancelled(bytes32 listingId);
+    event ERC1155ExecutedListing(
+        bytes32 indexed listingId,
+        address indexed seller,
+        address buyer,
+        address erc1155TokenAddress,
+        uint256 erc1155TypeId,
+        uint256 indexed category,
+        uint256 _quantity,
+        uint256 priceInWei,
+        uint256 timeLastPurchased
+    );
+
+    event UpdateERC1155Listing(bytes32 indexed _listingId, uint256 quantity);
+
+    event ERC1155ListingCancelled(bytes32 indexed listingId);
 
     event ChangedListingFee(uint256 listingFeeInWei);
-    event ChangedOwnerCutPerMillion(uint256 ownerCutPerMillion);
 
     function setListingFee(uint256 _listingFeeInWei) external onlyOwner {
         s.listingFeeInWei = _listingFeeInWei;
         emit ChangedListingFee(s.listingFeeInWei);
-    }
-
-    function setOwnerCutPerMillion(uint256 _ownerCutPerMillion) external onlyOwner {
-        require(_ownerCutPerMillion < 1000000, "The owner cut should be between 0 and 999,999");
-
-        s.ownerCutPerMillion = _ownerCutPerMillion;
-        emit ChangedOwnerCutPerMillion(s.ownerCutPerMillion);
     }
 
     function getERC1155Category(address _erc1155TokenAddress, uint256 _erc1155TypeId) internal view returns (uint256 category_) {
@@ -128,12 +134,11 @@ contract Marketplace is LibAppStorageModifiers {
     function executeERC1155Listing(bytes32 _listingId, uint256 _quantity) public {
         ERC1155Listing storage listing = s.erc1155MarketListings[_listingId];
         require(listing.timeCreated != 0, "Marketplace: listing not found");
-        uint256 listingQuantity = listing.quantity;
         address buyer = LibMeta.msgSender();
         address seller = listing.seller;
         require(seller != buyer, "Marketplace: buyer can't be seller");
         require(_quantity > 0, "Marketplace: _quantity can't be zero");
-        require(_quantity <= listingQuantity, "Marketplace: quantity is greater than listing");
+        require(_quantity <= listing.quantity, "Marketplace: quantity is greater than listing");
         require(listing.expires > block.timestamp, "Marketplace: listing has expired");
         uint256 bal = IERC20(s.ghstContract).balanceOf(buyer);
         uint256 cost = LibMath.mul(_quantity, listing.priceInWei);
@@ -170,7 +175,28 @@ contract Marketplace is LibAppStorageModifiers {
             IERC1155(listing.erc1155TokenAddress).safeTransferFrom(seller, buyer, listing.erc1155TypeId, _quantity, new bytes(0));
         }
         listing.timeLastPurchased = block.timestamp;
+        emit ERC1155ExecutedListing(
+            _listingId,
+            seller,
+            buyer,
+            listing.erc1155TokenAddress,
+            listing.erc1155TypeId,
+            listing.category,
+            _quantity,
+            listing.priceInWei,
+            block.timestamp
+        );
     }
 
-    function updateListing(bytes32 _listingId) public {}
+    function updateERC1155Listing(bytes32 _listingId) public {
+        ERC1155Listing storage listing = s.erc1155MarketListings[_listingId];
+        if (listing.timeCreated == 0) {
+            return;
+        }
+        uint256 quantity = IERC1155(listing.erc1155TokenAddress).balanceOf(listing.seller, listing.erc1155TypeId);
+        if (quantity < listing.quantity) {
+            listing.quantity = quantity;
+            emit UpdateERC1155Listing(_listingId, quantity);
+        }
+    }
 }
