@@ -155,7 +155,8 @@ async function main(scriptName) {
     daoFacet,
     vrfFacet,
     shopFacet,
-    metaTransactionsFacet
+    metaTransactionsFacet,
+    marketplaceFacet,
   ] = await deployFacets(
     'DiamondCutFacet',
     'DiamondLoupeFacet',
@@ -167,7 +168,8 @@ async function main(scriptName) {
     'DAOFacet',
     ['VrfFacet', [vrfCoordinator, linkAddress]],
     ['ShopFacet', [vouchersContractAddress]],
-    'MetaTransactionsFacet'
+    'MetaTransactionsFacet',
+    'MarketplaceFacet'
   )
 
   if (hre.network.name === 'hardhat') {
@@ -199,7 +201,8 @@ async function main(scriptName) {
       ['DAOFacet', daoFacet],
       ['VrfFacet', vrfFacet],
       ['ShopFacet', shopFacet],
-      ['MetaTransactionsFacet', metaTransactionsFacet]
+      ['MetaTransactionsFacet', metaTransactionsFacet],
+      ['MarketplaceFacet', marketplaceFacet]
     ],
     args: [account, dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, initialHauntSize]
   })
@@ -370,10 +373,11 @@ async function main(scriptName) {
     vrfFacet: vrfFacet,
     daoFacet: daoFacet,
     svgFacet: svgFacet,
+    marketplaceFacet: marketplaceFacet,
     vouchersContract: vouchersContract,
     shopFacet: shopFacet,
     linkAddress: linkAddress,
-    linkContract: linkContract
+    linkContract: linkContract,
   }
 }
 
