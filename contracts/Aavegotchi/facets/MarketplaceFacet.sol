@@ -15,8 +15,7 @@ contract Marketplace is LibAppStorageModifiers {
         uint256 erc1155TypeId,
         uint256 indexed category,
         uint256 quantity,
-        uint256 priceInWei,
-        uint256 expires
+        uint256 priceInWei
     );
 
     event ERC1155ExecutedListing(
@@ -34,7 +33,6 @@ contract Marketplace is LibAppStorageModifiers {
     event UpdateERC1155Listing(bytes32 indexed _listingId, uint256 quantity);
 
     event ERC1155ListingCancelled(bytes32 indexed listingId);
-    event ERC1155ListingExpired(bytes32 indexed listingId, uint256 _expired);
 
     event ChangedListingFee(uint256 listingFeeInWei);
 
@@ -62,7 +60,7 @@ contract Marketplace is LibAppStorageModifiers {
         }
     }
 
-    function removeERC1122ListingItem(string memory _sort, bytes32 _listingId) internal {
+    function removeERC1155ListingItem(string memory _sort, bytes32 _listingId) internal {
         ERC1155ListingListItem storage listingItem = s.erc1155ListingListItem[_sort][_listingId];
         if (listingItem.listingId == 0) {
             return;
@@ -86,12 +84,11 @@ contract Marketplace is LibAppStorageModifiers {
         listingItem.childListingId = 0;
     }
 
-    function setERC1122Listing(
+    function setERC1155Listing(
         address _erc1155TokenAddress,
         uint256 _erc1155TypeId,
         uint256 _quantity,
-        uint256 _priceInWei,
-        uint256 _expires
+        uint256 _priceInWei
     ) external {
         uint256 category = getERC1155Category(_erc1155TokenAddress, _erc1155TypeId);
         IERC1155 erc1155Token = IERC1155(_erc1155TokenAddress);
@@ -103,13 +100,12 @@ contract Marketplace is LibAppStorageModifiers {
 
         uint256 cost = LibMath.mul(_quantity, _priceInWei);
         require(cost >= 1e18, "Marketplace: cost should be 1 GHST or larger");
-        require(_expires > block.timestamp + 1 minutes, "Marketplace: Listing should be more than 1 minute in the future");
 
         bytes32 listingId = keccak256(abi.encodePacked(_erc1155TokenAddress, _erc1155TypeId, LibMeta.msgSender()));
         ERC1155Listing storage listing = s.erc1155Listings[listingId];
-        removeERC1122ListingItem("listed", listingId);
+        removeERC1155ListingItem("listed", listingId);
         if (_priceInWei != listing.priceInWei) {
-            removeERC1122ListingItem("purchased", listingId);
+            removeERC1155ListingItem("purchased", listingId);
         }
 
         if (listing.timeCreated == 0) {
@@ -121,7 +117,6 @@ contract Marketplace is LibAppStorageModifiers {
                 category: category,
                 quantity: _quantity,
                 priceInWei: _priceInWei,
-                expires: _expires,
                 timeCreated: block.timestamp,
                 timeLastPurchased: 0
             });
@@ -129,7 +124,6 @@ contract Marketplace is LibAppStorageModifiers {
         } else {
             listing.quantity = _quantity;
             listing.priceInWei = _priceInWei;
-            listing.expires = _expires;
         }
 
         // Check if there's a publication fee and
@@ -144,7 +138,7 @@ contract Marketplace is LibAppStorageModifiers {
         s.erc1155ListingHead[category]["listed"] = listingId;
         listingItem.listingId = listingId;
 
-        emit ERC1155ListingSet(listingId, LibMeta.msgSender(), _erc1155TokenAddress, _erc1155TypeId, category, _quantity, _priceInWei, _expires);
+        emit ERC1155ListingSet(listingId, LibMeta.msgSender(), _erc1155TokenAddress, _erc1155TypeId, category, _quantity, _priceInWei);
     }
 
     function cancelERC1155Listing(bytes32 _listingId) external {
@@ -154,8 +148,8 @@ contract Marketplace is LibAppStorageModifiers {
         require(listing.seller == LibMeta.msgSender(), "Marketplace: Only seller can cancel listing.");
         listing.quantity = 0;
         emit ERC1155ListingCancelled(_listingId);
-        removeERC1122ListingItem("listed", _listingId);
-        removeERC1122ListingItem("purchased", _listingId);
+        removeERC1155ListingItem("listed", _listingId);
+        removeERC1155ListingItem("purchased", _listingId);
     }
 
     function executeERC1155Listing(bytes32 _listingId, uint256 _quantity) external {
@@ -166,7 +160,6 @@ contract Marketplace is LibAppStorageModifiers {
         require(seller != buyer, "Marketplace: buyer can't be seller");
         require(_quantity > 0, "Marketplace: _quantity can't be zero");
         require(_quantity <= listing.quantity, "Marketplace: quantity is greater than listing");
-        require(listing.expires > block.timestamp, "Marketplace: listing has expired");
         uint256 cost = LibMath.mul(_quantity, listing.priceInWei);
         require(IERC20(s.ghstContract).balanceOf(buyer) >= cost, "Marketplace: not enough GHST");
         uint256 daoShare = cost / 100;
@@ -201,7 +194,7 @@ contract Marketplace is LibAppStorageModifiers {
             IERC1155(listing.erc1155TokenAddress).safeTransferFrom(seller, buyer, listing.erc1155TypeId, _quantity, new bytes(0));
         }
         listing.timeLastPurchased = block.timestamp;
-        removeERC1122ListingItem("purchased", _listingId);
+        removeERC1155ListingItem("purchased", _listingId);
         ERC1155ListingListItem storage listingItem = s.erc1155ListingListItem["purchased"][_listingId];
         listingItem.childListingId = s.erc1155ListingHead[listing.category]["purchased"];
         s.erc1155ListingHead[listing.category]["purchased"] = _listingId;
@@ -234,17 +227,9 @@ contract Marketplace is LibAppStorageModifiers {
                 emit UpdateERC1155Listing(_listingId, quantity);
             }
         }
-        bool removeListing = false;
         if (quantity == 0) {
-            removeListing = true;
-        }
-        if (block.timestamp >= listing.expires) {
-            emit ERC1155ListingExpired(_listingId, listing.expires);
-            removeListing = true;
-        }
-        if (removeListing) {
-            removeERC1122ListingItem("listed", _listingId);
-            removeERC1122ListingItem("purchased", _listingId);
+            removeERC1155ListingItem("listed", _listingId);
+            removeERC1155ListingItem("purchased", _listingId);
         }
     }
 }

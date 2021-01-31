@@ -98,7 +98,6 @@ struct ERC1155Listing {
     uint256 category; // 0 is wearable, 1 is badge, 2 is consumable, 3 is tickets
     uint256 quantity;
     uint256 priceInWei;
-    uint256 expires;
     uint256 timeCreated;
     uint256 timeLastPurchased;
 }
