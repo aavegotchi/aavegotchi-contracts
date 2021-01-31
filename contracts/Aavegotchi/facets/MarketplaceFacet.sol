@@ -62,7 +62,7 @@ contract Marketplace is LibAppStorageModifiers {
         }
     }
 
-    function removeERC1122ListingItem(string memory _sort, bytes32 _listingId) internal {
+    function removeERC1155ListingItem(string memory _sort, bytes32 _listingId) internal {
         ERC1155ListingListItem storage listingItem = s.erc1155ListingListItem[_sort][_listingId];
         if (listingItem.listingId == 0) {
             return;
@@ -86,7 +86,7 @@ contract Marketplace is LibAppStorageModifiers {
         listingItem.childListingId = 0;
     }
 
-    function setERC1122Listing(
+    function setERC1155Listing(
         address _erc1155TokenAddress,
         uint256 _erc1155TypeId,
         uint256 _quantity,
@@ -107,9 +107,9 @@ contract Marketplace is LibAppStorageModifiers {
 
         bytes32 listingId = keccak256(abi.encodePacked(_erc1155TokenAddress, _erc1155TypeId, LibMeta.msgSender()));
         ERC1155Listing storage listing = s.erc1155Listings[listingId];
-        removeERC1122ListingItem("listed", listingId);
+        removeERC1155ListingItem("listed", listingId);
         if (_priceInWei != listing.priceInWei) {
-            removeERC1122ListingItem("purchased", listingId);
+            removeERC1155ListingItem("purchased", listingId);
         }
 
         if (listing.timeCreated == 0) {
@@ -154,8 +154,8 @@ contract Marketplace is LibAppStorageModifiers {
         require(listing.seller == LibMeta.msgSender(), "Marketplace: Only seller can cancel listing.");
         listing.quantity = 0;
         emit ERC1155ListingCancelled(_listingId);
-        removeERC1122ListingItem("listed", _listingId);
-        removeERC1122ListingItem("purchased", _listingId);
+        removeERC1155ListingItem("listed", _listingId);
+        removeERC1155ListingItem("purchased", _listingId);
     }
 
     function executeERC1155Listing(bytes32 _listingId, uint256 _quantity) external {
@@ -201,7 +201,7 @@ contract Marketplace is LibAppStorageModifiers {
             IERC1155(listing.erc1155TokenAddress).safeTransferFrom(seller, buyer, listing.erc1155TypeId, _quantity, new bytes(0));
         }
         listing.timeLastPurchased = block.timestamp;
-        removeERC1122ListingItem("purchased", _listingId);
+        removeERC1155ListingItem("purchased", _listingId);
         ERC1155ListingListItem storage listingItem = s.erc1155ListingListItem["purchased"][_listingId];
         listingItem.childListingId = s.erc1155ListingHead[listing.category]["purchased"];
         s.erc1155ListingHead[listing.category]["purchased"] = _listingId;
@@ -243,8 +243,8 @@ contract Marketplace is LibAppStorageModifiers {
             removeListing = true;
         }
         if (removeListing) {
-            removeERC1122ListingItem("listed", _listingId);
-            removeERC1122ListingItem("purchased", _listingId);
+            removeERC1155ListingItem("listed", _listingId);
+            removeERC1155ListingItem("purchased", _listingId);
         }
     }
 }
