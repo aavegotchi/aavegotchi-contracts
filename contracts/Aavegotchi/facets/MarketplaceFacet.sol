@@ -6,6 +6,7 @@ import "../libraries/LibAppStorage.sol";
 import "../interfaces/IERC1155.sol";
 import "../libraries/LibMeta.sol";
 import "../libraries/LibMath.sol";
+
 import "hardhat/console.sol";
 
 contract MarketplaceFacet is LibAppStorageModifiers {
@@ -44,9 +45,13 @@ contract MarketplaceFacet is LibAppStorageModifiers {
     ) external view returns (ERC1155Listing[] memory listings_) {
         bytes32 listingId = s.erc1155ListingHead[_category][_sort];
         listings_ = new ERC1155Listing[](_length);
-        for (uint256 listIndex = 0; listingId != 0 && listIndex < _length; listIndex++) {
+        uint256 listIndex;
+        for (; listingId != 0 && listIndex < _length; listIndex++) {
             listings_[listIndex] = s.erc1155Listings[listingId];
             listingId = s.erc1155ListingListItem[_sort][listingId].childListingId;
+        }
+        assembly {
+            mstore(listings_, listIndex)
         }
     }
 
