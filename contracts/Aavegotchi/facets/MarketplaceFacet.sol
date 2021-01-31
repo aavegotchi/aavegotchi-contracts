@@ -39,7 +39,7 @@ contract Marketplace is LibAppStorageModifiers {
     event ChangedListingFee(uint256 listingFeeInWei);
 
     function getERC1155Listings(
-        uint256 _category, // // 0 is wearable, 1 is badge, 2 is consumable
+        uint256 _category, // // 0 is wearable, 1 is badge, 2 is consumable, 3 is tickets
         string memory _sort, // "listed" or "purchased"
         uint256 _length // how many items to get back or the rest available
     ) external view returns (ERC1155Listing[] memory listings_) {

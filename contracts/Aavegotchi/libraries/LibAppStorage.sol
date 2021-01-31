@@ -95,7 +95,7 @@ struct ERC1155Listing {
     address seller;
     address erc1155TokenAddress;
     uint256 erc1155TypeId;
-    uint256 category;
+    uint256 category; // 0 is wearable, 1 is badge, 2 is consumable, 3 is tickets
     uint256 quantity;
     uint256 priceInWei;
     uint256 expires;
