@@ -219,6 +219,7 @@ async function main(scriptName) {
   collateralFacet = await ethers.getContractAt('CollateralFacet', aavegotchiDiamond.address)
   shopFacet = await ethers.getContractAt('ShopFacet', aavegotchiDiamond.address)
   daoFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamond.address)
+  marketplaceFacet = await ethers.getContractAt('MarketplaceFacet', aavegotchiDiamond.address)
 
   // add collateral info
 

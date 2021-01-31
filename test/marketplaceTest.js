@@ -54,7 +54,7 @@ describe('Marketplace functionality', async function () {
     it('Should list an item', async function () {
         const address = global.aavegotchiDiamond.address
         console.log('address:', address)
-        await global.marketplaceFacet.setERC1155Listing(address, "129", 10, ethers.utils.parseEther("10"))
+        await global.marketplaceFacet.setERC1155Listing(address, "114", 10, ethers.utils.parseEther("10"))
         const listings = await global.marketplaceFacet.getERC1155Listings("0", "listed", "100")
         console.log('listings:', listings)
     })
