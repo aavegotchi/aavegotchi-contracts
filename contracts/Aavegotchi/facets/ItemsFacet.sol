@@ -11,6 +11,11 @@ import "../interfaces/IERC721.sol";
 import "../libraries/LibERC1155.sol";
 import "./AavegotchiFacet.sol";
 
+interface MaretplaceFacet {
+    // needed by the marketplace facet to update listings
+    function updateERC1155Listing(bytes32 _listingId) external;
+}
+
 contract ItemsFacet is LibAppStorageModifiers {
     //using LibAppStorage for AppStorage;
 
@@ -400,15 +405,15 @@ contract ItemsFacet is LibAppStorageModifiers {
         bytes calldata _data
     ) external {
         require(_to != address(0), "Items: Can't transfer to 0 address");
-        require(
-            LibMeta.msgSender() == _from || s.operators[_from][LibMeta.msgSender()] || LibMeta.msgSender() == address(this),
-            "Items: Not owner and not approved to transfer"
-        );
+        address sender = LibMeta.msgSender();
+        require(sender == _from || s.operators[_from][sender] || sender == address(this), "Items: Not owner and not approved to transfer");
         uint256 bal = s.items[_from][_id];
         require(_value <= bal, "Items: Doesn't have that many to transfer");
         s.items[_from][_id] = bal - _value;
         s.items[_to][_id] += _value;
         LibERC1155.onERC1155Received(_from, _to, _id, _value, _data);
+        bytes32 listingId = keccak256(abi.encodePacked(address(this), _id, _from));
+        MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
     }
 
     /**
@@ -435,7 +440,8 @@ contract ItemsFacet is LibAppStorageModifiers {
         bytes calldata _data
     ) external {
         require(_to != address(0), "Items: Can't transfer to 0 address");
-        require(LibMeta.msgSender() == _from || s.operators[_from][LibMeta.msgSender()], "Items: Not owner and not approved to transfer");
+        address sender = LibMeta.msgSender();
+        require(sender == _from || s.operators[_from][sender], "Items: Not owner and not approved to transfer");
         for (uint256 i; i < _ids.length; i++) {
             uint256 id = _ids[i];
             uint256 value = _values[i];
@@ -443,6 +449,8 @@ contract ItemsFacet is LibAppStorageModifiers {
             require(value <= bal, "Items: Doesn't have that many to transfer");
             s.items[_from][id] = bal - value;
             s.items[_to][id] += value;
+            bytes32 listingId = keccak256(abi.encodePacked(address(this), id, _from));
+            MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
         }
         LibERC1155.onERC1155BatchReceived(_from, _to, _ids, _values, _data);
     }
@@ -461,13 +469,16 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint256 _value
     ) external {
         require(_toContract != address(0), "Items: Can't transfer to 0 address");
-        require(LibMeta.msgSender() == _from || s.operators[_from][LibMeta.msgSender()], "Items: Not owner and not approved to transfer");
+        address sender = LibMeta.msgSender();
+        require(sender == _from || s.operators[_from][sender], "Items: Not owner and not approved to transfer");
         uint256 bal = s.items[_from][_id];
         require(_value <= bal, "Items: Doesn't have that many to transfer");
         s.items[_from][_id] = bal - _value;
         s.nftBalances[_toContract][_toTokenId][_id] += _value;
-        emit TransferSingle(LibMeta.msgSender(), _from, _toContract, _id, _value);
+        emit TransferSingle(sender, _from, _toContract, _id, _value);
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
+        bytes32 listingId = keccak256(abi.encodePacked(address(this), _id, _from));
+        MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
     }
 
     /// @notice Transfer token from a token to an address
@@ -653,6 +664,8 @@ contract ItemsFacet is LibAppStorageModifiers {
                 s.nftBalances[address(this)][_tokenId][wearableId] += 1;
                 emit TransferToParent(address(this), _tokenId, wearableId, 1);
                 emit TransferSingle(LibMeta.msgSender(), LibMeta.msgSender(), address(this), wearableId, 1);
+                bytes32 listingId = keccak256(abi.encodePacked(address(this), wearableId, LibMeta.msgSender()));
+                MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
             }
         }
         emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _equippedWearables);
@@ -698,6 +711,8 @@ contract ItemsFacet is LibAppStorageModifiers {
 
             itemType.totalQuantity -= uint32(quantity);
             LibAppStorage.interact(_tokenId);
+            bytes32 listingId = keccak256(abi.encodePacked(address(this), itemId, LibMeta.msgSender()));
+            MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
         }
         emit UseConsumables(_tokenId, _itemIds, _quantities);
         emit TransferBatch(LibMeta.msgSender(), LibMeta.msgSender(), address(0), _itemIds, _quantities);

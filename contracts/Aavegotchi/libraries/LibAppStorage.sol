@@ -103,6 +103,14 @@ struct ERC1155Listing {
     uint256 timeLastPurchased;
 }
 
+struct ERC1155ListingListItem {
+    // parent or child =>
+    // mapping(string => ERC1155ListingListItem) nodes;
+    bytes32 parentListingId;
+    bytes32 listingId;
+    bytes32 childListingId;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -135,9 +143,12 @@ struct AppStorage {
     // Marketplace
     // erc1155 category => erc1155Order
     //ERC1155Order[] erc1155MarketOrders;
-    mapping(bytes32 => ERC1155Listing) erc1155MarketListings;
-    // category => ("listing" or "sold" => listingIds)
-    mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
+    mapping(bytes32 => ERC1155Listing) erc1155Listings;
+    // category => ("listed" or purchased => first listingId)
+    //mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
+    mapping(uint256 => mapping(string => bytes32)) erc1155ListingHead;
+    // "listed" or purchased => (listingId => ERC1155ListingListItem)
+    mapping(string => mapping(bytes32 => ERC1155ListingListItem)) erc1155ListingListItem;
     uint256 ownerCutPerMillion;
     uint256 listingFeeInWei;
     // erc1155Token => (erc1155TypeId => category)
