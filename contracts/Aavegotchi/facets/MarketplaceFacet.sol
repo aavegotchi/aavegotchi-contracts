@@ -44,7 +44,10 @@ contract MarketplaceFacet is LibAppStorageModifiers {
     ) external view returns (ERC1155Listing[] memory listings_) {
         bytes32 listingId = s.erc1155ListingHead[_category][_sort];
         listings_ = new ERC1155Listing[](_length);
-        for (uint256 listIndex = 0; listingId != 0 && listIndex < _length; listIndex++) {
+        for (uint256 listIndex = 0; listIndex < _length; listIndex++) {
+            if (listingId == 0) {
+                break;
+            }
             listings_[listIndex] = s.erc1155Listings[listingId];
             listingId = s.erc1155ListingListItem[_sort][listingId].childListingId;
         }
