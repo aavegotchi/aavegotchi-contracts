@@ -193,10 +193,10 @@ contract MarketplaceFacet is LibAppStorageModifiers {
                     buyer, // to
                     listing.erc1155TypeId,
                     _quantity,
-                    new bytes(0),
-                    address(this) // becomes msg.sender
+                    new bytes(0)
                 );
-            (bool success, bytes memory result) = address(this).call(myFunctionCall);
+            // address(this) becomes msg.sender
+            (bool success, bytes memory result) = address(this).call(abi.encodePacked(myFunctionCall, address(this)));
             if (!success) {
                 if (result.length > 0) {
                     // bubble up any reason for revert
