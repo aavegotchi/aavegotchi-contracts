@@ -69,28 +69,41 @@ describe('Marketplace functionality', async function () {
 
         let listings = await global.marketplaceFacet.getERC1155Listings('0', 'listed', '100')
 
-        let bobMarket = global.marketplaceFacet.connect(bobSigner)
-        let bobGhst = global.ghstTokenContract.connect(bobSigner)
 
+        let bobGhst = global.ghstTokenContract.connect(bobSigner)
         await bobGhst.approve(aavegotchiDiamond.address, ethers.utils.parseEther("100000000000"))
+
+        let bobMarket = global.marketplaceFacet.connect(bobSigner)
         await bobMarket.executeERC1155Listing(listings[0].listingId, "1")
 
         listings = await global.marketplaceFacet.getERC1155Listings('0', 'listed', '100')
 
+
+        //Listing quantity is reduced by 1
         expect(listings[0].quantity).to.equal(9)
 
-        // const balance = await global.ghstTokenContract.balanceOf(bob)
-        //  console.log('balance:', balance)
-        //  expect(balance).to.equal(10000)
-
-
+        //Buyer receives 1 NFT
+        const nftBalance = await global.itemsFacet.balanceOf(bobAddress, 114)
+        expect(nftBalance).to.equal(1)
     })
 
     it('Should modify the listing quantity', async function () {
+        const address = global.aavegotchiDiamond.address
+        await global.marketplaceFacet.setERC1155Listing(address, '114', 5, ethers.utils.parseEther('10'))
 
+        let listings = await global.marketplaceFacet.getERC1155Listings('0', 'listed', '100')
+        expect(listings[0].quantity).to.equal(5)
+
+        console.log('listings:', listings)
     })
 
     it('Should modify the listing price', async function () {
+        const address = global.aavegotchiDiamond.address
+        await global.marketplaceFacet.setERC1155Listing(address, '114', 5, ethers.utils.parseEther('100'))
 
+        let listings = await global.marketplaceFacet.getERC1155Listings('0', 'listed', '100')
+        expect(listings[0].priceInWei).to.equal(ethers.utils.parseEther("100"))
+
+        console.log('listings:', listings)
     })
 })
