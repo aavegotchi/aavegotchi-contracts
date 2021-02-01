@@ -54,6 +54,20 @@ describe('Marketplace functionality', async function () {
     console.log('address:', address)
     await global.marketplaceFacet.setERC1155Listing(address, '114', 10, ethers.utils.parseEther('10'))
     const listings = await global.marketplaceFacet.getERC1155Listings('0', 'listed', '100')
-    console.log('listings:', listings)
+    expect(listings.length).to.equal(1)
+    expect(listings[0].quantity).to.equal(10)
+    console.log('listings:', listings[0])
+  })
+
+  it('Should execute an order to buy and reduce quantity by 1', async function () {
+
+  })
+
+  it('Should modify the listing quantity', async function () {
+
+  })
+
+  it('Should modify the listing price', async function () {
+
   })
 })
