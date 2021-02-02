@@ -23,7 +23,7 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
     global.vouchersContract = deployVars.vouchersContract
     global.diamondLoupeFacet = deployVars.diamondLoupeFacet
     global.metaTransactionsFacet = deployVars.metaTransactionsFacet
-    global.marketplaceFacet = deployVars.marketplaceFacet
+    global.erc1155MarketplaceFacet = deployVars.erc1155MarketplaceFacet
   })
   it('Should mint 10,000,000 GHST tokens', async function () {
     await global.ghstTokenContract.mint()
@@ -48,12 +48,12 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
   })
 })
 
-describe('Marketplace functionality', async function () {
+describe('ERC1155 Marketplace functionality', async function () {
   it('Should list an item', async function () {
     const address = global.aavegotchiDiamond.address
     console.log('address:', address)
-    await global.marketplaceFacet.setERC1155Listing(address, '114', 10, ethers.utils.parseEther('10'))
-    const listings = await global.marketplaceFacet.getERC1155Listings('0', 'listed', '100')
+    await global.erc1155MarketplaceFacet.setERC1155Listing(address, '114', 10, ethers.utils.parseEther('10'))
+    const listings = await global.erc1155MarketplaceFacet.getERC1155Listings('0', 'listed', '100')
     expect(listings.length).to.equal(1)
     expect(listings[0].quantity).to.equal(10)
     console.log('listings:', listings[0])

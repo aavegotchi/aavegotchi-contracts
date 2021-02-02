@@ -9,7 +9,7 @@ import "../libraries/LibMath.sol";
 
 import "hardhat/console.sol";
 
-contract MarketplaceFacet is LibAppStorageModifiers {
+contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
     event ERC1155ListingSet(
         bytes32 indexed listingId,
         address indexed seller,
@@ -62,14 +62,6 @@ contract MarketplaceFacet is LibAppStorageModifiers {
 
     function getERC1155Category(address _erc1155TokenAddress, uint256 _erc1155TypeId) internal view returns (uint256 category_) {
         category_ = s.erc1155Categories[_erc1155TokenAddress][_erc1155TypeId];
-        //  console.log("category:", category_);
-
-        console.log("address:", address(this));
-
-        console.log("yupe id:", _erc1155TypeId);
-
-        //  console.log("item quantity:", s.itemTypes[_erc1155TypeId].maxQuantity);
-
         if (category_ == 0) {
             require(_erc1155TokenAddress == address(this) && s.itemTypes[_erc1155TypeId].maxQuantity > 0, "Marketplace: erc1155 item not supported");
         }
