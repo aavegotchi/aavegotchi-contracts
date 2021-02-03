@@ -48,7 +48,7 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
     })
 })
 
-describe('Marketplace functionality', async function () {
+describe('Listing / Executing orders', async function () {
     it('Should list an item', async function () {
         const address = global.aavegotchiDiamond.address
         console.log('address:', address)
@@ -93,8 +93,6 @@ describe('Marketplace functionality', async function () {
 
         let listings = await global.marketplaceFacet.getERC1155Listings('0', 'listed', '100')
         expect(listings[0].quantity).to.equal(5)
-
-        console.log('listings:', listings)
     })
 
     it('Should modify the listing price', async function () {
@@ -103,7 +101,17 @@ describe('Marketplace functionality', async function () {
 
         let listings = await global.marketplaceFacet.getERC1155Listings('0', 'listed', '100')
         expect(listings[0].priceInWei).to.equal(ethers.utils.parseEther("100"))
-
-        console.log('listings:', listings)
     })
+})
+
+describe('Fees', async function () {
+    it('Can update listing fee', async function () {
+
+    })
+
+    it('Listing fee is burned', async function () {
+
+    })
+
+    it('Pixelcraft receives ')
 })
