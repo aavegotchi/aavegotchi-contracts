@@ -85,6 +85,7 @@ import "../libraries/LibMeta.sol";
 
 contract VrfFacet {
     event VrfRandomNumber(uint256 indexed tokenId, uint256 randomNumber, uint256 _vrfTimeSet);
+    event OpenPortals(uint256[] _tokenIds);
     event PortalOpened(uint256 indexed tokenId);
     AppStorage internal s;
     ILink internal immutable im_link;
@@ -125,7 +126,24 @@ contract VrfFacet {
    |            Write Functions        |
    |__________________________________*/
 
-    function drawRandomNumber(uint256 _tokenId) public {
+    function drawRandomNumbers(uint256[] calldata _tokenIds) external {
+        for (uint256 i; i < _tokenIds.length; i++) {
+            drawRandomNumber(_tokenIds[i]);
+        }
+    }
+
+    function openPortals(uint256[] calldata _tokenIds) external {
+        for (uint256 i; i < _tokenIds.length; i++) {
+            uint256 tokenId = _tokenIds[i];
+            require(s.aavegotchis[tokenId].status == LibAppStorage.STATUS_CLOSED_PORTAL, "AavegotchiFacet: Portal is not closed");
+            require(LibMeta.msgSender() == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
+            s.aavegotchis[tokenId].status = LibAppStorage.STATUS_VRF_PENDING;
+            drawRandomNumber(tokenId);
+        }
+        emit OpenPortals(_tokenIds);
+    }
+
+    function drawRandomNumber(uint256 _tokenId) internal {
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
         require(vrf_ds.tokenIdToVrfPending[_tokenId] == false, "VrfFacet: VRF call is pending");
         vrf_ds.tokenIdToVrfPending[_tokenId] = true;
@@ -183,7 +201,7 @@ contract VrfFacet {
     function rawFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) external {
         // console.log("bytes");
         // console.logBytes32(_requestId);
-        _requestId; // mentioned here to remove unused variable warning
+        //_requestId; // mentioned here to remove unused variable warning
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
         uint256 tokenId = vrf_ds.vrfRequestIdToTokenId[_requestId];
 

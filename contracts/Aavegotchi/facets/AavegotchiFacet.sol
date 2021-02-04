@@ -59,8 +59,6 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     ///  The operator can manage all NFTs of the owner.
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
-    event OpenPortals(uint256[] _tokenIds);
-
     event ClaimAavegotchi(uint256 indexed _tokenId);
 
     event SetAavegotchiName(uint256 indexed _tokenId, string _oldName, string _newName);
@@ -310,7 +308,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(_numericTraits >> (i * 16));
             if (number >= 50) {
-                _rarityScore += uint256(number);
+                _rarityScore += uint256(number) + 1;
             } else {
                 _rarityScore += uint256(int256(100) - number);
             }
@@ -419,18 +417,6 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     /***********************************|
    |             Write Functions        |
    |__________________________________*/
-
-    function openPortals(uint256[] calldata _tokenIds) external {
-        for (uint256 i; i < _tokenIds.length; i++) {
-            uint256 tokenId = _tokenIds[i];
-            require(s.aavegotchis[tokenId].status == LibAppStorage.STATUS_CLOSED_PORTAL, "AavegotchiFacet: Portal is not closed");
-            require(LibMeta.msgSender() == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
-
-            VrfFacet(address(this)).drawRandomNumber(tokenId);
-            s.aavegotchis[tokenId].status = LibAppStorage.STATUS_VRF_PENDING;
-        }
-        emit OpenPortals(_tokenIds);
-    }
 
     function claimAavegotchi(
         uint256 _tokenId,
