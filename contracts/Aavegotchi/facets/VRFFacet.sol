@@ -150,6 +150,8 @@ contract VrfFacet {
         require(im_link.balanceOf(address(this)) >= vrf_ds.fee, "VrfFacet: Not enough LINK");
         bytes32 requestId = requestRandomness(vrf_ds.keyHash, vrf_ds.fee, 0);
         vrf_ds.vrfRequestIdToTokenId[requestId] = _tokenId;
+        // for testing
+        //tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _tokenId))));
     }
 
     function requestRandomness(
@@ -184,6 +186,28 @@ contract VrfFacet {
         uint256 _nonce
     ) internal pure returns (uint256) {
         return uint256(keccak256(abi.encode(_keyHash, _userSeed, _requester, _nonce)));
+    }
+
+    // for testing purpose only
+    function tempFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) internal {
+        // console.log("bytes");
+        // console.logBytes32(_requestId);
+        //_requestId; // mentioned here to remove unused variable warning
+        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
+        uint256 tokenId = vrf_ds.vrfRequestIdToTokenId[_requestId];
+
+        // console.log("token id:", tokenId);
+
+        // require(LibMeta.msgSender() == im_vrfCoordinator, "Only VRFCoordinator can fulfill");
+
+        require(vrf_ds.tokenIdToVrfPending[tokenId] == true, "VrfFacet: VRF is not pending");
+        vrf_ds.tokenIdToVrfPending[tokenId] = false;
+
+        s.tokenIdToRandomNumber[tokenId] = _randomNumber;
+        s.aavegotchis[tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
+
+        emit PortalOpened(tokenId);
+        emit VrfRandomNumber(tokenId, _randomNumber, block.timestamp);
     }
 
     /**

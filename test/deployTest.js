@@ -120,7 +120,7 @@ describe('Opening Portals', async function () {
     let myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals[0].status).to.equal(0)
     //  const portalId = myPortals[0].tokenId
-    await global.aavegotchiFacet.openPortals(['0', '1', '2', '3'])
+    await global.vrfFacet.openPortals(['0', '1', '2', '3'])
 
     const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
 

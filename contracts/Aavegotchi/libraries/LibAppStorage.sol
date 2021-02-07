@@ -20,7 +20,7 @@ struct Aavegotchi {
     address owner;
     // uint32 batchId;
     uint16 hauntId;
-    uint8 status; // 0 == portal, 1 = open portal, 2 = Aavegotchi
+    uint8 status; // 0 == portal, 1 == VRF_PENDING, 2 == open portal, 3 == Aavegotchi
     uint32 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
     address collateralType;
     uint88 minimumStake; //The minimum amount of collateral that must be staked. Set upon creation.
@@ -102,9 +102,20 @@ struct ERC1155Listing {
     uint256 timeLastPurchased;
 }
 
-struct ERC1155ListingListItem {
-    // parent or child =>
-    // mapping(string => ERC1155ListingListItem) nodes;
+struct ERC721Listing {
+    bytes32 listingId;
+    address seller;
+    address erc721TokenAddress;
+    uint256 erc721TokenId;
+    uint256 category; // 0 is closed portal, 1 is vrf pending, 2 is open portal, 3 is Aavegotchi
+    uint256 priceInWei;
+    uint256 timeCreated;
+    uint256 timeLastPurchased;
+    bool sold;
+    bool cancelled;
+}
+
+struct ListingListItem {
     bytes32 parentListingId;
     bytes32 listingId;
     bytes32 childListingId;
@@ -126,7 +137,6 @@ struct AppStorage {
     mapping(uint256 => address) approved;
     mapping(string => bool) aavegotchiNamesUsed;
     mapping(address => uint256) metaNonces;
-    bytes32[1000] emptySlots;
     uint32 totalSupply;
     uint16 currentHauntId;
     //Addresses
@@ -146,14 +156,26 @@ struct AppStorage {
     // category => ("listed" or purchased => first listingId)
     //mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
     mapping(uint256 => mapping(string => bytes32)) erc1155ListingHead;
-    // "listed" or purchased => (listingId => ERC1155ListingListItem)
-    mapping(string => mapping(bytes32 => ERC1155ListingListItem)) erc1155ListingListItem;
-    uint256 ownerCutPerMillion;
+    // "listed" or purchased => (listingId => ListingListItem)
+    mapping(string => mapping(bytes32 => ListingListItem)) erc1155ListingListItem;
     uint256 listingFeeInWei;
     // erc1155Token => (erc1155TypeId => category)
     mapping(address => mapping(uint256 => uint256)) erc1155Categories;
+    //ERC1155Order[] erc1155MarketOrders;
+    mapping(bytes32 => ERC721Listing) erc721Listings;
     // userAddress => order[]
-    mapping(address => bytes32[]) userListingIds;
+    mapping(address => bytes32[]) userERC1155ListingIds;
+    // "listed" or purchased => (listingId => ListingListItem)
+    mapping(string => mapping(bytes32 => ListingListItem)) erc721ListingListItem;
+    //mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
+    mapping(uint256 => mapping(string => bytes32)) erc721ListingHead;
+    // user address => (listingId => ListingListItem)
+    mapping(address => mapping(bytes32 => ListingListItem)) erc721OwnerListingListItem;
+    //mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
+    mapping(address => bytes32) erc721OwnerListingHead;
+    // erc1155Token => (erc1155TypeId => category)
+    // not really in use now, for the future
+    mapping(address => mapping(uint256 => uint256)) erc721Categories;
 }
 
 library LibAppStorage {

@@ -562,6 +562,10 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         }
     }
 
+    function withdraw(uint256 _tokenId) external {
+        internalTransferFrom(LibMeta.msgSender(), address(this), _tokenId);
+    }
+
     /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
     ///  TO CONFIRM THAT `_to` IS CAPABLE OF RECEIVING NFTS OR ELSE
     ///  THEY MAY BE PERMANENTLY LOST

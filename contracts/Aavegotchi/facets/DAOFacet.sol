@@ -170,4 +170,6 @@ contract DAOFacet is LibAppStorageModifiers {
         GameManagerTransferred(s.gameManager, _gameManager);
         s.gameManager = _gameManager;
     }
+
+    
 }
