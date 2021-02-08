@@ -151,7 +151,7 @@ contract VrfFacet {
         bytes32 requestId = requestRandomness(vrf_ds.keyHash, vrf_ds.fee, 0);
         vrf_ds.vrfRequestIdToTokenId[requestId] = _tokenId;
         // for testing
-        //tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _tokenId))));
+        tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _tokenId))));
     }
 
     function requestRandomness(

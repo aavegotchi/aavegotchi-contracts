@@ -3,7 +3,7 @@ pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
 import "../libraries/LibAppStorage.sol";
-import "../interfaces/IERC721.sol";
+import "../../shared/interfaces/IERC721.sol";
 import "../libraries/LibMeta.sol";
 import "../libraries/LibMath.sol";
 

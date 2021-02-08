@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "../libraries/LibAppStorage.sol";
 import "../../shared/interfaces/IERC20.sol";
-import "../libraries/LibStrings.sol";
+import "../../shared/libraries/LibStrings.sol";
 import "../libraries/LibSvg.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
@@ -562,8 +562,17 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         }
     }
 
-    function withdraw(uint256 _tokenId) external {
-        internalTransferFrom(LibMeta.msgSender(), address(this), _tokenId);
+    event WithdrawnBatch(address indexed owner, uint256[] tokenIds);
+
+    function withdrawAavegotchiBatch(uint256[] calldata _tokenIds) external {
+        address owner = LibMeta.msgSender();
+        uint256 length = _tokenIds.length;
+        require(length <= 20, "AavegotchiFacet: exceeds withdraw limit for single transaction");
+        for (uint256 i; i < length; i++) {
+            uint256 tokenId = _tokenIds[i];
+            internalTransferFrom(owner, address(this), tokenId);
+        }
+        emit WithdrawnBatch(owner, _tokenIds);
     }
 
     /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE

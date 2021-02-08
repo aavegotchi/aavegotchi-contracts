@@ -96,7 +96,7 @@ async function main (scriptName) {
     pixelCraft = account // 'todo' // await accounts[3].getAddress()
   } else if (hre.network.name === 'mumbai') {
     vrfCoordinator = '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9' // wrong one
-    linkAddress = '0x1cf7D49BE7e0c6AC30dEd720623490B64F572E17'
+    linkAddress = '0x70d1F773A9f81C852087B77F6Ae6d3032B02D2AB'
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4' // wrong one
     fee = ethers.utils.parseEther('1')
 
@@ -161,9 +161,9 @@ async function main (scriptName) {
     'DiamondCutFacet',
     'DiamondLoupeFacet',
     'OwnershipFacet',
-    'AavegotchiFacet',
+    'contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet',
     'SvgFacet',
-    'ItemsFacet',
+    'contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet',
     'CollateralFacet',
     'DAOFacet',
     ['VrfFacet', [vrfCoordinator, linkAddress]],
@@ -215,7 +215,7 @@ async function main (scriptName) {
 
   diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', aavegotchiDiamond.address)
   vrfFacet = await ethers.getContractAt('VrfFacet', aavegotchiDiamond.address)
-  aavegotchiFacet = await ethers.getContractAt('AavegotchiFacet', aavegotchiDiamond.address)
+  aavegotchiFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamond.address)
   collateralFacet = await ethers.getContractAt('CollateralFacet', aavegotchiDiamond.address)
   shopFacet = await ethers.getContractAt('ShopFacet', aavegotchiDiamond.address)
   daoFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamond.address)
@@ -242,7 +242,7 @@ async function main (scriptName) {
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   console.log('Adding Item Types')
-  itemsFacet = await ethers.getContractAt('ItemsFacet', aavegotchiDiamond.address)
+  itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', aavegotchiDiamond.address)
 
   const { itemTypes } = require('./itemTypes.js')
 

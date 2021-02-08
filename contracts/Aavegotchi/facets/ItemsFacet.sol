@@ -4,10 +4,8 @@ pragma experimental ABIEncoderV2;
 
 import "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";
-import "../libraries/LibStrings.sol";
-import "hardhat/console.sol";
-import "../interfaces/IERC721.sol";
-// import "../interfaces/IERC1155TokenReceiver.sol";
+import "../../shared/libraries/LibStrings.sol";
+import "../../shared/interfaces/IERC721.sol";
 import "../libraries/LibERC1155.sol";
 import "./AavegotchiFacet.sol";
 
@@ -383,6 +381,22 @@ contract ItemsFacet is LibAppStorageModifiers {
    |             Write Functions        |
    |__________________________________*/
 
+    function withdrawItemsBatch(uint256[] calldata _ids, uint256[] calldata _values) external {
+        require(_ids.length == _values.length, "Items: ids not same length as values");
+        require(_ids.length <= 20, "Items: exceeded max number of ids for single transaction");
+        address owner = LibMeta.msgSender();
+        for (uint256 i; i < _ids.length; i++) {
+            uint256 id = _ids[i];
+            uint256 value = _values[i];
+            uint256 bal = s.items[owner][id];
+            require(value <= bal, "Items: Doesn't have that many to transfer");
+            s.items[owner][id] = bal - value;
+            bytes32 listingId = keccak256(abi.encodePacked(address(this), id, owner));
+            MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+        }
+        emit TransferBatch(owner, owner, address(0), _ids, _values);
+    }
+
     /**
         @notice Transfers `_value` amount of an `_id` from the `_from` address to the `_to` address specified (with safety call).
         @dev Caller must be approved to manage the tokens being transferred out of the `_from` account (see "Approval" section of the standard).
@@ -440,6 +454,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         bytes calldata _data
     ) external {
         require(_to != address(0), "Items: Can't transfer to 0 address");
+        require(_ids.length == _values.length, "Items: ids not same length as values");
         address sender = LibMeta.msgSender();
         require(sender == _from || s.operators[_from][sender], "Items: Not owner and not approved to transfer");
         for (uint256 i; i < _ids.length; i++) {

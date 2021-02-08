@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import {AppStorage, SvgLayer} from "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../libraries/LibSvg.sol";
-import "../libraries/LibStrings.sol";
+import "../../shared/libraries/LibStrings.sol";
 import "./AavegotchiFacet.sol";
 
 // This contract was added as a facet to the diamond

@@ -204,11 +204,6 @@ library LibAppStorage {
 
     event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
 
-    modifier onlyAavegotchiOwner(uint256 _tokenId) {
-        require(LibMeta.msgSender() == diamondStorage().aavegotchis[_tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can increase stake");
-        _;
-    }
-
     function diamondStorage() internal pure returns (AppStorage storage ds) {
         assembly {
             ds.slot := 0
