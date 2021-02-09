@@ -46,8 +46,10 @@ async function main (scriptName) {
   let daoTreasury
   let rarityFarming
   let pixelCraft
+  let childChainManager
 
   if (hre.network.name === 'hardhat') {
+    childChainManager = account
     const LinkTokenMock = await ethers.getContractFactory('LinkTokenMock')
     linkContract = await LinkTokenMock.deploy()
     await linkContract.deployed()
@@ -66,7 +68,8 @@ async function main (scriptName) {
     daoTreasury = await accounts[1].getAddress()
     rarityFarming = await accounts[2].getAddress()
     pixelCraft = await accounts[3].getAddress()
-  } else if (hre.network.name === 'mainnet') {
+  } else if (hre.network.name === 'matic') {
+    childChainManager = '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa'
     vrfCoordinator = '0xf0d54349aDdcf704F77AE15b96510dEA15cb7952'
     linkAddress = '0x514910771AF9Ca656af840dff83E8264EcF986CA'
     keyHash = '0xAA77729D3466CA35AE8D28B3BBAC7CC36A5031EFDC430821C02BC31A238AF445'
@@ -80,6 +83,7 @@ async function main (scriptName) {
     rarityFarming = 'todo' // await accounts[2].getAddress()
     pixelCraft = 'todo' // await accounts[3].getAddress()
   } else if (hre.network.name === 'kovan') {
+    childChainManager = account
     vrfCoordinator = '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9'
     linkAddress = '0xa36085F69e2889c224210F603D836748e7dC0088'
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
@@ -95,6 +99,8 @@ async function main (scriptName) {
     rarityFarming = account // 'todo' // await accounts[2].getAddress()
     pixelCraft = account // 'todo' // await accounts[3].getAddress()
   } else if (hre.network.name === 'mumbai') {
+    // childChainManager = '0xb5505a6d998549090530911180f38aC5130101c6'
+    childChainManager = account
     vrfCoordinator = '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9' // wrong one
     linkAddress = '0x70d1F773A9f81C852087B77F6Ae6d3032B02D2AB'
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4' // wrong one
@@ -148,6 +154,7 @@ async function main (scriptName) {
     diamondCutFacet,
     diamondLoupeFacet,
     ownershipFacet,
+    bridgeFacet,
     aavegotchiFacet,
     svgFacet,
     itemsFacet,
@@ -161,6 +168,7 @@ async function main (scriptName) {
     'DiamondCutFacet',
     'DiamondLoupeFacet',
     'OwnershipFacet',
+    'contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet',
     'contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet',
     'SvgFacet',
     'contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet',
@@ -189,11 +197,12 @@ async function main (scriptName) {
 
   // eslint-disable-next-line no-unused-vars
   const aavegotchiDiamond = await diamond.deploy({
-    diamondName: 'AavegotchiDiamond',
+    diamondName: 'contracts/Aavegotchi/AavegotchiDiamond.sol:AavegotchiDiamond',
     facets: [
       ['DiamondCutFacet', diamondCutFacet],
       ['DiamondLoupeFacet', diamondLoupeFacet],
       ['OwnershipFacet', ownershipFacet],
+      ['BridgeFacet', bridgeFacet],
       ['AavegotchiFacet', aavegotchiFacet],
       ['SvgFacet', svgFacet],
       ['ItemsFacet', itemsFacet],
@@ -204,7 +213,7 @@ async function main (scriptName) {
       ['MetaTransactionsFacet', metaTransactionsFacet],
       ['ERC1155MarketplaceFacet', erc1155MarketplaceFacet]
     ],
-    args: [account, dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, initialHauntSize]
+    args: [account, dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, initialHauntSize, childChainManager]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
@@ -220,6 +229,7 @@ async function main (scriptName) {
   shopFacet = await ethers.getContractAt('ShopFacet', aavegotchiDiamond.address)
   daoFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamond.address)
   erc1155MarketplaceFacet = await ethers.getContractAt('ERC1155MarketplaceFacet', aavegotchiDiamond.address)
+  bridgeFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet', aavegotchiDiamond.address)
 
   // add collateral info
 
@@ -365,6 +375,7 @@ async function main (scriptName) {
     account: account,
     aavegotchiDiamond: aavegotchiDiamond,
     diamondLoupeFacet: diamondLoupeFacet,
+    bridgeFacet: bridgeFacet,
     ghstTokenContract: ghstTokenContract,
     itemsFacet: itemsFacet,
     aavegotchiFacet: aavegotchiFacet,

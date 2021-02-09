@@ -31,13 +31,14 @@ async function main (scriptName) {
   let rootChainManager
 
   if (hre.network.name === 'hardhat') {
-    rootChainManager = ethers.constants.AddressZero
+    rootChainManager = account
   } else if (hre.network.name === 'mainnet') {
     rootChainManager = '0xA0c68C638235ee32657e8f720a23ceC1bFc77C7'
   } else if (hre.network.name === 'kovan') {
-
+    rootChainManager = account
   } else if (hre.network.name === 'gorli') {
-    rootChainManager = '0xBbD7cBFA79faee899Eaf900F13C9065bF03B1A74'
+    // rootChainManager = '0xBbD7cBFA79faee899Eaf900F13C9065bF03B1A74'
+    rootChainManager = account
   } else if (hre.network.name === 'mumbai') {
 
   } else {

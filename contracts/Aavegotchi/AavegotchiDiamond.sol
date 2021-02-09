@@ -37,6 +37,7 @@ contract AavegotchiDiamond {
         bytes32 chainlinkKeyHash;
         uint256 chainlinkFee;
         uint24 initialHauntSize;
+        address childChainManager;
     }
 
     constructor(IDiamondCut.FacetCut[] memory _diamondCut, ConstructorArgs memory _args) {
@@ -47,6 +48,7 @@ contract AavegotchiDiamond {
         s.rarityFarming = _args.rarityFarming;
         s.pixelCraft = _args.pixelCraft;
         s.itemsBaseUri = "https://aavegotchi.com/metadata/items/";
+        s.childChainManager = _args.childChainManager;
 
         s.domainSeperator = LibMeta.domainSeparator("AavegotchiDiamond", "V1");
 

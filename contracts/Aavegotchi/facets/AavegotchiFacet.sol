@@ -562,19 +562,6 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         }
     }
 
-    event WithdrawnBatch(address indexed owner, uint256[] tokenIds);
-
-    function withdrawAavegotchiBatch(uint256[] calldata _tokenIds) external {
-        address owner = LibMeta.msgSender();
-        uint256 length = _tokenIds.length;
-        require(length <= 20, "AavegotchiFacet: exceeds withdraw limit for single transaction");
-        for (uint256 i; i < length; i++) {
-            uint256 tokenId = _tokenIds[i];
-            internalTransferFrom(owner, address(this), tokenId);
-        }
-        emit WithdrawnBatch(owner, _tokenIds);
-    }
-
     /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
     ///  TO CONFIRM THAT `_to` IS CAPABLE OF RECEIVING NFTS OR ELSE
     ///  THEY MAY BE PERMANENTLY LOST

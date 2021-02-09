@@ -9,7 +9,7 @@ import "../../shared/interfaces/IERC721.sol";
 import "../libraries/LibERC1155.sol";
 import "./AavegotchiFacet.sol";
 
-interface MaretplaceFacet {
+interface IMaretplaceFacet {
     // needed by the marketplace facet to update listings
     function updateERC1155Listing(bytes32 _listingId) external;
 }
@@ -381,22 +381,6 @@ contract ItemsFacet is LibAppStorageModifiers {
    |             Write Functions        |
    |__________________________________*/
 
-    function withdrawItemsBatch(uint256[] calldata _ids, uint256[] calldata _values) external {
-        require(_ids.length == _values.length, "Items: ids not same length as values");
-        require(_ids.length <= 20, "Items: exceeded max number of ids for single transaction");
-        address owner = LibMeta.msgSender();
-        for (uint256 i; i < _ids.length; i++) {
-            uint256 id = _ids[i];
-            uint256 value = _values[i];
-            uint256 bal = s.items[owner][id];
-            require(value <= bal, "Items: Doesn't have that many to transfer");
-            s.items[owner][id] = bal - value;
-            bytes32 listingId = keccak256(abi.encodePacked(address(this), id, owner));
-            MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
-        }
-        emit TransferBatch(owner, owner, address(0), _ids, _values);
-    }
-
     /**
         @notice Transfers `_value` amount of an `_id` from the `_from` address to the `_to` address specified (with safety call).
         @dev Caller must be approved to manage the tokens being transferred out of the `_from` account (see "Approval" section of the standard).
@@ -427,7 +411,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         s.items[_to][_id] += _value;
         LibERC1155.onERC1155Received(_from, _to, _id, _value, _data);
         bytes32 listingId = keccak256(abi.encodePacked(address(this), _id, _from));
-        MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+        IMaretplaceFacet(address(this)).updateERC1155Listing(listingId);
     }
 
     /**
@@ -465,7 +449,7 @@ contract ItemsFacet is LibAppStorageModifiers {
             s.items[_from][id] = bal - value;
             s.items[_to][id] += value;
             bytes32 listingId = keccak256(abi.encodePacked(address(this), id, _from));
-            MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+            IMaretplaceFacet(address(this)).updateERC1155Listing(listingId);
         }
         LibERC1155.onERC1155BatchReceived(_from, _to, _ids, _values, _data);
     }
@@ -493,7 +477,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         emit TransferSingle(sender, _from, _toContract, _id, _value);
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
         bytes32 listingId = keccak256(abi.encodePacked(address(this), _id, _from));
-        MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+        IMaretplaceFacet(address(this)).updateERC1155Listing(listingId);
     }
 
     /// @notice Transfer token from a token to an address
@@ -680,7 +664,7 @@ contract ItemsFacet is LibAppStorageModifiers {
                 emit TransferToParent(address(this), _tokenId, wearableId, 1);
                 emit TransferSingle(LibMeta.msgSender(), LibMeta.msgSender(), address(this), wearableId, 1);
                 bytes32 listingId = keccak256(abi.encodePacked(address(this), wearableId, LibMeta.msgSender()));
-                MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+                IMaretplaceFacet(address(this)).updateERC1155Listing(listingId);
             }
         }
         emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _equippedWearables);
@@ -727,7 +711,7 @@ contract ItemsFacet is LibAppStorageModifiers {
             itemType.totalQuantity -= uint32(quantity);
             LibAppStorage.interact(_tokenId);
             bytes32 listingId = keccak256(abi.encodePacked(address(this), itemId, LibMeta.msgSender()));
-            MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+            IMaretplaceFacet(address(this)).updateERC1155Listing(listingId);
         }
         emit UseConsumables(_tokenId, _itemIds, _quantities);
         emit TransferBatch(LibMeta.msgSender(), LibMeta.msgSender(), address(0), _itemIds, _quantities);

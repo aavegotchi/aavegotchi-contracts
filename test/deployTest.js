@@ -73,6 +73,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.set = true
     global.account = deployVars.account
     global.aavegotchiDiamond = deployVars.aavegotchiDiamond
+    global.bridgeFacet = deployVars.bridgeFacet
     global.aavegotchiFacet = deployVars.aavegotchiFacet
     global.itemsFacet = deployVars.itemsFacet
     global.collateralFacet = deployVars.collateralFacet

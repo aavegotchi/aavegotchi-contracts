@@ -142,6 +142,7 @@ struct AppStorage {
     //Addresses
     address[] collateralTypes;
     address ghstContract;
+    address childChainManager;
     address gameManager;
     address dao;
     address daoTreasury;
