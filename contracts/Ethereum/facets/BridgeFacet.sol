@@ -70,6 +70,7 @@ contract BridgeFacet {
             for (uint256 i; i < tokenIds.length; i++) {
                 uint256 tokenId = tokenIds[i];
                 require(s.aavegotchis[tokenId].owner == depositor, "BridgeFacet: depositor does not own the token");
+                s.aavegotchis[tokenId].owner = address(0);
                 s.aavegotchiBalance[depositor]--;
                 if (s.approved[tokenId] != address(0)) {
                     delete s.approved[tokenId];

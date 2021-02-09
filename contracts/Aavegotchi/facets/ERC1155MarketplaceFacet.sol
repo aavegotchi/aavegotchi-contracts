@@ -216,6 +216,7 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
         require(seller != buyer, "Marketplace: buyer can't be seller");
         require(_quantity > 0, "Marketplace: _quantity can't be zero");
         require(_quantity <= listing.quantity, "Marketplace: quantity is greater than listing");
+        listing.quantity -= _quantity;
         uint256 cost = LibMath.mul(_quantity, listing.priceInWei);
         require(IERC20(s.ghstContract).balanceOf(buyer) >= cost, "Marketplace: not enough GHST");
         uint256 daoShare = cost / 100;
