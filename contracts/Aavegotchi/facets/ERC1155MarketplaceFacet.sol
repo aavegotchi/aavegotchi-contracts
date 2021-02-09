@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.1;
 
 import "../libraries/LibAppStorage.sol";
 import "../interfaces/IERC1155.sol";
 import "../libraries/LibMeta.sol";
-import "../libraries/LibMath.sol";
 
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
     event ERC1155ListingSet(
@@ -145,7 +143,7 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
             "Marketplace: Not approved for transfer"
         );
 
-        uint256 cost = LibMath.mul(_quantity, _priceInWei);
+        uint256 cost = _quantity * _priceInWei;
         require(cost >= 1e18, "Marketplace: cost should be 1 GHST or larger");
 
         bytes32 listingId = toERC1155ListingId(_erc1155TokenAddress, _erc1155TypeId, LibMeta.msgSender());
@@ -217,7 +215,7 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
         require(_quantity > 0, "Marketplace: _quantity can't be zero");
         require(_quantity <= listing.quantity, "Marketplace: quantity is greater than listing");
         listing.quantity -= _quantity;
-        uint256 cost = LibMath.mul(_quantity, listing.priceInWei);
+        uint256 cost = _quantity * listing.priceInWei;
         require(IERC20(s.ghstContract).balanceOf(buyer) >= cost, "Marketplace: not enough GHST");
         uint256 daoShare = cost / 100;
         uint256 pixelCraftShare = (cost * 2) / 100;

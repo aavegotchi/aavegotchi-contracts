@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.1;
 
 import "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";

@@ -1,5 +1,5 @@
-//SPDX-License-Identifier: MIT
-pragma solidity 0.7.6;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.1;
 
 /// @title ERC-721 Non-Fungible Token Standard
 /// @dev See https://eips.ethereum.org/EIPS/eip-721

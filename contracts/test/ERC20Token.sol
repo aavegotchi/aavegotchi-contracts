@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.1;
 
 import "../shared/libraries/LibDiamond.sol";
 
@@ -18,7 +17,7 @@ struct AppStorage {
 contract ERC20Token {
     AppStorage internal s;
 
-    uint256 constant MAX_UINT = uint256(-1);
+    uint256 constant MAX_UINT = type(uint256).max;
 
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
     event Transfer(address indexed _from, address indexed _to, uint256 _value);

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.1;
 
 import "../libraries/LibAppStorage.sol";
 import "../../shared/interfaces/IERC20.sol";
@@ -113,7 +112,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
                     value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
                 }
             }
-            int256 mod = int8(_modifiers >> (i * 8));
+            int256 mod = int8(int256(_modifiers >> (i * 8)));
             // set slot
             numericTraits_ |= uint256((int256(value) + mod) & 0xffff) << (16 * i);
         }
@@ -168,7 +167,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             portalAavegotchiTraits_[i].numericTraitsUint = single.numericTraits;
             portalAavegotchiTraits_[i].numericTraits = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
             for (uint256 j; j < LibAppStorage.NUMERIC_TRAITS_NUM; j++) {
-                portalAavegotchiTraits_[i].numericTraits[j] = int16(single.numericTraits >> (j * 16));
+                portalAavegotchiTraits_[i].numericTraits[j] = int16(int256(single.numericTraits >> (j * 16)));
             }
         }
     }
@@ -219,8 +218,8 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         uint256 temporaryTraitBoosts = s.aavegotchis[_tokenId].temporaryTraitBoosts;
         uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
         for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
-            int256 number = int16(numericTraits >> (i * 16));
-            int256 boost = int8(temporaryTraitBoosts >> (i * 8));
+            int256 number = int16(int256(numericTraits >> (i * 16)));
+            int256 boost = int8(int256(temporaryTraitBoosts >> (i * 8)));
 
             if (boost > 0) {
                 if (boost > boostDecay) {
@@ -260,7 +259,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
             aavegotchiInfo_.numericTraits = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
             for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
-                aavegotchiInfo_.numericTraits[i] = int16(numericTraits >> (i * 16));
+                aavegotchiInfo_.numericTraits[i] = int16(int256(numericTraits >> (i * 16)));
             }
             aavegotchiInfo_.baseRarityScore = baseRarityScore(numericTraits);
             (aavegotchiInfo_.modifiedNumericTraits, aavegotchiInfo_.modifiedRarityScore) = modifiedTraitsAndRarityScore(_tokenId);
@@ -282,7 +281,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
     function abs(int8 x) private pure returns (uint256) {
         require(x != -128, "AavegotchiFacet: x can't be -128");
-        return uint256(x >= 0 ? x : -x);
+        return uint256(int256(x >= 0 ? x : -x));
     }
 
     function aavegotchiLevel(uint32 _experience) public pure returns (uint256 level_) {
@@ -306,7 +305,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     //Calculates the base rarity score, including collateral modifier
     function baseRarityScore(uint256 _numericTraits) public pure returns (uint256 _rarityScore) {
         for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
-            int256 number = int16(_numericTraits >> (i * 16));
+            int256 number = int16(int256(_numericTraits >> (i * 16)));
             if (number >= 50) {
                 _rarityScore += uint256(number) + 1;
             } else {
@@ -333,8 +332,8 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             uint256 traitModifiers = itemType.traitModifiers;
             uint256 newNumericTraits;
             for (uint256 j; j < LibAppStorage.NUMERIC_TRAITS_NUM; j++) {
-                int256 number = int16(numericTraitsUint >> (j * 16));
-                int256 traitModifier = int8(traitModifiers >> (j * 8));
+                int256 number = int16(int256(numericTraitsUint >> (j * 16)));
+                int256 traitModifier = int8(int256(traitModifiers >> (j * 8)));
                 number += traitModifier;
                 // clear bits first then assign
                 newNumericTraits |= (uint256(number) & 0xffff) << (j * 16);
@@ -346,7 +345,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         uint256 baseRarity = baseRarityScore(numericTraitsUint);
         rarityScore_ = baseRarity + wearableBonus;
         for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
-            int256 number = int16(numericTraitsUint >> (i * 16));
+            int256 number = int16(int256(numericTraitsUint >> (i * 16)));
             numericTraits_[i] = number;
         }
     }
@@ -484,7 +483,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
             uint256 position = index * 16;
             // get trait
-            int256 trait = int16(numericTraits >> position);
+            int256 trait = int16(int256(numericTraits >> position));
             trait += _values[index];
             // clear trait value
             numericTraits &= ~(uint256(0xffff) << position);

@@ -1,6 +1,5 @@
-//SPDX-License-Identifier: Unlicense
-pragma solidity 0.7.6;
-pragma experimental ABIEncoderV2;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.1;
 
 import {AppStorage, SvgLayer} from "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";
@@ -81,7 +80,7 @@ contract SvgFacet is LibAppStorageModifiers {
         details.background = LibSvg.getSvg("aavegotchi", 4);
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
-        details.trait = uint16(_numericTraits >> (4 * 16));
+        details.trait = int16(int256(_numericTraits >> (4 * 16)));
         if (details.trait < 0) {
             details.eyeShape = LibSvg.getSvg("eyeShapes", 0);
         } else if (details.trait > 97) {
@@ -96,7 +95,7 @@ contract SvgFacet is LibAppStorageModifiers {
             }
         }
 
-        details.trait = uint16(_numericTraits >> (5 * 16));
+        details.trait = int16(int256(_numericTraits >> (5 * 16)));
         details.eyeColorTraitRanges = [int256(0), 2, 10, 25, 75, 90, 98, 100];
         details.eyeColors = [
             "FF00FF", // mythical_low

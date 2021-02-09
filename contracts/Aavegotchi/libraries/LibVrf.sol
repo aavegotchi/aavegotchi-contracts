@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.6;
+pragma solidity 0.8.1;
 
 library LibVrf {
     bytes32 internal constant DIAMOND_STORAGE_POSITION = keccak256("chainlink.VRF");

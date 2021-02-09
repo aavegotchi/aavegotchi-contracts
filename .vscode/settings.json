@@ -1,4 +1,4 @@
 {
-  "solidity.compileUsingRemoteVersion": "v0.7.6+commit.7338295f",
+  "solidity.compileUsingRemoteVersion": "v0.8.1+commit.df193b15",
   "liveServer.settings.port": 5502
 }

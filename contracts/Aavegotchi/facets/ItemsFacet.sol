@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.1;
 
 import "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";
@@ -195,7 +194,7 @@ contract ItemsFacet is LibAppStorageModifiers {
             uint256 traitModifiers = s.itemTypes[id].traitModifiers;
             itemBalanceWithSlots_[numItems].traitModifiers = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
             for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
-                itemBalanceWithSlots_[numItems].traitModifiers[i] = int8(traitModifiers >> (i * 8));
+                itemBalanceWithSlots_[numItems].traitModifiers[i] = int8(uint8(traitModifiers >> (i * 8)));
             }
             itemBalanceWithSlots_[numItems].minLevel = s.itemTypes[id].minLevel;
             numItems++;
@@ -221,7 +220,7 @@ contract ItemsFacet is LibAppStorageModifiers {
             uint256 traitModifiers = s.itemTypes[id].traitModifiers;
             itemBalanceWithSlots_[numItems].traitModifiers = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
             for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
-                itemBalanceWithSlots_[numItems].traitModifiers[i] = int8(traitModifiers >> (i * 8));
+                itemBalanceWithSlots_[numItems].traitModifiers[i] = int8(uint8(traitModifiers >> (i * 8)));
             }
             itemBalanceWithSlots_[numItems].minLevel = s.itemTypes[id].minLevel;
             numItems++;
@@ -277,7 +276,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         wearableSet_.wearableIds = LibAppStorage.uintToSixteenBitArray(s.wearableSets[_index].wearableIds);
         uint256 traitsBonuses = s.wearableSets[_index].traitsBonuses;
         for (uint256 i; i < 5; i++) {
-            wearableSet_.traitsBonuses[i] = int8(traitsBonuses >> (8 * i));
+            wearableSet_.traitsBonuses[i] = int8(uint8(traitsBonuses >> (8 * i)));
         }
     }
 
@@ -320,7 +319,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint256 traitModifiers = itemType.traitModifiers;
         itemType_.traitModifiers = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
         for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
-            itemType_.traitModifiers[i] = int8(traitModifiers >> (i * 8));
+            itemType_.traitModifiers[i] = int8(uint8(traitModifiers >> (i * 8)));
         }
         itemType_.allowedCollaterals = itemType.allowedCollaterals;
         itemType_.name = itemType.name;
@@ -683,14 +682,17 @@ contract ItemsFacet is LibAppStorageModifiers {
             uint256 quantity = _quantities[i];
             ItemType memory itemType = s.itemTypes[itemId];
             require(itemType.category == LibAppStorage.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
-            uint256 bal = s.items[LibMeta.msgSender()][itemId];
 
-            require(quantity <= bal, "Items: Do not have that many to consume");
-            s.items[LibMeta.msgSender()][itemId] = bal - quantity;
-
+            {
+                // prevent stack too deep error with braces here
+                uint256 bal = s.items[LibMeta.msgSender()][itemId];
+                require(quantity <= bal, "Items: Do not have that many to consume");
+                s.items[LibMeta.msgSender()][itemId] = bal - quantity;
+            }
             //Increase kinship permanently
             if (itemType.kinshipBonus > 0) {
-                uint256 kinship = (uint256(itemType.kinshipBonus) * quantity) + s.aavegotchis[_tokenId].interactionCount;
+                uint256 positiveKinship = uint256(int256(itemType.kinshipBonus));
+                uint256 kinship = (positiveKinship * quantity) + s.aavegotchis[_tokenId].interactionCount;
                 require(kinship <= type(uint16).max, "ItemsFacet: kinship beyond max value");
                 s.aavegotchis[_tokenId].interactionCount = uint16(kinship);
             }

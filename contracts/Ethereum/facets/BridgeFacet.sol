@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.1;
 
 import "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibDiamond.sol";
@@ -104,9 +103,9 @@ contract BridgeFacet {
         bytes memory logData = logRLPList[2].toBytes();
 
         if (bytes32(logTopicRLPList[0].toUint()) == TRANSFER_ERC1155_BATCH_EVENT_SIG) {
-            address withdrawer = address(logTopicRLPList[2].toUint()); // topic2 is from address
+            address withdrawer = address(uint160(logTopicRLPList[2].toUint())); // topic2 is from address
             require(
-                address(logTopicRLPList[3].toUint()) == address(0), // topic3 is to address
+                address(uint160(logTopicRLPList[3].toUint())) == address(0), // topic3 is to address
                 "ERC1155Predicate: INVALID_RECEIVER"
             );
             (uint256[] memory ids, uint256[] memory values) = abi.decode(logData, (uint256[], uint256[]));
@@ -123,7 +122,7 @@ contract BridgeFacet {
             }
             emit TransferBatch(msg.sender, address(0), withdrawer, ids, values);
         } else if (bytes32(logTopicRLPList[0].toUint()) == WITHDRAW_ERC721_BATCH_EVENT_SIG) {
-            address withdrawer = address(logTopicRLPList[1].toUint()); // topic1 is from address
+            address withdrawer = address(uint160(logTopicRLPList[1].toUint())); // topic1 is from address
             uint256[] memory tokenIds = abi.decode(logData, (uint256[])); // data is tokenId list
             for (uint256 i; i < tokenIds.length; i++) {
                 uint256 tokenId = tokenIds[i];

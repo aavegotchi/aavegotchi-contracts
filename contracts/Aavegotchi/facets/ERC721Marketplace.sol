@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.1;
 
 import "../libraries/LibAppStorage.sol";
 import "../../shared/interfaces/IERC721.sol";
 import "../libraries/LibMeta.sol";
-import "../libraries/LibMath.sol";
 
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 contract ERC721MarketplaceFacet is LibAppStorageModifiers {
     event ERC721ListingSet(
@@ -180,7 +178,7 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
         require(seller != buyer, "Marketplace: buyer can't be seller");
         require(IERC20(s.ghstContract).balanceOf(buyer) >= listing.priceInWei, "Marketplace: not enough GHST");
         uint256 daoShare = listing.priceInWei / 100;
-        uint256 pixelCraftShare = LibMath.mul(listing.priceInWei, 2) / 100;
+        uint256 pixelCraftShare = (listing.priceInWei * 2) / 100;
         uint256 transferAmount = listing.priceInWei - (daoShare + pixelCraftShare);
         LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, pixelCraftShare);
         LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, daoShare);

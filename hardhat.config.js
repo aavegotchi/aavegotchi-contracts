@@ -23,8 +23,8 @@ task('accounts', 'Prints the list of accounts', async () => {
 module.exports = {
   networks: {
     hardhat: {
-      blockGasLimit: 1350000000,
-      gas: 1300000000
+      blockGasLimit: 20000000,
+      gas: 'auto'
     },
     matic: {
       url: 'https://rpc-mainnet.matic.network',
@@ -57,16 +57,16 @@ module.exports = {
   },
   contractSizer: {
     alphaSort: false,
-    runOnCompile: false,
-    disambiguatePaths: false
+    runOnCompile: true,
+    disambiguatePaths: true
   },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
-    version: '0.7.6',
+    version: '0.8.1',
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
+        runs: 1
       }
     }
   }

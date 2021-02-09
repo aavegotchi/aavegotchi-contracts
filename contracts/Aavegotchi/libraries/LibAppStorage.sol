@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.6;
+pragma solidity 0.8.1;
 import "../../shared/libraries/LibERC20.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../libraries/LibVrf.sol";
