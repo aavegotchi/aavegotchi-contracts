@@ -8,8 +8,6 @@ import "../../shared/interfaces/IERC20.sol";
 import "../libraries/LibERC1155.sol";
 import "./SvgFacet.sol";
 
-// import "hardhat/console.sol";
-
 contract DAOFacet is LibAppStorageModifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
     event DaoTreasuryTransferred(address indexed previousDaoTreasury, address indexed newDaoTreasury);
@@ -169,5 +167,4 @@ contract DAOFacet is LibAppStorageModifiers {
         GameManagerTransferred(s.gameManager, _gameManager);
         s.gameManager = _gameManager;
     }
-
 }

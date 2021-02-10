@@ -68,6 +68,7 @@ const testWearableId = '1'
 const testSlot = '3'
 
 describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
+  this.timeout(100000)
   before(async function () {
     const deployVars = await deployProject('deployTest')
     global.set = true
@@ -76,7 +77,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.bridgeFacet = deployVars.bridgeFacet
     global.aavegotchiFacet = deployVars.aavegotchiFacet
     global.itemsFacet = deployVars.itemsFacet
-    global.itemsTranferFacet = deployVars.itemsTransferFacet
+    global.itemsTransferFacet = deployVars.itemsTransferFacet
     global.collateralFacet = deployVars.collateralFacet
     global.shopFacet = deployVars.shopFacet
     global.daoFacet = deployVars.daoFacet

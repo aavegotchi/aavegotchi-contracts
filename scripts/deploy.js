@@ -247,6 +247,7 @@ async function main (scriptName) {
 
   console.log('Adding Item Types')
   itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', aavegotchiDiamond.address)
+  itemsTransferFacet = await ethers.getContractAt('ItemsTransferFacet', aavegotchiDiamond.address)
 
   const { itemTypes } = require('./itemTypes.js')
 
@@ -365,6 +366,7 @@ async function main (scriptName) {
   }
 
   console.log('Total gas used: ' + strDisplay(totalGasUsed))
+  console.log('ITEMSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS transferfacet')
   return {
     account: account,
     aavegotchiDiamond: aavegotchiDiamond,

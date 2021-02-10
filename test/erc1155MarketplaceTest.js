@@ -6,12 +6,14 @@ const { deployProject } = require('../scripts/deploy.js')
 
 describe('Deploying Contracts, SVG and Minting Items', async function () {
   before(async function () {
+    this.timeout(100000)
     const deployVars = await deployProject('deployTest')
     global.set = true
     global.account = deployVars.account
     global.aavegotchiDiamond = deployVars.aavegotchiDiamond
     global.aavegotchiFacet = deployVars.aavegotchiFacet
     global.itemsFacet = deployVars.itemsFacet
+    global.itemsTransferFacet = deployVars.itemsTransferFacet
     global.collateralFacet = deployVars.collateralFacet
     global.shopFacet = deployVars.shopFacet
     global.daoFacet = deployVars.daoFacet
@@ -103,4 +105,16 @@ describe('Marketplace functionality', async function () {
 
     console.log('listings:', listings)
   })
+})
+
+describe('Fees', async function () {
+  it('Can update listing fee', async function () {
+
+  })
+
+  it('Listing fee is burned', async function () {
+
+  })
+
+  it('Pixelcraft receives ')
 })

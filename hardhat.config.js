@@ -24,8 +24,7 @@ module.exports = {
   networks: {
     hardhat: {
       blockGasLimit: 20000000,
-      gas: 'auto',
-      timeout: 100000
+      gas: 'auto'
     },
     matic: {
       url: 'https://rpc-mainnet.matic.network',
@@ -59,7 +58,7 @@ module.exports = {
   contractSizer: {
     alphaSort: false,
     runOnCompile: false,
-    disambiguatePaths: true
+    disambiguatePaths: false
   },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
