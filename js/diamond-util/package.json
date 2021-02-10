@@ -1,0 +1,58 @@
+{
+  "_from": "diamond-util@^1.0.14",
+  "_id": "diamond-util@1.1.0",
+  "_inBundle": false,
+  "_integrity": "sha512-mOad3zn2rZVhFbxcTXGP5E2fo59yCejnAs/q8Oz+d9ntnArsDWodQ/xy/sEJY0dgvaCksQBdj7OYMMgbRmhfeA==",
+  "_location": "/diamond-util",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "range",
+    "registry": true,
+    "raw": "diamond-util@^1.0.14",
+    "name": "diamond-util",
+    "escapedName": "diamond-util",
+    "rawSpec": "^1.0.14",
+    "saveSpec": null,
+    "fetchSpec": "^1.0.14"
+  },
+  "_requiredBy": [
+    "#DEV:/",
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/diamond-util/-/diamond-util-1.1.0.tgz",
+  "_shasum": "97469580ddf32be288ddcf7261648e677162a4a8",
+  "_spec": "diamond-util@^1.0.14",
+  "_where": "C:\\Users\\mudge\\projects\\aavegotchi\\aavegotchi-contracts",
+  "author": {
+    "name": "Nick Mudge"
+  },
+  "bugs": {
+    "url": "https://github.com/mudgen/diamonds.js/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Javascript library to deploy and upgrade diamonds.",
+  "devDependencies": {
+    "standard": "^14.3.4"
+  },
+  "homepage": "https://github.com/mudgen/diamonds.js#readme",
+  "keywords": [
+    "ethereum",
+    "solidity",
+    "upgrades",
+    "blockchain",
+    "smartcontracts",
+    "tools"
+  ],
+  "license": "MIT",
+  "main": "src/index.js",
+  "name": "diamond-util",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mudgen/diamonds.js.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.1.0"
+}

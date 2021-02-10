@@ -7,6 +7,8 @@ pragma solidity 0.8.1;
 /******************************************************************************/
 
 import "../interfaces/IDiamondCut.sol";
+import "../facets/DiamondLoupeFacet.sol";
+import "../facets/OwnershipFacet.sol";
 
 library LibDiamond {
     bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
@@ -61,6 +63,33 @@ library LibDiamond {
     }
 
     event DiamondCut(IDiamondCut.FacetCut[] _diamondCut, address _init, bytes _calldata);
+
+    function addDiamondFunctions(
+        address _diamondCutFacet,
+        address _diamondLoupeFacet,
+        address _ownershipFacet
+    ) internal {
+        IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](3);
+        bytes4[] memory functionSelectors = new bytes4[](1);
+        functionSelectors[0] = IDiamondCut.diamondCut.selector;
+        cut[0] = IDiamondCut.FacetCut({facetAddress: _diamondCutFacet, action: IDiamondCut.FacetCutAction.Add, functionSelectors: functionSelectors});
+        functionSelectors = new bytes4[](5);
+        functionSelectors[0] = DiamondLoupeFacet.facets.selector;
+        functionSelectors[1] = DiamondLoupeFacet.facetFunctionSelectors.selector;
+        functionSelectors[2] = DiamondLoupeFacet.facetAddresses.selector;
+        functionSelectors[3] = DiamondLoupeFacet.facetAddress.selector;
+        functionSelectors[4] = DiamondLoupeFacet.supportsInterface.selector;
+        cut[1] = IDiamondCut.FacetCut({
+            facetAddress: _diamondLoupeFacet,
+            action: IDiamondCut.FacetCutAction.Add,
+            functionSelectors: functionSelectors
+        });
+        functionSelectors = new bytes4[](2);
+        functionSelectors[0] = OwnershipFacet.transferOwnership.selector;
+        functionSelectors[1] = OwnershipFacet.owner.selector;
+        cut[2] = IDiamondCut.FacetCut({facetAddress: _ownershipFacet, action: IDiamondCut.FacetCutAction.Add, functionSelectors: functionSelectors});
+        diamondCut(cut, address(0), "");
+    }
 
     // Internal function version of diamondCut
     function diamondCut(

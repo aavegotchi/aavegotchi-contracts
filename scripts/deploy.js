@@ -1,6 +1,6 @@
 /* global ethers hre */
 
-const diamond = require('diamond-util')
+const diamond = require('../js/diamond-util/src/index.js')
 const { aavegotchiSvgs } = require('../svgs/aavegotchi.js')
 const { wearablesSvgs } = require('../svgs/wearables.js')
 const { collateralsSvgs } = require('../svgs/collaterals.js')
@@ -79,7 +79,7 @@ async function main (scriptName) {
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x3F382DbD960E3a9bbCeaE22651E88158d2791550')
 
     dao = 'todo' // await accounts[1].getAddress()
-    daoTreasury - 'todo'
+    daoTreasury = 'todo'
     rarityFarming = 'todo' // await accounts[2].getAddress()
     pixelCraft = 'todo' // await accounts[3].getAddress()
   } else if (hre.network.name === 'kovan') {
@@ -151,13 +151,11 @@ async function main (scriptName) {
     return instances
   }
   let [
-    diamondCutFacet,
-    diamondLoupeFacet,
-    ownershipFacet,
     bridgeFacet,
     aavegotchiFacet,
     svgFacet,
     itemsFacet,
+    itemsTransferFacet,
     collateralFacet,
     daoFacet,
     vrfFacet,
@@ -165,13 +163,11 @@ async function main (scriptName) {
     metaTransactionsFacet,
     erc1155MarketplaceFacet
   ] = await deployFacets(
-    'DiamondCutFacet',
-    'DiamondLoupeFacet',
-    'OwnershipFacet',
     'contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet',
     'contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet',
     'SvgFacet',
     'contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet',
+    'ItemsTransferFacet',
     'CollateralFacet',
     'DAOFacet',
     ['VrfFacet', [vrfCoordinator, linkAddress]],
@@ -183,13 +179,11 @@ async function main (scriptName) {
   if (hre.network.name === 'hardhat') {
     ghstTokenContract = await diamond.deploy({
       diamondName: 'GHSTDiamond',
+      initDiamond: 'contracts/GHST/InitDiamond.sol:InitDiamond',
       facets: [
-        ['DiamondCutFacet', diamondCutFacet],
-        ['DiamondLoupeFacet', diamondLoupeFacet],
-        ['OwnershipFacet', ownershipFacet],
         'GHSTFacet'
       ],
-      args: [account]
+      owner: account
     })
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', ghstTokenContract.address)
     console.log('GHST diamond address:' + ghstTokenContract.address)
@@ -197,15 +191,14 @@ async function main (scriptName) {
 
   // eslint-disable-next-line no-unused-vars
   const aavegotchiDiamond = await diamond.deploy({
-    diamondName: 'contracts/Aavegotchi/AavegotchiDiamond.sol:AavegotchiDiamond',
+    diamondName: 'AavegotchiDiamond',
+    initDiamond: 'contracts/Aavegotchi/InitDiamond.sol:InitDiamond',
     facets: [
-      ['DiamondCutFacet', diamondCutFacet],
-      ['DiamondLoupeFacet', diamondLoupeFacet],
-      ['OwnershipFacet', ownershipFacet],
       ['BridgeFacet', bridgeFacet],
       ['AavegotchiFacet', aavegotchiFacet],
       ['SvgFacet', svgFacet],
       ['ItemsFacet', itemsFacet],
+      ['ItemsTransferFacet', itemsTransferFacet],
       ['CollateralFacet', collateralFacet],
       ['DAOFacet', daoFacet],
       ['VrfFacet', vrfFacet],
@@ -213,7 +206,8 @@ async function main (scriptName) {
       ['MetaTransactionsFacet', metaTransactionsFacet],
       ['ERC1155MarketplaceFacet', erc1155MarketplaceFacet]
     ],
-    args: [account, dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, initialHauntSize, childChainManager]
+    owner: account,
+    args: [dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, initialHauntSize, childChainManager]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
@@ -222,7 +216,7 @@ async function main (scriptName) {
   console.log('Aavegotchi diamond deploy gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-  diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', aavegotchiDiamond.address)
+  const diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', aavegotchiDiamond.address)
   vrfFacet = await ethers.getContractAt('VrfFacet', aavegotchiDiamond.address)
   aavegotchiFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamond.address)
   collateralFacet = await ethers.getContractAt('CollateralFacet', aavegotchiDiamond.address)
@@ -378,6 +372,7 @@ async function main (scriptName) {
     bridgeFacet: bridgeFacet,
     ghstTokenContract: ghstTokenContract,
     itemsFacet: itemsFacet,
+    itemsTransferFacet: itemsTransferFacet,
     aavegotchiFacet: aavegotchiFacet,
     collateralFacet: collateralFacet,
     vrfFacet: vrfFacet,

@@ -76,6 +76,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.bridgeFacet = deployVars.bridgeFacet
     global.aavegotchiFacet = deployVars.aavegotchiFacet
     global.itemsFacet = deployVars.itemsFacet
+    global.itemsTranferFacet = deployVars.itemsTransferFacet
     global.collateralFacet = deployVars.collateralFacet
     global.shopFacet = deployVars.shopFacet
     global.daoFacet = deployVars.daoFacet
@@ -344,7 +345,7 @@ describe('Items & Wearables', async function () {
   })
 
   it('Can transfer wearables to Aavegotchi', async function () {
-    await global.itemsFacet.transferToParent(
+    await global.itemsTransferFacet.transferToParent(
       global.account, // address _from,
       global.aavegotchiFacet.address, // address _toContract,
       testAavegotchiId, // uint256 _toTokenId,
@@ -356,7 +357,7 @@ describe('Items & Wearables', async function () {
   })
 
   it('Can transfer wearables from Aavegotchi back to owner', async function () {
-    await global.itemsFacet.transferFromParent(
+    await global.itemsTransferFacet.transferFromParent(
       global.aavegotchiFacet.address, // address _fromContract,
       testAavegotchiId, // uint256 _fromTokenId,
       global.account, // address _to,
@@ -369,7 +370,7 @@ describe('Items & Wearables', async function () {
 
   it('Can equip wearables', async function () {
     // First transfer wearables to parent Aavegotchi
-    await global.itemsFacet.transferToParent(
+    await global.itemsTransferFacet.transferToParent(
       global.account, global.aavegotchiFacet.address, testAavegotchiId, testWearableId, '10')
     expect(await global.itemsFacet.balanceOfToken(aavegotchiFacet.address, testAavegotchiId, testWearableId)).to.equal(10)
 
@@ -473,7 +474,7 @@ describe('Items & Wearables', async function () {
     const santaHat = '71'
 
     await global.daoFacet.mintItems(account, [santaHat], ['10'])
-    await global.itemsFacet.transferToParent(
+    await global.itemsTransferFacet.transferToParent(
       global.account, // address _from,
       global.aavegotchiFacet.address, // address _toContract,
       testAavegotchiId, // uint256 _toTokenId,

@@ -24,7 +24,8 @@ module.exports = {
   networks: {
     hardhat: {
       blockGasLimit: 20000000,
-      gas: 'auto'
+      gas: 'auto',
+      timeout: 100000
     },
     matic: {
       url: 'https://rpc-mainnet.matic.network',
@@ -57,7 +58,7 @@ module.exports = {
   },
   contractSizer: {
     alphaSort: false,
-    runOnCompile: true,
+    runOnCompile: false,
     disambiguatePaths: true
   },
   // This is a sample solc configuration that specifies which version of solc to use
@@ -66,7 +67,7 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 1
+        runs: 200
       }
     }
   }

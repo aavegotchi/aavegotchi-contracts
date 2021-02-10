@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import "../../shared/libraries/LibDiamond.sol";
-import "../libraries/AppStorage.sol";
+import "../libraries/LibAppStorage.sol";
 
 contract GHSTFacet {
     AppStorage internal s;

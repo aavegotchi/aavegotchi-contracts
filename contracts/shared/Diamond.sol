@@ -2,36 +2,19 @@
 pragma solidity 0.8.1;
 
 /******************************************************************************\
-* Author: Nick Mudge
+* Authors: Nick Mudge (https://twitter.com/mudgen)
 *
-* Implementation of an example of a diamond.
+* Implementation of a diamond.
 /******************************************************************************/
 
-import "../shared/libraries/LibDiamond.sol";
-import "../shared/interfaces/IDiamondLoupe.sol";
-import "../shared/interfaces/IDiamondCut.sol";
-import "../shared/interfaces/IERC173.sol";
-import "../shared/interfaces/IERC165.sol";
-import "./libraries/AppStorage.sol";
+import "./libraries/LibDiamond.sol";
+import "./facets/DiamondCutFacet.sol";
+import "./facets/DiamondLoupeFacet.sol";
 
-contract GHSTDiamond {
-    AppStorage s;
-
-    struct ConstructorArgs {
-        address owner;
-    }
-
-    constructor(IDiamondCut.FacetCut[] memory _diamondCut, ConstructorArgs memory _args) {
-        LibDiamond.diamondCut(_diamondCut, address(0), new bytes(0));
-        LibDiamond.setContractOwner(_args.owner);
-
-        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-
-        // adding ERC165 data
-        ds.supportedInterfaces[type(IERC165).interfaceId] = true;
-        ds.supportedInterfaces[type(IDiamondCut).interfaceId] = true;
-        ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
-        ds.supportedInterfaces[type(IERC173).interfaceId] = true;
+contract Diamond {
+    constructor(address _contractOwner) {
+        LibDiamond.setContractOwner(_contractOwner);
+        LibDiamond.addDiamondFunctions(address(new DiamondCutFacet()), address(new DiamondLoupeFacet()), address(new OwnershipFacet()));
     }
 
     // Find facet for function that is called and execute the
