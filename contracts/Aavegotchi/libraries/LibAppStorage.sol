@@ -293,6 +293,8 @@ library LibAppStorage {
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
         emit AavegotchiInteract(_tokenId, kinship);
     }
+
+
 }
 
 contract LibAppStorageModifiers {

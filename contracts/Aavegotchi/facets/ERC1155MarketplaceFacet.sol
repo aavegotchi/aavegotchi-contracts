@@ -92,7 +92,10 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
     function getERC1155Category(address _erc1155TokenAddress, uint256 _erc1155TypeId) public view returns (uint256 category_) {
         category_ = s.erc1155Categories[_erc1155TokenAddress][_erc1155TypeId];
         if (category_ == 0) {
-            require(_erc1155TokenAddress == address(this) && s.itemTypes[_erc1155TypeId].maxQuantity > 0, "Marketplace: erc1155 item not supported");
+            require(
+                _erc1155TokenAddress == address(this) && s.itemTypes[_erc1155TypeId].maxQuantity > 0,
+                "ERC1155Marketplace: erc1155 item not supported"
+            );
         }
     }
 
@@ -137,14 +140,14 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
         uint256 category = getERC1155Category(_erc1155TokenAddress, _erc1155TypeId);
 
         IERC1155 erc1155Token = IERC1155(_erc1155TokenAddress);
-        require(erc1155Token.balanceOf(LibMeta.msgSender(), _erc1155TypeId) >= _quantity, "Marketplace: Not enough ERC1155 token");
+        require(erc1155Token.balanceOf(LibMeta.msgSender(), _erc1155TypeId) >= _quantity, "ERC1155Marketplace: Not enough ERC1155 token");
         require(
             _erc1155TokenAddress == address(this) || erc1155Token.isApprovedForAll(LibMeta.msgSender(), address(this)),
-            "Marketplace: Not approved for transfer"
+            "ERC1155Marketplace: Not approved for transfer"
         );
 
         uint256 cost = _quantity * _priceInWei;
-        require(cost >= 1e18, "Marketplace: cost should be 1 GHST or larger");
+        require(cost >= 1e18, "ERC1155Marketplace: cost should be 1 GHST or larger");
 
         bytes32 listingId = toERC1155ListingId(_erc1155TokenAddress, _erc1155TypeId, LibMeta.msgSender());
         ERC1155Listing storage listing = s.erc1155Listings[listingId];
@@ -199,30 +202,38 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
         ListingListItem storage listingItem = s.erc1155ListingListItem["listed"][_listingId];
         require(listingItem.listingId != 0, "Marketplace Listing doesn't exist or is already cancelled");
         ERC1155Listing storage listing = s.erc1155Listings[_listingId];
-        require(listing.seller == LibMeta.msgSender(), "Marketplace: Only seller can cancel listing.");
+        require(listing.seller == LibMeta.msgSender(), "ERC1155Marketplace: Only seller can cancel listing.");
         listing.quantity = 0;
         emit ERC1155ListingCancelled(_listingId);
         removeERC1155ListingItem("listed", _listingId);
         removeERC1155ListingItem("purchased", _listingId);
     }
 
-    function executeERC1155Listing(bytes32 _listingId, uint256 _quantity) external {
+    function executeERC1155Listing(
+        bytes32 _listingId,
+        uint256 _quantity,
+        uint256 _priceInWei
+    ) external {
         ERC1155Listing storage listing = s.erc1155Listings[_listingId];
-        require(listing.timeCreated != 0, "Marketplace: listing not found");
+        require(_priceInWei == listing.priceInWei, "ERC1155Marketplace: wrong price or price changed");
+        require(listing.timeCreated != 0, "ERC1155Marketplace: listing not found");
         address buyer = LibMeta.msgSender();
         address seller = listing.seller;
-        require(seller != buyer, "Marketplace: buyer can't be seller");
-        require(_quantity > 0, "Marketplace: _quantity can't be zero");
-        require(_quantity <= listing.quantity, "Marketplace: quantity is greater than listing");
+        require(seller != buyer, "ERC1155Marketplace: buyer can't be seller");
+        require(_quantity > 0, "ERC1155Marketplace: _quantity can't be zero");
+        require(_quantity <= listing.quantity, "ERC1155Marketplace: quantity is greater than listing");
         listing.quantity -= _quantity;
-        uint256 cost = _quantity * listing.priceInWei;
-        require(IERC20(s.ghstContract).balanceOf(buyer) >= cost, "Marketplace: not enough GHST");
-        uint256 daoShare = cost / 100;
-        uint256 pixelCraftShare = (cost * 2) / 100;
-        uint256 transferAmount = cost - (daoShare + pixelCraftShare);
-        LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, pixelCraftShare);
-        LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, daoShare);
-        LibERC20.transferFrom(s.ghstContract, buyer, seller, transferAmount);
+        uint256 cost = _quantity * _priceInWei;
+        require(IERC20(s.ghstContract).balanceOf(buyer) >= cost, "ERC1155Marketplace: not enough GHST");
+        {
+            // handles stack too deep error
+            uint256 daoShare = cost / 100;
+            uint256 pixelCraftShare = (cost * 2) / 100;
+            uint256 transferAmount = cost - (daoShare + pixelCraftShare);
+            LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, pixelCraftShare);
+            LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, daoShare);
+            LibERC20.transferFrom(s.ghstContract, buyer, seller, transferAmount);
+        }
         // Have to call it like this because LibMeta.msgSender() gets in the way
         if (listing.erc1155TokenAddress == address(this)) {
             bytes memory myFunctionCall =
@@ -241,7 +252,7 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
                     // bubble up any reason for revert
                     revert(string(result));
                 } else {
-                    revert("Marketplace: ERC1155 safeTransferFrom failed");
+                    revert("ERC1155Marketplace: ERC1155 safeTransferFrom failed");
                 }
             }
         } else {

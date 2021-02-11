@@ -234,8 +234,8 @@ async function main (scriptName) {
     const { getCollaterals } = require('./testCollateralTypes.js')
     tx = await daoFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstTokenContract.address))
   } else if (hre.network.name === 'mumbai') {
-    const { getCollaterals } = require('./collateralTypes.js')
-    // const { getCollaterals } = require('./testCollateralTypes.js')
+    // const { getCollaterals } = require('./collateralTypes.js')
+    const { getCollaterals } = require('./testCollateralTypes.js')
     tx = await daoFacet.addCollateralTypes(getCollaterals(hre.network.name, ghstTokenContract.address))
   } else {
     const { getCollaterals } = require('./collateralTypes.js')
@@ -366,7 +366,6 @@ async function main (scriptName) {
   }
 
   console.log('Total gas used: ' + strDisplay(totalGasUsed))
-  console.log('ITEMSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS transferfacet')
   return {
     account: account,
     aavegotchiDiamond: aavegotchiDiamond,

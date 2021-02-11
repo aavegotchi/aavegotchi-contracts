@@ -6,7 +6,7 @@ import "../../shared/libraries/LibStrings.sol";
 import "../../shared/interfaces/IERC721.sol";
 import "../libraries/LibERC1155.sol";
 
-interface IMaretplaceFacet {
+interface IERC1155MaretplaceFacet {
     // needed by the marketplace facet to update listings
     function updateERC1155Listing(bytes32 _listingId) external;
 }
@@ -47,7 +47,7 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
         s.items[_to][_id] += _value;
         LibERC1155.onERC1155Received(_from, _to, _id, _value, _data);
         bytes32 listingId = keccak256(abi.encodePacked(address(this), _id, _from));
-        IMaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+        IERC1155MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
     }
 
     /**
@@ -85,7 +85,7 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
             s.items[_from][id] = bal - value;
             s.items[_to][id] += value;
             bytes32 listingId = keccak256(abi.encodePacked(address(this), id, _from));
-            IMaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+            IERC1155MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
         }
         LibERC1155.onERC1155BatchReceived(_from, _to, _ids, _values, _data);
     }
@@ -113,7 +113,7 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
         emit TransferSingle(sender, _from, _toContract, _id, _value);
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
         bytes32 listingId = keccak256(abi.encodePacked(address(this), _id, _from));
-        IMaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+        IERC1155MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
     }
 
     /// @notice Transfer token from a token to an address

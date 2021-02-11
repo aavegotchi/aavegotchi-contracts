@@ -6,6 +6,7 @@ import "../interfaces/ILink.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../libraries/LibAppStorage.sol";
 import "../libraries/LibMeta.sol";
+import "../libraries/LibERC721Marketplace.sol";
 
 //import "hardhat/console.sol";
 
@@ -133,12 +134,15 @@ contract VrfFacet {
     }
 
     function openPortals(uint256[] calldata _tokenIds) external {
+        address owner = LibMeta.msgSender();
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             require(s.aavegotchis[tokenId].status == LibAppStorage.STATUS_CLOSED_PORTAL, "AavegotchiFacet: Portal is not closed");
-            require(LibMeta.msgSender() == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
+            require(owner == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
             s.aavegotchis[tokenId].status = LibAppStorage.STATUS_VRF_PENDING;
             drawRandomNumber(tokenId);
+            bytes32 listingId = keccak256(abi.encodePacked(address(this), tokenId, owner));
+            LibERC721Marketplace.cancelERC721Listing(listingId, owner);
         }
         emit OpenPortals(_tokenIds);
     }

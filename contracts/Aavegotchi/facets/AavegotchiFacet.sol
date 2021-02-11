@@ -12,6 +12,7 @@ import "./VrfFacet.sol";
 import "../CollateralEscrow.sol";
 import "../libraries/LibVrf.sol";
 import "../libraries/LibMeta.sol";
+import "../libraries/LibERC721Marketplace.sol";
 
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
 interface ERC721TokenReceiver {
@@ -33,6 +34,10 @@ interface ERC721TokenReceiver {
         uint256 _tokenId,
         bytes calldata _data
     ) external returns (bytes4);
+}
+
+interface IERC721MaretplaceFacet {
+    function updateERC721Listing(bytes32 _listingId) external;
 }
 
 contract AavegotchiFacet is LibAppStorageModifiers {
@@ -444,7 +449,11 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
         address escrow = address(new CollateralEscrow(option.collateralType));
         aavegotchi.escrow = escrow;
-        LibERC20.transferFrom(option.collateralType, LibMeta.msgSender(), escrow, _stakeAmount);
+        address owner = LibMeta.msgSender();
+        LibERC20.transferFrom(option.collateralType, owner, escrow, _stakeAmount);
+
+        bytes32 listingId = keccak256(abi.encodePacked(address(this), _tokenId, owner));
+        LibERC721Marketplace.cancelERC721Listing(listingId, owner);
     }
 
     function setAavegotchiName(uint256 _tokenId, string memory _name) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
@@ -605,6 +614,8 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             s.aavegotchis[_tokenId].unlockTime = block.timestamp - 1;
         }
         emit Transfer(_from, _to, _tokenId);
+        bytes32 listingId = keccak256(abi.encodePacked(address(this), _tokenId, owner));
+        IERC721MaretplaceFacet(address(this)).updateERC721Listing(listingId);
     }
 
     /// @notice Change or reaffirm the approved address for an NFT
