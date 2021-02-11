@@ -161,7 +161,8 @@ async function main (scriptName) {
     vrfFacet,
     shopFacet,
     metaTransactionsFacet,
-    erc1155MarketplaceFacet
+    erc1155MarketplaceFacet,
+    erc721MarketplaceFacet
   ] = await deployFacets(
     'contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet',
     'contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet',
@@ -173,7 +174,8 @@ async function main (scriptName) {
     ['VrfFacet', [vrfCoordinator, linkAddress]],
     ['ShopFacet', [vouchersContractAddress]],
     'MetaTransactionsFacet',
-    'ERC1155MarketplaceFacet'
+    'ERC1155MarketplaceFacet',
+    'ERC721MarketplaceFacet'
   )
 
   if (hre.network.name === 'hardhat') {
@@ -204,7 +206,8 @@ async function main (scriptName) {
       ['VrfFacet', vrfFacet],
       ['ShopFacet', shopFacet],
       ['MetaTransactionsFacet', metaTransactionsFacet],
-      ['ERC1155MarketplaceFacet', erc1155MarketplaceFacet]
+      ['ERC1155MarketplaceFacet', erc1155MarketplaceFacet],
+      ['ERC721MarketplaceFacet', erc721MarketplaceFacet]
     ],
     owner: account,
     args: [dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, initialHauntSize, childChainManager]
@@ -223,6 +226,7 @@ async function main (scriptName) {
   shopFacet = await ethers.getContractAt('ShopFacet', aavegotchiDiamond.address)
   daoFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamond.address)
   erc1155MarketplaceFacet = await ethers.getContractAt('ERC1155MarketplaceFacet', aavegotchiDiamond.address)
+  erc721MarketplaceFacet = await ethers.getContractAt('ERC721MarketplaceFacet', aavegotchiDiamond.address)
   bridgeFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet', aavegotchiDiamond.address)
 
   // add collateral info
@@ -380,6 +384,7 @@ async function main (scriptName) {
     daoFacet: daoFacet,
     svgFacet: svgFacet,
     erc1155MarketplaceFacet: erc1155MarketplaceFacet,
+    erc721MarketplaceFacet: erc721MarketplaceFacet,
     vouchersContract: vouchersContract,
     shopFacet: shopFacet,
     linkAddress: linkAddress,

@@ -39,8 +39,13 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
     //     uint256 timeLastPurchased;
     // }
 
+    function getERC721Listing(bytes32 _listingId) external view returns (ERC721Listing memory listing_) {
+        listing_ = s.erc721Listings[_listingId];
+        require(listing_.timeCreated != 0, "ERC721Marketplace: ERC721 listing does not exist");
+    }
+
     function getERC721Listings(
-        uint256 _category, // 0 is closed portal, 1 is open portal, 2 is Aavegotchi
+        uint256 _category, // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi
         string memory _sort, // "listed" or "purchased"
         uint256 _length // how many items to get back or the rest available
     ) external view returns (ERC721Listing[] memory listings_) {
