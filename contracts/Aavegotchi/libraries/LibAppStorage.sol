@@ -29,7 +29,8 @@ struct Aavegotchi {
     uint40 lastInteracted; //The last time this Aavegotchi was interacted with
     uint16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
     address escrow; //The escrow address this Aavegotchi manages.
-    uint256 unlockTime;
+    bool locked;
+    uint256 lockBlock;
 }
 
 struct ItemType {
@@ -177,6 +178,8 @@ struct AppStorage {
     // erc1155Token => (erc1155TypeId => category)
     // not really in use now, for the future
     mapping(address => mapping(uint256 => uint256)) erc721Categories;
+    // erc721 token address, erc721 tokenId, user address => listingId
+    mapping(address => mapping(uint256 => mapping(address => bytes32))) erc721TokenToListingId;
 }
 
 library LibAppStorage {
@@ -293,8 +296,6 @@ library LibAppStorage {
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
         emit AavegotchiInteract(_tokenId, kinship);
     }
-
-
 }
 
 contract LibAppStorageModifiers {
@@ -304,7 +305,7 @@ contract LibAppStorageModifiers {
         _;
     }
     modifier onlyUnlocked(uint256 _tokenId) {
-        require(s.aavegotchis[_tokenId].unlockTime < block.timestamp, "LibAppStorage: Only callable on unlocked Aavegotchis");
+        require(s.aavegotchis[_tokenId].locked == false, "LibAppStorage: Only callable on unlocked Aavegotchis");
         _;
     }
     // modifier onlyLocked(uint256 _tokenId) {

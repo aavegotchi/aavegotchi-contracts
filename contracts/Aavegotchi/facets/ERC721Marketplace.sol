@@ -5,6 +5,7 @@ import "../libraries/LibAppStorage.sol";
 import "../../shared/interfaces/IERC721.sol";
 import "../libraries/LibMeta.sol";
 import "../libraries/LibERC721Marketplace.sol";
+import "./AavegotchiFacet.sol";
 
 // import "hardhat/console.sol";
 
@@ -39,9 +40,29 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
     //     uint256 timeLastPurchased;
     // }
 
+    function getAavegotchiListing(bytes32 _listingId)
+        external
+        view
+        returns (ERC721Listing memory listing_, AavegotchiFacet.AavegotchiInfo memory aavegotchiInfo_)
+    {
+        listing_ = s.erc721Listings[_listingId];
+        require(listing_.timeCreated != 0, "ERC721Marketplace: ERC721 listing does not exist");
+        aavegotchiInfo_ = AavegotchiFacet(address(this)).getAavegotchi(listing_.erc721TokenId);
+    }
+
     function getERC721Listing(bytes32 _listingId) external view returns (ERC721Listing memory listing_) {
         listing_ = s.erc721Listings[_listingId];
         require(listing_.timeCreated != 0, "ERC721Marketplace: ERC721 listing does not exist");
+    }
+
+    function getERC721ListingFromToken(
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId,
+        address _owner
+    ) external view returns (ERC721Listing memory listing_) {
+        bytes32 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
+        require(listingId != 0, "ERC721Marketplace: listing doesn't exist");
+        listing_ = s.erc721Listings[listingId];
     }
 
     function getERC721Listings(
@@ -61,20 +82,12 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
         }
     }
 
-    function toERC721ListingId(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        address _user
-    ) internal pure returns (bytes32 listingId_) {
-        listingId_ = keccak256(abi.encodePacked(_erc721TokenAddress, _erc721TokenId, _user));
-    }
-
     function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view returns (uint256 category_) {
         require(_erc721TokenAddress == address(this), "ERC721Marketplace: ERC721 category does not exist");
         category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi
     }
 
-    function setERC721Listing(
+    function addERC721Listing(
         address _erc721TokenAddress,
         uint256 _erc721TokenId,
         uint256 _priceInWei
@@ -86,39 +99,39 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
             _erc721TokenAddress == address(this) || erc721Token.isApprovedForAll(owner, address(this)),
             "ERC721Marketplace: Not approved for transfer"
         );
+        s.aavegotchis[_erc721TokenId].locked = true;
 
         require(_priceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
-        bytes32 listingId = toERC721ListingId(_erc721TokenAddress, _erc721TokenId, owner);
+        bytes32 listingId = LibERC721Marketplace.toERC721ListingId(_erc721TokenAddress, _erc721TokenId, owner);
 
         uint256 category = getERC721Category(_erc721TokenAddress, _erc721TokenId);
         require(category != 1, "ERC721Marketplace: Cannot list a portal that is pending VRF");
 
-        ERC721Listing storage listing = s.erc721Listings[listingId];
-        LibERC721Marketplace.removeERC721ListingItem("listed", listingId);
-
-        if (listing.timeCreated == 0) {
-            s.erc721Listings[listingId] = ERC721Listing({
-                listingId: listingId,
-                seller: owner,
-                erc721TokenAddress: _erc721TokenAddress,
-                erc721TokenId: _erc721TokenId,
-                category: category,
-                priceInWei: _priceInWei,
-                timeCreated: block.timestamp,
-                timeLastPurchased: 0,
-                sold: false,
-                cancelled: false
-            });
-            //s.userListingIds[LibMeta.msgSender()].push(listingId);
-            ListingListItem storage ownerListingItem = s.erc721OwnerListingListItem[owner][listingId];
-            ownerListingItem.childListingId = s.erc721OwnerListingHead[owner];
-            s.erc721OwnerListingHead[owner] = listingId;
-            ownerListingItem.listingId = listingId;
-        } else {
-            listing.priceInWei = _priceInWei;
-            listing.sold = false;
-            listing.cancelled = false;
+        bytes32 oldListingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][owner];
+        if (oldListingId != 0) {
+            ERC721Listing storage listing = s.erc721Listings[oldListingId];
+            if (listing.sold == false && listing.cancelled == false) {
+                LibERC721Marketplace.cancelERC721Listing(oldListingId, owner);
+            }
         }
+        s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][owner] = listingId;
+        s.erc721Listings[listingId] = ERC721Listing({
+            listingId: listingId,
+            seller: owner,
+            erc721TokenAddress: _erc721TokenAddress,
+            erc721TokenId: _erc721TokenId,
+            category: category,
+            priceInWei: _priceInWei,
+            timeCreated: block.timestamp,
+            timeLastPurchased: 0,
+            sold: false,
+            cancelled: false
+        });
+
+        ListingListItem storage ownerListingItem = s.erc721OwnerListingListItem[owner][listingId];
+        ownerListingItem.childListingId = s.erc721OwnerListingHead[owner];
+        s.erc721OwnerListingHead[owner] = listingId;
+        ownerListingItem.listingId = listingId;
 
         // Check if there's a publication fee and
         // transfer the amount to burn address
@@ -135,24 +148,45 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
         emit ERC721ListingSet(listingId, owner, _erc721TokenAddress, _erc721TokenId, category, _priceInWei);
     }
 
-    function cancelERC721Listing(bytes32 _listingId) public {
+    function cancelERC721ListingByToken(address _erc721TokenAddress, uint256 _erc721TokenId) external {
+        address owner = LibMeta.msgSender();
+        bytes32 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][owner];
+
+        LibERC721Marketplace.cancelERC721Listing(listingId, owner);
+    }
+
+    function cancelERC721Listing(bytes32 _listingId) external {
         LibERC721Marketplace.cancelERC721Listing(_listingId, LibMeta.msgSender());
     }
 
-    function executeERC721Listing(bytes32 _listingId, uint256 _priceInWei) external {
+    function executeERC721Listing(bytes32 _listingId) external {
         ERC721Listing storage listing = s.erc721Listings[_listingId];
+        require(listing.sold == false, "ERC721Marketplace: listing already sold");
+        require(listing.cancelled == false, "ERC721Marketplace: listing cancelled");
         require(listing.timeCreated != 0, "ERC721Marketplace: listing not found");
-        require(_priceInWei == listing.priceInWei, "ERC721Marketplace: wrong price or price changed");
+        uint256 priceInWei = listing.priceInWei;
         address buyer = LibMeta.msgSender();
         address seller = listing.seller;
         require(seller != buyer, "ERC721Marketplace: buyer can't be seller");
-        require(IERC20(s.ghstContract).balanceOf(buyer) >= _priceInWei, "ERC721Marketplace: not enough GHST");
-        uint256 daoShare = _priceInWei / 100;
-        uint256 pixelCraftShare = (_priceInWei * 2) / 100;
-        uint256 transferAmount = _priceInWei - (daoShare + pixelCraftShare);
+        require(IERC20(s.ghstContract).balanceOf(buyer) >= priceInWei, "ERC721Marketplace: not enough GHST");
+
+        listing.sold = true;
+        LibERC721Marketplace.removeERC721ListingItem("listed", _listingId);
+        listing.timeLastPurchased = block.timestamp;
+        ListingListItem storage listingItem = s.erc721ListingListItem["purchased"][_listingId];
+        listingItem.childListingId = s.erc721ListingHead[listing.category]["purchased"];
+        s.erc721ListingHead[listing.category]["purchased"] = _listingId;
+        listingItem.listingId = _listingId;
+
+        uint256 daoShare = priceInWei / 100;
+        uint256 pixelCraftShare = (priceInWei * 2) / 100;
+        uint256 transferAmount = priceInWei - (daoShare + pixelCraftShare);
         LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, pixelCraftShare);
         LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, daoShare);
         LibERC20.transferFrom(s.ghstContract, buyer, seller, transferAmount);
+
+        s.aavegotchis[listing.erc721TokenId].locked = false;
+
         // Have to call it like this because LibMeta.msgSender() gets in the way
         if (listing.erc721TokenAddress == address(this)) {
             bytes memory myFunctionCall =
@@ -176,14 +210,6 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
             // GHSTStakingDiamond
             IERC721(listing.erc721TokenAddress).safeTransferFrom(seller, buyer, listing.erc721TokenId);
         }
-        listing.sold = true;
-        LibERC721Marketplace.removeERC721ListingItem("listed", _listingId);
-        LibERC721Marketplace.removeERC721ListingItem("purchased", _listingId);
-        listing.timeLastPurchased = block.timestamp;
-        ListingListItem storage listingItem = s.erc721ListingListItem["purchased"][_listingId];
-        listingItem.childListingId = s.erc721ListingHead[listing.category]["purchased"];
-        s.erc721ListingHead[listing.category]["purchased"] = _listingId;
-        listingItem.listingId = _listingId;
 
         emit ERC721ExecutedListing(
             _listingId,
@@ -197,17 +223,22 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
         );
     }
 
-    function updateERC721Listing(bytes32 _listingId) external {
-        ERC721Listing storage listing = s.erc721Listings[_listingId];
-        if (listing.timeCreated == 0) {
+    function updateERC721Listing(
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId,
+        address _owner
+    ) external {
+        bytes32 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
+        if (listingId == 0) {
             return;
         }
-        if (listing.sold == true) {
+        ERC721Listing storage listing = s.erc721Listings[listingId];
+        if (listing.sold == true || listing.cancelled == true) {
             return;
         }
         address owner = IERC721(listing.erc721TokenAddress).ownerOf(listing.erc721TokenId);
         if (owner != listing.seller) {
-            LibERC721Marketplace.cancelERC721Listing(_listingId, listing.seller);
+            LibERC721Marketplace.cancelERC721Listing(listingId, listing.seller);
         }
     }
 }

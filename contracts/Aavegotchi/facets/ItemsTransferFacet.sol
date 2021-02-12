@@ -136,7 +136,7 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
                 LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || LibMeta.msgSender() == s.approved[_fromTokenId],
                 "Items: Not owner and not approved to transfer"
             );
-            require(s.aavegotchis[_fromTokenId].unlockTime < block.timestamp, "Items: Only callable on unlocked Aavegotchis");
+            require(s.aavegotchis[_fromTokenId].locked == false, "Items: Only callable on unlocked Aavegotchis");
         } else {
             address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
             require(
@@ -176,7 +176,7 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
                 LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || LibMeta.msgSender() == s.approved[_fromTokenId],
                 "Items: Not owner and not approved to transfer"
             );
-            require(s.aavegotchis[_fromTokenId].unlockTime < block.timestamp, "Items: Only callable on unlocked Aavegotchis");
+            require(s.aavegotchis[_fromTokenId].locked == false, "Items: Only callable on unlocked Aavegotchis");
         } else {
             address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
             require(
@@ -227,7 +227,7 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
                 LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || LibMeta.msgSender() == s.approved[_fromTokenId],
                 "Items: Not owner and not approved to transfer"
             );
-            require(s.aavegotchis[_fromTokenId].unlockTime <= block.timestamp, "Items: Only callable on unlocked Aavegotchis");
+            require(s.aavegotchis[_fromTokenId].locked == false, "Items: Only callable on unlocked Aavegotchis");
         } else {
             address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
             require(

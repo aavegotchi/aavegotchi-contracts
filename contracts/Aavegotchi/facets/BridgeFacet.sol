@@ -57,10 +57,6 @@ contract BridgeFacet is LibAppStorageModifiers {
                 delete s.approved[tokenId];
                 emit Approval(owner, address(0), tokenId);
             }
-            // unlock if locked
-            if (s.aavegotchis[tokenId].unlockTime >= block.timestamp) {
-                s.aavegotchis[tokenId].unlockTime = block.timestamp - 1;
-            }
             emit Transfer(owner, address(this), tokenId);
         }
         emit WithdrawnBatch(owner, _tokenIds);

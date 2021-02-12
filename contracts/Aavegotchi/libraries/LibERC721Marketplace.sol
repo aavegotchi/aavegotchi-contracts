@@ -7,6 +7,14 @@ library LibERC721Marketplace {
     event ERC721ListingCancelled(bytes32 indexed listingId, uint256 category, uint256 time);
     event ERC721ListingRemoved(bytes32 indexed listingId, uint256 category, uint256 time);
 
+    function toERC721ListingId(
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId,
+        address _user
+    ) internal view returns (bytes32 listingId_) {
+        listingId_ = keccak256(abi.encodePacked(_erc721TokenAddress, _erc721TokenId, _user, blockhash(block.number - 1)));
+    }
+
     function cancelERC721Listing(bytes32 _listingId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         ListingListItem storage listingItem = s.erc721ListingListItem["listed"][_listingId];
@@ -14,11 +22,12 @@ library LibERC721Marketplace {
             return;
         }
         ERC721Listing storage listing = s.erc721Listings[_listingId];
-        if (listing.cancelled == true) {
+        if (listing.cancelled == true || listing.sold == true) {
             return;
         }
         require(listing.seller == _owner, "Marketplace: owner not seller");
         listing.cancelled = true;
+        s.aavegotchis[listing.erc721TokenId].locked = false;
         emit ERC721ListingCancelled(_listingId, listing.category, block.number);
         removeERC721ListingItem("listed", _listingId);
     }

@@ -37,7 +37,11 @@ interface ERC721TokenReceiver {
 }
 
 interface IERC721MaretplaceFacet {
-    function updateERC721Listing(bytes32 _listingId) external;
+    function updateERC721Listing(
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId,
+        address _owner
+    ) external;
 }
 
 contract AavegotchiFacet is LibAppStorageModifiers {
@@ -71,7 +75,8 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
     event SpendSkillpoints(uint256 indexed _tokenId, int8[4] _values);
 
-    event LockAavegotchi(uint256 indexed _tokenId, uint256 _lockDuration);
+    event LockAavegotchi(uint256 indexed _tokenId, uint256 _time);
+    event UnLockAavegotchi(uint256 indexed _tokenId, uint256 _time);
 
     /***********************************|
    |             Read Functions         |
@@ -214,7 +219,6 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         uint256 baseRarityScore;
         uint256 modifiedRarityScore;
         bool locked;
-        uint256 unlockTime;
     }
 
     function getNumericTraits(uint256 _tokenId) public view returns (uint256 numericTraits_) {
@@ -268,10 +272,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             }
             aavegotchiInfo_.baseRarityScore = baseRarityScore(numericTraits);
             (aavegotchiInfo_.modifiedNumericTraits, aavegotchiInfo_.modifiedRarityScore) = modifiedTraitsAndRarityScore(_tokenId);
-            aavegotchiInfo_.locked = s.aavegotchis[_tokenId].unlockTime >= block.timestamp;
-            if (aavegotchiInfo_.locked) {
-                aavegotchiInfo_.unlockTime = s.aavegotchis[_tokenId].unlockTime;
-            }
+            aavegotchiInfo_.locked = s.aavegotchis[_tokenId].locked;
         }
         return aavegotchiInfo_;
     }
@@ -507,13 +508,28 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         emit SpendSkillpoints(_tokenId, _values);
     }
 
-    /**@notice Prevnts assets and items from being moved from Aavegotchi during lock period, except by gameManager. */
-    function lockAavegotchi(uint256 _tokenId, uint256 _lockDuration) external onlyUnlocked(_tokenId) {
-        require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
-        require(LibMeta.msgSender() == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only owner can lock aavegotchi");
-        s.aavegotchis[_tokenId].unlockTime = block.timestamp + _lockDuration;
-        emit LockAavegotchi(_tokenId, _lockDuration);
-    }
+    // /**@notice Prevnts assets and items from being moved from Aavegotchi during lock period, except by gameManager. */
+    // function lockAavegotchi(uint256 _tokenId) external onlyUnlocked(_tokenId) {
+    //     require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
+    //     require(LibMeta.msgSender() == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only owner can lock aavegotchi");
+    //     //s.aavegotchis[_tokenId].lockBlock = block.number;
+    //     s.aavegotchis[_tokenId].locked = true;
+    //     emit LockAavegotchi(_tokenId, block.timestamp);
+    // }
+
+    // function unLockAavegotchi(uint256 _tokenId) external {
+    //     require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
+    //     address owner = LibMeta.msgSender();
+    //     require(owner == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: Only owner can lock aavegotchi");
+    //     //require(s.aavegotchis[_tokenId].lockBlock != block.number, "AavegotchiFacet: Cannot lock in same transaction as other sensitve action");
+    //     bytes32 listingId = s.erc721TokenToListingId[address(this)][_tokenId][owner];
+    //     if (listingId != 0) {
+    //         ERC721Listing storage listing = s.erc721Listings[listingId];
+    //         require(listing.sold == true || listing.cancelled == true, "AavegotchFacet: can't unlock while listed");
+    //     }
+    //     s.aavegotchis[_tokenId].locked = false;
+    //     emit UnLockAavegotchi(_tokenId, block.timestamp);
+    // }
 
     /// @notice Transfers the ownership of an NFT from one address to another address
     /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
@@ -596,9 +612,10 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     ) internal {
         require(_to != address(0), "ER721: Can't transfer to 0 address");
         address owner = s.aavegotchis[_tokenId].owner;
+        address sender = LibMeta.msgSender();
         require(owner != address(0), "ERC721: Invalid tokenId or can't be transferred");
         require(
-            LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || s.approved[_tokenId] == LibMeta.msgSender(),
+            sender == owner || sender == address(this) || s.operators[owner][sender] || sender == s.approved[_tokenId],
             "AavegotchiFacet: Not owner or approved to transfer"
         );
         require(_from == owner, "ERC721: _from is not owner, transfer failed");
@@ -609,13 +626,8 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             delete s.approved[_tokenId];
             emit Approval(owner, address(0), _tokenId);
         }
-        // unlock if locked
-        if (s.aavegotchis[_tokenId].unlockTime >= block.timestamp) {
-            s.aavegotchis[_tokenId].unlockTime = block.timestamp - 1;
-        }
         emit Transfer(_from, _to, _tokenId);
-        bytes32 listingId = keccak256(abi.encodePacked(address(this), _tokenId, owner));
-        IERC721MaretplaceFacet(address(this)).updateERC721Listing(listingId);
+        IERC721MaretplaceFacet(address(this)).updateERC721Listing(address(this), _tokenId, _from);
     }
 
     /// @notice Change or reaffirm the approved address for an NFT
