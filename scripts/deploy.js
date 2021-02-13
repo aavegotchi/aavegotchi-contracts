@@ -1,5 +1,12 @@
 /* global ethers hre */
 
+// Here are the details for Polygon mainnet (let's see if we can make this name stick):
+// VRF Coordinator: 0x3d2341ADb2D31f1c5530cDC622016af293177AE0
+// LINK: 0xb0897686c545045aFc77CF20eC7A532E3120E0F1
+// KeyHash: 0xf86195cf7690c55907b2b611ebb7343a6f649bff128701cc542f0569e2c549da
+// Fee: 100000000000000 (0.0001 LINK)
+// You can start using them now. Official announcement will be in 1-2 weeks.
+
 const diamond = require('../js/diamond-util/src/index.js')
 const { aavegotchiSvgs } = require('../svgs/aavegotchi.js')
 const { wearablesSvgs } = require('../svgs/wearables.js')
@@ -60,7 +67,7 @@ async function main (scriptName) {
     vouchersContractAddress = vouchersContract.address
     vrfCoordinator = account
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
-    fee = ethers.utils.parseEther('0.1')
+    fee = ethers.utils.parseEther('0.0001')
     initialHauntSize = '100'
 
     // ghstTokenContract = set below
@@ -70,10 +77,10 @@ async function main (scriptName) {
     pixelCraft = await accounts[3].getAddress()
   } else if (hre.network.name === 'matic') {
     childChainManager = '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa'
-    vrfCoordinator = '0xf0d54349aDdcf704F77AE15b96510dEA15cb7952'
-    linkAddress = '0x514910771AF9Ca656af840dff83E8264EcF986CA'
-    keyHash = '0xAA77729D3466CA35AE8D28B3BBAC7CC36A5031EFDC430821C02BC31A238AF445'
-    fee = ethers.utils.parseEther('2')
+    vrfCoordinator = '0x3d2341ADb2D31f1c5530cDC622016af293177AE0'
+    linkAddress = '0xb0897686c545045aFc77CF20eC7A532E3120E0F1'
+    keyHash = '0xf86195cf7690c55907b2b611ebb7343a6f649bff128701cc542f0569e2c549da'
+    fee = ethers.utils.parseEther('0.0001')
     vouchersContractAddress = '0xe54891774EED9277236bac10d82788aee0Aed313'
     initialHauntSize = '10000'
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x3F382DbD960E3a9bbCeaE22651E88158d2791550')
@@ -87,7 +94,7 @@ async function main (scriptName) {
     vrfCoordinator = '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9'
     linkAddress = '0xa36085F69e2889c224210F603D836748e7dC0088'
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
-    fee = ethers.utils.parseEther('0.1')
+    fee = ethers.utils.parseEther('0.0001')
     vouchersContractAddress = '0x9d038aed3BEDbb143B4F3414Af6119231b77ACFC'
     initialHauntSize = '10000'
 
@@ -104,7 +111,7 @@ async function main (scriptName) {
     vrfCoordinator = '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9' // wrong one
     linkAddress = '0x70d1F773A9f81C852087B77F6Ae6d3032B02D2AB'
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4' // wrong one
-    fee = ethers.utils.parseEther('1')
+    fee = ethers.utils.parseEther('0.0001')
 
     const VouchersContract = await ethers.getContractFactory('VouchersContract')
     vouchersContract = await VouchersContract.deploy(account)
