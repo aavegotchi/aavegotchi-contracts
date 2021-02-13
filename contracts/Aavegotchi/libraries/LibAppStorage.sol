@@ -30,7 +30,6 @@ struct Aavegotchi {
     uint16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
     address escrow; //The escrow address this Aavegotchi manages.
     bool locked;
-    uint256 lockBlock;
 }
 
 struct ItemType {
@@ -206,8 +205,6 @@ library LibAppStorage {
 
     uint8 internal constant WEARABLE_SLOTS_TOTAL = 11;
 
-    event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
-
     function diamondStorage() internal pure returns (AppStorage storage ds) {
         assembly {
             ds.slot := 0
@@ -253,48 +250,11 @@ library LibAppStorage {
         }
     }
 
-    function aavegotchiLevel(uint32 _experience) internal pure returns (uint256 level_) {
-        if (_experience > 490050) {
-            return 99;
-        }
-
-        level_ = (sqrt(2 * _experience) / 10);
-        return level_ + 1;
-    }
-
     function uintToSixteenBitArray(uint256 _data) internal pure returns (uint256[16] memory array_) {
         for (uint256 i; i < 16; i++) {
             uint256 item = uint16(_data >> (16 * i));
             array_[i] = item;
         }
-    }
-
-    function interact(uint256 _tokenId) internal {
-        AppStorage storage s = diamondStorage();
-        uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
-        // if interacted less than 12 hours ago
-        if (block.timestamp < lastInteracted + 12 hours) {
-            return;
-        }
-
-        uint256 interactionCount = s.aavegotchis[_tokenId].interactionCount;
-        uint256 interval = block.timestamp - lastInteracted;
-        uint256 daysSinceInteraction = interval / 86400;
-        uint256 kinship;
-        if (interactionCount > daysSinceInteraction) {
-            kinship = interactionCount - daysSinceInteraction;
-        }
-
-        uint256 hateBonus;
-
-        if (kinship < 40) {
-            hateBonus = 2;
-        }
-        kinship += 1 + hateBonus;
-        s.aavegotchis[_tokenId].interactionCount = uint16(kinship);
-
-        s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
-        emit AavegotchiInteract(_tokenId, kinship);
     }
 }
 

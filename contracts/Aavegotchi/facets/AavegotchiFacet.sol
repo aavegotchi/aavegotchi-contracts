@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibAppStorage.sol";
+import "../libraries/LibAavegotchi.sol";
 import "../../shared/interfaces/IERC20.sol";
 import "../../shared/libraries/LibStrings.sol";
 import "../libraries/LibSvg.sol";
@@ -46,7 +46,6 @@ interface IERC721MaretplaceFacet {
 
 contract AavegotchiFacet is LibAppStorageModifiers {
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
-    uint256 internal constant EQUIPPED_WEARABLE_SLOTS = 16;
     uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
     /***********************************|
@@ -90,7 +89,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         available_ = s.aavegotchiNamesUsed[_name];
     }
 
-    function currentHaunt() public view returns (uint16 hauntId_, Haunt memory haunt_) {
+    function currentHaunt() external view returns (uint16 hauntId_, Haunt memory haunt_) {
         hauntId_ = s.currentHauntId;
         haunt_ = s.haunts[hauntId_];
     }
@@ -195,90 +194,16 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         balance_ = s.aavegotchiBalance[_owner];
     }
 
-    struct AavegotchiInfo {
-        uint256 tokenId;
-        string name;
-        address owner;
-        uint256 randomNumber;
-        uint256 status;
-        int256[] numericTraits;
-        int256[] modifiedNumericTraits;
-        uint256[EQUIPPED_WEARABLE_SLOTS] equippedWearables;
-        address collateral;
-        address escrow;
-        uint256 stakedAmount;
-        uint256 minimumStake;
-        //New
-        uint256 kinship; //The kinship value of this Aavegotchi. Default is 50.
-        uint256 lastInteracted;
-        uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
-        uint256 toNextLevel;
-        uint256 usedSkillPoints; //number of skill points used
-        uint256 level; //the current aavegotchi level
-        uint256 hauntId;
-        uint256 baseRarityScore;
-        uint256 modifiedRarityScore;
-        bool locked;
+    function getNumericTraits(uint256 _tokenId) external view returns (uint256 numericTraits_) {
+        numericTraits_ = LibAavegotchi.getNumericTraits(_tokenId);
     }
 
-    function getNumericTraits(uint256 _tokenId) public view returns (uint256 numericTraits_) {
-        //Check if trait boosts from consumables are still valid
-        int256 boostDecay = int256((block.timestamp - s.aavegotchis[_tokenId].lastTemporaryBoost) / 24 hours);
-        uint256 temporaryTraitBoosts = s.aavegotchis[_tokenId].temporaryTraitBoosts;
-        uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
-        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
-            int256 number = int16(int256(numericTraits >> (i * 16)));
-            int256 boost = int8(int256(temporaryTraitBoosts >> (i * 8)));
-
-            if (boost > 0) {
-                if (boost > boostDecay) {
-                    number += boost - boostDecay;
-                }
-            } else {
-                if ((boost * -1) > boostDecay) {
-                    number += boost + boostDecay;
-                }
-            }
-            numericTraits_ |= uint256(number & 0xffff) << (i * 16);
-        }
-    }
-
-    function getAavegotchi(uint256 _tokenId) public view returns (AavegotchiInfo memory aavegotchiInfo_) {
-        aavegotchiInfo_.tokenId = _tokenId;
-        aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
-        aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
-        aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
-        aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
-        if (aavegotchiInfo_.status == LibAppStorage.STATUS_AAVEGOTCHI) {
-            aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
-            uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
-            for (uint16 i; i < EQUIPPED_WEARABLE_SLOTS; i++) {
-                aavegotchiInfo_.equippedWearables[i] = uint16(l_equippedWearables >> (i * 16));
-            }
-            aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
-            aavegotchiInfo_.escrow = s.aavegotchis[_tokenId].escrow;
-            aavegotchiInfo_.stakedAmount = IERC20(aavegotchiInfo_.collateral).balanceOf(aavegotchiInfo_.escrow);
-            aavegotchiInfo_.minimumStake = s.aavegotchis[_tokenId].minimumStake;
-            aavegotchiInfo_.kinship = kinship(_tokenId);
-            aavegotchiInfo_.lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
-            aavegotchiInfo_.experience = s.aavegotchis[_tokenId].experience;
-            aavegotchiInfo_.toNextLevel = xpUntilNextLevel(s.aavegotchis[_tokenId].experience);
-            aavegotchiInfo_.level = LibAppStorage.aavegotchiLevel(s.aavegotchis[_tokenId].experience);
-            aavegotchiInfo_.usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
-            uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
-            aavegotchiInfo_.numericTraits = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
-            for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
-                aavegotchiInfo_.numericTraits[i] = int16(int256(numericTraits >> (i * 16)));
-            }
-            aavegotchiInfo_.baseRarityScore = baseRarityScore(numericTraits);
-            (aavegotchiInfo_.modifiedNumericTraits, aavegotchiInfo_.modifiedRarityScore) = modifiedTraitsAndRarityScore(_tokenId);
-            aavegotchiInfo_.locked = s.aavegotchis[_tokenId].locked;
-        }
-        return aavegotchiInfo_;
+    function getAavegotchi(uint256 _tokenId) external view returns (AavegotchiInfo memory aavegotchiInfo_) {
+        aavegotchiInfo_ = LibAavegotchi.getAavegotchi(_tokenId);
     }
 
     function availableSkillPoints(uint256 _tokenId) public view returns (uint256) {
-        uint256 level = LibAppStorage.aavegotchiLevel(s.aavegotchis[_tokenId].experience);
+        uint256 level = LibAavegotchi.aavegotchiLevel(s.aavegotchis[_tokenId].experience);
         uint256 skillPoints = (level / 3);
         uint256 usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
         require(skillPoints >= usedSkillPoints, "AavegotchiFacet: Used skill points is greater than skill points");
@@ -290,17 +215,16 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         return uint256(int256(x >= 0 ? x : -x));
     }
 
-    function aavegotchiLevel(uint32 _experience) public pure returns (uint256 level_) {
-        level_ = LibAppStorage.aavegotchiLevel(_experience);
+    function aavegotchiLevel(uint32 _experience) external pure returns (uint256 level_) {
+        level_ = LibAavegotchi.aavegotchiLevel(_experience);
     }
 
-    function xpUntilNextLevel(uint32 _experience) public pure returns (uint256 requiredXp_) {
-        uint256 currentLevel = aavegotchiLevel(_experience);
-        requiredXp_ = (((currentLevel)**2) * 50) - _experience;
+    function xpUntilNextLevel(uint32 _experience) external pure returns (uint256 requiredXp_) {
+        requiredXp_ = LibAavegotchi.xpUntilNextLevel(_experience);
     }
 
     function rarityMultiplier(uint256 _numericTraits) public pure returns (uint256 multiplier) {
-        uint256 rarityScore = baseRarityScore(_numericTraits);
+        uint256 rarityScore = LibAavegotchi.baseRarityScore(_numericTraits);
         if (rarityScore < 300) return 10;
         else if (rarityScore >= 300 && rarityScore < 450) return 10;
         else if (rarityScore >= 450 && rarityScore <= 525) return 25;
@@ -309,64 +233,17 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     }
 
     //Calculates the base rarity score, including collateral modifier
-    function baseRarityScore(uint256 _numericTraits) public pure returns (uint256 _rarityScore) {
-        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
-            int256 number = int16(int256(_numericTraits >> (i * 16)));
-            if (number >= 50) {
-                _rarityScore += uint256(number) + 1;
-            } else {
-                _rarityScore += uint256(int256(100) - number);
-            }
-        }
+    function baseRarityScore(uint256 _numericTraits) external pure returns (uint256 rarityScore_) {
+        rarityScore_ = LibAavegotchi.baseRarityScore(_numericTraits);
     }
 
     //Only valid for claimed Aavegotchis
-    function modifiedTraitsAndRarityScore(uint256 _tokenId) public view returns (int256[] memory numericTraits_, uint256 rarityScore_) {
-        require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
-        numericTraits_ = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
-        Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
-        uint256 equippedWearables = aavegotchi.equippedWearables;
-        uint256 numericTraitsUint = getNumericTraits(_tokenId);
-        uint256 wearableBonus;
-        for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
-            uint256 wearableId = uint16(equippedWearables >> (16 * slot));
-            if (wearableId == 0) {
-                continue;
-            }
-            ItemType storage itemType = s.itemTypes[wearableId];
-            //Add on trait modifiers
-            uint256 traitModifiers = itemType.traitModifiers;
-            uint256 newNumericTraits;
-            for (uint256 j; j < LibAppStorage.NUMERIC_TRAITS_NUM; j++) {
-                int256 number = int16(int256(numericTraitsUint >> (j * 16)));
-                int256 traitModifier = int8(int256(traitModifiers >> (j * 8)));
-                number += traitModifier;
-                // clear bits first then assign
-                newNumericTraits |= (uint256(number) & 0xffff) << (j * 16);
-            }
-
-            numericTraitsUint = newNumericTraits;
-            wearableBonus += itemType.rarityScoreModifier;
-        }
-        uint256 baseRarity = baseRarityScore(numericTraitsUint);
-        rarityScore_ = baseRarity + wearableBonus;
-        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
-            int256 number = int16(int256(numericTraitsUint >> (i * 16)));
-            numericTraits_[i] = number;
-        }
+    function modifiedTraitsAndRarityScore(uint256 _tokenId) external view returns (int256[] memory numericTraits_, uint256 rarityScore_) {
+        (numericTraits_, rarityScore_) = LibAavegotchi.modifiedTraitsAndRarityScore(_tokenId);
     }
 
-    function kinship(uint256 _tokenId) public view returns (uint256 score_) {
-        Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
-        uint256 lastInteracted = aavegotchi.lastInteracted;
-        uint256 interactionCount = aavegotchi.interactionCount;
-        uint256 interval = block.timestamp - lastInteracted;
-
-        uint256 daysSinceInteraction = interval / 24 hours;
-
-        if (interactionCount > daysSinceInteraction) {
-            score_ = interactionCount - daysSinceInteraction;
-        }
+    function kinship(uint256 _tokenId) external view returns (uint256 score_) {
+        score_ = LibAavegotchi.kinship(_tokenId);
     }
 
     function allAavegotchiIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
@@ -387,7 +264,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         uint256 ownerIndex;
         for (uint256 tokenId; tokenId < l_totalSupply; tokenId++) {
             if (_owner == s.aavegotchis[tokenId].owner) {
-                aavegotchiInfos_[ownerIndex] = getAavegotchi(tokenId);
+                aavegotchiInfos_[ownerIndex] = LibAavegotchi.getAavegotchi(tokenId);
                 ownerIndex++;
             }
         }
@@ -480,7 +357,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
                 LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || s.approved[tokenId] == LibMeta.msgSender(),
                 "AavegotchiFacet: Not owner of token or approved"
             );
-            LibAppStorage.interact(tokenId);
+            LibAavegotchi.interact(tokenId);
         }
     }
 

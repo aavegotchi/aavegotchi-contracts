@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibAppStorage.sol";
+import "../libraries/LibAavegotchi.sol";
 import "../../shared/libraries/LibStrings.sol";
 import "../../shared/interfaces/IERC721.sol";
 import "../libraries/LibERC1155.sol";
@@ -341,7 +341,7 @@ contract ItemsFacet is LibAppStorageModifiers {
     function equipWearables(uint256 _tokenId, uint256 _equippedWearables) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
 
-        uint256 aavegotchiLevel = LibAppStorage.aavegotchiLevel(aavegotchi.experience);
+        uint256 aavegotchiLevel = LibAavegotchi.aavegotchiLevel(aavegotchi.experience);
 
         for (uint256 slot; slot < 16; slot++) {
             uint256 wearableId = uint16(_equippedWearables >> (16 * slot));
@@ -390,7 +390,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         }
         emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _equippedWearables);
         aavegotchi.equippedWearables = _equippedWearables;
-        LibAppStorage.interact(_tokenId);
+        LibAavegotchi.interact(_tokenId);
     }
 
     function useConsumables(
@@ -433,7 +433,7 @@ contract ItemsFacet is LibAppStorageModifiers {
             }
 
             itemType.totalQuantity -= uint32(quantity);
-            LibAppStorage.interact(_tokenId);
+            LibAavegotchi.interact(_tokenId);
             bytes32 listingId = keccak256(abi.encodePacked(address(this), itemId, LibMeta.msgSender()));
             IMaretplaceFacet(address(this)).updateERC1155Listing(listingId);
         }

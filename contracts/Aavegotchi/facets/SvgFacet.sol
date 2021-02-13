@@ -9,7 +9,6 @@ import "./AavegotchiFacet.sol";
 
 // This contract was added as a facet to the diamond
 contract SvgFacet is LibAppStorageModifiers {
-    uint256 internal constant EQUIPPED_WEARABLE_SLOTS = 16;
     uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
     event StoreSvg(LibSvg.SvgTypeAndSizes[] _typesAndSizes);

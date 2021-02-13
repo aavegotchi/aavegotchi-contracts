@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibAppStorage.sol";
+import "../libraries/LibAavegotchi.sol";
 import "../../shared/interfaces/IERC721.sol";
 import "../libraries/LibMeta.sol";
 import "../libraries/LibERC721Marketplace.sol";
@@ -40,14 +40,10 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
     //     uint256 timeLastPurchased;
     // }
 
-    function getAavegotchiListing(bytes32 _listingId)
-        external
-        view
-        returns (ERC721Listing memory listing_, AavegotchiFacet.AavegotchiInfo memory aavegotchiInfo_)
-    {
+    function getAavegotchiListing(bytes32 _listingId) external view returns (ERC721Listing memory listing_, AavegotchiInfo memory aavegotchiInfo_) {
         listing_ = s.erc721Listings[_listingId];
         require(listing_.timeCreated != 0, "ERC721Marketplace: ERC721 listing does not exist");
-        aavegotchiInfo_ = AavegotchiFacet(address(this)).getAavegotchi(listing_.erc721TokenId);
+        aavegotchiInfo_ = LibAavegotchi.getAavegotchi(listing_.erc721TokenId);
     }
 
     function getERC721Listing(bytes32 _listingId) external view returns (ERC721Listing memory listing_) {
@@ -65,6 +61,45 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
         listing_ = s.erc721Listings[listingId];
     }
 
+    function getOwnerERC721Listings(
+        address _owner,
+        uint256 _length // how many items to get back or the rest available
+    ) external view returns (ERC721Listing[] memory listings_) {
+        bytes32 listingId = s.erc721OwnerListingHead[_owner];
+        listings_ = new ERC721Listing[](_length);
+        uint256 listIndex;
+        for (; listingId != 0 && listIndex < _length; listIndex++) {
+            listings_[listIndex] = s.erc721Listings[listingId];
+            listingId = s.erc721OwnerListingListItem[_owner][listingId].childListingId;
+        }
+        assembly {
+            mstore(listings_, listIndex)
+        }
+    }
+
+    struct AavegotchiListing {
+        ERC721Listing listing;
+        AavegotchiInfo aavegotchiInfo;
+    }
+
+    function getOwnerAavegotchiListings(
+        address _owner,
+        uint256 _length // how many items to get back or the rest available
+    ) external view returns (AavegotchiListing[] memory listings_) {
+        bytes32 listingId = s.erc721OwnerListingHead[_owner];
+        listings_ = new AavegotchiListing[](_length);
+        uint256 listIndex;
+        for (; listingId != 0 && listIndex < _length; listIndex++) {
+            ERC721Listing memory listing = s.erc721Listings[listingId];
+            listings_[listIndex].listing = listing;
+            listings_[listIndex].aavegotchiInfo = LibAavegotchi.getAavegotchi(listing.erc721TokenId);
+            listingId = s.erc721OwnerListingListItem[_owner][listingId].childListingId;
+        }
+        assembly {
+            mstore(listings_, listIndex)
+        }
+    }
+
     function getERC721Listings(
         uint256 _category, // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi
         string memory _sort, // "listed" or "purchased"
@@ -75,6 +110,25 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
         uint256 listIndex;
         for (; listingId != 0 && listIndex < _length; listIndex++) {
             listings_[listIndex] = s.erc721Listings[listingId];
+            listingId = s.erc721ListingListItem[_sort][listingId].childListingId;
+        }
+        assembly {
+            mstore(listings_, listIndex)
+        }
+    }
+
+    function getAavegotchiListings(
+        uint256 _category, // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi
+        string memory _sort, // "listed" or "purchased"
+        uint256 _length // how many items to get back or the rest available
+    ) external view returns (AavegotchiListing[] memory listings_) {
+        bytes32 listingId = s.erc721ListingHead[_category][_sort];
+        listings_ = new AavegotchiListing[](_length);
+        uint256 listIndex;
+        for (; listingId != 0 && listIndex < _length; listIndex++) {
+            ERC721Listing memory listing = s.erc721Listings[listingId];
+            listings_[listIndex].listing = listing;
+            listings_[listIndex].aavegotchiInfo = LibAavegotchi.getAavegotchi(listing.erc721TokenId);
             listingId = s.erc721ListingListItem[_sort][listingId].childListingId;
         }
         assembly {
