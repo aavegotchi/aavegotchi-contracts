@@ -35,7 +35,7 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
     expect(balance).to.equal(oneMillion)
   })
   it('Should purchase portals using GHST', async function () {
-    let balance = await global.ghstTokenContract.balanceOf(account)
+    let balance = await global.ghstTokenContract.balanceOf(global.account)
     await global.ghstTokenContract.approve(global.aavegotchiDiamond.address, balance)
 
     const tx = await global.shopFacet.buyPortals(global.account, ethers.utils.parseEther('5000'))
@@ -45,7 +45,7 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
     global.erc721MarketplaceFacet.addERC721Listing(global.erc721MarketplaceFacet.address, 6, ethers.utils.parseEther('1'))
     global.erc721MarketplaceFacet.addERC721Listing(global.erc721MarketplaceFacet.address, 7, ethers.utils.parseEther('1'))
 
-    balance = await global.aavegotchiFacet.balanceOf(account)
+    balance = await global.aavegotchiFacet.balanceOf(global.account)
     console.log('Number of portals:', balance)
 
     let listings = await global.erc721MarketplaceFacet.getERC721Listings(0, 'listed', 20)
@@ -54,6 +54,10 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
     await global.erc721MarketplaceFacet.cancelERC721Listing(listings[1].listingId)
 
     listings = await global.erc721MarketplaceFacet.getERC721Listings(0, 'listed', 20)
+    console.log(listings)
+    console.log('get owner listings')
+    console.log()
+    listings = await global.erc721MarketplaceFacet.getOwnerERC721Listings(global.account, 0, 'listed', 20)
     console.log(listings)
   })
 })

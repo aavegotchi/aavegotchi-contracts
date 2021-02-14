@@ -63,14 +63,16 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
 
     function getOwnerERC721Listings(
         address _owner,
+        uint256 _category,
+        string memory _sort,
         uint256 _length // how many items to get back or the rest available
     ) external view returns (ERC721Listing[] memory listings_) {
-        bytes32 listingId = s.erc721OwnerListingHead[_owner];
+        bytes32 listingId = s.erc721OwnerListingHead[_owner][_category][_sort];
         listings_ = new ERC721Listing[](_length);
         uint256 listIndex;
         for (; listingId != 0 && listIndex < _length; listIndex++) {
             listings_[listIndex] = s.erc721Listings[listingId];
-            listingId = s.erc721OwnerListingListItem[_owner][listingId].childListingId;
+            listingId = s.erc721OwnerListingListItem[listingId].childListingId;
         }
         assembly {
             mstore(listings_, listIndex)
@@ -84,16 +86,18 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
 
     function getOwnerAavegotchiListings(
         address _owner,
+        uint256 _category,
+        string memory _sort,
         uint256 _length // how many items to get back or the rest available
     ) external view returns (AavegotchiListing[] memory listings_) {
-        bytes32 listingId = s.erc721OwnerListingHead[_owner];
+        bytes32 listingId = s.erc721OwnerListingHead[_owner][_category][_sort];
         listings_ = new AavegotchiListing[](_length);
         uint256 listIndex;
         for (; listingId != 0 && listIndex < _length; listIndex++) {
             ERC721Listing memory listing = s.erc721Listings[listingId];
             listings_[listIndex].listing = listing;
             listings_[listIndex].aavegotchiInfo = LibAavegotchi.getAavegotchi(listing.erc721TokenId);
-            listingId = s.erc721OwnerListingListItem[_owner][listingId].childListingId;
+            listingId = s.erc721OwnerListingListItem[listingId].childListingId;
         }
         assembly {
             mstore(listings_, listIndex)
@@ -110,7 +114,7 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
         uint256 listIndex;
         for (; listingId != 0 && listIndex < _length; listIndex++) {
             listings_[listIndex] = s.erc721Listings[listingId];
-            listingId = s.erc721ListingListItem[_sort][listingId].childListingId;
+            listingId = s.erc721ListingListItem[listingId].childListingId;
         }
         assembly {
             mstore(listings_, listIndex)
@@ -129,7 +133,7 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
             ERC721Listing memory listing = s.erc721Listings[listingId];
             listings_[listIndex].listing = listing;
             listings_[listIndex].aavegotchiInfo = LibAavegotchi.getAavegotchi(listing.erc721TokenId);
-            listingId = s.erc721ListingListItem[_sort][listingId].childListingId;
+            listingId = s.erc721ListingListItem[listingId].childListingId;
         }
         assembly {
             mstore(listings_, listIndex)
@@ -163,10 +167,7 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
 
         bytes32 oldListingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][owner];
         if (oldListingId != 0) {
-            ERC721Listing storage listing = s.erc721Listings[oldListingId];
-            if (listing.sold == false && listing.cancelled == false) {
-                LibERC721Marketplace.cancelERC721Listing(oldListingId, owner);
-            }
+            LibERC721Marketplace.cancelERC721Listing(oldListingId, owner);
         }
         s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][owner] = listingId;
         s.erc721Listings[listingId] = ERC721Listing({
@@ -182,27 +183,14 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
             cancelled: false
         });
 
-        ListingListItem storage ownerListingItem = s.erc721OwnerListingListItem[owner][listingId];
-        ownerListingItem.childListingId = s.erc721OwnerListingHead[owner];
-        s.erc721OwnerListingHead[owner] = listingId;
-        ownerListingItem.listingId = listingId;
-
+        LibERC721Marketplace.addERC721ListingItem(owner, category, "listed", listingId);
+        emit ERC721ListingSet(listingId, owner, _erc721TokenAddress, _erc721TokenId, category, _priceInWei);
         // Check if there's a publication fee and
         // transfer the amount to burn address
         if (s.listingFeeInWei > 0) {
             // burn address: address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)
             LibERC20.transferFrom(s.ghstContract, owner, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), s.listingFeeInWei);
         }
-
-        bytes32 headListingId = s.erc721ListingHead[category]["listed"];
-        ListingListItem storage headListingItem = s.erc721ListingListItem["listed"][headListingId];
-        headListingItem.parentListingId = listingId;
-        ListingListItem storage listingItem = s.erc721ListingListItem["listed"][listingId];
-        listingItem.childListingId = headListingId;
-        s.erc721ListingHead[category]["listed"] = listingId;
-        listingItem.listingId = listingId;
-
-        emit ERC721ListingSet(listingId, owner, _erc721TokenAddress, _erc721TokenId, category, _priceInWei);
     }
 
     function cancelERC721ListingByToken(address _erc721TokenAddress, uint256 _erc721TokenId) external {
@@ -228,12 +216,9 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
         require(IERC20(s.ghstContract).balanceOf(buyer) >= priceInWei, "ERC721Marketplace: not enough GHST");
 
         listing.sold = true;
-        LibERC721Marketplace.removeERC721ListingItem("listed", _listingId);
+        LibERC721Marketplace.removeERC721ListingItem(_listingId, seller);
+        LibERC721Marketplace.addERC721ListingItem(seller, listing.category, "purchased", _listingId);
         listing.timeLastPurchased = block.timestamp;
-        ListingListItem storage listingItem = s.erc721ListingListItem["purchased"][_listingId];
-        listingItem.childListingId = s.erc721ListingHead[listing.category]["purchased"];
-        s.erc721ListingHead[listing.category]["purchased"] = _listingId;
-        listingItem.listingId = _listingId;
 
         uint256 daoShare = priceInWei / 100;
         uint256 pixelCraftShare = (priceInWei * 2) / 100;

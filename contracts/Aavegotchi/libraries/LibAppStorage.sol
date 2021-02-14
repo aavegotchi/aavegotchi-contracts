@@ -166,14 +166,14 @@ struct AppStorage {
     mapping(bytes32 => ERC721Listing) erc721Listings;
     // userAddress => order[]
     mapping(address => bytes32[]) userERC1155ListingIds;
-    // "listed" or purchased => (listingId => ListingListItem)
-    mapping(string => mapping(bytes32 => ListingListItem)) erc721ListingListItem;
+    // listingId => ListingListItem
+    mapping(bytes32 => ListingListItem) erc721ListingListItem;
     //mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
     mapping(uint256 => mapping(string => bytes32)) erc721ListingHead;
-    // user address => (listingId => ListingListItem)
-    mapping(address => mapping(bytes32 => ListingListItem)) erc721OwnerListingListItem;
+    // user address => category => sort => listingId => ListingListItem
+    mapping(bytes32 => ListingListItem) erc721OwnerListingListItem;
     //mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
-    mapping(address => bytes32) erc721OwnerListingHead;
+    mapping(address => mapping(uint256 => mapping(string => bytes32))) erc721OwnerListingHead;
     // erc1155Token => (erc1155TypeId => category)
     // not really in use now, for the future
     mapping(address => mapping(uint256 => uint256)) erc721Categories;
