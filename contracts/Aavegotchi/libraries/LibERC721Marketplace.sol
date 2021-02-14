@@ -2,6 +2,7 @@
 pragma solidity 0.8.1;
 
 import "./LibAppStorage.sol";
+import "hardhat/console.sol";
 
 library LibERC721Marketplace {
     event ERC721ListingCancelled(bytes32 indexed listingId, uint256 category, uint256 time);

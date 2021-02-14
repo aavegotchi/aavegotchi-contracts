@@ -194,8 +194,11 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
             LibERC20.transferFrom(s.ghstContract, owner, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), s.listingFeeInWei);
         }
 
+        bytes32 headListingId = s.erc721ListingHead[category]["listed"];
+        ListingListItem storage headListingItem = s.erc721ListingListItem["listed"][headListingId];
+        headListingItem.parentListingId = listingId;
         ListingListItem storage listingItem = s.erc721ListingListItem["listed"][listingId];
-        listingItem.childListingId = s.erc721ListingHead[category]["listed"];
+        listingItem.childListingId = headListingId;
         s.erc721ListingHead[category]["listed"] = listingId;
         listingItem.listingId = listingId;
 
