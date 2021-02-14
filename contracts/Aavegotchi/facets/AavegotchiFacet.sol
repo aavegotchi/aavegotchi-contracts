@@ -36,14 +36,6 @@ interface ERC721TokenReceiver {
     ) external returns (bytes4);
 }
 
-interface IERC721MaretplaceFacet {
-    function updateERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        address _owner
-    ) external;
-}
-
 contract AavegotchiFacet is LibAppStorageModifiers {
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
     uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
@@ -329,9 +321,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         aavegotchi.escrow = escrow;
         address owner = LibMeta.msgSender();
         LibERC20.transferFrom(option.collateralType, owner, escrow, _stakeAmount);
-
-        bytes32 listingId = keccak256(abi.encodePacked(address(this), _tokenId, owner));
-        LibERC721Marketplace.cancelERC721Listing(listingId, owner);
+        LibERC721Marketplace.cancelERC721Listing(address(this), _tokenId, owner);
     }
 
     function setAavegotchiName(uint256 _tokenId, string memory _name) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
@@ -504,7 +494,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             emit Approval(owner, address(0), _tokenId);
         }
         emit Transfer(_from, _to, _tokenId);
-        IERC721MaretplaceFacet(address(this)).updateERC721Listing(address(this), _tokenId, _from);
+        LibERC721Marketplace.updateERC721Listing(address(this), _tokenId, _from);
     }
 
     /// @notice Change or reaffirm the approved address for an NFT

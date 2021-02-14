@@ -2,21 +2,15 @@
 pragma solidity 0.8.1;
 
 import "./LibAppStorage.sol";
-import "hardhat/console.sol";
+import "../../shared/interfaces/IERC721.sol";
+
+// import "hardhat/console.sol";
 
 library LibERC721Marketplace {
-    event ERC721ListingCancelled(bytes32 indexed listingId, uint256 category, uint256 time);
-    event ERC721ListingRemoved(bytes32 indexed listingId, uint256 category, uint256 time);
+    event ERC721ListingCancelled(uint256 indexed listingId, uint256 category, uint256 time);
+    event ERC721ListingRemoved(uint256 indexed listingId, uint256 category, uint256 time);
 
-    function toERC721ListingId(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        address _user
-    ) internal view returns (bytes32 listingId_) {
-        listingId_ = keccak256(abi.encodePacked(_erc721TokenAddress, _erc721TokenId, _user, blockhash(block.number - 1)));
-    }
-
-    function cancelERC721Listing(bytes32 _listingId, address _owner) internal {
+    function cancelERC721Listing(uint256 _listingId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         ListingListItem storage listingItem = s.erc721ListingListItem[_listingId];
         if (listingItem.listingId == 0) {
@@ -33,14 +27,27 @@ library LibERC721Marketplace {
         removeERC721ListingItem(_listingId, _owner);
     }
 
+    function cancelERC721Listing(
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId,
+        address _owner
+    ) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        uint256 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
+        if (listingId == 0) {
+            return;
+        }
+        cancelERC721Listing(listingId, _owner);
+    }
+
     function addERC721ListingItem(
         address _owner,
         uint256 _category,
         string memory _sort,
-        bytes32 _listingId
+        uint256 _listingId
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        bytes32 headListingId = s.erc721OwnerListingHead[_owner][_category][_sort];
+        uint256 headListingId = s.erc721OwnerListingHead[_owner][_category][_sort];
         if (headListingId != 0) {
             ListingListItem storage headListingItem = s.erc721OwnerListingListItem[headListingId];
             headListingItem.parentListingId = _listingId;
@@ -61,18 +68,18 @@ library LibERC721Marketplace {
         listingItem.listingId = _listingId;
     }
 
-    function removeERC721ListingItem(bytes32 _listingId, address _owner) internal {
+    function removeERC721ListingItem(uint256 _listingId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         ListingListItem storage listingItem = s.erc721ListingListItem[_listingId];
         if (listingItem.listingId == 0) {
             return;
         }
-        bytes32 parentListingId = listingItem.parentListingId;
+        uint256 parentListingId = listingItem.parentListingId;
         if (parentListingId != 0) {
             ListingListItem storage parentListingItem = s.erc721ListingListItem[parentListingId];
             parentListingItem.childListingId = listingItem.childListingId;
         }
-        bytes32 childListingId = listingItem.childListingId;
+        uint256 childListingId = listingItem.childListingId;
         if (childListingId != 0) {
             ListingListItem storage childListingItem = s.erc721ListingListItem[childListingId];
             childListingItem.parentListingId = listingItem.parentListingId;
@@ -106,5 +113,25 @@ library LibERC721Marketplace {
         listingItem.childListingId = 0;
 
         emit ERC721ListingRemoved(_listingId, listing.category, block.timestamp);
+    }
+
+    function updateERC721Listing(
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId,
+        address _owner
+    ) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        uint256 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
+        if (listingId == 0) {
+            return;
+        }
+        ERC721Listing storage listing = s.erc721Listings[listingId];
+        if (listing.sold == true || listing.cancelled == true) {
+            return;
+        }
+        address owner = IERC721(listing.erc721TokenAddress).ownerOf(listing.erc721TokenId);
+        if (owner != listing.seller) {
+            LibERC721Marketplace.cancelERC721Listing(listingId, listing.seller);
+        }
     }
 }

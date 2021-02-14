@@ -141,8 +141,7 @@ contract VrfFacet {
             require(owner == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
             s.aavegotchis[tokenId].status = LibAppStorage.STATUS_VRF_PENDING;
             drawRandomNumber(tokenId);
-            bytes32 listingId = s.erc721TokenToListingId[address(this)][tokenId][owner];
-            LibERC721Marketplace.cancelERC721Listing(listingId, owner);
+            LibERC721Marketplace.cancelERC721Listing(address(this), tokenId, owner);
         }
         emit OpenPortals(_tokenIds);
     }

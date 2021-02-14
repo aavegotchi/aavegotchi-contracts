@@ -91,7 +91,7 @@ struct AavegotchiCollateralTypeInfo {
 }
 
 struct ERC1155Listing {
-    bytes32 listingId;
+    uint256 listingId;
     address seller;
     address erc1155TokenAddress;
     uint256 erc1155TypeId;
@@ -100,25 +100,28 @@ struct ERC1155Listing {
     uint256 priceInWei;
     uint256 timeCreated;
     uint256 timeLastPurchased;
+    uint256 sourceListingId;
+    bool sold;
+    bool cancelled;
 }
 
 struct ERC721Listing {
-    bytes32 listingId;
+    uint256 listingId;
     address seller;
     address erc721TokenAddress;
     uint256 erc721TokenId;
     uint256 category; // 0 is closed portal, 1 is vrf pending, 2 is open portal, 3 is Aavegotchi
     uint256 priceInWei;
     uint256 timeCreated;
-    uint256 timeLastPurchased;
+    uint256 timePurchased;
     bool sold;
     bool cancelled;
 }
 
 struct ListingListItem {
-    bytes32 parentListingId;
-    bytes32 listingId;
-    bytes32 childListingId;
+    uint256 parentListingId;
+    uint256 listingId;
+    uint256 childListingId;
 }
 
 struct AppStorage {
@@ -151,34 +154,38 @@ struct AppStorage {
     string itemsBaseUri;
     bytes32 domainSeperator;
     // Marketplace
+    uint256 nextERC1155ListingId;
     // erc1155 category => erc1155Order
     //ERC1155Order[] erc1155MarketOrders;
-    mapping(bytes32 => ERC1155Listing) erc1155Listings;
+    mapping(uint256 => ERC1155Listing) erc1155Listings;
     // category => ("listed" or purchased => first listingId)
     //mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
-    mapping(uint256 => mapping(string => bytes32)) erc1155ListingHead;
+    mapping(uint256 => mapping(string => uint256)) erc1155ListingHead;
     // "listed" or purchased => (listingId => ListingListItem)
-    mapping(string => mapping(bytes32 => ListingListItem)) erc1155ListingListItem;
+    mapping(string => mapping(uint256 => ListingListItem)) erc1155ListingListItem;
+    mapping(address => mapping(uint256 => mapping(string => uint256))) erc1155OwnerListingHead;
+    // "listed" or purchased => (listingId => ListingListItem)
+    mapping(string => mapping(uint256 => ListingListItem)) erc1155OwnerListingListItem;
+    mapping(address => mapping(uint256 => mapping(address => uint256))) erc1155TokenToListingId;
     uint256 listingFeeInWei;
     // erc1155Token => (erc1155TypeId => category)
     mapping(address => mapping(uint256 => uint256)) erc1155Categories;
+    uint256 nextERC721ListingId;
     //ERC1155Order[] erc1155MarketOrders;
-    mapping(bytes32 => ERC721Listing) erc721Listings;
-    // userAddress => order[]
-    mapping(address => bytes32[]) userERC1155ListingIds;
+    mapping(uint256 => ERC721Listing) erc721Listings;
     // listingId => ListingListItem
-    mapping(bytes32 => ListingListItem) erc721ListingListItem;
+    mapping(uint256 => ListingListItem) erc721ListingListItem;
     //mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
-    mapping(uint256 => mapping(string => bytes32)) erc721ListingHead;
+    mapping(uint256 => mapping(string => uint256)) erc721ListingHead;
     // user address => category => sort => listingId => ListingListItem
-    mapping(bytes32 => ListingListItem) erc721OwnerListingListItem;
+    mapping(uint256 => ListingListItem) erc721OwnerListingListItem;
     //mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
-    mapping(address => mapping(uint256 => mapping(string => bytes32))) erc721OwnerListingHead;
+    mapping(address => mapping(uint256 => mapping(string => uint256))) erc721OwnerListingHead;
     // erc1155Token => (erc1155TypeId => category)
     // not really in use now, for the future
     mapping(address => mapping(uint256 => uint256)) erc721Categories;
     // erc721 token address, erc721 tokenId, user address => listingId
-    mapping(address => mapping(uint256 => mapping(address => bytes32))) erc721TokenToListingId;
+    mapping(address => mapping(uint256 => mapping(address => uint256))) erc721TokenToListingId;
 }
 
 library LibAppStorage {

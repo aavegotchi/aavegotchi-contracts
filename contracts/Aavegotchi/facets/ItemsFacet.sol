@@ -5,11 +5,7 @@ import "../libraries/LibAavegotchi.sol";
 import "../../shared/libraries/LibStrings.sol";
 import "../../shared/interfaces/IERC721.sol";
 import "../libraries/LibERC1155.sol";
-
-interface IMaretplaceFacet {
-    // needed by the marketplace facet to update listings
-    function updateERC1155Listing(bytes32 _listingId) external;
-}
+import "../libraries/LibERC1155Marketplace.sol";
 
 contract ItemsFacet is LibAppStorageModifiers {
     //using LibAppStorage for AppStorage;
@@ -340,6 +336,7 @@ contract ItemsFacet is LibAppStorageModifiers {
 
     function equipWearables(uint256 _tokenId, uint256 _equippedWearables) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
+        address sender = LibMeta.msgSender();
 
         uint256 aavegotchiLevel = LibAavegotchi.aavegotchiLevel(aavegotchi.experience);
 
@@ -376,16 +373,15 @@ contract ItemsFacet is LibAppStorageModifiers {
             //To do (Nick) prevent wearable from being equipped twice in the same transaction
 
             if (balance == 0) {
-                balance = s.items[LibMeta.msgSender()][wearableId];
+                balance = s.items[sender][wearableId];
                 require(balance > 0, "ItemsFacet: Wearable is not in inventories");
 
                 //Transfer to Aavegotchi
-                s.items[LibMeta.msgSender()][wearableId] = balance - 1;
+                s.items[sender][wearableId] = balance - 1;
                 s.nftBalances[address(this)][_tokenId][wearableId] += 1;
                 emit TransferToParent(address(this), _tokenId, wearableId, 1);
-                emit TransferSingle(LibMeta.msgSender(), LibMeta.msgSender(), address(this), wearableId, 1);
-                bytes32 listingId = keccak256(abi.encodePacked(address(this), wearableId, LibMeta.msgSender()));
-                IMaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+                emit TransferSingle(sender, sender, address(this), wearableId, 1);
+                LibERC1155Marketplace.updateERC1155Listing(address(this), wearableId, sender);
             }
         }
         emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _equippedWearables);
@@ -399,6 +395,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint256[] calldata _quantities
     ) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         require(_itemIds.length == _quantities.length, "ItemsFacet: _itemIds length does not match _quantities length");
+        address sender = LibMeta.msgSender();
         for (uint256 i; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
             uint256 quantity = _quantities[i];
@@ -407,14 +404,13 @@ contract ItemsFacet is LibAppStorageModifiers {
 
             {
                 // prevent stack too deep error with braces here
-                uint256 bal = s.items[LibMeta.msgSender()][itemId];
+                uint256 bal = s.items[sender][itemId];
                 require(quantity <= bal, "Items: Do not have that many to consume");
-                s.items[LibMeta.msgSender()][itemId] = bal - quantity;
+                s.items[sender][itemId] = bal - quantity;
             }
             //Increase kinship permanently
             if (itemType.kinshipBonus > 0) {
-                uint256 positiveKinship = uint256(int256(itemType.kinshipBonus));
-                uint256 kinship = (positiveKinship * quantity) + s.aavegotchis[_tokenId].interactionCount;
+                uint256 kinship = (uint256(int256(itemType.kinshipBonus)) * quantity) + s.aavegotchis[_tokenId].interactionCount;
                 require(kinship <= type(uint16).max, "ItemsFacet: kinship beyond max value");
                 s.aavegotchis[_tokenId].interactionCount = uint16(kinship);
             }
@@ -434,10 +430,9 @@ contract ItemsFacet is LibAppStorageModifiers {
 
             itemType.totalQuantity -= uint32(quantity);
             LibAavegotchi.interact(_tokenId);
-            bytes32 listingId = keccak256(abi.encodePacked(address(this), itemId, LibMeta.msgSender()));
-            IMaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+            LibERC1155Marketplace.updateERC1155Listing(address(this), itemId, sender);
         }
         emit UseConsumables(_tokenId, _itemIds, _quantities);
-        emit TransferBatch(LibMeta.msgSender(), LibMeta.msgSender(), address(0), _itemIds, _quantities);
+        emit TransferBatch(sender, sender, address(0), _itemIds, _quantities);
     }
 }

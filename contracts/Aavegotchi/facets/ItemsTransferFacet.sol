@@ -5,11 +5,7 @@ import "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibStrings.sol";
 import "../../shared/interfaces/IERC721.sol";
 import "../libraries/LibERC1155.sol";
-
-interface IERC1155MaretplaceFacet {
-    // needed by the marketplace facet to update listings
-    function updateERC1155Listing(bytes32 _listingId) external;
-}
+import "../libraries/LibERC1155Marketplace.sol";
 
 contract ItemsTransferFacet is LibAppStorageModifiers {
     event TransferToParent(address indexed _toContract, uint256 indexed _toTokenId, uint256 indexed _tokenTypeId, uint256 _value);
@@ -46,8 +42,7 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
         s.items[_from][_id] = bal - _value;
         s.items[_to][_id] += _value;
         LibERC1155.onERC1155Received(_from, _to, _id, _value, _data);
-        bytes32 listingId = keccak256(abi.encodePacked(address(this), _id, _from));
-        IERC1155MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+        LibERC1155Marketplace.updateERC1155Listing(address(this), _id, _from);
     }
 
     /**
@@ -84,8 +79,7 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
             require(value <= bal, "Items: Doesn't have that many to transfer");
             s.items[_from][id] = bal - value;
             s.items[_to][id] += value;
-            bytes32 listingId = keccak256(abi.encodePacked(address(this), id, _from));
-            IERC1155MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+            LibERC1155Marketplace.updateERC1155Listing(address(this), id, _from);
         }
         LibERC1155.onERC1155BatchReceived(_from, _to, _ids, _values, _data);
     }
@@ -112,8 +106,7 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
         s.nftBalances[_toContract][_toTokenId][_id] += _value;
         emit TransferSingle(sender, _from, _toContract, _id, _value);
         emit TransferToParent(_toContract, _toTokenId, _id, _value);
-        bytes32 listingId = keccak256(abi.encodePacked(address(this), _id, _from));
-        IERC1155MaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+        LibERC1155Marketplace.updateERC1155Listing(address(this), _id, _from);
     }
 
     /// @notice Transfer token from a token to an address

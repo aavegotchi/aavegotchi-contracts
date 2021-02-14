@@ -4,12 +4,13 @@ pragma solidity 0.8.1;
 import "../libraries/LibAppStorage.sol";
 import "../interfaces/IERC1155.sol";
 import "../libraries/LibMeta.sol";
+import "../libraries/LibERC1155Marketplace.sol";
 
 // import "hardhat/console.sol";
 
 contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
-    event ERC1155ListingSet(
-        bytes32 indexed listingId,
+    event ERC1155ListingAdd(
+        uint256 indexed listingId,
         address indexed seller,
         address erc1155TokenAddress,
         uint256 erc1155TypeId,
@@ -20,7 +21,7 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
     );
 
     event ERC1155ExecutedListing(
-        bytes32 indexed listingId,
+        uint256 indexed listingId,
         address indexed seller,
         address buyer,
         address erc1155TokenAddress,
@@ -31,9 +32,7 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
         uint256 time
     );
 
-    event UpdateERC1155Listing(bytes32 indexed _listingId, uint256 quantity);
-
-    event ERC1155ListingCancelled(bytes32 indexed listingId);
+    event ERC1155ListingCancelled(uint256 indexed listingId);
 
     event ChangedListingFee(uint256 listingFeeInWei);
 
@@ -41,29 +40,34 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
         return s.listingFeeInWei;
     }
 
-    function getERC1155Listing(bytes32 _listingId) external view returns (ERC1155Listing memory listing_) {
+    function getERC1155Listing(uint256 _listingId) external view returns (ERC1155Listing memory listing_) {
         listing_ = s.erc1155Listings[_listingId];
     }
 
-    function getERC1155ListingLong(
+    function getERC1155ListingFromToken(
         address _erc1155TokenAddress,
         uint256 _erc1155TypeId,
-        address _user
+        address _owner
     ) external view returns (ERC1155Listing memory listing_) {
-        bytes32 listingId = toERC1155ListingId(_erc1155TokenAddress, _erc1155TypeId, _user);
+        uint256 listingId = s.erc1155TokenToListingId[_erc1155TokenAddress][_erc1155TypeId][_owner];
         listing_ = s.erc1155Listings[listingId];
     }
 
-    function getUserERC1155ListingIds(address _user) external view returns (bytes32[] memory listingIds_) {
-        listingIds_ = s.userERC1155ListingIds[_user];
-    }
-
-    function getUserERC1155Listings(address _user) external view returns (ERC1155Listing[] memory listings_) {
-        uint256 length = s.userERC1155ListingIds[_user].length;
-        listings_ = new ERC1155Listing[](length);
-        for (uint256 i = length - 1; i < length; i--) {
-            bytes32 listingId = s.userERC1155ListingIds[_user][i];
-            listings_[i] = s.erc1155Listings[listingId];
+    function getOwnerERC1155Listings(
+        address _owner,
+        uint256 _category,
+        string memory _sort,
+        uint256 _length // how many items to get back or the rest available
+    ) external view returns (ERC1155Listing[] memory listings_) {
+        uint256 listingId = s.erc1155OwnerListingHead[_owner][_category][_sort];
+        listings_ = new ERC1155Listing[](_length);
+        uint256 listIndex;
+        for (; listingId != 0 && listIndex < _length; listIndex++) {
+            listings_[listIndex] = s.erc1155Listings[listingId];
+            listingId = s.erc1155OwnerListingListItem[_sort][listingId].childListingId;
+        }
+        assembly {
+            mstore(listings_, listIndex)
         }
     }
 
@@ -72,7 +76,7 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
         string memory _sort, // "listed" or "purchased"
         uint256 _length // how many items to get back or the rest available
     ) external view returns (ERC1155Listing[] memory listings_) {
-        bytes32 listingId = s.erc1155ListingHead[_category][_sort];
+        uint256 listingId = s.erc1155ListingHead[_category][_sort];
         listings_ = new ERC1155Listing[](_length);
         uint256 listIndex;
         for (; listingId != 0 && listIndex < _length; listIndex++) {
@@ -99,48 +103,17 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
         }
     }
 
-    function removeERC1155ListingItem(string memory _sort, bytes32 _listingId) internal {
-        ListingListItem storage listingItem = s.erc1155ListingListItem[_sort][_listingId];
-        if (listingItem.listingId == 0) {
-            return;
-        }
-        bytes32 parentListingId = listingItem.parentListingId;
-        if (parentListingId != 0) {
-            ListingListItem storage parentListingItem = s.erc1155ListingListItem[_sort][parentListingId];
-            parentListingItem.childListingId = listingItem.childListingId;
-        }
-        bytes32 childListingId = listingItem.childListingId;
-        if (childListingId != 0) {
-            ListingListItem storage childListingItem = s.erc1155ListingListItem[_sort][childListingId];
-            childListingItem.parentListingId = listingItem.parentListingId;
-        }
-        ERC1155Listing storage listing = s.erc1155Listings[_listingId];
-        if (s.erc1155ListingHead[listing.category][_sort] == _listingId) {
-            s.erc1155ListingHead[listing.category][_sort] = listingItem.childListingId;
-        }
-        listingItem.listingId = 0;
-        listingItem.parentListingId = 0;
-        listingItem.childListingId = 0;
-    }
-
-    function toERC1155ListingId(
-        address _erc1155TokenAddress,
-        uint256 _erc1155TypeId,
-        address _user
-    ) internal pure returns (bytes32 listingId_) {
-        listingId_ = keccak256(abi.encodePacked(_erc1155TokenAddress, _erc1155TypeId, _user));
-    }
-
     function setERC1155Listing(
         address _erc1155TokenAddress,
         uint256 _erc1155TypeId,
         uint256 _quantity,
         uint256 _priceInWei
     ) external {
+        address owner = LibMeta.msgSender();
         uint256 category = getERC1155Category(_erc1155TokenAddress, _erc1155TypeId);
 
         IERC1155 erc1155Token = IERC1155(_erc1155TokenAddress);
-        require(erc1155Token.balanceOf(LibMeta.msgSender(), _erc1155TypeId) >= _quantity, "ERC1155Marketplace: Not enough ERC1155 token");
+        require(erc1155Token.balanceOf(owner, _erc1155TypeId) >= _quantity, "ERC1155Marketplace: Not enough ERC1155 token");
         require(
             _erc1155TokenAddress == address(this) || erc1155Token.isApprovedForAll(LibMeta.msgSender(), address(this)),
             "ERC1155Marketplace: Not approved for transfer"
@@ -149,14 +122,11 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
         uint256 cost = _quantity * _priceInWei;
         require(cost >= 1e18, "ERC1155Marketplace: cost should be 1 GHST or larger");
 
-        bytes32 listingId = toERC1155ListingId(_erc1155TokenAddress, _erc1155TypeId, LibMeta.msgSender());
-        ERC1155Listing storage listing = s.erc1155Listings[listingId];
-        removeERC1155ListingItem("listed", listingId);
-        if (_priceInWei != listing.priceInWei) {
-            removeERC1155ListingItem("purchased", listingId);
-        }
-
-        if (listing.timeCreated == 0) {
+        uint256 listingId = s.erc1155TokenToListingId[_erc1155TokenAddress][_erc1155TypeId][owner];
+        if (listingId == 0) {
+            s.nextERC1155ListingId++;
+            listingId = s.nextERC1155ListingId;
+            s.erc1155TokenToListingId[_erc1155TokenAddress][_erc1155TypeId][owner] = listingId;
             s.erc1155Listings[listingId] = ERC1155Listing({
                 listingId: listingId,
                 seller: LibMeta.msgSender(),
@@ -166,12 +136,27 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
                 quantity: _quantity,
                 priceInWei: _priceInWei,
                 timeCreated: block.timestamp,
-                timeLastPurchased: 0
+                timeLastPurchased: 0,
+                sourceListingId: 0,
+                sold: false,
+                cancelled: false
             });
-            s.userERC1155ListingIds[LibMeta.msgSender()].push(listingId);
+            LibERC1155Marketplace.addERC1155ListingItem(owner, category, "listed", listingId);
+            emit ERC1155ListingAdd(
+                listingId,
+                LibMeta.msgSender(),
+                _erc1155TokenAddress,
+                _erc1155TypeId,
+                category,
+                _quantity,
+                _priceInWei,
+                block.timestamp
+            );
         } else {
+            ERC1155Listing storage listing = s.erc1155Listings[listingId];
             listing.quantity = _quantity;
             listing.priceInWei = _priceInWei;
+            emit LibERC1155Marketplace.UpdateERC1155Listing(listingId, _quantity, _priceInWei, block.timestamp);
         }
 
         // Check if there's a publication fee and
@@ -180,37 +165,14 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
             // burn address: address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)
             LibERC20.transferFrom(s.ghstContract, LibMeta.msgSender(), address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), s.listingFeeInWei);
         }
-
-        ListingListItem storage listingItem = s.erc1155ListingListItem["listed"][listingId];
-        listingItem.childListingId = s.erc1155ListingHead[category]["listed"];
-        s.erc1155ListingHead[category]["listed"] = listingId;
-        listingItem.listingId = listingId;
-
-        emit ERC1155ListingSet(
-            listingId,
-            LibMeta.msgSender(),
-            _erc1155TokenAddress,
-            _erc1155TypeId,
-            category,
-            _quantity,
-            _priceInWei,
-            block.timestamp
-        );
     }
 
-    function cancelERC1155Listing(bytes32 _listingId) external {
-        ListingListItem storage listingItem = s.erc1155ListingListItem["listed"][_listingId];
-        require(listingItem.listingId != 0, "Marketplace Listing doesn't exist or is already cancelled");
-        ERC1155Listing storage listing = s.erc1155Listings[_listingId];
-        require(listing.seller == LibMeta.msgSender(), "ERC1155Marketplace: Only seller can cancel listing.");
-        listing.quantity = 0;
-        emit ERC1155ListingCancelled(_listingId);
-        removeERC1155ListingItem("listed", _listingId);
-        removeERC1155ListingItem("purchased", _listingId);
+    function cancelERC1155Listing(uint256 _listingId) external {
+        LibERC1155Marketplace.cancelERC1155Listing(_listingId, LibMeta.msgSender());
     }
 
     function executeERC1155Listing(
-        bytes32 _listingId,
+        uint256 _listingId,
         uint256 _quantity,
         uint256 _priceInWei
     ) external {
@@ -233,6 +195,29 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
             LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, pixelCraftShare);
             LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, daoShare);
             LibERC20.transferFrom(s.ghstContract, buyer, seller, transferAmount);
+
+            listing.timeLastPurchased = block.timestamp;
+            s.nextERC1155ListingId++;
+            uint256 purchaseListingId = s.nextERC1155ListingId;
+            s.erc1155Listings[purchaseListingId] = ERC1155Listing({
+                listingId: purchaseListingId,
+                seller: seller,
+                erc1155TokenAddress: listing.erc1155TokenAddress,
+                erc1155TypeId: listing.erc1155TypeId,
+                category: listing.category,
+                quantity: _quantity,
+                priceInWei: _priceInWei,
+                timeCreated: block.timestamp,
+                timeLastPurchased: block.timestamp,
+                sourceListingId: _listingId,
+                sold: true,
+                cancelled: false
+            });
+            LibERC1155Marketplace.addERC1155ListingItem(seller, listing.category, "purchased", purchaseListingId);
+            if (listing.quantity == 0) {
+                listing.sold = true;
+                LibERC1155Marketplace.removeERC1155ListingItem(_listingId, seller);
+            }
         }
         // Have to call it like this because LibMeta.msgSender() gets in the way
         if (listing.erc1155TokenAddress == address(this)) {
@@ -259,14 +244,6 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
             // GHSTStakingDiamond
             IERC1155(listing.erc1155TokenAddress).safeTransferFrom(seller, buyer, listing.erc1155TypeId, _quantity, new bytes(0));
         }
-        listing.timeLastPurchased = block.timestamp;
-        removeERC1155ListingItem("purchased", _listingId);
-        ListingListItem storage listingItem = s.erc1155ListingListItem["purchased"][_listingId];
-        listingItem.childListingId = s.erc1155ListingHead[listing.category]["purchased"];
-        s.erc1155ListingHead[listing.category]["purchased"] = _listingId;
-        listingItem.listingId = _listingId;
-
-        //s.erc1155MarketListingIds[category]["purchased"].push(listingId);
         emit ERC1155ExecutedListing(
             _listingId,
             seller,
@@ -280,22 +257,11 @@ contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
         );
     }
 
-    function updateERC1155Listing(bytes32 _listingId) external {
-        ERC1155Listing storage listing = s.erc1155Listings[_listingId];
-        if (listing.timeCreated == 0) {
-            return;
-        }
-        uint256 quantity = listing.quantity;
-        if (quantity > 0) {
-            quantity = IERC1155(listing.erc1155TokenAddress).balanceOf(listing.seller, listing.erc1155TypeId);
-            if (quantity < listing.quantity) {
-                listing.quantity = quantity;
-                emit UpdateERC1155Listing(_listingId, quantity);
-            }
-        }
-        if (quantity == 0) {
-            removeERC1155ListingItem("listed", _listingId);
-            removeERC1155ListingItem("purchased", _listingId);
-        }
+    function updateERC1155Listing(
+        address _erc1155TokenAddress,
+        uint256 _erc1155TypeId,
+        address _owner
+    ) external {
+        LibERC1155Marketplace.updateERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _owner);
     }
 }
