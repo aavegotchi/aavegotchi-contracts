@@ -7,7 +7,7 @@ library LibMeta {
 
     function domainSeparator(string memory name, string memory version) internal view returns (bytes32 domainSeparator_) {
         domainSeparator_ = keccak256(
-            abi.encode(EIP712_DOMAIN_TYPEHASH, keccak256(bytes(name)), keccak256(bytes(version)), address(this), bytes32(getChainID()))
+            abi.encode(EIP712_DOMAIN_TYPEHASH, keccak256(bytes(name)), keccak256(bytes(version)), bytes32(getChainID()), address(this))
         );
     }
 
