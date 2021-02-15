@@ -18,6 +18,7 @@ contract InitDiamond {
         bytes32 _chainlinkKeyHash,
         uint256 _chainlinkFee,
         uint24 _initialHauntSize,
+        uint96 _portalPrice,
         address _childChainManager
     ) external {
         s.dao = _dao;
@@ -44,7 +45,7 @@ contract InitDiamond {
 
         uint256 currentHauntId = s.currentHauntId;
         s.haunts[currentHauntId].hauntMaxSize = _initialHauntSize; //10_000;
-        s.haunts[currentHauntId].portalPrice = 100e18;
+        s.haunts[currentHauntId].portalPrice = _portalPrice;
         s.listingFeeInWei = 1e17;
     }
 }

@@ -45,7 +45,6 @@ async function main (scriptName) {
   let linkContract
   let keyHash
   let fee
-  let vouchersContractAddress
   let vouchersContract
   let initialHauntSize
   let ghstTokenContract
@@ -55,6 +54,7 @@ async function main (scriptName) {
   let pixelCraft
   let childChainManager
 
+  const portalPrice = ethers.utils.parseEther('100')
   if (hre.network.name === 'hardhat') {
     childChainManager = account
     const LinkTokenMock = await ethers.getContractFactory('LinkTokenMock')
@@ -64,7 +64,6 @@ async function main (scriptName) {
     const VouchersContract = await ethers.getContractFactory('VouchersContract')
     vouchersContract = await VouchersContract.deploy(account)
     await vouchersContract.deployed()
-    vouchersContractAddress = vouchersContract.address
     vrfCoordinator = account
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     fee = ethers.utils.parseEther('0.0001')
@@ -81,7 +80,6 @@ async function main (scriptName) {
     linkAddress = '0xb0897686c545045aFc77CF20eC7A532E3120E0F1'
     keyHash = '0xf86195cf7690c55907b2b611ebb7343a6f649bff128701cc542f0569e2c549da'
     fee = ethers.utils.parseEther('0.0001')
-    vouchersContractAddress = '0xe54891774EED9277236bac10d82788aee0Aed313'
     initialHauntSize = '10000'
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x3F382DbD960E3a9bbCeaE22651E88158d2791550')
 
@@ -95,7 +93,6 @@ async function main (scriptName) {
     linkAddress = '0xa36085F69e2889c224210F603D836748e7dC0088'
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     fee = ethers.utils.parseEther('0.0001')
-    vouchersContractAddress = '0x9d038aed3BEDbb143B4F3414Af6119231b77ACFC'
     initialHauntSize = '10000'
 
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5')
@@ -116,7 +113,6 @@ async function main (scriptName) {
     const VouchersContract = await ethers.getContractFactory('VouchersContract')
     vouchersContract = await VouchersContract.deploy(account)
     await vouchersContract.deployed()
-    vouchersContractAddress = vouchersContract.address
 
     initialHauntSize = '10000'
 
@@ -179,7 +175,7 @@ async function main (scriptName) {
     'CollateralFacet',
     'DAOFacet',
     ['VrfFacet', [vrfCoordinator, linkAddress]],
-    ['ShopFacet', [vouchersContractAddress]],
+    'ShopFacet',
     'MetaTransactionsFacet',
     'ERC1155MarketplaceFacet',
     'ERC721MarketplaceFacet'
@@ -217,7 +213,7 @@ async function main (scriptName) {
       ['ERC721MarketplaceFacet', erc721MarketplaceFacet]
     ],
     owner: account,
-    args: [dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, initialHauntSize, childChainManager]
+    args: [dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, initialHauntSize, portalPrice, childChainManager]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 

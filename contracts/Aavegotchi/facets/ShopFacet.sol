@@ -34,12 +34,6 @@ contract ShopFacet {
 
     event PurchaseItemsWithVouchers(address indexed _from, address indexed _to, uint256[] _itemIds, uint256[] _quantities);
 
-    address internal immutable im_vouchersContract;
-
-    constructor(address _vouchersContract) {
-        im_vouchersContract = _vouchersContract;
-    }
-
     /***********************************|
    |             Write Functions        |
    |__________________________________*/
@@ -99,39 +93,39 @@ contract ShopFacet {
         LibAppStorage.purchase(totalPrice);
     }
 
-    function purchaseItemsWithVouchers(
-        address _to,
-        uint256[] calldata _voucherIds,
-        uint256[] calldata _quantities
-    ) external {
-        require(_voucherIds.length == _quantities.length, "ShopFacet: _voucherIds not same length as _quantities");
-        IERC1155(im_vouchersContract).safeBatchTransferFrom(LibMeta.msgSender(), address(this), _voucherIds, _quantities, "");
-        for (uint256 i; i < _voucherIds.length; i++) {
-            uint256 itemId = _voucherIds[i] + 1;
-            uint256 quantity = _quantities[i];
-            uint256 totalQuantity = s.itemTypes[itemId].totalQuantity + quantity;
-            require(totalQuantity <= s.itemTypes[itemId].maxQuantity, "ShopFacet: Total item type quantity exceeds max quantity");
-            s.items[_to][itemId] += quantity;
-            s.itemTypes[itemId].totalQuantity = uint32(totalQuantity);
-        }
-        emit PurchaseItemsWithVouchers(LibMeta.msgSender(), _to, _voucherIds, _quantities);
-        LibERC1155.onERC1155BatchReceived(LibMeta.msgSender(), _to, _voucherIds, _quantities, "");
-    }
+    // function purchaseItemsWithVouchers(
+    //     address _to,
+    //     uint256[] calldata _voucherIds,
+    //     uint256[] calldata _quantities
+    // ) external {
+    //     require(_voucherIds.length == _quantities.length, "ShopFacet: _voucherIds not same length as _quantities");
+    //     IERC1155(im_vouchersContract).safeBatchTransferFrom(LibMeta.msgSender(), address(this), _voucherIds, _quantities, "");
+    //     for (uint256 i; i < _voucherIds.length; i++) {
+    //         uint256 itemId = _voucherIds[i] + 1;
+    //         uint256 quantity = _quantities[i];
+    //         uint256 totalQuantity = s.itemTypes[itemId].totalQuantity + quantity;
+    //         require(totalQuantity <= s.itemTypes[itemId].maxQuantity, "ShopFacet: Total item type quantity exceeds max quantity");
+    //         s.items[_to][itemId] += quantity;
+    //         s.itemTypes[itemId].totalQuantity = uint32(totalQuantity);
+    //     }
+    //     emit PurchaseItemsWithVouchers(LibMeta.msgSender(), _to, _voucherIds, _quantities);
+    //     LibERC1155.onERC1155BatchReceived(LibMeta.msgSender(), _to, _voucherIds, _quantities, "");
+    // }
 
-    function onERC1155BatchReceived(
-        address _operator,
-        address _from,
-        uint256[] calldata _ids,
-        uint256[] calldata _values,
-        bytes calldata _data
-    ) external view returns (bytes4) {
-        _operator;
-        _from;
-        _ids;
-        _values;
-        _data;
-        require(LibMeta.msgSender() == im_vouchersContract, "ShopFacet: Only accepts ERC1155 tokens from VoucherContract");
-        require(_ids.length > 0, "ShopFacet: Can't receive 0 vouchers");
-        return ERC1155_BATCH_ACCEPTED;
-    }
+    // function onERC1155BatchReceived(
+    //     address _operator,
+    //     address _from,
+    //     uint256[] calldata _ids,
+    //     uint256[] calldata _values,
+    //     bytes calldata _data
+    // ) external view returns (bytes4) {
+    //     _operator;
+    //     _from;
+    //     _ids;
+    //     _values;
+    //     _data;
+    //     require(LibMeta.msgSender() == im_vouchersContract, "ShopFacet: Only accepts ERC1155 tokens from VoucherContract");
+    //     require(_ids.length > 0, "ShopFacet: Can't receive 0 vouchers");
+    //     return ERC1155_BATCH_ACCEPTED;
+    // }
 }
