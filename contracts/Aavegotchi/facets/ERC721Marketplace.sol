@@ -80,8 +80,8 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
     }
 
     struct AavegotchiListing {
-        ERC721Listing listing;
-        AavegotchiInfo aavegotchiInfo;
+        ERC721Listing listing_;
+        AavegotchiInfo aavegotchiInfo_;
     }
 
     function getOwnerAavegotchiListings(
@@ -95,8 +95,8 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
         uint256 listIndex;
         for (; listingId != 0 && listIndex < _length; listIndex++) {
             ERC721Listing memory listing = s.erc721Listings[listingId];
-            listings_[listIndex].listing = listing;
-            listings_[listIndex].aavegotchiInfo = LibAavegotchi.getAavegotchi(listing.erc721TokenId);
+            listings_[listIndex].listing_ = listing;
+            listings_[listIndex].aavegotchiInfo_ = LibAavegotchi.getAavegotchi(listing.erc721TokenId);
             listingId = s.erc721OwnerListingListItem[listingId].childListingId;
         }
         assembly {
@@ -131,8 +131,8 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
         uint256 listIndex;
         for (; listingId != 0 && listIndex < _length; listIndex++) {
             ERC721Listing memory listing = s.erc721Listings[listingId];
-            listings_[listIndex].listing = listing;
-            listings_[listIndex].aavegotchiInfo = LibAavegotchi.getAavegotchi(listing.erc721TokenId);
+            listings_[listIndex].listing_ = listing;
+            listings_[listIndex].aavegotchiInfo_ = LibAavegotchi.getAavegotchi(listing.erc721TokenId);
             listingId = s.erc721ListingListItem[listingId].childListingId;
         }
         assembly {
