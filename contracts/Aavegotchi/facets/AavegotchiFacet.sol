@@ -6,38 +6,15 @@ import "../../shared/interfaces/IERC20.sol";
 import "../../shared/libraries/LibStrings.sol";
 import "../libraries/LibSvg.sol";
 import "../../shared/libraries/LibDiamond.sol";
-import "../../shared/libraries/LibERC20.sol";
-import "./VrfFacet.sol";
+// import "../../shared/libraries/LibERC20.sol";
 // import "hardhat/console.sol";
 import "../CollateralEscrow.sol";
 import "../libraries/LibVrf.sol";
 import "../../shared/libraries/LibMeta.sol";
 import "../libraries/LibERC721Marketplace.sol";
-
-/// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
-interface ERC721TokenReceiver {
-    /// @notice Handle the receipt of an NFT
-    /// @dev The ERC721 smart contract calls this function on the recipient
-    ///  after a `transfer`. This function MAY throw to revert and reject the
-    ///  transfer. Return of other than the magic value MUST result in the
-    ///  transaction being reverted.
-    ///  Note: the contract address is always the message sender.
-    /// @param _operator The address which called `safeTransferFrom` function
-    /// @param _from The address which previously owned the token
-    /// @param _tokenId The NFT identifier which is being transferred
-    /// @param _data Additional data with no specified format
-    /// @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
-    ///  unless throwing
-    function onERC721Received(
-        address _operator,
-        address _from,
-        uint256 _tokenId,
-        bytes calldata _data
-    ) external returns (bytes4);
-}
+import {IERC721TokenReceiver} from "../../shared/interfaces/IERC721.sol";
 
 contract AavegotchiFacet is LibAppStorageModifiers {
-    bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
     uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
     /***********************************|
@@ -429,7 +406,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         }
         if (size > 0) {
             require(
-                ERC721_RECEIVED == ERC721TokenReceiver(_to).onERC721Received(LibMeta.msgSender(), _from, _tokenId, _data),
+                ERC721_RECEIVED == IERC721TokenReceiver(_to).onERC721Received(LibMeta.msgSender(), _from, _tokenId, _data),
                 "ERC721: Transfer rejected/failed by _to"
             );
         }
@@ -453,7 +430,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         }
         if (size > 0) {
             require(
-                ERC721_RECEIVED == ERC721TokenReceiver(_to).onERC721Received(LibMeta.msgSender(), _from, _tokenId, ""),
+                ERC721_RECEIVED == IERC721TokenReceiver(_to).onERC721Received(LibMeta.msgSender(), _from, _tokenId, ""),
                 "ERC721: Transfer rejected/failed by _to"
             );
         }

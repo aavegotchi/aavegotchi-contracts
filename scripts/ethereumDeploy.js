@@ -121,4 +121,4 @@ if (require.main === module) {
 
 exports.deployProject = main
 
-/// deployed to gorli here:  0xfb6aCD41431D6a9E8b55DB167df354A08BDE2Da2
+/// deployed to gorli here:  0xA06E3C7121a22a71932e8E746c7d430F990aD931
