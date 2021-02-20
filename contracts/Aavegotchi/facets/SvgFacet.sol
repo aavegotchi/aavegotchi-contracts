@@ -20,7 +20,7 @@ contract SvgFacet is LibAppStorageModifiers {
     function bytes3ToColorString(bytes3 _color) internal pure returns (string memory) {
         bytes memory numbers = "0123456789ABCDEF";
         bytes memory toString = new bytes(6);
-        uint256 pos = 0;
+        uint256 pos;
         for (uint256 i; i < 3; i++) {
             toString[pos] = numbers[uint8(_color[i] >> 4)];
             pos++;
@@ -206,19 +206,16 @@ contract SvgFacet is LibAppStorageModifiers {
         svg_ = abi.encodePacked(
             '<g class="gotchi-wearable ',
             wearableClass,
-            '"><svg x="',
             // x
-            LibStrings.uintStr(uint8(dimensions)),
-            '" y="',
+            LibStrings.strWithUint('"><svg x="', uint8(dimensions)),
             // y
-            LibStrings.uintStr(uint8(dimensions >> 8)),
+            LibStrings.strWithUint('" y="', uint8(dimensions >> 8)),
             '">'
         );
         if (_slotPosition == 5) {
             svg_ = abi.encodePacked(
                 svg_,
-                '<g transform="scale(-1, 1) translate(-',
-                LibStrings.uintStr(64 - (uint8(dimensions) * 2)),
+                LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 64 - (uint8(dimensions) * 2)),
                 ', 0)">',
                 LibSvg.getSvg("wearables", wearableType.svgId),
                 "</g></svg></g>"
@@ -300,12 +297,10 @@ contract SvgFacet is LibAppStorageModifiers {
         uint256 dimensions = s.itemTypes[_itemId].dimensions;
         ag_ = string(
             abi.encodePacked(
-                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ',
                 // width
-                LibStrings.uintStr(uint8(dimensions >> (2 * 8))),
-                " ",
+                LibStrings.strWithUint('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ', uint8(dimensions >> (2 * 8))),
                 // height
-                LibStrings.uintStr(uint8(dimensions >> (3 * 8))),
+                LibStrings.strWithUint(" ", uint8(dimensions >> (3 * 8))),
                 '">',
                 svg,
                 "</svg>"
@@ -320,7 +315,7 @@ contract SvgFacet is LibAppStorageModifiers {
     function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) public onlyDaoOrOwner {
         emit StoreSvg(_typesAndSizes);
         address svgContract = storeSvgInContract(_svg);
-        uint256 offset = 0;
+        uint256 offset;
         for (uint256 i; i < _typesAndSizes.length; i++) {
             LibSvg.SvgTypeAndSizes calldata svgTypeAndSizes = _typesAndSizes[i];
             for (uint256 j; j < svgTypeAndSizes.sizes.length; j++) {

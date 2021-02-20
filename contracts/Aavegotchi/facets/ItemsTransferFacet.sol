@@ -109,20 +109,7 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
         LibERC1155Marketplace.updateERC1155Listing(address(this), _id, _from);
     }
 
-    /// @notice Transfer token from a token to an address
-    /// @param _fromContract The address of the owning contract
-    /// @param _fromTokenId The owning token
-    /// @param _to The address the token is transferred to
-    /// @param _id ID of the token
-    /// @param _value The amount of tokens to transfer
-    function transferFromParent(
-        address _fromContract,
-        uint256 _fromTokenId,
-        address _to,
-        uint256 _id,
-        uint256 _value
-    ) external {
-        require(_to != address(0), "Items: Can't transfer to 0 address");
+    function transferApproved(address _fromContract, uint256 _fromTokenId) internal view {
         if (_fromContract == address(this)) {
             address owner = s.aavegotchis[_fromTokenId].owner;
             require(
@@ -139,14 +126,35 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
                 "Items: Not owner and not approved to transfer"
             );
         }
+    }
+
+    function checkWearableIsEquipped(uint256 _fromTokenId, uint256 _id) internal view {
+        uint256 l_equippedWearables = s.aavegotchis[_fromTokenId].equippedWearables;
+        for (uint256 i; i < 16; i++) {
+            require(uint16(l_equippedWearables >> (i * 16)) != _id, "Items: Cannot transfer wearable that is equipped");
+        }
+    }
+
+    /// @notice Transfer token from a token to an address
+    /// @param _fromContract The address of the owning contract
+    /// @param _fromTokenId The owning token
+    /// @param _to The address the token is transferred to
+    /// @param _id ID of the token
+    /// @param _value The amount of tokens to transfer
+    function transferFromParent(
+        address _fromContract,
+        uint256 _fromTokenId,
+        address _to,
+        uint256 _id,
+        uint256 _value
+    ) external {
+        require(_to != address(0), "Items: Can't transfer to 0 address");
+        transferApproved(_fromContract, _fromTokenId);
         uint256 bal = s.nftBalances[_fromContract][_fromTokenId][_id];
         require(_value <= bal, "Items: Doesn't have that many to transfer");
         bal -= _value;
         if (bal == 0 && _fromContract == address(this)) {
-            uint256 l_equippedWearables = s.aavegotchis[_fromTokenId].equippedWearables;
-            for (uint256 i; i < 16; i++) {
-                require(uint16(l_equippedWearables >> (i * 16)) != _id, "Items: Cannot transfer wearable that is equipped");
-            }
+            checkWearableIsEquipped(_fromTokenId, _id);
         }
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal;
         s.items[_to][_id] += _value;
@@ -163,22 +171,7 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
     ) external {
         require(_ids.length == _values.length, "Items: ids.length not the same as values.length");
         require(_to != address(0), "Items: Can't transfer to 0 address");
-        if (_fromContract == address(this)) {
-            address owner = s.aavegotchis[_fromTokenId].owner;
-            require(
-                LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || LibMeta.msgSender() == s.approved[_fromTokenId],
-                "Items: Not owner and not approved to transfer"
-            );
-            require(s.aavegotchis[_fromTokenId].locked == false, "Items: Only callable on unlocked Aavegotchis");
-        } else {
-            address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
-            require(
-                owner == LibMeta.msgSender() ||
-                    IERC721(_fromContract).getApproved(_fromTokenId) == LibMeta.msgSender() ||
-                    IERC721(_fromContract).isApprovedForAll(owner, LibMeta.msgSender()),
-                "Items: Not owner and not approved to transfer"
-            );
-        }
+        transferApproved(_fromContract, _fromTokenId);
         for (uint256 i; i < _ids.length; i++) {
             uint256 id = _ids[i];
             uint256 value = _values[i];
@@ -186,10 +179,7 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
             require(value <= bal, "Items: Doesn't have that many to transfer");
             bal -= value;
             if (bal == 0 && _fromContract == address(this)) {
-                uint256 l_equippedWearables = s.aavegotchis[_fromTokenId].equippedWearables;
-                for (uint256 j; j < 16; j++) {
-                    require(uint16(l_equippedWearables >> (j * 16)) != id, "Items: Cannot transfer wearable that is equipped");
-                }
+                checkWearableIsEquipped(_fromTokenId, id);
             }
             s.nftBalances[_fromContract][_fromTokenId][id] = bal;
             s.items[_to][id] += value;
@@ -214,30 +204,12 @@ contract ItemsTransferFacet is LibAppStorageModifiers {
         uint256 _value
     ) external {
         require(_toContract != address(0), "Items: Can't transfer to 0 address");
-        if (_fromContract == address(this)) {
-            address owner = s.aavegotchis[_fromTokenId].owner;
-            require(
-                LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || LibMeta.msgSender() == s.approved[_fromTokenId],
-                "Items: Not owner and not approved to transfer"
-            );
-            require(s.aavegotchis[_fromTokenId].locked == false, "Items: Only callable on unlocked Aavegotchis");
-        } else {
-            address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
-            require(
-                owner == LibMeta.msgSender() ||
-                    IERC721(_fromContract).getApproved(_fromTokenId) == LibMeta.msgSender() ||
-                    IERC721(_fromContract).isApprovedForAll(owner, LibMeta.msgSender()),
-                "Items: Not owner and not approved to transfer"
-            );
-        }
+        transferApproved(_fromContract, _fromTokenId);
         uint256 bal = s.nftBalances[_fromContract][_fromTokenId][_id];
         require(_value <= bal, "Items: Doesn't have that many to transfer");
         bal -= _value;
         if (bal == 0 && _fromContract == address(this)) {
-            uint256 l_equippedWearables = s.aavegotchis[_fromTokenId].equippedWearables;
-            for (uint256 i; i < 16; i++) {
-                require(uint16(l_equippedWearables >> (i * 16)) != _id, "Items: Cannot transfer wearable that is equipped");
-            }
+            checkWearableIsEquipped(_fromTokenId, _id);
         }
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal;
         s.nftBalances[_toContract][_toTokenId][_id] += _value;

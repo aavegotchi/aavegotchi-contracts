@@ -5,6 +5,7 @@ import "./libraries/LibAppStorage.sol";
 import "../shared/interfaces/IERC165.sol";
 import "../shared/interfaces/IDiamondLoupe.sol";
 import "../shared/interfaces/IERC173.sol";
+import "./interfaces/ILink.sol";
 
 contract InitDiamond {
     AppStorage internal s;
@@ -17,6 +18,8 @@ contract InitDiamond {
         address _ghstContract,
         bytes32 _chainlinkKeyHash,
         uint256 _chainlinkFee,
+        address _vrfCoordinator,
+        address _linkAddress,
         uint24 _initialHauntSize,
         uint96 _portalPrice,
         address _childChainManager
@@ -42,6 +45,8 @@ contract InitDiamond {
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
         vrf_ds.keyHash = _chainlinkKeyHash;
         vrf_ds.fee = uint144(_chainlinkFee);
+        vrf_ds.vrfCoordinator = _vrfCoordinator;
+        vrf_ds.link = ILink(_linkAddress);
 
         uint256 currentHauntId = s.currentHauntId;
         s.haunts[currentHauntId].hauntMaxSize = _initialHauntSize; //10_000;

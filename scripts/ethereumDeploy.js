@@ -1,6 +1,6 @@
 /* global ethers hre */
 
-const diamond = require('diamond-util')
+const diamond = require('../js/diamond-util/src/index.js')
 
 function addCommas (nStr) {
   nStr += ''
@@ -37,8 +37,8 @@ async function main (scriptName) {
   } else if (hre.network.name === 'kovan') {
     rootChainManager = account
   } else if (hre.network.name === 'gorli') {
-    // rootChainManager = '0xBbD7cBFA79faee899Eaf900F13C9065bF03B1A74'
-    rootChainManager = account
+    rootChainManager = '0xBbD7cBFA79faee899Eaf900F13C9065bF03B1A74'
+    // rootChainManager = account
   } else if (hre.network.name === 'mumbai') {
 
   } else {
@@ -64,16 +64,10 @@ async function main (scriptName) {
     return instances
   }
   let [
-    diamondCutFacet,
-    diamondLoupeFacet,
-    ownershipFacet,
     aavegotchiFacet,
     itemsFacet,
     bridgeFacet
   ] = await deployFacets(
-    'DiamondCutFacet',
-    'DiamondLoupeFacet',
-    'OwnershipFacet',
     'contracts/Ethereum/facets/AavegotchiFacet.sol:AavegotchiFacet',
     'contracts/Ethereum/facets/ItemsFacet.sol:ItemsFacet',
     'contracts/Ethereum/facets/BridgeFacet.sol:BridgeFacet'
@@ -81,16 +75,16 @@ async function main (scriptName) {
 
   // eslint-disable-next-line no-unused-vars
   const aavegotchiDiamond = await diamond.deploy({
-    diamondName: 'contracts/Ethereum/AavegotchiDiamond.sol:AavegotchiDiamond',
+    diamondName: 'AavegotchiDiamond',
+    initDiamond: 'contracts/Ethereum/InitDiamond.sol:InitDiamond',
     facets: [
-      ['DiamondCutFacet', diamondCutFacet],
-      ['DiamondLoupeFacet', diamondLoupeFacet],
-      ['OwnershipFacet', ownershipFacet],
       ['AavegotchiFacet', aavegotchiFacet],
       ['ItemsFacet', itemsFacet],
       ['BridgeFacet', bridgeFacet]
     ],
-    args: [account, rootChainManager]
+    owner: account,
+    args: [rootChainManager],
+    txArgs: { gasLimit: 5000000 }
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
@@ -99,7 +93,7 @@ async function main (scriptName) {
   console.log('Aavegotchi diamond deploy gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-  diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', aavegotchiDiamond.address)
+  const diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', aavegotchiDiamond.address)
   aavegotchiFacet = await ethers.getContractAt('contracts/Ethereum/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamond.address)
   bridgeFacet = await ethers.getContractAt('contracts/Ethereum/facets/BridgeFacet.sol:BridgeFacet', aavegotchiDiamond.address)
 
@@ -127,4 +121,4 @@ if (require.main === module) {
 
 exports.deployProject = main
 
-/// deployed to gorli here: 0x187DffAef821d03055aC5eAa1524c53EBB36eA97
+/// deployed to gorli here:  0xfb6aCD41431D6a9E8b55DB167df354A08BDE2Da2

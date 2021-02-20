@@ -57,7 +57,8 @@ async function deploy ({
   initDiamond,
   facets,
   owner,
-  args = []
+  args = [],
+  txArgs = {}
 }) {
   if (arguments.length !== 1) {
     throw Error(`Requires only 1 map argument. ${arguments.length} arguments used.`)
@@ -119,7 +120,7 @@ async function deploy ({
   console.log(`Diamond owner: ${owner}`)
 
   const diamondCutFacet = await ethers.getContractAt('DiamondCutFacet', deployedDiamond.address)
-  const tx = await diamondCutFacet.diamondCut(diamondCut, initDiamond.address, functionCall)
+  const tx = await diamondCutFacet.diamondCut(diamondCut, initDiamond.address, functionCall, txArgs)
 
   // console.log(`${diamondName} diamondCut arguments:`)
   // console.log(JSON.stringify([facets, initDiamond.address, args], null, 4))

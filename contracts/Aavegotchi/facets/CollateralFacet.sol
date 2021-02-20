@@ -2,10 +2,11 @@
 pragma solidity 0.8.1;
 
 import "../libraries/LibAppStorage.sol";
+import "../libraries/LibAavegotchi.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
 import "../../shared/interfaces/IERC20.sol";
-import "../libraries/LibMeta.sol";
+import "../../shared/libraries/LibMeta.sol";
 
 // import "hardhat/console.sol";
 
@@ -16,11 +17,6 @@ contract CollateralFacet is LibAppStorageModifiers {
     event IncreaseStake(uint256 indexed _tokenId, uint256 _stakeAmount);
     event DecreaseStake(uint256 indexed _tokenId, uint256 _reduceAmount);
     event ExperienceTransfer(uint256 indexed _fromTokenId, uint256 indexed _toTokenId, uint256 experience);
-
-    struct AavegotchiCollateralTypeIO {
-        address collateralType;
-        AavegotchiCollateralTypeInfo collateralTypeInfo;
-    }
 
     /***********************************|
    |             Read Functions         |
@@ -100,7 +96,7 @@ contract CollateralFacet is LibAppStorageModifiers {
             }
         }
 
-        //If the toId is different from the tokenId, then perform an essence transfer
+        //If the toId is different from the tokenId, then perform an experience transfer
         if (_tokenId != _toId) {
             uint32 experience = s.aavegotchis[_tokenId].experience;
             emit ExperienceTransfer(_tokenId, _toId, experience);

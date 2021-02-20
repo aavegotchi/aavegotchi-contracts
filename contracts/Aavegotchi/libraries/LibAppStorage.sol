@@ -3,7 +3,7 @@ pragma solidity 0.8.1;
 import "../../shared/libraries/LibERC20.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../libraries/LibVrf.sol";
-import "../libraries/LibMeta.sol";
+import "../../shared/libraries/LibMeta.sol";
 //import "../interfaces/IERC20.sol";
 // import "hardhat/console.sol";
 
@@ -27,7 +27,7 @@ struct Aavegotchi {
     uint16 usedSkillPoints; //The number of skill points this aavegotchi has already used
     uint40 claimTime; //The block timestamp when this Aavegotchi was claimed
     uint40 lastInteracted; //The last time this Aavegotchi was interacted with
-    uint16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it. Gets reset when the Aavegotchi is transferred to a new owner.
+    uint16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it.
     address escrow; //The escrow address this Aavegotchi manages.
     bool locked;
 }
@@ -189,8 +189,6 @@ struct AppStorage {
 }
 
 library LibAppStorage {
-    uint256 internal constant NUMERIC_TRAITS_NUM = 6;
-
     uint8 internal constant STATUS_CLOSED_PORTAL = 0;
     uint8 internal constant STATUS_VRF_PENDING = 1;
     uint8 internal constant STATUS_OPEN_PORTAL = 2;
@@ -235,17 +233,11 @@ library LibAppStorage {
 
         // Using 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF as burn address.
         // GHST token contract does not allow transferring to address(0) address: https://etherscan.io/address/0x3F382DbD960E3a9bbCeaE22651E88158d2791550#code
-        LibERC20.transferFrom(s.ghstContract, LibMeta.msgSender(), address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
-        LibERC20.transferFrom(s.ghstContract, LibMeta.msgSender(), s.pixelCraft, companyShare);
-        LibERC20.transferFrom(s.ghstContract, LibMeta.msgSender(), s.rarityFarming, rarityFarmShare);
-        LibERC20.transferFrom(s.ghstContract, LibMeta.msgSender(), s.dao, daoShare);
-    }
-
-    struct LevelInfo {
-        uint8 levelBoost;
-        uint16 levelAmount;
-        uint32 low;
-        uint32 high;
+        address ghstContract = s.ghstContract;
+        LibERC20.transferFrom(ghstContract, LibMeta.msgSender(), address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
+        LibERC20.transferFrom(ghstContract, LibMeta.msgSender(), s.pixelCraft, companyShare);
+        LibERC20.transferFrom(ghstContract, LibMeta.msgSender(), s.rarityFarming, rarityFarmShare);
+        LibERC20.transferFrom(ghstContract, LibMeta.msgSender(), s.dao, daoShare);
     }
 
     function sqrt(uint256 x) internal pure returns (uint256 y) {
@@ -281,7 +273,7 @@ contract LibAppStorageModifiers {
     // }
 
     modifier onlyOwner {
-        require(LibMeta.msgSender() == LibDiamond.contractOwner(), "Only owner can call this function");
+        LibDiamond.enforceIsContractOwner();        
         _;
     }
 

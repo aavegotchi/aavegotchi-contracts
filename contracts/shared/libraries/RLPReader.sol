@@ -153,7 +153,7 @@ library RLPReader {
         // add `isList` check if `item` is expected to be passsed without a check from calling function
         // require(isList(item), "RLPReader: NUM_ITEMS_NOT_LIST");
 
-        uint256 count = 0;
+        uint256 count;
         uint256 currPtr = item.memPtr + _payloadOffset(item.memPtr);
         uint256 endPtr = item.memPtr + item.len;
         while (currPtr < endPtr) {

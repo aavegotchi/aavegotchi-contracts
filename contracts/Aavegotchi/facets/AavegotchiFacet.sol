@@ -11,7 +11,7 @@ import "./VrfFacet.sol";
 // import "hardhat/console.sol";
 import "../CollateralEscrow.sol";
 import "../libraries/LibVrf.sol";
-import "../libraries/LibMeta.sol";
+import "../../shared/libraries/LibMeta.sol";
 import "../libraries/LibERC721Marketplace.sol";
 
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
@@ -105,7 +105,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     }
 
     function toNumericTraits(uint256 _randomNumber, uint256 _modifiers) internal pure returns (uint256 numericTraits_) {
-        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
+        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             uint256 value = uint8(_randomNumber >> (i * 8));
             if (value > 99) {
                 value /= 2;
@@ -166,8 +166,8 @@ contract AavegotchiFacet is LibAppStorageModifiers {
             portalAavegotchiTraits_[i].collateralType = single.collateralType;
             portalAavegotchiTraits_[i].minimumStake = single.minimumStake;
             portalAavegotchiTraits_[i].numericTraitsUint = single.numericTraits;
-            portalAavegotchiTraits_[i].numericTraits = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
-            for (uint256 j; j < LibAppStorage.NUMERIC_TRAITS_NUM; j++) {
+            portalAavegotchiTraits_[i].numericTraits = new int256[](NUMERIC_TRAITS_NUM);
+            for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
                 portalAavegotchiTraits_[i].numericTraits[j] = int16(int256(single.numericTraits >> (j * 16)));
             }
         }
@@ -183,6 +183,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     /// @param _owner An address for whom to query the balance
     /// @return balance_ The number of NFTs owned by `_owner`, possibly zero
     function balanceOf(address _owner) external view returns (uint256 balance_) {
+        require(_owner != address(0), "AavegotchiFacet: _owner can't be address(0");
         balance_ = s.aavegotchiBalance[_owner];
     }
 
@@ -230,7 +231,11 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     }
 
     //Only valid for claimed Aavegotchis
-    function modifiedTraitsAndRarityScore(uint256 _tokenId) external view returns (int256[] memory numericTraits_, uint256 rarityScore_) {
+    function modifiedTraitsAndRarityScore(uint256 _tokenId)
+        external
+        view
+        returns (int256[NUMERIC_TRAITS_NUM] memory numericTraits_, uint256 rarityScore_)
+    {
         (numericTraits_, rarityScore_) = LibAavegotchi.modifiedTraitsAndRarityScore(_tokenId);
     }
 
@@ -269,6 +274,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     /// @return owner_ The address of the owner of the NFT
     function ownerOf(uint256 _tokenId) external view returns (address owner_) {
         owner_ = s.aavegotchis[_tokenId].owner;
+        require(owner_ != address(0), "AavegotchiFacet: invalid _tokenId");
     }
 
     /// @notice Get the approved address for a single NFT
@@ -328,7 +334,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         require(bytes(_name).length > 0, "AavegotchiFacet: _name can't be empty");
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must choose Aavegotchi before setting name");
         require(bytes(_name).length < 26, "AavegotchiFacet: _name can't be greater than 25 characters");
-        require(s.aavegotchiNamesUsed[_name] == false, "AavegotchiFacet: Aavegotchi name used already");
+        require(!s.aavegotchiNamesUsed[_name], "AavegotchiFacet: Aavegotchi name used already");
         string memory existingName = s.aavegotchis[_tokenId].name;
         if (bytes(existingName).length > 0) {
             delete s.aavegotchiNamesUsed[existingName];
@@ -354,8 +360,8 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     function spendSkillPoints(uint256 _tokenId, int8[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
         //To test (Dan): Prevent underflow (is this ok?), see require below
-        uint256 totalUsed = 0;
-        for (uint8 index = 0; index < _values.length; index++) {
+        uint256 totalUsed;
+        for (uint256 index; index < _values.length; index++) {
             totalUsed += abs(_values[index]);
 
             uint256 position = index * 16;
@@ -535,7 +541,6 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     ///  3986. The URI may point to a JSON file that conforms to the "ERC721
     ///  Metadata JSON Schema".
     function tokenURI(uint256 _tokenId) external pure returns (string memory) {
-        string memory uid = LibStrings.uintStr(_tokenId);
-        return string(abi.encodePacked("https://aavegotchi.com/metadata/aavegotchis/", uid)); //Here is your URL!
+        return LibStrings.strWithUint("https://aavegotchi.com/metadata/aavegotchis/", _tokenId); //Here is your URL!
     }
 }

@@ -5,6 +5,12 @@ import "../../shared/interfaces/IERC20.sol";
 import "./LibAppStorage.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
+uint256 constant NUMERIC_TRAITS_NUM = 6;
+
+struct AavegotchiCollateralTypeIO {
+    address collateralType;
+    AavegotchiCollateralTypeInfo collateralTypeInfo;
+}
 
 struct AavegotchiInfo {
     uint256 tokenId;
@@ -12,8 +18,8 @@ struct AavegotchiInfo {
     address owner;
     uint256 randomNumber;
     uint256 status;
-    int256[] numericTraits;
-    int256[] modifiedNumericTraits;
+    int256[NUMERIC_TRAITS_NUM] numericTraits;
+    int256[NUMERIC_TRAITS_NUM] modifiedNumericTraits;
     uint256[EQUIPPED_WEARABLE_SLOTS] equippedWearables;
     address collateral;
     address escrow;
@@ -59,22 +65,23 @@ library LibAavegotchi {
             aavegotchiInfo_.level = aavegotchiLevel(s.aavegotchis[_tokenId].experience);
             aavegotchiInfo_.usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
             uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
-            aavegotchiInfo_.numericTraits = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
-            for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
+            for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
                 aavegotchiInfo_.numericTraits[i] = int16(int256(numericTraits >> (i * 16)));
             }
             aavegotchiInfo_.baseRarityScore = baseRarityScore(numericTraits);
             (aavegotchiInfo_.modifiedNumericTraits, aavegotchiInfo_.modifiedRarityScore) = modifiedTraitsAndRarityScore(_tokenId);
             aavegotchiInfo_.locked = s.aavegotchis[_tokenId].locked;
         }
-        return aavegotchiInfo_;
     }
 
     //Only valid for claimed Aavegotchis
-    function modifiedTraitsAndRarityScore(uint256 _tokenId) internal view returns (int256[] memory numericTraits_, uint256 rarityScore_) {
+    function modifiedTraitsAndRarityScore(uint256 _tokenId)
+        internal
+        view
+        returns (int256[NUMERIC_TRAITS_NUM] memory numericTraits_, uint256 rarityScore_)
+    {
         AppStorage storage s = LibAppStorage.diamondStorage();
         require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
-        numericTraits_ = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 equippedWearables = aavegotchi.equippedWearables;
         uint256 numericTraitsUint = getNumericTraits(_tokenId);
@@ -88,7 +95,7 @@ library LibAavegotchi {
             //Add on trait modifiers
             uint256 traitModifiers = itemType.traitModifiers;
             uint256 newNumericTraits;
-            for (uint256 j; j < LibAppStorage.NUMERIC_TRAITS_NUM; j++) {
+            for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
                 int256 number = int16(int256(numericTraitsUint >> (j * 16)));
                 int256 traitModifier = int8(int256(traitModifiers >> (j * 8)));
                 number += traitModifier;
@@ -101,7 +108,7 @@ library LibAavegotchi {
         }
         uint256 baseRarity = baseRarityScore(numericTraitsUint);
         rarityScore_ = baseRarity + wearableBonus;
-        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
+        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(int256(numericTraitsUint >> (i * 16)));
             numericTraits_[i] = number;
         }
@@ -113,18 +120,14 @@ library LibAavegotchi {
         int256 boostDecay = int256((block.timestamp - s.aavegotchis[_tokenId].lastTemporaryBoost) / 24 hours);
         uint256 temporaryTraitBoosts = s.aavegotchis[_tokenId].temporaryTraitBoosts;
         uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
-        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
+        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(int256(numericTraits >> (i * 16)));
             int256 boost = int8(int256(temporaryTraitBoosts >> (i * 8)));
 
-            if (boost > 0) {
-                if (boost > boostDecay) {
-                    number += boost - boostDecay;
-                }
-            } else {
-                if ((boost * -1) > boostDecay) {
-                    number += boost + boostDecay;
-                }
+            if (boost > 0 && boost > boostDecay) {
+                number += boost - boostDecay;
+            } else if ((boost * -1) > boostDecay) {
+                number += boost + boostDecay;
             }
             numericTraits_ |= uint256(number & 0xffff) << (i * 16);
         }
@@ -188,7 +191,7 @@ library LibAavegotchi {
 
     //Calculates the base rarity score, including collateral modifier
     function baseRarityScore(uint256 _numericTraits) internal pure returns (uint256 _rarityScore) {
-        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
+        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             int256 number = int16(int256(_numericTraits >> (i * 16)));
             if (number >= 50) {
                 _rarityScore += uint256(number) + 1;

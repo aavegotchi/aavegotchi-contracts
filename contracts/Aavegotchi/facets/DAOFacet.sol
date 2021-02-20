@@ -2,6 +2,7 @@
 pragma solidity 0.8.1;
 
 import "../libraries/LibAppStorage.sol";
+import "../libraries/LibAavegotchi.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../../shared/libraries/LibERC20.sol";
 import "../../shared/interfaces/IERC20.sol";
@@ -13,10 +14,7 @@ contract DAOFacet is LibAppStorageModifiers {
     event DaoTreasuryTransferred(address indexed previousDaoTreasury, address indexed newDaoTreasury);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
     event UpdateCollateralModifiers(uint256 _oldModifiers, uint256 _newModifiers);
-    struct AavegotchiCollateralTypeIO {
-        address collateralType;
-        AavegotchiCollateralTypeInfo collateralTypeInfo;
-    }
+
     event AddCollateralType(AavegotchiCollateralTypeIO _collateralType);
     event AddItemType(ItemType _itemType);
     event CreateHaunt(uint256 indexed _hauntId, uint256 _hauntMaxSize, uint256 _portalPrice, bytes32 _bodyColor);
@@ -100,7 +98,7 @@ contract DAOFacet is LibAppStorageModifiers {
         require(_itemIds.length == _quantities.length, "DAOFacet: Ids and quantities length must match");
 
         uint256 itemTypesLength = s.itemTypes.length;
-        for (uint256 i = 0; i < _itemIds.length; i++) {
+        for (uint256 i; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
 
             require(itemTypesLength > itemId, "DAOFacet: Item type does not exist");
@@ -117,7 +115,7 @@ contract DAOFacet is LibAppStorageModifiers {
 
     function grantExperience(uint256[] calldata _tokenIds, uint32[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {
         require(_tokenIds.length == _xpValues.length, "DAOFacet: IDs must match XP array length");
-        for (uint256 i = 0; i < _tokenIds.length; i++) {
+        for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             uint32 xp = _xpValues[i];
             require(xp <= 1000, "DAOFacet: Cannot grant more than 1000 XP at a time");
@@ -164,7 +162,7 @@ contract DAOFacet is LibAppStorageModifiers {
     }
 
     function setGameManager(address _gameManager) external onlyDaoOrOwner {
-        GameManagerTransferred(s.gameManager, _gameManager);
+        emit GameManagerTransferred(s.gameManager, _gameManager);
         s.gameManager = _gameManager;
     }
 }

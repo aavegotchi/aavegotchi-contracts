@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
+import "../interfaces/ILink.sol";
+
 library LibVrf {
     bytes32 internal constant DIAMOND_STORAGE_POSITION = keccak256("chainlink.VRF");
 
@@ -10,6 +12,8 @@ library LibVrf {
         mapping(uint256 => bool) tokenIdToVrfPending;
         bytes32 keyHash;
         uint144 fee;
+        address vrfCoordinator;
+        ILink link;
     }
 
     function diamondStorage() internal pure returns (Storage storage ds) {

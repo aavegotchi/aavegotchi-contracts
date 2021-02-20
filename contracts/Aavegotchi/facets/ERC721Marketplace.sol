@@ -3,7 +3,7 @@ pragma solidity 0.8.1;
 
 import "../libraries/LibAavegotchi.sol";
 import "../../shared/interfaces/IERC721.sol";
-import "../libraries/LibMeta.sol";
+import "../../shared/libraries/LibMeta.sol";
 import "../libraries/LibERC721Marketplace.sol";
 import "./AavegotchiFacet.sol";
 

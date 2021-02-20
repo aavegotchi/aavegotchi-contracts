@@ -47,7 +47,7 @@ contract ItemsFacet is LibAppStorageModifiers {
     function itemBalances(address _account) external view returns (uint256[] memory bals_) {
         uint256 count = s.itemTypes.length;
         bals_ = new uint256[](count);
-        for (uint256 id = 0; id < count; id++) {
+        for (uint256 id; id < count; id++) {
             bals_[id] = s.items[_account][id];
         }
     }
@@ -61,7 +61,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint256 count = s.itemTypes.length;
         uint256[] memory bals_ = new uint256[](count);
         ItemType[] memory itemTypes_ = new ItemType[](count);
-        for (uint256 id = 0; id < count; id++) {
+        for (uint256 id; id < count; id++) {
             bals_[id] = s.items[_account][id];
             itemTypes_[id] = s.itemTypes[id];
         }
@@ -99,7 +99,7 @@ contract ItemsFacet is LibAppStorageModifiers {
     function itemBalancesOfToken(address _tokenContract, uint256 _tokenId) external view returns (uint256[] memory bals_) {
         uint256 count = s.itemTypes.length;
         bals_ = new uint256[](count);
-        for (uint256 id = 0; id < count; id++) {
+        for (uint256 id; id < count; id++) {
             bals_[id] = s.nftBalances[_tokenContract][_tokenId][id];
         }
     }
@@ -136,7 +136,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint256 count = s.itemTypes.length;
         itemBalanceWithSlots_ = new ItemBalanceWithSlotsIO[](count);
         uint256 numItems;
-        for (uint256 id = 0; id < count; id++) {
+        for (uint256 id; id < count; id++) {
             uint256 bal = s.nftBalances[_tokenContract][_tokenId][id];
             if (bal == 0) {
                 continue;
@@ -146,8 +146,7 @@ contract ItemsFacet is LibAppStorageModifiers {
             itemBalanceWithSlots_[numItems].slotPositions = slotPositionsToArray(id);
             itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
             uint256 traitModifiers = s.itemTypes[id].traitModifiers;
-            itemBalanceWithSlots_[numItems].traitModifiers = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
-            for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
+            for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
                 itemBalanceWithSlots_[numItems].traitModifiers[i] = int8(uint8(traitModifiers >> (i * 8)));
             }
             itemBalanceWithSlots_[numItems].minLevel = s.itemTypes[id].minLevel;
@@ -162,7 +161,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint256 count = s.itemTypes.length;
         itemBalanceWithSlots_ = new ItemBalanceWithSlotsIO[](count);
         uint256 numItems;
-        for (uint256 id = 0; id < count; id++) {
+        for (uint256 id; id < count; id++) {
             uint256 bal = s.items[_owner][id];
             if (bal == 0) {
                 continue;
@@ -172,8 +171,7 @@ contract ItemsFacet is LibAppStorageModifiers {
             itemBalanceWithSlots_[numItems].slotPositions = slotPositionsToArray(id);
             itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
             uint256 traitModifiers = s.itemTypes[id].traitModifiers;
-            itemBalanceWithSlots_[numItems].traitModifiers = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
-            for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
+            for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
                 itemBalanceWithSlots_[numItems].traitModifiers[i] = int8(uint8(traitModifiers >> (i * 8)));
             }
             itemBalanceWithSlots_[numItems].minLevel = s.itemTypes[id].minLevel;
@@ -191,8 +189,9 @@ contract ItemsFacet is LibAppStorageModifiers {
         @return bals   The _owner's balance of the token types requested (i.e. balance for each (owner, id) pair)
      */
     function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory bals) {
+        require(_owners.length == _ids.length, "ItemsFacet: _owners length not same as _ids length");
         bals = new uint256[](_owners.length);
-        for (uint256 i; i < 0; i++) {
+        for (uint256 i; i < _owners.length; i++) {
             uint256 id = _ids[i];
             address owner = _owners[i];
             bals[i] = s.items[owner][id];
@@ -201,7 +200,7 @@ contract ItemsFacet is LibAppStorageModifiers {
 
     function equippedWearables(uint256 _tokenId) external view returns (uint256[16] memory wearableIds_) {
         uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
-        for (uint16 i; i < 16; i++) {
+        for (uint256 i; i < 16; i++) {
             wearableIds_[i] = uint16(l_equippedWearables >> (i * 16));
         }
     }
@@ -271,8 +270,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         require(_itemId < s.itemTypes.length, "ItemsFacet: Item type doesn't exist");
         ItemType storage itemType = s.itemTypes[_itemId];
         uint256 traitModifiers = itemType.traitModifiers;
-        itemType_.traitModifiers = new int256[](LibAppStorage.NUMERIC_TRAITS_NUM);
-        for (uint256 i; i < LibAppStorage.NUMERIC_TRAITS_NUM; i++) {
+        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             itemType_.traitModifiers[i] = int8(uint8(traitModifiers >> (i * 8)));
         }
         itemType_.allowedCollaterals = itemType.allowedCollaterals;
@@ -315,7 +313,7 @@ contract ItemsFacet is LibAppStorageModifiers {
     */
     function uri(uint256 _id) external view returns (string memory) {
         require(_id < s.itemTypes.length, "ItemsFacet: _id not found for item");
-        return string(abi.encodePacked(s.itemsBaseUri, LibStrings.uintStr(_id)));
+        return LibStrings.strWithUint(s.itemsBaseUri, _id);
     }
 
     /**
@@ -326,7 +324,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         // require(LibMeta.msgSender() == s.contractOwner, "ItemsFacet: Must be contract owner");
         s.itemsBaseUri = _value;
         for (uint256 i; i < s.itemTypes.length; i++) {
-            emit URI(string(abi.encodePacked(_value, LibStrings.uintStr(i))), i);
+            emit URI(LibStrings.strWithUint(_value, i), i);
         }
     }
 
@@ -365,7 +363,7 @@ contract ItemsFacet is LibAppStorageModifiers {
                         break;
                     }
                 }
-                require(canBeEquipped == true, "ItemsFacet: Wearable cannot be equipped in this collateral type");
+                require(canBeEquipped, "ItemsFacet: Wearable cannot be equipped in this collateral type");
             }
 
             //Then check if this wearable is in the Aavegotchis inventory

@@ -2,10 +2,9 @@
 pragma solidity 0.8.1;
 
 import "../libraries/LibVrf.sol";
-import "../interfaces/ILink.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../libraries/LibAppStorage.sol";
-import "../libraries/LibMeta.sol";
+import "../../shared/libraries/LibMeta.sol";
 import "../libraries/LibERC721Marketplace.sol";
 
 //import "hardhat/console.sol";
@@ -84,18 +83,10 @@ import "../libraries/LibERC721Marketplace.sol";
  * @dev until it calls fulfillRandomness().
  */
 
-contract VrfFacet {
+contract VrfFacet is LibAppStorageModifiers {
     event VrfRandomNumber(uint256 indexed tokenId, uint256 randomNumber, uint256 _vrfTimeSet);
     event OpenPortals(uint256[] _tokenIds);
     event PortalOpened(uint256 indexed tokenId);
-    AppStorage internal s;
-    ILink internal immutable im_link;
-    address internal immutable im_vrfCoordinator;
-
-    constructor(address _vrfCoordinator, address _link) {
-        im_vrfCoordinator = _vrfCoordinator;
-        im_link = ILink(_link);
-    }
 
     /***********************************|
    |            Read Functions          |
@@ -120,7 +111,8 @@ contract VrfFacet {
     */
 
     function linkBalance() external view returns (uint256 linkBalance_) {
-        linkBalance_ = im_link.balanceOf(address(this));
+        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
+        linkBalance_ = vrf_ds.link.balanceOf(address(this));
     }
 
     /***********************************|
@@ -148,9 +140,9 @@ contract VrfFacet {
 
     function drawRandomNumber(uint256 _tokenId) internal {
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
-        require(vrf_ds.tokenIdToVrfPending[_tokenId] == false, "VrfFacet: VRF call is pending");
+        require(!vrf_ds.tokenIdToVrfPending[_tokenId], "VrfFacet: VRF call is pending");
         vrf_ds.tokenIdToVrfPending[_tokenId] = true;
-        require(im_link.balanceOf(address(this)) >= vrf_ds.fee, "VrfFacet: Not enough LINK");
+        require(vrf_ds.link.balanceOf(address(this)) >= vrf_ds.fee, "VrfFacet: Not enough LINK");
         bytes32 requestId = requestRandomness(vrf_ds.keyHash, vrf_ds.fee, 0);
         vrf_ds.vrfRequestIdToTokenId[requestId] = _tokenId;
         // for testing
@@ -163,7 +155,7 @@ contract VrfFacet {
         uint256 _seed
     ) internal returns (bytes32 requestId) {
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
-        im_link.transferAndCall(im_vrfCoordinator, _fee, abi.encode(_keyHash, _seed));
+        require(vrf_ds.link.transferAndCall(vrf_ds.vrfCoordinator, _fee, abi.encode(_keyHash, _seed)), "VrfFacet: link transfer failed");
         // This is the seed passed to VRFCoordinator. The oracle will mix this with
         // the hash of the block containing this request to obtain the seed/input
         // which is finally passed to the VRF cryptographic machinery.
@@ -203,7 +195,7 @@ contract VrfFacet {
 
         // require(LibMeta.msgSender() == im_vrfCoordinator, "Only VRFCoordinator can fulfill");
 
-        require(vrf_ds.tokenIdToVrfPending[tokenId] == true, "VrfFacet: VRF is not pending");
+        require(vrf_ds.tokenIdToVrfPending[tokenId], "VrfFacet: VRF is not pending");
         vrf_ds.tokenIdToVrfPending[tokenId] = false;
 
         s.tokenIdToRandomNumber[tokenId] = _randomNumber;
@@ -234,9 +226,9 @@ contract VrfFacet {
 
         // console.log("token id:", tokenId);
 
-        require(LibMeta.msgSender() == im_vrfCoordinator, "Only VRFCoordinator can fulfill");
+        require(LibMeta.msgSender() == vrf_ds.vrfCoordinator, "Only VRFCoordinator can fulfill");
 
-        require(vrf_ds.tokenIdToVrfPending[tokenId] == true, "VrfFacet: VRF is not pending");
+        require(vrf_ds.tokenIdToVrfPending[tokenId], "VrfFacet: VRF is not pending");
         vrf_ds.tokenIdToVrfPending[tokenId] = false;
 
         s.tokenIdToRandomNumber[tokenId] = _randomNumber;
@@ -247,16 +239,15 @@ contract VrfFacet {
     }
 
     // Change the fee amount that is paid for VRF random numbers
-    function changeVRFFee(uint256 _newFee, bytes32 _keyHash) external {
-        require(LibMeta.msgSender() == LibDiamond.contractOwner(), "VrfFacet: Must be contract owner");
+    function changeVRFFee(uint256 _newFee, bytes32 _keyHash) external onlyOwner {
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
         vrf_ds.fee = uint96(_newFee);
         vrf_ds.keyHash = _keyHash;
     }
 
     // Remove the LINK tokens from this contract that are used to pay for VRF random number fees
-    function removeLinkTokens(address _to, uint256 _value) external {
-        require(LibMeta.msgSender() == LibDiamond.contractOwner(), "VrfFacet: Must be contract owner");
-        im_link.transfer(_to, _value);
+    function removeLinkTokens(address _to, uint256 _value) external onlyOwner {
+        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
+        vrf_ds.link.transfer(_to, _value);
     }
 }

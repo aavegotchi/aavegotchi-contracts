@@ -117,7 +117,7 @@ contract BridgeFacet {
                 if (!s.itemTypeExists[id]) {
                     s.itemTypeExists[id] = true;
                     s.itemTypes.push(id);
-                    emit URI(string(abi.encodePacked(s.itemsBaseUri, LibStrings.uintStr(id))), id);
+                    emit URI(LibStrings.strWithUint(s.itemsBaseUri, id), id);
                 }
             }
             emit TransferBatch(msg.sender, address(0), withdrawer, ids, values);

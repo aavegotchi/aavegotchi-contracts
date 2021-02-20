@@ -58,7 +58,7 @@ module.exports = {
   contractSizer: {
     alphaSort: false,
     runOnCompile: false,
-    disambiguatePaths: false
+    disambiguatePaths: true
   },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {

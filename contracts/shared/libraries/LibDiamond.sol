@@ -9,6 +9,7 @@ pragma solidity 0.8.1;
 import "../interfaces/IDiamondCut.sol";
 import "../facets/DiamondLoupeFacet.sol";
 import "../facets/OwnershipFacet.sol";
+import "./LibMeta.sol";
 
 library LibDiamond {
     bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
@@ -59,7 +60,7 @@ library LibDiamond {
     }
 
     function enforceIsContractOwner() internal view {
-        require(msg.sender == diamondStorage().contractOwner, "LibDiamond: Must be contract owner");
+        require(LibMeta.msgSender() == diamondStorage().contractOwner, "LibDiamond: Must be contract owner");
     }
 
     event DiamondCut(IDiamondCut.FacetCut[] _diamondCut, address _init, bytes _calldata);
@@ -230,6 +231,6 @@ library LibDiamond {
         assembly {
             contractSize := extcodesize(_contract)
         }
-        require(contractSize > 0, _errorMessage);
+        require(contractSize != 0, _errorMessage);
     }
 }

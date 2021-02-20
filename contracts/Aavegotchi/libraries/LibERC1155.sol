@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibMeta.sol";
+import "../../shared/libraries/LibMeta.sol";
 
 /**
     Note: The ERC-165 identifier for this interface is 0x4e2312e0.

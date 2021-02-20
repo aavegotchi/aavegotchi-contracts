@@ -112,7 +112,7 @@ contract ItemsFacet {
         @return URI for token type
     */
     function uri(uint256 _id) external view returns (string memory) {
-        return string(abi.encodePacked(s.itemsBaseUri, LibStrings.uintStr(_id)));
+        return LibStrings.strWithUint(s.itemsBaseUri, _id);
     }
 
     /***********************************|
@@ -127,7 +127,7 @@ contract ItemsFacet {
         LibDiamond.enforceIsContractOwner();
         s.itemsBaseUri = _value;
         for (uint256 i; i < s.itemTypes.length; i++) {
-            emit URI(string(abi.encodePacked(_value, LibStrings.uintStr(s.itemTypes[i]))), i);
+            emit URI(LibStrings.strWithUint(_value, s.itemTypes[i]), i);
         }
     }
 

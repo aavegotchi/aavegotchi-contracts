@@ -229,7 +229,6 @@ contract AavegotchiFacet {
     ///  3986. The URI may point to a JSON file that conforms to the "ERC721
     ///  Metadata JSON Schema".
     function tokenURI(uint256 _tokenId) external pure returns (string memory) {
-        string memory uid = LibStrings.uintStr(_tokenId);
-        return string(abi.encodePacked("https://aavegotchi.com/metadata/aavegotchis/", uid)); //Here is your URL!
+        return LibStrings.strWithUint("https://aavegotchi.com/metadata/aavegotchis/", _tokenId); //Here is your URL!
     }
 }
