@@ -299,11 +299,10 @@ contract ItemsFacet is LibAppStorageModifiers {
         itemType_.author = itemType.author;
     }
 
-    function getItemTypes() external view returns (ItemTypeIO[] memory itemTypes_) {
-        uint256 length = s.itemTypes.length;
-        itemTypes_ = new ItemTypeIO[](length);
-        for (uint256 i; i < length; i++) {
-            itemTypes_[i] = getItemType(i);
+    function getItemTypes(uint256[] calldata _itemIds) external view returns (ItemTypeIO[] memory itemTypes_) {
+        itemTypes_ = new ItemTypeIO[](_itemIds.length);
+        for (uint256 i; i < _itemIds.length; i++) {
+            itemTypes_[i] = getItemType(_itemIds[i]);
         }
     }
 

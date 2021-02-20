@@ -105,7 +105,7 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
     }
 
     function getERC721Listings(
-        uint256 _category, // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi
+        uint256 _category, // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi.
         string memory _sort, // "listed" or "purchased"
         uint256 _length // how many items to get back or the rest available
     ) external view returns (ERC721Listing[] memory listings_) {
