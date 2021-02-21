@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibVrf.sol";
-import "../../shared/libraries/LibDiamond.sol";
-import "../libraries/LibAppStorage.sol";
-import "../../shared/libraries/LibMeta.sol";
-import "../libraries/LibERC721Marketplace.sol";
+import {LibVrf} from "../libraries/LibVrf.sol";
+import {LibAppStorageModifiers} from "../libraries/LibAppStorage.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 
 //import "hardhat/console.sol";

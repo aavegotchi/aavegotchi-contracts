@@ -1,7 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {LibAavegotchi, AavegotchiInfo, NUMERIC_TRAITS_NUM, AavegotchiCollateralTypeInfo} from "../libraries/LibAavegotchi.sol";
+import {
+    LibAavegotchi,
+    AavegotchiInfo,
+    NUMERIC_TRAITS_NUM,
+    AavegotchiCollateralTypeInfo,
+    PortalAavegotchiTraitsIO,
+    InternalPortalAavegotchiTraitsIO,
+    PORTAL_AAVEGOTCHIS_NUM
+} from "../libraries/LibAavegotchi.sol";
+
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibAppStorageModifiers, Haunt, Aavegotchi} from "../libraries/LibAppStorage.sol";
@@ -13,8 +22,6 @@ import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
 import {ERC721_RECEIVED, IERC721TokenReceiver} from "../../shared/interfaces/IERC721.sol";
 
 contract AavegotchiFacet is LibAppStorageModifiers {
-    uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
-
     /***********************************|
    |             Events                |
    |__________________________________*/
@@ -72,80 +79,12 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         return RevenueSharesIO(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, s.daoTreasury, s.rarityFarming, s.pixelCraft);
     }
 
-    struct InternalPortalAavegotchiTraitsIO {
-        uint256 randomNumber;
-        uint256 numericTraits;
-        address collateralType;
-        uint256 minimumStake;
-    }
-
-    function toNumericTraits(uint256 _randomNumber, uint256 _modifiers) internal pure returns (uint256 numericTraits_) {
-        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-            uint256 value = uint8(_randomNumber >> (i * 8));
-            if (value > 99) {
-                value /= 2;
-                if (value > 99) {
-                    value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
-                }
-            }
-            int256 mod = int8(int256(_modifiers >> (i * 8)));
-            // set slot
-            numericTraits_ |= uint256((int256(value) + mod) & 0xffff) << (16 * i);
-        }
-    }
-
-    function singlePortalAavegotchiTraits(uint256 _randomNumber, uint256 _option)
-        internal
-        view
-        returns (InternalPortalAavegotchiTraitsIO memory singlePortalAavegotchiTraits_)
-    {
-        uint256 randomNumberN = uint256(keccak256(abi.encodePacked(_randomNumber, _option)));
-        singlePortalAavegotchiTraits_.randomNumber = randomNumberN;
-        address collateralType = s.collateralTypes[randomNumberN % s.collateralTypes.length];
-        singlePortalAavegotchiTraits_.numericTraits = toNumericTraits(randomNumberN, s.collateralTypeInfo[collateralType].modifiers);
-        singlePortalAavegotchiTraits_.collateralType = collateralType;
-
-        AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
-        uint16 conversionRate = collateralInfo.conversionRate;
-
-        //Get rarity multiplier
-        uint256 multiplier = rarityMultiplier(singlePortalAavegotchiTraits_.numericTraits);
-
-        //First we get the base price of our collateral in terms of DAI
-        uint256 collateralDAIPrice = ((10**IERC20(collateralType).decimals()) / conversionRate);
-
-        //Then multiply by the rarity multiplier
-        singlePortalAavegotchiTraits_.minimumStake = collateralDAIPrice * multiplier;
-    }
-
-    struct PortalAavegotchiTraitsIO {
-        uint256 randomNumber;
-        int256[] numericTraits;
-        uint256 numericTraitsUint;
-        address collateralType;
-        uint256 minimumStake;
-    }
-
     function portalAavegotchiTraits(uint256 _tokenId)
         external
         view
         returns (PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory portalAavegotchiTraits_)
     {
-        require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-
-        uint256 randomNumber = s.tokenIdToRandomNumber[_tokenId];
-
-        for (uint256 i; i < portalAavegotchiTraits_.length; i++) {
-            InternalPortalAavegotchiTraitsIO memory single = singlePortalAavegotchiTraits(randomNumber, i);
-            portalAavegotchiTraits_[i].randomNumber = single.randomNumber;
-            portalAavegotchiTraits_[i].collateralType = single.collateralType;
-            portalAavegotchiTraits_[i].minimumStake = single.minimumStake;
-            portalAavegotchiTraits_[i].numericTraitsUint = single.numericTraits;
-            portalAavegotchiTraits_[i].numericTraits = new int256[](NUMERIC_TRAITS_NUM);
-            for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
-                portalAavegotchiTraits_[i].numericTraits[j] = int16(int256(single.numericTraits >> (j * 16)));
-            }
-        }
+        portalAavegotchiTraits_ = LibAavegotchi.portalAavegotchiTraits(_tokenId);
     }
 
     function ghstAddress() external view returns (address contract_) {
@@ -191,13 +130,8 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         requiredXp_ = LibAavegotchi.xpUntilNextLevel(_experience);
     }
 
-    function rarityMultiplier(uint256 _numericTraits) public pure returns (uint256 multiplier) {
-        uint256 rarityScore = LibAavegotchi.baseRarityScore(_numericTraits);
-        if (rarityScore < 300) return 10;
-        else if (rarityScore >= 300 && rarityScore < 450) return 10;
-        else if (rarityScore >= 450 && rarityScore <= 525) return 25;
-        else if (rarityScore >= 526 && rarityScore <= 580) return 100;
-        else if (rarityScore >= 581) return 1000;
+    function rarityMultiplier(uint256 _numericTraits) external pure returns (uint256 multiplier_) {
+        multiplier_ = LibAavegotchi.rarityMultiplier(_numericTraits);
     }
 
     //Calculates the base rarity score, including collateral modifier
@@ -284,7 +218,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
         uint256 randomNumber = s.tokenIdToRandomNumber[_tokenId];
 
-        InternalPortalAavegotchiTraitsIO memory option = singlePortalAavegotchiTraits(randomNumber, _option);
+        InternalPortalAavegotchiTraitsIO memory option = LibAavegotchi.singlePortalAavegotchiTraits(randomNumber, _option);
         aavegotchi.randomNumber = option.randomNumber;
         aavegotchi.numericTraits = option.numericTraits;
         aavegotchi.collateralType = option.collateralType;

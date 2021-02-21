@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibAppStorage.sol";
-import "../../shared/libraries/LibDiamond.sol";
+import {AppStorage, ItemType, Haunt} from "../libraries/LibAppStorage.sol";
+import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 // import "hardhat/console.sol";
-import "../../shared/libraries/LibERC20.sol";
-import "../interfaces/IERC1155.sol";
-import "../libraries/LibERC1155.sol";
-import "../libraries/LibVrf.sol";
-import "../../shared/libraries/LibMeta.sol";
+import {IERC20} from "../../shared/interfaces/IERC20.sol";
+import {LibERC1155} from "../libraries/LibERC1155.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 contract ShopFacet {
     AppStorage internal s;
@@ -61,7 +59,7 @@ contract ShopFacet {
 
         s.aavegotchiBalance[_to] += numAavegotchisToPurchase;
         s.totalSupply = uint32(tokenId);
-        LibAppStorage.purchase(totalPrice);
+        LibAavegotchi.purchase(totalPrice);
     }
 
     function purchaseItemsWithGhst(
@@ -87,6 +85,6 @@ contract ShopFacet {
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(LibMeta.msgSender());
         require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
 
-        LibAppStorage.purchase(totalPrice);
+        LibAavegotchi.purchase(totalPrice);
     }
 }

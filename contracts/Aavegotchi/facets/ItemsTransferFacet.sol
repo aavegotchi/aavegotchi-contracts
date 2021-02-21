@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibAppStorage.sol";
-import "../../shared/libraries/LibStrings.sol";
-import "../../shared/interfaces/IERC721.sol";
-import "../libraries/LibERC1155.sol";
-import "../libraries/LibERC1155Marketplace.sol";
+import {LibAppStorageModifiers} from "../libraries/LibAppStorage.sol";
+import {IERC721} from "../../shared/interfaces/IERC721.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibERC1155} from "../libraries/LibERC1155.sol";
+import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
 contract ItemsTransferFacet is LibAppStorageModifiers {
     event TransferToParent(address indexed _toContract, uint256 indexed _toTokenId, uint256 indexed _tokenTypeId, uint256 _value);

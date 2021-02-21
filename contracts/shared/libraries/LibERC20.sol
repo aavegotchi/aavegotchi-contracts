@@ -6,7 +6,7 @@ pragma solidity 0.8.1;
 *
 /******************************************************************************/
 
-import "../interfaces/IERC20.sol";
+import {IERC20} from "../interfaces/IERC20.sol";
 
 library LibERC20 {
     function transferFrom(

@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibAavegotchi.sol";
-import "../../shared/libraries/LibStrings.sol";
-import "../../shared/interfaces/IERC721.sol";
-import "../libraries/LibERC1155.sol";
-import "../libraries/LibERC1155Marketplace.sol";
-import "hardhat/console.sol";
+import {LibItems} from "../libraries/LibItems.sol";
+import {LibAppStorage, LibAppStorageModifiers, ItemType, Aavegotchi} from "../libraries/LibAppStorage.sol";
+import {LibAavegotchi, NUMERIC_TRAITS_NUM} from "../libraries/LibAavegotchi.sol";
+import {LibStrings} from "../../shared/libraries/LibStrings.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
+
+// import "hardhat/console.sol";
 
 contract ItemsFacet is LibAppStorageModifiers {
     //using LibAppStorage for AppStorage;
@@ -345,7 +347,7 @@ contract ItemsFacet is LibAppStorageModifiers {
             }
             ItemType storage itemType = s.itemTypes[wearableId];
             require(aavegotchiLevel >= itemType.minLevel, "ItemsFacet: Aavegotchi level lower than minLevel");
-            require(itemType.category == LibAppStorage.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
+            require(itemType.category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
 
             // bitmask and bitwise operators used here. Info on them: https://code.tutsplus.com/articles/understanding-bitwise-operators--active-11301
             uint256 slotAllowed = (itemType.slotPositions >> slot) & 1;
@@ -397,7 +399,7 @@ contract ItemsFacet is LibAppStorageModifiers {
             uint256 itemId = _itemIds[i];
             uint256 quantity = _quantities[i];
             ItemType memory itemType = s.itemTypes[itemId];
-            require(itemType.category == LibAppStorage.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
+            require(itemType.category == LibItems.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
 
             {
                 // prevent stack too deep error with braces here

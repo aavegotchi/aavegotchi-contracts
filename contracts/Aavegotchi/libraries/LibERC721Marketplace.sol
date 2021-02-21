@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "./LibAppStorage.sol";
+import {LibAppStorage, AppStorage, ListingListItem, ERC721Listing} from "./LibAppStorage.sol";
+
 import "../../shared/interfaces/IERC721.sol";
 
 // import "hardhat/console.sol";

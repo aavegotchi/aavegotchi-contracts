@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibAppStorage.sol";
-import "../libraries/LibAavegotchi.sol";
-import "../../shared/libraries/LibDiamond.sol";
-import "../../shared/libraries/LibERC20.sol";
-import "../../shared/interfaces/IERC20.sol";
-import "../libraries/LibERC1155.sol";
-import "./SvgFacet.sol";
+import {LibAppStorageModifiers, ItemType, WearableSet} from "../libraries/LibAppStorage.sol";
+import {AavegotchiCollateralTypeIO} from "../libraries/LibAavegotchi.sol";
+import {LibERC1155} from "../libraries/LibERC1155.sol";
+import {LibSvg} from "../libraries/LibSvg.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 contract DAOFacet is LibAppStorageModifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
@@ -139,8 +137,7 @@ contract DAOFacet is LibAppStorageModifiers {
         LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes
     ) external onlyDaoOrOwner() {
         insertItemTypes(_itemTypes);
-        //Also store the SVGs
-        SvgFacet(address(this)).storeSvg(_svg, _typesAndSizes);
+        LibSvg.storeSvg(_svg, _typesAndSizes);
     }
 
     function insertItemTypes(ItemType[] memory _itemTypes) internal {

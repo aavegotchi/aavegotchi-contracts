@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
-import "../../shared/libraries/LibERC20.sol";
-import "../../shared/libraries/LibDiamond.sol";
-import "../libraries/LibVrf.sol";
-import "../../shared/libraries/LibMeta.sol";
+import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 //import "../interfaces/IERC20.sol";
 // import "hardhat/console.sol";
 
@@ -189,58 +187,9 @@ struct AppStorage {
 }
 
 library LibAppStorage {
-    //Wearables
-    uint8 internal constant WEARABLE_SLOT_BODY = 0;
-    uint8 internal constant WEARABLE_SLOT_FACE = 1;
-    uint8 internal constant WEARABLE_SLOT_EYES = 2;
-    uint8 internal constant WEARABLE_SLOT_HEAD = 3;
-    uint8 internal constant WEARABLE_SLOT_HAND_LEFT = 4;
-    uint8 internal constant WEARABLE_SLOT_HAND_RIGHT = 5;
-    uint8 internal constant WEARABLE_SLOT_PET = 6;
-    uint8 internal constant WEARABLE_SLOT_BG = 7;
-
-    uint256 internal constant ITEM_CATEGORY_WEARABLE = 0;
-    uint256 internal constant ITEM_CATEGORY_BADGE = 1;
-    uint256 internal constant ITEM_CATEGORY_CONSUMABLE = 2;
-
-    uint8 internal constant WEARABLE_SLOTS_TOTAL = 11;
-
     function diamondStorage() internal pure returns (AppStorage storage ds) {
         assembly {
             ds.slot := 0
-        }
-    }
-
-    // Need to ensure there is no overflow of _ghst
-    function purchase(uint256 _ghst) internal {
-        AppStorage storage s = diamondStorage();
-        //33% to burn address
-        uint256 burnShare = (_ghst * 33) / 100;
-
-        //17% to Pixelcraft wallet
-        uint256 companyShare = (_ghst * 17) / 100;
-
-        //40% to rarity farming rewards
-        uint256 rarityFarmShare = (_ghst * 2) / 5;
-
-        //10% to DAO
-        uint256 daoShare = (_ghst - burnShare - companyShare - rarityFarmShare);
-
-        // Using 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF as burn address.
-        // GHST token contract does not allow transferring to address(0) address: https://etherscan.io/address/0x3F382DbD960E3a9bbCeaE22651E88158d2791550#code
-        address ghstContract = s.ghstContract;
-        LibERC20.transferFrom(ghstContract, LibMeta.msgSender(), address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
-        LibERC20.transferFrom(ghstContract, LibMeta.msgSender(), s.pixelCraft, companyShare);
-        LibERC20.transferFrom(ghstContract, LibMeta.msgSender(), s.rarityFarming, rarityFarmShare);
-        LibERC20.transferFrom(ghstContract, LibMeta.msgSender(), s.dao, daoShare);
-    }
-
-    function sqrt(uint256 x) internal pure returns (uint256 y) {
-        uint256 z = (x + 1) / 2;
-        y = x;
-        while (z < y) {
-            y = z;
-            z = (x / z + z) / 2;
         }
     }
 

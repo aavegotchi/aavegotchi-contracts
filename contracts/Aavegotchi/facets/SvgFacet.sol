@@ -2,18 +2,12 @@
 pragma solidity 0.8.1;
 
 import {AppStorage, SvgLayer} from "../libraries/LibAppStorage.sol";
-import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
-import "../../shared/libraries/LibDiamond.sol";
-import "../libraries/LibSvg.sol";
-import "../../shared/libraries/LibStrings.sol";
-import "./AavegotchiFacet.sol";
+import {LibAavegotchi, PortalAavegotchiTraitsIO, PORTAL_AAVEGOTCHIS_NUM} from "../libraries/LibAavegotchi.sol";
+import {LibAppStorageModifiers, ItemType} from "../libraries/LibAppStorage.sol";
+import {LibSvg} from "../libraries/LibSvg.sol";
+import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 
-// This contract was added as a facet to the diamond
 contract SvgFacet is LibAppStorageModifiers {
-    uint256 internal constant PORTAL_AAVEGOTCHIS_NUM = 10;
-
-    event StoreSvg(LibSvg.SvgTypeAndSizes[] _typesAndSizes);
-
     /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -274,8 +268,7 @@ contract SvgFacet is LibAppStorageModifiers {
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
         require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-        AavegotchiFacet.PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits =
-            AavegotchiFacet(address(this)).portalAavegotchiTraits(_tokenId);
+        PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = LibAavegotchi.portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
             address collateralType = l_portalAavegotchiTraits[i].collateralType;
             uint256 numericTraits = l_portalAavegotchiTraits[i].numericTraitsUint;
@@ -314,39 +307,6 @@ contract SvgFacet is LibAppStorageModifiers {
    |__________________________________*/
 
     function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) public onlyDaoOrOwner {
-        emit StoreSvg(_typesAndSizes);
-        address svgContract = storeSvgInContract(_svg);
-        uint256 offset;
-        for (uint256 i; i < _typesAndSizes.length; i++) {
-            LibSvg.SvgTypeAndSizes calldata svgTypeAndSizes = _typesAndSizes[i];
-            for (uint256 j; j < svgTypeAndSizes.sizes.length; j++) {
-                uint256 size = svgTypeAndSizes.sizes[j];
-                s.svgLayers[svgTypeAndSizes.svgType].push(SvgLayer(svgContract, uint16(offset), uint16(size)));
-                offset += size;
-            }
-        }
-    }
-
-    function storeSvgInContract(string calldata _svg) internal returns (address svgContract) {
-        require(bytes(_svg).length < 24576, "SvgStorage: Exceeded 24,576 bytes max contract size");
-        // 61_00_00 -- PUSH2 (size)
-        // 60_00 -- PUSH1 (code position)
-        // 60_00 -- PUSH1 (mem position)
-        // 39 CODECOPY
-        // 61_00_00 PUSH2 (size)
-        // 60_00 PUSH1 (mem position)
-        // f3 RETURN
-        bytes memory init = hex"610000_600e_6000_39_610000_6000_f3";
-        bytes1 size1 = bytes1(uint8(bytes(_svg).length));
-        bytes1 size2 = bytes1(uint8(bytes(_svg).length >> 8));
-        init[2] = size1;
-        init[1] = size2;
-        init[10] = size1;
-        init[9] = size2;
-        bytes memory code = abi.encodePacked(init, _svg);
-
-        assembly {
-            svgContract := create(0, add(code, 32), mload(code))
-        }
+        LibSvg.storeSvg(_svg, _typesAndSizes);
     }
 }

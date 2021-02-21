@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibAppStorage.sol";
-import "../libraries/LibAavegotchi.sol";
-import "../../shared/libraries/LibDiamond.sol";
-import "../../shared/libraries/LibERC20.sol";
-import "../../shared/interfaces/IERC20.sol";
-import "../../shared/libraries/LibMeta.sol";
+import {LibAppStorageModifiers} from "../libraries/LibAppStorage.sol";
+import {AavegotchiCollateralTypeIO} from "../libraries/LibAavegotchi.sol";
+import {LibItems} from "../libraries/LibItems.sol";
+import {LibERC20} from "../../shared/libraries/LibERC20.sol";
+import {IERC20} from "../../shared/interfaces/IERC20.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 // import "hardhat/console.sol";
 
@@ -91,7 +91,7 @@ contract CollateralFacet is LibAppStorageModifiers {
         // check that all wearables have been removed from inventory before burning
         uint256 itemTypesLength = s.itemTypes.length;
         for (uint256 itemTypeId; itemTypeId < itemTypesLength; itemTypeId++) {
-            if (s.itemTypes[itemTypeId].category == LibAppStorage.ITEM_CATEGORY_WEARABLE) {
+            if (s.itemTypes[itemTypeId].category == LibItems.ITEM_CATEGORY_WEARABLE) {
                 require(s.nftBalances[address(this)][_tokenId][itemTypeId] == 0, "CollateralFacet: Can't burn aavegotchi with wearables");
             }
         }

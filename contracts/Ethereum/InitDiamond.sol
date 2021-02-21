@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "./libraries/LibAppStorage.sol";
-import "../shared/interfaces/IERC165.sol";
-import "../shared/interfaces/IDiamondLoupe.sol";
-import "../shared/interfaces/IERC173.sol";
+import {LibDiamond} from "../shared/libraries/LibDiamond.sol";
+import {AppStorage} from "./libraries/LibAppStorage.sol";
+import {IERC165} from "../shared/interfaces/IERC165.sol";
+import {IDiamondCut} from "../shared/interfaces/IDiamondCut.sol";
+import {IDiamondLoupe} from "../shared/interfaces/IDiamondLoupe.sol";
+import {IERC173} from "../shared/interfaces/IERC173.sol";
 
 contract InitDiamond {
     AppStorage internal s;

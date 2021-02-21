@@ -7,9 +7,10 @@ pragma solidity 0.8.1;
 * Implementation of a diamond.
 /******************************************************************************/
 
-import "./libraries/LibDiamond.sol";
-import "./facets/DiamondCutFacet.sol";
-import "./facets/DiamondLoupeFacet.sol";
+import {LibDiamond} from "./libraries/LibDiamond.sol";
+import {DiamondCutFacet} from "./facets/DiamondCutFacet.sol";
+import {DiamondLoupeFacet} from "./facets/DiamondLoupeFacet.sol";
+import {OwnershipFacet} from "./facets/OwnershipFacet.sol";
 
 contract Diamond {
     constructor(address _contractOwner) {

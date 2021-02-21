@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../interfaces/ILink.sol";
+import {ILink} from "../interfaces/ILink.sol";
 
 library LibVrf {
     bytes32 internal constant DIAMOND_STORAGE_POSITION = keccak256("chainlink.VRF");

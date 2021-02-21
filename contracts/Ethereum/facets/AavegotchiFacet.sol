@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibAppStorage.sol";
-import "../../shared/interfaces/IERC20.sol";
-import "../../shared/libraries/LibStrings.sol";
-import "../../shared/libraries/LibDiamond.sol";
-import "../../shared/libraries/LibERC20.sol";
+import {AppStorage} from "../libraries/LibAppStorage.sol";
+import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
 interface ERC721TokenReceiver {

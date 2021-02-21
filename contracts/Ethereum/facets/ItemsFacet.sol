@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibAppStorage.sol";
-import "../../shared/libraries/LibDiamond.sol";
-import "../../shared/libraries/LibStrings.sol";
-import "../../shared/interfaces/IERC721.sol";
-import "../libraries/LibERC1155.sol";
-import "./AavegotchiFacet.sol";
+import {AppStorage} from "../libraries/LibAppStorage.sol";
+import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
+import {LibStrings} from "../../shared/libraries/LibStrings.sol";
+import {LibERC1155} from "../libraries/LibERC1155.sol";
 
 contract ItemsFacet {
     AppStorage internal s;
