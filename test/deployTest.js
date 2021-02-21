@@ -17,7 +17,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToInt8Array (uint, numBytes) {
+function uintToInt8Array(uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -26,7 +26,7 @@ function uintToInt8Array (uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint (array) {
+function sixteenBitArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -38,7 +38,7 @@ function sixteenBitArrayToUint (array) {
   return ethers.BigNumber.from(0)
 }
 
-function sixteenBitIntArrayToUint (array) {
+function sixteenBitIntArrayToUint(array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -54,7 +54,7 @@ function sixteenBitIntArrayToUint (array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds (uint) {
+function uintToItemIds(uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -758,7 +758,7 @@ describe('Using Consumables', async function () {
     expect(afterXP).to.equal(Number(beforeXP) + 20)
   })
 
-  /*
+  /* Commented out because we don't have a Trait Potion
   it('Using Trait Potion increases NRG by 1', async function () {
     /*
     const beforeTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
@@ -798,11 +798,6 @@ describe('Using Consumables', async function () {
     ethers.provider.send('evm_mine')
     const afterTraits = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).modifiedNumericTraits
     expect(afterTraits[0]).to.equal(Number(beforeTraits[0]) - 1)
-  })
-
-  it('Should show item balances with slots', async function () {
-    const balances = await global.itemsFacet.itemBalancesWithSlots(account)
-    //  console.log('balances:', balances)
   })
   */
 })
@@ -973,7 +968,7 @@ describe('Kinship', async function () {
   })
 })
 
-async function neglectAavegotchi (days) {
+async function neglectAavegotchi(days) {
   ethers.provider.send('evm_increaseTime', [86400 * days])
   ethers.provider.send('evm_mine')
   // daysSinceInteraction = 0
@@ -986,13 +981,13 @@ async function neglectAavegotchi (days) {
   console.log(`* Neglect Gotchi for ${days} days`)
 }
 
-async function interactAndUpdateTime () {
+async function interactAndUpdateTime() {
   await global.aavegotchiFacet.interact(['0'])
   ethers.provider.send('evm_increaseTime', [86400 / 2])
   ethers.provider.send('evm_mine')
 }
 
-async function claimGotchis (tokenIds) {
+async function claimGotchis(tokenIds) {
   console.log('token ids:')
 
   for (let index = 0; index < tokenIds.length; index++) {
@@ -1012,7 +1007,7 @@ async function claimGotchis (tokenIds) {
   }
 }
 
-function eightBitArrayToUint (array) {
+function eightBitArrayToUint(array) {
   const uint = []
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8)
