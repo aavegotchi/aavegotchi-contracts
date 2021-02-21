@@ -189,11 +189,6 @@ struct AppStorage {
 }
 
 library LibAppStorage {
-    uint8 internal constant STATUS_CLOSED_PORTAL = 0;
-    uint8 internal constant STATUS_VRF_PENDING = 1;
-    uint8 internal constant STATUS_OPEN_PORTAL = 2;
-    uint8 internal constant STATUS_AAVEGOTCHI = 3;
-
     //Wearables
     uint8 internal constant WEARABLE_SLOT_BODY = 0;
     uint8 internal constant WEARABLE_SLOT_FACE = 1;
@@ -273,7 +268,7 @@ contract LibAppStorageModifiers {
     // }
 
     modifier onlyOwner {
-        LibDiamond.enforceIsContractOwner();        
+        LibDiamond.enforceIsContractOwner();
         _;
     }
 

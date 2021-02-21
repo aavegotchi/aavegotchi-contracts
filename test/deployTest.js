@@ -86,7 +86,6 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.svgFacet = deployVars.svgFacet
     global.linkAddress = deployVars.linkAddress
     global.linkContract = deployVars.linkContract
-    global.vouchersContract = deployVars.vouchersContract
     global.diamondLoupeFacet = deployVars.diamondLoupeFacet
     global.metaTransactionsFacet = deployVars.metaTransactionsFacet
   })
@@ -125,9 +124,9 @@ describe('Opening Portals', async function () {
     //  const portalId = myPortals[0].tokenId
     await global.vrfFacet.openPortals(['0', '1', '2', '3'])
 
-    const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
+    // const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
 
-    await global.vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
+    // await global.vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
 
     myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals[0].status).to.equal(2)
@@ -521,7 +520,7 @@ describe('Items & Wearables', async function () {
       traitValue += val
 
       if (traitValue >= 50) {
-        finalScore += traitValue
+        finalScore += traitValue + 1
       } else {
         finalScore += (100 - traitValue)
       }
@@ -603,20 +602,7 @@ describe('Revenue transfers', async function () {
   })
 })
 
-describe('Shop and Vouchers', async function () {
-  it('Should create vouchers', async function () {
-    await global.vouchersContract.createVoucherTypes(account, ['10', '20', '30', '40', '50', '60', '70'], [])
-    const supply = await global.vouchersContract.totalSupplies()
-    expect(supply[5]).to.equal(60)
-  })
-
-  it('Should convert vouchers into wearables', async function () {
-    await global.vouchersContract.setApprovalForAll(shopFacet.address, true)
-    await global.shopFacet.purchaseItemsWithVouchers(account, [0, 1, 2, 3, 4, 5, 6], [10, 10, 10, 10, 10, 60, 70])
-    const itemsBalance = await global.itemsFacet.itemBalances(account)
-    expect(itemsBalance[6]).to.equal(60)
-  })
-
+describe('Shop', async function () {
   it('Should return balances and item types', async function () {
     const itemsAndBalances = await global.itemsFacet.balancesWithItemTypes(account)
     // console.log('items and balances:', itemsAndBalances.balances)
@@ -907,17 +893,17 @@ describe('Kinship', async function () {
     await interactAndUpdateTime()
 
     kinship = await global.aavegotchiFacet.kinship('0')
-    expect(kinship).to.equal(56)
+    expect(kinship).to.equal(57)
     console.log('* After 5 Interactions, kinship is:', kinship.toString())
     // 5 interactions + 1 streak bonus
 
     // Go 3 days without interacting
-    ethers.provider.send('evm_increaseTime', [2 * 86400])
+    ethers.provider.send('evm_increaseTime', [4 * 86400])
     ethers.provider.send('evm_mine')
 
     kinship = await global.aavegotchiFacet.kinship('0')
     // Took three days off and lost streak bonus
-    console.log('* 3 days w/ no interaction, kinship is:', kinship.toString())
+    console.log('* 4 days w/ no interaction, kinship is:', kinship.toString())
     expect(kinship).to.equal(53)
 
     // Take a longggg break

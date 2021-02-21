@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibAppStorage.sol";
-
-interface IMaretplaceFacet {
-    // needed by the marketplace facet to update listings
-    function updateERC1155Listing(bytes32 _listingId) external;
-}
+import {LibAppStorageModifiers} from "../libraries/LibAppStorage.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
 contract BridgeFacet is LibAppStorageModifiers {
     event WithdrawnBatch(address indexed owner, uint256[] tokenIds);
@@ -37,8 +34,7 @@ contract BridgeFacet is LibAppStorageModifiers {
             uint256 bal = s.items[owner][id];
             require(value <= bal, "Items: Doesn't have that many to transfer");
             s.items[owner][id] = bal - value;
-            bytes32 listingId = keccak256(abi.encodePacked(address(this), id, owner));
-            IMaretplaceFacet(address(this)).updateERC1155Listing(listingId);
+            LibERC1155Marketplace.updateERC1155Listing(address(this), id, owner);
         }
         emit TransferBatch(owner, owner, address(0), _ids, _values);
         emit WithdrawnItems(owner, _ids, _values);

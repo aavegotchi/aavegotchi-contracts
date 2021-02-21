@@ -2,6 +2,7 @@
 pragma solidity 0.8.1;
 
 import {AppStorage, SvgLayer} from "../libraries/LibAppStorage.sol";
+import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import "../../shared/libraries/LibDiamond.sol";
 import "../libraries/LibSvg.sol";
 import "../../shared/libraries/LibStrings.sol";
@@ -36,13 +37,13 @@ contract SvgFacet is LibAppStorageModifiers {
 
         bytes memory svg;
         uint8 status = s.aavegotchis[_tokenId].status;
-        if (status == LibAppStorage.STATUS_CLOSED_PORTAL) {
+        if (status == LibAavegotchi.STATUS_CLOSED_PORTAL) {
             // sealed closed portal
             svg = LibSvg.getSvg("aavegotchi", 0);
-        } else if (status == LibAppStorage.STATUS_OPEN_PORTAL) {
+        } else if (status == LibAavegotchi.STATUS_OPEN_PORTAL) {
             // open portal
             svg = LibSvg.getSvg("aavegotchi", 1);
-        } else if (status == LibAppStorage.STATUS_AAVEGOTCHI) {
+        } else if (status == LibAavegotchi.STATUS_AAVEGOTCHI) {
             address collateralType = s.aavegotchis[_tokenId].collateralType;
             uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
             svg = getAavegotchiSvgLayers(collateralType, numericTraits, _tokenId);
@@ -272,7 +273,7 @@ contract SvgFacet is LibAppStorageModifiers {
     }
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
-        require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
+        require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
         AavegotchiFacet.PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits =
             AavegotchiFacet(address(this)).portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {

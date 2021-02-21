@@ -45,7 +45,6 @@ async function main (scriptName) {
   let linkContract
   let keyHash
   let fee
-  let vouchersContract
   let initialHauntSize
   let ghstTokenContract
   let dao
@@ -61,9 +60,6 @@ async function main (scriptName) {
     linkContract = await LinkTokenMock.deploy()
     await linkContract.deployed()
     linkAddress = linkContract.address
-    const VouchersContract = await ethers.getContractFactory('VouchersContract')
-    vouchersContract = await VouchersContract.deploy(account)
-    await vouchersContract.deployed()
     vrfCoordinator = account
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     fee = ethers.utils.parseEther('0.0001')
@@ -109,10 +105,6 @@ async function main (scriptName) {
     linkAddress = '0x70d1F773A9f81C852087B77F6Ae6d3032B02D2AB'
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4' // wrong one
     fee = ethers.utils.parseEther('0.0001')
-
-    const VouchersContract = await ethers.getContractFactory('VouchersContract')
-    vouchersContract = await VouchersContract.deploy(account)
-    await vouchersContract.deployed()
 
     initialHauntSize = '10000'
 
@@ -174,7 +166,7 @@ async function main (scriptName) {
     'ItemsTransferFacet',
     'CollateralFacet',
     'DAOFacet',
-    ['VrfFacet', [vrfCoordinator, linkAddress]],
+    'VrfFacet',
     'ShopFacet',
     'MetaTransactionsFacet',
     'ERC1155MarketplaceFacet',
@@ -213,7 +205,8 @@ async function main (scriptName) {
       ['ERC721MarketplaceFacet', erc721MarketplaceFacet]
     ],
     owner: account,
-    args: [dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, initialHauntSize, portalPrice, childChainManager]
+    args: [dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, vrfCoordinator, linkAddress, initialHauntSize, portalPrice, childChainManager]
+
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
@@ -388,7 +381,6 @@ async function main (scriptName) {
     svgFacet: svgFacet,
     erc1155MarketplaceFacet: erc1155MarketplaceFacet,
     erc721MarketplaceFacet: erc721MarketplaceFacet,
-    vouchersContract: vouchersContract,
     shopFacet: shopFacet,
     linkAddress: linkAddress,
     linkContract: linkContract

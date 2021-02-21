@@ -39,6 +39,11 @@ struct AavegotchiInfo {
 }
 
 library LibAavegotchi {
+    uint8 constant STATUS_CLOSED_PORTAL = 0;
+    uint8 constant STATUS_VRF_PENDING = 1;
+    uint8 constant STATUS_OPEN_PORTAL = 2;
+    uint8 constant STATUS_AAVEGOTCHI = 3;
+
     event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
 
     function getAavegotchi(uint256 _tokenId) internal view returns (AavegotchiInfo memory aavegotchiInfo_) {
@@ -48,7 +53,7 @@ library LibAavegotchi {
         aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
         aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
-        if (aavegotchiInfo_.status == LibAppStorage.STATUS_AAVEGOTCHI) {
+        if (aavegotchiInfo_.status == STATUS_AAVEGOTCHI) {
             aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
             uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
             for (uint16 i; i < EQUIPPED_WEARABLE_SLOTS; i++) {
@@ -81,7 +86,7 @@ library LibAavegotchi {
         returns (int256[NUMERIC_TRAITS_NUM] memory numericTraits_, uint256 rarityScore_)
     {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        require(s.aavegotchis[_tokenId].status == LibAppStorage.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
+        require(s.aavegotchis[_tokenId].status == STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         uint256 equippedWearables = aavegotchi.equippedWearables;
         uint256 numericTraitsUint = getNumericTraits(_tokenId);

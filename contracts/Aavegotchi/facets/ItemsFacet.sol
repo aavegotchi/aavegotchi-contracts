@@ -6,6 +6,7 @@ import "../../shared/libraries/LibStrings.sol";
 import "../../shared/interfaces/IERC721.sol";
 import "../libraries/LibERC1155.sol";
 import "../libraries/LibERC1155Marketplace.sol";
+import "hardhat/console.sol";
 
 contract ItemsFacet is LibAppStorageModifiers {
     //using LibAppStorage for AppStorage;
@@ -240,7 +241,7 @@ contract ItemsFacet is LibAppStorageModifiers {
     struct ItemTypeIO {
         // treated as int8s array
         // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
-        int256[] traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
+        int256[NUMERIC_TRAITS_NUM] traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
         // this is an array of uint indexes into the collateralTypes array
 
         uint8[] allowedCollaterals; //[WEARABLE ONLY] The collaterals this wearable can be equipped to. An empty array is "any"
@@ -250,7 +251,7 @@ contract ItemsFacet is LibAppStorageModifiers {
         uint32 maxQuantity; //Total number that can be minted of this item.
         uint8 rarityScoreModifier; //Number from 1-50.
         // Each bit is a slot position. 1 is true, 0 is false
-        bool[] slotPositions; //[WEARABLE ONLY] The slots that this wearable can be added to.
+        bool[16] slotPositions; //[WEARABLE ONLY] The slots that this wearable can be added to.
         bool canPurchaseWithGhst;
         uint32 totalQuantity; //The total quantity of this item minted so far
         uint8 minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
@@ -279,7 +280,6 @@ contract ItemsFacet is LibAppStorageModifiers {
         itemType_.svgId = itemType.svgId;
         itemType_.maxQuantity = itemType.maxQuantity;
         itemType_.rarityScoreModifier = itemType.rarityScoreModifier;
-        itemType_.slotPositions = new bool[](16);
         for (uint256 i; i < 16; i++) {
             itemType_.slotPositions[i] = ((itemType.slotPositions >> i) & 1) == 1;
         }

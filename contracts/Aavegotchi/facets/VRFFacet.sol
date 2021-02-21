@@ -6,6 +6,7 @@ import "../../shared/libraries/LibDiamond.sol";
 import "../libraries/LibAppStorage.sol";
 import "../../shared/libraries/LibMeta.sol";
 import "../libraries/LibERC721Marketplace.sol";
+import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 
 //import "hardhat/console.sol";
 
@@ -129,9 +130,9 @@ contract VrfFacet is LibAppStorageModifiers {
         address owner = LibMeta.msgSender();
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
-            require(s.aavegotchis[tokenId].status == LibAppStorage.STATUS_CLOSED_PORTAL, "AavegotchiFacet: Portal is not closed");
+            require(s.aavegotchis[tokenId].status == LibAavegotchi.STATUS_CLOSED_PORTAL, "AavegotchiFacet: Portal is not closed");
             require(owner == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
-            s.aavegotchis[tokenId].status = LibAppStorage.STATUS_VRF_PENDING;
+            s.aavegotchis[tokenId].status = LibAavegotchi.STATUS_VRF_PENDING;
             drawRandomNumber(tokenId);
             LibERC721Marketplace.cancelERC721Listing(address(this), tokenId, owner);
         }
@@ -199,7 +200,7 @@ contract VrfFacet is LibAppStorageModifiers {
         vrf_ds.tokenIdToVrfPending[tokenId] = false;
 
         s.tokenIdToRandomNumber[tokenId] = _randomNumber;
-        s.aavegotchis[tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
+        s.aavegotchis[tokenId].status = LibAavegotchi.STATUS_OPEN_PORTAL;
 
         emit PortalOpened(tokenId);
         emit VrfRandomNumber(tokenId, _randomNumber, block.timestamp);
@@ -232,7 +233,7 @@ contract VrfFacet is LibAppStorageModifiers {
         vrf_ds.tokenIdToVrfPending[tokenId] = false;
 
         s.tokenIdToRandomNumber[tokenId] = _randomNumber;
-        s.aavegotchis[tokenId].status = LibAppStorage.STATUS_OPEN_PORTAL;
+        s.aavegotchis[tokenId].status = LibAavegotchi.STATUS_OPEN_PORTAL;
 
         emit PortalOpened(tokenId);
         emit VrfRandomNumber(tokenId, _randomNumber, block.timestamp);
