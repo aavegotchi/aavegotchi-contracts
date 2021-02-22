@@ -16,4 +16,5 @@ struct AppStorage {
     mapping(uint256 => address) approved;
     uint32 totalSupply;
     address rootChainManager;
+    uint32[] tokenIds;
 }

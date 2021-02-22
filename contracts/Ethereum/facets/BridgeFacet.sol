@@ -125,6 +125,7 @@ contract BridgeFacet {
                 uint256 tokenId = tokenIds[i];
                 s.aavegotchis[tokenId].owner = withdrawer;
                 s.aavegotchiBalance[withdrawer]++;
+                s.tokenIds.push(uint32(tokenId));
                 emit Transfer(address(0), withdrawer, tokenId);
             }
             s.totalSupply += uint32(tokenIds.length);

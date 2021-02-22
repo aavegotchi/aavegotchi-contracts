@@ -1,6 +1,6 @@
 /* global ethers hre */
 
-const diamond = require('../js/diamond-util/src/index.js')
+const diamond = require('../../js/diamond-util/src/index.js')
 
 function addCommas (nStr) {
   nStr += ''

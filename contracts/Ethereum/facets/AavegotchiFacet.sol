@@ -30,11 +30,6 @@ contract AavegotchiFacet {
     AppStorage internal s;
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
-    /***********************************|
-   |             Events                |
-   |__________________________________*/
-
-    // event AavegotchiBatched(uint256 indexed _batchId, uint256[] tokenIds);
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
 
@@ -48,9 +43,18 @@ contract AavegotchiFacet {
     ///  The operator can manage all NFTs of the owner.
     event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
-    /***********************************|
-   |             Read Functions         |
-   |__________________________________*/
+    function tokenIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
+        uint256 len = s.tokenIds.length;
+        tokenIds_ = new uint256[](len);
+        uint256 count;
+        for (uint256 i; i < len; i++) {
+            uint256 tokenId = s.tokenIds[i];
+            if (s.aavegotchis[tokenId].owner == _owner) {
+                tokenIds_[i] = tokenId;
+                count++;
+            }
+        }
+    }
 
     function totalSupply() external view returns (uint256 totalSupply_) {
         totalSupply_ = s.totalSupply;
