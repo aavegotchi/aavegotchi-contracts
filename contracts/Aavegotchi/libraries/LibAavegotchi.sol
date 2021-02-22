@@ -330,7 +330,7 @@ library LibAavegotchi {
         }
     }
 
-    function validateAndLowerName(string calldata _name) internal pure returns (string memory) {
+    function validateAndLowerName(string memory _name) internal pure returns (string memory) {
         bytes memory name = abi.encodePacked(_name);
         uint256 len = name.length;
         require(len != 0, "LibAavegotchi: name can't be 0 chars");

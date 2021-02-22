@@ -241,10 +241,10 @@ contract AavegotchiFacet is LibAppStorageModifiers {
 
     function setAavegotchiName(uint256 _tokenId, string calldata _name) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must claim Aavegotchi before setting name");
-        string memory lowerName = LibAavegotchi.validateAndLower(_name);
+        string memory lowerName = LibAavegotchi.validateAndLowerName(_name);
         string memory existingName = s.aavegotchis[_tokenId].name;
         require(
-            !s.aavegotchiNamesUsed[lowerName] || keccak256(lowerName) == keccak256(LibAavegotchi.validateAndLower(existingName)),
+            !s.aavegotchiNamesUsed[lowerName] || keccak256(bytes(lowerName)) == keccak256(bytes(LibAavegotchi.validateAndLowerName(existingName))),
             "AavegotchiFacet: Aavegotchi name used already"
         );
         if (bytes(existingName).length > 0) {
