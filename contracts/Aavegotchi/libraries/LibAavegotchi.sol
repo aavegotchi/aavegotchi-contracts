@@ -329,4 +329,23 @@ library LibAavegotchi {
             z = (x / z + z) / 2;
         }
     }
+
+    function validateAndLowerName(string calldata _name) internal pure returns (string memory) {
+        bytes memory name = abi.encodePacked(_name);
+        uint256 len = name.length;
+        require(len != 0, "LibAavegotchi: name can't be 0 chars");
+        require(len < 26, "LibAavegotchi: name too long");
+        uint256 char = uint256(uint8(name[0]));
+        require(char != 20, "LibAavegotchi: first char of name can't be a space");
+        char = uint256(uint8(name[len - 1]));
+        require(char != 20, "LibAavegotchi: last char of name can't be a space");
+        for (uint256 i; i < len; i++) {
+            char = uint256(uint8(name[i]));
+            require(char > 31 && char < 127, "LibAavegotchi: invalid character in Aavegotchi name.");
+            if (char < 91 && char > 64) {
+                name[i] = bytes1(uint8(char + 32));
+            }
+        }
+        return string(name);
+    }
 }

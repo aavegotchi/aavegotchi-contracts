@@ -59,8 +59,8 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         totalSupply_ = s.totalSupply;
     }
 
-    function aavegotchiNameAvailable(string memory _name) external view returns (bool available_) {
-        available_ = s.aavegotchiNamesUsed[_name];
+    function aavegotchiNameAvailable(string calldata _name) external view returns (bool available_) {
+        available_ = s.aavegotchiNamesUsed[LibAavegotchi.validateAndLowerName(_name)];
     }
 
     function currentHaunt() external view returns (uint16 hauntId_, Haunt memory haunt_) {
@@ -239,16 +239,18 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         LibERC721Marketplace.cancelERC721Listing(address(this), _tokenId, owner);
     }
 
-    function setAavegotchiName(uint256 _tokenId, string memory _name) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
-        require(bytes(_name).length > 0, "AavegotchiFacet: _name can't be empty");
-        require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must choose Aavegotchi before setting name");
-        require(bytes(_name).length < 26, "AavegotchiFacet: _name can't be greater than 25 characters");
-        require(!s.aavegotchiNamesUsed[_name], "AavegotchiFacet: Aavegotchi name used already");
+    function setAavegotchiName(uint256 _tokenId, string calldata _name) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+        require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must claim Aavegotchi before setting name");
+        string memory lowerName = LibAavegotchi.validateAndLower(_name);
         string memory existingName = s.aavegotchis[_tokenId].name;
+        require(
+            !s.aavegotchiNamesUsed[lowerName] || keccak256(lowerName) == keccak256(LibAavegotchi.validateAndLower(existingName)),
+            "AavegotchiFacet: Aavegotchi name used already"
+        );
         if (bytes(existingName).length > 0) {
             delete s.aavegotchiNamesUsed[existingName];
         }
-        s.aavegotchiNamesUsed[_name] = true;
+        s.aavegotchiNamesUsed[lowerName] = true;
         s.aavegotchis[_tokenId].name = _name;
         emit SetAavegotchiName(_tokenId, existingName, _name);
     }
