@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {LibAppStorageModifiers} from "../libraries/LibAppStorage.sol";
+import {Modifiers} from "../libraries/LibAppStorage.sol";
 import {AavegotchiCollateralTypeIO} from "../libraries/LibAavegotchi.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
@@ -10,7 +10,7 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 // import "hardhat/console.sol";
 
-contract CollateralFacet is LibAppStorageModifiers {
+contract CollateralFacet is Modifiers {
     event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
 

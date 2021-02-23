@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import {LibItems} from "../libraries/LibItems.sol";
-import {LibAppStorage, LibAppStorageModifiers, ItemType, Aavegotchi} from "../libraries/LibAppStorage.sol";
+import {LibAppStorage, Modifiers, ItemType, Aavegotchi} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi, NUMERIC_TRAITS_NUM} from "../libraries/LibAavegotchi.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -10,7 +10,7 @@ import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
 // import "hardhat/console.sol";
 
-contract ItemsFacet is LibAppStorageModifiers {
+contract ItemsFacet is Modifiers {
     //using LibAppStorage for AppStorage;
 
     event TransferToParent(address indexed _toContract, uint256 indexed _toTokenId, uint256 indexed _tokenTypeId, uint256 _value);

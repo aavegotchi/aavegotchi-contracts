@@ -7,11 +7,11 @@ import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketplace.sol";
-import {LibAppStorageModifiers} from "../libraries/LibAppStorage.sol";
+import {Modifiers} from "../libraries/LibAppStorage.sol";
 
 // import "hardhat/console.sol";
 
-contract ERC721MarketplaceFacet is LibAppStorageModifiers {
+contract ERC721MarketplaceFacet is Modifiers {
     event ERC721ListingAdd(
         uint256 indexed listingId,
         address indexed seller,

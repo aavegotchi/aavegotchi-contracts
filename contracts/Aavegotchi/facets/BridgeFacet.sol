@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {LibAppStorageModifiers} from "../libraries/LibAppStorage.sol";
+import {Modifiers} from "../libraries/LibAppStorage.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
-contract BridgeFacet is LibAppStorageModifiers {
+contract BridgeFacet is Modifiers {
     event WithdrawnBatch(address indexed owner, uint256[] tokenIds);
     event AddedAavegotchiBatch(address indexed owner, uint256[] tokenIds);
     event AddedItemsBatch(address indexed owner, uint256[] ids, uint256[] values);

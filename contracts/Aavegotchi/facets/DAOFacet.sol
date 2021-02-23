@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {LibAppStorageModifiers, ItemType, WearableSet} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ItemType, WearableSet} from "../libraries/LibAppStorage.sol";
 import {AavegotchiCollateralTypeIO} from "../libraries/LibAavegotchi.sol";
 import {LibERC1155} from "../libraries/LibERC1155.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
-contract DAOFacet is LibAppStorageModifiers {
+contract DAOFacet is Modifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
     event DaoTreasuryTransferred(address indexed previousDaoTreasury, address indexed newDaoTreasury);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
