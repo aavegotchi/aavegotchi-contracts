@@ -219,6 +219,7 @@ contract ERC721MarketplaceFacet is Modifiers {
 
         s.aavegotchis[listing.erc721TokenId].locked = false;
 
+        //To do (Nick) -- Explain why this is necessary
         if (listing.erc721TokenAddress == address(this)) {
             LibAavegotchi.transfer(seller, buyer, listing.erc721TokenId);
         } else {
