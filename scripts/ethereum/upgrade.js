@@ -50,7 +50,7 @@ async function main () {
     },
     {
       facetAddress: aavegotchiFacet.address,
-      action: FacetCutAction.Add,
+      action: FacetCutAction.Replace,
       functionSelectors: [
         getSelector('function tokenIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_)')
       ]

@@ -5,6 +5,7 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibAppStorage, AavegotchiCollateralTypeInfo, AppStorage, Aavegotchi, ItemType} from "./LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {IERC721} from "../../shared/interfaces/IERC721.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
@@ -61,6 +62,9 @@ library LibAavegotchi {
     uint8 constant STATUS_VRF_PENDING = 1;
     uint8 constant STATUS_OPEN_PORTAL = 2;
     uint8 constant STATUS_AAVEGOTCHI = 3;
+
+    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
+    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
     event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
 
@@ -347,5 +351,21 @@ library LibAavegotchi {
             }
         }
         return string(name);
+    }
+
+    function transfer(
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        s.aavegotchis[_tokenId].owner = _to;
+        s.aavegotchiBalance[_from]--;
+        s.aavegotchiBalance[_to]++;
+        if (s.approved[_tokenId] != address(0)) {
+            delete s.approved[_tokenId];
+            emit Approval(_from, address(0), _tokenId);
+        }
+        emit Transfer(_from, _to, _tokenId);
     }
 }

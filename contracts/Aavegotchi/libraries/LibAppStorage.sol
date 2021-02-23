@@ -112,7 +112,6 @@ struct ERC721Listing {
     uint256 priceInWei;
     uint256 timeCreated;
     uint256 timePurchased;
-    bool sold;
     bool cancelled;
 }
 

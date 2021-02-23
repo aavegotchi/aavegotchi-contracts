@@ -18,7 +18,7 @@ library LibERC721Marketplace {
             return;
         }
         ERC721Listing storage listing = s.erc721Listings[_listingId];
-        if (listing.cancelled == true || listing.sold == true) {
+        if (listing.cancelled == true || listing.timePurchased != 0) {
             return;
         }
         require(listing.seller == _owner, "Marketplace: owner not seller");
@@ -127,7 +127,7 @@ library LibERC721Marketplace {
             return;
         }
         ERC721Listing storage listing = s.erc721Listings[listingId];
-        if (listing.sold == true || listing.cancelled == true) {
+        if (listing.timePurchased == 0 || listing.cancelled == true) {
             return;
         }
         address owner = IERC721(listing.erc721TokenAddress).ownerOf(listing.erc721TokenId);

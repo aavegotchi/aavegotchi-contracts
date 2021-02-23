@@ -32,16 +32,6 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
         uint256 time
     );
 
-    // struct ERC721Listing {
-    //     address seller;
-    //     address erc721TokenAddress;
-    //     uint256 erc721TokenId;
-    //     uint256 category; // 0 is closed portal, 1 is open portal, 2 is Aavegotchi
-    //     uint256 priceInWei;
-    //     uint256 timeCreated;
-    //     uint256 timeLastPurchased;
-    // }
-
     function getAavegotchiListing(uint256 _listingId) external view returns (ERC721Listing memory listing_, AavegotchiInfo memory aavegotchiInfo_) {
         listing_ = s.erc721Listings[_listingId];
         require(listing_.timeCreated != 0, "ERC721Marketplace: ERC721 listing does not exist");
@@ -156,7 +146,9 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
         address owner = LibMeta.msgSender();
         require(erc721Token.ownerOf(_erc721TokenId) == owner, "ERC721Marketplace: Not owner of ERC721 token");
         require(
-            _erc721TokenAddress == address(this) || erc721Token.isApprovedForAll(owner, address(this)),
+            _erc721TokenAddress == address(this) ||
+                erc721Token.isApprovedForAll(owner, address(this)) ||
+                erc721Token.getApproved(_erc721TokenId) == address(this),
             "ERC721Marketplace: Not approved for transfer"
         );
         s.aavegotchis[_erc721TokenId].locked = true;
@@ -182,7 +174,6 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
             priceInWei: _priceInWei,
             timeCreated: block.timestamp,
             timePurchased: 0,
-            sold: false,
             cancelled: false
         });
 
@@ -197,10 +188,7 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
     }
 
     function cancelERC721ListingByToken(address _erc721TokenAddress, uint256 _erc721TokenId) external {
-        address owner = LibMeta.msgSender();
-        uint256 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][owner];
-
-        LibERC721Marketplace.cancelERC721Listing(listingId, owner);
+        LibERC721Marketplace.cancelERC721Listing(_erc721TokenAddress, _erc721TokenId, LibMeta.msgSender());
     }
 
     function cancelERC721Listing(uint256 _listingId) external {
@@ -209,7 +197,7 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
 
     function executeERC721Listing(uint256 _listingId) external {
         ERC721Listing storage listing = s.erc721Listings[_listingId];
-        require(listing.sold == false, "ERC721Marketplace: listing already sold");
+        require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
         require(listing.cancelled == false, "ERC721Marketplace: listing cancelled");
         require(listing.timeCreated != 0, "ERC721Marketplace: listing not found");
         uint256 priceInWei = listing.priceInWei;
@@ -218,10 +206,9 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
         require(seller != buyer, "ERC721Marketplace: buyer can't be seller");
         require(IERC20(s.ghstContract).balanceOf(buyer) >= priceInWei, "ERC721Marketplace: not enough GHST");
 
-        listing.sold = true;
+        listing.timePurchased = block.timestamp;
         LibERC721Marketplace.removeERC721ListingItem(_listingId, seller);
         LibERC721Marketplace.addERC721ListingItem(seller, listing.category, "purchased", _listingId);
-        listing.timePurchased = block.timestamp;
 
         uint256 daoShare = priceInWei / 100;
         uint256 pixelCraftShare = (priceInWei * 2) / 100;
@@ -232,25 +219,8 @@ contract ERC721MarketplaceFacet is LibAppStorageModifiers {
 
         s.aavegotchis[listing.erc721TokenId].locked = false;
 
-        // Have to call it like this because LibMeta.msgSender() gets in the way
         if (listing.erc721TokenAddress == address(this)) {
-            bytes memory myFunctionCall =
-                abi.encodeWithSelector(
-                    0x42842e0e, // safeTransferFrom(address,address,uint256)
-                    seller, // from
-                    buyer, // to
-                    listing.erc721TokenId
-                );
-            // address(this) becomes msg.sender
-            (bool success, bytes memory result) = address(this).call(abi.encodePacked(myFunctionCall, address(this)));
-            if (!success) {
-                if (result.length > 0) {
-                    // bubble up any reason for revert
-                    revert(string(result));
-                } else {
-                    revert("ERC721Marketplace: ERC721 safeTransferFrom failed");
-                }
-            }
+            LibAavegotchi.transfer(seller, buyer, listing.erc721TokenId);
         } else {
             // GHSTStakingDiamond
             IERC721(listing.erc721TokenAddress).safeTransferFrom(seller, buyer, listing.erc721TokenId);

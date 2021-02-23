@@ -19,26 +19,23 @@ import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
-import {ERC721_RECEIVED, IERC721TokenReceiver} from "../../shared/interfaces/IERC721.sol";
+import {IERC721, ERC721_RECEIVED, IERC721TokenReceiver} from "../../shared/interfaces/IERC721.sol";
 
-contract AavegotchiFacet is LibAppStorageModifiers {
+contract AavegotchiFacet is IERC721, LibAppStorageModifiers {
     /***********************************|
    |             Events                |
    |__________________________________*/
 
     // event AavegotchiBatched(uint256 indexed _batchId, uint256[] tokenIds);
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
 
     /// @dev This emits when the approved address for an NFT is changed or
     ///  reaffirmed. The zero address indicates there is no approved address.
     ///  When a Transfer event emits, this also indicates that the approved
     ///  address for that NFT (if any) is reset to none.
-    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
     /// @dev This emits when an operator is enabled or disabled for an owner.
     ///  The operator can manage all NFTs of the owner.
-    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
     event ClaimAavegotchi(uint256 indexed _tokenId);
 
@@ -96,7 +93,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     ///  function throws for queries about the zero address.
     /// @param _owner An address for whom to query the balance
     /// @return balance_ The number of NFTs owned by `_owner`, possibly zero
-    function balanceOf(address _owner) external view returns (uint256 balance_) {
+    function balanceOf(address _owner) external view override returns (uint256 balance_) {
         require(_owner != address(0), "AavegotchiFacet: _owner can't be address(0");
         balance_ = s.aavegotchiBalance[_owner];
     }
@@ -181,7 +178,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     ///  about them do throw.
     /// @param _tokenId The identifier for an NFT
     /// @return owner_ The address of the owner of the NFT
-    function ownerOf(uint256 _tokenId) external view returns (address owner_) {
+    function ownerOf(uint256 _tokenId) external view override returns (address owner_) {
         owner_ = s.aavegotchis[_tokenId].owner;
         require(owner_ != address(0), "AavegotchiFacet: invalid _tokenId");
     }
@@ -190,7 +187,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     /// @dev Throws if `_tokenId` is not a valid NFT.
     /// @param _tokenId The NFT to find the approved address for
     /// @return approved_ The approved address for this NFT, or the zero address if there is none
-    function getApproved(uint256 _tokenId) external view returns (address approved_) {
+    function getApproved(uint256 _tokenId) external view override returns (address approved_) {
         require(_tokenId < s.totalSupply, "ERC721: tokenId is invalid");
         approved_ = s.approved[_tokenId];
     }
@@ -199,7 +196,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     /// @param _owner The address that owns the NFTs
     /// @param _operator The address that acts on behalf of the owner
     /// @return approved_ True if `_operator` is an approved operator for `_owner`, false otherwise
-    function isApprovedForAll(address _owner, address _operator) external view returns (bool approved_) {
+    function isApprovedForAll(address _owner, address _operator) external view override returns (bool approved_) {
         approved_ = s.operators[_owner][_operator];
     }
 
@@ -309,7 +306,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         address _to,
         uint256 _tokenId,
         bytes calldata _data
-    ) external {
+    ) external override {
         internalTransferFrom(_from, _to, _tokenId);
         checkOnERC721Received(_from, _to, _tokenId, _data);
     }
@@ -324,7 +321,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         address _from,
         address _to,
         uint256 _tokenId
-    ) external {
+    ) external override {
         internalTransferFrom(_from, _to, _tokenId);
         checkOnERC721Received(_from, _to, _tokenId, "");
     }
@@ -343,7 +340,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         address _from,
         address _to,
         uint256 _tokenId
-    ) external {
+    ) external override {
         internalTransferFrom(_from, _to, _tokenId);
     }
 
@@ -360,7 +357,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         if (size > 0) {
             require(
                 ERC721_RECEIVED == IERC721TokenReceiver(_to).onERC721Received(LibMeta.msgSender(), _from, _tokenId, _data),
-                "ERC721: Transfer rejected/failed by _to"
+                "AavegotchiFacet: Transfer rejected/failed by _to"
             );
         }
     }
@@ -371,23 +368,15 @@ contract AavegotchiFacet is LibAppStorageModifiers {
         address _to,
         uint256 _tokenId
     ) internal {
-        require(_to != address(0), "ER721: Can't transfer to 0 address");
-        address owner = s.aavegotchis[_tokenId].owner;
+        require(_to != address(0), "AavegotchiFacet: Can't transfer to 0 address");
+        require(_from != address(0), "AavegotchiFacet: _from can't be 0 address");
+        require(_from == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: _from is not owner, transfer failed");
         address sender = LibMeta.msgSender();
-        require(owner != address(0), "ERC721: Invalid tokenId or can't be transferred");
         require(
-            sender == owner || sender == address(this) || s.operators[owner][sender] || sender == s.approved[_tokenId],
+            sender == _from || s.operators[_from][sender] || sender == s.approved[_tokenId],
             "AavegotchiFacet: Not owner or approved to transfer"
         );
-        require(_from == owner, "ERC721: _from is not owner, transfer failed");
-        s.aavegotchis[_tokenId].owner = _to;
-        s.aavegotchiBalance[_from]--;
-        s.aavegotchiBalance[_to]++;
-        if (s.approved[_tokenId] != address(0)) {
-            delete s.approved[_tokenId];
-            emit Approval(owner, address(0), _tokenId);
-        }
-        emit Transfer(_from, _to, _tokenId);
+        LibAavegotchi.transfer(_from, _to, _tokenId);
         LibERC721Marketplace.updateERC721Listing(address(this), _tokenId, _from);
     }
 
@@ -397,7 +386,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     ///  operator of the current owner.
     /// @param _approved The new approved NFT controller
     /// @param _tokenId The NFT to approve
-    function approve(address _approved, uint256 _tokenId) external {
+    function approve(address _approved, uint256 _tokenId) external override {
         address owner = s.aavegotchis[_tokenId].owner;
         require(owner == LibMeta.msgSender() || s.operators[owner][LibMeta.msgSender()], "ERC721: Not owner or operator of token.");
         s.approved[_tokenId] = _approved;
@@ -410,7 +399,7 @@ contract AavegotchiFacet is LibAppStorageModifiers {
     ///  multiple operators per owner.
     /// @param _operator Address to add to the set of authorized operators
     /// @param _approved True if the operator is approved, false to revoke approval
-    function setApprovalForAll(address _operator, bool _approved) external {
+    function setApprovalForAll(address _operator, bool _approved) external override {
         s.operators[LibMeta.msgSender()][_operator] = _approved;
         emit ApprovalForAll(LibMeta.msgSender(), _operator, _approved);
     }
