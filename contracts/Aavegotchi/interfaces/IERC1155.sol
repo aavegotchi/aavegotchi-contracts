@@ -1,13 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-/**
-    @title ERC-1155 Multi Token Standard
-    @dev See https://eips.ethereum.org/EIPS/eip-1155
-    Note: The ERC-165 identifier for this interface is 0xd9b67a26.
- */
-/* is ERC165 */
-interface IERC1155 {
+interface IERC1155Events {
     /**
         @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
         The `_operator` argument MUST be the address of an account/contract that is approved to make the transfer (SHOULD be msg.sender).
@@ -43,7 +37,15 @@ interface IERC1155 {
         The URI MUST point to a JSON file that conforms to the "ERC-1155 Metadata URI JSON Schema".
     */
     event URI(string _value, uint256 indexed _id);
+}
 
+/**
+    @title ERC-1155 Multi Token Standard
+    @dev See https://eips.ethereum.org/EIPS/eip-1155
+    Note: The ERC-165 identifier for this interface is 0xd9b67a26.
+ */
+/* is ERC165 */
+interface IERC1155 is IERC1155Events {
     /**
         @notice Transfers `_value` amount of an `_id` from the `_from` address to the `_to` address specified (with safety call).
         @dev Caller must be approved to manage the tokens being transferred out of the `_from` account (see "Approval" section of the standard).

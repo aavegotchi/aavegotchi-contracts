@@ -3,11 +3,11 @@ pragma solidity 0.8.1;
 
 import {AppStorage, SvgLayer} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi, PortalAavegotchiTraitsIO, PORTAL_AAVEGOTCHIS_NUM} from "../libraries/LibAavegotchi.sol";
-import {LibAppStorageModifiers, ItemType} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 
-contract SvgFacet is LibAppStorageModifiers {
+contract SvgFacet is Modifiers {
     /***********************************|
    |             Read Functions         |
    |__________________________________*/

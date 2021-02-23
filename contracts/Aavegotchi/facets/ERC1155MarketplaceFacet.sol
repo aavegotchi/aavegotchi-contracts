@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {LibAppStorageModifiers} from "../libraries/LibAppStorage.sol";
+import {Modifiers} from "../libraries/LibAppStorage.sol";
 import {LibERC1155Marketplace, ERC1155Listing} from "../libraries/LibERC1155Marketplace.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
@@ -10,7 +10,7 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 // import "hardhat/console.sol";
 
-contract ERC1155MarketplaceFacet is LibAppStorageModifiers {
+contract ERC1155MarketplaceFacet is Modifiers {
     event ERC1155ListingAdd(
         uint256 indexed listingId,
         address indexed seller,

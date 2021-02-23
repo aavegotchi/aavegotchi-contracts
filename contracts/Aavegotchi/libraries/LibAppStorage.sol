@@ -200,7 +200,7 @@ library LibAppStorage {
     }
 }
 
-contract LibAppStorageModifiers {
+contract Modifiers {
     AppStorage internal s;
     modifier onlyAavegotchiOwner(uint256 _tokenId) {
         require(LibMeta.msgSender() == s.aavegotchis[_tokenId].owner, "LibAppStorage: Only aavegotchi owner can call this function");
@@ -221,24 +221,21 @@ contract LibAppStorageModifiers {
     }
 
     modifier onlyDao {
-        require(LibMeta.msgSender() == s.dao || LibMeta.msgSender() == address(this), "Only DAO can call this function");
+        address sender = LibMeta.msgSender();
+        require(sender == s.dao || sender == address(this), "Only DAO can call this function");
         _;
     }
 
     modifier onlyDaoOrOwner {
-        require(
-            LibMeta.msgSender() == s.dao || LibMeta.msgSender() == LibDiamond.contractOwner() || LibMeta.msgSender() == address(this),
-            "LibAppStorage: Do not have access"
-        );
+        address sender = LibMeta.msgSender();
+        require(sender == s.dao || sender == LibDiamond.contractOwner() || sender == address(this), "LibAppStorage: Do not have access");
         _;
     }
 
     modifier onlyOwnerOrDaoOrGameManager {
+        address sender = LibMeta.msgSender();
         require(
-            LibMeta.msgSender() == s.dao ||
-                LibMeta.msgSender() == LibDiamond.contractOwner() ||
-                LibMeta.msgSender() == address(this) ||
-                LibMeta.msgSender() == s.gameManager,
+            sender == s.dao || sender == LibDiamond.contractOwner() || sender == address(this) || sender == s.gameManager,
             "LibAppStorage: Do not have access"
         );
         _;

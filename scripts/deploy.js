@@ -88,7 +88,7 @@ async function main (scriptName) {
     vrfCoordinator = '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9'
     linkAddress = '0xa36085F69e2889c224210F603D836748e7dC0088'
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
-    fee = ethers.utils.parseEther('0.0001')
+    fee = ethers.utils.parseEther('0.1')
     initialHauntSize = '10000'
 
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5')
