@@ -77,6 +77,8 @@ async function main(scriptName) {
     keyHash = '0xf86195cf7690c55907b2b611ebb7343a6f649bff128701cc542f0569e2c549da'
     fee = ethers.utils.parseEther('0.0001')
     initialHauntSize = '10000'
+
+    //Matic ghst token address
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7')
 
     dao = 'todo' // await accounts[1].getAddress()
