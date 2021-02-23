@@ -17,7 +17,7 @@ const { deployProject } = require('../scripts/deploy.js')
 const { itemTypes } = require('../scripts/itemTypes.js')
 
 // numBytes is how many bytes of the uint that we care about
-function uintToInt8Array(uint, numBytes) {
+function uintToInt8Array (uint, numBytes) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), numBytes).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 2) {
@@ -26,7 +26,7 @@ function uintToInt8Array(uint, numBytes) {
   return array
 }
 
-function sixteenBitArrayToUint(array) {
+function sixteenBitArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -38,7 +38,7 @@ function sixteenBitArrayToUint(array) {
   return ethers.BigNumber.from(0)
 }
 
-function sixteenBitIntArrayToUint(array) {
+function sixteenBitIntArrayToUint (array) {
   const uint = []
   for (let item of array) {
     if (typeof item === 'string') {
@@ -54,7 +54,7 @@ function sixteenBitIntArrayToUint(array) {
   return ethers.BigNumber.from(0)
 }
 
-function uintToItemIds(uint) {
+function uintToItemIds (uint) {
   uint = ethers.utils.hexZeroPad(uint.toHexString(), 32).slice(2)
   const array = []
   for (let i = 0; i < uint.length; i += 4) {
@@ -76,6 +76,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.aavegotchiDiamond = deployVars.aavegotchiDiamond
     global.bridgeFacet = deployVars.bridgeFacet
     global.aavegotchiFacet = deployVars.aavegotchiFacet
+    global.aavegotchiGameFacet = deployVars.aavegotchiGameFacet
     global.itemsFacet = deployVars.itemsFacet
     global.itemsTransferFacet = deployVars.itemsTransferFacet
     global.collateralFacet = deployVars.collateralFacet
@@ -134,10 +135,10 @@ describe('Opening Portals', async function () {
 
   it('Should contain 10 random ghosts in the portal', async function () {
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
-    const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(myPortals[0].tokenId)
+    const ghosts = await global.aavegotchiGameFacet.portalAavegotchiTraits(myPortals[0].tokenId)
     // console.log(JSON.stringify(ghosts, null, 4))
     ghosts.forEach(async (ghost) => {
-      const rarityScore = await global.aavegotchiFacet.baseRarityScore(ghost.numericTraitsUint)
+      const rarityScore = await global.aavegotchiGameFacet.baseRarityScore(ghost.numericTraitsUint)
       expect(Number(rarityScore)).to.greaterThan(298)
       expect(Number(rarityScore)).to.lessThan(602)
     })
@@ -155,18 +156,18 @@ describe('Opening Portals', async function () {
   */
 
   it('Can only set name on claimed Aavegotchi', async function () {
-    await truffleAssert.reverts(aavegotchiFacet.setAavegotchiName('1', 'Portal'), 'AavegotchiFacet: Must choose Aavegotchi before setting name')
+    await truffleAssert.reverts(aavegotchiGameFacet.setAavegotchiName('1', 'Portal'), 'AavegotchiGameFacet: Must claim Aavegotchi before setting name')
   })
 
   it('Should claim an Aavegotchi', async function () {
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     //  console.log('my portals:', myPortals)
     const tokenId = myPortals[0].tokenId
-    const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(tokenId)
+    const ghosts = await global.aavegotchiGameFacet.portalAavegotchiTraits(tokenId)
     const selectedGhost = ghosts[4]
     const minStake = selectedGhost.minimumStake
-    await global.aavegotchiFacet.claimAavegotchi(tokenId, 4, minStake)
-    const kinship = await global.aavegotchiFacet.kinship(tokenId)
+    await global.aavegotchiGameFacet.claimAavegotchi(tokenId, 4, minStake)
+    const kinship = await global.aavegotchiGameFacet.kinship(tokenId)
 
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(tokenId)
 
@@ -183,8 +184,8 @@ describe('Aavegotchi Metadata', async function () {
   it('Should set a name', async function () {
     const myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     const tokenId = myPortals[0].tokenId
-    await truffleAssert.reverts(aavegotchiFacet.setAavegotchiName(tokenId, 'ThisIsLongerThan25CharsSoItWillRevert'), "AavegotchiFacet: _name can't be greater than 25 characters")
-    await global.aavegotchiFacet.setAavegotchiName(tokenId, 'Beavis')
+    await truffleAssert.reverts(aavegotchiGameFacet.setAavegotchiName(tokenId, 'ThisIsLongerThan25CharsSoItWillRevert'), "LibAavegotchi: name can't be greater than 25 characters")
+    await global.aavegotchiGameFacet.setAavegotchiName(tokenId, 'Beavis')
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(tokenId)
     expect(aavegotchi.name).to.equal('Beavis')
   })
@@ -199,10 +200,10 @@ describe('Aavegotchi Metadata', async function () {
     // for (const trait of aavegotchi.numericTraits) {
     //   console.log(trait.toString())
     // }
-    const score = await global.aavegotchiFacet.baseRarityScore(sixteenBitIntArrayToUint([0, 0, 0, -1, 0, 0]))
+    const score = await global.aavegotchiGameFacet.baseRarityScore(sixteenBitIntArrayToUint([0, 0, 0, -1, 0, 0]))
     expect(score).to.equal(601)
 
-    const multiplier = await global.aavegotchiFacet.rarityMultiplier(sixteenBitIntArrayToUint([0, 0, 0, -1, 0, 0]))
+    const multiplier = await global.aavegotchiGameFacet.rarityMultiplier(sixteenBitIntArrayToUint([0, 0, 0, -1, 0, 0]))
     expect(multiplier).to.equal(1000)
 
     // Todo: Clientside calculate what the rarity score should be
@@ -248,7 +249,7 @@ describe('Collaterals and escrow', async function () {
   it('Base rarity score can handle negative numbers', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi('0')
     // console.log(sixteenBitIntArrayToUint([-1, -1, 0, 0, 0, 0]).toHexString())
-    const score = await global.aavegotchiFacet.baseRarityScore(sixteenBitIntArrayToUint([-10, -10, 0, 0, 0, 0]))
+    const score = await global.aavegotchiGameFacet.baseRarityScore(sixteenBitIntArrayToUint([-10, -10, 0, 0, 0, 0]))
     expect(score).to.equal(620)
   })
 
@@ -267,13 +268,13 @@ describe('Collaterals and escrow', async function () {
     // await openAndClaim(['1'])
 
     const id = '1'
-    const ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
+    const ghosts = await global.aavegotchiGameFacet.portalAavegotchiTraits(id)
     const selectedGhost = ghosts[0]
     const minStake = selectedGhost.minimumStake
     console.log('min stake:', minStake)
 
     // Claim ghost and stake
-    await global.aavegotchiFacet.claimAavegotchi(id, 0, minStake)
+    await global.aavegotchiGameFacet.claimAavegotchi(id, 0, minStake)
     //  await claimGotchis[id]
 
     // Burn Aavegotchi and return collateral stake
@@ -291,20 +292,20 @@ describe('Collaterals and escrow', async function () {
     const receiveId = '3'
 
     let id = '2'
-    let ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
+    let ghosts = await global.aavegotchiGameFacet.portalAavegotchiTraits(id)
     let selectedGhost = ghosts[0]
     let minStake = selectedGhost.minimumStake
     console.log('min stake:', minStake)
     // Claim ghost and stake
-    await global.aavegotchiFacet.claimAavegotchi(id, 0, minStake)
+    await global.aavegotchiGameFacet.claimAavegotchi(id, 0, minStake)
 
     id = '3'
-    ghosts = await global.aavegotchiFacet.portalAavegotchiTraits(id)
+    ghosts = await global.aavegotchiGameFacet.portalAavegotchiTraits(id)
     selectedGhost = ghosts[0]
     minStake = selectedGhost.minimumStake
     console.log('min stake:', minStake)
     // Claim ghost and stake
-    await global.aavegotchiFacet.claimAavegotchi(id, 0, minStake)
+    await global.aavegotchiGameFacet.claimAavegotchi(id, 0, minStake)
 
     //   await openAndClaim([burnId, receiveId])
     const initialExperience = (await aavegotchiFacet.getAavegotchi(receiveId)).experience
@@ -527,7 +528,7 @@ describe('Items & Wearables', async function () {
     })
 
     // Retrieve the final score
-    const [modifiedTraits, augmentedScore] = await global.aavegotchiFacet.modifiedTraitsAndRarityScore(testAavegotchiId)
+    const [modifiedTraits, augmentedScore] = await global.aavegotchiGameFacet.modifiedTraitsAndRarityScore(testAavegotchiId)
     // console.log('numericTraits:' + aavegotchi.modifiedNumericTraits)
     // console.log('Modified traits:' + modifiedTraits)
 
@@ -557,10 +558,10 @@ describe('Haunts', async function () {
   })
 
   it('Can create new Haunt', async function () {
-    let currentHaunt = await global.aavegotchiFacet.currentHaunt()
+    let currentHaunt = await global.aavegotchiGameFacet.currentHaunt()
     expect(currentHaunt.hauntId_).to.equal(0)
     await daoFacet.createHaunt('10000', ethers.utils.parseEther('100'), '0x000000')
-    currentHaunt = await global.aavegotchiFacet.currentHaunt()
+    currentHaunt = await global.aavegotchiGameFacet.currentHaunt()
     expect(currentHaunt.hauntId_).to.equal(1)
   })
 })
@@ -572,7 +573,7 @@ describe('Revenue transfers', async function () {
     // 2 = rarity (40%)
     // 3 = pixelcraft (17%)
 
-    let revenueShares = await global.aavegotchiFacet.revenueShares()
+    let revenueShares = await global.aavegotchiGameFacet.revenueShares()
     const beforeBalances = []
     for (let index = 0; index < 4; index++) {
       const address = revenueShares[index]
@@ -589,7 +590,7 @@ describe('Revenue transfers', async function () {
     const rarityShare = ethers.utils.parseEther('400')
     const pixelCraftShare = ethers.utils.parseEther('170')
     const shares = [burnShare, daoShare, rarityShare, pixelCraftShare]
-    revenueShares = await global.aavegotchiFacet.revenueShares()
+    revenueShares = await global.aavegotchiGameFacet.revenueShares()
 
     // Verify the new balances
     for (let index = 0; index < 4; index++) {
@@ -742,9 +743,9 @@ describe('Using Consumables', async function () {
     const kinshipPotion = await itemsFacet.getItemType('126')
     expect(kinshipPotion.kinshipBonus).to.equal(2)
 
-    const originalScore = await aavegotchiFacet.kinship(testAavegotchiId)
+    const originalScore = await aavegotchiGameFacet.kinship(testAavegotchiId)
     await itemsFacet.useConsumables(testAavegotchiId, ['126'], ['1'])
-    const boostedScore = await aavegotchiFacet.kinship(testAavegotchiId)
+    const boostedScore = await aavegotchiGameFacet.kinship(testAavegotchiId)
     expect(boostedScore).to.equal(Number(originalScore) + Number(kinshipPotion.kinshipBonus))
   })
 
@@ -875,7 +876,7 @@ describe('Kinship', async function () {
     ethers.provider.send('evm_increaseTime', [86400])
     ethers.provider.send('evm_mine')
 
-    let kinship = await global.aavegotchiFacet.kinship('0')
+    let kinship = await global.aavegotchiGameFacet.kinship('0')
     console.log('* Initial Kinship:', kinship.toString())
 
     // Use a kinship potion earlier then waited 24hrs
@@ -887,7 +888,7 @@ describe('Kinship', async function () {
     await interactAndUpdateTime()
     await interactAndUpdateTime()
 
-    kinship = await global.aavegotchiFacet.kinship('0')
+    kinship = await global.aavegotchiGameFacet.kinship('0')
     expect(kinship).to.equal(57)
     console.log('* After 5 Interactions, kinship is:', kinship.toString())
     // 5 interactions + 1 streak bonus
@@ -896,7 +897,7 @@ describe('Kinship', async function () {
     ethers.provider.send('evm_increaseTime', [4 * 86400])
     ethers.provider.send('evm_mine')
 
-    kinship = await global.aavegotchiFacet.kinship('0')
+    kinship = await global.aavegotchiGameFacet.kinship('0')
     // Took three days off and lost streak bonus
     console.log('* 4 days w/ no interaction, kinship is:', kinship.toString())
     expect(kinship).to.equal(53)
@@ -905,23 +906,23 @@ describe('Kinship', async function () {
 
     ethers.provider.send('evm_increaseTime', [14 * 86400])
     ethers.provider.send('evm_mine')
-    kinship = await global.aavegotchiFacet.kinship('0')
+    kinship = await global.aavegotchiGameFacet.kinship('0')
     console.log('* Another 14 days since last interaction, total 17 days. Kinship is', kinship.toString())
     expect(kinship).to.equal(39)
 
     ethers.provider.send('evm_increaseTime', [20 * 86400])
     ethers.provider.send('evm_mine')
-    kinship = await global.aavegotchiFacet.kinship('0')
+    kinship = await global.aavegotchiGameFacet.kinship('0')
     console.log('* 37 days since last interaction, kinship is:', kinship.toString())
     expect(kinship).to.equal(19)
 
     for (let index = 1; index < 4; index++) {
       await interactAndUpdateTime()
-      kinship = await global.aavegotchiFacet.kinship('0')
+      kinship = await global.aavegotchiGameFacet.kinship('0')
       console.log(`* Kinship after interaction ${index} is:`, kinship.toString())
       expect(kinship).to.equal(19 + (3 * index))
     }
-    kinship = await global.aavegotchiFacet.kinship('0')
+    kinship = await global.aavegotchiGameFacet.kinship('0')
     console.log('* Kinship is:', kinship.toString())
 
     console.log('* Interact 120 times')
@@ -930,35 +931,35 @@ describe('Kinship', async function () {
       await interactAndUpdateTime()
     }
 
-    kinship = await global.aavegotchiFacet.kinship('0')
+    kinship = await global.aavegotchiGameFacet.kinship('0')
     console.log('* Kinship is:', kinship.toString())
     // 37 + 3, +119
     expect(kinship).to.equal(156)
 
     // Neglect for 120 days
     neglectAavegotchi(120)
-    kinship = await global.aavegotchiFacet.kinship('0')
+    kinship = await global.aavegotchiGameFacet.kinship('0')
     expect(kinship).to.equal(36)
 
     await interactAndUpdateTime()
-    kinship = await global.aavegotchiFacet.kinship('0')
+    kinship = await global.aavegotchiGameFacet.kinship('0')
     console.log('* Interact after 120 days. Kinship should be 42')
     expect(kinship).to.equal(39)
 
     // Neglect for another 120 days
     neglectAavegotchi(120)
     console.log('* Neglect for another 120 days. Kinship should be 0')
-    kinship = await global.aavegotchiFacet.kinship('0')
+    kinship = await global.aavegotchiGameFacet.kinship('0')
     expect(kinship).to.equal(0)
 
     console.log('* Interact 2 times')
     await interactAndUpdateTime()
-    kinship = await global.aavegotchiFacet.kinship('0')
+    kinship = await global.aavegotchiGameFacet.kinship('0')
     console.log('kinship:', kinship.toString())
     expect(kinship).to.equal(3)
 
     await interactAndUpdateTime()
-    kinship = await global.aavegotchiFacet.kinship('0')
+    kinship = await global.aavegotchiGameFacet.kinship('0')
     console.log('kinship:', kinship.toString())
     expect(kinship).to.equal(6)
 
@@ -968,7 +969,7 @@ describe('Kinship', async function () {
   })
 })
 
-async function neglectAavegotchi(days) {
+async function neglectAavegotchi (days) {
   ethers.provider.send('evm_increaseTime', [86400 * days])
   ethers.provider.send('evm_mine')
   // daysSinceInteraction = 0
@@ -981,13 +982,13 @@ async function neglectAavegotchi(days) {
   console.log(`* Neglect Gotchi for ${days} days`)
 }
 
-async function interactAndUpdateTime() {
-  await global.aavegotchiFacet.interact(['0'])
+async function interactAndUpdateTime () {
+  await global.aavegotchiGameFacet.interact(['0'])
   ethers.provider.send('evm_increaseTime', [86400 / 2])
   ethers.provider.send('evm_mine')
 }
 
-async function claimGotchis(tokenIds) {
+async function claimGotchis (tokenIds) {
   console.log('token ids:')
 
   for (let index = 0; index < tokenIds.length; index++) {
@@ -1007,7 +1008,7 @@ async function claimGotchis(tokenIds) {
   }
 }
 
-function eightBitArrayToUint(array) {
+function eightBitArrayToUint (array) {
   const uint = []
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8)

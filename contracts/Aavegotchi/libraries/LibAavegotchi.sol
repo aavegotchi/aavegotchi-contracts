@@ -338,7 +338,7 @@ library LibAavegotchi {
         bytes memory name = abi.encodePacked(_name);
         uint256 len = name.length;
         require(len != 0, "LibAavegotchi: name can't be 0 chars");
-        require(len < 26, "LibAavegotchi: name too long");
+        require(len < 26, "LibAavegotchi: name can't be greater than 25 characters");
         uint256 char = uint256(uint8(name[0]));
         require(char != 20, "LibAavegotchi: first char of name can't be a space");
         char = uint256(uint8(name[len - 1]));

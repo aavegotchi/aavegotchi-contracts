@@ -100,7 +100,7 @@ async function main (scriptName) {
     pixelCraft = account // 'todo' // await accounts[3].getAddress()
   } else if (hre.network.name === 'mumbai') {
     // childChainManager = '0xb5505a6d998549090530911180f38aC5130101c6'
-    childChainManager = account
+    childChainManager = '0xb5505a6d998549090530911180f38aC5130101c6'
     vrfCoordinator = '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9' // wrong one
     linkAddress = '0x70d1F773A9f81C852087B77F6Ae6d3032B02D2AB'
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4' // wrong one
@@ -148,6 +148,7 @@ async function main (scriptName) {
   let [
     bridgeFacet,
     aavegotchiFacet,
+    aavegotchiGameFacet,
     svgFacet,
     itemsFacet,
     itemsTransferFacet,
@@ -161,6 +162,7 @@ async function main (scriptName) {
   ] = await deployFacets(
     'contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet',
     'contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet',
+    'AavegotchiGameFacet',
     'SvgFacet',
     'contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet',
     'ItemsTransferFacet',
@@ -193,6 +195,7 @@ async function main (scriptName) {
     facets: [
       ['BridgeFacet', bridgeFacet],
       ['AavegotchiFacet', aavegotchiFacet],
+      ['AavegotchiGameFacet', aavegotchiGameFacet],
       ['SvgFacet', svgFacet],
       ['ItemsFacet', itemsFacet],
       ['ItemsTransferFacet', itemsTransferFacet],
@@ -206,7 +209,6 @@ async function main (scriptName) {
     ],
     owner: account,
     args: [dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, vrfCoordinator, linkAddress, initialHauntSize, portalPrice, childChainManager]
-
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
@@ -218,6 +220,7 @@ async function main (scriptName) {
   const diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', aavegotchiDiamond.address)
   vrfFacet = await ethers.getContractAt('VrfFacet', aavegotchiDiamond.address)
   aavegotchiFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamond.address)
+  aavegotchiGameFacet = await ethers.getContractAt('AavegotchiGameFacet', aavegotchiDiamond.address)
   collateralFacet = await ethers.getContractAt('CollateralFacet', aavegotchiDiamond.address)
   shopFacet = await ethers.getContractAt('ShopFacet', aavegotchiDiamond.address)
   daoFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamond.address)
@@ -375,6 +378,7 @@ async function main (scriptName) {
     itemsFacet: itemsFacet,
     itemsTransferFacet: itemsTransferFacet,
     aavegotchiFacet: aavegotchiFacet,
+    aavegotchiGameFacet: aavegotchiGameFacet,
     collateralFacet: collateralFacet,
     vrfFacet: vrfFacet,
     daoFacet: daoFacet,
@@ -399,3 +403,5 @@ if (require.main === module) {
 }
 
 exports.deployProject = main
+
+// diamond address: 0x7560d1282A3316DE155452Af3ec248d05b8A8044

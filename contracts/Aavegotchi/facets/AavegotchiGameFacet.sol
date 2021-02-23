@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import {
-    LibAavegotchi,    
+    LibAavegotchi,
     AavegotchiInfo,
     NUMERIC_TRAITS_NUM,
     AavegotchiCollateralTypeInfo,
@@ -20,7 +20,7 @@ import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
 
-contract AavegotchiFacet is Modifiers {    
+contract AavegotchiGameFacet is Modifiers {
     /// @dev This emits when the approved address for an NFT is changed or
     ///  reaffirmed. The zero address indicates there is no approved address.
     ///  When a Transfer event emits, this also indicates that the approved
@@ -80,12 +80,12 @@ contract AavegotchiFacet is Modifiers {
         uint256 level = LibAavegotchi.aavegotchiLevel(s.aavegotchis[_tokenId].experience);
         uint256 skillPoints = (level / 3);
         uint256 usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
-        require(skillPoints >= usedSkillPoints, "AavegotchiFacet: Used skill points is greater than skill points");
+        require(skillPoints >= usedSkillPoints, "AavegotchiGameFacet: Used skill points is greater than skill points");
         return skillPoints - usedSkillPoints;
     }
 
     function abs(int8 x) private pure returns (uint256) {
-        require(x != -128, "AavegotchiFacet: x can't be -128");
+        require(x != -128, "AavegotchiGameFacet: x can't be -128");
         return uint256(int256(x >= 0 ? x : -x));
     }
 
@@ -125,8 +125,8 @@ contract AavegotchiFacet is Modifiers {
         uint256 _stakeAmount
     ) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
-        require(aavegotchi.status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
-        require(_option < PORTAL_AAVEGOTCHIS_NUM, "AavegotchiFacet: Only 10 aavegotchi options available");
+        require(aavegotchi.status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiGameFacet: Portal not open");
+        require(_option < PORTAL_AAVEGOTCHIS_NUM, "AavegotchiGameFacet: Only 10 aavegotchi options available");
 
         uint256 randomNumber = s.tokenIdToRandomNumber[_tokenId];
 
@@ -139,7 +139,7 @@ contract AavegotchiFacet is Modifiers {
         aavegotchi.interactionCount = 50;
         aavegotchi.claimTime = uint40(block.timestamp);
 
-        require(_stakeAmount >= option.minimumStake, "AavegotchiFacet: _stakeAmount less than minimum stake");
+        require(_stakeAmount >= option.minimumStake, "AavegotchiGameFacet: _stakeAmount less than minimum stake");
 
         aavegotchi.status = LibAavegotchi.STATUS_AAVEGOTCHI;
         emit ClaimAavegotchi(_tokenId);
@@ -152,12 +152,12 @@ contract AavegotchiFacet is Modifiers {
     }
 
     function setAavegotchiName(uint256 _tokenId, string calldata _name) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
-        require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "AavegotchiFacet: Must claim Aavegotchi before setting name");
+        require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "AavegotchiGameFacet: Must claim Aavegotchi before setting name");
         string memory lowerName = LibAavegotchi.validateAndLowerName(_name);
         string memory existingName = s.aavegotchis[_tokenId].name;
         require(
             !s.aavegotchiNamesUsed[lowerName] || keccak256(bytes(lowerName)) == keccak256(bytes(LibAavegotchi.validateAndLowerName(existingName))),
-            "AavegotchiFacet: Aavegotchi name used already"
+            "AavegotchiGameFacet: Aavegotchi name used already"
         );
         if (bytes(existingName).length > 0) {
             delete s.aavegotchiNamesUsed[existingName];
@@ -171,10 +171,10 @@ contract AavegotchiFacet is Modifiers {
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             address owner = s.aavegotchis[tokenId].owner;
-            require(owner != address(0), "AavegotchiFacet: Invalid tokenId, is not owned or doesn't exist");
+            require(owner != address(0), "AavegotchiGameFacet: Invalid tokenId, is not owned or doesn't exist");
             require(
                 LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || s.approved[tokenId] == LibMeta.msgSender(),
-                "AavegotchiFacet: Not owner of token or approved"
+                "AavegotchiGameFacet: Not owner of token or approved"
             );
             LibAavegotchi.interact(tokenId);
         }
@@ -197,7 +197,7 @@ contract AavegotchiFacet is Modifiers {
             numericTraits |= uint256(trait & 0xffff) << position;
         }
         // handles underflow
-        require(availableSkillPoints(_tokenId) >= totalUsed, "AavegotchiFacet: Not enough skill points");
+        require(availableSkillPoints(_tokenId) >= totalUsed, "AavegotchiGameFacet: Not enough skill points");
         s.aavegotchis[_tokenId].numericTraits = numericTraits;
         //Increment used skill points
         s.aavegotchis[_tokenId].usedSkillPoints += uint16(totalUsed);

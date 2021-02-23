@@ -127,7 +127,7 @@ contract ItemsFacet is Modifiers {
         uint256 balance;
         uint256[] slotPositions;
         string name;
-        int256[] traitModifiers;
+        int256[NUMERIC_TRAITS_NUM] traitModifiers;
         uint256 minLevel;
     }
 
