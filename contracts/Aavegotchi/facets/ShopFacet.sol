@@ -5,19 +5,12 @@ import {AppStorage, ItemType, Haunt} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 // import "hardhat/console.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
+import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibERC1155} from "../libraries/LibERC1155.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 contract ShopFacet {
     AppStorage internal s;
-    event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
-    bytes4 internal constant ERC1155_BATCH_ACCEPTED = 0xbc197c81; // Return value from `onERC1155BatchReceived` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`).
-
-    /***********************************|
-   |             Events         |
-   |__________________________________*/
-
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
 
     event BuyPortals(
         address indexed _from,
@@ -32,10 +25,6 @@ contract ShopFacet {
 
     event PurchaseItemsWithVouchers(address indexed _from, address indexed _to, uint256[] _itemIds, uint256[] _quantities);
 
-    /***********************************|
-   |             Write Functions        |
-   |__________________________________*/
-
     function buyPortals(address _to, uint256 _ghst) external {
         uint256 currentHauntId = s.currentHauntId;
         Haunt memory haunt = s.haunts[currentHauntId];
@@ -47,18 +36,20 @@ contract ShopFacet {
         uint256 hauntCount = haunt.totalCount + numAavegotchisToPurchase;
         require(hauntCount <= haunt.hauntMaxSize, "ShopFacet: Exceeded max number of aavegotchis for this haunt");
         s.haunts[currentHauntId].totalCount = uint24(hauntCount);
-        uint256 tokenId = s.totalSupply;
+        uint32 tokenId = s.tokenIdCounter;
         uint256 totalPrice = _ghst - (_ghst % haunt.portalPrice);
         emit BuyPortals(LibMeta.msgSender(), _to, tokenId, numAavegotchisToPurchase, totalPrice);
         for (uint256 i; i < numAavegotchisToPurchase; i++) {
             s.aavegotchis[tokenId].owner = _to;
             s.aavegotchis[tokenId].hauntId = uint16(currentHauntId);
-            emit Transfer(address(0), _to, tokenId);
+            s.tokenIdIndexes[tokenId] = s.tokenIds.length;
+            s.tokenIds.push(tokenId);
+            s.ownerTokenIdIndexes[_to][tokenId] = s.ownerTokenIds[_to].length;
+            s.ownerTokenIds[_to].push(tokenId);
+            emit LibERC721.Transfer(address(0), _to, tokenId);
             tokenId++;
         }
-
-        s.aavegotchiBalance[_to] += numAavegotchisToPurchase;
-        s.totalSupply = uint32(tokenId);
+        s.tokenIdCounter = tokenId;
         LibAavegotchi.purchase(totalPrice);
     }
 

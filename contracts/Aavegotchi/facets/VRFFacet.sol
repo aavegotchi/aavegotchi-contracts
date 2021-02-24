@@ -140,7 +140,7 @@ contract VrfFacet is Modifiers {
 
     function drawRandomNumber(uint256 _tokenId) internal {
         LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
-        require(!vrf_ds.tokenIdToVrfPending[_tokenId], "VrfFacet: VRF call is pending");
+        require(vrf_ds.tokenIdToVrfPending[_tokenId] == false, "VrfFacet: VRF call is pending");
         vrf_ds.tokenIdToVrfPending[_tokenId] = true;
         require(vrf_ds.link.balanceOf(address(this)) >= vrf_ds.fee, "VrfFacet: Not enough LINK");
         bytes32 requestId = requestRandomness(vrf_ds.keyHash, vrf_ds.fee, 0);

@@ -216,7 +216,7 @@ library LibDiamond {
                 enforceHasContractCode(_init, "LibDiamondCut: _init address has no code");
             }
             (bool success, bytes memory error) = _init.delegatecall(_calldata);
-            if (!success) {
+            if (success == false) {
                 if (error.length > 0) {
                     // bubble up the error
                     revert(string(error));

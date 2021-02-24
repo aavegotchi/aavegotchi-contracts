@@ -103,23 +103,34 @@ contract CollateralFacet is Modifiers {
             s.aavegotchis[_toId].experience += experience;
         }
 
-        s.aavegotchiBalance[LibMeta.msgSender()]--;
+        // remove
+        address owner = LibMeta.msgSender();
+        uint256 index = s.ownerTokenIdIndexes[owner][_tokenId];
+        uint256 lastIndex = s.ownerTokenIds[owner].length - 1;
+        if (index != lastIndex) {
+            uint32 lastTokenId = s.ownerTokenIds[owner][lastIndex];
+            s.ownerTokenIds[owner][index] = lastTokenId;
+            s.ownerTokenIdIndexes[owner][lastTokenId] = index;
+        }
+        s.ownerTokenIds[owner].pop();
+        delete s.ownerTokenIdIndexes[owner][_tokenId];
+
         // delete token approval if any
         if (s.approved[_tokenId] != address(0)) {
             delete s.approved[_tokenId];
-            emit Approval(LibMeta.msgSender(), address(0), _tokenId);
+            emit Approval(owner, address(0), _tokenId);
         }
 
         // transfer all collateral to LibMeta.msgSender()
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         uint256 reduceAmount = IERC20(collateralType).balanceOf(escrow);
         emit DecreaseStake(_tokenId, reduceAmount);
-        LibERC20.transferFrom(collateralType, escrow, LibMeta.msgSender(), reduceAmount);
+        LibERC20.transferFrom(collateralType, escrow, owner, reduceAmount);
 
         // delete aavegotchi info
         delete s.aavegotchiNamesUsed[s.aavegotchis[_tokenId].name];
         delete s.aavegotchis[_tokenId];
 
-        emit Transfer(LibMeta.msgSender(), address(0), _tokenId);
+        emit Transfer(owner, address(0), _tokenId);
     }
 }

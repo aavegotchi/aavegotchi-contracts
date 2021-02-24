@@ -7,6 +7,7 @@ import {LibAavegotchi, NUMERIC_TRAITS_NUM} from "../libraries/LibAavegotchi.sol"
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
+import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 
 // import "hardhat/console.sol";
 
@@ -14,10 +15,8 @@ contract ItemsFacet is Modifiers {
     //using LibAppStorage for AppStorage;
 
     event TransferToParent(address indexed _toContract, uint256 indexed _toTokenId, uint256 indexed _tokenTypeId, uint256 _value);
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
 
     event EquipWearables(uint256 indexed _tokenId, uint256 _oldWearables, uint256 _newWearables);
-
     event UseConsumables(uint256 indexed _tokenId, uint256[] _itemIds, uint256[] _quantities);
 
     uint16 internal constant SLOT_BODY = 0;
@@ -27,20 +26,6 @@ contract ItemsFacet is Modifiers {
     uint16 internal constant SLOT_HAND_LEFT = 4;
     uint16 internal constant SLOT_HAND_RIGHT = 5;
     uint16 internal constant SLOT_PET = 6;
-
-    /***********************************|
-   |             Events                  |
-   |__________________________________*/
-
-    event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
-    event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
-
-    /**
-        @dev MUST emit when the URI is updated for a token ID.
-        URIs are defined in RFC 3986.
-        The URI MUST point to a JSON file that conforms to the "ERC-1155 Metadata URI JSON Schema".
-    */
-    event URI(string _value, uint256 indexed _id);
 
     /***********************************|
    |             Read Functions         |
@@ -68,10 +53,8 @@ contract ItemsFacet is Modifiers {
             bals_[id] = s.items[_account][id];
             itemTypes_[id] = s.itemTypes[id];
         }
-
         output_.balances = bals_;
         output_.itemTypes = itemTypes_;
-
         return output_;
     }
 
@@ -325,7 +308,7 @@ contract ItemsFacet is Modifiers {
         // require(LibMeta.msgSender() == s.contractOwner, "ItemsFacet: Must be contract owner");
         s.itemsBaseUri = _value;
         for (uint256 i; i < s.itemTypes.length; i++) {
-            emit URI(LibStrings.strWithUint(_value, i), i);
+            emit LibERC1155.URI(LibStrings.strWithUint(_value, i), i);
         }
     }
 
@@ -379,7 +362,7 @@ contract ItemsFacet is Modifiers {
                 s.items[sender][wearableId] = balance - 1;
                 s.nftBalances[address(this)][_tokenId][wearableId] += 1;
                 emit TransferToParent(address(this), _tokenId, wearableId, 1);
-                emit TransferSingle(sender, sender, address(this), wearableId, 1);
+                emit LibERC1155.TransferSingle(sender, sender, address(this), wearableId, 1);
                 LibERC1155Marketplace.updateERC1155Listing(address(this), wearableId, sender);
             }
         }
@@ -432,6 +415,6 @@ contract ItemsFacet is Modifiers {
             LibERC1155Marketplace.updateERC1155Listing(address(this), itemId, sender);
         }
         emit UseConsumables(_tokenId, _itemIds, _quantities);
-        emit TransferBatch(sender, sender, address(0), _itemIds, _quantities);
+        emit LibERC1155.TransferBatch(sender, sender, address(0), _itemIds, _quantities);
     }
 }

@@ -3,45 +3,12 @@ pragma solidity 0.8.1;
 
 import {AppStorage} from "../libraries/LibAppStorage.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
-
-/// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
-interface ERC721TokenReceiver {
-    /// @notice Handle the receipt of an NFT
-    /// @dev The ERC721 smart contract calls this function on the recipient
-    ///  after a `transfer`. This function MAY throw to revert and reject the
-    ///  transfer. Return of other than the magic value MUST result in the
-    ///  transaction being reverted.
-    ///  Note: the contract address is always the message sender.
-    /// @param _operator The address which called `safeTransferFrom` function
-    /// @param _from The address which previously owned the token
-    /// @param _tokenId The NFT identifier which is being transferred
-    /// @param _data Additional data with no specified format
-    /// @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
-    ///  unless throwing
-    function onERC721Received(
-        address _operator,
-        address _from,
-        uint256 _tokenId,
-        bytes calldata _data
-    ) external returns (bytes4);
-}
+import {LibERC721} from "../../shared/libraries/LibERC721.sol";
+import {IERC721TokenReceiver} from "../../shared/interfaces/IERC721TokenReceiver.sol";
 
 contract AavegotchiFacet {
     AppStorage internal s;
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
-
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
-    event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
-
-    /// @dev This emits when the approved address for an NFT is changed or
-    ///  reaffirmed. The zero address indicates there is no approved address.
-    ///  When a Transfer event emits, this also indicates that the approved
-    ///  address for that NFT (if any) is reset to none.
-    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
-
-    /// @dev This emits when an operator is enabled or disabled for an owner.
-    ///  The operator can manage all NFTs of the owner.
-    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
     function tokenIdsOfOwner(address _owner) external view returns (uint256[] memory tokenIds_) {
         uint256 len = s.tokenIds.length;
@@ -128,7 +95,7 @@ contract AavegotchiFacet {
         }
         if (size > 0) {
             require(
-                ERC721_RECEIVED == ERC721TokenReceiver(_to).onERC721Received(msg.sender, _from, _tokenId, _data),
+                ERC721_RECEIVED == IERC721TokenReceiver(_to).onERC721Received(msg.sender, _from, _tokenId, _data),
                 "ERC721: Transfer rejected/failed by _to"
             );
         }
@@ -152,7 +119,7 @@ contract AavegotchiFacet {
         }
         if (size > 0) {
             require(
-                ERC721_RECEIVED == ERC721TokenReceiver(_to).onERC721Received(msg.sender, _from, _tokenId, ""),
+                ERC721_RECEIVED == IERC721TokenReceiver(_to).onERC721Received(msg.sender, _from, _tokenId, ""),
                 "ERC721: Transfer rejected/failed by _to"
             );
         }
@@ -195,9 +162,9 @@ contract AavegotchiFacet {
         s.aavegotchiBalance[_to]++;
         if (s.approved[_tokenId] != address(0)) {
             delete s.approved[_tokenId];
-            emit Approval(owner, address(0), _tokenId);
+            emit LibERC721.Approval(owner, address(0), _tokenId);
         }
-        emit Transfer(_from, _to, _tokenId);
+        emit LibERC721.Transfer(_from, _to, _tokenId);
     }
 
     /// @notice Change or reaffirm the approved address for an NFT
@@ -210,7 +177,7 @@ contract AavegotchiFacet {
         address owner = s.aavegotchis[_tokenId].owner;
         require(owner == msg.sender || s.operators[owner][msg.sender], "ERC721: Not owner or operator of token.");
         s.approved[_tokenId] = _approved;
-        emit Approval(owner, _approved, _tokenId);
+        emit LibERC721.Approval(owner, _approved, _tokenId);
     }
 
     /// @notice Enable or disable approval for a third party ("operator") to manage
@@ -221,7 +188,7 @@ contract AavegotchiFacet {
     /// @param _approved True if the operator is approved, false to revoke approval
     function setApprovalForAll(address _operator, bool _approved) external {
         s.operators[msg.sender][_operator] = _approved;
-        emit ApprovalForAll(msg.sender, _operator, _approved);
+        emit LibERC721.ApprovalForAll(msg.sender, _operator, _approved);
     }
 
     function name() external pure returns (string memory) {

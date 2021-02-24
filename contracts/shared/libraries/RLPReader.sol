@@ -81,7 +81,7 @@ library RLPReader {
     }
 
     function toAddress(RLPItem memory item) internal pure returns (address) {
-        require(!isList(item), "RLPReader: DECODING_LIST_AS_ADDRESS");
+        require(isList(item) == false, "RLPReader: DECODING_LIST_AS_ADDRESS");
         // 1 byte for the length prefix
         require(item.len == 21, "RLPReader: INVALID_ADDRESS_LENGTH");
 
@@ -89,7 +89,7 @@ library RLPReader {
     }
 
     function toUint(RLPItem memory item) internal pure returns (uint256) {
-        require(!isList(item), "RLPReader: DECODING_LIST_AS_UINT");
+        require(isList(item) == false, "RLPReader: DECODING_LIST_AS_UINT");
         require(item.len <= 33, "RLPReader: INVALID_UINT_LENGTH");
 
         uint256 itemLength = _itemLength(item.memPtr);

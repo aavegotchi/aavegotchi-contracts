@@ -5,7 +5,7 @@ import {Modifiers} from "../libraries/LibAppStorage.sol";
 import {LibERC1155Marketplace, ERC1155Listing} from "../libraries/LibERC1155Marketplace.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
-import {IERC1155} from "../interfaces/IERC1155.sol";
+import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 // import "hardhat/console.sol";
@@ -90,7 +90,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         }
     }
 
-    function setListingFee(uint256 _listingFeeInWei) external onlyOwner {
+    function setListingFee(uint256 _listingFeeInWei) external onlyDaoOrOwner {
         s.listingFeeInWei = _listingFeeInWei;
         emit ChangedListingFee(s.listingFeeInWei);
     }
@@ -111,27 +111,27 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 _quantity,
         uint256 _priceInWei
     ) external {
-        address owner = LibMeta.msgSender();
+        address seller = LibMeta.msgSender();
         uint256 category = getERC1155Category(_erc1155TokenAddress, _erc1155TypeId);
 
         IERC1155 erc1155Token = IERC1155(_erc1155TokenAddress);
-        require(erc1155Token.balanceOf(owner, _erc1155TypeId) >= _quantity, "ERC1155Marketplace: Not enough ERC1155 token");
+        require(erc1155Token.balanceOf(seller, _erc1155TypeId) >= _quantity, "ERC1155Marketplace: Not enough ERC1155 token");
         require(
-            _erc1155TokenAddress == address(this) || erc1155Token.isApprovedForAll(LibMeta.msgSender(), address(this)),
+            _erc1155TokenAddress == address(this) || erc1155Token.isApprovedForAll(seller, address(this)),
             "ERC1155Marketplace: Not approved for transfer"
         );
 
         uint256 cost = _quantity * _priceInWei;
         require(cost >= 1e18, "ERC1155Marketplace: cost should be 1 GHST or larger");
 
-        uint256 listingId = s.erc1155TokenToListingId[_erc1155TokenAddress][_erc1155TypeId][owner];
+        uint256 listingId = s.erc1155TokenToListingId[_erc1155TokenAddress][_erc1155TypeId][seller];
         if (listingId == 0) {
             s.nextERC1155ListingId++;
             listingId = s.nextERC1155ListingId;
-            s.erc1155TokenToListingId[_erc1155TokenAddress][_erc1155TypeId][owner] = listingId;
+            s.erc1155TokenToListingId[_erc1155TokenAddress][_erc1155TypeId][seller] = listingId;
             s.erc1155Listings[listingId] = ERC1155Listing({
                 listingId: listingId,
-                seller: LibMeta.msgSender(),
+                seller: seller,
                 erc1155TokenAddress: _erc1155TokenAddress,
                 erc1155TypeId: _erc1155TypeId,
                 category: category,
@@ -143,17 +143,8 @@ contract ERC1155MarketplaceFacet is Modifiers {
                 sold: false,
                 cancelled: false
             });
-            LibERC1155Marketplace.addERC1155ListingItem(owner, category, "listed", listingId);
-            emit ERC1155ListingAdd(
-                listingId,
-                LibMeta.msgSender(),
-                _erc1155TokenAddress,
-                _erc1155TypeId,
-                category,
-                _quantity,
-                _priceInWei,
-                block.timestamp
-            );
+            LibERC1155Marketplace.addERC1155ListingItem(seller, category, "listed", listingId);
+            emit ERC1155ListingAdd(listingId, seller, _erc1155TokenAddress, _erc1155TypeId, category, _quantity, _priceInWei, block.timestamp);
         } else {
             ERC1155Listing storage listing = s.erc1155Listings[listingId];
             listing.quantity = _quantity;
@@ -234,7 +225,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
                 );
             // address(this) becomes msg.sender
             (bool success, bytes memory result) = address(this).call(abi.encodePacked(myFunctionCall, address(this)));
-            if (!success) {
+            if (success == false) {
                 if (result.length > 0) {
                     // bubble up any reason for revert
                     revert(string(result));

@@ -126,18 +126,21 @@ struct AppStorage {
     mapping(address => uint256) collateralTypeIndexes;
     mapping(bytes32 => SvgLayer[]) svgLayers;
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) nftBalances;
-    mapping(address => uint256) aavegotchiBalance;
     ItemType[] itemTypes;
     WearableSet[] wearableSets;
     mapping(uint256 => Haunt) haunts;
     mapping(address => mapping(uint256 => uint256)) items;
     mapping(uint256 => uint256) tokenIdToRandomNumber;
     mapping(uint256 => Aavegotchi) aavegotchis;
+    mapping(address => uint32[]) ownerTokenIds;
+    mapping(address => mapping(uint256 => uint256)) ownerTokenIdIndexes;
+    uint32[] tokenIds;
+    mapping(uint256 => uint256) tokenIdIndexes;
     mapping(address => mapping(address => bool)) operators;
     mapping(uint256 => address) approved;
     mapping(string => bool) aavegotchiNamesUsed;
     mapping(address => uint256) metaNonces;
-    uint32 totalSupply;
+    uint32 tokenIdCounter;
     uint16 currentHauntId;
     //Addresses
     address[] collateralTypes;

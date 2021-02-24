@@ -111,7 +111,7 @@ contract BridgeFacet {
                 uint256 id = ids[i];
                 uint256 value = values[i];
                 s.items[withdrawer][id] += value;
-                if (!s.itemTypeExists[id]) {
+                if (s.itemTypeExists[id] == false) {
                     s.itemTypeExists[id] = true;
                     s.itemTypes.push(id);
                     emit URI(LibStrings.strWithUint(s.itemsBaseUri, id), id);

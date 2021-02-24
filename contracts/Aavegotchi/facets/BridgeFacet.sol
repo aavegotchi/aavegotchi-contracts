@@ -47,8 +47,8 @@ contract BridgeFacet is Modifiers {
             uint256 tokenId = _tokenIds[i];
             require(owner == s.aavegotchis[tokenId].owner, "BridgeFacet: Not owner of token");
             s.aavegotchis[tokenId].owner = address(this);
-            s.aavegotchiBalance[owner]--;
-            s.aavegotchiBalance[address(this)]++;
+            //s.aavegotchiBalance[owner]--;
+            //s.aavegotchiBalance[address(this)]++;
             if (s.approved[tokenId] != address(0)) {
                 delete s.approved[tokenId];
                 emit Approval(owner, address(0), tokenId);
@@ -85,8 +85,8 @@ contract BridgeFacet is Modifiers {
                 uint256 tokenId = tokenIds[i];
                 require(address(this) == s.aavegotchis[tokenId].owner, "BridgeFacet: Not owner of token");
                 s.aavegotchis[tokenId].owner = user;
-                s.aavegotchiBalance[address(this)]--;
-                s.aavegotchiBalance[user]++;
+                // s.aavegotchiBalance[address(this)]--;
+                // s.aavegotchiBalance[user]++;
                 emit Transfer(address(this), user, tokenId);
             }
             emit AddedAavegotchiBatch(user, tokenIds);

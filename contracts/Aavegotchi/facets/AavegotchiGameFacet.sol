@@ -168,12 +168,13 @@ contract AavegotchiGameFacet is Modifiers {
     }
 
     function interact(uint256[] calldata _tokenIds) external {
+        address sender = LibMeta.msgSender();
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             address owner = s.aavegotchis[tokenId].owner;
             require(owner != address(0), "AavegotchiGameFacet: Invalid tokenId, is not owned or doesn't exist");
             require(
-                LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || s.approved[tokenId] == LibMeta.msgSender(),
+                sender == owner || s.operators[owner][sender] || s.approved[tokenId] == sender,
                 "AavegotchiGameFacet: Not owner of token or approved"
             );
             LibAavegotchi.interact(tokenId);

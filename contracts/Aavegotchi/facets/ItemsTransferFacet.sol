@@ -8,11 +8,6 @@ import {LibERC1155} from "../libraries/LibERC1155.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
 contract ItemsTransferFacet is Modifiers {
-    event TransferToParent(address indexed _toContract, uint256 indexed _toTokenId, uint256 indexed _tokenTypeId, uint256 _value);
-    event TransferFromParent(address indexed _fromContract, uint256 indexed _fromTokenId, uint256 indexed _tokenTypeId, uint256 _value);
-    event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
-    event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
-
     /**
         @notice Transfers `_value` amount of an `_id` from the `_from` address to the `_to` address specified (with safety call).
         @dev Caller must be approved to manage the tokens being transferred out of the `_from` account (see "Approval" section of the standard).
@@ -104,8 +99,8 @@ contract ItemsTransferFacet is Modifiers {
         require(_value <= bal, "Items: Doesn't have that many to transfer");
         s.items[_from][_id] = bal - _value;
         s.nftBalances[_toContract][_toTokenId][_id] += _value;
-        emit TransferSingle(sender, _from, _toContract, _id, _value);
-        emit TransferToParent(_toContract, _toTokenId, _id, _value);
+        emit LibERC1155.TransferSingle(sender, _from, _toContract, _id, _value);
+        emit LibERC1155.TransferToParent(_toContract, _toTokenId, _id, _value);
         LibERC1155Marketplace.updateERC1155Listing(address(this), _id, _from);
     }
 
@@ -158,8 +153,8 @@ contract ItemsTransferFacet is Modifiers {
         }
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal;
         s.items[_to][_id] += _value;
-        emit TransferSingle(LibMeta.msgSender(), _fromContract, _to, _id, _value);
-        emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
+        emit LibERC1155.TransferSingle(LibMeta.msgSender(), _fromContract, _to, _id, _value);
+        emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, _id, _value);
     }
 
     function batchTransferFromParent(
@@ -183,9 +178,9 @@ contract ItemsTransferFacet is Modifiers {
             }
             s.nftBalances[_fromContract][_fromTokenId][id] = bal;
             s.items[_to][id] += value;
-            emit TransferFromParent(_fromContract, _fromTokenId, id, value);
+            emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, id, value);
         }
-        emit TransferBatch(LibMeta.msgSender(), _fromContract, _to, _ids, _values);
+        emit LibERC1155.TransferBatch(LibMeta.msgSender(), _fromContract, _to, _ids, _values);
     }
 
     /// @notice Transfer a token from a token to another token
@@ -213,8 +208,8 @@ contract ItemsTransferFacet is Modifiers {
         }
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal;
         s.nftBalances[_toContract][_toTokenId][_id] += _value;
-        emit TransferSingle(LibMeta.msgSender(), _fromContract, _toContract, _id, _value);
-        emit TransferFromParent(_fromContract, _fromTokenId, _id, _value);
-        emit TransferToParent(_toContract, _toTokenId, _id, _value);
+        emit LibERC1155.TransferSingle(LibMeta.msgSender(), _fromContract, _toContract, _id, _value);
+        emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, _id, _value);
+        emit LibERC1155.TransferToParent(_toContract, _toTokenId, _id, _value);
     }
 }

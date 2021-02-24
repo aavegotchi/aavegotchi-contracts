@@ -1,52 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-/**
-    Note: The ERC-165 identifier for this interface is 0x4e2312e0.
-*/
-interface IERC1155TokenReceiver {
-    /**
-        @notice Handle the receipt of a single ERC1155 token type.
-        @dev An ERC1155-compliant smart contract MUST call this function on the token recipient contract, at the end of a `safeTransferFrom` after the balance has been updated.        
-        This function MUST return `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))` (i.e. 0xf23a6e61) if it accepts the transfer.
-        This function MUST revert if it rejects the transfer.
-        Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.
-        @param _operator  The address which initiated the transfer (i.e. LibMeta.msgSender())
-        @param _from      The address which previously owned the token
-        @param _id        The ID of the token being transferred
-        @param _value     The amount of tokens being transferred
-        @param _data      Additional data with no specified format
-        @return           `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`
-    */
-    function onERC1155Received(
-        address _operator,
-        address _from,
-        uint256 _id,
-        uint256 _value,
-        bytes calldata _data
-    ) external returns (bytes4);
-
-    /**
-        @notice Handle the receipt of multiple ERC1155 token types.
-        @dev An ERC1155-compliant smart contract MUST call this function on the token recipient contract, at the end of a `safeBatchTransferFrom` after the balances have been updated.        
-        This function MUST return `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))` (i.e. 0xbc197c81) if it accepts the transfer(s).
-        This function MUST revert if it rejects the transfer(s).
-        Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.
-        @param _operator  The address which initiated the batch transfer (i.e. LibMeta.msgSender())
-        @param _from      The address which previously owned the token
-        @param _ids       An array containing ids of each token being transferred (order and length must match _values array)
-        @param _values    An array containing amounts of each token being transferred (order and length must match _ids array)
-        @param _data      Additional data with no specified format
-        @return           `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`
-    */
-    function onERC1155BatchReceived(
-        address _operator,
-        address _from,
-        uint256[] calldata _ids,
-        uint256[] calldata _values,
-        bytes calldata _data
-    ) external returns (bytes4);
-}
+import {IERC1155TokenReceiver} from "../interfaces/IERC1155TokenReceiver.sol";
 
 library LibERC1155 {
     bytes4 internal constant ERC1155_ACCEPTED = 0xf23a6e61; // Return value from `onERC1155Received` call if a contract accepts receipt (i.e `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`).
@@ -74,6 +29,18 @@ library LibERC1155 {
         When burning/destroying tokens, the `_to` argument MUST be set to `0x0` (i.e. zero address).                
     */
     event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
+
+    /**
+        @dev MUST emit when approval for a second party/operator address to manage all tokens for an owner address is enabled or disabled (absence of an event assumes disabled).        
+    */
+    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+
+    /**
+        @dev MUST emit when the URI is updated for a token ID.
+        URIs are defined in RFC 3986.
+        The URI MUST point to a JSON file that conforms to the "ERC-1155 Metadata URI JSON Schema".
+    */
+    event URI(string _value, uint256 indexed _id);
 
     function onERC1155Received(
         address _from,
