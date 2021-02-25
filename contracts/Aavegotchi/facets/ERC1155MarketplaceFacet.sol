@@ -7,6 +7,7 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 
 // import "hardhat/console.sol";
 
@@ -214,25 +215,9 @@ contract ERC1155MarketplaceFacet is Modifiers {
         }
         // Have to call it like this because LibMeta.msgSender() gets in the way
         if (listing.erc1155TokenAddress == address(this)) {
-            bytes memory myFunctionCall =
-                abi.encodeWithSelector(
-                    IERC1155.safeTransferFrom.selector,
-                    seller, // from
-                    buyer, // to
-                    listing.erc1155TypeId,
-                    _quantity,
-                    new bytes(0)
-                );
-            // address(this) becomes msg.sender
-            (bool success, bytes memory result) = address(this).call(abi.encodePacked(myFunctionCall, address(this)));
-            if (success == false) {
-                if (result.length > 0) {
-                    // bubble up any reason for revert
-                    revert(string(result));
-                } else {
-                    revert("ERC1155Marketplace: ERC1155 safeTransferFrom failed");
-                }
-            }
+            s.items[seller][listing.erc1155TypeId] -= _quantity;
+            s.items[buyer][listing.erc1155TypeId] += _quantity;
+            LibERC1155.onERC1155Received(seller, buyer, listing.erc1155TypeId, _quantity, "");
         } else {
             // GHSTStakingDiamond
             IERC1155(listing.erc1155TokenAddress).safeTransferFrom(seller, buyer, listing.erc1155TypeId, _quantity, new bytes(0));

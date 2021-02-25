@@ -111,8 +111,9 @@ contract AavegotchiFacet {
         uint256 _tokenId,
         bytes calldata _data
     ) external {
-        internalTransferFrom(_from, _to, _tokenId);
-        checkOnERC721Received(_from, _to, _tokenId, _data);
+        address sender = LibMeta.msgSender();
+        internalTransferFrom(sender, _from, _to, _tokenId);
+        LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
     }
 
     /// @notice Transfers the ownership of an NFT from one address to another address
@@ -126,8 +127,9 @@ contract AavegotchiFacet {
         address _to,
         uint256 _tokenId
     ) external {
-        internalTransferFrom(_from, _to, _tokenId);
-        checkOnERC721Received(_from, _to, _tokenId, "");
+        address sender = LibMeta.msgSender();
+        internalTransferFrom(sender, _from, _to, _tokenId);
+        LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
     }
 
     /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
@@ -145,29 +147,12 @@ contract AavegotchiFacet {
         address _to,
         uint256 _tokenId
     ) external {
-        internalTransferFrom(_from, _to, _tokenId);
-    }
-
-    function checkOnERC721Received(
-        address _from,
-        address _to,
-        uint256 _tokenId,
-        bytes memory _data
-    ) internal {
-        uint256 size;
-        assembly {
-            size := extcodesize(_to)
-        }
-        if (size > 0) {
-            require(
-                LibERC721.ERC721_RECEIVED == IERC721TokenReceiver(_to).onERC721Received(LibMeta.msgSender(), _from, _tokenId, _data),
-                "AavegotchiFacet: Transfer rejected/failed by _to"
-            );
-        }
+        internalTransferFrom(LibMeta.msgSender(), _from, _to, _tokenId);
     }
 
     // This function is used by transfer functions
     function internalTransferFrom(
+        address _sender,
         address _from,
         address _to,
         uint256 _tokenId
@@ -175,9 +160,8 @@ contract AavegotchiFacet {
         require(_to != address(0), "AavegotchiFacet: Can't transfer to 0 address");
         require(_from != address(0), "AavegotchiFacet: _from can't be 0 address");
         require(_from == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: _from is not owner, transfer failed");
-        address sender = LibMeta.msgSender();
         require(
-            sender == _from || s.operators[_from][sender] || sender == s.approved[_tokenId],
+            _sender == _from || s.operators[_from][_sender] || _sender == s.approved[_tokenId],
             "AavegotchiFacet: Not owner or approved to transfer"
         );
         LibAavegotchi.transfer(_from, _to, _tokenId);

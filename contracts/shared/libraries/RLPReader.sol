@@ -35,22 +35,24 @@ library RLPReader {
      * @param item RLP encoded list in bytes
      */
     function toList(RLPItem memory item) internal pure returns (RLPItem[] memory) {
-        require(isList(item), "RLPReader: ITEM_NOT_LIST");
+        unchecked {
+            require(isList(item), "RLPReader: ITEM_NOT_LIST");
 
-        uint256 items = numItems(item);
-        RLPItem[] memory result = new RLPItem[](items);
-        uint256 listLength = _itemLength(item.memPtr);
-        require(listLength == item.len, "RLPReader: LIST_DECODED_LENGTH_MISMATCH");
+            uint256 items = numItems(item);
+            RLPItem[] memory result = new RLPItem[](items);
+            uint256 listLength = _itemLength(item.memPtr);
+            require(listLength == item.len, "RLPReader: LIST_DECODED_LENGTH_MISMATCH");
 
-        uint256 memPtr = item.memPtr + _payloadOffset(item.memPtr);
-        uint256 dataLen;
-        for (uint256 i = 0; i < items; i++) {
-            dataLen = _itemLength(memPtr);
-            result[i] = RLPItem(dataLen, memPtr);
-            memPtr = memPtr + dataLen;
+            uint256 memPtr = item.memPtr + _payloadOffset(item.memPtr);
+            uint256 dataLen;
+            for (uint256 i = 0; i < items; i++) {
+                dataLen = _itemLength(memPtr);
+                result[i] = RLPItem(dataLen, memPtr);
+                memPtr = memPtr + dataLen;
+            }
+
+            return result;
         }
-
-        return result;
     }
 
     // @return indicator whether encoded payload is a list. negate this function call for isData.
@@ -152,17 +154,18 @@ library RLPReader {
     function numItems(RLPItem memory item) private pure returns (uint256) {
         // add `isList` check if `item` is expected to be passsed without a check from calling function
         // require(isList(item), "RLPReader: NUM_ITEMS_NOT_LIST");
+        unchecked {
+            uint256 count;
+            uint256 currPtr = item.memPtr + _payloadOffset(item.memPtr);
+            uint256 endPtr = item.memPtr + item.len;
+            while (currPtr < endPtr) {
+                currPtr = currPtr + _itemLength(currPtr); // skip over an item
+                require(currPtr <= endPtr, "RLPReader: NUM_ITEMS_DECODED_LENGTH_MISMATCH");
+                count++;
+            }
 
-        uint256 count;
-        uint256 currPtr = item.memPtr + _payloadOffset(item.memPtr);
-        uint256 endPtr = item.memPtr + item.len;
-        while (currPtr < endPtr) {
-            currPtr = currPtr + _itemLength(currPtr); // skip over an item
-            require(currPtr <= endPtr, "RLPReader: NUM_ITEMS_DECODED_LENGTH_MISMATCH");
-            count++;
+            return count;
         }
-
-        return count;
     }
 
     // @return entire rlp item byte length
@@ -224,24 +227,26 @@ library RLPReader {
         uint256 dest,
         uint256 len
     ) private pure {
-        if (len == 0) return;
+        unchecked {
+            if (len == 0) return;
 
-        // copy as many word sizes as possible
-        for (; len >= WORD_SIZE; len -= WORD_SIZE) {
-            assembly {
-                mstore(dest, mload(src))
+            // copy as many word sizes as possible
+            for (; len >= WORD_SIZE; len -= WORD_SIZE) {
+                assembly {
+                    mstore(dest, mload(src))
+                }
+
+                src += WORD_SIZE;
+                dest += WORD_SIZE;
             }
 
-            src += WORD_SIZE;
-            dest += WORD_SIZE;
-        }
-
-        // left over bytes. Mask is used to remove unwanted bytes from the word
-        uint256 mask = 256**(WORD_SIZE - len) - 1;
-        assembly {
-            let srcpart := and(mload(src), not(mask)) // zero out src
-            let destpart := and(mload(dest), mask) // retrieve the bytes
-            mstore(dest, or(destpart, srcpart))
+            // left over bytes. Mask is used to remove unwanted bytes from the word
+            uint256 mask = 256**(WORD_SIZE - len) - 1;
+            assembly {
+                let srcpart := and(mload(src), not(mask)) // zero out src
+                let destpart := and(mload(dest), mask) // retrieve the bytes
+                mstore(dest, or(destpart, srcpart))
+            }
         }
     }
 }

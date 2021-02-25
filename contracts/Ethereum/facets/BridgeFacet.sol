@@ -121,7 +121,8 @@ contract BridgeFacet {
         } else if (bytes32(logTopicRLPList[0].toUint()) == WITHDRAW_ERC721_BATCH_EVENT_SIG) {
             address withdrawer = address(uint160(logTopicRLPList[1].toUint())); // topic1 is from address
             uint256[] memory tokenIds = abi.decode(logData, (uint256[])); // data is tokenId list
-            for (uint256 i; i < tokenIds.length; i++) {
+            uint256 length = tokenIds.length;
+            for (uint256 i; i < length; i++) {
                 uint256 tokenId = tokenIds[i];
                 s.aavegotchis[tokenId].owner = withdrawer;
                 s.aavegotchiBalance[withdrawer]++;

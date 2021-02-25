@@ -88,17 +88,8 @@ contract AavegotchiFacet {
         uint256 _tokenId,
         bytes calldata _data
     ) external {
-        internalTransferFrom(_from, _to, _tokenId);
-        uint256 size;
-        assembly {
-            size := extcodesize(_to)
-        }
-        if (size > 0) {
-            require(
-                ERC721_RECEIVED == IERC721TokenReceiver(_to).onERC721Received(msg.sender, _from, _tokenId, _data),
-                "ERC721: Transfer rejected/failed by _to"
-            );
-        }
+        internalTransferFrom(msg.sender, _from, _to, _tokenId);
+        LibERC721.checkOnERC721Received(msg.sender, _from, _to, _tokenId, _data);
     }
 
     /// @notice Transfers the ownership of an NFT from one address to another address
@@ -112,17 +103,8 @@ contract AavegotchiFacet {
         address _to,
         uint256 _tokenId
     ) external {
-        internalTransferFrom(_from, _to, _tokenId);
-        uint256 size;
-        assembly {
-            size := extcodesize(_to)
-        }
-        if (size > 0) {
-            require(
-                ERC721_RECEIVED == IERC721TokenReceiver(_to).onERC721Received(msg.sender, _from, _tokenId, ""),
-                "ERC721: Transfer rejected/failed by _to"
-            );
-        }
+        internalTransferFrom(msg.sender, _from, _to, _tokenId);
+        LibERC721.checkOnERC721Received(msg.sender, _from, _to, _tokenId, "");
     }
 
     /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
@@ -140,11 +122,12 @@ contract AavegotchiFacet {
         address _to,
         uint256 _tokenId
     ) external {
-        internalTransferFrom(_from, _to, _tokenId);
+        internalTransferFrom(msg.sender, _from, _to, _tokenId);
     }
 
     // This function is used by transfer functions
     function internalTransferFrom(
+        address _sender,
         address _from,
         address _to,
         uint256 _tokenId
@@ -153,7 +136,7 @@ contract AavegotchiFacet {
         address owner = s.aavegotchis[_tokenId].owner;
         require(owner != address(0), "ERC721: Invalid tokenId or can't be transferred");
         require(
-            msg.sender == owner || s.operators[owner][msg.sender] || s.approved[_tokenId] == msg.sender,
+            _sender == owner || s.operators[owner][_sender] || s.approved[_tokenId] == _sender,
             "AavegotchiFacet: Not owner or approved to transfer"
         );
         require(_from == owner, "ERC721: _from is not owner, transfer failed");
