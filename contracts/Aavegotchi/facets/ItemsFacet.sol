@@ -94,11 +94,12 @@ contract ItemsFacet is Modifiers {
         uint256 slotPositions = s.itemTypes[_itemId].slotPositions;
         slotPositions_ = new uint256[](16);
         uint256 numSlots;
-        for (uint256 i; i < 16; i++) {
+        for (uint256 i; i < 16;) {
             if ((slotPositions >> i) & 1 == 1) {
                 slotPositions_[numSlots] = i;
-                numSlots++;
+                unchecked {numSlots++;}
             }
+            unchecked {i++;}
         }
         assembly {
             mstore(slotPositions_, numSlots)
@@ -147,21 +148,22 @@ contract ItemsFacet is Modifiers {
         uint256 count = s.itemTypes.length;
         itemBalanceWithSlots_ = new ItemBalanceWithSlotsIO[](count);
         uint256 numItems;
-        for (uint256 id; id < count; id++) {
+        for (uint256 id; id < count;) {
             uint256 bal = s.items[_owner][id];
-            if (bal == 0) {
-                continue;
+            if (bal > 0) {
+                itemBalanceWithSlots_[numItems].itemId = id;
+                itemBalanceWithSlots_[numItems].balance = bal;
+                itemBalanceWithSlots_[numItems].slotPositions = slotPositionsToArray(id);
+                itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
+                uint256 traitModifiers = s.itemTypes[id].traitModifiers;
+                for (uint256 i; i < NUMERIC_TRAITS_NUM;) {
+                    itemBalanceWithSlots_[numItems].traitModifiers[i] = int8(uint8(traitModifiers >> (i * 8)));
+                    unchecked {i++;}
+                }
+                itemBalanceWithSlots_[numItems].minLevel = s.itemTypes[id].minLevel;
+                unchecked {numItems++;}
             }
-            itemBalanceWithSlots_[numItems].itemId = id;
-            itemBalanceWithSlots_[numItems].balance = bal;
-            itemBalanceWithSlots_[numItems].slotPositions = slotPositionsToArray(id);
-            itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
-            uint256 traitModifiers = s.itemTypes[id].traitModifiers;
-            for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-                itemBalanceWithSlots_[numItems].traitModifiers[i] = int8(uint8(traitModifiers >> (i * 8)));
-            }
-            itemBalanceWithSlots_[numItems].minLevel = s.itemTypes[id].minLevel;
-            numItems++;
+            unchecked {id++;}
         }
         assembly {
             mstore(itemBalanceWithSlots_, numItems)
@@ -285,9 +287,18 @@ contract ItemsFacet is Modifiers {
     }
 
     function getItemTypes(uint256[] calldata _itemIds) external view returns (ItemTypeIO[] memory itemTypes_) {
-        itemTypes_ = new ItemTypeIO[](_itemIds.length);
-        for (uint256 i; i < _itemIds.length; i++) {
-            itemTypes_[i] = getItemType(_itemIds[i]);
+        if(_itemIds.length == 0) {
+            uint256 length = s.itemTypes.length;
+            itemTypes_ = new ItemTypeIO[](length);
+            for (uint256 i; i < length; i++) {
+                itemTypes_[i] = getItemType(i);
+            }
+        }
+        else {
+            itemTypes_ = new ItemTypeIO[](_itemIds.length);
+            for (uint256 i; i < _itemIds.length; i++) {
+                itemTypes_[i] = getItemType(_itemIds[i]);
+            }
         }
     }
 

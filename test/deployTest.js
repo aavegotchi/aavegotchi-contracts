@@ -344,6 +344,9 @@ describe('Items & Wearables', async function () {
     balance = await global.itemsFacet.balanceOf(account, testWearableId)
     expect(balance).to.equal(10)
 
+    await global.daoFacet.mintItems(account, [62], ['10'])
+
+
     const result = await global.itemsFacet.itemBalancesWithSlots(account)
     console.log(result)
   })

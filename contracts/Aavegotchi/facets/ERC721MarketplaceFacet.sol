@@ -151,7 +151,6 @@ contract ERC721MarketplaceFacet is Modifiers {
                 erc721Token.getApproved(_erc721TokenId) == address(this),
             "ERC721Marketplace: Not approved for transfer"
         );
-        s.aavegotchis[_erc721TokenId].locked = true;
 
         require(_priceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
         s.nextERC721ListingId++;
@@ -179,6 +178,7 @@ contract ERC721MarketplaceFacet is Modifiers {
 
         LibERC721Marketplace.addERC721ListingItem(owner, category, "listed", listingId);
         emit ERC721ListingAdd(listingId, owner, _erc721TokenAddress, _erc721TokenId, category, _priceInWei);
+        s.aavegotchis[_erc721TokenId].locked = true;
         // Check if there's a publication fee and
         // transfer the amount to burn address
         if (s.listingFeeInWei > 0) {

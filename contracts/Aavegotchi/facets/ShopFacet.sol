@@ -28,20 +28,31 @@ contract ShopFacet {
     function buyPortals(address _to, uint256 _ghst) external {
         uint256 currentHauntId = s.currentHauntId;
         Haunt storage haunt = s.haunts[currentHauntId];
-        uint256 price = haunt.portalPrice;
-        require(_ghst >= price, "ShopFacet: Not enough GHST to buy portal");
+        require(_ghst >= 100e18, "Not enough GHST to buy portals");
+        require(_ghst <= 5500e18, "Can't buy more than 25");
         address sender = LibMeta.msgSender();
-        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
-        require(ghstBalance >= _ghst, "ShopFacet: Not enough GHST!");
-        uint256 numAavegotchisToPurchase = _ghst / price;
-        require(numAavegotchisToPurchase <= 50, "ShopFacet: Cannot buy more than 50 portals at a time");
-        uint256 hauntCount = haunt.totalCount + numAavegotchisToPurchase;
+        uint256 numToPurchase;
+        uint256 totalPrice;
+        if (_ghst <= 500e18) {
+            numToPurchase = _ghst / 100e18;
+            totalPrice = numToPurchase * 100e18;
+        } else {
+            if (_ghst <= 2500e18) {
+                numToPurchase = (_ghst - 500e18) / 200e18;
+                totalPrice = 500e18 + (numToPurchase * 200e18);
+                numToPurchase += 5;
+            } else {
+                numToPurchase = (_ghst - 2500e18) / 300e18;
+                totalPrice = 2500e18 + (numToPurchase * 300e18);
+                numToPurchase += 15;
+            }
+        }
+        uint256 hauntCount = haunt.totalCount + numToPurchase;
         require(hauntCount <= haunt.hauntMaxSize, "ShopFacet: Exceeded max number of aavegotchis for this haunt");
         s.haunts[currentHauntId].totalCount = uint24(hauntCount);
         uint32 tokenId = s.tokenIdCounter;
-        uint256 totalPrice = _ghst - (_ghst % price);
-        emit BuyPortals(sender, _to, tokenId, numAavegotchisToPurchase, totalPrice);
-        for (uint256 i; i < numAavegotchisToPurchase; i++) {
+        emit BuyPortals(sender, _to, tokenId, numToPurchase, totalPrice);
+        for (uint256 i; i < numToPurchase; i++) {
             s.aavegotchis[tokenId].owner = _to;
             s.aavegotchis[tokenId].hauntId = uint16(currentHauntId);
             s.tokenIdIndexes[tokenId] = s.tokenIds.length;

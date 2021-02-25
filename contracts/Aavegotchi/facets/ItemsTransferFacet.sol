@@ -148,8 +148,10 @@ contract ItemsTransferFacet is Modifiers {
         uint256 bal = s.nftBalances[_fromContract][_fromTokenId][_id];
         require(_value <= bal, "Items: Doesn't have that many to transfer");
         bal -= _value;
-        if (bal == 0 && _fromContract == address(this)) {
-            checkWearableIsEquipped(_fromTokenId, _id);
+        if (_fromContract == address(this)) {
+            if (bal == 0) {
+                checkWearableIsEquipped(_fromTokenId, _id);
+            }
         }
         s.nftBalances[_fromContract][_fromTokenId][_id] = bal;
         s.items[_to][_id] += _value;
