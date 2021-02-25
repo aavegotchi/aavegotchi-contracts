@@ -5,7 +5,6 @@ import {AppStorage} from "./libraries/LibAppStorage.sol";
 import {LibMeta} from "../shared/libraries/LibMeta.sol";
 import {LibDiamond} from "../shared/libraries/LibDiamond.sol";
 import {IDiamondCut} from "../shared/interfaces/IDiamondCut.sol";
-import {LibVrf} from "./libraries/LibVrf.sol";
 import {IERC165} from "../shared/interfaces/IERC165.sol";
 import {IDiamondLoupe} from "../shared/interfaces/IDiamondLoupe.sol";
 import {IERC173} from "../shared/interfaces/IERC173.sol";
@@ -46,11 +45,10 @@ contract InitDiamond {
         ds.supportedInterfaces[type(IERC173).interfaceId] = true;
 
         s.ghstContract = _ghstContract;
-        LibVrf.Storage storage vrf_ds = LibVrf.diamondStorage();
-        vrf_ds.keyHash = _chainlinkKeyHash;
-        vrf_ds.fee = uint144(_chainlinkFee);
-        vrf_ds.vrfCoordinator = _vrfCoordinator;
-        vrf_ds.link = ILink(_linkAddress);
+        s.keyHash = _chainlinkKeyHash;
+        s.fee = uint144(_chainlinkFee);
+        s.vrfCoordinator = _vrfCoordinator;
+        s.link = ILink(_linkAddress);
 
         uint256 currentHauntId = s.currentHauntId;
         s.haunts[currentHauntId].hauntMaxSize = _initialHauntSize; //10_000;

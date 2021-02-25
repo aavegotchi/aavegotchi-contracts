@@ -7,13 +7,11 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 
 // import "hardhat/console.sol";
 
 contract CollateralFacet is Modifiers {
-    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
-
     event IncreaseStake(uint256 indexed _tokenId, uint256 _stakeAmount);
     event DecreaseStake(uint256 indexed _tokenId, uint256 _reduceAmount);
     event ExperienceTransfer(uint256 indexed _fromTokenId, uint256 indexed _toTokenId, uint256 experience);
@@ -104,6 +102,7 @@ contract CollateralFacet is Modifiers {
         }
 
         // remove
+        s.aavegotchis[_tokenId].owner = address(0);
         address owner = LibMeta.msgSender();
         uint256 index = s.ownerTokenIdIndexes[owner][_tokenId];
         uint256 lastIndex = s.ownerTokenIds[owner].length - 1;
@@ -118,8 +117,10 @@ contract CollateralFacet is Modifiers {
         // delete token approval if any
         if (s.approved[_tokenId] != address(0)) {
             delete s.approved[_tokenId];
-            emit Approval(owner, address(0), _tokenId);
+            emit LibERC721.Approval(owner, address(0), _tokenId);
         }
+
+        emit LibERC721.Transfer(owner, address(0), _tokenId);
 
         // transfer all collateral to LibMeta.msgSender()
         address collateralType = s.aavegotchis[_tokenId].collateralType;
@@ -130,7 +131,5 @@ contract CollateralFacet is Modifiers {
         // delete aavegotchi info
         delete s.aavegotchiNamesUsed[s.aavegotchis[_tokenId].name];
         delete s.aavegotchis[_tokenId];
-
-        emit Transfer(owner, address(0), _tokenId);
     }
 }

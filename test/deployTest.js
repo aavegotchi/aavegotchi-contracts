@@ -343,6 +343,9 @@ describe('Items & Wearables', async function () {
     await global.daoFacet.mintItems(account, [testWearableId], ['10'])
     balance = await global.itemsFacet.balanceOf(account, testWearableId)
     expect(balance).to.equal(10)
+
+    const result = await global.itemsFacet.itemBalancesWithSlots(account)
+    console.log(result)
   })
 
   it('Can transfer wearables to Aavegotchi', async function () {
