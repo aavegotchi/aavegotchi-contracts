@@ -4,15 +4,15 @@ pragma solidity 0.8.1;
 import {Modifiers} from "../libraries/LibAppStorage.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
+import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
+import {LibERC721} from "../../shared/libraries/LibERC721.sol";
+import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 
 contract BridgeFacet is Modifiers {
     event WithdrawnBatch(address indexed owner, uint256[] tokenIds);
     event AddedAavegotchiBatch(address indexed owner, uint256[] tokenIds);
     event AddedItemsBatch(address indexed owner, uint256[] ids, uint256[] values);
     event WithdrawnItems(address indexed owner, uint256[] ids, uint256[] values);
-    event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
-    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     uint256 internal constant ERC721_TOKEN_TYPE = 721;
     uint256 internal constant ERC1155_TOKEN_TYPE = 1155;
 
@@ -36,7 +36,7 @@ contract BridgeFacet is Modifiers {
             s.items[owner][id] = bal - value;
             LibERC1155Marketplace.updateERC1155Listing(address(this), id, owner);
         }
-        emit TransferBatch(owner, owner, address(0), _ids, _values);
+        emit LibERC1155.TransferBatch(owner, owner, address(0), _ids, _values);
         emit WithdrawnItems(owner, _ids, _values);
     }
 
@@ -46,14 +46,7 @@ contract BridgeFacet is Modifiers {
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             require(owner == s.aavegotchis[tokenId].owner, "BridgeFacet: Not owner of token");
-            s.aavegotchis[tokenId].owner = address(this);
-            //s.aavegotchiBalance[owner]--;
-            //s.aavegotchiBalance[address(this)]++;
-            if (s.approved[tokenId] != address(0)) {
-                delete s.approved[tokenId];
-                emit Approval(owner, address(0), tokenId);
-            }
-            emit Transfer(owner, address(this), tokenId);
+            LibAavegotchi.transfer(owner, address(this), tokenId);
         }
         emit WithdrawnBatch(owner, _tokenIds);
     }
@@ -63,33 +56,30 @@ contract BridgeFacet is Modifiers {
      * @dev Should be callable only by ChildChainManager
      * Should handle deposit by minting or unlocking the required tokenId for user
      * Make sure minting is done only by this function
-     * @param user user address for whom deposit is being done
-     * @param depositData abi encoded tokenId
+     * @param _user user address for whom deposit is being done
+     * @param _depositData abi encoded tokenId
      */
-    function deposit(address user, bytes calldata depositData) external {
+    function deposit(address _user, bytes calldata _depositData) external {
         require(msg.sender == s.childChainManager, "BridgeFacet: only childChainManager can call this function");
-        (uint256 tokenType, bytes memory tokenDepositData) = abi.decode(depositData, (uint256, bytes));
+        (uint256 tokenType, bytes memory tokenDepositData) = abi.decode(_depositData, (uint256, bytes));
         if (tokenType == ERC1155_TOKEN_TYPE) {
             (uint256[] memory ids, uint256[] memory values) = abi.decode(tokenDepositData, (uint256[], uint256[]));
             require(ids.length == values.length, "Bridge: ids length not equal to values length");
             for (uint256 i; i < ids.length; i++) {
                 uint256 id = ids[i];
                 uint256 value = values[i];
-                s.items[user][id] += value;
+                s.items[_user][id] += value;
             }
-            emit TransferBatch(msg.sender, address(0), user, ids, values);
-            emit AddedItemsBatch(user, ids, values);
+            emit LibERC1155.TransferBatch(msg.sender, address(0), _user, ids, values);
+            emit AddedItemsBatch(_user, ids, values);
         } else if (tokenType == ERC721_TOKEN_TYPE) {
             uint256[] memory tokenIds = abi.decode(tokenDepositData, (uint256[]));
             for (uint256 i; i < tokenIds.length; i++) {
                 uint256 tokenId = tokenIds[i];
                 require(address(this) == s.aavegotchis[tokenId].owner, "BridgeFacet: Not owner of token");
-                s.aavegotchis[tokenId].owner = user;
-                // s.aavegotchiBalance[address(this)]--;
-                // s.aavegotchiBalance[user]++;
-                emit Transfer(address(this), user, tokenId);
+                LibAavegotchi.transfer(address(this), _user, tokenId);
             }
-            emit AddedAavegotchiBatch(user, tokenIds);
+            emit AddedAavegotchiBatch(_user, tokenIds);
         }
     }
 }

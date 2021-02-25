@@ -27,18 +27,20 @@ contract ShopFacet {
 
     function buyPortals(address _to, uint256 _ghst) external {
         uint256 currentHauntId = s.currentHauntId;
-        Haunt memory haunt = s.haunts[currentHauntId];
-        require(_ghst >= haunt.portalPrice, "ShopFacet: Not enough GHST to buy portal");
-        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(LibMeta.msgSender());
+        Haunt storage haunt = s.haunts[currentHauntId];
+        uint256 price = haunt.portalPrice;
+        require(_ghst >= price, "ShopFacet: Not enough GHST to buy portal");
+        address sender = LibMeta.msgSender();
+        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
         require(ghstBalance >= _ghst, "ShopFacet: Not enough GHST!");
-        uint256 numAavegotchisToPurchase = _ghst / haunt.portalPrice;
+        uint256 numAavegotchisToPurchase = _ghst / price;
         require(numAavegotchisToPurchase <= 50, "ShopFacet: Cannot buy more than 50 portals at a time");
         uint256 hauntCount = haunt.totalCount + numAavegotchisToPurchase;
         require(hauntCount <= haunt.hauntMaxSize, "ShopFacet: Exceeded max number of aavegotchis for this haunt");
         s.haunts[currentHauntId].totalCount = uint24(hauntCount);
         uint32 tokenId = s.tokenIdCounter;
-        uint256 totalPrice = _ghst - (_ghst % haunt.portalPrice);
-        emit BuyPortals(LibMeta.msgSender(), _to, tokenId, numAavegotchisToPurchase, totalPrice);
+        uint256 totalPrice = _ghst - (_ghst % price);
+        emit BuyPortals(sender, _to, tokenId, numAavegotchisToPurchase, totalPrice);
         for (uint256 i; i < numAavegotchisToPurchase; i++) {
             s.aavegotchis[tokenId].owner = _to;
             s.aavegotchis[tokenId].hauntId = uint16(currentHauntId);

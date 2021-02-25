@@ -350,13 +350,16 @@ library LibAavegotchi {
         return string(name);
     }
 
+    // function addTokenToUser(address _to, uint256 _tokenId) internal {}
+
+    // function removeTokenFromUser(address _from, uint256 _tokenId) internal {}
+
     function transfer(
         address _from,
         address _to,
         uint256 _tokenId
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        s.aavegotchis[_tokenId].owner = _to;
         // remove
         uint256 index = s.ownerTokenIdIndexes[_from][_tokenId];
         uint256 lastIndex = s.ownerTokenIds[_from].length - 1;
@@ -367,13 +370,14 @@ library LibAavegotchi {
         }
         s.ownerTokenIds[_from].pop();
         delete s.ownerTokenIdIndexes[_from][_tokenId];
-        // add
-        s.ownerTokenIdIndexes[_to][_tokenId] = s.ownerTokenIds[_to].length;
-        s.ownerTokenIds[_to].push(uint32(_tokenId));
         if (s.approved[_tokenId] != address(0)) {
             delete s.approved[_tokenId];
             emit Approval(_from, address(0), _tokenId);
         }
+        // add
+        s.aavegotchis[_tokenId].owner = _to;
+        s.ownerTokenIdIndexes[_to][_tokenId] = s.ownerTokenIds[_to].length;
+        s.ownerTokenIds[_to].push(uint32(_tokenId));
         emit Transfer(_from, _to, _tokenId);
     }
 

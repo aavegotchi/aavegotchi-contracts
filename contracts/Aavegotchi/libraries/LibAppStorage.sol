@@ -2,6 +2,7 @@
 pragma solidity 0.8.1;
 import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {ILink} from "../interfaces/ILink.sol";
 //import "../interfaces/IERC20.sol";
 // import "hardhat/console.sol";
 
@@ -153,6 +154,13 @@ struct AppStorage {
     address rarityFarming;
     string itemsBaseUri;
     bytes32 domainSeperator;
+    //VRF
+    mapping(bytes32 => uint256) vrfRequestIdToTokenId;
+    mapping(bytes32 => uint256) vrfNonces;
+    bytes32 keyHash;
+    uint144 fee;
+    address vrfCoordinator;
+    ILink link;
     // Marketplace
     uint256 nextERC1155ListingId;
     // erc1155 category => erc1155Order
