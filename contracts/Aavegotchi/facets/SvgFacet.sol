@@ -118,10 +118,8 @@ contract SvgFacet is Modifiers {
             }
         }
 
-        uint256 MAX_INT = 2**256 - 1;
-
         //Add wearables if tokenId isn't MAX_INT
-        if (_tokenId == MAX_INT) {
+        if (_tokenId == type(uint256).max) {
             svg_ = abi.encodePacked(applyStyles(details, _tokenId), details.background, svg_, details.collateral, details.eyeShape);
         } else {
             svg_ = abi.encodePacked(applyStyles(details, _tokenId), addBodyAndWearableSvgLayers(svg_, details, _tokenId));

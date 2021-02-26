@@ -16,7 +16,7 @@ library LibStrings {
         bytes memory buffer;
         unchecked {
             if (value == 0) {
-                return "0";
+                return string(abi.encodePacked(_str, "0"));
             }
             uint256 temp = value;
             uint256 digits;
