@@ -6,7 +6,7 @@ import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 // import "hardhat/console.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
-import {LibERC1155} from "../libraries/LibERC1155.sol";
+import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 contract ShopFacet {

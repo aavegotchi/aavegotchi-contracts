@@ -72,7 +72,7 @@ contract AavegotchiGameFacet is Modifiers {
         contract_ = s.ghstContract;
     }
 
-    function getNumericTraits(uint256 _tokenId) external view returns (uint256 numericTraits_) {
+    function getNumericTraits(uint256 _tokenId) external view returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_) {
         numericTraits_ = LibAavegotchi.getNumericTraits(_tokenId);
     }
 
@@ -97,12 +97,12 @@ contract AavegotchiGameFacet is Modifiers {
         requiredXp_ = LibAavegotchi.xpUntilNextLevel(_experience);
     }
 
-    function rarityMultiplier(uint256 _numericTraits) external pure returns (uint256 multiplier_) {
+    function rarityMultiplier(int16[NUMERIC_TRAITS_NUM] memory _numericTraits) external pure returns (uint256 multiplier_) {
         multiplier_ = LibAavegotchi.rarityMultiplier(_numericTraits);
     }
 
     //Calculates the base rarity score, including collateral modifier
-    function baseRarityScore(uint256 _numericTraits) external pure returns (uint256 rarityScore_) {
+    function baseRarityScore(int16[NUMERIC_TRAITS_NUM] memory _numericTraits) external pure returns (uint256 rarityScore_) {
         rarityScore_ = LibAavegotchi.baseRarityScore(_numericTraits);
     }
 
@@ -110,7 +110,7 @@ contract AavegotchiGameFacet is Modifiers {
     function modifiedTraitsAndRarityScore(uint256 _tokenId)
         external
         view
-        returns (int256[NUMERIC_TRAITS_NUM] memory numericTraits_, uint256 rarityScore_)
+        returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_, uint256 rarityScore_)
     {
         (numericTraits_, rarityScore_) = LibAavegotchi.modifiedTraitsAndRarityScore(_tokenId);
     }
@@ -182,24 +182,18 @@ contract AavegotchiGameFacet is Modifiers {
     }
 
     function spendSkillPoints(uint256 _tokenId, int8[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
-        uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
         //To test (Dan): Prevent underflow (is this ok?), see require below
         uint256 totalUsed;
         for (uint256 index; index < _values.length; index++) {
             totalUsed += abs(_values[index]);
 
-            uint256 position = index * 16;
             // get trait
-            int256 trait = int16(int256(numericTraits >> position));
+            int16 trait = s.aavegotchis[_tokenId].numericTraits[index];
             trait += _values[index];
-            // clear trait value
-            numericTraits &= ~(uint256(0xffff) << position);
-            // set trait value
-            numericTraits |= uint256(trait & 0xffff) << position;
+            s.aavegotchis[_tokenId].numericTraits[index] = trait;
         }
         // handles underflow
         require(availableSkillPoints(_tokenId) >= totalUsed, "AavegotchiGameFacet: Not enough skill points");
-        s.aavegotchis[_tokenId].numericTraits = numericTraits;
         //Increment used skill points
         s.aavegotchis[_tokenId].usedSkillPoints += uint16(totalUsed);
         emit SpendSkillpoints(_tokenId, _values);

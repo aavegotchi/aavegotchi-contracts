@@ -6,16 +6,19 @@ import {ILink} from "../interfaces/ILink.sol";
 //import "../interfaces/IERC20.sol";
 // import "hardhat/console.sol";
 
+uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
+uint256 constant NUMERIC_TRAITS_NUM = 6;
+uint256 constant PORTAL_AAVEGOTCHIS_NUM = 10;
+
 struct Aavegotchi {
-    // This 256 bit value is broken up into 16 16-bit slots for storing wearableIds
     // See helper function that converts this value into a uint16[16] memory equipedWearables
-    uint256 equippedWearables; //The currently equipped wearables of the Aavegotchi
+    uint16[EQUIPPED_WEARABLE_SLOTS] equippedWearables; //The currently equipped wearables of the Aavegotchi
     string name;
     uint256 randomNumber;
     // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
-    uint256 temporaryTraitBoosts;
+    int8[NUMERIC_TRAITS_NUM] temporaryTraitBoosts;
     uint40 lastTemporaryBoost;
-    uint256 numericTraits; // Sixteen 16 bit ints.  [Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
+    int16[NUMERIC_TRAITS_NUM] numericTraits; // Sixteen 16 bit ints.  [Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     address owner;
     // uint32 batchId;
     uint16 hauntId;
@@ -31,12 +34,19 @@ struct Aavegotchi {
     bool locked;
 }
 
+struct Dimensions {
+    uint8 x;
+    uint8 y;
+    uint8 width;
+    uint8 height;
+}
+
 struct ItemType {
     string description;
     string author;
     // treated as int8s array
     // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
-    uint256 traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
+    int8[NUMERIC_TRAITS_NUM] traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
     // this is an array of uint indexes into the collateralTypes array
     uint8[] allowedCollaterals; //[WEARABLE ONLY] The collaterals this wearable can be equipped to. An empty array is "any"
     string name; //The name of the item
@@ -45,7 +55,8 @@ struct ItemType {
     uint32 maxQuantity; //Total number that can be minted of this item.
     uint8 rarityScoreModifier; //Number from 1-50.
     // Each bit is a slot position. 1 is true, 0 is false
-    uint16 slotPositions; //[WEARABLE ONLY] The slots that this wearable can be added to.
+    // uint16 slotPositions; //[WEARABLE ONLY] The slots that this wearable can be added to.
+    bool[EQUIPPED_WEARABLE_SLOTS] slotPositions;
     bool canPurchaseWithGhst;
     uint32 totalQuantity; //The total quantity of this item minted so far
     uint8 minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
@@ -54,7 +65,7 @@ struct ItemType {
     int8 kinshipBonus; //[CONSUMABLE ONLY] How much this consumable boosts (or reduces) kinship score
     uint32 experienceBonus; //[CONSUMABLE ONLY]
     // SVG x,y,width,height
-    uint32 dimensions;
+    Dimensions dimensions;
 }
 
 struct WearableSet {
@@ -79,7 +90,7 @@ struct SvgLayer {
 
 struct AavegotchiCollateralTypeInfo {
     // treated as an arary of int8
-    uint256 modifiers; //Trait modifiers for each collateral. Can be 2, 1, -1, or -2
+    int16[NUMERIC_TRAITS_NUM] modifiers; //Trait modifiers for each collateral. Can be 2, 1, -1, or -2
     bytes3 primaryColor;
     bytes3 secondaryColor;
     bytes3 cheekColor;

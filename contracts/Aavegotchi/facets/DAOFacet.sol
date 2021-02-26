@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {Modifiers, ItemType, WearableSet} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ItemType, WearableSet, NUMERIC_TRAITS_NUM} from "../libraries/LibAppStorage.sol";
 import {AavegotchiCollateralTypeIO} from "../libraries/LibAavegotchi.sol";
-import {LibERC1155} from "../libraries/LibERC1155.sol";
+import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
@@ -11,7 +11,7 @@ contract DAOFacet is Modifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
     event DaoTreasuryTransferred(address indexed previousDaoTreasury, address indexed newDaoTreasury);
     event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
-    event UpdateCollateralModifiers(uint256 _oldModifiers, uint256 _newModifiers);
+    event UpdateCollateralModifiers(int16[NUMERIC_TRAITS_NUM] _oldModifiers, int16[NUMERIC_TRAITS_NUM] _newModifiers);
 
     event AddCollateralType(AavegotchiCollateralTypeIO _collateralType);
     event AddItemType(ItemType _itemType);
@@ -54,7 +54,7 @@ contract DAOFacet is Modifiers {
         }
     }
 
-    function updateCollateralModifiers(address _collateralType, uint256 _modifiers) external onlyDaoOrOwner {
+    function updateCollateralModifiers(address _collateralType, int16[NUMERIC_TRAITS_NUM] calldata _modifiers) external onlyDaoOrOwner {
         emit UpdateCollateralModifiers(s.collateralTypeInfo[_collateralType].modifiers, _modifiers);
         s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
     }

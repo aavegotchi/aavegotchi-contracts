@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {Modifiers} from "../libraries/LibAppStorage.sol";
+import {Modifiers, EQUIPPED_WEARABLE_SLOTS} from "../libraries/LibAppStorage.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
-import {LibERC1155} from "../libraries/LibERC1155.sol";
+import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
 contract ItemsTransferFacet is Modifiers {
@@ -124,9 +124,8 @@ contract ItemsTransferFacet is Modifiers {
     }
 
     function checkWearableIsEquipped(uint256 _fromTokenId, uint256 _id) internal view {
-        uint256 l_equippedWearables = s.aavegotchis[_fromTokenId].equippedWearables;
-        for (uint256 i; i < 16; i++) {
-            require(uint16(l_equippedWearables >> (i * 16)) != _id, "Items: Cannot transfer wearable that is equipped");
+        for (uint256 i; i < EQUIPPED_WEARABLE_SLOTS; i++) {
+            require(s.aavegotchis[_fromTokenId].equippedWearables[i] != _id, "Items: Cannot transfer wearable that is equipped");
         }
     }
 

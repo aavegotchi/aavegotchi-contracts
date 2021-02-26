@@ -6,7 +6,7 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
-import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
+import {LibAavegotchi} from "../libraries/LibAavegotchi.sol"; 
 
 contract BridgeFacet is Modifiers {
     event WithdrawnBatch(address indexed owner, uint256[] tokenIds);

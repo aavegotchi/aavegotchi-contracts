@@ -2,8 +2,10 @@
 pragma solidity 0.8.1;
 
 import {LibItems} from "../libraries/LibItems.sol";
-import {LibAppStorage, Modifiers, ItemType, Aavegotchi} from "../libraries/LibAppStorage.sol";
-import {LibAavegotchi, NUMERIC_TRAITS_NUM} from "../libraries/LibAavegotchi.sol";
+import {LibAppStorage, Modifiers, ItemType, Aavegotchi, NUMERIC_TRAITS_NUM,
+    EQUIPPED_WEARABLE_SLOTS,
+    PORTAL_AAVEGOTCHIS_NUM} from "../libraries/LibAppStorage.sol";
+import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
@@ -16,7 +18,7 @@ contract ItemsFacet is Modifiers {
 
     event TransferToParent(address indexed _toContract, uint256 indexed _toTokenId, uint256 indexed _tokenTypeId, uint256 _value);
 
-    event EquipWearables(uint256 indexed _tokenId, uint256 _oldWearables, uint256 _newWearables);
+    event EquipWearables(uint256 indexed _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] _oldWearables, uint16[EQUIPPED_WEARABLE_SLOTS] _newWearables);
     event UseConsumables(uint256 indexed _tokenId, uint256[] _itemIds, uint256[] _quantities);
 
     uint16 internal constant SLOT_BODY = 0;
@@ -88,30 +90,14 @@ contract ItemsFacet is Modifiers {
         for (uint256 id; id < count; id++) {
             bals_[id] = s.nftBalances[_tokenContract][_tokenId][id];
         }
-    }
-
-    function slotPositionsToArray(uint256 _itemId) internal view returns (uint256[] memory slotPositions_) {
-        uint256 slotPositions = s.itemTypes[_itemId].slotPositions;
-        slotPositions_ = new uint256[](16);
-        uint256 numSlots;
-        for (uint256 i; i < 16;) {
-            if ((slotPositions >> i) & 1 == 1) {
-                slotPositions_[numSlots] = i;
-                unchecked {numSlots++;}
-            }
-            unchecked {i++;}
-        }
-        assembly {
-            mstore(slotPositions_, numSlots)
-        }
-    }
+    } 
 
     struct ItemBalanceWithSlotsIO {
         uint256 itemId;
         uint256 balance;
-        uint256[] slotPositions;
+        bool[EQUIPPED_WEARABLE_SLOTS] slotPositions;
         string name;
-        int256[NUMERIC_TRAITS_NUM] traitModifiers;
+        int8[NUMERIC_TRAITS_NUM] traitModifiers;
         uint256 minLevel;
     }
 
@@ -130,12 +116,10 @@ contract ItemsFacet is Modifiers {
             }
             itemBalanceWithSlots_[numItems].itemId = id;
             itemBalanceWithSlots_[numItems].balance = bal;
-            itemBalanceWithSlots_[numItems].slotPositions = slotPositionsToArray(id);
+            itemBalanceWithSlots_[numItems].slotPositions = s.itemTypes[EQUIPPED_WEARABLE_SLOTS].slotPositions;
             itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
-            uint256 traitModifiers = s.itemTypes[id].traitModifiers;
-            for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-                itemBalanceWithSlots_[numItems].traitModifiers[i] = int8(uint8(traitModifiers >> (i * 8)));
-            }
+            itemBalanceWithSlots_[numItems].traitModifiers = s.itemTypes[id].traitModifiers;
+            
             itemBalanceWithSlots_[numItems].minLevel = s.itemTypes[id].minLevel;
             numItems++;
         }
@@ -153,13 +137,9 @@ contract ItemsFacet is Modifiers {
             if (bal > 0) {
                 itemBalanceWithSlots_[numItems].itemId = id;
                 itemBalanceWithSlots_[numItems].balance = bal;
-                itemBalanceWithSlots_[numItems].slotPositions = slotPositionsToArray(id);
+                itemBalanceWithSlots_[numItems].slotPositions = s.itemTypes[EQUIPPED_WEARABLE_SLOTS].slotPositions;
                 itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
-                uint256 traitModifiers = s.itemTypes[id].traitModifiers;
-                for (uint256 i; i < NUMERIC_TRAITS_NUM;) {
-                    itemBalanceWithSlots_[numItems].traitModifiers[i] = int8(uint8(traitModifiers >> (i * 8)));
-                    unchecked {i++;}
-                }
+                itemBalanceWithSlots_[numItems].traitModifiers = s.itemTypes[id].traitModifiers;                
                 itemBalanceWithSlots_[numItems].minLevel = s.itemTypes[id].minLevel;
                 unchecked {numItems++;}
             }
@@ -186,11 +166,8 @@ contract ItemsFacet is Modifiers {
         }
     }
 
-    function equippedWearables(uint256 _tokenId) external view returns (uint256[16] memory wearableIds_) {
-        uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
-        for (uint256 i; i < 16; i++) {
-            wearableIds_[i] = uint16(l_equippedWearables >> (i * 16));
-        }
+    function equippedWearables(uint256 _tokenId) external view returns (uint16[EQUIPPED_WEARABLE_SLOTS] memory wearableIds_) {
+        wearableIds_ = s.aavegotchis[_tokenId].equippedWearables;
     }
 
     struct WearableSetIO {
@@ -228,7 +205,7 @@ contract ItemsFacet is Modifiers {
     struct ItemTypeIO {
         // treated as int8s array
         // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
-        int256[NUMERIC_TRAITS_NUM] traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
+        int8[NUMERIC_TRAITS_NUM] traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
         // this is an array of uint indexes into the collateralTypes array
 
         uint8[] allowedCollaterals; //[WEARABLE ONLY] The collaterals this wearable can be equipped to. An empty array is "any"
@@ -238,7 +215,7 @@ contract ItemsFacet is Modifiers {
         uint32 maxQuantity; //Total number that can be minted of this item.
         uint8 rarityScoreModifier; //Number from 1-50.
         // Each bit is a slot position. 1 is true, 0 is false
-        bool[16] slotPositions; //[WEARABLE ONLY] The slots that this wearable can be added to.
+        bool[EQUIPPED_WEARABLE_SLOTS] slotPositions; //[WEARABLE ONLY] The slots that this wearable can be added to.
         bool canPurchaseWithGhst;
         uint32 totalQuantity; //The total quantity of this item minted so far
         uint8 minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
@@ -257,31 +234,25 @@ contract ItemsFacet is Modifiers {
     function getItemType(uint256 _itemId) public view returns (ItemTypeIO memory itemType_) {
         require(_itemId < s.itemTypes.length, "ItemsFacet: Item type doesn't exist");
         ItemType storage itemType = s.itemTypes[_itemId];
-        uint256 traitModifiers = itemType.traitModifiers;
-        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-            itemType_.traitModifiers[i] = int8(uint8(traitModifiers >> (i * 8)));
-        }
+        itemType_.traitModifiers = itemType.traitModifiers;
         itemType_.allowedCollaterals = itemType.allowedCollaterals;
         itemType_.name = itemType.name;
         itemType_.ghstPrice = itemType.ghstPrice;
         itemType_.svgId = itemType.svgId;
         itemType_.maxQuantity = itemType.maxQuantity;
         itemType_.rarityScoreModifier = itemType.rarityScoreModifier;
-        for (uint256 i; i < 16; i++) {
-            itemType_.slotPositions[i] = ((itemType.slotPositions >> i) & 1) == 1;
-        }
+        itemType_.slotPositions = itemType.slotPositions;
         itemType_.canPurchaseWithGhst = itemType.canPurchaseWithGhst;
         itemType_.totalQuantity = itemType.totalQuantity;
         itemType_.minLevel = itemType.minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
         itemType_.canBeTransferred = itemType.canBeTransferred;
         itemType_.category = itemType.category;
         itemType_.kinshipBonus = itemType.kinshipBonus;
-        itemType_.experienceBonus = itemType.experienceBonus;
-        uint256 dimensions = itemType.dimensions;
-        itemType_.x = uint8(dimensions);
-        itemType_.y = uint8(dimensions >> 8);
-        itemType_.width = uint8(dimensions >> 16);
-        itemType_.height = uint8(dimensions >> 24);
+        itemType_.experienceBonus = itemType.experienceBonus;        
+        itemType_.x = itemType.dimensions.x;
+        itemType_.y = itemType.dimensions.y;
+        itemType_.width = itemType.dimensions.width;
+        itemType_.height = itemType.dimensions.height;
         itemType_.description = itemType.description;
         itemType_.author = itemType.author;
     }
@@ -327,14 +298,14 @@ contract ItemsFacet is Modifiers {
    |             Write Functions        |
    |__________________________________*/
 
-    function equipWearables(uint256 _tokenId, uint256 _equippedWearables) external onlyAavegotchiOwner(_tokenId) {
+    function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _equippedWearables) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         address sender = LibMeta.msgSender();
 
         uint256 aavegotchiLevel = LibAavegotchi.aavegotchiLevel(aavegotchi.experience);
 
-        for (uint256 slot; slot < 16; slot++) {
-            uint256 wearableId = uint16(_equippedWearables >> (16 * slot));
+        for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
+            uint256 wearableId = _equippedWearables[slot];
 
             if (wearableId == 0) {
                 continue;
@@ -344,9 +315,9 @@ contract ItemsFacet is Modifiers {
             require(itemType.category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
 
             // bitmask and bitwise operators used here. Info on them: https://code.tutsplus.com/articles/understanding-bitwise-operators--active-11301
-            uint256 slotAllowed = (itemType.slotPositions >> slot) & 1;
+            bool slotAllowed = itemType.slotPositions[slot];
 
-            require(slotAllowed == 1, "ItemsFacet: Wearable cannot be equipped in this slot");
+            require(slotAllowed == true, "ItemsFacet: Wearable cannot be equipped in this slot");
             bool canBeEquipped;
             uint8[] memory allowedCollaterals = itemType.allowedCollaterals;
             if (allowedCollaterals.length > 0) {
@@ -407,11 +378,20 @@ contract ItemsFacet is Modifiers {
                 require(kinship <= type(uint16).max, "ItemsFacet: kinship beyond max value");
                 s.aavegotchis[_tokenId].interactionCount = uint16(kinship);
             }
-
-            //Boost traits and reset clock
-            if (itemType.traitModifiers != 0) {
-                s.aavegotchis[_tokenId].lastTemporaryBoost = uint40(block.timestamp);
-                s.aavegotchis[_tokenId].temporaryTraitBoosts = itemType.traitModifiers;
+            {
+                // prevent stack too deep error with braces here
+                //Boost traits and reset clock
+                bool boost = false;
+                for(uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
+                    if(itemType.traitModifiers[j] != 0) {
+                        boost = true;
+                        break;
+                    }
+                }
+                if (boost) {
+                    s.aavegotchis[_tokenId].lastTemporaryBoost = uint40(block.timestamp);
+                    s.aavegotchis[_tokenId].temporaryTraitBoosts = itemType.traitModifiers; 
+                }
             }
 
             //Increase experience

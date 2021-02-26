@@ -112,7 +112,7 @@ contract CollateralFacet is Modifiers {
             s.ownerTokenIdIndexes[owner][lastTokenId] = index;
         }
         s.ownerTokenIds[owner].pop();
-        delete s.ownerTokenIdIndexes[owner][_tokenId];
+        delete s.ownerTokenIdIndexes[owner][_tokenId]; 
 
         // delete token approval if any
         if (s.approved[_tokenId] != address(0)) {

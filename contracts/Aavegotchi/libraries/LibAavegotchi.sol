@@ -2,15 +2,20 @@
 pragma solidity 0.8.1;
 
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
-import {LibAppStorage, AavegotchiCollateralTypeInfo, AppStorage, Aavegotchi, ItemType} from "./LibAppStorage.sol";
+import {
+    LibAppStorage,
+    AavegotchiCollateralTypeInfo,
+    AppStorage,
+    Aavegotchi,
+    ItemType,
+    NUMERIC_TRAITS_NUM,
+    EQUIPPED_WEARABLE_SLOTS,
+    PORTAL_AAVEGOTCHIS_NUM
+} from "./LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
-
-uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
-uint256 constant NUMERIC_TRAITS_NUM = 6;
-uint256 constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
 struct AavegotchiCollateralTypeIO {
     address collateralType;
@@ -23,9 +28,9 @@ struct AavegotchiInfo {
     address owner;
     uint256 randomNumber;
     uint256 status;
-    int256[NUMERIC_TRAITS_NUM] numericTraits;
-    int256[NUMERIC_TRAITS_NUM] modifiedNumericTraits;
-    uint256[EQUIPPED_WEARABLE_SLOTS] equippedWearables;
+    int16[NUMERIC_TRAITS_NUM] numericTraits;
+    int16[NUMERIC_TRAITS_NUM] modifiedNumericTraits;
+    uint16[EQUIPPED_WEARABLE_SLOTS] equippedWearables;
     address collateral;
     address escrow;
     uint256 stakedAmount;
@@ -45,15 +50,14 @@ struct AavegotchiInfo {
 
 struct PortalAavegotchiTraitsIO {
     uint256 randomNumber;
-    int256[] numericTraits;
-    uint256 numericTraitsUint;
+    int16[NUMERIC_TRAITS_NUM] numericTraits;
     address collateralType;
     uint256 minimumStake;
 }
 
 struct InternalPortalAavegotchiTraitsIO {
     uint256 randomNumber;
-    uint256 numericTraits;
+    int16[NUMERIC_TRAITS_NUM] numericTraits;
     address collateralType;
     uint256 minimumStake;
 }
@@ -66,22 +70,24 @@ library LibAavegotchi {
 
     event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
 
-    function toNumericTraits(uint256 _randomNumber, uint256 _modifiers) internal pure returns (uint256 numericTraits_) {
+    function toNumericTraits(uint256 _randomNumber, int16[NUMERIC_TRAITS_NUM] memory _modifiers)
+        internal
+        pure
+        returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_)
+    {
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-            uint256 value = uint8(_randomNumber >> (i * 8));
+            uint256 value = uint8(uint256(_randomNumber >> (i * 8)));
             if (value > 99) {
                 value /= 2;
                 if (value > 99) {
                     value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
                 }
             }
-            int256 mod = int8(int256(_modifiers >> (i * 8)));
-            // set slot
-            numericTraits_ |= uint256((int256(value) + mod) & 0xffff) << (16 * i);
+            numericTraits_[i] = int16(int256(value)) + _modifiers[i];
         }
     }
 
-    function rarityMultiplier(uint256 _numericTraits) internal pure returns (uint256 multiplier) {
+    function rarityMultiplier(int16[NUMERIC_TRAITS_NUM] memory _numericTraits) internal pure returns (uint256 multiplier) {
         uint256 rarityScore = LibAavegotchi.baseRarityScore(_numericTraits);
         if (rarityScore < 300) return 10;
         else if (rarityScore >= 300 && rarityScore < 450) return 10;
@@ -130,11 +136,7 @@ library LibAavegotchi {
             portalAavegotchiTraits_[i].randomNumber = single.randomNumber;
             portalAavegotchiTraits_[i].collateralType = single.collateralType;
             portalAavegotchiTraits_[i].minimumStake = single.minimumStake;
-            portalAavegotchiTraits_[i].numericTraitsUint = single.numericTraits;
-            portalAavegotchiTraits_[i].numericTraits = new int256[](NUMERIC_TRAITS_NUM);
-            for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
-                portalAavegotchiTraits_[i].numericTraits[j] = int16(int256(single.numericTraits >> (j * 16)));
-            }
+            portalAavegotchiTraits_[i].numericTraits = single.numericTraits;
         }
     }
 
@@ -147,10 +149,7 @@ library LibAavegotchi {
         aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
         if (aavegotchiInfo_.status == STATUS_AAVEGOTCHI) {
             aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
-            uint256 l_equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
-            for (uint16 i; i < EQUIPPED_WEARABLE_SLOTS; i++) {
-                aavegotchiInfo_.equippedWearables[i] = uint16(l_equippedWearables >> (i * 16));
-            }
+            aavegotchiInfo_.equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
             aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
             aavegotchiInfo_.escrow = s.aavegotchis[_tokenId].escrow;
             aavegotchiInfo_.stakedAmount = IERC20(aavegotchiInfo_.collateral).balanceOf(aavegotchiInfo_.escrow);
@@ -161,11 +160,8 @@ library LibAavegotchi {
             aavegotchiInfo_.toNextLevel = xpUntilNextLevel(s.aavegotchis[_tokenId].experience);
             aavegotchiInfo_.level = aavegotchiLevel(s.aavegotchis[_tokenId].experience);
             aavegotchiInfo_.usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
-            uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
-            for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-                aavegotchiInfo_.numericTraits[i] = int16(int256(numericTraits >> (i * 16)));
-            }
-            aavegotchiInfo_.baseRarityScore = baseRarityScore(numericTraits);
+            aavegotchiInfo_.numericTraits = s.aavegotchis[_tokenId].numericTraits;
+            aavegotchiInfo_.baseRarityScore = baseRarityScore(aavegotchiInfo_.numericTraits);
             (aavegotchiInfo_.modifiedNumericTraits, aavegotchiInfo_.modifiedRarityScore) = modifiedTraitsAndRarityScore(_tokenId);
             aavegotchiInfo_.locked = s.aavegotchis[_tokenId].locked;
         }
@@ -175,58 +171,43 @@ library LibAavegotchi {
     function modifiedTraitsAndRarityScore(uint256 _tokenId)
         internal
         view
-        returns (int256[NUMERIC_TRAITS_NUM] memory numericTraits_, uint256 rarityScore_)
+        returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_, uint256 rarityScore_)
     {
         AppStorage storage s = LibAppStorage.diamondStorage();
         require(s.aavegotchis[_tokenId].status == STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
-        uint256 equippedWearables = aavegotchi.equippedWearables;
-        uint256 numericTraitsUint = getNumericTraits(_tokenId);
+        numericTraits_ = getNumericTraits(_tokenId);
         uint256 wearableBonus;
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
-            uint256 wearableId = uint16(equippedWearables >> (16 * slot));
+            uint256 wearableId = aavegotchi.equippedWearables[slot];
             if (wearableId == 0) {
                 continue;
             }
             ItemType storage itemType = s.itemTypes[wearableId];
             //Add on trait modifiers
-            uint256 traitModifiers = itemType.traitModifiers;
-            uint256 newNumericTraits;
             for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
-                int256 number = int16(int256(numericTraitsUint >> (j * 16)));
-                int256 traitModifier = int8(int256(traitModifiers >> (j * 8)));
-                number += traitModifier;
-                // clear bits first then assign
-                newNumericTraits |= (uint256(number) & 0xffff) << (j * 16);
+                numericTraits_[j] += itemType.traitModifiers[j];
             }
-
-            numericTraitsUint = newNumericTraits;
             wearableBonus += itemType.rarityScoreModifier;
         }
-        uint256 baseRarity = baseRarityScore(numericTraitsUint);
+        uint256 baseRarity = baseRarityScore(numericTraits_);
         rarityScore_ = baseRarity + wearableBonus;
-        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-            int256 number = int16(int256(numericTraitsUint >> (i * 16)));
-            numericTraits_[i] = number;
-        }
     }
 
-    function getNumericTraits(uint256 _tokenId) internal view returns (uint256 numericTraits_) {
+    function getNumericTraits(uint256 _tokenId) internal view returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         //Check if trait boosts from consumables are still valid
         int256 boostDecay = int256((block.timestamp - s.aavegotchis[_tokenId].lastTemporaryBoost) / 24 hours);
-        uint256 temporaryTraitBoosts = s.aavegotchis[_tokenId].temporaryTraitBoosts;
-        uint256 numericTraits = s.aavegotchis[_tokenId].numericTraits;
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-            int256 number = int16(int256(numericTraits >> (i * 16)));
-            int256 boost = int8(int256(temporaryTraitBoosts >> (i * 8)));
+            int256 number = s.aavegotchis[_tokenId].numericTraits[i];
+            int256 boost = s.aavegotchis[_tokenId].temporaryTraitBoosts[i];
 
             if (boost > 0 && boost > boostDecay) {
                 number += boost - boostDecay;
             } else if ((boost * -1) > boostDecay) {
                 number += boost + boostDecay;
             }
-            numericTraits_ |= uint256(number & 0xffff) << (i * 16);
+            numericTraits_[i] = int16(number);
         }
     }
 
@@ -287,9 +268,9 @@ library LibAavegotchi {
     }
 
     //Calculates the base rarity score, including collateral modifier
-    function baseRarityScore(uint256 _numericTraits) internal pure returns (uint256 _rarityScore) {
+    function baseRarityScore(int16[NUMERIC_TRAITS_NUM] memory _numericTraits) internal pure returns (uint256 _rarityScore) {
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-            int256 number = int16(int256(_numericTraits >> (i * 16)));
+            int256 number = _numericTraits[i];
             if (number >= 50) {
                 _rarityScore += uint256(number) + 1;
             } else {
