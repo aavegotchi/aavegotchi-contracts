@@ -1,8 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {LibAppStorage, AppStorage, Aavegotchi, EQUIPPED_WEARABLE_SLOTS} from "./LibAppStorage.sol";
+import {LibAppStorage, AppStorage, ItemType, Aavegotchi, EQUIPPED_WEARABLE_SLOTS} from "./LibAppStorage.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
+
+struct ItemTypeIO {
+    uint256 balance;
+    uint256 itemId;
+    ItemType itemType;
+}
 
 library LibItems {
     //Wearables
@@ -20,6 +26,23 @@ library LibItems {
     uint256 internal constant ITEM_CATEGORY_CONSUMABLE = 2;
 
     uint8 internal constant WEARABLE_SLOTS_TOTAL = 11;
+
+    function itemBalancesOfTokenWithTypes(address _tokenContract, uint256 _tokenId)
+        internal
+        view
+        returns (ItemTypeIO[] memory itemBalancesOfTokenWithTypes_)
+    {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        uint256 count = s.nftItems[_tokenContract][_tokenId].length;
+        itemBalancesOfTokenWithTypes_ = new ItemTypeIO[](count);
+        for (uint256 i; i < count; i++) {
+            uint256 itemId = s.nftItems[_tokenContract][_tokenId][i];
+            uint256 bal = s.nftItemBalances[_tokenContract][_tokenId][itemId];
+            itemBalancesOfTokenWithTypes_[i].itemId = itemId;
+            itemBalancesOfTokenWithTypes_[i].balance = bal;
+            itemBalancesOfTokenWithTypes_[i].itemType = s.itemTypes[itemId];
+        }
+    }
 
     function addToParent(
         address _toContract,

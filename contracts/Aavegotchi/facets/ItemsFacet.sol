@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {LibItems} from "../libraries/LibItems.sol";
+import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
 import {
     LibAppStorage,
     Modifiers,
@@ -57,12 +57,6 @@ contract ItemsFacet is Modifiers {
         }
     }
 
-    struct ItemTypeIO {
-        uint256 balance;
-        uint256 itemId;
-        ItemType itemType;
-    }
-
     function itemBalancesWithTypes(address _owner) external view returns (ItemTypeIO[] memory output_) {
         uint256 count = s.ownerItems[_owner].length;
         output_ = new ItemTypeIO[](count);
@@ -113,15 +107,7 @@ contract ItemsFacet is Modifiers {
         view
         returns (ItemTypeIO[] memory itemBalancesOfTokenWithTypes_)
     {
-        uint256 count = s.nftItems[_tokenContract][_tokenId].length;
-        itemBalancesOfTokenWithTypes_ = new ItemTypeIO[](count);
-        for (uint256 i; i < count; i++) {
-            uint256 itemId = s.nftItems[_tokenContract][_tokenId][i];
-            uint256 bal = s.nftItemBalances[_tokenContract][_tokenId][itemId];
-            itemBalancesOfTokenWithTypes_[i].itemId = itemId;
-            itemBalancesOfTokenWithTypes_[i].balance = bal;
-            itemBalancesOfTokenWithTypes_[i].itemType = s.itemTypes[itemId];
-        }
+        itemBalancesOfTokenWithTypes_ = LibItems.itemBalancesOfTokenWithTypes(_tokenContract, _tokenId);
     }
 
     /**

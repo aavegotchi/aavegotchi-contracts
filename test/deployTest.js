@@ -68,7 +68,7 @@ const testWearableId = '1'
 const testSlot = '3'
 
 describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
-  this.timeout(200000)
+  this.timeout(300000)
   before(async function () {
     const deployVars = await deployProject('deployTest')
     global.set = true
@@ -539,7 +539,7 @@ describe('Items & Wearables', async function () {
     // console.log('Modified traits:' + modifiedTraits)
 
     // Check the math
-    expect(Number(augmentedScore).toString()).to.equal(finalScore)
+    expect(Number(augmentedScore).toString()).to.equal(finalScore.toString())
   })
 })
 
@@ -610,7 +610,7 @@ describe('Revenue transfers', async function () {
 
 describe('Shop', async function () {
   it('Should return balances and item types', async function () {
-    const itemsAndBalances = await global.itemsFacet.balancesWithItemTypes(account)
+    const itemsAndBalances = await global.itemsFacet.itemBalancesWithItemTypes(account)
     // console.log('items and balances:', itemsAndBalances.balances)
   })
 

@@ -16,16 +16,11 @@ import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
+import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
 
 struct AavegotchiCollateralTypeIO {
     address collateralType;
     AavegotchiCollateralTypeInfo collateralTypeInfo;
-}
-
-struct ItemTypeIO {
-    uint256 balance;
-    uint256 itemId;
-    ItemType itemType;
 }
 
 struct AavegotchiInfo {
@@ -170,6 +165,7 @@ library LibAavegotchi {
             aavegotchiInfo_.baseRarityScore = baseRarityScore(aavegotchiInfo_.numericTraits);
             (aavegotchiInfo_.modifiedNumericTraits, aavegotchiInfo_.modifiedRarityScore) = modifiedTraitsAndRarityScore(_tokenId);
             aavegotchiInfo_.locked = s.aavegotchis[_tokenId].locked;
+            aavegotchiInfo_.items = LibItems.itemBalancesOfTokenWithTypes(address(this), _tokenId);
         }
     }
 
