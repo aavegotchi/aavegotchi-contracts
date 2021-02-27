@@ -610,21 +610,21 @@ describe('Revenue transfers', async function () {
 
 describe('Shop', async function () {
   it('Should return balances and item types', async function () {
-    const itemsAndBalances = await global.itemsFacet.itemBalancesWithItemTypes(account)
+    const itemsAndBalances = await global.itemsFacet.itemBalancesWithTypes(account)
     // console.log('items and balances:', itemsAndBalances.balances)
   })
 
   it('Should purchase items using GHST', async function () {
     let balances = await global.itemsFacet.itemBalances(account)
     // Start at 1 because 0 is always empty
-    console.log(balances)
+    // console.log(balances)
     // expect(balances[57]).to.equal(0)
 
     // Hawaiian Shirt and SantaHat
     await global.shopFacet.purchaseItemsWithGhst(account, ['114', '115', '116', '126', '127', '128', '129'], ['10', '10', '10', '100', '10', '10', '10'])
     balances = await global.itemsFacet.itemBalances(account)
-    // expect(balances[129]).to.equal(10)
-    console.log(balances)
+    expect(balances[4].balance).to.equal(10)
+    // console.log(balances)
   })
 })
 
