@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {Modifiers, EQUIPPED_WEARABLE_SLOTS} from "../libraries/LibAppStorage.sol";
+import {Modifiers, EQUIPPED_WEARABLE_SLOTS, Aavegotchi} from "../libraries/LibAppStorage.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
@@ -29,15 +30,14 @@ contract ItemsTransferFacet is Modifiers {
         uint256 _value,
         bytes calldata _data
     ) external {
-        require(_to != address(0), "Items: Can't transfer to 0 address");
+        require(_to != address(0), "ItemsTransfer: Can't transfer to 0 address");
         address sender = LibMeta.msgSender();
-        require(sender == _from || s.operators[_from][sender] || sender == address(this), "Items: Not owner and not approved to transfer");
-        uint256 bal = s.items[_from][_id];
-        require(_value <= bal, "Items: Doesn't have that many to transfer");
-        s.items[_from][_id] = bal - _value;
-        s.items[_to][_id] += _value;
-        LibERC1155.onERC1155Received(_from, _to, _id, _value, _data);
+        require(sender == _from || s.operators[_from][sender] || sender == address(this), "ItemsTransfer: Not owner and not approved to transfer");
+        LibItems.removeFromOwner(_from, _id, _value);
+        LibItems.addToOwner(_to, _id, _value);
+        emit LibERC1155.TransferSingle(sender, _from, _to, _id, _value);
         LibERC1155Marketplace.updateERC1155Listing(address(this), _id, _from);
+        LibERC1155.onERC1155Received(_from, _to, _id, _value, _data);
     }
 
     /**
@@ -63,19 +63,18 @@ contract ItemsTransferFacet is Modifiers {
         uint256[] calldata _values,
         bytes calldata _data
     ) external {
-        require(_to != address(0), "Items: Can't transfer to 0 address");
-        require(_ids.length == _values.length, "Items: ids not same length as values");
+        require(_to != address(0), "ItemsTransfer: Can't transfer to 0 address");
+        require(_ids.length == _values.length, "ItemsTransfer: ids not same length as values");
         address sender = LibMeta.msgSender();
-        require(sender == _from || s.operators[_from][sender], "Items: Not owner and not approved to transfer");
+        require(sender == _from || s.operators[_from][sender], "ItemsTransfer: Not owner and not approved to transfer");
         for (uint256 i; i < _ids.length; i++) {
             uint256 id = _ids[i];
             uint256 value = _values[i];
-            uint256 bal = s.items[_from][id];
-            require(value <= bal, "Items: Doesn't have that many to transfer");
-            s.items[_from][id] = bal - value;
-            s.items[_to][id] += value;
+            LibItems.removeFromOwner(_from, id, value);
+            LibItems.addToOwner(_to, id, value);
             LibERC1155Marketplace.updateERC1155Listing(address(this), id, _from);
         }
+        emit LibERC1155.TransferBatch(sender, _from, _to, _ids, _values);
         LibERC1155.onERC1155BatchReceived(_from, _to, _ids, _values, _data);
     }
 
@@ -92,16 +91,36 @@ contract ItemsTransferFacet is Modifiers {
         uint256 _id,
         uint256 _value
     ) external {
-        require(_toContract != address(0), "Items: Can't transfer to 0 address");
+        require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
         address sender = LibMeta.msgSender();
-        require(sender == _from || s.operators[_from][sender], "Items: Not owner and not approved to transfer");
-        uint256 bal = s.items[_from][_id];
-        require(_value <= bal, "Items: Doesn't have that many to transfer");
-        s.items[_from][_id] = bal - _value;
-        s.nftBalances[_toContract][_toTokenId][_id] += _value;
+        require(sender == _from || s.operators[_from][sender], "ItemsTransfer: Not owner and not approved to transfer");
+        LibItems.removeFromOwner(_from, _id, _value);
+        LibItems.addToParent(_toContract, _toTokenId, _id, _value);
         emit LibERC1155.TransferSingle(sender, _from, _toContract, _id, _value);
         emit LibERC1155.TransferToParent(_toContract, _toTokenId, _id, _value);
         LibERC1155Marketplace.updateERC1155Listing(address(this), _id, _from);
+    }
+
+    function batchTransferToParent(
+        address _from,
+        address _toContract,
+        uint256 _toTokenId,
+        uint256[] calldata _ids,
+        uint256[] calldata _values
+    ) external {
+        require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
+        require(_ids.length == _values.length, "ItemsTransfer: ids.length not the same as values.length");
+        address sender = LibMeta.msgSender();
+        require(sender == _from || s.operators[_from][sender], "ItemsTransfer: Not owner and not approved to transfer");
+        for (uint256 i; i < _ids.length; i++) {
+            uint256 id = _ids[i];
+            uint256 value = _values[i];
+            LibItems.removeFromOwner(_from, id, value);
+            LibItems.addToParent(_toContract, _toTokenId, id, value);
+            emit LibERC1155.TransferToParent(_toContract, _toTokenId, id, value);
+            LibERC1155Marketplace.updateERC1155Listing(address(this), id, _from);
+        }
+        emit LibERC1155.TransferBatch(sender, _from, _toContract, _ids, _values);
     }
 
     function transferApproved(address _fromContract, uint256 _fromTokenId) internal view {
@@ -109,23 +128,17 @@ contract ItemsTransferFacet is Modifiers {
             address owner = s.aavegotchis[_fromTokenId].owner;
             require(
                 LibMeta.msgSender() == owner || s.operators[owner][LibMeta.msgSender()] || LibMeta.msgSender() == s.approved[_fromTokenId],
-                "Items: Not owner and not approved to transfer"
+                "ItemsTransfer: Not owner and not approved to transfer"
             );
-            require(s.aavegotchis[_fromTokenId].locked == false, "Items: Only callable on unlocked Aavegotchis");
+            require(s.aavegotchis[_fromTokenId].locked == false, "ItemsTransfer: Only callable on unlocked Aavegotchis");
         } else {
             address owner = IERC721(_fromContract).ownerOf(_fromTokenId);
             require(
                 owner == LibMeta.msgSender() ||
                     IERC721(_fromContract).getApproved(_fromTokenId) == LibMeta.msgSender() ||
                     IERC721(_fromContract).isApprovedForAll(owner, LibMeta.msgSender()),
-                "Items: Not owner and not approved to transfer"
+                "ItemsTransfer: Not owner and not approved to transfer"
             );
-        }
-    }
-
-    function checkWearableIsEquipped(uint256 _fromTokenId, uint256 _id) internal view {
-        for (uint256 i; i < EQUIPPED_WEARABLE_SLOTS; i++) {
-            require(s.aavegotchis[_fromTokenId].equippedWearables[i] != _id, "Items: Cannot transfer wearable that is equipped");
         }
     }
 
@@ -142,18 +155,10 @@ contract ItemsTransferFacet is Modifiers {
         uint256 _id,
         uint256 _value
     ) external {
-        require(_to != address(0), "Items: Can't transfer to 0 address");
+        require(_to != address(0), "ItemsTransfer: Can't transfer to 0 address");
         transferApproved(_fromContract, _fromTokenId);
-        uint256 bal = s.nftBalances[_fromContract][_fromTokenId][_id];
-        require(_value <= bal, "Items: Doesn't have that many to transfer");
-        bal -= _value;
-        if (_fromContract == address(this)) {
-            if (bal == 0) {
-                checkWearableIsEquipped(_fromTokenId, _id);
-            }
-        }
-        s.nftBalances[_fromContract][_fromTokenId][_id] = bal;
-        s.items[_to][_id] += _value;
+        LibItems.removeFromParent(_fromContract, _fromTokenId, _id, _value);
+        LibItems.addToOwner(_to, _id, _value);
         emit LibERC1155.TransferSingle(LibMeta.msgSender(), _fromContract, _to, _id, _value);
         emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, _id, _value);
     }
@@ -165,32 +170,19 @@ contract ItemsTransferFacet is Modifiers {
         uint256[] calldata _ids,
         uint256[] calldata _values
     ) external {
-        require(_ids.length == _values.length, "Items: ids.length not the same as values.length");
-        require(_to != address(0), "Items: Can't transfer to 0 address");
+        require(_ids.length == _values.length, "ItemsTransfer: ids.length not the same as values.length");
+        require(_to != address(0), "ItemsTransfer: Can't transfer to 0 address");
         transferApproved(_fromContract, _fromTokenId);
         for (uint256 i; i < _ids.length; i++) {
             uint256 id = _ids[i];
             uint256 value = _values[i];
-            uint256 bal = s.nftBalances[_fromContract][_fromTokenId][id];
-            require(value <= bal, "Items: Doesn't have that many to transfer");
-            bal -= value;
-            if (bal == 0 && _fromContract == address(this)) {
-                checkWearableIsEquipped(_fromTokenId, id);
-            }
-            s.nftBalances[_fromContract][_fromTokenId][id] = bal;
-            s.items[_to][id] += value;
+            LibItems.removeFromParent(_fromContract, _fromTokenId, id, value);
+            LibItems.addToOwner(_to, id, value);
             emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, id, value);
         }
         emit LibERC1155.TransferBatch(LibMeta.msgSender(), _fromContract, _to, _ids, _values);
     }
 
-    /// @notice Transfer a token from a token to another token
-    /// @param _fromContract The address of the owning contract
-    /// @param _fromTokenId The owning token
-    /// @param _toContract The ERC721 contract of the receiving token
-    /// @param _toTokenId The receiving token
-    /// @param _id ID of the token
-    /// @param _value The amount tokens to transfer
     function transferAsChild(
         address _fromContract,
         uint256 _fromTokenId,
@@ -199,18 +191,34 @@ contract ItemsTransferFacet is Modifiers {
         uint256 _id,
         uint256 _value
     ) external {
-        require(_toContract != address(0), "Items: Can't transfer to 0 address");
+        require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
         transferApproved(_fromContract, _fromTokenId);
-        uint256 bal = s.nftBalances[_fromContract][_fromTokenId][_id];
-        require(_value <= bal, "Items: Doesn't have that many to transfer");
-        bal -= _value;
-        if (bal == 0 && _fromContract == address(this)) {
-            checkWearableIsEquipped(_fromTokenId, _id);
-        }
-        s.nftBalances[_fromContract][_fromTokenId][_id] = bal;
-        s.nftBalances[_toContract][_toTokenId][_id] += _value;
+        LibItems.removeFromParent(_fromContract, _fromTokenId, _id, _value);
+        LibItems.addToParent(_toContract, _toTokenId, _id, _value);
         emit LibERC1155.TransferSingle(LibMeta.msgSender(), _fromContract, _toContract, _id, _value);
         emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, _id, _value);
         emit LibERC1155.TransferToParent(_toContract, _toTokenId, _id, _value);
+    }
+
+    function batchTransferAsChild(
+        address _fromContract,
+        uint256 _fromTokenId,
+        address _toContract,
+        uint256 _toTokenId,
+        uint256[] calldata _ids,
+        uint256[] calldata _values
+    ) external {
+        require(_ids.length == _values.length, "ItemsTransfer: ids.length not the same as values.length");
+        require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
+        transferApproved(_fromContract, _fromTokenId);
+        for (uint256 i; i < _ids.length; i++) {
+            uint256 id = _ids[i];
+            uint256 value = _values[i];
+            LibItems.removeFromParent(_fromContract, _fromTokenId, id, value);
+            LibItems.addToParent(_toContract, _toTokenId, id, value);
+            emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, id, value);
+            emit LibERC1155.TransferToParent(_toContract, _toTokenId, id, value);
+        }
+        emit LibERC1155.TransferBatch(LibMeta.msgSender(), _fromContract, _toContract, _ids, _values);
     }
 }

@@ -4,9 +4,10 @@ pragma solidity 0.8.1;
 import {Modifiers} from "../libraries/LibAppStorage.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
+import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
-import {LibAavegotchi} from "../libraries/LibAavegotchi.sol"; 
+import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 
 contract BridgeFacet is Modifiers {
     event WithdrawnBatch(address indexed owner, uint256[] tokenIds);
@@ -25,15 +26,13 @@ contract BridgeFacet is Modifiers {
     }
 
     function withdrawItemsBatch(uint256[] calldata _ids, uint256[] calldata _values) external {
-        require(_ids.length == _values.length, "Items: ids not same length as values");
+        require(_ids.length == _values.length, "Bridge: ids not same length as values");
         require(_ids.length <= 20, "Items: exceeded max number of ids for single transaction");
         address owner = LibMeta.msgSender();
         for (uint256 i; i < _ids.length; i++) {
             uint256 id = _ids[i];
             uint256 value = _values[i];
-            uint256 bal = s.items[owner][id];
-            require(value <= bal, "Items: Doesn't have that many to transfer");
-            s.items[owner][id] = bal - value;
+            LibItems.removeFromOwner(owner, id, value);
             LibERC1155Marketplace.updateERC1155Listing(address(this), id, owner);
         }
         emit LibERC1155.TransferBatch(owner, owner, address(0), _ids, _values);
@@ -42,7 +41,7 @@ contract BridgeFacet is Modifiers {
 
     function withdrawAavegotchiBatch(uint256[] calldata _tokenIds) external {
         address owner = LibMeta.msgSender();
-        require(_tokenIds.length <= 20, "AavegotchiFacet: exceeds withdraw limit for single transaction");
+        require(_tokenIds.length <= 20, "Bridge: exceeds withdraw limit for single transaction");
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             require(owner == s.aavegotchis[tokenId].owner, "BridgeFacet: Not owner of token");
@@ -60,7 +59,7 @@ contract BridgeFacet is Modifiers {
      * @param _depositData abi encoded tokenId
      */
     function deposit(address _user, bytes calldata _depositData) external {
-        require(msg.sender == s.childChainManager, "BridgeFacet: only childChainManager can call this function");
+        require(msg.sender == s.childChainManager, "Bridge: only childChainManager can call this function");
         (uint256 tokenType, bytes memory tokenDepositData) = abi.decode(_depositData, (uint256, bytes));
         if (tokenType == ERC1155_TOKEN_TYPE) {
             (uint256[] memory ids, uint256[] memory values) = abi.decode(tokenDepositData, (uint256[], uint256[]));
@@ -68,7 +67,7 @@ contract BridgeFacet is Modifiers {
             for (uint256 i; i < ids.length; i++) {
                 uint256 id = ids[i];
                 uint256 value = values[i];
-                s.items[_user][id] += value;
+                LibItems.addToOwner(_user, id, value);
             }
             emit LibERC1155.TransferBatch(msg.sender, address(0), _user, ids, values);
             emit AddedItemsBatch(_user, ids, values);
@@ -76,7 +75,7 @@ contract BridgeFacet is Modifiers {
             uint256[] memory tokenIds = abi.decode(tokenDepositData, (uint256[]));
             for (uint256 i; i < tokenIds.length; i++) {
                 uint256 tokenId = tokenIds[i];
-                require(address(this) == s.aavegotchis[tokenId].owner, "BridgeFacet: Not owner of token");
+                require(address(this) == s.aavegotchis[tokenId].owner, "Bridge: Not owner of token");
                 LibAavegotchi.transfer(address(this), _user, tokenId);
             }
             emit AddedAavegotchiBatch(_user, tokenIds);

@@ -8,30 +8,29 @@ import {ILink} from "../interfaces/ILink.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
+uint256 constant TRAIT_BONUSES_NUM = 5;
 uint256 constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
 struct Aavegotchi {
-    // See helper function that converts this value into a uint16[16] memory equipedWearables
     uint16[EQUIPPED_WEARABLE_SLOTS] equippedWearables; //The currently equipped wearables of the Aavegotchi
-    string name;
-    uint256 randomNumber;
     // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     int8[NUMERIC_TRAITS_NUM] temporaryTraitBoosts;
-    uint40 lastTemporaryBoost;
     int16[NUMERIC_TRAITS_NUM] numericTraits; // Sixteen 16 bit ints.  [Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
-    address owner;
-    // uint32 batchId;
-    uint16 hauntId;
-    uint8 status; // 0 == portal, 1 == VRF_PENDING, 2 == open portal, 3 == Aavegotchi
-    uint32 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
+    string name;
+    uint256 randomNumber;
+    uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
+    uint256 minimumStake; //The minimum amount of collateral that must be staked. Set upon creation.
+    uint256 usedSkillPoints; //The number of skill points this aavegotchi has already used
+    uint256 interactionCount; //How many times the owner of this Aavegotchi has interacted with it.
     address collateralType;
-    uint88 minimumStake; //The minimum amount of collateral that must be staked. Set upon creation.
-    uint16 usedSkillPoints; //The number of skill points this aavegotchi has already used
     uint40 claimTime; //The block timestamp when this Aavegotchi was claimed
+    uint40 lastTemporaryBoost;
+    uint16 hauntId;
+    address owner;
+    uint8 status; // 0 == portal, 1 == VRF_PENDING, 2 == open portal, 3 == Aavegotchi
     uint40 lastInteracted; //The last time this Aavegotchi was interacted with
-    uint16 interactionCount; //How many times the owner of this Aavegotchi has interacted with it.
-    address escrow; //The escrow address this Aavegotchi manages.
     bool locked;
+    address escrow; //The escrow address this Aavegotchi manages.
 }
 
 struct Dimensions {
@@ -42,37 +41,37 @@ struct Dimensions {
 }
 
 struct ItemType {
+    string name; //The name of the item
     string description;
     string author;
     // treated as int8s array
     // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
     int8[NUMERIC_TRAITS_NUM] traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
+    //[WEARABLE ONLY] The slots that this wearable can be added to.
+    bool[EQUIPPED_WEARABLE_SLOTS] slotPositions;
     // this is an array of uint indexes into the collateralTypes array
     uint8[] allowedCollaterals; //[WEARABLE ONLY] The collaterals this wearable can be equipped to. An empty array is "any"
-    string name; //The name of the item
-    uint96 ghstPrice; //How much GHST this item costs
+    // SVG x,y,width,height
+    Dimensions dimensions;
+    uint256 ghstPrice; //How much GHST this item costs
+    uint256 maxQuantity; //Total number that can be minted of this item.
     uint32 svgId; //The svgId of the item
-    uint32 maxQuantity; //Total number that can be minted of this item.
     uint8 rarityScoreModifier; //Number from 1-50.
     // Each bit is a slot position. 1 is true, 0 is false
-    // uint16 slotPositions; //[WEARABLE ONLY] The slots that this wearable can be added to.
-    bool[EQUIPPED_WEARABLE_SLOTS] slotPositions;
     bool canPurchaseWithGhst;
     uint32 totalQuantity; //The total quantity of this item minted so far
-    uint8 minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
+    uint16 minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
     bool canBeTransferred;
     uint8 category; // 0 is wearable, 1 is badge, 2 is consumable
     int8 kinshipBonus; //[CONSUMABLE ONLY] How much this consumable boosts (or reduces) kinship score
     uint32 experienceBonus; //[CONSUMABLE ONLY]
-    // SVG x,y,width,height
-    Dimensions dimensions;
 }
 
 struct WearableSet {
     string name;
     uint8[] allowedCollaterals;
-    uint256 wearableIds; // The tokenIdS of each piece of the set
-    uint256 traitsBonuses;
+    uint16[] wearableIds; // The tokenIdS of each piece of the set
+    int8[TRAIT_BONUSES_NUM] traitsBonuses;
 }
 
 struct Haunt {
@@ -137,11 +136,17 @@ struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
     mapping(bytes32 => SvgLayer[]) svgLayers;
-    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) nftBalances;
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) nftItemBalances;
+    mapping(address => mapping(uint256 => uint256[])) nftItems;
+    // indexes are stored 1 higher so that 0 means no items in items array
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) nftItemIndexes;
     ItemType[] itemTypes;
     WearableSet[] wearableSets;
     mapping(uint256 => Haunt) haunts;
-    mapping(address => mapping(uint256 => uint256)) items;
+    mapping(address => mapping(uint256 => uint256)) ownerItemBalances;
+    mapping(address => uint256[]) ownerItems;
+    // indexes are stored 1 higher so that 0 means no items in items array
+    mapping(address => mapping(uint256 => uint256)) ownerItemIndexes;
     mapping(uint256 => uint256) tokenIdToRandomNumber;
     mapping(uint256 => Aavegotchi) aavegotchis;
     mapping(address => uint32[]) ownerTokenIds;
@@ -211,13 +216,6 @@ library LibAppStorage {
     function diamondStorage() internal pure returns (AppStorage storage ds) {
         assembly {
             ds.slot := 0
-        }
-    }
-
-    function uintToSixteenBitArray(uint256 _data) internal pure returns (uint256[16] memory array_) {
-        for (uint256 i; i < 16; i++) {
-            uint256 item = uint16(_data >> (16 * i));
-            array_[i] = item;
         }
     }
 }

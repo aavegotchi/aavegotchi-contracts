@@ -7,6 +7,7 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 
 // import "hardhat/console.sol";
@@ -214,9 +215,10 @@ contract ERC1155MarketplaceFacet is Modifiers {
             }
         }
         // Have to call it like this because LibMeta.msgSender() gets in the way
-        if (listing.erc1155TokenAddress == address(this)) {
-            s.items[seller][listing.erc1155TypeId] -= _quantity;
-            s.items[buyer][listing.erc1155TypeId] += _quantity;
+        if (listing.erc1155TokenAddress == address(this)) { 
+            LibItems.removeFromOwner(seller, listing.erc1155TypeId, _quantity);
+            LibItems.addToOwner(buyer, listing.erc1155TypeId, _quantity);
+            emit LibERC1155.TransferSingle(address(this), seller, buyer, listing.erc1155TypeId, _quantity);
             LibERC1155.onERC1155Received(seller, buyer, listing.erc1155TypeId, _quantity, "");
         } else {
             // GHSTStakingDiamond

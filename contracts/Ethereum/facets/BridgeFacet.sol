@@ -5,6 +5,8 @@ import {AppStorage} from "../libraries/LibAppStorage.sol";
 import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {RLPReader} from "../../shared/libraries/RLPReader.sol";
+import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
+import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 
 contract BridgeFacet {
     AppStorage internal s;
@@ -20,10 +22,6 @@ contract BridgeFacet {
         s.rootChainManager = _newRootChainManager;
     }
 
-    event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
-    event URI(string _value, uint256 indexed _id);
-    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event ERC1155SendToBridge(address indexed depositor, address indexed receiver, uint256[] ids, uint256[] values);
     event ERC721SendToBridge(address indexed depositor, address indexed receiver, uint256[] ids);
     uint256 internal constant ERC721_TOKEN_TYPE = 721;
@@ -52,6 +50,7 @@ contract BridgeFacet {
         if (tokenType == ERC1155_TOKEN_TYPE) {
             (uint256[] memory ids, uint256[] memory values) = abi.decode(tokenDepositData, (uint256[], uint256[]));
             require(ids.length == values.length, "Bridge: ids length not equal to values length");
+            require(ids.length <= 20, "Bridge: exceeded max number (20) of ids for single transaction");
             for (uint256 i; i < ids.length; i++) {
                 uint256 id = ids[i];
                 uint256 value = values[i];
@@ -59,10 +58,11 @@ contract BridgeFacet {
                 require(value <= bal, "Bridge: Doesn't have that many to transfer");
                 s.items[depositor][id] = bal - value;
             }
-            emit TransferBatch(msg.sender, depositor, address(0), ids, values);
+            emit LibERC1155.TransferBatch(msg.sender, depositor, address(0), ids, values);
             emit ERC1155SendToBridge(depositor, depositReceiver, ids, values);
         } else if (tokenType == ERC721_TOKEN_TYPE) {
             uint256[] memory tokenIds = abi.decode(tokenDepositData, (uint256[]));
+            require(tokenIds.length <= 20, "Bridge: exceeds 20 deposit limit for single transaction");
             for (uint256 i; i < tokenIds.length; i++) {
                 uint256 tokenId = tokenIds[i];
                 require(s.aavegotchis[tokenId].owner == depositor, "BridgeFacet: depositor does not own the token");
@@ -70,9 +70,9 @@ contract BridgeFacet {
                 s.aavegotchiBalance[depositor]--;
                 if (s.approved[tokenId] != address(0)) {
                     delete s.approved[tokenId];
-                    emit Approval(depositor, address(0), tokenId);
+                    emit LibERC721.Approval(depositor, address(0), tokenId);
                 }
-                emit Transfer(depositor, address(0), tokenId);
+                emit LibERC721.Transfer(depositor, address(0), tokenId);
             }
             s.totalSupply -= uint32(tokenIds.length);
             emit ERC721SendToBridge(depositor, depositReceiver, tokenIds);
@@ -114,10 +114,10 @@ contract BridgeFacet {
                 if (s.itemTypeExists[id] == false) {
                     s.itemTypeExists[id] = true;
                     s.itemTypes.push(id);
-                    emit URI(LibStrings.strWithUint(s.itemsBaseUri, id), id);
+                    emit LibERC1155.URI(LibStrings.strWithUint(s.itemsBaseUri, id), id);
                 }
             }
-            emit TransferBatch(msg.sender, address(0), withdrawer, ids, values);
+            emit LibERC1155.TransferBatch(msg.sender, address(0), withdrawer, ids, values);
         } else if (bytes32(logTopicRLPList[0].toUint()) == WITHDRAW_ERC721_BATCH_EVENT_SIG) {
             address withdrawer = address(uint160(logTopicRLPList[1].toUint())); // topic1 is from address
             uint256[] memory tokenIds = abi.decode(logData, (uint256[])); // data is tokenId list
@@ -127,7 +127,7 @@ contract BridgeFacet {
                 s.aavegotchis[tokenId].owner = withdrawer;
                 s.aavegotchiBalance[withdrawer]++;
                 s.tokenIds.push(uint32(tokenId));
-                emit Transfer(address(0), withdrawer, tokenId);
+                emit LibERC721.Transfer(address(0), withdrawer, tokenId);
             }
             s.totalSupply += uint32(tokenIds.length);
         } else {

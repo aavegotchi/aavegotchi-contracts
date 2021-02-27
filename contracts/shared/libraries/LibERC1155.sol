@@ -51,7 +51,6 @@ library LibERC1155 {
         uint256 _value,
         bytes memory _data
     ) internal {
-        emit TransferSingle(msg.sender, _from, _to, _id, _value);
         uint256 size;
         assembly {
             size := extcodesize(_to)
@@ -71,7 +70,6 @@ library LibERC1155 {
         uint256[] calldata _values,
         bytes memory _data
     ) internal {
-        emit TransferBatch(msg.sender, _from, _to, _ids, _values);
         uint256 size;
         assembly {
             size := extcodesize(_to)

@@ -466,8 +466,8 @@ for (const wearableSet of wearableSetArrays) {
   wearableSets.push(
     {
       name: wearableSet.name,
-      wearableIds: sixteenBitArrayToUint(wearableSet.wearableIds),
-      traitsBonuses: eightBitIntArrayToUint(wearableSet.traitsBonuses),
+      wearableIds: wearableSet.wearableIds,
+      traitsBonuses: wearableSet.traitsBonuses,
       allowedCollaterals: wearableSet.allowedCollaterals
     }
   )

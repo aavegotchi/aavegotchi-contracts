@@ -2,9 +2,17 @@
 pragma solidity 0.8.1;
 
 import {LibItems} from "../libraries/LibItems.sol";
-import {LibAppStorage, Modifiers, ItemType, Aavegotchi, NUMERIC_TRAITS_NUM,
+import {
+    LibAppStorage,
+    Modifiers,
+    ItemType,
+    Aavegotchi,
+    ItemType,
+    WearableSet,
+    NUMERIC_TRAITS_NUM,
     EQUIPPED_WEARABLE_SLOTS,
-    PORTAL_AAVEGOTCHIS_NUM} from "../libraries/LibAppStorage.sol";
+    PORTAL_AAVEGOTCHIS_NUM
+} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -33,31 +41,37 @@ contract ItemsFacet is Modifiers {
    |             Read Functions         |
    |__________________________________*/
 
+    struct ItemIdIO {
+        uint256 itemId;
+        uint256 balance;
+    }
+
     // Returns balance for each item that exists for an account
-    function itemBalances(address _account) external view returns (uint256[] memory bals_) {
-        uint256 count = s.itemTypes.length;
-        bals_ = new uint256[](count);
-        for (uint256 id; id < count; id++) {
-            bals_[id] = s.items[_account][id];
+    function itemBalances(address _account) external view returns (ItemIdIO[] memory bals_) {
+        uint256 count = s.ownerItems[_account].length;
+        bals_ = new ItemIdIO[](count);
+        for (uint256 i; i < count; i++) {
+            uint256 itemId = s.ownerItems[_account][i];
+            bals_[i].balance = s.ownerItemBalances[_account][itemId];
+            bals_[i].itemId = itemId;
         }
     }
 
-    struct BalanceItemTypeIO {
-        uint256[] balances;
-        ItemType[] itemTypes;
+    struct ItemTypeIO {
+        uint256 balance;
+        uint256 itemId;
+        ItemType itemType;
     }
 
-    function balancesWithItemTypes(address _account) external view returns (BalanceItemTypeIO memory output_) {
-        uint256 count = s.itemTypes.length;
-        uint256[] memory bals_ = new uint256[](count);
-        ItemType[] memory itemTypes_ = new ItemType[](count);
-        for (uint256 id; id < count; id++) {
-            bals_[id] = s.items[_account][id];
-            itemTypes_[id] = s.itemTypes[id];
+    function itemBalancesWithTypes(address _owner) external view returns (ItemTypeIO[] memory output_) {
+        uint256 count = s.ownerItems[_owner].length;
+        output_ = new ItemTypeIO[](count);
+        for (uint256 i; i < count; i++) {
+            uint256 itemId = s.ownerItems[_owner][i];
+            output_[i].balance = s.ownerItemBalances[_owner][itemId];
+            output_[i].itemId = itemId;
+            output_[i].itemType = s.itemTypes[itemId];
         }
-        output_.balances = bals_;
-        output_.itemTypes = itemTypes_;
-        return output_;
     }
 
     /**
@@ -67,7 +81,7 @@ contract ItemsFacet is Modifiers {
         @return bal_    The _owner's balance of the token type requested
      */
     function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal_) {
-        bal_ = s.items[_owner][_id];
+        bal_ = s.ownerItemBalances[_owner][_id];
     }
 
     /// @notice Get the balance of a non-fungible parent token
@@ -80,73 +94,33 @@ contract ItemsFacet is Modifiers {
         uint256 _tokenId,
         uint256 _id
     ) external view returns (uint256 value) {
-        value = s.nftBalances[_tokenContract][_tokenId][_id];
+        value = s.nftItemBalances[_tokenContract][_tokenId][_id];
     }
 
     // returns the balances for all items for a token
-    function itemBalancesOfToken(address _tokenContract, uint256 _tokenId) external view returns (uint256[] memory bals_) {
-        uint256 count = s.itemTypes.length;
-        bals_ = new uint256[](count);
-        for (uint256 id; id < count; id++) {
-            bals_[id] = s.nftBalances[_tokenContract][_tokenId][id];
+    function itemBalancesOfToken(address _tokenContract, uint256 _tokenId) external view returns (ItemIdIO[] memory bals_) {
+        uint256 count = s.nftItems[_tokenContract][_tokenId].length;
+        bals_ = new ItemIdIO[](count);
+        for (uint256 i; i < count; i++) {
+            uint256 itemId = s.nftItems[_tokenContract][_tokenId][i];
+            bals_[i].itemId = itemId;
+            bals_[i].balance = s.nftItemBalances[_tokenContract][_tokenId][itemId];
         }
-    } 
-
-    struct ItemBalanceWithSlotsIO {
-        uint256 itemId;
-        uint256 balance;
-        bool[EQUIPPED_WEARABLE_SLOTS] slotPositions;
-        string name;
-        int8[NUMERIC_TRAITS_NUM] traitModifiers;
-        uint256 minLevel;
     }
 
-    function itemBalancesOfTokenWithSlots(address _tokenContract, uint256 _tokenId)
+    function itemBalancesOfTokenWithTypes(address _tokenContract, uint256 _tokenId)
         external
         view
-        returns (ItemBalanceWithSlotsIO[] memory itemBalanceWithSlots_)
+        returns (ItemTypeIO[] memory itemBalancesOfTokenWithTypes_)
     {
-        uint256 count = s.itemTypes.length;
-        itemBalanceWithSlots_ = new ItemBalanceWithSlotsIO[](count);
-        uint256 numItems;
-        for (uint256 id; id < count; id++) {
-            uint256 bal = s.nftBalances[_tokenContract][_tokenId][id];
-            if (bal == 0) {
-                continue;
-            }
-            itemBalanceWithSlots_[numItems].itemId = id;
-            itemBalanceWithSlots_[numItems].balance = bal;
-            itemBalanceWithSlots_[numItems].slotPositions = s.itemTypes[id].slotPositions;
-            itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
-            itemBalanceWithSlots_[numItems].traitModifiers = s.itemTypes[id].traitModifiers;
-            
-            itemBalanceWithSlots_[numItems].minLevel = s.itemTypes[id].minLevel;
-            numItems++;
-        }
-        assembly {
-            mstore(itemBalanceWithSlots_, numItems)
-        }
-    }
-
-    function itemBalancesWithSlots(address _owner) external view returns (ItemBalanceWithSlotsIO[] memory itemBalanceWithSlots_) {
-        uint256 count = s.itemTypes.length;
-        itemBalanceWithSlots_ = new ItemBalanceWithSlotsIO[](count);
-        uint256 numItems;
-        for (uint256 id; id < count;) {
-            uint256 bal = s.items[_owner][id];
-            if (bal > 0) {
-                itemBalanceWithSlots_[numItems].itemId = id;
-                itemBalanceWithSlots_[numItems].balance = bal;
-                itemBalanceWithSlots_[numItems].slotPositions = s.itemTypes[id].slotPositions;
-                itemBalanceWithSlots_[numItems].name = s.itemTypes[id].name;
-                itemBalanceWithSlots_[numItems].traitModifiers = s.itemTypes[id].traitModifiers;                
-                itemBalanceWithSlots_[numItems].minLevel = s.itemTypes[id].minLevel;
-                unchecked {numItems++;}
-            }
-            unchecked {id++;}
-        }
-        assembly {
-            mstore(itemBalanceWithSlots_, numItems)
+        uint256 count = s.nftItems[_tokenContract][_tokenId].length;
+        itemBalancesOfTokenWithTypes_ = new ItemTypeIO[](count);
+        for (uint256 i; i < count; i++) {
+            uint256 itemId = s.nftItems[_tokenContract][_tokenId][i];
+            uint256 bal = s.nftItemBalances[_tokenContract][_tokenId][itemId];
+            itemBalancesOfTokenWithTypes_[i].itemId = itemId;
+            itemBalancesOfTokenWithTypes_[i].balance = bal;
+            itemBalancesOfTokenWithTypes_[i].itemType = s.itemTypes[itemId];
         }
     }
 
@@ -162,7 +136,7 @@ contract ItemsFacet is Modifiers {
         for (uint256 i; i < _owners.length; i++) {
             uint256 id = _ids[i];
             address owner = _owners[i];
-            bals[i] = s.items[owner][id];
+            bals[i] = s.ownerItemBalances[owner][id];
         }
     }
 
@@ -170,105 +144,33 @@ contract ItemsFacet is Modifiers {
         wearableIds_ = s.aavegotchis[_tokenId].equippedWearables;
     }
 
-    struct WearableSetIO {
-        string name;
-        uint8[] allowedCollaterals;
-        uint256[16] wearableIds;
-        int256[5] traitsBonuses;
-    }
-
     // Called by off chain software so not too concerned about gas costs
-    function getWearableSets() external view returns (WearableSetIO[] memory wearableSets_) {
-        uint256 length = s.wearableSets.length;
-        wearableSets_ = new WearableSetIO[](length);
-        for (uint256 i; i < length; i++) {
-            wearableSets_[i] = getWearableSet(i);
-        }
+    function getWearableSets() external view returns (WearableSet[] memory wearableSets_) {
+        wearableSets_ = s.wearableSets;
     }
 
-    function getWearableSet(uint256 _index) public view returns (WearableSetIO memory wearableSet_) {
+    function getWearableSet(uint256 _index) public view returns (WearableSet memory wearableSet_) {
         uint256 length = s.wearableSets.length;
         require(_index < length, "ItemsFacet: Wearable set does not exist");
-        wearableSet_.name = s.wearableSets[_index].name;
-        wearableSet_.allowedCollaterals = s.wearableSets[_index].allowedCollaterals;
-        wearableSet_.wearableIds = LibAppStorage.uintToSixteenBitArray(s.wearableSets[_index].wearableIds);
-        uint256 traitsBonuses = s.wearableSets[_index].traitsBonuses;
-        for (uint256 i; i < 5; i++) {
-            wearableSet_.traitsBonuses[i] = int8(uint8(traitsBonuses >> (8 * i)));
-        }
+        wearableSet_ = s.wearableSets[_index];
     }
 
     function totalWearableSets() external view returns (uint256) {
         return s.wearableSets.length;
     }
 
-    struct ItemTypeIO {
-        // treated as int8s array
-        // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
-        int8[NUMERIC_TRAITS_NUM] traitModifiers; //[WEARABLE ONLY] How much the wearable modifies each trait. Should not be more than +-5 total
-        // this is an array of uint indexes into the collateralTypes array
-
-        uint8[] allowedCollaterals; //[WEARABLE ONLY] The collaterals this wearable can be equipped to. An empty array is "any"
-        string name; //The name of the item
-        uint96 ghstPrice; //How much GHST this item costs
-        uint32 svgId; //The svgId of the item
-        uint32 maxQuantity; //Total number that can be minted of this item.
-        uint8 rarityScoreModifier; //Number from 1-50.
-        // Each bit is a slot position. 1 is true, 0 is false
-        bool[EQUIPPED_WEARABLE_SLOTS] slotPositions; //[WEARABLE ONLY] The slots that this wearable can be added to.
-        bool canPurchaseWithGhst;
-        uint32 totalQuantity; //The total quantity of this item minted so far
-        uint8 minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
-        bool canBeTransferred;
-        uint8 category; // 0 is wearable, 1 is badge, 2 is consumable
-        int8 kinshipBonus; //[CONSUMABLE ONLY] How much this consumable boosts (or reduces) kinship score
-        uint32 experienceBonus; //[CONSUMABLE ONLY]
-        uint256 x;
-        uint256 y;
-        uint256 width;
-        uint256 height;
-        string description;
-        string author;
-    }
-
-    function getItemType(uint256 _itemId) public view returns (ItemTypeIO memory itemType_) {
+    function getItemType(uint256 _itemId) public view returns (ItemType memory itemType_) {
         require(_itemId < s.itemTypes.length, "ItemsFacet: Item type doesn't exist");
-        ItemType storage itemType = s.itemTypes[_itemId];
-        itemType_.traitModifiers = itemType.traitModifiers;
-        itemType_.allowedCollaterals = itemType.allowedCollaterals;
-        itemType_.name = itemType.name;
-        itemType_.ghstPrice = itemType.ghstPrice;
-        itemType_.svgId = itemType.svgId;
-        itemType_.maxQuantity = itemType.maxQuantity;
-        itemType_.rarityScoreModifier = itemType.rarityScoreModifier;
-        itemType_.slotPositions = itemType.slotPositions;
-        itemType_.canPurchaseWithGhst = itemType.canPurchaseWithGhst;
-        itemType_.totalQuantity = itemType.totalQuantity;
-        itemType_.minLevel = itemType.minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
-        itemType_.canBeTransferred = itemType.canBeTransferred;
-        itemType_.category = itemType.category;
-        itemType_.kinshipBonus = itemType.kinshipBonus;
-        itemType_.experienceBonus = itemType.experienceBonus;        
-        itemType_.x = itemType.dimensions.x;
-        itemType_.y = itemType.dimensions.y;
-        itemType_.width = itemType.dimensions.width;
-        itemType_.height = itemType.dimensions.height;
-        itemType_.description = itemType.description;
-        itemType_.author = itemType.author;
+        itemType_ = s.itemTypes[_itemId];
     }
 
-    function getItemTypes(uint256[] calldata _itemIds) external view returns (ItemTypeIO[] memory itemTypes_) {
-        if(_itemIds.length == 0) {
-            uint256 length = s.itemTypes.length;
-            itemTypes_ = new ItemTypeIO[](length);
-            for (uint256 i; i < length; i++) {
-                itemTypes_[i] = getItemType(i);
-            }
-        }
-        else {
-            itemTypes_ = new ItemTypeIO[](_itemIds.length);
+    function getItemTypes(uint256[] calldata _itemIds) external view returns (ItemType[] memory itemTypes_) {
+        if (_itemIds.length == 0) {
+            itemTypes_ = s.itemTypes;
+        } else {
+            itemTypes_ = new ItemType[](_itemIds.length);
             for (uint256 i; i < _itemIds.length; i++) {
-                itemTypes_[i] = getItemType(_itemIds[i]);
+                itemTypes_[i] = s.itemTypes[_itemIds[i]];
             }
         }
     }
@@ -313,8 +215,8 @@ contract ItemsFacet is Modifiers {
             ItemType storage itemType = s.itemTypes[wearableId];
             require(aavegotchiLevel >= itemType.minLevel, "ItemsFacet: Aavegotchi level lower than minLevel");
             require(itemType.category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
-            require(itemType.slotPositions[slot] == true, "ItemsFacet: Wearable cannot be equipped in this slot");            
-            {                               
+            require(itemType.slotPositions[slot] == true, "ItemsFacet: Wearable cannot be equipped in this slot");
+            {
                 bool canBeEquipped;
                 uint8[] memory allowedCollaterals = itemType.allowedCollaterals;
                 if (allowedCollaterals.length > 0) {
@@ -331,23 +233,23 @@ contract ItemsFacet is Modifiers {
             }
 
             //Then check if this wearable is in the Aavegotchis inventory
-            uint256 nftBalance = s.nftBalances[address(this)][_tokenId][wearableId];
+            uint256 nftBalance = s.nftItemBalances[address(this)][_tokenId][wearableId];
             //To do (Nick) prevent wearable from being equipped twice in the same transaction
             uint256 neededBalance = 1;
-            if(slot == 4) {
-                if(_equippedWearables[5] == wearableId) {
+            if (slot == LibItems.WEARABLE_SLOT_HAND_LEFT) {
+                if (_equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT] == wearableId) {
                     neededBalance = 2;
                 }
             }
 
             if (nftBalance < neededBalance) {
-                uint256 ownerBalance = s.items[sender][wearableId];
+                uint256 ownerBalance = s.ownerItemBalances[sender][wearableId];
                 require(nftBalance + ownerBalance >= neededBalance, "ItemsFacet: Wearable is not in inventories");
                 uint256 balToTransfer = neededBalance - nftBalance;
 
                 //Transfer to Aavegotchi
-                s.items[sender][wearableId] -= balToTransfer;
-                s.nftBalances[address(this)][_tokenId][wearableId] += balToTransfer;
+                LibItems.removeFromOwner(sender, wearableId, balToTransfer);
+                LibItems.addToParent(address(this), _tokenId, wearableId, balToTransfer);
                 emit TransferToParent(address(this), _tokenId, wearableId, balToTransfer);
                 emit LibERC1155.TransferSingle(sender, sender, address(this), wearableId, balToTransfer);
                 LibERC1155Marketplace.updateERC1155Listing(address(this), wearableId, sender);
@@ -371,12 +273,8 @@ contract ItemsFacet is Modifiers {
             ItemType memory itemType = s.itemTypes[itemId];
             require(itemType.category == LibItems.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
 
-            {
-                // prevent stack too deep error with braces here
-                uint256 bal = s.items[sender][itemId];
-                require(quantity <= bal, "Items: Do not have that many to consume");
-                s.items[sender][itemId] = bal - quantity;
-            }
+            LibItems.removeFromOwner(sender, itemId, quantity);
+
             //Increase kinship permanently
             if (itemType.kinshipBonus > 0) {
                 uint256 kinship = (uint256(int256(itemType.kinshipBonus)) * quantity) + s.aavegotchis[_tokenId].interactionCount;
@@ -387,15 +285,15 @@ contract ItemsFacet is Modifiers {
                 // prevent stack too deep error with braces here
                 //Boost traits and reset clock
                 bool boost = false;
-                for(uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
-                    if(itemType.traitModifiers[j] != 0) {
+                for (uint256 j; j < NUMERIC_TRAITS_NUM; j++) {
+                    if (itemType.traitModifiers[j] != 0) {
                         boost = true;
                         break;
                     }
                 }
                 if (boost) {
                     s.aavegotchis[_tokenId].lastTemporaryBoost = uint40(block.timestamp);
-                    s.aavegotchis[_tokenId].temporaryTraitBoosts = itemType.traitModifiers; 
+                    s.aavegotchis[_tokenId].temporaryTraitBoosts = itemType.traitModifiers;
                 }
             }
 

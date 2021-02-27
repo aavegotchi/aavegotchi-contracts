@@ -4,6 +4,7 @@ pragma solidity 0.8.1;
 import {Modifiers, ItemType, WearableSet, NUMERIC_TRAITS_NUM} from "../libraries/LibAppStorage.sol";
 import {AavegotchiCollateralTypeIO} from "../libraries/LibAavegotchi.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
+import {LibItems} from "../libraries/LibItems.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
@@ -94,7 +95,7 @@ contract DAOFacet is Modifiers {
         uint256[] calldata _quantities
     ) external onlyDaoOrOwner {
         require(_itemIds.length == _quantities.length, "DAOFacet: Ids and quantities length must match");
-
+        address sender = LibMeta.msgSender();
         uint256 itemTypesLength = s.itemTypes.length;
         for (uint256 i; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
@@ -105,10 +106,11 @@ contract DAOFacet is Modifiers {
             uint256 totalQuantity = s.itemTypes[itemId].totalQuantity + quantity;
             require(totalQuantity <= s.itemTypes[itemId].maxQuantity, "DAOFacet: Total item type quantity exceeds max quantity");
 
-            s.items[_to][itemId] += quantity;
+            LibItems.addToOwner(_to, itemId, quantity);
             s.itemTypes[itemId].totalQuantity = uint32(totalQuantity);
         }
-        LibERC1155.onERC1155BatchReceived(LibMeta.msgSender(), _to, _itemIds, _quantities, "");
+        emit LibERC1155.TransferBatch(sender, address(0), _to, _itemIds, _quantities);
+        LibERC1155.onERC1155BatchReceived(sender, _to, _itemIds, _quantities, "");
     }
 
     function grantExperience(uint256[] calldata _tokenIds, uint32[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {
@@ -119,8 +121,8 @@ contract DAOFacet is Modifiers {
             require(xp <= 1000, "DAOFacet: Cannot grant more than 1000 XP at a time");
 
             //To test (Dan): Deal with overflow here? - Handling it just in case
-            uint32 experience = s.aavegotchis[tokenId].experience;
-            uint32 increasedExperience = experience + xp;
+            uint256 experience = s.aavegotchis[tokenId].experience;
+            uint256 increasedExperience = experience + xp;
             require(increasedExperience >= experience, "DAOFacet: Experience overflow");
             s.aavegotchis[tokenId].experience = increasedExperience;
         }

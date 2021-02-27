@@ -86,17 +86,11 @@ contract CollateralFacet is Modifiers {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 
-        // check that all wearables have been removed from inventory before burning
-        uint256 itemTypesLength = s.itemTypes.length;
-        for (uint256 itemTypeId; itemTypeId < itemTypesLength; itemTypeId++) {
-            if (s.itemTypes[itemTypeId].category == LibItems.ITEM_CATEGORY_WEARABLE) {
-                require(s.nftBalances[address(this)][_tokenId][itemTypeId] == 0, "CollateralFacet: Can't burn aavegotchi with wearables");
-            }
-        }
+        require(s.nftItems[address(this)][_tokenId].length == 0, "CollateralFacet: Can't burn aavegotchi with items");
 
         //If the toId is different from the tokenId, then perform an experience transfer
         if (_tokenId != _toId) {
-            uint32 experience = s.aavegotchis[_tokenId].experience;
+            uint256 experience = s.aavegotchis[_tokenId].experience;
             emit ExperienceTransfer(_tokenId, _toId, experience);
             s.aavegotchis[_toId].experience += experience;
         }
@@ -112,7 +106,7 @@ contract CollateralFacet is Modifiers {
             s.ownerTokenIdIndexes[owner][lastTokenId] = index;
         }
         s.ownerTokenIds[owner].pop();
-        delete s.ownerTokenIdIndexes[owner][_tokenId]; 
+        delete s.ownerTokenIdIndexes[owner][_tokenId];
 
         // delete token approval if any
         if (s.approved[_tokenId] != address(0)) {

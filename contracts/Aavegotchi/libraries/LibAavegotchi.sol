@@ -22,6 +22,12 @@ struct AavegotchiCollateralTypeIO {
     AavegotchiCollateralTypeInfo collateralTypeInfo;
 }
 
+struct ItemTypeIO {
+    uint256 balance;
+    uint256 itemId;
+    ItemType itemType;
+}
+
 struct AavegotchiInfo {
     uint256 tokenId;
     string name;
@@ -35,7 +41,6 @@ struct AavegotchiInfo {
     address escrow;
     uint256 stakedAmount;
     uint256 minimumStake;
-    //New
     uint256 kinship; //The kinship value of this Aavegotchi. Default is 50.
     uint256 lastInteracted;
     uint256 experience; //How much XP this Aavegotchi has accrued. Begins at 0.
@@ -46,6 +51,7 @@ struct AavegotchiInfo {
     uint256 baseRarityScore;
     uint256 modifiedRarityScore;
     bool locked;
+    ItemTypeIO[] items;
 }
 
 struct PortalAavegotchiTraitsIO {
@@ -225,12 +231,12 @@ library LibAavegotchi {
         }
     }
 
-    function xpUntilNextLevel(uint32 _experience) internal pure returns (uint256 requiredXp_) {
+    function xpUntilNextLevel(uint256 _experience) internal pure returns (uint256 requiredXp_) {
         uint256 currentLevel = aavegotchiLevel(_experience);
         requiredXp_ = (((currentLevel)**2) * 50) - _experience;
     }
 
-    function aavegotchiLevel(uint32 _experience) internal pure returns (uint256 level_) {
+    function aavegotchiLevel(uint256 _experience) internal pure returns (uint256 level_) {
         if (_experience > 490050) {
             return 99;
         }

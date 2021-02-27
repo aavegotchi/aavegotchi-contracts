@@ -164,7 +164,7 @@ contract ERC721MarketplaceFacet is Modifiers {
             LibERC721Marketplace.cancelERC721Listing(oldListingId, owner);
         }
         s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][owner] = listingId;
-        s.erc721Listings[listingId] = ERC721Listing({
+        s.erc721Listings[listingId] = ERC721Listing({ 
             listingId: listingId,
             seller: owner,
             erc721TokenAddress: _erc721TokenAddress,

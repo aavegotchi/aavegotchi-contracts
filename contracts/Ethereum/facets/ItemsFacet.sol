@@ -101,6 +101,7 @@ contract ItemsFacet {
         require(_value <= bal, "Items: Doesn't have that many to transfer");
         s.items[_from][_id] = bal - _value;
         s.items[_to][_id] += _value;
+        emit LibERC1155.TransferSingle(sender, _from, _to, _id, _value);
         LibERC1155.onERC1155Received(_from, _to, _id, _value, _data);
     }
 
@@ -139,6 +140,7 @@ contract ItemsFacet {
             s.items[_from][id] = bal - value;
             s.items[_to][id] += value;
         }
+        emit LibERC1155.TransferBatch(sender, _from, _to, _ids, _values);
         LibERC1155.onERC1155BatchReceived(_from, _to, _ids, _values, _data);
     }
 }

@@ -9,6 +9,7 @@ import {
     PORTAL_AAVEGOTCHIS_NUM,
     NUMERIC_TRAITS_NUM
 } from "../libraries/LibAavegotchi.sol";
+import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
@@ -130,7 +131,12 @@ contract SvgFacet is Modifiers {
     function applyStyles(SvgLayerDetails memory _details, uint256 _tokenId) internal view returns (bytes memory) {
         uint16[EQUIPPED_WEARABLE_SLOTS] storage equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
 
-        if (_tokenId != type(uint256).max && (equippedWearables[0] != 0 || equippedWearables[4] != 0 || equippedWearables[5] != 0)) {
+        if (
+            _tokenId != type(uint256).max &&
+            (equippedWearables[LibItems.WEARABLE_SLOT_BODY] != 0 ||
+                equippedWearables[LibItems.WEARABLE_SLOT_HAND_LEFT] != 0 ||
+                equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT] != 0)
+        ) {
             //Open-hands aavegotchi
             return
                 abi.encodePacked(
@@ -182,14 +188,14 @@ contract SvgFacet is Modifiers {
     uint8 internal constant WEARABLE_SLOT_BG = 7;
     */
 
-        if (_slotPosition == 0) className_ = "wearable-body";
-        if (_slotPosition == 1) className_ = "wearable-face";
-        if (_slotPosition == 2) className_ = "wearable-eyes";
-        if (_slotPosition == 3) className_ = "wearable-head";
-        if (_slotPosition == 4) className_ = "wearable-hand wearable-hand-left";
-        if (_slotPosition == 5) className_ = "wearable-hand wearable-hand-right";
-        if (_slotPosition == 6) className_ = "wearable-pet";
-        if (_slotPosition == 7) className_ = "wearable-bg";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_BODY) className_ = "wearable-body";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_FACE) className_ = "wearable-face";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_EYES) className_ = "wearable-eyes";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_HEAD) className_ = "wearable-head";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_HAND_LEFT) className_ = "wearable-hand wearable-hand-left";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_HAND_RIGHT) className_ = "wearable-hand wearable-hand-right";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_PET) className_ = "wearable-pet";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_BG) className_ = "wearable-bg";
     }
 
     function getWearable(uint256 _wearableId, uint256 _slotPosition) internal view returns (bytes memory svg_) {
@@ -207,7 +213,7 @@ contract SvgFacet is Modifiers {
             LibStrings.strWithUint('" y="', dimensions.y),
             '">'
         );
-        if (_slotPosition == 5) {
+        if (_slotPosition == LibItems.WEARABLE_SLOT_HAND_RIGHT) {
             svg_ = abi.encodePacked(
                 svg_,
                 LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 64 - (dimensions.x * 2)),
@@ -229,9 +235,9 @@ contract SvgFacet is Modifiers {
         uint16[EQUIPPED_WEARABLE_SLOTS] storage equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
 
         // If background is equipped
-        uint256 wearableId = equippedWearables[8];
+        uint256 wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BG];
         if (wearableId != 0) {
-            svg_ = abi.encodePacked(getWearable(wearableId, 7), _body, details.eyeShape, details.collateral);
+            svg_ = abi.encodePacked(getWearable(wearableId, LibItems.WEARABLE_SLOT_BG), _body, details.eyeShape, details.collateral);
         } else {
             //background, body, eyes, collateral
             svg_ = abi.encodePacked(details.background, _body, details.eyeShape, details.collateral);
@@ -250,7 +256,7 @@ contract SvgFacet is Modifiers {
         }
 
         // pet wearable
-        wearableId = equippedWearables[6];
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_PET];
         if (wearableId != 0) {
             svg_ = abi.encodePacked(svg_, getWearable(wearableId, 6));
         }

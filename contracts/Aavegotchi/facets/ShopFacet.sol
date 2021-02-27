@@ -7,6 +7,7 @@ import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
+import {LibItems} from "../libraries/LibItems.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 contract ShopFacet {
@@ -21,9 +22,9 @@ contract ShopFacet {
         uint256 _totalPrice
     );
 
-    event PurchaseItemsWithGhst(address indexed _from, address indexed _to, uint256[] _itemIds, uint256[] _quantities, uint256 _totalPrice);
+    event PurchaseItemsWithGhst(address indexed _buyer, address indexed _to, uint256[] _itemIds, uint256[] _quantities, uint256 _totalPrice);
 
-    event PurchaseItemsWithVouchers(address indexed _from, address indexed _to, uint256[] _itemIds, uint256[] _quantities);
+    event PurchaseItemsWithVouchers(address indexed _buyer, address indexed _to, uint256[] _itemIds, uint256[] _quantities);
 
     function buyPortals(address _to, uint256 _ghst) external {
         uint256 currentHauntId = s.currentHauntId;
@@ -71,6 +72,7 @@ contract ShopFacet {
         uint256[] calldata _itemIds,
         uint256[] calldata _quantities
     ) external {
+        address sender = LibMeta.msgSender();
         require(_itemIds.length == _quantities.length, "ShopFacet: _itemIds not same length as _quantities");
         uint256 totalPrice;
         for (uint256 i; i < _itemIds.length; i++) {
@@ -82,13 +84,13 @@ contract ShopFacet {
             require(totalQuantity <= itemType.maxQuantity, "ShopFacet: Total item type quantity exceeds max quantity");
             itemType.totalQuantity = uint32(totalQuantity);
             totalPrice += quantity * itemType.ghstPrice;
-            s.items[_to][itemId] += quantity;
+            LibItems.addToOwner(_to, itemId, quantity);
         }
-        emit PurchaseItemsWithGhst(LibMeta.msgSender(), _to, _itemIds, _quantities, totalPrice);
-        LibERC1155.onERC1155BatchReceived(LibMeta.msgSender(), _to, _itemIds, _quantities, "");
-        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(LibMeta.msgSender());
+        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
         require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
-
+        emit PurchaseItemsWithGhst(sender, _to, _itemIds, _quantities, totalPrice);
+        emit LibERC1155.TransferBatch(sender, address(0), _to, _itemIds, _quantities);
         LibAavegotchi.purchase(totalPrice);
+        LibERC1155.onERC1155BatchReceived(address(0), _to, _itemIds, _quantities, "");
     }
 }
