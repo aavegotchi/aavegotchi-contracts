@@ -362,18 +362,18 @@ async function main (scriptName) {
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
   console.log('-------------------------------------------')
 
-  if (hre.network.name === 'matic') {
-    // transfer ownership
-    const newOwner = '0x94cb5C277FCC64C274Bd30847f0821077B231022'
-    console.log('Transferring ownership of diamond: ' + aavegotchiDiamond.address)
-    const diamond = await ethers.getContractAt('OwnershipFacet', aavegotchiDiamond.address)
-    const tx = await diamond.transferOwnership(newOwner)
-    console.log('Transaction hash: ' + tx.hash)
-    receipt = await tx.wait()
-    console.log('Transfer Transaction complete')
-    console.log('Gas used:' + strDisplay(receipt.gasUsed))
-    totalGasUsed = totalGasUsed.add(receipt.gasUsed)
-  }
+  // // if (hre.network.name === 'matic') {
+  //   // transfer ownership
+  //   const newOwner = '0x94cb5C277FCC64C274Bd30847f0821077B231022'
+  //   console.log('Transferring ownership of diamond: ' + aavegotchiDiamond.address)
+  //   const diamond = await ethers.getContractAt('OwnershipFacet', aavegotchiDiamond.address)
+  //   const tx = await diamond.transferOwnership(newOwner)
+  //   console.log('Transaction hash: ' + tx.hash)
+  //   receipt = await tx.wait()
+  //   console.log('Transfer Transaction complete')
+  //   console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  //   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  // // }
 
   console.log('Total gas used: ' + strDisplay(totalGasUsed))
   return {

@@ -15,7 +15,7 @@ const collaterals = [
   {
     name: 'aDAI',
     kovanAddress: '0xdcf0af9e59c002fa3aa091a46196b37530fd48a8',
-    mainnetAddress: '0x028171bCA77440897B824Ca71D1c56caC55b68A3',
+    mainnetAddress: '0xE0b22E0037B130A9F56bBb537684E6fA18192341',
     maticAddress: '',
     primaryColor: '#FF7D00',
     secondaryColor: '#F9D792',
@@ -28,7 +28,7 @@ const collaterals = [
   {
     name: 'aWETH',
     kovanAddress: '0x87b1f4cf9bd63f7bbd3ee1ad04e8f52540349347',
-    mainnetAddress: '0x030bA81f1c18d280636F32af80b9AAd02Cf0854e',
+    mainnetAddress: '0x20D3922b4a1A8560E1aC99FBA4faDe0c849e2142',
     maticAddress: '',
     primaryColor: '#64438E',
     secondaryColor: '#EDD3FD',
@@ -41,7 +41,7 @@ const collaterals = [
   {
     name: 'aAAVE',
     kovanAddress: '0x6d93ef8093f067f19d33c2360ce17b20a8c45cd7',
-    mainnetAddress: '0xFFC97d72E13E01096502Cb8Eb52dEe56f74DAD7B',
+    mainnetAddress: '0x823CD4264C1b951C9209aD0DeAea9988fE8429bF',
     maticAddress: '',
     primaryColor: '#B6509E',
     secondaryColor: '#CFEEF4',
@@ -55,7 +55,7 @@ const collaterals = [
   {
     name: 'aLINK',
     kovanAddress: '0xed9044ca8f7cace8eaccd40367cf2bee39ed1b04',
-    mainnetAddress: '0xa06bC25B5805d5F8d82847D191Cb4Af5A3e873E0',
+    mainnetAddress: '0x98ea609569bD25119707451eF982b90E3eb719cD',
     maticAddress: '',
     primaryColor: '#0000B9',
     secondaryColor: '#D4DEF8',
@@ -69,7 +69,7 @@ const collaterals = [
   {
     name: 'aUSDT',
     kovanAddress: '0xff3c8bc103682fa918c954e84f5056ab4dd5189d',
-    mainnetAddress: '0x3Ed3B47Dd13EC9a98b44e6204A523E766B225811',
+    mainnetAddress: '0xDAE5F1590db13E3B40423B5b5c5fbf175515910b',
     maticAddress: '',
     primaryColor: '#26a17b',
     secondaryColor: '#aedcce',
@@ -83,7 +83,7 @@ const collaterals = [
   {
     name: 'aUSDC',
     kovanAddress: '0xe12afec5aa12cf614678f9bfeeb98ca9bb95b5b0',
-    mainnetAddress: '0xBcca60bB61934080951369a648Fb03DF4F96263C',
+    mainnetAddress: '0x9719d867A500Ef117cC201206B8ab51e794d3F82',
     maticAddress: '',
     primaryColor: '#2664BA',
     secondaryColor: '#D4E0F1',
@@ -96,7 +96,7 @@ const collaterals = [
   {
     name: 'aTUSD',
     kovanAddress: '0x39914adbe5fdbc2b9adeede8bcd444b20b039204',
-    mainnetAddress: '0x101cc05f4A51C0319f570d5E146a8C625198e636',
+    mainnetAddress: '0xF4b8888427b00d7caf21654408B7CBA2eCf4EbD9',
     maticAddress: '',
     primaryColor: '#282473',
     secondaryColor: '#489ff8',

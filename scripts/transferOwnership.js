@@ -1,6 +1,6 @@
 /* global ethers hre */
 
-const diamondAddress = '0xd94f3e6e026eeAf80AecD557c4a74faC4D46E8d7'
+const diamondAddress = '0x83692085F033eB333827BC16B47fcbfB46399aC1'
 const newOwner = '0x94cb5C277FCC64C274Bd30847f0821077B231022'
 
 async function main (scriptName) {
