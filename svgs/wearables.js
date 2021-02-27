@@ -41,7 +41,7 @@ const wearablesSvgs = [
   bodyWearable('37_ETHTShirt'),
   wearable('38_32ETHCoin'),
   wearable('39_FoxyMask'),
-  wearable('40_FoxyTail'),
+  wearable('40_FoxyTail'), //body but no sleeves
   wearable('41_TrezorWallet'),
   wearable('42_NogaraEagleMask'),
   bodyWearable('43_NogaraEagleArmor'),
