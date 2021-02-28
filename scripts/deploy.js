@@ -273,7 +273,14 @@ async function main (scriptName) {
 
   // add wearable types info
   console.log('Adding Wearable Sets')
-  tx = await daoFacet.addWearableSets(wearableSets)
+  tx = await daoFacet.addWearableSets(wearableSets.slice(0, wearableSets.length / 2))
+  receipt = await tx.wait()
+  console.log('Adding Wearable Sets gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  // add wearable types info
+  console.log('Adding Wearable Sets')
+  tx = await daoFacet.addWearableSets(wearableSets.slice(wearableSets.length / 2))
   receipt = await tx.wait()
   console.log('Adding Wearable Sets gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
