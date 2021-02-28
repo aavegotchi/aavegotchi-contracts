@@ -14,5 +14,5 @@ Ex. https://github.com/aavegotchi/aavegotchi-contracts/issues/1
 
 - [] Created/updated tests.
 - [] Created/updated documentation.
-- [] Sensitive information not commited.
+- [] Sensitive information not committed.
 - [] Smoke tested with no evident errors.
