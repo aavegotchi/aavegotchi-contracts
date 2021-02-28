@@ -34,7 +34,7 @@ contract InitDiamond {
         s.itemsBaseUri = "https://aavegotchi.com/metadata/items/";
         s.childChainManager = _childChainManager;
 
-        s.domainSeperator = LibMeta.domainSeparator("AavegotchiDiamond", "V1");
+        s.domainSeparator = LibMeta.domainSeparator("AavegotchiDiamond", "V1");
 
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 

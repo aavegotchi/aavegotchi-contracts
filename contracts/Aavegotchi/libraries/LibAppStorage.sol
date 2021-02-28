@@ -169,7 +169,7 @@ struct AppStorage {
     address pixelCraft;
     address rarityFarming;
     string itemsBaseUri;
-    bytes32 domainSeperator;
+    bytes32 domainSeparator;
     //VRF
     mapping(bytes32 => uint256) vrfRequestIdToTokenId;
     mapping(bytes32 => uint256) vrfNonces;

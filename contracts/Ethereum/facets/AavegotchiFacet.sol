@@ -5,6 +5,7 @@ import {AppStorage} from "../libraries/LibAppStorage.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {IERC721TokenReceiver} from "../../shared/interfaces/IERC721TokenReceiver.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 contract AavegotchiFacet {
     AppStorage internal s;
@@ -88,8 +89,9 @@ contract AavegotchiFacet {
         uint256 _tokenId,
         bytes calldata _data
     ) external {
-        internalTransferFrom(msg.sender, _from, _to, _tokenId);
-        LibERC721.checkOnERC721Received(msg.sender, _from, _to, _tokenId, _data);
+        address sender = LibMeta.msgSender();
+        internalTransferFrom(sender, _from, _to, _tokenId);
+        LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
     }
 
     /// @notice Transfers the ownership of an NFT from one address to another address
@@ -103,8 +105,9 @@ contract AavegotchiFacet {
         address _to,
         uint256 _tokenId
     ) external {
-        internalTransferFrom(msg.sender, _from, _to, _tokenId);
-        LibERC721.checkOnERC721Received(msg.sender, _from, _to, _tokenId, "");
+        address sender = LibMeta.msgSender();
+        internalTransferFrom(sender, _from, _to, _tokenId);
+        LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
     }
 
     /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
@@ -122,7 +125,8 @@ contract AavegotchiFacet {
         address _to,
         uint256 _tokenId
     ) external {
-        internalTransferFrom(msg.sender, _from, _to, _tokenId);
+        address sender = LibMeta.msgSender();
+        internalTransferFrom(sender, _from, _to, _tokenId);
     }
 
     // This function is used by transfer functions
@@ -158,7 +162,8 @@ contract AavegotchiFacet {
     /// @param _tokenId The NFT to approve
     function approve(address _approved, uint256 _tokenId) external {
         address owner = s.aavegotchis[_tokenId].owner;
-        require(owner == msg.sender || s.operators[owner][msg.sender], "ERC721: Not owner or operator of token.");
+        address sender = LibMeta.msgSender();
+        require(owner == sender || s.operators[owner][sender], "ERC721: Not owner or operator of token.");
         s.approved[_tokenId] = _approved;
         emit LibERC721.Approval(owner, _approved, _tokenId);
     }
@@ -170,8 +175,9 @@ contract AavegotchiFacet {
     /// @param _operator Address to add to the set of authorized operators
     /// @param _approved True if the operator is approved, false to revoke approval
     function setApprovalForAll(address _operator, bool _approved) external {
-        s.operators[msg.sender][_operator] = _approved;
-        emit LibERC721.ApprovalForAll(msg.sender, _operator, _approved);
+        address sender = LibMeta.msgSender();
+        s.operators[sender][_operator] = _approved;
+        emit LibERC721.ApprovalForAll(sender, _operator, _approved);
     }
 
     function name() external pure returns (string memory) {

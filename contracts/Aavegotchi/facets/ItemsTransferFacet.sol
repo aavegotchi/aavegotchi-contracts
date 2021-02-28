@@ -37,7 +37,7 @@ contract ItemsTransferFacet is Modifiers {
         LibItems.addToOwner(_to, _id, _value);
         emit LibERC1155.TransferSingle(sender, _from, _to, _id, _value);
         LibERC1155Marketplace.updateERC1155Listing(address(this), _id, _from);
-        LibERC1155.onERC1155Received(_from, _to, _id, _value, _data);
+        LibERC1155.onERC1155Received(sender, _from, _to, _id, _value, _data);
     }
 
     /**
@@ -75,7 +75,7 @@ contract ItemsTransferFacet is Modifiers {
             LibERC1155Marketplace.updateERC1155Listing(address(this), id, _from);
         }
         emit LibERC1155.TransferBatch(sender, _from, _to, _ids, _values);
-        LibERC1155.onERC1155BatchReceived(_from, _to, _ids, _values, _data);
+        LibERC1155.onERC1155BatchReceived(sender, _from, _to, _ids, _values, _data);
     }
 
     /// @notice Transfer tokens from owner address to a token

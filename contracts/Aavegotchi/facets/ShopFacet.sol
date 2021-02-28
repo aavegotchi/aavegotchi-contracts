@@ -91,6 +91,6 @@ contract ShopFacet {
         emit PurchaseItemsWithGhst(sender, _to, _itemIds, _quantities, totalPrice);
         emit LibERC1155.TransferBatch(sender, address(0), _to, _itemIds, _quantities);
         LibAavegotchi.purchase(totalPrice);
-        LibERC1155.onERC1155BatchReceived(address(0), _to, _itemIds, _quantities, "");
+        LibERC1155.onERC1155BatchReceived(sender, address(0), _to, _itemIds, _quantities, "");
     }
 }

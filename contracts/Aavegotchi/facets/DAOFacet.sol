@@ -110,7 +110,7 @@ contract DAOFacet is Modifiers {
             s.itemTypes[itemId].totalQuantity = uint32(totalQuantity);
         }
         emit LibERC1155.TransferBatch(sender, address(0), _to, _itemIds, _quantities);
-        LibERC1155.onERC1155BatchReceived(sender, _to, _itemIds, _quantities, "");
+        LibERC1155.onERC1155BatchReceived(sender, address(0), _to, _itemIds, _quantities, "");
     }
 
     function grantExperience(uint256[] calldata _tokenIds, uint32[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {

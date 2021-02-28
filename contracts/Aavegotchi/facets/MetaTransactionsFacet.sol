@@ -20,8 +20,8 @@ contract MetaTransactionsFacet {
         }
     }
 
-    function getDomainSeperator() private view returns (bytes32) {
-        return s.domainSeperator;
+    function getDomainSeparator() private view returns (bytes32) {
+        return s.domainSeparator;
     }
 
     /**
@@ -32,7 +32,7 @@ contract MetaTransactionsFacet {
      * "\\x01" is the version byte to make it compatible to EIP-191
      */
     function toTypedMessageHash(bytes32 messageHash) internal view returns (bytes32) {
-        return keccak256(abi.encodePacked("\x19\x01", getDomainSeperator(), messageHash));
+        return keccak256(abi.encodePacked("\x19\x01", getDomainSeparator(), messageHash));
     }
 
     function hashMetaTransaction(MetaTransaction memory metaTx) internal pure returns (bytes32) {

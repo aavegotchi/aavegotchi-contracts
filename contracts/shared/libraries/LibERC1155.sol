@@ -45,6 +45,7 @@ library LibERC1155 {
     event URI(string _value, uint256 indexed _id);
 
     function onERC1155Received(
+        address _operator,
         address _from,
         address _to,
         uint256 _id,
@@ -57,13 +58,14 @@ library LibERC1155 {
         }
         if (size > 0) {
             require(
-                ERC1155_ACCEPTED == IERC1155TokenReceiver(_to).onERC1155Received(msg.sender, _from, _id, _value, _data),
+                ERC1155_ACCEPTED == IERC1155TokenReceiver(_to).onERC1155Received(_operator, _from, _id, _value, _data),
                 "Wearables: Transfer rejected/failed by _to"
             );
         }
     }
 
     function onERC1155BatchReceived(
+        address _operator,
         address _from,
         address _to,
         uint256[] calldata _ids,
@@ -76,7 +78,7 @@ library LibERC1155 {
         }
         if (size > 0) {
             require(
-                ERC1155_BATCH_ACCEPTED == IERC1155TokenReceiver(_to).onERC1155BatchReceived(msg.sender, _from, _ids, _values, _data),
+                ERC1155_BATCH_ACCEPTED == IERC1155TokenReceiver(_to).onERC1155BatchReceived(_operator, _from, _ids, _values, _data),
                 "Wearables: Transfer rejected/failed by _to"
             );
         }

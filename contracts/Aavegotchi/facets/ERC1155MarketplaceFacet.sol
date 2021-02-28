@@ -215,11 +215,11 @@ contract ERC1155MarketplaceFacet is Modifiers {
             }
         }
         // Have to call it like this because LibMeta.msgSender() gets in the way
-        if (listing.erc1155TokenAddress == address(this)) { 
+        if (listing.erc1155TokenAddress == address(this)) {
             LibItems.removeFromOwner(seller, listing.erc1155TypeId, _quantity);
             LibItems.addToOwner(buyer, listing.erc1155TypeId, _quantity);
             emit LibERC1155.TransferSingle(address(this), seller, buyer, listing.erc1155TypeId, _quantity);
-            LibERC1155.onERC1155Received(seller, buyer, listing.erc1155TypeId, _quantity, "");
+            LibERC1155.onERC1155Received(address(this), seller, buyer, listing.erc1155TypeId, _quantity, "");
         } else {
             // GHSTStakingDiamond
             IERC1155(listing.erc1155TokenAddress).safeTransferFrom(seller, buyer, listing.erc1155TypeId, _quantity, new bytes(0));
@@ -243,5 +243,15 @@ contract ERC1155MarketplaceFacet is Modifiers {
         address _owner
     ) external {
         LibERC1155Marketplace.updateERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _owner);
+    }
+
+    function updateERC1155Listing(
+        address _erc1155TokenAddress,
+        uint256[] calldata _erc1155TypeIds,
+        address _owner
+    ) external {
+        for (uint256 i; i < _erc1155TypeIds.length; i++) {
+            LibERC1155Marketplace.updateERC1155Listing(_erc1155TokenAddress, _erc1155TypeIds[i], _owner);
+        }
     }
 }

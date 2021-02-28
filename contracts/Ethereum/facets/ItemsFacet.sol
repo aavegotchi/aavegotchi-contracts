@@ -5,6 +5,7 @@ import {AppStorage} from "../libraries/LibAppStorage.sol";
 import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 contract ItemsFacet {
     AppStorage internal s;
@@ -95,14 +96,14 @@ contract ItemsFacet {
         bytes calldata _data
     ) external {
         require(_to != address(0), "Items: Can't transfer to 0 address");
-        address sender = msg.sender;
+        address sender = LibMeta.msgSender();
         require(sender == _from || s.operators[_from][sender] || sender == address(this), "Items: Not owner and not approved to transfer");
         uint256 bal = s.items[_from][_id];
         require(_value <= bal, "Items: Doesn't have that many to transfer");
         s.items[_from][_id] = bal - _value;
         s.items[_to][_id] += _value;
         emit LibERC1155.TransferSingle(sender, _from, _to, _id, _value);
-        LibERC1155.onERC1155Received(_from, _to, _id, _value, _data);
+        LibERC1155.onERC1155Received(sender, _from, _to, _id, _value, _data);
     }
 
     /**
@@ -130,7 +131,7 @@ contract ItemsFacet {
     ) external {
         require(_to != address(0), "Items: Can't transfer to 0 address");
         require(_ids.length == _values.length, "Items: ids not same length as values");
-        address sender = msg.sender;
+        address sender = LibMeta.msgSender();
         require(sender == _from || s.operators[_from][sender], "Items: Not owner and not approved to transfer");
         for (uint256 i; i < _ids.length; i++) {
             uint256 id = _ids[i];
@@ -141,6 +142,6 @@ contract ItemsFacet {
             s.items[_to][id] += value;
         }
         emit LibERC1155.TransferBatch(sender, _from, _to, _ids, _values);
-        LibERC1155.onERC1155BatchReceived(_from, _to, _ids, _values, _data);
+        LibERC1155.onERC1155BatchReceived(sender, _from, _to, _ids, _values, _data);
     }
 }
