@@ -17,6 +17,14 @@ contract LibAavegotchiTest {
         return LibAavegotchi.rarityMultiplier(_numericTraits);
     }
 
+    function singlePortalAavegotchiTraits(uint256 _randomNumber, uint256 _option)
+        public
+        view
+        returns (InternalPortalAavegotchiTraitsIO memory singlePortalAavegotchiTraits_)
+    {
+        return LibAavegotchi.singlePortalAavegotchiTraits(_randomNumber, _option);
+    }
+
     function xpUntilNextLevel(uint256 _experience) public pure returns (uint256 requiredXp_) {
        return LibAavegotchi.xpUntilNextLevel(_experience);
     }

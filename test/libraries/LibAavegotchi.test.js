@@ -1,19 +1,40 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const truffleAssert = require("truffle-assertions");
+const {deployContract, getDeployedContract} = require("../utils/deployUtils");
+const {setup} = require("../utils/setup");
 
 
 describe("LibAavegotchi", () => {
 
     let Contract;
     beforeEach(async () => {
-        const LibAavegotchiTest = await ethers.getContractFactory("LibAavegotchiTest");
-        Contract = await LibAavegotchiTest.deploy();
-        await Contract.deployed()
+        Contract = (await deployContract("LibAavegotchiTest")).contract
     })
    
     
     describe("toNumericTraits", async () => {
+
+        it('should revert when AppStorage.collateralTypes.length == 0', async () => {
+            const randomNumber = 1
+            const option = 1
+            truffleAssert.fails(Contract.toNumericTraits(randomNumber, option))
+        })
+
+        describe('setup', () => {
+            let contracts = []
+            beforeEach(async () => {
+                contracts = await setup()
+            })
+
+
+            it('should not revert when AppStorage.collateralTypes.length > 0', async () => {
+                const randomNumber = 1
+                const option = 1
+
+                truffleAssert.fails(Contract.toNumericTraits(randomNumber, option))
+            })
+        })
 
     })
 
