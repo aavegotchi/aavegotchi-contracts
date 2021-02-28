@@ -9,4 +9,3 @@ coverage.json
 coverage
 contracts/Aavegotchi/facets/XingyunFacet.sol
 scripts/dep.js
-scripts/createHaunt.js
