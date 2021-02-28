@@ -23,8 +23,6 @@ contract InitDiamond {
         uint256 chainlinkFee;
         address vrfCoordinator;
         address linkAddress;
-        uint24 initialHauntSize;
-        uint96 portalPrice;
         address childChainManager;
         string name;
         string symbol;
@@ -54,9 +52,6 @@ contract InitDiamond {
         s.vrfCoordinator = _args.vrfCoordinator;
         s.link = ILink(_args.linkAddress);
 
-        uint256 currentHauntId = s.currentHauntId;
-        s.haunts[currentHauntId].hauntMaxSize = _args.initialHauntSize; //10_000;
-        s.haunts[currentHauntId].portalPrice = _args.portalPrice;
         s.listingFeeInWei = 1e17;
 
         s.name = _args.name;

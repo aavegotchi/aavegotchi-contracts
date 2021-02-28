@@ -245,7 +245,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         LibERC1155Marketplace.updateERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _owner);
     }
 
-    function updateERC1155Listing(
+    function updateBatchERC1155Listing(
         address _erc1155TokenAddress,
         uint256[] calldata _erc1155TypeIds,
         address _owner

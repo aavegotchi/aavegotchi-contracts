@@ -212,11 +212,22 @@ async function main (scriptName) {
       ['ERC721MarketplaceFacet', erc721MarketplaceFacet]
     ],
     owner: account,
-    args: [[dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, vrfCoordinator, linkAddress, initialHauntSize, portalPrice, childChainManager, name, symbol]]
+    args: [[dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, vrfCoordinator, linkAddress, childChainManager, name, symbol]]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
   tx = aavegotchiDiamond.deployTransaction
+  receipt = await tx.wait()
+  console.log('Aavegotchi diamond deploy gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  // create first haunt
+  daoFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamond.address)
+  tx = await daoFacet.createHaunt(initialHauntSize, portalPrice, '0x000000')
+  receipt = await tx.wait()
+  console.log('Haunt created:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
   receipt = await tx.wait()
   console.log('Aavegotchi diamond deploy gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
@@ -227,7 +238,6 @@ async function main (scriptName) {
   aavegotchiGameFacet = await ethers.getContractAt('AavegotchiGameFacet', aavegotchiDiamond.address)
   collateralFacet = await ethers.getContractAt('CollateralFacet', aavegotchiDiamond.address)
   shopFacet = await ethers.getContractAt('ShopFacet', aavegotchiDiamond.address)
-  daoFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamond.address)
   erc1155MarketplaceFacet = await ethers.getContractAt('ERC1155MarketplaceFacet', aavegotchiDiamond.address)
   erc721MarketplaceFacet = await ethers.getContractAt('ERC721MarketplaceFacet', aavegotchiDiamond.address)
   bridgeFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet', aavegotchiDiamond.address)
