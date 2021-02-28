@@ -229,6 +229,7 @@ library LibAavegotchi {
 
     function xpUntilNextLevel(uint256 _experience) internal pure returns (uint256 requiredXp_) {
         uint256 currentLevel = aavegotchiLevel(_experience);
+        if (currentLevel == 99) return 0;
         requiredXp_ = (((currentLevel)**2) * 50) - _experience;
     }
 
@@ -321,13 +322,13 @@ library LibAavegotchi {
         require(len != 0, "LibAavegotchi: name can't be 0 chars");
         require(len < 26, "LibAavegotchi: name can't be greater than 25 characters");
         uint256 char = uint256(uint8(name[0]));
-        require(char != 20, "LibAavegotchi: first char of name can't be a space");
+        require(char != 0x20, "LibAavegotchi: first char of name can't be a space");
         char = uint256(uint8(name[len - 1]));
-        require(char != 20, "LibAavegotchi: last char of name can't be a space");
+        require(char != 0x20, "LibAavegotchi: last char of name can't be a space");
         for (uint256 i; i < len; i++) {
             char = uint256(uint8(name[i]));
-            require(char > 31 && char < 127, "LibAavegotchi: invalid character in Aavegotchi name.");
-            if (char < 91 && char > 64) {
+            require(char > 0x2F && char < 0x7B, "LibAavegotchi: invalid character in Aavegotchi name.");
+            if (char < 0x5B && char > 0x40) {
                 name[i] = bytes1(uint8(char + 32));
             }
         }
