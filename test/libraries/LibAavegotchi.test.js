@@ -339,8 +339,8 @@ describe("LibAavegotchi", () => {
             await truffleAssert.reverts(Contract.validateAndLowerName(name), expected);
         })
 
-        it ('should revert when contains char greater than 0x7A', async () => {
-            const invalid = "\x7B"
+        it ('should revert when contains char greater than 0x7E', async () => {
+            const invalid = "\x7F"
 
             const name = `test${invalid}`
 

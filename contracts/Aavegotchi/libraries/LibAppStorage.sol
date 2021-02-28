@@ -75,8 +75,8 @@ struct WearableSet {
 }
 
 struct Haunt {
-    uint24 hauntMaxSize; //The max size of the Haunt
-    uint96 portalPrice;
+    uint256 hauntMaxSize; //The max size of the Haunt
+    uint256 portalPrice;
     bytes3 bodyColor;
     uint24 totalCount;
 }

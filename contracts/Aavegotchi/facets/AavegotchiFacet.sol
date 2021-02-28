@@ -11,7 +11,7 @@ import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {IERC721TokenReceiver} from "../../shared/interfaces/IERC721TokenReceiver.sol";
 
-contract AavegotchiFacet { 
+contract AavegotchiFacet {
     AppStorage internal s;
 
     function totalSupply() external view returns (uint256 totalSupply_) {
@@ -193,12 +193,14 @@ contract AavegotchiFacet {
     }
 
     function name() external pure returns (string memory) {
-        return "Aavegotchi";
+        // return "Aavegotchi";
+        return "ERC20testing";
     }
 
     /// @notice An abbreviated name for NFTs in this contract
     function symbol() external pure returns (string memory) {
-        return "GOTCHI";
+        //return "GOTCHI";
+        return "ERC20Testing";
     }
 
     /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
