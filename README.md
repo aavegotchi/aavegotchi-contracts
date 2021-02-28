@@ -27,8 +27,30 @@ let aavegotchiDiamond = new web3.eth.Contract(
 );
 ```
 
-## Local Deployment
+## Getting Started
+
+### Requirements 
+- Node 12.x
+
+### Setup
+
+1. Install dependencies
+
+```console
+npm i
+```
+
+2. Set .env file of env vars in hardhat.config.js
+
+
+### Local Deployment
 
 ```console
 npx hardhat run scripts/deploy.js
+```
+
+### Tests
+
+```console
+npx hardhat test
 ```
