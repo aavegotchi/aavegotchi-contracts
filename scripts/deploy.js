@@ -104,7 +104,7 @@ async function main (scriptName) {
     // childChainManager = '0xb5505a6d998549090530911180f38aC5130101c6'
     childChainManager = '0xb5505a6d998549090530911180f38aC5130101c6'
     vrfCoordinator = '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9' // wrong one
-    linkAddress = '0x70d1F773A9f81C852087B77F6Ae6d3032B02D2AB'
+    linkAddress = '0x326C977E6efc84E512bB9C30f76E30c160eD06FB'
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4' // wrong one
     fee = ethers.utils.parseEther('0.0001')
 

@@ -29,22 +29,27 @@ contract ShopFacet {
     function buyPortals(address _to, uint256 _ghst) external {
         uint256 currentHauntId = s.currentHauntId;
         Haunt storage haunt = s.haunts[currentHauntId];
-        require(_ghst >= 100e18, "Not enough GHST to buy portals");
-        require(_ghst <= 5500e18, "Can't buy more than 25");
+        uint256 price = haunt.portalPrice;
+        require(_ghst >= price, "Not enough GHST to buy portals");
+        uint256[3] memory tiers;
+        tiers[0] = price * 5;
+        tiers[1] = tiers[0] + (price * 2 * 10);
+        tiers[2] = tiers[1] + (price * 3 * 10);
+        require(_ghst <= tiers[2], "Can't buy more than 25");
         address sender = LibMeta.msgSender();
         uint256 numToPurchase;
         uint256 totalPrice;
-        if (_ghst <= 500e18) {
-            numToPurchase = _ghst / 100e18;
-            totalPrice = numToPurchase * 100e18;
+        if (_ghst <= tiers[0]) {
+            numToPurchase = _ghst / price;
+            totalPrice = numToPurchase * price;
         } else {
-            if (_ghst <= 2500e18) {
-                numToPurchase = (_ghst - 500e18) / 200e18;
-                totalPrice = 500e18 + (numToPurchase * 200e18);
+            if (_ghst <= tiers[1]) {
+                numToPurchase = (_ghst - tiers[0]) / (price * 2);
+                totalPrice = tiers[0] + (numToPurchase * (price * 2));
                 numToPurchase += 5;
             } else {
-                numToPurchase = (_ghst - 2500e18) / 300e18;
-                totalPrice = 2500e18 + (numToPurchase * 300e18);
+                numToPurchase = (_ghst - tiers[1]) / (price * 3);
+                totalPrice = tiers[1] + (numToPurchase * (price * 3));
                 numToPurchase += 15;
             }
         }
@@ -66,6 +71,47 @@ contract ShopFacet {
         s.tokenIdCounter = tokenId;
         LibAavegotchi.purchase(totalPrice);
     }
+
+    // function buyPortals(address _to, uint256 _ghst) external {
+    //     uint256 currentHauntId = s.currentHauntId;
+    //     Haunt storage haunt = s.haunts[currentHauntId];
+    //     require(_ghst >= 100e18, "Not enough GHST to buy portals");
+    //     require(_ghst <= 5500e18, "Can't buy more than 25");
+    //     address sender = LibMeta.msgSender();
+    //     uint256 numToPurchase;
+    //     uint256 totalPrice;
+    //     if (_ghst <= 500e18) {
+    //         numToPurchase = _ghst / 100e18;
+    //         totalPrice = numToPurchase * 100e18;
+    //     } else {
+    //         if (_ghst <= 2500e18) {
+    //             numToPurchase = (_ghst - 500e18) / 200e18;
+    //             totalPrice = 500e18 + (numToPurchase * 200e18);
+    //             numToPurchase += 5;
+    //         } else {
+    //             numToPurchase = (_ghst - 2500e18) / 300e18;
+    //             totalPrice = 2500e18 + (numToPurchase * 300e18);
+    //             numToPurchase += 15;
+    //         }
+    //     }
+    //     uint256 hauntCount = haunt.totalCount + numToPurchase;
+    //     require(hauntCount <= haunt.hauntMaxSize, "ShopFacet: Exceeded max number of aavegotchis for this haunt");
+    //     s.haunts[currentHauntId].totalCount = uint24(hauntCount);
+    //     uint32 tokenId = s.tokenIdCounter;
+    //     emit BuyPortals(sender, _to, tokenId, numToPurchase, totalPrice);
+    //     for (uint256 i; i < numToPurchase; i++) {
+    //         s.aavegotchis[tokenId].owner = _to;
+    //         s.aavegotchis[tokenId].hauntId = uint16(currentHauntId);
+    //         s.tokenIdIndexes[tokenId] = s.tokenIds.length;
+    //         s.tokenIds.push(tokenId);
+    //         s.ownerTokenIdIndexes[_to][tokenId] = s.ownerTokenIds[_to].length;
+    //         s.ownerTokenIds[_to].push(tokenId);
+    //         emit LibERC721.Transfer(address(0), _to, tokenId);
+    //         tokenId++;
+    //     }
+    //     s.tokenIdCounter = tokenId;
+    //     LibAavegotchi.purchase(totalPrice);
+    // }
 
     function purchaseItemsWithGhst(
         address _to,

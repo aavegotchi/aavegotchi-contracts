@@ -160,7 +160,7 @@ contract AavegotchiGameFacet is Modifiers {
             "AavegotchiGameFacet: Aavegotchi name used already"
         );
         if (bytes(existingName).length > 0) {
-            delete s.aavegotchiNamesUsed[existingName];
+            delete s.aavegotchiNamesUsed[lowerName];
         }
         s.aavegotchiNamesUsed[lowerName] = true;
         s.aavegotchis[_tokenId].name = _name;
