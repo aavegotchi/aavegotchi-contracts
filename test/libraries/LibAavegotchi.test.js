@@ -3,6 +3,7 @@ const { ethers } = require("hardhat");
 const truffleAssert = require("truffle-assertions");
 const {deployContract, getDeployedContract} = require("../utils/deployUtils");
 const {setup} = require("../utils/setup");
+const web3 = require("web3")
 
 
 describe("LibAavegotchi", () => {
@@ -22,9 +23,9 @@ describe("LibAavegotchi", () => {
         })
 
         describe('setup', () => {
-            let contracts = []
+            let config;
             beforeEach(async () => {
-                contracts = await setup()
+                config= await setup()
             })
 
 
@@ -278,6 +279,35 @@ describe("LibAavegotchi", () => {
     })
 
     describe("purchase", () => {
+
+        let config;
+        beforeEach(async () => {
+            config = await setup()
+        })
+
+
+        it('should send fees to accounts', async () => {
+            
+            const purchaseAmount = 100
+            
+            const expectedBurnShare = 33
+            const expectedCompanyShare = 17
+            const expectedRarityFarmShare = 40
+            const expectedDaoShare = 10
+
+
+            const Ghost = config.ghstTokenContract
+
+            console.log("T", await Contract.isContract(Ghost.address));
+
+            const response = await Contract.purchase(web3.utils.toWei(`${purchaseAmount}`, 'ether'))
+            console.log(response)
+            expect(web3.utils.fromWei(`${await Ghost.balanceOf(config.pixelCraftAccountAddress)}`, 'ether')).to.equal(expectedCompanyShare)
+            expect(web3.utils.fromWei(`${await Ghost.balanceOf(config.rarityFarmingAccountAddress)}`, 'ether')).to.equal(expectedRarityFarmShare)
+            expect(web3.utils.fromWei(`${await Ghost.balanceOf(config.daoAccountAddress)}`, 'ether')).to.equal(expectedDaoShare)
+            expect(web3.utils.fromWei(`${await Ghost.balanceOf(config.burnAccountAddress)}`, 'ether')).to.equal(expectedBurnShare)
+
+        })
 
     })
 

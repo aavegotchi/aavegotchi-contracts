@@ -3,6 +3,10 @@ pragma solidity 0.8.1;
 
 import "../../Aavegotchi/libraries/LibAavegotchi.sol";
 
+import {
+    LibAppStorage
+} from "../../Aavegotchi/libraries/LibAppStorage.sol";
+
 contract LibAavegotchiTest {
 
     constructor() {
@@ -37,6 +41,10 @@ contract LibAavegotchiTest {
         return LibAavegotchi.baseRarityScore(_numericTraits);
     }
 
+    function purchase(uint256 _ghst) public {
+        LibAavegotchi.purchase(_ghst);
+    }
+
 
     function sqrt(uint256 x) public pure returns (uint256 y) {
         return LibAavegotchi.sqrt(x);
@@ -44,5 +52,17 @@ contract LibAavegotchiTest {
 
     function validateAndLowerName(string memory _name) public pure returns (string memory) {
         return LibAavegotchi.validateAndLowerName(_name);
+    }
+
+    function isContract(address _addr) public view returns (address) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        address _add = s.ghstContract;
+        return _add;
+        uint32 size;
+        assembly {
+            size := extcodesize(_add)
+        }
+
+        //return (size > 0);
     }
 }

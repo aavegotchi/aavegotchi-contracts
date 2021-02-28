@@ -13,6 +13,7 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
 
     const Ghost = await deployContract("GHSTFacet");
     deployed.push(Ghost)
+    await Ghost.contract.mint()
 
     const facets = await _deployFacets()
     deployed = deployed.concat(facets)
@@ -22,10 +23,10 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
     const account = await accounts[0].getAddress()
 
     console.log("account", account)
-    const dao = account 
-    const daoTreasury = account
-    const rarityFarming = account
-    const pixelCraft = account
+    const dao = await accounts[1].getAddress()
+    const daoTreasury = await accounts[2].getAddress()
+    const rarityFarming = await accounts[3].getAddress()
+    const pixelCraft = await accounts[4].getAddress()
     const keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     const fee = ethers.utils.parseEther('0.0001')
     const vrfCoordinator = account;
@@ -33,6 +34,9 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
     const initialHauntSize = '100'
     const portalPrice = ethers.utils.parseEther('100')
     const childChainManager = account
+
+
+    console.log("GHST", Ghost.contract.address)
 
     const args = [
         dao, 
@@ -69,7 +73,17 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
     // await DAOFacet.addWearableSets(wearableSets.slice(wearableSets.length / 2))
 
     //_deploySvg(Diamond.contract)
- }
+
+    return {
+        deploymentAccountAddress: account,
+        burnAccountAddress: '0x0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF',
+        daoAccountAddress: dao,
+        rarityFarmingAccountAddress: rarityFarming,
+        pixelCraftAccountAddress: pixelCraft,
+        ghstTokenContract: Ghost.contract,
+        contracts: deployed
+    }
+}
 
 
 
@@ -136,9 +150,21 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
 
 
         const DiamondCutFacet = await ethers.getContractAt('DiamondCutFacet', Diamond.contract.address)
+
+        console.log("DIAMONG", Diamond.contract.address)
+
         const tx = await DiamondCutFacet.diamondCut(diamondCut, InitDiamond.contract.address, functionCall, txArgs)
     
-        await tx.wait()
+        const result =await tx.wait()
+
+        if (!result.status) {
+            console.log('TRANSACTION FAILED!!! -------------------------------------------')
+            console.log('See block explorer app for details.')
+        }
+
+        console.log('DiamondCut success!')
+        console.log('Transaction hash:' + tx.hash)
+        console.log('--')
     }
 
     await _deployDiamondCut();
