@@ -159,6 +159,8 @@ struct AppStorage {
     mapping(address => uint256) metaNonces;
     uint32 tokenIdCounter;
     uint16 currentHauntId;
+    string name;
+    string symbol;
     //Addresses
     address[] collateralTypes;
     address ghstContract;

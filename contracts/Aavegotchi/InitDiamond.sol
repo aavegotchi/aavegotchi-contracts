@@ -13,26 +13,30 @@ import {ILink} from "./interfaces/ILink.sol";
 contract InitDiamond {
     AppStorage internal s;
 
-    function init(
-        address _dao,
-        address _daoTreasury,
-        address _pixelCraft,
-        address _rarityFarming,
-        address _ghstContract,
-        bytes32 _chainlinkKeyHash,
-        uint256 _chainlinkFee,
-        address _vrfCoordinator,
-        address _linkAddress,
-        uint24 _initialHauntSize,
-        uint96 _portalPrice,
-        address _childChainManager
-    ) external {
-        s.dao = _dao;
-        s.daoTreasury = _daoTreasury;
-        s.rarityFarming = _rarityFarming;
-        s.pixelCraft = _pixelCraft;
+    struct Args {
+        address dao;
+        address daoTreasury;
+        address pixelCraft;
+        address rarityFarming;
+        address ghstContract;
+        bytes32 chainlinkKeyHash;
+        uint256 chainlinkFee;
+        address vrfCoordinator;
+        address linkAddress;
+        uint24 initialHauntSize;
+        uint96 portalPrice;
+        address childChainManager;
+        string name;
+        string symbol;
+    }
+
+    function init(Args memory _args) external {
+        s.dao = _args.dao;
+        s.daoTreasury = _args.daoTreasury;
+        s.rarityFarming = _args.rarityFarming;
+        s.pixelCraft = _args.pixelCraft;
         s.itemsBaseUri = "https://aavegotchi.com/metadata/items/";
-        s.childChainManager = _childChainManager;
+        s.childChainManager = _args.childChainManager;
 
         s.domainSeparator = LibMeta.domainSeparator("AavegotchiDiamond", "V1");
 
@@ -44,15 +48,18 @@ contract InitDiamond {
         ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
         ds.supportedInterfaces[type(IERC173).interfaceId] = true;
 
-        s.ghstContract = _ghstContract;
-        s.keyHash = _chainlinkKeyHash;
-        s.fee = uint144(_chainlinkFee);
-        s.vrfCoordinator = _vrfCoordinator;
-        s.link = ILink(_linkAddress);
+        s.ghstContract = _args.ghstContract;
+        s.keyHash = _args.chainlinkKeyHash;
+        s.fee = uint144(_args.chainlinkFee);
+        s.vrfCoordinator = _args.vrfCoordinator;
+        s.link = ILink(_args.linkAddress);
 
         uint256 currentHauntId = s.currentHauntId;
-        s.haunts[currentHauntId].hauntMaxSize = _initialHauntSize; //10_000;
-        s.haunts[currentHauntId].portalPrice = _portalPrice;
+        s.haunts[currentHauntId].hauntMaxSize = _args.initialHauntSize; //10_000;
+        s.haunts[currentHauntId].portalPrice = _args.portalPrice;
         s.listingFeeInWei = 1e17;
+
+        s.name = _args.name;
+        s.symbol = _args.symbol;
     }
 }

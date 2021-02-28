@@ -54,6 +54,8 @@ async function main (scriptName) {
   let childChainManager
 
   const portalPrice = ethers.utils.parseEther('100')
+  const name = ''
+  const symbol = ''
   if (hre.network.name === 'hardhat') {
     childChainManager = account
     const LinkTokenMock = await ethers.getContractFactory('LinkTokenMock')
@@ -210,7 +212,7 @@ async function main (scriptName) {
       ['ERC721MarketplaceFacet', erc721MarketplaceFacet]
     ],
     owner: account,
-    args: [dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, vrfCoordinator, linkAddress, initialHauntSize, portalPrice, childChainManager]
+    args: [[dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, vrfCoordinator, linkAddress, initialHauntSize, portalPrice, childChainManager, name, symbol]]
   })
   console.log('Aavegotchi diamond address:' + aavegotchiDiamond.address)
 
