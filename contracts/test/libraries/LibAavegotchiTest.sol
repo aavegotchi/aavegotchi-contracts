@@ -13,6 +13,10 @@ contract LibAavegotchiTest {
         return LibAavegotchi.toNumericTraits(_randomNumber, _modifiers);
     }
 
+    function rarityMultiplier(int16[NUMERIC_TRAITS_NUM] memory _numericTraits) public pure returns (uint256 multiplier) {
+        return LibAavegotchi.rarityMultiplier(_numericTraits);
+    }
+
     function xpUntilNextLevel(uint256 _experience) public pure returns (uint256 requiredXp_) {
        return LibAavegotchi.xpUntilNextLevel(_experience);
     }
@@ -20,6 +24,11 @@ contract LibAavegotchiTest {
     function aavegotchiLevel(uint256 _experience) public pure returns (uint256 level_) {
         return LibAavegotchi.aavegotchiLevel(_experience);
     }
+
+    function baseRarityScore(int16[NUMERIC_TRAITS_NUM] memory _numericTraits) public pure returns (uint256 _rarityScore) {
+        return LibAavegotchi.baseRarityScore(_numericTraits);
+    }
+
 
     function sqrt(uint256 x) public pure returns (uint256 y) {
         return LibAavegotchi.sqrt(x);

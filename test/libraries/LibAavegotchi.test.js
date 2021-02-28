@@ -20,6 +20,85 @@ describe("LibAavegotchi", () => {
 
     describe("rarityMultiplier", () => {
 
+        // This isn't possible to test?
+        // it('should return 10 when baseRarity is < 300', async () => {
+
+        //     const numericTraits = [50,50,50,50,50,50]
+
+        //     const score = await Contract.baseRarityScore(numericTraits)
+
+        //     expect(score < 300).to.equal(true)
+
+        //     const expected = 10
+
+        //     const multiplier = await Contract.rarityMultiplier(numericTraits)
+
+        //     expect(multiplier).to.equal(expected)
+        // })
+
+        it('should return 10 when baseRarity is <= 449', async () => {
+
+            const numericTraits = [50,50,50,50,50,-94]
+
+            const score = await Contract.baseRarityScore(numericTraits)
+
+            expect(score).to.equal(449)
+
+            const expected = 10
+
+            const multiplier = await Contract.rarityMultiplier(numericTraits)
+
+            expect(multiplier).to.equal(expected)
+        })
+        
+
+        it('should return 25 when baseRarity is >= 450 && <= 525', async () => {
+
+            const numericTraits = [50,50,50,50,50,-170]
+
+            const score = await Contract.baseRarityScore(numericTraits)
+
+            expect(score).to.equal(525)
+
+            const expected = 25
+
+            const multiplier = await Contract.rarityMultiplier(numericTraits)
+
+            expect(multiplier).to.equal(expected)
+        })
+
+        it('should return 100 when baseRarity is >=526 && <= 580', async () => {
+
+            const numericTraits = [50,50,50,50,50,-225]
+
+            const score = await Contract.baseRarityScore(numericTraits)
+
+            expect(score).to.equal(580)
+
+            const expected = 100
+
+            const multiplier = await Contract.rarityMultiplier(numericTraits)
+
+            expect(multiplier).to.equal(expected)
+        })
+
+        it('should return 1000 when baseRarity is >=581', async () => {
+
+            const numericTraits = [50,50,50,50,50,-226]
+
+            const score = await Contract.baseRarityScore(numericTraits)
+
+            expect(score).to.equal(581)
+
+            const expected = 1000
+
+            const multiplier = await Contract.rarityMultiplier(numericTraits)
+
+            expect(multiplier).to.equal(expected)
+        })
+
+
+
     })
 
     describe("singlePortalAavegotchiTraits", () => {
@@ -140,7 +219,41 @@ describe("LibAavegotchi", () => {
     })
 
     describe("baseRarityScore", () => {
+        it ("should add 100 to numericTrait when numericTrait is 0", async () => {
+            //for 0 the sum is (100 - 0) = 100
+            //100 + (50 +1) (*5)
+            const numericTraits = [0,50,50,50,50,50]
 
+            const expected = '355'
+
+            const score = await Contract.baseRarityScore(numericTraits)
+
+            expect(score).to.equal(expected)
+        })
+
+        it ("should add 1 to numericTrait when numericTrait is >= 50", async () => {
+            //for 0 the sum is (100 - 0) = 100
+            //100*5 + (50 +1)
+            const numericTraits = [0,0,0,0,0,50]
+
+            const expected = '551'
+
+            const score = await Contract.baseRarityScore(numericTraits)
+
+            expect(score).to.equal(expected)
+        })
+
+        it ("should add number to 100 when numericTrait is negative", async () => {
+            //for 0 the sum is (100 - -1) = 100
+            //100*5 + (101)
+            const numericTraits = [0,0,0,0,0,-1]
+
+            const expected = '601'
+
+            const score = await Contract.baseRarityScore(numericTraits)
+
+            expect(score).to.equal(expected)
+        })
     })
 
     describe("purchase", () => {
