@@ -134,7 +134,7 @@ contract AavegotchiGameFacet is Modifiers {
         aavegotchi.randomNumber = option.randomNumber;
         aavegotchi.numericTraits = option.numericTraits;
         aavegotchi.collateralType = option.collateralType;
-        aavegotchi.minimumStake = uint88(option.minimumStake);
+        aavegotchi.minimumStake = option.minimumStake;
         aavegotchi.lastInteracted = uint40(block.timestamp - 12 hours);
         aavegotchi.interactionCount = 50;
         aavegotchi.claimTime = uint40(block.timestamp);
@@ -187,10 +187,7 @@ contract AavegotchiGameFacet is Modifiers {
         for (uint256 index; index < _values.length; index++) {
             totalUsed += abs(_values[index]);
 
-            // get trait
-            int16 trait = s.aavegotchis[_tokenId].numericTraits[index];
-            trait += _values[index];
-            s.aavegotchis[_tokenId].numericTraits[index] = trait;
+            s.aavegotchis[_tokenId].numericTraits[index] += _values[index];
         }
         // handles underflow
         require(availableSkillPoints(_tokenId) >= totalUsed, "AavegotchiGameFacet: Not enough skill points");
