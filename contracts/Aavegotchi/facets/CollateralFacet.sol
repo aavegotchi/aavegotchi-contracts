@@ -123,7 +123,10 @@ contract CollateralFacet is Modifiers {
         LibERC20.transferFrom(collateralType, escrow, owner, reduceAmount);
 
         // delete aavegotchi info
-        delete s.aavegotchiNamesUsed[LibAavegotchi.validateAndLowerName(s.aavegotchis[_tokenId].name)];
+        string memory name = s.aavegotchis[_tokenId].name;
+        if (bytes(name).length > 0) {
+            delete s.aavegotchiNamesUsed[LibAavegotchi.validateAndLowerName(name)];
+        }
         delete s.aavegotchis[_tokenId];
     }
 }

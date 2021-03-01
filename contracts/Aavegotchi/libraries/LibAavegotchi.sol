@@ -251,7 +251,7 @@ library LibAavegotchi {
 
         uint256 interactionCount = s.aavegotchis[_tokenId].interactionCount;
         uint256 interval = block.timestamp - lastInteracted;
-        uint256 daysSinceInteraction = interval / 86400;
+        uint256 daysSinceInteraction = interval / 1 days;
         uint256 l_kinship;
         if (interactionCount > daysSinceInteraction) {
             l_kinship = interactionCount - daysSinceInteraction;
@@ -263,7 +263,7 @@ library LibAavegotchi {
             hateBonus = 2;
         }
         l_kinship += 1 + hateBonus;
-        s.aavegotchis[_tokenId].interactionCount = uint16(l_kinship);
+        s.aavegotchis[_tokenId].interactionCount = l_kinship;
 
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
         emit AavegotchiInteract(_tokenId, l_kinship);
@@ -282,7 +282,7 @@ library LibAavegotchi {
     }
 
     // Need to ensure there is no overflow of _ghst
-    function purchase(uint256 _ghst) internal {
+    function purchase(address _from, uint256 _ghst) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         //33% to burn address
         uint256 burnShare = (_ghst * 33) / 100;
@@ -299,11 +299,10 @@ library LibAavegotchi {
         // Using 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF as burn address.
         // GHST token contract does not allow transferring to address(0) address: https://etherscan.io/address/0x3F382DbD960E3a9bbCeaE22651E88158d2791550#code
         address ghstContract = s.ghstContract;
-        address from = LibMeta.msgSender();
-        LibERC20.transferFrom(ghstContract, from, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
-        LibERC20.transferFrom(ghstContract, from, s.pixelCraft, companyShare);
-        LibERC20.transferFrom(ghstContract, from, s.rarityFarming, rarityFarmShare);
-        LibERC20.transferFrom(ghstContract, from, s.dao, daoShare);
+        LibERC20.transferFrom(ghstContract, _from, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
+        LibERC20.transferFrom(ghstContract, _from, s.pixelCraft, companyShare);
+        LibERC20.transferFrom(ghstContract, _from, s.rarityFarming, rarityFarmShare);
+        LibERC20.transferFrom(ghstContract, _from, s.dao, daoShare);
     }
 
     function sqrt(uint256 x) internal pure returns (uint256 y) {
@@ -363,5 +362,10 @@ library LibAavegotchi {
         s.ownerTokenIdIndexes[_to][_tokenId] = s.ownerTokenIds[_to].length;
         s.ownerTokenIds[_to].push(uint32(_tokenId));
         emit LibERC721.Transfer(_from, _to, _tokenId);
+    }
+
+    function verify(uint256 _tokenId) internal pure {
+        if (_tokenId < 10) {}
+        revert("Not verified");
     }
 }

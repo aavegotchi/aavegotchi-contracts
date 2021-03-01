@@ -123,11 +123,10 @@ contract AavegotchiGameFacet is Modifiers {
         uint256 _tokenId,
         uint256 _option,
         uint256 _stakeAmount
-    ) external onlyAavegotchiOwner(_tokenId) {
+    ) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiGameFacet: Portal not open");
         require(_option < PORTAL_AAVEGOTCHIS_NUM, "AavegotchiGameFacet: Only 10 aavegotchi options available");
-        require(s.aavegotchis[_tokenId].locked == false, "AavegotchiGameFacet: Can't claim locked aavegotchi");
         uint256 randomNumber = s.tokenIdToRandomNumber[_tokenId];
 
         InternalPortalAavegotchiTraitsIO memory option = LibAavegotchi.singlePortalAavegotchiTraits(randomNumber, _option);
@@ -155,13 +154,10 @@ contract AavegotchiGameFacet is Modifiers {
         require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "AavegotchiGameFacet: Must claim Aavegotchi before setting name");
         string memory lowerName = LibAavegotchi.validateAndLowerName(_name);
         string memory existingName = s.aavegotchis[_tokenId].name;
-        require(
-            !s.aavegotchiNamesUsed[lowerName] || keccak256(bytes(lowerName)) == keccak256(bytes(LibAavegotchi.validateAndLowerName(existingName))),
-            "AavegotchiGameFacet: Aavegotchi name used already"
-        );
         if (bytes(existingName).length > 0) {
-            delete s.aavegotchiNamesUsed[lowerName];
+            delete s.aavegotchiNamesUsed[LibAavegotchi.validateAndLowerName(existingName)];
         }
+        require(!s.aavegotchiNamesUsed[lowerName], "AavegotchiGameFacet: Aavegotchi name used already");
         s.aavegotchiNamesUsed[lowerName] = true;
         s.aavegotchis[_tokenId].name = _name;
         emit SetAavegotchiName(_tokenId, existingName, _name);
@@ -172,7 +168,6 @@ contract AavegotchiGameFacet is Modifiers {
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             address owner = s.aavegotchis[tokenId].owner;
-            require(owner != address(0), "AavegotchiGameFacet: Invalid tokenId, is not owned or doesn't exist");
             require(
                 sender == owner || s.operators[owner][sender] || s.approved[tokenId] == sender,
                 "AavegotchiGameFacet: Not owner of token or approved"

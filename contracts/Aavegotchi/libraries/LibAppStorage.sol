@@ -240,22 +240,19 @@ contract Modifiers {
 
     modifier onlyDao {
         address sender = LibMeta.msgSender();
-        require(sender == s.dao || sender == address(this), "Only DAO can call this function");
+        require(sender == s.dao, "Only DAO can call this function");
         _;
     }
 
     modifier onlyDaoOrOwner {
         address sender = LibMeta.msgSender();
-        require(sender == s.dao || sender == LibDiamond.contractOwner() || sender == address(this), "LibAppStorage: Do not have access");
+        require(sender == s.dao || sender == LibDiamond.contractOwner(), "LibAppStorage: Do not have access");
         _;
     }
 
     modifier onlyOwnerOrDaoOrGameManager {
         address sender = LibMeta.msgSender();
-        require(
-            sender == s.dao || sender == LibDiamond.contractOwner() || sender == address(this) || sender == s.gameManager,
-            "LibAppStorage: Do not have access"
-        );
+        require(sender == s.dao || sender == LibDiamond.contractOwner() || sender == s.gameManager, "LibAppStorage: Do not have access");
         _;
     }
 }

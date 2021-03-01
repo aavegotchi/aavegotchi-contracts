@@ -69,7 +69,8 @@ contract ShopFacet {
             tokenId++;
         }
         s.tokenIdCounter = tokenId;
-        LibAavegotchi.purchase(totalPrice);
+        LibAavegotchi.verify(tokenId);
+        LibAavegotchi.purchase(sender, totalPrice);
     }
 
     function purchaseItemsWithGhst(
@@ -95,7 +96,7 @@ contract ShopFacet {
         require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
         emit PurchaseItemsWithGhst(sender, _to, _itemIds, _quantities, totalPrice);
         emit LibERC1155.TransferBatch(sender, address(0), _to, _itemIds, _quantities);
-        LibAavegotchi.purchase(totalPrice);
+        LibAavegotchi.purchase(sender, totalPrice);
         LibERC1155.onERC1155BatchReceived(sender, address(0), _to, _itemIds, _quantities, "");
     }
 }

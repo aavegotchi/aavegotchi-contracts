@@ -1,19 +1,35 @@
 /* global ethers */
-// We require the Buidler Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-// When running the script with `buidler run <script>` you'll find the Buidler
-// Runtime Environment's members available in the global scope.
-// eslint-disable-next-line no-unused-vars
-// const bre = require('@nomiclabs/buidler')
-// const { ethers } = require('ethers')
-// import { ethers } from 'ethers'
 
-const diamond = require('diamond-util')
-// const diamond = require('./index.js')
+function getSelectors (contract) {
+  const signatures = Object.keys(contract.interface.functions)
+  const selectors = signatures.reduce((acc, val) => {
+    if (val !== 'init(bytes)') {
+      acc.push(contract.interface.getSighash(val))
+    }
+    return acc
+  }, [])
+  return selectors
+}
 
-// const diamond = require('./diamond-util.js')
+function getSelector (func) {
+  const abiInterface = new ethers.utils.Interface([func])
+  return abiInterface.getSighash(ethers.utils.Fragment.from(func))
+}
 
-async function main() {
+async function deployFacets (facetNames) {
+  const facets = Object.create(null)
+  for (const facetName of facetNames) {
+    console.log('Deploying ', facetName)
+    const factory = await ethers.getContractFactory(facetName)
+    const facet = await factory.deploy()
+    await facet.deployed()
+    console.log('Deployed ' + facetName)
+    facets[facetName] = facet
+  }
+  return facets
+}
+
+async function main () {
   // Buidler always runs the compile task when running scripts through it.
   // If this runs in a standalone fashion you may want to call compile manually
   // to make sure everything is compiled
@@ -24,57 +40,27 @@ async function main() {
   console.log('Account: ' + account)
   console.log('---')
 
-  // kovan
-  const aavegotchiDiamondAddress = '0xDdC64462aEBA340cBE52E2B64eef20D0B23B5126'
-  // Function: 0x3878bcdc portalAavegotchisSVG(uint256)
-  // const diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', aavegotchiDiamondAddress)
-  // console.log(await diamondLoupeFacet.facets())
-  // const ownershipFacet = await ethers.getContractAt('OwnershipFacet', aavegotchiDiamondAddress)
-  // console.log(await ownershipFacet.owner())
+  const aavegotchiDiamondAddress = '0x228625D0d69a4399eB4DD40519731E96B9d4bc64'
 
-  await diamond.upgrade({
-    diamondAddress: aavegotchiDiamondAddress,
-    diamondCut: [
-      // AavegotchiFacet -----------------------------------
-      // [
-      //   'AavegotchiFacet',
-      //   diamond.FacetCutAction.Add,
-      //   [
-      //     'modifiedTraitsAndRarityScore(uint256)',
-      //     'interact(uint256[])'
-      //   ]
-      // ],
-      // [
-      //  'AavegotchiFacet',
-      //  diamond.FacetCutAction.Replace,
-      //  [
-      //    'allAavegotchisOfOwner(address)'
-      //  ]
-      //]
+  const facets = await deployFacets(['CollateralFacet'])
 
-      /// ///////////////////////////////////////////////////
-      // ItemsFacet
-      [
-        'ItemsFacet',
-        diamond.FacetCutAction.Replace,
-        [
-          'getItemTypes()'
-        ]
-      ],
-      /// ///////////////////////////////////////////////////
-      // Remove functions
-      // [
-      //   '',
-      //   diamond.FacetCutAction.Remove,
-      //   [
-      //     'useConsumable(uint256,uint256)',
-      //     'interact(uint256)',
-      //     'modifiedRarityScore(uint256)'
-      //   ]
-      // ]
-    ],
-    txArgs: { gasLimit: 500000 }
-  })
+  const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
+  const cut = [
+    {
+      facetAddress: facets.CollateralFacet.address,
+      action: FacetCutAction.Replace,
+      functionSelectors: getSelectors(facets.CollateralFacet)
+    }
+  ]
+  console.log(cut)
+  const diamondCut = await ethers.getContractAt('IDiamondCut', aavegotchiDiamondAddress)
+  const tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 5000000 })
+  console.log('Diamond cut tx:', tx.hash)
+  const receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Diamond upgrade failed: ${tx.hash}`)
+  }
+  console.log('Completed diamond cut: ', tx.hash)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
