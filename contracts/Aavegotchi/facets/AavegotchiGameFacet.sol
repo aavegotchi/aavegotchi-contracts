@@ -127,7 +127,7 @@ contract AavegotchiGameFacet is Modifiers {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiGameFacet: Portal not open");
         require(_option < PORTAL_AAVEGOTCHIS_NUM, "AavegotchiGameFacet: Only 10 aavegotchi options available");
-
+        require(s.aavegotchis[_tokenId].locked == false, "AavegotchiGameFacet: Can't claim locked aavegotchi");
         uint256 randomNumber = s.tokenIdToRandomNumber[_tokenId];
 
         InternalPortalAavegotchiTraitsIO memory option = LibAavegotchi.singlePortalAavegotchiTraits(randomNumber, _option);
