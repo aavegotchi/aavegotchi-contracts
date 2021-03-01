@@ -229,7 +229,7 @@ library LibAavegotchi {
 
     function xpUntilNextLevel(uint256 _experience) internal pure returns (uint256 requiredXp_) {
         uint256 currentLevel = aavegotchiLevel(_experience);
-        requiredXp_ = (((currentLevel)**2) * 50) - _experience;
+        requiredXp_ = ((currentLevel**2) * 50) - _experience;
     }
 
     function aavegotchiLevel(uint256 _experience) internal pure returns (uint256 level_) {

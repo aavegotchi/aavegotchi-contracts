@@ -55,11 +55,11 @@ struct ItemType {
     Dimensions dimensions;
     uint256 ghstPrice; //How much GHST this item costs
     uint256 maxQuantity; //Total number that can be minted of this item.
+    uint256 totalQuantity; //The total quantity of this item minted so far
     uint32 svgId; //The svgId of the item
     uint8 rarityScoreModifier; //Number from 1-50.
     // Each bit is a slot position. 1 is true, 0 is false
     bool canPurchaseWithGhst;
-    uint32 totalQuantity; //The total quantity of this item minted so far
     uint16 minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
     bool canBeTransferred;
     uint8 category; // 0 is wearable, 1 is badge, 2 is consumable
