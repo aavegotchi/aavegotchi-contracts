@@ -3,14 +3,13 @@ const { ethers } = require("hardhat");
 const truffleAssert = require("truffle-assertions");
 const {deployContract, getDeployedContract} = require("../utils/deployUtils");
 const {setup} = require("../utils/setup");
-const web3 = require("web3")
 
 
 describe("LibAavegotchi", () => {
 
     let Contract;
     beforeEach(async () => {
-        Contract = (await deployContract("LibAavegotchiTest")).contract
+        Contract = (await deployContract("LibAavegotchiTestFacet"))
     })
    
     
@@ -19,7 +18,7 @@ describe("LibAavegotchi", () => {
         it('should revert when AppStorage.collateralTypes.length == 0', async () => {
             const randomNumber = 1
             const option = 1
-            truffleAssert.fails(Contract.toNumericTraits(randomNumber, option))
+            truffleAssert.fails(Contract.t_toNumericTraits(randomNumber, option))
         })
 
         describe('setup', () => {
@@ -33,7 +32,7 @@ describe("LibAavegotchi", () => {
                 const randomNumber = 1
                 const option = 1
 
-                truffleAssert.fails(Contract.toNumericTraits(randomNumber, option))
+                truffleAssert.fails(Contract.t_toNumericTraits(randomNumber, option))
             })
         })
 
@@ -47,13 +46,13 @@ describe("LibAavegotchi", () => {
 
         //     const numericTraits = [50,50,50,50,50,50]
 
-        //     const score = await Contract.baseRarityScore(numericTraits)
+        //     const score = await Contract.t_baseRarityScore(numericTraits)
 
         //     expect(score < 300).to.equal(true)
 
         //     const expected = 10
 
-        //     const multiplier = await Contract.rarityMultiplier(numericTraits)
+        //     const multiplier = await Contract.t_rarityMultiplier(numericTraits)
 
         //     expect(multiplier).to.equal(expected)
         // })
@@ -62,13 +61,13 @@ describe("LibAavegotchi", () => {
 
             const numericTraits = [50,50,50,50,50,-94]
 
-            const score = await Contract.baseRarityScore(numericTraits)
+            const score = await Contract.t_baseRarityScore(numericTraits)
 
             expect(score).to.equal(449)
 
             const expected = 10
 
-            const multiplier = await Contract.rarityMultiplier(numericTraits)
+            const multiplier = await Contract.t_rarityMultiplier(numericTraits)
 
             expect(multiplier).to.equal(expected)
         })
@@ -78,13 +77,13 @@ describe("LibAavegotchi", () => {
 
             const numericTraits = [50,50,50,50,50,-170]
 
-            const score = await Contract.baseRarityScore(numericTraits)
+            const score = await Contract.t_baseRarityScore(numericTraits)
 
             expect(score).to.equal(525)
 
             const expected = 25
 
-            const multiplier = await Contract.rarityMultiplier(numericTraits)
+            const multiplier = await Contract.t_rarityMultiplier(numericTraits)
 
             expect(multiplier).to.equal(expected)
         })
@@ -93,13 +92,13 @@ describe("LibAavegotchi", () => {
 
             const numericTraits = [50,50,50,50,50,-225]
 
-            const score = await Contract.baseRarityScore(numericTraits)
+            const score = await Contract.t_baseRarityScore(numericTraits)
 
             expect(score).to.equal(580)
 
             const expected = 100
 
-            const multiplier = await Contract.rarityMultiplier(numericTraits)
+            const multiplier = await Contract.t_rarityMultiplier(numericTraits)
 
             expect(multiplier).to.equal(expected)
         })
@@ -108,13 +107,13 @@ describe("LibAavegotchi", () => {
 
             const numericTraits = [50,50,50,50,50,-226]
 
-            const score = await Contract.baseRarityScore(numericTraits)
+            const score = await Contract.t_baseRarityScore(numericTraits)
 
             expect(score).to.equal(581)
 
             const expected = 1000
 
-            const multiplier = await Contract.rarityMultiplier(numericTraits)
+            const multiplier = await Contract.t_rarityMultiplier(numericTraits)
 
             expect(multiplier).to.equal(expected)
         })
@@ -155,7 +154,7 @@ describe("LibAavegotchi", () => {
 
             const expected = 0
 
-            const xp = await Contract.xpUntilNextLevel(experience)
+            const xp = await Contract.t_xpUntilNextLevel(experience)
 
         
             expect(xp).to.equal(expected)
@@ -167,7 +166,7 @@ describe("LibAavegotchi", () => {
 
             const expected = 50
 
-            const xp = await Contract.xpUntilNextLevel(experience)
+            const xp = await Contract.t_xpUntilNextLevel(experience)
 
         
             expect(xp).to.equal(expected)
@@ -179,7 +178,7 @@ describe("LibAavegotchi", () => {
 
             const expected = 1
 
-            const xp = await Contract.xpUntilNextLevel(experience)
+            const xp = await Contract.t_xpUntilNextLevel(experience)
 
         
             expect(xp).to.equal(expected)
@@ -196,7 +195,7 @@ describe("LibAavegotchi", () => {
 
             const expected = 99
 
-            const level = await Contract.aavegotchiLevel(experience)
+            const level = await Contract.t_aavegotchiLevel(experience)
 
             expect(level).to.equal(expected)
         })
@@ -208,7 +207,7 @@ describe("LibAavegotchi", () => {
 
             const expected = 1
 
-            const level = await Contract.aavegotchiLevel(experience)
+            const level = await Contract.t_aavegotchiLevel(experience)
 
             expect(level).to.equal(expected)
         })
@@ -219,7 +218,7 @@ describe("LibAavegotchi", () => {
 
             const expected = 5 // Math.sqrt(2 * experience)/10 + 1
 
-            const level = await Contract.aavegotchiLevel(experience)
+            const level = await Contract.t_aavegotchiLevel(experience)
 
             expect(level).to.equal(expected)
         })
@@ -230,7 +229,7 @@ describe("LibAavegotchi", () => {
 
             const expected = 6 // Math.sqrt(2 * experience)/10 + 1
 
-            const level = await Contract.aavegotchiLevel(experience)
+            const level = await Contract.t_aavegotchiLevel(experience)
 
             expect(level).to.equal(expected)
         })
@@ -248,7 +247,7 @@ describe("LibAavegotchi", () => {
 
             const expected = '355'
 
-            const score = await Contract.baseRarityScore(numericTraits)
+            const score = await Contract.t_baseRarityScore(numericTraits)
 
             expect(score).to.equal(expected)
         })
@@ -260,7 +259,7 @@ describe("LibAavegotchi", () => {
 
             const expected = '551'
 
-            const score = await Contract.baseRarityScore(numericTraits)
+            const score = await Contract.t_baseRarityScore(numericTraits)
 
             expect(score).to.equal(expected)
         })
@@ -272,7 +271,7 @@ describe("LibAavegotchi", () => {
 
             const expected = '601'
 
-            const score = await Contract.baseRarityScore(numericTraits)
+            const score = await Contract.t_baseRarityScore(numericTraits)
 
             expect(score).to.equal(expected)
         })
@@ -283,29 +282,28 @@ describe("LibAavegotchi", () => {
         let config;
         beforeEach(async () => {
             config = await setup()
+            Contract = await ethers.getContractAt('LibAavegotchiTestFacet', config.aavegotchiDiamond.address)
         })
-
 
         it('should send fees to accounts', async () => {
             
             const purchaseAmount = 100
             
-            const expectedBurnShare = 33
-            const expectedCompanyShare = 17
-            const expectedRarityFarmShare = 40
-            const expectedDaoShare = 10
-
+            const expectedBurnShare = '33.0'
+            const expectedCompanyShare = '17.0'
+            const expectedRarityFarmShare = '40.0'
+            const expectedDaoShare = '10.0'
 
             const Ghost = config.ghstTokenContract
 
-            console.log("T", await Contract.isContract(Ghost.address));
+            await Ghost.approve(config.libAavegotchiTestFacet.address,  ethers.utils.parseEther(`${purchaseAmount}`))
+            
+            await Contract.t_purchase(ethers.utils.parseEther(`${purchaseAmount}`))
 
-            const response = await Contract.purchase(web3.utils.toWei(`${purchaseAmount}`, 'ether'))
-            console.log(response)
-            expect(web3.utils.fromWei(`${await Ghost.balanceOf(config.pixelCraftAccountAddress)}`, 'ether')).to.equal(expectedCompanyShare)
-            expect(web3.utils.fromWei(`${await Ghost.balanceOf(config.rarityFarmingAccountAddress)}`, 'ether')).to.equal(expectedRarityFarmShare)
-            expect(web3.utils.fromWei(`${await Ghost.balanceOf(config.daoAccountAddress)}`, 'ether')).to.equal(expectedDaoShare)
-            expect(web3.utils.fromWei(`${await Ghost.balanceOf(config.burnAccountAddress)}`, 'ether')).to.equal(expectedBurnShare)
+            expect(ethers.utils.formatEther(`${await Ghost.balanceOf(config.pixelCraft)}`)).to.equal(expectedCompanyShare)
+            expect(ethers.utils.formatEther(`${await Ghost.balanceOf(config.rarityFarming)}`)).to.equal(expectedRarityFarmShare)
+            expect(ethers.utils.formatEther(`${await Ghost.balanceOf(config.dao)}`)).to.equal(expectedDaoShare)
+            expect(ethers.utils.formatEther(`${await Ghost.balanceOf(config.burnAddress)}`)).to.equal(expectedBurnShare)
 
         })
 
@@ -319,7 +317,7 @@ describe("LibAavegotchi", () => {
 
             const expected = 3
 
-            const value = await Contract.sqrt(x);
+            const value = await Contract.t_sqrt(x);
 
             expect(value).to.equal(expected);
         })
@@ -330,7 +328,7 @@ describe("LibAavegotchi", () => {
 
             const expected = 3
 
-            const value = await Contract.sqrt(x);
+            const value = await Contract.t_sqrt(x);
 
             expect(value).to.equal(expected);
         })
@@ -341,7 +339,7 @@ describe("LibAavegotchi", () => {
 
             const expected = 0
 
-            const value = await Contract.sqrt(x);
+            const value = await Contract.t_sqrt(x);
 
             expect(value).to.equal(expected);
         })
@@ -353,7 +351,7 @@ describe("LibAavegotchi", () => {
 
             const expected = "LibAavegotchi: name can't be 0 chars"
 
-            await truffleAssert.reverts(Contract.validateAndLowerName(name), expected);
+            await truffleAssert.reverts(Contract.t_validateAndLowerName(name), expected);
         })
 
         it ('should revert when length is 26', async () => {
@@ -361,7 +359,7 @@ describe("LibAavegotchi", () => {
 
             const expected = "LibAavegotchi: name can't be greater than 25 characters";
 
-            await truffleAssert.reverts(Contract.validateAndLowerName(name), expected);
+            await truffleAssert.reverts(Contract.t_validateAndLowerName(name), expected);
         })
 
         it ('should revert when first char is a space', async () => {
@@ -369,7 +367,7 @@ describe("LibAavegotchi", () => {
 
             const expected = "LibAavegotchi: first char of name can't be a space";
 
-            await truffleAssert.reverts(Contract.validateAndLowerName(name), expected);
+            await truffleAssert.reverts(Contract.t_validateAndLowerName(name), expected);
         })
 
         it ('should revert when last char is a space', async () => {
@@ -377,7 +375,7 @@ describe("LibAavegotchi", () => {
 
             const expected = "LibAavegotchi: last char of name can't be a space";
 
-            await truffleAssert.reverts(Contract.validateAndLowerName(name), expected);
+            await truffleAssert.reverts(Contract.t_validateAndLowerName(name), expected);
         })
 
         it ('should revert when contains char less than 2F', async () => {
@@ -387,7 +385,7 @@ describe("LibAavegotchi", () => {
 
             const expected = `LibAavegotchi: invalid character in Aavegotchi name.`;
 
-            await truffleAssert.reverts(Contract.validateAndLowerName(name), expected);
+            await truffleAssert.reverts(Contract.t_validateAndLowerName(name), expected);
         })
 
         it ('should revert when contains char greater than 0x7E', async () => {
@@ -397,7 +395,7 @@ describe("LibAavegotchi", () => {
 
             const expected = `LibAavegotchi: invalid character in Aavegotchi name.`;
 
-            await truffleAssert.reverts(Contract.validateAndLowerName(name), expected);
+            await truffleAssert.reverts(Contract.t_validateAndLowerName(name), expected);
         })
 
         it ('should lowercase string', async () => {
@@ -405,7 +403,7 @@ describe("LibAavegotchi", () => {
 
             const expected = "lowercaseme132"
 
-            const res = await Contract.validateAndLowerName(name)
+            const res = await Contract.t_validateAndLowerName(name)
 
             expect(res).to.equal(expected);
         })

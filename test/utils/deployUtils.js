@@ -1,13 +1,9 @@
-const { Contract } = require("ethers");
 
 const deployContract = async (contractName) => {
     let contract = await ethers.getContractFactory(contractName);
     contract = await contract.deploy()
     contract.deployed()
-    return {
-        name: contractName,
-        contract
-    }
+    return contract
 }
 
 
@@ -17,11 +13,5 @@ const deployContracts = async (contractNames) => {
     )))
 }
 
-const getDeployedContract = (contracts, contractName) => {
-    return contracts.find(c => c.name === contractName).contract
-}
-
-
 exports.deployContract = deployContract
 exports.deployContracts = deployContracts
-exports.getDeployedContract = getDeployedContract

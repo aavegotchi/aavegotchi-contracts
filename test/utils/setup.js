@@ -9,41 +9,40 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
 
 
  const setup = async () => {
-    let deployed = []
 
-    const Ghost = await deployContract("GHSTFacet");
-    deployed.push(Ghost)
-    await Ghost.contract.mint()
-
-    const facets = await _deployFacets()
-    deployed = deployed.concat(facets)
-
-    const LinkToken = await deployContract('LinkTokenMock');
     const accounts = await ethers.getSigners()
     const account = await accounts[0].getAddress()
 
-    console.log("account", account)
+    const LinkToken = await deployContract('LinkTokenMock');
+
+    const facets = await _deployFacets()
+    
     const dao = await accounts[1].getAddress()
-    const daoTreasury = await accounts[2].getAddress()
+    const daoTreasury = await accounts[1].getAddress()
     const rarityFarming = await accounts[3].getAddress()
     const pixelCraft = await accounts[4].getAddress()
     const keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     const fee = ethers.utils.parseEther('0.0001')
     const vrfCoordinator = account;
-    const linkAddress = LinkToken.contract.address
+    const linkAddress = LinkToken.address
     const initialHauntSize = '100'
     const portalPrice = ethers.utils.parseEther('100')
     const childChainManager = account
 
 
-    console.log("GHST", Ghost.contract.address)
+    const Ghost = await deployContract("GHSTFacet");
+
+    const GhostDiamond = await _deployDiamond([Ghost], 'contracts/GHST/InitDiamond.sol:InitDiamond', [], account, {})
+
+    const ghstTokenContract = await ethers.getContractAt('GHSTFacet', GhostDiamond.address)
+    await ghstTokenContract.mint();
 
     const args = [
         dao, 
         daoTreasury, 
         pixelCraft, 
         rarityFarming, 
-        Ghost.contract.address, 
+        ghstTokenContract.address, 
         keyHash, 
         fee, 
         vrfCoordinator, 
@@ -53,13 +52,12 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
         childChainManager
     
     ]
+    
+    const aavegotchiDiamond = await _deployDiamond(facets, 'contracts/Aavegotchi/InitDiamond.sol:InitDiamond', args, account, {});
 
-    const Diamond = await _deployAavegotchiDiamond(facets, args, account);
-    deployed.push(Diamond)
+    const DAOFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamond.address)
 
-    const DAOFacet = daoFacet = await ethers.getContractAt('DAOFacet', Diamond.contract.address)
-
-    await DAOFacet.addCollateralTypes(getCollaterals("hardhat", Ghost.contract.address))
+    await DAOFacet.addCollateralTypes(getCollaterals("hardhat", Ghost.address))
     
     // This takes a while and causes tests to time out
     // await DAOFacet.addItemTypes(itemTypes.slice(0, itemTypes.length / 3))
@@ -72,16 +70,49 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
 
     // await DAOFacet.addWearableSets(wearableSets.slice(wearableSets.length / 2))
 
-    //_deploySvg(Diamond.contract)
+    //_deploySvg(Diamond)
+
+    
+    const diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', aavegotchiDiamond.address)
+    const vrfFacet = await ethers.getContractAt('VrfFacet', aavegotchiDiamond.address)
+    const aavegotchiFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamond.address)
+    const aavegotchiGameFacet = await ethers.getContractAt('AavegotchiGameFacet', aavegotchiDiamond.address)
+    const collateralFacet = await ethers.getContractAt('CollateralFacet', aavegotchiDiamond.address)
+    const shopFacet = await ethers.getContractAt('ShopFacet', aavegotchiDiamond.address)
+    const daoFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamond.address)
+    const erc1155MarketplaceFacet = await ethers.getContractAt('ERC1155MarketplaceFacet', aavegotchiDiamond.address)
+    const erc721MarketplaceFacet = await ethers.getContractAt('ERC721MarketplaceFacet', aavegotchiDiamond.address)
+    const bridgeFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet', aavegotchiDiamond.address)
+    //const itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', aavegotchiDiamond.address)
+    //const itemsTransferFacet = await ethers.getContractAt('ItemsTransferFacet', aavegotchiDiamond.address)
+    const libAavegotchiTestFacet = await ethers.getContractAt('LibAavegotchiTestFacet', aavegotchiDiamond.address)
+    //const svgFacet = await ethers.getContractAt('SvgFacet', aavegotchiDiamond.address)
 
     return {
-        deploymentAccountAddress: account,
-        burnAccountAddress: '0x0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF',
-        daoAccountAddress: dao,
-        rarityFarmingAccountAddress: rarityFarming,
-        pixelCraftAccountAddress: pixelCraft,
-        ghstTokenContract: Ghost.contract,
-        contracts: deployed
+        account: account,
+        dao,
+        daoTreasury,
+        pixelCraft,
+        rarityFarming,
+        burnAddress: '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF',
+        aavegotchiDiamond: aavegotchiDiamond,
+        diamondLoupeFacet: diamondLoupeFacet,
+        bridgeFacet: bridgeFacet,
+        ghstTokenContract: ghstTokenContract,
+        // itemsFacet: itemsFacet,
+        // itemsTransferFacet: itemsTransferFacet,
+        aavegotchiFacet: aavegotchiFacet,
+        aavegotchiGameFacet: aavegotchiGameFacet,
+        collateralFacet: collateralFacet,
+        vrfFacet: vrfFacet,
+        daoFacet: daoFacet,
+        // svgFacet: svgFacet,
+        erc1155MarketplaceFacet: erc1155MarketplaceFacet,
+        erc721MarketplaceFacet: erc721MarketplaceFacet,
+        shopFacet: shopFacet,
+        linkAddress,
+        linkContract: LinkToken,
+        libAavegotchiTestFacet
     }
 }
 
@@ -101,7 +132,8 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
         'ShopFacet',
         'MetaTransactionsFacet',
         'ERC1155MarketplaceFacet',
-        'ERC721MarketplaceFacet'
+        'ERC721MarketplaceFacet',
+        'LibAavegotchiTestFacet'
     ]
 
     const facets = await deployContracts(facetNames)
@@ -111,7 +143,7 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
 
  
 
- const _deployAavegotchiDiamond = async (facets, args, owner, txArgs = {}) => {
+ const _deployDiamond = async (facets, initDiamond, args, owner, txArgs = {}) => {
     const FacetCutAction = {
         Add: 0,
         Replace: 1,
@@ -122,8 +154,8 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
     const deployedDiamond = await diamondFactory.deploy(owner)
     await deployedDiamond.deployed()
 
-    const Diamond = {name: "Diamond", contract: deployedDiamond}
-    const InitDiamond = await deployContract('contracts/Aavegotchi/InitDiamond.sol:InitDiamond')
+    const Diamond = deployedDiamond
+    const InitDiamond = await deployContract(initDiamond)
 
     const _deployDiamondCut = async () => {
         
@@ -135,36 +167,27 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
                 }
                 return acc
             }, [])
+
             return selectors
         }
-    
+        
         const diamondCut = facets.map((deployedObj) => (
             [
-                deployedObj.contract.address, 
+                deployedObj.address, 
                 FacetCutAction.Add, 
-                _getSelectors(deployedObj.contract) 
+                _getSelectors(deployedObj) 
             ]
         ))
 
-        const functionCall = InitDiamond.contract.interface.encodeFunctionData('init', args)
 
+        const functionCall = InitDiamond.interface.encodeFunctionData('init', args)
 
-        const DiamondCutFacet = await ethers.getContractAt('DiamondCutFacet', Diamond.contract.address)
+        const DiamondCutFacet = await ethers.getContractAt('DiamondCutFacet', Diamond.address)
 
-        console.log("DIAMONG", Diamond.contract.address)
-
-        const tx = await DiamondCutFacet.diamondCut(diamondCut, InitDiamond.contract.address, functionCall, txArgs)
+        const tx = await DiamondCutFacet.diamondCut(diamondCut, InitDiamond.address, functionCall, txArgs)
     
         const result =await tx.wait()
 
-        if (!result.status) {
-            console.log('TRANSACTION FAILED!!! -------------------------------------------')
-            console.log('See block explorer app for details.')
-        }
-
-        console.log('DiamondCut success!')
-        console.log('Transaction hash:' + tx.hash)
-        console.log('--')
     }
 
     await _deployDiamondCut();
@@ -172,6 +195,7 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
 
     return Diamond;
 }
+
 
 
 const _deploySvg = async (aavegotchiDiamond) => {
