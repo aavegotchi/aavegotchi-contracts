@@ -55,15 +55,15 @@ struct ItemType {
     Dimensions dimensions;
     uint256 ghstPrice; //How much GHST this item costs
     uint256 maxQuantity; //Total number that can be minted of this item.
+    uint256 totalQuantity; //The total quantity of this item minted so far
     uint32 svgId; //The svgId of the item
     uint8 rarityScoreModifier; //Number from 1-50.
     // Each bit is a slot position. 1 is true, 0 is false
     bool canPurchaseWithGhst;
-    uint32 totalQuantity; //The total quantity of this item minted so far
     uint16 minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
     bool canBeTransferred;
     uint8 category; // 0 is wearable, 1 is badge, 2 is consumable
-    int8 kinshipBonus; //[CONSUMABLE ONLY] How much this consumable boosts (or reduces) kinship score
+    int16 kinshipBonus; //[CONSUMABLE ONLY] How much this consumable boosts (or reduces) kinship score
     uint32 experienceBonus; //[CONSUMABLE ONLY]
 }
 
@@ -159,6 +159,8 @@ struct AppStorage {
     mapping(address => uint256) metaNonces;
     uint32 tokenIdCounter;
     uint16 currentHauntId;
+    string name;
+    string symbol;
     //Addresses
     address[] collateralTypes;
     address ghstContract;
@@ -218,6 +220,10 @@ library LibAppStorage {
             ds.slot := 0
         }
     }
+
+    function abs(int256 x) internal pure returns (uint256) {
+        return uint256(x >= 0 ? x : -x);
+    }
 }
 
 contract Modifiers {
@@ -238,22 +244,19 @@ contract Modifiers {
 
     modifier onlyDao {
         address sender = LibMeta.msgSender();
-        require(sender == s.dao || sender == address(this), "Only DAO can call this function");
+        require(sender == s.dao, "Only DAO can call this function");
         _;
     }
 
     modifier onlyDaoOrOwner {
         address sender = LibMeta.msgSender();
-        require(sender == s.dao || sender == LibDiamond.contractOwner() || sender == address(this), "LibAppStorage: Do not have access");
+        require(sender == s.dao || sender == LibDiamond.contractOwner(), "LibAppStorage: Do not have access");
         _;
     }
 
     modifier onlyOwnerOrDaoOrGameManager {
         address sender = LibMeta.msgSender();
-        require(
-            sender == s.dao || sender == LibDiamond.contractOwner() || sender == address(this) || sender == s.gameManager,
-            "LibAppStorage: Do not have access"
-        );
+        require(sender == s.dao || sender == LibDiamond.contractOwner() || sender == s.gameManager, "LibAppStorage: Do not have access");
         _;
     }
 }

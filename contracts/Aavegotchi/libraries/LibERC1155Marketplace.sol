@@ -124,7 +124,8 @@ library LibERC1155Marketplace {
                 listing.quantity = quantity;
                 emit UpdateERC1155Listing(listingId, quantity, listing.priceInWei, block.timestamp);
             }
-        } else {
+        }
+        if (quantity == 0) {
             cancelERC1155Listing(listingId, listing.seller);
         }
     }

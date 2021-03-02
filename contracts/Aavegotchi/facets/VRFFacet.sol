@@ -124,6 +124,7 @@ contract VrfFacet is Modifiers {
             uint256 tokenId = _tokenIds[i];
             require(s.aavegotchis[tokenId].status == LibAavegotchi.STATUS_CLOSED_PORTAL, "AavegotchiFacet: Portal is not closed");
             require(owner == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
+            require(s.aavegotchis[tokenId].locked == false, "AavegotchiFacet: Can't open portal when it is locked");
             drawRandomNumber(tokenId);
             LibERC721Marketplace.cancelERC721Listing(address(this), tokenId, owner);
         }
@@ -141,7 +142,7 @@ contract VrfFacet is Modifiers {
         bytes32 requestId = keccak256(abi.encodePacked(l_keyHash, vrfSeed));
         s.vrfRequestIdToTokenId[requestId] = _tokenId;
         // for testing
-        tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _tokenId))));
+        // tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _tokenId))));
     }
 
     // for testing purpose only

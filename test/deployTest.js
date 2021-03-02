@@ -564,10 +564,10 @@ describe('Haunts', async function () {
 
   it('Can create new Haunt', async function () {
     let currentHaunt = await global.aavegotchiGameFacet.currentHaunt()
-    expect(currentHaunt.hauntId_).to.equal(0)
+    expect(currentHaunt.hauntId_).to.equal(1)
     await daoFacet.createHaunt('10000', ethers.utils.parseEther('100'), '0x000000')
     currentHaunt = await global.aavegotchiGameFacet.currentHaunt()
-    expect(currentHaunt.hauntId_).to.equal(1)
+    expect(currentHaunt.hauntId_).to.equal(2)
   })
 })
 

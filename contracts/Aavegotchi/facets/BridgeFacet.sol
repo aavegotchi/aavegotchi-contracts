@@ -45,6 +45,7 @@ contract BridgeFacet is Modifiers {
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             require(owner == s.aavegotchis[tokenId].owner, "BridgeFacet: Not owner of token");
+            require(s.aavegotchis[tokenId].locked == false, "BridgeFacet: Can't withdraw locked token");
             LibAavegotchi.transfer(owner, address(this), tokenId);
         }
         emit WithdrawnBatch(owner, _tokenIds);

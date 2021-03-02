@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import {Modifiers} from "../libraries/LibAppStorage.sol";
-import {AavegotchiCollateralTypeIO} from "../libraries/LibAavegotchi.sol";
+import {LibAavegotchi, AavegotchiCollateralTypeIO} from "../libraries/LibAavegotchi.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
@@ -123,7 +123,10 @@ contract CollateralFacet is Modifiers {
         LibERC20.transferFrom(collateralType, escrow, owner, reduceAmount);
 
         // delete aavegotchi info
-        delete s.aavegotchiNamesUsed[s.aavegotchis[_tokenId].name];
+        string memory name = s.aavegotchis[_tokenId].name;
+        if (bytes(name).length > 0) {
+            delete s.aavegotchiNamesUsed[LibAavegotchi.validateAndLowerName(name)];
+        }
         delete s.aavegotchis[_tokenId];
     }
 }

@@ -157,14 +157,14 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 listingId = s.nextERC721ListingId;
 
         uint256 category = getERC721Category(_erc721TokenAddress, _erc721TokenId);
-        require(category != 1, "ERC721Marketplace: Cannot list a portal that is pending VRF");
+        require(category != LibAavegotchi.STATUS_VRF_PENDING, "ERC721Marketplace: Cannot list a portal that is pending VRF");
 
         uint256 oldListingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][owner];
         if (oldListingId != 0) {
             LibERC721Marketplace.cancelERC721Listing(oldListingId, owner);
         }
         s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][owner] = listingId;
-        s.erc721Listings[listingId] = ERC721Listing({ 
+        s.erc721Listings[listingId] = ERC721Listing({
             listingId: listingId,
             seller: owner,
             erc721TokenAddress: _erc721TokenAddress,

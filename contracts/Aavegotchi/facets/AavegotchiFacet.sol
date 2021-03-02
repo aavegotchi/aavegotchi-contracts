@@ -192,15 +192,15 @@ contract AavegotchiFacet {
         emit LibERC721.ApprovalForAll(LibMeta.msgSender(), _operator, _approved);
     }
 
-    function name() external pure returns (string memory) {
+    function name() external view returns (string memory) {
         // return "Aavegotchi";
-        return "ERC20testing";
+        return s.name;
     }
 
     /// @notice An abbreviated name for NFTs in this contract
-    function symbol() external pure returns (string memory) {
+    function symbol() external view returns (string memory) {
         //return "GOTCHI";
-        return "ERC20Testing";
+        return s.symbol;
     }
 
     /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
