@@ -2,11 +2,14 @@
 
 async function main () {
   const aavegotchiDiamondAddress = ''
-  const hauntSize = 100
+  const hauntSize = 10000
   const price = ethers.utils.parseEther('100')
   const daoFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamondAddress)
   const tx = await daoFacet.createHaunt(hauntSize, price, '0x000000')
   const receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error creating haunt: ${tx.hash}`)
+  }
   console.log('Haunt created:', tx.hash)
 }
 

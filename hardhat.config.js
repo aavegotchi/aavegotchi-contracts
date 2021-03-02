@@ -29,6 +29,7 @@ module.exports = {
     matic: {
       url: 'https://rpc-mainnet.matic.network',
       accounts: [process.env.SECRET],
+      // accounts: [process.env.PERSONALSECRET2],
       blockGasLimit: 20000000,
       gasPrice: 1000000000
     },
