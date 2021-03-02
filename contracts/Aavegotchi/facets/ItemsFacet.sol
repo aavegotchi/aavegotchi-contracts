@@ -255,7 +255,7 @@ contract ItemsFacet is Modifiers {
             //Increase kinship
             if (itemType.kinshipBonus > 0) {
                 uint256 kinship = (uint256(int256(itemType.kinshipBonus)) * quantity) + s.aavegotchis[_tokenId].interactionCount;
-                s.aavegotchis[_tokenId].interactionCount = uint16(kinship);
+                s.aavegotchis[_tokenId].interactionCount = kinship;
             } else if (itemType.kinshipBonus < 0) {
                 uint256 kinshipBonus = LibAppStorage.abs(itemType.kinshipBonus) * quantity;
                 if (s.aavegotchis[_tokenId].interactionCount > kinshipBonus) {
@@ -284,11 +284,10 @@ contract ItemsFacet is Modifiers {
             //Increase experience
             if (itemType.experienceBonus > 0) {
                 uint256 experience = (uint256(itemType.experienceBonus) * quantity) + s.aavegotchis[_tokenId].experience;
-                require(experience <= type(uint32).max, "ItemsFacet: Experience beyond max value");
-                s.aavegotchis[_tokenId].experience = uint32(experience);
+                s.aavegotchis[_tokenId].experience = experience;
             }
 
-            itemType.totalQuantity -= uint32(quantity);
+            itemType.totalQuantity -= quantity;
             LibAavegotchi.interact(_tokenId);
             LibERC1155Marketplace.updateERC1155Listing(address(this), itemId, sender);
         }

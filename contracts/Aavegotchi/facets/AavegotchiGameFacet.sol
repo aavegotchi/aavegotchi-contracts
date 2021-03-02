@@ -46,7 +46,7 @@ contract AavegotchiGameFacet is Modifiers {
         available_ = s.aavegotchiNamesUsed[LibAavegotchi.validateAndLowerName(_name)];
     }
 
-    function currentHaunt() external view returns (uint16 hauntId_, Haunt memory haunt_) {
+    function currentHaunt() external view returns (uint256 hauntId_, Haunt memory haunt_) {
         hauntId_ = s.currentHauntId;
         haunt_ = s.haunts[hauntId_];
     }
@@ -86,11 +86,11 @@ contract AavegotchiGameFacet is Modifiers {
         return skillPoints - usedSkillPoints;
     }
 
-    function aavegotchiLevel(uint32 _experience) external pure returns (uint256 level_) {
+    function aavegotchiLevel(uint256 _experience) external pure returns (uint256 level_) {
         level_ = LibAavegotchi.aavegotchiLevel(_experience);
     }
 
-    function xpUntilNextLevel(uint32 _experience) external pure returns (uint256 requiredXp_) {
+    function xpUntilNextLevel(uint256 _experience) external pure returns (uint256 requiredXp_) {
         requiredXp_ = LibAavegotchi.xpUntilNextLevel(_experience);
     }
 
@@ -184,7 +184,7 @@ contract AavegotchiGameFacet is Modifiers {
         // handles underflow
         require(availableSkillPoints(_tokenId) >= totalUsed, "AavegotchiGameFacet: Not enough skill points");
         //Increment used skill points
-        s.aavegotchis[_tokenId].usedSkillPoints += uint16(totalUsed);
+        s.aavegotchis[_tokenId].usedSkillPoints += totalUsed;
         emit SpendSkillpoints(_tokenId, _values);
     }
 }

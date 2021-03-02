@@ -15,10 +15,10 @@ contract DAOFacet is Modifiers {
     event AddCollateralType(AavegotchiCollateralTypeIO _collateralType);
     event AddItemType(ItemType _itemType);
     event CreateHaunt(uint256 indexed _hauntId, uint256 _hauntMaxSize, uint256 _portalPrice, bytes32 _bodyColor);
-    event GrantExperience(uint256[] _tokenIds, uint32[] _xpValues);
+    event GrantExperience(uint256[] _tokenIds, uint256[] _xpValues);
     event AddWearableSet(WearableSet _wearableSet);
     event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
-    event ItemTypeMaxQuantity(uint256[] _itemIds, uint32[] _maxQuanities);
+    event ItemTypeMaxQuantity(uint256[] _itemIds, uint256[] _maxQuanities);
 
     /***********************************|
    |             Read Functions         |
@@ -58,11 +58,11 @@ contract DAOFacet is Modifiers {
         s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
     }
 
-    function updateItemTypeMaxQuantity(uint256[] calldata _itemIds, uint32[] calldata _maxQuantities) external onlyOwnerOrDaoOrGameManager {
+    function updateItemTypeMaxQuantity(uint256[] calldata _itemIds, uint256[] calldata _maxQuantities) external onlyOwnerOrDaoOrGameManager {
         require(_itemIds.length == _maxQuantities.length, "DAOFacet: _itemIds length not the same as _newQuantities length");
         for (uint256 i; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
-            uint32 maxQuantity = _maxQuantities[i];
+            uint256 maxQuantity = _maxQuantities[i];
             require(maxQuantity >= s.itemTypes[itemId].totalQuantity, "DAOFacet: maxQuantity is greater than existing quantity");
             s.itemTypes[itemId].maxQuantity = maxQuantity;
         }
@@ -105,17 +105,17 @@ contract DAOFacet is Modifiers {
             require(totalQuantity <= s.itemTypes[itemId].maxQuantity, "DAOFacet: Total item type quantity exceeds max quantity");
 
             LibItems.addToOwner(_to, itemId, quantity);
-            s.itemTypes[itemId].totalQuantity = uint32(totalQuantity);
+            s.itemTypes[itemId].totalQuantity = totalQuantity;
         }
         emit LibERC1155.TransferBatch(sender, address(0), _to, _itemIds, _quantities);
         LibERC1155.onERC1155BatchReceived(sender, address(0), _to, _itemIds, _quantities, "");
     }
 
-    function grantExperience(uint256[] calldata _tokenIds, uint32[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {
+    function grantExperience(uint256[] calldata _tokenIds, uint256[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {
         require(_tokenIds.length == _xpValues.length, "DAOFacet: IDs must match XP array length");
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
-            uint32 xp = _xpValues[i];
+            uint256 xp = _xpValues[i];
             require(xp <= 1000, "DAOFacet: Cannot grant more than 1000 XP at a time");
 
             //To test (Dan): Deal with overflow here? - Handling it just in case

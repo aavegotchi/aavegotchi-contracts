@@ -110,7 +110,7 @@ library LibAavegotchi {
         singlePortalAavegotchiTraits_.collateralType = collateralType;
 
         AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
-        uint16 conversionRate = collateralInfo.conversionRate;
+        uint256 conversionRate = collateralInfo.conversionRate;
 
         //Get rarity multiplier
         uint256 multiplier = rarityMultiplier(singlePortalAavegotchiTraits_.numericTraits);

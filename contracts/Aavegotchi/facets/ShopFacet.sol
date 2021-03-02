@@ -88,7 +88,7 @@ contract ShopFacet {
             require(itemType.canPurchaseWithGhst, "ShopFacet: Can't purchase item type with GHST");
             uint256 totalQuantity = itemType.totalQuantity + quantity;
             require(totalQuantity <= itemType.maxQuantity, "ShopFacet: Total item type quantity exceeds max quantity");
-            itemType.totalQuantity = uint32(totalQuantity);
+            itemType.totalQuantity = totalQuantity;
             totalPrice += quantity * itemType.ghstPrice;
             LibItems.addToOwner(_to, itemId, quantity);
         }
