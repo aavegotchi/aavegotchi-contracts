@@ -11,9 +11,7 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 contract DAOFacet is Modifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
     event DaoTreasuryTransferred(address indexed previousDaoTreasury, address indexed newDaoTreasury);
-    event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
     event UpdateCollateralModifiers(int16[NUMERIC_TRAITS_NUM] _oldModifiers, int16[NUMERIC_TRAITS_NUM] _newModifiers);
-
     event AddCollateralType(AavegotchiCollateralTypeIO _collateralType);
     event AddItemType(ItemType _itemType);
     event CreateHaunt(uint256 indexed _hauntId, uint256 _hauntMaxSize, uint256 _portalPrice, bytes32 _bodyColor);
@@ -149,7 +147,7 @@ contract DAOFacet is Modifiers {
             s.erc1155Categories[address(this)][itemId] = _itemTypes[i].category;
             s.itemTypes.push(_itemTypes[i]);
             emit AddItemType(_itemTypes[i]);
-            emit TransferSingle(LibMeta.msgSender(), address(0), address(0), itemId, 0);
+            emit LibERC1155.TransferSingle(LibMeta.msgSender(), address(0), address(0), itemId, 0);
         }
     }
 

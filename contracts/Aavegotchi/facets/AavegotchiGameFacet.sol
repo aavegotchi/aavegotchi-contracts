@@ -11,6 +11,8 @@ import {
     PORTAL_AAVEGOTCHIS_NUM
 } from "../libraries/LibAavegotchi.sol";
 
+import {LibAppStorage} from "../libraries/LibAppStorage.sol";
+
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {Modifiers, Haunt, Aavegotchi} from "../libraries/LibAppStorage.sol";
@@ -35,7 +37,7 @@ contract AavegotchiGameFacet is Modifiers {
 
     event SetBatchId(uint256 indexed _batchId, uint256[] tokenIds);
 
-    event SpendSkillpoints(uint256 indexed _tokenId, int8[4] _values);
+    event SpendSkillpoints(uint256 indexed _tokenId, int16[4] _values);
 
     event LockAavegotchi(uint256 indexed _tokenId, uint256 _time);
     event UnLockAavegotchi(uint256 indexed _tokenId, uint256 _time);
@@ -82,11 +84,6 @@ contract AavegotchiGameFacet is Modifiers {
         uint256 usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
         require(skillPoints >= usedSkillPoints, "AavegotchiGameFacet: Used skill points is greater than skill points");
         return skillPoints - usedSkillPoints;
-    }
-
-    function abs(int8 x) private pure returns (uint256) {
-        require(x != -128, "AavegotchiGameFacet: x can't be -128");
-        return uint256(int256(x >= 0 ? x : -x));
     }
 
     function aavegotchiLevel(uint32 _experience) external pure returns (uint256 level_) {
@@ -176,11 +173,11 @@ contract AavegotchiGameFacet is Modifiers {
         }
     }
 
-    function spendSkillPoints(uint256 _tokenId, int8[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function spendSkillPoints(uint256 _tokenId, int16[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         //To test (Dan): Prevent underflow (is this ok?), see require below
         uint256 totalUsed;
         for (uint256 index; index < _values.length; index++) {
-            totalUsed += abs(_values[index]);
+            totalUsed += LibAppStorage.abs(_values[index]);
 
             s.aavegotchis[_tokenId].numericTraits[index] += _values[index];
         }

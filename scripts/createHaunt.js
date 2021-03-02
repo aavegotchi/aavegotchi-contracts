@@ -1,9 +1,9 @@
 /* global ethers hre */
 
 async function main () {
-  const aavegotchiDiamondAddress = '0x228625D0d69a4399eB4DD40519731E96B9d4bc64'
+  const aavegotchiDiamondAddress = ''
   const hauntSize = 100
-  const price = ethers.utils.parseEther('0.0000000001')
+  const price = ethers.utils.parseEther('100')
   const daoFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamondAddress)
   const tx = await daoFacet.createHaunt(hauntSize, price, '0x000000')
   const receipt = await tx.wait()

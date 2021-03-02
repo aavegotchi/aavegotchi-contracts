@@ -29,14 +29,6 @@ contract ItemsFacet is Modifiers {
     event EquipWearables(uint256 indexed _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] _oldWearables, uint16[EQUIPPED_WEARABLE_SLOTS] _newWearables);
     event UseConsumables(uint256 indexed _tokenId, uint256[] _itemIds, uint256[] _quantities);
 
-    uint16 internal constant SLOT_BODY = 0;
-    uint16 internal constant SLOT_FACE = 1;
-    uint16 internal constant SLOT_EYES = 2;
-    uint16 internal constant SLOT_HEAD = 3;
-    uint16 internal constant SLOT_HAND_LEFT = 4;
-    uint16 internal constant SLOT_HAND_RIGHT = 5;
-    uint16 internal constant SLOT_PET = 6;
-
     /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -220,7 +212,6 @@ contract ItemsFacet is Modifiers {
 
             //Then check if this wearable is in the Aavegotchis inventory
             uint256 nftBalance = s.nftItemBalances[address(this)][_tokenId][wearableId];
-            //To do (Nick) prevent wearable from being equipped twice in the same transaction
             uint256 neededBalance = 1;
             if (slot == LibItems.WEARABLE_SLOT_HAND_LEFT) {
                 if (_equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT] == wearableId) {
@@ -261,12 +252,19 @@ contract ItemsFacet is Modifiers {
 
             LibItems.removeFromOwner(sender, itemId, quantity);
 
-            //Increase kinship permanently
+            //Increase kinship
             if (itemType.kinshipBonus > 0) {
                 uint256 kinship = (uint256(int256(itemType.kinshipBonus)) * quantity) + s.aavegotchis[_tokenId].interactionCount;
-                require(kinship <= type(uint16).max, "ItemsFacet: kinship beyond max value");
                 s.aavegotchis[_tokenId].interactionCount = uint16(kinship);
+            } else if (itemType.kinshipBonus < 0) {
+                uint256 kinshipBonus = LibAppStorage.abs(itemType.kinshipBonus) * quantity;
+                if (s.aavegotchis[_tokenId].interactionCount > kinshipBonus) {
+                    s.aavegotchis[_tokenId].interactionCount -= kinshipBonus;
+                } else {
+                    s.aavegotchis[_tokenId].interactionCount = 0;
+                }
             }
+
             {
                 // prevent stack too deep error with braces here
                 //Boost traits and reset clock

@@ -63,7 +63,7 @@ struct ItemType {
     uint16 minLevel; //The minimum Aavegotchi level required to use this item. Default is 1.
     bool canBeTransferred;
     uint8 category; // 0 is wearable, 1 is badge, 2 is consumable
-    int8 kinshipBonus; //[CONSUMABLE ONLY] How much this consumable boosts (or reduces) kinship score
+    int16 kinshipBonus; //[CONSUMABLE ONLY] How much this consumable boosts (or reduces) kinship score
     uint32 experienceBonus; //[CONSUMABLE ONLY]
 }
 
@@ -219,6 +219,10 @@ library LibAppStorage {
         assembly {
             ds.slot := 0
         }
+    }
+
+    function abs(int256 x) internal pure returns (uint256) {
+        return uint256(x >= 0 ? x : -x);
     }
 }
 
