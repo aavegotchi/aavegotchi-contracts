@@ -306,7 +306,6 @@ describe("LibAavegotchi", () => {
             expect(ethers.utils.formatEther(`${await Ghost.balanceOf(config.burnAddress)}`)).to.equal(expectedBurnShare)
 
         })
-
     })
 
     describe("sqrt", () => {

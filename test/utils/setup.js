@@ -25,9 +25,9 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
     const fee = ethers.utils.parseEther('0.0001')
     const vrfCoordinator = account;
     const linkAddress = LinkToken.address
-    const initialHauntSize = '100'
-    const portalPrice = ethers.utils.parseEther('100')
     const childChainManager = account
+    const name = ''
+    const symbol = ''
 
 
     const Ghost = await deployContract("GHSTFacet");
@@ -37,7 +37,7 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
     const ghstTokenContract = await ethers.getContractAt('GHSTFacet', GhostDiamond.address)
     await ghstTokenContract.mint();
 
-    const args = [
+    const args = [[
         dao, 
         daoTreasury, 
         pixelCraft, 
@@ -47,14 +47,14 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
         fee, 
         vrfCoordinator, 
         linkAddress, 
-        initialHauntSize, 
-        portalPrice, 
-        childChainManager
+        childChainManager,
+        name,
+        symbol
     
-    ]
+    ]]
     
     const aavegotchiDiamond = await _deployDiamond(facets, 'contracts/Aavegotchi/InitDiamond.sol:InitDiamond', args, account, {});
-
+    
     const DAOFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamond.address)
 
     await DAOFacet.addCollateralTypes(getCollaterals("hardhat", Ghost.address))
