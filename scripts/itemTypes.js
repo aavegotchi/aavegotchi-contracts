@@ -1479,7 +1479,7 @@ const itemTypes = [
   },
   {
     svgId: 61,
-    name: 'Legendary Wizard Hat ',
+    name: 'Legendary Wizard Hat',
     setId: [26, 30],
     author: 'Xibot',
     description: '',
@@ -1503,7 +1503,7 @@ const itemTypes = [
   },
   {
     svgId: 62,
-    name: 'Mythical Wizard Hat ',
+    name: 'Mythical Wizard Hat',
     setId: [27, 31],
     author: 'Xibot',
     description: '',
@@ -1527,7 +1527,7 @@ const itemTypes = [
   },
   {
     svgId: 63,
-    name: 'Godlike Wizard Hat ',
+    name: 'Godlike Wizard Hat',
     setId: [28, 32],
     author: 'Xibot',
     description: '',
@@ -1695,7 +1695,7 @@ const itemTypes = [
   },
   {
     svgId: 70,
-    name: 'Handsaw ',
+    name: 'Handsaw',
     setId: [34],
     author: 'Cryptofluffycat',
     description: '',
@@ -2079,7 +2079,7 @@ const itemTypes = [
   },
   {
     svgId: 86,
-    name: 'Monocle ',
+    name: 'Monocle',
     setId: [41],
     author: 'Xibot',
     description: '',
@@ -2151,7 +2151,7 @@ const itemTypes = [
   },
   {
     svgId: 89,
-    name: 'Pickaxe ',
+    name: 'Pickaxe',
     setId: [42, 65],
     author: 'Xibot',
     description: '',
