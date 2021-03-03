@@ -51,4 +51,8 @@ contract LibAavegotchiTestFacet {
     function t_validateAndLowerName(string memory _name) public pure returns (string memory) {
         return LibAavegotchi.validateAndLowerName(_name);
     }
+
+    function t_verify(uint256 _tokenId) public pure {
+       return LibAavegotchi.verify(_tokenId);
+    }
 }

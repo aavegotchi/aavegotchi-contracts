@@ -57,7 +57,11 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
     
     const DAOFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamond.address)
 
-    await DAOFacet.addCollateralTypes(getCollaterals("hardhat", Ghost.address))
+    const initialHauntSize = '10000'
+    const portalPrice = ethers.utils.parseEther('100')
+    await DAOFacet.createHaunt(initialHauntSize, portalPrice, '0x000000')
+
+    await DAOFacet.addCollateralTypes(getCollaterals("hardhat", ghstTokenContract.address))
     
     // This takes a while and causes tests to time out
     // await DAOFacet.addItemTypes(itemTypes.slice(0, itemTypes.length / 3))
@@ -75,6 +79,7 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
     
     const diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', aavegotchiDiamond.address)
     const vrfFacet = await ethers.getContractAt('VrfFacet', aavegotchiDiamond.address)
+    const vrfTestFacet = await ethers.getContractAt('VrfTestFacet', aavegotchiDiamond.address)
     const aavegotchiFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamond.address)
     const aavegotchiGameFacet = await ethers.getContractAt('AavegotchiGameFacet', aavegotchiDiamond.address)
     const collateralFacet = await ethers.getContractAt('CollateralFacet', aavegotchiDiamond.address)
@@ -105,6 +110,7 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
         aavegotchiGameFacet: aavegotchiGameFacet,
         collateralFacet: collateralFacet,
         vrfFacet: vrfFacet,
+        vrfTestFacet,
         daoFacet: daoFacet,
         // svgFacet: svgFacet,
         erc1155MarketplaceFacet: erc1155MarketplaceFacet,
@@ -133,7 +139,8 @@ const { eyeShapeSvgs } = require('../../svgs/eyeShapes.js')
         'MetaTransactionsFacet',
         'ERC1155MarketplaceFacet',
         'ERC721MarketplaceFacet',
-        'LibAavegotchiTestFacet'
+        'LibAavegotchiTestFacet',
+        'VrfTestFacet'
     ]
 
     const facets = await deployContracts(facetNames)

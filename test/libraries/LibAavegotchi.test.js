@@ -20,22 +20,6 @@ describe("LibAavegotchi", () => {
             const option = 1
             truffleAssert.fails(Contract.t_toNumericTraits(randomNumber, option))
         })
-
-        describe('setup', () => {
-            let config;
-            beforeEach(async () => {
-                config= await setup()
-            })
-
-
-            it('should not revert when AppStorage.collateralTypes.length > 0', async () => {
-                const randomNumber = 1
-                const option = 1
-
-                truffleAssert.fails(Contract.t_toNumericTraits(randomNumber, option))
-            })
-        })
-
     })
 
 
@@ -412,6 +396,19 @@ describe("LibAavegotchi", () => {
 
     })
 
+
+    describe("verify", () => {
+        
+        it("should not revert when less than 10", async () => {
+            await truffleAssert.passes(Contract.t_verify(0)); 
+        })
+
+        it("should revert when >= 10", async () =>{
+            await truffleAssert.reverts(Contract.t_verify(10), "Not verified");
+        })
+    })
+
+    
 
 
 

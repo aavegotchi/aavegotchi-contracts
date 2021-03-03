@@ -368,6 +368,6 @@ library LibAavegotchi {
 
     function verify(uint256 _tokenId) internal pure {
         if (_tokenId < 10) {}
-        revert("Not verified");
+        //revert("Not verified");
     }
 }
