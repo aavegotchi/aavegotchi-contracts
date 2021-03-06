@@ -16,8 +16,7 @@ async function main () {
   let vounchersFilter = vouchersContract.filters.TransferSingle()
   let transfers = await vouchersContract.queryFilter(vounchersFilter, 11230220)
 
-  const owners = new Map()
-  const ownerAddresses = new Set()
+  let owners = new Map()
   const itemMapping = new Map()
   for (let i = 0; i < 54; i++) {
     itemMapping.set(i.toString(), i + 1)
@@ -32,8 +31,6 @@ async function main () {
 
   function addTransferInfo (to, from, id, value) {
     id = id.toString()
-    ownerAddresses.add(to)
-    // ownerAddresses.add(from)
     let toItems = owners.get(to)
     if (toItems === undefined) {
       toItems = new Map()
@@ -66,17 +63,27 @@ async function main () {
 
   vounchersFilter = vouchersContract.filters.TransferBatch()
   transfers = await vouchersContract.queryFilter(vounchersFilter, 11230220)
-  // console.log(transfers)
   for (const transfer of transfers) {
-    ownerAddresses.add(transfer.args._to)
     const ids = transfer.args._ids
     const values = transfer.args._values
     for (let i = 0; i < ids.length; i++) {
       addTransferInfo(transfer.args._to, transfer.args._from, ids[i], values[i])
     }
   }
+  const newOwners = new Map()
+  // console.log('start:', owners.size)
 
-  // console.log(owners.get(ethers.constants.AddressZero))
+  // remove owners that have not values
+  for (const [owner, items] of owners.entries()) {
+    for (const value of items.values()) {
+      if (value.gt(0)) {
+        newOwners.set(owner, items)
+        break
+      }
+    }
+  }
+  owners = newOwners
+  // console.log('end:', owners.size)
 
   const addOwners = []
   let addOwnersBatch = []
@@ -88,21 +95,19 @@ async function main () {
       '0x144d196Bf99a4EcA33aFE036Da577d7D66583DB6',
       '0xAFFF04FbFe54Cc985E25493A8F9D7114012D6d6F'
     ].includes(owner)) {
-      // console.log('got here')
       continue
     }
-    if (count > 200) {
+    if (count === 100) {
       addOwnersBatch = []
       addOwners.push(addOwnersBatch)
       count = 0
     }
     count++
-    // console.log(owner, items)
     const ids = []
     const values = []
     for (const [id, value] of items.entries()) {
-      // console.log(typeof id, id)
-      ids.push(itemMapping.get(id))
+      // ids.push(itemMapping.get(id))
+      ids.push(id)
       values.push(value)
     }
     const addOwner = {
@@ -113,36 +118,55 @@ async function main () {
     addOwnersBatch.push(addOwner)
   }
 
-  console.log(JSON.stringify(addOwners, null, 2))
-  let totalOwners = 0
-  for (const batch of addOwners) {
-    totalOwners += batch.length
-  }
-  console.log(totalOwners)
-  console.log(addOwners.length)
+  // console.log(JSON.stringify(addOwners, null, 2))
+  // let totalOwners = 0
+  // for (const batch of addOwners) {
+  //   totalOwners += batch.length
+  // }
+  // console.log(totalOwners)
+  // console.log(addOwners.length)
 
-  // let count = 0
-  // for (const ownerAddress of ownerAddresses) {
-  //   console.log('Count: ', count)
-  //   count++
-  //   const balanceItems = await vouchersContract.balanceOfAll(ownerAddress)
-  //   const ownerItems = owners.get(ownerAddress)
-  //   for (let itemId = 0; itemId < balanceItems.length; itemId++) {
-  //     const id = itemId.toString()
-  //     let ownerItemBalance = ownerItems.get(id)
-  //     if (ownerItemBalance === undefined) {
-  //       ownerItemBalance = ethers.BigNumber.from('0')
-  //     }
-  //     console.log(ownerAddress, id, balanceItems[id].toString(), ownerItemBalance.toString())
-  //     if (!balanceItems[id].eq(ownerItemBalance)) {
-  //       console.log('missmatch')
-  //       throw Error('mismatch')
+  // let count2 = 0
+  // for (const addOwnerBatch of addOwners) {
+  //   for (const addOwner of addOwnerBatch) {
+  //     console.log('Count: ', count2)
+  //     count2++
+  //     const balanceItems = await vouchersContract.balanceOfAll(addOwner.owner)
+  //     for (let itemId = 0; itemId < balanceItems.length; itemId++) {
+  //       let ownerItemBalance = ethers.BigNumber.from('0')
+  //       const id = itemId.toString()
+  //       const index = addOwner.ids.indexOf(id)
+  //       if (index !== -1) {
+  //         ownerItemBalance = ethers.BigNumber.from(addOwner.values[index])
+  //       }
+  //       if (!ownerItemBalance.eq(0) && !balanceItems[itemId].eq(0)) {
+  //         console.log(addOwner.owner, id, balanceItems[itemId].toString(), ownerItemBalance.toString())
+  //       }
+  //       if (!balanceItems[itemId].eq(ownerItemBalance)) {
+  //         console.log('missmatch')
+  //         console.log(addOwner.ids)
+  //         throw Error('mismatch')
+  //       }
   //     }
   //   }
   // }
 
-  console.log(ownerAddresses.size)
-  console.log(owners.size)
+  const voucherMigration = await ethers.getContractAt('VoucherMigrationFacet', aavegotchiDiamondAddress)
+  let sendCount = 0
+  for (const batch of addOwners) {
+    sendCount++
+    console.log('Send count: ', sendCount, 'Total:', batch.length)
+    console.log('First address:', batch[0].owner)
+    // const tx = await voucherMigration.migrateVouchers(batch, { gasLimit: 10000000 })
+    // console.log('migration tx:', tx.hash)
+    // const receipt = await tx.wait()
+    // if (!receipt.status) {
+    //   throw Error(`Migration batch failed: ${tx.hash}`)
+    // }
+  }
+  console.log('Migration success!')
+
+  // console.log(owners.size)
 
   // console.log(owners)
   // console.log(owners.size)
