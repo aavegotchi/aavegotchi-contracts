@@ -177,16 +177,6 @@ contract SvgFacet is Modifiers {
 
     function getWearableClass(uint256 _slotPosition) internal pure returns (string memory className_) {
         //Wearables
-        /*
-    uint8 internal constant WEARABLE_SLOT_BODY = 0;
-    uint8 internal constant WEARABLE_SLOT_FACE = 1;
-    uint8 internal constant WEARABLE_SLOT_EYES = 2;
-    uint8 internal constant WEARABLE_SLOT_HEAD = 3;
-    uint8 internal constant WEARABLE_SLOT_HAND_LEFT = 4;
-    uint8 internal constant WEARABLE_SLOT_HAND_RIGHT = 5;
-    uint8 internal constant WEARABLE_SLOT_PET = 6;
-    uint8 internal constant WEARABLE_SLOT_BG = 7;
-    */
 
         if (_slotPosition == LibItems.WEARABLE_SLOT_BODY) className_ = "wearable-body";
         if (_slotPosition == LibItems.WEARABLE_SLOT_FACE) className_ = "wearable-face";

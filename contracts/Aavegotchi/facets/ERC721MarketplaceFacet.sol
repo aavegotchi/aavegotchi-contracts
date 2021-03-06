@@ -134,7 +134,7 @@ contract ERC721MarketplaceFacet is Modifiers {
 
     function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view returns (uint256 category_) {
         require(_erc721TokenAddress == address(this), "ERC721Marketplace: ERC721 category does not exist");
-        category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi
+        category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
     }
 
     function addERC721Listing(

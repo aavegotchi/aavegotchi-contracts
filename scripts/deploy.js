@@ -52,10 +52,11 @@ async function main (scriptName) {
   let rarityFarming
   let pixelCraft
   let childChainManager
+  const gasLimit = 12300000
 
   const portalPrice = ethers.utils.parseEther('100')
-  const name = ''
-  const symbol = ''
+  const name = 'Aavegotchi'
+  const symbol = 'GOTCHI'
   if (hre.network.name === 'hardhat') {
     childChainManager = account
     const LinkTokenMock = await ethers.getContractFactory('LinkTokenMock')
@@ -268,20 +269,35 @@ async function main (scriptName) {
 
   const { itemTypes } = require('./itemTypes.js')
 
-  tx = await daoFacet.addItemTypes(itemTypes.slice(0, itemTypes.length / 3))
+  tx = await daoFacet.addItemTypes(itemTypes.slice(0, itemTypes.length / 4), { gasLimit: gasLimit })
   receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
   console.log('Adding Item Types gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-  tx = await daoFacet.addItemTypes(itemTypes.slice(itemTypes.length / 3, (itemTypes.length / 3) * 2))
+  tx = await daoFacet.addItemTypes(itemTypes.slice(itemTypes.length / 4, (itemTypes.length / 4) * 2), { gasLimit: gasLimit })
   receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
   console.log('Adding Item Types gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-  tx = await daoFacet.addItemTypes(itemTypes.slice((itemTypes.length / 3) * 2))
+  tx = await daoFacet.addItemTypes(itemTypes.slice((itemTypes.length / 4) * 2, (itemTypes.length / 4) * 3), { gasLimit: gasLimit })
   receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
   console.log('Adding Item Types gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  tx = await daoFacet.addItemTypes(itemTypes.slice((itemTypes.length / 4) * 3), { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
 
   // add wearable types info
   console.log('Adding Wearable Sets')

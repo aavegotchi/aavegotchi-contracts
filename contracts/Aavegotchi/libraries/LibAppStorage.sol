@@ -11,6 +11,20 @@ uint256 constant NUMERIC_TRAITS_NUM = 6;
 uint256 constant TRAIT_BONUSES_NUM = 5;
 uint256 constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
+//  switch (traitType) {
+//         case 0:
+//             return energy(value);
+//         case 1:
+//             return aggressiveness(value);
+//         case 2:
+//             return spookiness(value);
+//         case 3:
+//             return brain(value);
+//         case 4:
+//             return eyeShape(value);
+//         case 5:
+//             return eyeColor(value);
+
 struct Aavegotchi {
     uint16[EQUIPPED_WEARABLE_SLOTS] equippedWearables; //The currently equipped wearables of the Aavegotchi
     // [Experience, Rarity Score, Kinship, Eye Color, Eye Shape, Brain Size, Spookiness, Aggressiveness, Energy]
