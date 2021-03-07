@@ -7,7 +7,7 @@ import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketplace.sol";
-import {Modifiers} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
 
 // import "hardhat/console.sol";
 
@@ -245,5 +245,17 @@ contract ERC721MarketplaceFacet is Modifiers {
         address _owner
     ) external {
         LibERC721Marketplace.updateERC721Listing(_erc721TokenAddress, _erc721TokenId, _owner);
+    }
+
+    function cancelERC721Listings(uint256[] calldata _listingIds) external onlyOwner {
+        for (uint256 i; i < _listingIds.length; i++) {
+            uint256 listingId = _listingIds[i];
+            ListingListItem storage listingItem = s.erc721ListingListItem[listingId];
+            require(listingItem.listingId != 0, "ERC721Marketplace: listingId does not exist");
+            ERC721Listing storage listing = s.erc721Listings[listingId];
+            listing.cancelled = true;
+            emit LibERC721Marketplace.ERC721ListingCancelled(listingId, listing.category, block.number);
+            LibERC721Marketplace.removeERC721ListingItem(listingId, listing.seller);
+        }
     }
 }

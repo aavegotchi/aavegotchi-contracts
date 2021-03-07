@@ -127,7 +127,7 @@ library LibERC721Marketplace {
             return;
         }
         ERC721Listing storage listing = s.erc721Listings[listingId];
-        if (listing.timePurchased == 0 || listing.cancelled == true) {
+        if (listing.timePurchased != 0 || listing.cancelled == true) {
             return;
         }
         address owner = IERC721(listing.erc721TokenAddress).ownerOf(listing.erc721TokenId);

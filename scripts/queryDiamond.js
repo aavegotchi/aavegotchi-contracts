@@ -3,11 +3,20 @@
 async function main () {
   const diamondCreationBlock = 11516320
   const aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
+  let diamond
+  // diamond = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamondAddress)
+  // const result = await diamond.getAavegotchi(805)
 
-  diamond = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamondAddress)
-  const result = await diamond.getAavegotchi(805)
-
+  diamond = await ethers.getContractAt('ERC721MarketplaceFacet', aavegotchiDiamondAddress)
+  const result = await diamond.getAavegotchiListing(2038)
   console.log(result)
+
+  // console.log(result)
+
+  // diamond = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamondAddress)
+  // const result = await diamond.getAavegotchi(805)
+
+  // console.log(result)
 
   // const diamond = await ethers.getContractAt('AavegotchiGameFacet', aavegotchiDiamondAddress)
   // const filter = diamond.filters.SetAavegotchiName()
