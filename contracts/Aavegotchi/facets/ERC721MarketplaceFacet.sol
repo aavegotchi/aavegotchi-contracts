@@ -18,6 +18,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         address erc721TokenAddress,
         uint256 erc721TokenId,
         uint256 indexed category,
+        uint256 priceInWei,
         uint256 time
     );
 
@@ -177,7 +178,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         });
 
         LibERC721Marketplace.addERC721ListingItem(owner, category, "listed", listingId);
-        emit ERC721ListingAdd(listingId, owner, _erc721TokenAddress, _erc721TokenId, category, _priceInWei);
+        emit ERC721ListingAdd(listingId, owner, _erc721TokenAddress, _erc721TokenId, category, _priceInWei, block.timestamp);
         s.aavegotchis[_erc721TokenId].locked = true;
         // Check if there's a publication fee and
         // transfer the amount to burn address
