@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {Modifiers} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
 import {LibERC1155Marketplace, ERC1155Listing} from "../libraries/LibERC1155Marketplace.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
@@ -174,6 +174,8 @@ contract ERC1155MarketplaceFacet is Modifiers {
         ERC1155Listing storage listing = s.erc1155Listings[_listingId];
         require(_priceInWei == listing.priceInWei, "ERC1155Marketplace: wrong price or price changed");
         require(listing.timeCreated != 0, "ERC1155Marketplace: listing not found");
+        require(listing.sold == false, "ERC1155Marketplace: listing is sold out");
+        require(listing.cancelled == false, "ERC1155Marketplace: listing is cancelled");
         address buyer = LibMeta.msgSender();
         address seller = listing.seller;
         require(seller != buyer, "ERC1155Marketplace: buyer can't be seller");
@@ -252,6 +254,20 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ) external {
         for (uint256 i; i < _erc1155TypeIds.length; i++) {
             LibERC1155Marketplace.updateERC1155Listing(_erc1155TokenAddress, _erc1155TypeIds[i], _owner);
+        }
+    }
+
+    function cancelERC1155Listings(uint256[] calldata _listingIds) external onlyOwner {
+        for (uint256 i; i < _listingIds.length; i++) {
+            uint256 listingId = _listingIds[i];
+
+            ERC1155Listing storage listing = s.erc1155Listings[listingId];
+            if (listing.cancelled == true || listing.sold == true) {
+                return;
+            }
+            listing.cancelled = true;
+            emit LibERC1155Marketplace.ERC1155ListingCancelled(listingId, listing.category, block.number);
+            LibERC1155Marketplace.removeERC1155ListingItem(listingId, listing.seller);
         }
     }
 }
