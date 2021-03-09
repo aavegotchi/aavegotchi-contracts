@@ -157,6 +157,7 @@ async function main () {
     sendCount++
     console.log('Send count: ', sendCount, 'Total:', batch.length)
     console.log('First address:', batch[0].owner)
+    // console.log(batch)
     // const tx = await voucherMigration.migrateVouchers(batch, { gasLimit: 10000000 })
     // console.log('migration tx:', tx.hash)
     // const receipt = await tx.wait()
