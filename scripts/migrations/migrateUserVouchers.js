@@ -106,8 +106,8 @@ async function main () {
     const ids = []
     const values = []
     for (const [id, value] of items.entries()) {
-      // ids.push(itemMapping.get(id))
-      ids.push(id)
+      ids.push(itemMapping.get(id))
+      // ids.push(id)
       values.push(value)
     }
     const addOwner = {
