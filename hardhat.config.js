@@ -27,10 +27,11 @@ module.exports = {
       gas: 'auto'
     },
     matic: {
-      url: 'https://rpc-mainnet.matic.network',
+      url: process.env.MATIC_URL,
       accounts: [process.env.SECRET],
       blockGasLimit: 20000000,
-      gasPrice: 1000000000
+      gasPrice: 1000000000,
+      timeout: 90000
     },
     mumbai: {
       url: 'https://rpc-mumbai.matic.today',

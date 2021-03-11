@@ -1,6 +1,8 @@
 /* global ethers hre */
 
-const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
+// const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
+// kovan
+const diamondAddress = '0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5'
 const newOwner = '0x94cb5C277FCC64C274Bd30847f0821077B231022'
 
 async function main (scriptName) {

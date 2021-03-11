@@ -19,20 +19,18 @@ contract VoucherMigrationFacet is Modifiers {
         address sender = LibMeta.msgSender();
         for (uint256 i; i < _vouchersOwners.length; i++) {
             address owner = _vouchersOwners[i].owner;
-            uint256[] calldata ids = _vouchersOwners[i].ids;
-            uint256[] calldata values = _vouchersOwners[i].values;
-            for (uint256 j; j < ids.length; j++) {
-                uint256 id = ids[j];
-                uint256 value = values[j];
+            for (uint256 j; j < _vouchersOwners[i].ids.length; j++) {
+                uint256 id = _vouchersOwners[i].ids[j];
+                uint256 value = _vouchersOwners[i].values[j];
                 ItemType storage itemType = s.itemTypes[id];
                 uint256 totalQuantity = itemType.totalQuantity + value;
                 require(totalQuantity <= itemType.maxQuantity, "ShopFacet: Total item type quantity exceeds max quantity");
                 itemType.totalQuantity = totalQuantity;
                 LibItems.addToOwner(owner, id, value);
             }
-            emit LibERC1155.TransferBatch(sender, address(0), owner, ids, values);
-            emit MigrateVouchers(owner, ids, values);
-            LibERC1155.onERC1155BatchReceived(sender, address(0), owner, ids, values, "");
+            emit LibERC1155.TransferBatch(sender, address(0), owner, _vouchersOwners[i].ids, _vouchersOwners[i].values);
+            emit MigrateVouchers(owner, _vouchersOwners[i].ids, _vouchersOwners[i].values);
+            LibERC1155.onERC1155BatchReceived(sender, address(0), owner, _vouchersOwners[i].ids, _vouchersOwners[i].values, "");
         }
     }
 }
