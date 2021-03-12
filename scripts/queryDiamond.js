@@ -4,28 +4,29 @@ async function main () {
   const diamondCreationBlock = 11516320
   const aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   let diamond
-  // diamond = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamondAddress)
-  // const result = await diamond.getAavegotchi(805)
+  diamond = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamondAddress)
+  const result = await diamond.getAavegotchi(7401)
+  console.log(result)
 
-  const erc1155Marketplace = await ethers.getContractAt('ERC1155MarketplaceFacet', aavegotchiDiamondAddress)
-  const itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', aavegotchiDiamondAddress)
-  for (let i = 0; i < 35000; i++) {
-    if (i % 100 === 0) {
-      console.log(i)
-    }
-    const result = await erc1155Marketplace.getERC1155Listing(i)
-    if (result.sold === false && result.cancelled === false) {
-      if (result.quantity.eq(0)) {
-        console.log('Open listing has quantity as 0. ListingId:', result.listingId.toString())
-      } else {
-        const amount = await itemsFacet.balanceOf(result.seller, result.erc1155TypeId)
-        if (result.quantity.gt(amount)) {
-          console.log('Open listing quantity greater than users balance. ListingId: ', result.listingId.toString())
-          console.log(result.quantity.toString(), ' and ', amount.toString())
-        }
-      }
-    }
-  }
+  // const erc1155Marketplace = await ethers.getContractAt('ERC1155MarketplaceFacet', aavegotchiDiamondAddress)
+  // const itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', aavegotchiDiamondAddress)
+  // for (let i = 0; i < 35000; i++) {
+  //   if (i % 100 === 0) {
+  //     console.log(i)
+  //   }
+  //   const result = await erc1155Marketplace.getERC1155Listing(i)
+  //   if (result.sold === false && result.cancelled === false) {
+  //     if (result.quantity.eq(0)) {
+  //       console.log('Open listing has quantity as 0. ListingId:', result.listingId.toString())
+  //     } else {
+  //       const amount = await itemsFacet.balanceOf(result.seller, result.erc1155TypeId)
+  //       if (result.quantity.gt(amount)) {
+  //         console.log('Open listing quantity greater than users balance. ListingId: ', result.listingId.toString())
+  //         console.log(result.quantity.toString(), ' and ', amount.toString())
+  //       }
+  //     }
+  //   }
+  // }
 
   // diamond = await ethers.getContractAt('ERC1155MarketplaceFacet', aavegotchiDiamondAddress)
   // let filter

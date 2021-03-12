@@ -97,6 +97,18 @@ contract ERC1155MarketplaceFacet is Modifiers {
         emit ChangedListingFee(s.listingFeeInWei);
     }
 
+    struct Category {
+        address erc1155TokenAddress;
+        uint256 erc1155TypeId;
+        uint256 category;
+    }
+
+    function setERC1155Categories(Category[] calldata _categories) external onlyOwner {
+        for (uint256 i; i < _categories.length; i++) {
+            s.erc1155Categories[_categories[i].erc1155TokenAddress][_categories[i].erc1155TypeId] = _categories[i].category;
+        }
+    }
+
     function getERC1155Category(address _erc1155TokenAddress, uint256 _erc1155TypeId) public view returns (uint256 category_) {
         category_ = s.erc1155Categories[_erc1155TokenAddress][_erc1155TypeId];
         if (category_ == 0) {

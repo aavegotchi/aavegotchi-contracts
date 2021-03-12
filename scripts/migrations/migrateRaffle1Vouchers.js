@@ -6,19 +6,13 @@ require('dotenv').config()
 
 async function main () {
   const aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
-  const voucherContractAddress = '0xe54891774EED9277236bac10d82788aee0Aed313'
-  const vouchersAbi = [
-    'event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value)',
-    'event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values)',
-    'function balanceOfAll(address _owner) external view returns (uint256[] memory balances_)'
-  ]
+  // const voucherContractAddress = '0xe54891774EED9277236bac10d82788aee0Aed313'
 
   const raffleAbi = [
     'function raffleSupply() external view returns (uint256 raffleSupply_)',
     'function getEntrants(uint256 _raffleId) external view returns (address[] memory entrants_)',
     'function getEntries(uint256 _raffleId, address _entrant) external view returns (tuple(address ticketAddress, uint256 ticketId, uint256 ticketQuantity, uint256 rangeStart, uint256 rangeEnd, uint256 raffleItemIndex, bool prizesClaimed)[] entries_)',
     'function getRaffles() external view returns (tuple(uint256 raffleId, uint256 raffleEnd, bool isOpen)[] raffles_)',
-    // 'function winners(uint256 _raffleId) external view returns (tuple(address entrant, bool claimed, uint256 userEntryIndex, uint256 raffleItemIndex, uint256 raffleItemPrizeIndex, uint256[] winningPrizeNumbers, uint256 prizeId)[] winners_)',
     'function winners(uint256 _raffleId, address[] memory _entrants) external view returns (tuple(address entrant, bool claimed, uint256 userEntryIndex, uint256 raffleItemIndex, uint256 raffleItemPrizeIndex, uint256[] winningPrizeNumbers, uint256 prizeId)[] winners_)',
     'function raffleInfo(uint256 _raffleId) external view returns (uint256 raffleEnd_, tuple(address ticketAddress, uint256 ticketId, tuple(address prizeAddress, uint256 prizeId, uint256 prizeQuantity)[] raffleItemPrizes)[] raffleItems_, uint256 randomNumber_)'
   ]
@@ -38,10 +32,17 @@ async function main () {
   const entrants = await raffle.getEntrants(raffleId)
   console.log((new Set(entrants)).size)
   console.log('Total entrants: ', entrants.length)
-  const outOfGas = ['0xCabdBFCf0aA88743D0552f4FAb6b7B8203A3cdE2']
+  const outOfGas = ['0xCabdBFCf0aA88743D0552f4FAb6b7B8203A3cdE2', '0x2c123fc5C27888571CD525e8ae9b0c5ff848386D']
   let count = 0
+  let start = false
   for (const entrant of entrants) {
     count++
+    if (entrant === '0x2c123fc5C27888571CD525e8ae9b0c5ff848386D') {
+      start = true
+    }
+    if (start === false) {
+      continue
+    }
     if (outOfGas.includes(entrant)) {
       continue
     }
@@ -51,18 +52,18 @@ async function main () {
       const ids = []
       const values = []
       for (const entrantItem of entrantData) {
-        console.log(entrantItem.prizeId.toString())
+        // console.log(entrantItem.prizeId.toString())
         ids.push(itemMapping.get(entrantItem.prizeId.toString()))
         values.push(entrantItem.winningPrizeNumbers.length)
       }
       const batch = [{ owner: entrant, ids: ids, values: values }]
-      console.log(batch)
-      // const tx = await voucherMigration.migrateVouchers(batch, { gasLimit: 10000000 })
-      // console.log('migration tx:', tx.hash)
-      // const receipt = await tx.wait()
-      // if (!receipt.status) {
-      //   throw Error(`Migration batch failed: ${tx.hash}`)
-      // }
+      console.log(JSON.stringify(batch, null, 2))
+      const tx = await voucherMigration.migrateVouchers(batch, { gasLimit: 10000000 })
+      console.log('migration tx:', tx.hash)
+      const receipt = await tx.wait()
+      if (!receipt.status) {
+        throw Error(`Migration batch failed: ${tx.hash}`)
+      }
     }
   }
   console.log('Migration success!')

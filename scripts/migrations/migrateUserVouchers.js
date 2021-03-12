@@ -77,7 +77,13 @@ async function main () {
   for (const [owner, items] of owners.entries()) {
     for (const value of items.values()) {
       if (value.gt(0)) {
-        newOwners.set(owner, items)
+        const newItems = new Map()
+        for (const [id, itemValue] of items.entries()) {
+          if (itemValue.gt(0)) {
+            newItems.set(id, itemValue)
+          }
+        }
+        newOwners.set(owner, newItems)
         break
       }
     }
@@ -97,7 +103,7 @@ async function main () {
     ].includes(owner)) {
       continue
     }
-    if (count === 50) {
+    if (count === 10) {
       addOwnersBatch = []
       addOwners.push(addOwnersBatch)
       count = 0
@@ -157,7 +163,8 @@ async function main () {
     sendCount++
     console.log('Send count: ', sendCount, 'Total:', batch.length)
     console.log('First address:', batch[0].owner)
-    const tx = await voucherMigration.migrateVouchers(batch, { gasLimit: 20000000 })
+    console.log(JSON.stringify(batch, null, 2))
+    const tx = await voucherMigration.migrateVouchers(batch, { gasLimit: 19000000 })
     console.log('migration tx:', tx.hash)
     const receipt = await tx.wait()
     if (!receipt.status) {

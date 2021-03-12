@@ -52,6 +52,7 @@ async function main (scriptName) {
   let rarityFarming
   let pixelCraft
   let childChainManager
+  let ghstStakingDiamond
   const gasLimit = 12300000
 
   const portalPrice = ethers.utils.parseEther('100')
@@ -59,6 +60,7 @@ async function main (scriptName) {
   const symbol = 'GOTCHI'
   if (hre.network.name === 'hardhat') {
     childChainManager = account
+    ghstStakingDiamond = account
     const LinkTokenMock = await ethers.getContractFactory('LinkTokenMock')
     linkContract = await LinkTokenMock.deploy()
     await linkContract.deployed()
@@ -84,6 +86,8 @@ async function main (scriptName) {
     // Matic ghst token address
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7')
 
+    ghstStakingDiamond = '0xA02d547512Bb90002807499F05495Fe9C4C3943f'
+
     dao = 'todo' // await accounts[1].getAddress()
     daoTreasury = 'todo'
     rarityFarming = 'todo' // await accounts[2].getAddress()
@@ -98,6 +102,8 @@ async function main (scriptName) {
 
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5')
     // console.log('GHST diamond address:' + ghstDiamond.address)
+
+    ghstStakingDiamond = '0xA4fF399Aa1BB21aBdd3FC689f46CCE0729d58DEd'
 
     dao = account // 'todo' // await accounts[1].getAddress()
     daoTreasury = account
@@ -115,6 +121,8 @@ async function main (scriptName) {
 
     // ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x658809Bb08595D15a59991d640Ed5f2c658eA284')
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x20d0A1ce31f8e8A77b291f25c5fbED007Adde932')
+
+    ghstStakingDiamond = '0xA02d547512Bb90002807499F05495Fe9C4C3943f'
     // const GhstTokenContract = await ethers.getContractFactory('GHSTFacet')
     // ghstTokenContract = await GhstTokenContract.deploy()
     // await ghstTokenContract.deployed()
@@ -261,6 +269,24 @@ async function main (scriptName) {
   }
   receipt = await tx.wait()
   console.log('Adding Collateral Types gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  console.log('Adding ticket categories')
+  // adding type categories
+  const ticketCategories = []
+  for (let i = 0; i < 6; i++) {
+    ticketCategories.push({
+      erc1155TokenAddress: ghstStakingDiamond,
+      erc1155TypeId: i,
+      category: 3
+    })
+  }
+  tx = await erc1155MarketplaceFacet.setERC1155Categories(ticketCategories, { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Adding ticket categories gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   console.log('Adding Item Types')

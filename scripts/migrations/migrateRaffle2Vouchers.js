@@ -6,12 +6,6 @@ const { getEntrantWins } = require('./getWinsRaffle2.js')
 
 async function main () {
   const aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
-  const voucherContractAddress = '0xe54891774EED9277236bac10d82788aee0Aed313'
-  const vouchersAbi = [
-    'event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value)',
-    'event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values)',
-    'function balanceOfAll(address _owner) external view returns (uint256[] memory balances_)'
-  ]
 
   const raffleAbi = [
     'function raffleSupply() external view returns (uint256 raffleSupply_)',
@@ -30,7 +24,7 @@ async function main () {
   const ethereumProvider = new ethers.providers.JsonRpcProvider(process.env.MAINNET_URL)
   const raffle = await ethers.getContractAt(raffleAbi, '0xAFFF04FbFe54Cc985E25493A8F9D7114012D6d6F', ethereumProvider)
   // raffles 1 & 2
-  const raffleId = 1
+  const raffleId = 2
   const entrants = await raffle.getEntrants(raffleId)
   // console.log((new Set(entrants)).size)
   console.log('Total entrants: ', entrants.length)
@@ -50,12 +44,12 @@ async function main () {
       }
       const batch = [{ owner: entrant, ids: ids, values: values }]
       console.log(batch)
-      // const tx = await voucherMigration.migrateVouchers(batch, { gasLimit: 10000000 })
-      // console.log('migration tx:', tx.hash)
-      // const receipt = await tx.wait()
-      // if (!receipt.status) {
-      //   throw Error(`Migration batch failed: ${tx.hash}`)
-      // }
+      const tx = await voucherMigration.migrateVouchers(batch, { gasLimit: 10000000 })
+      console.log('migration tx:', tx.hash)
+      const receipt = await tx.wait()
+      if (!receipt.status) {
+        throw Error(`Migration batch failed: ${tx.hash}`)
+      }
     }
   }
 
