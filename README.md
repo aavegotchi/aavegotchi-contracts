@@ -35,8 +35,30 @@ ERC721MarketplaceFacet: 0xFDdC3009B5AF4502DA6d9c1187Fa79db32ECF394
 VoucherMigrationFacet 0x9eB64b01860d694f615808C3c550166e265b83D3
 
 
-## Local Deployment
+## Getting Started
+
+### Requirements 
+- Node 12.x
+
+### Setup
+
+1. Install dependencies
+
+```console
+npm i
+```
+
+2. Set .env file of env vars in hardhat.config.js
+
+
+### Local Deployment
 
 ```console
 npx hardhat run scripts/deploy.js
+```
+
+### Tests
+
+```console
+npx hardhat test
 ```

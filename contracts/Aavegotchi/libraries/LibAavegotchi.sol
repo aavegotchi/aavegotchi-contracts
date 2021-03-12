@@ -229,6 +229,8 @@ library LibAavegotchi {
 
     function xpUntilNextLevel(uint256 _experience) internal pure returns (uint256 requiredXp_) {
         uint256 currentLevel = aavegotchiLevel(_experience);
+       
+        if (currentLevel == 99) return 0;
         requiredXp_ = ((currentLevel**2) * 50) - _experience;
     }
 
@@ -366,6 +368,6 @@ library LibAavegotchi {
 
     function verify(uint256 _tokenId) internal pure {
         if (_tokenId < 10) {}
-        revert("Not verified");
+        //revert("Not verified");
     }
 }
