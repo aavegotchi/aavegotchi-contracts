@@ -7,6 +7,7 @@ import {LibAppStorage, AppStorage, SvgLayer} from "./LibAppStorage.sol";
 
 library LibSvg {
     event StoreSvg(LibSvg.SvgTypeAndSizes[] _typesAndSizes);
+    event UpdateSvg(SvgTypeAndIdsAndSizes[] _typesAndIdsAndSizes);
 
     struct SvgTypeAndSizes {
         bytes32 svgType;
@@ -65,6 +66,28 @@ library LibSvg {
             for (uint256 j; j < svgTypeAndSizes.sizes.length; j++) {
                 uint256 size = svgTypeAndSizes.sizes[j];
                 s.svgLayers[svgTypeAndSizes.svgType].push(SvgLayer(svgContract, uint16(offset), uint16(size)));
+                offset += size;
+            }
+        }
+    }
+
+    struct SvgTypeAndIdsAndSizes {
+        bytes32 svgType;
+        uint256[] ids;
+        uint256[] sizes;
+    }
+
+    function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        emit UpdateSvg(_typesAndIdsAndSizes);
+        address svgContract = storeSvgInContract(_svg);
+        uint256 offset;
+        for (uint256 i; i < _typesAndIdsAndSizes.length; i++) {
+            LibSvg.SvgTypeAndIdsAndSizes calldata svgTypeAndIdsAndSizes = _typesAndIdsAndSizes[i];
+            for (uint256 j; j < svgTypeAndIdsAndSizes.sizes.length; j++) {
+                uint256 size = svgTypeAndIdsAndSizes.sizes[j];
+                uint256 id = svgTypeAndIdsAndSizes.ids[j];
+                s.svgLayers[svgTypeAndIdsAndSizes.svgType][id] = SvgLayer(svgContract, uint16(offset), uint16(size));
                 offset += size;
             }
         }

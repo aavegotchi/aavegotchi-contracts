@@ -305,4 +305,19 @@ contract SvgFacet is Modifiers {
     function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) public onlyDaoOrOwner {
         LibSvg.storeSvg(_svg, _typesAndSizes);
     }
+
+    function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) public onlyDaoOrOwner {
+        LibSvg.updateSvg(_svg, _typesAndIdsAndSizes);
+    }
+
+    struct Sleeve {
+        uint256 sleeveId;
+        uint256 wearableId;
+    }
+
+    function setSleeves(Sleeve[] calldata _sleeves) external onlyDaoOrOwner {
+        for (uint256 i; i < _sleeves.length; i++) {
+            s.sleeves[_sleeves[i].wearableId] = _sleeves[i].sleeveId;
+        }
+    }
 }
