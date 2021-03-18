@@ -192,6 +192,32 @@ contract SvgFacet is Modifiers {
         if (_slotPosition == LibItems.WEARABLE_SLOT_BG) className_ = "wearable-bg";
     }
 
+    function getBodyWearable(uint256 _wearableId) internal view returns (bytes memory bodyWearable_, bytes memory sleeves_) {
+        ItemType storage wearableType = s.itemTypes[_wearableId];
+        Dimensions memory dimensions = wearableType.dimensions;
+
+        bodyWearable_ = abi.encodePacked(
+            '<g class="gotchi-wearable wearable-body',
+            // x
+            LibStrings.strWithUint('"><svg x="', dimensions.x),
+            // y
+            LibStrings.strWithUint('" y="', dimensions.y),
+            '">',
+            LibSvg.getSvg("wearables", wearableType.svgId),
+            "</svg></g>"
+        );
+
+        sleeves_ = abi.encodePacked(
+            // x
+            LibStrings.strWithUint('"><svg x="', dimensions.x),
+            // y
+            LibStrings.strWithUint('" y="', dimensions.y),
+            '">',
+            LibSvg.getSvg("sleeves", s.sleeves[_wearableId]),
+            "</svg>"
+        );
+    }
+
     function getWearable(uint256 _wearableId, uint256 _slotPosition) internal view returns (bytes memory svg_) {
         ItemType storage wearableType = s.itemTypes[_wearableId];
         Dimensions memory dimensions = wearableType.dimensions;
@@ -255,8 +281,7 @@ contract SvgFacet is Modifiers {
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BODY];
         if (wearableId != 0) {
-            layers.bodyWearable = getWearable(wearableId, LibItems.WEARABLE_SLOT_BODY);
-            layers.sleeves = LibSvg.getSvg("sleeves", s.sleeves[wearableId]);
+            (layers.bodyWearable, layers.sleeves) = getBodyWearable(wearableId);
         }
 
         // get hands
