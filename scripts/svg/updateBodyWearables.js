@@ -1,6 +1,8 @@
-/* global ethers hre */
+/* global ethers */
 
 const fs = require('fs')
+
+const { LedgerSigner } = require('@ethersproject/hardware-wallets')
 
 const bodyWearables = []
 const sleeves = []
@@ -77,7 +79,13 @@ function bodyWearable (name) {
 }
 
 async function main () {
-  const svgFacet = await ethers.getContractAt('SvgFacet', '0x86935F11C86623deC8a25696E1C19a8659CbF95d')
+  // const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
+  // kovan
+  const diamondAddress = '0xd0576c4371bBb9e531700898760B0064237832Ee'
+  // const signer = new LedgerSigner(ethers.provider)
+  // const svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
+  // kovan
+  const svgFacet = await ethers.getContractAt('SvgFacet', diamondAddress)
   let tx
   let receipt
   console.log('Uploading Body Wearable Svgs')
@@ -101,12 +109,11 @@ async function main () {
       ['wearables', bodyWearables.slice(svgItemsStart, svgItemsEnd)]
     )
     console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`)
-    // printSizeInfo(svgTypesAndSizes)
-    // tx = await svgFacet.updateSvg(svg, svgTypesAndIdsAndSizes)
-    // receipt = await tx.wait()
-    // if (!receipt.status) {
-    //   throw Error(`Error updating body wearable SVG: ${tx.hash}`)
-    // }
+    tx = await svgFacet.updateSvg(svg, svgTypesAndIdsAndSizes)
+    receipt = await tx.wait()
+    if (!receipt.status) {
+      throw Error(`Error updating body wearable SVG: ${tx.hash}`)
+    }
     console.log(svgTypesAndIdsAndSizes)
     // console.log('Uploaded body wearable SVG:', tx.hash)
     if (svgItemsEnd === wearablesSvgs.length) {
@@ -135,20 +142,34 @@ async function main () {
     ;[svg, svgTypesAndSizes] = setupSvg(
       ['sleeves', sleeves.map(value => value.svg).slice(svgItemsStart, svgItemsEnd)]
     )
-    console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`)
-    // printSizeInfo(svgTypesAndSizes)
-    // tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-    // receipt = await tx.wait()
-    // if (!receipt.status) {
-    //   throw Error(`Error updating body wearable SVG: ${tx.hash}`)
-    // }
+    console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} sleeves SVGs`)
+    tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+    receipt = await tx.wait()
+    if (!receipt.status) {
+      throw Error(`Error updating sleeves SVG: ${tx.hash}`)
+    }
     console.log(svgTypesAndSizes)
-    // console.log('Uploaded body wearable SVG:', tx.hash)
+    console.log('Uploaded sleeves SVG:', tx.hash)
     if (svgItemsEnd === wearablesSvgs.length) {
       break
     }
     svgItemsStart = svgItemsEnd
   }
+
+  const sleevesStruct = []
+  sleeves.forEach((value, index) => {
+    sleevesStruct.push({
+      sleeveId: index,
+      wearableId: value.id
+    })
+  })
+  console.log()
+  tx = await svgFacet.setSleeves(sleevesStruct)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error setting sleeves: ${tx.hash}`)
+  }
+  console.log('Set sleeves:', tx.hash)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

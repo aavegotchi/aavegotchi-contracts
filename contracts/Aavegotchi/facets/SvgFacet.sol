@@ -55,7 +55,6 @@ contract SvgFacet is Modifiers {
         string primaryColor;
         string secondaryColor;
         string cheekColor;
-        bytes background;
         bytes collateral;
         int256 trait;
         int256[18] eyeShapeTraitRange;
@@ -76,8 +75,7 @@ contract SvgFacet is Modifiers {
         details.cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
 
         // aavagotchi body
-        svg_ = LibSvg.getSvg("aavegotchi", 2);
-        details.background = LibSvg.getSvg("aavegotchi", 4);
+        svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
         details.trait = _numericTraits[4];
@@ -121,7 +119,13 @@ contract SvgFacet is Modifiers {
 
         //Add wearables if tokenId isn't MAX_INT
         if (_tokenId == type(uint256).max) {
-            svg_ = abi.encodePacked(applyStyles(details, _tokenId), details.background, svg_, details.collateral, details.eyeShape);
+            svg_ = abi.encodePacked(
+                applyStyles(details, _tokenId),
+                LibSvg.getSvg("aavegotchi", LibSvg.BACKGROUND_SVG_ID),
+                svg_,
+                details.collateral,
+                details.eyeShape
+            );
         } else {
             svg_ = abi.encodePacked(applyStyles(details, _tokenId), addBodyAndWearableSvgLayers(svg_, details, _tokenId));
         }
@@ -216,6 +220,19 @@ contract SvgFacet is Modifiers {
         }
     }
 
+    struct AavegotchiLayers {
+        bytes background;
+        bytes bodyWearable;
+        bytes hands;
+        bytes face;
+        bytes eyes;
+        bytes head;
+        bytes sleeves;
+        bytes handLeft;
+        bytes handRight;
+        bytes pet;
+    }
+
     function addBodyAndWearableSvgLayers(
         bytes memory _body,
         SvgLayerDetails memory details,
@@ -223,43 +240,82 @@ contract SvgFacet is Modifiers {
     ) internal view returns (bytes memory svg_) {
         //Wearables
         uint16[EQUIPPED_WEARABLE_SLOTS] storage equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+        AavegotchiLayers memory layers;
 
         // If background is equipped
         uint256 wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BG];
         if (wearableId != 0) {
-            svg_ = abi.encodePacked(getWearable(wearableId, LibItems.WEARABLE_SLOT_BG), _body, details.eyeShape, details.collateral);
+            layers.background = getWearable(wearableId, LibItems.WEARABLE_SLOT_BG);
+            //svg_ = abi.encodePacked(getWearable(wearableId, LibItems.WEARABLE_SLOT_BG), _body, details.eyeShape, details.collateral);
         } else {
+            layers.background = LibSvg.getSvg("aavegotchi", 4);
             //background, body, eyes, collateral
-            svg_ = abi.encodePacked(details.background, _body, details.eyeShape, details.collateral);
+            // svg_ = abi.encodePacked(details.background, _body, details.eyeShape, details.collateral);
+        }
+
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BODY];
+        if (wearableId != 0) {
+            layers.bodyWearable = getWearable(wearableId, LibItems.WEARABLE_SLOT_BODY);
+            layers.sleeves = LibSvg.getSvg("sleeves", s.sleeves[wearableId]);
         }
 
         // get hands
-        svg_ = abi.encodePacked(svg_, LibSvg.getSvg("aavegotchi", 3));
+        layers.hands = abi.encodePacked(svg_, LibSvg.getSvg("aavegotchi", LibSvg.HANDS_SVG_ID));
 
-        // body, face, eyes, head, left hand, right hand wearables
-        for (uint256 slotPosition; slotPosition < 6; slotPosition++) {
-            wearableId = equippedWearables[slotPosition];
-            if (wearableId == 0) {
-                continue;
-            }
-            svg_ = abi.encodePacked(svg_, getWearable(wearableId, slotPosition));
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_FACE];
+        if (wearableId != 0) {
+            layers.face = getWearable(wearableId, LibItems.WEARABLE_SLOT_FACE);
         }
 
-        // pet wearable
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_EYES];
+        if (wearableId != 0) {
+            layers.eyes = getWearable(wearableId, LibItems.WEARABLE_SLOT_EYES);
+        }
+
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HEAD];
+        if (wearableId != 0) {
+            layers.head = getWearable(wearableId, LibItems.WEARABLE_SLOT_HEAD);
+        }
+
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_LEFT];
+        if (wearableId != 0) {
+            layers.handLeft = getWearable(wearableId, LibItems.WEARABLE_SLOT_HAND_LEFT);
+        }
+
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT];
+        if (wearableId != 0) {
+            layers.handRight = getWearable(wearableId, LibItems.WEARABLE_SLOT_HAND_RIGHT);
+        }
+
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_PET];
         if (wearableId != 0) {
-            svg_ = abi.encodePacked(svg_, getWearable(wearableId, 6));
+            layers.pet = getWearable(wearableId, LibItems.WEARABLE_SLOT_PET);
         }
-        // 1. background wearable
-        // 2. body
-        // 3. hands
-        // 4. body wearable
-        // 5. face wearable
-        // 6. eyes wearable
-        // 7. head wearable
-        // 8. left hand wearable
-        // 9. right hand wearable
-        // 10. pet wearable
+
+        //1. Background wearable
+        //2. Body
+        //3. Body wearable
+        //4. Hands
+        //5. Face
+        //6. Eyes
+        //7. Head
+        //8. Sleeves of body wearable
+        //9. Left hand wearable
+        //10. Right hand wearable
+        //11. Pet wearable
+
+        svg_ = abi.encodePacked(layers.background, _body, details.eyeShape, details.collateral, layers.bodyWearable);
+        svg_ = abi.encodePacked(
+            svg_,
+            layers.hands,
+            layers.face,
+            layers.eyes,
+            layers.head,
+            layers.sleeves,
+            layers.handLeft,
+            layers.handRight,
+            layers.pet
+        );
     }
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {

@@ -8,6 +8,12 @@ import {LibAppStorage, AppStorage, SvgLayer} from "./LibAppStorage.sol";
 library LibSvg {
     event StoreSvg(LibSvg.SvgTypeAndSizes[] _typesAndSizes);
     event UpdateSvg(SvgTypeAndIdsAndSizes[] _typesAndIdsAndSizes);
+    // svg type: "aavegotchiSvgs"
+    uint256 internal constant CLOSED_PORTAL_SVG_ID = 0;
+    uint256 internal constant OPEN_PORTAL_SVG_ID = 1;
+    uint256 internal constant AAVEGTOTCHI_BODY_SVG_ID = 2;
+    uint256 internal constant HANDS_SVG_ID = 3;
+    uint256 internal constant BACKGROUND_SVG_ID = 4;
 
     struct SvgTypeAndSizes {
         bytes32 svgType;
