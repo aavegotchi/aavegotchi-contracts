@@ -103,7 +103,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 category;
     }
 
-    function setERC1155Categories(Category[] calldata _categories) external onlyOwner {
+    function setERC1155Categories(Category[] calldata _categories) external onlyDaoOrOwner {
         for (uint256 i; i < _categories.length; i++) {
             s.erc1155Categories[_categories[i].erc1155TokenAddress][_categories[i].erc1155TypeId] = _categories[i].category;
         }
