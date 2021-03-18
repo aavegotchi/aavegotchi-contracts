@@ -48,27 +48,27 @@ async function main () {
   console.log(cut)
 
   const diamondCut = (await ethers.getContractAt('IDiamondCut', diamondAddress)).connect(signer)
-  const tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 5000000 })
+  let tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 5000000 })
   console.log('Diamond cut tx:', tx.hash)
-  const receipt = await tx.wait()
+  let receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Diamond upgrade failed: ${tx.hash}`)
   }
   console.log('Completed diamond cut: ', tx.hash)
 
   erc1155MarketplaceFacet = (await ethers.getContractAt('ERC1155MarketplaceFacet', diamondAddress)).connect(signer)
-  const ghstStakindDiamondAddress =
+  const ghstStakindDiamondAddress = '0xA02d547512Bb90002807499F05495Fe9C4C3943f'
   console.log('Adding ticket categories')
   // adding type categories
   const ticketCategories = []
   for (let i = 0; i < 6; i++) {
     ticketCategories.push({
-      erc1155TokenAddress: ghstStakingDiamond,
+      erc1155TokenAddress: ghstStakindDiamondAddress,
       erc1155TypeId: i,
       category: 3
     })
   }
-  tx = await erc1155MarketplaceFacet.setERC1155Categories(ticketCategories, { gasLimit: gasLimit })
+  tx = await erc1155MarketplaceFacet.setERC1155Categories(ticketCategories, { gasLimit: 10000000 })
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
