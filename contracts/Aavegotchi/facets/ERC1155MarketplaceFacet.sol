@@ -162,8 +162,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         } else {
             ERC1155Listing storage listing = s.erc1155Listings[listingId];
             listing.quantity = _quantity;
-            listing.priceInWei = _priceInWei;
-            emit LibERC1155Marketplace.UpdateERC1155Listing(listingId, _quantity, _priceInWei, block.timestamp);
+            emit LibERC1155Marketplace.UpdateERC1155Listing(listingId, _quantity, listing.priceInWei, block.timestamp);
         }
 
         // Check if there's a publication fee and
