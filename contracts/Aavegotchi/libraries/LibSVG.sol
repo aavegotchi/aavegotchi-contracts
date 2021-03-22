@@ -59,6 +59,10 @@ library LibSvg {
 
         assembly {
             svgContract := create(0, add(code, 32), mload(code))
+            if eq(svgContract, 0) {
+                returndatacopy(0, 0, returndatasize())
+                revert(0, returndatasize())
+            }
         }
     }
 

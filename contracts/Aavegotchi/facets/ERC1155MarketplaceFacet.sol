@@ -103,7 +103,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 category;
     }
 
-    function setERC1155Categories(Category[] calldata _categories) external onlyOwner {
+    function setERC1155Categories(Category[] calldata _categories) external onlyDaoOrOwner {
         for (uint256 i; i < _categories.length; i++) {
             s.erc1155Categories[_categories[i].erc1155TokenAddress][_categories[i].erc1155TypeId] = _categories[i].category;
         }
@@ -162,8 +162,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         } else {
             ERC1155Listing storage listing = s.erc1155Listings[listingId];
             listing.quantity = _quantity;
-            listing.priceInWei = _priceInWei;
-            emit LibERC1155Marketplace.UpdateERC1155Listing(listingId, _quantity, _priceInWei, block.timestamp);
+            emit LibERC1155Marketplace.UpdateERC1155Listing(listingId, _quantity, listing.priceInWei, block.timestamp);
         }
 
         // Check if there's a publication fee and

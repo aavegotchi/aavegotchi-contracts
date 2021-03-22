@@ -206,16 +206,18 @@ contract SvgFacet is Modifiers {
             LibSvg.getSvg("wearables", wearableType.svgId),
             "</svg></g>"
         );
-
-        sleeves_ = abi.encodePacked(
-            // x
-            LibStrings.strWithUint('"><svg x="', dimensions.x),
-            // y
-            LibStrings.strWithUint('" y="', dimensions.y),
-            '">',
-            LibSvg.getSvg("sleeves", s.sleeves[_wearableId]),
-            "</svg>"
-        );
+        uint256 svgId = s.sleeves[_wearableId];
+        if (svgId != 0) {
+            sleeves_ = abi.encodePacked(
+                // x
+                LibStrings.strWithUint('"><svg x="', dimensions.x),
+                // y
+                LibStrings.strWithUint('" y="', dimensions.y),
+                '">',
+                LibSvg.getSvg("sleeves", svgId),
+                "</svg>"
+            );
+        }
     }
 
     function getWearable(uint256 _wearableId, uint256 _slotPosition) internal view returns (bytes memory svg_) {
