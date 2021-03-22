@@ -278,11 +278,8 @@ contract SvgFacet is Modifiers {
         uint256 wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BG];
         if (wearableId != 0) {
             layers.background = getWearable(wearableId, LibItems.WEARABLE_SLOT_BG);
-            //svg_ = abi.encodePacked(getWearable(wearableId, LibItems.WEARABLE_SLOT_BG), _body, details.eyeShape, details.collateral);
         } else {
             layers.background = LibSvg.getSvg("aavegotchi", 4);
-            //background, body, eyes, collateral
-            // svg_ = abi.encodePacked(details.background, _body, details.eyeShape, details.collateral);
         }
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BODY];
@@ -389,11 +386,11 @@ contract SvgFacet is Modifiers {
    |             Write Functions        |
    |__________________________________*/
 
-    function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) public onlyDaoOrOwner {
+    function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) external onlyDaoOrOwner {
         LibSvg.storeSvg(_svg, _typesAndSizes);
     }
 
-    function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) public onlyDaoOrOwner {
+    function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) external onlyDaoOrOwner {
         LibSvg.updateSvg(_svg, _typesAndIdsAndSizes);
     }
 
@@ -405,6 +402,13 @@ contract SvgFacet is Modifiers {
     function setSleeves(Sleeve[] calldata _sleeves) external onlyDaoOrOwner {
         for (uint256 i; i < _sleeves.length; i++) {
             s.sleeves[_sleeves[i].wearableId] = _sleeves[i].sleeveId;
+        }
+    }
+
+    function setItemsDimensions(uint256[] calldata _itemIds, Dimensions[] calldata _dimensions) external onlyDaoOrOwner {
+        require(_itemIds.length == _dimensions.length, "SvgFacet: _itemIds not same length as _dimensions");
+        for (uint256 i; i < _itemIds.length; i++) {
+            s.itemTypes[i].dimensions = _dimensions[i];
         }
     }
 }
