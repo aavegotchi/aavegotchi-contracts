@@ -23,6 +23,9 @@ task('accounts', 'Prints the list of accounts', async () => {
 module.exports = {
   networks: {
     hardhat: {
+      forking: {
+        url: process.env.MATIC_URL
+      },
       blockGasLimit: 20000000,
       gas: 'auto'
     },

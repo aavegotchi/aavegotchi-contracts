@@ -139,6 +139,7 @@ async function main () {
   }
 
   // console.log('Uploading Sleeves Svgs')
+  sleeves.push({ id: 0, svg: svg })
   // let svgTypesAndSizes
   // console.log('Number of sleeves:' + sleeves.length)
   // svgItemsStart = 0

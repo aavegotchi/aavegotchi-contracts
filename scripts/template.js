@@ -1,4 +1,4 @@
-/* global ethers hre */
+/* global ethers */
 
 async function main () {
 

@@ -363,6 +363,18 @@ contract SvgFacet is Modifiers {
         }
     }
 
+    function getSvg(bytes32 _svgType, uint256 _itemId) external view returns (string memory svg_) {
+        svg_ = string(LibSvg.getSvg(_svgType, _itemId));
+    }
+
+    function getSvgs(bytes32 _svgType, uint256[] calldata _itemIds) external view returns (string[] memory svgs_) {
+        uint256 length = _itemIds.length;
+        svgs_ = new string[](length);
+        for (uint256 i; i < length; i++) {
+            svgs_[i] = string(LibSvg.getSvg(_svgType, _itemIds[i]));
+        }
+    }
+
     function getItemSvg(uint256 _itemId) external view returns (string memory ag_) {
         require(_itemId < s.itemTypes.length, "ItemsFacet: _id not found for item");
         bytes memory svg;
