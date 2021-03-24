@@ -3,10 +3,89 @@
 async function main () {
   const diamondCreationBlock = 11516320
   const aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
+  let events = []
   let diamond
-  diamond = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamondAddress)
-  const result = await diamond.getAavegotchi(7401)
-  console.log(result)
+  diamond = await ethers.getContractAt('ERC721MarketplaceFacet', aavegotchiDiamondAddress)
+  let filter
+  filter = diamond.filters.ERC721ListingAdd()
+  let results
+  results = await diamond.queryFilter(filter, diamondCreationBlock)
+
+  for (const result of results) {
+    if (result.args.erc721TokenId.eq(7401)) {
+      events.push([result.blockNumber, 'Add Listing', result.args.listingId.toString(), result.args.seller])
+    }
+  }
+
+  let diamond2
+  diamond2 = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', aavegotchiDiamondAddress)
+  filter = diamond2.filters.EquipWearables(7401)
+  results = await diamond2.queryFilter(filter, diamondCreationBlock)
+  for (const result of results) {
+    events.push([result.blockNumber, 'Equip', JSON.stringify(result.args._oldWearables, null, 0), JSON.stringify(result.args._newWearables, null, 0)])
+  }
+
+  diamond2 = await ethers.getContractAt('LibERC1155', aavegotchiDiamondAddress)
+  filter = diamond2.filters.TransferToParent(null, 7401)
+  results = await diamond2.queryFilter(filter, diamondCreationBlock)
+  for (const result of results) {
+    events.push([result.blockNumber, 'TransferToParent', result.args._tokenTypeId.toString(), result.args._value.toString()])
+  }
+
+  diamond2 = await ethers.getContractAt('LibERC1155', aavegotchiDiamondAddress)
+  filter = diamond2.filters.TransferFromParent(null, 7401)
+  results = await diamond2.queryFilter(filter, diamondCreationBlock)
+  for (const result of results) {
+    events.push([result.blockNumber, 'TransferFromParent', result.args._tokenTypeId.toString(), result.args._value.toString()])
+  }
+
+  // filter = diamond2.filters.TransferSingle()
+  // results = await diamond2.queryFilter(filter, diamondCreationBlock)
+  // for (const result of results) {
+  //   if (result.args._id.eq(39) || result.args._id.eq(76) || result.args._id.eq(40)) {
+  //     events.push([result.blockNumber, 'TransferSingle', result.args._from, result.args._to, result.args._id.toString(), result.args._value.toString()])
+  //   }
+  // }
+
+  // filter = diamond2.filters.TransferBatch()
+  // results = await diamond2.queryFilter(filter, diamondCreationBlock)
+  // for (const result of results) {
+  //   for (const id of result.args._ids) {
+  //     if (id.eq(39) || id.eq(76) || id.eq(40)) {
+  //       const ids = result.args._ids.map(value => value.toString())
+  //       const values = result.args._values.map(value => value.toString())
+  //       events.push([result.blockNumber, 'TransferBatch', result.args._from, result.args._to, ids, values])
+  //       break
+  //     }
+  //   }
+  // }
+
+  filter = diamond.filters.ERC721ExecutedListing()
+  results = await diamond.queryFilter(filter, diamondCreationBlock)
+  for (const result of results) {
+    if (result.args.erc721TokenId.eq(7401)) {
+      events.push([result.blockNumber, 'Exec Listing', result.args.listingId.toString(), result.args.seller, result.args.buyer])
+    }
+  }
+  events.sort((a, b) => {
+    const blockNumberA = a[0]
+    const blockNumberB = b[0]
+    // console.log(blockNumberA, blockNumberB)
+    if (blockNumberA > blockNumberB) {
+      return 1
+    } else if (blockNumberA < blockNumberB) {
+      return -1
+    }
+    return 0
+  })
+  events = events.map(value => [value[0].toString(), ...value.slice(1)])
+  for (const event of events) {
+    console.log(JSON.stringify(event, null, 0))
+  }
+
+  // diamond = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamondAddress)
+  // const result = await diamond.getAavegotchi(7401)
+  // console.log(result)
 
   // const erc1155Marketplace = await ethers.getContractAt('ERC1155MarketplaceFacet', aavegotchiDiamondAddress)
   // const itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', aavegotchiDiamondAddress)
