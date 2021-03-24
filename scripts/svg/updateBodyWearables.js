@@ -80,13 +80,13 @@ function bodyWearable (name) {
 }
 
 async function main () {
-  // const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
+  const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   // kovan
-  const diamondAddress = '0xd0576c4371bBb9e531700898760B0064237832Ee'
-  // const signer = new LedgerSigner(ethers.provider)
-  // const svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
+  // const diamondAddress = '0xd0576c4371bBb9e531700898760B0064237832Ee'
+  const signer = new LedgerSigner(ethers.provider)
+  const svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
   // kovan
-  const svgFacet = await ethers.getContractAt('SvgFacet', diamondAddress)
+  // const svgFacet = await ethers.getContractAt('SvgFacet', diamondAddress)
   let tx
   let receipt
   console.log('Uploading Body Wearable Svgs')
@@ -140,53 +140,53 @@ async function main () {
 
   // console.log('Uploading Sleeves Svgs')
   sleeves.push({ id: 0, svg: svg })
-  // let svgTypesAndSizes
-  // console.log('Number of sleeves:' + sleeves.length)
-  // svgItemsStart = 0
-  // svgItemsEnd = 0
-  // while (true) {
-  //   let itemsSize = 0
-  //   while (true) {
-  //     if (svgItemsEnd === sleeves.length) {
-  //       break
-  //     }
-  //     itemsSize += sleeves[svgItemsEnd].svg.length
-  //     if (itemsSize > 24576) {
-  //       break
-  //     }
-  //     svgItemsEnd++
-  //   }
-  //   ;[svg, svgTypesAndSizes] = setupSvg(
-  //     ['sleeves', sleeves.map(value => value.svg).slice(svgItemsStart, svgItemsEnd)]
-  //   )
-  //   console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} sleeves SVGs`)
-  //   tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  //   receipt = await tx.wait()
-  //   if (!receipt.status) {
-  //     throw Error(`Error updating sleeves SVG: ${tx.hash}`)
-  //   }
-  //   console.log(svgTypesAndSizes)
-  //   console.log('Uploaded sleeves SVG:', tx.hash)
-  //   if (svgItemsEnd === wearablesSvgs.length) {
-  //     break
-  //   }
-  //   svgItemsStart = svgItemsEnd
-  // }
+  let svgTypesAndSizes
+  console.log('Number of sleeves:' + sleeves.length)
+  svgItemsStart = 0
+  svgItemsEnd = 0
+  while (true) {
+    let itemsSize = 0
+    while (true) {
+      if (svgItemsEnd === sleeves.length) {
+        break
+      }
+      itemsSize += sleeves[svgItemsEnd].svg.length
+      if (itemsSize > 24576) {
+        break
+      }
+      svgItemsEnd++
+    }
+    ;[svg, svgTypesAndSizes] = setupSvg(
+      ['sleeves', sleeves.map(value => value.svg).slice(svgItemsStart, svgItemsEnd)]
+    )
+    console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} sleeves SVGs`)
+    tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, { gasLimit: 10000000 })
+    receipt = await tx.wait()
+    if (!receipt.status) {
+      throw Error(`Error updating sleeves SVG: ${tx.hash}`)
+    }
+    console.log(svgTypesAndSizes)
+    console.log('Uploaded sleeves SVG:', tx.hash)
+    if (svgItemsEnd === wearablesSvgs.length) {
+      break
+    }
+    svgItemsStart = svgItemsEnd
+  }
 
-  // const sleevesStruct = []
-  // sleeves.forEach((value, index) => {
-  //   sleevesStruct.push({
-  //     sleeveId: index,
-  //     wearableId: value.id
-  //   })
-  // })
-  // console.log()
-  // tx = await svgFacet.setSleeves(sleevesStruct)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error setting sleeves: ${tx.hash}`)
-  // }
-  // console.log('Set sleeves:', tx.hash)
+  const sleevesStruct = []
+  sleeves.forEach((value, index) => {
+    sleevesStruct.push({
+      sleeveId: index,
+      wearableId: value.id
+    })
+  })
+  console.log('Set Sleeves')
+  tx = await svgFacet.setSleeves(sleevesStruct, { gasLimit: 10000000 })
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error setting sleeves: ${tx.hash}`)
+  }
+  console.log('Set sleeves:', tx.hash)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -194,7 +194,6 @@ struct AppStorage {
     address vrfCoordinator;
     ILink link;
     // Marketplace
-    //uint256 listingFeeInWei;
     uint256 nextERC1155ListingId;
     // erc1155 category => erc1155Order
     //ERC1155Order[] erc1155MarketOrders;

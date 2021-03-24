@@ -420,7 +420,7 @@ contract SvgFacet is Modifiers {
     function setItemsDimensions(uint256[] calldata _itemIds, Dimensions[] calldata _dimensions) external onlyDaoOrOwner {
         require(_itemIds.length == _dimensions.length, "SvgFacet: _itemIds not same length as _dimensions");
         for (uint256 i; i < _itemIds.length; i++) {
-            s.itemTypes[i].dimensions = _dimensions[i];
+            s.itemTypes[_itemIds[i]].dimensions = _dimensions[i];
         }
     }
 }
