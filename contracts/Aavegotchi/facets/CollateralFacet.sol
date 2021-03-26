@@ -129,4 +129,8 @@ contract CollateralFacet is Modifiers {
         }
         delete s.aavegotchis[_tokenId];
     }
+
+    function setCollateralEyeShapeSvgId(address _collateralToken, uint8 _svgId) external onlyDaoOrOwner {
+        s.collateralTypeInfo[_collateralToken].eyeShapeSvgId = _svgId;
+    }
 }

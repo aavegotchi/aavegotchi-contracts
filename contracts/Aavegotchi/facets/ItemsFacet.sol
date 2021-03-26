@@ -294,4 +294,9 @@ contract ItemsFacet is Modifiers {
         emit UseConsumables(_tokenId, _itemIds, _quantities);
         emit LibERC1155.TransferBatch(sender, sender, address(0), _itemIds, _quantities);
     }
+
+    function setWearableSlotPositions(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] calldata _slotPositions) external onlyDaoOrOwner {
+        require(_wearableId < s.itemTypes.length, "DAOFacet: _wearableId not found for item");
+        s.itemTypes[_wearableId].slotPositions = _slotPositions;
+    }
 }
