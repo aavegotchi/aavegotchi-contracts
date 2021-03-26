@@ -1,4 +1,3 @@
-const { isThrowStatement } = require('typescript')
 
 /* global ethers */
 const WEARABLE_SLOT_BODY = 0
