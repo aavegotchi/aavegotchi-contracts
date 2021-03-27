@@ -130,7 +130,39 @@ const wearablesSvgs = [
   wearable("126_KinshipPotion"),
   wearable("127_GreaterKinshipPotion"),
   wearable("128_XPPotion"),
-  wearable("129_GreaterXPPotion")
+  wearable("129_GreaterXPPotion"),
+  wearable("130_Fireball"),
+  wearable("132_DragonWings"),
+  wearable("133_PointyHorns"), //Body wearable but not sleeves
+  wearable("134_L2Sign"),
+  bodyWearable("135_PolygonShirt"),
+  wearable("136_PolygonCap"),
+  wearable("137_VoteSign"),
+  bodyWearable("138_SnapshotShirt"),
+  wearable("139_SnapshotHat"),
+  wearable("140_ElfEars"),
+  wearable("141_GemstoneRing"),
+  wearable("142_PrincessTiara"),
+  wearable("143_GoldNecklace"),
+  wearable("144_PrincessHair"),
+  wearable("144_PrincessHair"), //MISSING GODLI LOCKS
+  wearable("146_ImperialMoustache"),
+  wearable("147_TinyCrown"),
+  wearable("148_RoyalScepter"),
+  wearable("149_RoyalCrown"),
+  bodyWearable("150_RoyalRobes"),
+  wearable("151_CommonRofl"),
+  wearable("151_CommonRofl"), //MISSING 152_UncommonRofl
+  wearable("151_CommonRofl"), //MISSING 153_RareRofl
+  wearable("151_CommonRofl"),//MISSING 154_LegendaryRofl
+  wearable("155_MythicalRofl"),
+  wearable("156_GodlikeRofl"),
+  wearable("157_LilPumpDrink"),
+  wearable("158_LilPumpGoatee"),
+  wearable("159_LilPumpShades"),
+  bodyWearable("160_LilPumpThreads"),
+  wearable("161_LilPumpDreads")
+
 ]
 
 function stripSvg (svg) {
