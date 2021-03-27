@@ -1,13 +1,1 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_1" xmlns:v="https://vecta.io/nano"
-	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 40 20"
-	 style="enable-background:new 0 0 40 20;" xml:space="preserve">
-<style type="text/css">
-	.st0{fill:#7D7D7D;}
-</style>
-<g>
-	<path class="st0" d="M3,0H2v1H1v1H0v7h2V8h1V0z"/>
-	<polygon points="2,2 1,2 1,8 2,8 2,7 3,7 3,1 2,1 	"/>
-</g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 20"  xmlns:v="https://vecta.io/nano"><path d="M3,0H2v1H1v1H0v7h2V8h1V0z" fill="#7d7d7d"/><path d="M2 2H1v6h1V7h1V1H2z"/><defs /></svg>
