@@ -5,39 +5,38 @@ const fs = require('fs')
 const wearables = []
 const sleeves = []
 
-wearable('0_Void')
-wearable('1_CamoHat')
-wearable('2_CamoPants') // body but doesn't have sleeves
-wearable('3_MK2Grenade')
-wearable('4_SnowCamoHat')
-wearable('5_SnowCamoPants') // body but no sleeves
-wearable('6_M67Grenade')
-wearable('7_MarineCap')
-bodyWearable('8_MarineJacket') // bodyWearable("8_MarineJacket")
-wearable('9_WalkieTalkie')
-wearable('10_LinkWhiteHat')
-bodyWearable('11_MessDress') // bodyWearable("11_MessDress")
-wearable('12_LinkBubbly')
-wearable('13_SergeyBeard')
-wearable('14_SergeyEyes')
-bodyWearable('15_RedPlaid') // bodyWearable("15_RedPlaid")
-bodyWearable('16_BluePlaid') //  bodyWearable("16_BluePlaid")
-wearable('17_LinkCube')
-wearable('18_AaveHeroMask')
-bodyWearable('19_AaveHeroShirt') // bodyWearable("19_AaveHeroShirt")
-wearable('20_AavePlush')
-wearable('21_CaptainAaveMask')
-bodyWearable('22_CaptainAaveSuit') // bodyWearable("22_CaptainAaveSuit")
-wearable('23_CaptainAaveShield')
-wearable('24_ThaaveHelmet')
-wearable('25_ThaaveSuit') // bodyWearable("25_ThaaveSuit")
-wearable('26_ThaaveHammer')
-wearable('27_MarcHair')
-bodyWearable('28_MarcOutfit') // bodyWearable("28_MarcOutfit")
-wearable('29_REKTSign')
-wearable('30_JordanHair')
-bodyWearable('31_JordanSuit') // bodyWearable("31_JordanSuit")
-wearable('32_AaveFlag')
+wearable('130_Fireball'),
+wearable('131_DragonHorns'),
+wearable('132_DragonWings'),
+wearable('133_PointyHorns'), // Body wearable but not sleeves
+wearable('134_L2Sign'),
+bodyWearable('135_PolygonShirt'),
+wearable('136_PolygonCap'),
+wearable('137_VoteSign'),
+bodyWearable('138_SnapshotShirt'),
+wearable('139_SnapshotHat'),
+wearable('140_ElfEars'),
+wearable('141_GemstoneRing'),
+wearable('142_PrincessTiara'),
+wearable('143_GoldNecklace'),
+wearable('144_PrincessHair'),
+wearable('145_GodliLocks'), // MISSING GODLI LOCKS
+wearable('146_ImperialMoustache'),
+wearable('147_TinyCrown'),
+wearable('148_RoyalScepter'),
+wearable('149_RoyalCrown'),
+bodyWearable('150_RoyalRobes'),
+wearable('151_CommonRofl'),
+wearable('152_UncommonRofl'), // MISSING 152_UncommonRofl
+wearable('153_RareRofl'), // MISSING 153_RareRofl
+wearable('154_LegendaryRofl'), // MISSING 154_LegendaryRofl
+wearable('155_MythicalRofl'),
+wearable('156_GodlikeRofl'),
+wearable('157_LilPumpDrink'),
+wearable('158_LilPumpGoatee'),
+wearable('159_LilPumpShades'),
+bodyWearable('160_LilPumpThreads'),
+wearable('161_LilPumpDreads')
 
 function stripSvg (svg) {
   // removes svg tag

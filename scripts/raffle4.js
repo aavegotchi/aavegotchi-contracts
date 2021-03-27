@@ -70,8 +70,8 @@ async function uploadSvgs (svgs) {
 }
 
 async function main () {
+  let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
   if (['hardhat', 'localhost'].includes(hre.network.name)) {
-    let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
     await hre.network.provider.request({
       method: 'hardhat_impersonateAccount',
       params: [owner]
@@ -86,6 +86,7 @@ async function main () {
   let receipt
   let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)
   let daoFacet = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
+  let svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
   console.log('Adding items')
   console.log(itemTypes.length)
   tx = await daoFacet.addItemTypes(itemTypes, { gasLimit: gasLimit })
@@ -99,6 +100,36 @@ async function main () {
 
   await uploadSvgs(wearablesSvgs)
   await uploadSvgs(sleevesSvgs.map(value => value.svg))
+
+  let sleevesSvgId = 23
+  let sleeves = []
+  for (const sleeve of sleevesSvgs) {
+    sleeves.push(
+      {
+        sleeveId: sleevesSvgId,
+        wearableId: sleeve.id
+      }
+    )
+    sleevesSvgId++
+  }
+  console.log('Associating sleeves svgs with body wearable svgs.')
+  tx = await svgFacet.setSleeves(sleeves, { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Sleeves associated:', tx.hash)
+
+  // deploy raffle:
+  console.log('Deploying raffle')
+  let vrfCoordinator = '0x3d2341ADb2D31f1c5530cDC622016af293177AE0'
+  let linkAddress = '0xb0897686c545045aFc77CF20eC7A532E3120E0F1'
+  let keyHash = '0xf86195cf7690c55907b2b611ebb7343a6f649bff128701cc542f0569e2c549da'
+  let fee = ethers.utils.parseEther('0.0001')
+  const RafflesContract = await ethers.getContractFactory('RafflesContract')
+  const rafflesContract = await RafflesContract.deploy(owner, vrfCoordinator, linkAddress, keyHash, fee)
+  await rafflesContract.deployed()
+  console.log('Deployed RaffleContract:' + rafflesContract.address)
 
   // let aavegotchiDiamondAddress = '0xd0576c4371bBb9e531700898760B0064237832Ee'
   // let aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'

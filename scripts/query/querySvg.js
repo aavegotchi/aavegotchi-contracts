@@ -24,8 +24,11 @@ async function main () {
   //   count++
   //   console.log('  -   ')
   // }
-  let aavegotchi = await svgFacet.getAavegotchiSvg(7422)
-  console.log(aavegotchi)
+  // let aavegotchi = await svgFacet.getAavegotchiSvg(7422)
+  // console.log(aavegotchi)
+  // 22
+  let result = await svgFacet.getSvg(ethers.utils.formatBytes32String('sleeves'), 23)
+  console.log(result)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
