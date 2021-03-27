@@ -145,16 +145,16 @@ const wearablesSvgs = [
   wearable("142_PrincessTiara"),
   wearable("143_GoldNecklace"),
   wearable("144_PrincessHair"),
-  wearable("145_GodliLocks"), //MISSING GODLI LOCKS
+  wearable("145_GodliLocks"),
   wearable("146_ImperialMoustache"),
   wearable("147_TinyCrown"),
   wearable("148_RoyalScepter"),
   wearable("149_RoyalCrown"),
   bodyWearable("150_RoyalRobes"),
   wearable("151_CommonRofl"),
-  wearable("152_UncommonRofl"), //MISSING 152_UncommonRofl
-  wearable("153_RareRofl"), //MISSING 153_RareRofl
-  wearable("154_LegendaryRofl"),//MISSING 154_LegendaryRofl
+  wearable("152_UncommonRofl"), 
+  wearable("153_RareRofl"), 
+  wearable("154_LegendaryRofl"),
   wearable("155_MythicalRofl"),
   wearable("156_GodlikeRofl"),
   wearable("157_LilPumpDrink"),
