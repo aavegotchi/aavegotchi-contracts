@@ -31,6 +31,9 @@ module.exports = {
       timeout: 60000,
       gas: 'auto'
     },
+    localhost: {
+      timeout: 60000
+    },
     matic: {
       url: process.env.MATIC_URL,
       accounts: [process.env.SECRET],
