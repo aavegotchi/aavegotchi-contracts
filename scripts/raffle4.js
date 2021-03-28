@@ -174,10 +174,19 @@ async function main () {
   ticketType.set(5, 5)
 
   for (const itemType of itemTypes) {
+    let quantity
+    if (itemType.svgId === 161) {
+      quantity = 3
+    } else if ([160, 159, 158, 157].includes(itemType.svgId)) {
+      quantity = itemType.maxQuantity / 2
+    } else {
+      quantity = itemType.maxQuantity
+    }
+
     raffleItems[ticketType.get(itemType.maxQuantity)].raffleItemPrizes.push({
       prizeAddress: diamondAddress,
       prizeId: itemType.svgId,
-      prizeQuantity: itemType.maxQuantity
+      prizeQuantity: quantity
     })
   }
   console.log('Raffle items:')

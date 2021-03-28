@@ -1,4 +1,5 @@
 /* global ethers */
+/* eslint-disable  prefer-const */
 
 async function main () {
 
