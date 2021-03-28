@@ -212,6 +212,25 @@ contract RafflesContract is IERC173, IERC165 {
         s.requestIdToRaffleId[requestId] = _raffleId;
     }
 
+    function drawRandomNumberTest(uint256 _raffleId) external {
+        require(msg.sender == s.contractOwner, "Raffle: Must be contract owner");
+        require(_raffleId < s.raffles.length, "Raffle: Raffle does not exist");
+        Raffle storage raffle = s.raffles[_raffleId];
+        require(raffle.raffleEnd < block.timestamp, "Raffle: Raffle time has not expired");
+        require(raffle.randomNumber == 0, "Raffle: Random number already generated");
+        require(raffle.randomNumberPending == false || msg.sender == s.contractOwner, "Raffle: Random number is pending");
+        raffle.randomNumberPending = true;
+        // Use Chainlink VRF to generate random number
+        require(s.link.balanceOf(address(this)) >= s.fee, "Not enough LINK");
+        bytes32 requestId = requestRandomness(s.keyHash, s.fee, 0);
+        s.requestIdToRaffleId[requestId] = _raffleId;
+
+        uint256 randomness = uint256(keccak256(abi.encodePacked(block.timestamp)));
+        s.raffles[_raffleId].randomNumber = randomness;
+        raffle.randomNumberPending = false;
+        emit RaffleRandomNumber(_raffleId, randomness);
+    }
+
     // rawFulfillRandomness is called by VRFCoordinator when it receives a valid VRFproof.
     /**
      * @notice Callback function used by VRF Coordinator
@@ -297,7 +316,7 @@ contract RafflesContract is IERC173, IERC165 {
      */
     function startRaffle(uint256 _raffleDuration, RaffleItemInput[] calldata _raffleItems) external {
         require(msg.sender == s.contractOwner, "Raffle: Must be contract owner");
-        require(_raffleDuration >= 3600, "Raffle: _raffleDuration must be greater than 1 hour");
+        require(_raffleDuration >= 0, "Raffle: _raffleDuration must be greater than 0");
         uint256 raffleEnd = block.timestamp + _raffleDuration;
         require(_raffleItems.length > 0, "Raffle: No raffle items");
         uint256 raffleId = s.raffles.length;

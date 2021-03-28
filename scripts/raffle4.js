@@ -71,7 +71,8 @@ async function uploadSvgs (svgs) {
 
 async function main () {
   let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
-  if (['hardhat', 'localhost'].includes(hre.network.name)) {
+  const testing = ['hardhat', 'localhost'].includes(hre.network.name)
+  if (testing) {
     await hre.network.provider.request({
       method: 'hardhat_impersonateAccount',
       params: [owner]
@@ -84,11 +85,10 @@ async function main () {
   }
   let tx
   let receipt
-  let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)
+  let itemsTransferFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', diamondAddress)).connect(signer)
   let daoFacet = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
   let svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
-  console.log('Adding items')
-  console.log(itemTypes.length)
+  console.log('Adding ', itemTypes.length, ' items')
   tx = await daoFacet.addItemTypes(itemTypes, { gasLimit: gasLimit })
   receipt = await tx.wait()
   if (!receipt.status) {
@@ -127,34 +127,79 @@ async function main () {
   let keyHash = '0xf86195cf7690c55907b2b611ebb7343a6f649bff128701cc542f0569e2c549da'
   let fee = ethers.utils.parseEther('0.0001')
   const RafflesContract = await ethers.getContractFactory('RafflesContract')
-  const rafflesContract = await RafflesContract.deploy(owner, vrfCoordinator, linkAddress, keyHash, fee)
+
+  let rafflesContract = await RafflesContract.deploy(owner, vrfCoordinator, linkAddress, keyHash, fee)
   await rafflesContract.deployed()
+  rafflesContract = await rafflesContract.connect(signer)
   console.log('Deployed RaffleContract:' + rafflesContract.address)
 
-  // let aavegotchiDiamondAddress = '0xd0576c4371bBb9e531700898760B0064237832Ee'
-  // let aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
-  // console.log(aavegotchiDiamondAddress)
-  // let svgFacet = await ethers.getContractAt('SvgFacet', aavegotchiDiamondAddress)
-  // let aavegotchi = await svgFacet.getAavegotchiSvg(4685)
-  // let aavegotchi = await svgFacet.getAavegotchiSvg(3564)
-  // pajamas:
-  // let aavegotchi = await svgFacet.getAavegotchiSvg(8120)
-  // aagent
-  // let aavegotchi = await svgFacet.getAavegotchiSvg(9887)
-  // uni eyes  5795
-  // hawwain shirt
-  // let aavegotchi = await svgFacet.getAavegotchiSvg(301)
-  // console.log(aavegotchi)
-  // let svgs = await itemsFacet.getSvgs(ethers.utils.formatBytes32String('eyeShapes'), [20, 21, 22, 23, 24])
-  // let count = 20
-  // for (const svg of svgs) {
-  //   console.log(count)
-  //   console.log(svg)
-  //   count++
-  //   console.log('  -   ')
-  // }
-  // let aavegotchi = await svgFacet.getAavegotchiSvg(7422)
-  // console.log(aavegotchi)
+  const itemIds = []
+  const quantities = []
+  for (const itemType of itemTypes) {
+    itemIds.push(itemType.svgId)
+    quantities.push(itemType.maxQuantity)
+  }
+  console.log('Mint prize items')
+  tx = await daoFacet.mintItems(owner, itemIds, quantities)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Prize items minted:', tx.hash)
+
+  const ticketAddress = '0xA02d547512Bb90002807499F05495Fe9C4C3943f'
+  const raffleItems = []
+  for (let ticketId = 0; ticketId < 6; ticketId++) {
+    raffleItems.push({
+      ticketAddress: ticketAddress,
+      ticketId: ticketId,
+      raffleItemPrizes: []
+    })
+  }
+
+  const ticketType = new Map()
+  ticketType.set(1000, 0)
+  ticketType.set(500, 1)
+  ticketType.set(250, 2)
+  ticketType.set(100, 3)
+  ticketType.set(50, 4)
+  ticketType.set(5, 5)
+
+  for (const itemType of itemTypes) {
+    raffleItems[ticketType.get(itemType.maxQuantity)].raffleItemPrizes.push({
+      prizeAddress: diamondAddress,
+      prizeId: itemType.svgId,
+      prizeQuantity: itemType.maxQuantity
+    })
+  }
+  console.log('Raffle items:')
+  // console.log(raffleItems)
+
+  console.log('Approve rafflesContract for wearable prizes')
+  tx = await itemsTransferFacet.setApprovalForAll(rafflesContract.address, true)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Set approval: ', tx.hash)
+
+  console.log('Starting raffle')
+  let raffleDuration
+  // 86400 = 1 day
+  const threeDays = 86400 * 3
+  const fiveMinutes = 60 * 5
+  if (testing) {
+    raffleDuration = fiveMinutes
+  } else {
+    raffleDuration = threeDays
+  }
+
+  tx = await rafflesContract.startRaffle(raffleDuration, raffleItems)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Started raffle: ', tx.hash)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
