@@ -88,8 +88,16 @@ async function main () {
   let itemsTransferFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', diamondAddress)).connect(signer)
   let daoFacet = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
   let svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
-  console.log('Adding ', itemTypes.length, ' items')
-  tx = await daoFacet.addItemTypes(itemTypes, { gasLimit: gasLimit })
+  console.log('Adding items', 0, 'to', itemTypes.length / 2)
+  tx = await daoFacet.addItemTypes(itemTypes.slice(0, itemTypes.length / 2), { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Items were added:', tx.hash)
+
+  console.log('Adding items', itemTypes.length / 2, 'to', itemTypes.length)
+  tx = await daoFacet.addItemTypes(itemTypes.slice(itemTypes.length / 2), { gasLimit: gasLimit })
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
