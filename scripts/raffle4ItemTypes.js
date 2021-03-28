@@ -1,7 +1,7 @@
 /* global ethers hre */
 /* eslint-disable  prefer-const */
 
-const { LedgerSigner } = require('@ethersproject/hardware-wallets')
+//const { LedgerSigner } = require('@ethersproject/hardware-wallets')
 
 const itemTypes = [
   {

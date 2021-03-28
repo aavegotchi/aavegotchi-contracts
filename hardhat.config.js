@@ -33,7 +33,7 @@ module.exports = {
       gas: 'auto'
     },
     localhost: {
-      timeout: 60000
+      timeout: 160000
     },
     matic: {
       url: process.env.MATIC_URL,
