@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/aavegotchi/aavegotchi-contracts#readme",
   "devDependencies": {
-    "@ethersproject/hardware-wallets": "file:./npm/ethers.js/packages/hardware-wallets",
+    "@ethersproject/hardware-wallets": "file:npm/ethers.js/packages/hardware-wallets",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "chai": "^4.3.4",
