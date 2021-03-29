@@ -205,10 +205,11 @@ async function main () {
   // 86400 = 1 day
   const threeDays = 86400 * 3
   const fiveMinutes = 60 * 5
+  const seventyNineHours = 3600 * 79
   if (testing) {
     raffleDuration = fiveMinutes
   } else {
-    raffleDuration = threeDays
+    raffleDuration = seventyNineHours
   }
 
   tx = await rafflesContract.startRaffle(raffleDuration, raffleItems)

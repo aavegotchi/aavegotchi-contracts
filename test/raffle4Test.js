@@ -7,7 +7,7 @@ const { itemTypes } = require('../scripts/raffle4ItemTypes.js')
 
 describe('Test Raffle4', function () {
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
-  const raffleContractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+  const raffleContractAddress = '0x6c723cac1E35FE29a175b287AE242d424c52c1CE'
   let itemsFacet
   let svgFacet
   let raffleContract
