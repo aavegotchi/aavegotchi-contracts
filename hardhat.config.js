@@ -78,12 +78,26 @@ module.exports = {
   },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
-    version: '0.8.1',
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200
+    compilers: [
+      {
+        version: '0.8.1',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200
+          }
+        }
+      },
+      {
+        version: '0.7.4',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200
+          }
+        }
       }
-    }
+    ]
+
   }
 }
