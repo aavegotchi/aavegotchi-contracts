@@ -25,16 +25,22 @@ module.exports = {
     hardhat: {
       forking: {
         url: process.env.MATIC_URL,
-        timeout: 60000
+        timeout: 80000
+        // blockNumber: 12552123
       },
       blockGasLimit: 20000000,
       timeout: 60000,
       gas: 'auto'
     },
+    localhost: {
+      timeout: 160000
+    },
     matic: {
       url: process.env.MATIC_URL,
+      // url: 'https://rpc-mainnet.maticvigil.com/',
       accounts: [process.env.SECRET],
-      blockGasLimit: 20000000,
+      // blockGasLimit: 20000000,
+      blockGasLimit: 200000000000,
       gasPrice: 1000000000,
       timeout: 90000
     },
@@ -74,12 +80,26 @@ module.exports = {
   },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
-    version: '0.8.1',
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200
+    compilers: [
+      {
+        version: '0.8.1',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200
+          }
+        }
+      },
+      {
+        version: '0.7.4',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200
+          }
+        }
       }
-    }
+    ]
+
   }
 }

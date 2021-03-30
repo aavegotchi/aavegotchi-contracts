@@ -1,5 +1,5 @@
 
-/* global ethers */
+/* global ethers hre */
 /* eslint prefer-const: "off" */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
@@ -21,12 +21,21 @@ function getSelector (func) {
 }
 
 async function main () {
-  const signer = new LedgerSigner(ethers.provider)
-  // const signer = (await ethers.getSigners())[0]
-
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
-  // kovan
-  // const diamondAddress = '0xd0576c4371bBb9e531700898760B0064237832Ee'
+  let signer
+  let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
+  const testing = ['hardhat', 'localhost'].includes(hre.network.name)
+  if (testing) {
+    await hre.network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: [owner]
+    })
+    signer = await ethers.provider.getSigner(owner)
+  } else if (hre.network.name === 'matic') {
+    signer = new LedgerSigner(ethers.provider)
+  } else {
+    throw Error('Incorrect network selected')
+  }
 
   const ItemsFacet = await ethers.getContractFactory('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet')
   let itemsFacet = await ItemsFacet.deploy()
