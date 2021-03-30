@@ -36,8 +36,8 @@ module.exports = {
       timeout: 160000
     },
     matic: {
-      // url: process.env.MATIC_URL,
-      url: 'https://rpc-mainnet.maticvigil.com/',
+      url: process.env.MATIC_URL,
+      // url: 'https://rpc-mainnet.maticvigil.com/',
       accounts: [process.env.SECRET],
       // blockGasLimit: 20000000,
       blockGasLimit: 200000000000,

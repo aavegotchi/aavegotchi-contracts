@@ -9,7 +9,7 @@ async function main () {
   let tx
   let receipt
   let ownershipFacet = await ethers.getContractAt('OwnershipFacet', diamondAddress)
-  let owner = await ownershipFacet.owner()
+  const owner = await ownershipFacet.owner()
   const accounts = await ethers.getSigners()
   const devAccountAddress = await accounts[0].getAddress()
   console.log('Diamond owner:', owner)
