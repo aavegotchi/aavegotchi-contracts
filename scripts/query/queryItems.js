@@ -2,11 +2,11 @@
 /* eslint-disable  prefer-const */
 
 async function main () {
-  let aavegotchiDiamondAddress = '0xd0576c4371bBb9e531700898760B0064237832Ee'
+  let aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   console.log(aavegotchiDiamondAddress)
-  let itemsFacet = await ethers.getContractAt('SvgFacet', aavegotchiDiamondAddress)
-  let svg = await itemsFacet.getItemSvg(115)
-  console.log(svg)
+  let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', aavegotchiDiamondAddress)
+  let item = await itemsFacet.getItemType(40)
+  console.log(item)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
