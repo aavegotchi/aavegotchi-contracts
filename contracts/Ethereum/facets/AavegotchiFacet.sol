@@ -15,17 +15,17 @@ contract AavegotchiFacet {
         uint256 len = s.tokenIds.length;
         tokenIds_ = new uint256[](len);
         uint256 count;
-        for (uint256 i; i < len;) {
+        for (uint256 i; i < len; ) {
             uint256 tokenId = s.tokenIds[i];
             if (s.aavegotchis[tokenId].owner == _owner) {
-                tokenIds_[i] = tokenId;                
+                tokenIds_[count] = tokenId;
                 unchecked {
                     count++;
                 }
             }
             unchecked {
                 i++;
-            }            
+            }
         }
         assembly {
             mstore(tokenIds_, count)
