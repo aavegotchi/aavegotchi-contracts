@@ -9,7 +9,7 @@ async function main(){
   console.log('impersonating')
      await hre.network.provider.request({
         method: "hardhat_impersonateAccount",
-        params: ["0x02491D37984764d39b99e4077649dcD349221a62"]
+        params: [owner]
     })
 
     const addresses= ["0xeda29227543b2bc0d8e4a5220ef0a34868033a2d",
@@ -67,29 +67,11 @@ async function main(){
     "0x6fec474030a273a673dff02f83bb1ceb9de7b82c"]
 
     console.log('creating ap array')
-    const xpValue= [...Array(250).fill(addresses.length)]
-
+  
 
     const signer = ethers.provider.getSigner(owner)
-
-    const Aaveg = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', diamondAddress)
-
-   // console.log('facet:',Aaveg)
-  //  console.log('aave:',Aaveg)
-    const dao = await ethers.getContractAt('DAOFacet', diamondAddress)
-
-
-    //addresses.forEach(async (ownerAddress) => {
-
-   // let ownerAddress = "0xeda29227543b2bc0d8e4a5220ef0a34868033a2d"
-
-   //   console.log('owner address:',ownerAddress)
-   // const ownerGotchis = await Aaveg.tokenIdsOfOwner(ownerAddress)
-
-   // console.log('owner gotchis:',ownerGotchis)
-   
-
-
+ 
+    /*DATA FROM SUBGRAPH*/
  
    var data= [
     {
@@ -644,31 +626,33 @@ async function main(){
     }
   ]
 
-  for(let i=0;i<data.length-1;i++){
-    var log=(data[i].gotchisOwned[0].experience);//breaks immediately it encounters any internal undefined array
-    const xpValue= [...Array(250).fill(data.length.length)];
-    }
 
-    /**send out tokens */
+  /*PARAMS*/
+
+  const xpPerGotchi = 250
+
+  const dao = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
+
+  for (let index = 0; index < data.length; index++) {
+    const item = data[index];
+
+    let gotchisOwned = item.gotchisOwned
+
+      let tokenIDs = []
+      let xp = []
   
-
-    //  const aavegotchiInfo = await Aaveg.getAavegotchi(tokenID)
-     // console.log('aavegotchi info:',aavegotchiInfo)
-     // return aavegotchiInfo
-   // }));
-
-    console.log('owner:',allAavegotchisOfOwner)
-
-  //  console.log('owner gotchis:',ownerGotchis)
-   
-
-    //  if (Number(ownerGotchis[0].status.toString())>=3){
-     //   const gotchiIds = [...Array(ownerGotchis[0].status.toString()).fill(addresses.length)];
-    //    console.log('gotchi ids:',gotchiIds)
-     //   const xpValue= [...Array(250).fill(addresses.length)];
- 
+      gotchisOwned.forEach((gotchi) => {
+          tokenIDs.push(gotchi.id)
+          xp.push(xpPerGotchi)
+      });
+  
+      await dao.grantExperience(tokenIDs,xp)
+  
+      console.log(`${xpPerGotchi} Experience granted to ${tokenIDs.length} Aavegotchis owned by ${addresses[index]}`)
     
- 
+    
+  }
+}
    
   //  });
 // We recommend this pattern to be able to use async/await everywhere
@@ -679,3 +663,4 @@ main()
         console.error(error)
         process.exit(1)
     })
+  
