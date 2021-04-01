@@ -168,6 +168,10 @@ struct AppStorage {
     uint32[] tokenIds;
     mapping(uint256 => uint256) tokenIdIndexes;
     mapping(address => mapping(address => bool)) operators;
+
+    //petters mapping
+    mapping(address => mapping(uint256 => bool)) petter;
+
     mapping(uint256 => address) approved;
     mapping(string => bool) aavegotchiNamesUsed;
     mapping(address => uint256) metaNonces;

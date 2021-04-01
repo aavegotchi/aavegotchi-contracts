@@ -187,4 +187,31 @@ contract AavegotchiGameFacet is Modifiers {
         s.aavegotchis[_tokenId].usedSkillPoints += totalUsed;
         emit SpendSkillpoints(_tokenId, _values);
     }
+
+    function pet(uint256[] calldata _tokenIds) external {
+      address sender = LibMeta.msgSender();
+      for (uint256 i; i < _tokenIds.length; i++) {
+          uint256 tokenId = _tokenIds[i];
+          address owner = s.aavegotchis[tokenId].owner;
+          require(
+              sender == owner || s.operators[owner][sender] || s.approved[tokenId] == sender || isApprovedPetter(sender, tokenId) == true,
+              "AavegotchiGameFacet: Not owner of token, approved, or petter"
+          );
+          LibAavegotchi.interact(tokenId);
+      }
+    }
+
+    function approvePetter(address newPetter, uint256 tokenId) external {
+        address sender = LibMeta.msgSender();
+        address owner = s.aavegotchis[tokenId].owner;
+        require(
+            sender == owner || s.operators[owner][sender] || s.approved[tokenId] == sender,
+            "AavegotchiGameFacet: Not owner of token or approved"
+        );
+        s.petter[newPetter][tokenId] = true;
+    }
+
+    function isApprovedPetter(address petter, uint256 _tokenId) internal returns (bool) {
+        return s.petter[petter][_tokenId];
+    }
 }
