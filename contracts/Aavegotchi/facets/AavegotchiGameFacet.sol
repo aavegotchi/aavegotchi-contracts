@@ -194,7 +194,7 @@ contract AavegotchiGameFacet is Modifiers {
           uint256 tokenId = _tokenIds[i];
           address owner = s.aavegotchis[tokenId].owner;
           require(
-              sender == owner || s.operators[owner][sender] || s.approved[tokenId] == sender || isApprovedPetter(sender, tokenId) == true,
+              sender == owner || s.operators[owner][sender] || s.approved[tokenId] == sender || s.petter[sender][tokenId],
               "AavegotchiGameFacet: Not owner of token, approved, or petter"
           );
           LibAavegotchi.interact(tokenId);
@@ -209,9 +209,5 @@ contract AavegotchiGameFacet is Modifiers {
             "AavegotchiGameFacet: Not owner of token or approved"
         );
         s.petter[newPetter][tokenId] = true;
-    }
-
-    function isApprovedPetter(address petter, uint256 _tokenId) internal returns (bool) {
-        return s.petter[petter][_tokenId];
     }
 }
