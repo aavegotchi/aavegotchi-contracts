@@ -23,21 +23,25 @@ async function main(){
     })
     const signer = ethers.provider.getSigner(owner)
  
-    /*Aragon*/
-  //  const addresses = aragonAddresses
-  //  const data = aragonBatch1
+    //Airdrop 1: Aragon
+    const addresses = aragonAddresses
+   const data = aragonBatch1
 
-    //Snapshot 1
+    //Airdrop 2: Snapshot 1 Batch 1
     const addresses = snapshot1Addresses
-   // const data = snapshot1Batch1
+    const data = snapshot1Batch1
+   
+    //Airdrop 3: Snapshot 1 Batch 2
+    const addresses = snapshot1Addresses
     const data = snapshot1Batch2
 
-    //Snapshot 2
-   // const addresses = snapshot2Addresses
-   // const data = snapshot2Batch1
-   // const data = snapshot2Batch2
+    //Airdrop 4: Snapshot 2 Batch 1
+    const addresses = snapshot2Addresses
+    const data = snapshot2Batch1
 
-    
+   //Airdrop 5: Snapshot 2 Batch 2
+   const addresses = snapshot2Addresses
+   const data = snapshot2Batch2
 
     console.log('address length:',addresses.length)
     console.log('users length:',data.data.users.length)
