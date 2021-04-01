@@ -26,22 +26,27 @@ async function main(){
     //Airdrop 1: Aragon
     const addresses = aragonAddresses
    const data = aragonBatch1
+   const xpPerGotchi = 250
 
     //Airdrop 2: Snapshot 1 Batch 1
-    const addresses = snapshot1Addresses
-    const data = snapshot1Batch1
+  //  const addresses = snapshot1Addresses
+  //  const data = snapshot1Batch1
+  //  const xpPerGotchi = 20
    
     //Airdrop 3: Snapshot 1 Batch 2
-    const addresses = snapshot1Addresses
-    const data = snapshot1Batch2
+  //  const addresses = snapshot1Addresses
+  //  const data = snapshot1Batch2
+  //  const xpPerGotchi = 20
 
     //Airdrop 4: Snapshot 2 Batch 1
-    const addresses = snapshot2Addresses
-    const data = snapshot2Batch1
+  //  const addresses = snapshot2Addresses
+  //  const data = snapshot2Batch1
+  //  const xpPerGotchi = 20
 
    //Airdrop 5: Snapshot 2 Batch 2
-   const addresses = snapshot2Addresses
-   const data = snapshot2Batch2
+  // const addresses = snapshot2Addresses
+  // const data = snapshot2Batch2
+  // const xpPerGotchi = 20
 
     console.log('address length:',addresses.length)
     console.log('users length:',data.data.users.length)
@@ -49,7 +54,7 @@ async function main(){
 
   /*PARAMS*/
 
-  const xpPerGotchi = 250
+
 
   const dao = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
 
