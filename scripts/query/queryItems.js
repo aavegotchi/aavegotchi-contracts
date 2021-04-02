@@ -5,7 +5,7 @@ async function main () {
   let aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   console.log(aavegotchiDiamondAddress)
   let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', aavegotchiDiamondAddress)
-  let item = await itemsFacet.getItemType(40)
+  let item = await itemsFacet.getItemType(135)
   console.log(item)
 }
 
@@ -17,3 +17,4 @@ main()
     console.error(error)
     process.exit(1)
   })
+

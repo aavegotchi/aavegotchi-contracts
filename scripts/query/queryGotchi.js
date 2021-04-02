@@ -6,7 +6,9 @@ async function main () {
   let aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   console.log(aavegotchiDiamondAddress)
   let svgFacet = await ethers.getContractAt('SvgFacet', aavegotchiDiamondAddress)
-  // let aavegotchi = await svgFacet.getAavegotchiSvg(4685)
+  let aavegotchi = await svgFacet.getAavegotchiSvg(2575)
+  console.log(aavegotchi)
+
   // let aavegotchi = await svgFacet.getAavegotchiSvg(3564)
   // pajamas:
   // let aavegotchi = await svgFacet.getAavegotchiSvg(8120)
@@ -18,14 +20,14 @@ async function main () {
   // console.log(aavegotchi)
   // 11 = robe
   // 13 = aagent shirt
-  let svgs = await svgFacet.getSvgs(ethers.utils.formatBytes32String('sleeves'), [22])
-  let count = 0
-  for (const svg of svgs) {
-    console.log(count)
-    console.log(svg)
-    count++
-    console.log('  -   ')
-  }
+  // let svgs = await svgFacet.getSvgs(ethers.utils.formatBytes32String('wearables'), [135])
+  // let count = 0
+  // for (const svg of svgs) {
+  //   console.log(count)
+  //   console.log(svg)
+  //   count++
+  //   console.log('  -   ')
+  // }
   // let aavegotchi = await svgFacet.getAavegotchiSvg(7274)
   // console.log(aavegotchi)
 }

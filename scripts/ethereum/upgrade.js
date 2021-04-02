@@ -19,7 +19,7 @@ function getSelector (func) {
 
 async function main () {
   // gorli
-  const diamondAddress = '0x514f64665331259529c3DCD46551bba70ABBE164'
+  const diamondAddress = '0x6c1fc89903d13EA41a5571751aD21973dB45c9e7'
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
   // const diamondLoupeFacet = await ethers.getContractAt('DiamondLoupeFacet', diamondAddress)
   //   const bridgeFacetAddress = await diamondLoupeFacet.facetAddress(getSelector('function exitTokens(address, address rootToken, bytes calldata log) external'))
@@ -41,13 +41,13 @@ async function main () {
   await aavegotchiFacet.deployed()
 
   const cut = [
-    {
-      facetAddress: bridgeFacet.address,
-      action: FacetCutAction.Replace,
-      functionSelectors: [
-        getSelector('function exitTokens(address,address rootToken,bytes calldata log) external')
-      ]
-    },
+    // {
+    //   facetAddress: bridgeFacet.address,
+    //   action: FacetCutAction.Replace,
+    //   functionSelectors: [
+    //     getSelector('function exitTokens(address,address rootToken,bytes calldata log) external')
+    //   ]
+    // },
     {
       facetAddress: aavegotchiFacet.address,
       action: FacetCutAction.Replace,

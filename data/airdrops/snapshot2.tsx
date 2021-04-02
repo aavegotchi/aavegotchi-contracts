@@ -18511,4 +18511,4 @@ const snapshot2Batch1 = {
 
 exports.snapshot2Addresses = snapshot2Addresses
 exports.snapshot2Batch1 = snapshot2Batch1
-exports.snapshot2Batch2 = snapshot2Batch1
+exports.snapshot2Batch2 = snapshot2Batch2
