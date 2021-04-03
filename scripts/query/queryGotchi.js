@@ -6,8 +6,8 @@ async function main () {
   let aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   console.log(aavegotchiDiamondAddress)
   let svgFacet = await ethers.getContractAt('SvgFacet', aavegotchiDiamondAddress)
-  let aavegotchi = await svgFacet.getAavegotchiSvg(2575)
-  console.log(aavegotchi)
+  // let aavegotchi = await svgFacet.getAavegotchiSvg(8380)
+  // console.log(aavegotchi)
 
   // let aavegotchi = await svgFacet.getAavegotchiSvg(3564)
   // pajamas:
