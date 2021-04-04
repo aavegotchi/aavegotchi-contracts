@@ -34,7 +34,7 @@ module.exports = {
     },
     localhost: {
       timeout: 160000
-    },
+    },/** 
     matic: {
       url: process.env.MATIC_URL,
       // url: 'https://rpc-mainnet.maticvigil.com/',
@@ -66,7 +66,7 @@ module.exports = {
       accounts: [process.env.SECRET],
       blockGasLimit: 20000000,
       gasPrice: 2100000000
-    }
+    }*/
   },
   gasReporter: {
     currency: 'USD',

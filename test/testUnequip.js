@@ -4,6 +4,8 @@ const { ethers } = require('hardhat')
 describe('Test uneqipping', async function () {
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
 
+  
+
   const totalUnequip=[
     0, 0, 0, 0, 0, 0,
     0, 0, 0,  0, 0, 0,
@@ -19,12 +21,11 @@ describe('Test uneqipping', async function () {
   before(async function () {
     global.account="0xF3a57FAbea6e198403864640061E3abc168cee80"
     global.signer=ethers.provider.getSigner(global.account)
-    itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)
   
-
+  
     //let currentGotchiBal= await (itemsFacet.equippedWearables(6845))
-   
-   let equippedBal='39'
+    itemsFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)).connect(global.signer)
+   let equippedBal=39
   })
   it('sends item back after unequipping', async function () {
 
@@ -41,7 +42,7 @@ describe('Test uneqipping', async function () {
 
    await global.itemsFacet.equipWearables(6847,totalUnequip)
 
-   let currentSlotBal=await(itemsFacet.balanceOf(owner,39))
+   let currentSlotBal=await(itemsFacet.balanceOf(owner,equippedBal))
 
     expect(currentSlotBal.toString()).to.equal('1')
      
