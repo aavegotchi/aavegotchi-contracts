@@ -72,7 +72,7 @@ library LibItems {
     }
 
     function removeFromOwner(
-        address _from,
+        address _from, 
         uint256 _id,
         uint256 _value
     ) internal {
