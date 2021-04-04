@@ -43,7 +43,7 @@ describe('Test uneqipping', async function () {
 
    let currentSlotBal=await(itemsFacet.balanceOf(owner,39))
 
-    expect(currentSlotBal.toString()).to.equal(equippedBal)
+    expect(currentSlotBal.toString()).to.equal('1')
      
   })
 
