@@ -253,7 +253,7 @@ contract ItemsFacet is Modifiers {
             //if new value for wearable is not 0 and there  is no equipped wearable in that slot
             //equip the new wearable to that slot
             
-            if (nftBalance < neededBalance && wearableId== 0 && existingEquippedWearableId != 0) {
+            if (nftBalance < neededBalance && wearableId!= 0 && existingEquippedWearableId == 0) {
                 uint256 ownerBalance = s.ownerItemBalances[sender][wearableId];
                 require(nftBalance + ownerBalance >= neededBalance, "ItemsFacet: Wearable is not in inventories");
                 uint256 balToTransfer = neededBalance - nftBalance;
