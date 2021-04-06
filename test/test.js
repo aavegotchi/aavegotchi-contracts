@@ -92,6 +92,10 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     const oneMillion = ethers.utils.parseEther('10000000')
     expect(balance).to.equal(oneMillion)
   })
+
+  // it.only('Should pass', async () => {
+  //   expect(1).to.equal(1);
+  // });
 })
 
 describe('Buying Portals, VRF', function () {
@@ -607,7 +611,7 @@ describe('Shop and Vouchers', async function () {
 })
 
 describe('Leveling up', async function () {
-  it('Aavegotchi should start with 0 XP and Level 0', async function () {
+  it.only('Aavegotchi should start with 0 XP and Level 0', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
     expect(aavegotchi.level).to.equal(1)
     expect(aavegotchi.experience).to.equal(0)
@@ -705,7 +709,7 @@ describe('Leveling up', async function () {
   })
 
   it('Experience required to Level 99 should be 6200', async function () {
-    //Current experience is 474000. Level 99 requires 480200. 
+    //Current experience is 474000. Level 99 requires 480200.
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
     expect(aavegotchi.toNextLevel).to.equal(6200)
   })
