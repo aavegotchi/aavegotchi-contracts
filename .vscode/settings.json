@@ -1,5 +1,6 @@
 {
   "solidity.compileUsingRemoteVersion": "v0.8.1+commit.df193b15",
 "liveServer.settings.port": 5502,
-"editor.tabSize": 2
+"editor.tabSize": 2,
+"solidity.defaultCompiler": "remote"
 }
