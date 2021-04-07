@@ -1,27 +1,44 @@
 const { expect } = require("chai");
+const { truffleAssert } = require("truffle-assertions");
 
 describe("Shopping  ", () => {
-  let shopFacet, itemsFacet, owner, addr1;
+  let shopFacet, itemsFacet, daoFacet, aavegotchiDiamondAddress, owner, addr1;
 
 
   before(async () => {
-    shopFacet = await ethers.getContractFactory("contracts/Aavegotchi/facets/ShopFacet.sol:ShopFacet");
-    shop = await shopFacet.deploy();
+    aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
 
-    itemsFacet = await ethers.getContractFactory("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet");
-    items = await itemsFacet.deploy();
+    shopFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ShopFacet.sol:ShopFacet", aavegotchiDiamondAddress);
+    itemsFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet", aavegotchiDiamondAddress);
+    daoFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet", aavegotchiDiamondAddress);
 
     [owner, addr1] = await ethers.getSigners();
   });
 
-  it.only("Should purchase items with Ghost", async () => {
+  it.only("Should purchase items with GHST", async () => {
     // console.log("itemsFacet", itemsFacet);
-    let balances = await items.itemBalances(addr1.address);
-    console.log("balance", balances);
+    // let balances = await items.itemBalances(addr1.address);
+
     // expect(balances[1]).to.equal(10);
-    //
-    // await shopFacet.purchaseItemsWithGhst(addr1.address, ['1'], ['10']);
-    // balances = await itemsFacet.itemBalances(addr1.address);
+    await daoFacet.connect(owner).setDao(addr1, owner);
+    await daoFacet.connect(addr1).updateItemTypeMaxQuantity(['129'], ['100']);
+
+    await shopFacet.purchaseItemsWithGhst(addr1.address, ['129'], ['10']);
+    let balances = await itemsFacet.itemBalances(addr1.address);
+    console.log("balance", balances);
     // expect(balances[1]).to.equal(20);
+  });
+
+  it("Should NOT purchase items because items cannot be purchased with GHST", async () => {
+    await expect(shopFacet.purchaseItemsWithGhst(addr1.address, ['1'], ['10'])).to.be.reverted;
+  });
+
+  it("Should NOT purchase items because total item type quantity exceeds max quantity", async () => {
+    await expect(shopFacet.purchaseItemsWithGhst(addr1.address, ['90'], ['10'])).to.be.reverted;
+  });
+
+  it("Should NOT purchase items because itemIds.length is NOT equal to quantities.length", async () => {
+    await expect(shopFacet.purchaseItemsWithGhst(addr1.address, ['90'], ['10', '1'])).to.be.reverted;
+    await expect(shopFacet.purchaseItemsWithGhst(addr1.address, ['90', '129'], ['10'])).to.be.reverted;
   });
 });

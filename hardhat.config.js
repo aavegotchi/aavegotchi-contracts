@@ -31,53 +31,54 @@ module.exports = {
       blockGasLimit: 20000000,
       timeout: 60000,
       gas: 'auto'
-    },
-    localhost: {
-      timeout: 160000
-    },
-    matic: {
-      url: process.env.MATIC_URL,
-      // url: 'https://rpc-mainnet.maticvigil.com/',
-      accounts: [process.env.SECRET],
-      // blockGasLimit: 20000000,
-      blockGasLimit: 200000000000,
-      gasPrice: 1000000000,
-      timeout: 90000
-    },
-    mumbai: {
-      url: 'https://rpc-mumbai.matic.today',
-      accounts: [process.env.SECRET],
-      blockGasLimit: 20000000,
-      gasPrice: 1000000000
-    },
-    gorli: {
-      url: process.env.GORLI,
-      accounts: [process.env.SECRET],
-      blockGasLimit: 20000000,
-      gasPrice: 2100000000
-    },
-    kovan: {
-      url: process.env.KOVAN_URL,
-      accounts: [process.env.SECRET],
-      gasPrice: 5000000000
-    },
-    ethereum: {
-      url: process.env.MAINNET_URL,
-      accounts: [process.env.SECRET],
-      blockGasLimit: 20000000,
-      gasPrice: 2100000000
     }
-  },
-  gasReporter: {
-    currency: 'USD',
-    gasPrice: 100,
-    enabled: false
-  },
-  contractSizer: {
-    alphaSort: false,
-    runOnCompile: false,
-    disambiguatePaths: true
-  },
+    },
+    // localhost: {
+    //   timeout: 160000
+    // },
+    // matic: {
+    //   url: process.env.MATIC_URL,
+    //   // url: 'https://rpc-mainnet.maticvigil.com/',
+    //   accounts: [process.env.SECRET],
+    //   // blockGasLimit: 20000000,
+    //   blockGasLimit: 200000000000,
+    //   gasPrice: 1000000000,
+    //   timeout: 90000
+    // },
+  //   mumbai: {
+  //     url: 'https://rpc-mumbai.matic.today',
+  //     accounts: [process.env.SECRET],
+  //     blockGasLimit: 20000000,
+  //     gasPrice: 1000000000
+  //   },
+  //   gorli: {
+  //     url: process.env.GORLI,
+  //     accounts: [process.env.SECRET],
+  //     blockGasLimit: 20000000,
+  //     gasPrice: 2100000000
+  //   },
+  //   kovan: {
+  //     url: process.env.KOVAN_URL,
+  //     accounts: [process.env.SECRET],
+  //     gasPrice: 5000000000
+  //   },
+  //   ethereum: {
+  //     url: process.env.MAINNET_URL,
+  //     accounts: [process.env.SECRET],
+  //     blockGasLimit: 20000000,
+  //     gasPrice: 2100000000
+  //   }
+  // },
+  // gasReporter: {
+  //   currency: 'USD',
+  //   gasPrice: 100,
+  //   enabled: false
+  // },
+  // contractSizer: {
+  //   alphaSort: false,
+  //   runOnCompile: false,
+  //   disambiguatePaths: true
+  // },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
     compilers: [
