@@ -2,7 +2,12 @@ const { expect } = require("chai");
 const { truffleAssert } = require("truffle-assertions");
 
 describe("Shopping  ", () => {
-  let shopFacet, itemsFacet, daoFacet, aavegotchiDiamondAddress, owner, addr1;
+  let shopFacet,
+      itemsFacet,
+      daoFacet,
+      aavegotchiDiamondAddress,
+      owner,
+      addr1;
 
 
   before(async () => {
@@ -13,6 +18,13 @@ describe("Shopping  ", () => {
     daoFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet", aavegotchiDiamondAddress);
 
     [owner, addr1] = await ethers.getSigners();
+    owner = await (await ethers.getContractAt('OwnershipFacet', aavegotchiDiamondAddress)).owner();
+
+    await hre.network.provider.request({
+       method: "hardhat_impersonateAccount",
+       params: [owner]
+     }
+    );
   });
 
   it.only("Should purchase items with GHST", async () => {
@@ -20,12 +32,12 @@ describe("Shopping  ", () => {
     // let balances = await items.itemBalances(addr1.address);
 
     // expect(balances[1]).to.equal(10);
-    await daoFacet.connect(owner).setDao(addr1, owner);
-    await daoFacet.connect(addr1).updateItemTypeMaxQuantity(['129'], ['100']);
+    // await daoFacet.connect(owner).setDao(addr1, addr1);
+    await (await daoFacet.connect(owner)).updateItemTypeMaxQuantity(['129'], ['1000']);
 
-    await shopFacet.purchaseItemsWithGhst(addr1.address, ['129'], ['10']);
-    let balances = await itemsFacet.itemBalances(addr1.address);
-    console.log("balance", balances);
+    // await shopFacet.purchaseItemsWithGhst(addr1.address, ['129'], ['10']);
+    // let balances = await itemsFacet.itemBalances(addr1.address);
+    // console.log("balance", balances);
     // expect(balances[1]).to.equal(20);
   });
 
