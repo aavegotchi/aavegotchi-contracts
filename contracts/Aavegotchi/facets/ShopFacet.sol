@@ -9,6 +9,7 @@ import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
 contract ShopFacet {
     AppStorage internal s;
@@ -23,6 +24,7 @@ contract ShopFacet {
     );
 
     event PurchaseItemsWithGhst(address indexed _buyer, address indexed _to, uint256[] _itemIds, uint256[] _quantities, uint256 _totalPrice);
+    event PurchaseTransferItemsWithGhst(address indexed _buyer, address indexed _to, uint256[] _itemIds, uint256[] _quantities, uint256 _totalPrice);
 
     event PurchaseItemsWithVouchers(address indexed _buyer, address indexed _to, uint256[] _itemIds, uint256[] _quantities);
 
@@ -98,5 +100,33 @@ contract ShopFacet {
         emit LibERC1155.TransferBatch(sender, address(0), _to, _itemIds, _quantities);
         LibAavegotchi.purchase(sender, totalPrice);
         LibERC1155.onERC1155BatchReceived(sender, address(0), _to, _itemIds, _quantities, "");
+    }
+
+    function purchaseTransferItemsWithGhst(
+        address _to,
+        uint256[] calldata _itemIds,
+        uint256[] calldata _quantities
+    ) external {
+        require(_to != address(0), "ItemsTransfer: Can't transfer to 0 address");
+        require(_itemIds.length == _quantities.length, "ItemsTransfer: ids not same length as values");
+        address sender = LibMeta.msgSender();
+        address from = address(this);       
+        uint256 totalPrice; 
+        for (uint256 i; i < _itemIds.length; i++) {
+            uint256 itemId = _itemIds[i];
+            uint256 quantity = _quantities[i];
+            ItemType storage itemType = s.itemTypes[itemId];
+            require(itemType.canPurchaseWithGhst, "ShopFacet: Can't purchase item type with GHST");
+            totalPrice += quantity * itemType.ghstPrice;
+            LibItems.removeFromOwner(from, itemId, quantity);
+            LibItems.addToOwner(_to, itemId, quantity);
+            LibERC1155Marketplace.updateERC1155Listing(address(this), itemId, from);
+        }
+        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
+        require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");        
+        emit LibERC1155.TransferBatch(sender, from, _to, _itemIds, _quantities);
+        emit PurchaseTransferItemsWithGhst(sender, _to, _itemIds, _quantities, totalPrice);
+        LibAavegotchi.purchase(sender, totalPrice);
+        LibERC1155.onERC1155BatchReceived(sender, from, _to, _itemIds, _quantities, '');
     }
 }
