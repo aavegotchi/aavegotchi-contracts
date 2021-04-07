@@ -364,8 +364,9 @@ library LibAavegotchi {
         emit LibERC721.Transfer(_from, _to, _tokenId);
     }
 
-    function verify(uint256 _tokenId) internal pure {
-        if (_tokenId < 10) {}
-        revert("Not verified");
+  /*  function verify(uint256 _tokenId) internal pure {
+       // if (_tokenId < 10) {}
+       // revert("Not verified");
     }
+    */
 }
