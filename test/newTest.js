@@ -5,7 +5,10 @@ describe("Shopping  ", () => {
   let shopFacet,
       itemsFacet,
       daoFacet,
+      libAavegotchi,
+      ghstFacet,
       aavegotchiDiamondAddress,
+      signer,
       owner,
       addr1;
 
@@ -16,15 +19,19 @@ describe("Shopping  ", () => {
     shopFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ShopFacet.sol:ShopFacet", aavegotchiDiamondAddress);
     itemsFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet", aavegotchiDiamondAddress);
     daoFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet", aavegotchiDiamondAddress);
+    libAavegotchi = await ethers.getContractAt("LibAavegotchi", aavegotchiDiamondAddress);
+    ghstFacet = await ethers.getContractAt("GHSTFacet", aavegotchiDiamondAddress);
 
     [owner, addr1] = await ethers.getSigners();
-    owner = await (await ethers.getContractAt('OwnershipFacet', aavegotchiDiamondAddress)).owner();
+    owner = await (await ethers.getContractAt("OwnershipFacet", aavegotchiDiamondAddress)).owner();
 
     await hre.network.provider.request({
        method: "hardhat_impersonateAccount",
        params: [owner]
      }
     );
+
+    signer = ethers.provider.getSigner(owner);
   });
 
   it.only("Should purchase items with GHST", async () => {
@@ -33,11 +40,13 @@ describe("Shopping  ", () => {
 
     // expect(balances[1]).to.equal(10);
     // await daoFacet.connect(owner).setDao(addr1, addr1);
-    await (await daoFacet.connect(owner)).updateItemTypeMaxQuantity(['129'], ['1000']);
+    await (await daoFacet.connect(signer)).updateItemTypeMaxQuantity(['129'], ['1000']);
 
-    // await shopFacet.purchaseItemsWithGhst(addr1.address, ['129'], ['10']);
-    // let balances = await itemsFacet.itemBalances(addr1.address);
-    // console.log("balance", balances);
+    await ghstFacet.mintTo(addr1.address);
+
+    await shopFacet.purchaseItemsWithGhst(addr1.address, ['129'], ['10']);
+    let balances = await itemsFacet.itemBalances(addr1.address);
+    console.log("balance", balances);
     // expect(balances[1]).to.equal(20);
   });
 
@@ -52,5 +61,11 @@ describe("Shopping  ", () => {
   it("Should NOT purchase items because itemIds.length is NOT equal to quantities.length", async () => {
     await expect(shopFacet.purchaseItemsWithGhst(addr1.address, ['90'], ['10', '1'])).to.be.reverted;
     await expect(shopFacet.purchaseItemsWithGhst(addr1.address, ['90', '129'], ['10'])).to.be.reverted;
+  });
+
+  it("Should NOT purchase items with GHST because address does NOT have enough GHST to purchase item", async () => {
+    await (await daoFacet.connect(signer)).updateItemTypeMaxQuantity(['129'], ['1000']);
+
+    await expect(shopFacet.purchaseItemsWithGhst(addr1.address, ['129'], ['10']));
   });
 });
