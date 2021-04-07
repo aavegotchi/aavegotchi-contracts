@@ -611,7 +611,7 @@ describe('Shop and Vouchers', async function () {
 })
 
 describe('Leveling up', async function () {
-  it.only('Aavegotchi should start with 0 XP and Level 0', async function () {
+  it('Aavegotchi should start with 0 XP and Level 0', async function () {
     const aavegotchi = await global.aavegotchiFacet.getAavegotchi(testAavegotchiId)
     expect(aavegotchi.level).to.equal(1)
     expect(aavegotchi.experience).to.equal(0)
