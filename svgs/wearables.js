@@ -157,8 +157,8 @@ const wearablesSvgs = [
   wearable("154_LegendaryRofl"),
   wearable("155_MythicalRofl"),
   wearable("156_GodlikeRofl"),
-  wearable("157_LilPumpDrink"),
-  wearable("158_LilPumpGoatee"),
+  wearable("157_LilPumpGoatee"),
+  wearable("158_LilPumpDrink"),
   wearable("159_LilPumpShades"),
   bodyWearable("160_LilPumpThreads"),
   wearable("161_LilPumpDreads")
