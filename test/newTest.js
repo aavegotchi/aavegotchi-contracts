@@ -54,9 +54,6 @@ describe("Shopping  ", () => {
     buyer = await ethers.getSigner("0x096c5ccb33cfc5732bcd1f3195c13dbefc4c82f4");
 
     await (await shopFacet.connect(buyer.address)).purchaseItemsWithGhst(buyer.address, ['129'], ['1'], { gasLimit: 8000000 });
-    // let balances = await itemsFacet.itemBalances(addr1.address);
-    // console.log("balance", balances);
-    // expect(balances[1]).to.equal(20);
   });
 
   it("Should NOT purchase items because item NOT permitted to be purchased with GHST", async () => {
