@@ -30,7 +30,7 @@ async function main () {
       method: 'hardhat_impersonateAccount',
       params: [owner]
     })
-    signer = await ethers.provider.getSigner(owner)
+    signer = await ethers.getSigner(owner)
   } else if (hre.network.name === 'matic') {
     signer = new LedgerSigner(ethers.provider)
   } else {
