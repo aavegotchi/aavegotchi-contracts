@@ -63,7 +63,7 @@ describe("Shopping  ", () => {
     let ownerBalance = await itemsFacet.balanceOf(opsWallet,id)
     console.log('owner',ownerBalance)
 
-  // await itemsTransferFacet.safeTransferFrom(opsWallet, aavegotchiDiamondAddress, id, quantity, []);
+   await itemsTransferFacet.safeTransferFrom(opsWallet, aavegotchiDiamondAddress, id, quantity, []);
      
     ownerBalance = await itemsFacet.balanceOf(opsWallet,id)
    console.log('owner',ownerBalance)
