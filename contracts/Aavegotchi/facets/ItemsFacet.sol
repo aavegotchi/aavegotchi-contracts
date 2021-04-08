@@ -193,18 +193,21 @@ contract ItemsFacet is Modifiers {
             //if new value for wearable is not zero and same as existing equipped wearableId
             //don't uneqip the existing wearable
             if (wearableId != 0 && wearableId == existingEquippedWearableId) {
-                continue;
+                //  continue;
             }
 
             //if the new wearable value is 0 and the slot is not equipped onlyAavegotchiOwner
             //do nothing
             if (wearableId == existingEquippedWearableId) {
-                continue;
+                //  continue;
             }
 
             //if new value for the wearable is not 0 and is not the same as existing equipped wearable
             //unequip the existing wearable and equip the new wearable
             if (wearableId != 0 && wearableId != existingEquippedWearableId) {
+                console.log("heres the bug");
+                console.log("wearable id:", wearableId);
+                console.log("existing equipped wearable id:", existingEquippedWearableId);
                 uint256 toUnequip = existingEquippedWearableId;
                 LibItems.removeFromParent(address(this), toUnequip, wearableId, 1);
                 LibItems.addToOwner(sender, toUnequip, 1);
