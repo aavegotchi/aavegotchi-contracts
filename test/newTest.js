@@ -30,29 +30,30 @@ describe("Shopping  ", () => {
        params: [owner]
      }
     );
-    await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: ["0x096c5ccb33cfc5732bcd1f3195c13dbefc4c82f4"]}
-    );
 
     signer = await ethers.provider.getSigner(owner);
-    buyer = await ethers.provider.getSigner("0x096c5ccb33cfc5732bcd1f3195c13dbefc4c82f4");
+
+    await (await daoFacet.connect(signer)).updateItemTypeMaxQuantity(['129'], ['1000']);
+
+    await hre.network.provider.request({
+       method: "hardhat_stopImpersonatingAccount",
+       params: [owner]
+     }
+    );
 
   });
 
 
   it.only("Should purchase items with GHST", async () => {
 
-    // console.log("itemsFacet", itemsFacet);
-    // let balances = await itemsFacet.itemBalances(addr1.address);
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: ["0x096c5ccb33cfc5732bcd1f3195c13dbefc4c82f4"]}
+    );
 
-    console.log("buyer", buyer._address);
+    buyer = await ethers.getSigner("0x096c5ccb33cfc5732bcd1f3195c13dbefc4c82f4");
 
-    // expect(balances[1]).to.equal(10);
-    // await daoFacet.connect(owner).setDao(addr1, addr1);
-    await (await daoFacet.connect(signer)).updateItemTypeMaxQuantity(['129'], ['1000']);
-
-    await shopFacet.connect(buyer._address).purchaseItemsWithGhst(buyer._address, ['129'], ['1'], { gasLimit: 8000000 });
+    await (await shopFacet.connect(buyer.address)).purchaseItemsWithGhst(buyer.address, ['129'], ['1'], { gasLimit: 8000000 });
     // let balances = await itemsFacet.itemBalances(addr1.address);
     // console.log("balance", balances);
     // expect(balances[1]).to.equal(20);
