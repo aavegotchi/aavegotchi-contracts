@@ -94,31 +94,43 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
 
   it('should reduce balance while equipping', async function(){
     
-    await global.itemsFacet.equipWearables(1,[
-      114, 0, 0, 0, 0, 0,
-      0, 0, 0,  0, 0, 0,
-      0, 0, 0,  0
-    ])
+    await global.itemsFacet.equipWearables(1,redEquip)
     const currentWearables = await global.itemsFacet.equippedWearables(1)
-   // console.log(currentWearables)
-    let currentItemBal = await(global.itemsFacet.balanceOf(global.account,114))
+    
+    let currentItemBal = await(global.itemsFacet.balanceOf(global.account,115))
     expect(currentItemBal.toString()).to.equal('9')
+   // console.log(currentWearables)
 
   
   })
   it('should send back item after unequipping', async function(){
     
-    await global.itemsFacet.equipWearables(1,[
-      0, 0, 0, 0, 0, 0,
-      0, 0, 0,  0, 0, 0,
-      0, 0, 0,  0
-    ])
+    await global.itemsFacet.equipWearables(1,totalUnequip)
     const currentWearables=await (global.itemsFacet.equippedWearables(1))
    // console.log(currentWearables)
     let currentItemBal = await(global.itemsFacet.balanceOf(global.account,114))
     expect(currentItemBal.toString()).to.equal('10')
-
-  
   })
+
+  it('should equip a new item', async function(){
+    
+    await global.itemsFacet.equipWearables(1,blueEquip)
+    const currentWearables=await (global.itemsFacet.equippedWearables(1))
+    //console.log(currentWearables)
+    expect(currentWearables[0].toString()).to.equal('114')
+  })
+  it('should unequip a new item and equip a new item', async function(){
+    
+    await global.itemsFacet.equipWearables(1,redEquip)
+    const currentWearables=await (global.itemsFacet.equippedWearables(1))
+    //console.log(currentWearables)
+    expect(currentWearables[0].toString()).to.equal('115')
+  })
+
+  it('should have sent the previous item back while unequipping', async function() {
+    let currentItemBal = await(global.itemsFacet.balanceOf(global.account,114))
+    expect(currentItemBal.toString()).to.equal('10')
+  })
+
 
 })
