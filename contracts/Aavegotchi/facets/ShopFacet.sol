@@ -107,14 +107,15 @@ contract ShopFacet {
         uint256[] calldata _itemIds,
         uint256[] calldata _quantities
     ) external {
-        require(_to != address(0), "ItemsTransfer: Can't transfer to 0 address");
-        require(_itemIds.length == _quantities.length, "ItemsTransfer: ids not same length as values");
+        require(_to != address(0), "ShopFacet: Can't transfer to 0 address");        
+        require(_itemIds.length == _quantities.length, "ShopFacet: ids not same length as values");        
         address sender = LibMeta.msgSender();
         address from = address(this);       
         uint256 totalPrice; 
         for (uint256 i; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
             uint256 quantity = _quantities[i];
+            require(quantity == 1, "ShopFacet: Can only purchase 1 of an item per transaction");
             ItemType storage itemType = s.itemTypes[itemId];
             require(itemType.canPurchaseWithGhst, "ShopFacet: Can't purchase item type with GHST");
             totalPrice += quantity * itemType.ghstPrice;
