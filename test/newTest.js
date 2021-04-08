@@ -2,6 +2,9 @@ const { expect } = require("chai");
 const { truffleAssert } = require("truffle-assertions");
 
 describe("Shopping  ", () => {
+
+
+
   let shopFacet,
       itemsFacet,
       daoFacet,
@@ -9,6 +12,7 @@ describe("Shopping  ", () => {
       ghstContract,
       maticGhstAddress,
       aavegotchiDiamondAddress,
+      itemID,
       signer,
       buyer,
       owner,
@@ -20,6 +24,7 @@ describe("Shopping  ", () => {
 
     maticGhstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
     aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+    itemID = '129'
 
     
 
@@ -29,7 +34,7 @@ describe("Shopping  ", () => {
     libAavegotchi = await ethers.getContractAt("LibAavegotchi", aavegotchiDiamondAddress);
 
     //ghst contract
-     ghstContract = await ethers.getContractAt("GHSTFacet",maticGhstAddress);
+     ghstContract = await ethers.getContractAt("ERC20Token",maticGhstAddress);
 
     [addr0, addr1] = await ethers.getSigners();
     owner = await (await ethers.getContractAt("OwnershipFacet", aavegotchiDiamondAddress)).owner();
@@ -42,7 +47,10 @@ describe("Shopping  ", () => {
 
     signer = await ethers.provider.getSigner(owner);
 
-    await (await daoFacet.connect(signer)).updateItemTypeMaxQuantity(['129'], ['1000']);
+    const connectedDaoFacet = await daoFacet.connect(signer)
+
+    console.log('item id:',itemID)
+   await connectedDaoFacet.updateItemTypeMaxQuantity([itemID], ['2000']);
 
     await hre.network.provider.request({
        method: "hardhat_stopImpersonatingAccount",
@@ -55,6 +63,8 @@ describe("Shopping  ", () => {
 
   it.only("Should purchase items with GHST", async () => {
 
+    console.log('item id:',itemID)
+    
     let ghstWhale = "0x41c63953aA3E69aF424CE6873C60BA13857b31bB"
 
     await hre.network.provider.request({
@@ -66,8 +76,12 @@ describe("Shopping  ", () => {
 
     console.log('buyer:',buyer.address)
 
-    const item = await itemsFacet.getItemType('129')
-   
+    const item = await itemsFacet.getItemType(itemID)
+
+    console.log('item:',item)
+    console.log('total:',item.totalQuantity.toString())
+    console.log('max:',item.maxQuantity.toString())
+    console.log('price:',item.ghstPrice.toString())
     const connectedShopFacet = await shopFacet.connect(buyer)
     const connectedGhstContract = await ghstContract.connect(buyer)
 
@@ -83,20 +97,13 @@ describe("Shopping  ", () => {
 
     console.log('allowance:',allowance.toString())
 
-     await connectedShopFacet.purchaseItemsWithGhst(ghstWhale, ['129'], ['1']);
+     await connectedShopFacet.purchaseItemsWithGhst(ghstWhale, [itemID], ['1']);
   });
 
+  /*
   it("Should NOT purchase items because item NOT permitted to be purchased with GHST", async () => {
     await expect(shopFacet.purchaseItemsWithGhst(buyer._address, ['1'], ['10'])).to.be.reverted;
   });
-
-  // it.only("Should NOT purchase items because items can NOT transferred to 0 address", async () => {
-  //   console.log("Address 0", addr0.address);
-  //
-  //   await (await daoFacet.connect(signer)).updateItemTypeMaxQuantity(['129'], ['1000']);
-  //
-  //   await shopFacet.purchaseItemsWithGhst(addr0.address, ['129'], ['10']);
-  // });
 
   it("Should NOT purchase items because total item type quantity exceeds max quantity", async () => {
     await expect(shopFacet.purchaseItemsWithGhst(buyer._address, ['90'], ['10'])).to.be.reverted;
@@ -112,4 +119,6 @@ describe("Shopping  ", () => {
 
     await expect(shopFacet.purchaseItemsWithGhst(addr1.address, ['129'], ['10']));
   });
+  */
 });
+
