@@ -6,6 +6,8 @@ describe("Shopping  ", () => {
       itemsFacet,
       daoFacet,
       libAavegotchi,
+      ghstContract,
+      maticGhstAddress,
       aavegotchiDiamondAddress,
       signer,
       buyer,
@@ -15,12 +17,19 @@ describe("Shopping  ", () => {
 
 
   before(async () => {
+
+    maticGhstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
     aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+
+    
 
     shopFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ShopFacet.sol:ShopFacet", aavegotchiDiamondAddress);
     itemsFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet", aavegotchiDiamondAddress);
     daoFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet", aavegotchiDiamondAddress);
     libAavegotchi = await ethers.getContractAt("LibAavegotchi", aavegotchiDiamondAddress);
+
+    //ghst contract
+     ghstContract = await ethers.getContractAt("GHSTFacet",maticGhstAddress);
 
     [addr0, addr1] = await ethers.getSigners();
     owner = await (await ethers.getContractAt("OwnershipFacet", aavegotchiDiamondAddress)).owner();
@@ -46,14 +55,35 @@ describe("Shopping  ", () => {
 
   it.only("Should purchase items with GHST", async () => {
 
+    let ghstWhale = "0x41c63953aA3E69aF424CE6873C60BA13857b31bB"
+
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: ["0x096c5ccb33cfc5732bcd1f3195c13dbefc4c82f4"]}
+      params: [ghstWhale]}
     );
 
-    buyer = await ethers.getSigner("0x096c5ccb33cfc5732bcd1f3195c13dbefc4c82f4");
+    buyer = await ethers.getSigner(ghstWhale);
 
-    await (await shopFacet.connect(buyer)).purchaseItemsWithGhst(buyer.address, ['129'], ['1'], { gasLimit: 8000000 });
+    console.log('buyer:',buyer.address)
+
+    const item = await itemsFacet.getItemType('129')
+   
+    const connectedShopFacet = await shopFacet.connect(buyer)
+    const connectedGhstContract = await ghstContract.connect(buyer)
+
+
+    
+
+    //first approve the funds to be transferred
+    await connectedGhstContract.approve(aavegotchiDiamondAddress,ethers.utils.parseEther("10000000000"))
+
+    const allowance = await connectedGhstContract.allowance(buyer.address, aavegotchiDiamondAddress)
+    const balance = await connectedGhstContract.balanceOf(ghstWhale)
+    console.log('balance:',balance.toString())
+
+    console.log('allowance:',allowance.toString())
+
+     await connectedShopFacet.purchaseItemsWithGhst(ghstWhale, ['129'], ['1']);
   });
 
   it("Should NOT purchase items because item NOT permitted to be purchased with GHST", async () => {
