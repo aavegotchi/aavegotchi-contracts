@@ -207,16 +207,16 @@ contract ItemsFacet is Modifiers {
                  LibItems.removeFromParent(address(this),toUnequip,wearableId,1);
                  LibItems.addToOwner(sender,toUnequip,1);
                 emit LibERC1155.TransferSingle(address(this), address(this), sender, toUnequip,1);
-               continue;
+               
             }
             
-            //if the new value for the wearable is 0 and a wearable is equipped in that slot
+            //if the new value for the wearable is 0 a wearable is equipped in that slot
             //unequip the wearable and send back to the user while removing ownership from the aavegotchi
             if (wearableId == 0 && existingEquippedWearableId !=0){
                 uint256 toUnequip= existingEquippedWearableId;
                  LibItems.removeFromParent(address(this),toUnequip,wearableId,1);
                  LibItems.addToOwner(sender,toUnequip,1);
-               continue;
+              
             }
                     
           
@@ -253,7 +253,7 @@ contract ItemsFacet is Modifiers {
             //if new value for wearable is not 0 and there  is no equipped wearable in that slot
             //equip the new wearable to that slot
             
-            if (nftBalance < neededBalance && wearableId!= 0 && existingEquippedWearableId == 0) {
+            if (nftBalance < neededBalance && wearableId== 0 && existingEquippedWearableId != 0) {
                 uint256 ownerBalance = s.ownerItemBalances[sender][wearableId];
                 require(nftBalance + ownerBalance >= neededBalance, "ItemsFacet: Wearable is not in inventories");
                 uint256 balToTransfer = neededBalance - nftBalance;
