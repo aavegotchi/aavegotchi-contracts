@@ -60,7 +60,7 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
 
     let balances = await global.itemsFacet.itemBalances(account)
 
-    console.log('balances:',balances)
+  //  console.log('balances:',balances)
     // Start at 1 because 0 is always empty
     expect(balances.length).to.equal(0)
 
@@ -68,7 +68,7 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
     await global.shopFacet.purchaseItemsWithGhst(account, ['114', '115', '116', '126', '127', '128', '129'], ['10', '10', '10', '100', '10', '10', '10'])
     balances = await global.itemsFacet.itemBalances(account)
 
-    console.log('balances:',balances)
+   // console.log('balances:',balances)
 
     const item114 = balances.find((item) => {
       return item.itemId.toString() === "114"
@@ -86,7 +86,7 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
     const tx = await global.shopFacet.buyPortals(account, buyAmount)
     const receipt = await tx.wait()
     const myGotchis = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
-    console.log(myGotchis)
+    //console.log(myGotchis)
    // const currentWearables=await (global.itemsFacet.equippedWearables(1))
    // console.log(currentWearables)
     expect(myGotchis.length).to.equal(5)
@@ -99,8 +99,8 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
       0, 0, 0,  0, 0, 0,
       0, 0, 0,  0
     ])
-    const currentWearables=await (global.itemsFacet.equippedWearables(1))
-    console.log(currentWearables)
+    const currentWearables = await global.itemsFacet.equippedWearables(1)
+   // console.log(currentWearables)
     let currentItemBal = await(global.itemsFacet.balanceOf(global.account,114))
     expect(currentItemBal.toString()).to.equal('9')
 
@@ -114,7 +114,7 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
       0, 0, 0,  0
     ])
     const currentWearables=await (global.itemsFacet.equippedWearables(1))
-    console.log(currentWearables)
+   // console.log(currentWearables)
     let currentItemBal = await(global.itemsFacet.balanceOf(global.account,114))
     expect(currentItemBal.toString()).to.equal('10')
 
