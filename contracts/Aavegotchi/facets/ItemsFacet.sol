@@ -19,7 +19,7 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 
-// import "hardhat/console.sol";
+import "hardhat/console.sol";
 
 contract ItemsFacet is Modifiers {
     //using LibAppStorage for AppStorage;
@@ -206,6 +206,7 @@ contract ItemsFacet is Modifiers {
                 uint256 toUnequip= existingEquippedWearableId;
                  LibItems.removeFromParent(address(this),toUnequip,wearableId,1);
                  LibItems.addToOwner(sender,toUnequip,1);
+                 console.log(wearableId,existingEquippedWearableId);
                 emit LibERC1155.TransferSingle(address(this), address(this), sender, toUnequip,1);
                
             }
@@ -216,7 +217,7 @@ contract ItemsFacet is Modifiers {
                 uint256 toUnequip= existingEquippedWearableId;
                  LibItems.removeFromParent(address(this),toUnequip,wearableId,1);
                  LibItems.addToOwner(sender,toUnequip,1);
-              
+              console.log(wearableId,existingEquippedWearableId);
             }
                     
           
