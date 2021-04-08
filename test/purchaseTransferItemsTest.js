@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+
 const { truffleAssert } = require("truffle-assertions");
 
 describe("Shopping  ", () => {
@@ -12,7 +13,6 @@ describe("Shopping  ", () => {
       ghstContract,
       maticGhstAddress,
       aavegotchiDiamondAddress,
-      itemID,
       signer,
       buyer,
       owner,
@@ -24,12 +24,16 @@ describe("Shopping  ", () => {
 
     maticGhstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
     aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-    itemID = '129'
+  
 
+
+    let opsWallet = "0xd0F9F536AA6332a6fe3BFB3522D549FbB3a1b0AE"
     
 
     shopFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ShopFacet.sol:ShopFacet", aavegotchiDiamondAddress);
-    itemsFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet", aavegotchiDiamondAddress);
+
+    console.log('shop:',shopFacet)
+  
     daoFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet", aavegotchiDiamondAddress);
     libAavegotchi = await ethers.getContractAt("LibAavegotchi", aavegotchiDiamondAddress);
 
@@ -37,24 +41,39 @@ describe("Shopping  ", () => {
      ghstContract = await ethers.getContractAt("ERC20Token",maticGhstAddress);
 
     [addr0, addr1] = await ethers.getSigners();
-    owner = await (await ethers.getContractAt("OwnershipFacet", aavegotchiDiamondAddress)).owner();
+    //owner = await (await ethers.getContractAt("OwnershipFacet", aavegotchiDiamondAddress)).owner();
 
+    //First we need to send the Lil Pump wearables to the Diamond
     await hre.network.provider.request({
        method: "hardhat_impersonateAccount",
-       params: [owner]
+       params: [opsWallet]
      }
     );
+    signer = await ethers.provider.getSigner(opsWallet);
 
-    signer = await ethers.provider.getSigner(owner);
+     itemsTransferFacet = (await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsTransferFacet.sol:ItemsTransferFacet", aavegotchiDiamondAddress)).connect(signer)
 
-    const connectedDaoFacet = await daoFacet.connect(signer)
+     const itemsFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet", aavegotchiDiamondAddress)
 
-    console.log('item id:',itemID)
-   await connectedDaoFacet.updateItemTypeMaxQuantity([itemID], ['2000']);
+
+   
+    const id = "160"
+    const quantity = "10"
+  
+    let ownerBalance = await itemsFacet.balanceOf(opsWallet,id)
+    console.log('owner',ownerBalance)
+
+  // await itemsTransferFacet.safeTransferFrom(opsWallet, aavegotchiDiamondAddress, id, quantity, []);
+     
+    ownerBalance = await itemsFacet.balanceOf(opsWallet,id)
+   console.log('owner',ownerBalance)
+   const diamondBalance = await itemsFacet.balanceOf(aavegotchiDiamondAddress,id)
+   console.log('diamond balance:',diamondBalance)
+
 
     await hre.network.provider.request({
        method: "hardhat_stopImpersonatingAccount",
-       params: [owner]
+       params: [opsWallet]
      }
     );
 
@@ -62,9 +81,7 @@ describe("Shopping  ", () => {
 
 
   it.only("Should purchase items with GHST", async () => {
-
-    console.log('item id:',itemID)
-    
+  
     let ghstWhale = "0x41c63953aA3E69aF424CE6873C60BA13857b31bB"
 
     await hre.network.provider.request({
@@ -73,31 +90,14 @@ describe("Shopping  ", () => {
     );
 
     buyer = await ethers.getSigner(ghstWhale);
-
-    console.log('buyer:',buyer.address)
-
-    const item = await itemsFacet.getItemType(itemID)
-
-    console.log('item:',item)
-    console.log('total:',item.totalQuantity.toString())
-    console.log('max:',item.maxQuantity.toString())
-    console.log('price:',item.ghstPrice.toString())
+  
     const connectedShopFacet = await shopFacet.connect(buyer)
     const connectedGhstContract = await ghstContract.connect(buyer)
 
-
-    
-
-    //first approve the funds to be transferred
-    await connectedGhstContract.approve(aavegotchiDiamondAddress,ethers.utils.parseEther("10000000000"))
-
-    const allowance = await connectedGhstContract.allowance(buyer.address, aavegotchiDiamondAddress)
     const balance = await connectedGhstContract.balanceOf(ghstWhale)
     console.log('balance:',balance.toString())
 
-    console.log('allowance:',allowance.toString())
-
-     await connectedShopFacet.purchaseItemsWithGhst(ghstWhale, [itemID], ['1']);
+     await connectedShopFacet.purchaseTransferItemsWithGhst(ghstWhale, ["160"], ['1']);
   });
 
   /*
