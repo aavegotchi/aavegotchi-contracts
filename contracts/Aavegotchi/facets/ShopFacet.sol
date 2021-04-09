@@ -71,7 +71,7 @@ contract ShopFacet {
             tokenId++;
         }
         s.tokenIdCounter = tokenId;
-        LibAavegotchi.verify(tokenId);
+       // LibAavegotchi.verify(tokenId);
         LibAavegotchi.purchase(sender, totalPrice);
     }
 
