@@ -92,23 +92,29 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
     expect(myGotchis.length).to.equal(5)
   })
 
-  it('should reduce balance while equipping', async function(){
+  it('should reduce balance to 9 while equipping', async function(){
     
     await global.itemsFacet.equipWearables(1,redEquip)
     const currentWearables = await global.itemsFacet.equippedWearables(1)
+    console.log('current:',currentWearables)
+
+    expect(currentWearables[0]).to.equal(115)
     
     let currentItemBal = await(global.itemsFacet.balanceOf(global.account,115))
+    console.log('balance:',currentItemBal.toString())
     expect(currentItemBal.toString()).to.equal('9')
    // console.log(currentWearables)
 
   
   })
-  it('should send back item after unequipping', async function(){
+  it('should increase balance back to item after unequipping', async function(){
     
     await global.itemsFacet.equipWearables(1,totalUnequip)
     const currentWearables=await (global.itemsFacet.equippedWearables(1))
-   // console.log(currentWearables)
-    let currentItemBal = await(global.itemsFacet.balanceOf(global.account,114))
+    console.log(currentWearables)
+    expect(currentWearables[0]).to.equal(0)
+    let currentItemBal = await(global.itemsFacet.balanceOf(global.account,115))
+    console.log('balance:',currentItemBal.toString())
     expect(currentItemBal.toString()).to.equal('10')
   })
 
@@ -128,8 +134,10 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
   })
 
   it('should have sent the previous item back while unequipping', async function() {
-    let currentItemBal = await(global.itemsFacet.balanceOf(global.account,114))
-    expect(currentItemBal.toString()).to.equal('10')
+    let item114balance = await(global.itemsFacet.balanceOf(global.account,114))
+    let item115balance = await(global.itemsFacet.balanceOf(global.account,114))
+    expect(item114balance.toString()).to.equal('10')
+    expect(item115balance.toString()).to.equal('9')
   })
 
 
