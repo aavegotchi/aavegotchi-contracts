@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 
-const { truffleAssert } = require('truffle-assertions')
+const truffleAssert = require('truffle-assertions')
 
 describe('Shopping  ', () => {
   let shopFacet,
@@ -45,7 +45,7 @@ describe('Shopping  ', () => {
 
     itemsTransferFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsTransferFacet.sol:ItemsTransferFacet', aavegotchiDiamondAddress)).connect(signer)
 
-    const itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', aavegotchiDiamondAddress)
+     itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', aavegotchiDiamondAddress)
 
     const id = '160'
     const quantity = '10'
@@ -53,12 +53,12 @@ describe('Shopping  ', () => {
     let ownerBalance = await itemsFacet.balanceOf(opsWallet, id)
     console.log('owner', ownerBalance)
 
-    await itemsTransferFacet.safeTransferFrom(opsWallet, aavegotchiDiamondAddress, id, quantity, [])
+   // await itemsTransferFacet.safeTransferFrom(opsWallet, aavegotchiDiamondAddress, id, quantity, [])
 
     ownerBalance = await itemsFacet.balanceOf(opsWallet, id)
-    console.log('owner', ownerBalance)
+    console.log('owner', ownerBalance.toString())
     const diamondBalance = await itemsFacet.balanceOf(aavegotchiDiamondAddress, id)
-    console.log('diamond balance:', diamondBalance)
+    console.log('diamond balance:', diamondBalance.toString())
 
     await hre.network.provider.request({
       method: 'hardhat_stopImpersonatingAccount',
@@ -78,33 +78,42 @@ describe('Shopping  ', () => {
 
     buyer = await ethers.getSigner(ghstWhale)
 
-    const connectedShopFacet = await shopFacet.connect(buyer)
+    let connectedShopFacet = await shopFacet.connect(buyer)
     const connectedGhstContract = await ghstContract.connect(buyer)
 
-    const balance = await connectedGhstContract.balanceOf(ghstWhale)
-    console.log('balance:', balance.toString())
+    let beforeBalance = await connectedGhstContract.balanceOf(ghstWhale)
+    console.log('before balance:', beforeBalance.toString())
 
+    const itemType = await itemsFacet.getItemType("160")
+
+    const beforeBuyingBalance =  await itemsFacet.balanceOf(ghstWhale,"160") 
+
+    //Can only buy one
+    await truffleAssert.reverts(connectedShopFacet.purchaseTransferItemsWithGhst(ghstWhale, ['160'], ['2']),"ShopFacet: Can only purchase 1 of an item per transaction")
     await connectedShopFacet.purchaseTransferItemsWithGhst(ghstWhale, ['160'], ['1'])
+
+    //Check that NFT balance has increased
+    const afterBuyingBalance = await itemsFacet.balanceOf(ghstWhale,"160")
+    expect(afterBuyingBalance).to.equal(Number(beforeBuyingBalance.toString())+1)
+   
+    //Check that GHST balance has decreased
+    let afterBalance = await connectedGhstContract.balanceOf(ghstWhale)
+    let ghstPrice = itemType.ghstPrice
+    console.log('after balance:', afterBalance.toString())
+    expect(afterBalance).to.equal((beforeBalance).sub(ghstPrice))
+
+
+      //Switch to buyer with smaller balance
+      const smallFish = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5"
+      await hre.network.provider.request({
+        method: 'hardhat_impersonateAccount',
+        params: [smallFish]
+      })
+      buyer = await ethers.getSigner(smallFish)
+       connectedShopFacet = await shopFacet.connect(buyer)
+      await truffleAssert.reverts(connectedShopFacet.purchaseTransferItemsWithGhst(smallFish, ['160'], ['1']),"ShopFacet: Not enough GHST!")
+  
   })
 
-  /*
-  it("Should NOT purchase items because item NOT permitted to be purchased with GHST", async () => {
-    await expect(shopFacet.purchaseItemsWithGhst(buyer._address, ['1'], ['10'])).to.be.reverted;
-  });
 
-  it("Should NOT purchase items because total item type quantity exceeds max quantity", async () => {
-    await expect(shopFacet.purchaseItemsWithGhst(buyer._address, ['90'], ['10'])).to.be.reverted;
-  });
-
-  it("Should NOT purchase items because itemIds.length is NOT equal to quantities.length", async () => {
-    await expect(shopFacet.purchaseItemsWithGhst(buyer._address, ['90'], ['10', '1'])).to.be.reverted;
-    await expect(shopFacet.purchaseItemsWithGhst(buyer._address, ['90', '129'], ['10'])).to.be.reverted;
-  });
-
-  it("Should NOT purchase items with GHST because address does NOT have enough GHST to purchase item", async () => {
-    await (await daoFacet.connect(signer)).updateItemTypeMaxQuantity(['129'], ['1000']);
-
-    await expect(shopFacet.purchaseItemsWithGhst(addr1.address, ['129'], ['10']));
-  });
-  */
 })
