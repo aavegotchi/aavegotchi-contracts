@@ -135,7 +135,7 @@ describe('Deploying Contracts, SVG and Minting Items', async function () {
 
   it('should have sent the previous item back while unequipping', async function() {
     let item114balance = await(global.itemsFacet.balanceOf(global.account,114))
-    let item115balance = await(global.itemsFacet.balanceOf(global.account,114))
+    let item115balance = await(global.itemsFacet.balanceOf(global.account,115))
     expect(item114balance.toString()).to.equal('10')
     expect(item115balance.toString()).to.equal('9')
   })
