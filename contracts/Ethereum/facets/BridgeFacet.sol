@@ -8,6 +8,9 @@ import {RLPReader} from "../../shared/libraries/RLPReader.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 
+// tokenType is keccak256(abi.encodePacked("AAVEGOTCHI")) == 0x79828ff8b1cfa00f403edd7ec403b29946552bf9b1ad51da3af53c3557d8da26
+// tokenType is used to find the predicate contract for the token.
+
 contract BridgeFacet {
     AppStorage internal s;
     using RLPReader for bytes;
