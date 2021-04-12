@@ -13,6 +13,7 @@ async function main () {
   const trackedTokenTransfersIn = await trackedToken.queryFilter(trackedTokenFilter, 13000000)
 
   let uniqueAddresses = [];
+  let uniqueItemIds = [];
   let item159Count = 0;
   let item160Count = 0;
 
@@ -24,9 +25,12 @@ async function main () {
 
     if (!uniqueAddresses.includes(args._buyer)) {
       uniqueAddresses.push(args._buyer)
-
     }
   //  console.log('args',args)
+
+    if (!uniqueItemIds.includes(args._itemIds)) {
+      uniqueItemIds.push(args._itemIds)
+    }
 
   event.args._itemIds.forEach((ids) => {
     if (ids.toString() === "160" || ids.toString() === "159") {
@@ -45,7 +49,9 @@ async function main () {
 
   console.log('Item 159 count: ', item159Count);
   console.log('Item 160 count: ', item160Count);
-  console.log('addresses:',uniqueAddresses.length)
+  console.log('# Unique Addresses:',uniqueAddresses.length);
+  console.log('# Unique Items:',uniqueItemIds.length);
+  // console.log('Items Array:',uniqueItemIds.toString());
 
 
 //  console.log('transfera:',trackedTokenTransfersIn)
