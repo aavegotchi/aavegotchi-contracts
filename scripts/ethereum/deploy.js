@@ -47,56 +47,69 @@ async function main (scriptName) {
   // const signerAddress = '0x02491D37984764d39b99e4077649dcD349221a62'
   console.log('Signer Address:', signerAddress)
 
-  let totalGasUsed = ethers.BigNumber.from('0')
+  // let totalGasUsed = ethers.BigNumber.from('0')
   let receipt
 
   const rootChainManager = '0xA0c68C638235ee32657e8f720a23ceC1bFc77C77'
 
-  async function deployFacets (...facets) {
-    const instances = []
-    for (let facet of facets) {
-      let constructorArgs = []
-      if (Array.isArray(facet)) {
-        ;[facet, constructorArgs] = facet
-      }
-      console.log('Deploying:', facet)
-      const factory = (await ethers.getContractFactory(facet)).connect(signer)
-      const facetInstance = await factory.deploy(...constructorArgs)
-      await facetInstance.deployed()
-      const tx = facetInstance.deployTransaction
-      const receipt = await tx.wait()
-      console.log(`${facet} address: ${facetInstance.address}`)
-      console.log(`${facet} deploy gas used:` + strDisplay(receipt.gasUsed))
-      totalGasUsed = totalGasUsed.add(receipt.gasUsed)
-      instances.push([facet, facetInstance])
-    }
-    return instances
-  }
-  console.log('Deploy facets')
-  const facets = await deployFacets(
-    'contracts/Ethereum/facets/AavegotchiFacet.sol:AavegotchiFacet',
-    // 'contracts/Ethereum/facets/ItemsFacet.sol:ItemsFacet',
-    'contracts/Ethereum/facets/BridgeFacet.sol:BridgeFacet'
-  )
-  console.log('Successfully deployed facets')
+  // async function deployFacets (...facets) {
+  //   const instances = []
+  //   for (let facet of facets) {
+  //     let constructorArgs = []
+  //     if (Array.isArray(facet)) {
+  //       ;[facet, constructorArgs] = facet
+  //     }
+  //     console.log('Deploying:', facet)
+  //     const factory = (await ethers.getContractFactory(facet)).connect(signer)
+  //     const facetInstance = await factory.deploy(...constructorArgs)
+  //     await facetInstance.deployed()
+  //     const tx = facetInstance.deployTransaction
+  //     const receipt = await tx.wait()
+  //     console.log(`${facet} address: ${facetInstance.address}`)
+  //     console.log(`${facet} deploy gas used:` + strDisplay(receipt.gasUsed))
+  //     totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  //     instances.push([facet, facetInstance])
+  //   }
+  //   return instances
+  // }
+  // console.log('Deploy facets')
+  // const facets = await deployFacets(
+  //   'contracts/Ethereum/facets/AavegotchiFacet.sol:AavegotchiFacet',
+  //   // 'contracts/Ethereum/facets/ItemsFacet.sol:ItemsFacet',
+  //   'contracts/Ethereum/facets/BridgeFacet.sol:BridgeFacet'
+  // )
+  // console.log('Successfully deployed facets')
 
-  console.log('Deploying InitDiamond')
+  // console.log('Deploying InitDiamond')
+  // // const InitDiamond = (await ethers.getContractFactory('contracts/Ethereum/InitDiamond.sol:InitDiamond')).connect(signer)
   // const InitDiamond = (await ethers.getContractFactory('contracts/Ethereum/InitDiamond.sol:InitDiamond')).connect(signer)
-  const InitDiamond = (await ethers.getContractFactory('contracts/Ethereum/InitDiamond.sol:InitDiamond')).connect(signer)
-  const initDiamond = await InitDiamond.deploy()
-  await initDiamond.deployed()
-  receipt = await initDiamond.deployTransaction.wait()
-  if (!receipt.status) {
-    throw (Error('Deploying InitDiamond TRANSACTION FAILED!!! -------------------------------------------'))
-  }
-  console.log('Deployed InitDiamond. Address: ', initDiamond.address)
+  // const initDiamond = await InitDiamond.deploy()
+  // await initDiamond.deployed()
+  // receipt = await initDiamond.deployTransaction.wait()
+  // if (!receipt.status) {
+  //   throw (Error('Deploying InitDiamond TRANSACTION FAILED!!! -------------------------------------------'))
+  // }
+  // console.log('Deployed InitDiamond. Address: ', initDiamond.address)
 
+  // console.log('Encoding diamondCut init function call')
+  // const functionCall = initDiamond.interface.encodeFunctionData('init', [rootChainManager])
+
+  const facets = [
+    ['contracts/Ethereum/facets/AavegotchiFacet.sol:AavegotchiFacet',
+      await ethers.getContractAt('contracts/Ethereum/facets/AavegotchiFacet.sol:AavegotchiFacet', '0xb7fd49c7b662B5135D1bB03b51FfC51a6b908230')],
+    ['contracts/Ethereum/facets/BridgeFacet.sol:BridgeFacet',
+      await ethers.getContractAt('contracts/Ethereum/facets/BridgeFacet.sol:BridgeFacet', '0xb81c32635524c24B02d8286B6Fc5157151e4c273')]
+  ]
+
+  const initDiamond = await ethers.getContractAt('contracts/Ethereum/InitDiamond.sol:InitDiamond', '0x8eD0e2DdD3e298E1497578C21f719428A3d93134')
+  console.log('InitDiamond address:', initDiamond.address)
   console.log('Encoding diamondCut init function call')
   const functionCall = initDiamond.interface.encodeFunctionData('init', [rootChainManager])
 
-  const diamondFactory = await ethers.getContractFactory('Diamond')
+  const diamondFactory = (await ethers.getContractFactory('Diamond')).connect(signer)
+
   console.log('Deploying Diamond with owner address:', signerAddress)
-  const deployedDiamond = await diamondFactory.deploy(signerAddress)
+  const deployedDiamond = await diamondFactory.deploy(signerAddress, { gasLimit: 10000000 })
   await deployedDiamond.deployed()
   receipt = await deployedDiamond.deployTransaction.wait()
   if (!receipt.status) {
