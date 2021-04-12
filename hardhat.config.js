@@ -24,7 +24,8 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: process.env.MATIC_URL,
+        // url: process.env.MATIC_URL,
+        url: process.env.MAINNET_URL,
         timeout: 80000
         // blockNumber: 12552123
         // blockNumber: 13024371
@@ -62,12 +63,12 @@ module.exports = {
     //   accounts: [process.env.SECRET],
     //   gasPrice: 5000000000
     // },
-    // ethereum: {
-    //   url: process.env.MAINNET_URL,
-    //   accounts: [process.env.SECRET],
-    //   blockGasLimit: 20000000,
-    //   gasPrice: 2100000000
-    // }
+    ethereum: {
+      url: process.env.MAINNET_URL,
+      accounts: [process.env.SECRET],
+      blockGasLimit: 12000000,
+      gasPrice: 75000000000
+    }
   },
   gasReporter: {
     currency: 'USD',

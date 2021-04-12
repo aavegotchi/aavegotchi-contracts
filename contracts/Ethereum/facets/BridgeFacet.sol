@@ -48,18 +48,19 @@ contract BridgeFacet {
         require(rootToken == address(this), "BridgeFacet: wrong rootToken address");
         (uint256 tokenType, bytes memory tokenDepositData) = abi.decode(depositData, (uint256, bytes));
         if (tokenType == ERC1155_TOKEN_TYPE) {
-            (uint256[] memory ids, uint256[] memory values) = abi.decode(tokenDepositData, (uint256[], uint256[]));
-            require(ids.length == values.length, "Bridge: ids length not equal to values length");
-            require(ids.length <= 20, "Bridge: exceeded max number (20) of ids for single transaction");
-            for (uint256 i; i < ids.length; i++) {
-                uint256 id = ids[i];
-                uint256 value = values[i];
-                uint256 bal = s.items[depositor][id];
-                require(value <= bal, "Bridge: Doesn't have that many to transfer");
-                s.items[depositor][id] = bal - value;
-            }
-            emit LibERC1155.TransferBatch(msg.sender, depositor, address(0), ids, values);
-            emit ERC1155SendToBridge(depositor, depositReceiver, ids, values);
+            revert("ERC1155 tokens not currently supported");
+            // (uint256[] memory ids, uint256[] memory values) = abi.decode(tokenDepositData, (uint256[], uint256[]));
+            // require(ids.length == values.length, "Bridge: ids length not equal to values length");
+            // require(ids.length <= 20, "Bridge: exceeded max number (20) of ids for single transaction");
+            // for (uint256 i; i < ids.length; i++) {
+            //     uint256 id = ids[i];
+            //     uint256 value = values[i];
+            //     uint256 bal = s.items[depositor][id];
+            //     require(value <= bal, "Bridge: Doesn't have that many to transfer");
+            //     s.items[depositor][id] = bal - value;
+            // }
+            // emit LibERC1155.TransferBatch(msg.sender, depositor, address(0), ids, values);
+            // emit ERC1155SendToBridge(depositor, depositReceiver, ids, values);
         } else if (tokenType == ERC721_TOKEN_TYPE) {
             uint256[] memory tokenIds = abi.decode(tokenDepositData, (uint256[]));
             require(tokenIds.length <= 20, "Bridge: exceeds 20 deposit limit for single transaction");
@@ -73,8 +74,17 @@ contract BridgeFacet {
                     emit LibERC721.Approval(depositor, address(0), tokenId);
                 }
                 emit LibERC721.Transfer(depositor, address(0), tokenId);
-            }
-            s.totalSupply -= uint32(tokenIds.length);
+                
+                uint256 lastIndex = s.tokenIds.length - 1;
+                uint256 index = s.tokenIdIndexes[tokenId];
+                if(lastIndex != index) {
+                    uint256 lastTokenId = s.tokenIds[lastIndex];
+                    s.tokenIds[index] = uint32(lastTokenId);
+                    s.tokenIdIndexes[lastTokenId] = index;
+                }
+                delete s.tokenIdIndexes[tokenId];
+                s.tokenIds.pop();
+            }            
             emit ERC721SendToBridge(depositor, depositReceiver, tokenIds);
         } else {
             revert("Token deposit type is incorrect");
@@ -100,24 +110,25 @@ contract BridgeFacet {
         bytes memory logData = logRLPList[2].toBytes();
 
         if (bytes32(logTopicRLPList[0].toUint()) == TRANSFER_ERC1155_BATCH_EVENT_SIG) {
-            address withdrawer = address(uint160(logTopicRLPList[2].toUint())); // topic2 is from address
-            require(
-                address(uint160(logTopicRLPList[3].toUint())) == address(0), // topic3 is to address
-                "ERC1155Predicate: INVALID_RECEIVER"
-            );
-            (uint256[] memory ids, uint256[] memory values) = abi.decode(logData, (uint256[], uint256[]));
-            require(ids.length == values.length, "BridgeFacet: ids different length than values");
-            for (uint256 i; i < ids.length; i++) {
-                uint256 id = ids[i];
-                uint256 value = values[i];
-                s.items[withdrawer][id] += value;
-                if (s.itemTypeExists[id] == false) {
-                    s.itemTypeExists[id] = true;
-                    s.itemTypes.push(id);
-                    emit LibERC1155.URI(LibStrings.strWithUint(s.itemsBaseUri, id), id);
-                }
-            }
-            emit LibERC1155.TransferBatch(msg.sender, address(0), withdrawer, ids, values);
+            revert("ERC1155 tokens not currently supported");
+            // address withdrawer = address(uint160(logTopicRLPList[2].toUint())); // topic2 is from address
+            // require(
+            //     address(uint160(logTopicRLPList[3].toUint())) == address(0), // topic3 is to address
+            //     "ERC1155Predicate: INVALID_RECEIVER"
+            // );
+            // (uint256[] memory ids, uint256[] memory values) = abi.decode(logData, (uint256[], uint256[]));
+            // require(ids.length == values.length, "BridgeFacet: ids different length than values");
+            // for (uint256 i; i < ids.length; i++) {
+            //     uint256 id = ids[i];
+            //     uint256 value = values[i];
+            //     s.items[withdrawer][id] += value;
+            //     if (s.itemTypeExists[id] == false) {
+            //         s.itemTypeExists[id] = true;
+            //         s.itemTypes.push(id);
+            //         emit LibERC1155.URI(LibStrings.strWithUint(s.itemsBaseUri, id), id);
+            //     }
+            // }
+            // emit LibERC1155.TransferBatch(msg.sender, address(0), withdrawer, ids, values);
         } else if (bytes32(logTopicRLPList[0].toUint()) == WITHDRAW_ERC721_BATCH_EVENT_SIG) {
             address withdrawer = address(uint160(logTopicRLPList[1].toUint())); // topic1 is from address
             uint256[] memory tokenIds = abi.decode(logData, (uint256[])); // data is tokenId list
@@ -126,10 +137,10 @@ contract BridgeFacet {
                 uint256 tokenId = tokenIds[i];
                 s.aavegotchis[tokenId].owner = withdrawer;
                 s.aavegotchiBalance[withdrawer]++;
+                s.tokenIdIndexes[tokenId] = s.tokenIds.length;
                 s.tokenIds.push(uint32(tokenId));
                 emit LibERC721.Transfer(address(0), withdrawer, tokenId);
-            }
-            s.totalSupply += uint32(tokenIds.length);
+            }            
         } else {
             revert("BridgeFacet: INVALID_WITHDRAW_SIG");
         }
