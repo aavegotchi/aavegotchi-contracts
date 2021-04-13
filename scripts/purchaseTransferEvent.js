@@ -16,11 +16,6 @@ async function main () {
   let uniqueItemIds = [];
   let item159Count = 0;
   let item160Count = 0;
-  let itemCountObj = {
-              item: 0,
-              purcahseCount: 0,
-            };
-  let itemPurchaseArray = [];
 
 
   trackedTokenTransfersIn.forEach((event) => {
@@ -50,6 +45,7 @@ async function main () {
     });
   });
 
+  //counter for times itemsIds have been purchased by uniqueAddress
   const itemPurchaseCount = uniqueItemIds.reduce((counts, value) => {
     const valueCount = (counts[ value ] === undefined ? 0 : counts[ value ])
 
