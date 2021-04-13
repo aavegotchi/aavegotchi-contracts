@@ -16,6 +16,11 @@ async function main () {
   let uniqueItemIds = [];
   let item159Count = 0;
   let item160Count = 0;
+  let itemCountObj = {
+              item: 0,
+              purcahseCount: 0,
+            };
+  let itemPurchaseArray = [];
 
 
   trackedTokenTransfersIn.forEach((event) => {
@@ -32,20 +37,29 @@ async function main () {
       uniqueItemIds.push(args._itemIds)
     }
 
-  event.args._itemIds.forEach((ids) => {
-    if (ids.toString() === "160" || ids.toString() === "159") {
-      console.log('event:',args._buyer, ids.toString(), event.transactionHash)
+    event.args._itemIds.forEach((ids) => {
+      if (ids.toString() === "160" || ids.toString() === "159") {
+        console.log('event:',args._buyer, ids.toString(), event.transactionHash)
 
-      if (uniqueAddresses.includes(args._buyer) && ids.toString() === "159") {
-        item159Count++;
-      } else if (uniqueAddresses.includes(args._buyer) && ids.toString() === "160") {
-        item160Count++;
+        if (uniqueAddresses.includes(args._buyer) && ids.toString() === "159") {
+          item159Count++;
+        } else if (uniqueAddresses.includes(args._buyer) && ids.toString() === "160") {
+          item160Count++;
+        }
       }
-    }
-
+    });
   });
 
-  });
+  const itemPurchaseCount = uniqueItemIds.reduce((counts, value) => {
+    const valueCount = (counts[ value ] === undefined ? 0 : counts[ value ])
+
+    return { ...counts, ...{ [value] : valueCount + 1 } }
+
+  }, {});
+
+  for(const value in itemPurchaseCount) {
+    console.log(`${ value } occours ${ itemPurchaseCount[value] } time(s)` );
+  }
 
   console.log('Item 159 count: ', item159Count);
   console.log('Item 160 count: ', item160Count);
