@@ -24,8 +24,8 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        // url: process.env.MATIC_URL,
-        url: process.env.MAINNET_URL,
+        url: process.env.MATIC_URL,
+        // url: process.env.MAINNET_URL,
         timeout: 80000
         // blockNumber: 12552123
         // blockNumber: 13024371
@@ -34,9 +34,9 @@ module.exports = {
       timeout: 60000,
       gas: 'auto'
     },
-    // localhost: {
-    //   timeout: 160000
-    // },
+    localhost: {
+      timeout: 160000
+    },
     matic: {
       url: process.env.MATIC_URL,
       // url: 'https://rpc-mainnet.maticvigil.com/',

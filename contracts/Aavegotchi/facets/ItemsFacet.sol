@@ -137,6 +137,39 @@ contract ItemsFacet is Modifiers {
         return s.wearableSets.length;
     }
 
+    function findWearableSets(uint256[] calldata _wearableIds) external view returns (uint256[] memory wearableSetIds_) {
+        unchecked {                    
+            uint256 length = s.wearableSets.length;
+            wearableSetIds_ = new uint256[](length);
+            uint256 count;
+            for(uint256 i; i < length; i++) {
+                uint16[] memory setWearableIds = s.wearableSets[i].wearableIds;
+                bool foundSet = true;
+                for(uint256 j; j < setWearableIds.length; j++) {
+                    uint256 setWearableId = setWearableIds[j];
+                    bool foundWearableId = false;
+                    for(uint256 k; k < _wearableIds.length; k++) {
+                        if(_wearableIds[k] == setWearableId) {
+                            foundWearableId = true;
+                            break;
+                        }
+                    }
+                    if(foundWearableId == false) {
+                        foundSet = false;
+                        break;
+                    }
+                }
+                if(foundSet) {
+                    wearableSetIds_[count] = i;
+                    count++;
+                }
+            }
+            assembly {
+                mstore(wearableSetIds_, count)
+            }
+        }
+    }
+
     function getItemType(uint256 _itemId) public view returns (ItemType memory itemType_) {
         require(_itemId < s.itemTypes.length, "ItemsFacet: Item type doesn't exist");
         itemType_ = s.itemTypes[_itemId];
