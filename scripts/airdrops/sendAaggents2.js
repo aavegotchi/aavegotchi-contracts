@@ -27,7 +27,7 @@ async function main() {
     '0x67023130eaAb2969E26e5a25E2AbF901C01bCDA0',
     '0x72C74e48bD7d4e28DEf498A5DFa737Ff33Cb5317']
 
-    let quantities = [1]
+    let quantities = [1,1,1,1,1]
     let fullsets = [55, 56, 57, 58, 59]
 
     const dao = await ethers.getContractAt('DAOFacet', diamondAddress)
@@ -42,10 +42,9 @@ async function main() {
     const signer = ethers.provider.getSigner(owner)
 
    console.log('increasing wearable limits')
-await (await dao.connect(signer)).updateItemTypeMaxQuantity(fullsets, [13,13,13,13,13] )
-  
+   const increaseLimit= await (await dao.connect(signer)).updateItemTypeMaxQuantity(fullsets, [50,50,50,50,50] )
+  // console.log(increaseLimit)
     for (let i = 0; i < MIA.length; i++) {
-
         const sendrecipients = await (await dao.connect(signer)).mintItems(MIA[i], fullsets, quantities)
         const receipt = await sendrecipients.wait()
         if (!receipt.status) {
