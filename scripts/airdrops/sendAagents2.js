@@ -8,7 +8,7 @@ async function main() {
 
 
     let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
-    console.log(owner)
+    //console.log(owner)
     
     //amount to send out(maxQuantity will be increased by this)
     let amountToSend=13
@@ -30,6 +30,7 @@ async function main() {
 
     let quantities = [1,1,1,1,1]
     let fullsets = [55, 56, 57, 58, 59]
+    let newItemMaxQuantity=[]
 
     const dao = await ethers.getContractAt('DAOFacet', diamondAddress)
     const itemsF= await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet',diamondAddress)
@@ -42,18 +43,14 @@ async function main() {
 
 for(j=0;j<fullsets.length;j++){
     const items= await itemsF.getItemType(fullsets[j])
-    currentItemMaxStr=(items[8].toString())
-    var Int=Number(currentItemMaxStr)+amountToSend
+    currentItemMaxStr=(items.maxQuantity.toString())
+    newItemMaxQuantity=Number(currentItemMaxStr)+amountToSend
 }
-
-    const newArr=new Array(fullsets.length).fill(Int)
-    console.log(newArr)
-
+    const newItemMaxQuantityArray=new Array(fullsets.length).fill(newItemMaxQuantity)
     const signer = ethers.provider.getSigner(owner)
- 
-   console.log('increasing wearable limits')
-   const increaseLimit= await (await dao.connect(signer)).updateItemTypeMaxQuantity(fullsets, newArr )
-   //console.log(increaseLimit)
+   const increaseLimit= await (await dao.connect(signer)).updateItemTypeMaxQuantity(fullsets, newItemMaxQuantityArray )
+   console.log('increased wearable limits to', newItemMaxQuantityArray)
+   console.log('sending items')
     for (let i = 0; i < MIA.length; i++) {
         const sendrecipients = await (await dao.connect(signer)).mintItems(MIA[i], fullsets, quantities)
         const receipt = await sendrecipients.wait()
