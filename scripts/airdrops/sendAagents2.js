@@ -13,8 +13,8 @@ async function main() {
     //amount to send out(maxQuantity will be increased by this)
     let amountToSend=13
 
-    //MIA
-    let MIA = ['0xedfb7bbBb0bc31C4D3DB77F6A56FE2E414A9bE63',
+    //miaList
+    let miaList = ['0xedfb7bbBb0bc31C4D3DB77F6A56FE2E414A9bE63',
     '0x999C7997864b9bA4bAE06EBc0Aa59Cae1c91eD0e',
     '0xd16bddE3c4388E90E3f640896c9B92f28A71bF08',
     '0x75CFbc49986b7137d6a6df6C584f49510a2C756e',
@@ -51,13 +51,13 @@ for(j=0;j<fullsets.length;j++){
    const increaseLimit= await (await dao.connect(signer)).updateItemTypeMaxQuantity(fullsets, newItemMaxQuantityArray )
    console.log('increased wearable limits to', newItemMaxQuantityArray)
    console.log('sending items')
-    for (let i = 0; i < MIA.length; i++) {
-        const sendrecipients = await (await dao.connect(signer)).mintItems(MIA[i], fullsets, quantities)
+    for (let i = 0; i < miaList.length; i++) {
+        const sendrecipients = await (await dao.connect(signer)).mintItems(miaList[i], fullsets, quantities)
         const receipt = await sendrecipients.wait()
         if (!receipt.status) {
             throw Error(`Not Sent: ${sendrecipients.hash}`)
         }
-        console.log(i,'Minted items', fullsets, 'and sent to', MIA[i], 'at txn', sendrecipients.hash)
+        console.log(i,'Minted items', fullsets, 'and sent to', miaList[i], 'at txn', sendrecipients.hash)
     }
 
 
