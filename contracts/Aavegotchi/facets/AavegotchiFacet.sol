@@ -32,6 +32,10 @@ contract AavegotchiFacet {
         aavegotchiInfo_ = LibAavegotchi.getAavegotchi(_tokenId);
     }
 
+    function aavegotchiClaimTime(uint256 _tokenId) external view returns (uint256 claimTime_) {
+        claimTime_ = s.aavegotchis[_tokenId].claimTime;
+    }
+
     // /// @notice Enumerate valid NFTs
     // /// @dev Throws if `_index` >= `totalSupply()`.
     // /// @param _index A counter less than `totalSupply()`
