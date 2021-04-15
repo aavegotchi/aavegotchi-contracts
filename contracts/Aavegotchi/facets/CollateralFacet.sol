@@ -17,6 +17,7 @@ contract CollateralFacet is Modifiers {
     event DecreaseStake(uint256 indexed _tokenId, uint256 _reduceAmount);
     event ExperienceTransfer(uint256 indexed _fromTokenId, uint256 indexed _toTokenId, uint256 experience);
     event TransferEscrow(uint256 indexed _tokenId, uint256 _transferAmount);
+    event Erc20Deposited(uint256 indexed _tokenId, uint256 _depositAmount);
 
     /***********************************|
    |             Read Functions         |
@@ -136,6 +137,17 @@ contract CollateralFacet is Modifiers {
         s.collateralTypeInfo[_collateralToken].eyeShapeSvgId = _svgId;
     }
 
+
+    function depositERC20(uint256 _tokenId,  address _erc20Contract, uint256 _value) external {
+      address escrow = s.aavegotchis[_tokenId].escrow;
+      require(escrow != address(0), "CollateralFacet: Does not have an escrow");
+
+      address collateralType = s.aavegotchis[_tokenId].collateralType;
+
+      emit Erc20Deposited(_tokenId, _value);
+      LibERC20.transferFrom(collateralType, _erc20Contract, escrow, _value);
+    }
+
     function escrowBalance(uint256 _tokenId) external view onlyAavegotchiOwner(_tokenId) returns(uint256){
       address escrow = s.aavegotchis[_tokenId].escrow;
       require(escrow != address(0), "CollateralFacet: Does not have an escrow");
@@ -154,6 +166,7 @@ contract CollateralFacet is Modifiers {
       uint256 balance = IERC20(collateralType).balanceOf(escrow);
       require(balance - _transferAmount >= 0, "CollateralFacet: Cannot transfer more than current ERC20 escrow balance");
 
+      emit TransferEscrow(_tokenId, _transferAmount);
       LibERC20.transferFrom(collateralType, escrow, _recipient, _transferAmount);
     }
 }
