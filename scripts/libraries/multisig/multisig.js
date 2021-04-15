@@ -18,6 +18,10 @@ async function sendToMultisig (multisigAddress, signer, transaction) {
   return tx
 }
 
+/// //////////////////////////
+// The code below serves as an example of how to use the sendToMultisig function
+// defined above.
+/// //////////////////////////
 async function main () {
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
   let signer
