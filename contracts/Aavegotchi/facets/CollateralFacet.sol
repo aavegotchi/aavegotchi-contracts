@@ -8,6 +8,7 @@ import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
+/* import {CollateralEscrow} from "./facets/CollateralEscrow.sol"; */
 
 // import "hardhat/console.sol";
 
@@ -15,6 +16,7 @@ contract CollateralFacet is Modifiers {
     event IncreaseStake(uint256 indexed _tokenId, uint256 _stakeAmount);
     event DecreaseStake(uint256 indexed _tokenId, uint256 _reduceAmount);
     event ExperienceTransfer(uint256 indexed _fromTokenId, uint256 indexed _toTokenId, uint256 experience);
+    event TransferEscrow(uint256 indexed _tokenId, uint256 _transferAmount);
 
     /***********************************|
    |             Read Functions         |
@@ -132,5 +134,26 @@ contract CollateralFacet is Modifiers {
 
     function setCollateralEyeShapeSvgId(address _collateralToken, uint8 _svgId) external onlyDaoOrOwner {
         s.collateralTypeInfo[_collateralToken].eyeShapeSvgId = _svgId;
+    }
+
+    function escrowBalance(uint256 _tokenId) external view onlyAavegotchiOwner(_tokenId) returns(uint256){
+      address escrow = s.aavegotchis[_tokenId].escrow;
+      require(escrow != address(0), "CollateralFacet: Does not have an escrow");
+
+      address collateralType = s.aavegotchis[_tokenId].collateralType;
+      uint256 balance = IERC20(collateralType).balanceOf(escrow);
+
+      return balance;
+    }
+
+    function transferEscrow(uint256 _tokenId, address _recipient, uint256 _transferAmount) external onlyAavegotchiOwner(_tokenId) {
+      address escrow = s.aavegotchis[_tokenId].escrow;
+      require(escrow != address(0), "CollateralFacet: Does not have an escrow");
+
+      address collateralType = s.aavegotchis[_tokenId].collateralType;
+      uint256 balance = IERC20(collateralType).balanceOf(escrow);
+      require(balance - _transferAmount >= 0, "CollateralFacet: Cannot transfer more than current ERC20 escrow balance");
+
+      LibERC20.transferFrom(collateralType, escrow, _recipient, _transferAmount);
     }
 }
