@@ -33,8 +33,19 @@ contract AavegotchiFacet {
     }
 
     function totalSupply() external view returns (uint256 totalSupply_) {
-        totalSupply_ = s.totalSupply;
+        totalSupply_ = s.tokenIds.length;
     }
+
+    /// @notice Enumerate valid NFTs
+    /// @dev Throws if `_index` >= `totalSupply()`.
+    /// @param _index A counter less than `totalSupply()`
+    /// @return tokenId_ The token identifier for the `_index`th NFT,
+    ///  (sort order not specified)
+    function tokenByIndex(uint256 _index) external view returns (uint256 tokenId_) {
+        require(_index < s.tokenIds.length, "AavegotchiFacet: _index is greater than total supply.");
+        tokenId_ = s.tokenIds[_index];
+    }
+    
 
     /// @notice Count all NFTs assigned to an owner
     /// @dev NFTs assigned to the zero address are considered invalid, and this.

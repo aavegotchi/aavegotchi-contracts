@@ -1,6 +1,6 @@
 # Aavegotchi Diamonds
 
-## Contract Addresses
+## Polygon Contract Addresses
 
 Aavegotchi diamond: 0x86935F11C86623deC8a25696E1C19a8659CbF95d
 
@@ -9,7 +9,7 @@ RaffleContract: 0x6c723cac1E35FE29a175b287AE242d424c52c1CE
 Facets:
 
 BridgeFacet: 0xE3D9759Ab6E3d36c645b362E163cc667e1422eB7
-
+--
 AavegotchiFacet: 0xFb2e9978B9E89D6a5e0E08508644913c55E8643b
 --
 AavegotchiGameFacet: 0xDc11301F577C2f5fad2e56593173372301ec21D6
@@ -36,9 +36,12 @@ ERC721MarketplaceFacet: 0xFDdC3009B5AF4502DA6d9c1187Fa79db32ECF394
 --
 VoucherMigrationFacet 0x9eB64b01860d694f615808C3c550166e265b83D3
 
+## Ethereum Contract Addresses
 
-## Local Deployment
+Aavegotchi Diamond: 0x1906fd9c4AC440561F7197Da0A4BD2E88DF5fA70
 
-```console
-npx hardhat run scripts/deploy.js
-```
+contracts/Ethereum/facets/AavegotchiFacet.sol:AavegotchiFacet: 0xb7fd49c7b662B5135D1bB03b51FfC51a6b908230
+
+contracts/Ethereum/facets/BridgeFacet.sol:BridgeFacet: 0xb81c32635524c24B02d8286B6Fc5157151e4c273
+
+contracts/Ethereum/InitDiamond.sol:InitDiamond: 0x8eD0e2DdD3e298E1497578C21f719428A3d93134

@@ -13,8 +13,8 @@ struct AppStorage {
     mapping(address => uint256) aavegotchiBalance;
     mapping(uint256 => Aavegotchi) aavegotchis;
     mapping(address => mapping(address => bool)) operators;
-    mapping(uint256 => address) approved;
-    uint32 totalSupply;
+    mapping(uint256 => address) approved;    
     address rootChainManager;
     uint32[] tokenIds;
+    mapping(uint256 => uint256) tokenIdIndexes;
 }

@@ -4,7 +4,7 @@
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
 
 const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
-const newGameManager = '0x027Ffd3c119567e85998f4E6B9c3d83D5702660c'
+const newGameManager = '0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119'
 
 async function main () {
   let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()

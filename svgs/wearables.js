@@ -152,8 +152,8 @@ const wearablesSvgs = [
   wearable("149_RoyalCrown"),
   bodyWearable("150_RoyalRobes"),
   wearable("151_CommonRofl"),
-  wearable("152_UncommonRofl"), 
-  wearable("153_RareRofl"), 
+  wearable("152_UncommonRofl"),
+  wearable("153_RareRofl"),
   wearable("154_LegendaryRofl"),
   wearable("155_MythicalRofl"),
   wearable("156_GodlikeRofl"),
@@ -175,7 +175,7 @@ function stripSvg (svg) {
 }
 
 function readSvg (name) {
-  return stripSvg(fs.readFileSync(`./svgs/svgItems/${name}.svg`, 'utf8'))
+  return stripSvg(fs.readFileSync(`./svgs/svgitems/${name}.svg`, 'utf8'))
 }
 
 function wearable (name) {

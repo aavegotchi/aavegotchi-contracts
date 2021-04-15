@@ -241,12 +241,12 @@ library LibAavegotchi {
         return level_ + 1;
     }
 
-    function interact(uint256 _tokenId) internal {
+    function interact(uint256 _tokenId) internal returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
         // if interacted less than 12 hours ago
         if (block.timestamp < lastInteracted + 12 hours) {
-            return;
+            return false;
         }
 
         uint256 interactionCount = s.aavegotchis[_tokenId].interactionCount;
@@ -267,6 +267,7 @@ library LibAavegotchi {
 
         s.aavegotchis[_tokenId].lastInteracted = uint40(block.timestamp);
         emit AavegotchiInteract(_tokenId, l_kinship);
+        return true;
     }
 
     //Calculates the base rarity score, including collateral modifier
