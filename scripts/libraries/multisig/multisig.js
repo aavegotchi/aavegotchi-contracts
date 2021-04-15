@@ -4,7 +4,6 @@ require('dotenv').config()
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
 
 async function sendToMultisig (multisigAddress, signer, transaction) {
-  // const multisig = await ethers.getSigner(multisigAddress)
   const abi = [
     'function submitTransaction(address destination, uint value, bytes data) public returns (uint transactionId)'
   ]
