@@ -212,10 +212,16 @@ contract ERC721MarketplaceFacet is Modifiers {
 
         uint256 daoShare = priceInWei / 100;
         uint256 pixelCraftShare = (priceInWei * 2) / 100;
-        uint256 transferAmount = priceInWei - (daoShare + pixelCraftShare);
+
+        //AGIP6
+        uint256 playerRewardsShare = priceInWei / 50;
+        uint256 transferAmount = priceInWei - (daoShare + pixelCraftShare + playerRewardsShare);
         LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, pixelCraftShare);
         LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, daoShare);
         LibERC20.transferFrom(s.ghstContract, buyer, seller, transferAmount);
+
+        //AGIP6
+        LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, playerRewardsShare);
 
         s.aavegotchis[listing.erc721TokenId].locked = false;
 
