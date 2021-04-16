@@ -54,4 +54,42 @@ const main = async() => {
     getSelector('function transferEscrow(uint256 _tokenId, address _recipient, uint256 _transferAmount) external onlyAavegotchiOwner(_tokenId)');
   ]
 
-}
+  let existingFuncs = getSelectors(facet);
+  for (const selector of newFuncs) {
+    if (!existingFuncs.includes(selector)) {
+      throw Error(`Selector ${selector} not found`);
+    }
+  }
+
+  existingFuncs = existingFuncs.filter(selector => !newFuncs.includes(selector));
+
+  const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
+
+  const cut = [
+     {
+       facetAddress: facet.address,
+       action: FacetCutAction.Add,
+       functionSelectors: newFuncs
+     },
+     {
+       facetAddress: facet.address,
+       action: FacetCutAction.Replace,
+       functionSelectors: existingFuncs
+     }
+   ];
+  console.log(cut);
+
+  const diamondCut = (await ethers.getContractAt('IDiamondCut', diamondAddress)).connect(signer);
+  let tx;
+  let receipt;
+
+  console.log('Diamond cut');
+  tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 8000000 });
+  console.log('Diamond cut tx:', tx.hash);
+  receipt = await tx.wait();
+  if (!receipt.status) {
+     throw Error(`Diamond upgrade failed: ${tx.hash}`);
+   }
+  console.log('Completed diamond cut: ', tx.hash);
+
+  }
