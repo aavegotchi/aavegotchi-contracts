@@ -2,21 +2,20 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
+const { sendToMultisig } = require('./libraries/multisig/multisig.js')
 
 const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
-const newGameManager = '0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119'
 
 async function main () {
-  let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
-  console.log(owner)
   let signer
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
   if (testing) {
+    const owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
     await hre.network.provider.request({
       method: 'hardhat_impersonateAccount',
       params: [owner]
     })
-    signer = await ethers.provider.getSigner(owner)
+    signer = await ethers.getSigner(owner)
   } else if (hre.network.name === 'matic') {
     signer = new LedgerSigner(ethers.provider)
   } else {
@@ -24,20 +23,24 @@ async function main () {
   }
   console.log('Setting game manager.')
   const daoFacet = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
-  const tx = await daoFacet.setGameManager(newGameManager)
-  console.log('Transaction hash: ' + tx.hash)
-  let receipt = await tx.wait()
-  if (!receipt.status) {
-    throw Error(`Error:: ${tx.hash}`)
-  }
-  console.log('Transaction complete')
+  if (testing) {
+    const tx = await daoFacet.setGameManager(process.env.NEW_GAME_MANAGER)
+    console.log('Transaction hash: ' + tx.hash)
+    let receipt = await tx.wait()
+    if (!receipt.status) {
+      throw Error(`Error:: ${tx.hash}`)
+    }
+    console.log('Transaction complete')
 
-  const gameManager = await daoFacet.gameManager()
-  console.log('Game manager:', gameManager)
+    // test by getting the gameManager and seeing it
+    const gameManager = await daoFacet.gameManager()
+    console.log('Game manager:', gameManager)
+  } else {
+    let tx = await daoFacet.populateTransaction.setGameManager(process.env.NEW_GAME_MANAGER)
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+  }
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main()
   .then(() => process.exit(0))
   .catch(error => {
