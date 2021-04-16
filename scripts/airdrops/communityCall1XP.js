@@ -33,7 +33,7 @@ async function main () {
     })
     signer = await ethers.provider.getSigner(gameManager)
   } else if (hre.network.name === 'matic') {
-    signer = new LedgerSigner(ethers.provider)
+    signer = new LedgerSigner(ethers.provider,"hid","m/44'/60'/2'/0/0")
   } else {
     throw Error('Incorrect network selected')
   }
@@ -59,7 +59,7 @@ async function main () {
 
 
 
-  const maxProcess = 500
+  const maxProcess = 2000
   const xpAmount = 50
 
   console.log(`Sending ${xpAmount} to ${addresses.length} addresses!`)
