@@ -22,7 +22,7 @@ async function main () {
     throw Error('Incorrect network selected')
   }
   console.log('Setting game manager.')
-  const daoFacet = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
+  const daoFacet = await ethers.getContractAt('DAOFacet', diamondAddress, signer)
   if (testing) {
     const tx = await daoFacet.setGameManager(process.env.NEW_GAME_MANAGER)
     console.log('Transaction hash: ' + tx.hash)
