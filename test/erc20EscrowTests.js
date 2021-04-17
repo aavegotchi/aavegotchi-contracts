@@ -15,7 +15,7 @@ describe('ERC20 Escrow', () => {
 
     const opsWallet = '0xd0F9F536AA6332a6fe3BFB3522D549FbB3a1b0AE';
 
-    collateralFacet = await ethers.getContractAt('CollateralFacet', aavegotchiDiamondAddress);
+
     aavegotchiFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamondAddress);
   });
 
