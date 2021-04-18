@@ -17,6 +17,7 @@ contract DAOFacet is Modifiers {
     event CreateHaunt(uint256 indexed _hauntId, uint256 _hauntMaxSize, uint256 _portalPrice, bytes32 _bodyColor);
     event GrantExperience(uint256[] _tokenIds, uint256[] _xpValues);
     event AddWearableSet(WearableSet _wearableSet);
+    event UpdateWearableSet(uint256 _setId, WearableSet _wearableSet);
     event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
     event ItemTypeMaxQuantity(uint256[] _itemIds, uint256[] _maxQuanities);
 
@@ -157,6 +158,15 @@ contract DAOFacet is Modifiers {
             emit AddWearableSet(_wearableSets[i]);
         }
     }
+
+    function updateWearableSets(uint256[] calldata _setIds, WearableSet[] calldata _wearableSets) external onlyDaoOrOwner {
+        require(_setIds.length == _wearableSets.length, "_setIds not same length as _wearableSets");
+        for (uint256 i; i < _setIds.length; i++) {
+            s.wearableSets[_setIds[i]] = _wearableSets[i];
+            emit UpdateWearableSet(_setIds[i], _wearableSets[i]);
+        }
+    }
+
 
     function setGameManager(address _gameManager) external onlyDaoOrOwner {
         emit GameManagerTransferred(s.gameManager, _gameManager);
