@@ -4,6 +4,8 @@
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
 
+const { sendToMultisig } = require('../libraries/multisig/multisig.js')
+
 function getSelectors (contract) {
   const signatures = Object.keys(contract.interface.functions)
   const selectors = signatures.reduce((acc, val) => {
@@ -68,19 +70,100 @@ async function main () {
     }
   ]
   console.log(cut)
-
-  const diamondCut = (await ethers.getContractAt('IDiamondCut', diamondAddress)).connect(signer)
+  const diamondCut = await ethers.getContractAt('IDiamondCut', diamondAddress, signer)
   let tx
   let receipt
 
-  console.log('Diamond cut')
-  tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 8000000 })
-  console.log('Diamond cut tx:', tx.hash)
-  receipt = await tx.wait()
-  if (!receipt.status) {
-    throw Error(`Diamond upgrade failed: ${tx.hash}`)
+  const setIds = [5, 6, 37, 38]
+  let sets = [
+    {
+      name: 'Godlike Sergey',
+      allowedCollaterals: [],
+      wearableIds: [13, 14, 16],
+      traitsBonuses: [6, -3, 0, 0, 0]
+    },
+    {
+      name: 'Apex Sergey',
+      allowedCollaterals: [3],
+      wearableIds: [13, 14, 16, 17],
+      traitsBonuses: [6, -4, 0, 0, 0]
+    },
+    {
+      name: 'Sushi Chef',
+      allowedCollaterals: [],
+      wearableIds: [80, 81, 82],
+      traitsBonuses: [4, 0, 2, 0, 0]
+
+    },
+    {
+      name: 'Sushi Chef',
+      allowedCollaterals: [],
+      wearableIds: [80, 81, 83],
+      traitsBonuses: [3, 0, 2, 0, 0]
+    }
+  ]
+
+  if (testing) {
+    console.log('Diamond cut')
+    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000 })
+    console.log('Diamond cut tx:', tx.hash)
+    receipt = await tx.wait()
+    if (!receipt.status) {
+      throw Error(`Diamond upgrade failed: ${tx.hash}`)
+    }
+    console.log('Completed diamond cut: ', tx.hash)
+
+    console.log('Update sets')
+    const dao = await ethers.getContractAt('DAOFacet', diamondAddress, signer)
+
+    tx = await dao.updateWearableSets(setIds, sets, { gasLimit: 8000000 })
+    console.log('Update sets tx:', tx.hash)
+    receipt = await tx.wait()
+    if (!receipt.status) {
+      throw Error(`Update sets failed: ${tx.hash}`)
+    }
+    console.log('Completed updating sets: ', tx.hash)
+
+    let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)
+    // let set = await itemsFacet.getWearableSet(69)
+    // console.log(set)
+    const names = [
+      'Godlike Sergey',
+      'Apex Sergey',
+      'Sushi Chef'
+    ]
+    sets = await itemsFacet.getWearableSets()
+    for (const [index, set] of sets.entries()) {
+      if (names.includes(set.name)) {
+        console.log(index, set)
+      }
+    }
+  } else {
+    // console.log('Diamond cut')
+    // tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000 })
+    // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+
+    // console.log('Update sets')
+    // const dao = await ethers.getContractAt('DAOFacet', diamondAddress, signer)
+
+    // tx = await dao.populateTransaction.updateWearableSets(setIds, sets, { gasLimit: 8000000 })
+    // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+
+    let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)
+    // let set = await itemsFacet.getWearableSet(69)
+    // console.log(set)
+    const names = [
+      'Godlike Sergey',
+      'Apex Sergey',
+      'Sushi Chef'
+    ]
+    sets = await itemsFacet.getWearableSets()
+    for (const [index, set] of sets.entries()) {
+      if (names.includes(set.name)) {
+        console.log(index, set)
+      }
+    }
   }
-  console.log('Completed diamond cut: ', tx.hash)
 }
 
 main()
