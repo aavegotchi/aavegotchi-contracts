@@ -147,7 +147,6 @@ async function main () {
   console.log('Mint items to aavegotchi.eth')
   let mintAddress = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c"
 
-  
 
 
   tx = await daoFacet.mintItems(mintAddress, [162], [1000])
@@ -156,6 +155,24 @@ async function main () {
     throw Error(`Error:: ${tx.hash}`)
   }
   console.log('Prize items minted:', tx.hash)
+
+  
+  //Aavegotchi equips
+
+  await hre.network.provider.request({
+    method: 'hardhat_impersonateAccount',
+    params: ["0x027Ffd3c119567e85998f4E6B9c3d83D5702660c"]
+  })
+  signer = await ethers.provider.getSigner("0x027Ffd3c119567e85998f4E6B9c3d83D5702660c")
+
+  const aavegotchiOwnerSigner = await itemsFacet.connect(signer)
+
+  await aavegotchiOwnerSigner.equipWearables("2575",[162,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+
+  const svgOutput = await svgFacet.getAavegotchiSvg("2575")
+
+  console.log('svg output:',svgOutput)
+
 
 }
 
