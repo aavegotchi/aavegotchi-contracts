@@ -11,7 +11,7 @@ let signer
 const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
 const gasLimit = 15000000
 
-async function uploadSvgs (svgs, testing) {
+async function uploadSvgs (svgs, svgType, testing) {
   let svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
   function setupSvg (...svgData) {
     const svgTypesAndSizes = []
@@ -54,7 +54,7 @@ async function uploadSvgs (svgs, testing) {
       svgItemsEnd++
     }
     ;[svg, svgTypesAndSizes] = setupSvg(
-      ['wearables', svgs.slice(svgItemsStart, svgItemsEnd)]
+      [svgType, svgs.slice(svgItemsStart, svgItemsEnd)]
     )
     console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`)
     printSizeInfo(svgTypesAndSizes)
@@ -123,10 +123,11 @@ async function main () {
   let item = await itemsFacet.getItemType(162)
   console.log('Item:', item)
 
-  await uploadSvgs(wearablesSvgs, testing)
-  await uploadSvgs(sleevesSvgs.map(value => value.svg), testing)
+  await uploadSvgs(wearablesSvgs, 'wearables', testing)
+  // console.log(sleevesSvgs)
+  await uploadSvgs(sleevesSvgs.map(value => value.svg), 'sleeves', testing)
 
-  let sleevesSvgId = 23
+  let sleevesSvgId = 27
   let sleeves = []
   for (const sleeve of sleevesSvgs) {
     sleeves.push(
@@ -166,27 +167,25 @@ async function main () {
       throw Error(`Error:: ${tx.hash}`)
     }
     console.log('Prize items minted:', tx.hash)
+    // Aavegotchi equips
+
+    await hre.network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: ['0x027Ffd3c119567e85998f4E6B9c3d83D5702660c']
+    })
+    signer = await ethers.provider.getSigner('0x027Ffd3c119567e85998f4E6B9c3d83D5702660c')
+
+    const aavegotchiOwnerSigner = await itemsFacet.connect(signer)
+
+    await aavegotchiOwnerSigner.equipWearables('2575', [162, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+    const svgOutput = await svgFacet.getAavegotchiSvg('2575')
+
+    console.log('svg output:', svgOutput)
   } else {
     tx = await daoFacet.populateTransaction.mintItems(mintAddress, [162], [1000])
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
-  console.log('Prize items minted:', tx.hash)
-
-  // Aavegotchi equips
-
-  await hre.network.provider.request({
-    method: 'hardhat_impersonateAccount',
-    params: ['0x027Ffd3c119567e85998f4E6B9c3d83D5702660c']
-  })
-  signer = await ethers.provider.getSigner('0x027Ffd3c119567e85998f4E6B9c3d83D5702660c')
-
-  const aavegotchiOwnerSigner = await itemsFacet.connect(signer)
-
-  await aavegotchiOwnerSigner.equipWearables('2575', [162, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-
-  const svgOutput = await svgFacet.getAavegotchiSvg('2575')
-
-  console.log('svg output:', svgOutput)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

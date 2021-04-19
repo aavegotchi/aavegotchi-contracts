@@ -9,7 +9,7 @@ let signer
 const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
 const gasLimit = 15000000
 
-async function uploadSvgs (svgs) {
+async function uploadSvgs (svgs, svgType) {
   let svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
   function setupSvg (...svgData) {
     const svgTypesAndSizes = []
@@ -52,7 +52,7 @@ async function uploadSvgs (svgs) {
       svgItemsEnd++
     }
     ;[svg, svgTypesAndSizes] = setupSvg(
-      ['wearables', svgs.slice(svgItemsStart, svgItemsEnd)]
+      [svgType, svgs.slice(svgItemsStart, svgItemsEnd)]
     )
     console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`)
     printSizeInfo(svgTypesAndSizes)
@@ -106,8 +106,8 @@ async function main () {
   // let item = await itemsFacet.getItemType(161)
   // console.log('Item:', item)
 
-  await uploadSvgs(wearablesSvgs)
-  await uploadSvgs(sleevesSvgs.map(value => value.svg))
+  await uploadSvgs(wearablesSvgs, 'wearables')
+  await uploadSvgs(sleevesSvgs.map(value => value.svg), 'sleeves')
 
   let sleevesSvgId = 23
   let sleeves = []

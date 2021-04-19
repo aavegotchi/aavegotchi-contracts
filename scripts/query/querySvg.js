@@ -18,7 +18,7 @@ async function main () {
   // console.log(aavegotchi)
   // 11 = robe
   // 13 = aagent shirt
-  let svgs = await svgFacet.getSvgs(ethers.utils.formatBytes32String('sleeves'), [24])
+  let svgs = await svgFacet.getSvgs(ethers.utils.formatBytes32String('sleeves'), [27])
   let count = 0
   for (const svg of svgs) {
     console.log(count)
