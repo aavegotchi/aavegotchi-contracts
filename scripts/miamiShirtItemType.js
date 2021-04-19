@@ -10,7 +10,7 @@ const itemTypes = [
     setId: [],
     author: 'xibot',
     description: '',
-    dimensions: { x: 12, y: 33, width: 40, height: 21 },
+    dimensions: { x: 12, y: 32, width: 40, height: 21 },
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 5,
