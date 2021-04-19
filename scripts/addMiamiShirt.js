@@ -5,11 +5,13 @@ const { LedgerSigner } = require('@ethersproject/hardware-wallets')
 const { itemTypes } = require('./miamiShirtItemType')
 const { wearablesSvgs, sleevesSvgs } = require('../svgs/miamiShirtWearables')
 
+const { sendToMultisig } = require('./libraries/multisig/multisig.js')
+
 let signer
 const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
 const gasLimit = 15000000
 
-async function uploadSvgs (svgs) {
+async function uploadSvgs (svgs, testing) {
   let svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
   function setupSvg (...svgData) {
     const svgTypesAndSizes = []
@@ -56,12 +58,17 @@ async function uploadSvgs (svgs) {
     )
     console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`)
     printSizeInfo(svgTypesAndSizes)
-    let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, { gasLimit: gasLimit })
-    let receipt = await tx.wait()
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`)
+    if (testing) {
+      let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, { gasLimit: gasLimit })
+      let receipt = await tx.wait()
+      if (!receipt.status) {
+        throw Error(`Error:: ${tx.hash}`)
+      }
+      console.log(svgItemsEnd, svg.length)
+    } else {
+      let tx = await svgFacet.populateTransaction.storeSvg(svg, svgTypesAndSizes, { gasLimit: gasLimit })
+      await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
     }
-    console.log(svgItemsEnd, svg.length)
     if (svgItemsEnd === svgs.length) {
       break
     }
@@ -70,18 +77,14 @@ async function uploadSvgs (svgs) {
 }
 
 async function main () {
-
-
-
   let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
   if (testing) {
-
-    await network.provider.request({
-      method: "hardhat_reset",
+    await hre.network.provider.request({
+      method: 'hardhat_reset',
       params: [{
         forking: {
-          jsonRpcUrl: process.env.MATIC_URL,
+          jsonRpcUrl: process.env.MATIC_URL
         }
       }]
     })
@@ -102,22 +105,26 @@ async function main () {
   let daoFacet = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
   let svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
 
-  let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet',diamondAddress)
+  let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)
 
   console.log('Adding items', 0, 'to', itemTypes.length)
-  tx = await daoFacet.addItemTypes(itemTypes, { gasLimit: gasLimit })
-  receipt = await tx.wait()
-  if (!receipt.status) {
-    throw Error(`Error:: ${tx.hash}`)
+  if (testing) {
+    tx = await daoFacet.addItemTypes(itemTypes, { gasLimit: gasLimit })
+    receipt = await tx.wait()
+    if (!receipt.status) {
+      throw Error(`Error:: ${tx.hash}`)
+    }
+    console.log('Items were added:', tx.hash)
+  } else {
+    tx = await daoFacet.populateTransaction.addItemTypes(itemTypes, { gasLimit: gasLimit })
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
-  console.log('Items were added:', tx.hash)
 
+  let item = await itemsFacet.getItemType(162)
+  console.log('Item:', item)
 
-   let item = await itemsFacet.getItemType(162)
-   console.log('Item:', item)
-
-  await uploadSvgs(wearablesSvgs)
-  await uploadSvgs(sleevesSvgs.map(value => value.svg))
+  await uploadSvgs(wearablesSvgs, testing)
+  await uploadSvgs(sleevesSvgs.map(value => value.svg), testing)
 
   let sleevesSvgId = 23
   let sleeves = []
@@ -131,32 +138,39 @@ async function main () {
     sleevesSvgId++
   }
   console.log('Associating sleeves svgs with body wearable svgs.')
-  tx = await svgFacet.setSleeves(sleeves, { gasLimit: gasLimit })
-  receipt = await tx.wait()
-  if (!receipt.status) {
-    throw Error(`Error:: ${tx.hash}`)
+  if (testing) {
+    tx = await svgFacet.setSleeves(sleeves, { gasLimit: gasLimit })
+    receipt = await tx.wait()
+    if (!receipt.status) {
+      throw Error(`Error:: ${tx.hash}`)
+    }
+    console.log('Sleeves associated:', tx.hash)
+  } else {
+    tx = await svgFacet.populateTransaction.setSleeves(sleeves, { gasLimit: gasLimit })
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
-  console.log('Sleeves associated:', tx.hash)
 
 
-  const finalSVG = await svgFacet.getItemSvg("162")
+  const finalSVG = await svgFacet.getItemSvg('162')
 
-  console.log('final svg:',finalSVG)
+  console.log('final svg:', finalSVG)
 
   // deploy raffle:
   console.log('Mint items to aavegotchi.eth')
-  let mintAddress = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c"
+  let mintAddress = '0x027Ffd3c119567e85998f4E6B9c3d83D5702660c'
 
-  
-
-
-  tx = await daoFacet.mintItems(mintAddress, [162], [1000])
-  receipt = await tx.wait()
-  if (!receipt.status) {
-    throw Error(`Error:: ${tx.hash}`)
+  console.log('Minting items')
+  if (testing) {
+    tx = await daoFacet.mintItems(mintAddress, [162], [1000])
+    receipt = await tx.wait()
+    if (!receipt.status) {
+      throw Error(`Error:: ${tx.hash}`)
+    }
+    console.log('Prize items minted:', tx.hash)
+  } else {
+    tx = await daoFacet.populateTransaction.mintItems(mintAddress, [162], [1000])
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
-  console.log('Prize items minted:', tx.hash)
-
 }
 
 // We recommend this pattern to be able to use async/await everywhere
