@@ -406,6 +406,12 @@ contract SvgFacet is Modifiers {
         LibSvg.updateSvg(_svg, _typesAndIdsAndSizes);
     }
 
+    function deleteLastSvgLayers(bytes32 _svgType, uint256 _numLayers) external onlyDaoOrOwner {
+        for(uint256 i; i < _numLayers; i++){
+            s.svgLayers[_svgType].pop();
+        }
+    }
+
     struct Sleeve {
         uint256 sleeveId;
         uint256 wearableId;
