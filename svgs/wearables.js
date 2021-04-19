@@ -161,7 +161,8 @@ const wearablesSvgs = [
   wearable("158_LilPumpDrink"),
   wearable("159_LilPumpShades"),
   bodyWearable("160_LilPumpThreads"),
-  wearable("161_LilPumpDreads")
+  wearable("161_LilPumpDreads"),
+  bodyWearable("162_MiamiShirt")
 
 ]
 
