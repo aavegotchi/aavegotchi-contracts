@@ -3,7 +3,7 @@
 /* eslint prefer-const: "off" */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
-const { sendToMultisig } = require('./multisig.js')
+const { sendToMultisig } = require('../libraries/multisig/multisig.js')
 
 const getSelectors = (contract) => {
   const signatures = Object.keys(contract.interface.functions)
@@ -22,7 +22,7 @@ const getSelector = (func) => {
 }
 
 
-const main = async() => {
+async function main () {
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
 
   let signer;
@@ -50,8 +50,8 @@ const main = async() => {
 
   const newFuncs = [
     getSelector('function depositERC20(uint256 _tokenId,  address _erc20Contract, uint256 _value) external'),
-    getSelector('function escrowBalance(uint256 _tokenId) external view onlyAavegotchiOwner(_tokenId) returns(uint256)'),
-    getSelector('function transferEscrow(uint256 _tokenId, address _recipient, uint256 _transferAmount) external onlyAavegotchiOwner(_tokenId)')
+    getSelector('function escrowBalance(uint256 _tokenId, address _erc20Contract) external view returns(uint256)'),
+    getSelector('function transferEscrow(uint256 _tokenId, address _recipient, uint256 _transferAmount) external')
   ]
 
   let existingFuncs = getSelectors(facet);
@@ -71,11 +71,11 @@ const main = async() => {
        action: FacetCutAction.Add,
        functionSelectors: newFuncs
      },
-     {
-       facetAddress: facet.address,
-       action: FacetCutAction.Replace,
-       functionSelectors: existingFuncs
-     }
+     // {
+     //   facetAddress: facet.address,
+     //   action: FacetCutAction.Replace,
+     //   functionSelectors: existingFuncs
+     // }
    ];
   console.log(cut);
 
@@ -85,32 +85,32 @@ const main = async() => {
 
   console.log('Diamond cut');
   tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 8000000 });
-  console.log('Diamond cut tx:', tx.hash);
+  console.log('Diamond cut tx:', tx.hash)
   receipt = await tx.wait();
   if (!receipt.status) {
-     throw Error(`Diamond upgrade failed: ${tx.hash}`);
+     throw Error(`Diamond upgrade failed: ${tx.hash}`)
    }
-  console.log('Completed diamond cut: ', tx.hash);
+  console.log('Completed diamond cut: ', tx.hash)
 
 
   //testing
-  let escrowFacet,
-      aavegotchiFacet,
-      maticGhstAddress,
-      aavegotchiDiamondAddress,
-      erc20TokenAddress;
-
-      maticGhstAddress = '0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7';
-      aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
-
-  escrowFacet = await ethers.getContractAt('EscrowFacet', aavegotchiDiamondAddress);
-
-
+//   let escrowFacet,
+//       aavegotchiFacet,
+//       maticGhstAddress,
+//       aavegotchiDiamondAddress,
+//       erc20TokenAddress;
+//
+//       maticGhstAddress = '0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7';
+//       aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
+//
+//   escrowFacet = await ethers.getContractAt('EscrowFacet', aavegotchiDiamondAddress);
+//
+//
+  }
 
   main()
     .then(() => process.exit(0))
-      .catch((error) => {
-        console.error(error);
-        process.exit(1);
-    });
-  }
+      .catch(error => {
+        console.error(error)
+        process.exit(1)
+    })
