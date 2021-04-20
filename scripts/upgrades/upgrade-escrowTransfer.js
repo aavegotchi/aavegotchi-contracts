@@ -54,14 +54,14 @@ async function main () {
     getSelector('function transferEscrow(uint256 _tokenId, address _recipient, uint256 _transferAmount) external')
   ]
 
-  let existingFuncs = getSelectors(facet);
-  for (const selector of newFuncs) {
-    if (!existingFuncs.includes(selector)) {
-      throw Error(`Selector ${selector} not found`);
-    }
-  }
+  // let existingFuncs = getSelectors(facet);
+  // for (const selector of newFuncs) {
+  //   if (!existingFuncs.includes(selector)) {
+  //     throw Error(`Selector ${selector} not found`);
+  //   }
+  // }
 
-  existingFuncs = existingFuncs.filter(selector => !newFuncs.includes(selector));
+  // existingFuncs = existingFuncs.filter(selector => !newFuncs.includes(selector));
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
