@@ -43,7 +43,7 @@ async function main () {
     throw Error('Incorrect network selected')
   }
 
-  const Facet = await ethers.getContractFactory('contracts/Aavegotchi/facets/CollateralFacet.sol:CollateralFacet');
+  const Facet = await ethers.getContractFactory('contracts/Aavegotchi/facets/EscrowFacet.sol:EscrowFacet');
   facet = await Facet.deploy();
   await facet.deployed();
   console.log('Deployed facet:', facet.address);
@@ -79,15 +79,22 @@ async function main () {
   let tx;
   let receipt;
 
-  console.log('Diamond cut');
-  tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 8000000 });
-  console.log('Diamond cut tx:', tx.hash)
-  receipt = await tx.wait();
-  if (!receipt.status) {
-     throw Error(`Diamond upgrade failed: ${tx.hash}`)
-   }
-  console.log('Completed diamond cut: ', tx.hash)
+  if(testing) {
+    console.log('Diamond cut');
+    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 8000000 });
+    console.log('Diamond cut tx:', tx.hash)
+    receipt = await tx.wait();
+    if (!receipt.status) {
+       throw Error(`Diamond upgrade failed: ${tx.hash}`)
+     }
+    console.log('Completed diamond cut: ', tx.hash);
+
+  } else {
+     console.log('Diamond cut');
+     tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000 });
+     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
   }
+}
 
   main()
     .then(() => process.exit(0))
