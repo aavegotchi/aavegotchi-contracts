@@ -48,11 +48,7 @@ async function main () {
   await facet.deployed();
   console.log('Deployed facet:', facet.address);
 
-  const newFuncs = [
-    getSelector('function depositERC20(uint256 _tokenId,  address _erc20Contract, uint256 _value) external'),
-    getSelector('function escrowBalance(uint256 _tokenId, address _erc20Contract) external view returns(uint256)'),
-    getSelector('function transferEscrow(uint256 _tokenId, address _recipient, uint256 _transferAmount) external')
-  ]
+  const newFuncs = getSelectors(facet);
 
   // let existingFuncs = getSelectors(facet);
   // for (const selector of newFuncs) {
