@@ -1,37 +1,34 @@
 const { expect } = require('chai');
 
-const { itemTypes } = require('../scripts/upgrades/upgrade-escrowTransfer.js');
-const { deployProject } = require('../scripts/deploy.js');
+const escrowFuncs = require('../scripts/upgrades/upgrade-escrowTransfer.js');
 
 
 describe('Escrow Transfering', () => {
   let escrowFacet,
       aavegotchiFacet,
-      maticGhstAddress,
+      erc20TokenConAddress,
       aavegotchiDiamondAddress,
       erc20TokenAddress,
-      account;
+      tokenOwner;
 
 
   before(async () => {
-      const deployVars = await deployProject('deployTest');
 
-      maticGhstAddress = '0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7';
+      erc20TokenConAddress = '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984';
       aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
 
-      account = deployVars.account;
-      console.log("Account 1: ");
-      console.log("Account 2: ");
-      console.log("Account 3: ");
+      escrowFacet = await ethers.getContractAt('EscrowFacet', aavegotchiDiamondAddress);
+      aavegotchiFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamondAddress);
 
+      tokenOwner = await aavegotchiFacet.ownerOf(6335);
+
+      console.log("Token Owner: ", tokenOwner);
   });
 
   it.only('Should depsoit erc20 token into escrow', async () => {
-    escrowFacet = await ethers.getContractAt('EscrowFacet', aavegotchiDiamondAddress);
-
-    console.log("Account 1: ", account[1]);
-    console.log("Account 2: ", account[2]);
-    console.log("Account 3: ", account[3]);
-
+      // await escrowFacet.depositERC20(6335, erc20TokenConAddress, 4);
+      //
+      // let balance = await escrowFacet.escrowBalance(6335, erc20TokenConAddress);
+      // console.log("UniSwap Balance: ", balance);
   });
 })
