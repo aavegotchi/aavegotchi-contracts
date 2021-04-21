@@ -91,21 +91,6 @@ async function main () {
      throw Error(`Diamond upgrade failed: ${tx.hash}`)
    }
   console.log('Completed diamond cut: ', tx.hash)
-
-
-  //testing
-//   let escrowFacet,
-//       aavegotchiFacet,
-//       maticGhstAddress,
-//       aavegotchiDiamondAddress,
-//       erc20TokenAddress;
-//
-//       maticGhstAddress = '0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7';
-//       aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
-//
-//   escrowFacet = await ethers.getContractAt('EscrowFacet', aavegotchiDiamondAddress);
-//
-//
   }
 
   main()
