@@ -37,20 +37,12 @@ async function main () {
     throw Error('Incorrect network selected')
   }
 
-  const ItemsFacet = await ethers.getContractFactory('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet')
-  let itemsFacet = await ItemsFacet.deploy()
-  await itemsFacet.deployed()
-  console.log('Deployed facet:', itemsFacet.address)
-
+  //const ItemsFacet = await ethers.getContractFactory('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet')
+  
   const CollateralFacet = await ethers.getContractFactory('CollateralFacet')
   let collateralFacet = await CollateralFacet.deploy()
   await collateralFacet.deployed()
   console.log('Deployed facet:', collateralFacet.address)
-
-  const newItemsFuncs = [
-    getSelector('function setWearableSlotPositions(uint256 _wearableId, bool[16] calldata _slotPositions) external')
-  ]
-  const existingItemsFuncs = getSelectors(itemsFacet).filter(selector => !newItemsFuncs.includes(selector))
 
   const newCollateralFuncs = [
     getSelector('function setCollateralEyeShapeSvgId(address _collateralToken, uint8 _svgId) external')
