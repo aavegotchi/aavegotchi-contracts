@@ -29,7 +29,8 @@ async function main () {
   let facet;
   let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner();
 
-  const testing = ['hardhat', 'localhost'].includes(hre.network.name)
+  const testing = ['hardhat', 'localhost'].includes(hre.network.name);
+  // await hre.run('compile');
 
   if (testing) {
     await hre.network.provider.request({
@@ -105,4 +106,4 @@ if(require.main === module){
     });
   }
 
-    exports.escrowProject = main
+    exports.escrowProject = main;
