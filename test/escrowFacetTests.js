@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 
-const escrowFuncs = require('../scripts/upgrades/upgrade-escrowTransfer.js');
+const { escrowProject } = require('../scripts/upgrades/upgrade-escrowTransfer.js');
 
 
 describe('Escrow Transfering', () => {
@@ -17,6 +17,9 @@ describe('Escrow Transfering', () => {
       erc20TokenConAddress = '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984';
       aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
 
+      // global.account = '0xF3a57FAbea6e198403864640061E3abc168cee80';
+      // global.signer = ethers.provider.getSigner(global.account).connect(global.signer);
+
       escrowFacet = await ethers.getContractAt('EscrowFacet', aavegotchiDiamondAddress);
       aavegotchiFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamondAddress);
 
@@ -27,8 +30,8 @@ describe('Escrow Transfering', () => {
 
   it.only('Should depsoit erc20 token into escrow', async () => {
       // await escrowFacet.depositERC20(6335, erc20TokenConAddress, 4);
-      //
-      // let balance = await escrowFacet.escrowBalance(6335, erc20TokenConAddress);
-      // console.log("UniSwap Balance: ", balance);
+
+      let balance = await escrowFacet.escrowBalance(6335, erc20TokenConAddress);
+      console.log("UniSwap Balance: ", balance);
   });
 })
