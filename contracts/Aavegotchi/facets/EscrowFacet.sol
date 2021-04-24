@@ -6,6 +6,7 @@ import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
+import {CollateralEscrow} from "../CollateralEscrow.sol";
 
 
 contract EscrowFacet is Modifiers {
@@ -19,7 +20,7 @@ contract EscrowFacet is Modifiers {
     require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 
     emit Erc20Deposited(_tokenId, _value, _erc20Contract);
-    
+
     LibERC20.transferFrom(_erc20Contract, LibMeta.msgSender(), escrow, _value);
   }
 
@@ -40,6 +41,8 @@ contract EscrowFacet is Modifiers {
     require(balance - _transferAmount >= 0, "CollateralFacet: Cannot transfer more than current ERC20 escrow balance");
 
     emit TransferEscrow(_tokenId, _transferAmount, _erc20Contract);
+
+    CollateralEscrow(escrow).approveAavegotchiDiamond(_erc20Contract);
     LibERC20.transferFrom(_erc20Contract, escrow, _recipient, _transferAmount);
   }
 }

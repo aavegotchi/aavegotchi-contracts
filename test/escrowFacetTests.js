@@ -7,10 +7,12 @@ const { escrowProject } = require('../scripts/upgrades/upgrade-escrowTransfer.js
 describe('Escrow Transfering', async () => {
   let escrowFacet,
       aavegotchiFacet,
+      libAavegotchi,
       erc20TokenConAddress,
       aavegotchiDiamondAddress,
       landTokenHolder,
       tokenOwner,
+      escrowOwner,
       owner,
       erc20Standard;
 
@@ -21,20 +23,11 @@ describe('Escrow Transfering', async () => {
 
       await escrowProject();
 
-      // global.account = '0xF3a57FAbea6e198403864640061E3abc168cee80';
-      // global.signer = ethers.provider.getSigner(global.account).connect(global.signer);
-
-      // landTokenHolder = '0xCCaD6fbEC3814458Ad88734cdc397B075e0D7BA0';
-
-      // owner = await ethers.getSigner(landTokenHolder);
-
       escrowFacet = await ethers.getContractAt('EscrowFacet', aavegotchiDiamondAddress);
       aavegotchiFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamondAddress);
-      // erc20Standard = await ethers.getContractAt('IERC20', erc20TokenConAddress);
 
       tokenOwner = await aavegotchiFacet.ownerOf(6335);
 
-      console.log("Token Owner: ", tokenOwner);
   });
 
   it.only('Should deposit erc20 token into escrow', async () => {
@@ -58,26 +51,24 @@ describe('Escrow Transfering', async () => {
     let balance = await escrowFacet.escrowBalance(6335, erc20TokenConAddress);
     console.log("Land Balance: ", balance.toNumber());
 
-    // await hre.network.provider.request({
-    //   method: 'hardhat_stopImpersonatingAccount',
-    //   params: [holderAddress]
-    // });
-    //
-    // await hre.network.provider.request({
-    //   method: "hardhat_impersonateAccount",
-    //   params: [erc20TokenConAddress]
-    // });
+    await hre.network.provider.request({
+      method: 'hardhat_stopImpersonatingAccount',
+      params: [holderAddress]
+    });
+
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [tokenOwner]
+    });
 
     let owner = await ethers.getSigner(tokenOwner);
     let ownerEscrowFacet = await escrowFacet.connect(owner);
-    const erc20Aavegotchi = await ethers.getContractAt("IERC20", aavegotchiDiamondAddress, owner);
-    //
-    // console.log("Token Owner: ", tokenOwner);
-    // console.log("Sender Address: ", owner);
-    await erc20Aavegotchi.approve(holderAddress, ethers.constants.MaxUint256);
+
 
     await ownerEscrowFacet.transferEscrow(6335, erc20TokenConAddress, holderAddress, 3);
-    // console.log("Land Balance: ", balance.toNumber());
+    let newBalance = await escrowFacet.escrowBalance(6335, erc20TokenConAddress);
+    
+    expect(newBalance.toNumber()).to.equal(1);
 
   });
 })
