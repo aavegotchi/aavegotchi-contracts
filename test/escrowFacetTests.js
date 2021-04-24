@@ -14,7 +14,7 @@ describe('Escrow Transfering', async () => {
 
   before(async () => {
 
-      erc20TokenConAddress = '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984';
+      erc20TokenConAddress = '0x0000000000000000000000000000000000001010';
       aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
 
       await escrowProject();
@@ -31,11 +31,29 @@ describe('Escrow Transfering', async () => {
   });
 
   it.only('Should deposit erc20 token into escrow', async () => {
-      // console.log("escrowProject: ", escrowProject);
-      // await escrowFacet.depositERC20(6335, erc20TokenConAddress, 4);
+      maticTokenHolder = '0x31de2088f38ed7F8a4231dE03973814edA1f8773';
+
+      await hre.network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [maticTokenHolder]
+      });
+
+      await escrowFacet.depositERC20(6335, maticTokenHolder, "1000000000000000000000");
 
       let balance = await escrowFacet.escrowBalance(6335, erc20TokenConAddress);
-      console.log("UniSwap Balance: ", balance);
-      // console.log("Escrow Facet: ", escrowFacet);
+      console.log("Matic Balance: ", balance.toNumber());
+
+      await hre.network.provider.request({
+        method: 'hardhat_stopImpersonatingAccount',
+        params: [maticTokenHolder]
+      });
+
+      await hre.network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [tokenOwner]
+      });
+
+      await escrowFacet.transferEscrow(6335, erc20TokenConAddress, maticTokenHolder, "1000000000000000000000");
+
   });
 })
