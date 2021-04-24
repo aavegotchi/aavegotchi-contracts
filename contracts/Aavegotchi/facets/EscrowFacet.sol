@@ -19,6 +19,7 @@ contract EscrowFacet is Modifiers {
     require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 
     emit Erc20Deposited(_tokenId, _value, _erc20Contract);
+    
     LibERC20.transferFrom(_erc20Contract, LibMeta.msgSender(), escrow, _value);
   }
 
