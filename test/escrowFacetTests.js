@@ -33,27 +33,17 @@ describe('Escrow Transfering', async () => {
   it.only('Should deposit erc20 token into escrow', async () => {
       maticTokenHolder = '0x31de2088f38ed7F8a4231dE03973814edA1f8773';
 
-      await hre.network.provider.request({
-        method: "hardhat_impersonateAccount",
-        params: [maticTokenHolder]
-      });
-
       await escrowFacet.depositERC20(6335, maticTokenHolder, "1000000000000000000000");
 
       let balance = await escrowFacet.escrowBalance(6335, erc20TokenConAddress);
       console.log("Matic Balance: ", balance.toNumber());
 
-      await hre.network.provider.request({
-        method: 'hardhat_stopImpersonatingAccount',
-        params: [maticTokenHolder]
-      });
+      let owner = await ethers.getSigner(tokenOwner);
+      let connectEscrowFacet = await escrowFacet.connect(owner);
 
-      await hre.network.provider.request({
-        method: "hardhat_impersonateAccount",
-        params: [tokenOwner]
-      });
+      console.log("Token Owner: ", tokenOwner);
 
-      await escrowFacet.transferEscrow(6335, erc20TokenConAddress, maticTokenHolder, "1000000000000000000000");
+      await connectEscrowFacet.transferEscrow(6335, erc20TokenConAddress, maticTokenHolder, "1000000000000000000000");
 
   });
 })
