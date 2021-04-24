@@ -28,7 +28,7 @@ contract XingyunFacet {
 
     event PurchaseItemsWithVouchers(address indexed _buyer, address indexed _to, uint256[] _itemIds, uint256[] _quantities);
 
-    function Xingyun(address _to, uint256 _ghst) external {
+    function xingyun(address _to, uint256 _ghst) external {
         uint256 currentHauntId = s.currentHauntId;
         Haunt storage haunt = s.haunts[currentHauntId];
         uint256 price = haunt.portalPrice;
