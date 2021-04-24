@@ -11,15 +11,15 @@ import {CollateralEscrow} from "../CollateralEscrow.sol";
 
 contract EscrowFacet is Modifiers {
 
-  event TransferEscrow(uint256 indexed _tokenId, uint256 _transferAmount, address _erc20Contract);
-  event Erc20Deposited(uint256 indexed _tokenId, uint256 _depositAmount, address _erc20Contract);
+  event Erc20Deposited(uint256 indexed _tokenId,  address _erc20Contract, uint256 _depositAmount);
+  event TransferEscrow(uint256 indexed _tokenId,  address _erc20Contract, uint256 _transferAmount);
 
 
   function depositERC20(uint256 _tokenId,  address _erc20Contract, uint256 _value) external {
     address escrow = s.aavegotchis[_tokenId].escrow;
     require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 
-    emit Erc20Deposited(_tokenId, _value, _erc20Contract);
+    emit Erc20Deposited(_tokenId, _erc20Contract, _value);
 
     LibERC20.transferFrom(_erc20Contract, LibMeta.msgSender(), escrow, _value);
   }
@@ -40,7 +40,7 @@ contract EscrowFacet is Modifiers {
     uint256 balance = IERC20(_erc20Contract).balanceOf(escrow);
     require(balance - _transferAmount >= 0, "CollateralFacet: Cannot transfer more than current ERC20 escrow balance");
 
-    emit TransferEscrow(_tokenId, _transferAmount, _erc20Contract);
+    emit TransferEscrow(_tokenId, _erc20Contract, _transferAmount);
 
     CollateralEscrow(escrow).approveAavegotchiDiamond(_erc20Contract);
     LibERC20.transferFrom(_erc20Contract, escrow, _recipient, _transferAmount);
