@@ -67,8 +67,8 @@ describe('Escrow Transfering', async () => {
 
     await ownerEscrowFacet.transferEscrow(6335, erc20TokenConAddress, holderAddress, 3);
     let newBalance = await escrowFacet.escrowBalance(6335, erc20TokenConAddress);
-    
-    expect(newBalance.toNumber()).to.equal(1);
 
+    expect(newBalance.toNumber()).to.equal(1);
+    console.log("New Land Balance: ", newBalance.toNumber());
   });
 })
