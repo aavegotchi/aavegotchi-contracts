@@ -41,8 +41,18 @@ describe('Escrow Transfering', async () => {
 
     let holder = await ethers.getSigner(holderAddress);
     const erc20 = await ethers.getContractAt("IERC20",erc20TokenConAddress, holder);
+    const collateralFacet = await ethers.getContractAt('CollateralFacet', aavegotchiDiamondAddress, holder);
+
+    collateralAddresses = await collateralFacet.collaterals();
+    console.log("Collateral Info: ", collateralAddresses);
+
+    collateralType = await collateralFacet.collateralBalance(6335);
+    console.log("Collateral Type: ", collateralType.collateralType_);
 
     let connectEscrowFacet = await escrowFacet.connect(holder);
+    await expect(
+      connectEscrowFacet.depositERC20(6335, collateralType.collateralType_, 4)
+    ).to.be.revertedWith("EscrowFacet: Depositing ERC20 token CANNOT be same as collateral ERC20 token");
 
     let tx = await erc20.approve(aavegotchiDiamondAddress, ethers.constants.MaxUint256);
 
@@ -63,7 +73,9 @@ describe('Escrow Transfering', async () => {
 
     let owner = await ethers.getSigner(tokenOwner);
     let ownerEscrowFacet = await escrowFacet.connect(owner);
-
+    await expect(
+      ownerEscrowFacet.transferEscrow(6335, collateralType.collateralType_, holderAddress, 3)
+    ).to.be.revertedWith("EscrowFacet: Transferring ERC20 token CANNOT be same as collateral ERC20 token");
 
     await ownerEscrowFacet.transferEscrow(6335, erc20TokenConAddress, holderAddress, 3);
     let newBalance = await escrowFacet.escrowBalance(6335, erc20TokenConAddress);

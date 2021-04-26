@@ -17,7 +17,9 @@ contract EscrowFacet is Modifiers {
 
   function depositERC20(uint256 _tokenId,  address _erc20Contract, uint256 _value) external {
     address escrow = s.aavegotchis[_tokenId].escrow;
-    require(escrow != address(0), "CollateralFacet: Does not have an escrow");
+    address collateralType = s.aavegotchis[_tokenId].collateralType;
+    require(escrow != address(0), "EscrowFacet: Does not have an escrow");
+    require(collateralType != _erc20Contract, "EscrowFacet: Depositing ERC20 token CANNOT be same as collateral ERC20 token");
 
     emit Erc20Deposited(_tokenId, _erc20Contract, _value);
 
@@ -26,7 +28,7 @@ contract EscrowFacet is Modifiers {
 
   function escrowBalance(uint256 _tokenId, address _erc20Contract) external view returns(uint256){
     address escrow = s.aavegotchis[_tokenId].escrow;
-    require(escrow != address(0), "CollateralFacet: Does not have an escrow");
+    require(escrow != address(0), "EscrowFacet: Does not have an escrow");
 
     uint256 balance = IERC20(_erc20Contract).balanceOf(escrow);
 
@@ -35,10 +37,12 @@ contract EscrowFacet is Modifiers {
 
   function transferEscrow(uint256 _tokenId, address _erc20Contract, address _recipient, uint256 _transferAmount) external onlyAavegotchiOwner(_tokenId) {
     address escrow = s.aavegotchis[_tokenId].escrow;
-    require(escrow != address(0), "CollateralFacet: Does not have an escrow");
+    address collateralType = s.aavegotchis[_tokenId].collateralType;
+    require(escrow != address(0), "EscrowFacet: Does not have an escrow");
+    require(collateralType != _erc20Contract, "EscrowFacet: Transferring ERC20 token CANNOT be same as collateral ERC20 token");
 
     uint256 balance = IERC20(_erc20Contract).balanceOf(escrow);
-    require(balance - _transferAmount >= 0, "CollateralFacet: Cannot transfer more than current ERC20 escrow balance");
+    require(balance - _transferAmount >= 0, "EscrowFacet: Cannot transfer more than current ERC20 escrow balance");
 
     emit TransferEscrow(_tokenId, _erc20Contract, _transferAmount);
 
