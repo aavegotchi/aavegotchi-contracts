@@ -43,7 +43,7 @@ contract EscrowFacet is Modifiers {
     require(collateralType != _erc20Contract, "EscrowFacet: Transferring ERC20 token CANNOT be same as collateral ERC20 token");
 
     uint256 balance = IERC20(_erc20Contract).balanceOf(escrow);
-    require(balance - _transferAmount >= 0, "EscrowFacet: Cannot transfer more than current ERC20 escrow balance");
+    require(balance >= _transferAmount, "EscrowFacet: Cannot transfer more than current ERC20 escrow balance");
 
     emit TransferEscrow(_tokenId, _erc20Contract, _transferAmount);
 
