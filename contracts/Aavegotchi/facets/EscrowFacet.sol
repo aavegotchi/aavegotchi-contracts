@@ -47,11 +47,9 @@ contract EscrowFacet is Modifiers {
 
     emit TransferEscrow(_tokenId, _erc20Contract, _transferAmount);
 
-    if(IERC20(_erc20Contract).allowance(escrow, LibMeta.msgSender()) > 0){
-      LibERC20.transferFrom(_erc20Contract, escrow, _recipient, _transferAmount);
-    }else{
-      CollateralEscrow(escrow).approveAavegotchiDiamond(_erc20Contract);
-      LibERC20.transferFrom(_erc20Contract, escrow, _recipient, _transferAmount);
+    if(IERC20(_erc20Contract).allowance(escrow, address(this)) < _transferAmount) {
+       CollateralEscrow(escrow).approveAavegotchiDiamond(_erc20Contract);
     }
+    LibERC20.transferFrom(_erc20Contract, escrow, _recipient, _transferAmount);
   }
 }
