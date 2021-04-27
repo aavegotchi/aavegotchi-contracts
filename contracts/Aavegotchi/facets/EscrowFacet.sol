@@ -24,6 +24,7 @@ contract EscrowFacet is Modifiers {
     emit Erc20Deposited(_tokenId, _erc20Contract, _value);
 
     LibERC20.transferFrom(_erc20Contract, LibMeta.msgSender(), escrow, _value);
+    /* IERC20(_erc20Contract).approve(LibMeta.msgSender(), _value); */
   }
 
   function escrowBalance(uint256 _tokenId, address _erc20Contract) external view returns(uint256){
@@ -46,7 +47,11 @@ contract EscrowFacet is Modifiers {
 
     emit TransferEscrow(_tokenId, _erc20Contract, _transferAmount);
 
-    CollateralEscrow(escrow).approveAavegotchiDiamond(_erc20Contract);
-    LibERC20.transferFrom(_erc20Contract, escrow, _recipient, _transferAmount);
+    if(IERC20(_erc20Contract).allowance(escrow, LibMeta.msgSender()) > 0){
+      LibERC20.transferFrom(_erc20Contract, escrow, _recipient, _transferAmount);
+    }else{
+      CollateralEscrow(escrow).approveAavegotchiDiamond(_erc20Contract);
+      LibERC20.transferFrom(_erc20Contract, escrow, _recipient, _transferAmount);
+    }
   }
 }

@@ -34,6 +34,14 @@ describe('Escrow Transfering', async () => {
 
     let holderAddress = '0xCCaD6fbEC3814458Ad88734cdc397B075e0D7BA0';
 
+    //let depoWei = ethers.utils.bigNumberify("4000000000000000000000");
+    let depositAmount = ethers.utils.parseEther("4");
+    console.log("Depo Amount: ", depositAmount.toString());
+
+    //let transWei = ethers.utils.bigNumberify("3000000000000000000000");
+    let transferAmount = ethers.utils.parseEther("3");
+    console.log("Trans Amount: ", transferAmount.toString());
+
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [holderAddress]
@@ -51,15 +59,15 @@ describe('Escrow Transfering', async () => {
 
     let connectEscrowFacet = await escrowFacet.connect(holder);
     await expect(
-      connectEscrowFacet.depositERC20(6335, collateralType.collateralType_, 4)
+      connectEscrowFacet.depositERC20(6335, collateralType.collateralType_, depositAmount)
     ).to.be.revertedWith("EscrowFacet: Depositing ERC20 token CANNOT be same as collateral ERC20 token");
 
     let tx = await erc20.approve(aavegotchiDiamondAddress, ethers.constants.MaxUint256);
 
-    await connectEscrowFacet.depositERC20(6335, erc20TokenConAddress, 4);
+    await connectEscrowFacet.depositERC20(6335, erc20TokenConAddress, depositAmount);
 
     let balance = await escrowFacet.escrowBalance(6335, erc20TokenConAddress);
-    console.log("Land Balance: ", balance.toNumber());
+    console.log("Balance: ", balance.toString());
 
     await hre.network.provider.request({
       method: 'hardhat_stopImpersonatingAccount',
@@ -74,13 +82,13 @@ describe('Escrow Transfering', async () => {
     let owner = await ethers.getSigner(tokenOwner);
     let ownerEscrowFacet = await escrowFacet.connect(owner);
     await expect(
-      ownerEscrowFacet.transferEscrow(6335, collateralType.collateralType_, holderAddress, 3)
+      ownerEscrowFacet.transferEscrow(6335, collateralType.collateralType_, holderAddress, transferAmount)
     ).to.be.revertedWith("EscrowFacet: Transferring ERC20 token CANNOT be same as collateral ERC20 token");
 
-    await ownerEscrowFacet.transferEscrow(6335, erc20TokenConAddress, holderAddress, 3);
+    await ownerEscrowFacet.transferEscrow(6335, erc20TokenConAddress, holderAddress, transferAmount);
     let newBalance = await escrowFacet.escrowBalance(6335, erc20TokenConAddress);
 
-    expect(newBalance.toNumber()).to.equal(1);
-    console.log("New Land Balance: ", newBalance.toNumber());
+    expect(newBalance.toString()).to.equal("1000000000000000000");
+    console.log("New Balance: ", newBalance.toString());
   });
 })
