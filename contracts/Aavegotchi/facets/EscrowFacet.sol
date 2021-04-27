@@ -11,8 +11,8 @@ import {CollateralEscrow} from "../CollateralEscrow.sol";
 
 contract EscrowFacet is Modifiers {
 
-  event Erc20Deposited(uint256 indexed _tokenId,  address indexed _erc20Contract, uint256 _depositAmount, address _from, address _to);
-  event TransferEscrow(uint256 indexed _tokenId,  address indexed _erc20Contract, uint256 _transferAmount, address _from, address _to);
+  event Erc20Deposited(uint256 indexed _tokenId,  address indexed _erc20Contract, uint256 _depositAmount, address _from, address indexed _to);
+  event TransferEscrow(uint256 indexed _tokenId,  address indexed _erc20Contract, uint256 _transferAmount, address indexed _from, address _to);
 
 
   function depositERC20(uint256 _tokenId,  address _erc20Contract, uint256 _value) external {
