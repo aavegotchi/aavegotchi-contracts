@@ -43,7 +43,7 @@ describe("Fees", async function(){
     let beforeBalance = await connectedGhstContract.balanceOf(ghstWhale)
     console.log('before balance:', beforeBalance.toString())
 
-    // await connectedGhstContract.approve(aavegotchiDiamondAddress, ethers.constants.MaxUint256);
+      // await connectedGhstContract.approve(aavegotchiDiamondAddress, ethers.constants.MaxUint256);
 
     const erc721Listing = await connectedERC721Facet.getERC721Listings(2, 'listed', 5);
     console.log("ERC721 Listings: ", erc721Listing.toString());
