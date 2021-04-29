@@ -42,16 +42,16 @@ async function main () {
   const ERC721Facet = await ethers.getContractFactory('ERC721MarketplaceFacet')
   erc721Facet = await ERC721Facet.deploy()
   await erc721Facet.deployed()
-  console.log('Deployed facet:', erc721Facet.address)
+  console.log('Deployed ERC721 facet:', erc721Facet.address)
 
   const ERC1155Facet = await ethers.getContractFactory('ERC1155MarketplaceFacet')
-  erc721Facet = await ERC1155Facet.deploy()
+  erc1155Facet = await ERC1155Facet.deploy()
   await erc1155Facet.deployed()
-  console.log('Deployed facet:', erc1155Facet.address)
+  console.log('Deployed ERC1155 facet:', erc1155Facet.address)
 
   const erc721MarketplaceSelectors = getSelectors(erc721Facet)
   const erc1155MarketplaceSelectors = getSelectors(erc1155Facet)
-  
+
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
@@ -82,7 +82,7 @@ async function main () {
   }
   console.log('Completed diamond cut: ', tx.hash)
 
-  
+
   //To do: Write test and check that the amount of fees transferred to the Player Rewards address is correct.
 
 }
@@ -92,4 +92,6 @@ main()
   .catch(error => {
     console.error(error)
     process.exit(1)
-  })
+  });
+
+ exports.agip6Project = main;
