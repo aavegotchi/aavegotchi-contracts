@@ -387,6 +387,7 @@ library LibAavegotchi {
         s.ownerTokenIds[_to].push(uint32(_tokenId));
         emit LibERC721.Transfer(_from, _to, _tokenId);
 
+
         if(_to == address(this)) {                        
             address petOperator = s.petOperators[_from][tokenId];
             if(petOperator != address(0)) {
