@@ -241,12 +241,10 @@ library LibAavegotchi {
         return level_ + 1;
     }
 
-    function removePetOperator(address _user, uint256 tokenId) internal {
+    function removePetOperator(uint256 tokenId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        address owner = s.aavegotchis[tokenId].owner;
-        address petOperator = s.petOperators[owner][tokenId];
+        address petOperator = s.petOperators[tokenId];
         if(petOperator != address(0)) {
-            require(owner == _user || petOperator == _user, "LibAavegotchi: Not authorized to remove pet operator");            
             uint256 index;
             uint256 length = s.petOperatorTokenIds[petOperator].length;
             for(;index < length; index++) {
@@ -260,7 +258,7 @@ library LibAavegotchi {
                 s.petOperatorTokenIds[petOperator][index] = lastTokenId;
             }
             s.petOperatorTokenIds[petOperator].pop();
-            delete s.petOperators[owner][tokenId];
+            delete s.petOperators[tokenId];
         }
     }
 
@@ -367,6 +365,10 @@ library LibAavegotchi {
         uint256 _tokenId
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
+        // remove pet operator
+        if(_to != address(this)) {                        
+            removePetOperator(_tokenId);
+        }
         // remove
         uint256 index = s.ownerTokenIdIndexes[_from][_tokenId];
         uint256 lastIndex = s.ownerTokenIds[_from].length - 1;
@@ -385,22 +387,13 @@ library LibAavegotchi {
         s.aavegotchis[_tokenId].owner = _to;
         s.ownerTokenIdIndexes[_to][_tokenId] = s.ownerTokenIds[_to].length;
         s.ownerTokenIds[_to].push(uint32(_tokenId));
-        emit LibERC721.Transfer(_from, _to, _tokenId);
-
-        if(_to == address(this)) {                        
-            address petOperator = s.petOperators[_from][tokenId];
-            if(petOperator != address(0)) {
-                delete s.petOperators[_from][tokenId];
-                s.petOperators[address(this)][tokenId] = petOperator;                                
-            }
-        else {
-            removePetOperator(_from, _tokenId);
-        }
+        emit LibERC721.Transfer(_from, _to, _tokenId);        
     }
+}
 
   /*  function verify(uint256 _tokenId) internal pure {
        // if (_tokenId < 10) {}
        // revert("Not verified");
     }
     */
-}
+    
