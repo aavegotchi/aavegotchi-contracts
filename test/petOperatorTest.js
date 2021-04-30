@@ -61,16 +61,16 @@ describe('Testing Pet Operator Upgrade', async function () {
     expect(await aavegotchiFacet.ownerOf(tokenIdOne)).to.equal(secondOwner)
   })
 
-  it('Add Petter', async function () {
+  it('Set Pet Operator', async function () {
     aavegotchiGameFacet = await impersonate(secondOwner, aavegotchiGameFacet)
 
-    const tx = await aavegotchiGameFacet.addPetOperator(firstOwner, [tokenIdOne, tokenIdTwo])
-    console.log('Transfer aavegotchi tx:', tx.hash)
+    const tx = await aavegotchiGameFacet.setPetOperator(firstOwner, [tokenIdOne, tokenIdTwo])
+    console.log('Set pet operator')
     const receipt = await tx.wait()
     if (!receipt.status) {
-      throw Error(`Transfer failed: ${tx.hash}`)
+      throw Error(`Transaction failed: ${tx.hash}`)
     }
-    console.log('Transfer completed:', tx.hash)
+    console.log('Transaction completed')
     const tokenIds = (await aavegotchiGameFacet.petOperatorTokenIds(firstOwner)).map(x => x.toNumber())
     expect(tokenIds).to.have.members([tokenIdOne, tokenIdTwo])
   })
@@ -81,7 +81,7 @@ describe('Testing Pet Operator Upgrade', async function () {
     let bal = await ghst.balanceOf(firstOwner)
     console.log('firstOwner Balance:', ethers.utils.formatEther(bal))
     const tx = await aavegotchiGameFacet.pet()
-    console.log('Transfer aavegotchi tx:', tx.hash)
+    console.log('Pet aavegotchi')
     const receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Transfer failed: ${tx.hash}`)

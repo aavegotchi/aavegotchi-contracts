@@ -48,7 +48,8 @@ async function main () {
     getSelector('function pet() external'),
     getSelector('function petOperatorTokenIds(address _petOperator) external view returns (uint256[] memory tokenIds_)'),
     getSelector('function removePetOperator(uint256[] calldata _tokenIds) external'),
-    getSelector('function addPetOperator(address _petOperator, uint256[] calldata _tokenIds) external')
+    getSelector('function setPetOperator(address _petOperator, uint256[] calldata _tokenIds) external'),
+    getSelector('function petOperator(uint256 _tokenId) external view returns (address petOperator_)')
   ]
   let existingFuncs = getSelectors(facet)
   for (const selector of newFuncs) {
