@@ -2,6 +2,7 @@
 /* eslint prefer-const: "off" */
 
 const { upgradePetOperator } = require('../scripts/upgrades/upgrade-petOperator.js')
+const truffleAssert = require('truffle-assertions')
 const { expect } = require('chai')
 
 async function impersonate (address, contract) {
@@ -66,34 +67,39 @@ describe('Testing Pet Operator Upgrade', async function () {
   it('Transfer Aavegotchi', async function () {
     aavegotchiFacet = await impersonate(firstOwner, aavegotchiFacet)
 
-    console.log('First owner:', firstOwner)
-    console.log('Second owner:', secondOwner)
+
     expect(firstOwner).to.not.equal(secondOwner)
     const tx = await aavegotchiFacet.transferFrom(firstOwner, secondOwner, tokenIdOne)
-    console.log('Transfer aavegotchi tx:', tx.hash)
+
     const receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Transfer failed: ${tx.hash}`)
     }
-    console.log('Transfer completed:', tx.hash)
+  
     expect(await aavegotchiFacet.ownerOf(tokenIdOne)).to.equal(secondOwner)
   })
 
-  it('Set Pet Operator', async function () {
+  it('Only owner can set Pet Operator', async function () {
+    aavegotchiGameFacet = await impersonate(thirdOwner, aavegotchiGameFacet)
+
+   await truffleAssert.reverts(aavegotchiGameFacet.setPetOperator(petOperator, [tokenIdOne, tokenIdTwo]),"AavegotchiGameFacet: must be owner to set petter")   
+  
+  })
+
+  it('Should set Pet Operator', async function () {
     aavegotchiGameFacet = await impersonate(secondOwner, aavegotchiGameFacet)
 
     const tx = await aavegotchiGameFacet.setPetOperator(petOperator, [tokenIdOne, tokenIdTwo])
-    console.log('Set pet operator')
     const receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Transaction failed: ${tx.hash}`)
     }
-    console.log('Transaction completed')
+   
     const tokenIds = (await aavegotchiGameFacet.petOperatorTokenIds(petOperator)).map(x => x.toNumber())
     expect(tokenIds).to.have.members([tokenIdOne, tokenIdTwo])
   })
 
-  it('Petting aavegotchis', async function () {
+  it('Pet Operator should pet Aavegotchis and deduct funds from Owner', async function () {
     aavegotchiGameFacet = await impersonate(petOperator, aavegotchiGameFacet)
 
     let petOperatorShare = ethers.BigNumber.from(ethers.utils.parseEther("0.2"))
@@ -101,18 +107,13 @@ describe('Testing Pet Operator Upgrade', async function () {
 
     let operatorOldBal = ethers.BigNumber.from(await ghst.balanceOf(petOperator))
     let ownerOldBal = ethers.BigNumber.from(await ghst.balanceOf(secondOwner))
- 
-    
-    console.log('PO Balance:', ethers.utils.formatEther(operatorOldBal))
-    console.log('Owner Balance:', ethers.utils.formatEther(ownerOldBal))
 
     const tx = await aavegotchiGameFacet.pet()
-    console.log('Pet aavegotchi')
+  
     const receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Transaction failed: ${tx.hash}`)
     }
-    console.log('Transaction completed:', tx.hash)
     let operatorNewBal = ethers.BigNumber.from(await ghst.balanceOf(firstOwner))
     let ownerNewBal = ethers.BigNumber.from(await ghst.balanceOf(secondOwner))
 
@@ -121,28 +122,48 @@ describe('Testing Pet Operator Upgrade', async function () {
 
     //The Owner spends 0.3 GHST per pet
     expect(ownerNewBal).to.equal(ownerOldBal.sub(petOperatorShare).sub(pixelcraftShare))
-    
-    console.log('PO Balance:', ethers.utils.formatEther(operatorNewBal))
-    console.log('Owner Balance:', ethers.utils.formatEther(ownerNewBal))
   })
+  
+  it('Should not charge the owner if Pet within 12 hrs', async function () {
+    aavegotchiGameFacet = await impersonate(petOperator, aavegotchiGameFacet)
 
-  it('Remove pet operator by transfer', async function () {
-    const tokenIds = (await aavegotchiGameFacet.petOperatorTokenIds(firstOwner)).map(x => x.toNumber())
-    expect(tokenIds).to.have.members([tokenIdOne, tokenIdTwo])
-
-    const petOperator = await aavegotchiGameFacet.petOperator(tokenIdOne)
-
-    expect(petOperator).to.equal(firstOwner)
-
-    aavegotchiFacet = await impersonate(secondOwner, aavegotchiFacet)
-
-    const tx = await aavegotchiFacet.transferFrom(secondOwner, thirdOwner, tokenIdOne)
-    console.log('Transfer aavegotchi tx:', tx.hash)
+    let operatorOldBal = ethers.BigNumber.from(await ghst.balanceOf(petOperator))
+    let ownerOldBal = ethers.BigNumber.from(await ghst.balanceOf(secondOwner))
+ 
+    const tx = await aavegotchiGameFacet.pet()
+  
     const receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Transaction failed: ${tx.hash}`)
     }
-    const newTokenIds = (await aavegotchiGameFacet.petOperatorTokenIds(firstOwner)).map(x => x.toNumber())
+
+    let operatorNewBal = ethers.BigNumber.from(await ghst.balanceOf(firstOwner))
+    let ownerNewBal = ethers.BigNumber.from(await ghst.balanceOf(secondOwner))
+
+    //The operator earns 0.2 GHST per Pet
+    expect(operatorNewBal).to.equal(operatorOldBal)
+
+    //The Owner spends 0.3 GHST per pet
+    expect(ownerNewBal).to.equal(ownerOldBal)
+ 
+  })
+  it('Remove pet operator by transfer', async function () {
+    const tokenIds = (await aavegotchiGameFacet.petOperatorTokenIds(petOperator)).map(x => x.toNumber())
+    expect(tokenIds).to.have.members([tokenIdOne, tokenIdTwo])
+
+    const currentPetOperator = await aavegotchiGameFacet.petOperator(tokenIdOne)
+
+    expect(currentPetOperator).to.equal(petOperator)
+
+    aavegotchiFacet = await impersonate(secondOwner, aavegotchiFacet)
+
+    const tx = await aavegotchiFacet.transferFrom(secondOwner, thirdOwner, tokenIdOne)
+
+    const receipt = await tx.wait()
+    if (!receipt.status) {
+      throw Error(`Transaction failed: ${tx.hash}`)
+    }
+    const newTokenIds = (await aavegotchiGameFacet.petOperatorTokenIds(petOperator)).map(x => x.toNumber())
     expect(newTokenIds).to.have.members([tokenIdTwo])
 
     const newPetOperator = await aavegotchiGameFacet.petOperator(tokenIdOne)
@@ -150,22 +171,22 @@ describe('Testing Pet Operator Upgrade', async function () {
     expect(newPetOperator).to.equal(ethers.constants.AddressZero)
   })
 
-  it('Bridge Aavegotchi', async function () {
-    const petOperator = await aavegotchiGameFacet.petOperator(tokenIdTwo)
+  it('Bridging Aavegotchi does not change the pet operator ', async function () {
+    const currentPetOperator = await aavegotchiGameFacet.petOperator(tokenIdTwo)
 
-    expect(petOperator).to.equal(firstOwner)
+    expect(currentPetOperator).to.equal(petOperator)
 
     bridgeFacet = await impersonate(secondOwner, bridgeFacet)
 
     const tx = await bridgeFacet.withdrawAavegotchiBatch([tokenIdTwo])
-    console.log('Bridge aavegotchi')
+ 
     const receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Transaction failed: ${tx.hash}`)
     }
     const newPetOperator = await aavegotchiGameFacet.petOperator(tokenIdTwo)
 
-    expect(newPetOperator).to.equal(firstOwner)
+    expect(newPetOperator).to.equal(petOperator)
 
     expect(await aavegotchiFacet.ownerOf(tokenIdTwo)).to.equal(diamondAddress)
   })
@@ -179,7 +200,7 @@ describe('Testing Pet Operator Upgrade', async function () {
     expect(await aavegotchiGameFacet.petOperator(tokenIdTwo)).to.equal(firstOwner)
 
     const tx = await aavegotchiGameFacet.removePetOperator([tokenIdTwo])
-    console.log('Remove operator')
+
     const receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Transaction failed: ${tx.hash}`)
