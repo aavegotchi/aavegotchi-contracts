@@ -140,4 +140,25 @@ describe('Testing Pet Operator Upgrade', async function () {
 
     expect(await aavegotchiFacet.ownerOf(tokenIdTwo)).to.equal(diamondAddress)
   })
+
+  it('Remove pet operator', async function () {
+    aavegotchiGameFacet = await impersonate(firstOwner, aavegotchiGameFacet)
+
+    const tokenIds = (await aavegotchiGameFacet.petOperatorTokenIds(firstOwner)).map(x => x.toNumber())
+    expect(tokenIds).to.have.members([tokenIdTwo])
+
+    expect(await aavegotchiGameFacet.petOperator(tokenIdTwo)).to.equal(firstOwner)
+
+    const tx = await aavegotchiGameFacet.removePetOperator([tokenIdTwo])
+    console.log('Remove operator')
+    const receipt = await tx.wait()
+    if (!receipt.status) {
+      throw Error(`Transaction failed: ${tx.hash}`)
+    }
+
+    const newTokenIds = (await aavegotchiGameFacet.petOperatorTokenIds(firstOwner)).map(x => x.toNumber())
+    expect(newTokenIds).to.have.members([])
+
+    expect(await aavegotchiGameFacet.petOperator(tokenIdTwo)).to.equal(ethers.constants.AddressZero)
+  })
 })
