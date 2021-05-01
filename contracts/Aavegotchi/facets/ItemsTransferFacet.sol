@@ -160,6 +160,10 @@ contract ItemsTransferFacet is Modifiers {
         uint256 _value
     ) external {
         require(_to != address(0), "ItemsTransfer: Can't transfer to 0 address");
+
+        //To do: Check if the item can be transferred.
+        require(s.itemTypes[_id].canBeTransferred, "ItemsTransfer: Item cannot be transferred");
+
         address sender = LibMeta.msgSender();
         transferFromTokenApproved(sender, _fromContract, _fromTokenId);
         LibItems.removeFromParent(_fromContract, _fromTokenId, _id, _value);
@@ -184,6 +188,7 @@ contract ItemsTransferFacet is Modifiers {
             uint256 value = _values[i];
 
             //To do: Check if the item can be transferred.
+            require(s.itemTypes[id].canBeTransferred, "ItemsTransfer: Item cannot be transferred");
 
             LibItems.removeFromParent(_fromContract, _fromTokenId, id, value);
             LibItems.addToOwner(_to, id, value);
@@ -201,6 +206,10 @@ contract ItemsTransferFacet is Modifiers {
         uint256 _value
     ) external {
         require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
+
+        //To do: Check if the item can be transferred.
+        require(s.itemTypes[_id].canBeTransferred, "ItemsTransfer: Item cannot be transferred");
+
         address sender = LibMeta.msgSender();
         transferFromTokenApproved(sender, _fromContract, _fromTokenId);
         LibItems.removeFromParent(_fromContract, _fromTokenId, _id, _value);
