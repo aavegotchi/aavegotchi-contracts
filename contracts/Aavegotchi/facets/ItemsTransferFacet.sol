@@ -232,8 +232,13 @@ contract ItemsTransferFacet is Modifiers {
         address sender = LibMeta.msgSender();
         transferFromTokenApproved(sender, _fromContract, _fromTokenId);
         for (uint256 i; i < _ids.length; i++) {
+            //To do: Check if the item can be transferred.
+
             uint256 id = _ids[i];
             uint256 value = _values[i];
+
+            require(s.itemTypes[id].canBeTransferred, "ItemsTransfer: Item cannot be transferred");
+
             LibItems.removeFromParent(_fromContract, _fromTokenId, id, value);
             LibItems.addToParent(_toContract, _toTokenId, id, value);
             emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, id, value);
