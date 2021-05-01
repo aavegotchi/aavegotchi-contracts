@@ -252,9 +252,9 @@ library LibAavegotchi {
                     break;
                 }
             }
-            uint256 lastIndex = length - 1;
-            uint256 lastTokenId = s.petOperatorTokenIds[petOperator][lastIndex];
+            uint256 lastIndex = length - 1;            
             if(lastIndex != index) {
+                uint256 lastTokenId = s.petOperatorTokenIds[petOperator][lastIndex];
                 s.petOperatorTokenIds[petOperator][index] = lastTokenId;
             }
             s.petOperatorTokenIds[petOperator].pop();
