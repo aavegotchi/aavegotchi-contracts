@@ -91,4 +91,4 @@ if (require.main === module) {
     })
 }
 
-exports.upgradePetOperator = main
+exports.preventItemTransfers = main
