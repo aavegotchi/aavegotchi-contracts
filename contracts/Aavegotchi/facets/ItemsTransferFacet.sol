@@ -36,7 +36,7 @@ contract ItemsTransferFacet is Modifiers {
         LibItems.removeFromOwner(_from, _id, _value);
         LibItems.addToOwner(_to, _id, _value);
         LibERC1155Marketplace.updateERC1155Listing(address(this), _id, _from);
-        emit LibERC1155.TransferSingle(sender, _from, _to, _id, _value);        
+        emit LibERC1155.TransferSingle(sender, _from, _to, _id, _value);
         LibERC1155.onERC1155Received(sender, _from, _to, _id, _value, _data);
     }
 
@@ -99,7 +99,6 @@ contract ItemsTransferFacet is Modifiers {
         LibERC1155Marketplace.updateERC1155Listing(address(this), _id, _from);
         emit LibERC1155.TransferSingle(sender, _from, _toContract, _id, _value);
         emit LibERC1155.TransferToParent(_toContract, _toTokenId, _id, _value);
-        
     }
 
     function batchTransferToParent(
@@ -119,7 +118,7 @@ contract ItemsTransferFacet is Modifiers {
             LibItems.removeFromOwner(_from, id, value);
             LibItems.addToParent(_toContract, _toTokenId, id, value);
             LibERC1155Marketplace.updateERC1155Listing(address(this), id, _from);
-            emit LibERC1155.TransferToParent(_toContract, _toTokenId, id, value);            
+            emit LibERC1155.TransferToParent(_toContract, _toTokenId, id, value);
         }
         emit LibERC1155.TransferBatch(sender, _from, _toContract, _ids, _values);
     }
@@ -183,6 +182,9 @@ contract ItemsTransferFacet is Modifiers {
         for (uint256 i; i < _ids.length; i++) {
             uint256 id = _ids[i];
             uint256 value = _values[i];
+
+            //To do: Check if the item can be transferred.
+
             LibItems.removeFromParent(_fromContract, _fromTokenId, id, value);
             LibItems.addToOwner(_to, id, value);
             emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, id, value);
@@ -239,10 +241,15 @@ contract ItemsTransferFacet is Modifiers {
         Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.
         @return           `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`
     */
-    function onERC1155Received(address /*_operator*/, address /*_from*/, uint256 /*_id*/, uint256 /*_value*/, bytes calldata /*_data*/) external pure returns(bytes4) {        
+    function onERC1155Received(
+        address, /*_operator*/
+        address, /*_from*/
+        uint256, /*_id*/
+        uint256, /*_value*/
+        bytes calldata /*_data*/
+    ) external pure returns (bytes4) {
         return LibERC1155.ERC1155_ACCEPTED;
     }
-
 
     /**
         @notice Handle the receipt of multiple ERC1155 token types.
@@ -252,10 +259,13 @@ contract ItemsTransferFacet is Modifiers {
         Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.
         @return           `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`
     */
-    function onERC1155BatchReceived(address /*_operator*/, address /*_from*/, uint256[] calldata /*_ids*/, uint256[] calldata /*_values*/, bytes calldata /*_data*/) external pure returns(bytes4) {
+    function onERC1155BatchReceived(
+        address, /*_operator*/
+        address, /*_from*/
+        uint256[] calldata, /*_ids*/
+        uint256[] calldata, /*_values*/
+        bytes calldata /*_data*/
+    ) external pure returns (bytes4) {
         return LibERC1155.ERC1155_BATCH_ACCEPTED;
     }
-
-
-
 }
