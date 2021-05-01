@@ -108,7 +108,14 @@ describe('Testing Pet Operator Upgrade', async function () {
     let operatorOldBal = ethers.BigNumber.from(await ghst.balanceOf(petOperator))
     let ownerOldBal = ethers.BigNumber.from(await ghst.balanceOf(secondOwner))
 
+    let beforePetAavegotchi = await aavegotchiFacet.getAavegotchi(tokenIdOne)
+   
+
     const tx = await aavegotchiGameFacet.pet()
+
+    let afterPetAavegotchi = await aavegotchiFacet.getAavegotchi(tokenIdOne)
+    expect(afterPetAavegotchi.kinship).to.gt(beforePetAavegotchi.kinship)
+  
   
     const receipt = await tx.wait()
     if (!receipt.status) {
