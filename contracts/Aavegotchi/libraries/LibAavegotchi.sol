@@ -263,7 +263,7 @@ library LibAavegotchi {
     }
 
     function interact(uint256 _tokenId) internal returns (bool) {
-        AppStorage storage s = LibAppStorage.diamondStorage();
+        AppStorage storage s = LibAppStorage.diamondStorage();        
         uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
         // if interacted less than 12 hours ago
         if (block.timestamp < lastInteracted + 12 hours) {
@@ -369,6 +369,7 @@ library LibAavegotchi {
         if(_to != address(this)) {                        
             removePetOperator(_tokenId);
         }
+        
         // remove
         uint256 index = s.ownerTokenIdIndexes[_from][_tokenId];
         uint256 lastIndex = s.ownerTokenIds[_from].length - 1;

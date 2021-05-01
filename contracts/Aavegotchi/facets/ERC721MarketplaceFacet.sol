@@ -221,6 +221,7 @@ contract ERC721MarketplaceFacet is Modifiers {
 
         //To do (Nick) -- Explain why this is necessary
         if (listing.erc721TokenAddress == address(this)) {
+            assert(s.aavegotchis[listing.erc721TokenId].owner == seller);
             LibAavegotchi.transfer(seller, buyer, listing.erc721TokenId);
         } else {
             // GHSTStakingDiamond
