@@ -6,12 +6,13 @@
 
 const itemTypes = [
   {
-    dateDistributed: "May 4, 2021",
+  
     name: "Rarity Farming SZN 1 Round 1 TOP 100 RARITY",
     description: "This Aavegotchi achieved a rank in the top 100 of RARITY for the very first round of the first ever season of Rarity Farming. \n\nThe first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were summoned from the original Haunt 1 portals of which there were 10,000 total.",
-    svgid: 163,
+    svgId: 163,
     canbeTransferred: false,
     totalQuantity: 0,
+    minLevel:0,
     maxQuantity: 90,
     setId: [],
     author: "xibot",
@@ -25,10 +26,11 @@ const itemTypes = [
     kinshipBonus: 0
   },
   {
-    dateDistributed: "May 4, 2021",
+
     name: "Rarity Farming SZN 1 Round 1 TOP 10 RARITY",
     description: "This Aavegotchi achieved a rank in the top 10 of RARITY for the very first round of the first ever season of Rarity Farming. \n\nThe first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were summoned from the original Haunt 1 portals of which there were 10,000 total.",
-    svgid: 164,
+    svgId: 164,
+    minLevel:0,
     canbeTransferred: false,
     totalQuantity: 0,
     maxQuantity: 10,
@@ -44,10 +46,10 @@ const itemTypes = [
     kinshipBonus: 0
   },
   {
-    dateDistributed: "May 4, 2021",
     name: "Rarity Farming SZN 1 Round 1 TOP 100 KINSHIP",
     description: "This Aavegotchi achieved a rank in the top 100 of KINSHIP for the very first round of the first ever season of Rarity Farming. \n\nThe first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were summoned from the original Haunt 1 portals of which there were 10,000 total.",
-    svgid: 165,
+    svgId: 165,
+    minLevel:0,
     canbeTransferred: false,
     totalQuantity: 0,
     maxQuantity: 90,
@@ -62,13 +64,15 @@ const itemTypes = [
     experienceBonus: 0,
     kinshipBonus: 0
   },
-  {
-    dateDistributed: "May 4, 2021",
+
+
+   {
     name: "Rarity Farming SZN 1 Round 1 TOP 10 KINSHIP",
     description: "This Aavegotchi achieved a rank in the top 10 of RARITY for the very first round of the first ever season of Rarity Farming. \n\nThe first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were summoned from the original Haunt 1 portals of which there were 10,000 total.",
-    svgid: 166,
+    svgId: 166,
     canbeTransferred: false,
     totalQuantity: 0,
+    minLevel:0,
     maxQuantity: 10,
     setId: [],
     author: "xibot",
@@ -82,12 +86,13 @@ const itemTypes = [
     kinshipBonus: 0
   },
   {
-    dateDistributed: "May 4, 2021",
+   
     name: "Rarity Farming SZN 1 Round 1 TOP 100 EXPERIENCE",
     description: "This Aavegotchi achieved a rank in the top 100 of EXPERIENCE for the very first round of the first ever season of Rarity Farming. \n\nThe first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were summoned from the original Haunt 1 portals of which there were 10,000 total.",
-    svgid: 167,
+    svgId: 167,
     canbeTransferred: false,
     totalQuantity: 0,
+    minLevel:0,
     maxQuantity: 90,
     setId: [],
     author: "xibot",
@@ -104,9 +109,10 @@ const itemTypes = [
     dateDistributed: "May 4, 2021",
     name: "Rarity Farming SZN 1 Round 1 TOP 10 EXPERIENCE",
     description: "This Aavegotchi achieved a rank in the top 10 of EXPERIENCE for the very first round of the first ever season of Rarity Farming. \n\nThe first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were summoned from the original Haunt 1 portals of which there were 10,000 total.",
-    svgid: 168,
+    svgId: 168,
     canbeTransferred: false,
     totalQuantity: 0,
+    minLevel:0,
     maxQuantity: 10,
     setId: [],
     author: "xibot",

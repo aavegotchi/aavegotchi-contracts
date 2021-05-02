@@ -2,10 +2,11 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
-const { itemTypes } = require('./miamiShirtItemType')
-const { wearablesSvgs, sleevesSvgs } = require('../../svgs/miamiShirtWearables')
+const { itemTypes } = require('./leaderboardItemTypes')
+const { badgeSvgs } = require('../../svgs/leaderboardBadgeSvgs')
 
 const { sendToMultisig } = require('../libraries/multisig/multisig.js')
+
 
 let signer
 const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
@@ -56,7 +57,7 @@ async function uploadSvgs (svgs, svgType, testing) {
     ;[svg, svgTypesAndSizes] = setupSvg(
       [svgType, svgs.slice(svgItemsStart, svgItemsEnd)]
     )
-    console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`)
+    console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} badges SVGs`)
     printSizeInfo(svgTypesAndSizes)
     if (testing) {
       let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, { gasLimit: gasLimit })
@@ -80,14 +81,6 @@ async function main () {
   let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
   if (testing) {
-    await hre.network.provider.request({
-      method: 'hardhat_reset',
-      params: [{
-        forking: {
-          jsonRpcUrl: process.env.MATIC_URL
-        }
-      }]
-    })
 
     await hre.network.provider.request({
       method: 'hardhat_impersonateAccount',
@@ -101,11 +94,9 @@ async function main () {
   }
   let tx
   let receipt
+  let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet',diamondAddress)
 
   let daoFacet = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
-  let svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
-
-  let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)
 
   console.log('Adding items', 0, 'to', itemTypes.length)
   if (testing) {
@@ -120,12 +111,15 @@ async function main () {
     // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 
+  await uploadSvgs(badgeSvgs, 'wearables', testing)
+ 
   console.log('Send items to Aavegotchis')
   let mintAddress = '0x027Ffd3c119567e85998f4E6B9c3d83D5702660c'
 
   console.log('Minting items')
   if (testing) {
-    tx = await daoFacet.mintItems(mintAddress, [162], [1000])
+    
+    tx = await daoFacet.mintItems(mintAddress, [163,164,165,166,167,168], [2,2,2,2,2,2])
     receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`)
@@ -133,19 +127,18 @@ async function main () {
     console.log('Prize items minted:', tx.hash)
     // Aavegotchi equips
 
-    await hre.network.provider.request({
-      method: 'hardhat_impersonateAccount',
-      params: ['0x027Ffd3c119567e85998f4E6B9c3d83D5702660c']
-    })
-    signer = await ethers.provider.getSigner('0x027Ffd3c119567e85998f4E6B9c3d83D5702660c')
+    //Check that items are received
+    const balance = await itemsFacet.balanceOf(mintAddress,"163")
+    console.log('balance of 163:',balance.toString())
 
-    const aavegotchiOwnerSigner = await itemsFacet.connect(signer)
 
-    await aavegotchiOwnerSigner.equipWearables('2575', [162, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    //Check the SVG output
+    const svgFacet = await ethers.getContractAt("SvgFacet",diamondAddress)
+    let wearables = ethers.utils.formatBytes32String("wearables")
+    const itemSvg = await svgFacet.getSvg(wearables,163)
 
-    const svgOutput = await svgFacet.getAavegotchiSvg('2575')
+  //  console.log('item svg:',itemSvg)
 
-    console.log('svg output:', svgOutput)
   } else {
     tx = await daoFacet.populateTransaction.mintItems(mintAddress, [162, 162], [500, 500], { gasLimit: gasLimit })
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
@@ -155,8 +148,10 @@ async function main () {
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main()
-  .then(() => process.exit(0))
+  .then(() => console.log('adding badges finished') /*process.exit(0*/)
   .catch(error => {
     console.error(error)
-    process.exit(1)
+   // process.exit(1)
   })
+
+  exports.addLeaderboardBadges = main
