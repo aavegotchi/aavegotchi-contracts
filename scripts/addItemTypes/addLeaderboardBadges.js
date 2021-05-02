@@ -107,8 +107,8 @@ async function main () {
     }
     console.log('Items were added:', tx.hash)
   } else {
-    // tx = await daoFacet.populateTransaction.addItemTypes(itemTypes, { gasLimit: gasLimit })
-    // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+     tx = await daoFacet.populateTransaction.addItemTypes(itemTypes, { gasLimit: gasLimit })
+     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 
   await uploadSvgs(badgeSvgs, 'wearables', testing)
@@ -119,7 +119,7 @@ async function main () {
   console.log('Minting items')
   if (testing) {
     
-    tx = await daoFacet.mintItems(mintAddress, [163,164,165,166,167,168], [2,2,2,2,2,2])
+    tx = await daoFacet.mintItems(mintAddress, [163,164,165,166,167,168], [10,90,10,90,10,90])
     receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`)
@@ -128,19 +128,24 @@ async function main () {
     // Aavegotchi equips
 
     //Check that items are received
-    const balance = await itemsFacet.balanceOf(mintAddress,"163")
-    console.log('balance of 163:',balance.toString())
 
+    if (testing) {
+      const balance = await itemsFacet.balanceOf(mintAddress,"163")
+      console.log('balance of 163:',balance.toString())
+  
+  
+      //Check the SVG output
+      const svgFacet = await ethers.getContractAt("SvgFacet",diamondAddress)
+      let wearables = ethers.utils.formatBytes32String("wearables")
+      const itemSvg = await svgFacet.getSvg(wearables,163)
+    }
 
-    //Check the SVG output
-    const svgFacet = await ethers.getContractAt("SvgFacet",diamondAddress)
-    let wearables = ethers.utils.formatBytes32String("wearables")
-    const itemSvg = await svgFacet.getSvg(wearables,163)
+    
 
   //  console.log('item svg:',itemSvg)
 
   } else {
-    tx = await daoFacet.populateTransaction.mintItems(mintAddress, [162, 162], [500, 500], { gasLimit: gasLimit })
+    tx = await daoFacet.populateTransaction.mintItems(mintAddress, [163,164,165,166,167,168], [10,90,10,90,10,90], { gasLimit: gasLimit })
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 }
