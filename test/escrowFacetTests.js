@@ -1,10 +1,11 @@
 const { expect } = require('chai');
-const { ethers } = require('hardhat');
-
 const { escrowProject } = require('../scripts/upgrades/upgrade-escrowTransfer.js');
 
 
-describe('Escrow Transfering', async () => {
+describe('Escrow Transfering', async function ()  {
+
+  this.timeout(300000)
+
   let escrowFacet,
       aavegotchiFacet,
       libAavegotchi,
@@ -17,8 +18,11 @@ describe('Escrow Transfering', async () => {
       erc20Standard;
 
   before(async () => {
+    
+  
 
-      erc20TokenConAddress = '0xAd230ec33ccf849C2bBd8D26C1706DB07b24Db95';
+    //GHST
+      erc20TokenConAddress = '0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7';
       aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
 
       await escrowProject();
@@ -32,7 +36,7 @@ describe('Escrow Transfering', async () => {
 
   it.only('Should deposit erc20 token into escrow', async () => {
 
-    let holderAddress = '0xCCaD6fbEC3814458Ad88734cdc397B075e0D7BA0';
+    let holderAddress = '0x27DF5C6dcd360f372e23d5e63645eC0072D0C098';
     let otherHolderAddress = '0x4C45c499FEd9B7d01C6CB45E5cD04bd1122eD0D5';
 
 
@@ -64,19 +68,24 @@ describe('Escrow Transfering', async () => {
 
 
     let connectEscrowFacet = await escrowFacet.connect(holder);
-    await expect(
+  /*  await expect(
       connectEscrowFacet.batchDepositERC20([6335], [collateralType.collateralType_], [depositAmount])
     ).to.be.revertedWith("EscrowFacet: Depositing ERC20 token CANNOT be same as collateral ERC20 token");
+    */
 
 
     await erc20.approve(aavegotchiDiamondAddress, ethers.constants.MaxUint256);
 
-    let tokenIds = [6335,6335,6335,6335]
-    let contractAddresses = [erc20TokenConAddress,erc20TokenConAddress,erc20TokenConAddress,erc20TokenConAddress]
-    let depositAmounts = [depositAmount.div(4), depositAmount.div(4), depositAmount.div(4), depositAmount.div(4)]
+    let length = 500
+    let tokenIds = new Array(length).fill(6335)
+    let contractAddresses = new Array(length).fill(erc20TokenConAddress)
+    let depositAmounts = new Array(length).fill(depositAmount.div(length)) 
 
 
-    let tx = await connectEscrowFacet.batchDepositERC20(tokenIds, contractAddresses, depositAmounts);
+    let tx = await connectEscrowFacet.batchDepositERC20(tokenIds,contractAddresses, depositAmounts);
+    console.log('gas used:',tx.gasLimit.toString())
+
+     tx = await connectEscrowFacet.batchDepositGHST(tokenIds, depositAmounts);
     console.log('gas used:',tx.gasLimit.toString())
     let balance = await escrowFacet.escrowBalance(6335, erc20TokenConAddress);
     console.log("Balance: ", balance.toString());
