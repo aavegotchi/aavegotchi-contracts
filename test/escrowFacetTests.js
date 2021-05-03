@@ -71,9 +71,9 @@ describe('Escrow Transfering', async () => {
 
     await erc20.approve(aavegotchiDiamondAddress, ethers.constants.MaxUint256);
 
-    let tokenIds = [6335,6335]
-    let contractAddresses = [erc20TokenConAddress,erc20TokenConAddress]
-    let depositAmounts = [depositAmount /2, depositAmount /2]
+    let tokenIds = [6335,6335,6335,6335]
+    let contractAddresses = [erc20TokenConAddress,erc20TokenConAddress,erc20TokenConAddress,erc20TokenConAddress]
+    let depositAmounts = [depositAmount.div(4), depositAmount.div(4), depositAmount.div(4), depositAmount.div(4)]
 
 
     let tx = await connectEscrowFacet.batchDepositERC20(tokenIds, contractAddresses, depositAmounts);
