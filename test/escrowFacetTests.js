@@ -65,14 +65,19 @@ describe('Escrow Transfering', async () => {
 
     let connectEscrowFacet = await escrowFacet.connect(holder);
     await expect(
-      connectEscrowFacet.depositERC20(6335, collateralType.collateralType_, depositAmount)
+      connectEscrowFacet.batchDepositERC20([6335], [collateralType.collateralType_], [depositAmount])
     ).to.be.revertedWith("EscrowFacet: Depositing ERC20 token CANNOT be same as collateral ERC20 token");
 
 
-    let tx = await erc20.approve(aavegotchiDiamondAddress, ethers.constants.MaxUint256);
+    await erc20.approve(aavegotchiDiamondAddress, ethers.constants.MaxUint256);
+
+    let tokenIds = [6335,6335]
+    let contractAddresses = [erc20TokenConAddress,erc20TokenConAddress]
+    let depositAmounts = [depositAmount /2, depositAmount /2]
 
 
-    await connectEscrowFacet.depositERC20(6335, erc20TokenConAddress, depositAmount);
+    let tx = await connectEscrowFacet.batchDepositERC20(tokenIds, contractAddresses, depositAmounts);
+    console.log('gas used:',tx.gasLimit.toString())
     let balance = await escrowFacet.escrowBalance(6335, erc20TokenConAddress);
     console.log("Balance: ", balance.toString());
 
