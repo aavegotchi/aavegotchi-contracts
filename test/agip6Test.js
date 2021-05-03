@@ -19,8 +19,7 @@ describe("Fees", async function(){
       ghstWhale,
       daoAddress,
       rarityFarmingAddress,
-      pixelCraftAddress,
-      playerRewardAddress;
+      pixelCraftAddress;
 
   before(async function() {
     aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
@@ -30,8 +29,6 @@ describe("Fees", async function(){
     rarityFarmingAddress = '0x27DF5C6dcd360f372e23d5e63645eC0072D0C098';
     pixelCraftAddress = '0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64';
 
-    // //must match with listId, if listId is sold or cancelled this address must change to match whatever new listId is entered
-    // playerRewardAddress = '0x67FdBb7326a6de4194b1DfEe2E1E212952F0092B';
 
     await agip6Project();
 
@@ -40,11 +37,70 @@ describe("Fees", async function(){
     gameFacet = await ethers.getContractAt('AavegotchiGameFacet', aavegotchiDiamondAddress, buyer);
     erc721Facet = await ethers.getContractAt('ERC721MarketplaceFacet', aavegotchiDiamondAddress, buyer);
     erc1155Facet = await ethers.getContractAt('ERC1155MarketplaceFacet', aavegotchiDiamondAddress, buyer);
+    ghstERC20 = await ethers.getContractAt('ERC20Token', maticGhstAddress, buyer);
 
+    await hre.network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: [ghstWhale]
+    });
 
   });
 
-  it.only("Should check fees amount", async function(){
+  it.only("Should check erc721 fees amount", async function(){
+
+
+    // const connectedGhstContract = await ghstERC20.connect(buyer);
+    // const connectedERC721Facet = await erc721Facet.connect(buyer);
+
+    let beforeWhaleBalance = await ghstERC20.balanceOf(ghstWhale);
+    console.log('before whale balance:', beforeWhaleBalance.toString());
+
+    let beforeDaoBalance = await ghstERC20.balanceOf(daoAddress);
+    console.log('before dao balance:', beforeDaoBalance.toString());
+    let beforeRarityBalance = await ghstERC20.balanceOf(rarityFarmingAddress);
+    console.log('before rarity balance:', beforeRarityBalance.toString());
+    let beforePixelBalance = await ghstERC20.balanceOf(pixelCraftAddress);
+    console.log('before pixel balance:', beforePixelBalance.toString());
+
+
+    let revenueShares = await gameFacet.revenueShares();
+    console.log("Revenue Shares: ", revenueShares);
+
+    await ghstERC20.approve(aavegotchiDiamondAddress, ethers.constants.MaxUint256);
+    // await ghstERC20.allowance(ghstWhale, aavegotchiDiamondAddress);
+
+    const erc721Listing = await erc721Facet.getERC721Listings(2, 'listed', 5);
+    // console.log("ERC721 Listings: ", erc721Listing.toString());
+
+    //may need to find different listingID from erc721Listing if fails
+    await erc721Facet.executeERC721Listing(76586);
+
+    let afterWhaleBalance = await ghstERC20.balanceOf(ghstWhale);
+    console.log('after whale balance:', afterWhaleBalance.toString());
+    let priceOfListing = await (beforeWhaleBalance.toString()) - (afterWhaleBalance.toString());
+    console.log("Price of Listing: ", priceOfListing);
+
+
+    let afterDaoBalance = await ghstERC20.balanceOf(daoAddress);
+    console.log('After dao balance:', afterDaoBalance.toString());
+    let afterRarityBalance = await ghstERC20.balanceOf(rarityFarmingAddress);
+    console.log('After rarity balance:', afterRarityBalance.toString());
+    let afterPixelBalance = await ghstERC20.balanceOf(pixelCraftAddress);
+    console.log('After pixel balance:', afterPixelBalance.toString());
+
+    let daoPercentage = await ((afterDaoBalance.toString()) - (beforeDaoBalance.toString()))/priceOfListing;
+    console.log("Dao Percentage: ", daoPercentage);
+    let pixelPercentage = await ((afterPixelBalance.toString()) - (beforePixelBalance.toString()))/priceOfListing;
+    console.log("PixelCraft Percentage: ", pixelPercentage);
+    let rarityPercentage = await ((afterRarityBalance.toString()) - (beforeRarityBalance.toString()))/priceOfListing;
+    console.log("Rarity Farming Percentage: ", rarityPercentage);
+
+    let totalFeePercentage = daoPercentage + pixelPercentage + rarityPercentage;
+    console.log("Total Fee Percentage: ", totalFeePercentage);
+    expect(totalFeePercentage.toFixed(3)).to.equal('0.035');
+  });
+
+  it.only("Should check erc1155 fees amount", async function(){
     await hre.network.provider.request({
       method: 'hardhat_impersonateAccount',
       params: [ghstWhale]
@@ -54,58 +110,46 @@ describe("Fees", async function(){
 
     buyer = await ethers.getSigner(ghstWhale);
 
-    // const connectedGhstContract = await ghstERC20.connect(buyer);
-    // const connectedERC721Facet = await erc721Facet.connect(buyer);
-
-    let before721Balance = await ghstERC20.balanceOf(ghstWhale);
-    console.log('before 721 balance:', before721Balance.toString());
+    let beforeWhaleBalance = await ghstERC20.balanceOf(ghstWhale);
+    console.log('before whale balance:', beforeWhaleBalance.toString());
 
     let beforeDaoBalance = await ghstERC20.balanceOf(daoAddress);
-    console.log('before dao balance:', beforeDaoBalance.toString());
+    // console.log('before dao balance:', beforeDaoBalance.toString());
     let beforeRarityBalance = await ghstERC20.balanceOf(rarityFarmingAddress);
-    console.log('before rarity balance:', beforeRarityBalance.toString());
+    // console.log('before rarity balance:', beforeRarityBalance.toString());
     let beforePixelBalance = await ghstERC20.balanceOf(pixelCraftAddress);
-    console.log('before pixel balance:', beforePixelBalance.toString());
-    // let beforePlayerBalance = await ghstERC20.balanceOf(playerRewardAddress);
-    // console.log('before balance:', beforePlayerBalance.toString());
+    // console.log('before pixel balance:', beforePixelBalance.toString());
 
-
-    let revenueShares = await gameFacet.revenueShares();
-    console.log("Revenue Shares: ", revenueShares);
 
     await ghstERC20.approve(aavegotchiDiamondAddress, ethers.constants.MaxUint256);
-    let allowance = await ghstERC20.allowance(ghstWhale, aavegotchiDiamondAddress);
-    // console.log("Allowance: ", allowance.toString());
+    const erc1155Listing = await erc1155Facet.getERC1155Listings(0, 'listed', 10);
+    // console.log("ERC1155 Listings: ", erc1155Listing.toString());
 
-    const erc721Listing = await erc721Facet.getERC721Listings(2, 'listed', 5);
-    // console.log("ERC721 Listings: ", erc721Listing.toString());
+    await erc1155Facet.executeERC1155Listing(102778, 1, '799000000000000000000');
 
-    //may need to find different listingID from erc721Listing if fails
-    const execute721Listing = await erc721Facet.executeERC721Listing(76586);
-    // console.log("ERC721 Executed: ", execute721Listing);
 
-    let after721Balance = await ghstERC20.balanceOf(ghstWhale);
-    console.log('after 721 balance:', after721Balance.toString());
-    let priceOfListing = await (before721Balance.toString()) - (after721Balance.toString());
+    let afterWhaleBalance = await ghstERC20.balanceOf(ghstWhale);
+    console.log('after whale balance:', afterWhaleBalance.toString());
+    let priceOfListing = await (beforeWhaleBalance.toString()) - (afterWhaleBalance.toString());
     console.log("Price of Listing: ", priceOfListing);
 
 
     let afterDaoBalance = await ghstERC20.balanceOf(daoAddress);
-    console.log('After dao balance:', afterDaoBalance.toString());
-    // let afterRarityBalance = await ghstERC20.balanceOf(rarityFarmingAddress);
+    // console.log('After dao balance:', afterDaoBalance.toString());
+    let afterRarityBalance = await ghstERC20.balanceOf(rarityFarmingAddress);
     // console.log('After rarity balance:', afterRarityBalance.toString());
     let afterPixelBalance = await ghstERC20.balanceOf(pixelCraftAddress);
-    console.log('After pixel balance:', afterPixelBalance.toString());
-    // let afterPlayerBalance = await ghstERC20.balanceOf(playerRewardAddress);
-    // console.log('After balance:', afterPlayerBalance.toString());
+    // console.log('After pixel balance:', afterPixelBalance.toString());
 
     let daoPercentage = await ((afterDaoBalance.toString()) - (beforeDaoBalance.toString()))/priceOfListing;
-    console.log("Dao Percentage: ", daoPercentage);
-
+    // console.log("Dao Percentage: ", daoPercentage);
     let pixelPercentage = await ((afterPixelBalance.toString()) - (beforePixelBalance.toString()))/priceOfListing;
-    console.log("PixelCraft Percentage: ", pixelPercentage);
-
-    // let rarityPercentage = await ((afterRarityBalance.toString()) - (beforeRarityBalance.toString()))/priceOfListing;
+    // console.log("PixelCraft Percentage: ", pixelPercentage);
+    let rarityPercentage = await ((afterRarityBalance.toString()) - (beforeRarityBalance.toString()))/priceOfListing;
     // console.log("Rarity Farming Percentage: ", rarityPercentage);
+
+    let totalFeePercentage = daoPercentage + pixelPercentage + rarityPercentage;
+    console.log("Total Fee Percentage: ", totalFeePercentage);
+    expect(totalFeePercentage.toFixed(3)).to.equal('0.035');
   });
 });
