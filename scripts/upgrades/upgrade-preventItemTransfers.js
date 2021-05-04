@@ -44,7 +44,7 @@ async function main () {
   const cut = []
 
   for (const facetName of [
-   'ItemsTransferFacet'
+    'ItemsTransferFacet'
   ]) {
     console.log('Deploying', facetName)
     const Facet = await ethers.getContractFactory(facetName)
@@ -73,7 +73,6 @@ async function main () {
       throw Error(`Diamond upgrade failed: ${tx.hash}`)
     }
     console.log('Completed diamond cut: ', tx.hash)
-
   } else {
     console.log('Diamond cut')
     tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000 })
@@ -84,7 +83,7 @@ async function main () {
 
 if (require.main === module) {
   main()
-    .then(() => console.log('upgrade finished') /*process.exit(0)*/)
+    .then(() => console.log('upgrade finished') /*process.exit(0) */)
     .catch(error => {
       console.error(error)
       process.exit(1)
