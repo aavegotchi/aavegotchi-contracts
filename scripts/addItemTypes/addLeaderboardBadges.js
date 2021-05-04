@@ -119,7 +119,7 @@ async function main () {
   console.log('Minting items')
   if (testing) {
     
-    tx = await daoFacet.mintItems(mintAddress, [163,164,165,166,167,168], [10,90,10,90,10,90])
+    tx = await daoFacet.mintItems(mintAddress, [163,164,165,166,167,168], [10,10,10,90,90,90])
     receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`)
