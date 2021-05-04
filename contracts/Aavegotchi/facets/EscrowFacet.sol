@@ -71,7 +71,7 @@ contract EscrowFacet is Modifiers {
         address _erc20Contract,
         address _recipient,
         uint256 _transferAmount
-    ) external onlyAavegotchiOwner(_tokenId) {
+    ) external onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
         address escrow = s.aavegotchis[_tokenId].escrow;
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         require(escrow != address(0), "EscrowFacet: Does not have an escrow");
