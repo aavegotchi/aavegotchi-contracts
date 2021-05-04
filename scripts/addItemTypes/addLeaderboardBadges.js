@@ -116,7 +116,7 @@ async function main () {
 
   console.log('Minting items')
   if (testing) {
-    tx = await daoFacet.mintItems(mintAddress, [163, 164, 165, 166, 167, 168], [10, 90, 10, 90, 10, 90])
+    tx = await daoFacet.mintItems(mintAddress, [163, 164, 165, 166, 167, 168], [10, 10, 10, 90, 90, 90])
     receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`)
@@ -129,7 +129,6 @@ async function main () {
     if (testing) {
       const balance = await itemsFacet.balanceOf(mintAddress, '163')
       console.log('balance of 163:', balance.toString())
-
 
       // Check the SVG output
       const svgFacet = await ethers.getContractAt('SvgFacet', diamondAddress)
@@ -148,7 +147,7 @@ async function main () {
 // and properly handle errors.
 if (require.main === module) {
   main()
-    .then(() => console.log('adding badges finished') /*process.exit(0 */)
+    .then(() => console.log('adding badges finished') /* process.exit(0 */)
     .catch(error => {
       console.error(error)
       // process.exit(1)
