@@ -142,7 +142,7 @@ async function main () {
    // console.log('amounts:',amounts)
 
    
-   /*const escrowFacet = await ethers.getContractAt("EscrowFacet")
+   const escrowFacet = await ethers.getContractAt("EscrowFacet")
   
     const tx = await escrowFacet.batchDepositGHST(tokenIds,amounts)
     let receipt = await tx.wait()
@@ -150,7 +150,7 @@ async function main () {
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`)
     }
-    */
+    
 
     
    /* const tx = await dao.grantExperience(tokenIds, Array(tokenIds.length).fill(xpAmount), { gasLimit: 20000000 })
