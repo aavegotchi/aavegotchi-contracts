@@ -113,7 +113,7 @@ async function main () {
 
   await uploadSvgs(badgeSvgs, 'wearables', testing)
  
-  console.log('Send items to Aavegotchi Multisig')
+  console.log('Send items to Aavegotchi Hardware')
   let mintAddress = '0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119'
 
   console.log('Minting items')
