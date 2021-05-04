@@ -113,8 +113,8 @@ async function main () {
 
   await uploadSvgs(badgeSvgs, 'wearables', testing)
  
-  console.log('Send items to Aavegotchis')
-  let mintAddress = '0x027Ffd3c119567e85998f4E6B9c3d83D5702660c'
+  console.log('Send items to Aavegotchi Multisig')
+  let mintAddress = '0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119'
 
   console.log('Minting items')
   if (testing) {
@@ -145,7 +145,9 @@ async function main () {
   //  console.log('item svg:',itemSvg)
 
   } else {
-    tx = await daoFacet.populateTransaction.mintItems(mintAddress, [163,164,165,166,167,168], [10,90,10,90,10,90], { gasLimit: gasLimit })
+
+    //Rarity 10, Kinship 10, XP 10, Rarity 100, Kinship 100, XP 100
+    tx = await daoFacet.populateTransaction.mintItems(mintAddress, [163,164,165,166,167,168], [10,10,10,90,90,90], { gasLimit: gasLimit })
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 }
