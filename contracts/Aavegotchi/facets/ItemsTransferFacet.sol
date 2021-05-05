@@ -101,13 +101,31 @@ contract ItemsTransferFacet is Modifiers {
         emit LibERC1155.TransferToParent(_toContract, _toTokenId, _id, _value);
     }
 
+    function batchBatchTransferToParent(
+        address _from,
+        address _toContract,
+        uint256[] calldata _toTokenIds,
+        uint256[][] calldata _ids,
+        uint256[][] calldata _values
+    ) external {
+        require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
+        require(_ids.length == _toTokenIds.length, "ItemsTransfer: ids.length not the same as toTokenIds length");
+        require(_ids.length == _values.length, "ItemsTransfer: ids.length not the same as values.length");
+        for (uint256 index = 0; index < _toTokenIds.length; index++) {
+            uint256 tokenId = _toTokenIds[index];
+            uint256[] calldata ids = _ids[index];
+            uint256[] calldata values = _values[index];
+            batchTransferToParent(_from, _toContract, tokenId, ids, values);
+        }
+    }
+
     function batchTransferToParent(
         address _from,
         address _toContract,
         uint256 _toTokenId,
         uint256[] calldata _ids,
         uint256[] calldata _values
-    ) external {
+    ) public {
         require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
         require(_ids.length == _values.length, "ItemsTransfer: ids.length not the same as values.length");
         address sender = LibMeta.msgSender();
