@@ -116,16 +116,16 @@ async function main () {
     }
     console.log('Items were added:', tx.hash)
   } else {
-    // tx = await daoFacet.populateTransaction.addItemTypes(itemTypes, { gasLimit: gasLimit })
-    // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+    tx = await daoFacet.populateTransaction.addItemTypes(itemTypes, { gasLimit: gasLimit })
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 
   // let item = await itemsFacet.getItemType(162)
   // console.log('Item:', item)
 
-  // await uploadSvgs(wearablesSvgs, 'wearables', testing)
+  await uploadSvgs(wearablesSvgs, 'wearables', testing)
   // console.log(sleevesSvgs)
-  // await uploadSvgs(sleevesSvgs.map(value => value.svg), 'sleeves', testing)
+  await uploadSvgs(sleevesSvgs.map(value => value.svg), 'sleeves', testing)
 
   let sleevesSvgId = 27
   let sleeves = []
@@ -147,15 +147,14 @@ async function main () {
     }
     console.log('Sleeves associated:', tx.hash)
   } else {
-    // tx = await svgFacet.populateTransaction.setSleeves(sleeves, { gasLimit: gasLimit })
-    // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+    tx = await svgFacet.populateTransaction.setSleeves(sleeves, { gasLimit: gasLimit })
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 
   // const finalSVG = await svgFacet.getItemSvg('162')
 
   // console.log('final svg:', finalSVG)
 
-  // deploy raffle:
   console.log('Mint items to aavegotchi.eth')
   let mintAddress = '0x027Ffd3c119567e85998f4E6B9c3d83D5702660c'
 
