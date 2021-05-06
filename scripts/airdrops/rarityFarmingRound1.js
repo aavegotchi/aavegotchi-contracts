@@ -2,6 +2,9 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
+const { rarityRoundOne, kinshipRoundOne, xpRoundOne } = require('../../data/rarityFarmingRoundOne.tsx')
+
+const {rarityRoundRewards, kinshipRoundRewards, xpRoundRewards} = require("../../data/rarityFarmingRoundRewards.tsx")
 
 
 function addCommas (nStr) {
@@ -44,8 +47,42 @@ async function main () {
   const finalRewards = {}
   //First iterate through all of the rewards and add them up by Gotchi ID
 
+  for (let index = 0; index < 5000; index++) {
+    const rarityGotchiID = rarityRoundOne[index];
+    const kinshipGotchiID = kinshipRoundOne[index]
+    const xpGotchiID = xpRoundOne[index]
+ 
+    const rarityReward = rarityRoundRewards[index]
+    const kinshipReward = kinshipRoundRewards[index]
+    const xpReward = xpRoundRewards[index]
+ 
+    //Add Rarity
+    if (finalRewards[rarityGotchiID]) finalRewards[rarityGotchiID] += Number(rarityReward)
+    else {
+      finalRewards[rarityGotchiID] = Number(rarityReward)
+    }
+    
+ 
+    //Add Kinship
+    if (finalRewards[kinshipGotchiID]) finalRewards[kinshipGotchiID] += Number(kinshipReward)
+    else {
+      finalRewards[kinshipGotchiID] = Number(kinshipReward)
+   }
+    
+    //Add XP
+    if (finalRewards[xpGotchiID]) finalRewards[xpGotchiID] += Number(xpReward)
+    else {
+      finalRewards[xpGotchiID] = Number(xpReward)
+    }
+   
+ 
+  }
+ 
 
   
+
+  let totalGhstSent = ethers.BigNumber.from(0)
+
 
   // group the data
   const txData = []
@@ -87,31 +124,34 @@ async function main () {
     let amounts = []
 
     txGroup.forEach(sendData => {
-
-   
-    
+      tokenIds.push(sendData.tokenID)
+      amounts.push(sendData.parsedAmount)
+     // console.log(`Sending ${sendData.parsedAmount} to ${sendData.tokenID}`)
     });
+
+    let totalAmount = amounts.reduce((prev, curr) => {
+      return ethers.BigNumber.from(prev).add(ethers.BigNumber.from(curr))
+    })
+
+    totalGhstSent = totalGhstSent.add(totalAmount)
+
     
-  
-      
-      
-  
-  
-      console.log(`Sending ${ethers.utils.formatEther(totalAmount)} GHST to ${tokenIds.length} Gotchis` )
+    console.log(`Sending ${ethers.utils.formatEther(totalAmount)} GHST to ${tokenIds.length} Gotchis` )
   
     //  console.log('token ids:',tokenIds)
      // console.log('amounts:',amounts)
   
      
-     const itemsTransferFacet = await ethers.getContractAt("ItemsTransferFacet",diamondAddress,signer)
-
-
-    const tx= await itemsTransferFacet.batchTransferToParent(
-      gameManager,
-      diamondAddress,
-      tokenId,
-      tokenIds,
-      values)
+     
+     const escrowFacet = await ethers.getContractAt("EscrowFacet")
+  
+     const tx = await escrowFacet.batchDepositGHST(tokenIds,amounts)
+     let receipt = await tx.wait()
+     console.log('Gas used:', strDisplay(receipt.gasUsed))
+     if (!receipt.status) {
+       throw Error(`Error:: ${tx.hash}`)
+     }
+ 
   
       let receipt = await tx.wait()
       console.log('Gas used:', strDisplay(receipt.gasUsed))
