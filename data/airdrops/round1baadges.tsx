@@ -22,7 +22,6 @@ const szn1rnd1Top10Kinship = [
   "1998",
   "6827",
   "8095",
-  "4441",
 ];
 
 const szn1rnd1Top10XP = [
@@ -36,7 +35,6 @@ const szn1rnd1Top10XP = [
   "5027",
   "1240",
   "3052",
-  "826",
 ];
 
 const szn1rnd1Top100Rarity = [
@@ -243,7 +241,6 @@ const szn1rnd1Top100Kinship = [
   "9816",
   "6984",
   "4679",
-  "4686",
 ];
 
 const szn1rnd1Top100XP = [
@@ -347,7 +344,6 @@ const szn1rnd1Top100XP = [
   "5790",
   "5808",
   "8273",
-  "101",
 ];
 
 exports.szn1rnd1Top10Rarity = szn1rnd1Top10Rarity;

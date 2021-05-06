@@ -2,9 +2,10 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
-const { rarityRoundOne, kinshipRoundOne, xpRoundOne } = require('../../data/rarityFarmingRoundOne.tsx')
 
-const {rarityRoundRewards, kinshipRoundRewards, xpRoundRewards} = require("../../data/rarityFarmingRoundRewards.tsx")
+const {addBatchBatchTransfer} = require('../upgrades/upgrade-addBatchBatchTransfer')
+
+const {rarityRoundOne, kinshipRoundOne, xpRoundOne} = require('../../data/rarityFarmingRoundOne.tsx')
 
 function addCommas (nStr) {
   nStr += ''
@@ -24,7 +25,6 @@ function strDisplay (str) {
 
 async function main () {
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
-  const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7"
   const gameManager = await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
   console.log(gameManager)
   let signer
@@ -35,63 +35,73 @@ async function main () {
       params: [gameManager]
     })
     signer = await ethers.provider.getSigner(gameManager)
+    
+
+    await addBatchBatchTransfer()
+
   } else if (hre.network.name === 'matic') {
     signer = new LedgerSigner(ethers.provider,"hid","m/44'/60'/2'/0/0")
   } else {
     throw Error('Incorrect network selected')
   }
 
-  const maxProcess = 500
-
+  //STEP ZERO: CHOOSE BATCH SIZE
   const finalRewards = {}
-  //First iterate through all of the rewards and add them up by Gotchi ID
+  let maxProcess = 100
+  
+  //STEP ONE: INPUT THE BADGE IDS
+  let badgeIds = [163,164,165,166,167,168]
 
- for (let index = 0; index < 5000; index++) {
-   const rarityGotchiID = rarityRoundOne[index];
-   const kinshipGotchiID = kinshipRoundOne[index]
-   const xpGotchiID = xpRoundOne[index]
+  //STEP TWO: GET THE WINNERS (IN ORDER OF BADGE IDS)
+  const rarityTop10 = rarityRoundOne.slice(0,10) //10 of 163
+  const kinshipTop10 = kinshipRoundOne.slice(0,10) //10 of 164
+  const xpTop10 = xpRoundOne.slice(0,10) //10 of 165
+  const rarityTop100 = rarityRoundOne.slice(10,100) //89 of 166
+  const kinshipTop100 = kinshipRoundOne.slice(10,100) //90 of 167
+  const xpTop100 = xpRoundOne.slice(10,100) //90 of 168
 
-   const rarityReward = rarityRoundRewards[index]
-   const kinshipReward = kinshipRoundRewards[index]
-   const xpReward = xpRoundRewards[index]
-
-   //Add Rarity
-   if (finalRewards[rarityGotchiID]) finalRewards[rarityGotchiID] += Number(rarityReward)
-   else {
-     finalRewards[rarityGotchiID] = Number(rarityReward)
-   }
-   
-
-   //Add Kinship
-   if (finalRewards[kinshipGotchiID]) finalRewards[kinshipGotchiID] += Number(kinshipReward)
-   else {
-     finalRewards[kinshipGotchiID] = Number(kinshipReward)
-  }
-   
-   //Add XP
-   if (finalRewards[xpGotchiID]) finalRewards[xpGotchiID] += Number(xpReward)
-   else {
-     finalRewards[xpGotchiID] = Number(xpReward)
-   }
+  //Remove 1306 for this badge drop because we sent a test badge already
+  const rarityTop100Without1306 = rarityTop100.filter((id) => {
+    return id !== "1306"
+  })
   
 
- }
-
-// console.log('final rewards:',finalRewards)
+  let awardsArray = [rarityTop10,kinshipTop10,xpTop10,rarityTop100Without1306,kinshipTop100,xpTop100]
 
 
+  let tokenIds = []
+  let _ids = []
+  let _values = []
+
+  //STEP THREE: COMBINE ALL OF THE WINNERS INTO A SINGLE OBJECT
+  awardsArray.forEach((winnersArray, index) => {
+    let badgeId = badgeIds[index]
+    for (let index = 0; index < winnersArray.length; index++) {
+      const gotchiID = winnersArray[index];
+      if (finalRewards[gotchiID]) {
+        finalRewards[gotchiID] = [...finalRewards[gotchiID], badgeId]
+      }
+      else finalRewards[gotchiID] = [badgeId]
+    }
+
+  });
+
+  //STEP FOUR: SEPARATE THE DATA INTO THREE GROUPS 
+  Object.keys(finalRewards).forEach((key) => {
+    let values = finalRewards[key]
+    tokenIds.push(key)
+    _ids.push(values)
+    _values.push(Array(values.length).fill(1))
+  });
 
 
-  // group the data
+//STEP FIVE: BATCH THE DATA FOR TRANSACTION
   const txData = []
+  
   let txGroup = []
   let tokenIdsNum = 0
-  for (const gotchiID of Object.keys(finalRewards)) {
 
-    let amount = finalRewards[gotchiID]
-    let parsedAmount = ethers.BigNumber.from(ethers.utils.parseEther(amount.toString()))
-    let finalParsed = parsedAmount.toString()
-
+  for (let index = 0; index < tokenIds.length; index++) {
       if (maxProcess < tokenIdsNum + 1) {
         txData.push(txGroup)
         txGroup = []
@@ -99,9 +109,7 @@ async function main () {
       }
 
       txGroup.push({
-        tokenID:gotchiID,
-        amount:amount,
-        parsedAmount: finalParsed
+        index
       })
       tokenIdsNum += 1
     }
@@ -112,57 +120,45 @@ async function main () {
       tokenIdsNum = 0
     }
 
+    const itemsTransferFacet = await ethers.getContractAt("ItemsTransferFacet",diamondAddress,signer)
 
-  // send transactions
-  let currentIndex = 0
-
-  let totalGhstSent = ethers.BigNumber.from(0)
-
+    //STEP SIX: ITERATE THROUGH EACH BATCH AND TRANSFER 
   for (const txGroup of txData) {
 
-    let tokenIds = []
-    let amounts = []
+    //Batch Info
+    let batchBeginning = txGroup[0].index
+    let batchEnd = txGroup[txGroup.length-1].index
+    let batchTokenIds = tokenIds.slice(batchBeginning,batchEnd+1)
+    let batchBadgeIds = _ids.slice(batchBeginning,batchEnd+1)
+    let batchBadgeValues = _values.slice(batchBeginning,batchEnd+1)
 
-    txGroup.forEach(sendData => {
-
-
-
-      if (Number(sendData.tokenID) >= 4391) {
-        tokenIds.push(sendData.tokenID)
-        amounts.push(sendData.parsedAmount)
-        console.log(`Sending ${sendData.amount} to ${sendData.tokenID}`)
-      }
-
-    
+    const itemsFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",diamondAddress)
+    const balances = await itemsFacet.itemBalances(gameManager)
+   
+    balances.forEach((item) => {
+      console.log(`Balance of ${item.itemId} is ${item.balance.toString()}`)
     });
-    
-    if (amounts.length > 0) {
-      let totalAmount = amounts.reduce((prev, curr) => {
-        return ethers.BigNumber.from(prev).add(ethers.BigNumber.from(curr))
-      })
-      
-      totalGhstSent = totalGhstSent.add(totalAmount)
-  
-  
-  
-      console.log(`Sending ${ethers.utils.formatEther(totalAmount)} GHST to ${tokenIds.length} Gotchis` )
-  
-    //  console.log('token ids:',tokenIds)
-     // console.log('amounts:',amounts)
-  
-     
-     const escrowFacet = await ethers.getContractAt("EscrowFacet",diamondAddress,signer)
-  
-     const ghstContract = await ethers.getContractAt("ERC20Token",ghstAddress,signer)
-  
-     await ghstContract.approve(diamondAddress,ethers.utils.parseEther("100000000000"))
-    
-      const tx = await escrowFacet.batchDepositGHST(tokenIds,amounts)
+
+
+    console.log(`Sending Batch to tokenIDs ${batchBeginning}-${batchEnd}`)
+   
+    //Transaction
+      const tx = await itemsTransferFacet.batchBatchTransferToParent(gameManager,diamondAddress,batchTokenIds,batchBadgeIds, batchBadgeValues)
       let receipt = await tx.wait()
-      console.log('Gas used:', strDisplay(receipt.gasUsed))
+      console.log('Batch complete! Gas used:', strDisplay(receipt.gasUsed))
       if (!receipt.status) {
         throw Error(`Error:: ${tx.hash}`)
       }
+
+      if (testing) {
+      
+        const balance = await itemsFacet.balanceOfToken(diamondAddress,batchTokenIds[0],batchBadgeIds[0][0])
+
+        console.log(`Balance of tokenID ${batchTokenIds[0]} for badge ${batchBadgeIds[0][0]} is: ${balance.toString()}`)
+
+
+      }
+      
     }
 
   
@@ -180,9 +176,7 @@ async function main () {
     console.log('Current address index:', addressIndex)
     console.log('')
     */
-  }
-
-  console.log('Total GHST Sent:',ethers.utils.formatEther(totalGhstSent))
+  
   
 }
 

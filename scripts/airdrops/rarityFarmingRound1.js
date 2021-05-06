@@ -2,7 +2,7 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
-const { szn1rnd1Top10Rarity, szn1rnd1Top10Kinship, szn1rnd1Top10XP, szn1rnd1Top100Rarity, szn1rnd1Top100Kinship, szn1rnd1Top100XP } = require('../../data/airdrops/round1baadges.tsx')
+
 
 function addCommas (nStr) {
   nStr += ''

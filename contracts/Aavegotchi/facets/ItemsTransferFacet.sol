@@ -109,8 +109,7 @@ contract ItemsTransferFacet is Modifiers {
         uint256[][] calldata _values
     ) external {
         require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
-
-        require(_ids.length == _toTokenIds.length, "ItemsTransfer: ids.length not the same as toTokenIds length");
+        require(_toTokenIds.length == _ids.length, "ItemsTransfer: ids.length not the same as toTokenIds length");
         require(_ids.length == _values.length, "ItemsTransfer: ids.length not the same as values.length");
         for (uint256 index = 0; index < _toTokenIds.length; index++) {
             uint256 tokenId = _toTokenIds[index];
