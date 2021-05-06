@@ -47,7 +47,7 @@ async function main () {
 
   //STEP ZERO: CHOOSE BATCH SIZE
   const finalRewards = {}
-  let maxProcess = 100
+  let maxProcess = 2
   
   //STEP ONE: INPUT THE BADGE IDS
   let badgeIds = [163,164,165,166,167,168]
@@ -160,24 +160,6 @@ async function main () {
       }
       
     }
-
-  
-    
-
-    
-   /* const tx = await dao.grantExperience(tokenIds, Array(tokenIds.length).fill(xpAmount), { gasLimit: 20000000 })
-    let receipt = await tx.wait()
-    console.log('Gas used:', strDisplay(receipt.gasUsed))
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`)
-    }
-    console.log('Airdropped XP to Aaavegotchis. Last address:', tokenIds[tokenIds.length-1])
-    console.log('A total of', tokenIds.length, 'Aavegotchis')
-    console.log('Current address index:', addressIndex)
-    console.log('')
-    */
-  
-  
 }
 
 // We recommend this pattern to be able to use async/await everywhere

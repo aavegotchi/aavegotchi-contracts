@@ -69,11 +69,12 @@ async function main () {
        action: FacetCutAction.Add,
        functionSelectors: newFuncs
      },
-      {
+    /*  {
         facetAddress: facet.address,
         action: FacetCutAction.Replace,
         functionSelectors: existingFuncs
       }
+      */
       
    ];
   console.log(cut);
