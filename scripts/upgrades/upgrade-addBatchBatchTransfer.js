@@ -24,6 +24,7 @@ const getSelector = (func) => {
 
 async function main () {
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
+  console.log('diamond address:',diamondAddress)
 
   let signer;
   let facet;
@@ -44,7 +45,9 @@ async function main () {
   }
 
   const Facet = await ethers.getContractFactory('ItemsTransferFacet');
+ 
   facet = await Facet.deploy();
+
   await facet.deployed();
   console.log('Deployed facet:', facet.address);
 
@@ -68,14 +71,7 @@ async function main () {
        facetAddress: facet.address,
        action: FacetCutAction.Add,
        functionSelectors: newFuncs
-     },
-    /*  {
-        facetAddress: facet.address,
-        action: FacetCutAction.Replace,
-        functionSelectors: existingFuncs
-      }
-      */
-      
+     },      
    ];
   console.log(cut);
 
