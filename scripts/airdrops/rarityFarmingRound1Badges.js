@@ -37,7 +37,7 @@ async function main () {
     signer = await ethers.provider.getSigner(gameManager)
     
 
-    await addBatchBatchTransfer()
+  //  await addBatchBatchTransfer()
 
   } else if (hre.network.name === 'matic') {
     signer = new LedgerSigner(ethers.provider,"hid","m/44'/60'/2'/0/0")
@@ -47,7 +47,7 @@ async function main () {
 
   //STEP ZERO: CHOOSE BATCH SIZE
   const finalRewards = {}
-  let maxProcess = 2
+  let maxProcess = 100
   
   //STEP ONE: INPUT THE BADGE IDS
   let badgeIds = [163,164,165,166,167,168]
@@ -131,6 +131,10 @@ async function main () {
     let batchTokenIds = tokenIds.slice(batchBeginning,batchEnd+1)
     let batchBadgeIds = _ids.slice(batchBeginning,batchEnd+1)
     let batchBadgeValues = _values.slice(batchBeginning,batchEnd+1)
+
+    console.log('token is:',batchTokenIds)
+    console.log('badge ids:',batchBadgeIds)
+    console.log('values:',batchBadgeValues)
 
     const itemsFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",diamondAddress)
     const balances = await itemsFacet.itemBalances(gameManager)
