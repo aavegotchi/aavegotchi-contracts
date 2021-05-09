@@ -54,6 +54,12 @@ struct Dimensions {
     uint8 height;
 }
 
+struct SideViewDimensions {
+    Dimensions leftSide;
+    Dimensions rightSide;
+    Dimensions backSide;
+}
+
 struct ItemType {
     string name; //The name of the item
     string description;
@@ -228,8 +234,8 @@ struct AppStorage {
     mapping(address => mapping(uint256 => mapping(address => uint256))) erc721TokenToListingId;
     // body wearableId => sleevesId
     mapping(uint256 => uint256) sleeves;
-    // mapping(address => mapping(uint256 => address)) petOperators;
-    // mapping(address => uint256[]) petOperatorTokenIds;
+    // itemTypeId => SideViewDimensions
+    mapping(uint256 => SideViewDimensions) sideViewDimensions;
 }
 
 library LibAppStorage {
