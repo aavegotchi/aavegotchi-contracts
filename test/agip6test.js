@@ -69,11 +69,12 @@ describe("Fees", async function(){
     await ghstERC20.approve(aavegotchiDiamondAddress, ethers.constants.MaxUint256);
     // await ghstERC20.allowance(ghstWhale, aavegotchiDiamondAddress);
 
-    const erc721Listing = await erc721Facet.getERC721Listings(2, 'listed', 5);
-    // console.log("ERC721 Listings: ", erc721Listing.toString());
+    const erc721Listings = await erc721Facet.getERC721Listings(2, 'listed', 5);
+    const listing = erc721Listings[0].listingId.toString()
 
+    
     //may need to find different listingID from erc721Listing if fails
-    await erc721Facet.executeERC721Listing(76586);
+    await erc721Facet.executeERC721Listing(listing);
 
     let afterWhaleBalance = await ghstERC20.balanceOf(ghstWhale);
     console.log('after whale balance:', afterWhaleBalance.toString());
@@ -122,10 +123,12 @@ describe("Fees", async function(){
 
 
     await ghstERC20.approve(aavegotchiDiamondAddress, ethers.constants.MaxUint256);
-    const erc1155Listing = await erc1155Facet.getERC1155Listings(0, 'listed', 10);
+    const erc1155Listings = await erc1155Facet.getERC1155Listings(0, 'listed', 10);
+
+    const erc1155Listing = erc1155Listings[0].listingId.toString()
     // console.log("ERC1155 Listings: ", erc1155Listing.toString());
 
-    await erc1155Facet.executeERC1155Listing(102778, 1, '799000000000000000000');
+    await erc1155Facet.executeERC1155Listing(erc1155Listing, 1, erc1155Listings[0].priceInWei.toString());
 
 
     let afterWhaleBalance = await ghstERC20.balanceOf(ghstWhale);
