@@ -171,7 +171,6 @@ struct AppStorage {
     mapping(uint256 => address) approved;
     mapping(string => bool) aavegotchiNamesUsed;
     mapping(address => uint256) metaNonces;
-    mapping(address=> bool) isWhitelistedItemManager;
     uint32 tokenIdCounter;
     uint16 currentHauntId;
     string name;
@@ -231,6 +230,7 @@ struct AppStorage {
     mapping(uint256 => uint256) sleeves;
     // mapping(address => mapping(uint256 => address)) petOperators;
     // mapping(address => uint256[]) petOperatorTokenIds;
+     mapping(address=> bool) isWhitelistedItemManager;
 }
 
 library LibAppStorage {
