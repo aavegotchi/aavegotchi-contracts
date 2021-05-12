@@ -20,8 +20,8 @@ contract DAOFacet is Modifiers {
     event UpdateWearableSet(uint256 _setId, WearableSet _wearableSet);
     event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
     event ItemTypeMaxQuantity(uint256[] _itemIds, uint256[] _maxQuanities);
-    event ItemManagerWhitelisted(address indexed newItemManager_,uint timestamp);
-    event ItemManagerBlacklisted(address indexed ItemManager_,uint timestamp);
+    event ItemManagerAdded(address indexed newItemManager_);
+    event ItemManagerRemoved(address indexed ItemManager_);
 
     /***********************************|
    |             Read Functions         |
@@ -56,16 +56,16 @@ contract DAOFacet is Modifiers {
         }
     }
 
-    function whiteListItemManager(address _newItemManager) external onlyDaoOrOwner {
-        require(s.isWhitelistedItemManager[_newItemManager]==false,"DAOFacet: itemManager already whitelisted");
-        s.isWhitelistedItemManager[_newItemManager]=true;
-        emit ItemManagerWhitelisted(_newItemManager,block.timestamp);
+    function addItemManager(address _newItemManager) external onlyDaoOrOwner {
+        require(s.isWhitelistedItemManager[_newItemManager] == false, "DAOFacet: itemManager already whitelisted");
+        s.isWhitelistedItemManager[_newItemManager] = true;
+        emit ItemManagerAdded(_newItemManager);
     }
 
-    function blackListItemManager(address itemManager) external onlyDaoOrOwner {
-        require(s.isWhitelistedItemManager[itemManager]==true,"DAOFacet: itemManager does not exist or already blacklisted");
-        s.isWhitelistedItemManager[itemManager]=false;
-        emit ItemManagerBlacklisted(itemManager,block.timestamp);
+    function removeItemManager(address itemManager) external onlyDaoOrOwner {
+        require(s.isWhitelistedItemManager[itemManager] == true, "DAOFacet: itemManager does not exist or already blacklisted");
+        s.isWhitelistedItemManager[itemManager] = false;
+        emit ItemManagerRemoved(itemManager);
     }
 
     function updateCollateralModifiers(address _collateralType, int16[NUMERIC_TRAITS_NUM] calldata _modifiers) external onlyDaoOrOwner {
@@ -180,7 +180,6 @@ contract DAOFacet is Modifiers {
             emit UpdateWearableSet(_setIds[i], _wearableSets[i]);
         }
     }
-
 
     function setGameManager(address _gameManager) external onlyDaoOrOwner {
         emit GameManagerTransferred(s.gameManager, _gameManager);
