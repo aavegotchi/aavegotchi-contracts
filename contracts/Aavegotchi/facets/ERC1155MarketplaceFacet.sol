@@ -199,10 +199,15 @@ contract ERC1155MarketplaceFacet is Modifiers {
             // handles stack too deep error
             uint256 daoShare = cost / 100;
             uint256 pixelCraftShare = (cost * 2) / 100;
-            uint256 transferAmount = cost - (daoShare + pixelCraftShare);
+            //AGIP6 adds on 0.5%
+            uint256 playerRewardsShare = cost / 200;
+
+            uint256 transferAmount = cost - (daoShare + pixelCraftShare + playerRewardsShare);
             LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, pixelCraftShare);
             LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, daoShare);
             LibERC20.transferFrom(s.ghstContract, buyer, seller, transferAmount);
+            //AGIP6 adds on 0.5%
+            LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, playerRewardsShare);
 
             listing.timeLastPurchased = block.timestamp;
             s.nextERC1155ListingId++;
