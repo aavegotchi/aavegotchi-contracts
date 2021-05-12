@@ -230,7 +230,7 @@ struct AppStorage {
     mapping(uint256 => uint256) sleeves;
     // mapping(address => mapping(uint256 => address)) petOperators;
     // mapping(address => uint256[]) petOperatorTokenIds;
-    mapping(address => bool) isWhitelistedItemManager;
+    mapping(address => bool) itemManagers;
 }
 
 library LibAppStorage {
@@ -280,7 +280,7 @@ contract Modifiers {
     }
     modifier onlyItemManager {
         address sender = LibMeta.msgSender();
-        require(s.isWhitelistedItemManager[sender] == true, "LibAppStorage: only an ItemManager can call this function");
+        require(s.itemManagers[sender] == true, "LibAppStorage: only an ItemManager can call this function");
         _;
     }
 }

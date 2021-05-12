@@ -57,14 +57,14 @@ contract DAOFacet is Modifiers {
     }
 
     function addItemManager(address _newItemManager) external onlyDaoOrOwner {
-        require(s.isWhitelistedItemManager[_newItemManager] == false, "DAOFacet: itemManager already whitelisted");
-        s.isWhitelistedItemManager[_newItemManager] = true;
+        require(s.itemManagers[_newItemManager] == false, "DAOFacet: itemManager already added");
+        s.itemManagers[_newItemManager] = true;
         emit ItemManagerAdded(_newItemManager);
     }
 
     function removeItemManager(address itemManager) external onlyDaoOrOwner {
-        require(s.isWhitelistedItemManager[itemManager] == true, "DAOFacet: itemManager does not exist or already blacklisted");
-        s.isWhitelistedItemManager[itemManager] = false;
+        require(s.itemManagers[itemManager] == true, "DAOFacet: itemManager does not exist or already removed");
+        s.itemManagers[itemManager] = false;
         emit ItemManagerRemoved(itemManager);
     }
 
