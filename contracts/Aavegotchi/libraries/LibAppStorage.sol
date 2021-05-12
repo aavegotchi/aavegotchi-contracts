@@ -171,6 +171,7 @@ struct AppStorage {
     mapping(uint256 => address) approved;
     mapping(string => bool) aavegotchiNamesUsed;
     mapping(address => uint256) metaNonces;
+    mapping(address=> bool) isWhitelistedItemManager;
     uint32 tokenIdCounter;
     uint16 currentHauntId;
     string name;
@@ -275,6 +276,11 @@ contract Modifiers {
     modifier onlyOwnerOrDaoOrGameManager {
         address sender = LibMeta.msgSender();
         require(sender == s.dao || sender == LibDiamond.contractOwner() || sender == s.gameManager, "LibAppStorage: Do not have access");
+        _;
+    }
+    modifier onlyItemManager{
+        address sender=LibMeta.msgSender();
+        require(s.isWhitelistedItemManager[sender]==true,"LibAppStorage: only an ItemManager can call this function");
         _;
     }
 }

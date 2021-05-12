@@ -20,6 +20,8 @@ contract DAOFacet is Modifiers {
     event UpdateWearableSet(uint256 _setId, WearableSet _wearableSet);
     event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
     event ItemTypeMaxQuantity(uint256[] _itemIds, uint256[] _maxQuanities);
+    event ItemManagerWhitelisted(address indexed newItemManager_,uint timestamp);
+    event ItemManagerBlacklisted(address indexed ItemManager_,uint timestamp);
 
     /***********************************|
    |             Read Functions         |
@@ -52,6 +54,18 @@ contract DAOFacet is Modifiers {
             s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
             emit AddCollateralType(_collateralTypes[i]);
         }
+    }
+
+    function whiteListItemManager(address _newItemManager) external onlyDaoOrOwner {
+        require(s.isWhitelistedItemManager[_newItemManager]==false,"DAOFacet: itemManager already whitelisted");
+        s.isWhitelistedItemManager[_newItemManager]=true;
+        emit ItemManagerWhitelisted(_newItemManager,block.timestamp);
+    }
+
+    function blackListItemManager(address itemManager) external onlyDaoOrOwner {
+        require(s.isWhitelistedItemManager[itemManager]==true,"DAOFacet: itemManager does not exist or already blacklisted");
+        s.isWhitelistedItemManager[itemManager]=false;
+        emit ItemManagerBlacklisted(itemManager,block.timestamp);
     }
 
     function updateCollateralModifiers(address _collateralType, int16[NUMERIC_TRAITS_NUM] calldata _modifiers) external onlyDaoOrOwner {

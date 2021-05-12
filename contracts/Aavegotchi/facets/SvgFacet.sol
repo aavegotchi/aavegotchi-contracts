@@ -398,15 +398,15 @@ contract SvgFacet is Modifiers {
    |             Write Functions        |
    |__________________________________*/
 
-    function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) external onlyDaoOrOwner {
+    function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) external onlyItemManager {
         LibSvg.storeSvg(_svg, _typesAndSizes);
     }
 
-    function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) external onlyDaoOrOwner {
+    function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) external onlyItemManager {
         LibSvg.updateSvg(_svg, _typesAndIdsAndSizes);
     }
 
-    function deleteLastSvgLayers(bytes32 _svgType, uint256 _numLayers) external onlyDaoOrOwner {
+    function deleteLastSvgLayers(bytes32 _svgType, uint256 _numLayers) external onlyItemManager {
         for(uint256 i; i < _numLayers; i++){
             s.svgLayers[_svgType].pop();
         }
