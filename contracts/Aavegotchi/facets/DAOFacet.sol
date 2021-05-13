@@ -142,7 +142,7 @@ contract DAOFacet is Modifiers {
         emit GrantExperience(_tokenIds, _xpValues);
     }
 
-    function addItemTypes(ItemType[] memory _itemTypes) external onlyDaoOrOwner() {
+    function addItemTypes(ItemType[] memory _itemTypes) external onlyItemManager {
         insertItemTypes(_itemTypes);
     }
 
@@ -150,7 +150,7 @@ contract DAOFacet is Modifiers {
         ItemType[] memory _itemTypes,
         string calldata _svg,
         LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes
-    ) external onlyDaoOrOwner() {
+    ) external onlyItemManager {
         insertItemTypes(_itemTypes);
         LibSvg.storeSvg(_svg, _typesAndSizes);
     }
