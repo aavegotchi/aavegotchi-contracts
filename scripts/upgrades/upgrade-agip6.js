@@ -3,6 +3,7 @@
 /* eslint prefer-const: "off" */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
+const { sendToMultisig } = require('../libraries/multisig/multisig.js')
 
 function getSelectors (contract) {
   const signatures = Object.keys(contract.interface.functions)
@@ -73,19 +74,22 @@ async function main () {
   let tx
   let receipt
 
-  console.log('Diamond cut')
-  tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 8000000 })
-  console.log('Diamond cut tx:', tx.hash)
-  receipt = await tx.wait()
-  if (!receipt.status) {
-    throw Error(`Diamond upgrade failed: ${tx.hash}`)
+  if(testing) {
+    console.log('Diamond cut');
+    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 8000000 });
+    console.log('Diamond cut tx:', tx.hash)
+    receipt = await tx.wait();
+    if (!receipt.status) {
+       throw Error(`Diamond upgrade failed: ${tx.hash}`)
+     }
+    console.log('Completed diamond cut: ', tx.hash);
+
+    } else {
+       console.log('Diamond cut');
+       tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000 });
+       await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
+    }
   }
-  console.log('Completed diamond cut: ', tx.hash)
-
-
-  //To do: Write test and check that the amount of fees transferred to the Player Rewards address is correct.
-
-}
 
 if(require.main === module){
   main()
