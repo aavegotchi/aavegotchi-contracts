@@ -19,11 +19,9 @@ rightBody += '<path class="gotchi-cheek" d="M40 32h2v2h-2z" fill="#f696c6"/>'
 let rightHand = '<g class="gotchi-handsDown"><path d="M39 44h1v-4h-1v-1h-2v-1h-2v-1h-1v-1h-1v-1h-2v7h1v1h1v1h2v1h4z" fill="#64438e"/><path d="M39 40h-2v-1h-2v-1h-1v-1h-1v-1h-2v5h1v1h1v1h2v1h4z" fill="#fff"/><g fill="#edd3fd"><path d="M32 40v1h-1v-1h1z"/><path d="M33 42v-1h-1v1h1v1h2v-1h-2z"/><path d="M39 43v1h-4v-1h4z"/></g></g>'
 rightHand += '<g class="gotchi-handsUp"><path d="M38 29v-1h-4v1h-1v2h-1v2h-1v1h-1v1h-1v2h7v-1h1v-1h1v-2h1v-4z" fill="#64438e"/><path d="M34 29v2h-1v2h-1v1h-1v1h-1v2h5v-1h1v-1h1v-2h1v-4z" fill="#fff"/><g fill="#edd3fd"><path d="M34,36h1v1h-1V36z"/><path d="M36 35h-1v1h1v-1h1v-2h-1v2z"/><path d="M37,29h1v4h-1V29z"/></g></g>'
 
-const aavegotchiSvgs = [
-  leftBody,
-  leftHand,
-  rightBody,
-  rightHand
-]
+const aavegotchiSvgs = {
+  left: ['', '', leftBody, leftHand],
+  right: ['', '', rightBody, rightHand]
+}
 
 exports.aavegotchiSvgs = aavegotchiSvgs

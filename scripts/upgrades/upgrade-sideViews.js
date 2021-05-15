@@ -8,7 +8,12 @@ const { sendToMultisig } = require('../libraries/multisig/multisig.js')
 
 const { aavegotchiSvgs } = require('../../svgs/aavegotchi-side.js')
 
-const {aavegotchiSvgs} = require('../../svgs/wearables-sides.js')
+const {
+  wearablesLeftSvgs,
+  wearablesRightSvgs,
+  wearablesBackSvgs
+
+} = require('../../svgs/wearables-sides.js')
 
 function getSelectors (contract) {
   const signatures = Object.keys(contract.interface.functions)
@@ -111,7 +116,8 @@ async function main () {
   }
   console.log(aavegotchiSvgs)
 
-  await uploadSvgs(aavegotchiSvgs, 'aavegotchi', testing)
+  await uploadSvgs(aavegotchiSvgs.left, 'aavegotchi-left', testing)
+  await uploadSvgs(aavegotchiSvgs.right, 'aavegotchi-right', testing)
 
   const Facet = await ethers.getContractFactory('SvgViewsFacet')
   facet = await Facet.deploy()

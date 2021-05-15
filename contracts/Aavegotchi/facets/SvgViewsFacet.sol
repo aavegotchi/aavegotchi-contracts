@@ -27,7 +27,7 @@ contract SvgViewsFacet is Modifiers {
         ag_[0] = SvgFacet(address(this)).getAavegotchiSvg(_tokenId);
 
         address collateralType = s.aavegotchis[_tokenId].collateralType;
-        bytes memory svg = getAavegotchiSvgLayers(collateralType, s.aavegotchis[_tokenId].numericTraits, _tokenId);
+        ag_[1] = getAavegotchiSvgLayers(collateralType, 'aavegotchi-left', s.aavegotchis[_tokenId].numericTraits, _tokenId);
                 
         // aavegotchi body
         // bytes memory svg = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_LEFT_SVG_ID);
@@ -48,6 +48,7 @@ contract SvgViewsFacet is Modifiers {
 
     function getAavegotchiSvgLayers(
         address _collateralType,
+        bytes32 _sideView,
         int16[NUMERIC_TRAITS_NUM] memory _numericTraits,
         uint256 _tokenId
     ) internal view returns (bytes memory svg_) {
@@ -57,7 +58,7 @@ contract SvgViewsFacet is Modifiers {
         details.cheekColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
 
         // aavagotchi body
-        svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
+        svg_ = LibSvg.getSvg(_sideView, LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
         details.trait = _numericTraits[4];
@@ -150,7 +151,7 @@ contract SvgViewsFacet is Modifiers {
         }
 
         // get hands
-        layers.hands = abi.encodePacked(svg_, LibSvg.getSvg("aavegotchi", LibSvg.HANDS_SVG_ID));
+        layers.hands = abi.encodePacked(svg_, LibSvg.getSvg(_sideView, LibSvg.HANDS_SVG_ID));
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_FACE];
         if (wearableId != 0) {
