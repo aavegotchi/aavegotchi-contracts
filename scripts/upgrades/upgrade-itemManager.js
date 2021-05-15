@@ -22,6 +22,7 @@ async function main () {
   let facet
   let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
+
   if (testing) {
     await hre.network.provider.request({
       method: 'hardhat_impersonateAccount',
@@ -35,37 +36,55 @@ async function main () {
   }
 
   const daoFacet = await ethers.getContractFactory('contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet')
-  facet = await daoFacet.deploy()
-  await facet.deployed()
-  console.log('Deployed facet:', facet.address)
+  const svgFacet=  await ethers.getContractFactory('contracts/Aavegotchi/facets/SvgFacet.sol:SvgFacet')
+  facet1 = await daoFacet.deploy()
+  facet2= await svgFacet.deploy()
+  await facet1.deployed()
+  await facet2.deployed()
+  console.log('Deployed daofacet:', facet1.address)
+  console.log('Deployed svgFacet:', facet2.address)
 
   const newFuncs = [
     getSelector('function addItemManager(address _newItemManager) external'),
-    getSelector('function removeItemManager(address itemManager) external')
-  ]
-  const changedFuncs=[
+    getSelector('function removeItemManager(address itemManager) external'),
     getSelector('function addItemTypes(ItemType[] memory _itemTypes) external'),
-    getSelector('function addItemTypesAndSvgs(ItemType[] memory _itemTypes,string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes ) external')
+    getSelector('function addItemTypesAndSvgs(ItemType[] memory _itemTypes,string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes ) external')]
+
+  const changedFunctionsinSvg=[
+    getSelector('function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) external'),
+    getSelector('function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) external'),
+    getSelector('function deleteLastSvgLayers(bytes32 _svgType, uint256 _numLayers) external')
    ]
 
-   let existingItemsFuncs = getSelectors(facet)
+   let existingDaoFuncs = getSelectors(facet1)
+   let existingSvgFuncs = getSelectors(facet2)
 
-  existingItemsFuncs = existingItemsFuncs.filter(selector => !newFuncs.includes(selector))
+  existingDaoFuncs = existingDaoFuncs.filter(selector => !newFuncs.includes(selector))
+  existingSvgFuncs = existingSvgFuncs.filter(selector => !changedFunctionsinSvg.includes(selector))
+ // const daoReplacedFuncs=existingDaoFuncs.filter(selector => !existingFuncsInDao.includes(selector))
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
   const cut = [
     {
-      facetAddress: facet.address,
+      facetAddress: facet1.address,
       action: FacetCutAction.Add,
       functionSelectors: newFuncs
     },
    
     {
-      facetAddress: facet.address,
+      facetAddress: facet1.address,
       action: FacetCutAction.Replace,
-      functionSelectors: existingItemsFuncs,changedFuncs
+      functionSelectors: existingDaoFuncs
+      
+    },
+    {
+      facetAddress: facet2.address,
+      action: FacetCutAction.Replace,
+      functionSelectors: existingSvgFuncs
+      
     }
+
   ]
   console.log(cut)
 
@@ -91,3 +110,5 @@ main()
     console.error(error)
     process.exit(1)
   })
+
+  exports.itemManager = main;
