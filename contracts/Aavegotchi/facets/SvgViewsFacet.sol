@@ -25,16 +25,95 @@ contract SvgViewsFacet is Modifiers {
         ag_ = new string[](4);        
         require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "SvgFacet: Aavegotchi not claimed");        
         ag_[0] = SvgFacet(address(this)).getAavegotchiSvg(_tokenId);
+
+        address collateralType = s.aavegotchis[_tokenId].collateralType;
+        bytes memory svg = getAavegotchiSvgLayers(collateralType, s.aavegotchis[_tokenId].numericTraits, _tokenId);
                 
         // aavegotchi body
-        bytes memory svg = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_SVG_ID);  
-
-
-
-
-
-
+        // bytes memory svg = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_LEFT_SVG_ID);
     }
+
+    struct SvgLayerDetails {
+        string primaryColor;
+        string secondaryColor;
+        string cheekColor;
+        bytes collateral;
+        int256 trait;
+        int256[18] eyeShapeTraitRange;
+        bytes eyeShape;
+        string eyeColor;
+        int256[8] eyeColorTraitRanges;
+        string[7] eyeColors;
+    }
+
+    function getAavegotchiSvgLayers(
+        address _collateralType,
+        int16[NUMERIC_TRAITS_NUM] memory _numericTraits,
+        uint256 _tokenId
+    ) internal view returns (bytes memory svg_) {
+        SvgLayerDetails memory details;
+        details.primaryColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
+        details.secondaryColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
+        details.cheekColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
+
+        // aavagotchi body
+        svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
+        details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
+
+        details.trait = _numericTraits[4];
+        if (details.trait < 0) {
+            details.eyeShape = LibSvg.getSvg("eyeShapes", 0);
+        } else if (details.trait > 97) {
+            details.eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
+        } else {
+            details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
+            for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
+                if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
+                    details.eyeShape = LibSvg.getSvg("eyeShapes", i);
+                    break;
+                }
+            }
+        }
+
+        details.trait = _numericTraits[5];
+        details.eyeColorTraitRanges = [int256(0), 2, 10, 25, 75, 90, 98, 100];
+        details.eyeColors = [
+            "FF00FF", // mythical_low
+            "0064FF", // rare_low
+            "5D24BF", // uncommon_low
+            details.primaryColor, // common
+            "36818E", // uncommon_high
+            "EA8C27", // rare_high
+            "51FFA8" // mythical_high
+        ];
+        if (details.trait < 0) {
+            details.eyeColor = "FF00FF";
+        } else if (details.trait > 99) {
+            details.eyeColor = "51FFA8";
+        } else {
+            for (uint256 i; i < details.eyeColorTraitRanges.length - 1; i++) {
+                if (details.trait >= details.eyeColorTraitRanges[i] && details.trait < details.eyeColorTraitRanges[i + 1]) {
+                    details.eyeColor = details.eyeColors[i];
+                    break;
+                }
+            }
+        }
+
+        //Add wearables if tokenId isn't MAX_INT
+        if (_tokenId == type(uint256).max) {
+            svg_ = abi.encodePacked(
+                applyStyles(details, _tokenId),
+                LibSvg.getSvg("aavegotchi", LibSvg.BACKGROUND_SVG_ID),
+                svg_,
+                details.collateral,
+                details.eyeShape
+            );
+        } else {
+            svg_ = abi.encodePacked(applyStyles(details, _tokenId), addBodyAndWearableSvgLayers(svg_, details, _tokenId));
+        }
+    }
+
+
     struct AavegotchiLayers {
         bytes background;
         bytes bodyWearable;

@@ -14,10 +14,29 @@ library LibSvg {
     uint256 internal constant AAVEGTOTCHI_BODY_SVG_ID = 2;
     uint256 internal constant HANDS_SVG_ID = 3;
     uint256 internal constant BACKGROUND_SVG_ID = 4;
+    uint256 internal constant AAVEGTOTCHI_BODY_LEFT_SVG_ID = 5;
+    uint256 internal constant HAND_LEFT_SVG_ID = 6;
+    uint256 internal constant AAVEGTOTCHI_BODY_RIGHT_SVG_ID = 7;
+    uint256 internal constant HAND_RIGHT_SVG_ID = 8;
+    
+
 
     struct SvgTypeAndSizes {
         bytes32 svgType;
         uint256[] sizes;
+    }
+
+    function bytes3ToColorString(bytes3 _color) internal pure returns (string memory) {
+        bytes memory numbers = "0123456789ABCDEF";
+        bytes memory toString = new bytes(6);
+        uint256 pos;
+        for (uint256 i; i < 3; i++) {
+            toString[pos] = numbers[uint8(_color[i] >> 4)];
+            pos++;
+            toString[pos] = numbers[uint8(_color[i] & 0x0f)];
+            pos++;
+        }
+        return string(toString);
     }
 
     function getSvg(bytes32 _svgType, uint256 _id) internal view returns (bytes memory svg_) {

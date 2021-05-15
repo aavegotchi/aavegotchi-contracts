@@ -8,12 +8,7 @@ const { sendToMultisig } = require('../libraries/multisig/multisig.js')
 
 const { aavegotchiSvgs } = require('../../svgs/aavegotchi-side.js')
 
-const {
-  wearablesLeftSvgs,
-  wearablesRightSvgs,
-  wearablesBackSvgs
-
-} = require('../../svgs/wearables-sides.js')
+const {aavegotchiSvgs} = require('../../svgs/wearables-sides.js')
 
 function getSelectors (contract) {
   const signatures = Object.keys(contract.interface.functions)
