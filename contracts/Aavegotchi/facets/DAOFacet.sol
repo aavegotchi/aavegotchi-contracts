@@ -56,16 +56,21 @@ contract DAOFacet is Modifiers {
         }
     }
 
-    function addItemManager(address _newItemManager) external onlyDaoOrOwner {
-        require(s.itemManagers[_newItemManager] == false, "DAOFacet: itemManager already added");
-        s.itemManagers[_newItemManager] = true;
-        emit ItemManagerAdded(_newItemManager);
+    function addItemManager(address[] calldata _newItemManagers) external onlyDaoOrOwner {
+        for (uint256 index = 0; index < _newItemManagers.length; index++) {
+            address newItemManager = _newItemManagers[index];
+            s.itemManagers[newItemManager] = true;
+            emit ItemManagerAdded(newItemManager);
+        }
     }
 
-    function removeItemManager(address itemManager) external onlyDaoOrOwner {
-        require(s.itemManagers[itemManager] == true, "DAOFacet: itemManager does not exist or already removed");
-        s.itemManagers[itemManager] = false;
-        emit ItemManagerRemoved(itemManager);
+    function removeItemManager(address[] calldata _itemManagers) external onlyDaoOrOwner {
+        for (uint256 index = 0; index < _itemManagers.length; index++) {
+            address itemManager = _itemManagers[index];
+            require(s.itemManagers[itemManager] == true, "DAOFacet: itemManager does not exist or already removed");
+            s.itemManagers[itemManager] = false;
+            emit ItemManagerRemoved(itemManager);
+        }
     }
 
     function updateCollateralModifiers(address _collateralType, int16[NUMERIC_TRAITS_NUM] calldata _modifiers) external onlyDaoOrOwner {
