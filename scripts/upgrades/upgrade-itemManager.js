@@ -20,7 +20,7 @@ async function main () {
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   let signer
   let facet
-  let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
+  const owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
 
   if (testing) {
@@ -36,9 +36,9 @@ async function main () {
   }
 
   const daoFacet = await ethers.getContractFactory('contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet')
-  const svgFacet=  await ethers.getContractFactory('contracts/Aavegotchi/facets/SvgFacet.sol:SvgFacet')
+  const svgFacet = await ethers.getContractFactory('contracts/Aavegotchi/facets/SvgFacet.sol:SvgFacet')
   facet1 = await daoFacet.deploy()
-  facet2= await svgFacet.deploy()
+  facet2 = await svgFacet.deploy()
   await facet1.deployed()
   await facet2.deployed()
   console.log('Deployed daofacet:', facet1.address)
@@ -46,11 +46,11 @@ async function main () {
 
   const newDaoFuncs = [
     getSelector('function addItemManagers(address[] calldata _newItemManagers) external'),
-    getSelector('function removeItemManagers(address[] calldata _itemManagers) external ') 
-    ]
+    getSelector('function removeItemManagers(address[] calldata _itemManagers) external ')
+  ]
 
-   let existingDaoFuncs = getSelectors(facet1)
-   let existingSvgFuncs = getSelectors(facet2)
+  let existingDaoFuncs = getSelectors(facet1)
+  const existingSvgFuncs = getSelectors(facet2)
 
   existingDaoFuncs = existingDaoFuncs.filter(selector => !newDaoFuncs.includes(selector))
 
@@ -67,13 +67,13 @@ async function main () {
       action: FacetCutAction.Replace,
       functionSelectors: existingDaoFuncs
     },
-   
+
     {
       facetAddress: facet2.address,
       action: FacetCutAction.Replace,
       functionSelectors: existingSvgFuncs
-      
-    },
+
+    }
   ]
   console.log(cut)
 
@@ -81,29 +81,27 @@ async function main () {
   let tx
   let receipt
 
-
-  if(testing) {
-    console.log('Diamond cut');
-    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 8000000 });
+  if (testing) {
+    console.log('Diamond cut')
+    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 8000000 })
     console.log('Diamond cut tx:', tx.hash)
-    receipt = await tx.wait();
+    receipt = await tx.wait()
     if (!receipt.status) {
-       throw Error(`Diamond upgrade failed: ${tx.hash}`)
-     }
-    console.log('Completed diamond cut: ', tx.hash);
-
+      throw Error(`Diamond upgrade failed: ${tx.hash}`)
+    }
+    console.log('Completed diamond cut: ', tx.hash)
   } else {
-     console.log('Diamond cut');
-     tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000 });
-     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
+    console.log('Diamond cut')
+    tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000 })
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 }
 
-//main()
- // .then(() => console.log('upgrade completed') /*process.exit(0)*/)
- // .catch(error => {
-  //  console.error(error)
-   // process.exit(1)
-  //})
+main()
+  .then(() => console.log('upgrade completed') /*process.exit(0) */)
+  .catch(error => {
+    console.error(error)
+    process.exit(1)
+  })
 
-  exports.itemManager = main;
+exports.itemManager = main
