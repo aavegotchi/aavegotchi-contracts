@@ -44,7 +44,7 @@ async function main () {
   console.log('Deployed daofacet:', facet1.address)
   console.log('Deployed svgFacet:', facet2.address)
 
-  const newFuncs = [
+  const newDaoFuncs = [
     getSelector('function addItemManagers(address[] calldata _newItemManagers) external'),
     getSelector('function removeItemManagers(address[] calldata _itemManagers) external ') 
     ]
@@ -52,7 +52,7 @@ async function main () {
    let existingDaoFuncs = getSelectors(facet1)
    let existingSvgFuncs = getSelectors(facet2)
 
-  existingDaoFuncs = existingDaoFuncs.filter(selector => !newFuncs.includes(selector))
+  existingDaoFuncs = existingDaoFuncs.filter(selector => !newDaoFuncs.includes(selector))
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
@@ -60,7 +60,7 @@ async function main () {
     {
       facetAddress: facet1.address,
       action: FacetCutAction.Add,
-      functionSelectors: newFuncs
+      functionSelectors: newDaoFuncs
     },
     {
       facetAddress: facet1.address,
@@ -81,16 +81,22 @@ async function main () {
   let tx
   let receipt
 
-  console.log('Diamond cut')
-  tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 8000000 })
-  console.log('Diamond cut tx:', tx.hash)
-  receipt = await tx.wait()
-  if (!receipt.status) {
-    throw Error(`Diamond upgrade failed: ${tx.hash}`)
+
+  if(testing) {
+    console.log('Diamond cut');
+    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 8000000 });
+    console.log('Diamond cut tx:', tx.hash)
+    receipt = await tx.wait();
+    if (!receipt.status) {
+       throw Error(`Diamond upgrade failed: ${tx.hash}`)
+     }
+    console.log('Completed diamond cut: ', tx.hash);
+
+  } else {
+     console.log('Diamond cut');
+     tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000 });
+     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
   }
-  console.log('Completed diamond cut: ', tx.hash)
-
-
 }
 
 main()
