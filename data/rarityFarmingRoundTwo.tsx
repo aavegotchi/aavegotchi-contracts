@@ -15007,6 +15007,6 @@ const xpRoundTwo = [
   "9975",
 ];
 
-exports.rarityRoundOne = rarityRoundTwo;
-exports.kinshipRoundOne = kinshipRoundTwo;
-exports.xpRoundOne = xpRoundTwo;
+exports.rarityRoundTwo = rarityRoundTwo;
+exports.kinshipRoundTwo = kinshipRoundTwo;
+exports.xpRoundTwo = xpRoundTwo;

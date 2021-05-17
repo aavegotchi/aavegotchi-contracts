@@ -198,4 +198,5 @@ function getItemTypes () {
   return result
 }
 
-exports.itemTypes = getItemTypes()
+exports.szn1rnd1ItemTypes = getItemTypes()
+

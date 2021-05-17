@@ -3,9 +3,10 @@
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
 
-const {addBatchBatchTransfer} = require('../upgrades/upgrade-addBatchBatchTransfer')
+const {addLeaderboardBadges} = require('../../scripts/addItemTypes/addSzn1Rnd2Badges')
 
-const {rarityRoundTwo, kinshipRoundTwo, xpRoundTwo} = require('../../data/rarityFarmingRoundTwo.tsx')
+
+const {rarityRoundTwo:rarity, kinshipRoundTwo:kinship, xpRoundTwo:xp} = require('../../data/rarityFarmingRoundTwo.tsx')
 
 function addCommas (nStr) {
   nStr += ''
@@ -24,6 +25,9 @@ function strDisplay (str) {
 }
 
 async function main () {
+
+await addLeaderboardBadges()
+
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   const gameManager = await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
   console.log(gameManager)
@@ -53,12 +57,12 @@ async function main () {
   let badgeIds = [169,170,171,172,173,174]
 
   //STEP TWO: GET THE WINNERS (IN ORDER OF BADGE IDS)
-  const rarityTop10 = rarityRoundOne.slice(0,10) //10 of 163
-  const kinshipTop10 = kinshipRoundOne.slice(0,10) //10 of 164
-  const xpTop10 = xpRoundOne.slice(0,10) //10 of 165
-  const rarityTop100 = rarityRoundOne.slice(10,100) //89 of 166
-  const kinshipTop100 = kinshipRoundOne.slice(10,100) //90 of 167
-  const xpTop100 = xpRoundOne.slice(10,100) //90 of 168
+  const rarityTop10 = rarity.slice(0,10) //10 of 169
+  const kinshipTop10 = kinship.slice(0,10) //10 of 170
+  const xpTop10 = xp.slice(0,10) //10 of 171
+  const rarityTop100 = rarity.slice(10,100) //89 of 172
+  const kinshipTop100 = kinship.slice(10,100) //90 of 173
+  const xpTop100 = xp.slice(10,100) //90 of 174
 
 
   let awardsArray = [rarityTop10,kinshipTop10,xpTop10,rarityTop100,kinshipTop100,xpTop100]

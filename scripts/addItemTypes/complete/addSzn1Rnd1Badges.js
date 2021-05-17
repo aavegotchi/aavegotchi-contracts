@@ -3,7 +3,7 @@
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
 const { itemTypes } = require('./leaderboardItemTypes')
-const { badgeSvgs } = require('../../../svgs/leaderboardBadgeSvgs')
+const { badgeSvgs } = require('../../../svgs/szn1rnd1BadgeSvgs')
 
 const { sendToMultisig } = require('../../libraries/multisig/multisig.js')
 
