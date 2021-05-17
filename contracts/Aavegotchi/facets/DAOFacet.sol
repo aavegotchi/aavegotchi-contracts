@@ -78,7 +78,7 @@ contract DAOFacet is Modifiers {
         s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
     }
 
-    function updateItemTypeMaxQuantity(uint256[] calldata _itemIds, uint256[] calldata _maxQuantities) external onlyOwnerOrDaoOrGameManager {
+    function updateItemTypeMaxQuantity(uint256[] calldata _itemIds, uint256[] calldata _maxQuantities) external onlyItemManager {
         require(_itemIds.length == _maxQuantities.length, "DAOFacet: _itemIds length not the same as _newQuantities length");
         for (uint256 i; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
@@ -111,7 +111,7 @@ contract DAOFacet is Modifiers {
         address _to,
         uint256[] calldata _itemIds,
         uint256[] calldata _quantities
-    ) external onlyDaoOrOwner {
+    ) external onlyItemManager {
         require(_itemIds.length == _quantities.length, "DAOFacet: Ids and quantities length must match");
         address sender = LibMeta.msgSender();
         uint256 itemTypesLength = s.itemTypes.length;
@@ -171,14 +171,14 @@ contract DAOFacet is Modifiers {
         }
     }
 
-    function addWearableSets(WearableSet[] memory _wearableSets) external onlyDaoOrOwner {
+    function addWearableSets(WearableSet[] memory _wearableSets) external onlyItemManager {
         for (uint256 i; i < _wearableSets.length; i++) {
             s.wearableSets.push(_wearableSets[i]);
             emit AddWearableSet(_wearableSets[i]);
         }
     }
 
-    function updateWearableSets(uint256[] calldata _setIds, WearableSet[] calldata _wearableSets) external onlyDaoOrOwner {
+    function updateWearableSets(uint256[] calldata _setIds, WearableSet[] calldata _wearableSets) external onlyItemManager {
         require(_setIds.length == _wearableSets.length, "_setIds not same length as _wearableSets");
         for (uint256 i; i < _setIds.length; i++) {
             s.wearableSets[_setIds[i]] = _wearableSets[i];
