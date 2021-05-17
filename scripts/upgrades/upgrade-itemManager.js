@@ -45,23 +45,14 @@ async function main () {
   console.log('Deployed svgFacet:', facet2.address)
 
   const newFuncs = [
-    getSelector('function addItemManager(address _newItemManager) external'),
-    getSelector('function removeItemManager(address itemManager) external'),
-    getSelector('function addItemTypes(ItemType[] memory _itemTypes) external'),
-    getSelector('function addItemTypesAndSvgs(ItemType[] memory _itemTypes,string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes ) external')]
-
-  const changedFunctionsinSvg=[
-    getSelector('function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) external'),
-    getSelector('function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) external'),
-    getSelector('function deleteLastSvgLayers(bytes32 _svgType, uint256 _numLayers) external')
-   ]
+    getSelector('function addItemManagers(address[] calldata _newItemManagers) external'),
+    getSelector('function removeItemManagers(address[] calldata _itemManagers) external ') 
+    ]
 
    let existingDaoFuncs = getSelectors(facet1)
    let existingSvgFuncs = getSelectors(facet2)
 
   existingDaoFuncs = existingDaoFuncs.filter(selector => !newFuncs.includes(selector))
-  existingSvgFuncs = existingSvgFuncs.filter(selector => !changedFunctionsinSvg.includes(selector))
- // const daoReplacedFuncs=existingDaoFuncs.filter(selector => !existingFuncsInDao.includes(selector))
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
@@ -71,20 +62,18 @@ async function main () {
       action: FacetCutAction.Add,
       functionSelectors: newFuncs
     },
-   
     {
       facetAddress: facet1.address,
       action: FacetCutAction.Replace,
       functionSelectors: existingDaoFuncs
-      
     },
+   
     {
-      facetAddress: facet2.address,
+      facetAddress: facet1.address,
       action: FacetCutAction.Replace,
       functionSelectors: existingSvgFuncs
       
-    }
-
+    },
   ]
   console.log(cut)
 

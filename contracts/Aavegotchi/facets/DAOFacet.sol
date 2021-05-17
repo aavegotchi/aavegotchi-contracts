@@ -56,7 +56,7 @@ contract DAOFacet is Modifiers {
         }
     }
 
-    function addItemManager(address[] calldata _newItemManagers) external onlyDaoOrOwner {
+    function addItemManagers(address[] calldata _newItemManagers) external onlyDaoOrOwner {
         for (uint256 index = 0; index < _newItemManagers.length; index++) {
             address newItemManager = _newItemManagers[index];
             s.itemManagers[newItemManager] = true;
@@ -64,7 +64,7 @@ contract DAOFacet is Modifiers {
         }
     }
 
-    function removeItemManager(address[] calldata _itemManagers) external onlyDaoOrOwner {
+    function removeItemManagers(address[] calldata _itemManagers) external onlyDaoOrOwner {
         for (uint256 index = 0; index < _itemManagers.length; index++) {
             address itemManager = _itemManagers[index];
             require(s.itemManagers[itemManager] == true, "DAOFacet: itemManager does not exist or already removed");
