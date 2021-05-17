@@ -1,4 +1,5 @@
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
+const { sendToMultisig } = require('../libraries/multisig/multisig.js')
 
 function getSelectors (contract) {
   const signatures = Object.keys(contract.interface.functions)
@@ -98,7 +99,7 @@ async function main () {
 }
 
 main()
-  .then(() => console.log('upgrade completed') /*process.exit(0) */)
+  .then(() => console.log('upgrade completed') /* process.exit(0) */)
   .catch(error => {
     console.error(error)
     process.exit(1)
