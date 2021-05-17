@@ -69,7 +69,7 @@ async function main () {
     },
    
     {
-      facetAddress: facet1.address,
+      facetAddress: facet2.address,
       action: FacetCutAction.Replace,
       functionSelectors: existingSvgFuncs
       
