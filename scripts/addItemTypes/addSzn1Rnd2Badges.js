@@ -3,9 +3,9 @@
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
 const { itemTypes } = require('./leaderboardItemTypes')
-const { badgeSvgs } = require('../../svgs/leaderboardBadgeSvgs')
+const { badgeSvgs } = require('../../../svgs/leaderboardBadgeSvgs')
 
-const { sendToMultisig } = require('../libraries/multisig/multisig.js')
+const { sendToMultisig } = require('../../libraries/multisig/multisig.js')
 
 let signer
 const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
