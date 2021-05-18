@@ -59,8 +59,8 @@ async function main () {
     throw Error('Duplicate addresses')
   }
 
-  const maxProcess = 10
-  const xpAmount = 0
+  const maxProcess = 500
+  const xpAmount = 20
 
   console.log(`Sending ${xpAmount} to ${addresses.length} addresses!`)
 
@@ -88,7 +88,14 @@ async function main () {
 
   // send transactions
   let addressIndex = 0
-  for (const txGroup of txData) {
+  for (const [i, txGroup] of txData.entries()) {
+
+    console.log('i:',i)
+   // console.log('v:',v)
+
+   if (i === 0) continue
+
+    
     const txAddresses = txGroup.map(obj => obj.id)
     addressIndex += txAddresses.length
     const tokenIds = txGroup.reduce((acc, obj) => {
@@ -97,7 +104,7 @@ async function main () {
 
     console.log(`Sending ${xpAmount} XP to ${tokenIds.length} Aavegotchis `)
     
-    const tx = await dao.grantExperience(tokenIds, Array(tokenIds.length).fill(xpAmount), { gasLimit: 20000000 })
+    const tx = await dao.grantExperience(tokenIds, Array(tokenIds.length).fill(xpAmount), { /*gasLimit: 10000000,*/  gasPrice: 2000000000 })
     console.log('tx:',tx.hash)
     let receipt = await tx.wait()
     console.log('Gas used:', strDisplay(receipt.gasUsed))
