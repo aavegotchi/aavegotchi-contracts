@@ -72,7 +72,7 @@ describe("Fees", async function(){
     const erc721Listings = await erc721Facet.getERC721Listings(2, 'listed', 5);
     const listing = erc721Listings[0].listingId.toString()
 
-    
+
     //may need to find different listingID from erc721Listing if fails
     await erc721Facet.executeERC721Listing(listing);
 
@@ -91,10 +91,23 @@ describe("Fees", async function(){
 
     let daoPercentage = await ((afterDaoBalance.toString()) - (beforeDaoBalance.toString()))/priceOfListing;
     console.log("Dao Percentage: ", daoPercentage);
+    expect(daoPercentage.toFixed(6)).to.equal('0.010000');
+    let doaBalanceTestIncrease = afterDaoBalance - beforeDaoBalance;
+    let doaIncrease = priceOfListing * daoPercentage;
+    expect(doaBalanceTestIncrease.toString()).to.equal(doaIncrease.toString());
+    expect(doaIncrease + Number(beforeDaoBalance.toString())).to.equal(Number(afterDaoBalance.toString()));
+
     let pixelPercentage = await ((afterPixelBalance.toString()) - (beforePixelBalance.toString()))/priceOfListing;
     console.log("PixelCraft Percentage: ", pixelPercentage);
+    expect(pixelPercentage.toFixed(6)).to.equal('0.020000');
+    let pixelIncrease = priceOfListing * pixelPercentage;
+    expect(pixelIncrease + Number(beforePixelBalance.toString())).to.equal(Number(afterPixelBalance.toString()));
+
     let rarityPercentage = await ((afterRarityBalance.toString()) - (beforeRarityBalance.toString()))/priceOfListing;
     console.log("Rarity Farming Percentage: ", rarityPercentage);
+    expect(rarityPercentage.toFixed(6)).to.equal('0.005000');
+    let rarityIncrease = priceOfListing * rarityPercentage;
+    expect(rarityIncrease + Number(beforeRarityBalance.toString())).to.equal(Number(afterRarityBalance.toString()));
 
     let totalFeePercentage = daoPercentage + pixelPercentage + rarityPercentage;
     console.log("Total Fee Percentage: ", totalFeePercentage);
@@ -144,12 +157,24 @@ describe("Fees", async function(){
     let afterPixelBalance = await ghstERC20.balanceOf(pixelCraftAddress);
     // console.log('After pixel balance:', afterPixelBalance.toString());
 
-    let daoPercentage = await ((afterDaoBalance.toString()) - (beforeDaoBalance.toString()))/priceOfListing;
-    // console.log("Dao Percentage: ", daoPercentage);
-    let pixelPercentage = await ((afterPixelBalance.toString()) - (beforePixelBalance.toString()))/priceOfListing;
-    // console.log("PixelCraft Percentage: ", pixelPercentage);
-    let rarityPercentage = await ((afterRarityBalance.toString()) - (beforeRarityBalance.toString()))/priceOfListing;
-    // console.log("Rarity Farming Percentage: ", rarityPercentage);
+    let daoPercentage = await (afterDaoBalance - beforeDaoBalance)/priceOfListing;
+    expect(daoPercentage.toFixed(6)).to.equal('0.010000');
+    let doaBalanceTestIncrease = afterDaoBalance - beforeDaoBalance;
+    let doaIncrease = priceOfListing * daoPercentage;
+    expect(doaBalanceTestIncrease.toString()).to.equal(doaIncrease.toString());
+    expect(doaIncrease + Number(beforeDaoBalance.toString())).to.equal(Number(afterDaoBalance.toString()));
+    console.log("Dao Increase: ", doaIncrease);
+    console.log("Dao Percentage: ", daoPercentage.toFixed(6));
+
+    let pixelPercentage = await (afterPixelBalance - beforePixelBalance)/priceOfListing;
+    expect(pixelPercentage.toFixed(6)).to.equal('0.020000');
+    let pixelIncrease = priceOfListing * pixelPercentage;
+    expect(pixelIncrease + Number(beforePixelBalance.toString())).to.equal(Number(afterPixelBalance.toString()));
+
+    let rarityPercentage = await (afterRarityBalance - beforeRarityBalance)/priceOfListing;
+    expect(rarityPercentage.toFixed(6)).to.equal('0.005000');
+    let rarityIncrease = priceOfListing * rarityPercentage;
+    expect(rarityIncrease + Number(beforeRarityBalance.toString())).to.equal(Number(afterRarityBalance.toString()));
 
     let totalFeePercentage = daoPercentage + pixelPercentage + rarityPercentage;
     console.log("Total Fee Percentage: ", totalFeePercentage);
