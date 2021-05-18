@@ -59,8 +59,8 @@ async function main () {
     throw Error('Duplicate addresses')
   }
 
-  const maxProcess = 1000
-  const xpAmount = 20
+  const maxProcess = 10
+  const xpAmount = 0
 
   console.log(`Sending ${xpAmount} to ${addresses.length} addresses!`)
 
@@ -98,6 +98,7 @@ async function main () {
     console.log(`Sending ${xpAmount} XP to ${tokenIds.length} Aavegotchis `)
     
     const tx = await dao.grantExperience(tokenIds, Array(tokenIds.length).fill(xpAmount), { gasLimit: 20000000 })
+    console.log('tx:',tx.hash)
     let receipt = await tx.wait()
     console.log('Gas used:', strDisplay(receipt.gasUsed))
     if (!receipt.status) {
