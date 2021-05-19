@@ -24,6 +24,7 @@ function strDisplay (str) {
 }
 
 async function main () {
+
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
 
   const gameManager = await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
@@ -44,13 +45,17 @@ async function main () {
 
   const maxProcess = 500
 
+ // const ghst = await ethers.getContractAt("GHSTFacet","0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7")
+ // const balance = await ghst.balanceOf(gameManager)
+  //console.log('balance:',ethers.utils.formatEther(balance))
+
   const finalRewards = {}
   //First iterate through all of the rewards and add them up by Gotchi ID
 
   for (let index = 0; index < 5000; index++) {
-    const rarityGotchiID = rarityRoundOne[index];
-    const kinshipGotchiID = kinshipRoundOne[index]
-    const xpGotchiID = xpRoundOne[index]
+    const rarityGotchiID = rarityRoundTwo[index];
+    const kinshipGotchiID = kinshipRoundTwo[index]
+    const xpGotchiID = xpRoundTwo[index]
  
     const rarityReward = rarityRoundRewards[index]
     const kinshipReward = kinshipRoundRewards[index]
@@ -118,6 +123,10 @@ async function main () {
   // send transactions
   let currentIndex = 0
 
+ // await ghst.approve(diamondAddress,ethers.utils.parseEther("100000000000"))
+
+
+
   for (const txGroup of txData) {
 
     let tokenIds = []
@@ -126,7 +135,7 @@ async function main () {
     txGroup.forEach(sendData => {
       tokenIds.push(sendData.tokenID)
       amounts.push(sendData.parsedAmount)
-     // console.log(`Sending ${sendData.parsedAmount} to ${sendData.tokenID}`)
+    //  console.log(`Sending ${sendData.amount} to ${sendData.tokenID}`)
     });
 
     let totalAmount = amounts.reduce((prev, curr) => {
@@ -138,12 +147,12 @@ async function main () {
     
     console.log(`Sending ${ethers.utils.formatEther(totalAmount)} GHST to ${tokenIds.length} Gotchis` )
   
-    //  console.log('token ids:',tokenIds)
-     // console.log('amounts:',amounts)
+   //   console.log('token ids:',tokenIds)
+    //  console.log('amounts:',amounts)
   
      
      
-     const escrowFacet = await ethers.getContractAt("EscrowFacet")
+     const escrowFacet = await ethers.getContractAt("EscrowFacet",diamondAddress,signer)
   
      const tx = await escrowFacet.batchDepositGHST(tokenIds,amounts)
      let receipt = await tx.wait()
@@ -152,29 +161,6 @@ async function main () {
        throw Error(`Error:: ${tx.hash}`)
      }
  
-  
-      let receipt = await tx.wait()
-      console.log('Gas used:', strDisplay(receipt.gasUsed))
-      if (!receipt.status) {
-        throw Error(`Error:: ${tx.hash}`)
-      }
-    
-
-  
-    
-
-    
-   /* const tx = await dao.grantExperience(tokenIds, Array(tokenIds.length).fill(xpAmount), { gasLimit: 20000000 })
-    let receipt = await tx.wait()
-    console.log('Gas used:', strDisplay(receipt.gasUsed))
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`)
-    }
-    console.log('Airdropped XP to Aaavegotchis. Last address:', tokenIds[tokenIds.length-1])
-    console.log('A total of', tokenIds.length, 'Aavegotchis')
-    console.log('Current address index:', addressIndex)
-    console.log('')
-    */
   }
 
   console.log('Total GHST Sent:',ethers.utils.formatEther(totalGhstSent))
