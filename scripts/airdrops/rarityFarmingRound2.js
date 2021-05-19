@@ -45,10 +45,6 @@ async function main () {
 
   const maxProcess = 500
 
- // const ghst = await ethers.getContractAt("GHSTFacet","0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7")
- // const balance = await ghst.balanceOf(gameManager)
-  //console.log('balance:',ethers.utils.formatEther(balance))
-
   const finalRewards = {}
   //First iterate through all of the rewards and add them up by Gotchi ID
 
@@ -119,15 +115,9 @@ async function main () {
       tokenIdsNum = 0
     }
 
+ for (const [i, txGroup] of txData.entries()) {
 
-  // send transactions
-  let currentIndex = 0
-
- // await ghst.approve(diamondAddress,ethers.utils.parseEther("100000000000"))
-
-
-
-  for (const txGroup of txData) {
+  console.log('current index:',i)
 
     let tokenIds = []
     let amounts = []
@@ -145,9 +135,9 @@ async function main () {
     totalGhstSent = totalGhstSent.add(totalAmount)
 
     
-    console.log(`Sending ${ethers.utils.formatEther(totalAmount)} GHST to ${tokenIds.length} Gotchis` )
+    console.log(`Sending ${ethers.utils.formatEther(totalAmount)} GHST to ${tokenIds.length} Gotchis (from ${tokenIds[0]} to ${tokenIds[tokenIds.length-1]})` )
   
-   //   console.log('token ids:',tokenIds)
+     // console.log('token ids:',tokenIds)
     //  console.log('amounts:',amounts)
   
      
