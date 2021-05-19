@@ -2,7 +2,7 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
-const { agip7Addresses, agip7GotchisOwned } = require('../../data/airdrops/agip7.tsx')
+const { agip7Addresses, agip7GotchisOwned } = require('../../../data/airdrops/agip7.tsx')
 
 function addCommas (nStr) {
   nStr += ''
