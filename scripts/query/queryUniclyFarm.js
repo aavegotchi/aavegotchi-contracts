@@ -1,7 +1,7 @@
 /* global ethers hre */
 
 async function main () {
-  const diamondCreationBlock = 12435632
+  const diamondCreationBlock = 12142683
   const contractAddress = '0x9b7e74b56400eeb15f9760c847ccc678f7223f70'
   let events = []
   let diamond
@@ -11,7 +11,7 @@ async function main () {
   diamond = await ethers.getContractAt(abi, contractAddress)
   let filter
   
-  filter = diamond.filters.Transfer(null,"0x4a25e4df835b605a5848d2db450fa600d96ee818")
+  filter = diamond.filters.Transfer(null,"0x2Bf120458d1270d0f666Cc75a70E8379270bC6e3")
   let results
   results = await diamond.queryFilter(filter, diamondCreationBlock)
   
