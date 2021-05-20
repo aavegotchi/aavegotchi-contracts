@@ -2,25 +2,8 @@
 /* global ethers hre */
 /* eslint prefer-const: "off" */
 
-const {wearableSets} = require("./wearableSets/wearableSetsRaffle4.js")
-
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
-
-function getSelectors (contract) {
-  const signatures = Object.keys(contract.interface.functions)
-  const selectors = signatures.reduce((acc, val) => {
-    if (val !== 'init(bytes)') {
-      acc.push(contract.interface.getSighash(val))
-    }
-    return acc
-  }, [])
-  return selectors
-}
-
-function getSelector (func) {
-  const abiInterface = new ethers.utils.Interface([func])
-  return abiInterface.getSighash(ethers.utils.Fragment.from(func))
-}
+const { sendToMultisig } = require('../libraries/multisig/multisig')
 
 async function main () {
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
