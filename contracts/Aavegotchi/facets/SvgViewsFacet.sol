@@ -357,7 +357,7 @@ contract SvgViewsFacet is Modifiers {
         }        
     }
 
-    function setSideViewDimensions(uint256[] calldata _itemIds, bytes[] calldata _sideViews, Dimensions[] calldata _sideViewDimensions) external onlyDaoOrOwner {
+    function setSideViewDimensions(uint256[] calldata _itemIds, bytes[] calldata _sideViews, Dimensions[] calldata _sideViewDimensions) external onlyItemManager {
         require(_itemIds.length == _sideViewDimensions.length, "SvgViewsFacet: _itemIds length not same as __sideViewDimensions length");
         require(_itemIds.length == _sideViews.length, "SvgViewsFacet: _sideViews length not same as _itemIds length");
         for(uint256 i; i < _itemIds.length; i++) {
