@@ -7,6 +7,7 @@ import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {GameManager} from "../libraries/LibAppStorage.sol";
 
 contract DAOFacet is Modifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
@@ -18,18 +19,15 @@ contract DAOFacet is Modifiers {
     event GrantExperience(uint256[] _tokenIds, uint256[] _xpValues);
     event AddWearableSet(WearableSet _wearableSet);
     event UpdateWearableSet(uint256 _setId, WearableSet _wearableSet);
-    event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
     event ItemTypeMaxQuantity(uint256[] _itemIds, uint256[] _maxQuanities);
+    event GameManagerAdded(address indexed gameManager_);
+    event GameManagerRemoved(address indexed gameManager_);
     event ItemManagerAdded(address indexed newItemManager_);
     event ItemManagerRemoved(address indexed ItemManager_);
 
     /***********************************|
    |             Read Functions         |
    |__________________________________*/
-
-    function gameManager() external view returns (address) {
-        return s.gameManager;
-    }
 
     /***********************************|
    |             Write Functions        |
@@ -133,16 +131,24 @@ contract DAOFacet is Modifiers {
 
     function grantExperience(uint256[] calldata _tokenIds, uint256[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {
         require(_tokenIds.length == _xpValues.length, "DAOFacet: IDs must match XP array length");
+        GameManager storage gameManager = s.gameManagers[LibMeta.msgSender()];
+        if (gameManager.refreshTime < block.timestamp) {
+            gameManager.balance = gameManager.limit;
+            gameManager.refreshTime = uint32(block.timestamp + 1 days);
+        }
+
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             uint256 xp = _xpValues[i];
             require(xp <= 1000, "DAOFacet: Cannot grant more than 1000 XP at a time");
+            require(gameManager.balance >= xp, "DAOFacet: Game Manager's xp grant limit is reached");
 
             //To test (Dan): Deal with overflow here? - Handling it just in case
             uint256 experience = s.aavegotchis[tokenId].experience;
             uint256 increasedExperience = experience + xp;
             require(increasedExperience >= experience, "DAOFacet: Experience overflow");
             s.aavegotchis[tokenId].experience = increasedExperience;
+            gameManager.balance -= xp;
         }
         emit GrantExperience(_tokenIds, _xpValues);
     }
@@ -186,8 +192,22 @@ contract DAOFacet is Modifiers {
         }
     }
 
-    function setGameManager(address _gameManager) external onlyDaoOrOwner {
-        emit GameManagerTransferred(s.gameManager, _gameManager);
-        s.gameManager = _gameManager;
+    function addGameManagers(address[] calldata _newGameManagers, uint256[] calldata _limits) external onlyDaoOrOwner {
+        for (uint256 index = 0; index < _newGameManagers.length; index++) {
+            GameManager storage gameManager = s.gameManagers[_newGameManagers[index]];
+            gameManager.limit = _limits[index];
+            gameManager.balance = _limits[index];
+            gameManager.refreshTime = uint256(block.timestamp + 1 days);
+            emit GameManagerAdded(_newGameManagers[index]);
+        }
+    }
+
+    function removeGameManagers(address[] calldata _gameManagers) external onlyDaoOrOwner {
+        for (uint256 index = 0; index < _gameManagers.length; index++) {
+            GameManager storage gameManager = s.gameManagers[_gameManagers[index]];
+            require(gameManager.limit != 0, "DAOFacet: gameManager does not exist or already removed");
+            gameManager.limit = 0;
+            emit GameManagerRemoved(_gameManagers[index]);
+        }
     }
 }

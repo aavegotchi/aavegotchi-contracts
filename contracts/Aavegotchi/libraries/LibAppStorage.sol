@@ -146,6 +146,12 @@ struct ListingListItem {
     uint256 childListingId;
 }
 
+struct GameManager {
+    uint256 limit;
+    uint256 balance;
+    uint256 refreshTime;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -179,7 +185,6 @@ struct AppStorage {
     address[] collateralTypes;
     address ghstContract;
     address childChainManager;
-    address gameManager;
     address dao;
     address daoTreasury;
     address pixelCraft;
@@ -231,6 +236,7 @@ struct AppStorage {
     // mapping(address => mapping(uint256 => address)) petOperators;
     // mapping(address => uint256[]) petOperatorTokenIds;
     mapping(address => bool) itemManagers;
+    mapping(address => GameManager) gameManagers;
 }
 
 library LibAppStorage {
@@ -275,7 +281,8 @@ contract Modifiers {
 
     modifier onlyOwnerOrDaoOrGameManager {
         address sender = LibMeta.msgSender();
-        require(sender == s.dao || sender == LibDiamond.contractOwner() || sender == s.gameManager, "LibAppStorage: Do not have access");
+        bool isGameManager = s.gameManagers[sender].limit != 0;
+        require(sender == s.dao || sender == LibDiamond.contractOwner() || isGameManager, "LibAppStorage: Do not have access");
         _;
     }
     modifier onlyItemManager {
