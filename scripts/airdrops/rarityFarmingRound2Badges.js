@@ -26,6 +26,7 @@ function strDisplay (str) {
 
 async function main () {
 
+  //ADD THE LEADERBOARD BADGES
 await addLeaderboardBadges()
 
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
@@ -150,19 +151,19 @@ await addLeaderboardBadges()
 
       if (testing) {
 
-        
-      
         const balance = await itemsFacet.balanceOfToken(diamondAddress,batchTokenIds[0],batchBadgeIds[0][0])
 
         console.log(`Balance of tokenID ${batchTokenIds[0]} for badge ${batchBadgeIds[0][0]} is: ${balance.toString()}`)
 
+        const balances = await itemsFacet.itemBalances(gameManager)
+        balances.forEach((item) => {
+          console.log(`Balance of ${item.itemId} after sending Batch ${i} is ${item.balance.toString()}`)
+        });
+
 
       }
 
-      const balances = await itemsFacet.itemBalances(gameManager)
-      balances.forEach((item) => {
-        console.log(`Balance of ${item.itemId} after sending Batch ${i} is ${item.balance.toString()}`)
-      });
+    
       
     }
 }

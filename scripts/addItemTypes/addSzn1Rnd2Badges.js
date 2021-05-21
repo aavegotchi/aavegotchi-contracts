@@ -11,6 +11,22 @@ let signer
 const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
 const gasLimit = 15000000
 
+function strDisplay (str) {
+  return addCommas(str.toString())
+}
+
+function addCommas (nStr) {
+  nStr += ''
+  const x = nStr.split('.')
+  let x1 = x[0]
+  const x2 = x.length > 1 ? '.' + x[1] : ''
+  var rgx = /(\d+)(\d{3})/
+  while (rgx.test(x1)) {
+    x1 = x1.replace(rgx, '$1' + ',' + '$2')
+  }
+  return x1 + x2
+}
+
 async function uploadSvgs (svgs, svgType, testing) {
   let svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
   function setupSvg (...svgData) {
@@ -64,6 +80,7 @@ async function uploadSvgs (svgs, svgType, testing) {
       if (!receipt.status) {
         throw Error(`Error:: ${tx.hash}`)
       }
+      console.log('Gas used:' + strDisplay(receipt.gasUsed))
       console.log(svgItemsEnd, svg.length)
     } else {
       let tx = await svgFacet.populateTransaction.storeSvg(svg, svgTypesAndSizes)
@@ -105,9 +122,11 @@ async function main () {
       throw Error(`Error:: ${tx.hash}`)
     }
     console.log('Items were added:', tx.hash)
+    console.log('Gas used:' + strDisplay(receipt.gasUsed))
   } else {
-    tx = await daoFacet.populateTransaction.addItemTypes(itemTypes, { gasLimit: gasLimit })
-   // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+    tx = await daoFacet.addItemTypes(itemTypes)
+    console.log('Items added:', tx.hash)
+    
   }
 
   await uploadSvgs(badgeSvgs, 'wearables', testing)
@@ -122,6 +141,7 @@ async function main () {
   if (testing) {
     tx = await daoFacet.mintItems(mintAddress, itemIds, quantities)
     receipt = await tx.wait()
+    console.log('Gas used:' + strDisplay(receipt.gasUsed))
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`)
     }
