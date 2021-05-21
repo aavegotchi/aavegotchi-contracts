@@ -41,8 +41,6 @@ await addLeaderboardBadges()
     signer = await ethers.provider.getSigner(gameManager)
     
 
-  //  await addBatchBatchTransfer()
-
   } else if (hre.network.name === 'matic') {
     signer = new LedgerSigner(ethers.provider,"hid","m/44'/60'/2'/0/0")
   } else {
@@ -122,7 +120,7 @@ await addLeaderboardBadges()
     const itemsTransferFacet = await ethers.getContractAt("ItemsTransferFacet",diamondAddress,signer)
 
     //STEP SIX: ITERATE THROUGH EACH BATCH AND TRANSFER 
-  for (const txGroup of txData) {
+    for (const [i, txGroup] of txData.entries()) {
 
     //Batch Info
     let batchBeginning = txGroup[0].index
@@ -131,22 +129,19 @@ await addLeaderboardBadges()
     let batchBadgeIds = _ids.slice(batchBeginning,batchEnd+1)
     let batchBadgeValues = _values.slice(batchBeginning,batchEnd+1)
 
-    console.log('token is:',batchTokenIds)
-    console.log('badge ids:',batchBadgeIds)
-    console.log('values:',batchBadgeValues)
+   // console.log('token is:',batchTokenIds)
+   // console.log('badge ids:',batchBadgeIds)
+   // console.log('values:',batchBadgeValues)
 
     const itemsFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",diamondAddress)
-    const balances = await itemsFacet.itemBalances(gameManager)
    
-    balances.forEach((item) => {
-      console.log(`Balance of ${item.itemId} is ${item.balance.toString()}`)
-    });
 
 
-    console.log(`Sending Batch to tokenIDs ${batchBeginning}-${batchEnd}`)
+    console.log(`Sending Batch ${i} to tokenIDs ${batchBeginning}-${batchEnd}`)
    
     //Transaction
       const tx = await itemsTransferFacet.batchBatchTransferToParent(gameManager,diamondAddress,batchTokenIds,batchBadgeIds, batchBadgeValues)
+      console.log('Tx hash:',tx.hash)
       let receipt = await tx.wait()
       console.log('Batch complete! Gas used:', strDisplay(receipt.gasUsed))
       if (!receipt.status) {
@@ -154,6 +149,8 @@ await addLeaderboardBadges()
       }
 
       if (testing) {
+
+        
       
         const balance = await itemsFacet.balanceOfToken(diamondAddress,batchTokenIds[0],batchBadgeIds[0][0])
 
@@ -161,6 +158,11 @@ await addLeaderboardBadges()
 
 
       }
+
+      const balances = await itemsFacet.itemBalances(gameManager)
+      balances.forEach((item) => {
+        console.log(`Balance of ${item.itemId} after sending Batch ${i} is ${item.balance.toString()}`)
+      });
       
     }
 }

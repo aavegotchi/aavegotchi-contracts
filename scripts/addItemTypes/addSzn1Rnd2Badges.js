@@ -98,6 +98,7 @@ async function main () {
 
   console.log('Adding items', 0, 'to', itemTypes.length)
   if (testing) {
+
     tx = await daoFacet.addItemTypes(itemTypes, { gasLimit: gasLimit })
     receipt = await tx.wait()
     if (!receipt.status) {
@@ -111,7 +112,7 @@ async function main () {
 
   await uploadSvgs(badgeSvgs, 'wearables', testing)
  
-  console.log('Send items to Aavegotchi Hardware')
+  console.log('Send items to Aavegotchi Item Manager')
   let mintAddress = '0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119'
 
   let itemIds = [169, 170, 171, 172, 173, 174]
@@ -138,7 +139,7 @@ async function main () {
       let wearables = ethers.utils.formatBytes32String('wearables')
       const itemSvg = await svgFacet.getSvg(wearables, 169)
 
-      console.log('item svg:',itemSvg)
+     // console.log('item svg:',itemSvg)
     }
 
     //  console.log('item svg:',itemSvg)
