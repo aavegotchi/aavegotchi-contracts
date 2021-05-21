@@ -6,7 +6,7 @@ async function main () {
   const diamond = await ethers.getContractAt('DiamondLoupeFacet', aavegotchiDiamondAddress)
   // const facets = await diamond.facets()
   // console.log(facets)
-  const facet = await diamond.facetAddress('0xf242432a')
+  const facet = await diamond.facetAddress('0x1c4695f4')
   console.log(facet)
 }
 

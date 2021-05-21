@@ -1,7 +1,12 @@
 /* global ethers hre */
+/* eslint-disable  prefer-const */
 
 async function main () {
-  const diamondCreationBlock = 11516320
+  // const startBlock, endBlock = 11516320
+  // sale: 14505312
+  // const startBlock, endBlock = 14502311
+  const startBlock = 14500311
+  const endBlock = 14568502
   const aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   let events = []
   let diamond
@@ -9,38 +14,82 @@ async function main () {
   let filter
   filter = diamond.filters.ERC721ListingAdd()
   let results
-  results = await diamond.queryFilter(filter, diamondCreationBlock)
+  results = await diamond.queryFilter(filter, startBlock, endBlock)
+
+  const tokenId = 4849
 
   for (const result of results) {
-    if (result.args.erc721TokenId.eq(7401)) {
+    if (result.args.erc721TokenId.eq(tokenId)) {
       events.push([result.blockNumber, 'Add Listing', result.args.listingId.toString(), result.args.seller])
     }
   }
 
+  let diamond3
+  let listingId
+  diamond3 = await ethers.getContractAt('LibERC721Marketplace', aavegotchiDiamondAddress)
+  listingId = 81123
+  filter = diamond3.filters.ERC721ListingCancelled(listingId)
+  results = await diamond3.queryFilter(filter, startBlock, endBlock)
+  for (const result of results) {
+    events.push([result.blockNumber, 'ERC721ListingCancelled', listingId, ''])
+  }
+
+  filter = diamond3.filters.ERC721ListingRemoved(listingId)
+  results = await diamond3.queryFilter(filter, startBlock, endBlock)
+  for (const result of results) {
+    events.push([result.blockNumber, 'ERC721ListingRemoved', listingId, ''])
+  }
+
+  listingId = 81124
+  filter = diamond3.filters.ERC721ListingCancelled(listingId)
+  results = await diamond3.queryFilter(filter, startBlock, endBlock)
+  for (const result of results) {
+    events.push([result.blockNumber, 'ERC721ListingCancelled', listingId, ''])
+  }
+
+  filter = diamond3.filters.ERC721ListingRemoved(listingId)
+  results = await diamond3.queryFilter(filter, startBlock, endBlock)
+  for (const result of results) {
+    events.push([result.blockNumber, 'ERC721ListingRemoved', listingId, ''])
+  }
+
+  listingId = 81152
+  filter = diamond3.filters.ERC721ListingCancelled(listingId)
+  results = await diamond3.queryFilter(filter, startBlock, endBlock)
+  for (const result of results) {
+    events.push([result.blockNumber, 'ERC721ListingCancelled', listingId, ''])
+  }
+
+  filter = diamond3.filters.ERC721ListingRemoved(listingId)
+  results = await diamond3.queryFilter(filter, startBlock, endBlock)
+  for (const result of results) {
+    events.push([result.blockNumber, 'ERC721ListingRemoved', listingId, ''])
+  }
+
   let diamond2
   diamond2 = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', aavegotchiDiamondAddress)
-  filter = diamond2.filters.EquipWearables(7401)
-  results = await diamond2.queryFilter(filter, diamondCreationBlock)
+  filter = diamond2.filters.EquipWearables(tokenId)
+  results = await diamond2.queryFilter(filter, startBlock, endBlock)
   for (const result of results) {
     events.push([result.blockNumber, 'Equip', JSON.stringify(result.args._oldWearables, null, 0), JSON.stringify(result.args._newWearables, null, 0)])
   }
 
   diamond2 = await ethers.getContractAt('LibERC1155', aavegotchiDiamondAddress)
-  filter = diamond2.filters.TransferToParent(null, 7401)
-  results = await diamond2.queryFilter(filter, diamondCreationBlock)
+  filter = diamond2.filters.TransferToParent(null, tokenId)
+  results = await diamond2.queryFilter(filter, startBlock, endBlock)
   for (const result of results) {
     events.push([result.blockNumber, 'TransferToParent', result.args._tokenTypeId.toString(), result.args._value.toString()])
   }
 
   diamond2 = await ethers.getContractAt('LibERC1155', aavegotchiDiamondAddress)
-  filter = diamond2.filters.TransferFromParent(null, 7401)
-  results = await diamond2.queryFilter(filter, diamondCreationBlock)
+  filter = diamond2.filters.TransferFromParent(null, tokenId)
+  results = await diamond2.queryFilter(filter, startBlock, endBlock)
   for (const result of results) {
     events.push([result.blockNumber, 'TransferFromParent', result.args._tokenTypeId.toString(), result.args._value.toString()])
   }
 
   // filter = diamond2.filters.TransferSingle()
-  // results = await diamond2.queryFilter(filter, diamondCreationBlock)
+  // results = await diamond2.queryFilter(filter, startBlock, endBlock)
   // for (const result of results) {
   //   if (result.args._id.eq(39) || result.args._id.eq(76) || result.args._id.eq(40)) {
   //     events.push([result.blockNumber, 'TransferSingle', result.args._from, result.args._to, result.args._id.toString(), result.args._value.toString()])
@@ -48,7 +97,7 @@ async function main () {
   // }
 
   // filter = diamond2.filters.TransferBatch()
-  // results = await diamond2.queryFilter(filter, diamondCreationBlock)
+  // results = await diamond2.queryFilter(filter, startBlock, endBlock)
   // for (const result of results) {
   //   for (const id of result.args._ids) {
   //     if (id.eq(39) || id.eq(76) || id.eq(40)) {
@@ -61,12 +110,13 @@ async function main () {
   // }
 
   filter = diamond.filters.ERC721ExecutedListing()
-  results = await diamond.queryFilter(filter, diamondCreationBlock)
+  results = await diamond.queryFilter(filter, startBlock, endBlock)
   for (const result of results) {
-    if (result.args.erc721TokenId.eq(7401)) {
+    if (result.args.erc721TokenId.eq(tokenId)) {
       events.push([result.blockNumber, 'Exec Listing', result.args.listingId.toString(), result.args.seller, result.args.buyer])
     }
   }
+
   events.sort((a, b) => {
     const blockNumberA = a[0]
     const blockNumberB = b[0]
@@ -111,7 +161,7 @@ async function main () {
   // let filter
   // filter = diamond.filters.ERC1155ListingAdd()
   // let results
-  // results = await diamond.queryFilter(filter, diamondCreationBlock)
+  // results = await diamond.queryFilter(filter, startBlock, endBlock)
   // let count = 0
   // for (const result of results) {
   //   count++
@@ -157,7 +207,7 @@ async function main () {
 
   // const diamond = await ethers.getContractAt('AavegotchiGameFacet', aavegotchiDiamondAddress)
   // const filter = diamond.filters.SetAavegotchiName()
-  // const results = await diamond.queryFilter(filter, diamondCreationBlock)
+  // const results = await diamond.queryFilter(filter, startBlock, endBlock)
   // const name = 'CASPER THE FRIENDLY GHOST'
   // for (const result of results) {
   //   // console.log(result.args._tokenId.toString(), result.args._oldName, result.args._newName)
@@ -180,7 +230,7 @@ async function main () {
   // const tokenId = ethers.BigNumber.from('2575')
   // const erc721Marketplace = await ethers.getContractAt('ERC721MarketplaceFacet', aavegotchiDiamondAddress)
   // const filter = erc721Marketplace.filters.ERC721ListingAdd()
-  // const results = await erc721Marketplace.queryFilter(filter, diamondCreationBlock)
+  // const results = await erc721Marketplace.queryFilter(filter, startBlock, endBlock)
   // for (const result of results) {
   //   if (result.args.erc721TokenId.eq(tokenId)) {
   //     const listing = await erc721Marketplace.getERC721Listing(result.args.listingId)
@@ -196,7 +246,7 @@ async function main () {
   // const userAddress = '0x2A8D763a923d546E0A73c954A08BE37978E380CC'
   // const erc721Marketplace = await ethers.getContractAt('ERC721MarketplaceFacet', aavegotchiDiamondAddress)
   // // const executeListingFilter = erc721Marketplace.filters.ERC721ExecutedListing()
-  // const executions = await erc721Marketplace.queryFilter(executeListingFilter, diamondCreationBlock)
+  // const executions = await erc721Marketplace.queryFilter(executeListingFilter, startBlock, endBlock)
   // for (const execution of executions) {
   //   if (execution.args.buyer === userAddress) {
   //     console.log(execution)
