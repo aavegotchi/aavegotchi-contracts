@@ -77,7 +77,7 @@ async function uploadSvgs (svgs, svgType, testing) {
 }
 
 async function main () {
-  let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
+  let owner = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119" //await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
   if (testing) {
     await hre.network.provider.request({
