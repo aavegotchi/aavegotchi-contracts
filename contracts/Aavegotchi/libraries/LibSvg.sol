@@ -20,6 +20,13 @@ library LibSvg {
         uint256[] sizes;
     }
 
+    function bytesToBytes32(bytes memory _bytes1, bytes memory _bytes2) internal pure returns (bytes32 result_) {
+        bytes memory theBytes = abi.encodePacked(_bytes1, _bytes2);
+        assembly {
+            result_ := mload(add(theBytes, 32))
+        }
+    }
+
     function getSvg(bytes32 _svgType, uint256 _id) internal view returns (bytes memory svg_) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         SvgLayer[] storage svgLayers = s.svgLayers[_svgType];

@@ -229,7 +229,7 @@ struct AppStorage {
     // body wearableId => sleevesId
     mapping(uint256 => uint256) sleeves;
     // itemTypeId => (sideview => Dimensions)
-    mapping(uint256 => mapping(bytes32 => Dimensions)) sideViewDimensions;    
+    mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;    
 }
 
 library LibAppStorage {

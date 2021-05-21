@@ -27,7 +27,8 @@ contract SvgViewsFacet is Modifiers {
         ag_[0] = SvgFacet(address(this)).getAavegotchiSvg(_tokenId);
 
         address collateralType = s.aavegotchis[_tokenId].collateralType;
-        ag_[1] = getAavegotchiSvgLayers(collateralType, 'aavegotchi-left', s.aavegotchis[_tokenId].numericTraits, _tokenId);
+        int16[NUMERIC_TRAITS_NUM] memory _numericTraits = s.aavegotchis[_tokenId].numericTraits;
+        ag_[1] = getAavegotchiSvgLayers('left', collateralType, _numericTraits, _tokenId);
                 
         // aavegotchi body
         // bytes memory svg = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_LEFT_SVG_ID);
@@ -47,8 +48,8 @@ contract SvgViewsFacet is Modifiers {
     }
 
     function getAavegotchiSvgLayers(
-        address _collateralType,
-        bytes32 _sideView,
+        bytes memory _sideView,
+        address _collateralType,        
         int16[NUMERIC_TRAITS_NUM] memory _numericTraits,
         uint256 _tokenId
     ) internal view returns (bytes memory svg_) {
@@ -58,19 +59,19 @@ contract SvgViewsFacet is Modifiers {
         details.cheekColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
 
         // aavagotchi body
-        svg_ = LibSvg.getSvg(_sideView, LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
-        details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
+        svg_ = LibSvg.getSvg(LibSvg.bytesToBytes32('aavegotchi-', _sideView), LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
+        details.collateral = LibSvg.getSvg(LibSvg.bytesToBytes32("collaterals-", _sideView), s.collateralTypeInfo[_collateralType].svgId);
 
         details.trait = _numericTraits[4];
         if (details.trait < 0) {
-            details.eyeShape = LibSvg.getSvg("eyeShapes", 0);
+            details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32("eyeShapes-", _sideView), 0);
         } else if (details.trait > 97) {
-            details.eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
+            details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32("eyeShapes-", _sideView), s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
         } else {
             details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
             for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
                 if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
-                    details.eyeShape = LibSvg.getSvg("eyeShapes", i);
+                    details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32("eyeShapes-", _sideView), i);
                     break;
                 }
             }
@@ -104,13 +105,64 @@ contract SvgViewsFacet is Modifiers {
         if (_tokenId == type(uint256).max) {
             svg_ = abi.encodePacked(
                 applyStyles(details, _tokenId),
-                LibSvg.getSvg("aavegotchi", LibSvg.BACKGROUND_SVG_ID),
+                LibSvg.getSvg(LibSvg.bytesToBytes32("aavegotchi-", _sideView), LibSvg.BACKGROUND_SVG_ID),
                 svg_,
                 details.collateral,
                 details.eyeShape
             );
         } else {
-            svg_ = abi.encodePacked(applyStyles(details, _tokenId), addBodyAndWearableSvgLayers(svg_, details, _tokenId));
+            svg_ = abi.encodePacked(applyStyles(details, _tokenId), addBodyAndWearableSvgLayers(_sideView, svg_, details, _tokenId));
+        }
+    }
+
+    function applyStyles(SvgLayerDetails memory _details, uint256 _tokenId) internal view returns (bytes memory) {
+        uint16[EQUIPPED_WEARABLE_SLOTS] storage equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+
+        if (
+            _tokenId != type(uint256).max &&
+            (equippedWearables[LibItems.WEARABLE_SLOT_BODY] != 0 ||
+                equippedWearables[LibItems.WEARABLE_SLOT_HAND_LEFT] != 0 ||
+                equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT] != 0)
+        ) {
+            //Open-hands aavegotchi
+            return
+                abi.encodePacked(
+                    "<style>.gotchi-primary{fill:#",
+                    _details.primaryColor,
+                    ";}.gotchi-secondary{fill:#",
+                    _details.secondaryColor,
+                    ";}.gotchi-cheek{fill:#",
+                    _details.cheekColor,
+                    ";}.gotchi-eyeColor{fill:#",
+                    _details.eyeColor,
+                    ";}.gotchi-primary-mouth{fill:#",
+                    _details.primaryColor,
+                    ";}.gotchi-sleeves-up{display:none;}",
+                    ".gotchi-handsUp{display:none;}",
+                    ".gotchi-handsDownOpen{display:block;}",
+                    ".gotchi-handsDownClosed{display:none;}",
+                    "</style>"
+                );
+        } else {
+            //Normal Aavegotchi, closed hands
+            return
+                abi.encodePacked(
+                    "<style>.gotchi-primary{fill:#",
+                    _details.primaryColor,
+                    ";}.gotchi-secondary{fill:#",
+                    _details.secondaryColor,
+                    ";}.gotchi-cheek{fill:#",
+                    _details.cheekColor,
+                    ";}.gotchi-eyeColor{fill:#",
+                    _details.eyeColor,
+                    ";}.gotchi-primary-mouth{fill:#",
+                    _details.primaryColor,
+                    ";}.gotchi-sleeves-up{display:none;}",
+                    ".gotchi-handsUp{display:none;}",
+                    ".gotchi-handsDownOpen{display:none;}",
+                    ".gotchi-handsDownClosed{display:block}",
+                    "</style>"
+                );
         }
     }
 
@@ -129,8 +181,8 @@ contract SvgViewsFacet is Modifiers {
     }
 
     function addBodyAndWearableSvgLayers(
-        bytes memory _body,
-        bytes32 _sideView,
+        bytes memory _sideView,
+        bytes memory _body,        
         uint256 _tokenId
     ) internal view returns (bytes memory svg_) {
         //Wearables
@@ -140,9 +192,9 @@ contract SvgViewsFacet is Modifiers {
         // If background is equipped
         uint256 wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BG];
         if (wearableId != 0) {
-            layers.background = getWearableView(wearableId, "wearables", LibItems.WEARABLE_SLOT_BG);
+            layers.background = getWearableView(_sideView, wearableId, LibItems.WEARABLE_SLOT_BG);
         } else {
-            layers.background = LibSvg.getSvg("aavegotchi", 4);
+            layers.background = LibSvg.getSvg(LibSvg.bytesToBytes32("aavegotchi-", _sideView), 4);
         }
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BODY];
@@ -151,36 +203,36 @@ contract SvgViewsFacet is Modifiers {
         }
 
         // get hands
-        layers.hands = abi.encodePacked(svg_, LibSvg.getSvg(_sideView, LibSvg.HANDS_SVG_ID));
+        layers.hands = abi.encodePacked(svg_, LibSvg.getSvg(LibSvg.bytesToBytes32("aavegotchi-",_sideView), LibSvg.HANDS_SVG_ID));
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_FACE];
         if (wearableId != 0) {
-            layers.face = getWearableView(wearableId, _sideView, LibItems.WEARABLE_SLOT_FACE);
+            layers.face = getWearableView(_sideView, wearableId, LibItems.WEARABLE_SLOT_FACE);
         }
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_EYES];
         if (wearableId != 0) {
-            layers.eyes = getWearableView(wearableId, _sideView, LibItems.WEARABLE_SLOT_EYES);
+            layers.eyes = getWearableView(_sideView, wearableId, LibItems.WEARABLE_SLOT_EYES);
         }
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HEAD];
         if (wearableId != 0) {
-            layers.head = getWearableView(wearableId, _sideView, LibItems.WEARABLE_SLOT_HEAD);
+            layers.head = getWearableView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HEAD);
         }
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_LEFT];
         if (wearableId != 0) {
-            layers.handLeft = getWearableView(wearableId, _sideView,  LibItems.WEARABLE_SLOT_HAND_LEFT);
+            layers.handLeft = getWearableView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HAND_LEFT);
         }
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT];
         if (wearableId != 0) {
-            layers.handRight = getWearableView(wearableId, _sideView,  LibItems.WEARABLE_SLOT_HAND_RIGHT);
+            layers.handRight = getWearableView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HAND_RIGHT);
         }
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_PET];
         if (wearableId != 0) {
-            layers.pet = getWearableView(wearableId, _sideView,  LibItems.WEARABLE_SLOT_PET);
+            layers.pet = getWearableView(_sideView, wearableId, LibItems.WEARABLE_SLOT_PET);
         }
 
         //1. Background wearable
@@ -222,7 +274,7 @@ contract SvgViewsFacet is Modifiers {
         if (_slotPosition == LibItems.WEARABLE_SLOT_BG) className_ = "wearable-bg";
     }
 
-    function getWearableView(uint256 _wearableId, bytes32 _sideView, uint256 _slotPosition) internal view returns (bytes memory svg_) {
+    function getWearableView(bytes memory _sideView, uint256 _wearableId, uint256 _slotPosition) internal view returns (bytes memory svg_) {
         ItemType storage wearableType = s.itemTypes[_wearableId];
         Dimensions memory dimensions = s.sideViewDimensions[_wearableId][_sideView];
 
@@ -238,10 +290,10 @@ contract SvgViewsFacet is Modifiers {
             '">'
         );
         
-        svg_ = abi.encodePacked(svg_, LibSvg.getSvg(_sideView, wearableType.svgId), "</svg></g>");        
+        svg_ = abi.encodePacked(svg_, LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-",_sideView), wearableType.svgId), "</svg></g>");        
     }
 
-    function getBodyWearable(uint256 _wearableId, bytes32 _sideView) internal view returns (bytes memory bodyWearable_, bytes memory sleeves_) {
+    function getBodyWearable(bytes32 _sideView, uint256 _wearableId) internal view returns (bytes memory bodyWearable_, bytes memory sleeves_) {
         ItemType storage wearableType = s.itemTypes[_wearableId];
         Dimensions memory dimensions = s.sideViewDimensions[_wearableId][_sideView];
 
@@ -293,9 +345,9 @@ contract SvgViewsFacet is Modifiers {
         require(_itemId < s.itemTypes.length, "ItemsFacet: _id not found for item");
         svg_ = new string[](4);
         svg_[0] = prepareItemSvg(s.itemTypes[_itemId].dimensions, LibSvg.getSvg("wearables", _itemId));        
-        svg_[1] = prepareItemSvg(s.sideViewDimensions[_itemId]["wearables-leftSide"], LibSvg.getSvg("wearables-leftSide", _itemId));
-        svg_[2] = prepareItemSvg(s.sideViewDimensions[_itemId]["wearables-rightSide"], LibSvg.getSvg("wearables-rightSide", _itemId));
-        svg_[3] = prepareItemSvg(s.sideViewDimensions[_itemId]["wearables-backSide"], LibSvg.getSvg("wearables-backSide", _itemId));
+        svg_[1] = prepareItemSvg(s.sideViewDimensions[_itemId]["left"], LibSvg.getSvg("wearables-left", _itemId));
+        svg_[2] = prepareItemSvg(s.sideViewDimensions[_itemId]["right"], LibSvg.getSvg("wearables-right", _itemId));
+        svg_[3] = prepareItemSvg(s.sideViewDimensions[_itemId]["back"], LibSvg.getSvg("wearables-back", _itemId));
     }
 
     function getItemsSvgs(uint256[] calldata _itemIds) public view returns (string[][] memory svgs_) {
@@ -305,7 +357,7 @@ contract SvgViewsFacet is Modifiers {
         }        
     }
 
-    function setSideViewDimensions(uint256[] calldata _itemIds, bytes32[] calldata _sideViews, Dimensions[] calldata _sideViewDimensions) external onlyDaoOrOwner {
+    function setSideViewDimensions(uint256[] calldata _itemIds, bytes[] calldata _sideViews, Dimensions[] calldata _sideViewDimensions) external onlyDaoOrOwner {
         require(_itemIds.length == _sideViewDimensions.length, "SvgViewsFacet: _itemIds length not same as __sideViewDimensions length");
         require(_itemIds.length == _sideViews.length, "SvgViewsFacet: _sideViews length not same as _itemIds length");
         for(uint256 i; i < _itemIds.length; i++) {
