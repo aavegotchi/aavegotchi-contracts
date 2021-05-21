@@ -20,6 +20,8 @@ contract DAOFacet is Modifiers {
     event UpdateWearableSet(uint256 _setId, WearableSet _wearableSet);
     event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
     event ItemTypeMaxQuantity(uint256[] _itemIds, uint256[] _maxQuanities);
+    event ItemManagerAdded(address indexed newItemManager_);
+    event ItemManagerRemoved(address indexed ItemManager_);
 
     /***********************************|
    |             Read Functions         |
@@ -54,12 +56,29 @@ contract DAOFacet is Modifiers {
         }
     }
 
+    function addItemManagers(address[] calldata _newItemManagers) external onlyDaoOrOwner {
+        for (uint256 index = 0; index < _newItemManagers.length; index++) {
+            address newItemManager = _newItemManagers[index];
+            s.itemManagers[newItemManager] = true;
+            emit ItemManagerAdded(newItemManager);
+        }
+    }
+
+    function removeItemManagers(address[] calldata _itemManagers) external onlyDaoOrOwner {
+        for (uint256 index = 0; index < _itemManagers.length; index++) {
+            address itemManager = _itemManagers[index];
+            require(s.itemManagers[itemManager] == true, "DAOFacet: itemManager does not exist or already removed");
+            s.itemManagers[itemManager] = false;
+            emit ItemManagerRemoved(itemManager);
+        }
+    }
+
     function updateCollateralModifiers(address _collateralType, int16[NUMERIC_TRAITS_NUM] calldata _modifiers) external onlyDaoOrOwner {
         emit UpdateCollateralModifiers(s.collateralTypeInfo[_collateralType].modifiers, _modifiers);
         s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
     }
 
-    function updateItemTypeMaxQuantity(uint256[] calldata _itemIds, uint256[] calldata _maxQuantities) external onlyOwnerOrDaoOrGameManager {
+    function updateItemTypeMaxQuantity(uint256[] calldata _itemIds, uint256[] calldata _maxQuantities) external onlyItemManager {
         require(_itemIds.length == _maxQuantities.length, "DAOFacet: _itemIds length not the same as _newQuantities length");
         for (uint256 i; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
@@ -92,7 +111,7 @@ contract DAOFacet is Modifiers {
         address _to,
         uint256[] calldata _itemIds,
         uint256[] calldata _quantities
-    ) external onlyDaoOrOwner {
+    ) external onlyItemManager {
         require(_itemIds.length == _quantities.length, "DAOFacet: Ids and quantities length must match");
         address sender = LibMeta.msgSender();
         uint256 itemTypesLength = s.itemTypes.length;
@@ -128,7 +147,7 @@ contract DAOFacet is Modifiers {
         emit GrantExperience(_tokenIds, _xpValues);
     }
 
-    function addItemTypes(ItemType[] memory _itemTypes) external onlyDaoOrOwner() {
+    function addItemTypes(ItemType[] memory _itemTypes) external onlyItemManager {
         insertItemTypes(_itemTypes);
     }
 
@@ -136,7 +155,7 @@ contract DAOFacet is Modifiers {
         ItemType[] memory _itemTypes,
         string calldata _svg,
         LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes
-    ) external onlyDaoOrOwner() {
+    ) external onlyItemManager {
         insertItemTypes(_itemTypes);
         LibSvg.storeSvg(_svg, _typesAndSizes);
     }
@@ -152,21 +171,20 @@ contract DAOFacet is Modifiers {
         }
     }
 
-    function addWearableSets(WearableSet[] memory _wearableSets) external onlyDaoOrOwner {
+    function addWearableSets(WearableSet[] memory _wearableSets) external onlyItemManager {
         for (uint256 i; i < _wearableSets.length; i++) {
             s.wearableSets.push(_wearableSets[i]);
             emit AddWearableSet(_wearableSets[i]);
         }
     }
 
-    function updateWearableSets(uint256[] calldata _setIds, WearableSet[] calldata _wearableSets) external onlyDaoOrOwner {
+    function updateWearableSets(uint256[] calldata _setIds, WearableSet[] calldata _wearableSets) external onlyItemManager {
         require(_setIds.length == _wearableSets.length, "_setIds not same length as _wearableSets");
         for (uint256 i; i < _setIds.length; i++) {
             s.wearableSets[_setIds[i]] = _wearableSets[i];
             emit UpdateWearableSet(_setIds[i], _wearableSets[i]);
         }
     }
-
 
     function setGameManager(address _gameManager) external onlyDaoOrOwner {
         emit GameManagerTransferred(s.gameManager, _gameManager);

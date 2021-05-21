@@ -228,8 +228,11 @@ struct AppStorage {
     mapping(address => mapping(uint256 => mapping(address => uint256))) erc721TokenToListingId;
     // body wearableId => sleevesId
     mapping(uint256 => uint256) sleeves;
+    // mapping(address => mapping(uint256 => address)) petOperators;
+    // mapping(address => uint256[]) petOperatorTokenIds;
+    mapping(address => bool) itemManagers;
     // itemTypeId => (sideview => Dimensions)
-    mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;    
+    mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;        
 }
 
 library LibAppStorage {
@@ -275,6 +278,11 @@ contract Modifiers {
     modifier onlyOwnerOrDaoOrGameManager {
         address sender = LibMeta.msgSender();
         require(sender == s.dao || sender == LibDiamond.contractOwner() || sender == s.gameManager, "LibAppStorage: Do not have access");
+        _;
+    }
+    modifier onlyItemManager {
+        address sender = LibMeta.msgSender();
+        require(s.itemManagers[sender] == true, "LibAppStorage: only an ItemManager can call this function");
         _;
     }
 }

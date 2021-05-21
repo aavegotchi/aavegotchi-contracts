@@ -2,10 +2,10 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
-const { itemTypes } = require('./leaderboardItemTypes')
-const { badgeSvgs } = require('../../svgs/leaderboardBadgeSvgs')
+const { szn1rnd2ItemTypes:itemTypes } = require('./itemTypes/szn1rnd2ItemTypes')
+const { badgeSvgs } = require('../../svgs/szn1rnd2BadgeSvgs')
 
-const { sendToMultisig } = require('../libraries/multisig/multisig.js')
+//const { sendToMultisig } = require('../../libraries/multisig/multisig.js')
 
 let signer
 const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
@@ -67,7 +67,7 @@ async function uploadSvgs (svgs, svgType, testing) {
       console.log(svgItemsEnd, svg.length)
     } else {
       let tx = await svgFacet.populateTransaction.storeSvg(svg, svgTypesAndSizes)
-      await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+    //  await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
     }
     if (svgItemsEnd === svgs.length) {
       break
@@ -106,7 +106,7 @@ async function main () {
     console.log('Items were added:', tx.hash)
   } else {
     tx = await daoFacet.populateTransaction.addItemTypes(itemTypes, { gasLimit: gasLimit })
-    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+   // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 
   await uploadSvgs(badgeSvgs, 'wearables', testing)
@@ -114,9 +114,12 @@ async function main () {
   console.log('Send items to Aavegotchi Hardware')
   let mintAddress = '0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119'
 
+  let itemIds = [169, 170, 171, 172, 173, 174]
+  let quantities = [10, 10, 10, 90, 90, 90]
+
   console.log('Minting items')
   if (testing) {
-    tx = await daoFacet.mintItems(mintAddress, [163, 164, 165, 166, 167, 168], [10, 10, 10, 90, 90, 90])
+    tx = await daoFacet.mintItems(mintAddress, itemIds, quantities)
     receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`)
@@ -127,20 +130,22 @@ async function main () {
     // Check that items are received
 
     if (testing) {
-      const balance = await itemsFacet.balanceOf(mintAddress, '163')
-      console.log('balance of 163:', balance.toString())
+      const balance = await itemsFacet.balanceOf(mintAddress, '169')
+      console.log('balance of 169:', balance.toString())
 
       // Check the SVG output
       const svgFacet = await ethers.getContractAt('SvgFacet', diamondAddress)
       let wearables = ethers.utils.formatBytes32String('wearables')
-      const itemSvg = await svgFacet.getSvg(wearables, 163)
+      const itemSvg = await svgFacet.getSvg(wearables, 169)
+
+      console.log('item svg:',itemSvg)
     }
 
     //  console.log('item svg:',itemSvg)
   } else {
     // Rarity 10, Kinship 10, XP 10, Rarity 100, Kinship 100, XP 100
-    tx = await daoFacet.populateTransaction.mintItems(mintAddress, [163, 164, 165, 166, 167, 168], [10, 10, 10, 90, 90, 90], { gasLimit: gasLimit })
-    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+    tx = await daoFacet.populateTransaction.mintItems(mintAddress, itemIds, quantities, { gasLimit: gasLimit })
+   // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 }
 
