@@ -27,7 +27,9 @@ function strDisplay (str) {
 async function main () {
 
   //ADD THE LEADERBOARD BADGES
-await addLeaderboardBadges()
+//await addLeaderboardBadges()
+
+console.log('Sending Rewards!')
 
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   const gameManager = await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
@@ -44,6 +46,7 @@ await addLeaderboardBadges()
 
   } else if (hre.network.name === 'matic') {
     signer = new LedgerSigner(ethers.provider,"hid","m/44'/60'/2'/0/0")
+    console.log('signer:',signer)
   } else {
     throw Error('Incorrect network selected')
   }
@@ -130,9 +133,9 @@ await addLeaderboardBadges()
     let batchBadgeIds = _ids.slice(batchBeginning,batchEnd+1)
     let batchBadgeValues = _values.slice(batchBeginning,batchEnd+1)
 
-   // console.log('token is:',batchTokenIds)
-   // console.log('badge ids:',batchBadgeIds)
-   // console.log('values:',batchBadgeValues)
+    console.log('token ids:',batchTokenIds)
+    console.log('badge ids:',batchBadgeIds)
+    console.log('values:',batchBadgeValues)
 
     const itemsFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",diamondAddress)
    

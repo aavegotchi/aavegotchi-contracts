@@ -27,7 +27,7 @@ function addCommas (nStr) {
   return x1 + x2
 }
 
-async function uploadSvgs (svgs, svgType, testing) {
+async function uploadSvgs (svgs, svgType, testing, signer) {
   let svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
   function setupSvg (...svgData) {
     const svgTypesAndSizes = []
@@ -83,7 +83,7 @@ async function uploadSvgs (svgs, svgType, testing) {
       console.log('Gas used:' + strDisplay(receipt.gasUsed))
       console.log(svgItemsEnd, svg.length)
     } else {
-      let tx = await svgFacet.populateTransaction.storeSvg(svg, svgTypesAndSizes)
+      let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
     //  await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
     }
     if (svgItemsEnd === svgs.length) {
@@ -103,16 +103,16 @@ async function main () {
     })
     signer = await ethers.provider.getSigner(owner)
   } else if (hre.network.name === 'matic') {
-    signer = new LedgerSigner(ethers.provider)
+    signer = new LedgerSigner(ethers.provider,"hid","m/44'/60'/2'/0/0")
   } else {
     throw Error('Incorrect network selected')
   }
   let tx
   let receipt
-  let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)
+  let itemsFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)).connect(signer)
 
   let daoFacet = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
-
+/*
   console.log('Adding items', 0, 'to', itemTypes.length)
   if (testing) {
 
@@ -128,8 +128,9 @@ async function main () {
     console.log('Items added:', tx.hash)
     
   }
+  */
 
-  await uploadSvgs(badgeSvgs, 'wearables', testing)
+ // await uploadSvgs(badgeSvgs, 'wearables', testing, signer)
  
   console.log('Send items to Aavegotchi Item Manager')
   let mintAddress = '0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119'
@@ -165,7 +166,7 @@ async function main () {
     //  console.log('item svg:',itemSvg)
   } else {
     // Rarity 10, Kinship 10, XP 10, Rarity 100, Kinship 100, XP 100
-    tx = await daoFacet.populateTransaction.mintItems(mintAddress, itemIds, quantities, { gasLimit: gasLimit })
+    tx = await daoFacet.mintItems(mintAddress, itemIds, quantities, { gasLimit: gasLimit })
    // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 }
