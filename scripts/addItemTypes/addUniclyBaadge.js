@@ -2,10 +2,8 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
-const { szn1rnd2ItemTypes:itemTypes } = require('./itemTypes/szn1rnd2ItemTypes')
-const { badgeSvgs } = require('../../svgs/szn1rnd2BadgeSvgs')
-
-//const { sendToMultisig } = require('../../libraries/multisig/multisig.js')
+const { uniclyBaadgeItemTypes:itemTypes } = require('../itemTypes/uniclyBaadgeItemType')
+const { badgeSvgs } = require('../../svgs/uniclyBaadgeSvg')
 
 let signer
 const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
@@ -84,7 +82,6 @@ async function uploadSvgs (svgs, svgType, testing, signer) {
       console.log(svgItemsEnd, svg.length)
     } else {
       let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-    //  await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
     }
     if (svgItemsEnd === svgs.length) {
       break
@@ -94,7 +91,7 @@ async function uploadSvgs (svgs, svgType, testing, signer) {
 }
 
 async function main () {
-  let owner = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119" //await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
+  let owner = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119" 
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
   if (testing) {
     await hre.network.provider.request({
@@ -112,7 +109,7 @@ async function main () {
   let itemsFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)).connect(signer)
 
   let daoFacet = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
-/*
+
   console.log('Adding items', 0, 'to', itemTypes.length)
   if (testing) {
 
@@ -128,15 +125,15 @@ async function main () {
     console.log('Items added:', tx.hash)
     
   }
-  */
+  
 
- // await uploadSvgs(badgeSvgs, 'wearables', testing, signer)
+  await uploadSvgs(badgeSvgs, 'wearables', testing, signer)
  
   console.log('Send items to Aavegotchi Item Manager')
   let mintAddress = '0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119'
 
-  let itemIds = [169, 170, 171, 172, 173, 174]
-  let quantities = [10, 10, 10, 90, 90, 90]
+  let itemIds = [175]
+  let quantities = [0]
 
   console.log('Minting items')
   if (testing) {
@@ -182,4 +179,4 @@ if (require.main === module) {
     })
 }
 
-exports.addLeaderboardBadges = main
+exports.addUniclyBaadge = main
