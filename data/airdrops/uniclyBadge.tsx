@@ -245,6 +245,38 @@ const uniclyBadgeGotchisOwned = {
       {
         gotchisOwned: [
           {
+            id: "100",
+          },
+          {
+            id: "4211",
+          },
+          {
+            id: "4212",
+          },
+          {
+            id: "4214",
+          },
+          {
+            id: "8479",
+          },
+          {
+            id: "8480",
+          },
+          {
+            id: "8481",
+          },
+          {
+            id: "900",
+          },
+          {
+            id: "9040",
+          },
+        ],
+        id: "0x0b81747f504dfc906a215e301d8b8ad82e44cbd2",
+      },
+      {
+        gotchisOwned: [
+          {
             id: "2582",
           },
           {
@@ -375,6 +407,71 @@ const uniclyBadgeGotchisOwned = {
       {
         gotchisOwned: [
           {
+            id: "3754",
+          },
+          {
+            id: "4140",
+          },
+          {
+            id: "4141",
+          },
+          {
+            id: "4142",
+          },
+          {
+            id: "4143",
+          },
+          {
+            id: "4144",
+          },
+          {
+            id: "4146",
+          },
+          {
+            id: "4150",
+          },
+          {
+            id: "4151",
+          },
+          {
+            id: "4152",
+          },
+          {
+            id: "4153",
+          },
+          {
+            id: "4154",
+          },
+          {
+            id: "5570",
+          },
+          {
+            id: "5741",
+          },
+          {
+            id: "6630",
+          },
+          {
+            id: "800",
+          },
+          {
+            id: "8564",
+          },
+          {
+            id: "9737",
+          },
+          {
+            id: "9775",
+          },
+          {
+            id: "9890",
+          },
+        ],
+        id: "0x174b079bb5aeb7a7ffa2a6407b906a844738428d",
+      },
+      {
+        gotchisOwned: [
+          {
             id: "7486",
           },
           {
@@ -476,13 +573,7 @@ const uniclyBadgeGotchisOwned = {
             id: "267",
           },
           {
-            id: "3689",
-          },
-          {
             id: "3880",
-          },
-          {
-            id: "3931",
           },
           {
             id: "3932",
@@ -491,19 +582,10 @@ const uniclyBadgeGotchisOwned = {
             id: "3933",
           },
           {
-            id: "3934",
-          },
-          {
             id: "3935",
           },
           {
             id: "4336",
-          },
-          {
-            id: "5446",
-          },
-          {
-            id: "5697",
           },
           {
             id: "6558",
@@ -765,6 +847,9 @@ const uniclyBadgeGotchisOwned = {
       {
         gotchisOwned: [
           {
+            id: "1979",
+          },
+          {
             id: "7844",
           },
           {
@@ -827,9 +912,6 @@ const uniclyBadgeGotchisOwned = {
       },
       {
         gotchisOwned: [
-          {
-            id: "1195",
-          },
           {
             id: "1852",
           },
@@ -933,6 +1015,64 @@ const uniclyBadgeGotchisOwned = {
       {
         gotchisOwned: [
           {
+            id: "1128",
+          },
+          {
+            id: "7769",
+          },
+        ],
+        id: "0x54688a441c8e9f17253038ff8a4336b679c02a4b",
+      },
+      {
+        gotchisOwned: [
+          {
+            id: "1953",
+          },
+          {
+            id: "2197",
+          },
+          {
+            id: "2242",
+          },
+          {
+            id: "2578",
+          },
+          {
+            id: "277",
+          },
+          {
+            id: "6406",
+          },
+          {
+            id: "6668",
+          },
+          {
+            id: "6685",
+          },
+          {
+            id: "7411",
+          },
+          {
+            id: "7462",
+          },
+          {
+            id: "7600",
+          },
+          {
+            id: "8159",
+          },
+          {
+            id: "8332",
+          },
+          {
+            id: "9139",
+          },
+        ],
+        id: "0x5761ac2e1cb06cc3f8e1dd7e40b358bb35558def",
+      },
+      {
+        gotchisOwned: [
+          {
             id: "2015",
           },
           {
@@ -1021,9 +1161,6 @@ const uniclyBadgeGotchisOwned = {
           },
           {
             id: "1679",
-          },
-          {
-            id: "2091",
           },
           {
             id: "2235",
@@ -1187,6 +1324,42 @@ const uniclyBadgeGotchisOwned = {
       {
         gotchisOwned: [
           {
+            id: "2431",
+          },
+          {
+            id: "5442",
+          },
+          {
+            id: "8572",
+          },
+        ],
+        id: "0x61477eaa5e33400acc353390ca001be0eb706eb4",
+      },
+      {
+        gotchisOwned: [
+          {
+            id: "1459",
+          },
+          {
+            id: "2603",
+          },
+        ],
+        id: "0x6360ea0e3af36b7b51cf7e4f810370dd5a8cdc0f",
+      },
+      {
+        gotchisOwned: [
+          {
+            id: "1441",
+          },
+          {
+            id: "7455",
+          },
+        ],
+        id: "0x6541e84af0b25f3e084e9ed17d8f255a12d125d3",
+      },
+      {
+        gotchisOwned: [
+          {
             id: "1348",
           },
           {
@@ -1218,8 +1391,32 @@ const uniclyBadgeGotchisOwned = {
         id: "0x6eb13bf70edaade22b0c5a7f0de7138ce96d53db",
       },
       {
-        gotchisOwned: [],
+        gotchisOwned: [
+          {
+            id: "6605",
+          },
+          {
+            id: "6665",
+          },
+          {
+            id: "7024",
+          },
+          {
+            id: "9715",
+          },
+        ],
         id: "0x705ae5aef02b0a8ceaa712af547d39a051da5d4a",
+      },
+      {
+        gotchisOwned: [
+          {
+            id: "5209",
+          },
+          {
+            id: "7097",
+          },
+        ],
+        id: "0x727df4ab614e0025637c4d23b48171054e0f6dde",
       },
       {
         gotchisOwned: [
@@ -1259,6 +1456,14 @@ const uniclyBadgeGotchisOwned = {
       {
         gotchisOwned: [
           {
+            id: "5393",
+          },
+        ],
+        id: "0x787b4b7ffef8eddad54f311039acf4c36fec9593",
+      },
+      {
+        gotchisOwned: [
+          {
             id: "3538",
           },
           {
@@ -1272,18 +1477,6 @@ const uniclyBadgeGotchisOwned = {
           },
           {
             id: "4044",
-          },
-          {
-            id: "6605",
-          },
-          {
-            id: "6665",
-          },
-          {
-            id: "7024",
-          },
-          {
-            id: "9715",
           },
         ],
         id: "0x7e4724c60718a9f87ce51bcf8812bf90d0b7b9db",
@@ -1333,6 +1526,23 @@ const uniclyBadgeGotchisOwned = {
           },
         ],
         id: "0x7fd93c8cfd654b24ef2c4b5fa36d41bea4cf2f90",
+      },
+      {
+        gotchisOwned: [
+          {
+            id: "3841",
+          },
+          {
+            id: "4054",
+          },
+          {
+            id: "8022",
+          },
+          {
+            id: "9704",
+          },
+        ],
+        id: "0x83bb781a2a2ca1fec0350f178c911848811cc440",
       },
       {
         gotchisOwned: [
@@ -1463,6 +1673,10 @@ const uniclyBadgeGotchisOwned = {
         id: "0x9080196182f77b89bb5b0eee3ddb48cfa716c4c3",
       },
       {
+        gotchisOwned: [],
+        id: "0x923bbe01b2404986a16d95313aafa222ec539f4c",
+      },
+      {
         gotchisOwned: [
           {
             id: "2182",
@@ -1475,12 +1689,6 @@ const uniclyBadgeGotchisOwned = {
           },
           {
             id: "4616",
-          },
-          {
-            id: "4820",
-          },
-          {
-            id: "9996",
           },
         ],
         id: "0x9ff84b91998df96a6587db8dde8d4e47518107d6",
@@ -1626,6 +1834,35 @@ const uniclyBadgeGotchisOwned = {
       {
         gotchisOwned: [
           {
+            id: "1381",
+          },
+          {
+            id: "2752",
+          },
+          {
+            id: "4299",
+          },
+          {
+            id: "5783",
+          },
+          {
+            id: "7849",
+          },
+          {
+            id: "8499",
+          },
+          {
+            id: "8749",
+          },
+          {
+            id: "9698",
+          },
+        ],
+        id: "0xb0c4cc1aa998df91d2c27ce06641261707a8c9c3",
+      },
+      {
+        gotchisOwned: [
+          {
             id: "1460",
           },
           {
@@ -1740,16 +1977,10 @@ const uniclyBadgeGotchisOwned = {
       {
         gotchisOwned: [
           {
-            id: "1979",
-          },
-          {
             id: "2830",
           },
           {
             id: "5613",
-          },
-          {
-            id: "6634",
           },
           {
             id: "6647",
@@ -1845,7 +2076,7 @@ const uniclyBadgeGotchisOwned = {
       {
         gotchisOwned: [
           {
-            id: "1860",
+            id: "3083",
           },
           {
             id: "4301",
@@ -1987,6 +2218,14 @@ const uniclyBadgeGotchisOwned = {
       {
         gotchisOwned: [
           {
+            id: "2277",
+          },
+        ],
+        id: "0xecab3ed0d13c9172f54d433106ece2a8aa0e674a",
+      },
+      {
+        gotchisOwned: [
+          {
             id: "7389",
           },
           {
@@ -2065,9 +2304,6 @@ const uniclyBadgeGotchisOwned = {
       },
       {
         gotchisOwned: [
-          {
-            id: "1449",
-          },
           {
             id: "3588",
           },

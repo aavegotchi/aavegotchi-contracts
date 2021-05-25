@@ -2,7 +2,7 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
-const { uniclyBaadgeItemTypes:itemTypes } = require('../itemTypes/uniclyBaadgeItemType')
+const { uniclyBaadgeItemType:itemTypes } = require('../addItemTypes/itemTypes/uniclyBaadgeItemType')
 const { badgeSvgs } = require('../../svgs/uniclyBaadgeSvg')
 
 let signer
