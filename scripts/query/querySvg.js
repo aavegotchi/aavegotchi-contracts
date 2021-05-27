@@ -14,7 +14,7 @@ async function main () {
   // let aavegotchi = await svgFacet.getAavegotchiSvg(9887)
   // uni eyes  5795
   // hawwain shirt
-  let aavegotchi = await svgFacet.getAavegotchiSvg(4849)
+  let aavegotchi = await svgFacet.getItemSvg(174)
   console.log(aavegotchi)
   // 11 = robe
   // 13 = aagent shirt

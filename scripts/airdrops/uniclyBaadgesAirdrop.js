@@ -3,7 +3,7 @@
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
 
-const {addLeaderboardBadges} = require('../../scripts/addItemTypes/addSzn1Rnd2Badges')
+const {addUniclyBaadge} = require('../../addItemTypes/addUniclyBaadge')
 
 
 const {rarityRoundTwo:rarity, kinshipRoundTwo:kinship, xpRoundTwo:xp} = require('../../data/rarityFarmingRoundTwo.tsx')
@@ -26,7 +26,10 @@ function strDisplay (str) {
 
 async function main () {
 
-await addLeaderboardBadges()
+//  ADD THE UNICLY BADGE
+await addUniclyBaadge()
+
+console.log('Sending Rewards!')
 
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   const gameManager = await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
@@ -41,10 +44,9 @@ await addLeaderboardBadges()
     signer = await ethers.provider.getSigner(gameManager)
     
 
-  //  await addBatchBatchTransfer()
-
   } else if (hre.network.name === 'matic') {
     signer = new LedgerSigner(ethers.provider,"hid","m/44'/60'/2'/0/0")
+    console.log('signer:',signer)
   } else {
     throw Error('Incorrect network selected')
   }
@@ -54,7 +56,7 @@ await addLeaderboardBadges()
   let maxProcess = 100
   
   //STEP ONE: INPUT THE BADGE IDS
-  let badgeIds = [169,170,171,172,173,174]
+  let badgeIds = [175]
 
   //STEP TWO: GET THE WINNERS (IN ORDER OF BADGE IDS)
   const rarityTop10 = rarity.slice(0,10) //10 of 169
@@ -122,7 +124,7 @@ await addLeaderboardBadges()
     const itemsTransferFacet = await ethers.getContractAt("ItemsTransferFacet",diamondAddress,signer)
 
     //STEP SIX: ITERATE THROUGH EACH BATCH AND TRANSFER 
-  for (const txGroup of txData) {
+    for (const [i, txGroup] of txData.entries()) {
 
     //Batch Info
     let batchBeginning = txGroup[0].index
@@ -131,22 +133,19 @@ await addLeaderboardBadges()
     let batchBadgeIds = _ids.slice(batchBeginning,batchEnd+1)
     let batchBadgeValues = _values.slice(batchBeginning,batchEnd+1)
 
-    console.log('token is:',batchTokenIds)
+    console.log('token ids:',batchTokenIds)
     console.log('badge ids:',batchBadgeIds)
     console.log('values:',batchBadgeValues)
 
     const itemsFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",diamondAddress)
-    const balances = await itemsFacet.itemBalances(gameManager)
    
-    balances.forEach((item) => {
-      console.log(`Balance of ${item.itemId} is ${item.balance.toString()}`)
-    });
 
 
-    console.log(`Sending Batch to tokenIDs ${batchBeginning}-${batchEnd}`)
+    console.log(`Sending Batch ${i} to tokenIDs ${batchBeginning}-${batchEnd}`)
    
     //Transaction
       const tx = await itemsTransferFacet.batchBatchTransferToParent(gameManager,diamondAddress,batchTokenIds,batchBadgeIds, batchBadgeValues)
+      console.log('Tx hash:',tx.hash)
       let receipt = await tx.wait()
       console.log('Batch complete! Gas used:', strDisplay(receipt.gasUsed))
       if (!receipt.status) {
@@ -154,13 +153,20 @@ await addLeaderboardBadges()
       }
 
       if (testing) {
-      
+
         const balance = await itemsFacet.balanceOfToken(diamondAddress,batchTokenIds[0],batchBadgeIds[0][0])
 
         console.log(`Balance of tokenID ${batchTokenIds[0]} for badge ${batchBadgeIds[0][0]} is: ${balance.toString()}`)
 
+        const balances = await itemsFacet.itemBalances(gameManager)
+        balances.forEach((item) => {
+          console.log(`Balance of ${item.itemId} after sending Batch ${i} is ${item.balance.toString()}`)
+        });
+
 
       }
+
+    
       
     }
 }

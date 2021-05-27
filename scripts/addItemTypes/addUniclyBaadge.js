@@ -2,16 +2,30 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
-const { szn1rnd2ItemTypes:itemTypes } = require('./itemTypes/szn1rnd2ItemTypes')
-const { badgeSvgs } = require('../../svgs/szn1rnd2BadgeSvgs')
-
-//const { sendToMultisig } = require('../../libraries/multisig/multisig.js')
+const { uniclyBaadgeItemType:itemTypes } = require('../addItemTypes/itemTypes/uniclyBaadgeItemType')
+const { badgeSvgs } = require('../../svgs/uniclyBaadgeSvg')
 
 let signer
 const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
 const gasLimit = 15000000
 
-async function uploadSvgs (svgs, svgType, testing) {
+function strDisplay (str) {
+  return addCommas(str.toString())
+}
+
+function addCommas (nStr) {
+  nStr += ''
+  const x = nStr.split('.')
+  let x1 = x[0]
+  const x2 = x.length > 1 ? '.' + x[1] : ''
+  var rgx = /(\d+)(\d{3})/
+  while (rgx.test(x1)) {
+    x1 = x1.replace(rgx, '$1' + ',' + '$2')
+  }
+  return x1 + x2
+}
+
+async function uploadSvgs (svgs, svgType, testing, signer) {
   let svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
   function setupSvg (...svgData) {
     const svgTypesAndSizes = []
@@ -64,10 +78,10 @@ async function uploadSvgs (svgs, svgType, testing) {
       if (!receipt.status) {
         throw Error(`Error:: ${tx.hash}`)
       }
+      console.log('Gas used:' + strDisplay(receipt.gasUsed))
       console.log(svgItemsEnd, svg.length)
     } else {
-      let tx = await svgFacet.populateTransaction.storeSvg(svg, svgTypesAndSizes)
-    //  await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+      let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
     }
     if (svgItemsEnd === svgs.length) {
       break
@@ -77,7 +91,7 @@ async function uploadSvgs (svgs, svgType, testing) {
 }
 
 async function main () {
-  let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
+  let owner = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119" 
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
   if (testing) {
     await hre.network.provider.request({
@@ -86,41 +100,46 @@ async function main () {
     })
     signer = await ethers.provider.getSigner(owner)
   } else if (hre.network.name === 'matic') {
-    signer = new LedgerSigner(ethers.provider)
+    signer = new LedgerSigner(ethers.provider,"hid","m/44'/60'/2'/0/0")
   } else {
     throw Error('Incorrect network selected')
   }
   let tx
   let receipt
-  let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)
+  let itemsFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)).connect(signer)
 
   let daoFacet = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
 
   console.log('Adding items', 0, 'to', itemTypes.length)
   if (testing) {
+
     tx = await daoFacet.addItemTypes(itemTypes, { gasLimit: gasLimit })
     receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`)
     }
     console.log('Items were added:', tx.hash)
+    console.log('Gas used:' + strDisplay(receipt.gasUsed))
   } else {
-    tx = await daoFacet.populateTransaction.addItemTypes(itemTypes, { gasLimit: gasLimit })
-   // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+    tx = await daoFacet.addItemTypes(itemTypes)
+    console.log('Items added:', tx.hash)
+    
   }
+  
 
-  await uploadSvgs(badgeSvgs, 'wearables', testing)
+  await uploadSvgs(badgeSvgs, 'wearables', testing, signer)
  
-  console.log('Send items to Aavegotchi Hardware')
+  console.log('Send items to Aavegotchi Item Manager')
   let mintAddress = '0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119'
 
-  let itemIds = [169, 170, 171, 172, 173, 174]
-  let quantities = [10, 10, 10, 90, 90, 90]
+  let itemIds = [175]
+  let quantities = [0]
 
   console.log('Minting items')
   if (testing) {
     tx = await daoFacet.mintItems(mintAddress, itemIds, quantities)
     receipt = await tx.wait()
+    console.log('Gas used:' + strDisplay(receipt.gasUsed))
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`)
     }
@@ -138,13 +157,13 @@ async function main () {
       let wearables = ethers.utils.formatBytes32String('wearables')
       const itemSvg = await svgFacet.getSvg(wearables, 169)
 
-      console.log('item svg:',itemSvg)
+     // console.log('item svg:',itemSvg)
     }
 
     //  console.log('item svg:',itemSvg)
   } else {
     // Rarity 10, Kinship 10, XP 10, Rarity 100, Kinship 100, XP 100
-    tx = await daoFacet.populateTransaction.mintItems(mintAddress, itemIds, quantities, { gasLimit: gasLimit })
+    tx = await daoFacet.mintItems(mintAddress, itemIds, quantities, { gasLimit: gasLimit })
    // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 }
@@ -160,4 +179,4 @@ if (require.main === module) {
     })
 }
 
-exports.addLeaderboardBadges = main
+exports.addUniclyBaadge = main

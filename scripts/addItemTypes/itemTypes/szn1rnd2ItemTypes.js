@@ -8,9 +8,9 @@ const itemTypes = [
 
   {
 
-    name: "Rarity Farming SZN 1 Round 1 TOP 10 RARITY",
-    description: "This Aavegotchi achieved a rank in the top 10 of RARITY for the very first round of the first ever season of Rarity Farming. \n\nFrom April 20 to May 4, 2021, the first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were from the original Haunt 1 portals of which there were 10,000 total.",
-    svgId: 163,
+    name: "Rarity Farming SZN 1 Round 2 TOP 10 RARITY",
+    description: "This Aavegotchi achieved a rank in the top 10 of RARITY for the second round of the first ever season of Rarity Farming. \n\nFrom April 20 to May 4, 2021, the first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were from the original Haunt 1 portals of which there were 10,000 total.",
+    svgId: 169,
     minLevel:0,
     canbeTransferred: false,
     totalQuantity: 0,
@@ -28,9 +28,9 @@ const itemTypes = [
   },
  
    {
-    name: "Rarity Farming SZN 1 Round 1 TOP 10 KINSHIP",
-    description: "This Aavegotchi achieved a rank in the top 10 of RARITY for the very first round of the first ever season of Rarity Farming. \n\nFrom April 20 to May 4, 2021, the first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were from the original Haunt 1 portals of which there were 10,000 total.",
-    svgId: 164,
+    name: "Rarity Farming SZN 1 Round 2 TOP 10 KINSHIP",
+    description: "This Aavegotchi achieved a rank in the top 10 of RARITY for the second round of the first ever season of Rarity Farming. \n\nFrom April 20 to May 4, 2021, the first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were from the original Haunt 1 portals of which there were 10,000 total.",
+    svgId: 170,
     canbeTransferred: false,
     totalQuantity: 0,
     minLevel:0,
@@ -48,9 +48,9 @@ const itemTypes = [
   },
  
   {
-    name: "Rarity Farming SZN 1 Round 1 TOP 10 EXPERIENCE",
-    description: "This Aavegotchi achieved a rank in the top 10 of EXPERIENCE for the very first round of the first ever season of Rarity Farming. \n\nFrom April 20 to May 4, 2021, the first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were from the original Haunt 1 portals of which there were 10,000 total.",
-    svgId: 165,
+    name: "Rarity Farming SZN 1 Round 2 TOP 10 EXPERIENCE",
+    description: "This Aavegotchi achieved a rank in the top 10 of EXPERIENCE for the second round of the first ever season of Rarity Farming. \n\nFrom April 20 to May 4, 2021, the first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were from the original Haunt 1 portals of which there were 10,000 total.",
+    svgId: 171,
     canbeTransferred: false,
     totalQuantity: 0,
     minLevel:0,
@@ -70,9 +70,9 @@ const itemTypes = [
    
   {
   
-    name: "Rarity Farming SZN 1 Round 1 TOP 100 RARITY",
-    description: "This Aavegotchi achieved a rank in the top 100 of RARITY for the very first round of the first ever season of Rarity Farming. \n\nFrom April 20 to May 4, 2021, the first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were from the original Haunt 1 portals of which there were 10,000 total.",
-    svgId: 166,
+    name: "Rarity Farming SZN 1 Round 2 TOP 100 RARITY",
+    description: "This Aavegotchi achieved a rank in the top 100 of RARITY for the second round of the first ever season of Rarity Farming. \n\nFrom April 20 to May 4, 2021, the first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were from the original Haunt 1 portals of which there were 10,000 total.",
+    svgId: 172,
     canbeTransferred: false,
     totalQuantity: 0,
     minLevel:0,
@@ -91,9 +91,9 @@ const itemTypes = [
  
 
   {
-    name: "Rarity Farming SZN 1 Round 1 TOP 100 KINSHIP",
-    description: "This Aavegotchi achieved a rank in the top 100 of KINSHIP for the very first round of the first ever season of Rarity Farming. \n\nFrom April 20 to May 4, 2021, the first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were from the original Haunt 1 portals of which there were 10,000 total.",
-    svgId: 167,
+    name: "Rarity Farming SZN 1 Round 2 TOP 100 KINSHIP",
+    description: "This Aavegotchi achieved a rank in the top 100 of KINSHIP for the second round of the first ever season of Rarity Farming. \n\nFrom April 20 to May 4, 2021, the first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were from the original Haunt 1 portals of which there were 10,000 total.",
+    svgId: 173,
     minLevel:0,
     canbeTransferred: false,
     totalQuantity: 0,
@@ -112,9 +112,9 @@ const itemTypes = [
 
   {
    
-    name: "Rarity Farming SZN 1 Round 1 TOP 100 EXPERIENCE",
-    description: "This Aavegotchi achieved a rank in the top 100 of EXPERIENCE for the very first round of the first ever season of Rarity Farming. \n\nFrom April 20 to May 4, 2021, the first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were from the original Haunt 1 portals of which there were 10,000 total.",
-    svgId: 168,
+    name: "Rarity Farming SZN 1 Round 2 TOP 100 EXPERIENCE",
+    description: "This Aavegotchi achieved a rank in the top 100 of EXPERIENCE for the second round of the first ever season of Rarity Farming. \n\nFrom April 20 to May 4, 2021, the first season of Rarity Farming featured three main leaderboards that any summoned Aavegotchi could participate in. All competing Aavegotchis were from the original Haunt 1 portals of which there were 10,000 total.",
+    svgId: 174,
     canbeTransferred: false,
     totalQuantity: 0,
     minLevel:0,
