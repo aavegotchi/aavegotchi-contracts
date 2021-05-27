@@ -29,6 +29,8 @@ contract SvgViewsFacet is Modifiers {
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         int16[NUMERIC_TRAITS_NUM] memory _numericTraits = s.aavegotchis[_tokenId].numericTraits;
         ag_[1] = getAavegotchiSvgLayers('left', collateralType, _numericTraits, _tokenId);
+        ag_[2] = getAavegotchiSvgLayers('right', collateralType, _numericTraits, _tokenId);
+        ag_[3] = getAavegotchiSvgLayers('back', collateralType, _numericTraits, _tokenId);
                 
         // aavegotchi body
         // bytes memory svg = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_LEFT_SVG_ID);
@@ -315,7 +317,7 @@ contract SvgViewsFacet is Modifiers {
                 // y
                 LibStrings.strWithUint('" y="', dimensions.y),
                 '">',
-                LibSvg.getSvg("sleeves", svgId),
+                LibSvg.getSvg(LibSvg.bytesToBytes32("sleeves-", _sideView), svgId),
                 "</svg>"
             );
         }

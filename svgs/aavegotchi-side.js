@@ -19,9 +19,15 @@ rightBody += '<path class="gotchi-cheek" d="M40 32h2v2h-2z" fill="#f696c6"/>'
 let rightHand = '<g class="gotchi-handsDown"><path d="M39 44h1v-4h-1v-1h-2v-1h-2v-1h-1v-1h-1v-1h-2v7h1v1h1v1h2v1h4z" fill="#64438e"/><path d="M39 40h-2v-1h-2v-1h-1v-1h-1v-1h-2v5h1v1h1v1h2v1h4z" fill="#fff"/><g fill="#edd3fd"><path d="M32 40v1h-1v-1h1z"/><path d="M33 42v-1h-1v1h1v1h2v-1h-2z"/><path d="M39 43v1h-4v-1h4z"/></g></g>'
 rightHand += '<g class="gotchi-handsUp"><path d="M38 29v-1h-4v1h-1v2h-1v2h-1v1h-1v1h-1v2h7v-1h1v-1h1v-2h1v-4z" fill="#64438e"/><path d="M34 29v2h-1v2h-1v1h-1v1h-1v2h5v-1h1v-1h1v-2h1v-4z" fill="#fff"/><g fill="#edd3fd"><path d="M34,36h1v1h-1V36z"/><path d="M36 35h-1v1h1v-1h1v-2h-1v2z"/><path d="M37,29h1v4h-1V29z"/></g></g>'
 
+let backBody = '<g class="gotchi-body"><g class="gotchi-primary"><path d="M21 12h2v-2h-4v2h1z"/><path d="M19 14v-2h-2v2h1zm6-4h2V8h-4v2h1z"/><path d="M29 8h8V6H27v2h1zm16 6h2v-2h-2v1z"/><path d="M48 14h-1v39h-2v2h4V14zm-11-4h4V8h-4v1z"/><path d="M41 12h4v-2h-4v1zM17 53V14h-2v41h4v-2h-1z"/><path d="M24 51h-5v2h5v-1z"/><path d="M27 53h-3v2h5v-2h-1zm18-2h-5v2h5v-1z"/><path d="M35 51h-6v2h6v-1z"/><path d="M38 53h-3v2h5v-2h-1z"/></g><g class="gotchi-secondary"><path d="M18 43v6h2v-1h2v1h2v2h-5v2h-2V14h2v1h-1v26z"/><path d="M27 51h-3v2h5v-2h-1zm11 0h-3v2h5v-2h-1z"/><path d="M35 49h-2v-1h-2v1h-2v2h6v-1zM25 11h2v-1h-4v1h1zm-4 2h2v-1h-4v1h1zm24 31v5h-1v-1h-2v1h-2v2h5v2h2V14h-2v29z"/><path d="M37 8H27v1h5v1h5V9zm8 4h-4v2h4v-1z"/><path d="M41 10h-4v2h4v-1z"/></g><path d="M44 14h-3v-2h-4v-2h-5V9h-5v2h-4v2h-4v2h-1v34h2v-1h2v1h2v2h5v-2h2v-1h2v1h2v2h5v-2h2v-1h2v1h1V14z" fill="#fff"/></g>'
+// shadow
+backBody += '<g class="gotchi-shadow"><path opacity=".25" d="M25 58H19v1h1v1h24V59h1V58h-1z" fill="#000"/></g>'
+
+
 const aavegotchiSvgs = {
   left: ['', '', leftBody, leftHand],
   right: ['', '', rightBody, rightHand]
+  back: ['','', ]
 }
 
 exports.aavegotchiSvgs = aavegotchiSvgs
