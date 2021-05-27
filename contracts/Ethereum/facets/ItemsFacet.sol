@@ -6,6 +6,7 @@ import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 
 contract ItemsFacet {
     AppStorage internal s;
@@ -72,6 +73,26 @@ contract ItemsFacet {
         for (uint256 i; i < s.itemTypes.length; i++) {
             emit LibERC1155.URI(LibStrings.strWithUint(_value, s.itemTypes[i]), i);
         }
+    }
+
+    /// @notice Enable or disable approval for a third party ("operator") to manage
+    ///  all of `msg.sender`'s assets
+    /// @dev Emits the ApprovalForAll event. The contract MUST allow
+    ///  multiple operators per owner.
+    /// @param _operator Address to add to the set of authorized operators
+    /// @param _approved True if the operator is approved, false to revoke approval
+    function setApprovalForAll(address _operator, bool _approved) external {
+        address sender = LibMeta.msgSender();
+        s.operators[sender][_operator] = _approved;
+        emit LibERC721.ApprovalForAll(sender, _operator, _approved);
+    }
+
+    /// @notice Query if an address is an authorized operator for another address
+    /// @param _owner The address that owns the NFTs
+    /// @param _operator The address that acts on behalf of the owner
+    /// @return approved_ True if `_operator` is an approved operator for `_owner`, false otherwise
+    function isApprovedForAll(address _owner, address _operator) external view returns (bool approved_) {
+        approved_ = s.operators[_owner][_operator];
     }
 
     /**
