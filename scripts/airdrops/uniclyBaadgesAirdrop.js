@@ -3,10 +3,10 @@
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
 
-const {addUniclyBaadge} = require('../../addItemTypes/addUniclyBaadge')
+const {addUniclyBaadge} = require('../addItemTypes/addUniclyBaadge')
 
 
-const {rarityRoundTwo:rarity, kinshipRoundTwo:kinship, xpRoundTwo:xp} = require('../../data/rarityFarmingRoundTwo.tsx')
+const {uniclyBadgeGotchisOwned:data} = require('../../data/airdrops/uniclyBadge.tsx')
 
 function addCommas (nStr) {
   nStr += ''
@@ -27,7 +27,7 @@ function strDisplay (str) {
 async function main () {
 
 //  ADD THE UNICLY BADGE
-await addUniclyBaadge()
+//await addUniclyBaadge()
 
 console.log('Sending Rewards!')
 
@@ -59,16 +59,7 @@ console.log('Sending Rewards!')
   let badgeIds = [175]
 
   //STEP TWO: GET THE WINNERS (IN ORDER OF BADGE IDS)
-  const rarityTop10 = rarity.slice(0,10) //10 of 169
-  const kinshipTop10 = kinship.slice(0,10) //10 of 170
-  const xpTop10 = xp.slice(0,10) //10 of 171
-  const rarityTop100 = rarity.slice(10,100) //89 of 172
-  const kinshipTop100 = kinship.slice(10,100) //90 of 173
-  const xpTop100 = xp.slice(10,100) //90 of 174
-
-
-  let awardsArray = [rarityTop10,kinshipTop10,xpTop10,rarityTop100,kinshipTop100,xpTop100]
-
+  let awardsArray = [data.data.users]
 
   let tokenIds = []
   let _ids = []
@@ -76,16 +67,25 @@ console.log('Sending Rewards!')
 
   //STEP THREE: COMBINE ALL OF THE WINNERS INTO A SINGLE OBJECT
   awardsArray.forEach((winnersArray, index) => {
+    console.log('winners array:',winnersArray)
     let badgeId = badgeIds[index]
     for (let index = 0; index < winnersArray.length; index++) {
-      const gotchiID = winnersArray[index];
-      if (finalRewards[gotchiID]) {
-        finalRewards[gotchiID] = [...finalRewards[gotchiID], badgeId]
-      }
-      else finalRewards[gotchiID] = [badgeId]
+      const gotchiObject = winnersArray[index];
+      const gotchisOwned = gotchiObject.gotchisOwned
+
+      console.log('gotchis owned:',gotchisOwned)
+
+      gotchisOwned.forEach((gotchiIdObj) => {
+
+        finalRewards[gotchiIdObj.id] = [badgeId]
+      });
+    
+       
     }
 
   });
+
+  console.log('final rewards:',finalRewards)
 
   //STEP FOUR: SEPARATE THE DATA INTO THREE GROUPS 
   Object.keys(finalRewards).forEach((key) => {

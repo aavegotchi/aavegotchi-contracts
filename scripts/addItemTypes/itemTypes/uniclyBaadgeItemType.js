@@ -14,7 +14,7 @@ const itemTypes = [
     minLevel:0,
     canbeTransferred: false,
     totalQuantity: 0,
-    maxQuantity: 10,
+    maxQuantity: 635,
     setId: [],
     author: "xibot",
     dimensions: {x: 0, y:0, width:0, height:0 },

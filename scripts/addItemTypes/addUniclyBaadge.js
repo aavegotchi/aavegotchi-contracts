@@ -133,7 +133,7 @@ async function main () {
   let mintAddress = '0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119'
 
   let itemIds = [175]
-  let quantities = [0]
+  let quantities = [635]
 
   console.log('Minting items')
   if (testing) {
@@ -149,8 +149,8 @@ async function main () {
     // Check that items are received
 
     if (testing) {
-      const balance = await itemsFacet.balanceOf(mintAddress, '169')
-      console.log('balance of 169:', balance.toString())
+      const balance = await itemsFacet.balanceOf(mintAddress, '175')
+      console.log('balance of 175:', balance.toString())
 
       // Check the SVG output
       const svgFacet = await ethers.getContractAt('SvgFacet', diamondAddress)
