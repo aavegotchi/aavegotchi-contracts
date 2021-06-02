@@ -185,6 +185,7 @@ struct AppStorage {
     address[] collateralTypes;
     address ghstContract;
     address childChainManager;
+    address gameManager;
     address dao;
     address daoTreasury;
     address pixelCraft;

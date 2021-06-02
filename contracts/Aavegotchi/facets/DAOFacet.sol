@@ -29,6 +29,14 @@ contract DAOFacet is Modifiers {
    |             Read Functions         |
    |__________________________________*/
 
+    function isGameManager(address _manager) external view returns (bool) {
+        return s.gameManagers[_manager].limit != 0;
+    }
+
+    function getGameManagerBalance(address _manager) external view returns (uint256) {
+        return s.gameManagers[_manager].balance;
+    }
+
     /***********************************|
    |             Write Functions        |
    |__________________________________*/

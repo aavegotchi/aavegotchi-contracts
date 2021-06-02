@@ -1,80 +1,109 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
 const truffleAsserts = require('truffle-assertions')
-const { itemManager } = require('../scripts/upgrades/upgrade-itemManager.js');
-const { itemTypes } = require('../scripts/addItemTypes/miamiShirtItemType')
-
+const { GameManager } = require('../scripts/upgrades/upgrade-gameManager.js');
 
 describe('Test GameManager role', async function () {
-
- 
-  
-  const svg = 'hey'
-  const _typesAndIdsAndSizes = [{ svgType: ethers.utils.formatBytes32String('eyeShapes'), ids: [22], sizes: [svg.length] }]
-
-  const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
-  let txData,
-     owner, 
-     signer,
-     daoFacet,
-     svgFacet
-    
- 
-
- // const svg= ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 23"  xmlns:v="https://vecta.io/nano"><path d="M3,0H1v1h1v1H1v1H0v7h2V9h1V0z"/></svg>']
-
+  const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
+  let txData, owner, gameManager, generalUser, signer, daoFacet, gameManagerDaoFacet, signerDaoFacet, aavegotchiFacet;
+  let aavegotchiID = 7938;
   
   before(async function () {
     this.timeout(1000000)
-     owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
-     signer = await ethers.provider.getSigner(owner)
-     daoFacet = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
-     svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
-    
+    await GameManager();
+
+    owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner();
+    signer = await ethers.provider.getSigner(owner);
+    [gameManager, generalUser] = await ethers.getSigners();
+    daoFacet = (await ethers.getContractAt('DAOFacet', diamondAddress))
+    signerDaoFacet = await daoFacet.connect(signer);
+    gameManagerDaoFacet = await daoFacet.connect(gameManager);
+    aavegotchiFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', diamondAddress)).connect(signer)    
   })
 
-  it('allows the dao or Owner to add an ItemManager', async function () {
+  it('should allow dao or owner to add or remove a game manager and trigger event', async function () {
+    // Add Game Manager
+    let addTx = await signerDaoFacet.addGameManagers([owner], [3000])
+    txData = await addTx.wait()
 
-    await itemManager();
+    // Check Event dispatched
+    const addedEvents = txData.events
+    expect(addedEvents[0].event).to.equal('GameManagerAdded')
+    const addedAddr = ((addedEvents[0].args).gameManager_)
+    expect(addedAddr).to.equal(owner)
 
-    let addTx = await daoFacet.addItemManagers([owner])
-    txData=await addTx.wait()
-    const events= txData.events
-    const addedAddr=((events[events.length-1].args).newItemManager_)
-    expect(addedAddr).to.equal(owner)    
+    // Check view function works
+    let isManager = await signerDaoFacet.isGameManager(owner);
+    expect(isManager).to.equal(true);
+
+    // Remove Game Manager
+    let removeTx = await signerDaoFacet.removeGameManagers([owner])
+    txData = await removeTx.wait()
+
+    // Check Event dispatched
+    const removedEvents = txData.events
+    expect(removedEvents[0].event).to.equal('GameManagerRemoved')
+    const removedAddr = ((removedEvents[0].args).gameManager_)
+    expect(removedAddr).to.equal(owner)
+
+    isManager = await signerDaoFacet.isGameManager(owner);
+    expect(isManager).to.equal(false);
   })
 
-  it('only allows ItemManagers to add an item', async function(){
-  let removeTx= await daoFacet.removeItemManagers([owner])//remove the existing itemmanager
- await  truffleAsserts.reverts( daoFacet.addItemTypes(itemTypes),"LibAppStorage: only an ItemManager can call this function");
+  it('should allow game managers to grant experience and restore the xp balance in 24 hours', async function(){
+    // Add Game Manager with 100 Balance
+    let addTx = await signerDaoFacet.addGameManagers([gameManager.address], [100])
+    const balance = await signerDaoFacet.getGameManagerBalance(gameManager.address);
+    expect(balance.toNumber()).to.equal(100);
+    await addTx.wait()
 
+    // Grant 50 xp and check remaining balance
+    txData = await gameManagerDaoFacet.grantExperience([aavegotchiID], [50]);
+    expect(await signerDaoFacet.getGameManagerBalance(gameManager.address)).to.equal(50);
+
+    // Simulate 24 hours later
+    await ethers.provider.send('evm_setNextBlockTimestamp', [(new Date()).getTime() + 86400]); 
+    await ethers.provider.send('evm_mine');
+
+    // Try to grant 100 xp to check if balance refreshed
+    txData = await gameManagerDaoFacet.grantExperience([aavegotchiID], [100]);
+    expect(await signerDaoFacet.getGameManagerBalance(gameManager.address)).to.equal(0);
   })
 
-  it('only allows ItemManagers to update an svg', async function(){
-   await  truffleAsserts.reverts( svgFacet.updateSvg(svg, _typesAndIdsAndSizes),"LibAppStorage: only an ItemManager can call this function");
+  it('should reject game manager without enough xp balance', async function(){
+    // Add Game Manager with 100 xp
+    let addTx = await signerDaoFacet.addGameManagers([gameManager.address], [100])
+    const balance = await signerDaoFacet.getGameManagerBalance(gameManager.address);
+    expect(balance.toNumber()).to.equal(100);
+    await addTx.wait()
 
-})
-it('only allows ItemManagers to add an item type and svg', async function(){
-  await  truffleAsserts.reverts( daoFacet.addItemTypesAndSvgs(itemTypes,svg, _typesAndIdsAndSizes),"LibAppStorage: only an ItemManager can call this function");
-})
+    // Grant 50 xp and remaining balance is 50
+    txData = await gameManagerDaoFacet.grantExperience([aavegotchiID], [50]);
+    expect(await signerDaoFacet.getGameManagerBalance(gameManager.address)).to.equal(50);
 
-it('Item Manager can add an item type and svg', async function () {
-  let addTx = await daoFacet.addItemManagers([owner])
-  txData=await addTx.wait()
-  const events= txData.events
-  const addedAddr=((events[events.length-1].args).newItemManager_)
-  expect(addedAddr).to.equal(owner) 
+    // Try grant 80 xp and check error
+    try {
+      txData = await gameManagerDaoFacet.grantExperience([aavegotchiID], [80]);
+      expect(true).to.equal(false);
+    } catch (e) {
+      expect(true).to.equal(true);
+    }
 
-  await svgFacet.updateSvg(svg, _typesAndIdsAndSizes)
+    // Balance is not changed
+    expect(await signerDaoFacet.getGameManagerBalance(gameManager.address)).to.equal(50);
+  })
 
-  const itemSvg = await svgFacet.getSvg(ethers.utils.formatBytes32String("eyeShapes"),22)
+  it('should reject general users to grant experience', async function(){
+    const generalUserDaoFacet = await daoFacet.connect(generalUser);
+    // Check if game manager
+    let isManager = await signerDaoFacet.isGameManager(generalUser.address);
+    expect(isManager).to.equal(false);
 
-  
-
-  console.log('svg:',itemSvg)
-  expect(itemSvg).to.equal(svg)
-  
-})
-
-
+    try {
+      txData = await generalUserDaoFacet.grantExperience([aavegotchiID], [50]);
+      expect(true).to.equal(false);
+    } catch (e) {
+      expect(true).to.equal(true);
+    }
+  })
 })

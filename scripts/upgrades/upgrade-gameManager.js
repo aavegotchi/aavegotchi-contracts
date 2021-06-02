@@ -37,21 +37,22 @@ async function main () {
   }
 
   const daoFacet = await ethers.getContractFactory('contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet')
-  const svgFacet = await ethers.getContractFactory('contracts/Aavegotchi/facets/SvgFacet.sol:SvgFacet')
-  facet1 = await daoFacet.deploy()
-  facet2 = await svgFacet.deploy()
-  await facet1.deployed()
-  await facet2.deployed()
-  console.log('Deployed daofacet:', facet1.address)
-  console.log('Deployed svgFacet:', facet2.address)
+  facet = await daoFacet.deploy()
+  await facet.deployed()
+  console.log('Deployed daofacet:', facet.address)
 
   const newDaoFuncs = [
-    getSelector('function addItemManagers(address[] calldata _newItemManagers) external'),
-    getSelector('function removeItemManagers(address[] calldata _itemManagers) external ')
+    getSelector('function isGameManager(address _manager) external'),
+    getSelector('function addGameManagers(address[] calldata _newGameManagers, uint256[] calldata _limits) external'),
+    getSelector('function removeGameManagers(address[] calldata _gameManagers) external'),
+    getSelector('function getGameManagerBalance(address _manager) external')
   ]
 
-  let existingDaoFuncs = getSelectors(facet1)
-  const existingSvgFuncs = getSelectors(facet2)
+  // const removedDaoFuncs = [
+  //   getSelector('function gameManager() external'),
+  // ]
+
+  let existingDaoFuncs = getSelectors(facet)
 
   existingDaoFuncs = existingDaoFuncs.filter(selector => !newDaoFuncs.includes(selector))
 
@@ -59,22 +60,20 @@ async function main () {
 
   const cut = [
     {
-      facetAddress: facet1.address,
+      facetAddress: facet.address,
       action: FacetCutAction.Add,
       functionSelectors: newDaoFuncs
     },
     {
-      facetAddress: facet1.address,
+      facetAddress: facet.address,
       action: FacetCutAction.Replace,
       functionSelectors: existingDaoFuncs
     },
-
-    {
-      facetAddress: facet2.address,
-      action: FacetCutAction.Replace,
-      functionSelectors: existingSvgFuncs
-
-    }
+    // {
+    //   facetAddress: facet.address,
+    //   action: FacetCutAction.Replace,
+    //   functionSelectors: removedDaoFuncs
+    // }
   ]
   console.log(cut)
 
@@ -98,11 +97,11 @@ async function main () {
   }
 }
 
-main()
-  .then(() => console.log('upgrade completed') /* process.exit(0) */)
-  .catch(error => {
-    console.error(error)
-    process.exit(1)
-  })
+// main()
+//   .then(() => console.log('upgrade completed') /* process.exit(0) */)
+//   .catch(error => {
+//     console.error(error)
+//     process.exit(1)
+//   })
 
-exports.itemManager = main
+exports.GameManager = main
