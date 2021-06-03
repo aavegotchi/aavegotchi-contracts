@@ -82,12 +82,13 @@ describe('Test GameManager role', async function () {
     expect(await signerDaoFacet.getGameManagerBalance(gameManager.address)).to.equal(50);
 
     // Try grant 80 xp and check error
-    try {
-      txData = await gameManagerDaoFacet.grantExperience([aavegotchiID], [80]);
-      expect(true).to.equal(false);
-    } catch (e) {
-      expect(true).to.equal(true);
-    }
+    //try {
+      await expect(gameManagerDaoFacet.grantExperience([aavegotchiID], [80])).to.be.revertedWith("DAOFacet: Game Manager's xp grant limit is reached")
+      //txData = ;
+     // expect(true).to.equal(false);
+   // } //catch (e) {
+     // expect(true).to.equal(true);
+   // }
 
     // Balance is not changed
     expect(await signerDaoFacet.getGameManagerBalance(gameManager.address)).to.equal(50);
