@@ -1218,7 +1218,7 @@ const itemTypes = [
     setId: [19],
     author: 'Xibot',
     description: '',
-    dimensions: { x: 10, y: 31, width: 44, height: 24 },
+    dimensions: { x: 10, y: 32, width: 44, height: 24 },
     x: 10,
     y: 33,
     width: 44,

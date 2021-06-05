@@ -12,7 +12,13 @@ const { aavegotchiSvgs } = require('../svgs/aavegotchi.js')
 const { wearablesSvgs } = require('../svgs/wearables.js')
 const { collateralsSvgs } = require('../svgs/collaterals.js')
 const { eyeShapeSvgs } = require('../svgs/eyeShapes.js')
+const { badgeSvgs:uniclyBaadgeSvgs } = require('../svgs/uniclyBaadgeSvg')
+const { sleevesSvgs:miamiSleevesSvgs  } = require('../svgs/miamiShirtWearables')
+const { sleevesSvgs:raffe4SleevesSvgs  } = require('../svgs/raffe4Wearables')
+const { badgeSvgs:szn1Rnd1badgeSvgs } = require('../svgs/szn1rnd1BadgeSvgs')
+const { badgeSvgs:szn1Rnd2badgeSvgs } = require('../svgs/szn1rnd2BadgeSvgs')
 const { wearableSets } = require('./wearableSets.js')
+const {wearableSets:wearableSetsRaffle4} = require("./updates/wearableSets/wearableSetsRaffle4.js")
 
 function addCommas (nStr) {
   nStr += ''
@@ -53,6 +59,8 @@ async function main (scriptName) {
   let pixelCraft
   let childChainManager
   let ghstStakingDiamond
+  let itemManagers
+  let mintAddress
   const gasLimit = 12300000
 
   const portalPrice = ethers.utils.parseEther('100')
@@ -109,6 +117,8 @@ async function main (scriptName) {
     daoTreasury = account
     rarityFarming = account // 'todo' // await accounts[2].getAddress()
     pixelCraft = account // 'todo' // await accounts[3].getAddress()
+    itemManagers = [account] // 'todo'
+    mintAddress = account // 'todo'
   } else if (hre.network.name === 'mumbai') {
     // childChainManager = '0xb5505a6d998549090530911180f38aC5130101c6'
     childChainManager = '0xb5505a6d998549090530911180f38aC5130101c6'
@@ -171,7 +181,8 @@ async function main (scriptName) {
     shopFacet,
     metaTransactionsFacet,
     erc1155MarketplaceFacet,
-    erc721MarketplaceFacet
+    erc721MarketplaceFacet,
+    escrowFacet
   ] = await deployFacets(
     'contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet',
     'contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet',
@@ -185,7 +196,8 @@ async function main (scriptName) {
     'ShopFacet',
     'MetaTransactionsFacet',
     'ERC1155MarketplaceFacet',
-    'ERC721MarketplaceFacet'
+    'ERC721MarketplaceFacet',
+    'EscrowFacet'
   )
 
   if (hre.network.name === 'hardhat') {
@@ -218,7 +230,8 @@ async function main (scriptName) {
       ['ShopFacet', shopFacet],
       ['MetaTransactionsFacet', metaTransactionsFacet],
       ['ERC1155MarketplaceFacet', erc1155MarketplaceFacet],
-      ['ERC721MarketplaceFacet', erc721MarketplaceFacet]
+      ['ERC721MarketplaceFacet', erc721MarketplaceFacet],
+      ['EscrowFacet', escrowFacet]
     ],
     owner: account,
     args: [[dao, daoTreasury, pixelCraft, rarityFarming, ghstTokenContract.address, keyHash, fee, vrfCoordinator, linkAddress, childChainManager, name, symbol]]
@@ -249,6 +262,7 @@ async function main (scriptName) {
   shopFacet = await ethers.getContractAt('ShopFacet', aavegotchiDiamond.address)
   erc1155MarketplaceFacet = await ethers.getContractAt('ERC1155MarketplaceFacet', aavegotchiDiamond.address)
   erc721MarketplaceFacet = await ethers.getContractAt('ERC721MarketplaceFacet', aavegotchiDiamond.address)
+  escrowFacet = await ethers.getContractAt('EscrowFacet', aavegotchiDiamond.address)
   bridgeFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet', aavegotchiDiamond.address)
 
   // add collateral info
@@ -289,6 +303,16 @@ async function main (scriptName) {
   console.log('Adding ticket categories gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
+  console.log('Adding item managers')
+  tx = await daoFacet.addItemManagers(itemManagers)
+  console.log('Adding item managers tx:', tx.hash)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Adding item manager failed: ${tx.hash}`)
+  }
+  console.log('Adding Item managers gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
   console.log('Adding Item Types')
   itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', aavegotchiDiamond.address)
   itemsTransferFacet = await ethers.getContractAt('ItemsTransferFacet', aavegotchiDiamond.address)
@@ -300,7 +324,7 @@ async function main (scriptName) {
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
-  console.log('Adding Item Types gas used::' + strDisplay(receipt.gasUsed))
+  console.log('Adding Item Types (1 / 4) gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   tx = await daoFacet.addItemTypes(itemTypes.slice(itemTypes.length / 4, (itemTypes.length / 4) * 2), { gasLimit: gasLimit })
@@ -308,7 +332,7 @@ async function main (scriptName) {
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
-  console.log('Adding Item Types gas used::' + strDisplay(receipt.gasUsed))
+  console.log('Adding Item Types (2 / 4) gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   tx = await daoFacet.addItemTypes(itemTypes.slice((itemTypes.length / 4) * 2, (itemTypes.length / 4) * 3), { gasLimit: gasLimit })
@@ -316,7 +340,7 @@ async function main (scriptName) {
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
-  console.log('Adding Item Types gas used::' + strDisplay(receipt.gasUsed))
+  console.log('Adding Item Types (3 / 4) gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   tx = await daoFacet.addItemTypes(itemTypes.slice((itemTypes.length / 4) * 3), { gasLimit: gasLimit })
@@ -324,19 +348,123 @@ async function main (scriptName) {
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
+  console.log('Adding Item Types (4 / 4) gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-  // add wearable types info
+  // add raffle4ItemTypes
+  const { itemTypes:raffle4ItemTypes } = require('./raffle4ItemTypes.js')
+
+  tx = await daoFacet.addItemTypes(itemTypes.slice(0, raffle4ItemTypes.length / 4), { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Adding Raffle4 Item Types (4 / 16) gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  tx = await daoFacet.addItemTypes(itemTypes.slice(raffle4ItemTypes.length / 4, (itemTypes.length / 16) * 5), { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Adding Raffle4 Item Types (5 / 16) gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  tx = await daoFacet.addItemTypes(itemTypes.slice((itemTypes.length / 16) * 5, (itemTypes.length / 8) * 3), { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Adding Raffle4 Item Types (6 / 16) gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  tx = await daoFacet.addItemTypes(itemTypes.slice((itemTypes.length / 8) * 3, (itemTypes.length / 4) * 2), { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Adding Raffle4 Item Types (8 / 16) gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  tx = await daoFacet.addItemTypes(itemTypes.slice((itemTypes.length / 4) * 2, (itemTypes.length / 4) * 3), { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Adding Raffle4 Item Types (12 / 16) gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  tx = await daoFacet.addItemTypes(itemTypes.slice((itemTypes.length / 4) * 3), { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Adding Raffle4 Item Types (16 / 16) gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  // add Miami shirts
+  console.log('Adding Miami shirts')
+  const { itemTypes:miamiShirtTypes } = require('./addItemTypes/itemTypes/miamiShirtItemType')
+  tx = await daoFacet.addItemTypes(miamiShirtTypes)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Adding Miami shirts gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  // add Szn1Rnd1bages
+  console.log('Adding Szn1Rnd1badges')
+  const { szn1rnd1ItemTypes } = require('./addItemTypes/itemTypes/szn1rnd1ItemTypes')
+  tx = await daoFacet.addItemTypes(szn1rnd1ItemTypes)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Adding Szn1Rnd1badges gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  // add Szn1Rnd2bages
+  console.log('Adding Szn1Rnd2badges')
+  const { szn1rnd2ItemTypes } = require('./addItemTypes/itemTypes/szn1rnd2ItemTypes')
+  tx = await daoFacet.addItemTypes(szn1rnd2ItemTypes)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Adding Szn1Rnd2badges gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  // add Unicly Badges
+  console.log('Adding Unicly Badges')
+  const { uniclyBaadgeItemType } = require('./addItemTypes/itemTypes/uniclyBaadgeItemType')
+  tx = await daoFacet.addItemTypes(uniclyBaadgeItemType)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Adding Unicly Badges gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  // add wearable types sets
   console.log('Adding Wearable Sets')
   tx = await daoFacet.addWearableSets(wearableSets.slice(0, wearableSets.length / 2))
   receipt = await tx.wait()
-  console.log('Adding Wearable Sets gas used::' + strDisplay(receipt.gasUsed))
+  console.log('Adding Wearable Sets (1 / 2) gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
-  // add wearable types info
+  // add wearable types sets
   console.log('Adding Wearable Sets')
   tx = await daoFacet.addWearableSets(wearableSets.slice(wearableSets.length / 2))
   receipt = await tx.wait()
-  console.log('Adding Wearable Sets gas used::' + strDisplay(receipt.gasUsed))
+  console.log('Adding Wearable Sets (2 / 2) gas used::' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  // add wearable types sets
+  console.log('Adding Wearable Sets Raffle4')
+  tx = await daoFacet.addWearableSets(wearableSetsRaffle4)
+  receipt = await tx.wait()
+  console.log('Adding Wearable Sets Raffle4 gas used::' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   // ----------------------------------------------------------------
@@ -365,6 +493,7 @@ async function main (scriptName) {
     }
     console.log('Total sizes:' + sizes)
   }
+
   console.log('Uploading Wearable Svgs')
   let svg, svgTypesAndSizes
   console.log('Number of wearables:' + wearablesSvgs.length)
@@ -398,6 +527,93 @@ async function main (scriptName) {
     svgItemsStart = svgItemsEnd
   }
 
+  console.log('Uploading raffle4 sleeves')
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['sleeves', raffe4SleevesSvgs.map(value => value.svg)],
+  )
+  printSizeInfo(svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  console.log('-------------------------------------------')
+
+  console.log('Uploading miami sleeves')
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['sleeves', miamiSleevesSvgs.map(value => value.svg)],
+  )
+  printSizeInfo(svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  console.log('-------------------------------------------')
+
+  console.log('Uploading szn1rnd1 badges')
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['wearables', szn1Rnd1badgeSvgs.slice(0, szn1Rnd1badgeSvgs.length / 3)]
+  )
+  printSizeInfo(svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['wearables', szn1Rnd1badgeSvgs.slice(szn1Rnd1badgeSvgs.length / 3, (szn1Rnd1badgeSvgs.length / 3) * 2)]
+  )
+  printSizeInfo(svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['wearables', szn1Rnd1badgeSvgs.slice((szn1Rnd1badgeSvgs.length / 3) * 2)]
+  )
+  printSizeInfo(svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  console.log('-------------------------------------------')
+
+  console.log('Uploading szn1rnd2 badges')
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['wearables', szn1Rnd2badgeSvgs.slice(0, szn1Rnd2badgeSvgs.length / 3)]
+  )
+  printSizeInfo(svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['wearables', szn1Rnd2badgeSvgs.slice(szn1Rnd2badgeSvgs.length / 3, (szn1Rnd2badgeSvgs.length / 3) * 2)]
+  )
+  printSizeInfo(svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['wearables', szn1Rnd2badgeSvgs.slice((szn1Rnd2badgeSvgs.length / 3) * 2)]
+  )
+  printSizeInfo(svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  console.log('-------------------------------------------')
+
+  console.log('Uploading badges')
+  ;[svg, svgTypesAndSizes] = setupSvg(
+    ['wearables', uniclyBaadgeSvgs]
+  )
+  printSizeInfo(svgTypesAndSizes)
+  tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+  console.log('-------------------------------------------')
+
   // --------------------------------
   console.log('Uploading aavegotchi SVGs')
   ;[svg, svgTypesAndSizes] = setupSvg(
@@ -417,11 +633,44 @@ async function main (scriptName) {
   )
   printSizeInfo(svgTypesAndSizes)
   tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-  console.log('Uploaded SVGs')
   receipt = await tx.wait()
   console.log('Gas used:' + strDisplay(receipt.gasUsed))
   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
   console.log('-------------------------------------------')
+
+  console.log('Setting raffle4 sleeves...')
+  let sleevesSvgId = 23
+  let sleeves = []
+  for (const sleeve of raffe4SleevesSvgs) {
+    sleeves.push(
+      {
+        sleeveId: sleevesSvgId,
+        wearableId: sleeve.id
+      }
+    )
+    sleevesSvgId++
+  }
+  tx = await svgFacet.setSleeves(sleeves, { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
+
+  console.log('Setting miami sleeves...')
+  sleevesSvgId = 27
+  sleeves = []
+  for (const sleeve of miamiSleevesSvgs) {
+    sleeves.push(
+      {
+        sleeveId: sleevesSvgId,
+        wearableId: sleeve.id
+      }
+    )
+    sleevesSvgId++
+  }
+  tx = await svgFacet.setSleeves(sleeves, { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  console.log('Gas used:' + strDisplay(receipt.gasUsed))
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed)
 
   // // if (hre.network.name === 'matic') {
   //   // transfer ownership
@@ -454,6 +703,7 @@ async function main (scriptName) {
     erc1155MarketplaceFacet: erc1155MarketplaceFacet,
     erc721MarketplaceFacet: erc721MarketplaceFacet,
     shopFacet: shopFacet,
+    escrowFacet: escrowFacet,
     linkAddress: linkAddress,
     linkContract: linkContract
   }
