@@ -74,6 +74,12 @@ async function main (scriptName) {
     await linkContract.deployed()
     linkAddress = linkContract.address
     vrfCoordinator = account
+    dao = account // 'todo' // await accounts[1].getAddress()
+    daoTreasury = account
+    rarityFarming = account // 'todo' // await accounts[2].getAddress()
+    pixelCraft = account // 'todo' // await accounts[3].getAddress()
+    itemManagers = [account] // 'todo'
+    mintAddress = account // 'todo'
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     fee = ethers.utils.parseEther('0.0001')
     initialHauntSize = '100'
