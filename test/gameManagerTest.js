@@ -61,9 +61,9 @@ describe('Test GameManager role', async function () {
     txData = await gameManagerDaoFacet.grantExperience([aavegotchiID], [50]);
     expect(await signerDaoFacet.getGameManagerBalance(gameManager.address)).to.equal(50);
 
-    // Simulate 24 hours later
-    await ethers.provider.send('evm_setNextBlockTimestamp', [(new Date()).getTime() + 86400]); 
-    await ethers.provider.send('evm_mine');
+    // Simulate 24 hours late
+    ethers.provider.send('evm_increaseTime', [24 * 3600])
+    ethers.provider.send('evm_mine')
 
     // Try to grant 100 xp to check if balance refreshed
     txData = await gameManagerDaoFacet.grantExperience([aavegotchiID], [100]);

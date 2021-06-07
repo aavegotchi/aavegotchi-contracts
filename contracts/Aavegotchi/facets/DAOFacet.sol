@@ -213,7 +213,7 @@ contract DAOFacet is Modifiers {
     function removeGameManagers(address[] calldata _gameManagers) external onlyDaoOrOwner {
         for (uint256 index = 0; index < _gameManagers.length; index++) {
             GameManager storage gameManager = s.gameManagers[_gameManagers[index]];
-            require(gameManager.limit != 0, "DAOFacet: gameManager does not exist or already removed");
+            require(gameManager.limit != 0, "DAOFacet: GameManager does not exist or already removed");
             gameManager.limit = 0;
             emit GameManagerRemoved(_gameManagers[index]);
         }
