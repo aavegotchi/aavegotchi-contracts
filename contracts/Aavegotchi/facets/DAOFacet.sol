@@ -151,11 +151,7 @@ contract DAOFacet is Modifiers {
             require(xp <= 1000, "DAOFacet: Cannot grant more than 1000 XP at a time");
             require(gameManager.balance >= xp, "DAOFacet: Game Manager's xp grant limit is reached");
 
-            //To test (Dan): Deal with overflow here? - Handling it just in case
-            uint256 experience = s.aavegotchis[tokenId].experience;
-            uint256 increasedExperience = experience + xp;
-            require(increasedExperience >= experience, "DAOFacet: Experience overflow");
-            s.aavegotchis[tokenId].experience = increasedExperience;
+            s.aavegotchis[tokenId].experience += xp;
             gameManager.balance -= xp;
         }
         emit GrantExperience(_tokenIds, _xpValues);
@@ -201,6 +197,7 @@ contract DAOFacet is Modifiers {
     }
 
     function addGameManagers(address[] calldata _newGameManagers, uint256[] calldata _limits) external onlyDaoOrOwner {
+        require(_newGameManagers.length == _limits.length, "New Game Managers and Limits should have same length");
         for (uint256 index = 0; index < _newGameManagers.length; index++) {
             GameManager storage gameManager = s.gameManagers[_newGameManagers[index]];
             gameManager.limit = _limits[index];
