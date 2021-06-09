@@ -8,7 +8,7 @@ const wearablesRightSvgs = [
 ]
 
 const wearablesBackSvgs = [
-  wearable('0_VoidBackRight'),
+  wearable('0_VoidRight'),
   wearable('1_CamoHatRight'),
   wearable('2_CamoPantsRight'), // body but doesn't have sleeves
   wearable('3_MK2GrenadeRight')
@@ -190,7 +190,7 @@ function stripSvg (svg) {
 }
 
 function readSvg (name) {
-  return stripSvg(fs.readFileSync(`./svgs/svgitems/${name}.svg`, 'utf8'))
+  return stripSvg(fs.readFileSync(`./svgs/svgItems/${name}.svg`, 'utf8'))
 }
 
 function wearable (name) {

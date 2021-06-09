@@ -34,6 +34,8 @@ function getSelector (func) {
 async function main () {
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   const gasLimit = 9000000
+  let account1Signer
+  let account1Address
   let signer
   let facet
   let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
@@ -44,14 +46,23 @@ async function main () {
       params: [owner]
     })
     signer = await ethers.getSigner(owner)
+    let dao = await ethers.getContractAt('DAOFacet', diamondAddress, signer)
+    ;[account1Signer] = await ethers.getSigners()
+    account1Address = await account1Signer.getAddress()
+    let tx = await dao.addItemManagers([account1Address])
+    let receipt = await tx.wait()
+    if (!receipt.status) {
+      throw Error(`Error:: ${tx.hash}`)
+    }
+    console.log('assigned', account1Address, 'as item manager')
   } else if (hre.network.name === 'matic') {
     signer = new LedgerSigner(ethers.provider)
   } else {
     throw Error('Incorrect network selected')
   }
 
-  async function uploadSvgs (svgs, svgType, testing) {
-    let svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
+  async function uploadSvgs (svgs, svgType, testing, uploadSigner) {
+    let svgFacet = await ethers.getContractAt('SvgFacet', diamondAddress, uploadSigner)
     function setupSvg (...svgData) {
       const svgTypesAndSizes = []
       const svgItems = []
@@ -116,8 +127,9 @@ async function main () {
   }
   console.log(aavegotchiSvgs)
 
-  await uploadSvgs(aavegotchiSvgs.left, 'aavegotchi-left', testing)
-  await uploadSvgs(aavegotchiSvgs.right, 'aavegotchi-right', testing)
+  await uploadSvgs(aavegotchiSvgs.left, 'aavegotchi-left', testing, account1Signer)
+  await uploadSvgs(aavegotchiSvgs.right, 'aavegotchi-right', testing, account1Signer)
+  await uploadSvgs(aavegotchiSvgs.back, 'aavegotchi-back', testing, account1Signer)
 
   const Facet = await ethers.getContractFactory('SvgViewsFacet')
   facet = await Facet.deploy()

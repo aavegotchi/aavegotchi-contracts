@@ -28,9 +28,9 @@ contract SvgViewsFacet is Modifiers {
 
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         int16[NUMERIC_TRAITS_NUM] memory _numericTraits = s.aavegotchis[_tokenId].numericTraits;
-        ag_[1] = getAavegotchiSvgLayers('left', collateralType, _numericTraits, _tokenId);
-        ag_[2] = getAavegotchiSvgLayers('right', collateralType, _numericTraits, _tokenId);
-        ag_[3] = getAavegotchiSvgLayers('back', collateralType, _numericTraits, _tokenId);
+        ag_[1] = string(getAavegotchiSvgLayers('left', collateralType, _numericTraits, _tokenId));
+        ag_[2] = string(getAavegotchiSvgLayers('right', collateralType, _numericTraits, _tokenId));
+        ag_[3] = string(getAavegotchiSvgLayers('back', collateralType, _numericTraits, _tokenId));
                 
         // aavegotchi body
         // bytes memory svg = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_LEFT_SVG_ID);
@@ -184,7 +184,8 @@ contract SvgViewsFacet is Modifiers {
 
     function addBodyAndWearableSvgLayers(
         bytes memory _sideView,
-        bytes memory _body,        
+        bytes memory _body,
+        SvgLayerDetails memory details,        
         uint256 _tokenId
     ) internal view returns (bytes memory svg_) {
         //Wearables
@@ -295,7 +296,7 @@ contract SvgViewsFacet is Modifiers {
         svg_ = abi.encodePacked(svg_, LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-",_sideView), wearableType.svgId), "</svg></g>");        
     }
 
-    function getBodyWearable(bytes32 _sideView, uint256 _wearableId) internal view returns (bytes memory bodyWearable_, bytes memory sleeves_) {
+    function getBodyWearable(bytes memory _sideView, uint256 _wearableId) internal view returns (bytes memory bodyWearable_, bytes memory sleeves_) {
         ItemType storage wearableType = s.itemTypes[_wearableId];
         Dimensions memory dimensions = s.sideViewDimensions[_wearableId][_sideView];
 
@@ -306,7 +307,7 @@ contract SvgViewsFacet is Modifiers {
             // y
             LibStrings.strWithUint('" y="', dimensions.y),
             '">',
-            LibSvg.getSvg(_sideView, wearableType.svgId),
+            LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-",_sideView), wearableType.svgId),
             "</svg></g>"
         );
         uint256 svgId = s.sleeves[_wearableId];

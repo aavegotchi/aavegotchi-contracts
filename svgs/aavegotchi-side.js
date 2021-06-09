@@ -23,11 +23,10 @@ let backBody = '<g class="gotchi-body"><g class="gotchi-primary"><path d="M21 12
 // shadow
 backBody += '<g class="gotchi-shadow"><path opacity=".25" d="M25 58H19v1h1v1h24V59h1V58h-1z" fill="#000"/></g>'
 
-
 const aavegotchiSvgs = {
   left: ['', '', leftBody, leftHand],
-  right: ['', '', rightBody, rightHand]
-  back: ['','', ]
+  right: ['', '', rightBody, rightHand],
+  back: ['', '', backBody, '']
 }
 
 exports.aavegotchiSvgs = aavegotchiSvgs
