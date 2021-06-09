@@ -9,6 +9,11 @@ const { sendToMultisig } = require('../libraries/multisig/multisig.js')
 const { aavegotchiSvgs } = require('../../svgs/aavegotchi-side.js')
 
 const {
+  collateralsLeftSvgs,
+  collateralsRightSvgs
+} = require('../../svgs/collaterals-sides.js')
+
+const {
   wearablesLeftSvgs,
   wearablesRightSvgs,
   wearablesBackSvgs
@@ -125,11 +130,24 @@ async function main () {
       svgItemsStart = svgItemsEnd
     }
   }
-  console.log(aavegotchiSvgs)
+  // console.log(aavegotchiSvgs)
+  let itemSigner
+  if (testing) {
+    itemSigner = account1Signer
+  } else {
+    itemSigner = signer
+  }
 
-  await uploadSvgs(aavegotchiSvgs.left, 'aavegotchi-left', testing, account1Signer)
-  await uploadSvgs(aavegotchiSvgs.right, 'aavegotchi-right', testing, account1Signer)
-  await uploadSvgs(aavegotchiSvgs.back, 'aavegotchi-back', testing, account1Signer)
+  await uploadSvgs(aavegotchiSvgs.left, 'aavegotchi-left', testing, itemSigner)
+  await uploadSvgs(aavegotchiSvgs.right, 'aavegotchi-right', testing, itemSigner)
+  await uploadSvgs(aavegotchiSvgs.back, 'aavegotchi-back', testing, itemSigner)
+
+  await uploadSvgs(wearablesLeftSvgs, 'wearables-left', testing, itemSigner)
+  await uploadSvgs(wearablesRightSvgs, 'wearables-right', testing, itemSigner)
+  await uploadSvgs(wearablesBackSvgs, 'wearables-back', testing, itemSigner)
+
+  await uploadSvgs(collateralsLeftSvgs, 'collaterals-left', testing, itemSigner)
+  await uploadSvgs(collateralsRightSvgs, 'collaterals-right', testing, itemSigner)
 
   const Facet = await ethers.getContractFactory('SvgViewsFacet')
   facet = await Facet.deploy()
