@@ -95,11 +95,8 @@ describe('Test GameManager role', async function () {
     let isManager = await signerDaoFacet.isGameManager(generalUser.address);
     expect(isManager).to.equal(false);
 
-    try {
-      txData = await generalUserDaoFacet.grantExperience([aavegotchiID], [50]);
-      expect(true).to.equal(false);
-    } catch (e) {
-      expect(true).to.equal(true);
-    }
+   
+    await expect(generalUserDaoFacet.grantExperience([aavegotchiID], [50])).to.be.revertedWith("LibAppStorage: Do not have access")
+   
   })
 })
