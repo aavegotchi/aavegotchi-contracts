@@ -20,7 +20,7 @@ contract DAOFacet is Modifiers {
     event AddWearableSet(WearableSet _wearableSet);
     event UpdateWearableSet(uint256 _setId, WearableSet _wearableSet);
     event ItemTypeMaxQuantity(uint256[] _itemIds, uint256[] _maxQuanities);
-    event GameManagerAdded(address indexed gameManager_);
+    event GameManagerAdded(address indexed gameManager_, uint256 indexed limit_);
     event GameManagerRemoved(address indexed gameManager_);
     event ItemManagerAdded(address indexed newItemManager_);
     event ItemManagerRemoved(address indexed ItemManager_);
@@ -203,7 +203,7 @@ contract DAOFacet is Modifiers {
             gameManager.limit = _limits[index];
             gameManager.balance = _limits[index];
             gameManager.refreshTime = uint256(block.timestamp + 1 days);
-            emit GameManagerAdded(_newGameManagers[index]);
+            emit GameManagerAdded(_newGameManagers[index], _limits[index]);
         }
     }
 

@@ -32,6 +32,9 @@ describe('Test GameManager role', async function () {
     const addedAddr = ((addedEvents[0].args).gameManager_)
     expect(addedAddr).to.equal(owner)
 
+    const limit = ((addedEvents[0].args).limit_)
+    expect(limit.toNumber()).to.equal(3000)
+
     // Check view function works
     let isManager = await signerDaoFacet.isGameManager(owner);
     expect(isManager).to.equal(true);
