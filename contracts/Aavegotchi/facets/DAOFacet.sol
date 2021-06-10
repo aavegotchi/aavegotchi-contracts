@@ -140,6 +140,8 @@ contract DAOFacet is Modifiers {
     function grantExperience(uint256[] calldata _tokenIds, uint256[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {
         require(_tokenIds.length == _xpValues.length, "DAOFacet: IDs must match XP array length");
         GameManager storage gameManager = s.gameManagers[LibMeta.msgSender()];
+
+        /*GameManager: If the refresh time has been reached, reset the gameManager's balance to the individual limit, and set the refreshTime to 1 day after the block timestamp.*/
         if (gameManager.refreshTime < block.timestamp) {
             gameManager.balance = gameManager.limit;
             gameManager.refreshTime = uint32(block.timestamp + 1 days);
@@ -197,7 +199,7 @@ contract DAOFacet is Modifiers {
     }
 
     function addGameManagers(address[] calldata _newGameManagers, uint256[] calldata _limits) external onlyDaoOrOwner {
-        require(_newGameManagers.length == _limits.length, "New Game Managers and Limits should have same length");
+        require(_newGameManagers.length == _limits.length, "DAOFacet: New Game Managers and Limits should have same length");
         for (uint256 index = 0; index < _newGameManagers.length; index++) {
             GameManager storage gameManager = s.gameManagers[_newGameManagers[index]];
             gameManager.limit = _limits[index];
