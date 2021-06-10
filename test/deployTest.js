@@ -125,9 +125,9 @@ describe('Opening Portals', async function () {
     //  const portalId = myPortals[0].tokenId
     await global.vrfFacet.openPortals(['0', '1', '2', '3'])
 
-    // const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
+    const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
 
-    // await global.vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
+    await global.vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
 
     myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals[0].status).to.equal(2)
@@ -174,7 +174,7 @@ describe('Opening Portals', async function () {
     const collateral = aavegotchi.collateral
     expect(selectedGhost.collateralType).to.equal(collateral)
     expect(aavegotchi.status).to.equal(3)
-    expect(aavegotchi.hauntId).to.equal(0)
+    expect(aavegotchi.hauntId).to.equal(1)
     expect(aavegotchi.stakedAmount).to.equal(minStake)
     expect(kinship).to.equal(50)
   })

@@ -83,6 +83,7 @@ async function main (scriptName) {
     daoTreasury = await accounts[1].getAddress()
     rarityFarming = await accounts[2].getAddress()
     pixelCraft = await accounts[3].getAddress()
+    itemManagers = [account] // 'todo'
   } else if (hre.network.name === 'matic') {
     childChainManager = '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa'
     vrfCoordinator = '0x3d2341ADb2D31f1c5530cDC622016af293177AE0'
