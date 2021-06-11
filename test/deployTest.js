@@ -72,6 +72,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
   before(async function () {
     const deployVars = await deployProject('deployTest')
     global.set = true
+    global.testing = ['hardhat', 'localhost'].includes(hre.network.name)
     global.account = deployVars.account
     global.aavegotchiDiamond = deployVars.aavegotchiDiamond
     global.bridgeFacet = deployVars.bridgeFacet
@@ -109,7 +110,7 @@ describe('Buying Portals, VRF', function () {
   it('Should purchase portal', async function () {
     const balance = await ghstTokenContract.balanceOf(account)
     await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
-    const buyAmount = ethers.utils.parseEther('500') // 1 portals
+    const buyAmount = ethers.utils.parseEther('500') // 5 portals
     const tx = await global.shopFacet.buyPortals(account, buyAmount)
     const receipt = await tx.wait()
 
@@ -125,9 +126,10 @@ describe('Opening Portals', async function () {
     //  const portalId = myPortals[0].tokenId
     await global.vrfFacet.openPortals(['0', '1', '2', '3'])
 
-    const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
-
-    await global.vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
+    if (!testing) {
+      const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
+      await global.vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
+    }
 
     myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals[0].status).to.equal(2)
@@ -550,7 +552,8 @@ describe('Haunts', async function () {
   })
 
   it('Cannot exceed max haunt size', async function () {
-    for (let i = 0; i < 399; i++) {
+    const count = testing ? 3 : 399 // This value is related with initialHauntSize in deploy.js
+    for (let i = 0; i < count; i++) {
       const purchaseNumber = ethers.utils.parseEther('5500')
       await global.shopFacet.buyPortals(account, purchaseNumber)
     }
@@ -563,6 +566,9 @@ describe('Haunts', async function () {
   })
 
   it('Can create new Haunt', async function () {
+    const purchaseNumber = ethers.utils.parseEther('3700') // GHST for 19 portals
+    await global.shopFacet.buyPortals(account, purchaseNumber)
+
     let currentHaunt = await global.aavegotchiGameFacet.currentHaunt()
     expect(currentHaunt.hauntId_).to.equal(1)
     await daoFacet.createHaunt('10000', ethers.utils.parseEther('100'), '0x000000')
