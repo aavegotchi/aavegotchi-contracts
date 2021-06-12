@@ -19,6 +19,7 @@ const { badgeSvgs:szn1Rnd1badgeSvgs } = require('../svgs/szn1rnd1BadgeSvgs')
 const { badgeSvgs:szn1Rnd2badgeSvgs } = require('../svgs/szn1rnd2BadgeSvgs')
 const { wearableSets } = require('./wearableSets.js')
 const {wearableSets:wearableSetsRaffle4} = require("./updates/wearableSets/wearableSetsRaffle4.js")
+//const deployToken= require('../scripts/deployTesttoken.js')
 
 function addCommas (nStr) {
   nStr += ''
@@ -41,6 +42,7 @@ async function main (scriptName) {
 
   const accounts = await ethers.getSigners()
   const account = await accounts[0].getAddress()
+  const secondAccount= await accounts[1].getAddress()
   console.log('Account: ' + account)
   console.log('---')
   let tx
@@ -62,6 +64,7 @@ async function main (scriptName) {
   let itemManagers
   const gasLimit = 12300000
 
+
   const portalPrice = ethers.utils.parseEther('100')
   const name = 'Aavegotchi'
   const symbol = 'GOTCHI'
@@ -81,6 +84,7 @@ async function main (scriptName) {
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     fee = ethers.utils.parseEther('0.0001')
     initialHauntSize = '100'
+  
 
     // ghstTokenContract = set below
     dao = await accounts[1].getAddress()
@@ -710,7 +714,8 @@ async function main (scriptName) {
     shopFacet: shopFacet,
     escrowFacet: escrowFacet,
     linkAddress: linkAddress,
-    linkContract: linkContract
+    linkContract: linkContract,
+    secondAccount: secondAccount
   }
 }
 
