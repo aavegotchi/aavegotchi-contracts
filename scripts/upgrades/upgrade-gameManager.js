@@ -45,7 +45,8 @@ async function main () {
     getSelector('function isGameManager(address _manager) external'),
     getSelector('function addGameManagers(address[] calldata _newGameManagers, uint256[] calldata _limits) external'),
     getSelector('function removeGameManagers(address[] calldata _gameManagers) external'),
-    getSelector('function getGameManagerBalance(address _manager) external')
+    getSelector('function gameManagerBalance(address _manager) external'),
+    getSelector('function gameManagerRefreshTime(address _manager) external')
   ]
 
   // const removedDaoFuncs = [

@@ -56,40 +56,40 @@ describe('Test GameManager role', async function () {
   it('should allow game managers to grant experience and restore the xp balance in 24 hours', async function(){
     // Add Game Manager with 100 Balance
     let addTx = await signerDaoFacet.addGameManagers([gameManager.address], [100])
-    const balance = await signerDaoFacet.getGameManagerBalance(gameManager.address);
+    const balance = await signerDaoFacet.gameManagerBalance(gameManager.address);
     expect(balance.toNumber()).to.equal(100);
     await addTx.wait()
 
     // Grant 50 xp and check remaining balance
     txData = await gameManagerDaoFacet.grantExperience([aavegotchiID], [50]);
-    expect(await signerDaoFacet.getGameManagerBalance(gameManager.address)).to.equal(50);
+    expect(await signerDaoFacet.gameManagerBalance(gameManager.address)).to.equal(50);
 
-    // Simulate 24 hours late
+    // Simulate 24 hours later
     ethers.provider.send('evm_increaseTime', [24 * 3600])
     ethers.provider.send('evm_mine')
 
     // Try to grant 100 xp to check if balance refreshed
     txData = await gameManagerDaoFacet.grantExperience([aavegotchiID], [100]);
-    expect(await signerDaoFacet.getGameManagerBalance(gameManager.address)).to.equal(0);
+    expect(await signerDaoFacet.gameManagerBalance(gameManager.address)).to.equal(0);
   })
 
   it('should reject game manager without enough xp balance', async function(){
     // Add Game Manager with 100 xp
     let addTx = await signerDaoFacet.addGameManagers([gameManager.address], [100])
-    const balance = await signerDaoFacet.getGameManagerBalance(gameManager.address);
+    const balance = await signerDaoFacet.gameManagerBalance(gameManager.address);
     expect(balance.toNumber()).to.equal(100);
     await addTx.wait()
 
     // Grant 50 xp and remaining balance is 50
     txData = await gameManagerDaoFacet.grantExperience([aavegotchiID], [50]);
-    expect(await signerDaoFacet.getGameManagerBalance(gameManager.address)).to.equal(50);
+    expect(await signerDaoFacet.gameManagerBalance(gameManager.address)).to.equal(50);
 
     // Try grant 80 xp and check error
   
       await expect(gameManagerDaoFacet.grantExperience([aavegotchiID], [80])).to.be.revertedWith("DAOFacet: Game Manager's xp grant limit is reached")
 
     // Balance is not changed
-    expect(await signerDaoFacet.getGameManagerBalance(gameManager.address)).to.equal(50);
+    expect(await signerDaoFacet.gameManagerBalance(gameManager.address)).to.equal(50);
   })
 
   it('should reject general users to grant experience', async function(){

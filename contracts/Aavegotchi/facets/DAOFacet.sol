@@ -20,7 +20,7 @@ contract DAOFacet is Modifiers {
     event AddWearableSet(WearableSet _wearableSet);
     event UpdateWearableSet(uint256 _setId, WearableSet _wearableSet);
     event ItemTypeMaxQuantity(uint256[] _itemIds, uint256[] _maxQuanities);
-    event GameManagerAdded(address indexed gameManager_, uint256 indexed limit_);
+    event GameManagerAdded(address indexed gameManager_, uint256 indexed limit_, uint256 refreshTime_);
     event GameManagerRemoved(address indexed gameManager_);
     event ItemManagerAdded(address indexed newItemManager_);
     event ItemManagerRemoved(address indexed ItemManager_);
@@ -33,8 +33,12 @@ contract DAOFacet is Modifiers {
         return s.gameManagers[_manager].limit != 0;
     }
 
-    function getGameManagerBalance(address _manager) external view returns (uint256) {
+    function gameManagerBalance(address _manager) external view returns (uint256) {
         return s.gameManagers[_manager].balance;
+    }
+
+    function gameManagerRefreshTime(address _manager) external view returns (uint256) {
+        return s.gameManagers[_manager].refreshTime;
     }
 
     /***********************************|
@@ -205,7 +209,7 @@ contract DAOFacet is Modifiers {
             gameManager.limit = _limits[index];
             gameManager.balance = _limits[index];
             gameManager.refreshTime = uint256(block.timestamp + 1 days);
-            emit GameManagerAdded(_newGameManagers[index], _limits[index]);
+            emit GameManagerAdded(_newGameManagers[index], _limits[index], uint256(block.timestamp + 1 days));
         }
     }
 

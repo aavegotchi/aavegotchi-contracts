@@ -32,7 +32,7 @@ async function main () {
   console.log('Adding Game Manager')  
 
   if (testing) {
-    tx = await daoFacet.addGameManagers(gameManagers,[100000])
+    tx = await daoFacet.addGameManagers(gameManagers,[1000])
     console.log('Adding game managers tx:', tx.hash)
     receipt = await tx.wait()
     if (!receipt.status) {
@@ -41,10 +41,10 @@ async function main () {
     console.log('Adding item manager succeeded:', tx.hash)
     
 
-    let balance = await daoFacet.getGameManagerBalance(gameManagers[0])
+    let balance = await daoFacet.gameManagerBalance(gameManagers[0])
     console.log('balance:',balance.toString())
 
-    /*
+    
     await hre.network.provider.request({
       method: 'hardhat_impersonateAccount',
       params: [gameManagers[0]]
@@ -53,10 +53,12 @@ async function main () {
 
     const gameManagerDaoFacet = await ethers.getContractAt("DAOFacet", diamondAddress, gmSigner)  
 
-    await gameManagerDaoFacet.grantExperience([1484],[100])
-     balance = await daoFacet.getGameManagerBalance(gameManagers[0])
+    await gameManagerDaoFacet.grantExperience([1484],[1000])
+     balance = await daoFacet.gameManagerBalance(gameManagers[0])
     console.log('balance:',balance.toString())
-    */
+
+    const refreshTime = await daoFacet.gameManagerRefreshTime(gameManagers[0])
+    
 
   }
   else {
