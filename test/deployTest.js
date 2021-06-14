@@ -69,7 +69,7 @@ const testSlot = '3'
 
 
 describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
-  this.timeout(300000)
+  this.timeout(3000000)
   before(async function () {
   const Token2 = await ethers.getContractFactory("ERC20Token");
   const token = await Token2.deploy();
@@ -99,7 +99,7 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.erc1155MarketplaceFacet=deployVars.erc1155MarketplaceFacet
     global.erc721MarketplaceFacet= deployVars.erc721MarketplaceFacet
     global.escrowFacet=deployVars.escrowFacet
-    global.secondAccount=deployVars.secondAccount
+    //global.secondAccount=deployVars.secondAccount
     global.token= token
   })
   it('Should mint 10,000,000 GHST tokens', async function () {
@@ -1070,7 +1070,6 @@ describe('Escrow Tests', async function ()  {
 
   it('Cannot withdraw collateral from locked Aavegotchis', async function(){
     holderAddress = account;
-    otherHolderAddress = secondAccount;
     transferAmount = ethers.utils.parseEther("3");
     aavegotchiDiamondAddress = aavegotchiDiamond.address;
     erc20TokenConAddress = token.address;

@@ -42,7 +42,7 @@ async function main (scriptName) {
 
   const accounts = await ethers.getSigners()
   const account = await accounts[0].getAddress()
-  const secondAccount= await accounts[1].getAddress()
+  let secondAccount
   console.log('Account: ' + account)
   console.log('---')
   let tx
@@ -84,6 +84,7 @@ async function main (scriptName) {
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     fee = ethers.utils.parseEther('0.0001')
     initialHauntSize = '100'
+    secondAccount= await accounts[1].getAddress()
   
 
     // ghstTokenContract = set below
