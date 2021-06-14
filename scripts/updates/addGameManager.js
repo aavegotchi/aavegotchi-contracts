@@ -62,7 +62,7 @@ async function main () {
 
   }
   else {
-    tx = await daoFacet.populateTransaction.addGameManagers(gameManagers,[100000])
+    tx = await daoFacet.populateTransaction.addGameManagers(gameManagers,[500000])
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
     
   }
