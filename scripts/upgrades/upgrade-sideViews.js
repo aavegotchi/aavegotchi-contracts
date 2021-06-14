@@ -14,6 +14,11 @@ const {
 } = require('../../svgs/collaterals-sides.js')
 
 const {
+  eyeShapesLeftSvgs,
+  eyeShapesRightSvgs
+} = require('../../svgs/eyeShapes-sides.js')
+
+const {
   wearablesLeftSvgs,
   wearablesRightSvgs,
   wearablesBackSvgs
@@ -148,6 +153,9 @@ async function main () {
 
   await uploadSvgs(collateralsLeftSvgs, 'collaterals-left', testing, itemSigner)
   await uploadSvgs(collateralsRightSvgs, 'collaterals-right', testing, itemSigner)
+
+  await uploadSvgs(eyeShapesLeftSvgs, 'eyeShapes-left', testing, itemSigner)
+  await uploadSvgs(eyeShapesRightSvgs, 'eyeShapes-right', testing, itemSigner)
 
   const Facet = await ethers.getContractFactory('SvgViewsFacet')
   facet = await Facet.deploy()
