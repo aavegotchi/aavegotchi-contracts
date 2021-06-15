@@ -219,50 +219,63 @@ contract ItemsFacet is Modifiers {
 
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             uint256 wearableId = _equippedWearables[slot];
-
-            if (wearableId == 0) {
+            uint256 existingEquippedWearableId = aavegotchi.equippedWearables[slot];
+            //if the new wearable value is equal to the current equipped wearable in that slot
+            //do nothing
+            if (wearableId == existingEquippedWearableId) {
                 continue;
             }
-            ItemType storage itemType = s.itemTypes[wearableId];
-            require(aavegotchiLevel >= itemType.minLevel, "ItemsFacet: Aavegotchi level lower than minLevel");
-            require(itemType.category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
-            require(itemType.slotPositions[slot] == true, "ItemsFacet: Wearable cannot be equipped in this slot");
-            {
-                bool canBeEquipped;
-                uint8[] memory allowedCollaterals = itemType.allowedCollaterals;
-                if (allowedCollaterals.length > 0) {
-                    uint256 collateralIndex = s.collateralTypeIndexes[aavegotchi.collateralType];
 
-                    for (uint256 i; i < allowedCollaterals.length; i++) {
-                        if (collateralIndex == allowedCollaterals[i]) {
-                            canBeEquipped = true;
-                            break;
+            if(existingEquippedWearableId != 0) {
+                // unequip and return item to owner
+                LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
+                LibItems.addToOwner(sender, existingEquippedWearableId, 1);
+                emit LibERC1155.TransferSingle(sender, address(this), sender, existingEquippedWearableId, 1);
+                emit LibERC1155.TransferFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
+            }
+
+            if (wearableId != 0) {
+                ItemType storage itemType = s.itemTypes[wearableId];
+                require(aavegotchiLevel >= itemType.minLevel, "ItemsFacet: Aavegotchi level lower than minLevel");
+                require(itemType.category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
+                require(itemType.slotPositions[slot] == true, "ItemsFacet: Wearable cannot be equipped in this slot");
+                {
+                    bool canBeEquipped;
+                    uint8[] memory allowedCollaterals = itemType.allowedCollaterals;
+                    if (allowedCollaterals.length > 0) {
+                        uint256 collateralIndex = s.collateralTypeIndexes[aavegotchi.collateralType];
+
+                        for (uint256 i; i < allowedCollaterals.length; i++) {
+                            if (collateralIndex == allowedCollaterals[i]) {
+                                canBeEquipped = true;
+                                break;
+                            }
                         }
+                        require(canBeEquipped, "ItemsFacet: Wearable cannot be equipped in this collateral type");
                     }
-                    require(canBeEquipped, "ItemsFacet: Wearable cannot be equipped in this collateral type");
                 }
-            }
 
-            //Then check if this wearable is in the Aavegotchis inventory
-            uint256 nftBalance = s.nftItemBalances[address(this)][_tokenId][wearableId];
-            uint256 neededBalance = 1;
-            if (slot == LibItems.WEARABLE_SLOT_HAND_LEFT) {
-                if (_equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT] == wearableId) {
-                    neededBalance = 2;
+                //Then check if this wearable is in the Aavegotchis inventory
+                uint256 nftBalance = s.nftItemBalances[address(this)][_tokenId][wearableId];
+                uint256 neededBalance = 1;
+                if (slot == LibItems.WEARABLE_SLOT_HAND_LEFT) {
+                    if (_equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT] == wearableId) {
+                        neededBalance = 2;
+                    }
                 }
-            }
 
-            if (nftBalance < neededBalance) {
-                uint256 ownerBalance = s.ownerItemBalances[sender][wearableId];
-                require(nftBalance + ownerBalance >= neededBalance, "ItemsFacet: Wearable is not in inventories");
-                uint256 balToTransfer = neededBalance - nftBalance;
+                if (nftBalance < neededBalance) {
+                    uint256 ownerBalance = s.ownerItemBalances[sender][wearableId];
+                    require(nftBalance + ownerBalance >= neededBalance, "ItemsFacet: Wearable is not in inventories");
+                    uint256 balToTransfer = neededBalance - nftBalance;
 
-                //Transfer to Aavegotchi
-                LibItems.removeFromOwner(sender, wearableId, balToTransfer);
-                LibItems.addToParent(address(this), _tokenId, wearableId, balToTransfer);
-                emit TransferToParent(address(this), _tokenId, wearableId, balToTransfer);
-                emit LibERC1155.TransferSingle(sender, sender, address(this), wearableId, balToTransfer);
-                LibERC1155Marketplace.updateERC1155Listing(address(this), wearableId, sender);
+                    //Transfer to Aavegotchi
+                    LibItems.removeFromOwner(sender, wearableId, balToTransfer);
+                    LibItems.addToParent(address(this), _tokenId, wearableId, balToTransfer);
+                    emit TransferToParent(address(this), _tokenId, wearableId, balToTransfer);
+                    emit LibERC1155.TransferSingle(sender, sender, address(this), wearableId, balToTransfer);
+                    LibERC1155Marketplace.updateERC1155Listing(address(this), wearableId, sender);
+                }
             }
         }
         emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _equippedWearables);
