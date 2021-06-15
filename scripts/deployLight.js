@@ -54,6 +54,7 @@ async function main (scriptName) {
   let childChainManager
   let ghstStakingDiamond
   const gasLimit = 12300000
+  let itemManagers
 
   const portalPrice = ethers.utils.parseEther('100')
   const name = 'Aavegotchi'
@@ -75,6 +76,7 @@ async function main (scriptName) {
     daoTreasury = await accounts[1].getAddress()
     rarityFarming = await accounts[2].getAddress()
     pixelCraft = await accounts[3].getAddress()
+    itemManagers = [account] // 'todo'
   } else if (hre.network.name === 'matic') {
     childChainManager = '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa'
     vrfCoordinator = '0x3d2341ADb2D31f1c5530cDC622016af293177AE0'
@@ -82,6 +84,7 @@ async function main (scriptName) {
     keyHash = '0xf86195cf7690c55907b2b611ebb7343a6f649bff128701cc542f0569e2c549da'
     fee = ethers.utils.parseEther('0.0001')
     initialHauntSize = '10000'
+    itemManagers = [account] // 'todo'
 
     // Matic ghst token address
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7')
@@ -99,6 +102,7 @@ async function main (scriptName) {
     keyHash = '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
     fee = ethers.utils.parseEther('0.1')
     initialHauntSize = '10000'
+    itemManagers = [account] // 'todo'
 
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0xeDaA788Ee96a0749a2De48738f5dF0AA88E99ab5')
     // console.log('GHST diamond address:' + ghstDiamond.address)
@@ -118,6 +122,7 @@ async function main (scriptName) {
     fee = ethers.utils.parseEther('0.0001')
 
     initialHauntSize = '10000'
+    itemManagers = [account] // 'todo'
 
     // ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x658809Bb08595D15a59991d640Ed5f2c658eA284')
     ghstTokenContract = await ethers.getContractAt('GHSTFacet', '0x20d0A1ce31f8e8A77b291f25c5fbED007Adde932')
@@ -253,6 +258,14 @@ async function main (scriptName) {
 
   // add collateral info
 
+  console.log('Adding item managers')
+  tx = await daoFacet.addItemManagers(itemManagers)
+  console.log('Adding item managers tx:', tx.hash)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Adding item manager failed: ${tx.hash}`)
+  }
+  
   console.log('Adding Collateral Types')
 
   if (hre.network.name === 'hardhat') {
@@ -458,6 +471,7 @@ async function main (scriptName) {
     shopFacet: shopFacet,
     linkAddress: linkAddress,
     linkContract: linkContract
+    
   }
 }
 
