@@ -221,21 +221,26 @@ contract ItemsFacet is Modifiers {
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             uint256 wearableId = _equippedWearables[slot];
             uint256 existingEquippedWearableId = aavegotchi.equippedWearables[slot];
+            
             //if the new wearable value is equal to the current equipped wearable in that slot
             //do nothing
             if (wearableId == existingEquippedWearableId) {
                 continue;
             }
+
+            // unequips wearable
             aavegotchi.equippedWearables[slot] = uint16(wearableId);
 
+            // if a wearable was equipped in this slot
             if(existingEquippedWearableId != 0) {
-                // unequip and transfer item to owner
+                // remove wearable from Aavegotchi and transfer item to owner
                 LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
                 LibItems.addToOwner(sender, existingEquippedWearableId, 1);
                 emit LibERC1155.TransferSingle(sender, address(this), sender, existingEquippedWearableId, 1);
                 emit LibERC1155.TransferFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
             }
 
+            // if a wearable is being equipped
             if (wearableId != 0) {
                 ItemType storage itemType = s.itemTypes[wearableId];
                 require(aavegotchiLevel >= itemType.minLevel, "ItemsFacet: Aavegotchi level lower than minLevel");
