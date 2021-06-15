@@ -213,6 +213,7 @@ contract ItemsFacet is Modifiers {
 
     function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _equippedWearables) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
+        emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _equippedWearables);
         address sender = LibMeta.msgSender();
 
         uint256 aavegotchiLevel = LibAavegotchi.aavegotchiLevel(aavegotchi.experience);
@@ -225,6 +226,7 @@ contract ItemsFacet is Modifiers {
             if (wearableId == existingEquippedWearableId) {
                 continue;
             }
+            aavegotchi.equippedWearables[slot] = uint16(wearableId);
 
             if(existingEquippedWearableId != 0) {
                 // unequip and transfer item to owner
@@ -277,9 +279,7 @@ contract ItemsFacet is Modifiers {
                     LibERC1155Marketplace.updateERC1155Listing(address(this), wearableId, sender);
                 }
             }
-        }
-        emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _equippedWearables);
-        aavegotchi.equippedWearables = _equippedWearables;
+        }                
         LibAavegotchi.interact(_tokenId);
     }
 
