@@ -2,7 +2,7 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
-const { vpSigPropWearablesGotchis:aavegotchis } = require('../../../data/airdrops/VPSigPropWearables.tsx')
+const { dinoswapSigProp:aavegotchis } = require('../../../data/airdrops/DinoSwapSigProp.tsx')
 
 function addCommas (nStr) {
   nStr += ''
@@ -22,7 +22,7 @@ function strDisplay (str) {
 
 async function main () {
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
-  const gameManager = await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
+  const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119" //await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
   console.log(gameManager)
   let signer
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
@@ -46,7 +46,7 @@ async function main () {
   console.log(`Sending ${xpAmount} XP to ${aavegotchis.length} Aavegotchis!`)
 
   // group the data
-  const txData = []
+  let txData = []
   let txGroup = []
   let tokenIdsNum = 0
   for (const gotchiID of aavegotchis) {
@@ -65,6 +65,9 @@ async function main () {
       tokenIdsNum = 0
     }
 
+
+    txData = txData.splice(2,4)
+    
 
   // send transactions
   let addressIndex = 0

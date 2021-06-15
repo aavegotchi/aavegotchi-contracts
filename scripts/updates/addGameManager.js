@@ -17,7 +17,8 @@ async function main () {
     })
     signer = await ethers.provider.getSigner(owner)
   } else if (hre.network.name === 'matic') {
-    signer = new LedgerSigner(ethers.provider)
+    signer = new LedgerSigner(ethers.provider,"hid","m/44'/60'/2'/0/0")  //new LedgerSigner(ethers.provider)
+    console.log('signer:',signer)
   } else {
     throw Error('Incorrect network selected')
   }
@@ -62,8 +63,14 @@ async function main () {
 
   }
   else {
-    tx = await daoFacet.populateTransaction.addGameManagers(gameManagers,[500000])
-    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+    try {
+      tx = await daoFacet.populateTransaction.addGameManagers(gameManagers,[500000], {gasPrice:ethers.utils.parseUnits("2",9)})
+      console.log('tx:',tx)
+      await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+    } catch (error) {
+      console.log('error:',error)
+    }
+   
     
   }
 

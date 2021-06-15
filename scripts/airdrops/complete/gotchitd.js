@@ -45,6 +45,10 @@ async function main () {
   let groups = [[game15, 15], [game10, 10], [game5,5]]
   const maxProcess = 500
 
+  console.log('5 length:',game5.length)
+  console.log('10 length:',game10.length)
+  console.log('15 length:',game15.length)
+
     
   for (let index = 0; index < groups.length; index++) {
     const row = groups[index];
