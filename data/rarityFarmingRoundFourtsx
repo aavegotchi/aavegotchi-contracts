@@ -1,0 +1,9 @@
+const rarityRoundFour = [];
+
+const kinshipRoundFour = [];
+
+const xpRoundFour = [];
+
+exports.rarityRoundFour = rarityRoundFour;
+exports.kinshipRoundFour = kinshipRoundFour;
+exports.xpRoundFour = xpRoundFour;
