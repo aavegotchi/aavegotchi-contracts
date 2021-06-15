@@ -227,7 +227,7 @@ contract ItemsFacet is Modifiers {
             }
 
             if(existingEquippedWearableId != 0) {
-                // unequip and return item to owner
+                // unequip and transfer item to owner
                 LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
                 LibItems.addToOwner(sender, existingEquippedWearableId, 1);
                 emit LibERC1155.TransferSingle(sender, address(this), sender, existingEquippedWearableId, 1);
