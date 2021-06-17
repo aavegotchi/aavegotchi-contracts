@@ -176,7 +176,7 @@ function stripSvg (svg) {
 }
 
 function readSvg (name) {
-  return stripSvg(fs.readFileSync(`./svgs/svgitems/${name}.svg`, 'utf8'))
+  return stripSvg(fs.readFileSync(`./svgs/svgItems/${name}.svg`, 'utf8'))
 }
 
 function wearable (name) {

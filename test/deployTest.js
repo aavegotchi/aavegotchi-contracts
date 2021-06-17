@@ -67,11 +67,18 @@ const testAavegotchiId = '0'
 const testWearableId = '1'
 const testSlot = '3'
 
+
 describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
   this.timeout(300000)
   before(async function () {
+  const Token2 = await ethers.getContractFactory("ERC20Token");
+  const token = await Token2.deploy();
+  await token.mint()
+  console.log("MOCK Token deployed to:", token.address);
+
     const deployVars = await deployProject('deployTest')
     global.set = true
+    global.testing = ['hardhat', 'localhost'].includes(hre.network.name)
     global.account = deployVars.account
     global.aavegotchiDiamond = deployVars.aavegotchiDiamond
     global.bridgeFacet = deployVars.bridgeFacet
@@ -89,6 +96,11 @@ describe('Deploying Contracts, SVG and Minting Aavegotchis', async function () {
     global.linkContract = deployVars.linkContract
     global.diamondLoupeFacet = deployVars.diamondLoupeFacet
     global.metaTransactionsFacet = deployVars.metaTransactionsFacet
+    global.erc1155MarketplaceFacet=deployVars.erc1155MarketplaceFacet
+    global.erc721MarketplaceFacet= deployVars.erc721MarketplaceFacet
+    global.escrowFacet=deployVars.escrowFacet
+    global.secondAccount=deployVars.secondAccount
+    global.token= token
   })
   it('Should mint 10,000,000 GHST tokens', async function () {
     await global.ghstTokenContract.mint()
@@ -109,7 +121,7 @@ describe('Buying Portals, VRF', function () {
   it('Should purchase portal', async function () {
     const balance = await ghstTokenContract.balanceOf(account)
     await ghstTokenContract.approve(aavegotchiDiamond.address, balance)
-    const buyAmount = ethers.utils.parseEther('500') // 1 portals
+    const buyAmount = ethers.utils.parseEther('500') // 5 portals
     const tx = await global.shopFacet.buyPortals(account, buyAmount)
     const receipt = await tx.wait()
 
@@ -125,9 +137,10 @@ describe('Opening Portals', async function () {
     //  const portalId = myPortals[0].tokenId
     await global.vrfFacet.openPortals(['0', '1', '2', '3'])
 
-    // const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
-
-    // await global.vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
+    if (!testing) {
+      const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
+      await global.vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
+    }
 
     myPortals = await global.aavegotchiFacet.allAavegotchisOfOwner(account)
     expect(myPortals[0].status).to.equal(2)
@@ -174,7 +187,7 @@ describe('Opening Portals', async function () {
     const collateral = aavegotchi.collateral
     expect(selectedGhost.collateralType).to.equal(collateral)
     expect(aavegotchi.status).to.equal(3)
-    expect(aavegotchi.hauntId).to.equal(0)
+    expect(aavegotchi.hauntId).to.equal(1)
     expect(aavegotchi.stakedAmount).to.equal(minStake)
     expect(kinship).to.equal(50)
   })
@@ -550,7 +563,8 @@ describe('Haunts', async function () {
   })
 
   it('Cannot exceed max haunt size', async function () {
-    for (let i = 0; i < 399; i++) {
+    const count = testing ? 3 : 399 // This value is related with initialHauntSize in deploy.js
+    for (let i = 0; i < count; i++) {
       const purchaseNumber = ethers.utils.parseEther('5500')
       await global.shopFacet.buyPortals(account, purchaseNumber)
     }
@@ -563,6 +577,9 @@ describe('Haunts', async function () {
   })
 
   it('Can create new Haunt', async function () {
+    const purchaseNumber = ethers.utils.parseEther('3700') // GHST for 19 portals
+    await global.shopFacet.buyPortals(account, purchaseNumber)
+
     let currentHaunt = await global.aavegotchiGameFacet.currentHaunt()
     expect(currentHaunt.hauntId_).to.equal(1)
     await daoFacet.createHaunt('10000', ethers.utils.parseEther('100'), '0x000000')
@@ -975,6 +992,109 @@ describe('Kinship', async function () {
     console.log('* Kinship should be 6:', kinship.toString())
   })
 })
+
+describe('Testing ItemManagers', async function(){
+it('should allow owner to remove an itemManager', async function(){
+  const managers=[account]
+  let addTx = await global.daoFacet.removeItemManagers(managers)
+  txData=await addTx.wait()
+  //console.log(txData)
+  const events= txData.events
+  const addedAddr=((events[events.length-1].args).ItemManager_)
+  expect(addedAddr).to.equal(account)
+})
+
+it('only allows ItemManagers to add an item', async function(){
+ await  truffleAssert.reverts( daoFacet.addItemTypes(itemTypes),"LibAppStorage: only an ItemManager can call this function");
+  })
+
+  it('Item Manager can add an item type and svg', async function () {
+    const svg = 'hey'
+    const _typesAndIdsAndSizes = [{ svgType: ethers.utils.formatBytes32String('eyeShapes'), ids: [22], sizes: [svg.length] }]
+    let addTx = await daoFacet.addItemManagers([account])
+    txData=await addTx.wait()
+    const events= txData.events
+    const addedAddr=((events[events.length-1].args).newItemManager_)
+    expect(addedAddr).to.equal(account) 
+    await svgFacet.updateSvg(svg, _typesAndIdsAndSizes)
+  
+    const itemSvg = await svgFacet.getSvg(ethers.utils.formatBytes32String("eyeShapes"),22)
+  //console.log('svg:',itemSvg)
+    expect(itemSvg).to.equal(svg)
+    
+  })
+
+})
+
+describe('Escrow Tests', async function ()  {
+  it('Should deposit erc20 token into escrow', async function(){
+
+  
+    
+      erc20TokenConAddress = token.address;
+      aavegotchiDiamondAddress = aavegotchiDiamond.address;
+     depositAmount = ethers.utils.parseEther("4");
+    // console.log("Depo Amount: ", depositAmount.toString());
+      transferAmount = ethers.utils.parseEther("3");
+    // console.log("Trans Amount: ", transferAmount.toString());
+      failTransferAmount = ethers.utils.parseEther("5");
+    // console.log("Trans Amount: ", failTransferAmount.toString());
+     
+
+
+    collateralAddresses = await collateralFacet.collaterals();
+    console.log("Collateral Info: ", collateralAddresses);
+    collateralType = await collateralFacet.collateralBalance(0);
+    console.log("Collateral Type: ", collateralType.collateralType_);
+
+
+    await token.approve(aavegotchiDiamondAddress, ethers.constants.MaxUint256);
+
+    let length = 2
+    let tokenIds = new Array(length).fill(0)
+    let contractAddresses = new Array(length).fill(erc20TokenConAddress)
+    let depositAmounts = new Array(length).fill(depositAmount.div(length)) 
+
+
+    let tx = await escrowFacet.batchDepositERC20(tokenIds,contractAddresses, depositAmounts);
+    console.log('gas used:',tx.gasLimit.toString())
+
+     //tx = await escrowFacet.batchDepositGHST(tokenIds, depositAmounts);
+    //console.log('gas used:',tx.gasLimit.toString())
+    let balance = await escrowFacet.escrowBalance(0, erc20TokenConAddress);
+    let ghstBal= await escrowFacet.escrowBalance(0,aavegotchiDiamondAddress)
+    expect(balance.toString()).to.equal(depositAmount)
+  //  console.log("Token Balance: ", balance.toString());
+  //  console.log('GHST Balance',ghstBal)
+  })
+
+  it('Cannot withdraw collateral from locked Aavegotchis', async function(){
+    holderAddress = account;
+    otherHolderAddress = secondAccount;
+    transferAmount = ethers.utils.parseEther("3");
+    aavegotchiDiamondAddress = aavegotchiDiamond.address;
+    erc20TokenConAddress = token.address;
+
+    await erc721MarketplaceFacet.addERC721Listing(
+      aavegotchiDiamondAddress,
+      "0",
+      ethers.utils.parseEther("10000")
+  )
+  
+      await expect(escrowFacet.transferEscrow(0, erc20TokenConAddress, holderAddress, transferAmount)).to.be.revertedWith("LibAppStorage: Only callable on unlocked Aavegotchis");
+
+      const listings = await erc721MarketplaceFacet.getOwnerERC721Listings(holderAddress,"3","listed",100)
+
+      let listingId = listings[0].listingId.toString()
+
+      await erc721MarketplaceFacet.cancelERC721Listing(listingId)
+      
+})
+
+
+})
+
+
 
 async function neglectAavegotchi (days) {
   ethers.provider.send('evm_increaseTime', [86400 * days])
