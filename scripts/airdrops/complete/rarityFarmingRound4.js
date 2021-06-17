@@ -2,9 +2,9 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
-const { rarityRoundFour:rarity, kinshipRoundFour:kinship, xpRoundFour:xp } = require('../../data/rarityFarmingRoundFour.tsx')
+const { rarityRoundFour:rarity, kinshipRoundFour:kinship, xpRoundFour:xp } = require('../../../data/rarityFarmingRoundFour.tsx')
 
-const {rarityRoundRewards, kinshipRoundRewards, xpRoundRewards} = require("../../data/rarityFarmingRoundRewards.tsx")
+const {rarityRoundRewards, kinshipRoundRewards, xpRoundRewards} = require("../../../data/rarityFarmingRoundRewards.tsx")
 
 
 function addCommas (nStr) {
@@ -27,7 +27,7 @@ async function main () {
 
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
 
-  const gameManager = await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
+  const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119" //await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
   console.log(gameManager)
   let signer
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
@@ -119,6 +119,11 @@ async function main () {
 
   console.log('current index:',i)
 
+  if (i === 0) {
+    console.log('skip!')
+    continue
+  }
+
     let tokenIds = []
     let amounts = []
 
@@ -137,22 +142,24 @@ async function main () {
     
     console.log(`Sending ${ethers.utils.formatEther(totalAmount)} GHST to ${tokenIds.length} Gotchis (from ${tokenIds[0]} to ${tokenIds[tokenIds.length-1]})` )
   
-      console.log('token ids:',tokenIds)
-      console.log('amounts:',amounts)
+    //  console.log('token ids:',tokenIds)
+    //  console.log('amounts:',amounts)
   
      
      
      const escrowFacet = await ethers.getContractAt("EscrowFacet",diamondAddress,signer)
   
-     const tx = await escrowFacet.batchDepositGHST(tokenIds,amounts)
+     const tx = await escrowFacet.batchDepositGHST(tokenIds,amounts, {gasPrice: ethers.utils.parseUnits('5', 'gwei')})
      let receipt = await tx.wait()
+     console.log('receipt:',receipt)
      console.log('Gas used:', strDisplay(receipt.gasUsed))
      if (!receipt.status) {
        throw Error(`Error:: ${tx.hash}`)
      }
  
   }
-
+//244,876 5gwei
+//         1gwei
   console.log('Total GHST Sent:',ethers.utils.formatEther(totalGhstSent))
   
 }
