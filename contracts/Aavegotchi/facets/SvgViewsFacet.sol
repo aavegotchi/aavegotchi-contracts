@@ -360,12 +360,24 @@ contract SvgViewsFacet is Modifiers {
         }        
     }
 
-    function setSideViewDimensions(uint256[] calldata _itemIds, bytes[] calldata _sideViews, Dimensions[] calldata _sideViewDimensions) external onlyItemManager {
-        require(_itemIds.length == _sideViewDimensions.length, "SvgViewsFacet: _itemIds length not same as __sideViewDimensions length");
-        require(_itemIds.length == _sideViews.length, "SvgViewsFacet: _sideViews length not same as _itemIds length");
-        for(uint256 i; i < _itemIds.length; i++) {
-            s.sideViewDimensions[_itemIds[i]][_sideViews[i]] = _sideViewDimensions[i];
+    struct SideViewDimensionsArgs {
+        uint256 itemId;
+        string side;
+        Dimensions dimensions;
+    }
+
+    function setSideViewDimensions(SideViewDimensionsArgs[] calldata _sideViewDimensions) external onlyItemManager {
+        for(uint256 i; i < _sideViewDimensions.length; i++) {
+            s.sideViewDimensions[_sideViewDimensions[i].itemId][bytes(_sideViewDimensions[i].side)] = _sideViewDimensions[i].dimensions;
         }
     }
+
+    // function setSideViewDimensions(uint256[] calldata _itemIds, bytes[] calldata _sideViews, Dimensions[] calldata _sideViewDimensions) external onlyItemManager {
+    //     require(_itemIds.length == _sideViewDimensions.length, "SvgViewsFacet: _itemIds length not same as __sideViewDimensions length");
+    //     require(_itemIds.length == _sideViews.length, "SvgViewsFacet: _sideViews length not same as _itemIds length");
+    //     for(uint256 i; i < _itemIds.length; i++) {
+    //         s.sideViewDimensions[_itemIds[i]][_sideViews[i]] = _sideViewDimensions[i];
+    //     }
+    // }
 
 }

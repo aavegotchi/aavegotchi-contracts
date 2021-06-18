@@ -22,8 +22,9 @@ const {
   wearablesLeftSvgs,
   wearablesRightSvgs,
   wearablesBackSvgs
-
 } = require('../../svgs/wearables-sides.js')
+
+const { sideViewDimensions } = require('../../svgs/sideViewDimensions.js')
 
 function getSelectors (contract) {
   const signatures = Object.keys(contract.interface.functions)
@@ -135,6 +136,9 @@ async function main () {
       svgItemsStart = svgItemsEnd
     }
   }
+
+  let tx
+  let receipt
   // console.log(aavegotchiSvgs)
   let itemSigner
   if (testing) {
@@ -190,8 +194,6 @@ async function main () {
   console.log(cut)
 
   const diamondCut = await ethers.getContractAt('IDiamondCut', diamondAddress, signer)
-  let tx
-  let receipt
 
   if (testing) {
     console.log('Diamond cut')
@@ -207,6 +209,15 @@ async function main () {
     tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000 })
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
+
+  const svgViewsFacet = await ethers.getContractAt('SvgViewsFacet', diamondAddress, itemSigner)
+
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions, { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Uploaded item side dimensions')
 }
 
 main()
