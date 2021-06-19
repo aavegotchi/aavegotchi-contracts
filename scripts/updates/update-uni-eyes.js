@@ -33,8 +33,11 @@ async function main() {
   let receipt;
   const svgFacet = (await ethers.getContractAt("SvgFacet", diamondAddress)).connect(signer);
 
+  let gotchi = await svgFacet.getAavegotchiSvg("1859");
+  console.log("Before upgrade: ", gotchi);
+
   const eyeShapes = ethers.utils.formatBytes32String("eyeShapes");
-  const svg = "<g class=\"gotchi-eyeColor\"><path d=\"M35,20h1v1h-1V20z\" fill=\"#fff\"/><path d=\"M37 22v-1h-1v2h2v-1zm0\" fill=\"#ffdeec\"/><g fill=\"#ff3085\"><path d=\"M36 20v-1h-1v-1h-1v3h1v-1z\"/><path d=\"M36 20h1v1h-1z\"/><path d=\"M37 21h1v1h-1z\"/><path d=\"M40 24v-1h-1v-1h-1v1h-2v3h1v2h3v-1h1v-3h-1zm-3\"/><path d=\"M35 21h1v2h-1z\"/></g><path d=\"M22,20h1v1h-1V20z\" fill=\"#fff\"/><path d=\"M24 22v-1h-1v2h2v-1zm0\" fill=\"#ffdeec\"/><g fill=\"#ff3085\"><path d=\"M23 20v-1h-1v-1h-1v3h1v-1z\"/><path d=\"M23 20h1v1h-1z\"/><path d=\"M24 21h1v1h-1z\"/><path d=\"M27 24v-1h-1v-1h-1v1h-2v3h1v2h3v-1h1v-3h-1zm-3\"/><path d=\"M22 21h1v2h-1z\"/></g></g>";
+  const svg = "<g class=\"gotchi-eyeColor\"><path d=\"M35,20h1v1h-1V20z\" fill=\"#fff\"/><path d=\"M37 22v-1h-1v2h2v-1zm0\" fill=\"#ffdeec\"/><g><path d=\"M36 20v-1h-1v-1h-1v3h1v-1z\"/><path d=\"M36 20h1v1h-1z\"/><path d=\"M37 21h1v1h-1z\"/><path d=\"M40 24v-1h-1v-1h-1v1h-2v3h1v2h3v-1h1v-3h-1zm-3\"/><path d=\"M35 21h1v2h-1z\"/></g><path d=\"M22,20h1v1h-1V20z\" fill=\"#fff\"/><path d=\"M24 22v-1h-1v2h2v-1zm0\" fill=\"#ffdeec\"/><g><path d=\"M23 20v-1h-1v-1h-1v3h1v-1z\"/><path d=\"M23 20h1v1h-1z\"/><path d=\"M24 21h1v1h-1z\"/><path d=\"M27 24v-1h-1v-1h-1v1h-2v3h1v2h3v-1h1v-3h-1zm-3\"/><path d=\"M22 21h1v2h-1z\"/></g></g>";
   const _typesAndIdsAndSizes = [{
     svgType: eyeShapes,
     ids: [23],
@@ -47,8 +50,8 @@ async function main() {
   }
   console.log("Transaction succcess:", tx.hash);
 
-  const uniEyeSVG = await svgFacet.getSvg(eyeShapes, 23);
-  console.log(uniEyeSVG);
+  gotchi = await svgFacet.getAavegotchiSvg("1859");
+  console.log("After upgrade: ", gotchi);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
