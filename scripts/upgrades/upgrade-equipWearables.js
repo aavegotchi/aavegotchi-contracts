@@ -49,16 +49,10 @@ async function main () {
 
    let existingItemsFuncs = getSelectors(facet)
 
-  existingItemsFuncs = existingItemsFuncs.filter(selector => !newFuncs.includes(selector))
-
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
   const cut = [
-    {
-      facetAddress: facet.address,
-      action: FacetCutAction.Add,
-      functionSelectors: newFuncs
-    },
+ 
     {
       facetAddress: facet.address,
       action: FacetCutAction.Replace,
