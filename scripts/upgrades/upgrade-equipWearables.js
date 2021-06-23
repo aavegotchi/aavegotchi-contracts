@@ -43,9 +43,6 @@ async function main () {
   await facet.deployed()
   console.log('Deployed facet:', facet.address)
 
-  const newFuncs = [
-    getSelector('function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _equippedWearables) external')
-   ]
 
    let existingItemsFuncs = getSelectors(facet)
 
