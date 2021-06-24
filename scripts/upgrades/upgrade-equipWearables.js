@@ -43,22 +43,13 @@ async function main () {
   await facet.deployed()
   console.log('Deployed facet:', facet.address)
 
-  const newFuncs = [
-    getSelector('function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _equippedWearables) external')
-   ]
 
    let existingItemsFuncs = getSelectors(facet)
-
-  existingItemsFuncs = existingItemsFuncs.filter(selector => !newFuncs.includes(selector))
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
   const cut = [
-    {
-      facetAddress: facet.address,
-      action: FacetCutAction.Add,
-      functionSelectors: newFuncs
-    },
+ 
     {
       facetAddress: facet.address,
       action: FacetCutAction.Replace,
