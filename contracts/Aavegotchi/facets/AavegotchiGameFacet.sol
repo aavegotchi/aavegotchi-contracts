@@ -206,6 +206,7 @@ contract AavegotchiGameFacet is Modifiers {
                 sender == owner || s.operators[owner][sender] || s.approved[tokenId] == sender,
                 "AavegotchiGameFacet: Not owner of token or approved"
             );
+            require(s.aavegotchis[tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for Aavegotchi");
             LibAavegotchi.interact(tokenId);
         }
     }
