@@ -84,7 +84,7 @@ async function main () {
 }
 
 main()
-  .then(() => process.exit(0))
+  .then(() => console.log('Upgrade complete!'))
   .catch(error => {
     console.error(error)
     process.exit(1)

@@ -138,28 +138,28 @@ contract ItemsFacet is Modifiers {
     }
 
     function findWearableSets(uint256[] calldata _wearableIds) external view returns (uint256[] memory wearableSetIds_) {
-        unchecked {                    
+        unchecked {
             uint256 length = s.wearableSets.length;
             wearableSetIds_ = new uint256[](length);
             uint256 count;
-            for(uint256 i; i < length; i++) {
+            for (uint256 i; i < length; i++) {
                 uint16[] memory setWearableIds = s.wearableSets[i].wearableIds;
                 bool foundSet = true;
-                for(uint256 j; j < setWearableIds.length; j++) {
+                for (uint256 j; j < setWearableIds.length; j++) {
                     uint256 setWearableId = setWearableIds[j];
                     bool foundWearableId = false;
-                    for(uint256 k; k < _wearableIds.length; k++) {
-                        if(_wearableIds[k] == setWearableId) {
+                    for (uint256 k; k < _wearableIds.length; k++) {
+                        if (_wearableIds[k] == setWearableId) {
                             foundWearableId = true;
                             break;
                         }
                     }
-                    if(foundWearableId == false) {
+                    if (foundWearableId == false) {
                         foundSet = false;
                         break;
                     }
                 }
-                if(foundSet) {
+                if (foundSet) {
                     wearableSetIds_[count] = i;
                     count++;
                 }
@@ -211,28 +211,28 @@ contract ItemsFacet is Modifiers {
    |             Write Functions        |
    |__________________________________*/
 
-    function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _equippedWearables) external onlyAavegotchiOwner(_tokenId) {
+    function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
-        emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _equippedWearables);
+        emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _wearablesToEquip);
         address sender = LibMeta.msgSender();
 
         uint256 aavegotchiLevel = LibAavegotchi.aavegotchiLevel(aavegotchi.experience);
 
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
-            uint256 wearableId = _equippedWearables[slot];
+            uint256 toEquipId = _wearablesToEquip[slot];
             uint256 existingEquippedWearableId = aavegotchi.equippedWearables[slot];
-            
+
             //if the new wearable value is equal to the current equipped wearable in that slot
             //do nothing
-            if (wearableId == existingEquippedWearableId) {
+            if (toEquipId == existingEquippedWearableId) {
                 continue;
             }
 
             // unequips wearable
-            aavegotchi.equippedWearables[slot] = uint16(wearableId);
+            aavegotchi.equippedWearables[slot] = uint16(toEquipId);
 
             // if a wearable was equipped in this slot
-            if(existingEquippedWearableId != 0) {
+            if (existingEquippedWearableId != 0) {
                 // remove wearable from Aavegotchi and transfer item to owner
                 LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
                 LibItems.addToOwner(sender, existingEquippedWearableId, 1);
@@ -241,8 +241,8 @@ contract ItemsFacet is Modifiers {
             }
 
             // if a wearable is being equipped
-            if (wearableId != 0) {
-                ItemType storage itemType = s.itemTypes[wearableId];
+            if (toEquipId != 0) {
+                ItemType storage itemType = s.itemTypes[toEquipId];
                 require(aavegotchiLevel >= itemType.minLevel, "ItemsFacet: Aavegotchi level lower than minLevel");
                 require(itemType.category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
                 require(itemType.slotPositions[slot] == true, "ItemsFacet: Wearable cannot be equipped in this slot");
@@ -263,28 +263,28 @@ contract ItemsFacet is Modifiers {
                 }
 
                 //Then check if this wearable is in the Aavegotchis inventory
-                uint256 nftBalance = s.nftItemBalances[address(this)][_tokenId][wearableId];
+                uint256 nftBalance = s.nftItemBalances[address(this)][_tokenId][toEquipId];
                 uint256 neededBalance = 1;
                 if (slot == LibItems.WEARABLE_SLOT_HAND_LEFT) {
-                    if (_equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT] == wearableId) {
+                    if (_wearablesToEquip[LibItems.WEARABLE_SLOT_HAND_RIGHT] == toEquipId) {
                         neededBalance = 2;
                     }
                 }
 
                 if (nftBalance < neededBalance) {
-                    uint256 ownerBalance = s.ownerItemBalances[sender][wearableId];
+                    uint256 ownerBalance = s.ownerItemBalances[sender][toEquipId];
                     require(nftBalance + ownerBalance >= neededBalance, "ItemsFacet: Wearable is not in inventories");
                     uint256 balToTransfer = neededBalance - nftBalance;
 
                     //Transfer to Aavegotchi
-                    LibItems.removeFromOwner(sender, wearableId, balToTransfer);
-                    LibItems.addToParent(address(this), _tokenId, wearableId, balToTransfer);
-                    emit TransferToParent(address(this), _tokenId, wearableId, balToTransfer);
-                    emit LibERC1155.TransferSingle(sender, sender, address(this), wearableId, balToTransfer);
-                    LibERC1155Marketplace.updateERC1155Listing(address(this), wearableId, sender);
+                    LibItems.removeFromOwner(sender, toEquipId, balToTransfer);
+                    LibItems.addToParent(address(this), _tokenId, toEquipId, balToTransfer);
+                    emit TransferToParent(address(this), _tokenId, toEquipId, balToTransfer);
+                    emit LibERC1155.TransferSingle(sender, sender, address(this), toEquipId, balToTransfer);
+                    LibERC1155Marketplace.updateERC1155Listing(address(this), toEquipId, sender);
                 }
             }
-        }                
+        }
         LibAavegotchi.interact(_tokenId);
     }
 

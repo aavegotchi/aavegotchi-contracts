@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
-//const { equipUpgrade } = require('../scripts/upgrades/upgrade-equipWearables.js');
+const { equipUpgrade } = require('../scripts/upgrades/upgrade-equipWearables.js');
 
 describe('Test uneqipping', async function () {
   this.timeout(300000)
@@ -44,7 +44,7 @@ describe('Test uneqipping', async function () {
       method: "hardhat_impersonateAccount",
       params: [owner]
    })
-  // await equipUpgrade();
+  
     const signer = ethers.provider.getSigner(owner)
     itemsFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)).connect(signer)
     shopFacet= (await ethers.getContractAt('contracts/Aavegotchi/facets/ShopFacet.sol:ShopFacet', diamondAddress)).connect(signer)
@@ -69,6 +69,8 @@ describe('Test uneqipping', async function () {
 
   it('sends all items back after full unequipping', async function () {
     
+  //  await equipUpgrade();
+
    //const signer = ethers.provider.getSigner(owner)
 
    await itemsFacet.equipWearables(1484,totalUnequip)
