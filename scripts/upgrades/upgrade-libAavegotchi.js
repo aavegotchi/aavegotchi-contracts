@@ -86,7 +86,8 @@ async function main() {
     facetAddress: aavegotchiGameFacet.address,
     action: FacetCutAction.Replace,
     functionSelectors: getSelectors(aavegotchiGameFacet)
-  },{
+  },
+  {
     facetAddress: itemsFacet.address,
     action: FacetCutAction.Replace,
     functionSelectors: getSelectors(itemsFacet)
@@ -112,3 +113,5 @@ main()
     console.error(error);
     process.exit(1);
   });
+
+  exports.interactUpgrade=main
