@@ -1,5 +1,6 @@
 /* global ethers */
 const { sendToMultisig } = require('../libraries/multisig/multisig.js')
+const { LedgerSigner } = require('@ethersproject/hardware-wallets')
 
 function getSelectors (contract) {
   const signatures = Object.keys(contract.interface.functions)
@@ -55,6 +56,7 @@ async function main() {
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
+  
   if (testing) {
     const owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
     await hre.network.provider.request({
@@ -72,7 +74,7 @@ async function main() {
     });
     signer = await ethers.provider.getSigner(owner);
   } else if (hre.network.name === "matic") {
-    signer = new LedgerSigner(ethers.provider,"hid","m/44'/60'/2'/0/0")
+    signer = new LedgerSigner(ethers.provider)
   } else {
     throw Error("Incorrect network selected");
   }
