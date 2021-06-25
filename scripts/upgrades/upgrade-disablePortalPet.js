@@ -1,4 +1,5 @@
 /* global ethers */
+const { sendToMultisig } = require('../libraries/multisig/multisig.js')
 
 function getSelectors (contract) {
   const signatures = Object.keys(contract.interface.functions)
@@ -109,7 +110,7 @@ async function main() {
   //  throw Error(`Diamond upgrade failed: ${tx.hash}`);
  // }
 
-  console.log("Completed diamond cut: ", tx.hash);
+  //console.log("Completed diamond cut: ", tx.hash);
 }
 
 main()
