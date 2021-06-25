@@ -213,7 +213,9 @@ contract ItemsFacet is Modifiers {
 
     function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
+        require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for Aavegotchi");
         emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _wearablesToEquip);
+
         address sender = LibMeta.msgSender();
 
         uint256 aavegotchiLevel = LibAavegotchi.aavegotchiLevel(aavegotchi.experience);
@@ -294,6 +296,8 @@ contract ItemsFacet is Modifiers {
         uint256[] calldata _quantities
     ) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         require(_itemIds.length == _quantities.length, "ItemsFacet: _itemIds length does not match _quantities length");
+        require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for Aavegotchi");
+
         address sender = LibMeta.msgSender();
         for (uint256 i; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
