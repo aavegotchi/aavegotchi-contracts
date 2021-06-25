@@ -3,6 +3,7 @@
 /* eslint prefer-const: "off" */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
+const { sendToMultisig } = require('../libraries/multisig/multisig.js')
 
 function getSelectors (contract) {
   const signatures = Object.keys(contract.interface.functions)
@@ -38,8 +39,10 @@ async function main () {
     throw Error('Incorrect network selected')
   }
 
+  console.log('Deploying facets')
+
   const itemsFacet = await ethers.getContractFactory('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet')
-  facet = await itemsFacet.deploy()
+  facet = await itemsFacet.deploy({gasPrice:10000000000})
   await facet.deployed()
   console.log('Deployed facet:', facet.address)
 
@@ -60,17 +63,14 @@ async function main () {
 
   const diamondCut = (await ethers.getContractAt('IDiamondCut', diamondAddress)).connect(signer)
   let tx
-  let receipt
+  //let receipt
 
-  console.log('Diamond cut')
-  tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 8000000 })
-  console.log('Diamond cut tx:', tx.hash)
-  receipt = await tx.wait()
-  if (!receipt.status) {
-    throw Error(`Diamond upgrade failed: ${tx.hash}`)
-  }
-  console.log('Completed diamond cut: ', tx.hash)
+  tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000, gasPrice: 5000000000});
 
+  console.log('tx:',tx)
+  await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, gasPrice:5000000000);
+
+  console.log('Sent to multisig')
 
 }
 
