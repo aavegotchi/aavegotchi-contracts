@@ -40,7 +40,7 @@ async function deployFacets(...facets) {
       ;[facet, constructorArgs] = facet;
     }
     const factory = await ethers.getContractFactory(facet);
-    const facetInstance = await factory.deploy(...constructorArgs);
+    const facetInstance = await factory.deploy(...constructorArgs, {gasPrice:5000000000});
     await facetInstance.deployed();
     const tx = facetInstance.deployTransaction;
     const receipt = await tx.wait();
@@ -97,12 +97,17 @@ async function main() {
 
   const diamondCut = await (await ethers.getContractAt("IDiamondCut", diamondAddress)).connect(signer);
 
-  const tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", { gasLimit: 20000000 });
-  console.log("Diamond cut tx:", tx.hash);
-  const receipt = await tx.wait();
-  if (!receipt.status) {
-    throw Error(`Diamond upgrade failed: ${tx.hash}`);
-  }
+  tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000, gasPrice:5000000000 })
+  await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, {gasPrice:5000000000})
+
+  console.log('sent to multisig')
+
+  //const tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", { gasLimit: 20000000 });
+  //console.log("Diamond cut tx:", tx.hash);
+ // const receipt = await tx.wait();
+ // if (!receipt.status) {
+  //  throw Error(`Diamond upgrade failed: ${tx.hash}`);
+ // }
 
   console.log("Completed diamond cut: ", tx.hash);
 }
