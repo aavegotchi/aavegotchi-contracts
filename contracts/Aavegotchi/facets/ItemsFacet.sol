@@ -191,7 +191,7 @@ contract ItemsFacet is Modifiers {
         @return URI for token type
     */
     function uri(uint256 _id) external view returns (string memory) {
-        require(_id < s.itemTypes.length, "ItemsFacet: _id not found for item");
+        require(_id < s.itemTypes.length, "ItemsFacet: Item _id not found");
         return LibStrings.strWithUint(s.itemsBaseUri, _id);
     }
 
@@ -247,7 +247,7 @@ contract ItemsFacet is Modifiers {
                 ItemType storage itemType = s.itemTypes[toEquipId];
                 require(aavegotchiLevel >= itemType.minLevel, "ItemsFacet: Aavegotchi level lower than minLevel");
                 require(itemType.category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
-                require(itemType.slotPositions[slot] == true, "ItemsFacet: Wearable cannot be equipped in this slot");
+                require(itemType.slotPositions[slot] == true, "ItemsFacet: Wearable can't be equipped in slot");
                 {
                     bool canBeEquipped;
                     uint8[] memory allowedCollaterals = itemType.allowedCollaterals;
@@ -260,7 +260,7 @@ contract ItemsFacet is Modifiers {
                                 break;
                             }
                         }
-                        require(canBeEquipped, "ItemsFacet: Wearable cannot be equipped in this collateral type");
+                        require(canBeEquipped, "ItemsFacet: Wearable can't be used for this collateral");
                     }
                 }
 
@@ -275,7 +275,7 @@ contract ItemsFacet is Modifiers {
 
                 if (nftBalance < neededBalance) {
                     uint256 ownerBalance = s.ownerItemBalances[sender][toEquipId];
-                    require(nftBalance + ownerBalance >= neededBalance, "ItemsFacet: Wearable is not in inventories");
+                    require(nftBalance + ownerBalance >= neededBalance, "ItemsFacet: Wearable isn't in inventory");
                     uint256 balToTransfer = neededBalance - nftBalance;
 
                     //Transfer to Aavegotchi
@@ -295,7 +295,7 @@ contract ItemsFacet is Modifiers {
         uint256[] calldata _itemIds,
         uint256[] calldata _quantities
     ) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
-        require(_itemIds.length == _quantities.length, "ItemsFacet: _itemIds length does not match _quantities length");
+        require(_itemIds.length == _quantities.length, "ItemsFacet: _itemIds length != _quantities length");
         require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for Aavegotchi");
 
         address sender = LibMeta.msgSender();
@@ -303,7 +303,7 @@ contract ItemsFacet is Modifiers {
             uint256 itemId = _itemIds[i];
             uint256 quantity = _quantities[i];
             ItemType memory itemType = s.itemTypes[itemId];
-            require(itemType.category == LibItems.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item must be consumable");
+            require(itemType.category == LibItems.ITEM_CATEGORY_CONSUMABLE, "ItemsFacet: Item isn't consumable");
 
             LibItems.removeFromOwner(sender, itemId, quantity);
 
@@ -351,7 +351,7 @@ contract ItemsFacet is Modifiers {
     }
 
     function setWearableSlotPositions(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] calldata _slotPositions) external onlyDaoOrOwner {
-        require(_wearableId < s.itemTypes.length, "DAOFacet: _wearableId not found for item");
+        require(_wearableId < s.itemTypes.length, "DAOFacet: Item _wearableId not found");
         s.itemTypes[_wearableId].slotPositions = _slotPositions;
     }
 }

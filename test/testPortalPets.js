@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat')
 const truffleAsserts = require('truffle-assertions')
-//const { interactUpgrade } = require('../scripts/upgrades/upgrade-libAavegotchi.js');
+const { interactUpgrade } = require('../scripts/upgrades/upgrade-disablePortalPet.js');
 
 
 describe('Testing interaction on portals', async function ()  {
@@ -15,7 +15,7 @@ describe('Testing interaction on portals', async function ()  {
 
   before(async () => {
       
-     // await interactUpgrade();
+      await interactUpgrade();
 
      // aavegotchiGameFacet = await ethers.getContractAt('AavegotchiGameFacet', aavegotchiDiamondAddress);
       aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
