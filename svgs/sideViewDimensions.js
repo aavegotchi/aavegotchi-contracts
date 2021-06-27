@@ -1244,7 +1244,7 @@ let sideViewDimensions = [
  },
  {
    itemId: 24,
-   name: " Thaave Helmet",
+   name: "Thaave Helmet",
    side: "back",
    dimensions: {x:9, y:6, width:46, height:24},
 
@@ -1255,7 +1255,7 @@ let sideViewDimensions = [
  },
  {
    itemId: 24,
-   name: " Thaave Helmet",
+   name: "Thaave Helmet",
    side: "left",
    dimensions: {x:20, y:6, width:24, height:24},
 
@@ -1266,7 +1266,7 @@ let sideViewDimensions = [
  },
  {
    itemId: 24,
-   name: " Thaave Helmet",
+   name: "Thaave Helmet",
    side: "right",
    dimensions: {x:20, y:6, width:24, height:24},
 
@@ -1277,7 +1277,7 @@ let sideViewDimensions = [
  },
  {
    itemId: 25,
-   name: " Thaave Suit",
+   name: "Thaave Suit",
    side: "left",
    dimensions: {x:20, y:34, width:30, height:21},
 
@@ -1288,7 +1288,7 @@ let sideViewDimensions = [
  },
  {
    itemId: 25,
-   name: " Thaave Suit",
+   name: "Thaave Suit",
    side: "right",
    dimensions: {x:14, y:34, width:30, height:21},
 
@@ -1299,7 +1299,7 @@ let sideViewDimensions = [
  },
  {
    itemId: 25,
-   name: " Thaave Suit",
+   name: "Thaave Suit",
    side: "back",
    dimensions: {x:9, y:33, width:46, height:22},
 
@@ -1354,7 +1354,7 @@ let sideViewDimensions = [
  },
  {
    itemId: 26,
-   name: " Thaave Hammer",
+   name: "Thaave Hammer",
    side: "left back",
    dimensions: {x:0, y:28, width:14, height:14},
 
@@ -1365,7 +1365,7 @@ let sideViewDimensions = [
  },
  {
    itemId: 26,
-   name: " Thaave Hammer",
+   name: "Thaave Hammer",
    side: "left",
    dimensions: {x:20, y:29, width:12, height:12},
 
@@ -1376,7 +1376,7 @@ let sideViewDimensions = [
  },
  {
    itemId: 26,
-   name: " Thaave Hammer",
+   name: "Thaave Hammer",
    side: "right back",
    dimensions: {x:50, y:28, width:14, height:14},
 
@@ -1387,7 +1387,7 @@ let sideViewDimensions = [
  },
  {
    itemId: 26,
-   name: " Thaave Hammer",
+   name: "Thaave Hammer",
    side: "right",
    dimensions: {x:32, y:29, width:12, height:12},
 
