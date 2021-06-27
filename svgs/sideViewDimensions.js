@@ -35,7 +35,7 @@ let sideViewDimensions = [
  {
    itemId: 1,
    name: "Camo Hat",
-   side: " right",
+   side: "right",
    dimensions: {x:20, y:2, width:30, height:12},
 
 
@@ -3126,7 +3126,7 @@ let sideViewDimensions = [
  {
    itemId: 57,
    name: "Aagent Shades",
-   side: " back",
+   side: "back",
    dimensions: {x:15, y:22, width:34, height:2},
 
 
@@ -3137,7 +3137,7 @@ let sideViewDimensions = [
  {
    itemId: 57,
    name: "Aagent Shades",
-   side: " left",
+   side: "left",
    dimensions: {x:19, y:22, width:25, height:9},
 
 
@@ -3148,7 +3148,7 @@ let sideViewDimensions = [
  {
    itemId: 57,
    name: "Aagent Shades",
-   side: " right",
+   side: "right",
    dimensions: {x:20, y:22, width:25, height:9},
 
 
@@ -3940,7 +3940,7 @@ let sideViewDimensions = [
  {
    itemId: 79,
    name: "Skateboard",
-   side: " back",
+   side: "back",
    dimensions: {x:51, y:25, width:8, height:26},
 
 
@@ -3951,7 +3951,7 @@ let sideViewDimensions = [
  {
    itemId: 79,
    name: "Skateboard",
-   side: " left",
+   side: "left",
    dimensions: {x:25, y:25, width:2, height:26},
 
 
@@ -3962,7 +3962,7 @@ let sideViewDimensions = [
  {
    itemId: 79,
    name: "Skateboard",
-   side: " right",
+   side: "right",
    dimensions: {x:37, y:25, width:2, height:26},
 
 
@@ -4435,7 +4435,7 @@ let sideViewDimensions = [
  {
    itemId: 91,
    name: "Pajama Pants",
-   side: " left",
+   side: "left",
    dimensions: {x:20, y:33, width:24, height:22},
 
 
@@ -4446,7 +4446,7 @@ let sideViewDimensions = [
  {
    itemId: 91,
    name: "Pajama Pants",
-   side: " right",
+   side: "right",
    dimensions: {x:20, y:33, width:24, height:22},
 
 
@@ -4457,7 +4457,7 @@ let sideViewDimensions = [
  {
    itemId: 91,
    name: "Pajama Pants",
-   side: " back",
+   side: "back",
    dimensions: {x:15, y:33, width:34, height:22},
 
 
@@ -4468,7 +4468,7 @@ let sideViewDimensions = [
  {
    itemId: 91,
    name: "Pajama Pants",
-   side: " left back up",
+   side: "left back up",
    dimensions: {x:11, y:31, width:4, height:10},
 
 
@@ -4479,7 +4479,7 @@ let sideViewDimensions = [
  {
    itemId: 91,
    name: "Pajama Pants",
-   side: " left back",
+   side: "left back",
    dimensions: {x:11, y:33, width:4, height:10},
 
 
@@ -4490,7 +4490,7 @@ let sideViewDimensions = [
  {
    itemId: 91,
    name: "Pajama Pants",
-   side: " left up",
+   side: "left up",
    dimensions: {x:25, y:32, width:10, height:5},
 
 
@@ -4501,7 +4501,7 @@ let sideViewDimensions = [
  {
    itemId: 91,
    name: "Pajama Pants",
-   side: " left",
+   side: "left",
    dimensions: {x:28, y:35, width:5, height:10},
 
 
@@ -4512,7 +4512,7 @@ let sideViewDimensions = [
  {
    itemId: 91,
    name: "Pajama Pants",
-   side: " right back up",
+   side: "right back up",
    dimensions: {x:49, y:31, width:4, height:10},
 
 
@@ -4523,7 +4523,7 @@ let sideViewDimensions = [
  {
    itemId: 91,
    name: "Pajama Pants",
-   side: " right back",
+   side: "right back",
    dimensions: {x:49, y:33, width:4, height:10},
 
 
@@ -4534,7 +4534,7 @@ let sideViewDimensions = [
  {
    itemId: 91,
    name: "Pajama Pants",
-   side: " right up",
+   side: "right up",
    dimensions: {x:29, y:32, width:10, height:5},
 
 
@@ -4545,7 +4545,7 @@ let sideViewDimensions = [
  {
    itemId: 91,
    name: "Pajama Pants",
-   side: " right",
+   side: "right",
    dimensions: {x:31, y:35, width:5, height:10},
 
 
@@ -4941,7 +4941,7 @@ let sideViewDimensions = [
  {
    itemId: 102,
    name: "Witch Cape",
-   side: " left",
+   side: "left",
    dimensions: {x:20, y:29, width:30, height:26},
 
 
@@ -4952,7 +4952,7 @@ let sideViewDimensions = [
  {
    itemId: 102,
    name: "Witch Cape",
-   side: " right",
+   side: "right",
    dimensions: {x:14, y:29, width:30, height:26},
 
 
@@ -4963,7 +4963,7 @@ let sideViewDimensions = [
  {
    itemId: 102,
    name: "Witch Cape",
-   side: " back",
+   side: "back",
    dimensions: {x:9, y:30, width:46, height:25},
 
 
@@ -4974,7 +4974,7 @@ let sideViewDimensions = [
  {
    itemId: 102,
    name: "Witch Cape",
-   side: " left back up",
+   side: "left back up",
    dimensions: {x:12, y:32, width:3, height:9},
 
 
@@ -4985,7 +4985,7 @@ let sideViewDimensions = [
  {
    itemId: 102,
    name: "Witch Cape",
-   side: " left back",
+   side: "left back",
    dimensions: {x:12, y:33, width:3, height:9},
 
 
@@ -4996,7 +4996,7 @@ let sideViewDimensions = [
  {
    itemId: 102,
    name: "Witch Cape",
-   side: " left up",
+   side: "left up",
    dimensions: {x:26, y:33, width:9, height:4},
 
 
@@ -5007,7 +5007,7 @@ let sideViewDimensions = [
  {
    itemId: 102,
    name: "Witch Cape",
-   side: " left",
+   side: "left",
    dimensions: {x:29, y:35, width:4, height:9},
 
 
@@ -5018,7 +5018,7 @@ let sideViewDimensions = [
  {
    itemId: 102,
    name: "Witch Cape",
-   side: " right back up",
+   side: "right back up",
    dimensions: {x:49, y:32, width:3, height:9},
 
 
@@ -5029,7 +5029,7 @@ let sideViewDimensions = [
  {
    itemId: 102,
    name: "Witch Cape",
-   side: " right back",
+   side: "right back",
    dimensions: {x:49, y:33, width:3, height:9},
 
 
@@ -5040,7 +5040,7 @@ let sideViewDimensions = [
  {
    itemId: 102,
    name: "Witch Cape",
-   side: " right up",
+   side: "right up",
    dimensions: {x:29, y:33, width:9, height:4},
 
 
@@ -5051,7 +5051,7 @@ let sideViewDimensions = [
  {
    itemId: 102,
    name: "Witch Cape",
-   side: " right",
+   side: "right",
    dimensions: {x:31, y:35, width:4, height:9},
 
 
@@ -5304,7 +5304,7 @@ let sideViewDimensions = [
  {
    itemId: 107,
    name: "Portal Mage Black Axe",
-   side: " left back",
+   side: "left back",
    dimensions: {x:0, y:18, width:14, height:28},
 
 
@@ -5315,7 +5315,7 @@ let sideViewDimensions = [
  {
    itemId: 107,
    name: "Portal Mage Black Axe",
-   side: " left",
+   side: "left",
    dimensions: {x:17, y:19, width:14, height:28},
 
 
@@ -5326,7 +5326,7 @@ let sideViewDimensions = [
  {
    itemId: 107,
    name: "Portal Mage Black Axe",
-   side: " right back",
+   side: "right back",
    dimensions: {x:50, y:18, width:14, height:28},
 
 
@@ -5337,7 +5337,7 @@ let sideViewDimensions = [
  {
    itemId: 107,
    name: "Portal Mage Black Axe",
-   side: " right",
+   side: "right",
    dimensions: {x:33, y:19, width:14, height:28},
 
 
@@ -5348,7 +5348,7 @@ let sideViewDimensions = [
  {
    itemId: 108,
    name: "Rasta Dreds",
-   side: " back",
+   side: "back",
    dimensions: {x:11, y:3, width:42, height:27},
 
 
@@ -5359,7 +5359,7 @@ let sideViewDimensions = [
  {
    itemId: 108,
    name: "Rasta Dreds",
-   side: " left",
+   side: "left",
    dimensions: {x:16, y:3, width:32, height:27},
 
 
@@ -5370,7 +5370,7 @@ let sideViewDimensions = [
  {
    itemId: 108,
    name: "Rasta Dreds",
-   side: " right",
+   side: "right",
    dimensions: {x:16, y:3, width:32, height:27},
 
 
@@ -5986,7 +5986,7 @@ let sideViewDimensions = [
  {
    itemId: 116,
    name: "Coconut",
-   side: " left back",
+   side: "left back",
    dimensions: {x:1, y:27, width:12, height:18},
 
 
@@ -5997,7 +5997,7 @@ let sideViewDimensions = [
  {
    itemId: 116,
    name: "Coconut",
-   side: " left",
+   side: "left",
    dimensions: {x:18, y:27, width:12, height:18},
 
 
@@ -6008,7 +6008,7 @@ let sideViewDimensions = [
  {
    itemId: 116,
    name: "Coconut",
-   side: " right back",
+   side: "right back",
    dimensions: {x:51, y:27, width:12, height:18},
 
 
@@ -6019,7 +6019,7 @@ let sideViewDimensions = [
  {
    itemId: 116,
    name: "Coconut",
-   side: " right",
+   side: "right",
    dimensions: {x:34, y:27, width:12, height:18},
 
 
@@ -6030,7 +6030,7 @@ let sideViewDimensions = [
  {
    itemId: 117,
    name: "Deal With It Shades",
-   side: " back",
+   side: "back",
    dimensions: {x:15, y:22, width:34, height:2},
 
 
@@ -6041,7 +6041,7 @@ let sideViewDimensions = [
  {
    itemId: 117,
    name: "Deal With It Shades",
-   side: " left",
+   side: "left",
    dimensions: {x:19, y:22, width:25, height:8},
 
 
@@ -6052,7 +6052,7 @@ let sideViewDimensions = [
  {
    itemId: 117,
    name: "Deal With It Shades",
-   side: " right",
+   side: "right",
    dimensions: {x:20, y:22, width:25, height:8},
 
 
@@ -6151,7 +6151,7 @@ let sideViewDimensions = [
  {
    itemId: 120,
    name: "Martini",
-   side: " left back",
+   side: "left back",
    dimensions: {x:1, y:25, width:14, height:19},
 
 
@@ -6162,7 +6162,7 @@ let sideViewDimensions = [
  {
    itemId: 120,
    name: "Martini",
-   side: " left",
+   side: "left",
    dimensions: {x:21, y:27, width:14, height:19},
 
 
@@ -6173,7 +6173,7 @@ let sideViewDimensions = [
  {
    itemId: 120,
    name: "Martini",
-   side: " right back",
+   side: "right back",
    dimensions: {x:49, y:25, width:14, height:19},
 
 
@@ -6184,7 +6184,7 @@ let sideViewDimensions = [
  {
    itemId: 120,
    name: "Martini",
-   side: " right",
+   side: "right",
    dimensions: {x:29, y:27, width:14, height:19},
 
 
@@ -6239,7 +6239,7 @@ let sideViewDimensions = [
  {
    itemId: 122,
    name: "Milkshake",
-   side: " left back",
+   side: "left back",
    dimensions: {x:2, y:21, width:12, height:29},
 
 
@@ -6250,7 +6250,7 @@ let sideViewDimensions = [
  {
    itemId: 122,
    name: "Milkshake",
-   side: " left",
+   side: "left",
    dimensions: {x:19, y:21, width:12, height:29},
 
 
@@ -6261,7 +6261,7 @@ let sideViewDimensions = [
  {
    itemId: 122,
    name: "Milkshake",
-   side: " right back",
+   side: "right back",
    dimensions: {x:50, y:21, width:12, height:29},
 
 
@@ -6272,7 +6272,7 @@ let sideViewDimensions = [
  {
    itemId: 122,
    name: "Milkshake",
-   side: " right",
+   side: "right",
    dimensions: {x:33, y:21, width:12, height:29},
 
 
@@ -6481,7 +6481,7 @@ let sideViewDimensions = [
  {
    itemId: 130,
    name: "Fireball",
-   side: " left back",
+   side: "left back",
    dimensions: {x:3, y:32, width:10, height:12},
 
 
@@ -6492,7 +6492,7 @@ let sideViewDimensions = [
  {
    itemId: 130,
    name: "Fireball",
-   side: " left",
+   side: "left",
    dimensions: {x:23, y:32, width:7, height:12},
 
 
@@ -6503,7 +6503,7 @@ let sideViewDimensions = [
  {
    itemId: 130,
    name: "Fireball",
-   side: " right back",
+   side: "right back",
    dimensions: {x:51, y:32, width:10, height:12},
 
 
@@ -6514,7 +6514,7 @@ let sideViewDimensions = [
  {
    itemId: 130,
    name: "Fireball",
-   side: " right",
+   side: "right",
    dimensions: {x:34, y:32, width:7, height:12},
 
 
@@ -7262,7 +7262,7 @@ let sideViewDimensions = [
  {
    itemId: 148,
    name: "Royal Scepter",
-   side: " left back",
+   side: "left back",
    dimensions: {x:7, y:28, width:6, height:21},
 
 
@@ -7273,7 +7273,7 @@ let sideViewDimensions = [
  {
    itemId: 148,
    name: "Royal Scepter",
-   side: " left",
+   side: "left",
    dimensions: {x:26, y:28, width:1, height:21},
 
 
@@ -7284,7 +7284,7 @@ let sideViewDimensions = [
  {
    itemId: 148,
    name: "Royal Scepter",
-   side: " right back",
+   side: "right back",
    dimensions: {x:51, y:28, width:6, height:21},
 
 
@@ -7295,7 +7295,7 @@ let sideViewDimensions = [
  {
    itemId: 148,
    name: "Royal Scepter",
-   side: " right",
+   side: "right",
    dimensions: {x:37, y:28, width:1, height:21},
 
 
@@ -7339,7 +7339,7 @@ let sideViewDimensions = [
  {
    itemId: 150,
    name: "Royal Robes",
-   side: " left",
+   side: "left",
    dimensions: {x:20, y:30, width:30, height:25},
 
 
@@ -7350,7 +7350,7 @@ let sideViewDimensions = [
  {
    itemId: 150,
    name: "Royal Robes",
-   side: " right",
+   side: "right",
    dimensions: {x:14, y:30, width:30, height:25},
 
 
@@ -7361,7 +7361,7 @@ let sideViewDimensions = [
  {
    itemId: 150,
    name: "Royal Robes",
-   side: " back",
+   side: "back",
    dimensions: {x:9, y:30, width:46, height:25},
 
 
@@ -7372,7 +7372,7 @@ let sideViewDimensions = [
  {
    itemId: 150,
    name: "Royal Robes",
-   side: " left back up",
+   side: "left back up",
    dimensions: {x:12, y:32, width:3, height:9},
 
 
@@ -7383,7 +7383,7 @@ let sideViewDimensions = [
  {
    itemId: 150,
    name: "Royal Robes",
-   side: " left back",
+   side: "left back",
    dimensions: {x:12, y:33, width:3, height:9},
 
 
@@ -7394,7 +7394,7 @@ let sideViewDimensions = [
  {
    itemId: 150,
    name: "Royal Robes",
-   side: " left up",
+   side: "left up",
    dimensions: {x:26, y:33, width:9, height:4},
 
 
@@ -7405,7 +7405,7 @@ let sideViewDimensions = [
  {
    itemId: 150,
    name: "Royal Robes",
-   side: " left",
+   side: "left",
    dimensions: {x:29, y:35, width:4, height:9},
 
 
@@ -7416,7 +7416,7 @@ let sideViewDimensions = [
  {
    itemId: 150,
    name: "Royal Robes",
-   side: " right back up",
+   side: "right back up",
    dimensions: {x:49, y:32, width:3, height:9},
 
 
@@ -7427,7 +7427,7 @@ let sideViewDimensions = [
  {
    itemId: 150,
    name: "Royal Robes",
-   side: " right back",
+   side: "right back",
    dimensions: {x:49, y:33, width:3, height:9},
 
 
@@ -7438,7 +7438,7 @@ let sideViewDimensions = [
  {
    itemId: 150,
    name: "Royal Robes",
-   side: " right up",
+   side: "right up",
    dimensions: {x:29, y:33, width:9, height:4},
 
 
@@ -7449,7 +7449,7 @@ let sideViewDimensions = [
  {
    itemId: 150,
    name: "Royal Robes",
-   side: " right",
+   side: "right",
    dimensions: {x:31, y:35, width:4, height:9},
 
 
@@ -7493,7 +7493,7 @@ let sideViewDimensions = [
  {
    itemId: 152,
    name: "Uncommon Rofl",
-   side: " back left",
+   side: "back left",
    dimensions: {x:2, y:43, width:20, height:17},
 
 
@@ -7504,7 +7504,7 @@ let sideViewDimensions = [
  {
    itemId: 152,
    name: "Uncommon Rofl",
-   side: " left",
+   side: "left",
    dimensions: {x:14, y:43, width:19, height:17},
 
 
@@ -7515,7 +7515,7 @@ let sideViewDimensions = [
  {
    itemId: 152,
    name: "Uncommon Rofl",
-   side: " right",
+   side: "right",
    dimensions: {x:31, y:43, width:19, height:17},
 
 
@@ -7702,7 +7702,7 @@ let sideViewDimensions = [
  {
    itemId: 159,
    name: "Lil Pump Shades",
-   side: " back",
+   side: "back",
    dimensions: {x:15, y:24, width:34, height:2},
 
 
@@ -7713,7 +7713,7 @@ let sideViewDimensions = [
  {
    itemId: 159,
    name: "Lil Pump Shades",
-   side: " left",
+   side: "left",
    dimensions: {x:19, y:19, width:25, height:12},
 
 
@@ -7724,7 +7724,7 @@ let sideViewDimensions = [
  {
    itemId: 159,
    name: "Lil Pump Shades",
-   side: " right",
+   side: "right",
    dimensions: {x:20, y:19, width:25, height:12},
 
 
@@ -7856,7 +7856,7 @@ let sideViewDimensions = [
  {
    itemId: 161,
    name: "Lil Pump Dreads",
-   side: " back",
+   side: "back",
    dimensions: {x:13, y:6, width:38, height:28},
 
 
@@ -7867,7 +7867,7 @@ let sideViewDimensions = [
  {
    itemId: 161,
    name: "Lil Pump Dreads",
-   side: " left",
+   side: "left",
    dimensions: {x:21, y:6, width:23, height:28},
 
 
@@ -7878,7 +7878,7 @@ let sideViewDimensions = [
  {
    itemId: 161,
    name: "Lil Pump Dreads",
-   side: " right",
+   side: "right",
    dimensions: {x:20, y:6, width:23, height:28},
 
 
@@ -7944,7 +7944,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " left",
+   side: "left",
    dimensions: {x:20, y:33, width:24, height:20},
 
 
@@ -7955,7 +7955,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " right",
+   side: "right",
    dimensions: {x:20, y:33, width:24, height:20},
 
 
@@ -7966,7 +7966,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk Front",
-   side: " front",
+   side: "front",
    dimensions: {x:15, y:33, width:34, height:20},
 
 
@@ -7977,7 +7977,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " back",
+   side: "back",
    dimensions: {x:15, y:33, width:34, height:20},
 
 
@@ -7988,7 +7988,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " left back up",
+   side: "left back up",
    dimensions: {x:12, y:32, width:3, height:9},
 
 
@@ -7999,7 +7999,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " left back",
+   side: "left back",
    dimensions: {x:12, y:33, width:3, height:9},
 
 
@@ -8010,7 +8010,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " left front up",
+   side: "left front up",
    dimensions: {x:49, y:32, width:3, height:9},
 
 
@@ -8021,7 +8021,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " left front",
+   side: "left front",
    dimensions: {x:49, y:33, width:3, height:9},
 
 
@@ -8032,7 +8032,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " left up",
+   side: "left up",
    dimensions: {x:26, y:33, width:9, height:4},
 
 
@@ -8043,7 +8043,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " left",
+   side: "left",
    dimensions: {x:29, y:35, width:4, height:9},
 
 
@@ -8054,7 +8054,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " right back up",
+   side: "right back up",
    dimensions: {x:49, y:32, width:3, height:9},
 
 
@@ -8065,7 +8065,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " right back",
+   side: "right back",
    dimensions: {x:49, y:33, width:3, height:9},
 
 
@@ -8076,7 +8076,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " right front up",
+   side: "right front up",
    dimensions: {x:12, y:32, width:3, height:9},
 
 
@@ -8087,7 +8087,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " right front",
+   side: "right front",
    dimensions: {x:12, y:33, width:3, height:9},
 
 
@@ -8098,7 +8098,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " right up",
+   side: "right up",
    dimensions: {x:29, y:33, width:9, height:4},
 
 
@@ -8109,7 +8109,7 @@ let sideViewDimensions = [
  {
    itemId: 177,
    name: "Cyberpunk",
-   side: " right",
+   side: "right",
    dimensions: {x:31, y:35, width:4, height:9},
 
 
@@ -8252,7 +8252,7 @@ let sideViewDimensions = [
  {
    itemId: 181,
    name: "Steampunk",
-   side: " back",
+   side: "back",
    dimensions: {x:15, y:41, width:34, height:14},
 
 
@@ -8263,7 +8263,7 @@ let sideViewDimensions = [
  {
    itemId: 181,
    name: "Steampunk Front",
-   side: " front",
+   side: "front",
    dimensions: {x:15, y:41, width:34, height:14},
 
 
@@ -8274,7 +8274,7 @@ let sideViewDimensions = [
  {
    itemId: 181,
    name: "Steampunk",
-   side: " left",
+   side: "left",
    dimensions: {x:20, y:41, width:24, height:14},
 
 
@@ -8285,7 +8285,7 @@ let sideViewDimensions = [
  {
    itemId: 181,
    name: "Steampunk",
-   side: " right",
+   side: "right",
    dimensions: {x:20, y:41, width:24, height:14},
 
 
