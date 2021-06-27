@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
-const { equipUpgrade } = require('../scripts/upgrades/upgrade-equipWearables.js');
+//const { equipUpgrade } = require('../scripts/upgrades/upgrade-equipWearables.js');
 
 describe('Test uneqipping', async function () {
   this.timeout(300000)
@@ -34,25 +34,49 @@ describe('Test uneqipping', async function () {
     0,  0,  0,   0
   ]
 
+  //First equip right hand
+  const equipRightHand = [
+    0,0,0,0,96,0, 0,0,0,0,0,0,0,0,0,0
+  ]
+  //Then equip left hand
+  const equipRightLeftHand = [
+    0,0,0,0,96,96,0,0,0,0,0,0,
+    0,0,0,0
+  ]
 
 
-  before(async function () {
-    gotchiFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', diamondAddress))
-    owner= await(gotchiFacet.ownerOf(1484))
-
-    impersonate=await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [owner]
-   })
   
-    const signer = ethers.provider.getSigner(owner)
-    itemsFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)).connect(signer)
-    shopFacet= (await ethers.getContractAt('contracts/Aavegotchi/facets/ShopFacet.sol:ShopFacet', diamondAddress)).connect(signer)
-   // console.log(shopFacet)
-    console.log(owner)
 
+
+    it('Can equip one item in both hands', async function () {
+
+
+      gotchiFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', diamondAddress))
+      owner= "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5" //await(gotchiFacet.ownerOf(1484))
+  
+      impersonate=await hre.network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [owner]
+     })
+    
+      const signer = ethers.provider.getSigner(owner)
+      itemsFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)).connect(signer)
+      shopFacet= (await ethers.getContractAt('contracts/Aavegotchi/facets/ShopFacet.sol:ShopFacet', diamondAddress)).connect(signer)
+     // console.log(shopFacet)
+      console.log(owner)
+
+       itemsFacet.equipWearables(1484,equipRightHand)
+    //  await itemsFacet.equipWearables(1484, totalUnequip)
+      await itemsFacet.equipWearables(1484,equipRightLeftHand)
+
+      const equipped = await itemsFacet.equippedWearables(1484)
+      console.log('equipped:',equipped)
+
+      expect(equipped.length).to.equal(16)
+    })
    
 
+    /*
    //const signer = ethers.provider.getSigner(owner)
 
    const bal105=(await(itemsFacet.balanceOf(owner,105))).toString()
@@ -118,8 +142,9 @@ it('should replace equipped items with new items and send them back',async funct
    expect(bal96).to.equal('0') 
    expect(bal59).to.equal('0') 
    expect(bal106).to.equal('1') 
+  */
 
-})
+
 
 
 })
