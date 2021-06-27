@@ -45,18 +45,8 @@ async function main () {
   facet = await itemsFacet.deploy({gasPrice:10000000000})
   await facet.deployed()
   console.log('Deployed facet:', facet.address)
-
-
   
    let existingItemsFuncs = getSelectors(facet)
-
-   //Remove this function because it is unnecessary and can be removed
-  /* const removeFuncs = [
-    getSelector('function setWearableSlotPositions(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] calldata _slotPositions) external'),
-  ]
-  */
-  //Filter the existing functions to remove the above
- // existingItemsFuncs = existingItemsFuncs.filter(selector => !removeFuncs.includes(selector))
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
@@ -66,11 +56,6 @@ async function main () {
       action: FacetCutAction.Replace,
       functionSelectors: existingItemsFuncs
     },
-   /* {
-      facetAddress: "0x0000000000000000000000000000000000000000",
-      action: FacetCutAction.Remove,
-      functionSelectors: removeFuncs
-    },*/
   ]
   console.log(cut)
 
@@ -78,21 +63,26 @@ async function main () {
 //  let tx
   //let receipt
 
-//  tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000, gasPrice: 5000000000});
 
-  /*
-  console.log('tx:',tx)
-  await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, {gasPrice:5000000000});
 
-  console.log('Sent to multisig')
-  */
-
-   const tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", { gasLimit: 20000000 });
-  console.log("Diamond cut tx:", tx.hash);
-  const receipt = await tx.wait();
-  if (!receipt.status) {
-    throw Error(`Diamond upgrade failed: ${tx.hash}`);
+  if (testing) {
+    const tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", { gasLimit: 20000000 });
+    console.log("Diamond cut tx:", tx.hash);
+    const receipt = await tx.wait();
+    if (!receipt.status) {
+      throw Error(`Diamond upgrade failed: ${tx.hash}`);
+    }
   }
+  else {
+      tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000, gasPrice: 5000000000});
+      console.log('tx:',tx)
+      await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, {gasPrice:5000000000});
+      console.log('Sent to multisig')
+  }
+
+  
+
+  
 
   //console.log("Completed diamond cut: ", tx.hash);
 
