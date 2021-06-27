@@ -34,11 +34,11 @@ describe('Test uneqipping', async function () {
     0,  0,  0,   0
   ]
 
-  //First equip right hand
+  //First equip left hand
   const equipLeftHand = [
     0,0,0,0,96,0, 0,0,0,0,0,0,0,0,0,0
   ]
-  //Then equip left hand
+  //Then equip both hands
   const equipLeftRightHand = [
     0,0,0,0,96,96,0,0,0,0,0,0,
     0,0,0,0
@@ -66,9 +66,7 @@ describe('Test uneqipping', async function () {
       console.log(owner)
 
        itemsFacet.equipWearables(1484,equipLeftHand)
-    //  await itemsFacet.equipWearables(1484, totalUnequip)
       await itemsFacet.equipWearables(1484,equipLeftRightHand)
-
       const equipped = await itemsFacet.equippedWearables(1484)
       console.log('equipped:',equipped)
 
