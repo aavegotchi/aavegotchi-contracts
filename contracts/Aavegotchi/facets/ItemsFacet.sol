@@ -213,7 +213,7 @@ contract ItemsFacet is Modifiers {
 
     function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
-        require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for Aavegotchi");
+        require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
         emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _wearablesToEquip);
 
         address sender = LibMeta.msgSender();
@@ -245,7 +245,7 @@ contract ItemsFacet is Modifiers {
             //If a wearable is being equipped
             if (toEquipId != 0) {
                 ItemType storage itemType = s.itemTypes[toEquipId];
-                require(aavegotchiLevel >= itemType.minLevel, "ItemsFacet: Aavegotchi level lower than minLevel");
+                require(aavegotchiLevel >= itemType.minLevel, "ItemsFacet: AG level lower than minLevel");
                 require(itemType.category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
                 require(itemType.slotPositions[slot] == true, "ItemsFacet: Wearable can't be equipped in slot");
                 {
@@ -273,6 +273,12 @@ contract ItemsFacet is Modifiers {
                     }
                 }
 
+                if (slot == LibItems.WEARABLE_SLOT_HAND_RIGHT) {
+                    if (_wearablesToEquip[LibItems.WEARABLE_SLOT_HAND_LEFT] == toEquipId) {
+                        neededBalance = 2;
+                    }
+                }
+
                 if (nftBalance < neededBalance) {
                     uint256 ownerBalance = s.ownerItemBalances[sender][toEquipId];
                     require(nftBalance + ownerBalance >= neededBalance, "ItemsFacet: Wearable isn't in inventory");
@@ -296,7 +302,7 @@ contract ItemsFacet is Modifiers {
         uint256[] calldata _quantities
     ) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         require(_itemIds.length == _quantities.length, "ItemsFacet: _itemIds length != _quantities length");
-        require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for Aavegotchi");
+        require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
 
         address sender = LibMeta.msgSender();
         for (uint256 i; i < _itemIds.length; i++) {
@@ -351,7 +357,7 @@ contract ItemsFacet is Modifiers {
     }
 
     function setWearableSlotPositions(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] calldata _slotPositions) external onlyDaoOrOwner {
-        require(_wearableId < s.itemTypes.length, "DAOFacet: Item _wearableId not found");
+        require(_wearableId < s.itemTypes.length, "Error");
         s.itemTypes[_wearableId].slotPositions = _slotPositions;
     }
 }

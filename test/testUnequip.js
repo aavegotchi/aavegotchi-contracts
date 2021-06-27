@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
-//const { equipUpgrade } = require('../scripts/upgrades/upgrade-equipWearables.js');
+const { equipUpgrade } = require('../scripts/upgrades/upgrade-equipWearables.js');
 
 describe('Test uneqipping', async function () {
   this.timeout(300000)
@@ -50,6 +50,8 @@ describe('Test uneqipping', async function () {
 
     it('Can equip one item in both hands', async function () {
 
+      await equipUpgrade()
+
 
       gotchiFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', diamondAddress))
       owner= "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5" //await(gotchiFacet.ownerOf(1484))
@@ -65,7 +67,7 @@ describe('Test uneqipping', async function () {
      // console.log(shopFacet)
       console.log(owner)
 
-       itemsFacet.equipWearables(1484,equipLeftHand)
+       await itemsFacet.equipWearables(1484,equipLeftHand)
       await itemsFacet.equipWearables(1484,equipLeftRightHand)
       const equipped = await itemsFacet.equippedWearables(1484)
       console.log('equipped:',equipped)
