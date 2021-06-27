@@ -1260,7 +1260,7 @@ let sideViewDimensions = [
    dimensions: {x:20, y:6, width:24, height:24},
 
 
- 
+
 
 
  },
@@ -8613,3 +8613,12 @@ let sideViewDimensions = [
 
  }
 ]
+
+sideViewDimensions = sideViewDimensions.map(value => {
+  delete value.name
+  return value
+})
+
+// console.log(sideViewDimensions)
+
+exports.sideViewDimensions = sideViewDimensions
