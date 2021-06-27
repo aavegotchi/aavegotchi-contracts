@@ -1,20 +1,15 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
-const { equipUpgrade } = require('../scripts/upgrades/upgrade-equipWearables.js');
+//const { equipUpgrade } = require('../scripts/upgrades/upgrade-equipWearables.js');
 
 describe('Test uneqipping', async function () {
   this.timeout(300000)
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
 
   let owner,
-  equipMultiple,
-  unequipMultiple,
-  currentItem,
   impersonate,
-  signer,
   itemsFacet,
   gotchiFacet,
-  shopFacet
   
 
   const fullEquip=[
@@ -63,8 +58,6 @@ describe('Test uneqipping', async function () {
     
       const signer = ethers.provider.getSigner(owner)
       itemsFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)).connect(signer)
-      shopFacet= (await ethers.getContractAt('contracts/Aavegotchi/facets/ShopFacet.sol:ShopFacet', diamondAddress)).connect(signer)
-     // console.log(shopFacet)
       console.log(owner)
 
        await itemsFacet.equipWearables(1484,equipLeftHand)

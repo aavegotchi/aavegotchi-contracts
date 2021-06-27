@@ -60,10 +60,6 @@ async function main () {
   console.log(cut)
 
   const diamondCut = (await ethers.getContractAt('IDiamondCut', diamondAddress)).connect(signer)
-//  let tx
-  //let receipt
-
-
 
   if (testing) {
     const tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", { gasLimit: 20000000 });
@@ -79,12 +75,6 @@ async function main () {
       await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, {gasPrice:5000000000});
       console.log('Sent to multisig')
   }
-
-  
-
-  
-
-  //console.log("Completed diamond cut: ", tx.hash);
 
 }
 
