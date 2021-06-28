@@ -9,7 +9,7 @@ describe('Test uneqipping', async function () {
   let owner,
   impersonate,
   itemsFacet,
-  gotchiFacet,
+  gotchiFacet
   
 
   const fullEquip=[
@@ -45,7 +45,7 @@ describe('Test uneqipping', async function () {
 
     it('Can equip one item in both hands', async function () {
 
-      await equipUpgrade()
+    //  await equipUpgrade()
 
 
       gotchiFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', diamondAddress))
