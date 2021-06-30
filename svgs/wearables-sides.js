@@ -163,15 +163,24 @@ const wearablesRightSvgs = [
   wearable('159_LilPumpShadesRight'),
   bodyWearable('160_LilPumpThreadsRight'),
   wearable('161_LilPumpDreadsRight'),
-  bodyWearable('162_MiamiShirtRight')
+  wearable('176_AagentRadioRight'),
+  bodyWearable('177_CyberpunkRight'),
+  wearable('178_CyberpunkVRRight'),
+  wearable('179_CyberpunkControlRight'),
+  wearable('180_CyberpunkEarPlugRight'),
+  wearable('181_SteampunkRight'),
+  bodyWearable('182_SteampunkGloveRight'),
+  wearable('183_SteampunkGlassesRight'),
+  bodyWearable('184_MiamiShirtRight'),
+  wearable('185_CoffeeCupRight')
 
 ]
 
 const wearablesBackSvgs = [
-  wearable('0_VoidRight'),
-  wearable('1_CamoHatRight'),
-  wearable('2_CamoPantsRight'), // body but doesn't have sleeves
-  wearable('3_MK2GrenadeRight'),
+  wearable('0_VoidBack'),
+  wearable('1_CamoHatBack'),
+  wearable('2_CamoPantsBack'), // body but doesn't have sleeves
+  wearable('3_MK2GrenadeBack'),
   wearable('4_SnowCamoHatBack'),
   wearable('5_SnowCamoPantsBack'), // body but no sleeves
   wearable('6_M67GrenadeBack'),
@@ -330,7 +339,16 @@ const wearablesBackSvgs = [
   wearable('159_LilPumpShadesBack'),
   bodyWearable('160_LilPumpThreadsBack'),
   wearable('161_LilPumpDreadsBack'),
-  bodyWearable('162_MiamiShirtBack')
+  wearable('176_AagentRadioBack'),
+  bodyWearable('177_CyberpunkBack'),
+  wearable('178_CyberpunkVRBack'),
+  wearable('179_CyberpunkControlBack'),
+  wearable('180_CyberpunkEarPlugBack'),
+  wearable('181_SteampunkBack'),
+  bodyWearable('182_SteampunkGloveBack'),
+  wearable('183_SteampunkGlassesBack'),
+  bodyWearable('184_MiamiShirtBack'),
+  wearable('185_CoffeeCupBack')
 
 ]
 
@@ -497,7 +515,16 @@ const wearablesLeftSvgs = [
   wearable('159_LilPumpShadesLeft'),
   bodyWearable('160_LilPumpThreadsLeft'),
   wearable('161_LilPumpDreadsLeft'),
-  bodyWearable('162_MiamiShirtLeft')
+  wearable('176_AagentRadioLeft'),
+  bodyWearable('177_CyberpunkLeft'),
+  wearable('178_CyberpunkVRLeft'),
+  wearable('179_CyberpunkControlLeft'),
+  wearable('180_CyberpunkEarPlugLeft'),
+  wearable('181_SteampunkLeft'),
+  bodyWearable('182_SteampunkGloveLeft'),
+  wearable('183_SteampunkGlassesLeft'),
+  bodyWearable('184_MiamiShirtLeft'),
+  wearable('185_CoffeeCupLeft')
 
 ]
 
