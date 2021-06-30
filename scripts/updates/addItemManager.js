@@ -27,8 +27,17 @@ async function main () {
   let tx
   let receipt
 
+  let itemManager;
 
-  let itemManagers = ["0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119"]
+  if (testing) {
+itemManager = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+  }
+  else {
+itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119"
+  }
+
+
+  let itemManagers = [itemManager]
   console.log('Adding item managers')  
 
   if (testing) {
@@ -39,6 +48,31 @@ async function main () {
       throw Error(`Adding item manager failed: ${tx.hash}`)
     }
     console.log('Adding item manager succeeded:', tx.hash)
+
+
+    /*
+    console.log('Updating dimensions')
+
+    await hre.network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: ["0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"]
+    })
+
+    signer = await ethers.provider.getSigner("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266")
+
+    let svgFacet = await ethers.getContractAt("SvgFacet", diamondAddress, signer)  
+
+    let dimensions = [30,38,34,23]
+    await svgFacet.setItemsDimensions(["156"],[dimensions])
+
+    
+
+    console.log('Dimensions updated')
+
+    const gotchi = await svgFacet.getAavegotchiSvg("4441")
+    console.log('output:',gotchi)
+    */
+
   }
   else {
     tx = await daoFacet.populateTransaction.addItemManagers(itemManagers)
