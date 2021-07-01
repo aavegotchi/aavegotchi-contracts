@@ -1,4 +1,7 @@
-// npx hardhat verifyFacet --apikey 8BZW8WAFKXEMBPQJ85JI895A61EKWE2FAT --contract 0xFb2e9978B9E89D6a5e0E08508644913c55E8643b --facet AavegotchiFacet
+// npx hardhat flatten ./contracts/Aavegotchi/facets/AavegotchiFacet.sol > ./flat/AavegotchiFacet.sol.flat
+// npx hardhat verifyFacet --apikey 8BZW8WAFKXEMBPQJ85JI895A61EKWE2FAT --contract 0xc317D47d094958b2D7f2e689598d3EC3fD75577F --facet AavegotchiFacet
+
+// npx hardhat verifyFacet --apikey 8BZW8WAFKXEMBPQJ85JI895A61EKWE2FAT --contract 0x70b03b843122887B907d177C97d0CD837cC5667c --facet AavegotchiFacet
 /* global ethers hre task */
 
 const axios = require('axios');
@@ -42,20 +45,32 @@ function verifyRequest(guid, apikey) {
 
 
 task('verifyFacet', 'Generates ABI file for diamond, includes all ABIs of facets')
+.addOptionalParam("noflatten", 'Flatten the file or not')
 .addParam("apikey", 'Polygon scan api key')
 .addParam("contract", 'Faucet contract address')
 .addParam("facet", 'Facet File name without extension')
 .setAction(async (taskArgs, { run }) => {
+  const noFlatten = taskArgs.noflatten == 'true';
   const apikey = taskArgs.apikey;
   const contractaddress = taskArgs.contract;
   const file = taskArgs.facet;
   let contractname = file;
 
-  let sourceCode = await run('flatten:get-flattened-sources', {
-    files: [
-      `./contracts/Aavegotchi/facets/${file}.sol`,
-    ]
-  });
+  let sourceCode = null;
+  if (noFlatten) {
+    try {
+      sourceCode = fs.readFileSync(`./flat/${file}.sol.flat`, 'utf8')
+    } catch (err) {
+      sourceCode = null;
+    }
+  }
+  if (!sourceCode) {
+    sourceCode = await run('flatten:get-flattened-sources', {
+      files: [
+        `./contracts/Aavegotchi/facets/${file}.sol`,
+      ]
+    });
+  }
   sourceCode = sourceCode.replace(/\/\/ SPDX\-License\-Identifier\: MIT/g,'JavaScript');
 
   const compilerversion = getCompilerVersion(sourceCode);
