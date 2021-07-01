@@ -30,7 +30,7 @@ async function main () {
 
 
   if (testing) {
-    tx = await erc1155marketplace.setERC1155Categories([{
+    tx = await erc1155Marketplace.setERC1155Categories([{
        erc1155TokenAddress:"0xA02d547512Bb90002807499F05495Fe9C4C3943f",
        erc1155TypeId:6,
        category:3
