@@ -5,6 +5,7 @@
 /* global ethers hre task */
 
 const axios = require('axios');
+const fs = require('fs');
 
 const addresses = [
   // '0x4f908Fa47F10bc2254dae7c74d8B797C1749A8a6', // 120 days
@@ -81,6 +82,7 @@ task('verifyFacet', 'Generates ABI file for diamond, includes all ABIs of facets
     try {
       sourceCode = fs.readFileSync(`./flat/${file}.sol.flat`, 'utf8')
     } catch (err) {
+      console.log(err);
       sourceCode = null;
     }
   }
@@ -100,47 +102,6 @@ task('verifyFacet', 'Generates ABI file for diamond, includes all ABIs of facets
   const runs = 200;
   const constructorArguements = '';
   const licenseType = 3;
-  const data = {
-    apikey,
-    module: 'contract',
-    action: 'verifysourcecode',
-    contractaddress,
-    sourceCode,
-    codeformat,
-    contractname,
-    compilerversion,
-    optimizationUsed,
-    runs,
-    constructorArguements,
-    evmversion: '',
-    licenseType,
-    libraryname1: '',
-    libraryaddress1: '',
-    libraryname2: '',
-    libraryaddress2: '',
-    libraryname3: '',
-    libraryaddress3: '',
-    libraryname4: '',
-    libraryaddress4: '',
-    libraryname5: '',
-    libraryaddress5: '',
-    libraryname6: '',
-    libraryaddress6: '',
-    libraryname7: '',
-    libraryaddress7: '',
-    libraryname8: '',
-    libraryaddress8: '',
-    libraryname9: '',
-    libraryaddress9: '',
-    libraryname10: '',
-    libraryaddress10: '',
-  }
-
-  const params = new URLSearchParams()
-
-  Object.keys(data).map(key => {
-    params.append(key, data[key]);
-  })
 
   const config = {
     headers: {
@@ -148,11 +109,54 @@ task('verifyFacet', 'Generates ABI file for diamond, includes all ABIs of facets
     }
   }
 
-  addresses.map(async address => {
-    data.contractaddress = address;
-    console.log('CONTRACT : ' + address);
-    await axios.post('https://api.polygonscan.com/api', params, config)
-    .then((response) => {
+  for (let i = 0; i < addresses.length; i++) {
+    const address = addresses[i];
+    try {
+      const data = {
+        apikey,
+        module: 'contract',
+        action: 'verifysourcecode',
+        contractaddress: address,
+        sourceCode,
+        codeformat,
+        contractname,
+        compilerversion,
+        optimizationUsed,
+        runs,
+        constructorArguements,
+        evmversion: '',
+        licenseType,
+        libraryname1: '',
+        libraryaddress1: '',
+        libraryname2: '',
+        libraryaddress2: '',
+        libraryname3: '',
+        libraryaddress3: '',
+        libraryname4: '',
+        libraryaddress4: '',
+        libraryname5: '',
+        libraryaddress5: '',
+        libraryname6: '',
+        libraryaddress6: '',
+        libraryname7: '',
+        libraryaddress7: '',
+        libraryname8: '',
+        libraryaddress8: '',
+        libraryname9: '',
+        libraryaddress9: '',
+        libraryname10: '',
+        libraryaddress10: '',
+      }
+    
+      const params = new URLSearchParams()
+    
+      Object.keys(data).map(key => {
+        params.append(key, data[key]);
+      })
+      
+      const response = await axios.post('https://api.polygonscan.com/api', params, config)
+      console.log('===============================');
+      console.log('CONTRACT : ' + address);
       if (response.data.status == 1) {
         console.log('Request Succeeded. GUID : ' + response.data.result);
       } else {
@@ -163,10 +167,10 @@ task('verifyFacet', 'Generates ABI file for diamond, includes all ABIs of facets
       }
       const guid = response.data.result;
       
-      return verifyRequest(guid, apikey);
-    })
-    .catch((err) => {
-      console.log('ERROR', err);
-    })
-  })
+      await verifyRequest(guid, apikey);
+    } catch (e) {
+      console.log('CONTRACT : ' + address);
+      console.log('ERROR', e);
+    }
+  }
 })

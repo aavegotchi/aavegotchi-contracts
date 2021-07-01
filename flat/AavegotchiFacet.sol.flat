@@ -2,7 +2,7 @@
 
 // File contracts/shared/interfaces/IERC20.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 interface IERC20 {
@@ -32,7 +32,7 @@ interface IERC20 {
 
 // File contracts/shared/interfaces/IDiamondCut.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 /******************************************************************************\
@@ -66,7 +66,7 @@ interface IDiamondCut {
 
 // File contracts/shared/interfaces/IDiamondLoupe.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 // A loupe is a small magnifying glass used to look at diamonds.
@@ -103,7 +103,7 @@ interface IDiamondLoupe {
 
 // File contracts/shared/interfaces/IERC165.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 interface IERC165 {
@@ -119,7 +119,7 @@ interface IERC165 {
 
 // File contracts/shared/interfaces/IERC173.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 /// @title ERC-173 Contract Ownership Standard
@@ -139,7 +139,7 @@ interface IERC173 {
 
 // File contracts/shared/libraries/LibMeta.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 library LibMeta {
@@ -175,7 +175,7 @@ library LibMeta {
 
 // File contracts/shared/libraries/LibDiamond.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 /******************************************************************************\
@@ -414,7 +414,7 @@ library LibDiamond {
 
 // File contracts/Aavegotchi/interfaces/ILink.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 interface ILink {
@@ -454,7 +454,7 @@ interface ILink {
 
 // File contracts/Aavegotchi/libraries/LibAppStorage.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 
@@ -752,7 +752,7 @@ contract Modifiers {
 
 // File contracts/shared/libraries/LibERC20.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 /******************************************************************************\
@@ -809,7 +809,7 @@ library LibERC20 {
 
 // File contracts/shared/interfaces/IERC721.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 /// @title ERC-721 Non-Fungible Token Standard
@@ -910,7 +910,7 @@ interface IERC721 {
 
 // File contracts/shared/interfaces/IERC721TokenReceiver.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
@@ -938,7 +938,7 @@ interface IERC721TokenReceiver {
 
 // File contracts/shared/libraries/LibERC721.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 library LibERC721 {
@@ -984,7 +984,7 @@ library LibERC721 {
 
 // File contracts/shared/interfaces/IERC1155TokenReceiver.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 /**
@@ -1037,7 +1037,7 @@ interface IERC1155TokenReceiver {
 
 // File contracts/shared/libraries/LibERC1155.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 library LibERC1155 {
@@ -1125,7 +1125,7 @@ library LibERC1155 {
 
 // File contracts/Aavegotchi/libraries/LibItems.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 
@@ -1266,7 +1266,7 @@ library LibItems {
 
 // File contracts/Aavegotchi/libraries/LibAavegotchi.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 
@@ -1632,7 +1632,7 @@ library LibAavegotchi {
 
 // File contracts/shared/libraries/LibStrings.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 // From Open Zeppelin contracts: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Strings.sol
@@ -1676,7 +1676,7 @@ library LibStrings {
 
 // File contracts/Aavegotchi/libraries/LibERC721Marketplace.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 // import "hardhat/console.sol";
@@ -1814,7 +1814,7 @@ library LibERC721Marketplace {
 
 // File contracts/Aavegotchi/facets/AavegotchiFacet.sol
 
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 
