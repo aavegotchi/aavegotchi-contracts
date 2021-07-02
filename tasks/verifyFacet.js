@@ -1,8 +1,6 @@
 // npx hardhat flatten ./contracts/Aavegotchi/facets/AavegotchiFacet.sol > ./flat/AavegotchiFacet.sol.flat
-// npx hardhat verifyFacet --apikey 8BZW8WAFKXEMBPQJ85JI895A61EKWE2FAT --contract 0xfa7a3bb12848A7856Dd2769Cd763310096c053F1 --facet AavegotchiFacet --noflatten true
+// npx hardhat verifyFacet --apikey 8BZW8WAFKXEMBPQJ85JI895A61EKWE2FAT --contract 0x691a713894403bF3b8a8A871BAB0D755D4b15096 --facet AavegotchiFacet --noflatten true
 
-// npx hardhat verifyFacet --apikey 8BZW8WAFKXEMBPQJ85JI895A61EKWE2FAT --contract 0x1AbA526A0508bf55844625597F10539999caB598 --facet AavegotchiFacet --noflatten true
-/* global ethers hre task */
 
 const axios = require('axios');
 const fs = require('fs');
@@ -14,7 +12,7 @@ const addresses = [
   // '0xefD4Cc25E5D01F84411D8Fca321F74bdf65E3d02', // 88 days
   // '0xfa7a3bb12848A7856Dd2769Cd763310096c053F1', // 6 days
   // '0xf35c518e373D71e4966295cF1E30f0c0555Cc85F', // 44 days
-  '0xE6fC4684bb1a6A71DB11B25Be01F9D3b1eCe10c6', // 3 days
+  // '0xE6fC4684bb1a6A71DB11B25Be01F9D3b1eCe10c6', // 3 days
   // '0xc317D47d094958b2D7f2e689598d3EC3fD75577F', // 88 days
   // '0x70b03b843122887B907d177C97d0CD837cC5667c', // 44 days
   // '0x0BfA0cfC88ff56C37e2AfA32af9BeE77f6f970ED', // 83 days
@@ -74,7 +72,7 @@ task('verifyFacet', 'Generates ABI file for diamond, includes all ABIs of facets
   const apikey = taskArgs.apikey;
   const contractaddress = taskArgs.contract;
   const file = taskArgs.facet;
-  let contractname = `contracts/Aavegotchi/facets/${file}.sol:${file}`;
+  let contractname = `contracts/Aavegotchi/facets/${file}.sol:${file}`; // file
 
   let sourceCode = null;
   if (noFlatten) {
@@ -109,6 +107,7 @@ task('verifyFacet', 'Generates ABI file for diamond, includes all ABIs of facets
     }
   }
 
+  addresses.push(contractaddress);
   for (let i = 0; i < addresses.length; i++) {
     const address = addresses[i];
     try {
