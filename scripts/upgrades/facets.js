@@ -15,6 +15,8 @@ function getSelector (func) {
 }
 
 async function main () {
+  console.log(getSelector('function xpUntilNextLevel(uint256 _experience) external'));
+  return;
   const existings = [
     '0xb50d6662', '0x33dc83b1',
     '0x095ea7b3', '0x70a08231',

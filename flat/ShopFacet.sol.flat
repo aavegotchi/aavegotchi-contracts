@@ -1,39 +1,9 @@
 // Sources flattened with hardhat v2.2.1 https://hardhat.org
 
-// File contracts/shared/interfaces/IERC20.sol
+// File contracts/shared/interfaces/IDiamondCut.sol
 
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
-
-interface IERC20 {
-    function name() external view returns (string memory);
-
-    function symbol() external view returns (string memory);
-
-    function decimals() external view returns (uint8);
-
-    function totalSupply() external view returns (uint256);
-
-    function balanceOf(address _owner) external view returns (uint256 balance);
-
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _value
-    ) external returns (bool success);
-
-    function transfer(address _to, uint256 _value) external returns (bool success);
-
-    function approve(address _spender, uint256 _value) external returns (bool success);
-
-    function allowance(address _owner, address _spender) external view returns (uint256 remaining);
-}
-
-
-// File contracts/shared/interfaces/IDiamondCut.sol
-
-
-
 
 /******************************************************************************\
 * Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
@@ -747,6 +717,36 @@ contract Modifiers {
         require(s.itemManagers[sender] == true, "LibAppStorage: only an ItemManager can call this function");
         _;
     }
+}
+
+
+// File contracts/shared/interfaces/IERC20.sol
+
+
+
+
+interface IERC20 {
+    function name() external view returns (string memory);
+
+    function symbol() external view returns (string memory);
+
+    function decimals() external view returns (uint8);
+
+    function totalSupply() external view returns (uint256);
+
+    function balanceOf(address _owner) external view returns (uint256 balance);
+
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value
+    ) external returns (bool success);
+
+    function transfer(address _to, uint256 _value) external returns (bool success);
+
+    function approve(address _spender, uint256 _value) external returns (bool success);
+
+    function allowance(address _owner, address _spender) external view returns (uint256 remaining);
 }
 
 
@@ -1630,189 +1630,233 @@ library LibAavegotchi {
 }
 
 
-// File contracts/shared/libraries/LibStrings.sol
+// File contracts/shared/interfaces/IERC1155.sol
 
 
 
-
-// From Open Zeppelin contracts: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Strings.sol
 
 /**
- * @dev String operations.
+    @title ERC-1155 Multi Token Standard
+    @dev See https://eips.ethereum.org/EIPS/eip-1155
+    Note: The ERC-165 identifier for this interface is 0xd9b67a26.
  */
-library LibStrings {
+/* is ERC165 */
+interface IERC1155 {
     /**
-     * @dev Converts a `uint256` to its ASCII `string` representation.
-     */
-    function strWithUint(string memory _str, uint256 value) internal pure returns (string memory) {
-        // Inspired by OraclizeAPI's implementation - MIT licence
-        // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
-        bytes memory buffer;
-        unchecked {
-            if (value == 0) {
-                return string(abi.encodePacked(_str, "0"));
-            }
-            uint256 temp = value;
-            uint256 digits;
-            while (temp != 0) {
-                digits++;
-                temp /= 10;
-            }
-            buffer = new bytes(digits);
-            uint256 index = digits - 1;
-            temp = value;
-            while (temp != 0) {
-                buffer[index--] = bytes1(uint8(48 + (temp % 10)));
-                temp /= 10;
-            }
-        }
-        return string(abi.encodePacked(_str, buffer));
-    }
+    @notice Transfers `_value` amount of an `_id` from the `_from` address to the `_to` address specified (with safety call).
+    @dev Caller must be approved to manage the tokens being transferred out of the `_from` account (see "Approval" section of the standard).
+    MUST revert if `_to` is the zero address.
+    MUST revert if balance of holder for token `_id` is lower than the `_value` sent.
+    MUST revert on any other error.
+    MUST emit the `TransferSingle` event to reflect the balance change (see "Safe Transfer Rules" section of the standard).
+    After the above conditions are met, this function MUST check if `_to` is a smart contract (e.g. code size > 0). If so, it MUST call `onERC1155Received` on `_to` and act appropriately (see "Safe Transfer Rules" section of the standard).        
+    @param _from    Source address
+    @param _to      Target address
+    @param _id      ID of the token type
+    @param _value   Transfer amount
+    @param _data    Additional data with no specified format, MUST be sent unaltered in call to `onERC1155Received` on `_to`
+    */
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _id,
+        uint256 _value,
+        bytes calldata _data
+    ) external;
 
+    /**
+    @notice Transfers `_values` amount(s) of `_ids` from the `_from` address to the `_to` address specified (with safety call).
+    @dev Caller must be approved to manage the tokens being transferred out of the `_from` account (see "Approval" section of the standard).
+    MUST revert if `_to` is the zero address.
+    MUST revert if length of `_ids` is not the same as length of `_values`.
+    MUST revert if any of the balance(s) of the holder(s) for token(s) in `_ids` is lower than the respective amount(s) in `_values` sent to the recipient.
+    MUST revert on any other error.        
+    MUST emit `TransferSingle` or `TransferBatch` event(s) such that all the balance changes are reflected (see "Safe Transfer Rules" section of the standard).
+    Balance changes and events MUST follow the ordering of the arrays (_ids[0]/_values[0] before _ids[1]/_values[1], etc).
+    After the above conditions for the transfer(s) in the batch are met, this function MUST check if `_to` is a smart contract (e.g. code size > 0). If so, it MUST call the relevant `ERC1155TokenReceiver` hook(s) on `_to` and act appropriately (see "Safe Transfer Rules" section of the standard).                      
+    @param _from    Source address
+    @param _to      Target address
+    @param _ids     IDs of each token type (order and length must match _values array)
+    @param _values  Transfer amounts per token type (order and length must match _ids array)
+    @param _data    Additional data with no specified format, MUST be sent unaltered in call to the `ERC1155TokenReceiver` hook(s) on `_to`
+    */
+    function safeBatchTransferFrom(
+        address _from,
+        address _to,
+        uint256[] calldata _ids,
+        uint256[] calldata _values,
+        bytes calldata _data
+    ) external;
 
+    /**
+    @notice Get the balance of an account's tokens.
+    @param _owner  The address of the token holder
+    @param _id     ID of the token
+    @return        The _owner's balance of the token type requested
+    */
+    function balanceOf(address _owner, uint256 _id) external view returns (uint256);
 
+    /**
+    @notice Get the balance of multiple account/token pairs
+    @param _owners The addresses of the token holders
+    @param _ids    ID of the tokens
+    @return        The _owner's balance of the token types requested (i.e. balance for each (owner, id) pair)
+    */
+    function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory);
+
+    /**
+    @notice Enable or disable approval for a third party ("operator") to manage all of the caller's tokens.
+    @dev MUST emit the ApprovalForAll event on success.
+    @param _operator  Address to add to the set of authorized operators
+    @param _approved  True if the operator is approved, false to revoke approval
+    */
+    function setApprovalForAll(address _operator, bool _approved) external;
+
+    /**
+    @notice Queries the approval status of an operator for a given owner.
+    @param _owner     The owner of the tokens
+    @param _operator  Address of authorized operator
+    @return           True if the operator is approved, false if not
+    */
+    function isApprovedForAll(address _owner, address _operator) external view returns (bool);
 }
 
 
-// File contracts/Aavegotchi/libraries/LibERC721Marketplace.sol
+// File contracts/Aavegotchi/libraries/LibERC1155Marketplace.sol
+
 
 
 
 
 // import "hardhat/console.sol";
 
-library LibERC721Marketplace {
-    event ERC721ListingCancelled(uint256 indexed listingId, uint256 category, uint256 time);
-    event ERC721ListingRemoved(uint256 indexed listingId, uint256 category, uint256 time);
+library LibERC1155Marketplace {
+    event ERC1155ListingCancelled(uint256 indexed listingId, uint256 category, uint256 time);
+    event ERC1155ListingRemoved(uint256 indexed listingId, uint256 category, uint256 time);
+    event UpdateERC1155Listing(uint256 indexed listingId, uint256 quantity, uint256 priceInWei, uint256 time);
 
-    function cancelERC721Listing(uint256 _listingId, address _owner) internal {
+    function cancelERC1155Listing(uint256 _listingId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        ListingListItem storage listingItem = s.erc721ListingListItem[_listingId];
+        ListingListItem storage listingItem = s.erc1155ListingListItem["listed"][_listingId];
         if (listingItem.listingId == 0) {
             return;
         }
-        ERC721Listing storage listing = s.erc721Listings[_listingId];
-        if (listing.cancelled == true || listing.timePurchased != 0) {
+        ERC1155Listing storage listing = s.erc1155Listings[_listingId];
+        if (listing.cancelled == true || listing.sold == true) {
             return;
         }
         require(listing.seller == _owner, "Marketplace: owner not seller");
         listing.cancelled = true;
-        s.aavegotchis[listing.erc721TokenId].locked = false;
-        emit ERC721ListingCancelled(_listingId, listing.category, block.number);
-        removeERC721ListingItem(_listingId, _owner);
+        emit ERC1155ListingCancelled(_listingId, listing.category, block.number);
+        removeERC1155ListingItem(_listingId, _owner);
     }
 
-    function cancelERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        address _owner
-    ) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
-        if (listingId == 0) {
-            return;
-        }
-        cancelERC721Listing(listingId, _owner);
-    }
-
-    function addERC721ListingItem(
+    function addERC1155ListingItem(
         address _owner,
         uint256 _category,
         string memory _sort,
         uint256 _listingId
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 headListingId = s.erc721OwnerListingHead[_owner][_category][_sort];
+        uint256 headListingId = s.erc1155OwnerListingHead[_owner][_category][_sort];
         if (headListingId != 0) {
-            ListingListItem storage headListingItem = s.erc721OwnerListingListItem[headListingId];
+            ListingListItem storage headListingItem = s.erc1155OwnerListingListItem[_sort][headListingId];
             headListingItem.parentListingId = _listingId;
         }
-        ListingListItem storage listingItem = s.erc721OwnerListingListItem[_listingId];
+        ListingListItem storage listingItem = s.erc1155OwnerListingListItem[_sort][_listingId];
         listingItem.childListingId = headListingId;
-        s.erc721OwnerListingHead[_owner][_category][_sort] = _listingId;
+        s.erc1155OwnerListingHead[_owner][_category][_sort] = _listingId;
         listingItem.listingId = _listingId;
 
-        headListingId = s.erc721ListingHead[_category][_sort];
+        headListingId = s.erc1155ListingHead[_category][_sort];
         if (headListingId != 0) {
-            ListingListItem storage headListingItem = s.erc721ListingListItem[headListingId];
+            ListingListItem storage headListingItem = s.erc1155ListingListItem[_sort][headListingId];
             headListingItem.parentListingId = _listingId;
         }
-        listingItem = s.erc721ListingListItem[_listingId];
+        listingItem = s.erc1155ListingListItem[_sort][_listingId];
         listingItem.childListingId = headListingId;
-        s.erc721ListingHead[_category][_sort] = _listingId;
+        s.erc1155ListingHead[_category][_sort] = _listingId;
         listingItem.listingId = _listingId;
     }
 
-    function removeERC721ListingItem(uint256 _listingId, address _owner) internal {
+    function removeERC1155ListingItem(uint256 _listingId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        ListingListItem storage listingItem = s.erc721ListingListItem[_listingId];
+        ListingListItem storage listingItem = s.erc1155ListingListItem["listed"][_listingId];
         if (listingItem.listingId == 0) {
             return;
         }
         uint256 parentListingId = listingItem.parentListingId;
         if (parentListingId != 0) {
-            ListingListItem storage parentListingItem = s.erc721ListingListItem[parentListingId];
+            ListingListItem storage parentListingItem = s.erc1155ListingListItem["listed"][parentListingId];
             parentListingItem.childListingId = listingItem.childListingId;
         }
         uint256 childListingId = listingItem.childListingId;
         if (childListingId != 0) {
-            ListingListItem storage childListingItem = s.erc721ListingListItem[childListingId];
+            ListingListItem storage childListingItem = s.erc1155ListingListItem["listed"][childListingId];
             childListingItem.parentListingId = listingItem.parentListingId;
         }
-        ERC721Listing storage listing = s.erc721Listings[_listingId];
-        if (s.erc721ListingHead[listing.category]["listed"] == _listingId) {
-            s.erc721ListingHead[listing.category]["listed"] = listingItem.childListingId;
+        ERC1155Listing storage listing = s.erc1155Listings[_listingId];
+        if (s.erc1155ListingHead[listing.category]["listed"] == _listingId) {
+            s.erc1155ListingHead[listing.category]["listed"] = listingItem.childListingId;
         }
         listingItem.listingId = 0;
         listingItem.parentListingId = 0;
         listingItem.childListingId = 0;
 
-        listingItem = s.erc721OwnerListingListItem[_listingId];
+        listingItem = s.erc1155OwnerListingListItem["listed"][_listingId];
 
         parentListingId = listingItem.parentListingId;
         if (parentListingId != 0) {
-            ListingListItem storage parentListingItem = s.erc721OwnerListingListItem[parentListingId];
+            ListingListItem storage parentListingItem = s.erc1155OwnerListingListItem["listed"][parentListingId];
             parentListingItem.childListingId = listingItem.childListingId;
         }
         childListingId = listingItem.childListingId;
         if (childListingId != 0) {
-            ListingListItem storage childListingItem = s.erc721OwnerListingListItem[childListingId];
+            ListingListItem storage childListingItem = s.erc1155OwnerListingListItem["listed"][childListingId];
             childListingItem.parentListingId = listingItem.parentListingId;
         }
-        listing = s.erc721Listings[_listingId];
-        if (s.erc721OwnerListingHead[_owner][listing.category]["listed"] == _listingId) {
-            s.erc721OwnerListingHead[_owner][listing.category]["listed"] = listingItem.childListingId;
+        listing = s.erc1155Listings[_listingId];
+        if (s.erc1155OwnerListingHead[_owner][listing.category]["listed"] == _listingId) {
+            s.erc1155OwnerListingHead[_owner][listing.category]["listed"] = listingItem.childListingId;
         }
         listingItem.listingId = 0;
         listingItem.parentListingId = 0;
         listingItem.childListingId = 0;
+        s.erc1155TokenToListingId[listing.erc1155TokenAddress][listing.erc1155TypeId][_owner] = 0;
 
-        emit ERC721ListingRemoved(_listingId, listing.category, block.timestamp);
+        emit ERC1155ListingRemoved(_listingId, listing.category, block.timestamp);
     }
 
-    function updateERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
+    function updateERC1155Listing(
+        address _erc1155TokenAddress,
+        uint256 _erc1155TypeId,
         address _owner
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
+        uint256 listingId = s.erc1155TokenToListingId[_erc1155TokenAddress][_erc1155TypeId][_owner];
         if (listingId == 0) {
             return;
         }
-        ERC721Listing storage listing = s.erc721Listings[listingId];
-        if (listing.timePurchased != 0 || listing.cancelled == true) {
+        ERC1155Listing storage listing = s.erc1155Listings[listingId];
+        if (listing.timeCreated == 0 || listing.cancelled == true || listing.sold == true) {
             return;
         }
-        address owner = IERC721(listing.erc721TokenAddress).ownerOf(listing.erc721TokenId);
-        if (owner != listing.seller) {
-            LibERC721Marketplace.cancelERC721Listing(listingId, listing.seller);
+        uint256 quantity = listing.quantity;
+        if (quantity > 0) {
+            quantity = IERC1155(listing.erc1155TokenAddress).balanceOf(listing.seller, listing.erc1155TypeId);
+            if (quantity < listing.quantity) {
+                listing.quantity = quantity;
+                emit UpdateERC1155Listing(listingId, quantity, listing.priceInWei, block.timestamp);
+            }
+        }
+        if (quantity == 0) {
+            cancelERC1155Listing(listingId, listing.seller);
         }
     }
 }
 
 
-// File contracts/Aavegotchi/facets/AavegotchiFacet.sol
+// File contracts/Aavegotchi/facets/ShopFacet.sol
 
 
 
@@ -1823,207 +1867,125 @@ library LibERC721Marketplace {
 
 
 
-contract AavegotchiFacet {
+
+
+contract ShopFacet {
     AppStorage internal s;
 
-    function totalSupply() external view returns (uint256 totalSupply_) {
-        totalSupply_ = s.tokenIds.length;
-    }
-
-    /// @notice Count all NFTs assigned to an owner
-    /// @dev NFTs assigned to the zero address are considered invalid, and this.
-    ///  function throws for queries about the zero address.
-    /// @param _owner An address for whom to query the balance
-    /// @return balance_ The number of NFTs owned by `_owner`, possibly zero
-    function balanceOf(address _owner) external view returns (uint256 balance_) {
-        require(_owner != address(0), "AavegotchiFacet: _owner can't be address(0");
-        balance_ = s.ownerTokenIds[_owner].length;
-    }
-
-    function getAavegotchi(uint256 _tokenId) external view returns (AavegotchiInfo memory aavegotchiInfo_) {
-        aavegotchiInfo_ = LibAavegotchi.getAavegotchi(_tokenId);
-    }
-
-    function aavegotchiClaimTime(uint256 _tokenId) external view returns (uint256 claimTime_) {
-        claimTime_ = s.aavegotchis[_tokenId].claimTime;
-    }
-
-    // /// @notice Enumerate valid NFTs
-    // /// @dev Throws if `_index` >= `totalSupply()`.
-    // /// @param _index A counter less than `totalSupply()`
-    // /// @return The token identifier for the `_index`th NFT,
-    // ///  (sort order not specified)
-    function tokenByIndex(uint256 _index) external view returns (uint256 tokenId_) {
-        require(_index < s.tokenIds.length, "AavegotchiFacet: index beyond supply");
-        tokenId_ = s.tokenIds[_index];
-    }
-
-    // /// @notice Enumerate NFTs assigned to an owner
-    // /// @dev Throws if `_index` >= `balanceOf(_owner)` or if
-    // ///  `_owner` is the zero address, representing invalid NFTs.
-    // /// @param _owner An address where we are interested in NFTs owned by them
-    // /// @param _index A counter less than `balanceOf(_owner)`
-    // /// @return The token identifier for the `_index`th NFT assigned to `_owner`,
-    // ///   (sort order not specified)
-    function tokenOfOwnerByIndex(address _owner, uint256 _index) external view returns (uint256 tokenId_) {
-        require(_index < s.ownerTokenIds[_owner].length, "AavegotchiFacet: index beyond owner balance");
-        tokenId_ = s.ownerTokenIds[_owner][_index];
-    }
-
-    function tokenIdsOfOwner(address _owner) external view returns (uint32[] memory tokenIds_) {
-        tokenIds_ = s.ownerTokenIds[_owner];
-    }
-
-    function allAavegotchisOfOwner(address _owner) external view returns (AavegotchiInfo[] memory aavegotchiInfos_) {
-        uint256 length = s.ownerTokenIds[_owner].length;
-        aavegotchiInfos_ = new AavegotchiInfo[](length);
-        for (uint256 i; i < length; i++) {
-            aavegotchiInfos_[i] = LibAavegotchi.getAavegotchi(s.ownerTokenIds[_owner][i]);
-        }
-    }
-
-    /// @notice Find the owner of an NFT
-    /// @dev NFTs assigned to zero address are considered invalid, and queries
-    ///  about them do throw.
-    /// @param _tokenId The identifier for an NFT
-    /// @return owner_ The address of the owner of the NFT
-    function ownerOf(uint256 _tokenId) external view returns (address owner_) {
-        owner_ = s.aavegotchis[_tokenId].owner;
-        require(owner_ != address(0), "AavegotchiFacet: invalid _tokenId");
-    }
-
-    /// @notice Get the approved address for a single NFT
-    /// @dev Throws if `_tokenId` is not a valid NFT.
-    /// @param _tokenId The NFT to find the approved address for
-    /// @return approved_ The approved address for this NFT, or the zero address if there is none
-    function getApproved(uint256 _tokenId) external view returns (address approved_) {
-        require(_tokenId < s.tokenIds.length, "ERC721: tokenId is invalid");
-        approved_ = s.approved[_tokenId];
-    }
-
-    /// @notice Query if an address is an authorized operator for another address
-    /// @param _owner The address that owns the NFTs
-    /// @param _operator The address that acts on behalf of the owner
-    /// @return approved_ True if `_operator` is an approved operator for `_owner`, false otherwise
-    function isApprovedForAll(address _owner, address _operator) external view returns (bool approved_) {
-        approved_ = s.operators[_owner][_operator];
-    }
-
-    /// @notice Transfers the ownership of an NFT from one address to another address
-    /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
-    ///  operator, or the approved address for this NFT. Throws if `_from` is
-    ///  not the current owner. Throws if `_to` is the zero address. Throws if
-    ///  `_tokenId` is not a valid NFT. When transfer is complete, this function
-    ///  checks if `_to` is a smart contract (code size > 0). If so, it calls
-    ///  `onERC721Received` on `_to` and throws if the return value is not
-    ///  `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
-    /// @param _from The current owner of the NFT
-    /// @param _to The new owner
-    /// @param _tokenId The NFT to transfer
-    /// @param _data Additional data with no specified format, sent in call to `_to`
-    function safeTransferFrom(
-        address _from,
-        address _to,
+    event BuyPortals(
+        address indexed _from,
+        address indexed _to,
+        // uint256 indexed _batchId,
         uint256 _tokenId,
-        bytes calldata _data
+        uint256 _numAavegotchisToPurchase,
+        uint256 _totalPrice
+    );
+
+    event PurchaseItemsWithGhst(address indexed _buyer, address indexed _to, uint256[] _itemIds, uint256[] _quantities, uint256 _totalPrice);
+    event PurchaseTransferItemsWithGhst(address indexed _buyer, address indexed _to, uint256[] _itemIds, uint256[] _quantities, uint256 _totalPrice);
+
+    event PurchaseItemsWithVouchers(address indexed _buyer, address indexed _to, uint256[] _itemIds, uint256[] _quantities);
+
+    function buyPortals(address _to, uint256 _ghst) external {
+        uint256 currentHauntId = s.currentHauntId;
+        Haunt storage haunt = s.haunts[currentHauntId];
+        uint256 price = haunt.portalPrice;
+        require(_ghst >= price, "Not enough GHST to buy portals");
+        uint256[3] memory tiers;
+        tiers[0] = price * 5;
+        tiers[1] = tiers[0] + (price * 2 * 10);
+        tiers[2] = tiers[1] + (price * 3 * 10);
+        require(_ghst <= tiers[2], "Can't buy more than 25");
+        address sender = LibMeta.msgSender();
+        uint256 numToPurchase;
+        uint256 totalPrice;
+        if (_ghst <= tiers[0]) {
+            numToPurchase = _ghst / price;
+            totalPrice = numToPurchase * price;
+        } else {
+            if (_ghst <= tiers[1]) {
+                numToPurchase = (_ghst - tiers[0]) / (price * 2);
+                totalPrice = tiers[0] + (numToPurchase * (price * 2));
+                numToPurchase += 5;
+            } else {
+                numToPurchase = (_ghst - tiers[1]) / (price * 3);
+                totalPrice = tiers[1] + (numToPurchase * (price * 3));
+                numToPurchase += 15;
+            }
+        }
+        uint256 hauntCount = haunt.totalCount + numToPurchase;
+        require(hauntCount <= haunt.hauntMaxSize, "ShopFacet: Exceeded max number of aavegotchis for this haunt");
+        s.haunts[currentHauntId].totalCount = uint24(hauntCount);
+        uint32 tokenId = s.tokenIdCounter;
+        emit BuyPortals(sender, _to, tokenId, numToPurchase, totalPrice);
+        for (uint256 i; i < numToPurchase; i++) {
+            s.aavegotchis[tokenId].owner = _to;
+            s.aavegotchis[tokenId].hauntId = uint16(currentHauntId);
+            s.tokenIdIndexes[tokenId] = s.tokenIds.length;
+            s.tokenIds.push(tokenId);
+            s.ownerTokenIdIndexes[_to][tokenId] = s.ownerTokenIds[_to].length;
+            s.ownerTokenIds[_to].push(tokenId);
+            emit LibERC721.Transfer(address(0), _to, tokenId);
+            tokenId++;
+        }
+        s.tokenIdCounter = tokenId;
+       // LibAavegotchi.verify(tokenId);
+        LibAavegotchi.purchase(sender, totalPrice);
+    }
+
+    function purchaseItemsWithGhst(
+        address _to,
+        uint256[] calldata _itemIds,
+        uint256[] calldata _quantities
     ) external {
         address sender = LibMeta.msgSender();
-        internalTransferFrom(sender, _from, _to, _tokenId);
-        LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
+        require(_itemIds.length == _quantities.length, "ShopFacet: _itemIds not same length as _quantities");
+        uint256 totalPrice;
+        for (uint256 i; i < _itemIds.length; i++) {
+            uint256 itemId = _itemIds[i];
+            uint256 quantity = _quantities[i];
+            ItemType storage itemType = s.itemTypes[itemId];
+            require(itemType.canPurchaseWithGhst, "ShopFacet: Can't purchase item type with GHST");
+            uint256 totalQuantity = itemType.totalQuantity + quantity;
+            require(totalQuantity <= itemType.maxQuantity, "ShopFacet: Total item type quantity exceeds max quantity");
+            itemType.totalQuantity = totalQuantity;
+            totalPrice += quantity * itemType.ghstPrice;
+            LibItems.addToOwner(_to, itemId, quantity);
+        }
+        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
+        require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
+        emit PurchaseItemsWithGhst(sender, _to, _itemIds, _quantities, totalPrice);
+        emit LibERC1155.TransferBatch(sender, address(0), _to, _itemIds, _quantities);
+        LibAavegotchi.purchase(sender, totalPrice);
+        LibERC1155.onERC1155BatchReceived(sender, address(0), _to, _itemIds, _quantities, "");
     }
 
-    /// @notice Transfers the ownership of an NFT from one address to another address
-    /// @dev This works identically to the other function with an extra data parameter,
-    ///  except this function just sets data to "".
-    /// @param _from The current owner of the NFT
-    /// @param _to The new owner
-    /// @param _tokenId The NFT to transfer
-    function safeTransferFrom(
-        address _from,
+    function purchaseTransferItemsWithGhst(
         address _to,
-        uint256 _tokenId
+        uint256[] calldata _itemIds,
+        uint256[] calldata _quantities
     ) external {
+        require(_to != address(0), "ShopFacet: Can't transfer to 0 address");        
+        require(_itemIds.length == _quantities.length, "ShopFacet: ids not same length as values");        
         address sender = LibMeta.msgSender();
-        internalTransferFrom(sender, _from, _to, _tokenId);
-        LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
-    }
-
-    /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
-    ///  TO CONFIRM THAT `_to` IS CAPABLE OF RECEIVING NFTS OR ELSE
-    ///  THEY MAY BE PERMANENTLY LOST
-    /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
-    ///  operator, or the approved address for this NFT. Throws if `_from` is
-    ///  not the current owner. Throws if `_to` is the zero address. Throws if
-    ///  `_tokenId` is not a valid NFT.
-    /// @param _from The current owner of the NFT
-    /// @param _to The new owner
-    /// @param _tokenId The NFT to transfer
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external {
-        internalTransferFrom(LibMeta.msgSender(), _from, _to, _tokenId);
-    }
-
-    // This function is used by transfer functions
-    function internalTransferFrom(
-        address _sender,
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) internal {
-        require(_to != address(0), "AavegotchiFacet: Can't transfer to 0 address");
-        require(_from != address(0), "AavegotchiFacet: _from can't be 0 address");
-        require(_from == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: _from is not owner, transfer failed");
-        require(
-            _sender == _from || s.operators[_from][_sender] || _sender == s.approved[_tokenId],
-            "AavegotchiFacet: Not owner or approved to transfer"
-        );
-        LibAavegotchi.transfer(_from, _to, _tokenId);
-        LibERC721Marketplace.updateERC721Listing(address(this), _tokenId, _from);
-    }
-
-    /// @notice Change or reaffirm the approved address for an NFT
-    /// @dev The zero address indicates there is no approved address.
-    ///  Throws unless `LibMeta.msgSender()` is the current NFT owner, or an authorized
-    ///  operator of the current owner.
-    /// @param _approved The new approved NFT controller
-    /// @param _tokenId The NFT to approve
-    function approve(address _approved, uint256 _tokenId) external {
-        address owner = s.aavegotchis[_tokenId].owner;
-        require(owner == LibMeta.msgSender() || s.operators[owner][LibMeta.msgSender()], "ERC721: Not owner or operator of token.");
-        s.approved[_tokenId] = _approved;
-        emit LibERC721.Approval(owner, _approved, _tokenId);
-    }
-
-    /// @notice Enable or disable approval for a third party ("operator") to manage
-    ///  all of `LibMeta.msgSender()`'s assets
-    /// @dev Emits the ApprovalForAll event. The contract MUST allow
-    ///  multiple operators per owner.
-    /// @param _operator Address to add to the set of authorized operators
-    /// @param _approved True if the operator is approved, false to revoke approval
-    function setApprovalForAll(address _operator, bool _approved) external {
-        s.operators[LibMeta.msgSender()][_operator] = _approved;
-        emit LibERC721.ApprovalForAll(LibMeta.msgSender(), _operator, _approved);
-    }
-
-    function name() external view returns (string memory) {
-        // return "Aavegotchi";
-        return s.name;
-    }
-
-    /// @notice An abbreviated name for NFTs in this contract
-    function symbol() external view returns (string memory) {
-        //return "GOTCHI";
-        return s.symbol;
-    }
-
-    /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
-    /// @dev Throws if `_tokenId` is not a valid NFT. URIs are defined in RFC
-    ///  3986. The URI may point to a JSON file that conforms to the "ERC721
-    ///  Metadata JSON Schema".
-    function tokenURI(uint256 _tokenId) external pure returns (string memory) {
-        return LibStrings.strWithUint("https://aavegotchi.com/metadata/aavegotchis/", _tokenId); //Here is your URL!
+        address from = address(this);       
+        uint256 totalPrice; 
+        for (uint256 i; i < _itemIds.length; i++) {
+            uint256 itemId = _itemIds[i];
+            uint256 quantity = _quantities[i];
+            require(quantity == 1, "ShopFacet: Can only purchase 1 of an item per transaction");
+            ItemType storage itemType = s.itemTypes[itemId];
+            require(itemType.canPurchaseWithGhst, "ShopFacet: Can't purchase item type with GHST");
+            totalPrice += quantity * itemType.ghstPrice;
+            LibItems.removeFromOwner(from, itemId, quantity);
+            LibItems.addToOwner(_to, itemId, quantity);
+            LibERC1155Marketplace.updateERC1155Listing(address(this), itemId, from);
+        }
+        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
+        require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");        
+        emit LibERC1155.TransferBatch(sender, from, _to, _itemIds, _quantities);
+        emit PurchaseTransferItemsWithGhst(sender, _to, _itemIds, _quantities, totalPrice);
+        LibAavegotchi.purchase(sender, totalPrice);
+        LibERC1155.onERC1155BatchReceived(sender, from, _to, _itemIds, _quantities, '');
     }
 }

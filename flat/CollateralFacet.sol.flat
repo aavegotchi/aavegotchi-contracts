@@ -1,8 +1,8 @@
-// Sources flattened with hardhat v2.1.2 https://hardhat.org
+// Sources flattened with hardhat v2.2.1 https://hardhat.org
 
 // File contracts/shared/interfaces/IDiamondCut.sol
 
-// SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.1;
 
 /******************************************************************************\
@@ -35,6 +35,9 @@ interface IDiamondCut {
 
 
 // File contracts/shared/interfaces/IDiamondLoupe.sol
+
+
+
 
 // A loupe is a small magnifying glass used to look at diamonds.
 // These functions look at diamonds
@@ -70,6 +73,9 @@ interface IDiamondLoupe {
 
 // File contracts/shared/interfaces/IERC165.sol
 
+
+
+
 interface IERC165 {
     /// @notice Query if a contract implements an interface
     /// @param interfaceId The interface identifier, as specified in ERC-165
@@ -82,6 +88,9 @@ interface IERC165 {
 
 
 // File contracts/shared/interfaces/IERC173.sol
+
+
+
 
 /// @title ERC-173 Contract Ownership Standard
 ///  Note: the ERC-165 identifier for this interface is 0x7f5828d0
@@ -99,6 +108,9 @@ interface IERC173 {
 
 
 // File contracts/shared/libraries/LibMeta.sol
+
+
+
 
 library LibMeta {
     bytes32 internal constant EIP712_DOMAIN_TYPEHASH =
@@ -132,6 +144,9 @@ library LibMeta {
 
 
 // File contracts/shared/libraries/LibDiamond.sol
+
+
+
 
 /******************************************************************************\
 * Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
@@ -370,6 +385,8 @@ library LibDiamond {
 // File contracts/Aavegotchi/interfaces/ILink.sol
 
 
+
+
 interface ILink {
     function allowance(address owner, address spender) external view returns (uint256 remaining);
 
@@ -406,6 +423,10 @@ interface ILink {
 
 
 // File contracts/Aavegotchi/libraries/LibAppStorage.sol
+
+
+
+
 
 
 //import "../interfaces/IERC20.sol";
@@ -551,6 +572,12 @@ struct ListingListItem {
     uint256 childListingId;
 }
 
+struct GameManager {
+    uint256 limit;
+    uint256 balance;
+    uint256 refreshTime;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -635,6 +662,8 @@ struct AppStorage {
     mapping(uint256 => uint256) sleeves;
     // mapping(address => mapping(uint256 => address)) petOperators;
     // mapping(address => uint256[]) petOperatorTokenIds;
+    mapping(address => bool) itemManagers;
+    mapping(address => GameManager) gameManagers;
 }
 
 library LibAppStorage {
@@ -679,13 +708,21 @@ contract Modifiers {
 
     modifier onlyOwnerOrDaoOrGameManager {
         address sender = LibMeta.msgSender();
-        require(sender == s.dao || sender == LibDiamond.contractOwner() || sender == s.gameManager, "LibAppStorage: Do not have access");
+        bool isGameManager = s.gameManagers[sender].limit != 0;
+        require(sender == s.dao || sender == LibDiamond.contractOwner() || isGameManager, "LibAppStorage: Do not have access");
+        _;
+    }
+    modifier onlyItemManager {
+        address sender = LibMeta.msgSender();
+        require(s.itemManagers[sender] == true, "LibAppStorage: only an ItemManager can call this function");
         _;
     }
 }
 
 
 // File contracts/shared/interfaces/IERC20.sol
+
+
 
 
 interface IERC20 {
@@ -714,6 +751,9 @@ interface IERC20 {
 
 
 // File contracts/shared/libraries/LibERC20.sol
+
+
+
 
 /******************************************************************************\
 * Author: Nick Mudge
@@ -768,6 +808,8 @@ library LibERC20 {
 
 
 // File contracts/shared/interfaces/IERC721.sol
+
+
 
 
 /// @title ERC-721 Non-Fungible Token Standard
@@ -869,6 +911,8 @@ interface IERC721 {
 // File contracts/shared/interfaces/IERC721TokenReceiver.sol
 
 
+
+
 /// @dev Note: the ERC-165 identifier for this interface is 0x150b7a02.
 interface IERC721TokenReceiver {
     /// @notice Handle the receipt of an NFT
@@ -893,6 +937,8 @@ interface IERC721TokenReceiver {
 
 
 // File contracts/shared/libraries/LibERC721.sol
+
+
 
 
 library LibERC721 {
@@ -937,6 +983,8 @@ library LibERC721 {
 
 
 // File contracts/shared/interfaces/IERC1155TokenReceiver.sol
+
+
 
 
 /**
@@ -988,6 +1036,8 @@ interface IERC1155TokenReceiver {
 
 
 // File contracts/shared/libraries/LibERC1155.sol
+
+
 
 
 library LibERC1155 {
@@ -1074,6 +1124,8 @@ library LibERC1155 {
 
 
 // File contracts/Aavegotchi/libraries/LibItems.sol
+
+
 
 
 
@@ -1213,6 +1265,13 @@ library LibItems {
 
 
 // File contracts/Aavegotchi/libraries/LibAavegotchi.sol
+
+
+
+
+
+
+
 
 
 
@@ -1572,6 +1631,14 @@ library LibAavegotchi {
 
 
 // File contracts/Aavegotchi/facets/CollateralFacet.sol
+
+
+
+
+
+
+
+
 
 
 // import "hardhat/console.sol";
