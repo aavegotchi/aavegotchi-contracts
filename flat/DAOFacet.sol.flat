@@ -1,39 +1,9 @@
 // Sources flattened with hardhat v2.2.1 https://hardhat.org
 
-// File contracts/shared/interfaces/IERC20.sol
+// File contracts/shared/interfaces/IDiamondCut.sol
 
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
-
-interface IERC20 {
-    function name() external view returns (string memory);
-
-    function symbol() external view returns (string memory);
-
-    function decimals() external view returns (uint8);
-
-    function totalSupply() external view returns (uint256);
-
-    function balanceOf(address _owner) external view returns (uint256 balance);
-
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _value
-    ) external returns (bool success);
-
-    function transfer(address _to, uint256 _value) external returns (bool success);
-
-    function approve(address _spender, uint256 _value) external returns (bool success);
-
-    function allowance(address _owner, address _spender) external view returns (uint256 remaining);
-}
-
-
-// File contracts/shared/interfaces/IDiamondCut.sol
-
-
-
 
 /******************************************************************************\
 * Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
@@ -641,6 +611,7 @@ struct AppStorage {
     address[] collateralTypes;
     address ghstContract;
     address childChainManager;
+    address gameManager;
     address dao;
     address daoTreasury;
     address pixelCraft;
@@ -746,6 +717,36 @@ contract Modifiers {
         require(s.itemManagers[sender] == true, "LibAppStorage: only an ItemManager can call this function");
         _;
     }
+}
+
+
+// File contracts/shared/interfaces/IERC20.sol
+
+
+
+
+interface IERC20 {
+    function name() external view returns (string memory);
+
+    function symbol() external view returns (string memory);
+
+    function decimals() external view returns (uint8);
+
+    function totalSupply() external view returns (uint256);
+
+    function balanceOf(address _owner) external view returns (uint256 balance);
+
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value
+    ) external returns (bool success);
+
+    function transfer(address _to, uint256 _value) external returns (bool success);
+
+    function approve(address _spender, uint256 _value) external returns (bool success);
+
+    function allowance(address _owner, address _spender) external view returns (uint256 remaining);
 }
 
 
@@ -1629,400 +1630,334 @@ library LibAavegotchi {
 }
 
 
-// File contracts/shared/libraries/LibStrings.sol
+// File contracts/Aavegotchi/libraries/LibSvg.sol
 
 
 
 
-// From Open Zeppelin contracts: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Strings.sol
+//import "hardhat/console.sol";
 
-/**
- * @dev String operations.
- */
-library LibStrings {
-    /**
-     * @dev Converts a `uint256` to its ASCII `string` representation.
-     */
-    function strWithUint(string memory _str, uint256 value) internal pure returns (string memory) {
-        // Inspired by OraclizeAPI's implementation - MIT licence
-        // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
-        bytes memory buffer;
-        unchecked {
-            if (value == 0) {
-                return string(abi.encodePacked(_str, "0"));
+library LibSvg {
+    event StoreSvg(LibSvg.SvgTypeAndSizes[] _typesAndSizes);
+    event UpdateSvg(SvgTypeAndIdsAndSizes[] _typesAndIdsAndSizes);
+    // svg type: "aavegotchiSvgs"
+    uint256 internal constant CLOSED_PORTAL_SVG_ID = 0;
+    uint256 internal constant OPEN_PORTAL_SVG_ID = 1;
+    uint256 internal constant AAVEGTOTCHI_BODY_SVG_ID = 2;
+    uint256 internal constant HANDS_SVG_ID = 3;
+    uint256 internal constant BACKGROUND_SVG_ID = 4;
+
+    struct SvgTypeAndSizes {
+        bytes32 svgType;
+        uint256[] sizes;
+    }
+
+    function getSvg(bytes32 _svgType, uint256 _id) internal view returns (bytes memory svg_) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        SvgLayer[] storage svgLayers = s.svgLayers[_svgType];
+        svg_ = getSvg(svgLayers, _id);
+    }
+
+    function getSvg(SvgLayer[] storage _svgLayers, uint256 _id) internal view returns (bytes memory svg_) {
+        require(_id < _svgLayers.length, "LibSvg: SVG type or id does not exist");
+        //  console.log("length:", svgLayers.length);
+        SvgLayer storage svgLayer = _svgLayers[_id];
+        address svgContract = svgLayer.svgLayersContract;
+        uint256 size = svgLayer.size;
+        uint256 offset = svgLayer.offset;
+        svg_ = new bytes(size);
+        assembly {
+            extcodecopy(svgContract, add(svg_, 32), offset, size)
+        }
+    }
+
+    function storeSvgInContract(string calldata _svg) internal returns (address svgContract) {
+        require(bytes(_svg).length < 24576, "SvgStorage: Exceeded 24,576 bytes max contract size");
+        // 61_00_00 -- PUSH2 (size)
+        // 60_00 -- PUSH1 (code position)
+        // 60_00 -- PUSH1 (mem position)
+        // 39 CODECOPY
+        // 61_00_00 PUSH2 (size)
+        // 60_00 PUSH1 (mem position)
+        // f3 RETURN
+        bytes memory init = hex"610000_600e_6000_39_610000_6000_f3";
+        bytes1 size1 = bytes1(uint8(bytes(_svg).length));
+        bytes1 size2 = bytes1(uint8(bytes(_svg).length >> 8));
+        init[2] = size1;
+        init[1] = size2;
+        init[10] = size1;
+        init[9] = size2;
+        bytes memory code = abi.encodePacked(init, _svg);
+
+        assembly {
+            svgContract := create(0, add(code, 32), mload(code))
+            if eq(svgContract, 0) {
+                returndatacopy(0, 0, returndatasize())
+                revert(0, returndatasize())
             }
-            uint256 temp = value;
-            uint256 digits;
-            while (temp != 0) {
-                digits++;
-                temp /= 10;
+        }
+    }
+
+    function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        emit StoreSvg(_typesAndSizes);
+        address svgContract = storeSvgInContract(_svg);
+        uint256 offset;
+        for (uint256 i; i < _typesAndSizes.length; i++) {
+            LibSvg.SvgTypeAndSizes calldata svgTypeAndSizes = _typesAndSizes[i];
+            for (uint256 j; j < svgTypeAndSizes.sizes.length; j++) {
+                uint256 size = svgTypeAndSizes.sizes[j];
+                s.svgLayers[svgTypeAndSizes.svgType].push(SvgLayer(svgContract, uint16(offset), uint16(size)));
+                offset += size;
             }
-            buffer = new bytes(digits);
-            uint256 index = digits - 1;
-            temp = value;
-            while (temp != 0) {
-                buffer[index--] = bytes1(uint8(48 + (temp % 10)));
-                temp /= 10;
+        }
+    }
+
+    struct SvgTypeAndIdsAndSizes {
+        bytes32 svgType;
+        uint256[] ids;
+        uint256[] sizes;
+    }
+
+    function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        emit UpdateSvg(_typesAndIdsAndSizes);
+        address svgContract = storeSvgInContract(_svg);
+        uint256 offset;
+        for (uint256 i; i < _typesAndIdsAndSizes.length; i++) {
+            LibSvg.SvgTypeAndIdsAndSizes calldata svgTypeAndIdsAndSizes = _typesAndIdsAndSizes[i];
+            for (uint256 j; j < svgTypeAndIdsAndSizes.sizes.length; j++) {
+                uint256 size = svgTypeAndIdsAndSizes.sizes[j];
+                uint256 id = svgTypeAndIdsAndSizes.ids[j];
+                s.svgLayers[svgTypeAndIdsAndSizes.svgType][id] = SvgLayer(svgContract, uint16(offset), uint16(size));
+                offset += size;
             }
-        }
-        return string(abi.encodePacked(_str, buffer));
-    }
-
-
-
-}
-
-
-// File contracts/Aavegotchi/libraries/LibERC721Marketplace.sol
-
-
-
-
-// import "hardhat/console.sol";
-
-library LibERC721Marketplace {
-    event ERC721ListingCancelled(uint256 indexed listingId, uint256 category, uint256 time);
-    event ERC721ListingRemoved(uint256 indexed listingId, uint256 category, uint256 time);
-
-    function cancelERC721Listing(uint256 _listingId, address _owner) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        ListingListItem storage listingItem = s.erc721ListingListItem[_listingId];
-        if (listingItem.listingId == 0) {
-            return;
-        }
-        ERC721Listing storage listing = s.erc721Listings[_listingId];
-        if (listing.cancelled == true || listing.timePurchased != 0) {
-            return;
-        }
-        require(listing.seller == _owner, "Marketplace: owner not seller");
-        listing.cancelled = true;
-        s.aavegotchis[listing.erc721TokenId].locked = false;
-        emit ERC721ListingCancelled(_listingId, listing.category, block.number);
-        removeERC721ListingItem(_listingId, _owner);
-    }
-
-    function cancelERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        address _owner
-    ) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
-        if (listingId == 0) {
-            return;
-        }
-        cancelERC721Listing(listingId, _owner);
-    }
-
-    function addERC721ListingItem(
-        address _owner,
-        uint256 _category,
-        string memory _sort,
-        uint256 _listingId
-    ) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 headListingId = s.erc721OwnerListingHead[_owner][_category][_sort];
-        if (headListingId != 0) {
-            ListingListItem storage headListingItem = s.erc721OwnerListingListItem[headListingId];
-            headListingItem.parentListingId = _listingId;
-        }
-        ListingListItem storage listingItem = s.erc721OwnerListingListItem[_listingId];
-        listingItem.childListingId = headListingId;
-        s.erc721OwnerListingHead[_owner][_category][_sort] = _listingId;
-        listingItem.listingId = _listingId;
-
-        headListingId = s.erc721ListingHead[_category][_sort];
-        if (headListingId != 0) {
-            ListingListItem storage headListingItem = s.erc721ListingListItem[headListingId];
-            headListingItem.parentListingId = _listingId;
-        }
-        listingItem = s.erc721ListingListItem[_listingId];
-        listingItem.childListingId = headListingId;
-        s.erc721ListingHead[_category][_sort] = _listingId;
-        listingItem.listingId = _listingId;
-    }
-
-    function removeERC721ListingItem(uint256 _listingId, address _owner) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        ListingListItem storage listingItem = s.erc721ListingListItem[_listingId];
-        if (listingItem.listingId == 0) {
-            return;
-        }
-        uint256 parentListingId = listingItem.parentListingId;
-        if (parentListingId != 0) {
-            ListingListItem storage parentListingItem = s.erc721ListingListItem[parentListingId];
-            parentListingItem.childListingId = listingItem.childListingId;
-        }
-        uint256 childListingId = listingItem.childListingId;
-        if (childListingId != 0) {
-            ListingListItem storage childListingItem = s.erc721ListingListItem[childListingId];
-            childListingItem.parentListingId = listingItem.parentListingId;
-        }
-        ERC721Listing storage listing = s.erc721Listings[_listingId];
-        if (s.erc721ListingHead[listing.category]["listed"] == _listingId) {
-            s.erc721ListingHead[listing.category]["listed"] = listingItem.childListingId;
-        }
-        listingItem.listingId = 0;
-        listingItem.parentListingId = 0;
-        listingItem.childListingId = 0;
-
-        listingItem = s.erc721OwnerListingListItem[_listingId];
-
-        parentListingId = listingItem.parentListingId;
-        if (parentListingId != 0) {
-            ListingListItem storage parentListingItem = s.erc721OwnerListingListItem[parentListingId];
-            parentListingItem.childListingId = listingItem.childListingId;
-        }
-        childListingId = listingItem.childListingId;
-        if (childListingId != 0) {
-            ListingListItem storage childListingItem = s.erc721OwnerListingListItem[childListingId];
-            childListingItem.parentListingId = listingItem.parentListingId;
-        }
-        listing = s.erc721Listings[_listingId];
-        if (s.erc721OwnerListingHead[_owner][listing.category]["listed"] == _listingId) {
-            s.erc721OwnerListingHead[_owner][listing.category]["listed"] = listingItem.childListingId;
-        }
-        listingItem.listingId = 0;
-        listingItem.parentListingId = 0;
-        listingItem.childListingId = 0;
-
-        emit ERC721ListingRemoved(_listingId, listing.category, block.timestamp);
-    }
-
-    function updateERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        address _owner
-    ) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
-        if (listingId == 0) {
-            return;
-        }
-        ERC721Listing storage listing = s.erc721Listings[listingId];
-        if (listing.timePurchased != 0 || listing.cancelled == true) {
-            return;
-        }
-        address owner = IERC721(listing.erc721TokenAddress).ownerOf(listing.erc721TokenId);
-        if (owner != listing.seller) {
-            LibERC721Marketplace.cancelERC721Listing(listingId, listing.seller);
         }
     }
 }
 
 
-// File contracts/Aavegotchi/facets/AavegotchiFacet.sol
+// File contracts/Aavegotchi/facets/DAOFacet.sol
 
 
 
 
 
-// import "hardhat/console.sol";
 
 
 
 
-contract AavegotchiFacet {
-    AppStorage internal s;
 
-    function totalSupply() external view returns (uint256 totalSupply_) {
-        totalSupply_ = s.tokenIds.length;
+contract DAOFacet is Modifiers {
+    event DaoTransferred(address indexed previousDao, address indexed newDao);
+    event DaoTreasuryTransferred(address indexed previousDaoTreasury, address indexed newDaoTreasury);
+    event UpdateCollateralModifiers(int16[NUMERIC_TRAITS_NUM] _oldModifiers, int16[NUMERIC_TRAITS_NUM] _newModifiers);
+    event AddCollateralType(AavegotchiCollateralTypeIO _collateralType);
+    event AddItemType(ItemType _itemType);
+    event CreateHaunt(uint256 indexed _hauntId, uint256 _hauntMaxSize, uint256 _portalPrice, bytes32 _bodyColor);
+    event GrantExperience(uint256[] _tokenIds, uint256[] _xpValues);
+    event AddWearableSet(WearableSet _wearableSet);
+    event UpdateWearableSet(uint256 _setId, WearableSet _wearableSet);
+    event ItemTypeMaxQuantity(uint256[] _itemIds, uint256[] _maxQuanities);
+    event GameManagerAdded(address indexed gameManager_, uint256 indexed limit_, uint256 refreshTime_);
+    event GameManagerRemoved(address indexed gameManager_);
+    event ItemManagerAdded(address indexed newItemManager_);
+    event ItemManagerRemoved(address indexed ItemManager_);
+
+    /***********************************|
+   |             Read Functions         |
+   |__________________________________*/
+
+    function isGameManager(address _manager) external view returns (bool) {
+        return s.gameManagers[_manager].limit != 0;
     }
 
-    /// @notice Count all NFTs assigned to an owner
-    /// @dev NFTs assigned to the zero address are considered invalid, and this.
-    ///  function throws for queries about the zero address.
-    /// @param _owner An address for whom to query the balance
-    /// @return balance_ The number of NFTs owned by `_owner`, possibly zero
-    function balanceOf(address _owner) external view returns (uint256 balance_) {
-        require(_owner != address(0), "AavegotchiFacet: _owner can't be address(0");
-        balance_ = s.ownerTokenIds[_owner].length;
+    function gameManagerBalance(address _manager) external view returns (uint256) {
+        return s.gameManagers[_manager].balance;
     }
 
-    function getAavegotchi(uint256 _tokenId) external view returns (AavegotchiInfo memory aavegotchiInfo_) {
-        aavegotchiInfo_ = LibAavegotchi.getAavegotchi(_tokenId);
+    function gameManagerRefreshTime(address _manager) external view returns (uint256) {
+        return s.gameManagers[_manager].refreshTime;
     }
 
-    function aavegotchiClaimTime(uint256 _tokenId) external view returns (uint256 claimTime_) {
-        claimTime_ = s.aavegotchis[_tokenId].claimTime;
+    /***********************************|
+   |             Write Functions        |
+   |__________________________________*/
+
+    function setDao(address _newDao, address _newDaoTreasury) external onlyDaoOrOwner {
+        emit DaoTransferred(s.dao, _newDao);
+        emit DaoTreasuryTransferred(s.daoTreasury, _newDaoTreasury);
+        s.dao = _newDao;
+        s.daoTreasury = _newDaoTreasury;
     }
 
-    // /// @notice Enumerate valid NFTs
-    // /// @dev Throws if `_index` >= `totalSupply()`.
-    // /// @param _index A counter less than `totalSupply()`
-    // /// @return The token identifier for the `_index`th NFT,
-    // ///  (sort order not specified)
-    function tokenByIndex(uint256 _index) external view returns (uint256 tokenId_) {
-        require(_index < s.tokenIds.length, "AavegotchiFacet: index beyond supply");
-        tokenId_ = s.tokenIds[_index];
-    }
+    function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyDaoOrOwner {
+        for (uint256 i; i < _collateralTypes.length; i++) {
+            address collateralType = _collateralTypes[i].collateralType;
 
-    // /// @notice Enumerate NFTs assigned to an owner
-    // /// @dev Throws if `_index` >= `balanceOf(_owner)` or if
-    // ///  `_owner` is the zero address, representing invalid NFTs.
-    // /// @param _owner An address where we are interested in NFTs owned by them
-    // /// @param _index A counter less than `balanceOf(_owner)`
-    // /// @return The token identifier for the `_index`th NFT assigned to `_owner`,
-    // ///   (sort order not specified)
-    function tokenOfOwnerByIndex(address _owner, uint256 _index) external view returns (uint256 tokenId_) {
-        require(_index < s.ownerTokenIds[_owner].length, "AavegotchiFacet: index beyond owner balance");
-        tokenId_ = s.ownerTokenIds[_owner][_index];
-    }
+            //Prevent the same collateral from being added multiple times
+            require(s.collateralTypeInfo[collateralType].cheekColor == 0, "DAOFacet: Collateral already added");
 
-    function tokenIdsOfOwner(address _owner) external view returns (uint32[] memory tokenIds_) {
-        tokenIds_ = s.ownerTokenIds[_owner];
-    }
-
-    function allAavegotchisOfOwner(address _owner) external view returns (AavegotchiInfo[] memory aavegotchiInfos_) {
-        uint256 length = s.ownerTokenIds[_owner].length;
-        aavegotchiInfos_ = new AavegotchiInfo[](length);
-        for (uint256 i; i < length; i++) {
-            aavegotchiInfos_[i] = LibAavegotchi.getAavegotchi(s.ownerTokenIds[_owner][i]);
+            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
+            s.collateralTypes.push(collateralType);
+            s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
+            emit AddCollateralType(_collateralTypes[i]);
         }
     }
 
-    /// @notice Find the owner of an NFT
-    /// @dev NFTs assigned to zero address are considered invalid, and queries
-    ///  about them do throw.
-    /// @param _tokenId The identifier for an NFT
-    /// @return owner_ The address of the owner of the NFT
-    function ownerOf(uint256 _tokenId) external view returns (address owner_) {
-        owner_ = s.aavegotchis[_tokenId].owner;
-        require(owner_ != address(0), "AavegotchiFacet: invalid _tokenId");
+    function addItemManagers(address[] calldata _newItemManagers) external onlyDaoOrOwner {
+        for (uint256 index = 0; index < _newItemManagers.length; index++) {
+            address newItemManager = _newItemManagers[index];
+            s.itemManagers[newItemManager] = true;
+            emit ItemManagerAdded(newItemManager);
+        }
     }
 
-    /// @notice Get the approved address for a single NFT
-    /// @dev Throws if `_tokenId` is not a valid NFT.
-    /// @param _tokenId The NFT to find the approved address for
-    /// @return approved_ The approved address for this NFT, or the zero address if there is none
-    function getApproved(uint256 _tokenId) external view returns (address approved_) {
-        require(_tokenId < s.tokenIds.length, "ERC721: tokenId is invalid");
-        approved_ = s.approved[_tokenId];
+    function removeItemManagers(address[] calldata _itemManagers) external onlyDaoOrOwner {
+        for (uint256 index = 0; index < _itemManagers.length; index++) {
+            address itemManager = _itemManagers[index];
+            require(s.itemManagers[itemManager] == true, "DAOFacet: itemManager does not exist or already removed");
+            s.itemManagers[itemManager] = false;
+            emit ItemManagerRemoved(itemManager);
+        }
     }
 
-    /// @notice Query if an address is an authorized operator for another address
-    /// @param _owner The address that owns the NFTs
-    /// @param _operator The address that acts on behalf of the owner
-    /// @return approved_ True if `_operator` is an approved operator for `_owner`, false otherwise
-    function isApprovedForAll(address _owner, address _operator) external view returns (bool approved_) {
-        approved_ = s.operators[_owner][_operator];
+    function updateCollateralModifiers(address _collateralType, int16[NUMERIC_TRAITS_NUM] calldata _modifiers) external onlyDaoOrOwner {
+        emit UpdateCollateralModifiers(s.collateralTypeInfo[_collateralType].modifiers, _modifiers);
+        s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
     }
 
-    /// @notice Transfers the ownership of an NFT from one address to another address
-    /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
-    ///  operator, or the approved address for this NFT. Throws if `_from` is
-    ///  not the current owner. Throws if `_to` is the zero address. Throws if
-    ///  `_tokenId` is not a valid NFT. When transfer is complete, this function
-    ///  checks if `_to` is a smart contract (code size > 0). If so, it calls
-    ///  `onERC721Received` on `_to` and throws if the return value is not
-    ///  `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
-    /// @param _from The current owner of the NFT
-    /// @param _to The new owner
-    /// @param _tokenId The NFT to transfer
-    /// @param _data Additional data with no specified format, sent in call to `_to`
-    function safeTransferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId,
-        bytes calldata _data
-    ) external {
-        address sender = LibMeta.msgSender();
-        internalTransferFrom(sender, _from, _to, _tokenId);
-        LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
+    function updateItemTypeMaxQuantity(uint256[] calldata _itemIds, uint256[] calldata _maxQuantities) external onlyItemManager {
+        require(_itemIds.length == _maxQuantities.length, "DAOFacet: _itemIds length not the same as _newQuantities length");
+        for (uint256 i; i < _itemIds.length; i++) {
+            uint256 itemId = _itemIds[i];
+            uint256 maxQuantity = _maxQuantities[i];
+            require(maxQuantity >= s.itemTypes[itemId].totalQuantity, "DAOFacet: maxQuantity is greater than existing quantity");
+            s.itemTypes[itemId].maxQuantity = maxQuantity;
+        }
+        emit ItemTypeMaxQuantity(_itemIds, _maxQuantities);
     }
 
-    /// @notice Transfers the ownership of an NFT from one address to another address
-    /// @dev This works identically to the other function with an extra data parameter,
-    ///  except this function just sets data to "".
-    /// @param _from The current owner of the NFT
-    /// @param _to The new owner
-    /// @param _tokenId The NFT to transfer
-    function safeTransferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external {
-        address sender = LibMeta.msgSender();
-        internalTransferFrom(sender, _from, _to, _tokenId);
-        LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
-    }
-
-    /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
-    ///  TO CONFIRM THAT `_to` IS CAPABLE OF RECEIVING NFTS OR ELSE
-    ///  THEY MAY BE PERMANENTLY LOST
-    /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
-    ///  operator, or the approved address for this NFT. Throws if `_from` is
-    ///  not the current owner. Throws if `_to` is the zero address. Throws if
-    ///  `_tokenId` is not a valid NFT.
-    /// @param _from The current owner of the NFT
-    /// @param _to The new owner
-    /// @param _tokenId The NFT to transfer
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external {
-        internalTransferFrom(LibMeta.msgSender(), _from, _to, _tokenId);
-    }
-
-    // This function is used by transfer functions
-    function internalTransferFrom(
-        address _sender,
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) internal {
-        require(_to != address(0), "AavegotchiFacet: Can't transfer to 0 address");
-        require(_from != address(0), "AavegotchiFacet: _from can't be 0 address");
-        require(_from == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: _from is not owner, transfer failed");
+    function createHaunt(
+        uint24 _hauntMaxSize,
+        uint96 _portalPrice,
+        bytes3 _bodyColor
+    ) external onlyDaoOrOwner returns (uint256 hauntId_) {
+        uint256 currentHauntId = s.currentHauntId;
         require(
-            _sender == _from || s.operators[_from][_sender] || _sender == s.approved[_tokenId],
-            "AavegotchiFacet: Not owner or approved to transfer"
+            s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
+            "AavegotchiFacet: Haunt must be full before creating new"
         );
-        LibAavegotchi.transfer(_from, _to, _tokenId);
-        LibERC721Marketplace.updateERC721Listing(address(this), _tokenId, _from);
+        hauntId_ = currentHauntId + 1;
+        s.currentHauntId = uint16(hauntId_);
+        s.haunts[hauntId_].hauntMaxSize = _hauntMaxSize;
+        s.haunts[hauntId_].portalPrice = _portalPrice;
+        s.haunts[hauntId_].bodyColor = _bodyColor;
+        emit CreateHaunt(hauntId_, _hauntMaxSize, _portalPrice, _bodyColor);
     }
 
-    /// @notice Change or reaffirm the approved address for an NFT
-    /// @dev The zero address indicates there is no approved address.
-    ///  Throws unless `LibMeta.msgSender()` is the current NFT owner, or an authorized
-    ///  operator of the current owner.
-    /// @param _approved The new approved NFT controller
-    /// @param _tokenId The NFT to approve
-    function approve(address _approved, uint256 _tokenId) external {
-        address owner = s.aavegotchis[_tokenId].owner;
-        require(owner == LibMeta.msgSender() || s.operators[owner][LibMeta.msgSender()], "ERC721: Not owner or operator of token.");
-        s.approved[_tokenId] = _approved;
-        emit LibERC721.Approval(owner, _approved, _tokenId);
+    function mintItems(
+        address _to,
+        uint256[] calldata _itemIds,
+        uint256[] calldata _quantities
+    ) external onlyItemManager {
+        require(_itemIds.length == _quantities.length, "DAOFacet: Ids and quantities length must match");
+        address sender = LibMeta.msgSender();
+        uint256 itemTypesLength = s.itemTypes.length;
+        for (uint256 i; i < _itemIds.length; i++) {
+            uint256 itemId = _itemIds[i];
+
+            require(itemTypesLength > itemId, "DAOFacet: Item type does not exist");
+
+            uint256 quantity = _quantities[i];
+            uint256 totalQuantity = s.itemTypes[itemId].totalQuantity + quantity;
+            require(totalQuantity <= s.itemTypes[itemId].maxQuantity, "DAOFacet: Total item type quantity exceeds max quantity");
+
+            LibItems.addToOwner(_to, itemId, quantity);
+            s.itemTypes[itemId].totalQuantity = totalQuantity;
+        }
+        emit LibERC1155.TransferBatch(sender, address(0), _to, _itemIds, _quantities);
+        LibERC1155.onERC1155BatchReceived(sender, address(0), _to, _itemIds, _quantities, "");
     }
 
-    /// @notice Enable or disable approval for a third party ("operator") to manage
-    ///  all of `LibMeta.msgSender()`'s assets
-    /// @dev Emits the ApprovalForAll event. The contract MUST allow
-    ///  multiple operators per owner.
-    /// @param _operator Address to add to the set of authorized operators
-    /// @param _approved True if the operator is approved, false to revoke approval
-    function setApprovalForAll(address _operator, bool _approved) external {
-        s.operators[LibMeta.msgSender()][_operator] = _approved;
-        emit LibERC721.ApprovalForAll(LibMeta.msgSender(), _operator, _approved);
+    function grantExperience(uint256[] calldata _tokenIds, uint256[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {
+        require(_tokenIds.length == _xpValues.length, "DAOFacet: IDs must match XP array length");
+        GameManager storage gameManager = s.gameManagers[LibMeta.msgSender()];
+
+        /*GameManager: If the refresh time has been reached, reset the gameManager's balance to the individual limit, and set the refreshTime to 1 day after the block timestamp.*/
+        if (gameManager.refreshTime < block.timestamp) {
+            gameManager.balance = gameManager.limit;
+            gameManager.refreshTime = uint32(block.timestamp + 1 days);
+        }
+
+        for (uint256 i; i < _tokenIds.length; i++) {
+            uint256 tokenId = _tokenIds[i];
+            uint256 xp = _xpValues[i];
+            require(xp <= 1000, "DAOFacet: Cannot grant more than 1000 XP at a time");
+            require(gameManager.balance >= xp, "DAOFacet: Game Manager's xp grant limit is reached");
+
+            s.aavegotchis[tokenId].experience += xp;
+            gameManager.balance -= xp;
+        }
+        emit GrantExperience(_tokenIds, _xpValues);
     }
 
-    function name() external view returns (string memory) {
-        // return "Aavegotchi";
-        return s.name;
+    function addItemTypes(ItemType[] memory _itemTypes) external onlyItemManager {
+        insertItemTypes(_itemTypes);
     }
 
-    /// @notice An abbreviated name for NFTs in this contract
-    function symbol() external view returns (string memory) {
-        //return "GOTCHI";
-        return s.symbol;
+    function addItemTypesAndSvgs(
+        ItemType[] memory _itemTypes,
+        string calldata _svg,
+        LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes
+    ) external onlyItemManager {
+        insertItemTypes(_itemTypes);
+        LibSvg.storeSvg(_svg, _typesAndSizes);
     }
 
-    /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
-    /// @dev Throws if `_tokenId` is not a valid NFT. URIs are defined in RFC
-    ///  3986. The URI may point to a JSON file that conforms to the "ERC721
-    ///  Metadata JSON Schema".
-    function tokenURI(uint256 _tokenId) external pure returns (string memory) {
-        return LibStrings.strWithUint("https://aavegotchi.com/metadata/aavegotchis/", _tokenId); //Here is your URL!
+    function insertItemTypes(ItemType[] memory _itemTypes) internal {
+        uint256 itemTypesLength = s.itemTypes.length;
+        for (uint256 i; i < _itemTypes.length; i++) {
+            uint256 itemId = itemTypesLength++;
+            s.erc1155Categories[address(this)][itemId] = _itemTypes[i].category;
+            s.itemTypes.push(_itemTypes[i]);
+            emit AddItemType(_itemTypes[i]);
+            emit LibERC1155.TransferSingle(LibMeta.msgSender(), address(0), address(0), itemId, 0);
+        }
+    }
+
+    function addWearableSets(WearableSet[] memory _wearableSets) external onlyItemManager {
+        for (uint256 i; i < _wearableSets.length; i++) {
+            s.wearableSets.push(_wearableSets[i]);
+            emit AddWearableSet(_wearableSets[i]);
+        }
+    }
+
+    function updateWearableSets(uint256[] calldata _setIds, WearableSet[] calldata _wearableSets) external onlyItemManager {
+        require(_setIds.length == _wearableSets.length, "_setIds not same length as _wearableSets");
+        for (uint256 i; i < _setIds.length; i++) {
+            s.wearableSets[_setIds[i]] = _wearableSets[i];
+            emit UpdateWearableSet(_setIds[i], _wearableSets[i]);
+        }
+    }
+
+    function addGameManagers(address[] calldata _newGameManagers, uint256[] calldata _limits) external onlyDaoOrOwner {
+        require(_newGameManagers.length == _limits.length, "DAOFacet: New Game Managers and Limits should have same length");
+        for (uint256 index = 0; index < _newGameManagers.length; index++) {
+            GameManager storage gameManager = s.gameManagers[_newGameManagers[index]];
+            gameManager.limit = _limits[index];
+            gameManager.balance = _limits[index];
+            gameManager.refreshTime = uint256(block.timestamp + 1 days);
+            emit GameManagerAdded(_newGameManagers[index], _limits[index], uint256(block.timestamp + 1 days));
+        }
+    }
+
+    function removeGameManagers(address[] calldata _gameManagers) external onlyDaoOrOwner {
+        for (uint256 index = 0; index < _gameManagers.length; index++) {
+            GameManager storage gameManager = s.gameManagers[_gameManagers[index]];
+            require(gameManager.limit != 0, "DAOFacet: GameManager does not exist or already removed");
+            gameManager.limit = 0;
+            emit GameManagerRemoved(_gameManagers[index]);
+        }
     }
 }

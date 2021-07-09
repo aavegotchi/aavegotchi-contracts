@@ -1,35 +1,5 @@
 // Sources flattened with hardhat v2.2.1 https://hardhat.org
 
-// File contracts/shared/interfaces/IERC20.sol
-
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.1;
-
-interface IERC20 {
-    function name() external view returns (string memory);
-
-    function symbol() external view returns (string memory);
-
-    function decimals() external view returns (uint8);
-
-    function totalSupply() external view returns (uint256);
-
-    function balanceOf(address _owner) external view returns (uint256 balance);
-
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _value
-    ) external returns (bool success);
-
-    function transfer(address _to, uint256 _value) external returns (bool success);
-
-    function approve(address _spender, uint256 _value) external returns (bool success);
-
-    function allowance(address _owner, address _spender) external view returns (uint256 remaining);
-}
-
-
 // File contracts/shared/interfaces/IDiamondCut.sol
 
 
@@ -641,6 +611,7 @@ struct AppStorage {
     address[] collateralTypes;
     address ghstContract;
     address childChainManager;
+    address gameManager;
     address dao;
     address daoTreasury;
     address pixelCraft;
@@ -746,6 +717,36 @@ contract Modifiers {
         require(s.itemManagers[sender] == true, "LibAppStorage: only an ItemManager can call this function");
         _;
     }
+}
+
+
+// File contracts/shared/interfaces/IERC20.sol
+
+
+
+
+interface IERC20 {
+    function name() external view returns (string memory);
+
+    function symbol() external view returns (string memory);
+
+    function decimals() external view returns (uint8);
+
+    function totalSupply() external view returns (uint256);
+
+    function balanceOf(address _owner) external view returns (uint256 balance);
+
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value
+    ) external returns (bool success);
+
+    function transfer(address _to, uint256 _value) external returns (bool success);
+
+    function approve(address _spender, uint256 _value) external returns (bool success);
+
+    function allowance(address _owner, address _spender) external view returns (uint256 remaining);
 }
 
 
@@ -1629,6 +1630,113 @@ library LibAavegotchi {
 }
 
 
+// File contracts/Aavegotchi/libraries/LibSvg.sol
+
+
+
+
+//import "hardhat/console.sol";
+
+library LibSvg {
+    event StoreSvg(LibSvg.SvgTypeAndSizes[] _typesAndSizes);
+    event UpdateSvg(SvgTypeAndIdsAndSizes[] _typesAndIdsAndSizes);
+    // svg type: "aavegotchiSvgs"
+    uint256 internal constant CLOSED_PORTAL_SVG_ID = 0;
+    uint256 internal constant OPEN_PORTAL_SVG_ID = 1;
+    uint256 internal constant AAVEGTOTCHI_BODY_SVG_ID = 2;
+    uint256 internal constant HANDS_SVG_ID = 3;
+    uint256 internal constant BACKGROUND_SVG_ID = 4;
+
+    struct SvgTypeAndSizes {
+        bytes32 svgType;
+        uint256[] sizes;
+    }
+
+    function getSvg(bytes32 _svgType, uint256 _id) internal view returns (bytes memory svg_) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        SvgLayer[] storage svgLayers = s.svgLayers[_svgType];
+        svg_ = getSvg(svgLayers, _id);
+    }
+
+    function getSvg(SvgLayer[] storage _svgLayers, uint256 _id) internal view returns (bytes memory svg_) {
+        require(_id < _svgLayers.length, "LibSvg: SVG type or id does not exist");
+        //  console.log("length:", svgLayers.length);
+        SvgLayer storage svgLayer = _svgLayers[_id];
+        address svgContract = svgLayer.svgLayersContract;
+        uint256 size = svgLayer.size;
+        uint256 offset = svgLayer.offset;
+        svg_ = new bytes(size);
+        assembly {
+            extcodecopy(svgContract, add(svg_, 32), offset, size)
+        }
+    }
+
+    function storeSvgInContract(string calldata _svg) internal returns (address svgContract) {
+        require(bytes(_svg).length < 24576, "SvgStorage: Exceeded 24,576 bytes max contract size");
+        // 61_00_00 -- PUSH2 (size)
+        // 60_00 -- PUSH1 (code position)
+        // 60_00 -- PUSH1 (mem position)
+        // 39 CODECOPY
+        // 61_00_00 PUSH2 (size)
+        // 60_00 PUSH1 (mem position)
+        // f3 RETURN
+        bytes memory init = hex"610000_600e_6000_39_610000_6000_f3";
+        bytes1 size1 = bytes1(uint8(bytes(_svg).length));
+        bytes1 size2 = bytes1(uint8(bytes(_svg).length >> 8));
+        init[2] = size1;
+        init[1] = size2;
+        init[10] = size1;
+        init[9] = size2;
+        bytes memory code = abi.encodePacked(init, _svg);
+
+        assembly {
+            svgContract := create(0, add(code, 32), mload(code))
+            if eq(svgContract, 0) {
+                returndatacopy(0, 0, returndatasize())
+                revert(0, returndatasize())
+            }
+        }
+    }
+
+    function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        emit StoreSvg(_typesAndSizes);
+        address svgContract = storeSvgInContract(_svg);
+        uint256 offset;
+        for (uint256 i; i < _typesAndSizes.length; i++) {
+            LibSvg.SvgTypeAndSizes calldata svgTypeAndSizes = _typesAndSizes[i];
+            for (uint256 j; j < svgTypeAndSizes.sizes.length; j++) {
+                uint256 size = svgTypeAndSizes.sizes[j];
+                s.svgLayers[svgTypeAndSizes.svgType].push(SvgLayer(svgContract, uint16(offset), uint16(size)));
+                offset += size;
+            }
+        }
+    }
+
+    struct SvgTypeAndIdsAndSizes {
+        bytes32 svgType;
+        uint256[] ids;
+        uint256[] sizes;
+    }
+
+    function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        emit UpdateSvg(_typesAndIdsAndSizes);
+        address svgContract = storeSvgInContract(_svg);
+        uint256 offset;
+        for (uint256 i; i < _typesAndIdsAndSizes.length; i++) {
+            LibSvg.SvgTypeAndIdsAndSizes calldata svgTypeAndIdsAndSizes = _typesAndIdsAndSizes[i];
+            for (uint256 j; j < svgTypeAndIdsAndSizes.sizes.length; j++) {
+                uint256 size = svgTypeAndIdsAndSizes.sizes[j];
+                uint256 id = svgTypeAndIdsAndSizes.ids[j];
+                s.svgLayers[svgTypeAndIdsAndSizes.svgType][id] = SvgLayer(svgContract, uint16(offset), uint16(size));
+                offset += size;
+            }
+        }
+    }
+}
+
+
 // File contracts/shared/libraries/LibStrings.sol
 
 
@@ -1673,356 +1781,429 @@ library LibStrings {
 }
 
 
-// File contracts/Aavegotchi/libraries/LibERC721Marketplace.sol
+// File contracts/Aavegotchi/facets/SvgFacet.sol
 
 
 
 
-// import "hardhat/console.sol";
 
-library LibERC721Marketplace {
-    event ERC721ListingCancelled(uint256 indexed listingId, uint256 category, uint256 time);
-    event ERC721ListingRemoved(uint256 indexed listingId, uint256 category, uint256 time);
 
-    function cancelERC721Listing(uint256 _listingId, address _owner) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        ListingListItem storage listingItem = s.erc721ListingListItem[_listingId];
-        if (listingItem.listingId == 0) {
-            return;
+
+
+
+contract SvgFacet is Modifiers {
+    /***********************************|
+   |             Read Functions         |
+   |__________________________________*/
+
+    function bytes3ToColorString(bytes3 _color) internal pure returns (string memory) {
+        bytes memory numbers = "0123456789ABCDEF";
+        bytes memory toString = new bytes(6);
+        uint256 pos;
+        for (uint256 i; i < 3; i++) {
+            toString[pos] = numbers[uint8(_color[i] >> 4)];
+            pos++;
+            toString[pos] = numbers[uint8(_color[i] & 0x0f)];
+            pos++;
         }
-        ERC721Listing storage listing = s.erc721Listings[_listingId];
-        if (listing.cancelled == true || listing.timePurchased != 0) {
-            return;
+        return string(toString);
+    }
+
+    // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
+    function getAavegotchiSvg(uint256 _tokenId) public view returns (string memory ag_) {
+        require(s.aavegotchis[_tokenId].owner != address(0), "SvgFacet: _tokenId does not exist");
+
+        bytes memory svg;
+        uint8 status = s.aavegotchis[_tokenId].status;
+        if (status == LibAavegotchi.STATUS_CLOSED_PORTAL) {
+            // sealed closed portal
+            svg = LibSvg.getSvg("aavegotchi", 0);
+        } else if (status == LibAavegotchi.STATUS_OPEN_PORTAL) {
+            // open portal
+            svg = LibSvg.getSvg("aavegotchi", 1);
+        } else if (status == LibAavegotchi.STATUS_AAVEGOTCHI) {
+            address collateralType = s.aavegotchis[_tokenId].collateralType;
+            svg = getAavegotchiSvgLayers(collateralType, s.aavegotchis[_tokenId].numericTraits, _tokenId);
         }
-        require(listing.seller == _owner, "Marketplace: owner not seller");
-        listing.cancelled = true;
-        s.aavegotchis[listing.erc721TokenId].locked = false;
-        emit ERC721ListingCancelled(_listingId, listing.category, block.number);
-        removeERC721ListingItem(_listingId, _owner);
+        ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg, "</svg>"));
     }
 
-    function cancelERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        address _owner
-    ) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
-        if (listingId == 0) {
-            return;
-        }
-        cancelERC721Listing(listingId, _owner);
+    struct SvgLayerDetails {
+        string primaryColor;
+        string secondaryColor;
+        string cheekColor;
+        bytes collateral;
+        int256 trait;
+        int256[18] eyeShapeTraitRange;
+        bytes eyeShape;
+        string eyeColor;
+        int256[8] eyeColorTraitRanges;
+        string[7] eyeColors;
     }
 
-    function addERC721ListingItem(
-        address _owner,
-        uint256 _category,
-        string memory _sort,
-        uint256 _listingId
-    ) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 headListingId = s.erc721OwnerListingHead[_owner][_category][_sort];
-        if (headListingId != 0) {
-            ListingListItem storage headListingItem = s.erc721OwnerListingListItem[headListingId];
-            headListingItem.parentListingId = _listingId;
-        }
-        ListingListItem storage listingItem = s.erc721OwnerListingListItem[_listingId];
-        listingItem.childListingId = headListingId;
-        s.erc721OwnerListingHead[_owner][_category][_sort] = _listingId;
-        listingItem.listingId = _listingId;
-
-        headListingId = s.erc721ListingHead[_category][_sort];
-        if (headListingId != 0) {
-            ListingListItem storage headListingItem = s.erc721ListingListItem[headListingId];
-            headListingItem.parentListingId = _listingId;
-        }
-        listingItem = s.erc721ListingListItem[_listingId];
-        listingItem.childListingId = headListingId;
-        s.erc721ListingHead[_category][_sort] = _listingId;
-        listingItem.listingId = _listingId;
-    }
-
-    function removeERC721ListingItem(uint256 _listingId, address _owner) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        ListingListItem storage listingItem = s.erc721ListingListItem[_listingId];
-        if (listingItem.listingId == 0) {
-            return;
-        }
-        uint256 parentListingId = listingItem.parentListingId;
-        if (parentListingId != 0) {
-            ListingListItem storage parentListingItem = s.erc721ListingListItem[parentListingId];
-            parentListingItem.childListingId = listingItem.childListingId;
-        }
-        uint256 childListingId = listingItem.childListingId;
-        if (childListingId != 0) {
-            ListingListItem storage childListingItem = s.erc721ListingListItem[childListingId];
-            childListingItem.parentListingId = listingItem.parentListingId;
-        }
-        ERC721Listing storage listing = s.erc721Listings[_listingId];
-        if (s.erc721ListingHead[listing.category]["listed"] == _listingId) {
-            s.erc721ListingHead[listing.category]["listed"] = listingItem.childListingId;
-        }
-        listingItem.listingId = 0;
-        listingItem.parentListingId = 0;
-        listingItem.childListingId = 0;
-
-        listingItem = s.erc721OwnerListingListItem[_listingId];
-
-        parentListingId = listingItem.parentListingId;
-        if (parentListingId != 0) {
-            ListingListItem storage parentListingItem = s.erc721OwnerListingListItem[parentListingId];
-            parentListingItem.childListingId = listingItem.childListingId;
-        }
-        childListingId = listingItem.childListingId;
-        if (childListingId != 0) {
-            ListingListItem storage childListingItem = s.erc721OwnerListingListItem[childListingId];
-            childListingItem.parentListingId = listingItem.parentListingId;
-        }
-        listing = s.erc721Listings[_listingId];
-        if (s.erc721OwnerListingHead[_owner][listing.category]["listed"] == _listingId) {
-            s.erc721OwnerListingHead[_owner][listing.category]["listed"] = listingItem.childListingId;
-        }
-        listingItem.listingId = 0;
-        listingItem.parentListingId = 0;
-        listingItem.childListingId = 0;
-
-        emit ERC721ListingRemoved(_listingId, listing.category, block.timestamp);
-    }
-
-    function updateERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        address _owner
-    ) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
-        if (listingId == 0) {
-            return;
-        }
-        ERC721Listing storage listing = s.erc721Listings[listingId];
-        if (listing.timePurchased != 0 || listing.cancelled == true) {
-            return;
-        }
-        address owner = IERC721(listing.erc721TokenAddress).ownerOf(listing.erc721TokenId);
-        if (owner != listing.seller) {
-            LibERC721Marketplace.cancelERC721Listing(listingId, listing.seller);
-        }
-    }
-}
-
-
-// File contracts/Aavegotchi/facets/AavegotchiFacet.sol
-
-
-
-
-
-// import "hardhat/console.sol";
-
-
-
-
-contract AavegotchiFacet {
-    AppStorage internal s;
-
-    function totalSupply() external view returns (uint256 totalSupply_) {
-        totalSupply_ = s.tokenIds.length;
-    }
-
-    /// @notice Count all NFTs assigned to an owner
-    /// @dev NFTs assigned to the zero address are considered invalid, and this.
-    ///  function throws for queries about the zero address.
-    /// @param _owner An address for whom to query the balance
-    /// @return balance_ The number of NFTs owned by `_owner`, possibly zero
-    function balanceOf(address _owner) external view returns (uint256 balance_) {
-        require(_owner != address(0), "AavegotchiFacet: _owner can't be address(0");
-        balance_ = s.ownerTokenIds[_owner].length;
-    }
-
-    function getAavegotchi(uint256 _tokenId) external view returns (AavegotchiInfo memory aavegotchiInfo_) {
-        aavegotchiInfo_ = LibAavegotchi.getAavegotchi(_tokenId);
-    }
-
-    function aavegotchiClaimTime(uint256 _tokenId) external view returns (uint256 claimTime_) {
-        claimTime_ = s.aavegotchis[_tokenId].claimTime;
-    }
-
-    // /// @notice Enumerate valid NFTs
-    // /// @dev Throws if `_index` >= `totalSupply()`.
-    // /// @param _index A counter less than `totalSupply()`
-    // /// @return The token identifier for the `_index`th NFT,
-    // ///  (sort order not specified)
-    function tokenByIndex(uint256 _index) external view returns (uint256 tokenId_) {
-        require(_index < s.tokenIds.length, "AavegotchiFacet: index beyond supply");
-        tokenId_ = s.tokenIds[_index];
-    }
-
-    // /// @notice Enumerate NFTs assigned to an owner
-    // /// @dev Throws if `_index` >= `balanceOf(_owner)` or if
-    // ///  `_owner` is the zero address, representing invalid NFTs.
-    // /// @param _owner An address where we are interested in NFTs owned by them
-    // /// @param _index A counter less than `balanceOf(_owner)`
-    // /// @return The token identifier for the `_index`th NFT assigned to `_owner`,
-    // ///   (sort order not specified)
-    function tokenOfOwnerByIndex(address _owner, uint256 _index) external view returns (uint256 tokenId_) {
-        require(_index < s.ownerTokenIds[_owner].length, "AavegotchiFacet: index beyond owner balance");
-        tokenId_ = s.ownerTokenIds[_owner][_index];
-    }
-
-    function tokenIdsOfOwner(address _owner) external view returns (uint32[] memory tokenIds_) {
-        tokenIds_ = s.ownerTokenIds[_owner];
-    }
-
-    function allAavegotchisOfOwner(address _owner) external view returns (AavegotchiInfo[] memory aavegotchiInfos_) {
-        uint256 length = s.ownerTokenIds[_owner].length;
-        aavegotchiInfos_ = new AavegotchiInfo[](length);
-        for (uint256 i; i < length; i++) {
-            aavegotchiInfos_[i] = LibAavegotchi.getAavegotchi(s.ownerTokenIds[_owner][i]);
-        }
-    }
-
-    /// @notice Find the owner of an NFT
-    /// @dev NFTs assigned to zero address are considered invalid, and queries
-    ///  about them do throw.
-    /// @param _tokenId The identifier for an NFT
-    /// @return owner_ The address of the owner of the NFT
-    function ownerOf(uint256 _tokenId) external view returns (address owner_) {
-        owner_ = s.aavegotchis[_tokenId].owner;
-        require(owner_ != address(0), "AavegotchiFacet: invalid _tokenId");
-    }
-
-    /// @notice Get the approved address for a single NFT
-    /// @dev Throws if `_tokenId` is not a valid NFT.
-    /// @param _tokenId The NFT to find the approved address for
-    /// @return approved_ The approved address for this NFT, or the zero address if there is none
-    function getApproved(uint256 _tokenId) external view returns (address approved_) {
-        require(_tokenId < s.tokenIds.length, "ERC721: tokenId is invalid");
-        approved_ = s.approved[_tokenId];
-    }
-
-    /// @notice Query if an address is an authorized operator for another address
-    /// @param _owner The address that owns the NFTs
-    /// @param _operator The address that acts on behalf of the owner
-    /// @return approved_ True if `_operator` is an approved operator for `_owner`, false otherwise
-    function isApprovedForAll(address _owner, address _operator) external view returns (bool approved_) {
-        approved_ = s.operators[_owner][_operator];
-    }
-
-    /// @notice Transfers the ownership of an NFT from one address to another address
-    /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
-    ///  operator, or the approved address for this NFT. Throws if `_from` is
-    ///  not the current owner. Throws if `_to` is the zero address. Throws if
-    ///  `_tokenId` is not a valid NFT. When transfer is complete, this function
-    ///  checks if `_to` is a smart contract (code size > 0). If so, it calls
-    ///  `onERC721Received` on `_to` and throws if the return value is not
-    ///  `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
-    /// @param _from The current owner of the NFT
-    /// @param _to The new owner
-    /// @param _tokenId The NFT to transfer
-    /// @param _data Additional data with no specified format, sent in call to `_to`
-    function safeTransferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId,
-        bytes calldata _data
-    ) external {
-        address sender = LibMeta.msgSender();
-        internalTransferFrom(sender, _from, _to, _tokenId);
-        LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
-    }
-
-    /// @notice Transfers the ownership of an NFT from one address to another address
-    /// @dev This works identically to the other function with an extra data parameter,
-    ///  except this function just sets data to "".
-    /// @param _from The current owner of the NFT
-    /// @param _to The new owner
-    /// @param _tokenId The NFT to transfer
-    function safeTransferFrom(
-        address _from,
-        address _to,
+    function getAavegotchiSvgLayers(
+        address _collateralType,
+        int16[NUMERIC_TRAITS_NUM] memory _numericTraits,
         uint256 _tokenId
-    ) external {
-        address sender = LibMeta.msgSender();
-        internalTransferFrom(sender, _from, _to, _tokenId);
-        LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
+    ) internal view returns (bytes memory svg_) {
+        SvgLayerDetails memory details;
+        details.primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
+        details.secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
+        details.cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
+
+        // aavagotchi body
+        svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
+        details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
+
+        details.trait = _numericTraits[4];
+        if (details.trait < 0) {
+            details.eyeShape = LibSvg.getSvg("eyeShapes", 0);
+        } else if (details.trait > 97) {
+            details.eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
+        } else {
+            details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
+            for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
+                if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
+                    details.eyeShape = LibSvg.getSvg("eyeShapes", i);
+                    break;
+                }
+            }
+        }
+
+        details.trait = _numericTraits[5];
+        details.eyeColorTraitRanges = [int256(0), 2, 10, 25, 75, 90, 98, 100];
+        details.eyeColors = [
+            "FF00FF", // mythical_low
+            "0064FF", // rare_low
+            "5D24BF", // uncommon_low
+            details.primaryColor, // common
+            "36818E", // uncommon_high
+            "EA8C27", // rare_high
+            "51FFA8" // mythical_high
+        ];
+        if (details.trait < 0) {
+            details.eyeColor = "FF00FF";
+        } else if (details.trait > 99) {
+            details.eyeColor = "51FFA8";
+        } else {
+            for (uint256 i; i < details.eyeColorTraitRanges.length - 1; i++) {
+                if (details.trait >= details.eyeColorTraitRanges[i] && details.trait < details.eyeColorTraitRanges[i + 1]) {
+                    details.eyeColor = details.eyeColors[i];
+                    break;
+                }
+            }
+        }
+
+        //Add wearables if tokenId isn't MAX_INT
+        if (_tokenId == type(uint256).max) {
+            svg_ = abi.encodePacked(
+                applyStyles(details, _tokenId),
+                LibSvg.getSvg("aavegotchi", LibSvg.BACKGROUND_SVG_ID),
+                svg_,
+                details.collateral,
+                details.eyeShape
+            );
+        } else {
+            svg_ = abi.encodePacked(applyStyles(details, _tokenId), addBodyAndWearableSvgLayers(svg_, details, _tokenId));
+        }
     }
 
-    /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
-    ///  TO CONFIRM THAT `_to` IS CAPABLE OF RECEIVING NFTS OR ELSE
-    ///  THEY MAY BE PERMANENTLY LOST
-    /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
-    ///  operator, or the approved address for this NFT. Throws if `_from` is
-    ///  not the current owner. Throws if `_to` is the zero address. Throws if
-    ///  `_tokenId` is not a valid NFT.
-    /// @param _from The current owner of the NFT
-    /// @param _to The new owner
-    /// @param _tokenId The NFT to transfer
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external {
-        internalTransferFrom(LibMeta.msgSender(), _from, _to, _tokenId);
+    //Apply styles based on the traits and wearables
+    function applyStyles(SvgLayerDetails memory _details, uint256 _tokenId) internal view returns (bytes memory) {
+        uint16[EQUIPPED_WEARABLE_SLOTS] storage equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+
+        if (
+            _tokenId != type(uint256).max &&
+            (equippedWearables[LibItems.WEARABLE_SLOT_BODY] != 0 ||
+                equippedWearables[LibItems.WEARABLE_SLOT_HAND_LEFT] != 0 ||
+                equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT] != 0)
+        ) {
+            //Open-hands aavegotchi
+            return
+                abi.encodePacked(
+                    "<style>.gotchi-primary{fill:#",
+                    _details.primaryColor,
+                    ";}.gotchi-secondary{fill:#",
+                    _details.secondaryColor,
+                    ";}.gotchi-cheek{fill:#",
+                    _details.cheekColor,
+                    ";}.gotchi-eyeColor{fill:#",
+                    _details.eyeColor,
+                    ";}.gotchi-primary-mouth{fill:#",
+                    _details.primaryColor,
+                    ";}.gotchi-sleeves-up{display:none;}",
+                    ".gotchi-handsUp{display:none;}",
+                    ".gotchi-handsDownOpen{display:block;}",
+                    ".gotchi-handsDownClosed{display:none;}",
+                    "</style>"
+                );
+        } else {
+            //Normal Aavegotchi, closed hands
+            return
+                abi.encodePacked(
+                    "<style>.gotchi-primary{fill:#",
+                    _details.primaryColor,
+                    ";}.gotchi-secondary{fill:#",
+                    _details.secondaryColor,
+                    ";}.gotchi-cheek{fill:#",
+                    _details.cheekColor,
+                    ";}.gotchi-eyeColor{fill:#",
+                    _details.eyeColor,
+                    ";}.gotchi-primary-mouth{fill:#",
+                    _details.primaryColor,
+                    ";}.gotchi-sleeves-up{display:none;}",
+                    ".gotchi-handsUp{display:none;}",
+                    ".gotchi-handsDownOpen{display:none;}",
+                    ".gotchi-handsDownClosed{display:block}",
+                    "</style>"
+                );
+        }
     }
 
-    // This function is used by transfer functions
-    function internalTransferFrom(
-        address _sender,
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) internal {
-        require(_to != address(0), "AavegotchiFacet: Can't transfer to 0 address");
-        require(_from != address(0), "AavegotchiFacet: _from can't be 0 address");
-        require(_from == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: _from is not owner, transfer failed");
-        require(
-            _sender == _from || s.operators[_from][_sender] || _sender == s.approved[_tokenId],
-            "AavegotchiFacet: Not owner or approved to transfer"
+    function getWearableClass(uint256 _slotPosition) internal pure returns (string memory className_) {
+        //Wearables
+
+        if (_slotPosition == LibItems.WEARABLE_SLOT_BODY) className_ = "wearable-body";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_FACE) className_ = "wearable-face";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_EYES) className_ = "wearable-eyes";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_HEAD) className_ = "wearable-head";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_HAND_LEFT) className_ = "wearable-hand wearable-hand-left";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_HAND_RIGHT) className_ = "wearable-hand wearable-hand-right";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_PET) className_ = "wearable-pet";
+        if (_slotPosition == LibItems.WEARABLE_SLOT_BG) className_ = "wearable-bg";
+    }
+
+    function getBodyWearable(uint256 _wearableId) internal view returns (bytes memory bodyWearable_, bytes memory sleeves_) {
+        ItemType storage wearableType = s.itemTypes[_wearableId];
+        Dimensions memory dimensions = wearableType.dimensions;
+
+        bodyWearable_ = abi.encodePacked(
+            '<g class="gotchi-wearable wearable-body',
+            // x
+            LibStrings.strWithUint('"><svg x="', dimensions.x),
+            // y
+            LibStrings.strWithUint('" y="', dimensions.y),
+            '">',
+            LibSvg.getSvg("wearables", wearableType.svgId),
+            "</svg></g>"
         );
-        LibAavegotchi.transfer(_from, _to, _tokenId);
-        LibERC721Marketplace.updateERC721Listing(address(this), _tokenId, _from);
+        uint256 svgId = s.sleeves[_wearableId];
+        if (svgId != 0) {
+            sleeves_ = abi.encodePacked(
+                // x
+                LibStrings.strWithUint('"><svg x="', dimensions.x),
+                // y
+                LibStrings.strWithUint('" y="', dimensions.y),
+                '">',
+                LibSvg.getSvg("sleeves", svgId),
+                "</svg>"
+            );
+        }
     }
 
-    /// @notice Change or reaffirm the approved address for an NFT
-    /// @dev The zero address indicates there is no approved address.
-    ///  Throws unless `LibMeta.msgSender()` is the current NFT owner, or an authorized
-    ///  operator of the current owner.
-    /// @param _approved The new approved NFT controller
-    /// @param _tokenId The NFT to approve
-    function approve(address _approved, uint256 _tokenId) external {
-        address owner = s.aavegotchis[_tokenId].owner;
-        require(owner == LibMeta.msgSender() || s.operators[owner][LibMeta.msgSender()], "ERC721: Not owner or operator of token.");
-        s.approved[_tokenId] = _approved;
-        emit LibERC721.Approval(owner, _approved, _tokenId);
+    function getWearable(uint256 _wearableId, uint256 _slotPosition) internal view returns (bytes memory svg_) {
+        ItemType storage wearableType = s.itemTypes[_wearableId];
+        Dimensions memory dimensions = wearableType.dimensions;
+
+        string memory wearableClass = getWearableClass(_slotPosition);
+
+        svg_ = abi.encodePacked(
+            '<g class="gotchi-wearable ',
+            wearableClass,
+            // x
+            LibStrings.strWithUint('"><svg x="', dimensions.x),
+            // y
+            LibStrings.strWithUint('" y="', dimensions.y),
+            '">'
+        );
+        if (_slotPosition == LibItems.WEARABLE_SLOT_HAND_RIGHT) {
+            svg_ = abi.encodePacked(
+                svg_,
+                LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 64 - (dimensions.x * 2)),
+                ', 0)">',
+                LibSvg.getSvg("wearables", wearableType.svgId),
+                "</g></svg></g>"
+            );
+        } else {
+            svg_ = abi.encodePacked(svg_, LibSvg.getSvg("wearables", wearableType.svgId), "</svg></g>");
+        }
     }
 
-    /// @notice Enable or disable approval for a third party ("operator") to manage
-    ///  all of `LibMeta.msgSender()`'s assets
-    /// @dev Emits the ApprovalForAll event. The contract MUST allow
-    ///  multiple operators per owner.
-    /// @param _operator Address to add to the set of authorized operators
-    /// @param _approved True if the operator is approved, false to revoke approval
-    function setApprovalForAll(address _operator, bool _approved) external {
-        s.operators[LibMeta.msgSender()][_operator] = _approved;
-        emit LibERC721.ApprovalForAll(LibMeta.msgSender(), _operator, _approved);
+    struct AavegotchiLayers {
+        bytes background;
+        bytes bodyWearable;
+        bytes hands;
+        bytes face;
+        bytes eyes;
+        bytes head;
+        bytes sleeves;
+        bytes handLeft;
+        bytes handRight;
+        bytes pet;
     }
 
-    function name() external view returns (string memory) {
-        // return "Aavegotchi";
-        return s.name;
+    function addBodyAndWearableSvgLayers(
+        bytes memory _body,
+        SvgLayerDetails memory details,
+        uint256 _tokenId
+    ) internal view returns (bytes memory svg_) {
+        //Wearables
+        uint16[EQUIPPED_WEARABLE_SLOTS] storage equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+        AavegotchiLayers memory layers;
+
+        // If background is equipped
+        uint256 wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BG];
+        if (wearableId != 0) {
+            layers.background = getWearable(wearableId, LibItems.WEARABLE_SLOT_BG);
+        } else {
+            layers.background = LibSvg.getSvg("aavegotchi", 4);
+        }
+
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BODY];
+        if (wearableId != 0) {
+            (layers.bodyWearable, layers.sleeves) = getBodyWearable(wearableId);
+        }
+
+        // get hands
+        layers.hands = abi.encodePacked(svg_, LibSvg.getSvg("aavegotchi", LibSvg.HANDS_SVG_ID));
+
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_FACE];
+        if (wearableId != 0) {
+            layers.face = getWearable(wearableId, LibItems.WEARABLE_SLOT_FACE);
+        }
+
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_EYES];
+        if (wearableId != 0) {
+            layers.eyes = getWearable(wearableId, LibItems.WEARABLE_SLOT_EYES);
+        }
+
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HEAD];
+        if (wearableId != 0) {
+            layers.head = getWearable(wearableId, LibItems.WEARABLE_SLOT_HEAD);
+        }
+
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_LEFT];
+        if (wearableId != 0) {
+            layers.handLeft = getWearable(wearableId, LibItems.WEARABLE_SLOT_HAND_LEFT);
+        }
+
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT];
+        if (wearableId != 0) {
+            layers.handRight = getWearable(wearableId, LibItems.WEARABLE_SLOT_HAND_RIGHT);
+        }
+
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_PET];
+        if (wearableId != 0) {
+            layers.pet = getWearable(wearableId, LibItems.WEARABLE_SLOT_PET);
+        }
+
+        //1. Background wearable
+        //2. Body
+        //3. Body wearable
+        //4. Hands
+        //5. Face
+        //6. Eyes
+        //7. Head
+        //8. Sleeves of body wearable
+        //9. Left hand wearable
+        //10. Right hand wearable
+        //11. Pet wearable
+
+        svg_ = abi.encodePacked(layers.background, _body, details.eyeShape, details.collateral, layers.bodyWearable);
+        svg_ = abi.encodePacked(
+            svg_,
+            layers.hands,
+            layers.face,
+            layers.eyes,
+            layers.head,
+            layers.sleeves,
+            layers.handLeft,
+            layers.handRight,
+            layers.pet
+        );
     }
 
-    /// @notice An abbreviated name for NFTs in this contract
-    function symbol() external view returns (string memory) {
-        //return "GOTCHI";
-        return s.symbol;
+    function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
+        require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
+        PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = LibAavegotchi.portalAavegotchiTraits(_tokenId);
+        for (uint256 i; i < svg_.length; i++) {
+            address collateralType = l_portalAavegotchiTraits[i].collateralType;
+            svg_[i] = string(
+                abi.encodePacked(
+                    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">',
+                    getAavegotchiSvgLayers(collateralType, l_portalAavegotchiTraits[i].numericTraits, type(uint256).max),
+                    // get hands
+                    LibSvg.getSvg("aavegotchi", 3),
+                    "</svg>"
+                )
+            );
+        }
     }
 
-    /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
-    /// @dev Throws if `_tokenId` is not a valid NFT. URIs are defined in RFC
-    ///  3986. The URI may point to a JSON file that conforms to the "ERC721
-    ///  Metadata JSON Schema".
-    function tokenURI(uint256 _tokenId) external pure returns (string memory) {
-        return LibStrings.strWithUint("https://aavegotchi.com/metadata/aavegotchis/", _tokenId); //Here is your URL!
+    function getSvg(bytes32 _svgType, uint256 _itemId) external view returns (string memory svg_) {
+        svg_ = string(LibSvg.getSvg(_svgType, _itemId));
+    }
+
+    function getSvgs(bytes32 _svgType, uint256[] calldata _itemIds) external view returns (string[] memory svgs_) {
+        uint256 length = _itemIds.length;
+        svgs_ = new string[](length);
+        for (uint256 i; i < length; i++) {
+            svgs_[i] = string(LibSvg.getSvg(_svgType, _itemIds[i]));
+        }
+    }
+
+    function getItemSvg(uint256 _itemId) external view returns (string memory ag_) {
+        require(_itemId < s.itemTypes.length, "ItemsFacet: _id not found for item");
+        bytes memory svg;
+        svg = LibSvg.getSvg("wearables", _itemId);
+        // uint256 dimensions = s.itemTypes[_itemId].dimensions;
+        Dimensions storage dimensions = s.itemTypes[_itemId].dimensions;
+        ag_ = string(
+            abi.encodePacked(
+                // width
+                LibStrings.strWithUint('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ', dimensions.width),
+                // height
+                LibStrings.strWithUint(" ", dimensions.height),
+                '">',
+                svg,
+                "</svg>"
+            )
+        );
+    }
+
+    /***********************************|
+   |             Write Functions        |
+   |__________________________________*/
+
+    function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) external onlyItemManager {
+        LibSvg.storeSvg(_svg, _typesAndSizes);
+    }
+
+    function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) external onlyItemManager {
+        LibSvg.updateSvg(_svg, _typesAndIdsAndSizes);
+    }
+
+    function deleteLastSvgLayers(bytes32 _svgType, uint256 _numLayers) external onlyItemManager {
+        for(uint256 i; i < _numLayers; i++){
+            s.svgLayers[_svgType].pop();
+        }
+    }
+
+    struct Sleeve {
+        uint256 sleeveId;
+        uint256 wearableId;
+    }
+
+    function setSleeves(Sleeve[] calldata _sleeves) external onlyItemManager {
+        for (uint256 i; i < _sleeves.length; i++) {
+            s.sleeves[_sleeves[i].wearableId] = _sleeves[i].sleeveId;
+        }
+    }
+
+    function setItemsDimensions(uint256[] calldata _itemIds, Dimensions[] calldata _dimensions) external onlyItemManager {
+        require(_itemIds.length == _dimensions.length, "SvgFacet: _itemIds not same length as _dimensions");
+        for (uint256 i; i < _itemIds.length; i++) {
+            s.itemTypes[_itemIds[i]].dimensions = _dimensions[i];
+        }
     }
 }
