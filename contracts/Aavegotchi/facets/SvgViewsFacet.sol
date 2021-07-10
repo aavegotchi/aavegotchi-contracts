@@ -14,6 +14,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
+import "hardhat/console.sol";
 
 contract SvgViewsFacet is Modifiers {
 
@@ -263,7 +264,7 @@ contract SvgViewsFacet is Modifiers {
                 layers.sleeves,
                 layers.pet
               );
-          } else if (LibSvg.bytesToBytes32("wearables-",_sideView) == keccak256(abi.encodePacked("wearables-", "right"))) {
+          } else if(LibSvg.bytesToBytes32("wearables-",_sideView) == keccak256(abi.encodePacked("wearables-", "right"))) {
             svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
             svg_ = abi.encodePacked(
                 svg_,
@@ -275,11 +276,11 @@ contract SvgViewsFacet is Modifiers {
                 layers.sleeves,
                 layers.pet
               );
-            } else if (LibSvg.bytesToBytes32("wearables-",_sideView) == keccak256(abi.encodePacked("wearables-", "back"))) {
+            } else if(LibSvg.bytesToBytes32("wearables-",_sideView) == keccak256(abi.encodePacked("wearables-", "back"))) {
               svg_ = abi.encodePacked(layers.background);
+              svg_ = abi.encodePacked(svg_, _body);
               svg_ = abi.encodePacked(
                   svg_,
-                  _body,
                   layers.handRight,
                   layers.hands,
                   layers.bodyWearable,
@@ -289,11 +290,11 @@ contract SvgViewsFacet is Modifiers {
                   layers.head,
                   layers.pet
                 );
-              /* } else if (LibSvg.bytesToBytes32("wearables-",_sideView) == keccak256(abi.encodePacked("wearables-", "front"))) {
+              } else if(LibSvg.bytesToBytes32("wearables-",_sideView) == keccak256(abi.encodePacked("wearables-", "front"))) {
                 svg_ = abi.encodePacked(layers.background);
+                svg_ = abi.encodePacked(svg_, _body);
                 svg_ = abi.encodePacked(
                     svg_,
-                    _body,
                     layers.hands,
                     layers.bodyWearable,
                     layers.sleeves,
@@ -302,7 +303,7 @@ contract SvgViewsFacet is Modifiers {
                     layers.head,
                     layers.handRight,
                     layers.pet
-                  ); */
+                  );
                 }
 
     }
