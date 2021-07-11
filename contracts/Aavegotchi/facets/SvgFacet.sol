@@ -2,13 +2,7 @@
 pragma solidity 0.8.1;
 
 import {AppStorage, SvgLayer, Dimensions} from "../libraries/LibAppStorage.sol";
-import {
-    LibAavegotchi,
-    PortalAavegotchiTraitsIO,
-    EQUIPPED_WEARABLE_SLOTS,
-    PORTAL_AAVEGOTCHIS_NUM,
-    NUMERIC_TRAITS_NUM
-} from "../libraries/LibAavegotchi.sol";
+import {LibAavegotchi, PortalAavegotchiTraitsIO, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, NUMERIC_TRAITS_NUM} from "../libraries/LibAavegotchi.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
@@ -62,6 +56,7 @@ contract SvgFacet is Modifiers {
         string eyeColor;
         int256[8] eyeColorTraitRanges;
         string[7] eyeColors;
+        uint256 bg;
     }
 
     function getAavegotchiSvgLayers(
@@ -70,6 +65,7 @@ contract SvgFacet is Modifiers {
         uint256 _tokenId
     ) internal view returns (bytes memory svg_) {
         SvgLayerDetails memory details;
+        uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
         details.primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
         details.secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
         details.cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
@@ -116,7 +112,14 @@ contract SvgFacet is Modifiers {
                 }
             }
         }
-
+        for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
+            if (slot == LibItems.WEARABLE_SLOT_BG) {
+                if (equippedWearables[slot] != 0) {
+                    details.bg = equippedWearables[slot];
+                    continue;
+                }
+            }
+        }
         //Add wearables if tokenId isn't MAX_INT
         if (_tokenId == type(uint256).max) {
             svg_ = abi.encodePacked(
@@ -407,7 +410,7 @@ contract SvgFacet is Modifiers {
     }
 
     function deleteLastSvgLayers(bytes32 _svgType, uint256 _numLayers) external onlyItemManager {
-        for(uint256 i; i < _numLayers; i++){
+        for (uint256 i; i < _numLayers; i++) {
             s.svgLayers[_svgType].pop();
         }
     }
