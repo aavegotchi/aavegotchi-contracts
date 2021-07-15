@@ -4,9 +4,8 @@
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
 const { itemTypes } = require("./gbmAuctionItemTypes");
 const { wearablesSvgs, sleevesSvgs } = require("../svgs/gbmWearables");
-const { impersonate } = require("./helperFunctions");
 
-console.log("sleeves:", sleevesSvgs);
+const gasPrice = 2000000000;
 
 let signer;
 const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
@@ -106,7 +105,7 @@ async function main() {
   ).connect(signer);
   console.log("Adding items", 0, "to", itemTypes.length);
 
-  tx = await daoFacet.addItemTypes(itemTypes);
+  tx = await daoFacet.addItemTypes(itemTypes, { gasPrice: gasPrice });
 
   receipt = await tx.wait();
   if (!receipt.status) {
@@ -114,10 +113,12 @@ async function main() {
   }
   console.log("Items were added:", tx.hash);
 
-  await uploadSvgs(wearablesSvgs, "wearables");
+  console.log("Upload SVGs");
+  await uploadSvgs(wearablesSvgs, "wearables", { gasPrice: gasPrice });
   await uploadSvgs(
     sleevesSvgs.map((value) => value.svg),
-    "sleeves"
+    "sleeves",
+    { gasPrice: gasPrice }
   );
 
   let sleevesSvgId = 28;
@@ -130,7 +131,10 @@ async function main() {
     sleevesSvgId++;
   }
   console.log("Associating sleeves svgs with body wearable svgs.");
-  tx = await svgFacet.setSleeves(sleeves, { gasLimit: gasLimit });
+  tx = await svgFacet.setSleeves(sleeves, {
+    gasLimit: gasLimit,
+    gasPrice: gasPrice,
+  });
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
@@ -146,7 +150,9 @@ async function main() {
 
   console.log("Mint prize items to itemManager");
 
-  tx = await daoFacet.mintItems(itemManager, itemIds, quantities);
+  tx = await daoFacet.mintItems(itemManager, itemIds, quantities, {
+    gasPrice: gasPrice,
+  });
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
