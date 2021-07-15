@@ -90,7 +90,7 @@ const itemTypes = [
     setId: [88, 90],
     author: "xibot",
     description: "",
-    dimensions: { x: 15, y: 33, width: 34, height: 20 },
+    dimensions: { x: 12, y: 32, width: 34, height: 20 },
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 100,

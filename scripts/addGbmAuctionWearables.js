@@ -164,7 +164,7 @@ async function main() {
 
   const impersonatedItems = await impersonate(coderdan, itemsFacet);
 
-  let equipIds = [203, 0, 0, 0, 201, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  let equipIds = [203, 0, 202, 0, 201, 205, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   await impersonatedItems.equipWearables("1484", equipIds);
 
   const svg = await svgFacet.getAavegotchiSvg("1484");
