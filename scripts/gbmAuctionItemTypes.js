@@ -46,7 +46,7 @@ const itemTypes = [
   },
   {
     svgId: 201,
-    name: "Mechanical claw",
+    name: "Mechanical Claw",
     setId: [89],
     author: "xibot",
     description: "",
@@ -66,7 +66,7 @@ const itemTypes = [
   },
   {
     svgId: 202,
-    name: "VR headset",
+    name: "VR Headset",
     setId: [88, 92],
     author: "xibot",
     description: "",

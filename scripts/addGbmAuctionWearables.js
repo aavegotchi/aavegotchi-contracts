@@ -91,13 +91,13 @@ async function main() {
     });
     signer = await ethers.provider.getSigner(owner);
   } else if (hre.network.name === "matic") {
-    signer = new LedgerSigner(ethers.provider);
+    signer = new LedgerSigner(ethers.provider, "hid", "m/44'/60'/2'/0/0");
   } else {
     throw Error("Incorrect network selected");
   }
   let tx;
   let receipt;
-  // let itemsTransferFacet = (await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', diamondAddress)).connect(signer)
+
   let daoFacet = (
     await ethers.getContractAt("DAOFacet", diamondAddress)
   ).connect(signer);
@@ -144,32 +144,15 @@ async function main() {
     quantities.push(itemType.maxQuantity);
   }
 
-  console.log("Mint prize items");
+  console.log("Mint prize items to itemManager");
 
-  const itemsFacet = await ethers.getContractAt(
-    "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
-    diamondAddress
-  );
-  let coderdan = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
-
-  tx = await daoFacet.mintItems(coderdan, itemIds, quantities);
+  tx = await daoFacet.mintItems(itemManager, itemIds, quantities);
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
 
   console.log("Prize items minted:", tx.hash);
-
-  //Impersonate coderdan
-
-  const impersonatedItems = await impersonate(coderdan, itemsFacet);
-
-  let equipIds = [203, 0, 202, 0, 201, 205, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  await impersonatedItems.equipWearables("1484", equipIds);
-
-  const svg = await svgFacet.getAavegotchiSvg("1484");
-
-  console.log("svg:", svg);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
