@@ -238,6 +238,8 @@ struct AppStorage {
     // mapping(address => uint256[]) petOperatorTokenIds;
     mapping(address => bool) itemManagers;
     mapping(address => GameManager) gameManagers;
+    //H2
+    mapping(uint256 => address[]) hauntCollateralTypes;
 }
 
 library LibAppStorage {

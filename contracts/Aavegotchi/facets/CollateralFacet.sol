@@ -20,20 +20,23 @@ contract CollateralFacet is Modifiers {
    |             Read Functions         |
    |__________________________________*/
 
-    function collaterals() external view returns (address[] memory collateralTypes_) {
-        collateralTypes_ = s.collateralTypes;
+    //H2 Todo: Use the hauntID=>collateralType mapping
+    function collaterals(uint256 _hauntId) external view returns (address[] memory collateralTypes_) {
+        collateralTypes_ = s.hauntCollateralTypes[_hauntId];
     }
 
-    function collateralInfo(uint256 _collateralId) external view returns (AavegotchiCollateralTypeIO memory collateralInfo_) {
-        address collateral = s.collateralTypes[_collateralId];
+    //H2 Todo: Use the hauntID=>collateralType mapping
+    function collateralInfo(uint256 _hauntId, uint256 _collateralId) external view returns (AavegotchiCollateralTypeIO memory collateralInfo_) {
+        address collateral = s.hauntCollateralTypes[_hauntId][_collateralId];
         collateralInfo_ = AavegotchiCollateralTypeIO(collateral, s.collateralTypeInfo[collateral]);
         return collateralInfo_;
     }
 
-    function getCollateralInfo() external view returns (AavegotchiCollateralTypeIO[] memory collateralInfo_) {
-        address[] memory collateralTypes = s.collateralTypes;
+    //H2 Todo: Use the hauntID=>collateralType mapping
+    function getCollateralInfo(uint256 _hauntId) external view returns (AavegotchiCollateralTypeIO[] memory collateralInfo_) {
+        address[] memory collateralTypes = s.hauntCollateralTypes[_hauntId];
 
-        collateralInfo_ = new AavegotchiCollateralTypeIO[](collateralTypes.length);
+        collateralInfo_ = new AavegotchiCollateralTypeIO[](s.hauntCollateralTypes[_hauntId].length);
 
         for (uint256 i; i < collateralTypes.length; i++) {
             address collateral = collateralTypes[i];

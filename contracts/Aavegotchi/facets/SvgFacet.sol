@@ -87,6 +87,7 @@ contract SvgFacet is Modifiers {
             details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
             for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
                 if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
+                    //H2 Todo: Create eyeShapesH2 svg type and substitute here
                     details.eyeShape = LibSvg.getSvg("eyeShapes", i);
                     break;
                 }
@@ -407,7 +408,7 @@ contract SvgFacet is Modifiers {
     }
 
     function deleteLastSvgLayers(bytes32 _svgType, uint256 _numLayers) external onlyItemManager {
-        for(uint256 i; i < _numLayers; i++){
+        for (uint256 i; i < _numLayers; i++) {
             s.svgLayers[_svgType].pop();
         }
     }
