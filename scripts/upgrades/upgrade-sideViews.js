@@ -166,30 +166,17 @@ async function main () {
   await facet.deployed()
   console.log('Deployed facet:', facet.address)
 
-  // const newFuncs = [
-  //   getSelector('function aavegotchiClaimTime(uint256 _tokenId) external view returns (uint256 claimTime_)')
-  // ]
-  // let existingFuncs = getSelectors(facet)
-  // for (const selector of newFuncs) {
-  //   if (!existingFuncs.includes(selector)) {
-  //     throw Error(`Selector ${selector} not found`)
-  //   }
-  // }
-  // existingFuncs = existingFuncs.filter(selector => !newFuncs.includes(selector))
+  const sideViewsSelectors = getSelectors(facet)
+
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
   const cut = [
     {
       facetAddress: facet.address,
-      action: FacetCutAction.Add,
-      functionSelectors: getSelectors(facet)
+      action: FacetCutAction.Replace,
+      functionSelectors: sideViewsSelectors
     }
-    // {
-    //   facetAddress: facet.address,
-    //   action: FacetCutAction.Replace,
-    //   functionSelectors: existingFuncs
-    // }
   ]
   console.log(cut)
 

@@ -399,7 +399,7 @@ let sideViewDimensions = [
    itemId: 10,
    name: "Link White Hat",
    side: "left",
-   dimensions: {x:12 y:2, width:36, height:19},
+   dimensions: {x:12, y:2, width:36, height:19},
 
 
 
@@ -883,7 +883,7 @@ let sideViewDimensions = [
    itemId: 17,
    name: "Link Cube",
    side: "right",
-   dimensions: {x:32, y:31, width:12, height16},
+   dimensions: {x:32, y:31, width:12, height: 16},
 
 
 
