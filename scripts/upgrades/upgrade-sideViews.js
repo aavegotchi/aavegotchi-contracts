@@ -187,7 +187,7 @@ async function main () {
   }
   existingFuncs = existingFuncs.filter(selector => !newFuncs.includes(selector))
 
-  const sideViewsSelectors = getSelectors(facet)
+  // const sideViewsSelectors = getSelectors(facet)
 
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
