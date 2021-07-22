@@ -62,15 +62,6 @@ async function main() {
   if (testing) {
     const owner = await (await ethers.getContractAt("OwnershipFacet", diamondAddress)).owner();
     await hre.network.provider.request({
-      method: "hardhat_reset",
-      params: [{
-        forking: {
-          jsonRpcUrl: process.env.MATIC_URL
-        }
-      }]
-    });
-
-    await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [owner]
     });
@@ -82,29 +73,6 @@ async function main() {
   }
 
   const diamondCut = await (await ethers.getContractAt("IDiamondCut", diamondAddress)).connect(signer);
-
-  async function deployCut(cut) {
-    console.log(cut);
-    // tx = await diamondCut.estimateGas.diamondCut(cut, ethers.constants.AddressZero, "0x");
-    // console.log("Diamond cut gas:", tx.toString());
-    if (testing) {
-      tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", { gasLimit: 20000000 });
-      console.log("Diamond cut tx:", tx.hash);
-      const receipt = await tx.wait();
-      if (!receipt.status) {
-        throw Error(`Diamond upgrade failed: ${tx.hash}`);
-      }
-    } else {
-      tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, "0x", {
-        gasLimit: 800000,
-        gasPrice: 5000000000
-      });
-      console.log("tx:", tx);
-      await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, { gasPrice: 5000000000 });
-      console.log("Sent to multisig");
-    }
-  }
-
   let [collateralFacet, daoFacet, ...facets] = await deployFacets(
     "CollateralFacet",
     "DAOFacet",
@@ -170,15 +138,30 @@ async function main() {
       functionSelectors: existingDaoFacetFuncs
     }
   ];
-  await deployCut(cut);
-
   for (let facet of facets) {
-    cut = [{
+    cut.push({
       facetAddress: facet.address,
       action: FacetCutAction.Replace,
       functionSelectors: getSelectors(facet)
-    }];
-    await deployCut(cut);
+    });
+  }
+  // console.log(cut);
+
+  if (testing) {
+    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", { gasLimit: 20000000 });
+    console.log("Diamond cut tx:", tx.hash);
+    const receipt = await tx.wait();
+    if (!receipt.status) {
+      throw Error(`Diamond upgrade failed: ${tx.hash}`);
+    }
+  } else {
+    tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, "0x", {
+      gasLimit: 800000,
+      gasPrice: 5000000000
+    });
+    console.log("tx:", tx);
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, { gasPrice: 5000000000 });
+    console.log("Sent to multisig");
   }
 
   // Add collateral types for H1
