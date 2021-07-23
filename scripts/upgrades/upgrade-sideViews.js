@@ -166,26 +166,26 @@ async function main () {
   await facet.deployed()
   console.log('Deployed facet:', facet.address)
 
-  const newFuncs = [
-    getSelector('function getAavegotchiSideSvgs(uint256 _tokenId) public view returns (string[] memory ag_)'),
-    getSelector('function getAavegotchiSideSvgLayers(bytes memory _sideView, address _collateralType, int16[NUMERIC_TRAITS_NUM] memory _numericTraits, uint256 _tokenId) internal view returns (bytes memory svg_)'),
-    getSelector('function applySideStyles(SvgLayerDetails memory _details, uint256 _tokenId) internal view returns (bytes memory)'),
-    getSelector('function addBodyAndWearableSideSvgLayers(bytes memory _sideView, bytes memory _body, SvgLayerDetails memory details, uint256 _tokenId) internal view returns (bytes memory svg_)'),
-    getSelector('function getSideWearableClass(uint256 _slotPosition) internal pure returns (string memory className_)'),
-    getSelector('function getWearableSideView(bytes memory _sideView, uint256 _wearableId, uint256 _slotPosition) internal view returns (bytes memory svg_)'),
-    getSelector('function getBodySideWearable(bytes memory _sideView, uint256 _wearableId) internal view returns (bytes memory bodyWearable_, bytes memory sleeves_)'),
-    getSelector('function prepareItemSvg(Dimensions storage _dimensions, bytes memory _svg) internal view returns (string memory svg_)'),
-    getSelector('function getItemSvgs(uint256 _itemId) public view returns (string[] memory svg_)'),
-    getSelector('function getItemsSvgs(uint256[] calldata _itemIds) public view returns (string[][] memory svgs_)'),
-    getSelector('function setSideViewDimensions(SideViewDimensionsArgs[] calldata _sideViewDimensions) external onlyItemManager')
-  ]
-  let existingFuncs = getSelectors(facet)
-  for (const selector of newFuncs) {
-    if (!existingFuncs.includes(selector)) {
-      throw Error(`Selector ${selector} not found`)
-    }
-  }
-  existingFuncs = existingFuncs.filter(selector => !newFuncs.includes(selector))
+  // const newFuncs = [
+  //   getSelector('function getAavegotchiSideSvgs(uint256 _tokenId) public view returns (string[] memory ag_)'),
+  //   getSelector('function getAavegotchiSideSvgLayers(bytes memory _sideView, address _collateralType, int16[NUMERIC_TRAITS_NUM] memory _numericTraits, uint256 _tokenId) internal view returns (bytes memory svg_)'),
+  //   getSelector('function applySideStyles(SvgLayerDetails memory _details, uint256 _tokenId) internal view returns (bytes memory)'),
+  //   getSelector('function addBodyAndWearableSideSvgLayers(bytes memory _sideView, bytes memory _body, SvgLayerDetails memory details, uint256 _tokenId) internal view returns (bytes memory svg_)'),
+  //   getSelector('function getSideWearableClass(uint256 _slotPosition) internal pure returns (string memory className_)'),
+  //   getSelector('function getWearableSideView(bytes memory _sideView, uint256 _wearableId, uint256 _slotPosition) internal view returns (bytes memory svg_)'),
+  //   getSelector('function getBodySideWearable(bytes memory _sideView, uint256 _wearableId) internal view returns (bytes memory bodyWearable_, bytes memory sleeves_)'),
+  //   getSelector('function prepareItemSvg(Dimensions storage _dimensions, bytes memory _svg) internal view returns (string memory svg_)'),
+  //   getSelector('function getItemSvgs(uint256 _itemId) public view returns (string[] memory svg_)'),
+  //   getSelector('function getItemsSvgs(uint256[] calldata _itemIds) public view returns (string[][] memory svgs_)'),
+  //   getSelector('function setSideViewDimensions(SideViewDimensionsArgs[] calldata _sideViewDimensions) external onlyItemManager')
+  // ]
+  // let existingFuncs = getSelectors(facet)
+  // for (const selector of newFuncs) {
+  //   if (!existingFuncs.includes(selector)) {
+  //     throw Error(`Selector ${selector} not found`)
+  //   }
+  // }
+  // existingFuncs = existingFuncs.filter(selector => !newFuncs.includes(selector))
 
   // const sideViewsSelectors = getSelectors(facet)
 
@@ -196,13 +196,13 @@ async function main () {
     {
       facetAddress: facet.address,
       action: FacetCutAction.Add,
-      functionSelectors: newFuncs
+      functionSelectors: getSelectors(facet)
     },
-    {
-      facetAddress: facet.address,
-      action: FacetCutAction.Replace,
-      functionSelectors: existingFuncs
-    }
+    // {
+    //   facetAddress: facet.address,
+    //   action: FacetCutAction.Replace,
+    //   functionSelectors: existingFuncs
+    // }
   ]
   console.log(cut)
 
