@@ -178,13 +178,22 @@ async function main() {
   if (!receipt.status) {
     throw Error(`Adding Collateral Types failed: ${tx.hash}`);
   }
+
+  return {
+    signer,
+    diamondAddress,
+    ghstAddress,
+    collateralFacet, daoFacet, facets
+  };
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch(error => {
-    console.error(error);
-    process.exit(1);
-  });
+if (require.main === module) {
+  main()
+    .then(() => process.exit(0))
+    .catch(error => {
+      console.error(error);
+      process.exit(1);
+    });
+}
 
 exports.upgradeHauntCollateralTypes = main;
