@@ -225,6 +225,8 @@ async function main () {
 
   const svgViewsFacet = await ethers.getContractAt('SvgViewsFacet', diamondAddress, itemSigner)
 
+  console.log("Side view Dimensions: ", sideViewDimensions[1]);
+
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions, { gasLimit: gasLimit })
   receipt = await tx.wait()
   if (!receipt.status) {
@@ -232,6 +234,8 @@ async function main () {
   }
   console.log('Uploaded item side dimensions')
 }
+
+
 
 if(require.main === module){
     main()

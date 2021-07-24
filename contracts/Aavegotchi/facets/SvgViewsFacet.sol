@@ -183,6 +183,7 @@ contract SvgViewsFacet is Modifiers {
         bytes pet;
     }
 
+    /* _sideView should either be left, right, front or back */
     function addBodyAndWearableSideSvgLayers(
         bytes memory _sideView,
         bytes memory _body,
