@@ -3,7 +3,7 @@ let sideViewDimensions = [
    itemId: 0,
    name: "The Void",
    side: "none",
-   dimensions: "",
+   dimensions: {x:0, y:0, width:0, height:0},
 },
  {
    itemId: 1,
@@ -3717,7 +3717,7 @@ let sideViewDimensions = [
    itemId: 137,
    name: "Vote Sign",
    side: "left back",
-   dimensions: {x:-1, y:24, width:17, height:23},
+   dimensions: {x:0, y:24, width:17, height:23},
 },
  {
    itemId: 137,
@@ -4161,7 +4161,7 @@ let sideViewDimensions = [
    itemId: 156,
    name: "Godlike Rofl",
    side: "back",
-   dimensions: {x:-1, y:38, width:26, height:22},
+   dimensions: {x:0, y:38, width:26, height:22},
 },
  {
    itemId: 156,

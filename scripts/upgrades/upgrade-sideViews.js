@@ -147,6 +147,7 @@ async function main () {
     itemSigner = signer
   }
 
+  /*
   await uploadSvgs(aavegotchiSvgs.left, 'aavegotchi-left', testing, itemSigner)
   await uploadSvgs(aavegotchiSvgs.right, 'aavegotchi-right', testing, itemSigner)
   await uploadSvgs(aavegotchiSvgs.back, 'aavegotchi-back', testing, itemSigner)
@@ -160,6 +161,7 @@ async function main () {
 
   await uploadSvgs(eyeShapesLeftSvgs, 'eyeShapes-left', testing, itemSigner)
   await uploadSvgs(eyeShapesRightSvgs, 'eyeShapes-right', testing, itemSigner)
+  */
 
   const Facet = await ethers.getContractFactory('SvgViewsFacet')
   facet = await Facet.deploy()
@@ -226,6 +228,8 @@ async function main () {
   const svgViewsFacet = await ethers.getContractAt('SvgViewsFacet', diamondAddress, itemSigner)
 
   console.log("Side view Dimensions: ", sideViewDimensions[1]);
+
+  console.log('dimensions:',sideViewDimensions)
 
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions, { gasLimit: gasLimit })
   receipt = await tx.wait()
