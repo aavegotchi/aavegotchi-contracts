@@ -45,6 +45,7 @@ library LibSvg {
         AppStorage storage s = LibAppStorage.diamondStorage();
         SvgLayer[] storage svgLayers = s.svgLayers[_svgType];
         console.log("id before func:", _id);
+        console.logBytes32(_svgType);
         svg_ = getSvg(svgLayers, _id);
     }
 
