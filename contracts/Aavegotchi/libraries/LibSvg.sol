@@ -3,7 +3,7 @@ pragma solidity 0.8.1;
 
 import {LibAppStorage, AppStorage, SvgLayer} from "./LibAppStorage.sol";
 
-//import "hardhat/console.sol";
+import "hardhat/console.sol";
 
 library LibSvg {
     event StoreSvg(LibSvg.SvgTypeAndSizes[] _typesAndSizes);
@@ -44,12 +44,16 @@ library LibSvg {
     function getSvg(bytes32 _svgType, uint256 _id) internal view returns (bytes memory svg_) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         SvgLayer[] storage svgLayers = s.svgLayers[_svgType];
+        console.log("id before func:", _id);
         svg_ = getSvg(svgLayers, _id);
     }
 
     function getSvg(SvgLayer[] storage _svgLayers, uint256 _id) internal view returns (bytes memory svg_) {
+        console.log("getSvg() function");
+        console.log("SvgLayer length:", _svgLayers.length);
+        console.log("id:", _id);
         require(_id < _svgLayers.length, "LibSvg: SVG type or id does not exist");
-        //  console.log("length:", svgLayers.length);
+        /* console.log("length:", _svgLayers.length); */
         SvgLayer storage svgLayer = _svgLayers[_id];
         address svgContract = svgLayer.svgLayersContract;
         uint256 size = svgLayer.size;

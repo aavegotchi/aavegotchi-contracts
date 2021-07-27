@@ -13,6 +13,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
+import "hardhat/console.sol";
 
 contract SvgFacet is Modifiers {
     /***********************************|
@@ -21,17 +22,21 @@ contract SvgFacet is Modifiers {
 
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
     function getAavegotchiSvg(uint256 _tokenId) public view returns (string memory ag_) {
+        console.log("getAavegotchiSvgs() func");
         require(s.aavegotchis[_tokenId].owner != address(0), "SvgFacet: _tokenId does not exist");
 
         bytes memory svg;
         uint8 status = s.aavegotchis[_tokenId].status;
         if (status == LibAavegotchi.STATUS_CLOSED_PORTAL) {
+            console.log("First is being run");
             // sealed closed portal
             svg = LibSvg.getSvg("aavegotchi", 0);
         } else if (status == LibAavegotchi.STATUS_OPEN_PORTAL) {
+            console.log("Second is being run");
             // open portal
             svg = LibSvg.getSvg("aavegotchi", 1);
         } else if (status == LibAavegotchi.STATUS_AAVEGOTCHI) {
+            console.log("Third is being run");
             address collateralType = s.aavegotchis[_tokenId].collateralType;
             svg = getAavegotchiSvgLayers(collateralType, s.aavegotchis[_tokenId].numericTraits, _tokenId);
         }

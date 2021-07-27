@@ -47,6 +47,6 @@ describe("Side Views", async function () {
     console.log("Aavegotchi Items: ", aavegotchiMess.items[3].itemId.toString());
     console.log("Aavegotchi Items: ", aavegotchiMess.items[4].itemId.toString());
 
-    await svgViewsFacet.getAavegotchiSideSvgs(7623);
+    await svgViewsFacet.getAavegotchiSideSvgs(7624);
   });
 });

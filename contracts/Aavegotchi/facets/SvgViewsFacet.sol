@@ -22,6 +22,7 @@ contract SvgViewsFacet is Modifiers {
         // 1 == leftSide view
         // 2 == rightSide view
         // 3 == backSide view
+        console.log("getAavegotchiSideSvgs() func");
         ag_ = new string[](4);
         require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "SvgFacet: Aavegotchi not claimed");
         ag_[0] = SvgFacet(address(this)).getAavegotchiSvg(_tokenId);
@@ -55,21 +56,26 @@ contract SvgViewsFacet is Modifiers {
         int16[NUMERIC_TRAITS_NUM] memory _numericTraits,
         uint256 _tokenId
     ) internal view returns (bytes memory svg_) {
+        console.log("This is getAavegotchiSvgLayers() func");
         SvgLayerDetails memory details;
         details.primaryColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
         details.secondaryColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
         details.cheekColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
 
         // aavagotchi body
+        console.log("AAVEGTOTCHI_BODY_SVG_ID: ", LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
         svg_ = LibSvg.getSvg(LibSvg.bytesToBytes32("aavegotchi-", _sideView), LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
         details.collateral = LibSvg.getSvg(LibSvg.bytesToBytes32("collaterals-", _sideView), s.collateralTypeInfo[_collateralType].svgId);
 
         details.trait = _numericTraits[4];
         if (details.trait < 0) {
+            console.log("one");
             details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32("eyeShapes-", _sideView), 0);
         } else if (details.trait > 97) {
+            console.log("two");
             details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32("eyeShapes-", _sideView), s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
         } else {
+            console.log("three");
             details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
             for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
                 if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
