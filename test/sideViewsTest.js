@@ -28,14 +28,25 @@ describe("Side Views", async function () {
     //   method: 'hardhat_impersonateAccount',
     //   params: [aavegotchiOwner]
     // });
-    await svgViewsFacet.getAavegotchiSideSvgs(7624);
-    let aavegotchi = await aavegotchiFacet.getAavegotchi(7624);
 
-    console.log("Aavegotchi Items Array Length: ", aavegotchi.items.length);
-    console.log("Aavegotchi Items: ", aavegotchi.items[0].itemId.toString());
-    console.log("Aavegotchi Items: ", aavegotchi.items[1].itemId.toString());
-    console.log("Aavegotchi Items: ", aavegotchi.items[2].itemId.toString());
-    console.log("Aavegotchi Items: ", aavegotchi.items[3].itemId.toString());
-    console.log("Aavegotchi Items: ", aavegotchi.items[4].itemId.toString());
+    let aavegotchiMarine = await aavegotchiFacet.getAavegotchi(7623);
+    let aavegotchiMess = await aavegotchiFacet.getAavegotchi(7624);
+
+    console.log("Marine Items Array Length: ", aavegotchiMarine.items.length);
+    console.log("Aavegotchi Items: ", aavegotchiMarine.items[0].itemId.toString());
+    console.log("Aavegotchi Items: ", aavegotchiMarine.items[1].itemId.toString());
+    console.log("Aavegotchi Items: ", aavegotchiMarine.items[2].itemId.toString());
+    console.log("Aavegotchi Items: ", aavegotchiMarine.items[3].itemId.toString());
+    console.log("Aavegotchi Items: ", aavegotchiMarine.items[4].itemId.toString());
+    console.log("Aavegotchi Items: ", aavegotchiMarine.items[5].itemId.toString());
+
+    console.log("Mess Items Array Length: ", aavegotchiMess.items.length);
+    console.log("Aavegotchi Items: ", aavegotchiMess.items[0].itemId.toString());
+    console.log("Aavegotchi Items: ", aavegotchiMess.items[1].itemId.toString());
+    console.log("Aavegotchi Items: ", aavegotchiMess.items[2].itemId.toString());
+    console.log("Aavegotchi Items: ", aavegotchiMess.items[3].itemId.toString());
+    console.log("Aavegotchi Items: ", aavegotchiMess.items[4].itemId.toString());
+
+    await svgViewsFacet.getAavegotchiSideSvgs(7623);
   });
 });
