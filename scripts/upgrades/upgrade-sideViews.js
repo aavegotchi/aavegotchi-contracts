@@ -229,7 +229,7 @@ async function main () {
 
   console.log("Side view Dimensions: ", sideViewDimensions[1]);
 
-  console.log('dimensions:',sideViewDimensions)
+  // console.log('dimensions:',sideViewDimensions)
 
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions, { gasLimit: gasLimit })
   receipt = await tx.wait()

@@ -393,9 +393,8 @@ contract SvgViewsFacet is Modifiers {
     }
 
     function setSideViewDimensions(SideViewDimensionsArgs[] calldata _sideViewDimensions) external onlyItemManager {
-        console.log("hello");
         for (uint256 i; i < _sideViewDimensions.length; i++) {
-            console.log("dimensions:", _sideViewDimensions[i].dimensions.x);
+            /* console.log("dimensions:", _sideViewDimensions[i].dimensions.x); */
             s.sideViewDimensions[_sideViewDimensions[i].itemId][bytes(_sideViewDimensions[i].side)] = _sideViewDimensions[i].dimensions;
         }
     }
