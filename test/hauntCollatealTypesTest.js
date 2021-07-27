@@ -11,280 +11,280 @@ const testAavegotchiId = '0'
 const testWearableId = '1'
 const testSlot = '3'
 const initialHauntSize = '10000'
-const portalPrice = ethers.utils.parseEther('100')
-// const account = '0x819c3fc356bb319035f9d2886fac9e57df0343f5'
+let portalPrice = ethers.utils.parseEther('0.00001')
+const account = '0x819c3fc356bb319035f9d2886fac9e57df0343f5'
 
 describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 collateral types', async function () {
   this.timeout(300000)
-  let tx, account, diamondAddress, daoFacet, collateralFacet, bridgeFacet, aavegotchiFacet, svgFacet, itemsFacet, itemsTransferFacet, vrfFacet, shopFacet, metaTransactionsFacet, ghstTokenContract, haunt
-  before(async function () {
+  let diamondAddress, signer, signerAddress, tx
+  let daoFacet, collateralFacet, bridgeFacet, aavegotchiFacet, svgFacet, itemsFacet, itemsTransferFacet, vrfFacet,
+    shopFacet, metaTransactionsFacet, ghstTokenContract
+  let haunt, currentHauntId, hauntMaxSize, totalCount, buyAmount
+  before(async function() {
     const deployVars = await upgradeHauntCollateralTypes('deployTest')
-    account  = await deployVars.signer.getAddress()
     diamondAddress = deployVars.diamondAddress
-    daoFacet = deployVars.daoFacet
-    collateralFacet = deployVars.collateralFacet
-    bridgeFacet = deployVars.facets[0]
-    aavegotchiFacet = deployVars.facets[1]
-    aavegotchiGameFacet = deployVars.facets[2]
-    svgFacet = deployVars.facets[3]
-    itemsFacet = deployVars.facets[4]
-    itemsTransferFacet = deployVars.facets[5]
-    vrfFacet = deployVars.facets[6]
-    shopFacet = deployVars.facets[7]
-    metaTransactionsFacet = deployVars.facets[8]
-    ghstTokenContract = await ethers.getContractAt('GHSTFacet', deployVars.ghstAddress)
-
-    haunt = await aavegotchiGameFacet.currentHaunt()
-    console.log('haunt1', haunt)
-    tx = await daoFacet.createHaunt(initialHauntSize, portalPrice, '0x000000')
-    let receipt = await tx.wait()
-    // ethers.provider.send("evm_mine");
-    console.log('receipt', receipt)
-    haunt = await aavegotchiGameFacet.currentHaunt()
-    console.log('haunt2', haunt)
-    return
+    signer = await deployVars.signer
+    // Transfer ownership for GHST balance
+    await (await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).connect(signer)).transferOwnership(account)
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [account]
+    });
+    signer = await ethers.provider.getSigner(account);
+    daoFacet = await (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
+    collateralFacet = await (await ethers.getContractAt('CollateralFacet', diamondAddress)).connect(signer)
+    bridgeFacet = await (await ethers.getContractAt('contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet', diamondAddress)).connect(signer)
+    aavegotchiFacet = await (await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', diamondAddress)).connect(signer)
+    aavegotchiGameFacet = await (await ethers.getContractAt('AavegotchiGameFacet', diamondAddress)).connect(signer)
+    svgFacet = await (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
+    itemsFacet = await (await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)).connect(signer)
+    itemsTransferFacet = await (await ethers.getContractAt('ItemsTransferFacet', diamondAddress)).connect(signer)
+    vrfFacet = await (await ethers.getContractAt('VrfFacet', diamondAddress)).connect(signer)
+    shopFacet = await (await ethers.getContractAt('ShopFacet', diamondAddress)).connect(signer)
+    metaTransactionsFacet = await (await ethers.getContractAt('MetaTransactionsFacet', diamondAddress)).connect(signer)
+    ghstTokenContract = await (await ethers.getContractAt('GHSTFacet', deployVars.ghstAddress)).connect(signer)
     // linkAddress = deployVars.linkAddress
     // linkContract = deployVars.linkContract
     // diamondLoupeFacet = deployVars.diamondLoupeFacet
   })
 
-  describe('Buying Portals, VRF', function () {
-    it('Portal should cost 100 GHST', async function () {
-      const balance = await ghstTokenContract.balanceOf(account)
-      await ghstTokenContract.approve(diamondAddress, balance)
-      const buyAmount = (50 * Math.pow(10, 18)).toFixed() // 1 portal
-
-      await truffleAssert.reverts(shopFacet.buyPortals(account, buyAmount), 'Not enough GHST to buy portals')
+  describe('Create new haunt', function() {
+    it('Should get current haunt info', async function() {
+      haunt = await aavegotchiGameFacet.currentHaunt()
+      currentHauntId = haunt['hauntId_'].toNumber()
+      expect(currentHauntId).to.equal(1)
     })
 
-    it('Should purchase portal', async function () {
+    it('Should create new haunt', async function() {
+      await (await daoFacet.createHaunt(initialHauntSize, portalPrice, '0x000000')).wait()
+      haunt = await aavegotchiGameFacet.currentHaunt()
+      currentHauntId = haunt['hauntId_'].toNumber()
+      expect(currentHauntId).to.equal(2)
+
+      await (await daoFacet.addCollateralTypes(currentHauntId, getCollaterals('hardhat', ghstTokenContract.address))).wait()
+    })
+  })
+
+  describe('Buying Portals, VRF', function() {
+    it('Portal should cost 0.00001 GHST', async function() {
       const balance = await ghstTokenContract.balanceOf(account)
       await ghstTokenContract.approve(diamondAddress, balance)
-      const buyAmount = ethers.utils.parseEther('500') // 1 portals
-      const tx = await shopFacet.buyPortals(account, buyAmount)
-      const receipt = await tx.wait()
+      buyAmount = portalPrice.div(2)
+      await expect(shopFacet.buyPortals(account, buyAmount)).to.be.revertedWith("Not enough GHST to buy portals")
+    })
+
+    it('Should purchase portal', async function() {
+      const balance = await ghstTokenContract.balanceOf(account)
+      await ghstTokenContract.approve(diamondAddress, balance)
+      buyAmount = portalPrice.mul(5)
+      await (await shopFacet.buyPortals(account, buyAmount)).wait()
 
       const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
       expect(myPortals.length).to.equal(5)
     })
   })
 
-  // describe('Opening Portals', async function () {
-  //   it('Should open the portal', async function () {
-  //     let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-  //     expect(myPortals[0].status).to.equal(0)
-  //     //  const portalId = myPortals[0].tokenId
-  //     await vrfFacet.openPortals(['0', '1', '2', '3'])
-  //
-  //     // const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
-  //
-  //     // await vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
-  //
-  //     myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-  //     expect(myPortals[0].status).to.equal(2)
-  //   })
-  //
-  //   it('Should contain 10 random ghosts in the portal', async function () {
-  //     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-  //     const ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(myPortals[0].tokenId)
-  //     // console.log(JSON.stringify(ghosts, null, 4))
-  //     ghosts.forEach(async (ghost) => {
-  //       const rarityScore = await aavegotchiGameFacet.baseRarityScore(ghost.numericTraits)
-  //       expect(Number(rarityScore)).to.greaterThan(298)
-  //       expect(Number(rarityScore)).to.lessThan(602)
-  //     })
-  //     expect(ghosts.length).to.equal(10)
-  //   })
-  //
-  //   /*
-  //   it('Should show SVGs', async function () {
-  //     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-  //     const tokenId = myPortals[0].tokenId
-  //     const svgs = await svgFacet.portalAavegotchisSvg(tokenId)
-  //     console.log('svgs:', svgs[0])
-  //     expect(svgs.length).to.equal(10)
-  //   })
-  //   */
-  //
-  //   it('Can only set name on claimed Aavegotchi', async function () {
-  //     await truffleAssert.reverts(aavegotchiGameFacet.setAavegotchiName('1', 'Portal'), 'AavegotchiGameFacet: Must claim Aavegotchi before setting name')
-  //   })
-  //
-  //   it('Should claim an Aavegotchi', async function () {
-  //     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-  //     //  console.log('my portals:', myPortals)
-  //     const tokenId = myPortals[0].tokenId
-  //     const ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(tokenId)
-  //     const selectedGhost = ghosts[4]
-  //     const minStake = selectedGhost.minimumStake
-  //     await aavegotchiGameFacet.claimAavegotchi(tokenId, 4, minStake)
-  //     const kinship = await aavegotchiGameFacet.kinship(tokenId)
-  //
-  //     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
-  //
-  //     const collateral = aavegotchi.collateral
-  //     expect(selectedGhost.collateralType).to.equal(collateral)
-  //     expect(aavegotchi.status).to.equal(3)
-  //     expect(aavegotchi.hauntId).to.equal(0)
-  //     expect(aavegotchi.stakedAmount).to.equal(minStake)
-  //     expect(kinship).to.equal(50)
-  //   })
-  // })
-  //
-  // describe('Aavegotchi Metadata', async function () {
-  //   it('Should set a name', async function () {
-  //     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-  //     const tokenId = myPortals[0].tokenId
-  //     await truffleAssert.reverts(aavegotchiGameFacet.setAavegotchiName(tokenId, 'ThisIsLongerThan25CharsSoItWillRevert'), "LibAavegotchi: name can't be greater than 25 characters")
-  //     await aavegotchiGameFacet.setAavegotchiName(tokenId, 'Beavis')
-  //     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
-  //     expect(aavegotchi.name).to.equal('Beavis')
-  //   })
-  //
-  //   it('Should show correct rarity score', async function () {
-  //     const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-  //     const tokenId = myPortals[0].tokenId
-  //     const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
-  //     console.log('collateral:' + aavegotchi.collateral)
-  //     // 0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82
-  //     // console.log('traits:')
-  //     // for (const trait of aavegotchi.numericTraits) {
-  //     //   console.log(trait.toString())
-  //     // }
-  //     const score = await aavegotchiGameFacet.baseRarityScore([0, 0, 0, -1, 0, 0])
-  //     expect(score).to.equal(601)
-  //
-  //     const multiplier = await aavegotchiGameFacet.rarityMultiplier([0, 0, 0, -1, 0, 0])
-  //     expect(multiplier).to.equal(1000)
-  //
-  //     // Todo: Clientside calculate what the rarity score should be
-  //   })
-  // })
-  //
-  // describe('Collaterals and escrow', async function () {
-  //   it('Should show all whitelisted collaterals', async function () {
-  //     const collaterals = await collateralFacet.getCollateralInfo()
-  //     const collateral = collaterals[0].collateralTypeInfo
-  //     expect(collateral.conversionRate).to.equal(1)
-  //     expect(collaterals.length).to.equal(1)
-  //     // const modifiers = uintToInt8Array(collateral.modifiers, 6)
-  //     expect(collateral.modifiers[2]).to.equal(-1)
-  //   })
-  //
-  //   it('Can increase stake', async function () {
-  //     let aavegotchi = await aavegotchiFacet.getAavegotchi('0')
-  //     const currentStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
-  //     // Let's double the stake
-  //     await collateralFacet.increaseStake('0', currentStake.toString())
-  //     aavegotchi = await aavegotchiFacet.getAavegotchi('0')
-  //     const finalStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
-  //     expect(finalStake).to.equal(currentStake.add(currentStake))
-  //
-  //     // Todo: Balance check
-  //   })
-  //
-  //   it('Can decrease stake, but not below minimum', async function () {
-  //     let aavegotchi = await aavegotchiFacet.getAavegotchi(testAavegotchiId)
-  //     let currentStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
-  //     const minimumStake = ethers.BigNumber.from(aavegotchi.minimumStake)
-  //
-  //     const available = currentStake.sub(minimumStake)
-  //     await truffleAssert.reverts(collateralFacet.decreaseStake(testAavegotchiId, currentStake), 'CollateralFacet: Cannot reduce below minimum stake')
-  //     await collateralFacet.decreaseStake(testAavegotchiId, available)
-  //
-  //     aavegotchi = await aavegotchiFacet.getAavegotchi(testAavegotchiId)
-  //     currentStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
-  //     expect(currentStake).to.equal(minimumStake)
-  //   })
-  //
-  //   it('Base rarity score can handle negative numbers', async function () {
-  //     const aavegotchi = await aavegotchiFacet.getAavegotchi('0')
-  //     // console.log(sixteenBitIntArrayToUint([-1, -1, 0, 0, 0, 0]).toHexString())
-  //     const score = await aavegotchiGameFacet.baseRarityScore([-10, -10, 0, 0, 0, 0])
-  //     expect(score).to.equal(620)
-  //   })
-  //
-  //   it('Can decrease stake and destroy Aavegotchi', async function () {
-  //     // Buy portal
-  //     const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
-  //     await shopFacet.buyPortals(account, buyAmount)
-  //
-  //     let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-  //     expect(myPortals.length).to.equal(6)
-  //
-  //     console.log('my portals:', myPortals.length)
-  //     // Open portal
-  //
-  //     const initialBalance = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
-  //     // await openAndClaim(['1'])
-  //
-  //     const id = '1'
-  //     const ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(id)
-  //     const selectedGhost = ghosts[0]
-  //     const minStake = selectedGhost.minimumStake
-  //     console.log('min stake:', minStake)
-  //
-  //     // Claim ghost and stake
-  //     await aavegotchiGameFacet.claimAavegotchi(id, 0, minStake)
-  //     //  await claimGotchis[id]
-  //
-  //     // Burn Aavegotchi and return collateral stake
-  //     await collateralFacet.decreaseAndDestroy('1', '1')
-  //     const balanceAfterDestroy = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
-  //     expect(balanceAfterDestroy).to.equal(initialBalance)
-  //
-  //     // Should only have 1 portal now
-  //     myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
-  //     expect(myPortals.length).to.equal(5)
-  //   })
-  //
-  //   it('Can destroy Aavegotchi and transfer XP to another', async function () {
-  //     const burnId = '2'
-  //     const receiveId = '3'
-  //
-  //     let id = '2'
-  //     let ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(id)
-  //     let selectedGhost = ghosts[0]
-  //     let minStake = selectedGhost.minimumStake
-  //     console.log('min stake:', minStake)
-  //     // Claim ghost and stake
-  //     await aavegotchiGameFacet.claimAavegotchi(id, 0, minStake)
-  //
-  //     id = '3'
-  //     ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(id)
-  //     selectedGhost = ghosts[0]
-  //     minStake = selectedGhost.minimumStake
-  //     console.log('min stake:', minStake)
-  //     // Claim ghost and stake
-  //     await aavegotchiGameFacet.claimAavegotchi(id, 0, minStake)
-  //
-  //     //   await openAndClaim([burnId, receiveId])
-  //     const initialExperience = (await aavegotchiFacet.getAavegotchi(receiveId)).experience
-  //     expect(initialExperience).to.equal(0)
-  //
-  //     // Give some experience to the burned one
-  //     await daoFacet.grantExperience([burnId], ['1000'])
-  //
-  //     // Perform essence transfer
-  //     await collateralFacet.decreaseAndDestroy(burnId, receiveId)
-  //     const finalExperience = (await aavegotchiFacet.getAavegotchi(receiveId)).experience
-  //     expect(finalExperience).to.equal(1000)
-  //   })
-  // })
-  //
-  // describe('Items & Wearables', async function () {
-  //   it('Shows item URI', async function () {
+  describe('Opening Portals', async function() {
+    it('Should open the portal', async function() {
+      let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+      expect(myPortals[0].status).to.equal(0)
+      await vrfFacet.openPortals(['10000', '10001', '10002', '10003'])
+      // const randomness = ethers.utils.keccak256(new Date().getMilliseconds())
+      // await vrfFacet.rawFulfillRandomness(ethers.constants.HashZero, randomness)
+      myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+      expect(myPortals[0].status).to.equal(2)
+    })
+
+    it('Should contain 10 random ghosts in the portal', async function() {
+      const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+      const ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(myPortals[0].tokenId)
+      // console.log(JSON.stringify(ghosts, null, 4))
+      ghosts.forEach(async (ghost) => {
+        const rarityScore = await aavegotchiGameFacet.baseRarityScore(ghost.numericTraits)
+        expect(Number(rarityScore)).to.greaterThan(298)
+        expect(Number(rarityScore)).to.lessThan(602)
+      })
+      expect(ghosts.length).to.equal(10)
+    })
+
+    it('Can only set name on claimed Aavegotchi', async function() {
+      await expect(aavegotchiGameFacet.setAavegotchiName('10001', 'Portal')).to.be.revertedWith("AavegotchiGameFacet: Must claim Aavegotchi before setting name")
+    })
+
+    it('Should claim an Aavegotchi', async function() {
+      const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+      const tokenId = myPortals[0].tokenId
+      const ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(tokenId)
+      const selectedGhost = ghosts[4]
+      const minStake = selectedGhost.minimumStake
+      await aavegotchiGameFacet.claimAavegotchi(tokenId, 4, minStake)
+      const kinship = await aavegotchiGameFacet.kinship(tokenId)
+
+      const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
+
+      const collateral = aavegotchi.collateral
+      expect(selectedGhost.collateralType).to.equal(collateral)
+      expect(aavegotchi.status).to.equal(3)
+      expect(aavegotchi.hauntId).to.equal(1)
+      expect(aavegotchi.stakedAmount).to.equal(minStake)
+      expect(kinship).to.equal(50)
+    })
+  })
+
+  describe('Aavegotchi Metadata', async function() {
+    it('Should set a name', async function() {
+      const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+      const tokenId = myPortals[0].tokenId
+      await truffleAssert.reverts(aavegotchiGameFacet.setAavegotchiName(tokenId, 'ThisIsLongerThan25CharsSoItWillRevert'), "LibAavegotchi: name can't be greater than 25 characters")
+      await aavegotchiGameFacet.setAavegotchiName(tokenId, 'Beavis')
+      const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
+      expect(aavegotchi.name).to.equal('Beavis')
+    })
+
+    it('Should show correct rarity score', async function() {
+      const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+      const tokenId = myPortals[0].tokenId
+      const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId)
+      console.log('collateral:' + aavegotchi.collateral)
+      // 0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82
+      // console.log('traits:')
+      // for (const trait of aavegotchi.numericTraits) {
+      //   console.log(trait.toString())
+      // }
+      const score = await aavegotchiGameFacet.baseRarityScore([0, 0, 0, -1, 0, 0])
+      expect(score).to.equal(601)
+
+      const multiplier = await aavegotchiGameFacet.rarityMultiplier([0, 0, 0, -1, 0, 0])
+      expect(multiplier).to.equal(1000)
+
+      // Todo: Clientside calculate what the rarity score should be
+    })
+  })
+
+  describe('Collaterals and escrow', async function() {
+    it('Should show all whitelisted collaterals', async function() {
+      const collaterals = await collateralFacet.getCollateralInfo(currentHauntId)
+      const collateral = collaterals[0].collateralTypeInfo
+      expect(collateral.conversionRate).to.equal(1)
+      expect(collaterals.length).to.equal(1)
+      // const modifiers = uintToInt8Array(collateral.modifiers, 6)
+      expect(collateral.modifiers[2]).to.equal(-1)
+    })
+
+    it('Can increase stake', async function() {
+      let aavegotchi = await aavegotchiFacet.getAavegotchi('0')
+      const currentStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
+      // Let's double the stake
+      await collateralFacet.increaseStake('0', currentStake.toString())
+      aavegotchi = await aavegotchiFacet.getAavegotchi('0')
+      const finalStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
+      expect(finalStake).to.equal(currentStake.add(currentStake))
+
+      // Todo: Balance check
+    })
+
+    it('Can decrease stake, but not below minimum', async function() {
+      let aavegotchi = await aavegotchiFacet.getAavegotchi(testAavegotchiId)
+      let currentStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
+      const minimumStake = ethers.BigNumber.from(aavegotchi.minimumStake)
+
+      const available = currentStake.sub(minimumStake)
+      await truffleAssert.reverts(collateralFacet.decreaseStake(testAavegotchiId, currentStake), 'CollateralFacet: Cannot reduce below minimum stake')
+      await collateralFacet.decreaseStake(testAavegotchiId, available)
+
+      aavegotchi = await aavegotchiFacet.getAavegotchi(testAavegotchiId)
+      currentStake = ethers.BigNumber.from(aavegotchi.stakedAmount)
+      expect(currentStake).to.equal(minimumStake)
+    })
+
+    it('Base rarity score can handle negative numbers', async function() {
+      const aavegotchi = await aavegotchiFacet.getAavegotchi('0')
+      // console.log(sixteenBitIntArrayToUint([-1, -1, 0, 0, 0, 0]).toHexString())
+      const score = await aavegotchiGameFacet.baseRarityScore([-10, -10, 0, 0, 0, 0])
+      expect(score).to.equal(620)
+    })
+
+    it('Can decrease stake and destroy Aavegotchi', async function() {
+      // Buy portal
+      const buyAmount = (100 * Math.pow(10, 18)).toFixed() // 1 portal
+      await shopFacet.buyPortals(account, buyAmount)
+
+      let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+      expect(myPortals.length).to.equal(6)
+
+      console.log('my portals:', myPortals.length)
+      // Open portal
+
+      const initialBalance = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
+      // await openAndClaim(['1'])
+
+      const id = '1'
+      const ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(id)
+      const selectedGhost = ghosts[0]
+      const minStake = selectedGhost.minimumStake
+      console.log('min stake:', minStake)
+
+      // Claim ghost and stake
+      await aavegotchiGameFacet.claimAavegotchi(id, 0, minStake)
+      //  await claimGotchis[id]
+
+      // Burn Aavegotchi and return collateral stake
+      await collateralFacet.decreaseAndDestroy('1', '1')
+      const balanceAfterDestroy = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
+      expect(balanceAfterDestroy).to.equal(initialBalance)
+
+      // Should only have 1 portal now
+      myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account)
+      expect(myPortals.length).to.equal(5)
+    })
+
+    it('Can destroy Aavegotchi and transfer XP to another', async function() {
+      const burnId = '2'
+      const receiveId = '3'
+
+      let id = '2'
+      let ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(id)
+      let selectedGhost = ghosts[0]
+      let minStake = selectedGhost.minimumStake
+      console.log('min stake:', minStake)
+      // Claim ghost and stake
+      await aavegotchiGameFacet.claimAavegotchi(id, 0, minStake)
+
+      id = '3'
+      ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(id)
+      selectedGhost = ghosts[0]
+      minStake = selectedGhost.minimumStake
+      console.log('min stake:', minStake)
+      // Claim ghost and stake
+      await aavegotchiGameFacet.claimAavegotchi(id, 0, minStake)
+
+      //   await openAndClaim([burnId, receiveId])
+      const initialExperience = (await aavegotchiFacet.getAavegotchi(receiveId)).experience
+      expect(initialExperience).to.equal(0)
+
+      // Give some experience to the burned one
+      await daoFacet.grantExperience([burnId], ['1000'])
+
+      // Perform essence transfer
+      await collateralFacet.decreaseAndDestroy(burnId, receiveId)
+      const finalExperience = (await aavegotchiFacet.getAavegotchi(receiveId)).experience
+      expect(finalExperience).to.equal(1000)
+    })
+  })
+
+  // describe('Items & Wearables', async function() {
+  //   it('Shows item URI', async function() {
   //     const uri = await itemsFacet.uri(testWearableId)
   //     expect(uri).to.equal('https://aavegotchi.com/metadata/items/1')
   //   })
   //
-  //   it('Returns item SVG', async function () {
+  //   it('Returns item SVG', async function() {
   //     const svg = await svgFacet.getItemSvg(testWearableId)
   //     // console.log('svg:', svg)
   //     expect(svg).not.to.equal('')
   //   })
   //
-  //   it('Can mint items', async function () {
+  //   it('Can mint items', async function() {
   //     let balance = await itemsFacet.balanceOf(account, '0')
   //     expect(balance).to.equal(0)
   //     // To do: Get max length of wearables array
@@ -301,7 +301,7 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //     // console.log(result)
   //   })
   //
-  //   it('Can transfer wearables to Aavegotchi', async function () {
+  //   it('Can transfer wearables to Aavegotchi', async function() {
   //     await itemsTransferFacet.transferToParent(
   //       account, // address _from,
   //       aavegotchiFacet.address, // address _toContract,
@@ -313,7 +313,7 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //     expect(balance).to.equal(10)
   //   })
   //
-  //   it('Can transfer wearables from Aavegotchi back to owner', async function () {
+  //   it('Can transfer wearables from Aavegotchi back to owner', async function() {
   //     await itemsTransferFacet.transferFromParent(
   //       aavegotchiFacet.address, // address _fromContract,
   //       testAavegotchiId, // uint256 _fromTokenId,
@@ -325,7 +325,7 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //     expect(balance).to.equal(10)
   //   })
   //
-  //   it('Can equip wearables', async function () {
+  //   it('Can equip wearables', async function() {
   //     // First transfer wearables to parent Aavegotchi
   //     await itemsTransferFacet.transferToParent(
   //       account, aavegotchiFacet.address, testAavegotchiId, testWearableId, '10')
@@ -341,7 +341,7 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //     expect(equipped[testSlot].toString()).to.equal(testWearableId)
   //   })
   //
-  //   it('Can modify aavegotchi traits with wearable sets', async function () {
+  //   it('Can modify aavegotchi traits with wearable sets', async function() {
   //     // {
   //     //   name: 'Socialite',
   //     //   wearableIds: [97, 98, 99, 100],
@@ -405,13 +405,13 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //   })
   //   */
   //
-  //   it('Cannot equip wearables in the wrong slot', async function () {
+  //   it('Cannot equip wearables in the wrong slot', async function() {
   //     // This wearable can't be equipped in the 4th slot
   //     const wearableIds = [testWearableId, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] // fourth slot, third slot, second slot, first slot
   //     await truffleAssert.reverts(itemsFacet.equipWearables(testAavegotchiId, wearableIds), 'ItemsFacet: Wearable cannot be equipped in this slot')
   //   })
   //
-  //   it('Can unequip all wearables with empty array', async function () {
+  //   it('Can unequip all wearables with empty array', async function() {
   //     let equipped = await itemsFacet.equippedWearables(testAavegotchiId)
   //     expect(equipped[3]).to.equal(97)
   //
@@ -424,11 +424,11 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //     await itemsFacet.equipWearables(testAavegotchiId, [0, 0, 0, testWearableId, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
   //   })
   //
-  //   it('Can equip wearables from owners inventory', async function () {
+  //   it('Can equip wearables from owners inventory', async function() {
   //
   //   })
   //
-  //   it('Can display aavegotchi with wearables', async function () {
+  //   it('Can display aavegotchi with wearables', async function() {
   //     const santaHat = '71'
   //
   //     await daoFacet.mintItems(account, [santaHat], ['10'])
@@ -445,7 +445,7 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //     console.log(svg)
   //   })
   //
-  //   it('Equipping Wearables alters base rarity score', async function () {
+  //   it('Equipping Wearables alters base rarity score', async function() {
   //     // Unequip all wearables
   //     let wearableIds = new Array(16).fill(0)
   //     await itemsFacet.equipWearables(testAavegotchiId, wearableIds)
@@ -494,13 +494,13 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //   })
   // })
   //
-  // describe('Haunts', async function () {
-  //   it('Cannot create new haunt until first is finished', async function () {
+  // describe('Haunts', async function() {
+  //   it('Cannot create new haunt until first is finished', async function() {
   //     const purchaseNumber = ethers.utils.parseEther('100')
   //     await truffleAssert.reverts(daoFacet.createHaunt('10000', purchaseNumber, '0x000000'), 'AavegotchiFacet: Haunt must be full before creating new')
   //   })
   //
-  //   it('Cannot exceed max haunt size', async function () {
+  //   it('Cannot exceed max haunt size', async function() {
   //     for (let i = 0; i < 399; i++) {
   //       const purchaseNumber = ethers.utils.parseEther('5500')
   //       await shopFacet.buyPortals(account, purchaseNumber)
@@ -513,7 +513,7 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //     //  const receipt = await tx.wait()
   //   })
   //
-  //   it('Can create new Haunt', async function () {
+  //   it('Can create new Haunt', async function() {
   //     let currentHaunt = await aavegotchiGameFacet.currentHaunt()
   //     expect(currentHaunt.hauntId_).to.equal(1)
   //     await daoFacet.createHaunt('10000', ethers.utils.parseEther('100'), '0x000000')
@@ -522,8 +522,8 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //   })
   // })
   //
-  // describe('Revenue transfers', async function () {
-  //   it('Buying portals should send revenue to 4 wallets', async function () {
+  // describe('Revenue transfers', async function() {
+  //   it('Buying portals should send revenue to 4 wallets', async function() {
   //     // 0 = burn (33%)
   //     // 1 = dao (10%)
   //     // 2 = rarity (40%)
@@ -559,13 +559,13 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //   })
   // })
   //
-  // describe('Shop', async function () {
-  //   it('Should return balances and item types', async function () {
+  // describe('Shop', async function() {
+  //   it('Should return balances and item types', async function() {
   //     const itemsAndBalances = await itemsFacet.itemBalancesWithTypes(account)
   //     // console.log('items and balances:', itemsAndBalances.balances)
   //   })
   //
-  //   it('Should purchase items using GHST', async function () {
+  //   it('Should purchase items using GHST', async function() {
   //     let balances = await itemsFacet.itemBalances(account)
   //     // Start at 1 because 0 is always empty
   //     // console.log(balances)
@@ -696,8 +696,8 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   // })
   // */
   //
-  // describe('Using Consumables', async function () {
-  //   it('Using Kinship Potion increases kinship by 2', async function () {
+  // describe('Using Consumables', async function() {
+  //   it('Using Kinship Potion increases kinship by 2', async function() {
   //     const kinshipPotion = await itemsFacet.getItemType('126')
   //     expect(kinshipPotion.kinshipBonus).to.equal(2)
   //
@@ -707,7 +707,7 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //     expect(boostedScore).to.equal(Number(originalScore) + Number(kinshipPotion.kinshipBonus))
   //   })
   //
-  //   it('Using Experience potion increases XP by 200', async function () {
+  //   it('Using Experience potion increases XP by 200', async function() {
   //     const beforeXP = (await aavegotchiFacet.getAavegotchi(testAavegotchiId)).experience
   //
   //     // XP Potion
@@ -761,23 +761,23 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //   */
   // })
   //
-  // describe('DAO Functions', async function () {
-  //   it('Only DAO or admin can set game manager', async function () {
+  // describe('DAO Functions', async function() {
+  //   it('Only DAO or admin can set game manager', async function() {
   //     // To do: Check revert using another account
   //     await daoFacet.setGameManager(account)
   //     const gameManager = await daoFacet.gameManager()
   //     expect(gameManager).to.equal(account)
   //   })
   //
-  //   it('Cannot add the same collateral twice', async function () {
+  //   it('Cannot add the same collateral twice', async function() {
   //     // console.log(getCollaterals('hardhat', ghstTokenContract.address))
-  //     await truffleAssert.reverts(daoFacet.addCollateralTypes(getCollaterals('hardhat', ghstTokenContract.address)), 'DAOFacet: Collateral already added')
+  //     await truffleAssert.reverts(daoFacet.addCollateralTypes(currentHauntId, getCollaterals('hardhat', ghstTokenContract.address)), 'DAOFacet: Collateral already added')
   //   })
   //
-  //   it('Can add collateral types', async function () {
+  //   it('Can add collateral types', async function() {
   //     let collateralInfo = await collateralFacet.collaterals()
   //     // console.log('info:', collateralInfo)
-  //     // await daoFacet.addCollateralTypes(getCollaterals('hardhat', ghstTokenContract.address))
+  //     // await daoFacet.addCollateralTypes(currentHauntId, getCollaterals('hardhat', ghstTokenContract.address))
   //
   //     // Deploy an extra TEST contract
   //     const erc20TokenContract = await ethers.getContractFactory('ERC20Token')
@@ -797,7 +797,7 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //         delisted: false
   //       }
   //     ]
-  //     await daoFacet.addCollateralTypes([collateralTypeInfo])
+  //     await daoFacet.addCollateralTypes(currentHauntId, [collateralTypeInfo])
   //     collateralInfo = await collateralFacet.collaterals()
   //     expect(collateralInfo[1]).to.equal(testToken.address)
   //   })
@@ -829,8 +829,8 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //   */
   // })
   //
-  // describe('Kinship', async function () {
-  //   it('Can calculate kinship according to formula', async function () {
+  // describe('Kinship', async function() {
+  //   it('Can calculate kinship according to formula', async function() {
   //     ethers.provider.send('evm_increaseTime', [86400])
   //     ethers.provider.send('evm_mine')
   //
@@ -926,52 +926,52 @@ describe('Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   //     console.log('* Kinship should be 6:', kinship.toString())
   //   })
   // })
+
+  async function neglectAavegotchi(days) {
+    ethers.provider.send('evm_increaseTime', [86400 * days])
+    ethers.provider.send('evm_mine')
+    // daysSinceInteraction = 0
+    // for (let index = 0; index < days; index++) {
+    //   daysSinceInteraction += days
+    //   ethers.provider.send('evm_increaseTime', [86400])
+    //   ethers.provider.send('evm_mine')
+    // }
+
+    console.log(`* Neglect Gotchi for ${days} days`)
+  }
+
+  async function interactAndUpdateTime() {
+    await aavegotchiGameFacet.interact(['0'])
+    ethers.provider.send('evm_increaseTime', [86400 / 2])
+    ethers.provider.send('evm_mine')
+  }
+
+  async function claimGotchis(tokenIds) {
+    console.log('token ids:')
+
+    for (let index = 0; index < tokenIds.length; index++) {
+      console.log('fucker')
+
+      const id = tokenIds[index]
+      const ghosts = await aavegotchiFacet.portalAavegotchiTraits(id)
+      const selectedGhost = ghosts[0]
+      const minStake = selectedGhost.minimumStake
+      console.log('min stake:', minStake)
+      const initialBalance = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
+
+      // Claim ghost and stake
+      await aavegotchiFacet.claimAavegotchi(id, 0, minStake)
+      const balanceAfterClaim = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
+      expect(balanceAfterClaim).to.equal(initialBalance.sub(minStake))
+    }
+  }
+
+  function eightBitArrayToUint(array) {
+    const uint = []
+    for (const num of array) {
+      const value = ethers.BigNumber.from(num).toTwos(8)
+      uint.unshift(value.toHexString().slice(2))
+    }
+    return ethers.BigNumber.from('0x' + uint.join(''))
+  }
 })
-
-async function neglectAavegotchi (days) {
-  ethers.provider.send('evm_increaseTime', [86400 * days])
-  ethers.provider.send('evm_mine')
-  // daysSinceInteraction = 0
-  // for (let index = 0; index < days; index++) {
-  //   daysSinceInteraction += days
-  //   ethers.provider.send('evm_increaseTime', [86400])
-  //   ethers.provider.send('evm_mine')
-  // }
-
-  console.log(`* Neglect Gotchi for ${days} days`)
-}
-
-async function interactAndUpdateTime () {
-  await aavegotchiGameFacet.interact(['0'])
-  ethers.provider.send('evm_increaseTime', [86400 / 2])
-  ethers.provider.send('evm_mine')
-}
-
-async function claimGotchis (tokenIds) {
-  console.log('token ids:')
-
-  for (let index = 0; index < tokenIds.length; index++) {
-    console.log('fucker')
-
-    const id = tokenIds[index]
-    const ghosts = await aavegotchiFacet.portalAavegotchiTraits(id)
-    const selectedGhost = ghosts[0]
-    const minStake = selectedGhost.minimumStake
-    console.log('min stake:', minStake)
-    const initialBalance = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
-
-    // Claim ghost and stake
-    await aavegotchiFacet.claimAavegotchi(id, 0, minStake)
-    const balanceAfterClaim = ethers.BigNumber.from(await ghstTokenContract.balanceOf(account))
-    expect(balanceAfterClaim).to.equal(initialBalance.sub(minStake))
-  }
-}
-
-function eightBitArrayToUint (array) {
-  const uint = []
-  for (const num of array) {
-    const value = ethers.BigNumber.from(num).toTwos(8)
-    uint.unshift(value.toHexString().slice(2))
-  }
-  return ethers.BigNumber.from('0x' + uint.join(''))
-}

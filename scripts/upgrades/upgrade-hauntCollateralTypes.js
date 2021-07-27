@@ -182,8 +182,7 @@ async function main() {
   return {
     signer,
     diamondAddress,
-    ghstAddress,
-    collateralFacet, daoFacet, facets
+    ghstAddress
   };
 }
 
