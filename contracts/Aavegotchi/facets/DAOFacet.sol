@@ -54,15 +54,18 @@ contract DAOFacet is Modifiers {
 
     //H2 Todo: Use the hauntID=>collateralType mapping
     function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyDaoOrOwner {
+        bool checkDuplication = (_hauntId > 1) || (s.hauntCollateralTypes[_hauntId].length != 0);
         for (uint256 i; i < _collateralTypes.length; i++) {
             address collateralType = _collateralTypes[i].collateralType;
 
-            //Prevent the same collateral from being added multiple times
-            require(s.collateralTypeInfo[collateralType].cheekColor == 0, "DAOFacet: Collateral already added");
+            //Prevent the same collateral from being added multiple times except first request for haunt 1
+            if (checkDuplication) {
+                require(s.collateralTypeInfo[collateralType].cheekColor == 0, "DAOFacet: Collateral already added");
+                s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
+            }
 
             s.collateralTypeIndexes[collateralType] = s.hauntCollateralTypes[_hauntId].length;
             s.hauntCollateralTypes[_hauntId].push(collateralType);
-            s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
             emit AddCollateralType(_collateralTypes[i]);
         }
     }

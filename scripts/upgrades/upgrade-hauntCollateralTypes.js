@@ -166,11 +166,10 @@ async function main() {
 
   // Add collateral types for H1
   daoFacet = await ethers.getContractAt("DAOFacet", diamondAddress, signer);
+  const { getCollaterals } = require("../collateralTypes.js");
   if (testing) {
-    const { getCollaterals } = require("../testCollateralTypes.js");
-    tx = await daoFacet.addCollateralTypes(1, getCollaterals(hre.network.name, ghstAddress));
+    tx = await daoFacet.addCollateralTypes(1, getCollaterals("matic", ghstAddress));
   } else {
-    const { getCollaterals } = require("../collateralTypes.js");
     tx = await daoFacet.addCollateralTypes(1, getCollaterals(hre.network.name, ghstAddress));
   }
   console.log("Adding Collateral Types tx:", tx.hash);
