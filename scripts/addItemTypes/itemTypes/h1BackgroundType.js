@@ -5,7 +5,7 @@
 
 const itemTypes = [
   {
-    svgId: 206,
+    svgId: 210,
     name: "Haunt1 BG",
     setId: [],
     author: "xibot",
@@ -215,8 +215,8 @@ function stringToSlotPositions(str) {
       false,
       false,
       false,
-      true,
       false,
+      true,
       false,
       false,
       false,

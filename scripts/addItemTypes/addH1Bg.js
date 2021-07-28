@@ -190,7 +190,7 @@ async function main() {
 
   console.log("Minting items");
   if (testing) {
-    tx = await daoFacet.mintItems(mintAddress, [206], [100]);
+    tx = await daoFacet.mintItems(mintAddress, [210], [100]);
     receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
@@ -208,10 +208,24 @@ async function main() {
 
     const aavegotchiOwnerSigner = await itemsFacet.connect(signer);
 
-    await aavegotchiOwnerSigner.equipWearables(
-      "2575",
-      [0, 0, 0, 0, 0, 0, 206, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    );
+    await aavegotchiOwnerSigner.equipWearables("2575", [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      210,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ]);
 
     const svgOutput = await svgFacet.getAavegotchiSvg("2575");
 
