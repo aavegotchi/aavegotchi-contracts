@@ -7,6 +7,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
+import "hardhat/console.sol";
 
 contract SvgFacet is Modifiers {
     /***********************************|
@@ -41,6 +42,7 @@ contract SvgFacet is Modifiers {
         } else if (status == LibAavegotchi.STATUS_AAVEGOTCHI) {
             address collateralType = s.aavegotchis[_tokenId].collateralType;
             svg = getAavegotchiSvgLayers(collateralType, s.aavegotchis[_tokenId].numericTraits, _tokenId);
+            console.logBytes(svg);
         }
         ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg, "</svg>"));
     }
@@ -56,7 +58,6 @@ contract SvgFacet is Modifiers {
         string eyeColor;
         int256[8] eyeColorTraitRanges;
         string[7] eyeColors;
-        uint256 bg;
     }
 
     function getAavegotchiSvgLayers(
@@ -65,7 +66,7 @@ contract SvgFacet is Modifiers {
         uint256 _tokenId
     ) internal view returns (bytes memory svg_) {
         SvgLayerDetails memory details;
-        uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+        //uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
         details.primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
         details.secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
         details.cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
@@ -112,6 +113,7 @@ contract SvgFacet is Modifiers {
                 }
             }
         }
+        /** 
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             if (slot == LibItems.WEARABLE_SLOT_BG) {
                 if (equippedWearables[slot] != 0) {
@@ -120,6 +122,7 @@ contract SvgFacet is Modifiers {
                 }
             }
         }
+        */
         //Add wearables if tokenId isn't MAX_INT
         if (_tokenId == type(uint256).max) {
             svg_ = abi.encodePacked(
@@ -281,6 +284,7 @@ contract SvgFacet is Modifiers {
         uint256 wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BG];
         if (wearableId != 0) {
             layers.background = getWearable(wearableId, LibItems.WEARABLE_SLOT_BG);
+            console.logBytes(layers.background);
         } else {
             layers.background = LibSvg.getSvg("aavegotchi", 4);
         }
