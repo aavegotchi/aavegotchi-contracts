@@ -106,6 +106,7 @@ async function main() {
   ).connect(signer);
   console.log("Adding items", 0, "to", itemTypes.length);
 
+  /*
   tx = await daoFacet.addItemTypes(itemTypes, { gasPrice: gasPrice });
 
   receipt = await tx.wait();
@@ -113,9 +114,13 @@ async function main() {
     throw Error(`Error:: ${tx.hash}`);
   }
   console.log("Items were added:", tx.hash);
+  */
 
   console.log("Upload SVGs");
-  await uploadSvgs(wearablesSvgs, "wearables", { gasPrice: gasPrice });
+  tx = await uploadSvgs(wearablesSvgs, "wearables", {
+    gasPrice: gasPrice,
+  });
+  console.log("tx:", tx);
 
   /*await uploadSvgs(
     sleevesSvgs.map((value) => value.svg),
@@ -159,11 +164,12 @@ async function main() {
   console.log("itemids", itemIds);
   console.log("quantities:", quantities);
 
-  console.log("Mint prize items to itemManager");
+  console.log("Mint prize items to Recipient");
 
-  const coderdan = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c";
+  //Venly Wallet
+  const recipient = "0x076156b761b1C7EDF502b049D0c8c8Cd9aF7C71a";
 
-  tx = await daoFacet.mintItems(coderdan, itemIds, quantities, {
+  tx = await daoFacet.mintItems(recipient, itemIds, quantities, {
     gasPrice: gasPrice,
   });
   receipt = await tx.wait();
