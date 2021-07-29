@@ -78,16 +78,20 @@ contract SvgFacet is Modifiers {
         svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
+        bytes32 eyeSvgType = "eyeShapes";
+        if (s.currentHauntId == 2) {
+            eyeSvgType = "eyeShapesH2";
+        }
         details.trait = _numericTraits[4];
         if (details.trait < 0) {
-            details.eyeShape = LibSvg.getSvg("eyeShapes", 0);
+            details.eyeShape = LibSvg.getSvg(eyeSvgType, 0);
         } else if (details.trait > 97) {
-            details.eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
+            details.eyeShape = LibSvg.getSvg(eyeSvgType, s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
         } else {
             details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
             for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
                 if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
-                    details.eyeShape = LibSvg.getSvg("eyeShapes", i);
+                    details.eyeShape = LibSvg.getSvg(eyeSvgType, i);
                     break;
                 }
             }
