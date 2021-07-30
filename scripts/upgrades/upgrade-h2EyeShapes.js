@@ -73,6 +73,11 @@ async function main() {
   }
 
   await uploadH2EyeShapeSVG();
+
+  return {
+    signer,
+    diamondAddress
+  };
 }
 
 if (require.main === module) {
