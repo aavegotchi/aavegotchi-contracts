@@ -14,20 +14,20 @@ describe("Side Views", async function () {
   before(async function(){
     aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
     // maticGhstAddress = '0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7';
-    // aavegotchiOwner = '0x0628FF854C191D4b80D2F07B3f1a39D878CD2e3A';
-    // owner = await ethers.getSigner(aavegotchiOwner);
+    aavegotchiOwner = '0x0628FF854C191D4b80D2F07B3f1a39D878CD2e3A';
+    owner = await ethers.getSigner(aavegotchiOwner);
 
     await sideViewsUpgrade();
 
-    svgViewsFacet = await ethers.getContractAt('SvgViewsFacet', aavegotchiDiamondAddress);
+    svgViewsFacet = await ethers.getContractAt('SvgViewsFacet', aavegotchiDiamondAddress, owner);
     aavegotchiFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet', aavegotchiDiamondAddress);
   });
 
   it.only("Should render particular gotchi side view", async function() {
-    // await hre.network.provider.request({
-    //   method: 'hardhat_impersonateAccount',
-    //   params: [aavegotchiOwner]
-    // });
+    await hre.network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: [aavegotchiOwner]
+    });
 
     let aavegotchiMarine = await aavegotchiFacet.getAavegotchi(7623);
     let aavegotchiMess = await aavegotchiFacet.getAavegotchi(7624);
@@ -47,6 +47,6 @@ describe("Side Views", async function () {
     console.log("Aavegotchi Items: ", aavegotchiMess.items[3].itemId.toString());
     console.log("Aavegotchi Items: ", aavegotchiMess.items[4].itemId.toString());
 
-    await svgViewsFacet.getAavegotchiSideSvgs(7624);
+    await svgViewsFacet.getAavegotchiSideSvgs(7623);
   });
 });

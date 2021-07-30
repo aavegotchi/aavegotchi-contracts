@@ -56,6 +56,9 @@ contract SvgViewsFacet is Modifiers {
         int16[NUMERIC_TRAITS_NUM] memory _numericTraits,
         uint256 _tokenId
     ) internal view returns (bytes memory svg_) {
+        console.log("*** Side View ***");
+        console.logBytes(_sideView);
+
         console.log("This is getAavegotchiSvgLayers() func");
         SvgLayerDetails memory details;
         details.primaryColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
@@ -69,16 +72,17 @@ contract SvgViewsFacet is Modifiers {
 
         details.trait = _numericTraits[4];
         if (details.trait < 0) {
-            console.log("one");
+            console.log("---ONE Views---");
             details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32("eyeShapes-", _sideView), 0);
         } else if (details.trait > 97) {
-            console.log("two");
+            console.log("---TWO Views---");
             details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32("eyeShapes-", _sideView), s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
         } else {
-            console.log("three");
+            console.log("---THREE Views---");
             details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
             for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
                 if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
+                    console.log("THREE Views Loop: ", i);
                     details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32("eyeShapes-", _sideView), i);
                     break;
                 }

@@ -72,10 +72,13 @@ contract SvgFacet is Modifiers {
 
         details.trait = _numericTraits[4];
         if (details.trait < 0) {
+            console.log("---ONE---");
             details.eyeShape = LibSvg.getSvg("eyeShapes", 0);
         } else if (details.trait > 97) {
+            console.log("---TWO---");
             details.eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
         } else {
+            console.log("---THREE---");
             details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
             for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
                 if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {

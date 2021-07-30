@@ -73,6 +73,7 @@ async function main () {
   }
 
   async function uploadSvgs (svgs, svgType, testing, uploadSigner) {
+    console.log("***", svgType, "***");
     let svgFacet = await ethers.getContractAt('SvgFacet', diamondAddress, uploadSigner)
     function setupSvg (...svgData) {
       const svgTypesAndSizes = []
