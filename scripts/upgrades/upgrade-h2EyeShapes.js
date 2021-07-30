@@ -43,8 +43,9 @@ async function main() {
   facet = await facetFactory.deploy();
   await facet.deployed();
 
-  const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
   let existingFacetFuncs = getSelectors(facet);
+
+  const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
   let cut = [
     {
       facetAddress: facet.address,
@@ -52,6 +53,28 @@ async function main() {
       functionSelectors: existingFacetFuncs
     }
   ];
+
+  if (testing) {
+    const ShopFacet = await ethers.getContractFactory("ShopFacet");
+    let shopFacet = await ShopFacet.deploy();
+    await shopFacet.deployed();
+    let existingShopFuncs = getSelectors(shopFacet);
+
+    const VRFFacet = await ethers.getContractFactory("VrfFacet");
+    let vrfFacet = await VRFFacet.deploy();
+    await vrfFacet.deployed();
+    let existingVRFFuncs = getSelectors(vrfFacet);
+    cut.push({
+      facetAddress: shopFacet.address,
+      action: FacetCutAction.Replace,
+      functionSelectors: existingShopFuncs
+    });
+    cut.push({
+      facetAddress: vrfFacet.address,
+      action: FacetCutAction.Replace,
+      functionSelectors: existingVRFFuncs
+    });
+  }
   // console.log(cut);
 
   const diamondCut = (await ethers.getContractAt("IDiamondCut", diamondAddress)).connect(signer);

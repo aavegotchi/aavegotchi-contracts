@@ -7,13 +7,13 @@ const testAavegotchiId = "10000";
 const testEyeShapeId = "1";
 const initialHauntSize = "10000";
 let portalPrice = ethers.utils.parseEther("0.00001");
-const account = "0x819c3fc356bb319035f9d2886fac9e57df0343f5";
+const account = "0x45fdb9d9ff3105392bf5f1a3828f9523314117a7";
 const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
 
 describe("Upgrade H2 eye shapes", async function() {
   this.timeout(300000);
   let diamondAddress, signer;
-  let daoFacet, aavegotchiFacet, aavegotchiGameFacet, svgFacet, vrfFacet, shopFacet, ghstTokenContract
+  let daoFacet, aavegotchiFacet, aavegotchiGameFacet, svgFacet, vrfFacet, shopFacet, ghstTokenContract;
   let haunt, currentHauntId, buyAmount;
   before(async function() {
     const deployVars = await upgradeH2EyeShapes("deployTest");
@@ -49,6 +49,8 @@ describe("Upgrade H2 eye shapes", async function() {
       haunt = await aavegotchiGameFacet.currentHaunt();
       currentHauntId = haunt["hauntId_"].toNumber();
       expect(currentHauntId).to.equal(2);
+
+      // await (await daoFacet.addCollateralTypes(currentHauntId, getCollaterals("matic", ghstTokenContract.address))).wait();
     });
   });
 
@@ -109,10 +111,18 @@ describe("Upgrade H2 eye shapes", async function() {
     });
   });
 
-  describe("Items & Wearables", async function() {
+  describe("H2 eye shape", async function() {
     it("Returns h2 eye shape SVG", async function() {
-      const svg = await svgFacet.getSvg(ethers.utils.formatBytes32String('eyeShapesH2'), testEyeShapeId);
+      const svg = await svgFacet.getSvg(ethers.utils.formatBytes32String("eyeShapesH2"), testEyeShapeId);
       expect(svg).to.equal(eyeShapeSvgs[testEyeShapeId]);
+    });
+
+    it("Returned aavegotchi SVG including correct eye shape", async function() {
+      const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account);
+      const tokenId = myPortals[0].tokenId;
+      const svg = await svgFacet.getAavegotchiSvg(tokenId);
+      console.log(svg);
+      expect(svg.includes(eyeShapeSvgs[testEyeShapeId])).to.equal(true);
     });
   });
 });
