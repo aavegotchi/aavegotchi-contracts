@@ -15340,5 +15340,5 @@ const batch2gotchis = {
   },
 };
 
-exports.Haunt2SigPropAddresses = Haunt2SigPropAddresses;
-exports.Haunt2SigPropGotchis = Haunt2SigPropGotchis;
+exports.Haunt2SigPropAddresses = batch2;
+exports.Haunt2SigPropGotchis = batch2gotchis;

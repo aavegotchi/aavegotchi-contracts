@@ -110,7 +110,7 @@ async function main() {
     const tx = await dao.grantExperience(
       tokenIds,
       Array(tokenIds.length).fill(xpAmount),
-      { gasPrice: 10000000000 }
+      { gasPrice: 20000000000 }
     );
     console.log("tx:", tx.hash);
     let receipt = await tx.wait();
