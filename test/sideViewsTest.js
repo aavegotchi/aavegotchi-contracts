@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const { sideViewsUpgrade } = require('../scripts/upgrades/upgrade-sideViews.js');
 
 describe("Side Views", async function () {
-  this.timeout(300000);
+  this.timeout(1000000);
 
   let svgViewsFacet,
       aavegotchiFacet,
