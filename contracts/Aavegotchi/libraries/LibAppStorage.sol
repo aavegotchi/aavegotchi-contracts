@@ -232,7 +232,7 @@ struct AppStorage {
     // mapping(address => uint256[]) petOperatorTokenIds;
     mapping(address => bool) itemManagers;
     // itemTypeId => (sideview => Dimensions)
-    mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;        
+    mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
 }
 
 library LibAppStorage {

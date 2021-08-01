@@ -159,9 +159,11 @@ async function main () {
 
   await uploadSvgs(collateralsLeftSvgs, 'collaterals-left', testing, itemSigner)
   await uploadSvgs(collateralsRightSvgs, 'collaterals-right', testing, itemSigner)
+  await uploadSvgs(collateralsRightSvgs, 'collaterals-back', testing, itemSigner)
 
   await uploadSvgs(eyeShapesLeftSvgs, 'eyeShapes-left', testing, itemSigner)
   await uploadSvgs(eyeShapesRightSvgs, 'eyeShapes-right', testing, itemSigner)
+  await uploadSvgs(eyeShapesRightSvgs, 'eyeShapes-back', testing, itemSigner)
 
 
   const Facet = await ethers.getContractFactory('SvgViewsFacet')
