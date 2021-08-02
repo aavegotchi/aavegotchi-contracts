@@ -2,10 +2,10 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
-const { itemTypes } = require('./miamiShirtItemType')
-const { wearablesSvgs, sleevesSvgs } = require('../svgs/miamiShirtWearables')
+const { itemTypes } = require('./leaderboardItemTypes')
+const { badgeSvgs } = require('../../../svgs/szn1rnd1BadgeSvgs')
 
-const { sendToMultisig } = require('./libraries/multisig/multisig.js')
+const { sendToMultisig } = require('../../libraries/multisig/multisig.js')
 
 let signer
 const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
@@ -56,7 +56,7 @@ async function uploadSvgs (svgs, svgType, testing) {
     ;[svg, svgTypesAndSizes] = setupSvg(
       [svgType, svgs.slice(svgItemsStart, svgItemsEnd)]
     )
-    console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`)
+    console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} badges SVGs`)
     printSizeInfo(svgTypesAndSizes)
     if (testing) {
       let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, { gasLimit: gasLimit })
@@ -81,15 +81,6 @@ async function main () {
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
   if (testing) {
     await hre.network.provider.request({
-      method: 'hardhat_reset',
-      params: [{
-        forking: {
-          jsonRpcUrl: process.env.MATIC_URL
-        }
-      }]
-    })
-
-    await hre.network.provider.request({
       method: 'hardhat_impersonateAccount',
       params: [owner]
     })
@@ -101,11 +92,9 @@ async function main () {
   }
   let tx
   let receipt
+  let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)
 
   let daoFacet = (await ethers.getContractAt('DAOFacet', diamondAddress)).connect(signer)
-  let svgFacet = (await ethers.getContractAt('SvgFacet', diamondAddress)).connect(signer)
-
-  let itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)
 
   console.log('Adding items', 0, 'to', itemTypes.length)
   if (testing) {
@@ -116,52 +105,18 @@ async function main () {
     }
     console.log('Items were added:', tx.hash)
   } else {
-    // tx = await daoFacet.populateTransaction.addItemTypes(itemTypes, { gasLimit: gasLimit })
-    // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
+    tx = await daoFacet.populateTransaction.addItemTypes(itemTypes, { gasLimit: gasLimit })
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 
-  // let item = await itemsFacet.getItemType(162)
-  // console.log('Item:', item)
-
-  // await uploadSvgs(wearablesSvgs, 'wearables', testing)
-  // console.log(sleevesSvgs)
-  // await uploadSvgs(sleevesSvgs.map(value => value.svg), 'sleeves', testing)
-
-  let sleevesSvgId = 27
-  let sleeves = []
-  for (const sleeve of sleevesSvgs) {
-    sleeves.push(
-      {
-        sleeveId: sleevesSvgId,
-        wearableId: sleeve.id
-      }
-    )
-    sleevesSvgId++
-  }
-  console.log('Associating sleeves svgs with body wearable svgs.')
-  if (testing) {
-    tx = await svgFacet.setSleeves(sleeves, { gasLimit: gasLimit })
-    receipt = await tx.wait()
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`)
-    }
-    console.log('Sleeves associated:', tx.hash)
-  } else {
-    // tx = await svgFacet.populateTransaction.setSleeves(sleeves, { gasLimit: gasLimit })
-    // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
-  }
-
-  // const finalSVG = await svgFacet.getItemSvg('162')
-
-  // console.log('final svg:', finalSVG)
-
-  // deploy raffle:
-  console.log('Mint items to aavegotchi.eth')
-  let mintAddress = '0x027Ffd3c119567e85998f4E6B9c3d83D5702660c'
+  await uploadSvgs(badgeSvgs, 'wearables', testing)
+ 
+  console.log('Send items to Aavegotchi Hardware')
+  let mintAddress = '0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119'
 
   console.log('Minting items')
   if (testing) {
-    tx = await daoFacet.mintItems(mintAddress, [162], [1000])
+    tx = await daoFacet.mintItems(mintAddress, [163, 164, 165, 166, 167, 168], [10, 10, 10, 90, 90, 90])
     receipt = await tx.wait()
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`)
@@ -169,30 +124,35 @@ async function main () {
     console.log('Prize items minted:', tx.hash)
     // Aavegotchi equips
 
-    await hre.network.provider.request({
-      method: 'hardhat_impersonateAccount',
-      params: ['0x027Ffd3c119567e85998f4E6B9c3d83D5702660c']
-    })
-    signer = await ethers.provider.getSigner('0x027Ffd3c119567e85998f4E6B9c3d83D5702660c')
+    // Check that items are received
 
-    const aavegotchiOwnerSigner = await itemsFacet.connect(signer)
+    if (testing) {
+      const balance = await itemsFacet.balanceOf(mintAddress, '163')
+      console.log('balance of 163:', balance.toString())
 
-    await aavegotchiOwnerSigner.equipWearables('2575', [162, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+      // Check the SVG output
+      const svgFacet = await ethers.getContractAt('SvgFacet', diamondAddress)
+      let wearables = ethers.utils.formatBytes32String('wearables')
+      const itemSvg = await svgFacet.getSvg(wearables, 163)
+    }
 
-    const svgOutput = await svgFacet.getAavegotchiSvg('2575')
-
-    console.log('svg output:', svgOutput)
+    //  console.log('item svg:',itemSvg)
   } else {
-    tx = await daoFacet.populateTransaction.mintItems(mintAddress, [162, 162], [500, 500], { gasLimit: gasLimit })
+    // Rarity 10, Kinship 10, XP 10, Rarity 100, Kinship 100, XP 100
+    tx = await daoFacet.populateTransaction.mintItems(mintAddress, [163, 164, 165, 166, 167, 168], [10, 10, 10, 90, 90, 90], { gasLimit: gasLimit })
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-main()
-  .then(() => process.exit(0))
-  .catch(error => {
-    console.error(error)
-    process.exit(1)
-  })
+if (require.main === module) {
+  main()
+    .then(() => console.log('adding badges finished') /* process.exit(0 */)
+    .catch(error => {
+      console.error(error)
+      // process.exit(1)
+    })
+}
+
+exports.addLeaderboardBadges = main

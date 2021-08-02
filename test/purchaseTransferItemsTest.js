@@ -67,7 +67,7 @@ describe('Shopping  ', () => {
     )
   })
 
-  it.only('Should purchase items with GHST', async () => {
+  it('Should purchase items with GHST', async () => {
     const ghstWhale = '0x41c63953aA3E69aF424CE6873C60BA13857b31bB'
 
     await hre.network.provider.request({
@@ -86,7 +86,7 @@ describe('Shopping  ', () => {
 
     const itemType = await itemsFacet.getItemType("160")
 
-    const beforeBuyingBalance =  await itemsFacet.balanceOf(ghstWhale,"160") 
+    const beforeBuyingBalance =  await itemsFacet.balanceOf(ghstWhale,"160")
 
     //Can only buy one
     await truffleAssert.reverts(connectedShopFacet.purchaseTransferItemsWithGhst(ghstWhale, ['160'], ['2']),"ShopFacet: Can only purchase 1 of an item per transaction")
@@ -95,7 +95,7 @@ describe('Shopping  ', () => {
     //Check that NFT balance has increased
     const afterBuyingBalance = await itemsFacet.balanceOf(ghstWhale,"160")
     expect(afterBuyingBalance).to.equal(Number(beforeBuyingBalance.toString())+1)
-   
+
     //Check that GHST balance has decreased
     let afterBalance = await connectedGhstContract.balanceOf(ghstWhale)
     let ghstPrice = itemType.ghstPrice
@@ -112,7 +112,7 @@ describe('Shopping  ', () => {
       buyer = await ethers.getSigner(smallFish)
        connectedShopFacet = await shopFacet.connect(buyer)
       await truffleAssert.reverts(connectedShopFacet.purchaseTransferItemsWithGhst(smallFish, ['160'], ['1']),"ShopFacet: Not enough GHST!")
-  
+
   })
 
 

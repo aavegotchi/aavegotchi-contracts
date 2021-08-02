@@ -398,15 +398,15 @@ contract SvgFacet is Modifiers {
    |             Write Functions        |
    |__________________________________*/
 
-    function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) external onlyDaoOrOwner {
+    function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) external onlyItemManager {
         LibSvg.storeSvg(_svg, _typesAndSizes);
     }
 
-    function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) external onlyDaoOrOwner {
+    function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) external onlyItemManager {
         LibSvg.updateSvg(_svg, _typesAndIdsAndSizes);
     }
 
-    function deleteLastSvgLayers(bytes32 _svgType, uint256 _numLayers) external onlyDaoOrOwner {
+    function deleteLastSvgLayers(bytes32 _svgType, uint256 _numLayers) external onlyItemManager {
         for(uint256 i; i < _numLayers; i++){
             s.svgLayers[_svgType].pop();
         }
@@ -417,13 +417,13 @@ contract SvgFacet is Modifiers {
         uint256 wearableId;
     }
 
-    function setSleeves(Sleeve[] calldata _sleeves) external onlyDaoOrOwner {
+    function setSleeves(Sleeve[] calldata _sleeves) external onlyItemManager {
         for (uint256 i; i < _sleeves.length; i++) {
             s.sleeves[_sleeves[i].wearableId] = _sleeves[i].sleeveId;
         }
     }
 
-    function setItemsDimensions(uint256[] calldata _itemIds, Dimensions[] calldata _dimensions) external onlyDaoOrOwner {
+    function setItemsDimensions(uint256[] calldata _itemIds, Dimensions[] calldata _dimensions) external onlyItemManager {
         require(_itemIds.length == _dimensions.length, "SvgFacet: _itemIds not same length as _dimensions");
         for (uint256 i; i < _itemIds.length; i++) {
             s.itemTypes[_itemIds[i]].dimensions = _dimensions[i];

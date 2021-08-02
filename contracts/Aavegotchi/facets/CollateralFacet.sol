@@ -86,7 +86,7 @@ contract CollateralFacet is Modifiers {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 
-        require(s.nftItems[address(this)][_tokenId].length == 0, "CollateralFacet: Can't burn aavegotchi with items");
+        // require(s.nftItems[address(this)][_tokenId].length == 0, "CollateralFacet: Can't burn aavegotchi with items");
 
         //If the toId is different from the tokenId, then perform an experience transfer
         if (_tokenId != _toId) {
@@ -131,6 +131,6 @@ contract CollateralFacet is Modifiers {
     }
 
     function setCollateralEyeShapeSvgId(address _collateralToken, uint8 _svgId) external onlyDaoOrOwner {
-         s.collateralTypeInfo[_collateralToken].eyeShapeSvgId = _svgId;
+        s.collateralTypeInfo[_collateralToken].eyeShapeSvgId = _svgId;
     }
 }

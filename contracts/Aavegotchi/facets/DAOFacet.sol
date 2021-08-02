@@ -7,6 +7,7 @@ import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {GameManager} from "../libraries/LibAppStorage.sol";
 
 contract DAOFacet is Modifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
@@ -18,15 +19,26 @@ contract DAOFacet is Modifiers {
     event GrantExperience(uint256[] _tokenIds, uint256[] _xpValues);
     event AddWearableSet(WearableSet _wearableSet);
     event UpdateWearableSet(uint256 _setId, WearableSet _wearableSet);
-    event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
     event ItemTypeMaxQuantity(uint256[] _itemIds, uint256[] _maxQuanities);
+    event GameManagerAdded(address indexed gameManager_, uint256 indexed limit_, uint256 refreshTime_);
+    event GameManagerRemoved(address indexed gameManager_);
+    event ItemManagerAdded(address indexed newItemManager_);
+    event ItemManagerRemoved(address indexed ItemManager_);
 
     /***********************************|
    |             Read Functions         |
    |__________________________________*/
 
-    function gameManager() external view returns (address) {
-        return s.gameManager;
+    function isGameManager(address _manager) external view returns (bool) {
+        return s.gameManagers[_manager].limit != 0;
+    }
+
+    function gameManagerBalance(address _manager) external view returns (uint256) {
+        return s.gameManagers[_manager].balance;
+    }
+
+    function gameManagerRefreshTime(address _manager) external view returns (uint256) {
+        return s.gameManagers[_manager].refreshTime;
     }
 
     /***********************************|
@@ -54,12 +66,29 @@ contract DAOFacet is Modifiers {
         }
     }
 
+    function addItemManagers(address[] calldata _newItemManagers) external onlyDaoOrOwner {
+        for (uint256 index = 0; index < _newItemManagers.length; index++) {
+            address newItemManager = _newItemManagers[index];
+            s.itemManagers[newItemManager] = true;
+            emit ItemManagerAdded(newItemManager);
+        }
+    }
+
+    function removeItemManagers(address[] calldata _itemManagers) external onlyDaoOrOwner {
+        for (uint256 index = 0; index < _itemManagers.length; index++) {
+            address itemManager = _itemManagers[index];
+            require(s.itemManagers[itemManager] == true, "DAOFacet: itemManager does not exist or already removed");
+            s.itemManagers[itemManager] = false;
+            emit ItemManagerRemoved(itemManager);
+        }
+    }
+
     function updateCollateralModifiers(address _collateralType, int16[NUMERIC_TRAITS_NUM] calldata _modifiers) external onlyDaoOrOwner {
         emit UpdateCollateralModifiers(s.collateralTypeInfo[_collateralType].modifiers, _modifiers);
         s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
     }
 
-    function updateItemTypeMaxQuantity(uint256[] calldata _itemIds, uint256[] calldata _maxQuantities) external onlyOwnerOrDaoOrGameManager {
+    function updateItemTypeMaxQuantity(uint256[] calldata _itemIds, uint256[] calldata _maxQuantities) external onlyItemManager {
         require(_itemIds.length == _maxQuantities.length, "DAOFacet: _itemIds length not the same as _newQuantities length");
         for (uint256 i; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
@@ -92,7 +121,7 @@ contract DAOFacet is Modifiers {
         address _to,
         uint256[] calldata _itemIds,
         uint256[] calldata _quantities
-    ) external onlyDaoOrOwner {
+    ) external onlyItemManager {
         require(_itemIds.length == _quantities.length, "DAOFacet: Ids and quantities length must match");
         address sender = LibMeta.msgSender();
         uint256 itemTypesLength = s.itemTypes.length;
@@ -114,21 +143,27 @@ contract DAOFacet is Modifiers {
 
     function grantExperience(uint256[] calldata _tokenIds, uint256[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {
         require(_tokenIds.length == _xpValues.length, "DAOFacet: IDs must match XP array length");
+        GameManager storage gameManager = s.gameManagers[LibMeta.msgSender()];
+
+        /*GameManager: If the refresh time has been reached, reset the gameManager's balance to the individual limit, and set the refreshTime to 1 day after the block timestamp.*/
+        if (gameManager.refreshTime < block.timestamp) {
+            gameManager.balance = gameManager.limit;
+            gameManager.refreshTime = uint32(block.timestamp + 1 days);
+        }
+
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             uint256 xp = _xpValues[i];
             require(xp <= 1000, "DAOFacet: Cannot grant more than 1000 XP at a time");
+            require(gameManager.balance >= xp, "DAOFacet: Game Manager's xp grant limit is reached");
 
-            //To test (Dan): Deal with overflow here? - Handling it just in case
-            uint256 experience = s.aavegotchis[tokenId].experience;
-            uint256 increasedExperience = experience + xp;
-            require(increasedExperience >= experience, "DAOFacet: Experience overflow");
-            s.aavegotchis[tokenId].experience = increasedExperience;
+            s.aavegotchis[tokenId].experience += xp;
+            gameManager.balance -= xp;
         }
         emit GrantExperience(_tokenIds, _xpValues);
     }
 
-    function addItemTypes(ItemType[] memory _itemTypes) external onlyDaoOrOwner() {
+    function addItemTypes(ItemType[] memory _itemTypes) external onlyItemManager {
         insertItemTypes(_itemTypes);
     }
 
@@ -136,7 +171,7 @@ contract DAOFacet is Modifiers {
         ItemType[] memory _itemTypes,
         string calldata _svg,
         LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes
-    ) external onlyDaoOrOwner() {
+    ) external onlyItemManager {
         insertItemTypes(_itemTypes);
         LibSvg.storeSvg(_svg, _typesAndSizes);
     }
@@ -152,14 +187,14 @@ contract DAOFacet is Modifiers {
         }
     }
 
-    function addWearableSets(WearableSet[] memory _wearableSets) external onlyDaoOrOwner {
+    function addWearableSets(WearableSet[] memory _wearableSets) external onlyItemManager {
         for (uint256 i; i < _wearableSets.length; i++) {
             s.wearableSets.push(_wearableSets[i]);
             emit AddWearableSet(_wearableSets[i]);
         }
     }
 
-    function updateWearableSets(uint256[] calldata _setIds, WearableSet[] calldata _wearableSets) external onlyDaoOrOwner {
+    function updateWearableSets(uint256[] calldata _setIds, WearableSet[] calldata _wearableSets) external onlyItemManager {
         require(_setIds.length == _wearableSets.length, "_setIds not same length as _wearableSets");
         for (uint256 i; i < _setIds.length; i++) {
             s.wearableSets[_setIds[i]] = _wearableSets[i];
@@ -167,9 +202,23 @@ contract DAOFacet is Modifiers {
         }
     }
 
+    function addGameManagers(address[] calldata _newGameManagers, uint256[] calldata _limits) external onlyDaoOrOwner {
+        require(_newGameManagers.length == _limits.length, "DAOFacet: New Game Managers and Limits should have same length");
+        for (uint256 index = 0; index < _newGameManagers.length; index++) {
+            GameManager storage gameManager = s.gameManagers[_newGameManagers[index]];
+            gameManager.limit = _limits[index];
+            gameManager.balance = _limits[index];
+            gameManager.refreshTime = uint256(block.timestamp + 1 days);
+            emit GameManagerAdded(_newGameManagers[index], _limits[index], uint256(block.timestamp + 1 days));
+        }
+    }
 
-    function setGameManager(address _gameManager) external onlyDaoOrOwner {
-        emit GameManagerTransferred(s.gameManager, _gameManager);
-        s.gameManager = _gameManager;
+    function removeGameManagers(address[] calldata _gameManagers) external onlyDaoOrOwner {
+        for (uint256 index = 0; index < _gameManagers.length; index++) {
+            GameManager storage gameManager = s.gameManagers[_gameManagers[index]];
+            require(gameManager.limit != 0, "DAOFacet: GameManager does not exist or already removed");
+            gameManager.limit = 0;
+            emit GameManagerRemoved(_gameManagers[index]);
+        }
     }
 }

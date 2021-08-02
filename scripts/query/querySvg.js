@@ -14,18 +14,18 @@ async function main () {
   // let aavegotchi = await svgFacet.getAavegotchiSvg(9887)
   // uni eyes  5795
   // hawwain shirt
-  // let aavegotchi = await svgFacet.getAavegotchiSvg(301)
-  // console.log(aavegotchi)
+  let aavegotchi = await svgFacet.getItemSvg(174)
+  console.log(aavegotchi)
   // 11 = robe
   // 13 = aagent shirt
-  let svgs = await svgFacet.getSvgs(ethers.utils.formatBytes32String('sleeves'), [27])
-  let count = 0
-  for (const svg of svgs) {
-    console.log(count)
-    console.log(svg)
-    count++
-    console.log('  -   ')
-  }
+  // let svgs = await svgFacet.getSvgs(ethers.utils.formatBytes32String('sleeves'), [27])
+  // let count = 0
+  // for (const svg of svgs) {
+  //   console.log(count)
+  //   console.log(svg)
+  //   count++
+  //   console.log('  -   ')
+  // }
   // let aavegotchi = await svgFacet.getAavegotchiSvg(7274)
   // console.log(aavegotchi)
 }

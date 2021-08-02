@@ -36,7 +36,7 @@ contract ItemsTransferFacet is Modifiers {
         LibItems.removeFromOwner(_from, _id, _value);
         LibItems.addToOwner(_to, _id, _value);
         LibERC1155Marketplace.updateERC1155Listing(address(this), _id, _from);
-        emit LibERC1155.TransferSingle(sender, _from, _to, _id, _value);        
+        emit LibERC1155.TransferSingle(sender, _from, _to, _id, _value);
         LibERC1155.onERC1155Received(sender, _from, _to, _id, _value, _data);
     }
 
@@ -99,7 +99,24 @@ contract ItemsTransferFacet is Modifiers {
         LibERC1155Marketplace.updateERC1155Listing(address(this), _id, _from);
         emit LibERC1155.TransferSingle(sender, _from, _toContract, _id, _value);
         emit LibERC1155.TransferToParent(_toContract, _toTokenId, _id, _value);
-        
+    }
+
+    function batchBatchTransferToParent(
+        address _from,
+        address _toContract,
+        uint256[] calldata _toTokenIds,
+        uint256[][] calldata _ids,
+        uint256[][] calldata _values
+    ) external {
+        require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
+        require(_toTokenIds.length == _ids.length, "ItemsTransfer: ids.length not the same as toTokenIds length");
+        require(_ids.length == _values.length, "ItemsTransfer: ids.length not the same as values.length");
+        for (uint256 index = 0; index < _toTokenIds.length; index++) {
+            uint256 tokenId = _toTokenIds[index];
+            uint256[] calldata ids = _ids[index];
+            uint256[] calldata values = _values[index];
+            batchTransferToParent(_from, _toContract, tokenId, ids, values);
+        }
     }
 
     function batchTransferToParent(
@@ -108,7 +125,7 @@ contract ItemsTransferFacet is Modifiers {
         uint256 _toTokenId,
         uint256[] calldata _ids,
         uint256[] calldata _values
-    ) external {
+    ) public {
         require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
         require(_ids.length == _values.length, "ItemsTransfer: ids.length not the same as values.length");
         address sender = LibMeta.msgSender();
@@ -119,7 +136,7 @@ contract ItemsTransferFacet is Modifiers {
             LibItems.removeFromOwner(_from, id, value);
             LibItems.addToParent(_toContract, _toTokenId, id, value);
             LibERC1155Marketplace.updateERC1155Listing(address(this), id, _from);
-            emit LibERC1155.TransferToParent(_toContract, _toTokenId, id, value);            
+            emit LibERC1155.TransferToParent(_toContract, _toTokenId, id, value);
         }
         emit LibERC1155.TransferBatch(sender, _from, _toContract, _ids, _values);
     }
@@ -161,6 +178,10 @@ contract ItemsTransferFacet is Modifiers {
         uint256 _value
     ) external {
         require(_to != address(0), "ItemsTransfer: Can't transfer to 0 address");
+
+        //To do: Check if the item can be transferred.
+        require(s.itemTypes[_id].canBeTransferred, "ItemsTransfer: Item cannot be transferred");
+
         address sender = LibMeta.msgSender();
         transferFromTokenApproved(sender, _fromContract, _fromTokenId);
         LibItems.removeFromParent(_fromContract, _fromTokenId, _id, _value);
@@ -183,6 +204,10 @@ contract ItemsTransferFacet is Modifiers {
         for (uint256 i; i < _ids.length; i++) {
             uint256 id = _ids[i];
             uint256 value = _values[i];
+
+            //To do: Check if the item can be transferred.
+            require(s.itemTypes[id].canBeTransferred, "ItemsTransfer: Item cannot be transferred");
+
             LibItems.removeFromParent(_fromContract, _fromTokenId, id, value);
             LibItems.addToOwner(_to, id, value);
             emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, id, value);
@@ -199,6 +224,10 @@ contract ItemsTransferFacet is Modifiers {
         uint256 _value
     ) external {
         require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
+
+        //To do: Check if the item can be transferred.
+        require(s.itemTypes[_id].canBeTransferred, "ItemsTransfer: Item cannot be transferred");
+
         address sender = LibMeta.msgSender();
         transferFromTokenApproved(sender, _fromContract, _fromTokenId);
         LibItems.removeFromParent(_fromContract, _fromTokenId, _id, _value);
@@ -221,8 +250,13 @@ contract ItemsTransferFacet is Modifiers {
         address sender = LibMeta.msgSender();
         transferFromTokenApproved(sender, _fromContract, _fromTokenId);
         for (uint256 i; i < _ids.length; i++) {
+            //To do: Check if the item can be transferred.
+
             uint256 id = _ids[i];
             uint256 value = _values[i];
+
+            require(s.itemTypes[id].canBeTransferred, "ItemsTransfer: Item cannot be transferred");
+
             LibItems.removeFromParent(_fromContract, _fromTokenId, id, value);
             LibItems.addToParent(_toContract, _toTokenId, id, value);
             emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, id, value);
@@ -239,10 +273,15 @@ contract ItemsTransferFacet is Modifiers {
         Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.
         @return           `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`
     */
-    function onERC1155Received(address /*_operator*/, address /*_from*/, uint256 /*_id*/, uint256 /*_value*/, bytes calldata /*_data*/) external pure returns(bytes4) {        
+    function onERC1155Received(
+        address, /*_operator*/
+        address, /*_from*/
+        uint256, /*_id*/
+        uint256, /*_value*/
+        bytes calldata /*_data*/
+    ) external pure returns (bytes4) {
         return LibERC1155.ERC1155_ACCEPTED;
     }
-
 
     /**
         @notice Handle the receipt of multiple ERC1155 token types.
@@ -252,10 +291,13 @@ contract ItemsTransferFacet is Modifiers {
         Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.
         @return           `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`
     */
-    function onERC1155BatchReceived(address /*_operator*/, address /*_from*/, uint256[] calldata /*_ids*/, uint256[] calldata /*_values*/, bytes calldata /*_data*/) external pure returns(bytes4) {
+    function onERC1155BatchReceived(
+        address, /*_operator*/
+        address, /*_from*/
+        uint256[] calldata, /*_ids*/
+        uint256[] calldata, /*_values*/
+        bytes calldata /*_data*/
+    ) external pure returns (bytes4) {
         return LibERC1155.ERC1155_BATCH_ACCEPTED;
     }
-
-
-
 }
