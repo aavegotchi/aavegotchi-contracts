@@ -120,6 +120,32 @@ async function main() {
   }
 
   console.log("Completed diamond cut");
+
+
+
+  /*
+  const daoContract = await ethers.getContractAt("DAOFacet",diamondAddress, signer)
+
+  const itemContract = await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",diamondAddress)
+
+  let itemType = await itemContract.getItemType("100")
+
+  console.log('before:',itemType)
+
+
+
+  console.log('testing upgrade')
+  await daoContract.setWearableSlotPositions("100", [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false])
+
+   itemType = await itemContract.getItemType("100")
+
+  console.log('after:',itemType)
+  */
+
+
+
+
+
 }
 
 main()
