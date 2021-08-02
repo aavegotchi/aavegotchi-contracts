@@ -244,16 +244,16 @@ library LibAavegotchi {
     function removePetOperator(uint256 tokenId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         address petOperator = s.petOperators[tokenId];
-        if(petOperator != address(0)) {
+        if (petOperator != address(0)) {
             uint256 index;
             uint256 length = s.petOperatorTokenIds[petOperator].length;
-            for(;index < length; index++) {
-                if(s.petOperatorTokenIds[petOperator][index] == tokenId) {
+            for (; index < length; index++) {
+                if (s.petOperatorTokenIds[petOperator][index] == tokenId) {
                     break;
                 }
             }
-            uint256 lastIndex = length - 1;            
-            if(lastIndex != index) {
+            uint256 lastIndex = length - 1;
+            if (lastIndex != index) {
                 uint256 lastTokenId = s.petOperatorTokenIds[petOperator][lastIndex];
                 s.petOperatorTokenIds[petOperator][index] = lastTokenId;
             }
@@ -263,7 +263,7 @@ library LibAavegotchi {
     }
 
     function interact(uint256 _tokenId) internal returns (bool) {
-        AppStorage storage s = LibAppStorage.diamondStorage();        
+        AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
         // if interacted less than 12 hours ago
         if (block.timestamp < lastInteracted + 12 hours) {
@@ -365,11 +365,12 @@ library LibAavegotchi {
         uint256 _tokenId
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        // remove pet operator
-        if(_to != address(this)) {                        
+
+        // remove pet operator if not transferring to Diamond
+        if (_to != address(this)) {
             removePetOperator(_tokenId);
         }
-        
+
         // remove
         uint256 index = s.ownerTokenIdIndexes[_from][_tokenId];
         uint256 lastIndex = s.ownerTokenIds[_from].length - 1;
@@ -388,13 +389,12 @@ library LibAavegotchi {
         s.aavegotchis[_tokenId].owner = _to;
         s.ownerTokenIdIndexes[_to][_tokenId] = s.ownerTokenIds[_to].length;
         s.ownerTokenIds[_to].push(uint32(_tokenId));
-        emit LibERC721.Transfer(_from, _to, _tokenId);        
+        emit LibERC721.Transfer(_from, _to, _tokenId);
     }
 }
 
-  /*  function verify(uint256 _tokenId) internal pure {
+/*  function verify(uint256 _tokenId) internal pure {
        // if (_tokenId < 10) {}
        // revert("Not verified");
     }
     */
-    
