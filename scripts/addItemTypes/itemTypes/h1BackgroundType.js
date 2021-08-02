@@ -19,7 +19,7 @@ const itemTypes = [
     canPurchaseWithGhst: false,
     slotPositions: "background",
     category: 0,
-    canBeTransferred: true,
+    canBeTransferred: false,
     totalQuantity: 0,
     experienceBonus: 0,
     kinshipBonus: 0,
