@@ -234,6 +234,7 @@ struct AppStorage {
     mapping(address => mapping(uint256 => mapping(address => uint256))) erc721TokenToListingId;
     // body wearableId => sleevesId
     mapping(uint256 => uint256) sleeves;
+    //Pet operator
     mapping(uint256 => address) petOperators;
     mapping(address => uint256[]) petOperatorTokenIds;
     mapping(address => PetOperatorInfo) petOperatorInfo;
