@@ -1,10 +1,10 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { addH1 } = require("../scripts/addItemTypes/addH1Bg.js");
+//const { addH1 } = require("../scripts/addItemTypes/addH1Bg.js");
 //
 
 describe("Test uneqipping", async function () {
-  addH1();
+  //addH1();
   this.timeout(30000000);
   //await equipUpgrade();
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
