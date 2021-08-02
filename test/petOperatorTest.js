@@ -278,6 +278,18 @@ describe("Testing Pet Operator Upgrade", async function () {
     expect(newPetOperator).to.equal(ethers.constants.AddressZero);
   });
 
+  it("Cannot set rate lower than 0.3 GHST", async function () {
+    const rate = ethers.utils.parseEther("0.2");
+    await truffleAssert.reverts(
+      aavegotchiGameFacet.registerAsPetOperator(
+        rate,
+        "Coder Dan's Pet Shop",
+        "The best petting shop in town"
+      ),
+      "AavegotchiGameFacet: Pet rate too low"
+    );
+  });
+
   /*
   it('Bridging Aavegotchi does not change the pet operator ', async function () {
     const currentPetOperator = await aavegotchiGameFacet.petOperator(tokenIdTwo)
