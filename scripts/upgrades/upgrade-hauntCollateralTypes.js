@@ -172,10 +172,21 @@ async function main() {
   } else {
     tx = await daoFacet.addCollateralTypes(1, getCollaterals(hre.network.name, ghstAddress));
   }
-  console.log("Adding Collateral Types tx:", tx.hash);
-  const receipt = await tx.wait();
+  console.log("Adding Collateral Types for H1 tx:", tx.hash);
+  let receipt = await tx.wait();
   if (!receipt.status) {
-    throw Error(`Adding Collateral Types failed: ${tx.hash}`);
+    throw Error(`Adding Collateral Types for H1 failed: ${tx.hash}`);
+  }
+
+  // Add collateral types for H2
+  if (!testing) {
+    const { getCollaterals } = require("../collateralTypesHaunt2.js");
+    tx = await daoFacet.addCollateralTypes(2, getCollaterals(hre.network.name, ghstAddress));
+    console.log("Adding Collateral Types for H2 tx:", tx.hash);
+    receipt = await tx.wait();
+    if (!receipt.status) {
+      throw Error(`Adding Collateral Types for H2 failed: ${tx.hash}`);
+    }
   }
 
   return {
