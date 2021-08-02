@@ -21,6 +21,8 @@ function getSelector(func) {
 }
 
 async function main() {
+  const gasPrice = 2000000000;
+
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
   let owner = await (
@@ -53,14 +55,18 @@ async function main() {
   const itemsFacetFactory = await ethers.getContractFactory(
     "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet"
   );
-  let itemsFacet = await itemsFacetFactory.deploy();
+  let itemsFacet = await itemsFacetFactory.deploy({
+    gasPrice: gasPrice,
+  });
   await itemsFacet.deployed();
   console.log("Deployed ItemsFacet:", itemsFacet.address);
 
   const daoFacetFactory = await ethers.getContractFactory(
     "contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet"
   );
-  let daoFacet = await daoFacetFactory.deploy();
+  let daoFacet = await daoFacetFactory.deploy({
+    gasPrice: gasPrice,
+  });
   await daoFacet.deployed();
   console.log("Deployed DAOFacet:", daoFacet.address);
 
