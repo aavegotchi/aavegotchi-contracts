@@ -23,21 +23,25 @@ function getSelector(func) {
 async function main() {
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
-  let owner = await (await ethers.getContractAt("OwnershipFacet", diamondAddress)).owner();
+  let owner = await (
+    await ethers.getContractAt("OwnershipFacet", diamondAddress)
+  ).owner();
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
   if (testing) {
     await hre.network.provider.request({
       method: "hardhat_reset",
-      params: [{
-        forking: {
-          jsonRpcUrl: process.env.MATIC_URL
-        }
-      }]
+      params: [
+        {
+          forking: {
+            jsonRpcUrl: process.env.MATIC_URL,
+          },
+        },
+      ],
     });
 
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [owner]
+      params: [owner],
     });
     signer = await ethers.provider.getSigner(owner);
   } else if (hre.network.name === "matic") {
@@ -46,18 +50,24 @@ async function main() {
     throw Error("Incorrect network selected");
   }
 
-  const itemsFacetFactory = await ethers.getContractFactory("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet");
+  const itemsFacetFactory = await ethers.getContractFactory(
+    "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet"
+  );
   let itemsFacet = await itemsFacetFactory.deploy();
   await itemsFacet.deployed();
   console.log("Deployed ItemsFacet:", itemsFacet.address);
 
-  const daoFacetFactory = await ethers.getContractFactory("contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet");
+  const daoFacetFactory = await ethers.getContractFactory(
+    "contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet"
+  );
   let daoFacet = await daoFacetFactory.deploy();
   await daoFacet.deployed();
   console.log("Deployed DAOFacet:", daoFacet.address);
 
   const movingFuncs = [
-    getSelector("function setWearableSlotPositions(uint256 _wearableId, bool[16] calldata _slotPositions) external")
+    getSelector(
+      "function setWearableSlotPositions(uint256 _wearableId, bool[16] calldata _slotPositions) external"
+    ),
   ];
   let existingItemsFuncs = getSelectors(itemsFacet);
   for (const selector of movingFuncs) {
@@ -72,7 +82,9 @@ async function main() {
       throw Error("Selector", selector, "not found in DAOFacet");
     }
   }
-  existingDaoFuncs = existingDaoFuncs.filter(selector => !movingFuncs.includes(selector));
+  existingDaoFuncs = existingDaoFuncs.filter(
+    (selector) => !movingFuncs.includes(selector)
+  );
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
@@ -80,48 +92,57 @@ async function main() {
     {
       facetAddress: ethers.constants.AddressZero,
       action: FacetCutAction.Remove,
-      functionSelectors: movingFuncs
+      functionSelectors: movingFuncs,
     },
     {
       facetAddress: itemsFacet.address,
       action: FacetCutAction.Replace,
-      functionSelectors: existingItemsFuncs
+      functionSelectors: existingItemsFuncs,
     },
     {
       facetAddress: daoFacet.address,
       action: FacetCutAction.Add,
-      functionSelectors: movingFuncs
+      functionSelectors: movingFuncs,
     },
     {
       facetAddress: daoFacet.address,
       action: FacetCutAction.Replace,
-      functionSelectors: existingDaoFuncs
-    }
+      functionSelectors: existingDaoFuncs,
+    },
   ];
   console.log(cut);
 
-  const diamondCut = (await ethers.getContractAt("IDiamondCut", diamondAddress)).connect(signer);
+  const diamondCut = (
+    await ethers.getContractAt("IDiamondCut", diamondAddress)
+  ).connect(signer);
 
   console.log("Diamond cut");
-  if(testing) {
-    const tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", { gasLimit: 20000000 });
+  if (testing) {
+    const tx = await diamondCut.diamondCut(
+      cut,
+      ethers.constants.AddressZero,
+      "0x",
+      { gasLimit: 20000000 }
+    );
     console.log("Diamond cut tx:", tx.hash);
     const receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Diamond upgrade failed: ${tx.hash}`);
     }
   } else {
-    let tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, "0x", {
-      gasLimit: 800000,
-      gasPrice: 5000000000
-    });
-    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, { gasPrice: 5000000000 });
+    let tx = await diamondCut.populateTransaction.diamondCut(
+      cut,
+      ethers.constants.AddressZero,
+      "0x",
+      {
+        gasLimit: 800000,
+      }
+    );
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
     console.log("sent to multisig tx:", tx.hash);
   }
 
   console.log("Completed diamond cut");
-
-
 
   /*
   const daoContract = await ethers.getContractAt("DAOFacet",diamondAddress, signer)
@@ -141,16 +162,11 @@ async function main() {
 
   console.log('after:',itemType)
   */
-
-
-
-
-
 }
 
 main()
   .then(() => process.exit(0))
-  .catch(error => {
+  .catch((error) => {
     console.error(error);
     process.exit(1);
   });
