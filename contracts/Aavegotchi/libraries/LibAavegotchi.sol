@@ -70,6 +70,7 @@ library LibAavegotchi {
     uint8 constant STATUS_AAVEGOTCHI = 3;
 
     event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
+    event PetOperatorRemoved(uint256 indexed _tokenId, address indexed _petOperator);
 
     function toNumericTraits(uint256 _randomNumber, int16[NUMERIC_TRAITS_NUM] memory _modifiers)
         internal
@@ -259,6 +260,8 @@ library LibAavegotchi {
             }
             s.petOperatorTokenIds[petOperator].pop();
             delete s.petOperators[tokenId];
+
+            emit PetOperatorRemoved(tokenId, petOperator);
         }
     }
 

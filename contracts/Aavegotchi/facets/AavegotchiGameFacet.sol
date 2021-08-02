@@ -17,10 +17,11 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {Modifiers, Haunt, Aavegotchi} from "../libraries/LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
-// import "hardhat/console.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
+
+// import "hardhat/console.sol";
 
 contract AavegotchiGameFacet is Modifiers {
     /// @dev This emits when the approved address for an NFT is changed or
@@ -41,6 +42,9 @@ contract AavegotchiGameFacet is Modifiers {
 
     event LockAavegotchi(uint256 indexed _tokenId, uint256 _time);
     event UnLockAavegotchi(uint256 indexed _tokenId, uint256 _time);
+
+    event PetOperatorRegistered(address indexed _address);
+    event PetOperatorSet(uint256 indexed _tokenId, address indexed _petOperator);
 
     function aavegotchiNameAvailable(string calldata _name) external view returns (bool available_) {
         available_ = s.aavegotchiNamesUsed[LibAavegotchi.validateAndLowerName(_name)];
@@ -161,10 +165,10 @@ contract AavegotchiGameFacet is Modifiers {
     }
 
     function pet() external {
-        address sender = LibMeta.msgSender();
+        address operator = LibMeta.msgSender();
 
         //Get all the tokenIDs attached to the petOperator
-        uint256[] memory tokenIds = s.petOperatorTokenIds[sender];
+        uint256[] memory tokenIds = s.petOperatorTokenIds[operator];
         address ghstContract = s.ghstContract;
         for (uint256 i; i < tokenIds.length; i++) {
             uint256 tokenId = tokenIds[i];
@@ -178,10 +182,18 @@ contract AavegotchiGameFacet is Modifiers {
                 LibAavegotchi.interact(tokenId);
             } else {
                 //It costs 0.3 GHST to Pet. 0.1 GHST goes to Pixelcraft, 0.2 goes to Pet Operator
+
+                uint256 petRate = s.petOperatorInfo[operator].rate;
+
                 uint256 balance = IERC20(ghstContract).balanceOf(owner);
-                if (balance >= 3e17 && LibAavegotchi.interact(tokenId)) {
-                    LibERC20.transferFrom(ghstContract, owner, s.pixelCraft, 1e17);
-                    LibERC20.transferFrom(ghstContract, owner, sender, 2e17);
+                if (balance >= petRate && LibAavegotchi.interact(tokenId)) {
+                    //todo: Ensure percentages are correct
+
+                    uint256 operatorShare = (petRate / 10) * 7;
+                    uint256 pixelCraftShare = (petRate / 10) * 3;
+
+                    LibERC20.transferFrom(ghstContract, owner, s.pixelCraft, pixelCraftShare);
+                    LibERC20.transferFrom(ghstContract, owner, operator, operatorShare);
                 }
             }
         }
@@ -208,13 +220,50 @@ contract AavegotchiGameFacet is Modifiers {
         }
     }
 
+    //todo: test
+    function registerAsPetOperator(
+        uint256 _rate,
+        string calldata _name,
+        string calldata _description
+    ) external {
+        //First check if the petOperator is managing any Aavegotchis
+        address sender = LibMeta.msgSender();
+
+        require(s.petOperatorTokenIds[sender].length == 0, "AavegotchiGameFacet: Cannot update Pet Operator information with managed Aavegotchis");
+
+        //todo: test
+        require(_rate >= 3e17, "AavegotchiGameFacet: Pet rate too low");
+
+        s.petOperatorInfo[sender].rate = _rate;
+        s.petOperatorInfo[sender].name = _name;
+        s.petOperatorInfo[sender].description = _description;
+
+        emit PetOperatorRegistered(sender);
+    }
+
+    struct PetOperatorInfo {
+        uint256 rate_;
+        string name_;
+        string description_;
+    }
+
+    function petOperatorInfo(address _operator) external view returns (PetOperatorInfo memory info_) {
+        info_.rate_ = s.petOperatorInfo[_operator].rate;
+        info_.name_ = s.petOperatorInfo[_operator].name;
+        info_.description_ = s.petOperatorInfo[_operator].description;
+    }
+
     function setPetOperator(address _petOperator, uint256[] calldata _tokenIds) external {
         require(_petOperator != address(0), "AavegotchiGameFacet: pet operator can't be address(0)");
+
+        //todo: test
+        require(s.petOperatorInfo[_petOperator].rate > 0, "AavegotchiGameFacet: Pet Operator not registered");
+
         address sender = LibMeta.msgSender();
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             address owner = s.aavegotchis[tokenId].owner;
-            require(owner == sender, "AavegotchiGameFacet: must be owner to set petter");
+            require(owner == sender, "AavegotchiGameFacet: Must be owner to set petter");
 
             //PO Already set
             if (s.petOperators[tokenId] == _petOperator) {
@@ -227,6 +276,7 @@ contract AavegotchiGameFacet is Modifiers {
             }
             s.petOperatorTokenIds[_petOperator].push(tokenId);
             s.petOperators[tokenId] = _petOperator;
+            emit PetOperatorSet(tokenId, _petOperator);
         }
         require(s.petOperatorTokenIds[_petOperator].length < 11, "AavegotchiGameFacet: Pet operator can't have more than 10 aavegotchis");
     }

@@ -146,6 +146,12 @@ struct ListingListItem {
     uint256 childListingId;
 }
 
+struct PetOperatorInfo {
+    uint256 rate;
+    string name;
+    string description;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -230,6 +236,7 @@ struct AppStorage {
     mapping(uint256 => uint256) sleeves;
     mapping(uint256 => address) petOperators;
     mapping(address => uint256[]) petOperatorTokenIds;
+    mapping(address => PetOperatorInfo) petOperatorInfo;
 }
 
 library LibAppStorage {
