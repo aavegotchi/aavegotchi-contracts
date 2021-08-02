@@ -2,17 +2,7 @@
 pragma solidity 0.8.1;
 
 import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
-import {
-    LibAppStorage,
-    Modifiers,
-    ItemType,
-    Aavegotchi,
-    ItemType,
-    WearableSet,
-    NUMERIC_TRAITS_NUM,
-    EQUIPPED_WEARABLE_SLOTS,
-    PORTAL_AAVEGOTCHIS_NUM
-} from "../libraries/LibAppStorage.sol";
+import {LibAppStorage, Modifiers, ItemType, Aavegotchi, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -223,7 +213,7 @@ contract ItemsFacet is Modifiers {
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             uint256 toEquipId = _wearablesToEquip[slot];
             uint256 existingEquippedWearableId = aavegotchi.equippedWearables[slot];
-
+            // ItemType memory item = s.itemTypes[existingEquippedWearableId];
             //If the new wearable value is equal to the current equipped wearable in that slot
             //do nothing
             if (toEquipId == existingEquippedWearableId) {
@@ -234,7 +224,7 @@ contract ItemsFacet is Modifiers {
             aavegotchi.equippedWearables[slot] = uint16(toEquipId);
 
             //If a wearable was equipped in this slot
-            if (existingEquippedWearableId != 0) {
+            if (existingEquippedWearableId != 0 && s.itemTypes[existingEquippedWearableId].canBeTransferred) {
                 // remove wearable from Aavegotchi and transfer item to owner
                 LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
                 LibItems.addToOwner(sender, existingEquippedWearableId, 1);
