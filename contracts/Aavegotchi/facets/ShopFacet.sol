@@ -18,7 +18,6 @@ contract ShopFacet is Modifiers {
         // uint256 indexed _batchId,
         uint256 _tokenId,
         uint256 _numAavegotchisToPurchase,
-        uint256 _totalPrice,
         uint256 _hauntId
     );
 
@@ -27,39 +26,16 @@ contract ShopFacet is Modifiers {
 
     event PurchaseItemsWithVouchers(address indexed _buyer, address indexed _to, uint256[] _itemIds, uint256[] _quantities);
 
-    function mintPortals(address _to, uint256 _ghst) external onlyOwner {
+    function mintPortals(address _to, uint256 _amount) external onlyOwner {
         uint256 currentHauntId = s.currentHauntId;
         Haunt storage haunt = s.haunts[currentHauntId];
-        uint256 price = haunt.portalPrice;
-        require(_ghst >= price, "Not enough GHST to buy portals");
-        uint256[3] memory tiers;
-        tiers[0] = price * 5;
-        tiers[1] = tiers[0] + (price * 2 * 10);
-        tiers[2] = tiers[1] + (price * 3 * 10);
-        require(_ghst <= tiers[2], "Can't buy more than 25");
         address sender = LibMeta.msgSender();
-        uint256 numToPurchase;
-        uint256 totalPrice;
-        if (_ghst <= tiers[0]) {
-            numToPurchase = _ghst / price;
-            totalPrice = numToPurchase * price;
-        } else {
-            if (_ghst <= tiers[1]) {
-                numToPurchase = (_ghst - tiers[0]) / (price * 2);
-                totalPrice = tiers[0] + (numToPurchase * (price * 2));
-                numToPurchase += 5;
-            } else {
-                numToPurchase = (_ghst - tiers[1]) / (price * 3);
-                totalPrice = tiers[1] + (numToPurchase * (price * 3));
-                numToPurchase += 15;
-            }
-        }
-        uint256 hauntCount = haunt.totalCount + numToPurchase;
+        uint256 hauntCount = haunt.totalCount + _amount;
         require(hauntCount <= haunt.hauntMaxSize, "ShopFacet: Exceeded max number of aavegotchis for this haunt");
         s.haunts[currentHauntId].totalCount = uint24(hauntCount);
         uint32 tokenId = s.tokenIdCounter;
-        emit MintPortals(sender, _to, tokenId, numToPurchase, totalPrice, currentHauntId);
-        for (uint256 i; i < numToPurchase; i++) {
+        emit MintPortals(sender, _to, tokenId, _amount, currentHauntId);
+        for (uint256 i; i < _amount; i++) {
             s.aavegotchis[tokenId].owner = _to;
             s.aavegotchis[tokenId].hauntId = uint16(currentHauntId);
             s.tokenIdIndexes[tokenId] = s.tokenIds.length;
@@ -70,8 +46,6 @@ contract ShopFacet is Modifiers {
             tokenId++;
         }
         s.tokenIdCounter = tokenId;
-        // LibAavegotchi.verify(tokenId);
-        LibAavegotchi.purchase(sender, totalPrice);
     }
 
     function purchaseItemsWithGhst(

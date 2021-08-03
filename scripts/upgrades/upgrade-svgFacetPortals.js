@@ -39,16 +39,6 @@ async function main() {
     throw Error("Incorrect network selected");
   }
 
-  const xingYunFacet = await ethers.getContractAt(
-    "XingyunFacet",
-    diamondAddress
-  );
-
-  const ShopFacet = await ethers.getContractFactory("ShopFacet");
-  let shopFacet = await ShopFacet.deploy();
-  await shopFacet.deployed();
-  console.log("Deployed ShopFacet");
-
   const SvgFacet = await ethers.getContractFactory(
     "contracts/Aavegotchi/facets/SvgFacet.sol:SvgFacet"
   );
@@ -57,43 +47,11 @@ async function main() {
   await svgFacet.deployed();
   console.log("Deployed Svgfacet:", svgFacet.address);
 
-  //const xingAddress = "0x68B7BF18184E0cC160f046E567Cc5cdbbf0d89d6";
-  //let allExistingXingYunFuncs = getSelectors(xingYunFacet);
-
-  //add the generic mintPortals function
-  let existingShopFuncs = getSelectors(shopFacet);
-
   let existingSvgFuncs = getSelectors(svgFacet);
-  //remove the buyPortals function
-  const toRemove = [
-    getSelector("function buyPortals(address _to, uint256 _ghst) external"),
-  ];
-
-  const newShopFuncs = [
-    getSelector("function mintPortals(address _to, uint256 _ghst) external"),
-  ];
-  //existingDaoFuncs = existingDaoFuncs.filter(selector => !newDaoFuncs.includes(selector))
-
-  //let existingShopFuncs = getSelectors(shopFacet);
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
   const cut = [
-    {
-      facetAddress: ethers.constants.AddressZero,
-      action: FacetCutAction.Remove,
-      functionSelectors: ["0xebdc3b58", "0x432788ec"], //excluding '0xf83023af' which appears to not be in the diamond
-    },
-    {
-      facetAddress: ethers.constants.AddressZero,
-      action: FacetCutAction.Remove,
-      functionSelectors: toRemove,
-    },
-    {
-      facetAddress: shopFacet.address,
-      action: FacetCutAction.Add,
-      functionSelectors: newShopFuncs,
-    },
     {
       facetAddress: svgFacet.address,
       action: FacetCutAction.Replace,
