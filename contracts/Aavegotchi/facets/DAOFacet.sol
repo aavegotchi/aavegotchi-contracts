@@ -24,6 +24,7 @@ contract DAOFacet is Modifiers {
     event GameManagerRemoved(address indexed gameManager_);
     event ItemManagerAdded(address indexed newItemManager_);
     event ItemManagerRemoved(address indexed ItemManager_);
+    event WearableSlotPositionsSet(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] _slotPositions);
 
     /***********************************|
    |             Read Functions         |
@@ -220,5 +221,11 @@ contract DAOFacet is Modifiers {
             gameManager.limit = 0;
             emit GameManagerRemoved(_gameManagers[index]);
         }
+    }
+
+    function setWearableSlotPositions(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] calldata _slotPositions) external onlyDaoOrOwner {
+        require(_wearableId < s.itemTypes.length, "Error");
+        s.itemTypes[_wearableId].slotPositions = _slotPositions;
+        emit WearableSlotPositionsSet(_wearableId, _slotPositions);
     }
 }
