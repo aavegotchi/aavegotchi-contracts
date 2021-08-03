@@ -1,6 +1,5 @@
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
 //const { ethers } = require("ethers");
-//const { ethers } = require("ethers");
 const { sendToMultisig } = require("../libraries/multisig/multisig.js");
 
 function getSelectors(contract) {
@@ -44,11 +43,38 @@ async function main() {
     "XingyunFacet",
     diamondAddress
   );
-  console.log("all functions include", getSelectors(xingYunFacet));
-  const xingAddress = "0x68B7BF18184E0cC160f046E567Cc5cdbbf0d89d6";
-  let allExistingXingYunFuncs = getSelectors(xingYunFacet);
 
+  const ShopFacet = await ethers.getContractFactory("ShopFacet");
+  let shopFacet = await ShopFacet.deploy();
+  await shopFacet.deployed();
+  console.log("Deployed ShopFacet");
+
+  const SvgFacet = await ethers.getContractFactory(
+    "contracts/Aavegotchi/facets/SvgFacet.sol:SvgFacet"
+  );
+
+  let svgFacet = await SvgFacet.deploy();
+  await svgFacet.deployed();
+  console.log("Deployed Svgfacet:", svgFacet.address);
+
+  //const xingAddress = "0x68B7BF18184E0cC160f046E567Cc5cdbbf0d89d6";
+  //let allExistingXingYunFuncs = getSelectors(xingYunFacet);
+
+  //add the generic mintPortals function
+  let existingShopFuncs = getSelectors(shopFacet);
+
+  let existingSvgFuncs = getSelectors(svgFacet);
+  //remove the buyPortals function
+  const toRemove = [
+    getSelector("function buyPortals(address _to, uint256 _ghst) external"),
+  ];
+
+  const newShopFuncs = [
+    getSelector("function mintPortals(address _to, uint256 _ghst) external"),
+  ];
   //existingDaoFuncs = existingDaoFuncs.filter(selector => !newDaoFuncs.includes(selector))
+
+  //let existingShopFuncs = getSelectors(shopFacet);
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
@@ -56,7 +82,22 @@ async function main() {
     {
       facetAddress: ethers.constants.AddressZero,
       action: FacetCutAction.Remove,
-      functionSelectors: allExistingXingYunFuncs,
+      functionSelectors: ["0xebdc3b58", "0x432788ec"], //excluding '0xf83023af' which appears to not be in the diamond
+    },
+    {
+      facetAddress: ethers.constants.AddressZero,
+      action: FacetCutAction.Remove,
+      functionSelectors: toRemove,
+    },
+    {
+      facetAddress: shopFacet.address,
+      action: FacetCutAction.Add,
+      functionSelectors: newShopFuncs,
+    },
+    {
+      facetAddress: svgFacet.address,
+      action: FacetCutAction.Replace,
+      functionSelectors: existingSvgFuncs,
     },
   ];
 

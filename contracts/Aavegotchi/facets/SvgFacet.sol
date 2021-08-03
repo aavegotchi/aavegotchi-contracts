@@ -2,13 +2,7 @@
 pragma solidity 0.8.1;
 
 import {AppStorage, SvgLayer, Dimensions} from "../libraries/LibAppStorage.sol";
-import {
-    LibAavegotchi,
-    PortalAavegotchiTraitsIO,
-    EQUIPPED_WEARABLE_SLOTS,
-    PORTAL_AAVEGOTCHIS_NUM,
-    NUMERIC_TRAITS_NUM
-} from "../libraries/LibAavegotchi.sol";
+import {LibAavegotchi, PortalAavegotchiTraitsIO, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, NUMERIC_TRAITS_NUM} from "../libraries/LibAavegotchi.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
@@ -40,10 +34,10 @@ contract SvgFacet is Modifiers {
         uint8 status = s.aavegotchis[_tokenId].status;
         if (status == LibAavegotchi.STATUS_CLOSED_PORTAL) {
             // sealed closed portal
-            svg = LibSvg.getSvg("aavegotchi", 0);
+            svg = LibSvg.getSvg("portal-closed", 0);
         } else if (status == LibAavegotchi.STATUS_OPEN_PORTAL) {
             // open portal
-            svg = LibSvg.getSvg("aavegotchi", 1);
+            svg = LibSvg.getSvg("portal-open", 1);
         } else if (status == LibAavegotchi.STATUS_AAVEGOTCHI) {
             address collateralType = s.aavegotchis[_tokenId].collateralType;
             svg = getAavegotchiSvgLayers(collateralType, s.aavegotchis[_tokenId].numericTraits, _tokenId);
@@ -407,7 +401,7 @@ contract SvgFacet is Modifiers {
     }
 
     function deleteLastSvgLayers(bytes32 _svgType, uint256 _numLayers) external onlyItemManager {
-        for(uint256 i; i < _numLayers; i++){
+        for (uint256 i; i < _numLayers; i++) {
             s.svgLayers[_svgType].pop();
         }
     }
