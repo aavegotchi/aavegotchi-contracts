@@ -545,19 +545,20 @@ function wearable (name) {
 
 function bodyWearable (name) {
   let svg = readSvg(name)
-  const backLeftSleevesUp = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-up">' + readSvg(`${name}BackLeftUp`) + '</g>'
-  const backLeft = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' + readSvg(`${name}BackLeft`) + '</g>'
-  const sideLeft = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' + readSvg(`${name}SideLeft`) + '</g>'
-  const sideLeftUp = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' + readSvg(`${name}SideLeftUp`) + '</g>'
-  const sideLeftDown = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' + readSvg(`${name}SideLeftDown`) + '</g>'
+  const back = readSvg(`${name}Back`)
+  const backLeftSleevesUp = readSvg(`${name}BackLeftUp`)
+  const backLeft = readSvg(`${name}BackLeft`)
+  const sideLeft = readSvg(`${name}SideLeft`)
+  const sideLeftUp = readSvg(`${name}SideLeftUp`)
+  const sideLeftDown = readSvg(`${name}SideLeftDown`)
 
-  const backRightSleevesUp = '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-up">' + readSvg(`${name}BackRightUp`) + '</g>'
-  const backRight = '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-down">' + readSvg(`${name}BackRight`) + '</g>'
-  const sideRight = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' + readSvg(`${name}SideRight`) + '</g>'
-  const sideRightUp = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' + readSvg(`${name}SideRightUp`) + '</g>'
-  const sideRightDown = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' + readSvg(`${name}SideRightDown`) + '</g>'
+  const backRightSleevesUp = readSvg(`${name}BackRightUp`)
+  const backRight = readSvg(`${name}BackRight`)
+  const sideRight = readSvg(`${name}SideRight`)
+  const sideRightUp = readSvg(`${name}SideRightUp`)
+  const sideRightDown = readSvg(`${name}SideRightDown`)
 
-  svg = '<g>' + svg + backLeftSleevesUp + backLeft + sideLeft + sideLeftUp + sideLeftDown + backRightSleevesUp + backRight + sideRight + sideRightUp + sideRightDown + '</g>'
+  svg = '<g>' + back + backLeftSleevesUp + backLeft + backRightSleevesUp + backRight + '</g>'
   return svg
 }
 
