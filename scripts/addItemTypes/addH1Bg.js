@@ -190,7 +190,7 @@ async function main() {
 
   console.log("Minting items");
   if (testing) {
-    tx = await daoFacet.mintItems(mintAddress, [210], [2]);
+    tx = await daoFacet.mintItems(mintAddress, [210], [1]);
     receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
@@ -219,7 +219,7 @@ async function main() {
   } else {
     tx = await daoFacet.populateTransaction.mintItems(
       mintAddress,
-      [206],
+      [210],
       [100],
       { gasLimit: gasLimit }
     );

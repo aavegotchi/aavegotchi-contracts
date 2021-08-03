@@ -34,7 +34,7 @@ describe("Test uneqipping", async function () {
     GotchiBalanceBefore = (
       await itemsFacet.balanceOfToken(diamondAddress, 2575, 210)
     ).toString();
-    expect(addressBalanceBefore).to.equal("1");
+    expect(addressBalanceBefore).to.equal("0");
     expect(GotchiBalanceBefore).to.equal("1");
     impersonate = await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
@@ -55,8 +55,8 @@ describe("Test uneqipping", async function () {
     GotchiBalanceAfter = (
       await itemsFacet.balanceOfToken(diamondAddress, 2575, 210)
     ).toString();
-    expect(addressBalanceAfter).to.equal(1);
-    expect(GotchiBalanceAfter).to.equal(1);
+    expect(addressBalanceAfter).to.equal("0");
+    expect(GotchiBalanceAfter).to.equal("1");
     console.log("gotchi is now", itemsNow);
 
     expect(equipped.length).to.equal(16);
