@@ -257,7 +257,7 @@ contract SvgViewsFacet is Modifiers {
             layers.pet = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_PET);
         }
 
-        console.log("WEARABLES");
+        console.log("WEARABLE");
         console.logBytes(layers.handRight);
         console.logBytes(layers.handLeft);
         console.logBytes(layers.hands);
