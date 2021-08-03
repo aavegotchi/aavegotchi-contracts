@@ -204,6 +204,8 @@ contract SvgViewsFacet is Modifiers {
         SvgLayerDetails memory details,
         uint256 _tokenId
     ) internal view returns (bytes memory svg_) {
+        console.log(">>>>>>SideView in Bytes<<<<<<");
+        console.logBytes(_sideView);
         //Wearables
         uint16[EQUIPPED_WEARABLE_SLOTS] storage equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
         AavegotchiLayers memory layers;
@@ -255,6 +257,16 @@ contract SvgViewsFacet is Modifiers {
             layers.pet = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_PET);
         }
 
+        console.log("WEARABLES");
+        console.logBytes(layers.handRight);
+        console.logBytes(layers.handLeft);
+        console.logBytes(layers.hands);
+        console.logBytes(layers.head);
+        console.logBytes(layers.face);
+        console.logBytes(layers.eyes);
+        console.logBytes(layers.bodyWearable);
+        console.logBytes(layers.sleeves);
+
         //1. Background wearable
         //2. Body
         //3. Body wearable
@@ -266,18 +278,21 @@ contract SvgViewsFacet is Modifiers {
         //9. Left hand wearable
         //10. Right hand wearable
         //11. Pet wearable
-        /* if (LibSvg.bytesToBytes32("wearables-", _sideView) == keccak256(abi.encodePacked("wearables-", "left"))) {
+        /*if (LibSvg.bytesToBytes32("wearables-", _sideView) == keccak256(abi.encodePacked("wearables-", "left"))) {
             svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
             svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.handLeft, layers.hands, layers.sleeves, layers.pet);
-        } else if (LibSvg.bytesToBytes32("wearables-", _sideView) == keccak256(abi.encodePacked("wearables-", "right"))) {
+        }
+        if (LibSvg.bytesToBytes32("wearables-", _sideView) == keccak256(abi.encodePacked("wearables-", "right"))) {
             svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
             svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.handRight, layers.hands, layers.sleeves, layers.pet);
-        } else if (LibSvg.bytesToBytes32("wearables-", _sideView) == keccak256(abi.encodePacked("wearables-", "back"))) {
+        }
+        if (LibSvg.bytesToBytes32("wearables-", _sideView) == keccak256(abi.encodePacked("wearables-", "back"))) {
             svg_ = abi.encodePacked(layers.background);
             svg_ = abi.encodePacked(svg_, _body);
             svg_ = abi.encodePacked(
                 svg_,
                 layers.handRight,
+                layers.handLeft,
                 layers.hands,
                 layers.bodyWearable,
                 layers.sleeves,
@@ -286,7 +301,8 @@ contract SvgViewsFacet is Modifiers {
                 layers.head,
                 layers.pet
             );
-        } else if (LibSvg.bytesToBytes32("wearables-", _sideView) == keccak256(abi.encodePacked("wearables-", "front"))) {
+        }
+        else if (LibSvg.bytesToBytes32("wearables-", _sideView) == keccak256(abi.encodePacked("wearables-", "front"))) {
             svg_ = abi.encodePacked(layers.background);
             svg_ = abi.encodePacked(svg_, _body);
             svg_ = abi.encodePacked(
