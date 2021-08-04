@@ -96,17 +96,6 @@ async function main() {
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
   if (testing) {
     await hre.network.provider.request({
-      method: "hardhat_reset",
-      params: [
-        {
-          forking: {
-            jsonRpcUrl: process.env.MATIC_URL,
-          },
-        },
-      ],
-    });
-
-    await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [owner],
     });
@@ -198,6 +187,7 @@ async function main() {
     console.log("Prize items minted:", tx.hash);
     // Aavegotchi equips
 
+    /*
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: ["0x027Ffd3c119567e85998f4E6B9c3d83D5702660c"],
@@ -212,9 +202,10 @@ async function main() {
       "2575",
       [0, 0, 0, 0, 0, 0, 0, 210, 0, 0, 0, 0, 0, 0, 0, 0]
     );
+    */
 
     const addressBalanceAfter = (
-      await itemsFacet.balanceOf(owner, 210)
+      await itemsFacet.balanceOf(mintAddress, 210)
     ).toString();
     const GotchiBalanceAfter = (
       await itemsFacet.balanceOfToken(diamondAddress, 2575, 210)
@@ -223,9 +214,9 @@ async function main() {
     console.log("address balance:", addressBalanceAfter);
     console.log("gotchi balance after:", GotchiBalanceAfter);
 
-    const svgOutput = await svgFacet.getAavegotchiSvg("2575");
+    // const svgOutput = await svgFacet.getAavegotchiSvg("2575");
 
-    console.log("svg output:", svgOutput);
+    // console.log("svg output:", svgOutput);
   } else {
     tx = await daoFacet.populateTransaction.mintItems(
       mintAddress,

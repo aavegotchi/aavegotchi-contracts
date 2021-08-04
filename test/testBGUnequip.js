@@ -46,12 +46,10 @@ describe("Test uneqipping", async function () {
 
     expect(itemType.canBeTransferred).to.equal(false);
 
-    /*
     await aavegotchiOwnerSigner.equipWearables(
       "2575",
       [0, 0, 0, 0, 0, 0, 0, 210, 0, 0, 0, 0, 0, 0, 0, 0]
     );
-    */
 
     owner = await gotchiFacet.ownerOf(2575);
     addressBalanceBefore = (await itemsFacet.balanceOf(owner, 210)).toString();
