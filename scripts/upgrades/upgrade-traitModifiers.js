@@ -72,6 +72,11 @@ async function main() {
       action: FacetCutAction.Add,
       functionSelectors: newDaoFuncs,
     },
+    {
+      facetAddress: facet1.address,
+      action: FacetCutAction.Replace,
+      functionSelectors: existingDaoFuncs,
+    },
   ];
   console.log(cut);
 
