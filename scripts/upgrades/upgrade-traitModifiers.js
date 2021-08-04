@@ -18,6 +18,7 @@ function getSelector(func) {
 }
 
 async function main() {
+  const gasPrice = 20000000000;
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
   let facet;
@@ -25,6 +26,8 @@ async function main() {
     await ethers.getContractAt("OwnershipFacet", diamondAddress)
   ).owner();
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
+
+  console.log("testing:", testing);
 
   if (testing) {
     await hre.network.provider.request({
@@ -41,7 +44,9 @@ async function main() {
   const daoFacet = await ethers.getContractFactory(
     "contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet"
   );
-  facet1 = await daoFacet.deploy();
+  facet1 = await daoFacet.deploy({
+    gasPrice: gasPrice,
+  });
 
   await facet1.deployed();
 
@@ -89,44 +94,43 @@ async function main() {
     console.log("Completed diamond cut: ", tx.hash);
 
     //item manager
-    if (testing) {
-      const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
-      await hre.network.provider.request({
-        method: "hardhat_impersonateAccount",
-        params: [itemManager],
-      });
-      signer = await ethers.provider.getSigner(itemManager);
 
-      const itemManagerDAO = await ethers.getContractAt(
-        "DAOFacet",
-        diamondAddress,
-        signer
-      );
+    const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [itemManager],
+    });
+    signer = await ethers.provider.getSigner(itemManager);
 
-      await itemManagerDAO.setItemTraitModifiersAndRarityModifier(
-        "210",
-        [0, 0, 0, 0, 0, 0],
-        0
-      );
+    const itemManagerDAO = await ethers.getContractAt(
+      "DAOFacet",
+      diamondAddress,
+      signer
+    );
 
-      const itemsFacet = await ethers.getContractAt(
-        "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
-        diamondAddress
-      );
+    await itemManagerDAO.setItemTraitModifiersAndRarityModifier(
+      "210",
+      [0, 0, 0, 0, 0, 0],
+      0
+    );
 
-      const itemType = await itemsFacet.getItemType("210");
+    const itemsFacet = await ethers.getContractAt(
+      "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
+      diamondAddress
+    );
 
-      console.log("item type:", itemType);
-    } else {
-      console.log("Diamond cut");
-      tx = await diamondCut.populateTransaction.diamondCut(
-        cut,
-        ethers.constants.AddressZero,
-        "0x",
-        { gasLimit: 800000 }
-      );
-      await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
-    }
+    const itemType = await itemsFacet.getItemType("210");
+
+    console.log("item type:", itemType);
+  } else {
+    console.log("Diamond cut");
+    tx = await diamondCut.populateTransaction.diamondCut(
+      cut,
+      ethers.constants.AddressZero,
+      "0x",
+      { gasLimit: 800000 }
+    );
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
   }
 }
 
