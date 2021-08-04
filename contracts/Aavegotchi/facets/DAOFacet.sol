@@ -25,6 +25,7 @@ contract DAOFacet is Modifiers {
     event ItemManagerAdded(address indexed newItemManager_);
     event ItemManagerRemoved(address indexed ItemManager_);
     event WearableSlotPositionsSet(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] _slotPositions);
+    event ItemModifiersSet(uint256 _wearableId, int8[6] _traitModifiers, uint8 _rarityScoreModifier);
 
     /***********************************|
    |             Read Functions         |
@@ -227,5 +228,16 @@ contract DAOFacet is Modifiers {
         require(_wearableId < s.itemTypes.length, "Error");
         s.itemTypes[_wearableId].slotPositions = _slotPositions;
         emit WearableSlotPositionsSet(_wearableId, _slotPositions);
+    }
+
+    function setItemTraitModifiersAndRarityModifier(
+        uint256 _wearableId,
+        int8[6] calldata _traitModifiers,
+        uint8 _rarityScoreModifier
+    ) external onlyItemManager {
+        require(_wearableId < s.itemTypes.length, "Error");
+        s.itemTypes[_wearableId].traitModifiers = _traitModifiers;
+        s.itemTypes[_wearableId].rarityScoreModifier = _rarityScoreModifier;
+        emit ItemModifiersSet(_wearableId, _traitModifiers, _rarityScoreModifier);
     }
 }
