@@ -10,9 +10,11 @@ const { sendToMultisig } = require("../libraries/multisig/multisig.js");
 let signer;
 const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
 const gasLimit = 15000000;
+const gasPrice = 2000000000;
 
 async function uploadSvgs(svgs, svgType, testing) {
   this.timeout = 200000000;
+
   let svgFacet = (
     await ethers.getContractAt("SvgFacet", diamondAddress)
   ).connect(signer);
@@ -67,7 +69,8 @@ async function uploadSvgs(svgs, svgType, testing) {
     printSizeInfo(svgTypesAndSizes);
     if (testing) {
       let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, {
-        gasLimit: gasLimit,
+        //gasLimit: gasLimit,
+        gasPrice: gasPrice,
       });
       let receipt = await tx.wait();
       if (!receipt.status) {
@@ -75,11 +78,8 @@ async function uploadSvgs(svgs, svgType, testing) {
       }
       console.log(svgItemsEnd, svg.length);
     } else {
-      let tx = await svgFacet.populateTransaction.storeSvg(
-        svg,
-        svgTypesAndSizes
-      );
-      await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
+      await svgFacet.storeSvg(svg, svgTypesAndSizes);
+      console.log("svg stored");
     }
     if (svgItemsEnd === svgs.length) {
       break;
@@ -112,9 +112,6 @@ async function main() {
   let daoFacet = (
     await ethers.getContractAt("DAOFacet", diamondAddress)
   ).connect(signer);
-  let svgFacet = (
-    await ethers.getContractAt("SvgFacet", diamondAddress)
-  ).connect(signer);
 
   let itemsFacet = await ethers.getContractAt(
     "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
@@ -130,67 +127,18 @@ async function main() {
   console.log("Items were added:", tx.hash);
 
   await uploadSvgs(H1bgs, "wearables", testing);
-  // console.log(sleevesSvgs)
-  // await uploadSvgs(sleevesSvgs.map(value => value.svg), 'sleeves', testing)
-
-  /** 
-  let sleevesSvgId = 27
-  let sleeves = []
-  for (const sleeve of sleevesSvgs) {
-    sleeves.push(
-      {
-        sleeveId: sleevesSvgId,
-        wearableId: sleeve.id
-      }
-    )
-    sleevesSvgId++
-  }
-
-  console.log('Associating sleeves svgs with body wearable svgs.')
-  if (testing) {
-    tx = await svgFacet.setSleeves(sleeves, { gasLimit: gasLimit })
-    receipt = await tx.wait()
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`)
-    }
-    console.log('Sleeves associated:', tx.hash)
-  } else {
-    tx = await svgFacet.populateTransaction.setSleeves(sleeves, { gasLimit: gasLimit })
-    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
-  }
-*/
-  // const finalSVG = await svgFacet.getItemSvg("206");
-
-  //console.log("final svg:", finalSVG);
 
   console.log("Mint items to aavegotchi.eth");
   let mintAddress = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c";
 
   console.log("Minting items");
-  tx = await daoFacet.mintItems(mintAddress, [210], [1]);
+  tx = await daoFacet.mintItems(mintAddress, [210], [10000]);
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
   console.log("Prize items minted:", tx.hash);
   // Aavegotchi equips
-
-  /*
-    await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: ["0x027Ffd3c119567e85998f4E6B9c3d83D5702660c"],
-    });
-    signer = await ethers.provider.getSigner(
-      "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c"
-    );
-
-    const aavegotchiOwnerSigner = await itemsFacet.connect(signer);
-
-    await aavegotchiOwnerSigner.equipWearables(
-      "2575",
-      [0, 0, 0, 0, 0, 0, 0, 210, 0, 0, 0, 0, 0, 0, 0, 0]
-    );
-    */
 
   const addressBalanceAfter = (
     await itemsFacet.balanceOf(mintAddress, 210)

@@ -14,7 +14,7 @@ const itemTypes = [
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 5,
-    maxQuantity: 1000,
+    maxQuantity: 10000,
     traitModifiers: [1, 0, 0, 0, 0, 0],
     canPurchaseWithGhst: false,
     slotPositions: "background",
