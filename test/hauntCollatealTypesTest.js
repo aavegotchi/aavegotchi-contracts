@@ -35,7 +35,7 @@ const itemTypes = [
   }];
 
 describe("Re-deploying Contracts, replacing facet selectors, and uploading H1 collateral types", async function() {
-  this.timeout(300000);
+  this.timeout(1000000);
   let diamondAddress, signer;
   let daoFacet, collateralFacet, bridgeFacet, aavegotchiFacet, aavegotchiGameFacet, svgFacet, itemsFacet, itemsTransferFacet, vrfFacet,
     shopFacet, metaTransactionsFacet, ghstTokenContract;

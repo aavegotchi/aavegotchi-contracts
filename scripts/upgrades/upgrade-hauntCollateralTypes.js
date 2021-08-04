@@ -1,6 +1,7 @@
 /* global ethers */
 const { sendToMultisig } = require("../libraries/multisig/multisig.js");
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
+const { uploadH2SVG } = require("./uploadH2SVG.js");
 
 function getSelectors(contract) {
   const signatures = Object.keys(contract.interface.functions);
@@ -98,6 +99,11 @@ async function main() {
     getSelector("function collateralInfo(uint256 _hauntId, uint256 _collateralId) external view returns (AavegotchiCollateralTypeIO collateralInfo_)"),
     getSelector("function getCollateralInfo(uint256 _hauntId) external view returns (AavegotchiCollateralTypeIO[] collateralInfo_)")
   ];
+  const oldCollateralFacetFuncs = [
+    getSelector("function collaterals() external view returns (address[] collateralTypes_)"),
+    getSelector("function collateralInfo(uint256 _collateralId) external view returns (AavegotchiCollateralTypeIO collateralInfo_)"),
+    getSelector("function getCollateralInfo() external view returns (AavegotchiCollateralTypeIO[] collateralInfo_)")
+  ];
   let existingCollateralFacetFuncs = getSelectors(collateralFacet);
   for (const selector of newCollateralFacetFuncs) {
     if (!existingCollateralFacetFuncs.includes(selector)) {
@@ -108,6 +114,9 @@ async function main() {
 
   const newDaoFacetFuncs = [
     getSelector("function addCollateralTypes(uint256 _hauntId, tuple(address collateralType, tuple(int16[6] modifiers, bytes3 primaryColor, bytes3 secondaryColor, bytes3 cheekColor, uint8 svgId, uint8 eyeShapeSvgId, uint16 conversionRate, bool delisted) collateralTypeInfo)[] _collateralTypes) external")
+  ];
+  const oldDaoFacetFuncs = [
+    getSelector("function addCollateralTypes(tuple(address collateralType, tuple(int16[6] modifiers, bytes3 primaryColor, bytes3 secondaryColor, bytes3 cheekColor, uint8 svgId, uint8 eyeShapeSvgId, uint16 conversionRate, bool delisted) collateralTypeInfo)[] _collateralTypes) external")
   ];
   let existingDaoFacetFuncs = getSelectors(daoFacet);
   for (const selector of newDaoFacetFuncs) {
@@ -122,10 +131,16 @@ async function main() {
       facetAddress: collateralFacet.address,
       action: FacetCutAction.Add,
       functionSelectors: newCollateralFacetFuncs
-    }, {
+    },
+    {
       facetAddress: collateralFacet.address,
       action: FacetCutAction.Replace,
       functionSelectors: existingCollateralFacetFuncs
+    },
+    {
+      facetAddress: ethers.constants.AddressZero,
+      action: FacetCutAction.Remove,
+      functionSelectors: oldCollateralFacetFuncs
     },
     {
       facetAddress: daoFacet.address,
@@ -136,6 +151,11 @@ async function main() {
       facetAddress: daoFacet.address,
       action: FacetCutAction.Replace,
       functionSelectors: existingDaoFacetFuncs
+    },
+    {
+      facetAddress: ethers.constants.AddressZero,
+      action: FacetCutAction.Remove,
+      functionSelectors: oldDaoFacetFuncs
     }
   ];
   for (let facet of facets) {
@@ -188,6 +208,9 @@ async function main() {
       throw Error(`Adding Collateral Types for H2 failed: ${tx.hash}`);
     }
   }
+
+  // Upload SVG for H2
+  await uploadH2SVG();
 
   return {
     signer,
