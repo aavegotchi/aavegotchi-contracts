@@ -213,6 +213,16 @@ async function main() {
       [0, 0, 0, 0, 0, 0, 0, 210, 0, 0, 0, 0, 0, 0, 0, 0]
     );
 
+    const addressBalanceAfter = (
+      await itemsFacet.balanceOf(owner, 210)
+    ).toString();
+    const GotchiBalanceAfter = (
+      await itemsFacet.balanceOfToken(diamondAddress, 2575, 210)
+    ).toString();
+
+    console.log("address balance:", addressBalanceAfter);
+    console.log("gotchi balance after:", GotchiBalanceAfter);
+
     const svgOutput = await svgFacet.getAavegotchiSvg("2575");
 
     console.log("svg output:", svgOutput);
