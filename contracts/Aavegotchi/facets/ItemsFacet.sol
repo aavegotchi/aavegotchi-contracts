@@ -213,7 +213,7 @@ contract ItemsFacet is Modifiers {
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             uint256 toEquipId = _wearablesToEquip[slot];
             uint256 existingEquippedWearableId = aavegotchi.equippedWearables[slot];
-            // ItemType memory item = s.itemTypes[existingEquippedWearableId];
+
             //If the new wearable value is equal to the current equipped wearable in that slot
             //do nothing
             if (toEquipId == existingEquippedWearableId) {
@@ -223,7 +223,7 @@ contract ItemsFacet is Modifiers {
             //Equips new wearable (or sets to 0)
             aavegotchi.equippedWearables[slot] = uint16(toEquipId);
 
-            //If a wearable was equipped in this slot
+            //If a wearable was equipped in this slot and can be transferred, transfer back to owner.
             if (existingEquippedWearableId != 0 && s.itemTypes[existingEquippedWearableId].canBeTransferred) {
                 // remove wearable from Aavegotchi and transfer item to owner
                 LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
