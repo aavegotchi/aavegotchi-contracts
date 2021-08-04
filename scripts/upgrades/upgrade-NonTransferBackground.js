@@ -86,9 +86,7 @@ async function main() {
       { gasLimit: 800000, gasPrice: 5000000000 }
     );
     console.log("tx:", tx);
-    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, {
-      gasPrice: 5000000000,
-    });
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
     console.log("Sent to multisig");
   }
 }
