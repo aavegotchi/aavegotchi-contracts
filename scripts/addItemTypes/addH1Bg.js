@@ -90,23 +90,19 @@ async function uploadSvgs(svgs, svgType, testing) {
 
 async function main() {
   this.timeout = 200000000;
-  let owner = await (
-    await ethers.getContractAt("OwnershipFacet", diamondAddress)
-  ).owner();
+  let ItemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
   if (testing) {
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [owner],
+      params: [ItemManager],
     });
-    signer = await ethers.provider.getSigner(owner);
+    signer = await ethers.provider.getSigner(ItemManager);
     const dao = (
       await ethers.getContractAt("DAOFacet", diamondAddress)
     ).connect(signer);
-    //make owner an itemManager
-    await dao.addItemManagers([owner]);
   } else if (hre.network.name === "matic") {
-    signer = new LedgerSigner(ethers.provider);
+    signer = new LedgerSigner(ethers.provider, "hid", "m/44'/60'/2'/0/0");
   } else {
     throw Error("Incorrect network selected");
   }
@@ -124,21 +120,14 @@ async function main() {
     "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
     diamondAddress
   );
-
   console.log("Adding items", 0, "to", itemTypes.length);
-  if (testing) {
-    tx = await daoFacet.addItemTypes(itemTypes, { gasLimit: gasLimit });
-    receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`);
-    }
-    console.log("Items were added:", tx.hash);
-  } else {
-    tx = await daoFacet.populateTransaction.addItemTypes(itemTypes, {
-      gasLimit: gasLimit,
-    });
-    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
+
+  tx = await daoFacet.addItemTypes(itemTypes, { gasLimit: gasLimit });
+  receipt = await tx.wait();
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`);
   }
+  console.log("Items were added:", tx.hash);
 
   await uploadSvgs(H1bgs, "wearables", testing);
   // console.log(sleevesSvgs)
@@ -178,16 +167,15 @@ async function main() {
   let mintAddress = "0x027Ffd3c119567e85998f4E6B9c3d83D5702660c";
 
   console.log("Minting items");
-  if (testing) {
-    tx = await daoFacet.mintItems(mintAddress, [210], [1]);
-    receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`);
-    }
-    console.log("Prize items minted:", tx.hash);
-    // Aavegotchi equips
+  tx = await daoFacet.mintItems(mintAddress, [210], [1]);
+  receipt = await tx.wait();
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`);
+  }
+  console.log("Prize items minted:", tx.hash);
+  // Aavegotchi equips
 
-    /*
+  /*
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: ["0x027Ffd3c119567e85998f4E6B9c3d83D5702660c"],
@@ -204,28 +192,19 @@ async function main() {
     );
     */
 
-    const addressBalanceAfter = (
-      await itemsFacet.balanceOf(mintAddress, 210)
-    ).toString();
-    const GotchiBalanceAfter = (
-      await itemsFacet.balanceOfToken(diamondAddress, 2575, 210)
-    ).toString();
+  const addressBalanceAfter = (
+    await itemsFacet.balanceOf(mintAddress, 210)
+  ).toString();
+  const GotchiBalanceAfter = (
+    await itemsFacet.balanceOfToken(diamondAddress, 2575, 210)
+  ).toString();
 
-    console.log("address balance:", addressBalanceAfter);
-    console.log("gotchi balance after:", GotchiBalanceAfter);
+  console.log("address balance:", addressBalanceAfter);
+  console.log("gotchi balance after:", GotchiBalanceAfter);
 
-    // const svgOutput = await svgFacet.getAavegotchiSvg("2575");
+  // const svgOutput = await svgFacet.getAavegotchiSvg("2575");
 
-    // console.log("svg output:", svgOutput);
-  } else {
-    tx = await daoFacet.populateTransaction.mintItems(
-      mintAddress,
-      [210],
-      [100],
-      { gasLimit: gasLimit }
-    );
-    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
-  }
+  // console.log("svg output:", svgOutput);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

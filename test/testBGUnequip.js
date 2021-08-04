@@ -86,10 +86,5 @@ describe("Test uneqipping", async function () {
     expect(addressBalanceAfter).to.equal("0");
     expect(GotchiBalanceAfter).to.equal("1");
     // console.log("gotchi is now", itemsNow);
-
-    const equippedWearables = await itemsFacet.equippedWearables("2575");
-    //const equipped
-
-    expect(equippedWearables.length).to.equal(16);
   });
 });
