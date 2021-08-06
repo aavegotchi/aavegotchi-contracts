@@ -546,17 +546,17 @@ function wearable (name) {
 function bodyWearable (name) {
   let svg = readSvg(name)
   const back = readSvg(`${name}Back`)
-  const backLeftSleevesUp = readSvg(`${name}BackLeftUp`)
+  const backLeftSleevesUp = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-up">' + readSvg(`${name}BackLeftUp`) + '</g>'
   const backLeft = readSvg(`${name}BackLeft`)
-  const sideLeft = readSvg(`${name}SideLeft`)
-  const sideLeftUp = readSvg(`${name}SideLeftUp`)
-  const sideLeftDown = readSvg(`${name}SideLeftDown`)
+  // const sideLeft = readSvg(`${name}SideLeft`)
+  // const sideLeftUp = readSvg(`${name}SideLeftUp`)
+  // const sideLeftDown = readSvg(`${name}SideLeftDown`)
 
-  const backRightSleevesUp = readSvg(`${name}BackRightUp`)
+  const backRightSleevesUp = '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-up">' + readSvg(`${name}BackRightUp`) + '</g>'
   const backRight = readSvg(`${name}BackRight`)
-  const sideRight = readSvg(`${name}SideRight`)
-  const sideRightUp = readSvg(`${name}SideRightUp`)
-  const sideRightDown = readSvg(`${name}SideRightDown`)
+  // const sideRight = readSvg(`${name}SideRight`)
+  // const sideRightUp = readSvg(`${name}SideRightUp`)
+  // const sideRightDown = readSvg(`${name}SideRightDown`)
 
   svg = '<g>' + back + backLeftSleevesUp + backLeft + backRightSleevesUp + backRight + '</g>'
   return svg
@@ -565,17 +565,19 @@ function bodyWearable (name) {
 
 function bodyWearableLeft (name) {
   let svg;
-  const leftSleeves = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-up">' + readSvg(`${name}LeftUp`) + '</g>'
-  const left = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' + readSvg(`${name}Left`) + '</g>'
-  svg = '<g>' + left + leftSleeves + '</g>'
+  const leftSleevesUp = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-up">' + readSvg(`${name}SideLeftUp`) + '</g>'
+  const left = readSvg(`${name}SideLeft`)
+  const leftSleevesDown = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' + readSvg(`${name}SideLeftDown`) + '</g>'
+  svg = '<g>' + left + leftSleevesUp + leftSleevesDown + '</g>'
   return svg
 }
 
 function bodyWearableRight (name) {
   let svg;
-  const rightSleeves = '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-up">' + readSvg(`${name}RightUp`) + '</g>'
-  const right = '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-down">' + readSvg(`${name}Right`) + '</g>'
-  svg = '<g>' + right + rightSleeves + '</g>'
+  const rightSleevesUp = '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-up">' + readSvg(`${name}SideRightUp`) + '</g>'
+  const right = readSvg(`${name}SideRight`)
+  const rightSleevesDown = '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-down">' + readSvg(`${name}SideRightDown`) + '</g>'
+  svg = '<g>' + right + rightSleevesUp + rightSleevesDown + '</g>'
   return svg
 }
 

@@ -221,7 +221,8 @@ contract SvgViewsFacet is Modifiers {
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BODY];
         if (wearableId != 0) {
-            (layers.bodyWearable, layers.sleeves) = getBodySideWearable(_sideView, wearableId);
+            console.log("Wearable ID: ", wearableId);
+            (layers.bodyWearable) = getBodySideWearable(_sideView, wearableId);
         }
 
         // get hands
@@ -363,7 +364,7 @@ contract SvgViewsFacet is Modifiers {
     function getBodySideWearable(bytes memory _sideView, uint256 _wearableId)
         internal
         view
-        returns (bytes memory bodyWearable_, bytes memory sleeves_)
+        returns (bytes memory bodyWearable_)
     {
         ItemType storage wearableType = s.itemTypes[_wearableId];
         Dimensions memory dimensions = s.sideViewDimensions[_wearableId][_sideView];
@@ -378,7 +379,7 @@ contract SvgViewsFacet is Modifiers {
             LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-", _sideView), wearableType.svgId),
             "</svg></g>"
         );
-        uint256 svgId = s.sleeves[_wearableId];
+        /* uint256 svgId = s.sleeves[_wearableId];
         if (svgId != 0) {
             sleeves_ = abi.encodePacked(
                 // x
@@ -389,7 +390,7 @@ contract SvgViewsFacet is Modifiers {
                 LibSvg.getSvg(LibSvg.bytesToBytes32("sleeves-", _sideView), svgId),
                 "</svg>"
             );
-        }
+        } */
     }
 
     function prepareItemSvg(Dimensions storage _dimensions, bytes memory _svg) internal view returns (string memory svg_) {
