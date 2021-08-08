@@ -41,7 +41,7 @@ describe("Testing mintPortal()", async function () {
     // console.log(newGotchi);
     txData = await tx.wait();
     const events = txData.events;
-    console.log(events);
+    console.log(events[events.length - 1].args);
     expect(gotchiOwner).to.equal(testAdd);
     expect(newGotchi.hauntId.toString()).to.equal("2");
     //console.log(await tx.wait());
@@ -62,4 +62,32 @@ describe("Testing mintPortal()", async function () {
       "LibDiamond: Must be contract owner"
     );
   });
+
+  it("should not allow the xingyun function to be called", async () => {
+    const Xing = await ethers.getContractAt(
+      "XingyunFacet",
+      aavegotchiDiamondAddress
+    );
+    //await Xing.xingyun("0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5", 30000000);
+    await truffleAsserts.reverts(
+      Xing.xingyun("0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5", 30000000),
+      "Diamond: Function does not exist"
+    );
+  });
+
+  /*
+  it("should not allow the buyPortals function to be called", async () => {
+    const Xing = await ethers.getContractAt(
+      "XingyunFacet",
+      aavegotchiDiamondAddress
+    );
+    //await Xing.xingyun("0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5", 30000000);
+    await truffleAsserts.reverts(
+      shopFacet.buyPortals(
+        "0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5",
+        30000000
+      ),
+      "Diamond: Function does not exist"
+    );
+  });*/
 });
