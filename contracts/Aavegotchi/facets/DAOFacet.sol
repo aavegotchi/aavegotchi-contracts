@@ -54,19 +54,41 @@ contract DAOFacet is Modifiers {
 
     //H2 Todo: Use the hauntID=>collateralType mapping
     function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyDaoOrOwner {
-        bool checkDuplication = (_hauntId > 1) || (s.hauntCollateralTypes[_hauntId].length != 0);
         for (uint256 i; i < _collateralTypes.length; i++) {
-            address collateralType = _collateralTypes[i].collateralType;
+            address newCollateralType = _collateralTypes[i].collateralType;
 
-            //Prevent the same collateral from being added multiple times except first request for haunt 1
-            if (checkDuplication) {
-                require(s.collateralTypeInfo[collateralType].cheekColor == 0, "DAOFacet: Collateral already added");
-                s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
+            //Overwrite the collateralTypeInfo if it already exists
+            s.collateralTypeInfo[newCollateralType] = _collateralTypes[i].collateralTypeInfo;
+
+            //First handle global collateralTypes array
+            bool collateralExists;
+            for (uint256 index = 0; index < s.collateralTypes.length; index++) {
+                address existingCollateral = s.collateralTypes[index];
+                if (existingCollateral == newCollateralType) {
+                    collateralExists = true;
+                    break;
+                }
+            }
+            if (!collateralExists) {
+                s.collateralTypes.push(newCollateralType);
+                s.collateralTypeIndexes[newCollateralType] = s.collateralTypes.length;
             }
 
-            s.collateralTypeIndexes[collateralType] = s.hauntCollateralTypes[_hauntId].length;
-            s.hauntCollateralTypes[_hauntId].push(collateralType);
-            emit AddCollateralType(_collateralTypes[i]);
+            //Then handle hauntCollateralTypes array
+            bool hauntCollateralExists = false;
+            for (uint256 index = 0; index < s.hauntCollateralTypes[_hauntId].length; index++) {
+                address existingHauntCollateral = s.hauntCollateralTypes[_hauntId][index];
+
+                if (existingHauntCollateral == newCollateralType) {
+                    hauntCollateralExists = true;
+                    break;
+                }
+            }
+
+            if (!hauntCollateralExists) {
+                s.hauntCollateralTypes[_hauntId].push(newCollateralType);
+                emit AddCollateralType(_collateralTypes[i]);
+            }
         }
     }
 
