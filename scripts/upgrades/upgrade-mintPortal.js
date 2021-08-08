@@ -47,28 +47,34 @@ async function main() {
   //add the generic mintPortals function
   let existingShopFuncs = getSelectors(shopFacet);
 
-  //remove the buyPortals function
-  const toRemove = [
-    getSelector("function buyPortals(address _to, uint256 _ghst) external"),
-  ];
-
   //add the generic mintPortals function
   const newShopFuncs = [
     getSelector("function mintPortals(address _to, uint256 _amount) external"),
   ];
 
+  let existingShopFuncs = getSelectors(shopFacet);
+  for (const selector of newShopFuncs) {
+    if (!existingShopFuncs.includes(selector)) {
+      throw Error(`Selector ${selector} not found`);
+    }
+  }
+
+  existingShopFuncs = existingShopFuncs.filter(
+    (selector) => !newShopFuncs.includes(selector)
+  );
+
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
   const cut = [
     {
-      facetAddress: ethers.constants.AddressZero,
-      action: FacetCutAction.Remove,
-      functionSelectors: toRemove,
-    },
-    {
       facetAddress: shopFacet.address,
       action: FacetCutAction.Add,
       functionSelectors: newShopFuncs,
+    },
+    {
+      facetAddress: shopFacet.address,
+      action: FacetCutAction.Replace,
+      functionSelectors: existingShopFuncs,
     },
   ];
 
