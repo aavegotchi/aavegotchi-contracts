@@ -53,7 +53,7 @@ contract DAOFacet is Modifiers {
         s.daoTreasury = _newDaoTreasury;
     }
 
-    function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyDaoOrOwner {
+    function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) public onlyDaoOrOwner {
         for (uint256 i; i < _collateralTypes.length; i++) {
             address collateralType = _collateralTypes[i].collateralType;
 
@@ -110,6 +110,48 @@ contract DAOFacet is Modifiers {
             s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
             "AavegotchiFacet: Haunt must be full before creating new"
         );
+        hauntId_ = currentHauntId + 1;
+        s.currentHauntId = uint16(hauntId_);
+        s.haunts[hauntId_].hauntMaxSize = _hauntMaxSize;
+        s.haunts[hauntId_].portalPrice = _portalPrice;
+        s.haunts[hauntId_].bodyColor = _bodyColor;
+        emit CreateHaunt(hauntId_, _hauntMaxSize, _portalPrice, _bodyColor);
+    }
+
+    //May overload the block gas limit but worth trying
+    function createHauntWithPayload(
+        uint24 _hauntMaxSize,
+        uint96 _portalPrice,
+        bytes3 _bodyColor,
+        AavegotchiCollateralTypeIO[] calldata _collateralTypes,
+        string[] calldata _collateralSvgs,
+        LibSvg.SvgTypeAndSizes[][] calldata _collateralTypesAndSizes,
+        string[] calldata _eyeShapeSvgs,
+        LibSvg.SvgTypeAndSizes[][] calldata _eyeShapeTypesAndSizes
+    ) external onlyDaoOrOwner returns (uint256 hauntId_) {
+        uint256 currentHauntId = s.currentHauntId;
+        require(
+            s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
+            "AavegotchiFacet: Haunt must be full before creating new"
+        );
+
+        //Upload collateralTypes
+        addCollateralTypes(_collateralTypes);
+
+        //Upload collateralSvgs
+        for (uint256 index = 0; index < _collateralSvgs.length; index++) {
+            string calldata _collateralSvg = _collateralSvgs[index];
+            LibSvg.SvgTypeAndSizes[] calldata typesAndSizes = _collateralTypesAndSizes[index];
+            LibSvg.storeSvg(_collateralSvg, typesAndSizes);
+        }
+
+        //Upload eyeShapes
+        for (uint256 index = 0; index < _eyeShapeSvgs.length; index++) {
+            string calldata _eyeShapeSvg = _eyeShapeSvgs[index];
+            LibSvg.SvgTypeAndSizes[] calldata typesAndSizes = _eyeShapeTypesAndSizes[index];
+            LibSvg.storeSvg(_eyeShapeSvg, typesAndSizes);
+        }
+
         hauntId_ = currentHauntId + 1;
         s.currentHauntId = uint16(hauntId_);
         s.haunts[hauntId_].hauntMaxSize = _hauntMaxSize;
