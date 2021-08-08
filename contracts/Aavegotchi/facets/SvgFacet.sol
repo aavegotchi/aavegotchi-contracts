@@ -2,13 +2,7 @@
 pragma solidity 0.8.1;
 
 import {AppStorage, SvgLayer, Dimensions} from "../libraries/LibAppStorage.sol";
-import {
-    LibAavegotchi,
-    PortalAavegotchiTraitsIO,
-    EQUIPPED_WEARABLE_SLOTS,
-    PORTAL_AAVEGOTCHIS_NUM,
-    NUMERIC_TRAITS_NUM
-} from "../libraries/LibAavegotchi.sol";
+import {LibAavegotchi, PortalAavegotchiTraitsIO, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, NUMERIC_TRAITS_NUM} from "../libraries/LibAavegotchi.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
@@ -74,10 +68,11 @@ contract SvgFacet is Modifiers {
         details.secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
         details.cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
 
-        // aavagotchi body
+        // aavegotchi body
         svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
+        //todo: make this more dynamic
         bytes32 eyeSvgType = "eyeShapes";
         if (s.currentHauntId == 2) {
             eyeSvgType = "eyeShapesH2";
@@ -411,7 +406,7 @@ contract SvgFacet is Modifiers {
     }
 
     function deleteLastSvgLayers(bytes32 _svgType, uint256 _numLayers) external onlyItemManager {
-        for(uint256 i; i < _numLayers; i++){
+        for (uint256 i; i < _numLayers; i++) {
             s.svgLayers[_svgType].pop();
         }
     }
