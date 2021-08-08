@@ -40,10 +40,12 @@ async function deployFacets(...facets) {
   for (let facet of facets) {
     let constructorArgs = [];
     if (Array.isArray(facet)) {
-      ;[facet, constructorArgs] = facet;
+      [facet, constructorArgs] = facet;
     }
     const factory = await ethers.getContractFactory(facet);
-    const facetInstance = await factory.deploy(...constructorArgs, { gasPrice: 5000000000 });
+    const facetInstance = await factory.deploy(...constructorArgs, {
+      gasPrice: 5000000000,
+    });
     await facetInstance.deployed();
     const tx = facetInstance.deployTransaction;
     const receipt = await tx.wait();
@@ -61,10 +63,12 @@ async function main() {
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
 
   if (testing) {
-    const owner = await (await ethers.getContractAt("OwnershipFacet", diamondAddress)).owner();
+    const owner = await (
+      await ethers.getContractAt("OwnershipFacet", diamondAddress)
+    ).owner();
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [owner]
+      params: [owner],
     });
     signer = await ethers.provider.getSigner(owner);
   } else if (hre.network.name === "matic") {
@@ -73,36 +77,51 @@ async function main() {
     throw Error("Incorrect network selected");
   }
 
-  const diamondCut = await (await ethers.getContractAt("IDiamondCut", diamondAddress)).connect(signer);
+  //Redeploy all of the facets that use LibAavegotchi's portalAavegotchiTraits function
+  const diamondCut = await (
+    await ethers.getContractAt("IDiamondCut", diamondAddress)
+  ).connect(signer);
   let [collateralFacet, daoFacet, ...facets] = await deployFacets(
     "CollateralFacet",
     "DAOFacet",
-    "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
+    // "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
     "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
     "AavegotchiGameFacet",
-    "SvgFacet",
-    "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
-    "ItemsTransferFacet",
-    "VrfFacet",
-    "ShopFacet",
-    "MetaTransactionsFacet",
-    "ERC1155MarketplaceFacet",
-    "ERC721MarketplaceFacet",
-    "EscrowFacet"
+    "SvgFacet"
+    // "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
+    // "ItemsTransferFacet",
+    // "VrfFacet",
+    // "ShopFacet",
+    // "MetaTransactionsFacet",
+    // "ERC1155MarketplaceFacet",
+    // "ERC721MarketplaceFacet",
+    // "EscrowFacet"
   );
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
   let cut = [];
 
   const newCollateralFacetFuncs = [
-    getSelector("function collaterals(uint256 _hauntId) external view returns (address[] collateralTypes_)"),
-    getSelector("function collateralInfo(uint256 _hauntId, uint256 _collateralId) external view returns (AavegotchiCollateralTypeIO collateralInfo_)"),
-    getSelector("function getCollateralInfo(uint256 _hauntId) external view returns (AavegotchiCollateralTypeIO[] collateralInfo_)")
+    getSelector(
+      "function collaterals(uint256 _hauntId) external view returns (address[] collateralTypes_)"
+    ),
+    getSelector(
+      "function collateralInfo(uint256 _hauntId, uint256 _collateralId) external view returns (AavegotchiCollateralTypeIO collateralInfo_)"
+    ),
+    getSelector(
+      "function getCollateralInfo(uint256 _hauntId) external view returns (AavegotchiCollateralTypeIO[] collateralInfo_)"
+    ),
   ];
   const oldCollateralFacetFuncs = [
-    getSelector("function collaterals() external view returns (address[] collateralTypes_)"),
-    getSelector("function collateralInfo(uint256 _collateralId) external view returns (AavegotchiCollateralTypeIO collateralInfo_)"),
-    getSelector("function getCollateralInfo() external view returns (AavegotchiCollateralTypeIO[] collateralInfo_)")
+    getSelector(
+      "function collaterals() external view returns (address[] collateralTypes_)"
+    ),
+    getSelector(
+      "function collateralInfo(uint256 _collateralId) external view returns (AavegotchiCollateralTypeIO collateralInfo_)"
+    ),
+    getSelector(
+      "function getCollateralInfo() external view returns (AavegotchiCollateralTypeIO[] collateralInfo_)"
+    ),
   ];
   let existingCollateralFacetFuncs = getSelectors(collateralFacet);
   for (const selector of newCollateralFacetFuncs) {
@@ -110,13 +129,19 @@ async function main() {
       throw Error(`Selector ${selector} not found`);
     }
   }
-  existingCollateralFacetFuncs = existingCollateralFacetFuncs.filter(selector => !newCollateralFacetFuncs.includes(selector));
+  existingCollateralFacetFuncs = existingCollateralFacetFuncs.filter(
+    (selector) => !newCollateralFacetFuncs.includes(selector)
+  );
 
   const newDaoFacetFuncs = [
-    getSelector("function addCollateralTypes(uint256 _hauntId, tuple(address collateralType, tuple(int16[6] modifiers, bytes3 primaryColor, bytes3 secondaryColor, bytes3 cheekColor, uint8 svgId, uint8 eyeShapeSvgId, uint16 conversionRate, bool delisted) collateralTypeInfo)[] _collateralTypes) external")
+    getSelector(
+      "function addCollateralTypes(uint256 _hauntId, tuple(address collateralType, tuple(int16[6] modifiers, bytes3 primaryColor, bytes3 secondaryColor, bytes3 cheekColor, uint8 svgId, uint8 eyeShapeSvgId, uint16 conversionRate, bool delisted) collateralTypeInfo)[] _collateralTypes) external"
+    ),
   ];
   const oldDaoFacetFuncs = [
-    getSelector("function addCollateralTypes(tuple(address collateralType, tuple(int16[6] modifiers, bytes3 primaryColor, bytes3 secondaryColor, bytes3 cheekColor, uint8 svgId, uint8 eyeShapeSvgId, uint16 conversionRate, bool delisted) collateralTypeInfo)[] _collateralTypes) external")
+    getSelector(
+      "function addCollateralTypes(tuple(address collateralType, tuple(int16[6] modifiers, bytes3 primaryColor, bytes3 secondaryColor, bytes3 cheekColor, uint8 svgId, uint8 eyeShapeSvgId, uint16 conversionRate, bool delisted) collateralTypeInfo)[] _collateralTypes) external"
+    ),
   ];
   let existingDaoFacetFuncs = getSelectors(daoFacet);
   for (const selector of newDaoFacetFuncs) {
@@ -124,63 +149,74 @@ async function main() {
       throw Error(`Selector ${selector} not found`);
     }
   }
-  existingDaoFacetFuncs = existingDaoFacetFuncs.filter(selector => !newDaoFacetFuncs.includes(selector));
+  existingDaoFacetFuncs = existingDaoFacetFuncs.filter(
+    (selector) => !newDaoFacetFuncs.includes(selector)
+  );
 
   cut = [
     {
       facetAddress: collateralFacet.address,
       action: FacetCutAction.Add,
-      functionSelectors: newCollateralFacetFuncs
+      functionSelectors: newCollateralFacetFuncs,
     },
     {
       facetAddress: collateralFacet.address,
       action: FacetCutAction.Replace,
-      functionSelectors: existingCollateralFacetFuncs
+      functionSelectors: existingCollateralFacetFuncs,
     },
     {
       facetAddress: ethers.constants.AddressZero,
       action: FacetCutAction.Remove,
-      functionSelectors: oldCollateralFacetFuncs
+      functionSelectors: oldCollateralFacetFuncs,
     },
     {
       facetAddress: daoFacet.address,
       action: FacetCutAction.Add,
-      functionSelectors: newDaoFacetFuncs
+      functionSelectors: newDaoFacetFuncs,
     },
     {
       facetAddress: daoFacet.address,
       action: FacetCutAction.Replace,
-      functionSelectors: existingDaoFacetFuncs
+      functionSelectors: existingDaoFacetFuncs,
     },
     {
       facetAddress: ethers.constants.AddressZero,
       action: FacetCutAction.Remove,
-      functionSelectors: oldDaoFacetFuncs
-    }
+      functionSelectors: oldDaoFacetFuncs,
+    },
   ];
   for (let facet of facets) {
     cut.push({
       facetAddress: facet.address,
       action: FacetCutAction.Replace,
-      functionSelectors: getSelectors(facet)
+      functionSelectors: getSelectors(facet),
     });
   }
   // console.log(cut);
 
   if (testing) {
-    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", { gasLimit: 20000000 });
+    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", {
+      gasLimit: 20000000,
+    });
     console.log("Diamond cut tx:", tx.hash);
     const receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Diamond upgrade failed: ${tx.hash}`);
     }
   } else {
-    tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, "0x", {
-      gasLimit: 800000,
-      gasPrice: 5000000000
-    });
+    tx = await diamondCut.populateTransaction.diamondCut(
+      cut,
+      ethers.constants.AddressZero,
+      "0x",
+      {
+        gasLimit: 800000,
+        gasPrice: 5000000000,
+      }
+    );
     console.log("tx:", tx);
-    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, { gasPrice: 5000000000 });
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, {
+      gasPrice: 5000000000,
+    });
     console.log("Sent to multisig");
   }
 
@@ -188,9 +224,15 @@ async function main() {
   daoFacet = await ethers.getContractAt("DAOFacet", diamondAddress, signer);
   const { getCollaterals } = require("../collateralTypes.js");
   if (testing) {
-    tx = await daoFacet.addCollateralTypes(1, getCollaterals("matic", ghstAddress));
+    tx = await daoFacet.addCollateralTypes(
+      1,
+      getCollaterals("matic", ghstAddress)
+    );
   } else {
-    tx = await daoFacet.addCollateralTypes(1, getCollaterals(hre.network.name, ghstAddress));
+    tx = await daoFacet.addCollateralTypes(
+      1,
+      getCollaterals(hre.network.name, ghstAddress)
+    );
   }
   console.log("Adding Collateral Types for H1 tx:", tx.hash);
   let receipt = await tx.wait();
@@ -201,7 +243,10 @@ async function main() {
   // Add collateral types for H2
   if (!testing) {
     const { getCollaterals } = require("../collateralTypesHaunt2.js");
-    tx = await daoFacet.addCollateralTypes(2, getCollaterals(hre.network.name, ghstAddress));
+    tx = await daoFacet.addCollateralTypes(
+      2,
+      getCollaterals(hre.network.name, ghstAddress)
+    );
     console.log("Adding Collateral Types for H2 tx:", tx.hash);
     receipt = await tx.wait();
     if (!receipt.status) {
@@ -215,14 +260,14 @@ async function main() {
   return {
     signer,
     diamondAddress,
-    ghstAddress
+    ghstAddress,
   };
 }
 
 if (require.main === module) {
   main()
     .then(() => process.exit(0))
-    .catch(error => {
+    .catch((error) => {
       console.error(error);
       process.exit(1);
     });
