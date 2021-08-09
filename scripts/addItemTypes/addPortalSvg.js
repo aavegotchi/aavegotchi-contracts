@@ -2,8 +2,8 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
-const { openPortalSvgs } = require("../../svgs/openPortalSvg");
-const { closedPortalSvgs } = require("../../svgs/closedPortalSvg");
+const { openPortalSvgs } = require("../../svgs/openPortalSvg"); //haunt 0,1
+const { closedPortalSvgs } = require("../../svgs/closedPortalSvg"); //haunt 0,1
 
 //const { sendToMultisig } = require("../libraries/multisig/multisig.js");
 

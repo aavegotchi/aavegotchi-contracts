@@ -4,7 +4,9 @@ const fs = require("fs");
 
 const portals = [];
 
-portal("sealedClosedPortal");
+portal("h1-closed");
+portal("h1-closed");
+portal("h2-closed");
 
 function stripSvg(svg) {
   // removes svg tag
