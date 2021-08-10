@@ -1,11 +1,12 @@
 /* global describe it before ethers */
 const { expect } = require("chai");
+const { getCollaterals: getCollateralsH1 } = require("../scripts/collateralTypes.js");
 const { getCollaterals } = require("../scripts/collateralTypesHaunt2.js");
 
 const { upgradeHauntCollateralTypes } = require("../scripts/upgrades/upgrade-hauntCollateralTypes.js");
 
 const testAavegotchiId = "10000";
-const newTestWearableId = "210";
+const newTestWearableId = "211";
 const testWearableId = "1";
 const testSlot = "3";
 const initialHauntSize = "10000";
@@ -13,7 +14,7 @@ let portalPrice = ethers.utils.parseEther("0.00001");
 const account = "0x819c3fc356bb319035f9d2886fac9e57df0343f5";
 const itemTypes = [
   {
-    svgId: 210,
+    svgId: 211,
     name: "Camo Hat Test",
     setId: [1],
     author: "Xibot",
@@ -37,7 +38,8 @@ const itemTypes = [
 describe("Re-deploying Contracts, replacing facet selectors, and uploading H1 collateral types", async function() {
   this.timeout(1000000);
   let diamondAddress, signer;
-  let daoFacet, collateralFacet, bridgeFacet, aavegotchiFacet, aavegotchiGameFacet, svgFacet, itemsFacet, itemsTransferFacet, vrfFacet,
+  let daoFacet, collateralFacet, bridgeFacet, aavegotchiFacet, aavegotchiGameFacet, svgFacet, itemsFacet,
+    itemsTransferFacet, vrfFacet,
     shopFacet, metaTransactionsFacet, ghstTokenContract;
   let haunt, currentHauntId, buyAmount;
   before(async function() {
@@ -335,8 +337,35 @@ describe("Re-deploying Contracts, replacing facet selectors, and uploading H1 co
   });
 
   describe("DAO Functions", async function() {
-    it("Cannot add the same collateral twice", async function() {
-      await expect(daoFacet.addCollateralTypes(currentHauntId, getCollaterals("hardhat", ghstTokenContract.address))).to.be.revertedWith("DAOFacet: Collateral already added");
+    it("Check addCollateralTypes", async function() {
+      let collaterals = await collateralFacet.getCollateralInfo(currentHauntId - 1);
+      expect(collaterals.length).to.equal(9); // H1 collaterals
+
+      collaterals = await collateralFacet.getCollateralInfo(currentHauntId);
+      expect(collaterals.length).to.equal(1); // H2 test collaterals
+
+      let collateralTypes = await collateralFacet.getAllCollateralTypes();
+      expect(collateralTypes.length).to.equal(10); // All collateral types
+
+      const h1Collaterals = getCollateralsH1("matic", ghstTokenContract.address);
+      await (await daoFacet.addCollateralTypes(currentHauntId, h1Collaterals)).wait();
+
+      collaterals = await collateralFacet.getCollateralInfo(currentHauntId - 1);
+      expect(collaterals.length).to.equal(9); // H1 collaterals, not changed
+
+      collateralTypes = await collateralFacet.getAllCollateralTypes();
+      expect(collateralTypes.length).to.equal(10); // All collateral types, Not changed
+
+      collaterals = await collateralFacet.getCollateralInfo(currentHauntId + 1);
+      expect(collaterals.length).to.equal(0); // H3 collaterals
+
+      await (await daoFacet.addCollateralTypes(currentHauntId + 1, h1Collaterals)).wait();
+
+      collaterals = await collateralFacet.getCollateralInfo(currentHauntId + 1);
+      expect(collaterals.length).to.equal(9); // H3 collaterals
+
+      collateralTypes = await collateralFacet.getAllCollateralTypes();
+      expect(collateralTypes.length).to.equal(10); // All collateral types, Not changed
     });
   });
 });

@@ -111,6 +111,9 @@ async function main() {
     getSelector(
       "function getCollateralInfo(uint256 _hauntId) external view returns (AavegotchiCollateralTypeIO[] collateralInfo_)"
     ),
+    getSelector(
+      "function getAllCollateralTypes() external view returns (address[])"
+    ),
   ];
   const oldCollateralFacetFuncs = [
     getSelector(

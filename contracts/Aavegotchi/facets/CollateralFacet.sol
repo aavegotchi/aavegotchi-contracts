@@ -45,6 +45,10 @@ contract CollateralFacet is Modifiers {
         }
     }
 
+    function getAllCollateralTypes() external view returns (address[] memory) {
+        return s.collateralTypes;
+    }
+
     function collateralBalance(uint256 _tokenId)
         external
         view
