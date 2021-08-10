@@ -135,7 +135,7 @@ let sideViewDimensions = [
    itemId: 8,
    name: "Marine Jacket",
    side: "back",
-   dimensions: {x:12, y:33, width:34, height:22},
+   dimensions: {x:12, y:32, width:34, height:22},
 },
  {
    itemId: 8,
@@ -243,7 +243,7 @@ let sideViewDimensions = [
    itemId: 11,
    name: "Mess Dress",
    side: "back",
-   dimensions: {x:12, y:33, width:34, height:22},
+   dimensions: {x:12, y:32, width:34, height:22},
 },
  {
    itemId: 11,
@@ -267,7 +267,7 @@ let sideViewDimensions = [
    itemId: 11,
    name: "Mess Dress",
    side: "left",
-   dimensions: {x:29, y:32, width:5, height:12},
+   dimensions: {x:20, y:32, width:5, height:12},
 },
  {
    itemId: 11,
@@ -291,7 +291,7 @@ let sideViewDimensions = [
    itemId: 11,
    name: "Mess Dress",
    side: "right",
-   dimensions: {x:30, y:32, width:5, height:12},
+   dimensions: {x:20, y:32, width:5, height:12},
 },
  {
    itemId: 12,

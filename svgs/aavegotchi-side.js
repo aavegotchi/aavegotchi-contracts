@@ -23,10 +23,15 @@ let backBody = '<g class="gotchi-body"><g class="gotchi-primary"><path d="M21 12
 // shadow
 backBody += '<g class="gotchi-shadow"><path opacity=".25" d="M25 58H19v1h1v1h24V59h1V58h-1z" fill="#000"/></g>'
 
+let handsDownOpen = '<g class="gotchi-handsDownOpen"><g class="gotchi-primary"><path d="M14 40h1v1h-1v-1zm-1-6h1v1h-1v-1z"/><path d="M14 33h1v1h-1v-1zm-2 2h1v1h-1v-1zm-5 3h1v4H7v-4zm5 3h2v1h-2v-1z"/><path d="M8 42h4v1H8v-1zm0-5h2v1H8v-1z"/><path d="M10,36h2v1h-2V36z"/></g><g class="gotchi-secondary"><path d="M14,39h1v1h-1V39z"/><path d="M12,40h2v1h-2V40z"/><path d="M8,41h4v1H8V41z"/></g><path d="M8,38v3h4v-1h2v-1h1v-5h-1v1h-1v1h-1v1h-2v1H8z" fill="#fff" /><g class="gotchi-primary"><path d="M49 40h1v1h-1v-1zm1-6h1v1h-1v-1z"/><path d="M49 33h1v1h-1v-1zm2 2h1v1h-1v-1zm5 3h1v4h-1v-4zm-6 3h2v1h-2v-1z"/><path d="M52 42h4v1h-4v-1zm2-5h2v1h-2v-1z"/><path d="M52,36h2v1h-2V36z"/></g><g class="gotchi-secondary"><path d="M49,39h1v1h-1V39z"/><path d="M50,40h2v1h-2V40z"/><path d="M52,41h4v1h-4V41z"/></g><path d="M54,38v-1h-2v-1h-1v-1h-1v-1h-1v5h1v1h2v1h4v-3H54z" fill="#fff" /></g>'
+let handsUp = '<g class="gotchi-handsUp"><g class="gotchi-secondary"><path d="M50,38h1v1h-1V38z"/><path d="M49 39h1v1h-1v-1zm2-2h1v1h-1v-1z"/><path d="M52,36h2v1h-2V36z"/><path d="M54,35h2v1h-2V35z"/></g><path d="M52,32v1h-2v1h-1v5h1v-1h1v-1h1v-1h2v-1h2v-3H52z" fill="#fff"/><g class="gotchi-primary"><path d="M49,33h1v1h-1V33z"/><path d="M50 32h2v1h-2v-1zm0 7h1v1h-1v-1z"/><path d="M49 40h1v1h-1v-1zm2-2h1v1h-1v-1z"/><path d="M52 37h2v1h-2v-1zm0-6h4v1h-4v-1z"/><path d="M56,32h1v4h-1V32z"/><path d="M54,36h2v1h-2V36z"/></g><g class="gotchi-secondary"><path d="M13,38h1v1h-1V38z"/><path d="M14 39h1v1h-1v-1zm-2-2h1v1h-1v-1z"/><path d="M10,36h2v1h-2V36z"/><path d="M8,35h2v1H8V35z"/></g><path d="M8,32v3h2v1h2v1h1v1h1v1h1v-5h-1v-1h-2v-1H8z" fill="#fff"/><g class="gotchi-primary"><path d="M14,33h1v1h-1V33z"/><path d="M12 32h2v1h-2v-1zm1 7h1v1h-1v-1z"/><path d="M14 40h1v1h-1v-1zm-2-2h1v1h-1v-1z"/><path d="M10 37h2v1h-2v-1zm-2-6h4v1H8v-1z"/><path d="M7,32h1v4H7V32z"/><path d="M8,36h2v1H8V36z"/></g></g>'
+
+let hands = handsDownOpen + handsUp
+
 const aavegotchiSvgs = {
   left: ['', '', leftBody, leftHand],
   right: ['', '', rightBody, rightHand],
-  back: ['', '', backBody, '']
+  back: ['', '', backBody, hands, '']
 }
 
 exports.aavegotchiSvgs = aavegotchiSvgs

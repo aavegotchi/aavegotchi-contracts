@@ -279,31 +279,34 @@ contract SvgViewsFacet is Modifiers {
         //9. Left hand wearable
         //10. Right hand wearable
         //11. Pet wearable
-        /*if (LibSvg.bytesToBytes32("wearables-", _sideView) == keccak256(abi.encodePacked("wearables-", "left"))) {
+
+        bytes32 left = LibSvg.bytesToBytes32("wearables-", "left");
+        bytes32 right = LibSvg.bytesToBytes32("wearables-", "right");
+        bytes32 back = LibSvg.bytesToBytes32("wearables-", "back");
+        bytes32 side = LibSvg.bytesToBytes32("wearables-", _sideView);
+
+        if (side == left) {
             svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
-            svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.handLeft, layers.hands, layers.sleeves, layers.pet);
+            svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.handLeft, layers.hands, layers.pet);
         }
-        if (LibSvg.bytesToBytes32("wearables-", _sideView) == keccak256(abi.encodePacked("wearables-", "right"))) {
+        else if (side == right) {
             svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
-            svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.handRight, layers.hands, layers.sleeves, layers.pet);
+            svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.handRight, layers.hands, layers.pet);
         }
-        if (LibSvg.bytesToBytes32("wearables-", _sideView) == keccak256(abi.encodePacked("wearables-", "back"))) {
+        else if (side == back) {
             svg_ = abi.encodePacked(layers.background);
             svg_ = abi.encodePacked(svg_, _body);
+            svg_ = abi.encodePacked(svg_, layers.handRight, layers.handLeft, layers.hands);
             svg_ = abi.encodePacked(
                 svg_,
-                layers.handRight,
-                layers.handLeft,
-                layers.hands,
                 layers.bodyWearable,
-                layers.sleeves,
                 layers.face,
                 layers.eyes,
                 layers.head,
                 layers.pet
             );
         }
-        else if (LibSvg.bytesToBytes32("wearables-", _sideView) == keccak256(abi.encodePacked("wearables-", "front"))) {
+        /* else if (LibSvg.bytesToBytes32("wearables-", _sideView) == keccak256(abi.encodePacked("wearables-", "front"))) {
             svg_ = abi.encodePacked(layers.background);
             svg_ = abi.encodePacked(svg_, _body);
             svg_ = abi.encodePacked(
@@ -320,8 +323,8 @@ contract SvgViewsFacet is Modifiers {
         } */
 
         /* for(uint256 i; i < _sideView.length; i++){ */
-        svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
-        svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.hands, layers.handLeft, layers.handRight, layers.sleeves, layers.pet);
+        /* svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
+        svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.hands, layers.handLeft, layers.handRight, layers.sleeves, layers.pet); */
 
     }
 
