@@ -5,11 +5,8 @@ const { LedgerSigner } = require("@ethersproject/hardware-wallets");
 const { openPortalSvgs } = require("../../svgs/openPortalSvg"); //haunt 0,1
 const { closedPortalSvgs } = require("../../svgs/closedPortalSvg"); //haunt 0,1
 
-//const { sendToMultisig } = require("../libraries/multisig/multisig.js");
-
 let signer;
 const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-const gasLimit = 15000000;
 const gasPrice = 2000000000;
 let svgFacet;
 async function uploadSvgs(svgs, svgType, testing) {
@@ -106,16 +103,9 @@ async function main() {
   } else {
     throw Error("Incorrect network selected");
   }
-  let tx;
-  let receipt;
 
-  let itemsFacet = await ethers.getContractAt(
-    "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
-    diamondAddress
-  );
-
-  await uploadSvgs(openPortalSvgs, "portal-open", testing);
   await uploadSvgs(closedPortalSvgs, "portal-closed", testing);
+  await uploadSvgs(openPortalSvgs, "portal-open", testing);
 
   const svgOutput = await svgFacet.getAavegotchiSvg("7516");
 

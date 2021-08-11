@@ -2,6 +2,8 @@ const { LedgerSigner } = require("@ethersproject/hardware-wallets");
 //const { ethers } = require("ethers");
 const { sendToMultisig } = require("../libraries/multisig/multisig.js");
 
+const gasPrice = 2000000000;
+
 function getSelectors(contract) {
   const signatures = Object.keys(contract.interface.functions);
   const selectors = signatures.reduce((acc, val) => {
@@ -43,7 +45,9 @@ async function main() {
     "contracts/Aavegotchi/facets/SvgFacet.sol:SvgFacet"
   );
 
-  let svgFacet = await SvgFacet.deploy();
+  let svgFacet = await SvgFacet.deploy({
+    gasPrice: gasPrice,
+  });
   await svgFacet.deployed();
   console.log("Deployed Svgfacet:", svgFacet.address);
 
