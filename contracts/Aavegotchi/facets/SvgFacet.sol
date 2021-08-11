@@ -32,12 +32,13 @@ contract SvgFacet is Modifiers {
 
         bytes memory svg;
         uint8 status = s.aavegotchis[_tokenId].status;
+        uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
         if (status == LibAavegotchi.STATUS_CLOSED_PORTAL) {
             // sealed closed portal
-            svg = LibSvg.getSvg("aavegotchi", 0);
+            svg = LibSvg.getSvg("portal-closed", hauntId);
         } else if (status == LibAavegotchi.STATUS_OPEN_PORTAL) {
             // open portal
-            svg = LibSvg.getSvg("aavegotchi", 1);
+            svg = LibSvg.getSvg("portal-open", hauntId);
         } else if (status == LibAavegotchi.STATUS_AAVEGOTCHI) {
             address collateralType = s.aavegotchis[_tokenId].collateralType;
             svg = getAavegotchiSvgLayers(collateralType, s.aavegotchis[_tokenId].numericTraits, _tokenId);
@@ -64,7 +65,6 @@ contract SvgFacet is Modifiers {
         uint256 _tokenId
     ) internal view returns (bytes memory svg_) {
         SvgLayerDetails memory details;
-
         details.primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
         details.secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
         details.cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
@@ -111,16 +111,7 @@ contract SvgFacet is Modifiers {
                 }
             }
         }
-        /** 
-        for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
-            if (slot == LibItems.WEARABLE_SLOT_BG) {
-                if (equippedWearables[slot] != 0) {
-                    details.bg = equippedWearables[slot];
-                    continue;
-                }
-            }
-        }
-        */
+
         //Add wearables if tokenId isn't MAX_INT
         if (_tokenId == type(uint256).max) {
             svg_ = abi.encodePacked(
