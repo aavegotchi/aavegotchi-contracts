@@ -10,7 +10,7 @@ const collaterals = [
     svgId: 0,
     eyeShapeSvgId: 18,
     modifiers: [1, 0, 0, 0, 0, 0],
-    conversionRate: 1 // 1 DAI equals 1 DAI
+    conversionRate: 1, // 1 DAI equals 1 DAI
   },
   {
     name: "amWETH",
@@ -23,7 +23,7 @@ const collaterals = [
     svgId: 9,
     eyeShapeSvgId: 19,
     modifiers: [0, 1, 0, 0, 0, 0],
-    conversionRate: 2537 // 2537 DAI = 1 ETH
+    conversionRate: 2537, // 2537 DAI = 1 ETH
   },
   {
     name: "amAAVE",
@@ -36,7 +36,7 @@ const collaterals = [
     svgId: 2,
     eyeShapeSvgId: 17,
     modifiers: [0, 0, 1, 0, 0, 0],
-    conversionRate: 322
+    conversionRate: 322,
   },
   {
     name: "amUSDT",
@@ -49,7 +49,7 @@ const collaterals = [
     svgId: 4,
     eyeShapeSvgId: 20,
     modifiers: [0, -1, 0, 0, 0, 0],
-    conversionRate: 1
+    conversionRate: 1,
   },
   {
     name: "amUSDC",
@@ -62,7 +62,7 @@ const collaterals = [
     svgId: 5,
     eyeShapeSvgId: 21,
     modifiers: [0, 0, -1, 0, 0, 0],
-    conversionRate: 1 // 1 DAI = 1 USDC
+    conversionRate: 1, // 1 DAI = 1 USDC
   },
   {
     name: "amWBTC",
@@ -75,7 +75,7 @@ const collaterals = [
     svgId: 10,
     eyeShapeSvgId: 22,
     modifiers: [0, 1, 0, 0, 0, 0],
-    conversionRate: 39400
+    conversionRate: 39400,
   },
   {
     name: "amWMATIC",
@@ -88,7 +88,7 @@ const collaterals = [
     svgId: 11,
     eyeShapeSvgId: 23,
     modifiers: [0, 1, 0, 0, 0, 0],
-    conversionRate: 1
+    conversionRate: 1,
   },
   {
     name: "amGHST",
@@ -101,8 +101,8 @@ const collaterals = [
     svgId: 12,
     eyeShapeSvgId: 24,
     modifiers: [0, 0, -1, 0, 0, 0],
-    conversionRate: 1 // 1 DAI equals 1 GHST
-  }
+    conversionRate: 1, // 1 DAI equals 1 GHST
+  },
 ];
 
 const testCollaterals = [
@@ -117,8 +117,8 @@ const testCollaterals = [
     svgId: 0,
     eyeShapeSvgId: 16,
     modifiers: [0, 0, -1, 0, 0, 0],
-    conversionRate: 50000 // 1 DAI equals 1 GHST
-  }
+    conversionRate: 50000, // 1 DAI equals 1 GHST
+  },
 ];
 
 function getCollaterals(network, ghstAddress) {
@@ -127,17 +127,14 @@ function getCollaterals(network, ghstAddress) {
   const collateralTypes = [];
   for (const collateralType of collateralArr) {
     const collateralTypeInfo = {
-      primaryColor:
-        "0x" + collateralType.primaryColor.slice(1),
-      secondaryColor:
-        "0x" + collateralType.secondaryColor.slice(1),
-      cheekColor:
-        "0x" + collateralType.cheekColor.slice(1),
+      primaryColor: "0x" + collateralType.primaryColor.slice(1),
+      secondaryColor: "0x" + collateralType.secondaryColor.slice(1),
+      cheekColor: "0x" + collateralType.cheekColor.slice(1),
       svgId: collateralType.svgId,
       eyeShapeSvgId: collateralType.eyeShapeSvgId,
       modifiers: collateralType.modifiers,
       conversionRate: collateralType.conversionRate,
-      delisted: false
+      delisted: false,
     };
     const item = {};
     if (network === "kovan") {
@@ -156,4 +153,4 @@ function getCollaterals(network, ghstAddress) {
   return collateralTypes;
 }
 
-exports.getCollaterals = getCollaterals;
+exports.getH2Collaterals = getCollaterals;

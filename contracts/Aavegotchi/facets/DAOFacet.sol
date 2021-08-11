@@ -53,7 +53,7 @@ contract DAOFacet is Modifiers {
     }
 
     //H2 Todo: Use the hauntID=>collateralType mapping
-    function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyDaoOrOwner {
+    function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyItemManager {
         for (uint256 i; i < _collateralTypes.length; i++) {
             address newCollateralType = _collateralTypes[i].collateralType;
 

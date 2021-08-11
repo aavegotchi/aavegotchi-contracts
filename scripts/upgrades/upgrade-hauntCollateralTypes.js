@@ -77,6 +77,19 @@ async function main() {
     throw Error("Incorrect network selected");
   }
 
+  let aavegotchiFacet = await ethers.getContractAt(
+    "AavegotchiGameFacet",
+    diamondAddress
+  );
+  let aavegotchi = await aavegotchiFacet.portalAavegotchiTraits("8447");
+  console.log("aavegotchi:", aavegotchi);
+
+  aavegotchi.forEach((portal) => {
+    console.log("collateral:", portal.collateralType);
+  });
+
+  //8447
+
   //Redeploy all of the facets that use LibAavegotchi's portalAavegotchiTraits function
   const diamondCut = await (
     await ethers.getContractAt("IDiamondCut", diamondAddress)
@@ -87,11 +100,11 @@ async function main() {
     // "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
     "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
     "AavegotchiGameFacet",
-    "SvgFacet"
+    "SvgFacet",
     // "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
     // "ItemsTransferFacet",
-    // "VrfFacet",
-    // "ShopFacet",
+    "VrfFacet",
+    "ShopFacet"
     // "MetaTransactionsFacet",
     // "ERC1155MarketplaceFacet",
     // "ERC721MarketplaceFacet",
@@ -225,9 +238,35 @@ async function main() {
 
   // Add collateral types for H1
   daoFacet = await ethers.getContractAt("DAOFacet", diamondAddress, signer);
+
   const { getCollaterals } = require("../collateralTypes.js");
   if (testing) {
-    tx = await daoFacet.addCollateralTypes(
+    let itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [itemManager],
+    });
+
+    let imSigner = await ethers.provider.getSigner(itemManager);
+
+    const itemManagerDaoFacet = await ethers.getContractAt(
+      "DAOFacet",
+      diamondAddress,
+      imSigner
+    );
+
+    collateralFacet = await ethers.getContractAt(
+      "CollateralFacet",
+      diamondAddress
+    );
+
+    const collaterals = await collateralFacet.getAllCollateralTypes();
+    console.log("all collaterals:", collaterals);
+
+    let h1collaterals = await collateralFacet.collaterals("1");
+    console.log("h1 before adding:", h1collaterals);
+
+    tx = await itemManagerDaoFacet.addCollateralTypes(
       1,
       getCollaterals("matic", ghstAddress)
     );
@@ -243,22 +282,54 @@ async function main() {
     throw Error(`Adding Collateral Types for H1 failed: ${tx.hash}`);
   }
 
+  h1collaterals = await collateralFacet.collaterals("1");
+  console.log("h1 after adding:", h1collaterals);
+
   // Add collateral types for H2
-  if (!testing) {
-    const { getCollaterals } = require("../collateralTypesHaunt2.js");
-    tx = await daoFacet.addCollateralTypes(
+  if (testing) {
+    const { getH2Collaterals } = require("../collateralTypesHaunt2.js");
+
+    let itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [itemManager],
+    });
+
+    let imSigner = await ethers.provider.getSigner(itemManager);
+
+    const itemManagerDaoFacet = await ethers.getContractAt(
+      "DAOFacet",
+      diamondAddress,
+      imSigner
+    );
+
+    tx = await itemManagerDaoFacet.addCollateralTypes(
       2,
-      getCollaterals(hre.network.name, ghstAddress)
+      getH2Collaterals(hre.network.name, ghstAddress)
     );
     console.log("Adding Collateral Types for H2 tx:", tx.hash);
     receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Adding Collateral Types for H2 failed: ${tx.hash}`);
     }
+
+    let h2collaterals = await collateralFacet.collaterals("2");
+    console.log("h2 after adding:", h2collaterals);
+
+    //Check the collaterals for H1 opened portals
+    let aavegotchiFacet = await ethers.getContractAt(
+      "AavegotchiGameFacet",
+      diamondAddress
+    );
+    let aavegotchi = await aavegotchiFacet.portalAavegotchiTraits("8447");
+
+    aavegotchi.forEach((portal) => {
+      console.log("collateral:", portal.collateralType);
+    });
   }
 
   // Upload SVG for H2
-  await uploadH2SVG();
+  // await uploadH2SVG();
 
   return {
     signer,
