@@ -3,7 +3,7 @@ const { expect } = require("chai");
 const {
   getCollaterals: getCollateralsH1,
 } = require("../scripts/collateralTypes.js");
-const { getCollaterals } = require("../scripts/collateralTypesHaunt2.js");
+const { getH2Collaterals } = require("../scripts/collateralTypesHaunt2.js");
 
 const {
   upgradeHauntCollateralTypes,
@@ -157,7 +157,7 @@ describe("Re-deploying Contracts, replacing facet selectors, and uploading H1 co
       await (
         await daoFacet.addCollateralTypes(
           currentHauntId,
-          getCollaterals("hardhat", ghstTokenContract.address)
+          getH2Collaterals("hardhat", ghstTokenContract.address)
         )
       ).wait();
     });
