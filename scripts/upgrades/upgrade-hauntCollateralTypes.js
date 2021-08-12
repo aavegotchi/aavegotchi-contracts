@@ -100,11 +100,11 @@ async function main() {
     // "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
     "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
     "AavegotchiGameFacet",
-    "SvgFacet",
+    "SvgFacet"
     // "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
     // "ItemsTransferFacet",
-    "VrfFacet",
-    "ShopFacet"
+    // "VrfFacet"
+    // "ShopFacet"
     // "MetaTransactionsFacet",
     // "ERC1155MarketplaceFacet",
     // "ERC721MarketplaceFacet",
@@ -286,6 +286,7 @@ async function main() {
   console.log("h1 after adding:", h1collaterals);
 
   // Add collateral types for H2
+  /*
   if (testing) {
     const { getH2Collaterals } = require("../collateralTypesHaunt2.js");
 
@@ -330,6 +331,7 @@ async function main() {
 
   // Upload SVG for H2
   // await uploadH2SVG();
+  */
 
   return {
     signer,
