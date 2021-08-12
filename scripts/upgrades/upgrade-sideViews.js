@@ -21,7 +21,10 @@ const {
 const {
   wearablesLeftSvgs,
   wearablesRightSvgs,
-  wearablesBackSvgs
+  wearablesBackSvgs,
+  wearablesLeftSleeveSvgs,
+  wearablesRightSleeveSvgs,
+  wearablesBackSleeveSvgs
 } = require('../../svgs/wearables-sides.js')
 
 const { sideViewDimensions } = require('../../svgs/sideViewDimensions.js')
@@ -156,6 +159,9 @@ async function main () {
   await uploadSvgs(wearablesLeftSvgs, 'wearables-left', testing, itemSigner)
   await uploadSvgs(wearablesRightSvgs, 'wearables-right', testing, itemSigner)
   await uploadSvgs(wearablesBackSvgs, 'wearables-back', testing, itemSigner)
+  await uploadSvgs(wearablesLeftSleeveSvgs, 'sleeves-left', testing, itemSigner)
+  await uploadSvgs(wearablesRightSleeveSvgs, 'sleeves-right', testing, itemSigner)
+  await uploadSvgs(wearablesBackSleeveSvgs, 'sleeves-back', testing, itemSigner)
 
   await uploadSvgs(collateralsLeftSvgs, 'collaterals-left', testing, itemSigner)
   await uploadSvgs(collateralsRightSvgs, 'collaterals-right', testing, itemSigner)

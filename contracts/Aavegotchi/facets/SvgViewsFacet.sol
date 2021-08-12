@@ -219,10 +219,12 @@ contract SvgViewsFacet is Modifiers {
             layers.background = LibSvg.getSvg("aavegotchi", 4);
         }
 
+        console.log("BodyWearable ID before: ", LibItems.WEARABLE_SLOT_BODY);
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BODY];
+        console.log("BodyWearable ID: ", wearableId);
         if (wearableId != 0) {
             console.log("Wearable ID: ", wearableId);
-            (layers.bodyWearable) = getBodySideWearable(_sideView, wearableId);
+            (layers.bodyWearable, layers.sleeves) = getBodySideWearable(_sideView, wearableId);
         }
 
         // get hands
@@ -266,6 +268,7 @@ contract SvgViewsFacet is Modifiers {
         console.logBytes(layers.face);
         console.logBytes(layers.eyes);
         console.logBytes(layers.bodyWearable);
+        console.log("Layers.Sleeves");
         console.logBytes(layers.sleeves);
 
         //1. Background wearable
@@ -283,15 +286,17 @@ contract SvgViewsFacet is Modifiers {
         bytes32 left = LibSvg.bytesToBytes32("wearables-", "left");
         bytes32 right = LibSvg.bytesToBytes32("wearables-", "right");
         bytes32 back = LibSvg.bytesToBytes32("wearables-", "back");
+        /* bytes32 leftSleeve = LibSvg.bytesToBytes32("wearables-", "leftSleeve");
+        bytes32 rightSleeve = LibSvg.bytesToBytes32("wearables-", "rightSleeve"); */
         bytes32 side = LibSvg.bytesToBytes32("wearables-", _sideView);
 
         if (side == left) {
             svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
-            svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.handLeft, layers.hands, layers.pet);
+            svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.handLeft, layers.hands, layers.sleeves, layers.pet);
         }
         else if (side == right) {
             svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
-            svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.handRight, layers.hands, layers.pet);
+            svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.handRight, layers.hands, layers.sleeves, layers.pet);
         }
         else if (side == back) {
             svg_ = abi.encodePacked(layers.background);
@@ -367,7 +372,7 @@ contract SvgViewsFacet is Modifiers {
     function getBodySideWearable(bytes memory _sideView, uint256 _wearableId)
         internal
         view
-        returns (bytes memory bodyWearable_)
+        returns (bytes memory bodyWearable_, bytes memory sleeves_)
     {
         ItemType storage wearableType = s.itemTypes[_wearableId];
         Dimensions memory dimensions = s.sideViewDimensions[_wearableId][_sideView];
@@ -382,8 +387,9 @@ contract SvgViewsFacet is Modifiers {
             LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-", _sideView), wearableType.svgId),
             "</svg></g>"
         );
-        /* uint256 svgId = s.sleeves[_wearableId];
-        if (svgId != 0) {
+        uint256 svgId = s.sleeves[_wearableId];
+        console.log('svg Sleeve id:',svgId);
+        /* if (svgId != 0) { */
             sleeves_ = abi.encodePacked(
                 // x
                 LibStrings.strWithUint('"><svg x="', dimensions.x),
@@ -393,7 +399,33 @@ contract SvgViewsFacet is Modifiers {
                 LibSvg.getSvg(LibSvg.bytesToBytes32("sleeves-", _sideView), svgId),
                 "</svg>"
             );
-        } */
+        /* } */
+    }
+
+    function getSleeveSideWearable(
+        bytes memory _sideView,
+        uint256 _wearableId,
+        uint256 _slotPosition
+    ) internal view returns (bytes memory svg_) {
+        ItemType storage wearableType = s.itemTypes[_wearableId];
+        Dimensions memory dimensions = s.sideViewDimensions[_wearableId][_sideView];
+
+        string memory wearableClass = getSideWearableClass(_slotPosition);
+        bytes32 svgLog = LibSvg.bytesToBytes32("sleeves-", _sideView);
+        console.log("~~~SLEEVES~~~");
+        console.logBytes32(svgLog);
+
+        svg_ = abi.encodePacked(
+            '<g class="gotchi-wearable ',
+            wearableClass,
+            // x
+            LibStrings.strWithUint('"><svg x="', dimensions.x),
+            // y
+            LibStrings.strWithUint('" y="', dimensions.y),
+            '">'
+        );
+
+        svg_ = abi.encodePacked(svg_, LibSvg.getSvg(LibSvg.bytesToBytes32("sleeves-", _sideView), wearableType.svgId), "</svg></g>");
     }
 
     function prepareItemSvg(Dimensions storage _dimensions, bytes memory _svg) internal view returns (string memory svg_) {
