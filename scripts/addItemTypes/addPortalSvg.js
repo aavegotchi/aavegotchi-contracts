@@ -4,6 +4,7 @@
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
 const { openPortalSvgs } = require("../../svgs/openPortalSvg"); //haunt 0,1
 const { closedPortalSvgs } = require("../../svgs/closedPortalSvg"); //haunt 0,1
+const { formatBytes32String } = require("ethers/lib/utils");
 
 let signer;
 const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
@@ -104,20 +105,20 @@ async function main() {
     throw Error("Incorrect network selected");
   }
 
-  // await uploadSvgs(closedPortalSvgs, "portal-closed", testing);
-  // await uploadSvgs(openPortalSvgs, "portal-open", testing);
+  await uploadSvgs(closedPortalSvgs, "portal-closed", testing);
+  await uploadSvgs(openPortalSvgs, "portal-open", testing);
 
   let svgFacet = await ethers.getContractAt("SvgFacet", diamondAddress);
 
-  const types = ["portal-closed"];
-  const ids = ["1"];
-  const output = await svgFacet.getSvgs(types, ids);
+  const portalClosed = formatBytes32String("portal-closed");
 
-  console.log("output");
+  const output = await svgFacet.getSvg(portalClosed, 1);
 
-  const svgOutput = await svgFacet.getAavegotchiSvg("2");
+  console.log("output", output);
 
-  console.log("svg output:", svgOutput);
+  // const svgOutput = await svgFacet.getAavegotchiSvg("2");
+
+  // console.log("svg output:", svgOutput);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
