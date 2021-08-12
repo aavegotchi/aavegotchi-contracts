@@ -104,10 +104,18 @@ async function main() {
     throw Error("Incorrect network selected");
   }
 
-  await uploadSvgs(closedPortalSvgs, "portal-closed", testing);
-  await uploadSvgs(openPortalSvgs, "portal-open", testing);
+  // await uploadSvgs(closedPortalSvgs, "portal-closed", testing);
+  // await uploadSvgs(openPortalSvgs, "portal-open", testing);
 
-  const svgOutput = await svgFacet.getAavegotchiSvg("7516");
+  let svgFacet = await ethers.getContractAt("SvgFacet", diamondAddress);
+
+  const types = ["portal-closed"];
+  const ids = ["1"];
+  const output = await svgFacet.getSvgs(types, ids);
+
+  console.log("output");
+
+  const svgOutput = await svgFacet.getAavegotchiSvg("2");
 
   console.log("svg output:", svgOutput);
 }
