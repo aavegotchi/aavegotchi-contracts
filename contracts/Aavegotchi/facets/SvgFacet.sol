@@ -73,12 +73,11 @@ contract SvgFacet is Modifiers {
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
         uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
-
         //todo: make this more dynamic
-        bytes32 eyeSvgType;
-        if (hauntId == 1) eyeSvgType = "eyeShapes";
-        else eyeSvgType = abi.encodePacked("eyeShapesH", hauntId);
-
+        bytes32 eyeSvgType = "eyeShapes";
+        if (hauntId == 2) {
+            eyeSvgType = "eyeShapesH2";
+        }
         details.trait = _numericTraits[4];
         if (details.trait < 0) {
             details.eyeShape = LibSvg.getSvg(eyeSvgType, 0);
