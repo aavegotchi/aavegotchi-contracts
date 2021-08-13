@@ -1,7 +1,6 @@
 /* global ethers */
 const { sendToMultisig } = require("../libraries/multisig/multisig.js");
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
-const { uploadH2SVG } = require("./uploadH2SVG.js");
 
 function getSelectors(contract) {
   const signatures = Object.keys(contract.interface.functions);
@@ -49,6 +48,7 @@ async function deployFacets(...facets) {
     await facetInstance.deployed();
     const tx = facetInstance.deployTransaction;
     const receipt = await tx.wait();
+    console.log(`${facet} was deployed. New address: ${facetInstance.address}`);
     console.log(`${facet} deploy gas used:` + strDisplay(receipt.gasUsed));
     instances.push(facetInstance);
   }
@@ -76,19 +76,6 @@ async function main() {
   } else {
     throw Error("Incorrect network selected");
   }
-
-  let aavegotchiFacet = await ethers.getContractAt(
-    "AavegotchiGameFacet",
-    diamondAddress
-  );
-  let aavegotchi = await aavegotchiFacet.portalAavegotchiTraits("8447");
-  console.log("aavegotchi:", aavegotchi);
-
-  aavegotchi.forEach((portal) => {
-    console.log("collateral:", portal.collateralType);
-  });
-
-  //8447
 
   //Redeploy all of the facets that use LibAavegotchi's portalAavegotchiTraits function
   const diamondCut = await (
