@@ -71,7 +71,6 @@ library LibAavegotchi {
             uint256 value = uint8(uint256(_randomNumber >> (i * 8)));
             if (value > 99) {
                 value /= 2;
-
                 if (value > 99) {
                     value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
                 }
