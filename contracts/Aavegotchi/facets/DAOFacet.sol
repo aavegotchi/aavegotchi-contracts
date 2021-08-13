@@ -52,7 +52,6 @@ contract DAOFacet is Modifiers {
         s.daoTreasury = _newDaoTreasury;
     }
 
-    //H2 Todo: Use the hauntID=>collateralType mapping
     function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyItemManager {
         for (uint256 i; i < _collateralTypes.length; i++) {
             address newCollateralType = _collateralTypes[i].collateralType;
@@ -71,8 +70,8 @@ contract DAOFacet is Modifiers {
 
             //Then handle hauntCollateralTypes array
             bool hauntCollateralExists = false;
-            for (uint256 index = 0; index < s.hauntCollateralTypes[_hauntId].length; index++) {
-                address existingHauntCollateral = s.hauntCollateralTypes[_hauntId][index];
+            for (uint256 hauntIndex = 0; hauntIndex < s.hauntCollateralTypes[_hauntId].length; hauntIndex++) {
+                address existingHauntCollateral = s.hauntCollateralTypes[_hauntId][hauntIndex];
 
                 if (existingHauntCollateral == newCollateralType) {
                     hauntCollateralExists = true;

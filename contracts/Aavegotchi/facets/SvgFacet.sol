@@ -2,13 +2,7 @@
 pragma solidity 0.8.1;
 
 import {AppStorage, SvgLayer, Dimensions} from "../libraries/LibAppStorage.sol";
-import {
-    LibAavegotchi,
-    PortalAavegotchiTraitsIO,
-    EQUIPPED_WEARABLE_SLOTS,
-    PORTAL_AAVEGOTCHIS_NUM,
-    NUMERIC_TRAITS_NUM
-} from "../libraries/LibAavegotchi.sol";
+import {LibAavegotchi, PortalAavegotchiTraitsIO, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, NUMERIC_TRAITS_NUM} from "../libraries/LibAavegotchi.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
@@ -87,7 +81,6 @@ contract SvgFacet is Modifiers {
             details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
             for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
                 if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
-                    //H2 Todo: Create eyeShapesH2 svg type and substitute here
                     details.eyeShape = LibSvg.getSvg("eyeShapes", i);
                     break;
                 }
