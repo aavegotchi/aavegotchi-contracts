@@ -2,16 +2,7 @@
 pragma solidity 0.8.1;
 
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
-import {
-    LibAppStorage,
-    AavegotchiCollateralTypeInfo,
-    AppStorage,
-    Aavegotchi,
-    ItemType,
-    NUMERIC_TRAITS_NUM,
-    EQUIPPED_WEARABLE_SLOTS,
-    PORTAL_AAVEGOTCHIS_NUM
-} from "./LibAppStorage.sol";
+import {LibAppStorage, AavegotchiCollateralTypeInfo, AppStorage, Aavegotchi, ItemType, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM} from "./LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
@@ -81,7 +72,6 @@ library LibAavegotchi {
             if (value > 99) {
                 value /= 2;
 
-                //H2 Todo: Prevent it from skewing to higher numbers
                 if (value > 99) {
                     value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
                 }
@@ -108,7 +98,6 @@ library LibAavegotchi {
         uint256 randomNumberN = uint256(keccak256(abi.encodePacked(_randomNumber, _option)));
         singlePortalAavegotchiTraits_.randomNumber = randomNumberN;
 
-        //H2 Todo: Use the hauntID=>collateralType mapping
         address collateralType = s.hauntCollateralTypes[_hauntId][randomNumberN % s.hauntCollateralTypes[_hauntId].length];
         singlePortalAavegotchiTraits_.numericTraits = toNumericTraits(randomNumberN, s.collateralTypeInfo[collateralType].modifiers);
         singlePortalAavegotchiTraits_.collateralType = collateralType;
@@ -136,7 +125,6 @@ library LibAavegotchi {
 
         uint256 randomNumber = s.tokenIdToRandomNumber[_tokenId];
 
-        //H2 Todo: ensure that this value is defined in the new mintAavegotchi function
         uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
 
         for (uint256 i; i < portalAavegotchiTraits_.length; i++) {
@@ -371,10 +359,4 @@ library LibAavegotchi {
         s.ownerTokenIds[_to].push(uint32(_tokenId));
         emit LibERC721.Transfer(_from, _to, _tokenId);
     }
-
-    /*  function verify(uint256 _tokenId) internal pure {
-       // if (_tokenId < 10) {}
-       // revert("Not verified");
-    }
-    */
 }
