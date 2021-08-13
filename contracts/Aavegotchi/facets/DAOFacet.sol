@@ -54,17 +54,37 @@ contract DAOFacet is Modifiers {
         s.daoTreasury = _newDaoTreasury;
     }
 
-    function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyDaoOrOwner {
+    function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyItemManager {
         for (uint256 i; i < _collateralTypes.length; i++) {
-            address collateralType = _collateralTypes[i].collateralType;
+            address newCollateralType = _collateralTypes[i].collateralType;
 
-            //Prevent the same collateral from being added multiple times
-            require(s.collateralTypeInfo[collateralType].cheekColor == 0, "DAOFacet: Collateral already added");
+            //Overwrite the collateralTypeInfo if it already exists
+            s.collateralTypeInfo[newCollateralType] = _collateralTypes[i].collateralTypeInfo;
 
-            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
-            s.collateralTypes.push(collateralType);
-            s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
-            emit AddCollateralType(_collateralTypes[i]);
+            //First handle global collateralTypes array
+            uint256 index = s.collateralTypeIndexes[newCollateralType];
+            bool collateralExists = index > 0 || s.collateralTypes[0] == newCollateralType;
+
+            if (!collateralExists) {
+                s.collateralTypes.push(newCollateralType);
+                s.collateralTypeIndexes[newCollateralType] = s.collateralTypes.length;
+            }
+
+            //Then handle hauntCollateralTypes array
+            bool hauntCollateralExists = false;
+            for (uint256 hauntIndex = 0; hauntIndex < s.hauntCollateralTypes[_hauntId].length; hauntIndex++) {
+                address existingHauntCollateral = s.hauntCollateralTypes[_hauntId][hauntIndex];
+
+                if (existingHauntCollateral == newCollateralType) {
+                    hauntCollateralExists = true;
+                    break;
+                }
+            }
+
+            if (!hauntCollateralExists) {
+                s.hauntCollateralTypes[_hauntId].push(newCollateralType);
+                emit AddCollateralType(_collateralTypes[i]);
+            }
         }
     }
 
