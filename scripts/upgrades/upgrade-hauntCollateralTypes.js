@@ -44,7 +44,7 @@ async function deployFacets(...facets) {
     }
     const factory = await ethers.getContractFactory(facet);
     const facetInstance = await factory.deploy(...constructorArgs, {
-      gasPrice: 5000000000,
+      gasPrice: 2000000000,
     });
     await facetInstance.deployed();
     const tx = facetInstance.deployTransaction;
@@ -97,18 +97,9 @@ async function main() {
   let [collateralFacet, daoFacet, ...facets] = await deployFacets(
     "CollateralFacet",
     "DAOFacet",
-    // "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
     "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
     "AavegotchiGameFacet",
     "SvgFacet"
-    // "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
-    // "ItemsTransferFacet",
-    // "VrfFacet"
-    // "ShopFacet"
-    // "MetaTransactionsFacet",
-    // "ERC1155MarketplaceFacet",
-    // "ERC721MarketplaceFacet",
-    // "EscrowFacet"
   );
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
@@ -208,7 +199,6 @@ async function main() {
       functionSelectors: getSelectors(facet),
     });
   }
-  // console.log(cut);
 
   if (testing) {
     tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", {
@@ -235,103 +225,6 @@ async function main() {
     });
     console.log("Sent to multisig");
   }
-
-  // Add collateral types for H1
-  daoFacet = await ethers.getContractAt("DAOFacet", diamondAddress, signer);
-
-  const { getCollaterals } = require("../collateralTypes.js");
-  if (testing) {
-    let itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
-    await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [itemManager],
-    });
-
-    let imSigner = await ethers.provider.getSigner(itemManager);
-
-    const itemManagerDaoFacet = await ethers.getContractAt(
-      "DAOFacet",
-      diamondAddress,
-      imSigner
-    );
-
-    collateralFacet = await ethers.getContractAt(
-      "CollateralFacet",
-      diamondAddress
-    );
-
-    const collaterals = await collateralFacet.getAllCollateralTypes();
-    console.log("all collaterals:", collaterals);
-
-    let h1collaterals = await collateralFacet.collaterals("1");
-    console.log("h1 before adding:", h1collaterals);
-
-    tx = await itemManagerDaoFacet.addCollateralTypes(
-      1,
-      getCollaterals("matic", ghstAddress)
-    );
-  } else {
-    tx = await daoFacet.addCollateralTypes(
-      1,
-      getCollaterals(hre.network.name, ghstAddress)
-    );
-  }
-  console.log("Adding Collateral Types for H1 tx:", tx.hash);
-  let receipt = await tx.wait();
-  if (!receipt.status) {
-    throw Error(`Adding Collateral Types for H1 failed: ${tx.hash}`);
-  }
-
-  h1collaterals = await collateralFacet.collaterals("1");
-  console.log("h1 after adding:", h1collaterals);
-
-  // Add collateral types for H2
-  /*
-  if (testing) {
-    const { getH2Collaterals } = require("../collateralTypesHaunt2.js");
-
-    let itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
-    await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [itemManager],
-    });
-
-    let imSigner = await ethers.provider.getSigner(itemManager);
-
-    const itemManagerDaoFacet = await ethers.getContractAt(
-      "DAOFacet",
-      diamondAddress,
-      imSigner
-    );
-
-    tx = await itemManagerDaoFacet.addCollateralTypes(
-      2,
-      getH2Collaterals(hre.network.name, ghstAddress)
-    );
-    console.log("Adding Collateral Types for H2 tx:", tx.hash);
-    receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Adding Collateral Types for H2 failed: ${tx.hash}`);
-    }
-
-    let h2collaterals = await collateralFacet.collaterals("2");
-    console.log("h2 after adding:", h2collaterals);
-
-    //Check the collaterals for H1 opened portals
-    let aavegotchiFacet = await ethers.getContractAt(
-      "AavegotchiGameFacet",
-      diamondAddress
-    );
-    let aavegotchi = await aavegotchiFacet.portalAavegotchiTraits("8447");
-
-    aavegotchi.forEach((portal) => {
-      console.log("collateral:", portal.collateralType);
-    });
-  }
-
-  // Upload SVG for H2
-  // await uploadH2SVG();
-  */
 
   return {
     signer,
