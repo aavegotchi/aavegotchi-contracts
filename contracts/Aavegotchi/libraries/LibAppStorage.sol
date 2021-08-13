@@ -221,24 +221,18 @@ struct AppStorage {
     mapping(uint256 => ERC721Listing) erc721Listings;
     // listingId => ListingListItem
     mapping(uint256 => ListingListItem) erc721ListingListItem;
-    //mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
     mapping(uint256 => mapping(string => uint256)) erc721ListingHead;
     // user address => category => sort => listingId => ListingListItem
     mapping(uint256 => ListingListItem) erc721OwnerListingListItem;
-    //mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
     mapping(address => mapping(uint256 => mapping(string => uint256))) erc721OwnerListingHead;
     // erc1155Token => (erc1155TypeId => category)
     // not really in use now, for the future
     mapping(address => mapping(uint256 => uint256)) erc721Categories;
     // erc721 token address, erc721 tokenId, user address => listingId
     mapping(address => mapping(uint256 => mapping(address => uint256))) erc721TokenToListingId;
-    // body wearableId => sleevesId
     mapping(uint256 => uint256) sleeves;
-    // mapping(address => mapping(uint256 => address)) petOperators;
-    // mapping(address => uint256[]) petOperatorTokenIds;
     mapping(address => bool) itemManagers;
     mapping(address => GameManager) gameManagers;
-    //H2
     mapping(uint256 => address[]) hauntCollateralTypes;
 }
 
@@ -265,30 +259,30 @@ contract Modifiers {
         _;
     }
 
-    modifier onlyOwner {
+    modifier onlyOwner() {
         LibDiamond.enforceIsContractOwner();
         _;
     }
 
-    modifier onlyDao {
+    modifier onlyDao() {
         address sender = LibMeta.msgSender();
         require(sender == s.dao, "Only DAO can call this function");
         _;
     }
 
-    modifier onlyDaoOrOwner {
+    modifier onlyDaoOrOwner() {
         address sender = LibMeta.msgSender();
         require(sender == s.dao || sender == LibDiamond.contractOwner(), "LibAppStorage: Do not have access");
         _;
     }
 
-    modifier onlyOwnerOrDaoOrGameManager {
+    modifier onlyOwnerOrDaoOrGameManager() {
         address sender = LibMeta.msgSender();
         bool isGameManager = s.gameManagers[sender].limit != 0;
         require(sender == s.dao || sender == LibDiamond.contractOwner() || isGameManager, "LibAppStorage: Do not have access");
         _;
     }
-    modifier onlyItemManager {
+    modifier onlyItemManager() {
         address sender = LibMeta.msgSender();
         require(s.itemManagers[sender] == true, "LibAppStorage: only an ItemManager can call this function");
         _;
