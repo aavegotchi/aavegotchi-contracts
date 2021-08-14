@@ -76,21 +76,19 @@ contract SvgFacet is Modifiers {
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
         uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
-        console.log("hauntId:", hauntId);
 
         //todo: make this more dynamic
         bytes32 eyeSvgType = "eyeShapes";
+
         if (hauntId != 1) {
-            //  eyeSvgType = keccak256(abi.encodePacked("eyeShapesH", s.aavegotchis[_tokenId].hauntId));
-            eyeSvgType = "eyeShapesH2";
+            bytes memory eyeShapesH = abi.encodePacked("eyeShapesH");
+            bytes memory haunt = abi.encodePacked(LibSvg.uint2str(hauntId));
+            eyeSvgType = LibSvg.bytesToBytes32(eyeShapesH, haunt);
         }
         //else
 
-        console.logBytes32(eyeSvgType);
-
         details.trait = _numericTraits[4];
 
-        console.logInt(_numericTraits[4]);
         if (details.trait < 0) {
             details.eyeShape = LibSvg.getSvg(eyeSvgType, 0);
         } else if (details.trait > 97) {

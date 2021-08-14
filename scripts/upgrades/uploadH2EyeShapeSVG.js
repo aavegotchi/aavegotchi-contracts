@@ -21,6 +21,7 @@ async function uploadSvgs(svgs, svgType) {
     const svgTypesAndSizes = [];
     const svgItems = [];
     for (const [svgType, svg] of svgData) {
+      console.log("svg type:", ethers.utils.formatBytes32String(svgType));
       svgItems.push(svg.join(""));
       svgTypesAndSizes.push([
         ethers.utils.formatBytes32String(svgType),
@@ -60,6 +61,7 @@ async function uploadSvgs(svgs, svgType) {
       }
       svgItemsEnd++;
     }
+
     [svg, svgTypesAndSizes] = setupSvg([
       svgType,
       svgs.slice(svgItemsStart, svgItemsEnd),
@@ -108,6 +110,12 @@ async function main() {
   }
 
   console.log("Upload SVGs");
+
+  const eyeSvgType = ethers.utils.solidityKeccak256(
+    ["bytes32", "uint16"],
+    [ethers.utils.formatBytes32String("eyeShapesH"), 2]
+  );
+
   await uploadSvgs(eyeShapeSvgs, "eyeShapesH2", testing, {
     gasPrice: gasPrice,
   });
