@@ -142,7 +142,7 @@ contract VrfFacet is Modifiers {
         bytes32 requestId = keccak256(abi.encodePacked(l_keyHash, vrfSeed));
         s.vrfRequestIdToTokenId[requestId] = _tokenId;
         // for testing
-        // tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _tokenId))));
+        tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _tokenId))));
     }
 
     // for testing purpose only

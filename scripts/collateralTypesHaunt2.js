@@ -115,7 +115,7 @@ const testCollaterals = [
     secondaryColor: "#F9D792",
     cheekColor: "#F4AF24",
     svgId: 0,
-    eyeShapeSvgId: 16,
+    eyeShapeSvgId: 1,
     modifiers: [0, 0, -1, 0, 0, 0],
     conversionRate: 50000, // 1 DAI equals 1 GHST
   },

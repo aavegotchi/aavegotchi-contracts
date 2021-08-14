@@ -8,6 +8,8 @@ import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 
+import "hardhat/console.sol";
+
 contract SvgFacet is Modifiers {
     /***********************************|
    |             Read Functions         |
@@ -74,13 +76,21 @@ contract SvgFacet is Modifiers {
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
         uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
+        console.log("hauntId:", hauntId);
+
         //todo: make this more dynamic
         bytes32 eyeSvgType = "eyeShapes";
         if (hauntId != 1) {
-            eyeSvgType = keccak256(abi.encodePacked("eyeShapes", s.aavegotchis[_tokenId].hauntId));
+            //  eyeSvgType = keccak256(abi.encodePacked("eyeShapesH", s.aavegotchis[_tokenId].hauntId));
+            eyeSvgType = "eyeShapesH2";
         }
+        //else
+
+        console.logBytes32(eyeSvgType);
 
         details.trait = _numericTraits[4];
+
+        console.logInt(_numericTraits[4]);
         if (details.trait < 0) {
             details.eyeShape = LibSvg.getSvg(eyeSvgType, 0);
         } else if (details.trait > 97) {
@@ -89,7 +99,9 @@ contract SvgFacet is Modifiers {
             details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
             for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
                 if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
+                    console.log("eye shape:", i);
                     details.eyeShape = LibSvg.getSvg(eyeSvgType, i);
+
                     break;
                 }
             }

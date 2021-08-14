@@ -24,7 +24,7 @@ async function uploadSvgs(svgs, svgType) {
       svgItems.push(svg.join(""));
       svgTypesAndSizes.push([
         ethers.utils.formatBytes32String(svgType),
-        svg.map((value) => value.length)
+        svg.map((value) => value.length),
       ]);
     }
     return [svgItems.join(""), svgTypesAndSizes];
@@ -62,21 +62,26 @@ async function uploadSvgs(svgs, svgType) {
     }
     [svg, svgTypesAndSizes] = setupSvg([
       svgType,
-      svgs.slice(svgItemsStart, svgItemsEnd)
+      svgs.slice(svgItemsStart, svgItemsEnd),
     ]);
 
-    console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`);
+    console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} eyeShape SVGs`);
     printSizeInfo(svgTypesAndSizes);
 
     if (testing) {
-      let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, { gasLimit: gasLimit });
+      let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, {
+        gasLimit: gasLimit,
+      });
       let receipt = await tx.wait();
       if (!receipt.status) {
         throw Error(`Error:: ${tx.hash}`);
       }
       console.log(svgItemsEnd, svg.length);
     } else {
-      let tx = await svgFacet.populateTransaction.storeSvg(svg, svgTypesAndSizes);
+      let tx = await svgFacet.populateTransaction.storeSvg(
+        svg,
+        svgTypesAndSizes
+      );
       await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
     }
     if (svgItemsEnd === svgs.length) {
@@ -93,7 +98,7 @@ async function main() {
   if (testing) {
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [itemManager]
+      params: [itemManager],
     });
     signer = await ethers.provider.getSigner(itemManager);
   } else if (hre.network.name === "matic") {
@@ -103,7 +108,9 @@ async function main() {
   }
 
   console.log("Upload SVGs");
-  await uploadSvgs(eyeShapeSvgs, "eyeShapesH2", testing, { gasPrice: gasPrice });
+  await uploadSvgs(eyeShapeSvgs, "eyeShapesH2", testing, {
+    gasPrice: gasPrice,
+  });
 }
 
 // We recommend this pattern to be able to use async/await everywhere
