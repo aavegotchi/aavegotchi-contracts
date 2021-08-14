@@ -77,15 +77,12 @@ contract SvgFacet is Modifiers {
 
         uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
 
-        //todo: make this more dynamic
         bytes32 eyeSvgType = "eyeShapes";
-
         if (hauntId != 1) {
-            bytes memory eyeShapesH = abi.encodePacked("eyeShapesH");
+            //Haunt needs to be converted into a string to match the uploaded category name
             bytes memory haunt = abi.encodePacked(LibSvg.uint2str(hauntId));
-            eyeSvgType = LibSvg.bytesToBytes32(eyeShapesH, haunt);
+            eyeSvgType = LibSvg.bytesToBytes32(abi.encodePacked("eyeShapesH"), haunt);
         }
-        //else
 
         details.trait = _numericTraits[4];
 
