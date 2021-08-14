@@ -48,9 +48,14 @@ async function main() {
       getCollaterals("matic", ghstAddress)
     );
   } else {
+    const daoFacet = await ethers.getContractAt(
+      "DAOFacet",
+      diamondAddress,
+      signer
+    );
     tx = await daoFacet.addCollateralTypes(
       1,
-      getCollaterals(hre.network.name, ghstAddress)
+      getCollaterals("matic", ghstAddress)
     );
   }
   console.log("Adding Collateral Types for H1 tx:", tx.hash);
