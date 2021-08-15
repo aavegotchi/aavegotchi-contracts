@@ -3,11 +3,18 @@ const { ethers } = require("hardhat");
 const truffleAsserts = require("truffle-assertions");
 //const j = require("../scripts/upgrades/upgrade-mintPortal.js");
 //const k = require("../scripts/createhaunt2.js");
+
 describe("Testing mintPortal()", async function () {
   this.timeout(300000);
 
-  let aavegotchiDiamondAddress, gotchifacet, owner, testAdd, shopFacet, txData;
-
+  let aavegotchiDiamondAddress,
+    gotchifacet,
+    owner,
+    testAdd,
+    shopFacet,
+    txData,
+    totalGasUsed;
+  const noOfPortals = 50;
   before(async () => {
     //await j.mintPortal();
     // await k.createH2();
@@ -29,16 +36,26 @@ describe("Testing mintPortal()", async function () {
     );
   });
 
-  it("mints 1 portal to an address", async () => {
+  it("mints 50 portals to an address", async () => {
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [owner],
     });
 
-    const tx = await shopFacet.mintPortals(testAdd, 1);
+    const tx = await shopFacet.mintPortals(testAdd, noOfPortals);
+    txData = await tx.wait();
+    //console.log(txData);
+    totalGasUsed = txData.gasUsed;
+    console.log(
+      "gas used in minting",
+      noOfPortals,
+      "portal(s) is: ",
+      totalGasUsed.toString()
+    );
     const newGotchi = await gotchifacet.getAavegotchi(10000);
     const gotchiOwner = await gotchifacet.ownerOf(10000);
     // console.log(newGotchi);
+
     expect(gotchiOwner).to.equal(testAdd);
     expect(newGotchi.hauntId.toString()).to.equal("2");
     //console.log(await tx.wait());

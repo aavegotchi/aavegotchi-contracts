@@ -21,7 +21,7 @@ async function main() {
     throw Error("Incorrect network selected");
   }
 
-  const hauntSize = 10000;
+  const hauntSize = 15000;
   const price = ethers.utils.parseEther("0"); //no price since it'll be GBM
   const daoFacet = (
     await ethers.getContractAt("DAOFacet", aavegotchiDiamondAddress)
