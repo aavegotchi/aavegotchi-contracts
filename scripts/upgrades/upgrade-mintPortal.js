@@ -45,9 +45,6 @@ async function main() {
   console.log("Deployed ShopFacet");
 
   //add the generic mintPortals function
-  let existingShopFuncs = getSelectors(shopFacet);
-
-  //add the generic mintPortals function
   const newShopFuncs = [
     getSelector("function mintPortals(address _to, uint256 _amount) external"),
   ];

@@ -39,9 +39,6 @@ describe("Testing mintPortal()", async function () {
     const newGotchi = await gotchifacet.getAavegotchi(10000);
     const gotchiOwner = await gotchifacet.ownerOf(10000);
     // console.log(newGotchi);
-    txData = await tx.wait();
-    const events = txData.events;
-    console.log(events[events.length - 1].args);
     expect(gotchiOwner).to.equal(testAdd);
     expect(newGotchi.hauntId.toString()).to.equal("2");
     //console.log(await tx.wait());
