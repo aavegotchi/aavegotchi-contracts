@@ -3,8 +3,6 @@ pragma solidity 0.8.1;
 
 import {LibAppStorage, AppStorage, SvgLayer} from "./LibAppStorage.sol";
 
-// import "hardhat/console.sol";
-
 library LibSvg {
     event StoreSvg(LibSvg.SvgTypeAndSizes[] _typesAndSizes);
     event UpdateSvg(SvgTypeAndIdsAndSizes[] _typesAndIdsAndSizes);
