@@ -187,10 +187,26 @@ describe("Upgrade H2 eye shapes", async function () {
 
     it("Returned aavegotchi SVG including correct eye shape", async function () {
       const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account);
+
+      console.log("my portals:", myPortals[0]);
       const tokenId = myPortals[0].tokenId;
+
+      const eyeShapeRange = [
+        0, 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98,
+      ];
+
+      const eyeShapeTrait = myPortals[0].numericTraits[4]; //[ 23, 18, 34, 42, 8, 38 ],
+
+      var index = eyeShapeRange.findIndex((number) => {
+        return number > eyeShapeTrait;
+      });
+
+      console.log("final eye shape:", index);
+
       const svg = await svgFacet.getAavegotchiSvg(tokenId);
       console.log(svg);
-      expect(svg.includes(eyeShapeSvgs[testEyeShapeId])).to.equal(true);
+
+      expect(svg.includes(eyeShapeSvgs[index - 1])).to.equal(true);
     });
   });
 });
