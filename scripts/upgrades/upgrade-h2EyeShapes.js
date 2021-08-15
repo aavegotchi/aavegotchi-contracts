@@ -42,6 +42,7 @@ async function main() {
     gasPrice: gasPrice,
   });
   await facet.deployed();
+  console.log("New SvgFacet deployed:", facet.address);
 
   let existingFacetFuncs = getSelectors(facet);
 
