@@ -2,16 +2,7 @@
 pragma solidity 0.8.1;
 
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
-import {
-    LibAppStorage,
-    AavegotchiCollateralTypeInfo,
-    AppStorage,
-    Aavegotchi,
-    ItemType,
-    NUMERIC_TRAITS_NUM,
-    EQUIPPED_WEARABLE_SLOTS,
-    PORTAL_AAVEGOTCHIS_NUM
-} from "./LibAppStorage.sol";
+import {LibAppStorage, AavegotchiCollateralTypeInfo, AppStorage, Aavegotchi, ItemType, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM} from "./LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
@@ -97,15 +88,16 @@ library LibAavegotchi {
         else if (rarityScore >= 581) return 1000;
     }
 
-    function singlePortalAavegotchiTraits(uint256 _randomNumber, uint256 _option)
-        internal
-        view
-        returns (InternalPortalAavegotchiTraitsIO memory singlePortalAavegotchiTraits_)
-    {
+    function singlePortalAavegotchiTraits(
+        uint256 _hauntId,
+        uint256 _randomNumber,
+        uint256 _option
+    ) internal view returns (InternalPortalAavegotchiTraitsIO memory singlePortalAavegotchiTraits_) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 randomNumberN = uint256(keccak256(abi.encodePacked(_randomNumber, _option)));
         singlePortalAavegotchiTraits_.randomNumber = randomNumberN;
-        address collateralType = s.collateralTypes[randomNumberN % s.collateralTypes.length];
+
+        address collateralType = s.hauntCollateralTypes[_hauntId][randomNumberN % s.hauntCollateralTypes[_hauntId].length];
         singlePortalAavegotchiTraits_.numericTraits = toNumericTraits(randomNumberN, s.collateralTypeInfo[collateralType].modifiers);
         singlePortalAavegotchiTraits_.collateralType = collateralType;
 
@@ -132,8 +124,10 @@ library LibAavegotchi {
 
         uint256 randomNumber = s.tokenIdToRandomNumber[_tokenId];
 
+        uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
+
         for (uint256 i; i < portalAavegotchiTraits_.length; i++) {
-            InternalPortalAavegotchiTraitsIO memory single = singlePortalAavegotchiTraits(randomNumber, i);
+            InternalPortalAavegotchiTraitsIO memory single = singlePortalAavegotchiTraits(hauntId, randomNumber, i);
             portalAavegotchiTraits_[i].randomNumber = single.randomNumber;
             portalAavegotchiTraits_[i].collateralType = single.collateralType;
             portalAavegotchiTraits_[i].minimumStake = single.minimumStake;
@@ -364,10 +358,4 @@ library LibAavegotchi {
         s.ownerTokenIds[_to].push(uint32(_tokenId));
         emit LibERC721.Transfer(_from, _to, _tokenId);
     }
-
-  /*  function verify(uint256 _tokenId) internal pure {
-       // if (_tokenId < 10) {}
-       // revert("Not verified");
-    }
-    */
 }

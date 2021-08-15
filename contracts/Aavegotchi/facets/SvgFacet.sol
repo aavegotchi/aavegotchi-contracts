@@ -32,12 +32,13 @@ contract SvgFacet is Modifiers {
 
         bytes memory svg;
         uint8 status = s.aavegotchis[_tokenId].status;
+        uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
         if (status == LibAavegotchi.STATUS_CLOSED_PORTAL) {
             // sealed closed portal
-            svg = LibSvg.getSvg("aavegotchis", 0);
+            svg = LibSvg.getSvg("portal-closed", hauntId);
         } else if (status == LibAavegotchi.STATUS_OPEN_PORTAL) {
             // open portal
-            svg = LibSvg.getSvg("aavegotchi", 1);
+            svg = LibSvg.getSvg("portal-open", hauntId);
         } else if (status == LibAavegotchi.STATUS_AAVEGOTCHI) {
             address collateralType = s.aavegotchis[_tokenId].collateralType;
             svg = getAavegotchiSvgLayers(collateralType, s.aavegotchis[_tokenId].numericTraits, _tokenId);

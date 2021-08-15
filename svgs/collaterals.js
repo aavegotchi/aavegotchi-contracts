@@ -18,8 +18,7 @@ const collateralsSvgs = [
   // 7, YFI Collateral
   '<g class="gotchi-collateral" fill="#0074f9"><path d="M30 16h1v1h-1zm4 1h1v1h-1z"/><path d="M33 16h1v1h-1zm1 2h1v1h-1z"/><path d="M34 19h1v1h-1z"/><path d="M34 20h1v1h-1zm-2 1h1v1h-1z"/><path d="M33 21h1v1h-1zm-2 0h1v1h-1z"/><path d="M30 21h1v1h-1z"/><path d="M29 20h1v1h-1z"/><path d="M30 19h1v1h-1z"/><path d="M30 18h1v1h-1z"/><path d="M29 18h1v1h-1zm4-7h1v1h-1zm-2 0h1v1h-1z"/><path d="M30 11h1v1h-1zm2 0h1v1h-1zm-3 4h1v1h-1zm0-2h1v1h-1z"/><path d="M29 12h1v1h-1zm0 2h1v1h-1zm5-2h1v1h-1zm-1 2h1v1h-1z"/><path d="M34 14h1v1h-1z"/><path d="M33 13h1v1h-1zm-1.5 2h1v1h-1z"/><path d="M31.5 14h1v1h-1z"/><path d="M31.5 13h1v1h-1zm0 3h1v1h-1zm0 2h1v1h-1z"/><path d="M31.5 19h1v1h-1zm0-2h1v1h-1z"/></g>',
   // 8, TUSD Collateral
-  '<g class="gotchi-collateral"><g fill="#282473"><path d="M37 15h-1v4h1zm-3 5h1v1h-1z"/><path d="M35 19h1v1h-1zm-6 1h1v1h-1z"/><path d="M34 22v-1h-4v1z"/></g><g fill="#489ff8"><path d="M30.5 15v1h1v3h1v-3h1v-1zm-.5-3v1h4v-1z"/><path d="M34 13h1v1h-1zm-7 6h1v-4h-1zm2-6h1v1h-1z"/><path d="M28 14h1v1h-1z"/></g></g>'
-  // '<g class="gotchi-collateral"><path d="M32 20h1v1h-1zm-2 0h1v1h-1z"/><path d="M33 21h1v1h-1zm-4-2h1v1h-1zm-2-2h1v1h-1zm0-2h1v1h-1z"/><path d="M28 18h1v1h-1zm0-2h1v1h-1zm0-2h1v1h-1z"/><path d="M29 13h1v1h-1zm0 2h1v1h-1z"/><path d="M30 14h1v1h-1z"/><path d="M32 15h1v1h1v1h-1v1h1v1h-1v1h1v1h1v-1h1v-1h1v-4h-1v-1h-1v-1h-1v-1h-4v1h1v1h1z"/><path d="M31 15h1v1h-1z"/><path d="M30 16h1v1h-1zm2 0h1v1h-1z"/><path d="M29 17h1v1h-1zm2 0h1v1h-1z"/><path d="M30 18h1v1h-1zm2 0h1v1h-1z"/><path d="M31 19h1v1h-1zm0 2h1v1h-1z"/></g>'
-]
+  '<g class="gotchi-collateral"><g fill="#282473"><path d="M37 15h-1v4h1zm-3 5h1v1h-1z"/><path d="M35 19h1v1h-1zm-6 1h1v1h-1z"/><path d="M34 22v-1h-4v1z"/></g><g fill="#489ff8"><path d="M30.5 15v1h1v3h1v-3h1v-1zm-.5-3v1h4v-1z"/><path d="M34 13h1v1h-1zm-7 6h1v-4h-1zm2-6h1v1h-1z"/><path d="M28 14h1v1h-1z"/></g></g>',
+];
 
-exports.collateralsSvgs = collateralsSvgs
+exports.collateralsSvgs = collateralsSvgs;
