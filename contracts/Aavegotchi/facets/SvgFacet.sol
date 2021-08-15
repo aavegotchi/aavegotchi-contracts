@@ -79,7 +79,7 @@ contract SvgFacet is Modifiers {
 
         bytes32 eyeSvgType = "eyeShapes";
         if (hauntId != 1) {
-            //Haunt needs to be converted into a string to match the uploaded category name
+            //Convert Haunt into string to match the uploaded category name
             bytes memory haunt = abi.encodePacked(LibSvg.uint2str(hauntId));
             eyeSvgType = LibSvg.bytesToBytes32(abi.encodePacked("eyeShapesH"), haunt);
         }
