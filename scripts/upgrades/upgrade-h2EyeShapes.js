@@ -1,7 +1,7 @@
 /* global ethers */
 const { sendToMultisig } = require("../libraries/multisig/multisig.js");
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
-const { uploadH2EyeShapeSVG } = require("./uploadH2EyeShapeSVG.js");
+// const { uploadH2EyeShapeSVG } = require("./uploadH2EyeShapeSVG.js");
 
 function getSelectors(contract) {
   const signatures = Object.keys(contract.interface.functions);
@@ -14,12 +14,8 @@ function getSelectors(contract) {
   return selectors;
 }
 
-function getSelector(func) {
-  const abiInterface = new ethers.utils.Interface([func]);
-  return abiInterface.getSighash(ethers.utils.Fragment.from(func));
-}
-
 async function main() {
+  const gasPrice = 2000000000;
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
   let facet;
@@ -27,10 +23,12 @@ async function main() {
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
 
   if (testing) {
-    const owner = await (await ethers.getContractAt("OwnershipFacet", diamondAddress)).owner();
+    const owner = await (
+      await ethers.getContractAt("OwnershipFacet", diamondAddress)
+    ).owner();
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [owner]
+      params: [owner],
     });
     signer = await ethers.provider.getSigner(owner);
   } else if (hre.network.name === "matic") {
@@ -40,7 +38,9 @@ async function main() {
   }
 
   const facetFactory = await ethers.getContractFactory("SvgFacet");
-  facet = await facetFactory.deploy();
+  facet = await facetFactory.deploy({
+    gasPrice: gasPrice,
+  });
   await facet.deployed();
 
   let existingFacetFuncs = getSelectors(facet);
@@ -50,13 +50,15 @@ async function main() {
     {
       facetAddress: facet.address,
       action: FacetCutAction.Replace,
-      functionSelectors: existingFacetFuncs
-    }
+      functionSelectors: existingFacetFuncs,
+    },
   ];
 
   if (testing) {
     const ShopFacet = await ethers.getContractFactory("ShopFacet");
-    let shopFacet = await ShopFacet.deploy();
+    let shopFacet = await ShopFacet.deploy({
+      gasPrice: gasPrice,
+    });
     await shopFacet.deployed();
     let existingShopFuncs = getSelectors(shopFacet);
 
@@ -67,46 +69,54 @@ async function main() {
     cut.push({
       facetAddress: shopFacet.address,
       action: FacetCutAction.Replace,
-      functionSelectors: existingShopFuncs
+      functionSelectors: existingShopFuncs,
     });
     cut.push({
       facetAddress: vrfFacet.address,
       action: FacetCutAction.Replace,
-      functionSelectors: existingVRFFuncs
+      functionSelectors: existingVRFFuncs,
     });
   }
-  // console.log(cut);
+  console.log(cut);
 
-  const diamondCut = (await ethers.getContractAt("IDiamondCut", diamondAddress)).connect(signer);
+  const diamondCut = (
+    await ethers.getContractAt("IDiamondCut", diamondAddress)
+  ).connect(signer);
   if (testing) {
-    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", { gasLimit: 20000000 });
+    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", {
+      gasLimit: 20000000,
+    });
     console.log("Diamond cut tx:", tx.hash);
     const receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Diamond upgrade failed: ${tx.hash}`);
     }
   } else {
-    tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, "0x", {
-      gasLimit: 800000,
-      gasPrice: 5000000000
-    });
+    tx = await diamondCut.populateTransaction.diamondCut(
+      cut,
+      ethers.constants.AddressZero,
+      "0x",
+      {
+        gasLimit: 800000,
+      }
+    );
     console.log("tx:", tx);
-    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, { gasPrice: 5000000000 });
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
     console.log("Sent to multisig");
   }
 
-  await uploadH2EyeShapeSVG();
+  // await uploadH2EyeShapeSVG();
 
   return {
     signer,
-    diamondAddress
+    diamondAddress,
   };
 }
 
 if (require.main === module) {
   main()
     .then(() => process.exit(0))
-    .catch(error => {
+    .catch((error) => {
       console.error(error);
       process.exit(1);
     });
