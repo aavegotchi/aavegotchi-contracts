@@ -247,12 +247,12 @@ contract SvgViewsFacet is Modifiers {
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT];
         if (wearableId != 0) {
-            layers.handLeft = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HAND_LEFT);
+            layers.handLeft = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HAND_RIGHT);
         }
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_LEFT];
         if (wearableId != 0) {
-            layers.handRight = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HAND_RIGHT);
+            layers.handRight = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HAND_LEFT);
         }
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_PET];
