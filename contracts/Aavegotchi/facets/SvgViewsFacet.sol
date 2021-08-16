@@ -245,12 +245,12 @@ contract SvgViewsFacet is Modifiers {
             layers.head = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HEAD);
         }
 
-        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_LEFT];
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT];
         if (wearableId != 0) {
             layers.handLeft = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HAND_LEFT);
         }
 
-        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT];
+        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_LEFT];
         if (wearableId != 0) {
             layers.handRight = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HAND_RIGHT);
         }
@@ -291,14 +291,22 @@ contract SvgViewsFacet is Modifiers {
         bytes32 side = LibSvg.bytesToBytes32("wearables-", _sideView);
 
         if (side == left) {
+            console.log("LEFT HAND");
+            console.logBytes(layers.handLeft);
             svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
             svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.handLeft, layers.hands, layers.sleeves, layers.pet);
         }
         else if (side == right) {
+            console.log("RIGHT HAND");
+            console.logBytes(layers.handRight);
             svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
             svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.handRight, layers.hands, layers.sleeves, layers.pet);
         }
         else if (side == back) {
+            console.log("LEFT HAND");
+            console.logBytes(layers.handLeft);
+            console.log("RIGHT HAND");
+            console.logBytes(layers.handRight);
             svg_ = abi.encodePacked(layers.background);
             svg_ = abi.encodePacked(svg_, _body);
             svg_ = abi.encodePacked(svg_, layers.handRight, layers.handLeft, layers.hands);
