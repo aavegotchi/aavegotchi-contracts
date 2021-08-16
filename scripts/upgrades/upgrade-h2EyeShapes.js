@@ -55,29 +55,6 @@ async function main() {
     },
   ];
 
-  if (testing) {
-    const ShopFacet = await ethers.getContractFactory("ShopFacet");
-    let shopFacet = await ShopFacet.deploy({
-      gasPrice: gasPrice,
-    });
-    await shopFacet.deployed();
-    let existingShopFuncs = getSelectors(shopFacet);
-
-    const VRFFacet = await ethers.getContractFactory("VrfFacet");
-    let vrfFacet = await VRFFacet.deploy();
-    await vrfFacet.deployed();
-    let existingVRFFuncs = getSelectors(vrfFacet);
-    cut.push({
-      facetAddress: shopFacet.address,
-      action: FacetCutAction.Replace,
-      functionSelectors: existingShopFuncs,
-    });
-    cut.push({
-      facetAddress: vrfFacet.address,
-      action: FacetCutAction.Replace,
-      functionSelectors: existingVRFFuncs,
-    });
-  }
   console.log(cut);
 
   const diamondCut = (
@@ -105,6 +82,12 @@ async function main() {
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
     console.log("Sent to multisig");
   }
+
+  const svgContract = await ethers.getContractAt("SvgFacet", diamondAddress);
+
+  const portals = await svgContract.portalAavegotchisSvg("8504");
+
+  console.log("portals:", portals);
 
   // await uploadH2EyeShapeSVG();
 
