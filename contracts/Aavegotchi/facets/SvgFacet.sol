@@ -32,15 +32,16 @@ contract SvgFacet is Modifiers {
 
         bytes memory svg;
         uint8 status = s.aavegotchis[_tokenId].status;
+        uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
         if (status == LibAavegotchi.STATUS_CLOSED_PORTAL) {
             // sealed closed portal
-            svg = LibSvg.getSvg("aavegotchis", 0);
+            svg = LibSvg.getSvg("portal-closed", hauntId);
         } else if (status == LibAavegotchi.STATUS_OPEN_PORTAL) {
             // open portal
-            svg = LibSvg.getSvg("aavegotchi", 1);
+            svg = LibSvg.getSvg("portal-open", hauntId);
         } else if (status == LibAavegotchi.STATUS_AAVEGOTCHI) {
             address collateralType = s.aavegotchis[_tokenId].collateralType;
-            svg = getAavegotchiSvgLayers(collateralType, s.aavegotchis[_tokenId].numericTraits, _tokenId);
+            svg = getAavegotchiSvgLayers(collateralType, s.aavegotchis[_tokenId].numericTraits, _tokenId, hauntId);
         }
         ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg, "</svg>"));
     }
@@ -61,27 +62,36 @@ contract SvgFacet is Modifiers {
     function getAavegotchiSvgLayers(
         address _collateralType,
         int16[NUMERIC_TRAITS_NUM] memory _numericTraits,
-        uint256 _tokenId
+        uint256 _tokenId,
+        uint256 _hauntId
     ) internal view returns (bytes memory svg_) {
         SvgLayerDetails memory details;
         details.primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
         details.secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
         details.cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
 
-        // aavagotchi body
+        // aavegotchi body
         svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
+        bytes32 eyeSvgType = "eyeShapes";
+        if (_hauntId != 1) {
+            //Convert Haunt into string to match the uploaded category name
+            bytes memory haunt = abi.encodePacked(LibSvg.uint2str(_hauntId));
+            eyeSvgType = LibSvg.bytesToBytes32(abi.encodePacked("eyeShapesH"), haunt);
+        }
+
         details.trait = _numericTraits[4];
+
         if (details.trait < 0) {
-            details.eyeShape = LibSvg.getSvg("eyeShapes", 0);
+            details.eyeShape = LibSvg.getSvg(eyeSvgType, 0);
         } else if (details.trait > 97) {
-            details.eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
+            details.eyeShape = LibSvg.getSvg(eyeSvgType, s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
         } else {
             details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
             for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
                 if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
-                    details.eyeShape = LibSvg.getSvg("eyeShapes", i);
+                    details.eyeShape = LibSvg.getSvg(eyeSvgType, i);
                     break;
                 }
             }
@@ -342,13 +352,15 @@ contract SvgFacet is Modifiers {
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
         require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
+
+        uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
         PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = LibAavegotchi.portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
             address collateralType = l_portalAavegotchiTraits[i].collateralType;
             svg_[i] = string(
                 abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">',
-                    getAavegotchiSvgLayers(collateralType, l_portalAavegotchiTraits[i].numericTraits, type(uint256).max),
+                    getAavegotchiSvgLayers(collateralType, l_portalAavegotchiTraits[i].numericTraits, type(uint256).max, hauntId),
                     // get hands
                     LibSvg.getSvg("aavegotchi", 3),
                     "</svg>"
