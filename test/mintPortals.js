@@ -13,8 +13,9 @@ describe("Testing mintPortal()", async function () {
     testAdd,
     shopFacet,
     txData,
+    daoFacet,
     totalGasUsed;
-  const noOfPortals = 50;
+  const noOfPortals = 1;
   before(async () => {
     //await j.mintPortal();
     // await k.createH2();
@@ -29,7 +30,10 @@ describe("Testing mintPortal()", async function () {
     shopFacet = (
       await ethers.getContractAt("ShopFacet", aavegotchiDiamondAddress)
     ).connect(signer);
-
+    daoFacet = (
+      await ethers.getContractAt("DAOFacet", aavegotchiDiamondAddress)
+    ).connect(signer);
+    await daoFacet.addItemManagers([owner]);
     gotchifacet = await ethers.getContractAt(
       "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
       aavegotchiDiamondAddress
@@ -61,7 +65,7 @@ describe("Testing mintPortal()", async function () {
     //console.log(await tx.wait());
   });
 
-  it("only the owner should be able to mint Portals", async () => {
+  it("only an ItemManager can mint Portals", async () => {
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [testAdd],
@@ -73,7 +77,7 @@ describe("Testing mintPortal()", async function () {
 
     await truffleAsserts.reverts(
       shopFacet.mintPortals(testAdd, 1),
-      "LibDiamond: Must be contract owner"
+      "LibAppStorage: only an ItemManager can call this function"
     );
   });
 
@@ -84,7 +88,11 @@ describe("Testing mintPortal()", async function () {
     );
     //await Xing.xingyun("0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5", 30000000);
     await truffleAsserts.reverts(
-      Xing.xingyun("0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5", 30000000),
+      Xing.xingyun(
+        "0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5",
+        30000000,
+        "0xf48c74edd9814f2ee0acc45a05089a82c2b6eeba85cd581d2575517a31cfcfec"
+      ),
       "Diamond: Function does not exist"
     );
   });
