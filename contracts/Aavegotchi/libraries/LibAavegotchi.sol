@@ -2,16 +2,7 @@
 pragma solidity 0.8.1;
 
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
-import {
-    LibAppStorage,
-    AavegotchiCollateralTypeInfo,
-    AppStorage,
-    Aavegotchi,
-    ItemType,
-    NUMERIC_TRAITS_NUM,
-    EQUIPPED_WEARABLE_SLOTS,
-    PORTAL_AAVEGOTCHIS_NUM
-} from "./LibAppStorage.sol";
+import {LibAppStorage, AavegotchiCollateralTypeInfo, AppStorage, Aavegotchi, ItemType, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM} from "./LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
@@ -78,12 +69,7 @@ library LibAavegotchi {
     {
         for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
             uint256 value = uint8(uint256(_randomNumber >> (i * 8)));
-            if (value > 99) {
-                value /= 2;
-                if (value > 99) {
-                    value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
-                }
-            }
+            value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 99;
             numericTraits_[i] = int16(int256(value)) + _modifiers[i];
         }
     }
@@ -365,7 +351,7 @@ library LibAavegotchi {
         emit LibERC721.Transfer(_from, _to, _tokenId);
     }
 
-  /*  function verify(uint256 _tokenId) internal pure {
+    /*  function verify(uint256 _tokenId) internal pure {
        // if (_tokenId < 10) {}
        // revert("Not verified");
     }
