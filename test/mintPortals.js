@@ -14,37 +14,53 @@ describe("Testing mintPortal()", async function () {
     shopFacet,
     txData,
     daoFacet,
+    ownershipFacet,
     totalGasUsed;
   const noOfPortals = 1;
   before(async () => {
     //await j.mintPortal();
     // await k.createH2();
     aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-    owner = await (
-      await ethers.getContractAt("OwnershipFacet", aavegotchiDiamondAddress)
-    ).owner();
+
+    ownershipFacet = await ethers.getContractAt(
+      "OwnershipFacet",
+      aavegotchiDiamondAddress
+    );
+    owner = await ownershipFacet.owner();
+
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [owner],
+    });
+
+    console.log("owner:", owner);
     signer = await ethers.provider.getSigner(owner);
-    // aavegotchiGameFacet = await ethers.getContractAt('AavegotchiGameFacet', aavegotchiDiamondAddress);
+
+    console.log("signer:", signer);
 
     testAdd = "0x19B0c0CA183A730966e314eA55e08e5Ece10f928";
-    shopFacet = (
-      await ethers.getContractAt("ShopFacet", aavegotchiDiamondAddress)
-    ).connect(signer);
-    daoFacet = (
-      await ethers.getContractAt("DAOFacet", aavegotchiDiamondAddress)
-    ).connect(signer);
+    shopFacet = await ethers.getContractAt(
+      "ShopFacet",
+      aavegotchiDiamondAddress,
+      signer
+    );
+
+    daoFacet = await ethers.getContractAt(
+      "DAOFacet",
+      aavegotchiDiamondAddress,
+      signer
+    );
+  });
+
+  it("mints 50 portals to an address", async () => {
+    console.log("owner:", owner);
     await daoFacet.addItemManagers([owner]);
     gotchifacet = await ethers.getContractAt(
       "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
       aavegotchiDiamondAddress
     );
-  });
 
-  it("mints 50 portals to an address", async () => {
-    await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [owner],
-    });
+    console.log("");
 
     const tx = await shopFacet.mintPortals(testAdd, noOfPortals);
     txData = await tx.wait();
