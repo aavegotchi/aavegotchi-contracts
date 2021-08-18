@@ -129,7 +129,7 @@ contract SvgViewsFacet is Modifiers {
                 details.eyeShape
             );
         } else {
-            svg_ = abi.encodePacked(applySideStyles(details, _tokenId), addBodyAndWearableSideSvgLayers(_sideView, svg_, details, _tokenId));
+            svg_ = abi.encodePacked(applySideStyles(details, _tokenId), addBodyAndWearableSideSvgLayers(_sideView, svg_, _tokenId));
         }
     }
 
@@ -198,10 +198,10 @@ contract SvgViewsFacet is Modifiers {
     }
 
     /* _sideView should either be left, right, front or back */
+    /* Removed argument SvgLayerDetails memory details from addBodyAndWearableSideSvgLayers() function due to not being used in function */
     function addBodyAndWearableSideSvgLayers(
         bytes memory _sideView,
         bytes memory _body,
-        SvgLayerDetails memory details,
         uint256 _tokenId
     ) internal view returns (bytes memory svg_) {
         console.log(">>>>>>SideView in Bytes<<<<<<");
@@ -374,7 +374,24 @@ contract SvgViewsFacet is Modifiers {
             '">'
         );
 
-        svg_ = abi.encodePacked(svg_, LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-", _sideView), wearableType.svgId), "</svg></g>");
+        bytes32 back = LibSvg.bytesToBytes32("wearables-", "back");
+        bytes32 side = LibSvg.bytesToBytes32("wearables-", _sideView);
+
+        if (side == back) {
+            svg_ = abi.encodePacked(
+                svg_,
+                LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 64 - (dimensions.x * 2)),
+                ', 0)">',
+                LibSvg.getSvg(side, wearableType.svgId),
+                "</g></svg></g>");
+            /* svg_ = abi.encodePacked(
+                svg_,
+                LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-", _sideView),
+                wearableType.svgId), "</svg></g>"); */
+
+        } else {
+            svg_ = abi.encodePacked(svg_, LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-", _sideView), wearableType.svgId), "</svg></g>");
+        }
     }
 
     function getBodySideWearable(bytes memory _sideView, uint256 _wearableId)
