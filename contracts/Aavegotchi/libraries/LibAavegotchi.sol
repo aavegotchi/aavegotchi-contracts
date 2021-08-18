@@ -81,7 +81,11 @@ library LibAavegotchi {
         } else {
             for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
                 uint256 value = uint8(uint256(_randomNumber >> (i * 8)));
-                value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 99;
+                if (value < 200) {
+                    value %= 100;
+                } else {
+                    value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
+                }
                 numericTraits_[i] = int16(int256(value)) + _modifiers[i];
             }
         }

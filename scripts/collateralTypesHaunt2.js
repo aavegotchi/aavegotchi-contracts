@@ -153,4 +153,4 @@ function getCollaterals(network, ghstAddress) {
   return collateralTypes;
 }
 
-exports.getH2Collaterals = getCollaterals;
+exports.getCollaterals = getCollaterals;

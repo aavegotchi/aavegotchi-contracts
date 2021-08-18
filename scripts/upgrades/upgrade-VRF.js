@@ -43,11 +43,18 @@ async function main() {
   console.log("Deploying facets");
 
   const vrfFacet = await ethers.getContractFactory("VrfFacet");
+  const gameFacet = await ethers.getContractFactory("AavegotchiGameFacet");
+
   facet = await vrfFacet.deploy();
   await facet.deployed();
   console.log("Deployed facet:", facet.address);
 
+  facet2 = await gameFacet.deploy();
+  await facet2.deployed();
+  console.log("Deployed facet:", facet2.address);
+
   let existingVrfFuncs = getSelectors(facet);
+  let existingGameFuncs = getSelectors(facet2);
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
@@ -56,6 +63,11 @@ async function main() {
       facetAddress: facet.address,
       action: FacetCutAction.Replace,
       functionSelectors: existingVrfFuncs,
+    },
+    {
+      facetAddress: facet2.address,
+      action: FacetCutAction.Replace,
+      functionSelectors: existingGameFuncs,
     },
   ];
   console.log(cut);
