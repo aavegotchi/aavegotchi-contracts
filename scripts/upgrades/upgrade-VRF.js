@@ -106,7 +106,6 @@ main()
   .then(() => console.log("Upgrade complete!"))
   .catch((error) => {
     console.error(error);
-    process.exit(1);
   });
 
-exports.equipUpgrade = main;
+exports.VRFUpgrade = main;
