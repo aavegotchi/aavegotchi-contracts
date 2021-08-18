@@ -1,5 +1,7 @@
+/* global ethers hre */
+/* eslint prefer-const: "off" */
+
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
-//const { ethers } = require("ethers");
 const { sendToMultisig } = require("../libraries/multisig/multisig.js");
 
 function getSelectors(contract) {
@@ -22,11 +24,10 @@ async function main() {
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
   let facet;
-  const owner = await (
+  let owner = await (
     await ethers.getContractAt("OwnershipFacet", diamondAddress)
   ).owner();
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
-
   if (testing) {
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
@@ -39,81 +40,61 @@ async function main() {
     throw Error("Incorrect network selected");
   }
 
-  const ShopFacet = await ethers.getContractFactory("ShopFacet");
-  let shopFacet = await ShopFacet.deploy();
-  await shopFacet.deployed();
-  console.log("Deployed ShopFacet");
+  console.log("Deploying facets");
 
-  //add the generic mintPortals function
-  let existingShopFuncs = getSelectors(shopFacet);
+  const vrfFacet = await ethers.getContractFactory("VrfFacet");
+  facet = await vrfFacet.deploy();
+  await facet.deployed();
+  console.log("Deployed facet:", facet.address);
 
-  //add the generic mintPortals function
-  const newShopFuncs = [
-    getSelector("function mintPortals(address _to, uint256 _amount) external"),
-  ];
-
-  //let existingShopFuncs = getSelectors(shopFacet);
-  for (const selector of newShopFuncs) {
-    if (!existingShopFuncs.includes(selector)) {
-      throw Error(`Selector ${selector} not found`);
-    }
-  }
-
-  existingShopFuncs = existingShopFuncs.filter(
-    (selector) => !newShopFuncs.includes(selector)
-  );
+  let existingVrfFuncs = getSelectors(facet);
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
   const cut = [
     {
-      facetAddress: shopFacet.address,
-      action: FacetCutAction.Add,
-      functionSelectors: newShopFuncs,
-    },
-    {
-      facetAddress: shopFacet.address,
+      facetAddress: facet.address,
       action: FacetCutAction.Replace,
-      functionSelectors: existingShopFuncs,
+      functionSelectors: existingVrfFuncs,
     },
   ];
-
   console.log(cut);
 
   const diamondCut = (
     await ethers.getContractAt("IDiamondCut", diamondAddress)
   ).connect(signer);
-  let tx;
-  let receipt;
 
   if (testing) {
-    console.log("Diamond cut");
-    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", {
-      gasLimit: 8000000,
-    });
+    const tx = await diamondCut.diamondCut(
+      cut,
+      ethers.constants.AddressZero,
+      "0x"
+    );
     console.log("Diamond cut tx:", tx.hash);
-    receipt = await tx.wait();
+    const receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Diamond upgrade failed: ${tx.hash}`);
     }
-    console.log("Completed diamond cut: ", tx.hash);
   } else {
-    console.log("Diamond cut");
     tx = await diamondCut.populateTransaction.diamondCut(
       cut,
       ethers.constants.AddressZero,
       "0x",
-      { gasLimit: 800000 }
+      { gasLimit: 800000, gasPrice: 5000000000 }
     );
-    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
+    console.log("tx:", tx);
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, {
+      gasPrice: 5000000000,
+    });
+    console.log("Sent to multisig");
   }
 }
 
 main()
-  .then(() => console.log("upgrade completed") /* process.exit(0) */)
+  .then(() => console.log("Upgrade complete!"))
   .catch((error) => {
     console.error(error);
     process.exit(1);
   });
 
-exports.mintPortal = main;
+exports.equipUpgrade = main;
