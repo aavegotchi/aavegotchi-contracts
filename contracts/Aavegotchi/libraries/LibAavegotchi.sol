@@ -80,24 +80,15 @@ library LibAavegotchi {
             }
         } else {
             for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-                uint256 value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 99;
+                uint256 value = uint8(uint256(_randomNumber >> (i * 8)));
+                if (value > 99) {
+                    value = value - 100;
+                    if (value > 99) {
+                        value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
+                    }
+                }
                 numericTraits_[i] = int16(int256(value)) + _modifiers[i];
             }
-
-            /* if (value < 200) {
-
-                //180 = 80
-                //80 = 80
-                //50 = 50
-                //30 = 30
-
-                    value %= 100;
-                } else {
-                    value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
-                }
-                */
-            // numericTraits_[i] = int16(int256(value)) + _modifiers[i];
-            //}
         }
     }
 
