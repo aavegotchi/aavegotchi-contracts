@@ -381,7 +381,7 @@ contract SvgViewsFacet is Modifiers {
             console.log("### Back Side View Triggered ###");
             svg_ = abi.encodePacked(
               svg_,
-              /* LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 64 - (dimensions.x * 2)), */
+              LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 64 - (dimensions.x * 2)),
               ', 0)">',
               LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-", _sideView), wearableType.svgId),
               "</g></svg></g>"
