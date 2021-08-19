@@ -80,7 +80,7 @@ describe("Testing mintPortal()", async function () {
       "LibAppStorage: only an ItemManager can call this function"
     );
   });
-
+*/
   it("should not allow the xingyun function to be called", async () => {
     const Xing = await ethers.getContractAt(
       "XingyunFacet",
@@ -96,7 +96,7 @@ describe("Testing mintPortal()", async function () {
       "Diamond: Function does not exist"
     );
   });
-*/
+
   it("should double confirm that XingYunFacet only has two functions remaining", async () => {
     const Loupe = await ethers.getContractAt(
       "DiamondLoupeFacet",
@@ -108,6 +108,6 @@ describe("Testing mintPortal()", async function () {
     const rouge = await Loupe.facetAddress("0xc2bb68d4");
     console.log(functions);
     console.log(rouge);
-    expect(functions[1].length).to.equal(2);
+    expect(functions.length).to.equal(2);
   });
 });

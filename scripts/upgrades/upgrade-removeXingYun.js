@@ -62,6 +62,11 @@ async function main() {
       action: FacetCutAction.Remove,
       functionSelectors: xingFunc,
     },
+    {
+      facetAddress: ethers.constants.AddressZero,
+      action: FacetCutAction.Remove,
+      functionSelectors: ["0xe0a76947"],
+    },
   ];
 
   console.log(cut);
