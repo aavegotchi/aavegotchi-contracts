@@ -9,7 +9,7 @@ function avr(arr) {
   }
   return totalS / arr.length;
 }
-const maxRandNo = 10;
+const maxRandNo = 100;
 let eachRandNum;
 const traits = [];
 traits.length = 6;
@@ -19,7 +19,7 @@ let val1;
 for (let i = 0; i < maxRandNo; i++) {
   eachRandNum = Math.floor(Math.random() * 10 ** 17);
   for (let j = 0; j < traits.length; j++) {
-    let val = eachRandNum >> (j * 8);
+    let val = eachRandNum >>> (j * 8);
     //console.log(val);
     if (val < 200) {
       val1 = val % 100;
