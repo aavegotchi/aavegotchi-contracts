@@ -36,7 +36,7 @@ describe("Testing mintPortal()", async function () {
     console.log("owner:", owner);
     signer = await ethers.provider.getSigner(owner);
 
-    console.log("signer:", signer);
+    //console.log("signer:", signer);
 
     testAdd = "0x19B0c0CA183A730966e314eA55e08e5Ece10f928";
     shopFacet = await ethers.getContractAt(
@@ -52,7 +52,7 @@ describe("Testing mintPortal()", async function () {
     );
   });
 
-  it("mints 50 portals to an address", async () => {
+  it("mints 1 portal to an address", async () => {
     console.log("owner:", owner);
     await daoFacet.addItemManagers([owner]);
     gotchifacet = await ethers.getContractAt(
@@ -77,7 +77,7 @@ describe("Testing mintPortal()", async function () {
     // console.log(newGotchi);
 
     expect(gotchiOwner).to.equal(testAdd);
-    expect(newGotchi.hauntId.toString()).to.equal("2");
+    expect(newGotchi.hauntId.toString()).to.equal("1");
     //console.log(await tx.wait());
   });
 
@@ -104,11 +104,7 @@ describe("Testing mintPortal()", async function () {
     );
     //await Xing.xingyun("0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5", 30000000);
     await truffleAsserts.reverts(
-      Xing.xingyun(
-        "0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5",
-        30000000,
-        "0xf48c74edd9814f2ee0acc45a05089a82c2b6eeba85cd581d2575517a31cfcfec"
-      ),
+      Xing.xingyun("0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5", 30000000),
       "Diamond: Function does not exist"
     );
   });
