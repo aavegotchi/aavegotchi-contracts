@@ -19,6 +19,7 @@ function getSelector(func) {
 }
 
 async function main() {
+  console.log("PERFORMING UPGRADE");
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
   let facet;
@@ -106,11 +107,13 @@ async function main() {
   }
 }
 
+/*
 main()
-  .then(() => console.log("upgrade completed") /* process.exit(0) */)
+  .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);
     process.exit(1);
   });
+  */
 
 exports.mintPortal = main;

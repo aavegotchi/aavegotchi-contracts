@@ -1,8 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const truffleAsserts = require("truffle-assertions");
-//const j = require("../scripts/upgrades/upgrade-mintPortal.js");
-//const k = require("../scripts/createhaunt2.js");
 
 describe("Testing mintPortal()", async function () {
   this.timeout(300000);
@@ -17,9 +15,8 @@ describe("Testing mintPortal()", async function () {
     ownershipFacet,
     totalGasUsed;
   const noOfPortals = 1;
+
   before(async () => {
-    //await j.mintPortal();
-    // await k.createH2();
     aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
 
     ownershipFacet = await ethers.getContractAt(
@@ -53,6 +50,17 @@ describe("Testing mintPortal()", async function () {
   });
 
   it("mints 1 portal to an address", async () => {
+    console.log("Deploying portal upgrade");
+
+    const {
+      mintPortal: mintPortalUpgrade,
+    } = require("../scripts/upgrades/upgrade-mintPortal.js");
+    await mintPortalUpgrade();
+
+    const { createH2: createHaunt2 } = require("../scripts/createhaunt2.js");
+    console.log("Creating Haunt 2");
+    await createHaunt2();
+
     console.log("owner:", owner);
     await daoFacet.addItemManagers([owner]);
     gotchifacet = await ethers.getContractAt(
@@ -77,7 +85,7 @@ describe("Testing mintPortal()", async function () {
     // console.log(newGotchi);
 
     expect(gotchiOwner).to.equal(testAdd);
-    expect(newGotchi.hauntId.toString()).to.equal("1");
+    expect(newGotchi.hauntId.toString()).to.equal("2");
     //console.log(await tx.wait());
   });
 
