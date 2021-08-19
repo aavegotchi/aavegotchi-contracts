@@ -20,7 +20,7 @@ describe("Testing mintPortal()", async function () {
     //await j.mintPortal();
     // await k.createH2();
     aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-    owner = await (
+    /* owner = await (
       await ethers.getContractAt("OwnershipFacet", aavegotchiDiamondAddress)
     ).owner();
     signer = await ethers.provider.getSigner(owner);
@@ -37,9 +37,9 @@ describe("Testing mintPortal()", async function () {
     gotchifacet = await ethers.getContractAt(
       "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
       aavegotchiDiamondAddress
-    );
+    );*/
   });
-
+  /*
   it("mints 50 portals to an address", async () => {
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
@@ -96,20 +96,18 @@ describe("Testing mintPortal()", async function () {
       "Diamond: Function does not exist"
     );
   });
-
-  /*
-  it("should not allow the buyPortals function to be called", async () => {
-    const Xing = await ethers.getContractAt(
-      "XingyunFacet",
+*/
+  it("should double confirm that XingYunFacet only has two functions remaining", async () => {
+    const Loupe = await ethers.getContractAt(
+      "DiamondLoupeFacet",
       aavegotchiDiamondAddress
     );
-    //await Xing.xingyun("0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5", 30000000);
-    await truffleAsserts.reverts(
-      shopFacet.buyPortals(
-        "0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5",
-        30000000
-      ),
-      "Diamond: Function does not exist"
+    functions = await Loupe.facetFunctionSelectors(
+      "0x0BfA0cfC88ff56C37e2AfA32af9BeE77f6f970ED"
     );
-  });*/
+    const rouge = await Loupe.facetAddress("0xc2bb68d4");
+    console.log(functions);
+    console.log(rouge);
+    expect(functions[1].length).to.equal(2);
+  });
 });
