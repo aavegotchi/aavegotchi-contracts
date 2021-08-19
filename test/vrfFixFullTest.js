@@ -2,17 +2,17 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const {
-  mintPortal:upgradeMintPortal,
+  mintPortal: upgradeMintPortal,
 } = require("../scripts/upgrades/upgrade-mintPortal.js");
 const {
   upgradeVrfFacet4Test,
 } = require("../scripts/upgrades/upgrade-vrfFacet4Test.js");
-const { createH2:createHaunt2 } = require("../scripts/createhaunt2.js");
+const { createH2: createHaunt2 } = require("../scripts/createhaunt2.js");
 const {
-  upgradeH2: upgradeHauntCollateralTypes
+  upgradeH2: upgradeHauntCollateralTypes,
 } = require("../scripts/addTestCollaterals.js");
 
-describe("Minting portals", async function() {
+describe("Minting portals", async function () {
   const allPortals = [
     "10000",
     "10001",
@@ -23,7 +23,7 @@ describe("Minting portals", async function() {
     "10006",
     "10007",
     "10008",
-    "10009"
+    "10009",
   ];
   /**
    "10010",
@@ -75,9 +75,9 @@ describe("Minting portals", async function() {
     shopFacet,
     vrfFacet,
     aavegotchiGameFacet;
-  before(async function() {
+  before(async function () {
     aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-    testAdd = "0x18376b013Ff6f238E9cdd9c1e72E2085197E525D";
+    testAdd = "0xd77caf4c72c635e0ee0853694607cb567c06653d";
     owner = await (
       await ethers.getContractAt("OwnershipFacet", aavegotchiDiamondAddress)
     ).owner();
@@ -102,7 +102,7 @@ describe("Minting portals", async function() {
     );
   });
 
-  it("Should mint 10 H2 portals to the test address", async function() {
+  it("Should mint 10 H2 portals to the test address", async function () {
     // console.log("Upgrading to allow direct portal minting");
     // await upgradeMintPortal();
 
@@ -121,7 +121,7 @@ describe("Minting portals", async function() {
 
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [owner]
+      params: [owner],
     });
     const tx = await shopFacet.mintPortals(testAdd, 10);
     //const newGotchi = await gotchiFacet.getAavegotchi(10000);
@@ -132,10 +132,10 @@ describe("Minting portals", async function() {
     expect(myPortals.length).to.equal(10);
   });
 
-  it("Should open the portals", async function() {
+  it("Should open the portals", async function () {
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [testAdd]
+      params: [testAdd],
     });
     let myPortals = await gotchiFacet.allAavegotchisOfOwner(testAdd);
     //expect(myPortals[myPortals.length - 1].status).to.equal(0);
@@ -146,7 +146,7 @@ describe("Minting portals", async function() {
     }
   });
 
-  it("Should contain 10 random ghosts in a portal", async function() {
+  it("Should contain 10 random ghosts in a portal", async function () {
     const myPortals = await gotchiFacet.allAavegotchisOfOwner(testAdd);
     const ghosts = await aavegotchiGameFacet.portalAavegotchiTraits("10000");
     // console.log(JSON.stringify(ghosts, null, 4))
@@ -160,7 +160,7 @@ describe("Minting portals", async function() {
     expect(ghosts.length).to.equal(10);
   });
 
-  it("Should claim 10 Aavegotchis", async function() {
+  it("Should claim 10 Aavegotchis", async function () {
     //const myPortals = await gotchiFacet.allAavegotchisOfOwner(testAdd);
     //  console.log('my portals:', myPortals)
 
@@ -225,4 +225,3 @@ describe("Minting portals", async function() {
     expect(kinship).to.equal(10);
   });
   **/
-
