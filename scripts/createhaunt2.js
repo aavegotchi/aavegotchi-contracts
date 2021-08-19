@@ -1,7 +1,6 @@
 /* global ethers hre */
 
 async function main() {
-  console.log("WHAT");
   const aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
   const owner = await (
