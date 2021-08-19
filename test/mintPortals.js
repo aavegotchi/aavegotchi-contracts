@@ -1,87 +1,21 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const truffleAsserts = require("truffle-assertions");
-//const j = require("../scripts/upgrades/upgrade-mintPortal.js");
-//const k = require("../scripts/createhaunt2.js");
+const {
+  removeXingYun,
+} = require("../scripts/upgrades/upgrade-removeXingYun.js");
 
 describe("Testing mintPortal()", async function () {
   this.timeout(300000);
 
-  let aavegotchiDiamondAddress,
-    gotchifacet,
-    owner,
-    testAdd,
-    shopFacet,
-    txData,
-    daoFacet,
-    totalGasUsed;
-  const noOfPortals = 1;
+  let aavegotchiDiamondAddress;
+
   before(async () => {
-    //await j.mintPortal();
-    // await k.createH2();
     aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-    /* owner = await (
-      await ethers.getContractAt("OwnershipFacet", aavegotchiDiamondAddress)
-    ).owner();
-    signer = await ethers.provider.getSigner(owner);
-    // aavegotchiGameFacet = await ethers.getContractAt('AavegotchiGameFacet', aavegotchiDiamondAddress);
-
-    testAdd = "0x19B0c0CA183A730966e314eA55e08e5Ece10f928";
-    shopFacet = (
-      await ethers.getContractAt("ShopFacet", aavegotchiDiamondAddress)
-    ).connect(signer);
-    daoFacet = (
-      await ethers.getContractAt("DAOFacet", aavegotchiDiamondAddress)
-    ).connect(signer);
-    await daoFacet.addItemManagers([owner]);
-    gotchifacet = await ethers.getContractAt(
-      "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-      aavegotchiDiamondAddress
-    );*/
   });
-  /*
-  it("mints 50 portals to an address", async () => {
-    await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [owner],
-    });
-
-    const tx = await shopFacet.mintPortals(testAdd, noOfPortals);
-    txData = await tx.wait();
-    //console.log(txData);
-    totalGasUsed = txData.gasUsed;
-    console.log(
-      "gas used in minting",
-      noOfPortals,
-      "portal(s) is: ",
-      totalGasUsed.toString()
-    );
-    const newGotchi = await gotchifacet.getAavegotchi(10000);
-    const gotchiOwner = await gotchifacet.ownerOf(10000);
-    // console.log(newGotchi);
-
-    expect(gotchiOwner).to.equal(testAdd);
-    expect(newGotchi.hauntId.toString()).to.equal("2");
-    //console.log(await tx.wait());
-  });
-
-  it("only an ItemManager can mint Portals", async () => {
-    await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [testAdd],
-    });
-    signer = await ethers.provider.getSigner(testAdd);
-    shopFacet = (
-      await ethers.getContractAt("ShopFacet", aavegotchiDiamondAddress)
-    ).connect(signer);
-
-    await truffleAsserts.reverts(
-      shopFacet.mintPortals(testAdd, 1),
-      "LibAppStorage: only an ItemManager can call this function"
-    );
-  });
-*/
   it("should not allow the xingyun function to be called", async () => {
+    console.log("removing XingYun");
+    await removeXingYun();
     const Xing = await ethers.getContractAt(
       "XingyunFacet",
       aavegotchiDiamondAddress
@@ -107,7 +41,10 @@ describe("Testing mintPortal()", async function () {
     );
     const rouge = await Loupe.facetAddress("0xc2bb68d4");
     console.log(functions);
-    console.log(rouge);
+    //console.log(rouge);
+    const exists = functions.includes("0xc2bb68d4");
     expect(functions.length).to.equal(2);
+    expect(rouge).to.equal(ethers.constants.AddressZero);
+    expect(exists).to.equal(false);
   });
 });

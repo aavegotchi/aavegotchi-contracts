@@ -100,9 +100,10 @@ async function main() {
   }
 }
 
-main()
-  .then(() => console.log("upgrade completed") /* process.exit(0) */)
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+// main()
+// .then(() => console.log("upgrade completed") /* process.exit(0) */)
+// .catch((error) => {
+// console.error(error);
+// });
+
+exports.removeXingYun = main;
