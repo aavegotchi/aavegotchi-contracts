@@ -5,7 +5,7 @@ const {
   removeXingYun,
 } = require("../scripts/upgrades/upgrade-removeXingYun.js");
 
-describe("Testing mintPortal()", async function () {
+describe("removing xingyun()", async function () {
   this.timeout(300000);
 
   let aavegotchiDiamondAddress;
