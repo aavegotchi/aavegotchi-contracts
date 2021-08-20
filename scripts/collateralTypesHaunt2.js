@@ -90,6 +90,7 @@ const collaterals = [
     modifiers: [0, 1, 0, 0, 0, 0],
     conversionRate: 1.5,
   },
+  /*
   {
     name: "amGHST",
     kovanAddress: "0x3F382DbD960E3a9bbCeaE22651E88158d2791550",
@@ -103,6 +104,7 @@ const collaterals = [
     modifiers: [0, 0, -1, 0, 0, 0],
     conversionRate: 2.2, // 2 DAI equals 1 GHST
   },
+  */
 ];
 
 const testCollaterals = [
