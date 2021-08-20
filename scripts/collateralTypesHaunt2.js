@@ -88,7 +88,7 @@ const collaterals = [
     svgId: 11,
     eyeShapeSvgId: 23,
     modifiers: [0, 1, 0, 0, 0, 0],
-    conversionRate: 1,
+    conversionRate: 1.5,
   },
   {
     name: "amGHST",
@@ -101,7 +101,7 @@ const collaterals = [
     svgId: 12,
     eyeShapeSvgId: 24,
     modifiers: [0, 0, -1, 0, 0, 0],
-    conversionRate: 2, // 2 DAI equals 1 GHST
+    conversionRate: 2.2, // 2 DAI equals 1 GHST
   },
 ];
 
