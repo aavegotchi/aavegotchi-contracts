@@ -14,7 +14,6 @@ describe("removing xingyun()", async function () {
     aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   });
   it("should not allow the xingyun function to be called", async () => {
-    console.log("removing XingYun");
     await removeXingYun();
     const Xing = await ethers.getContractAt(
       "XingyunFacet",
@@ -31,19 +30,20 @@ describe("removing xingyun()", async function () {
     );
   });
 
-  it("should double confirm that XingYunFacet only has two functions remaining", async () => {
+  it("should double confirm that XingYunFacet does not exist", async () => {
+    const XingYunFacetAddress = "0x0BfA0cfC88ff56C37e2AfA32af9BeE77f6f970ED";
+    const secondFacetAddress = "0x433484AAfDa3820A851cf560F23026c375E76194";
     const Loupe = await ethers.getContractAt(
       "DiamondLoupeFacet",
       aavegotchiDiamondAddress
     );
-    functions = await Loupe.facetFunctionSelectors(
-      "0x0BfA0cfC88ff56C37e2AfA32af9BeE77f6f970ED"
-    );
+    functions = await Loupe.facetAddresses();
+
     const rouge = await Loupe.facetAddress("0xc2bb68d4");
-    console.log(functions);
+    //console.log(functions);
     //console.log(rouge);
-    const exists = functions.includes("0xc2bb68d4");
-    expect(functions.length).to.equal(2);
+    const exists = functions.includes(XingYunFacetAddress, secondFacetAddress);
+
     expect(rouge).to.equal(ethers.constants.AddressZero);
     expect(exists).to.equal(false);
   });
