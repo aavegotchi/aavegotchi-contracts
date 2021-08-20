@@ -51,6 +51,7 @@ async function main() {
     "0x0BfA0cfC88ff56C37e2AfA32af9BeE77f6f970ED"
   );
 
+  /*
   console.log("Onchain ShopFacet functions", shopFacetFunctions);
 
   const originalXingFunc = [
@@ -74,6 +75,7 @@ async function main() {
     "purchase transfer items with ghst selector:",
     purchaseTransferItemsWithGhst
   );
+  */
 
   const xingyunFunction = [
     getSelector(
@@ -86,10 +88,7 @@ async function main() {
   const xingyunFacet = await Loupe.facetFunctionSelectors(
     "0x433484AAfDa3820A851cf560F23026c375E76194"
   );
-
   console.log("Xingyun Facet functions:", xingyunFacet);
-
-  //existingDaoFuncs = existingDaoFuncs.filter(selector => !newDaoFuncs.includes(selector))
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
@@ -97,12 +96,7 @@ async function main() {
     {
       facetAddress: ethers.constants.AddressZero,
       action: FacetCutAction.Remove,
-      functionSelectors: secondXingFunc,
-    },
-    {
-      facetAddress: ethers.constants.AddressZero,
-      action: FacetCutAction.Remove,
-      functionSelectors: allXingFuncs,
+      functionSelectors: xingyunFunction,
     },
   ];
 

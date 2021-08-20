@@ -31,20 +31,20 @@ describe("removing xingyun()", async function () {
   });
 
   it("should double confirm that XingYunFacet does not exist", async () => {
-    const XingYunFacetAddress = "0x0BfA0cfC88ff56C37e2AfA32af9BeE77f6f970ED";
-    const secondFacetAddress = "0x433484AAfDa3820A851cf560F23026c375E76194";
+    //  const XingYunFacetAddress = "0x0BfA0cfC88ff56C37e2AfA32af9BeE77f6f970ED";
+    const XingyunFacetAddress = "0x433484AAfDa3820A851cf560F23026c375E76194";
     const Loupe = await ethers.getContractAt(
       "DiamondLoupeFacet",
       aavegotchiDiamondAddress
     );
     functions = await Loupe.facetAddresses();
 
-    const rouge = await Loupe.facetAddress("0xc2bb68d4");
+    const xingyunFunction = await Loupe.facetAddress("0xc2bb68d4");
     //console.log(functions);
     //console.log(rouge);
-    const exists = functions.includes(XingYunFacetAddress, secondFacetAddress);
+    const exists = functions.includes(XingyunFacetAddress, XingyunFacetAddress);
 
-    expect(rouge).to.equal(ethers.constants.AddressZero);
+    expect(xingyunFunction).to.equal(ethers.constants.AddressZero);
     expect(exists).to.equal(false);
   });
 });
