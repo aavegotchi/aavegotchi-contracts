@@ -6,6 +6,8 @@ const {
   whacarofl: results,
 } = require("../../../data/airdrops/minigames/whacarofl.tsx");
 
+const gasPrice = 2000000000;
+
 function addCommas(nStr) {
   nStr += "";
   const x = nStr.split(".");
@@ -49,11 +51,12 @@ async function main() {
   let xp10 = results.slice(100, 500);
   console.log("xp 10:", xp10.length);
   let xp5 = results.slice(500, results.length);
-  console.log("xp5:", xp5.length);
 
   xp5 = xp5.filter((obj) => {
     return obj.score >= 100;
   });
+
+  console.log("xp5:", xp5.length);
 
   let aavegotchis = xp5;
 
@@ -86,7 +89,7 @@ async function main() {
   // send transactions
   let addressIndex = 0;
   for (const txGroup of txData) {
-    // console.log("tx group:", txGroup);
+    console.log("tx group:", txGroup);
 
     const tokenIds = txGroup;
 
@@ -94,7 +97,8 @@ async function main() {
 
     const tx = await dao.grantExperience(
       tokenIds,
-      Array(tokenIds.length).fill(xpAmount)
+      Array(tokenIds.length).fill(xpAmount),
+      { gasPrice: gasPrice }
     );
     let receipt = await tx.wait();
     console.log("Gas used:", strDisplay(receipt.gasUsed));
