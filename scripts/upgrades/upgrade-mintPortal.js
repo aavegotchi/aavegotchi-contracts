@@ -1,5 +1,4 @@
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
-//const { ethers } = require("ethers");
 const { sendToMultisig } = require("../libraries/multisig/multisig.js");
 
 function getSelectors(contract) {
@@ -19,6 +18,7 @@ function getSelector(func) {
 }
 
 async function main() {
+  const gasPrice = 2000000000;
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
   let facet;
@@ -40,12 +40,9 @@ async function main() {
   }
 
   const ShopFacet = await ethers.getContractFactory("ShopFacet");
-  let shopFacet = await ShopFacet.deploy();
+  let shopFacet = await ShopFacet.deploy({ gasPrice: gasPrice });
   await shopFacet.deployed();
   console.log("Deployed ShopFacet");
-
-  //add the generic mintPortals function
-  let existingShopFuncs = getSelectors(shopFacet);
 
   //add the generic mintPortals function
   const newShopFuncs = [
@@ -110,7 +107,7 @@ async function main() {
 }
 
 main()
-  .then(() => console.log("upgrade completed") /* process.exit(0) */)
+  .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);
   });
