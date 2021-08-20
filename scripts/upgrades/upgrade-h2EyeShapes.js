@@ -1,8 +1,7 @@
-const { LedgerSigner } = require("@ethersproject/hardware-wallets");
-//const { ethers } = require("ethers");
+/* global ethers */
 const { sendToMultisig } = require("../libraries/multisig/multisig.js");
-
-const gasPrice = 2000000000;
+const { LedgerSigner } = require("@ethersproject/hardware-wallets");
+// const { uploadH2EyeShapeSVG } = require("./uploadH2EyeShapeSVG.js");
 
 function getSelectors(contract) {
   const signatures = Object.keys(contract.interface.functions);
@@ -15,51 +14,44 @@ function getSelectors(contract) {
   return selectors;
 }
 
-function getSelector(func) {
-  const abiInterface = new ethers.utils.Interface([func]);
-  return abiInterface.getSighash(ethers.utils.Fragment.from(func));
-}
-
 async function main() {
+  const gasPrice = 2000000000;
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
   let facet;
-  const owner = await (
-    await ethers.getContractAt("OwnershipFacet", diamondAddress)
-  ).owner();
+  let tx;
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
 
   if (testing) {
+    const owner = await (
+      await ethers.getContractAt("OwnershipFacet", diamondAddress)
+    ).owner();
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [owner],
     });
-    signer = await ethers.getSigner(owner);
+    signer = await ethers.provider.getSigner(owner);
   } else if (hre.network.name === "matic") {
     signer = new LedgerSigner(ethers.provider);
   } else {
     throw Error("Incorrect network selected");
   }
 
-  const SvgFacet = await ethers.getContractFactory(
-    "contracts/Aavegotchi/facets/SvgFacet.sol:SvgFacet"
-  );
-
-  let svgFacet = await SvgFacet.deploy({
+  const facetFactory = await ethers.getContractFactory("SvgFacet");
+  facet = await facetFactory.deploy({
     gasPrice: gasPrice,
   });
-  await svgFacet.deployed();
-  console.log("Deployed Svgfacet:", svgFacet.address);
+  await facet.deployed();
+  console.log("New SvgFacet deployed:", facet.address);
 
-  let existingSvgFuncs = getSelectors(svgFacet);
+  let existingFacetFuncs = getSelectors(facet);
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
-
-  const cut = [
+  let cut = [
     {
-      facetAddress: svgFacet.address,
+      facetAddress: facet.address,
       action: FacetCutAction.Replace,
-      functionSelectors: existingSvgFuncs,
+      functionSelectors: existingFacetFuncs,
     },
   ];
 
@@ -68,35 +60,50 @@ async function main() {
   const diamondCut = (
     await ethers.getContractAt("IDiamondCut", diamondAddress)
   ).connect(signer);
-  let tx;
-  let receipt;
-
   if (testing) {
-    console.log("Diamond cut");
     tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, "0x", {
-      gasLimit: 8000000,
+      gasLimit: 20000000,
     });
     console.log("Diamond cut tx:", tx.hash);
-    receipt = await tx.wait();
+    const receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Diamond upgrade failed: ${tx.hash}`);
     }
-    console.log("Completed diamond cut: ", tx.hash);
   } else {
-    console.log("Diamond cut");
     tx = await diamondCut.populateTransaction.diamondCut(
       cut,
       ethers.constants.AddressZero,
       "0x",
-      { gasLimit: 800000 }
+      {
+        gasLimit: 800000,
+      }
     );
+    console.log("tx:", tx);
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
+    console.log("Sent to multisig");
   }
+
+  const svgContract = await ethers.getContractAt("SvgFacet", diamondAddress);
+
+  const portals = await svgContract.portalAavegotchisSvg("8504");
+
+  console.log("portals:", portals);
+
+  // await uploadH2EyeShapeSVG();
+
+  return {
+    signer,
+    diamondAddress,
+  };
 }
 
-main()
-  .then(() => console.log("upgrade completed") /* process.exit(0) */)
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+if (require.main === module) {
+  main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}
+
+exports.upgradeH2EyeShapes = main;

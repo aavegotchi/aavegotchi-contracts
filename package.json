@@ -18,7 +18,6 @@
   },
   "homepage": "https://github.com/aavegotchi/aavegotchi-contracts#readme",
   "devDependencies": {
-    "@ethersproject/hardware-wallets": "https://github.com/mudgen/ethers-ledger.git",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "chai": "^4.3.4",
@@ -36,6 +35,7 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
+    "@ethersproject/hardware-wallets": "https://github.com/mudgen/ethers-ledger.git",
     "axios": "^0.21.1",
     "hardhat": "^2.2.1",
     "node-hid": "^2.1.1"
