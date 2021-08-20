@@ -5,8 +5,40 @@ const fs = require("fs");
 const wearables = [];
 const sleeves = [];
 
-// wearable("206_BikerHelmet"), wearable("207_BikerJacket"); //no sleeves
-// wearable("208_Aviators"), wearable("209_HorseshoeMustache");
+wearable('211_GuyFauwkesMask')
+wearable('212_1337Laptop')
+bodyWearable('213_1H4xx0rShirt')
+wearable('214_MatrixEyes')
+wearable('215_CyborgEye')
+wearable('216_RainbowVomit')
+wearable('217_CyborgGun')
+wearable('218_Mohawk')
+wearable('219_MuttonChops')
+bodyWearable('220_PunkShirt')
+wearable('221_PirateHat')
+bodyWearable('222_PirateCoat')
+wearable('223_Hook Hand')
+wearable('224_PiratePatch')
+wearable('225_Basketball')
+wearable('226_RedHeadband')
+wearable('227_MJJersey')
+wearable('228_10GallonHat')
+wearable('229_Lasso')
+wearable('230_WraanglerJeans')
+bodyWearable('231_ComfyPoncho')
+wearable('232_PonchoHoodie')
+wearable('233_UncommonCacti')
+bodyWearable('234_ShaamanPoncho')
+wearable('235_ShaamanHoodie')
+wearable('236_BlueCacti')
+wearable('237_MythicalCacti')
+wearable('238_GodlikeCacti')
+wearable('239_WagieCap')
+wearable('240_Headphones')
+bodyWearable('241_WGMIShirt')
+wearable('242_YellowManbun')
+wearable('243_TintedShades')
+bodyWearable('244_VNeckShirt')
 
 function stripSvg(svg) {
   // removes svg tag
