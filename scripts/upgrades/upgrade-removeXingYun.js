@@ -45,8 +45,15 @@ async function main() {
     diamondAddress
   );
   console.log("all functions include", getSelectors(xingYunFacet));
-  //const xingAddress = "0x68B7BF18184E0cC160f046E567Cc5cdbbf0d89d6";
-  const xingFunc = [
+  //using an on-chain source of truth as opposed to getSelectors
+  const Loupe = await ethers.getContractAt("DiamondLoupeFacet", diamondAddress);
+  const allXingFuncs = await Loupe.facetFunctionSelectors(
+    "0x0BfA0cfC88ff56C37e2AfA32af9BeE77f6f970ED"
+  );
+
+  console.log("XingYun currently contains", allXingFuncs);
+
+  const secondXingFunc = [
     getSelector(
       "function xingyun( address _to, uint256 _ghst, bytes32 _hash) external"
     ),
@@ -60,12 +67,12 @@ async function main() {
     {
       facetAddress: ethers.constants.AddressZero,
       action: FacetCutAction.Remove,
-      functionSelectors: xingFunc,
+      functionSelectors: secondXingFunc,
     },
     {
       facetAddress: ethers.constants.AddressZero,
       action: FacetCutAction.Remove,
-      functionSelectors: ["0xe0a76947"],
+      functionSelectors: allXingFuncs,
     },
   ];
 
@@ -100,7 +107,7 @@ async function main() {
   }
 }
 
-// main()
+//main();
 // .then(() => console.log("upgrade completed") /* process.exit(0) */)
 // .catch((error) => {
 // console.error(error);
