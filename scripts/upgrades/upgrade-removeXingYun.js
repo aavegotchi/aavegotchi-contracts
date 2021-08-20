@@ -44,20 +44,50 @@ async function main() {
     "XingyunFacet",
     diamondAddress
   );
-  console.log("all functions include", getSelectors(xingYunFacet));
+  console.log("Github Xingyun functions", getSelectors(xingYunFacet));
   //using an on-chain source of truth as opposed to getSelectors
   const Loupe = await ethers.getContractAt("DiamondLoupeFacet", diamondAddress);
-  const allXingFuncs = await Loupe.facetFunctionSelectors(
+  const shopFacetFunctions = await Loupe.facetFunctionSelectors(
     "0x0BfA0cfC88ff56C37e2AfA32af9BeE77f6f970ED"
   );
 
-  console.log("XingYun currently contains", allXingFuncs);
+  console.log("Onchain ShopFacet functions", shopFacetFunctions);
 
-  const secondXingFunc = [
+  const originalXingFunc = [
+    getSelector("function buyPortals(address _to, uint256 _ghst) external"),
+  ];
+  console.log("buy portals function:", originalXingFunc);
+
+  const purchaseitemsWithGhst = [
     getSelector(
-      "function xingyun( address _to, uint256 _ghst, bytes32 _hash) external"
+      "function purchaseItemsWithGhst(address _to, uint256[] calldata _itemIds, uint256[] calldata _quantities) external"
     ),
   ];
+  console.log("purchase items selector:", purchaseitemsWithGhst);
+
+  const purchaseTransferItemsWithGhst = [
+    getSelector(
+      " function purchaseTransferItemsWithGhst(address _to, uint256[] calldata _itemIds, uint256[] calldata _quantities) external"
+    ),
+  ];
+  console.log(
+    "purchase transfer items with ghst selector:",
+    purchaseTransferItemsWithGhst
+  );
+
+  const xingyunFunction = [
+    getSelector(
+      "function xingyun(address _to, uint256 _ghst, bytes32 _hash) external"
+    ),
+  ];
+
+  console.log("xingyun func:", xingyunFunction);
+
+  const xingyunFacet = await Loupe.facetFunctionSelectors(
+    "0x433484AAfDa3820A851cf560F23026c375E76194"
+  );
+
+  console.log("Xingyun Facet functions:", xingyunFacet);
 
   //existingDaoFuncs = existingDaoFuncs.filter(selector => !newDaoFuncs.includes(selector))
 
