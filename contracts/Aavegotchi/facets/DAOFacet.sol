@@ -143,8 +143,7 @@ contract DAOFacet is Modifiers {
         uint24 _hauntMaxSize;
         uint96 _portalPrice;
         bytes3 _bodyColor;
-        address[] collateralTypes;
-        AavegotchiCollateralTypeInfo[] collateralTypeInfos;
+        AavegotchiCollateralTypeIO[] _collateralTypes;
         string[] _collateralSvgs;
         LibSvg.SvgTypeAndSizes[][] _collateralTypesAndSizes;
         string[] _eyeShapeSvgs;
@@ -152,16 +151,7 @@ contract DAOFacet is Modifiers {
     }
 
     //May overload the block gas limit but worth trying
-    function createHauntWithPayload(
-        uint24 _hauntMaxSize,
-        uint96 _portalPrice,
-        bytes3 _bodyColor,
-        AavegotchiCollateralTypeIO[] calldata _collateralTypes,
-        string[] calldata _collateralSvgs,
-        LibSvg.SvgTypeAndSizes[][] calldata _collateralTypesAndSizes,
-        string[] calldata _eyeShapeSvgs,
-        LibSvg.SvgTypeAndSizes[][] calldata _eyeShapeTypesAndSizes
-    ) external onlyDaoOrOwner returns (uint256 hauntId_) {
+    function createHauntWithPayload(CreateHauntPayload calldata _payload) external returns (uint256 hauntId_) {
         uint256 currentHauntId = s.currentHauntId;
         require(
             s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
@@ -169,28 +159,28 @@ contract DAOFacet is Modifiers {
         );
 
         //Upload collateralTypes
-        addCollateralTypes(s.currentHauntId, _collateralTypes);
+        addCollateralTypes(s.currentHauntId, _payload._collateralTypes);
 
         //Upload collateralSvgs
-        for (uint256 index = 0; index < _collateralSvgs.length; index++) {
-            string calldata _collateralSvg = _collateralSvgs[index];
-            LibSvg.SvgTypeAndSizes[] calldata typesAndSizes = _collateralTypesAndSizes[index];
+        for (uint256 index = 0; index < _payload._collateralSvgs.length; index++) {
+            string calldata _collateralSvg = _payload._collateralSvgs[index];
+            LibSvg.SvgTypeAndSizes[] calldata typesAndSizes = _payload._collateralTypesAndSizes[index];
             LibSvg.storeSvg(_collateralSvg, typesAndSizes);
         }
 
         //Upload eyeShapes
-        for (uint256 index = 0; index < _eyeShapeSvgs.length; index++) {
-            string calldata _eyeShapeSvg = _eyeShapeSvgs[index];
-            LibSvg.SvgTypeAndSizes[] calldata typesAndSizes = _eyeShapeTypesAndSizes[index];
+        for (uint256 index = 0; index < _payload._eyeShapeSvgs.length; index++) {
+            string calldata _eyeShapeSvg = _payload._eyeShapeSvgs[index];
+            LibSvg.SvgTypeAndSizes[] calldata typesAndSizes = _payload._eyeShapeTypesAndSizes[index];
             LibSvg.storeSvg(_eyeShapeSvg, typesAndSizes);
         }
 
         hauntId_ = currentHauntId + 1;
         s.currentHauntId = uint16(hauntId_);
-        s.haunts[hauntId_].hauntMaxSize = _hauntMaxSize;
-        s.haunts[hauntId_].portalPrice = _portalPrice;
-        s.haunts[hauntId_].bodyColor = _bodyColor;
-        emit CreateHaunt(hauntId_, _hauntMaxSize, _portalPrice, _bodyColor);
+        s.haunts[hauntId_].hauntMaxSize = _payload._hauntMaxSize;
+        s.haunts[hauntId_].portalPrice = _payload._portalPrice;
+        s.haunts[hauntId_].bodyColor = _payload._bodyColor;
+        emit CreateHaunt(hauntId_, _payload._hauntMaxSize, _payload._portalPrice, _payload._bodyColor);
     }
 
     function mintItems(
