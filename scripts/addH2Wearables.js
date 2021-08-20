@@ -72,6 +72,7 @@ async function uploadSvgs(svgs, svgType) {
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
     }
+    console.log("tx:", tx.hash);
     console.log(svgItemsEnd, svg.length);
     if (svgItemsEnd === svgs.length) {
       break;
@@ -106,7 +107,6 @@ async function main() {
   ).connect(signer);
   console.log("Adding items", 0, "to", itemTypes.length);
 
-  /*
   tx = await daoFacet.addItemTypes(itemTypes, { gasPrice: gasPrice });
 
   receipt = await tx.wait();
@@ -114,13 +114,11 @@ async function main() {
     throw Error(`Error:: ${tx.hash}`);
   }
   console.log("Items were added:", tx.hash);
-  */
 
   console.log("Upload SVGs");
-  tx = await uploadSvgs(wearablesSvgs, "wearables", {
+  await uploadSvgs(wearablesSvgs, "wearables", {
     gasPrice: gasPrice,
   });
-  console.log("tx:", tx);
 
   /*await uploadSvgs(
     sleevesSvgs.map((value) => value.svg),
