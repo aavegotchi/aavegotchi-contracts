@@ -82,7 +82,7 @@ describe("Testing mintPortal()", async function () {
     );
     const newGotchi = await gotchifacet.getAavegotchi(10000);
     const gotchiOwner = await gotchifacet.ownerOf(10000);
-    // console.log(newGotchi);
+    console.log(newGotchi);
 
     expect(gotchiOwner).to.equal(testAdd);
     expect(newGotchi.hauntId.toString()).to.equal("2");
@@ -102,18 +102,6 @@ describe("Testing mintPortal()", async function () {
     await truffleAsserts.reverts(
       shopFacet.mintPortals(testAdd, 1),
       "LibAppStorage: only an ItemManager can call this function"
-    );
-  });
-
-  it("should not allow the xingyun function to be called", async () => {
-    const Xing = await ethers.getContractAt(
-      "XingyunFacet",
-      aavegotchiDiamondAddress
-    );
-    //await Xing.xingyun("0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5", 30000000);
-    await truffleAsserts.reverts(
-      Xing.xingyun("0xE47d2d47aA7fd150Fe86045e81509B09454a4Ee5", 30000000),
-      "Diamond: Function does not exist"
     );
   });
 
