@@ -46,11 +46,6 @@ async function main() {
 
   console.log("xingyun func:", xingyunFunction);
 
-  const xingyunFacet = await Loupe.facetFunctionSelectors(
-    "0x433484AAfDa3820A851cf560F23026c375E76194"
-  );
-  console.log("Xingyun Facet functions:", xingyunFacet);
-
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
   const cut = [
