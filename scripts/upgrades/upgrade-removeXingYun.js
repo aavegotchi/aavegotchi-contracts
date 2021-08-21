@@ -61,6 +61,15 @@ async function main() {
       throw Error(`Diamond upgrade failed: ${tx.hash}`);
     }
     console.log("Completed diamond cut: ", tx.hash);
+
+    const Loupe = await ethers.getContractAt(
+      "DiamondLoupeFacet",
+      diamondAddress
+    );
+    const xingyunFacet = await Loupe.facetFunctionSelectors(
+      "0x433484AAfDa3820A851cf560F23026c375E76194"
+    );
+    console.log("Xingyun Facet functions:", xingyunFacet);
   } else {
     console.log("Diamond cut");
     tx = await diamondCut.populateTransaction.diamondCut(
