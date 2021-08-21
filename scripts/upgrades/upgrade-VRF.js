@@ -38,17 +38,17 @@ async function main() {
   console.log("Deploying facets");
 
   const gameFacet = await ethers.getContractFactory("AavegotchiGameFacet");
-  let gameFacet = await gameFacet.deploy();
-  await gameFacet.deployed();
-  console.log("Deployed facet:", gameFacet.address);
+  let deployedGameFacet = await gameFacet.deploy();
+  await deployedGameFacet.deployed();
+  console.log("Deployed facet:", deployedGameFacet.address);
 
-  let existingGameFuncs = getSelectors(gameFacet);
+  let existingGameFuncs = getSelectors(deployedGameFacet);
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
   const cut = [
     {
-      facetAddress: gameFacet.address,
+      facetAddress: deployedGameFacet.address,
       action: FacetCutAction.Replace,
       functionSelectors: existingGameFuncs,
     },
@@ -92,9 +92,15 @@ async function main() {
       { gasLimit: 800000, gasPrice: 5000000000 }
     );
     console.log("tx:", tx);
-    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, {
-      gasPrice: 5000000000,
+
+    //verify facet
+    await run("verifyFacet", {
+      apikey: process.env.POLYGON_API_KEY,
+      contract: deployedGameFacet.address,
+      facet: "AavegotchiGameFacet",
     });
+
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
     console.log("Sent to multisig");
   }
 }
