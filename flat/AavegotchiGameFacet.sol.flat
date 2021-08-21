@@ -1,4 +1,4 @@
-// Sources flattened with hardhat v2.2.1 https://hardhat.org
+// Sources flattened with hardhat v2.5.0 https://hardhat.org
 
 // File contracts/shared/interfaces/IERC20.sol
 
@@ -677,23 +677,19 @@ struct AppStorage {
     mapping(uint256 => ERC721Listing) erc721Listings;
     // listingId => ListingListItem
     mapping(uint256 => ListingListItem) erc721ListingListItem;
-    //mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
     mapping(uint256 => mapping(string => uint256)) erc721ListingHead;
     // user address => category => sort => listingId => ListingListItem
     mapping(uint256 => ListingListItem) erc721OwnerListingListItem;
-    //mapping(uint256 => mapping(string => bytes32[])) erc1155MarketListingIds;
     mapping(address => mapping(uint256 => mapping(string => uint256))) erc721OwnerListingHead;
     // erc1155Token => (erc1155TypeId => category)
     // not really in use now, for the future
     mapping(address => mapping(uint256 => uint256)) erc721Categories;
     // erc721 token address, erc721 tokenId, user address => listingId
     mapping(address => mapping(uint256 => mapping(address => uint256))) erc721TokenToListingId;
-    // body wearableId => sleevesId
     mapping(uint256 => uint256) sleeves;
-    // mapping(address => mapping(uint256 => address)) petOperators;
-    // mapping(address => uint256[]) petOperatorTokenIds;
     mapping(address => bool) itemManagers;
     mapping(address => GameManager) gameManagers;
+    mapping(uint256 => address[]) hauntCollateralTypes;
 }
 
 library LibAppStorage {
@@ -719,30 +715,30 @@ contract Modifiers {
         _;
     }
 
-    modifier onlyOwner {
+    modifier onlyOwner() {
         LibDiamond.enforceIsContractOwner();
         _;
     }
 
-    modifier onlyDao {
+    modifier onlyDao() {
         address sender = LibMeta.msgSender();
         require(sender == s.dao, "Only DAO can call this function");
         _;
     }
 
-    modifier onlyDaoOrOwner {
+    modifier onlyDaoOrOwner() {
         address sender = LibMeta.msgSender();
         require(sender == s.dao || sender == LibDiamond.contractOwner(), "LibAppStorage: Do not have access");
         _;
     }
 
-    modifier onlyOwnerOrDaoOrGameManager {
+    modifier onlyOwnerOrDaoOrGameManager() {
         address sender = LibMeta.msgSender();
         bool isGameManager = s.gameManagers[sender].limit != 0;
         require(sender == s.dao || sender == LibDiamond.contractOwner() || isGameManager, "LibAppStorage: Do not have access");
         _;
     }
-    modifier onlyItemManager {
+    modifier onlyItemManager() {
         address sender = LibMeta.msgSender();
         require(s.itemManagers[sender] == true, "LibAppStorage: only an ItemManager can call this function");
         _;
@@ -1328,20 +1324,33 @@ library LibAavegotchi {
 
     event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
 
-    function toNumericTraits(uint256 _randomNumber, int16[NUMERIC_TRAITS_NUM] memory _modifiers)
-        internal
-        pure
-        returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_)
-    {
-        for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
-            uint256 value = uint8(uint256(_randomNumber >> (i * 8)));
-            if (value > 99) {
-                value /= 2;
+    function toNumericTraits(
+        uint256 _randomNumber,
+        int16[NUMERIC_TRAITS_NUM] memory _modifiers,
+        uint256 _hauntId
+    ) internal pure returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_) {
+        if (_hauntId == 1) {
+            for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
+                uint256 value = uint8(uint256(_randomNumber >> (i * 8)));
                 if (value > 99) {
-                    value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
+                    value /= 2;
+                    if (value > 99) {
+                        value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
+                    }
                 }
+                numericTraits_[i] = int16(int256(value)) + _modifiers[i];
             }
-            numericTraits_[i] = int16(int256(value)) + _modifiers[i];
+        } else {
+            for (uint256 i; i < NUMERIC_TRAITS_NUM; i++) {
+                uint256 value = uint8(uint256(_randomNumber >> (i * 8)));
+                if (value > 99) {
+                    value = value - 100;
+                    if (value > 99) {
+                        value = uint256(keccak256(abi.encodePacked(_randomNumber, i))) % 100;
+                    }
+                }
+                numericTraits_[i] = int16(int256(value)) + _modifiers[i];
+            }
         }
     }
 
@@ -1354,16 +1363,17 @@ library LibAavegotchi {
         else if (rarityScore >= 581) return 1000;
     }
 
-    function singlePortalAavegotchiTraits(uint256 _randomNumber, uint256 _option)
-        internal
-        view
-        returns (InternalPortalAavegotchiTraitsIO memory singlePortalAavegotchiTraits_)
-    {
+    function singlePortalAavegotchiTraits(
+        uint256 _hauntId,
+        uint256 _randomNumber,
+        uint256 _option
+    ) internal view returns (InternalPortalAavegotchiTraitsIO memory singlePortalAavegotchiTraits_) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 randomNumberN = uint256(keccak256(abi.encodePacked(_randomNumber, _option)));
         singlePortalAavegotchiTraits_.randomNumber = randomNumberN;
-        address collateralType = s.collateralTypes[randomNumberN % s.collateralTypes.length];
-        singlePortalAavegotchiTraits_.numericTraits = toNumericTraits(randomNumberN, s.collateralTypeInfo[collateralType].modifiers);
+
+        address collateralType = s.hauntCollateralTypes[_hauntId][randomNumberN % s.hauntCollateralTypes[_hauntId].length];
+        singlePortalAavegotchiTraits_.numericTraits = toNumericTraits(randomNumberN, s.collateralTypeInfo[collateralType].modifiers, _hauntId);
         singlePortalAavegotchiTraits_.collateralType = collateralType;
 
         AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
@@ -1389,8 +1399,10 @@ library LibAavegotchi {
 
         uint256 randomNumber = s.tokenIdToRandomNumber[_tokenId];
 
+        uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
+
         for (uint256 i; i < portalAavegotchiTraits_.length; i++) {
-            InternalPortalAavegotchiTraitsIO memory single = singlePortalAavegotchiTraits(randomNumber, i);
+            InternalPortalAavegotchiTraitsIO memory single = singlePortalAavegotchiTraits(hauntId, randomNumber, i);
             portalAavegotchiTraits_[i].randomNumber = single.randomNumber;
             portalAavegotchiTraits_[i].collateralType = single.collateralType;
             portalAavegotchiTraits_[i].minimumStake = single.minimumStake;
@@ -1621,12 +1633,6 @@ library LibAavegotchi {
         s.ownerTokenIds[_to].push(uint32(_tokenId));
         emit LibERC721.Transfer(_from, _to, _tokenId);
     }
-
-  /*  function verify(uint256 _tokenId) internal pure {
-       // if (_tokenId < 10) {}
-       // revert("Not verified");
-    }
-    */
 }
 
 
@@ -1951,8 +1957,9 @@ contract AavegotchiGameFacet is Modifiers {
         require(aavegotchi.status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiGameFacet: Portal not open");
         require(_option < PORTAL_AAVEGOTCHIS_NUM, "AavegotchiGameFacet: Only 10 aavegotchi options available");
         uint256 randomNumber = s.tokenIdToRandomNumber[_tokenId];
+        uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
 
-        InternalPortalAavegotchiTraitsIO memory option = LibAavegotchi.singlePortalAavegotchiTraits(randomNumber, _option);
+        InternalPortalAavegotchiTraitsIO memory option = LibAavegotchi.singlePortalAavegotchiTraits(hauntId, randomNumber, _option);
         aavegotchi.randomNumber = option.randomNumber;
         aavegotchi.numericTraits = option.numericTraits;
         aavegotchi.collateralType = option.collateralType;

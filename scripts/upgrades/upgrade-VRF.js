@@ -15,11 +15,6 @@ function getSelectors(contract) {
   return selectors;
 }
 
-function getSelector(func) {
-  const abiInterface = new ethers.utils.Interface([func]);
-  return abiInterface.getSighash(ethers.utils.Fragment.from(func));
-}
-
 async function main() {
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
@@ -42,34 +37,36 @@ async function main() {
 
   console.log("Deploying facets");
 
-  const vrfFacet = await ethers.getContractFactory("VrfFacet");
   const gameFacet = await ethers.getContractFactory("AavegotchiGameFacet");
+  let deployedGameFacet = await gameFacet.deploy();
+  await deployedGameFacet.deployed();
+  console.log("Deployed facet:", deployedGameFacet.address);
 
-  facet = await vrfFacet.deploy();
-  await facet.deployed();
-  console.log("Deployed facet:", facet.address);
-
-  facet2 = await gameFacet.deploy();
-  await facet2.deployed();
-  console.log("Deployed facet:", facet2.address);
-
-  let existingVrfFuncs = getSelectors(facet);
-  let existingGameFuncs = getSelectors(facet2);
+  let existingGameFuncs = getSelectors(deployedGameFacet);
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
   const cut = [
     {
-      facetAddress: facet.address,
-      action: FacetCutAction.Replace,
-      functionSelectors: existingVrfFuncs,
-    },
-    {
-      facetAddress: facet2.address,
+      facetAddress: deployedGameFacet.address,
       action: FacetCutAction.Replace,
       functionSelectors: existingGameFuncs,
     },
   ];
+
+  if (testing) {
+    const vrfFacet = await ethers.getContractFactory("VrfFacet");
+    facet = await vrfFacet.deploy();
+    await facet.deployed();
+    console.log("Deployed facet:", facet.address);
+    let existingVrfFuncs = getSelectors(facet);
+    cut.push({
+      facetAddress: facet.address,
+      action: FacetCutAction.Replace,
+      functionSelectors: existingVrfFuncs,
+    });
+  }
+
   console.log(cut);
 
   const diamondCut = (
@@ -95,9 +92,15 @@ async function main() {
       { gasLimit: 800000, gasPrice: 5000000000 }
     );
     console.log("tx:", tx);
-    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, {
-      gasPrice: 5000000000,
+
+    //verify facet
+    await run("verifyFacet", {
+      apikey: process.env.POLYGON_API_KEY,
+      contract: deployedGameFacet.address,
+      facet: "AavegotchiGameFacet",
     });
+
+    await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
     console.log("Sent to multisig");
   }
 }

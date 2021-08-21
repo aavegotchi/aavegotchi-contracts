@@ -1,14 +1,20 @@
-const { run } = require("hardhat")
+const { run } = require("hardhat");
 
-async function verify(address, facet) {
-  // const address = '0xfa7a3bb12848A7856Dd2769Cd763310096c053F1'; // deployed address
-  // const facet = 'StakingFacet'; // name of facet
-  await run('verifyFacet', {
+async function verify() {
+  const address = "0x854555cD2D82f956627cAc66bf6f4858e71A39d4"; // deployed address
+  const facet = "AavegotchiGameFacet"; // name of facet
+  await run("verifyFacet", {
     apikey: process.env.POLYGON_API_KEY,
     contract: address,
-    facet
+    facet,
   });
 }
 
-// verify('0x691a713894403bF3b8a8A871BAB0D755D4b15096', 'AavegotchiFacet');
-exports.VerifyFacet = verify
+verify()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+
+exports.VerifyFacet = verify;

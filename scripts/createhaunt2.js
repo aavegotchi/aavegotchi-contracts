@@ -21,7 +21,7 @@ async function main() {
     throw Error("Incorrect network selected");
   }
 
-  const hauntSize = 10000;
+  const hauntSize = 15000;
   const price = ethers.utils.parseEther("0"); //no price since it'll be GBM
   const daoFacet = (
     await ethers.getContractAt("DAOFacet", aavegotchiDiamondAddress)
@@ -38,9 +38,13 @@ async function main() {
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
+
+/*
 main()
-  .then(() => console.log("complete"))
+  .then(() => console.log("Haunt created"))
   .catch((error) => {
     console.error(error);
   });
+  */
+
 exports.createH2 = main;

@@ -83,7 +83,7 @@ contract ShopFacet is Modifiers {
         LibAavegotchi.purchase(sender, totalPrice);
     }
 
-    function mintPortals(address _to, uint256 _amount) external onlyOwner {
+    function mintPortals(address _to, uint256 _amount) external onlyItemManager {
         uint256 currentHauntId = s.currentHauntId;
         Haunt storage haunt = s.haunts[currentHauntId];
         address sender = LibMeta.msgSender();
