@@ -44,7 +44,6 @@ main()
   .then(() => console.log("Haunt created"))
   .catch((error) => {
     console.error(error);
-    process.exit(1);
   });
   */
 
