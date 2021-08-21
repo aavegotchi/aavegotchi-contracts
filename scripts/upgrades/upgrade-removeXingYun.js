@@ -1,18 +1,5 @@
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
-//const { ethers } = require("ethers");
-//const { ethers } = require("ethers");
 const { sendToMultisig } = require("../libraries/multisig/multisig.js");
-
-function getSelectors(contract) {
-  const signatures = Object.keys(contract.interface.functions);
-  const selectors = signatures.reduce((acc, val) => {
-    if (val !== "init(bytes)") {
-      acc.push(contract.interface.getSighash(val));
-    }
-    return acc;
-  }, []);
-  return selectors;
-}
 
 function getSelector(func) {
   const abiInterface = new ethers.utils.Interface([func]);
@@ -43,8 +30,6 @@ async function main() {
       "function xingyun(address _to, uint256 _ghst, bytes32 _hash) external"
     ),
   ];
-
-  console.log("xingyun func:", xingyunFunction);
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
@@ -87,10 +72,10 @@ async function main() {
   }
 }
 
-//main();
-// .then(() => console.log("upgrade completed") /* process.exit(0) */)
-// .catch((error) => {
-// console.error(error);
-// });
+main()
+  .then(() => console.log("upgrade completed") /* process.exit(0) */)
+  .catch((error) => {
+    console.error(error);
+  });
 
 exports.removeXingYun = main;
