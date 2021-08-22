@@ -71,7 +71,7 @@ contract SvgFacet is Modifiers {
         details.cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
 
         // aavegotchi body
-        svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
+        svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGOTCHI_BODY_SVG_ID);
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
         bytes32 eyeSvgType = "eyeShapes";
