@@ -1,15 +1,15 @@
 /* global describe it before ethers */
 const { expect } = require("chai");
-const {
-  addH2Wearables
-} = require("../scripts/addH2Wearables");
+const { addH2Wearables } = require("../scripts/addH2Wearables");
 const { getCollaterals } = require("../scripts/collateralTypesHaunt2.js");
 const {
   upgradeH2EyeShapes,
 } = require("../scripts/upgrades/upgrade-h2EyeShapes.js");
-const { uploadH2EyeShapeSVG } = require("../scripts/upgrades/uploadH2EyeShapeSVG.js");
 const {
-  upgradeVrfFacet4Test
+  uploadH2EyeShapeSVG,
+} = require("../scripts/upgrades/uploadH2EyeShapeSVG.js");
+const {
+  upgradeVrfFacet4Test,
 } = require("../scripts/upgrades/upgrade-vrfFacet4Test.js");
 
 const initialHauntSize = "10000";
@@ -17,7 +17,7 @@ let portalPrice = ethers.utils.parseEther("0.00001");
 const account = "0x45fdb9d9ff3105392bf5f1a3828f9523314117a7";
 const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
 
-describe("Upgrade H2 wearables", async function() {
+describe("Upgrade H2 wearables", async function () {
   this.timeout(10000000);
 
   let diamondAddress, signer, itemManager;
@@ -32,10 +32,10 @@ describe("Upgrade H2 wearables", async function() {
     ghstTokenContract;
   let haunt, currentHauntId;
 
-  before(async function() {
+  before(async function () {
     console.log("Upgrading VRFFacet for test");
     await upgradeVrfFacet4Test();
-    await upgradeH2EyeShapes("deployTest");
+    // await upgradeH2EyeShapes("deployTest");
     await uploadH2EyeShapeSVG();
 
     const deployVars = await addH2Wearables("deployTest");
@@ -48,7 +48,7 @@ describe("Upgrade H2 wearables", async function() {
     ).owner();
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [owner]
+      params: [owner],
     });
     signer = await ethers.provider.getSigner(owner);
 
@@ -60,7 +60,7 @@ describe("Upgrade H2 wearables", async function() {
     ).transferOwnership(account);
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [account]
+      params: [account],
     });
     signer = await ethers.provider.getSigner(account);
     daoFacet = await (
@@ -85,7 +85,10 @@ describe("Upgrade H2 wearables", async function() {
       await ethers.getContractAt("ShopFacet", diamondAddress)
     ).connect(itemManager);
     itemsFacet = await (
-      await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet", diamondAddress)
+      await ethers.getContractAt(
+        "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
+        diamondAddress
+      )
     ).connect(signer);
     itemsTransferFacet = await (
       await ethers.getContractAt("ItemsTransferFacet", diamondAddress)
@@ -95,14 +98,14 @@ describe("Upgrade H2 wearables", async function() {
     ).connect(signer);
   });
 
-  describe("Create new haunt", function() {
-    it("Should get current haunt info", async function() {
+  describe("Create new haunt", function () {
+    it("Should get current haunt info", async function () {
       haunt = await aavegotchiGameFacet.currentHaunt();
       currentHauntId = haunt["hauntId_"].toNumber();
       expect(currentHauntId).to.equal(1);
     });
 
-    it("Should create new haunt", async function() {
+    it("Should create new haunt", async function () {
       await (
         await daoFacet.createHaunt(initialHauntSize, portalPrice, "0x000000")
       ).wait();
@@ -125,8 +128,8 @@ describe("Upgrade H2 wearables", async function() {
     });
   });
 
-  describe("Mint and open Portals and claim new aavegotchi", function() {
-    it("Should mint portal", async function() {
+  describe("Mint and open Portals and claim new aavegotchi", function () {
+    it("Should mint portal", async function () {
       const balance = await ghstTokenContract.balanceOf(account);
       await ghstTokenContract.approve(diamondAddress, balance);
       await (await shopFacet.mintPortals(account, 5)).wait();
@@ -135,7 +138,7 @@ describe("Upgrade H2 wearables", async function() {
       expect(myPortals.length).to.equal(5);
     });
 
-    it("Should open the portal", async function() {
+    it("Should open the portal", async function () {
       let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account);
       expect(myPortals[0].status).to.equal(0);
       await vrfFacet.openPortals(["10000", "10001", "10002", "10003"]);
@@ -144,7 +147,7 @@ describe("Upgrade H2 wearables", async function() {
       expect(myPortals[0].status).to.equal(2);
     });
 
-    it("Should contain 10 random ghosts in the portal", async function() {
+    it("Should contain 10 random ghosts in the portal", async function () {
       const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account);
       const ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(
         myPortals[0].tokenId
@@ -160,7 +163,7 @@ describe("Upgrade H2 wearables", async function() {
       expect(ghosts.length).to.equal(10);
     });
 
-    it("Can only set name on claimed Aavegotchi", async function() {
+    it("Can only set name on claimed Aavegotchi", async function () {
       await expect(
         aavegotchiGameFacet.setAavegotchiName("10001", "Portal")
       ).to.be.revertedWith(
@@ -168,7 +171,7 @@ describe("Upgrade H2 wearables", async function() {
       );
     });
 
-    it("Should claim an Aavegotchi", async function() {
+    it("Should claim an Aavegotchi", async function () {
       const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account);
       const tokenId = myPortals[0].tokenId;
       const ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(tokenId);
@@ -190,26 +193,59 @@ describe("Upgrade H2 wearables", async function() {
     });
   });
 
-  describe("Wearables", async function() {
-    it("Equip wearables and check", async function() {
+  describe("Wearables", async function () {
+    it("Equip wearables and check", async function () {
       const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account);
       const tokenId = myPortals[0].tokenId;
       const itemManagerAddress = await itemManager.getAddress();
 
-      await itemsTransferFacet.safeTransferFrom(itemManagerAddress, account, 214, 1, []);
-      await itemsTransferFacet.safeTransferFrom(itemManagerAddress, account, 222, 1, []);
-      await itemsTransferFacet.safeTransferFrom(itemManagerAddress, account, 226, 1, []);
-      await itemsTransferFacet.safeTransferFrom(itemManagerAddress, account, 244, 1, []);
+      await itemsTransferFacet.safeTransferFrom(
+        itemManagerAddress,
+        account,
+        214,
+        1,
+        []
+      );
+      await itemsTransferFacet.safeTransferFrom(
+        itemManagerAddress,
+        account,
+        222,
+        1,
+        []
+      );
+      await itemsTransferFacet.safeTransferFrom(
+        itemManagerAddress,
+        account,
+        226,
+        1,
+        []
+      );
+      await itemsTransferFacet.safeTransferFrom(
+        itemManagerAddress,
+        account,
+        244,
+        1,
+        []
+      );
 
-      await itemsFacet.equipWearables(tokenId, [0, 0, 214, 226, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      await itemsFacet.equipWearables(
+        tokenId,
+        [0, 0, 214, 226, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      );
       let svgOutput = await svgFacet.getAavegotchiSvg(tokenId);
       console.log("wearable 214, 226 - svg output:", svgOutput);
 
-      await itemsFacet.equipWearables(tokenId, [222, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      await itemsFacet.equipWearables(
+        tokenId,
+        [222, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      );
       svgOutput = await svgFacet.getAavegotchiSvg(tokenId);
       console.log("wearable 222 - svg output:", svgOutput);
 
-      await itemsFacet.equipWearables(tokenId, [244, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+      await itemsFacet.equipWearables(
+        tokenId,
+        [244, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      );
       svgOutput = await svgFacet.getAavegotchiSvg(tokenId);
       console.log("wearable 244 - svg output:", svgOutput);
     });
