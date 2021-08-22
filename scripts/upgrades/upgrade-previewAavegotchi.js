@@ -48,9 +48,9 @@ async function main() {
   }
 
   const svgFacet = await ethers.getContractFactory("SvgFacet");
-  facet2 = await svgFacet.deploy();
-  await facet2.deployed();
-  console.log("Deployed svgFacet:", facet2.address);
+  facet = await svgFacet.deploy();
+  await facet.deployed();
+  console.log("Deployed svgFacet:", facet.address);
 
   const newSvgFuncs = [
     getSelector(
@@ -60,7 +60,7 @@ async function main() {
 
   console.log("func:", newSvgFuncs);
 
-  let existingSvgFuncs = getSelectors(facet2);
+  let existingSvgFuncs = getSelectors(facet);
 
   console.log("existing:", existingSvgFuncs);
 
@@ -72,12 +72,12 @@ async function main() {
 
   const cut = [
     {
-      facetAddress: facet2.address,
+      facetAddress: facet.address,
       action: FacetCutAction.Add,
       functionSelectors: newSvgFuncs,
     },
     {
-      facetAddress: facet2.address,
+      facetAddress: facet.address,
       action: FacetCutAction.Replace,
       functionSelectors: existingSvgFuncs,
     },
@@ -119,7 +119,7 @@ async function main() {
     console.log("normal gotchi:", normalGotchi);
 
     const openPortalGotchis = await svgContract.portalAavegotchisSvg("8447");
-    // console.log("open portal:", openPortalGotchis[0]);
+    console.log("open portal:", openPortalGotchis[0]);
   } else {
     console.log("Diamond cut");
     tx = await diamondCut.populateTransaction.diamondCut(
