@@ -45,11 +45,24 @@ async function main() {
 
   const newDaoFunc = [
     getSelector(
-      "function CreateHauntWithPayload(uint24 _hauntMaxSize,uint96 _portalPrice,bytes3 _bodyColor,tuple(address collateralType, tuple(int16[6] modifiers, bytes3 primaryColor, bytes3 secondaryColor, bytes3 cheekColor, uint8 svgId, uint8 eyeShapeSvgId, uint16 conversionRate, bool delisted) collateralTypeInfo)[] _collateralTypes,string[] _collateralSvgs,tuple(bytes32 svgType,uint256[] sizes)[][] _collateralTypesAndSizes,string[] _eyeShapeSvgs,tuple(bytes32 svgType,uint256[] sizes)[][] _eyeShapeTypesAndSizes) external"
+      `function createHauntWithPayload(uint24 _hauntMaxSize,uint96 _portalPrice,bytes3 _bodyColor,tuple(address collateralType, tuple(int16[6] modifiers, bytes3 primaryColor, bytes3 secondaryColor, bytes3 cheekColor, uint8 svgId, uint8 eyeShapeSvgId, uint16 conversionRate, bool delisted) collateralTypeInfo)[] _collateralTypes,string[] _collateralSvgs,tuple(bytes32 svgType,uint256[] sizes)[][] _collateralTypesAndSizes,string[] _eyeShapeSvgs,tuple(bytes32 svgType,uint256[] sizes)[][] _eyeShapeTypesAndSizes) external`
     ),
   ];
 
+  const loupe = await ethers.getContractAt("DiamondLoupeFacet", diamondAddress);
+
+  const currentDAOSelectors = await loupe.facetFunctionSelectors(
+    "0xe26dA73a14adBc2Cdea7664E3aFfBbbD7e26651C"
+  );
+
+  console.log("current selectors:", currentDAOSelectors);
+
+  console.log("new dao func:", newDaoFunc);
+
   let existingDaoFuncs = getSelectors(daoFacet);
+
+  console.log("existing dao funcs:", existingDaoFuncs);
+
   for (const selector of newDaoFunc) {
     if (!existingDaoFuncs.includes(selector)) {
       throw Error(`Selector ${selector} not found`);
