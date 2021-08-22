@@ -45,7 +45,7 @@ async function main() {
   console.log("Deployed VRFFacet");
 
   //add the generic mintPortals function
-  let existingShopFuncs = getSelectors(vrfFacet);
+  let existingVrfFuncs = getSelectors(vrfFacet);
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
@@ -53,7 +53,7 @@ async function main() {
     {
       facetAddress: vrfFacet.address,
       action: FacetCutAction.Replace,
-      functionSelectors: existingShopFuncs
+      functionSelectors: existingVrfFuncs
     }
   ];
 
@@ -88,10 +88,11 @@ async function main() {
   }
 }
 
-main()
-  .then(() => console.log("upgrade completed") /* process.exit(0) */)
-  .catch((error) => {
-    console.error(error);
-  });
-
+if (require.main === module) {
+  main()
+    .then(() => console.log("upgrade completed") /* process.exit(0) */)
+    .catch((error) => {
+      console.error(error);
+    });
+}
 exports.upgradeVrfFacet4Test = main;

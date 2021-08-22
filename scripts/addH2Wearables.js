@@ -16,6 +16,7 @@ async function uploadSvgs(svgs, svgType) {
   let svgFacet = (
     await ethers.getContractAt("SvgFacet", diamondAddress)
   ).connect(signer);
+
   function setupSvg(...svgData) {
     const svgTypesAndSizes = [];
     const svgItems = [];
@@ -119,6 +120,9 @@ async function main() {
   await uploadSvgs(wearablesSvgs, "wearables", {
     gasPrice: gasPrice,
   });
+  await uploadSvgs(sleevesSvgs.map(value => value.svg), "sleeves", {
+    gasPrice: gasPrice,
+  });
 
   /*await uploadSvgs(
     sleevesSvgs.map((value) => value.svg),
@@ -127,7 +131,7 @@ async function main() {
   );
   */
 
-  let sleevesSvgId = 28;
+  let sleevesSvgId = 29;
   let sleeves = [];
   for (const sleeve of sleevesSvgs) {
     sleeves.push({
@@ -166,13 +170,20 @@ async function main() {
   }
 
   console.log("Prize items minted:", tx.hash);
+
+  return {
+    signer,
+    diamondAddress
+  };
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+if (require.main === module) {
+  main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}
+
+exports.addH2Wearables = main;
