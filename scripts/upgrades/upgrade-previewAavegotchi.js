@@ -58,6 +58,13 @@ async function main() {
     ),
   ];
 
+  let existingFuncs = getSelectors(facet);
+  for (const selector of newSvgFuncs) {
+    if (!existingFuncs.includes(selector)) {
+      throw Error(`Selector ${selector} not found`);
+    }
+  }
+
   console.log("func:", newSvgFuncs);
 
   let existingSvgFuncs = getSelectors(facet);
@@ -106,8 +113,8 @@ async function main() {
     const svgContract = await ethers.getContractAt("SvgFacet", diamondAddress);
 
     //haunt 1, adai,
-    const numTraits1 = [99, 99, 99, 99, 0, 99];
-    const wearables1 = [2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const numTraits1 = [99, 99, 99, 99, 0, 0];
+    const wearables1 = [11, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     const preview1 = await svgContract.previewAavegotchi(
       "1",
       "0xE0b22E0037B130A9F56bBb537684E6fA18192341",
@@ -115,7 +122,9 @@ async function main() {
       wearables1
     );
 
-    const normalGotchi = await svgContract.getAavegotchiSvg("7108");
+    // console.log("preview1:", preview1);
+
+    const normalGotchi = await svgContract.getAavegotchiSvg("2912");
     console.log("normal gotchi:", normalGotchi);
 
     const openPortalGotchis = await svgContract.portalAavegotchisSvg("8447");
