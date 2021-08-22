@@ -115,11 +115,11 @@ async function main() {
       wearables1
     );
 
-    const normalGotchi = await svgContract.getAavegotchiSvg("8518");
-    // console.log("normal gotchi:", normalGotchi);
+    const normalGotchi = await svgContract.getAavegotchiSvg("7108");
+    console.log("normal gotchi:", normalGotchi);
 
     const openPortalGotchis = await svgContract.portalAavegotchisSvg("8447");
-    console.log("open portal:", openPortalGotchis[0]);
+    // console.log("open portal:", openPortalGotchis[0]);
   } else {
     console.log("Diamond cut");
     tx = await diamondCut.populateTransaction.diamondCut(

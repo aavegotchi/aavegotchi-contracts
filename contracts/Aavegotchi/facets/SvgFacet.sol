@@ -147,12 +147,15 @@ contract SvgFacet is Modifiers {
 
             //Normal token ID
         } else {
-            svg_ = abi.encodePacked(
+            /* svg_ = abi.encodePacked(
                 applyStyles(details, _tokenId, equippedWearables),
                 details.collateral,
                 details.eyeShape,
                 addBodyAndWearableSvgLayers(svg_, equippedWearables)
             );
+            */
+            svg_ = abi.encodePacked(applyStyles(details, _tokenId, equippedWearables), svg_, details.collateral, details.eyeShape);
+            svg_ = addBodyAndWearableSvgLayers(svg_, equippedWearables);
         }
     }
 
