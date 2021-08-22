@@ -2,7 +2,7 @@ const itemTypes = [
   {
     svgId: 211,
     name: "Guy Fauwkes Mask",
-    setId: [],
+    setId: [94, 114],
     author: "xibot",
     description: "",
     dimensions: { x: 15, y: 6, width: 34, height: 39 },
@@ -17,12 +17,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 212,
     name: "1337 Laptop",
-    setId: [],
+    setId: [94, 95, 112, 114],
     author: "xibot",
     description: "",
     dimensions: { x: 0, y: 30, width: 16, height: 14 },
@@ -37,12 +37,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 213,
-    name: "H4xx0r Shirt",
-    setId: [],
+    name: "H4xx0r Shirt ",
+    setId: [94, 95],
     author: "xibot",
     description: "",
     dimensions: { x: 10, y: 31, width: 44, height: 22 },
@@ -57,12 +57,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 214,
     name: "Matrix Eyes",
-    setId: [],
+    setId: [95],
     author: "xibot",
     description: "",
     dimensions: { x: 20, y: 22, width: 24, height: 8 },
@@ -77,12 +77,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 215,
     name: "Cyborg Eye",
-    setId: [],
+    setId: [96],
     author: "xibot",
     description: "",
     dimensions: { x: 32, y: 15, width: 17, height: 19 },
@@ -97,12 +97,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 216,
     name: "Rainbow Vomit",
-    setId: [],
+    setId: [96],
     author: "xibot",
     description: "",
     dimensions: { x: 22, y: 32, width: 20, height: 23 },
@@ -117,12 +117,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 217,
     name: "Energy Gun",
-    setId: [],
+    setId: [96],
     author: "xibot",
     description: "",
     dimensions: { x: 2, y: 33, width: 13, height: 11 },
@@ -137,12 +137,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 218,
     name: "Mohawk",
-    setId: [],
+    setId: [97],
     author: "xibot",
     description: "",
     dimensions: { x: 27, y: 0, width: 10, height: 22 },
@@ -157,12 +157,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 219,
     name: "Mutton Chops",
-    setId: [],
+    setId: [97],
     author: "xibot",
     description: "",
     dimensions: { x: 15, y: 21, width: 34, height: 19 },
@@ -177,12 +177,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 220,
     name: "Punk Shirt",
-    setId: [],
+    setId: [97],
     author: "xibot",
     description: "",
     dimensions: { x: 9, y: 32, width: 46, height: 21 },
@@ -197,12 +197,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 221,
     name: "Pirate Hat",
-    setId: [],
+    setId: [98],
     author: "xibot",
     description: "",
     dimensions: { x: 7, y: 0, width: 50, height: 20 },
@@ -217,12 +217,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 222,
     name: "Pirate Coat",
-    setId: [],
+    setId: [98],
     author: "xibot",
     description: "",
     dimensions: { x: 10, y: 31, width: 44, height: 24 },
@@ -237,12 +237,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 223,
     name: "Hook Hand",
-    setId: [],
+    setId: [98],
     author: "xibot",
     description: "",
     dimensions: { x: 1, y: 35, width: 9, height: 9 },
@@ -257,12 +257,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 224,
     name: "Pirate Patch",
-    setId: [],
+    setId: [98],
     author: "xibot",
     description: "",
     dimensions: { x: 15, y: 21, width: 34, height: 10 },
@@ -277,12 +277,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 225,
     name: "Basketball",
-    setId: [],
+    setId: [99],
     author: "xibot",
     description: "",
     dimensions: { x: 1, y: 28, width: 13, height: 13 },
@@ -297,12 +297,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 226,
     name: "Red Headband",
-    setId: [],
+    setId: [99],
     author: "xibot",
     description: "",
     dimensions: { x: 15, y: 14, width: 34, height: 6 },
@@ -317,12 +317,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 227,
     name: "23 Jersey",
-    setId: [],
+    setId: [99],
     author: "xibot",
     description: "",
     dimensions: { x: 15, y: 33, width: 34, height: 22 },
@@ -337,12 +337,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 228,
     name: "10 Gallon Hat",
-    setId: [],
+    setId: [100, 113],
     author: "xibot",
     description: "",
     dimensions: { x: 9, y: 3, width: 46, height: 18 },
@@ -357,12 +357,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 229,
     name: "Lasso",
-    setId: [],
+    setId: [100],
     author: "xibot",
     description: "",
     dimensions: { x: 2, y: 23, width: 12, height: 26 },
@@ -377,12 +377,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 230,
     name: "Wraangler Jeans",
-    setId: [],
+    setId: [100],
     author: "xibot",
     description: "",
     dimensions: { x: 15, y: 40, width: 34, height: 15 },
@@ -397,12 +397,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 231,
     name: "Comfy Poncho",
-    setId: [],
+    setId: [101, 102, 103, 104, 113],
     author: "rod",
     description: "",
     dimensions: { x: 12, y: 31, width: 40, height: 24 },
@@ -417,12 +417,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 232,
     name: "Poncho Hoodie",
-    setId: [],
+    setId: [101, 102, 103, 104],
     author: "rod",
     description: "",
     dimensions: { x: 12, y: 1, width: 40, height: 30 },
@@ -437,12 +437,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 233,
     name: "Uncommon Cacti",
-    setId: [],
+    setId: [101, 105],
     author: "xibot",
     description: "",
     dimensions: { x: 40, y: 45, width: 23, height: 17 },
@@ -457,12 +457,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 234,
     name: "Shaaman Poncho",
-    setId: [],
+    setId: [105, 106, 107, 108, 111],
     author: "xibot",
     description: "",
     dimensions: { x: 12, y: 31, width: 40, height: 24 },
@@ -477,12 +477,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 235,
     name: "Shaaman Hoodie",
-    setId: [],
+    setId: [105, 106, 107, 108, 111],
     author: "xibot",
     description: "",
     dimensions: { x: 12, y: 1, width: 40, height: 30 },
@@ -497,12 +497,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 236,
     name: "Blue Cacti",
-    setId: [],
+    setId: [102, 106],
     author: "xibot",
     description: "",
     dimensions: { x: 40, y: 45, width: 23, height: 17 },
@@ -517,12 +517,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 237,
     name: "Mythical Cacti",
-    setId: [],
+    setId: [103, 107],
     author: "xibot",
     description: "",
     dimensions: { x: 1, y: 48, width: 62, height: 14 },
@@ -537,12 +537,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 238,
     name: "Godlike Cacti",
-    setId: [],
+    setId: [104, 108, 111],
     author: "xibot",
     description: "",
     dimensions: { x: 1, y: 48, width: 62, height: 14 },
@@ -557,12 +557,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 239,
     name: "Wagie Cap",
-    setId: [],
+    setId: [109],
     author: "xibot",
     description: "",
     dimensions: { x: 15, y: 4, width: 34, height: 19 },
@@ -577,12 +577,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 240,
     name: "Headphones",
-    setId: [],
+    setId: [109],
     author: "xibot",
     description: "",
     dimensions: { x: 11, y: 2, width: 42, height: 29 },
@@ -597,12 +597,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 241,
     name: "WGMI Shirt",
-    setId: [],
+    setId: [109],
     author: "xibot",
     description: "",
     dimensions: { x: 12, y: 32, width: 40, height: 21 },
@@ -617,12 +617,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 242,
     name: "Yellow Manbun",
-    setId: [],
+    setId: [110, 112],
     author: "esveebee",
     description: "",
     dimensions: { x: 15, y: 0, width: 34, height: 22 },
@@ -637,12 +637,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 243,
     name: "Tinted Shades",
-    setId: [],
+    setId: [110, 112],
     author: "esveebee",
     description: "",
     dimensions: { x: 15, y: 22, width: 34, height: 9 },
@@ -657,12 +657,12 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
+    kinshipBonus: 0,
   },
   {
     svgId: 244,
     name: "V-Neck Shirt",
-    setId: [],
+    setId: [110, 112],
     author: "esveebee",
     description: "",
     dimensions: { x: 12, y: 32, width: 40, height: 23 },
@@ -677,8 +677,8 @@ const itemTypes = [
     canBeTransferred: true,
     totalQuantity: 0,
     experienceBonus: 0,
-    kinshipBonus: 0
-  }
+    kinshipBonus: 0,
+  },
 ];
 
 function stringToSlotPositions(str) {
@@ -699,7 +699,7 @@ function stringToSlotPositions(str) {
       false,
       false,
       false,
-      false
+      false,
     ];
   // Slot 0 Body
   else if (str === "body")
@@ -719,7 +719,7 @@ function stringToSlotPositions(str) {
       false,
       false,
       false,
-      false
+      false,
     ];
   // Slot 1 Face
   else if (str === "face")
@@ -739,7 +739,7 @@ function stringToSlotPositions(str) {
       false,
       false,
       false,
-      false
+      false,
     ];
   // Slot 2 Eyes
   else if (str === "eyes")
@@ -759,7 +759,7 @@ function stringToSlotPositions(str) {
       false,
       false,
       false,
-      false
+      false,
     ];
   // Slot 3 Head
   else if (str === "head")
@@ -779,7 +779,7 @@ function stringToSlotPositions(str) {
       false,
       false,
       false,
-      false
+      false,
     ];
   // Slot 4/5 Either hand
   else if (str === "hands")
@@ -799,7 +799,7 @@ function stringToSlotPositions(str) {
       false,
       false,
       false,
-      false
+      false,
     ];
   // Slot 4 Left hand
   else if (str === "handLeft")
@@ -819,7 +819,7 @@ function stringToSlotPositions(str) {
       false,
       false,
       false,
-      false
+      false,
     ];
   // Slot 5 Right Hand
   else if (str === "handRight")
@@ -839,7 +839,7 @@ function stringToSlotPositions(str) {
       false,
       false,
       false,
-      false
+      false,
     ];
   // Slot 6 Pet
   else if (str === "pet")
@@ -859,7 +859,7 @@ function stringToSlotPositions(str) {
       false,
       false,
       false,
-      false
+      false,
     ];
   // Slot 7 Background
   else if (str === "background")
@@ -879,7 +879,7 @@ function stringToSlotPositions(str) {
       false,
       false,
       false,
-      false
+      false,
     ];
   else {
     throw Error("Wrong slot string: " + str);
