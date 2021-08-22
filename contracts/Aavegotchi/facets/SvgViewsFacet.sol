@@ -383,7 +383,7 @@ contract SvgViewsFacet is Modifiers {
             console.log("wearableId: ", _wearableId);
             svg_ = abi.encodePacked(
               svg_,
-              LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 64 - (dimensions.x * 18)),
+              LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 64 - (dimensions.x * 14)),
               ', 0)">',
               LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-", _sideView), wearableType.svgId),
               "</g></svg></g>"

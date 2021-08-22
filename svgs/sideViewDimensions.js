@@ -45,7 +45,7 @@ let sideViewDimensions = [
    itemId: 3,
    name: "MK2 Grenade",
    side: "back",
-   dimensions: {x:3, y:31, width:8, height:11},
+   dimensions: {x:4, y:31, width:8, height:11},
 },
  {
    itemId: 3,
