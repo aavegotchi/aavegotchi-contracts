@@ -378,10 +378,23 @@ contract SvgViewsFacet is Modifiers {
         bytes32 side = LibSvg.bytesToBytes32("wearables-", _sideView);
 
         if (side == back && _slotPosition == LibItems.WEARABLE_SLOT_HAND_RIGHT) {
-            console.log("### Back Side View Triggered ###");
+            console.log("### Back LEFT Side View Triggered ###");
+            console.log("Dimensions X: ", dimensions.x);
+            console.log("wearableId: ", _wearableId);
             svg_ = abi.encodePacked(
               svg_,
-              LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 64 - (dimensions.x * 2)),
+              LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 64 - (dimensions.x * 18)),
+              ', 0)">',
+              LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-", _sideView), wearableType.svgId),
+              "</g></svg></g>"
+              );
+        }else if (side == back && _slotPosition == LibItems.WEARABLE_SLOT_HAND_LEFT) {
+            console.log("### Back RIGHT Side View Triggered ###");
+            console.log("Dimensions X: ", dimensions.x);
+            console.log("wearableId: ", _wearableId);
+            svg_ = abi.encodePacked(
+              svg_,
+              LibStrings.strWithUint('<g transform="translate(-', 64 - (dimensions.x * 2)),
               ', 0)">',
               LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-", _sideView), wearableType.svgId),
               "</g></svg></g>"

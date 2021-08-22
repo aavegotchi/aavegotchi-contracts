@@ -39,13 +39,13 @@ let sideViewDimensions = [
    itemId: 2,
    name: "Camo Pant",
    side: "right",
-   dimensions: {x:20, y:41, width:24, height:14},
+   dimensions: {x:3, y:41, width:24, height:14},
 },
  {
    itemId: 3,
    name: "MK2 Grenade",
    side: "back",
-   dimensions: {x:51, y:31, width:8, height:11},
+   dimensions: {x:3, y:31, width:8, height:11},
 },
  {
    itemId: 3,
