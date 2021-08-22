@@ -121,9 +121,10 @@ contract SvgFacet is Modifiers {
             }
         }
 
+        //Load in all the equipped wearables
         uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
 
-        //Add wearables if tokenId isn't MAX_INT
+        //Token ID is uint256 max: used for Portal Aavegotchis to close hands
         if (_tokenId == type(uint256).max) {
             svg_ = abi.encodePacked(
                 applyStyles(details, _tokenId, equippedWearables),
@@ -133,7 +134,7 @@ contract SvgFacet is Modifiers {
                 details.eyeShape
             );
         }
-        //Preview
+        //Token ID is uint256 max - 1: used for Gotchi previews to open hands
         else if (_tokenId == type(uint256).max - 1) {
             equippedWearables[0] = 1;
             svg_ = abi.encodePacked(
@@ -143,6 +144,8 @@ contract SvgFacet is Modifiers {
                 details.collateral,
                 details.eyeShape
             );
+
+            //Normal token ID
         } else {
             svg_ = abi.encodePacked(
                 applyStyles(details, _tokenId, equippedWearables),
@@ -295,21 +298,21 @@ contract SvgFacet is Modifiers {
         int16[NUMERIC_TRAITS_NUM] memory _numericTraits,
         uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables
     ) external view returns (string memory ag_) {
+        //Get base body layers
         bytes memory svg_ = getAavegotchiSvgLayers(_collateralType, _numericTraits, type(uint256).max - 1, _hauntId);
 
         //Add on body wearables
         svg_ = abi.encodePacked(addBodyAndWearableSvgLayers(svg_, equippedWearables));
 
+        //Encode
         ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg_, "</svg>"));
     }
 
-    function addBodyAndWearableSvgLayers(
-        bytes memory _body,
-        // SvgLayerDetails memory details,
-        uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables
-    ) internal view returns (bytes memory svg_) {
-        //Wearables
-        //  uint16[EQUIPPED_WEARABLE_SLOTS] storage equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+    function addBodyAndWearableSvgLayers(bytes memory _body, uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables)
+        internal
+        view
+        returns (bytes memory svg_)
+    {
         AavegotchiLayers memory layers;
 
         // If background is equipped
