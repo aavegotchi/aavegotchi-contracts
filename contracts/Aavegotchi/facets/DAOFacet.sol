@@ -158,8 +158,10 @@ contract DAOFacet is Modifiers {
             "AavegotchiFacet: Haunt must be full before creating new"
         );
 
+        hauntId_ = currentHauntId + 1;
+
         //Upload collateralTypes
-        addCollateralTypes(s.currentHauntId, _payload._collateralTypes);
+        addCollateralTypes(hauntId_, _payload._collateralTypes);
 
         //Upload collateralSvgs
         for (uint256 index = 0; index < _payload._collateralSvgs.length; index++) {
@@ -175,7 +177,6 @@ contract DAOFacet is Modifiers {
             LibSvg.storeSvg(_eyeShapeSvg, typesAndSizes);
         }
 
-        hauntId_ = currentHauntId + 1;
         s.currentHauntId = uint16(hauntId_);
         s.haunts[hauntId_].hauntMaxSize = _payload._hauntMaxSize;
         s.haunts[hauntId_].portalPrice = _payload._portalPrice;
