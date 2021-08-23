@@ -3,9 +3,6 @@ const { expect } = require("chai");
 const { addH2Wearables } = require("../scripts/addH2Wearables");
 const { getCollaterals } = require("../scripts/collateralTypesHaunt2.js");
 const {
-  upgradeH2EyeShapes,
-} = require("../scripts/upgrades/upgrade-h2EyeShapes.js");
-const {
   uploadH2EyeShapeSVG,
 } = require("../scripts/upgrades/uploadH2EyeShapeSVG.js");
 const {
@@ -35,7 +32,6 @@ describe("Upgrade H2 wearables", async function () {
   before(async function () {
     console.log("Upgrading VRFFacet for test");
     await upgradeVrfFacet4Test();
-    // await upgradeH2EyeShapes("deployTest");
     await uploadH2EyeShapeSVG();
 
     const deployVars = await addH2Wearables("deployTest");
@@ -196,58 +192,16 @@ describe("Upgrade H2 wearables", async function () {
   describe("Wearables", async function () {
     it("Equip wearables and check", async function () {
       const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account);
-      const tokenId = myPortals[0].tokenId;
-      const itemManagerAddress = await itemManager.getAddress();
 
-      await itemsTransferFacet.safeTransferFrom(
-        itemManagerAddress,
-        account,
-        214,
-        1,
-        []
-      );
-      await itemsTransferFacet.safeTransferFrom(
-        itemManagerAddress,
-        account,
-        222,
-        1,
-        []
-      );
-      await itemsTransferFacet.safeTransferFrom(
-        itemManagerAddress,
-        account,
-        226,
-        1,
-        []
-      );
-      await itemsTransferFacet.safeTransferFrom(
-        itemManagerAddress,
-        account,
-        244,
-        1,
-        []
-      );
-
-      await itemsFacet.equipWearables(
-        tokenId,
-        [0, 0, 214, 226, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-      );
-      let svgOutput = await svgFacet.getAavegotchiSvg(tokenId);
-      console.log("wearable 214, 226 - svg output:", svgOutput);
-
-      await itemsFacet.equipWearables(
-        tokenId,
-        [222, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-      );
-      svgOutput = await svgFacet.getAavegotchiSvg(tokenId);
-      console.log("wearable 222 - svg output:", svgOutput);
-
-      await itemsFacet.equipWearables(
-        tokenId,
-        [244, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-      );
-      svgOutput = await svgFacet.getAavegotchiSvg(tokenId);
-      console.log("wearable 244 - svg output:", svgOutput);
+      for (const wearableSvgId of [213,220,222,231,234,241,244]) {
+        let preview = await svgFacet.previewAavegotchi(
+          "2",
+          ghstTokenContract.address,
+          myPortals[0].numericTraits,
+          [wearableSvgId, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        )
+        console.log(`Body wearable ${wearableSvgId} preview`, preview)
+      }
     });
   });
 });
