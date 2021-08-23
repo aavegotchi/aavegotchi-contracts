@@ -1,37 +1,23 @@
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
+const {
+  getSelector,
+  getSelectors,
+  maticDiamondAddress: diamondAddress,
+  contractOwner,
+  getFunctionsForFacet,
+} = require("../helpers.js");
 const { sendToMultisig } = require("../libraries/multisig/multisig.js");
 
-function getSelectors(contract) {
-  const signatures = Object.keys(contract.interface.functions);
-  const selectors = signatures.reduce((acc, val) => {
-    if (val !== "init(bytes)") {
-      acc.push(contract.interface.getSighash(val));
-    }
-    return acc;
-  }, []);
-  return selectors;
-}
-
-function getSelector(func) {
-  const abiInterface = new ethers.utils.Interface([func]);
-  return abiInterface.getSighash(ethers.utils.Fragment.from(func));
-}
-
 async function main() {
-  const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
   let facet;
-  const owner = await (
-    await ethers.getContractAt("OwnershipFacet", diamondAddress)
-  ).owner();
+
+  const owner = await contractOwner();
+
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
 
   if (testing) {
-    const Loupe = await ethers.getContractAt(
-      "DiamondLoupeFacet",
-      diamondAddress
-    );
-    const oldSvgFacet = await Loupe.facetFunctionSelectors(
+    const oldSvgFacet = await getFunctionsForFacet(
       "0xEA849a2B683Fed2BbE49610b7A01607fb386DE0A"
     );
     console.log("current selectors", oldSvgFacet);
