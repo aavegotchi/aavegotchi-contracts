@@ -71,7 +71,7 @@ contract SvgFacet is Modifiers {
         details.cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
 
         // aavegotchi body
-        svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
+        svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGOTCHI_BODY_SVG_ID);
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
         bytes32 eyeSvgType = "eyeShapes";
@@ -121,24 +121,43 @@ contract SvgFacet is Modifiers {
             }
         }
 
-        //Add wearables if tokenId isn't MAX_INT
+        //Load in all the equipped wearables
+        uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+
+        //Token ID is uint256 max: used for Portal Aavegotchis to close hands
         if (_tokenId == type(uint256).max) {
             svg_ = abi.encodePacked(
-                applyStyles(details, _tokenId),
+                applyStyles(details, _tokenId, equippedWearables),
                 LibSvg.getSvg("aavegotchi", LibSvg.BACKGROUND_SVG_ID),
                 svg_,
                 details.collateral,
                 details.eyeShape
             );
+        }
+        //Token ID is uint256 max - 1: used for Gotchi previews to open hands
+        else if (_tokenId == type(uint256).max - 1) {
+            equippedWearables[0] = 1;
+            svg_ = abi.encodePacked(
+                applyStyles(details, _tokenId, equippedWearables),
+                LibSvg.getSvg("aavegotchi", LibSvg.BACKGROUND_SVG_ID),
+                svg_,
+                details.collateral,
+                details.eyeShape
+            );
+
+            //Normal token ID
         } else {
-            svg_ = abi.encodePacked(applyStyles(details, _tokenId), addBodyAndWearableSvgLayers(svg_, details, _tokenId));
+            svg_ = abi.encodePacked(applyStyles(details, _tokenId, equippedWearables), svg_, details.collateral, details.eyeShape);
+            svg_ = addBodyAndWearableSvgLayers(svg_, equippedWearables);
         }
     }
 
     //Apply styles based on the traits and wearables
-    function applyStyles(SvgLayerDetails memory _details, uint256 _tokenId) internal view returns (bytes memory) {
-        uint16[EQUIPPED_WEARABLE_SLOTS] storage equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
-
+    function applyStyles(
+        SvgLayerDetails memory _details,
+        uint256 _tokenId,
+        uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables
+    ) internal pure returns (bytes memory) {
         if (
             _tokenId != type(uint256).max &&
             (equippedWearables[LibItems.WEARABLE_SLOT_BODY] != 0 ||
@@ -269,13 +288,27 @@ contract SvgFacet is Modifiers {
         bytes pet;
     }
 
-    function addBodyAndWearableSvgLayers(
-        bytes memory _body,
-        SvgLayerDetails memory details,
-        uint256 _tokenId
-    ) internal view returns (bytes memory svg_) {
-        //Wearables
-        uint16[EQUIPPED_WEARABLE_SLOTS] storage equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+    function previewAavegotchi(
+        uint256 _hauntId,
+        address _collateralType,
+        int16[NUMERIC_TRAITS_NUM] memory _numericTraits,
+        uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables
+    ) external view returns (string memory ag_) {
+        //Get base body layers
+        bytes memory svg_ = getAavegotchiSvgLayers(_collateralType, _numericTraits, type(uint256).max - 1, _hauntId);
+
+        //Add on body wearables
+        svg_ = abi.encodePacked(addBodyAndWearableSvgLayers(svg_, equippedWearables));
+
+        //Encode
+        ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg_, "</svg>"));
+    }
+
+    function addBodyAndWearableSvgLayers(bytes memory _body, uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables)
+        internal
+        view
+        returns (bytes memory svg_)
+    {
         AavegotchiLayers memory layers;
 
         // If background is equipped
@@ -336,7 +369,7 @@ contract SvgFacet is Modifiers {
         //10. Right hand wearable
         //11. Pet wearable
 
-        svg_ = abi.encodePacked(layers.background, _body, details.eyeShape, details.collateral, layers.bodyWearable);
+        svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
         svg_ = abi.encodePacked(
             svg_,
             layers.hands,
