@@ -297,7 +297,7 @@ let sideViewDimensions = [
    itemId: 12,
    name: "Link Bubbly",
    side: "back",
-   dimensions: {x:54, y:25, width:5, height:19},
+   dimensions: {x:5, y:25, width:5, height:19},
 },
  {
    itemId: 12,
