@@ -12,7 +12,7 @@ let signer,
   _eyeShapeSvgs;
 async function main() {
   console.log("upgrading");
-  // await addPayload();
+  await addPayload();
   const aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 
@@ -58,9 +58,9 @@ async function main() {
 
   const _hauntMaxSize = 15000;
   const portalPrice = 0; //GBM
-  const _bodyColor = "#D4E0F1"; //test color
+  const _bodyColor = "0x000000"; //test color
   const _collateralTypes = getH2Collaterals();
-  console.log(_collateralTypes);
+  // console.log(_collateralTypes);
   // const H2Svgs = collateralsSvgs;
 
   //collaterals
@@ -68,14 +68,14 @@ async function main() {
     "collateralsH2",
     collateralsSvgs,
   ]);
-  printSizeInfo(collateralTypesAndSizes);
+  // printSizeInfo(collateralTypesAndSizes);
   //console.log("the collateral types and sizes are", collateralTypesAndSizes);
   //eyeshapes
   [_eyeShapeSvgs, eyeShapeTypesAndSizes] = setupSvg([
     "eyeShapesH2",
     eyeShapeSvgs,
   ]);
-  printSizeInfo(eyeShapeTypesAndSizes);
+  // printSizeInfo(eyeShapeTypesAndSizes);
   // console.log("these are the eyeShapes and sizes", eyeShapeTypesAndSizes);
   //console.log("eyeshapeSvgs are", eyeShapeSvgs);
 
@@ -83,11 +83,11 @@ async function main() {
     _hauntMaxSize: _hauntMaxSize,
     _portalPrice: portalPrice,
     _bodyColor: _bodyColor,
-    _collateralTypes: _collateralTypes,
-    collateralsSvgs: collateralsSvgs,
-    collateralTypesAndSizes: collateralTypesAndSizes,
-    eyeShapeSvgs: eyeShapeSvgs,
-    eyeShapeTypesAndSizes: eyeShapeTypesAndSizes,
+    _collateralTypes: [],
+    _collateralSvgs: collateralsSvgs,
+    _collateralTypesAndSizes: [collateralTypesAndSizes],
+    _eyeShapeSvgs: eyeShapeSvgs,
+    _eyeShapeTypesAndSizes: [eyeShapeTypesAndSizes],
   };
   console.log(totalPayload);
   daoFacet = (
