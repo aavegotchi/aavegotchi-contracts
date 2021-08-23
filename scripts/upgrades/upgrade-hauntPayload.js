@@ -49,19 +49,7 @@ async function main() {
     ),
   ];
 
-  const loupe = await ethers.getContractAt("DiamondLoupeFacet", diamondAddress);
-
-  const currentDAOSelectors = await loupe.facetFunctionSelectors(
-    "0xe26dA73a14adBc2Cdea7664E3aFfBbbD7e26651C"
-  );
-
-  console.log("current selectors:", currentDAOSelectors);
-
-  console.log("new dao func:", newDaoFunc);
-
   let existingDaoFuncs = getSelectors(daoFacet);
-
-  console.log("existing dao funcs:", existingDaoFuncs);
 
   for (const selector of newDaoFunc) {
     if (!existingDaoFuncs.includes(selector)) {

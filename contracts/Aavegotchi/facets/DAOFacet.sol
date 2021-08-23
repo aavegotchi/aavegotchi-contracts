@@ -151,7 +151,7 @@ contract DAOFacet is Modifiers {
     }
 
     //May overload the block gas limit but worth trying
-    function createHauntWithPayload(CreateHauntPayload calldata _payload) external returns (uint256 hauntId_) {
+    function createHauntWithPayload(CreateHauntPayload calldata _payload) external onlyItemManager returns (uint256 hauntId_) {
         uint256 currentHauntId = s.currentHauntId;
         require(
             s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
