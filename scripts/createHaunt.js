@@ -64,14 +64,14 @@ async function main() {
   // const H2Svgs = collateralsSvgs;
 
   //collaterals
-  [_collateralSvgs, collateralTypesAndSizes] = setupSvg([
-    "collateralsH2",
+  ;[collateralSvg, collateralTypesAndSizes] = setupSvg([
+    "collaterals",
     collateralsSvgs,
   ]);
   // printSizeInfo(collateralTypesAndSizes);
   //console.log("the collateral types and sizes are", collateralTypesAndSizes);
   //eyeshapes
-  [_eyeShapeSvgs, eyeShapeTypesAndSizes] = setupSvg([
+  ;[eyeShapeSvg, eyeShapeTypesAndSizes] = setupSvg([
     "eyeShapesH2",
     eyeShapeSvgs,
   ]);
@@ -79,15 +79,15 @@ async function main() {
   // console.log("these are the eyeShapes and sizes", eyeShapeTypesAndSizes);
   //console.log("eyeshapeSvgs are", eyeShapeSvgs);
 
-  totalPayload = {
+  const totalPayload = {
     _hauntMaxSize: _hauntMaxSize,
     _portalPrice: portalPrice,
     _bodyColor: _bodyColor,
     _collateralTypes: [],
-    _collateralSvgs: collateralsSvgs,
-    _collateralTypesAndSizes: [collateralTypesAndSizes],
-    _eyeShapeSvgs: eyeShapeSvgs,
-    _eyeShapeTypesAndSizes: [eyeShapeTypesAndSizes],
+    _collateralSvg: collateralSvg,
+    _collateralTypesAndSizes: collateralTypesAndSizes,
+    _eyeShapeSvg: eyeShapeSvg,
+    _eyeShapeTypesAndSizes: eyeShapeTypesAndSizes,
   };
   console.log(totalPayload);
   daoFacet = (

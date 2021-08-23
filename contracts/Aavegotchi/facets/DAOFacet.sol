@@ -144,10 +144,10 @@ contract DAOFacet is Modifiers {
         uint96 _portalPrice;
         bytes3 _bodyColor;
         AavegotchiCollateralTypeIO[] _collateralTypes;
-        string[] _collateralSvgs;
-        LibSvg.SvgTypeAndSizes[][] _collateralTypesAndSizes;
-        string[] _eyeShapeSvgs;
-        LibSvg.SvgTypeAndSizes[][] _eyeShapeTypesAndSizes;
+        string _collateralSvg;
+        LibSvg.SvgTypeAndSizes[] _collateralTypesAndSizes;
+        string _eyeShapeSvg;
+        LibSvg.SvgTypeAndSizes[] _eyeShapeTypesAndSizes;
     }
 
     //May overload the block gas limit but worth trying
@@ -164,18 +164,10 @@ contract DAOFacet is Modifiers {
         addCollateralTypes(hauntId_, _payload._collateralTypes);
 
         //Upload collateralSvgs
-        for (uint256 index = 0; index < _payload._collateralSvgs.length; index++) {
-            string calldata _collateralSvg = _payload._collateralSvgs[index];
-            LibSvg.SvgTypeAndSizes[] calldata typesAndSizes = _payload._collateralTypesAndSizes[index];
-            LibSvg.storeSvg(_collateralSvg, typesAndSizes);
-        }
+        LibSvg.storeSvg(_payload._collateralSvg, _payload._collateralTypesAndSizes);
 
         //Upload eyeShapes
-        for (uint256 index = 0; index < _payload._eyeShapeSvgs.length; index++) {
-            string calldata _eyeShapeSvg = _payload._eyeShapeSvgs[index];
-            LibSvg.SvgTypeAndSizes[] calldata typesAndSizes = _payload._eyeShapeTypesAndSizes[index];
-            LibSvg.storeSvg(_eyeShapeSvg, typesAndSizes);
-        }
+        LibSvg.storeSvg(_payload._eyeShapeSvg, _payload._eyeShapeTypesAndSizes);
 
         s.currentHauntId = uint16(hauntId_);
         s.haunts[hauntId_].hauntMaxSize = _payload._hauntMaxSize;
