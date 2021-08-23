@@ -1,7 +1,7 @@
 const itemTypes = [
   {
     svgId: 211,
-    name: "Guy Fauwkes Mask",
+    name: "Guy Fawkes Mask",
     setId: [94, 114],
     author: "xibot",
     description: "",
