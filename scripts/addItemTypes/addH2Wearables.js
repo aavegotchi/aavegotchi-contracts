@@ -107,7 +107,7 @@ async function main() {
   let svgFacet = (
     await ethers.getContractAt("SvgFacet", diamondAddress)
   ).connect(signer);
-  // console.log("Adding items", 0, "to", itemTypes.length);
+  console.log("Adding items", 0, "to", itemTypes.length);
 
   tx = await daoFacet.addItemTypes(itemTypes, { gasPrice: gasPrice });
 
