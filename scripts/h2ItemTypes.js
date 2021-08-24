@@ -501,7 +501,7 @@ const itemTypes = [
   },
   {
     svgId: 236,
-    name: "Blue Cacti",
+    name: "Rare Cacti",
     setId: [102, 106],
     author: "xibot",
     description: "",
@@ -621,7 +621,7 @@ const itemTypes = [
   },
   {
     svgId: 242,
-    name: "Yellow Manbun",
+    name: "Maan Bun",
     setId: [110, 112],
     author: "esveebee",
     description: "",

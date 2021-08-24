@@ -84,6 +84,7 @@ async function uploadSvgs(svgs, svgType) {
 
 async function main() {
   const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+
   let owner = itemManager;
   const testing = ["hardhat", "localhost"].includes(hre.network.name);
   if (testing) {
@@ -106,7 +107,7 @@ async function main() {
   let svgFacet = (
     await ethers.getContractAt("SvgFacet", diamondAddress)
   ).connect(signer);
-  console.log("Adding items", 0, "to", itemTypes.length);
+  // console.log("Adding items", 0, "to", itemTypes.length);
 
   tx = await daoFacet.addItemTypes(itemTypes, { gasPrice: gasPrice });
 
@@ -128,12 +129,11 @@ async function main() {
     }
   );
 
-  /*await uploadSvgs(
+  await uploadSvgs(
     sleevesSvgs.map((value) => value.svg),
     "sleeves",
     { gasPrice: gasPrice }
   );
-  */
 
   let sleevesSvgId = 29;
   let sleeves = [];
@@ -174,6 +174,15 @@ async function main() {
   }
 
   console.log("Prize items minted:", tx.hash);
+
+  const preview = await svgFacet.previewAavegotchi(
+    "1",
+    "0xE0b22E0037B130A9F56bBb537684E6fA18192341",
+    [0, 0, 0, 0, 0, 0],
+    [0, 219, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  );
+
+  console.log("preview:", preview);
 
   return {
     signer,
