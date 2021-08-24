@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {Modifiers, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, AavegotchiCollateralTypeInfo} from "../libraries/LibAppStorage.sol";
 import {AavegotchiCollateralTypeIO} from "../libraries/LibAavegotchi.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibItems} from "../libraries/LibItems.sol";
@@ -54,7 +54,7 @@ contract DAOFacet is Modifiers {
         s.daoTreasury = _newDaoTreasury;
     }
 
-    function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyItemManager {
+    function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) public onlyItemManager {
         for (uint256 i; i < _collateralTypes.length; i++) {
             address newCollateralType = _collateralTypes[i].collateralType;
 
@@ -137,6 +137,43 @@ contract DAOFacet is Modifiers {
         s.haunts[hauntId_].portalPrice = _portalPrice;
         s.haunts[hauntId_].bodyColor = _bodyColor;
         emit CreateHaunt(hauntId_, _hauntMaxSize, _portalPrice, _bodyColor);
+    }
+
+    struct CreateHauntPayload {
+        uint24 _hauntMaxSize;
+        uint96 _portalPrice;
+        bytes3 _bodyColor;
+        AavegotchiCollateralTypeIO[] _collateralTypes;
+        string _collateralSvg;
+        LibSvg.SvgTypeAndSizes[] _collateralTypesAndSizes;
+        string _eyeShapeSvg;
+        LibSvg.SvgTypeAndSizes[] _eyeShapeTypesAndSizes;
+    }
+
+    //May overload the block gas limit but worth trying
+    function createHauntWithPayload(CreateHauntPayload calldata _payload) external onlyItemManager returns (uint256 hauntId_) {
+        uint256 currentHauntId = s.currentHauntId;
+        require(
+            s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
+            "AavegotchiFacet: Haunt must be full before creating new"
+        );
+
+        hauntId_ = currentHauntId + 1;
+
+        //Upload collateralTypes
+        addCollateralTypes(hauntId_, _payload._collateralTypes);
+
+        //Upload collateralSvgs
+        LibSvg.storeSvg(_payload._collateralSvg, _payload._collateralTypesAndSizes);
+
+        //Upload eyeShapes
+        LibSvg.storeSvg(_payload._eyeShapeSvg, _payload._eyeShapeTypesAndSizes);
+
+        s.currentHauntId = uint16(hauntId_);
+        s.haunts[hauntId_].hauntMaxSize = _payload._hauntMaxSize;
+        s.haunts[hauntId_].portalPrice = _payload._portalPrice;
+        s.haunts[hauntId_].bodyColor = _payload._bodyColor;
+        emit CreateHaunt(hauntId_, _payload._hauntMaxSize, _payload._portalPrice, _payload._bodyColor);
     }
 
     function mintItems(

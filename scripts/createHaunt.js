@@ -1,23 +1,106 @@
 /* global ethers hre */
+const { getCollaterals } = require("./collateralTypesHaunt2.js");
+const { collateralsSvgs } = require("../svgs/collateralsH2.js");
+const { eyeShapeSvgs } = require("../svgs/eyeShapesH2.js");
+const { addPayload } = require("./upgrades/upgrade-hauntPayload.js");
 
-async function main () {
-  const aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
-  const hauntSize = 10000
-  const price = ethers.utils.parseEther('100')
-  const daoFacet = await ethers.getContractAt('DAOFacet', aavegotchiDiamondAddress)
-  const tx = await daoFacet.createHaunt(hauntSize, price, '0x000000', { gasLimit: 5000000 })
-  const receipt = await tx.wait()
-  if (!receipt.status) {
-    throw Error(`Error creating haunt: ${tx.hash}`)
+let signer, daoFacet, collateralTypesAndSizes, eyeShapeTypesAndSizes;
+
+async function main() {
+  console.log("upgrading");
+  await addPayload();
+  const aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+  const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+
+  const testing = ["hardhat", "localhost"].includes(hre.network.name);
+  if (testing) {
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [itemManager],
+    });
+
+    signer = await ethers.provider.getSigner(itemManager);
+  } else if (hre.network.name === "matic") {
+    signer = new LedgerSigner(ethers.provider);
+  } else {
+    throw Error("Incorrect network selected");
   }
-  console.log('Haunt created:', tx.hash)
+
+  function setupSvg(...svgData) {
+    const svgTypesAndSizes = [];
+    const svgItems = [];
+    for (const [svgType, svg] of svgData) {
+      svgItems.push(svg.join(""));
+      svgTypesAndSizes.push([
+        ethers.utils.formatBytes32String(svgType),
+        svg.map((value) => value.length),
+      ]);
+    }
+    return [svgItems.join(""), svgTypesAndSizes];
+  }
+
+  const _hauntMaxSize = 15000;
+  const portalPrice = 0; //GBM
+  const _bodyColor = "0x000000"; //test color
+  const _collateralTypes = getCollaterals("matic");
+
+  //collaterals
+  [collateralSvg, collateralTypesAndSizes] = setupSvg([
+    "collaterals",
+    collateralsSvgs,
+  ]);
+
+  //eyeshapes
+  [eyeShapeSvg, eyeShapeTypesAndSizes] = setupSvg([
+    "eyeShapesH2",
+    eyeShapeSvgs,
+  ]);
+
+  const totalPayload = {
+    _hauntMaxSize: _hauntMaxSize,
+    _portalPrice: portalPrice,
+    _bodyColor: _bodyColor,
+    _collateralTypes: _collateralTypes,
+    _collateralSvg: collateralSvg,
+    _collateralTypesAndSizes: collateralTypesAndSizes,
+    _eyeShapeSvg: eyeShapeSvg,
+    _eyeShapeTypesAndSizes: eyeShapeTypesAndSizes,
+  };
+  console.log(totalPayload);
+  daoFacet = (
+    await ethers.getContractAt("DAOFacet", aavegotchiDiamondAddress)
+  ).connect(signer);
+
+  if (testing) {
+    const tx = await daoFacet.createHauntWithPayload(totalPayload, {
+      gasLimit: 15000000,
+    });
+    const receipt = await tx.wait();
+    if (!receipt.status) {
+      throw Error(`Error creating haunt: ${tx.hash}`);
+    }
+    console.log("Haunt created:", tx.hash);
+
+    const svgFacet = await ethers.getContractAt(
+      "SvgFacet",
+      aavegotchiDiamondAddress
+    );
+    const preview = await svgFacet.previewAavegotchi(
+      "2",
+      "0x8dF3aad3a84da6b69A4DA8aeC3eA40d9091B2Ac4",
+      [0, 0, 0, 0, 99, 99],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+
+    console.log("preview:", preview);
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main()
   .then(() => process.exit(0))
-  .catch(error => {
-    console.error(error)
-    process.exit(1)
-  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
