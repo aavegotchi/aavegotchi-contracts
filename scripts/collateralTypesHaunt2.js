@@ -23,7 +23,7 @@ const collaterals = [
     svgId: 9,
     eyeShapeSvgId: 19,
     modifiers: [0, 1, 0, 0, 0, 0],
-    conversionRate: 2537, // 2537 DAI = 1 ETH
+    conversionRate: 3150, // 2537 DAI = 1 ETH
   },
   {
     name: "amAAVE",
@@ -36,7 +36,7 @@ const collaterals = [
     svgId: 2,
     eyeShapeSvgId: 17,
     modifiers: [0, 0, 1, 0, 0, 0],
-    conversionRate: 322,
+    conversionRate: 399,
   },
   {
     name: "amUSDT",
@@ -75,7 +75,7 @@ const collaterals = [
     svgId: 10,
     eyeShapeSvgId: 22,
     modifiers: [0, 1, 0, 0, 0, 0],
-    conversionRate: 39400,
+    conversionRate: 46550,
   },
   {
     name: "amWMATIC",
@@ -88,8 +88,9 @@ const collaterals = [
     svgId: 11,
     eyeShapeSvgId: 23,
     modifiers: [0, 1, 0, 0, 0, 0],
-    conversionRate: 1,
+    conversionRate: 1.5,
   },
+  /*
   {
     name: "amGHST",
     kovanAddress: "0x3F382DbD960E3a9bbCeaE22651E88158d2791550",
@@ -101,8 +102,9 @@ const collaterals = [
     svgId: 12,
     eyeShapeSvgId: 24,
     modifiers: [0, 0, -1, 0, 0, 0],
-    conversionRate: 1, // 1 DAI equals 1 GHST
+    conversionRate: 2.2, // 2 DAI equals 1 GHST
   },
+  */
 ];
 
 const testCollaterals = [
@@ -153,4 +155,4 @@ function getCollaterals(network, ghstAddress) {
   return collateralTypes;
 }
 
-exports.getH2Collaterals = getCollaterals;
+exports.getCollaterals = getCollaterals;
