@@ -18,7 +18,7 @@ function getSelector(func) {
 }
 
 async function main() {
-  const gasPrice = 2000000000;
+  const gasPrice = 20000000000;
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
   const owner = await (
