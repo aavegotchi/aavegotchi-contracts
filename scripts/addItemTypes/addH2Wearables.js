@@ -2,9 +2,9 @@
 /* eslint-disable  prefer-const */
 
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
-const { itemTypes } = require("./h2ItemTypes.js");
+const { itemTypes } = require("../h2ItemTypes");
 
-const { wearablesSvgs, sleevesSvgs } = require("../svgs/h2wearables.js");
+const { wearablesSvgs, sleevesSvgs } = require("../../svgs/h2wearables.js");
 
 const gasPrice = 2000000000;
 
@@ -120,9 +120,13 @@ async function main() {
   await uploadSvgs(wearablesSvgs, "wearables", {
     gasPrice: gasPrice,
   });
-  await uploadSvgs(sleevesSvgs.map(value => value.svg), "sleeves", {
-    gasPrice: gasPrice,
-  });
+  await uploadSvgs(
+    sleevesSvgs.map((value) => value.svg),
+    "sleeves",
+    {
+      gasPrice: gasPrice,
+    }
+  );
 
   /*await uploadSvgs(
     sleevesSvgs.map((value) => value.svg),
@@ -173,7 +177,7 @@ async function main() {
 
   return {
     signer,
-    diamondAddress
+    diamondAddress,
   };
 }
 
