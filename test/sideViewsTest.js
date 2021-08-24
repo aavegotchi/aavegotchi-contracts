@@ -25,14 +25,23 @@ describe("Side Views", async function () {
 
   it.only("Should render particular gotchi side view", async function() {
 
-    let aavegotchiMarine = await aavegotchiFacet.getAavegotchi(7623);
-    let aavegotchiMess = await aavegotchiFacet.getAavegotchi(7624);
+    // let aavegotchiMarine = await aavegotchiFacet.getAavegotchi(7623);
+    // let aavegotchiMess = await aavegotchiFacet.getAavegotchi(7624);
+    //
+    // console.log("Marine Items Array Length: ", aavegotchiMarine.items.length);
+    // console.log("Mess Items Array Length: ", aavegotchiMess.items.length);
 
-    console.log("Marine Items Array Length: ", aavegotchiMarine.items.length);
-    console.log("Mess Items Array Length: ", aavegotchiMess.items.length);
 
+    // const svgs = await svgViewsFacet.getAavegotchiSideSvgs(7623);
+    // console.log('svgs:',svgs);
+    const numTraits1 = [99, 99, 99, 99, 0, 0];
+    const wearables1 = [11, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-    const svgs = await svgViewsFacet.getAavegotchiSideSvgs(7623);
-    console.log('svgs:',svgs);
+    // const left = ethers.utils.formatBytes32String("aavegotchi-left");
+    // const right = ethers.utils.formatBytes32String("aavegotchi-right");
+    // const back = ethers.utils.formatBytes32String("aavegotchi-back");
+
+    const preview = await svgViewsFacet.previewSideAavegotchi("1", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
+    console.log("PREVIEW: ", preview);
   });
 });

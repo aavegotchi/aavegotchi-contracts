@@ -3,21 +3,38 @@ pragma solidity 0.8.1;
 
 import {LibAppStorage, AppStorage, SvgLayer} from "./LibAppStorage.sol";
 
-import "hardhat/console.sol";
-
 library LibSvg {
     event StoreSvg(LibSvg.SvgTypeAndSizes[] _typesAndSizes);
     event UpdateSvg(SvgTypeAndIdsAndSizes[] _typesAndIdsAndSizes);
     // svg type: "aavegotchiSvgs"
     uint256 internal constant CLOSED_PORTAL_SVG_ID = 0;
     uint256 internal constant OPEN_PORTAL_SVG_ID = 1;
-    uint256 internal constant AAVEGTOTCHI_BODY_SVG_ID = 2;
+    uint256 internal constant AAVEGOTCHI_BODY_SVG_ID = 2;
     uint256 internal constant HANDS_SVG_ID = 3;
     uint256 internal constant BACKGROUND_SVG_ID = 4;
 
     struct SvgTypeAndSizes {
         bytes32 svgType;
         uint256[] sizes;
+    }
+
+    function getSvg(bytes32 _svgType, uint256 _id) internal view returns (bytes memory svg_) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        SvgLayer[] storage svgLayers = s.svgLayers[_svgType];
+        svg_ = getSvg(svgLayers, _id);
+    }
+
+    function getSvg(SvgLayer[] storage _svgLayers, uint256 _id) internal view returns (bytes memory svg_) {
+        require(_id < _svgLayers.length, "LibSvg: SVG type or id does not exist");
+
+        SvgLayer storage svgLayer = _svgLayers[_id];
+        address svgContract = svgLayer.svgLayersContract;
+        uint256 size = svgLayer.size;
+        uint256 offset = svgLayer.offset;
+        svg_ = new bytes(size);
+        assembly {
+            extcodecopy(svgContract, add(svg_, 32), offset, size)
+        }
     }
 
     function bytes3ToColorString(bytes3 _color) internal pure returns (string memory) {
@@ -41,28 +58,26 @@ library LibSvg {
         }
     }
 
-    function getSvg(bytes32 _svgType, uint256 _id) internal view returns (bytes memory svg_) {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        SvgLayer[] storage svgLayers = s.svgLayers[_svgType];
-        console.log("id before func:", _id);
-        console.logBytes32(_svgType);
-        svg_ = getSvg(svgLayers, _id);
-    }
-
-    function getSvg(SvgLayer[] storage _svgLayers, uint256 _id) internal view returns (bytes memory svg_) {
-        console.log("getSvg() function");
-        console.log("SvgLayer length:", _svgLayers.length);
-        console.log("id:", _id);
-        require(_id < _svgLayers.length, "LibSvg: SVG type or id does not exist");
-        /* console.log("length:", _svgLayers.length); */
-        SvgLayer storage svgLayer = _svgLayers[_id];
-        address svgContract = svgLayer.svgLayersContract;
-        uint256 size = svgLayer.size;
-        uint256 offset = svgLayer.offset;
-        svg_ = new bytes(size);
-        assembly {
-            extcodecopy(svgContract, add(svg_, 32), offset, size)
+    function uint2str(uint256 _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
         }
+        uint256 j = _i;
+        uint256 len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint256 k = len;
+        while (_i != 0) {
+            k = k - 1;
+            uint8 temp = (48 + uint8(_i - (_i / 10) * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
     }
 
     function storeSvgInContract(string calldata _svg) internal returns (address svgContract) {
