@@ -88,7 +88,7 @@ const collaterals = [
     svgId: 11,
     eyeShapeSvgId: 23,
     modifiers: [0, 1, 0, 0, 0, 0],
-    conversionRate: 1.5,
+    conversionRate: 2,
   },
   /*
   {

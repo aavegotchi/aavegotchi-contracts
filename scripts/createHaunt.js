@@ -1,5 +1,5 @@
 /* global ethers hre */
-const { getH2Collaterals } = require("./collateralTypesHaunt2.js");
+const { getCollaterals } = require("./collateralTypesHaunt2.js");
 const { collateralsSvgs } = require("../svgs/collateralsH2.js");
 const { eyeShapeSvgs } = require("../svgs/eyeShapesH2.js");
 const { addPayload } = require("./upgrades/upgrade-hauntPayload.js");
@@ -59,7 +59,7 @@ async function main() {
   const _hauntMaxSize = 15000;
   const portalPrice = 0; //GBM
   const _bodyColor = "0x000000"; //test color
-  const _collateralTypes = getH2Collaterals("matic");
+  const _collateralTypes = getCollaterals("matic");
   // console.log(_collateralTypes);
   // const H2Svgs = collateralsSvgs;
 
@@ -104,8 +104,18 @@ async function main() {
     }
     console.log("Haunt created:", tx.hash);
 
-    // const svgFacet = await ethers.getContractAt("SvgFacet",aavegotchiDiamondAddress)
-    // const preview = await svgFacet.previewAavegotchi()
+    const svgFacet = await ethers.getContractAt(
+      "SvgFacet",
+      aavegotchiDiamondAddress
+    );
+    const preview = await svgFacet.previewAavegotchi(
+      "2",
+      "0x8dF3aad3a84da6b69A4DA8aeC3eA40d9091B2Ac4",
+      [0, 0, 0, 0, 99, 99],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+
+    console.log("preview:", preview);
   }
 }
 
