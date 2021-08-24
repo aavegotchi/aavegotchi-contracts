@@ -41,7 +41,7 @@ const itemTypes = [
   },
   {
     svgId: 213,
-    name: "H4xx0r Shirt ",
+    name: "H4xx0r Shirt",
     setId: [94, 95],
     author: "xibot",
     description: "",
