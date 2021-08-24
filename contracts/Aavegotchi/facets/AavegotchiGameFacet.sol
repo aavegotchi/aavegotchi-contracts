@@ -1,15 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {
-    LibAavegotchi,
-    AavegotchiInfo,
-    NUMERIC_TRAITS_NUM,
-    AavegotchiCollateralTypeInfo,
-    PortalAavegotchiTraitsIO,
-    InternalPortalAavegotchiTraitsIO,
-    PORTAL_AAVEGOTCHIS_NUM
-} from "../libraries/LibAavegotchi.sol";
+import {LibAavegotchi, AavegotchiInfo, NUMERIC_TRAITS_NUM, AavegotchiCollateralTypeInfo, PortalAavegotchiTraitsIO, InternalPortalAavegotchiTraitsIO, PORTAL_AAVEGOTCHIS_NUM} from "../libraries/LibAavegotchi.sol";
 
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
 
@@ -167,6 +159,8 @@ contract AavegotchiGameFacet is Modifiers {
     function pet() external {
         address operator = LibMeta.msgSender();
 
+        //todo: check balance to ensure owner has enough GHST
+
         //Get all the tokenIDs attached to the petOperator
         uint256[] memory tokenIds = s.petOperatorTokenIds[operator];
         address ghstContract = s.ghstContract;
@@ -186,8 +180,9 @@ contract AavegotchiGameFacet is Modifiers {
                 uint256 petRate = s.petOperatorInfo[operator].rate;
 
                 uint256 balance = IERC20(ghstContract).balanceOf(owner);
+
                 if (balance >= petRate && LibAavegotchi.interact(tokenId)) {
-                    //todo: Ensure percentages are correct
+                    //todo: check rounding errors for divisible by 3 and 7
 
                     uint256 operatorShare = (petRate / 10) * 7;
                     uint256 pixelCraftShare = (petRate / 10) * 3;
