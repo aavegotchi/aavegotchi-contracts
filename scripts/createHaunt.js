@@ -59,19 +59,19 @@ async function main() {
   const _hauntMaxSize = 15000;
   const portalPrice = 0; //GBM
   const _bodyColor = "0x000000"; //test color
-  const _collateralTypes = getH2Collaterals();
+  const _collateralTypes = getH2Collaterals("matic");
   // console.log(_collateralTypes);
   // const H2Svgs = collateralsSvgs;
 
   //collaterals
-  ;[collateralSvg, collateralTypesAndSizes] = setupSvg([
+  [collateralSvg, collateralTypesAndSizes] = setupSvg([
     "collaterals",
     collateralsSvgs,
   ]);
   // printSizeInfo(collateralTypesAndSizes);
   //console.log("the collateral types and sizes are", collateralTypesAndSizes);
   //eyeshapes
-  ;[eyeShapeSvg, eyeShapeTypesAndSizes] = setupSvg([
+  [eyeShapeSvg, eyeShapeTypesAndSizes] = setupSvg([
     "eyeShapesH2",
     eyeShapeSvgs,
   ]);
@@ -83,7 +83,7 @@ async function main() {
     _hauntMaxSize: _hauntMaxSize,
     _portalPrice: portalPrice,
     _bodyColor: _bodyColor,
-    _collateralTypes: [],
+    _collateralTypes: _collateralTypes,
     _collateralSvg: collateralSvg,
     _collateralTypesAndSizes: collateralTypesAndSizes,
     _eyeShapeSvg: eyeShapeSvg,
@@ -103,6 +103,9 @@ async function main() {
       throw Error(`Error creating haunt: ${tx.hash}`);
     }
     console.log("Haunt created:", tx.hash);
+
+    // const svgFacet = await ethers.getContractAt("SvgFacet",aavegotchiDiamondAddress)
+    // const preview = await svgFacet.previewAavegotchi()
   }
 }
 
