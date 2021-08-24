@@ -32,16 +32,16 @@ describe("Side Views", async function () {
     // console.log("Mess Items Array Length: ", aavegotchiMess.items.length);
 
 
-    // const svgs = await svgViewsFacet.getAavegotchiSideSvgs(7623);
-    // console.log('svgs:',svgs);
+    const svgs = await svgViewsFacet.getAavegotchiSideSvgs(7623);
+    console.log('svgs:',svgs);
     const numTraits1 = [99, 99, 99, 99, 0, 0];
-    const wearables1 = [11, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const wearables1 = [11, 0, 0, 3, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     // const left = ethers.utils.formatBytes32String("aavegotchi-left");
     // const right = ethers.utils.formatBytes32String("aavegotchi-right");
     // const back = ethers.utils.formatBytes32String("aavegotchi-back");
 
-    const preview = await svgViewsFacet.previewSideAavegotchi("1", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
-    console.log("PREVIEW: ", preview);
+    // const preview = await svgViewsFacet.previewSideAavegotchi("1", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
+    // console.log("PREVIEW: ", preview);
   });
 });
