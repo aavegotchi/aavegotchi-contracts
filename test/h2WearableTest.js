@@ -24,16 +24,9 @@ describe("Upgrade H2 wearables", async function () {
     svgFacet,
     vrfFacet,
     shopFacet,
-    itemsFacet,
-    itemsTransferFacet,
     ghstTokenContract;
-  let haunt, currentHauntId;
 
   before(async function () {
-    console.log("Upgrading VRFFacet for test");
-    await upgradeVrfFacet4Test();
-    await uploadH2EyeShapeSVG();
-
     const deployVars = await addH2Wearables("deployTest");
 
     diamondAddress = deployVars.diamondAddress;
@@ -94,113 +87,16 @@ describe("Upgrade H2 wearables", async function () {
     ).connect(signer);
   });
 
-  describe("Create new haunt", function () {
-    it("Should get current haunt info", async function () {
-      haunt = await aavegotchiGameFacet.currentHaunt();
-      currentHauntId = haunt["hauntId_"].toNumber();
-      expect(currentHauntId).to.equal(1);
-    });
-
-    it("Should create new haunt", async function () {
-      await (
-        await daoFacet.createHaunt(initialHauntSize, portalPrice, "0x000000")
-      ).wait();
-      haunt = await aavegotchiGameFacet.currentHaunt();
-      currentHauntId = haunt["hauntId_"].toNumber();
-      expect(currentHauntId).to.equal(2);
-
-      const imDaoContract = await ethers.getContractAt(
-        "DAOFacet",
-        diamondAddress,
-        itemManager
-      );
-
-      await (
-        await imDaoContract.addCollateralTypes(
-          currentHauntId,
-          getCollaterals("hardhat", ghstTokenContract.address)
-        )
-      ).wait();
-    });
-  });
-
-  describe("Mint and open Portals and claim new aavegotchi", function () {
-    it("Should mint portal", async function () {
-      const balance = await ghstTokenContract.balanceOf(account);
-      await ghstTokenContract.approve(diamondAddress, balance);
-      await (await shopFacet.mintPortals(account, 5)).wait();
-
-      const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account);
-      expect(myPortals.length).to.equal(5);
-    });
-
-    it("Should open the portal", async function () {
-      let myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account);
-      expect(myPortals[0].status).to.equal(0);
-      await vrfFacet.openPortals(["10000", "10001", "10002", "10003"]);
-
-      myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account);
-      expect(myPortals[0].status).to.equal(2);
-    });
-
-    it("Should contain 10 random ghosts in the portal", async function () {
-      const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account);
-      const ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(
-        myPortals[0].tokenId
-      );
-      // console.log(JSON.stringify(ghosts, null, 4))
-      ghosts.forEach(async (ghost) => {
-        const rarityScore = await aavegotchiGameFacet.baseRarityScore(
-          ghost.numericTraits
-        );
-        expect(Number(rarityScore)).to.greaterThan(298);
-        expect(Number(rarityScore)).to.lessThan(602);
-      });
-      expect(ghosts.length).to.equal(10);
-    });
-
-    it("Can only set name on claimed Aavegotchi", async function () {
-      await expect(
-        aavegotchiGameFacet.setAavegotchiName("10001", "Portal")
-      ).to.be.revertedWith(
-        "AavegotchiGameFacet: Must claim Aavegotchi before setting name"
-      );
-    });
-
-    it("Should claim an Aavegotchi", async function () {
-      const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account);
-      const tokenId = myPortals[0].tokenId;
-      const ghosts = await aavegotchiGameFacet.portalAavegotchiTraits(tokenId);
-      const selectedGhost = ghosts[4];
-
-      const minStake = selectedGhost.minimumStake;
-      // console.log(minStake.toString());
-      await aavegotchiGameFacet.claimAavegotchi(tokenId, 4, minStake);
-      const kinship = await aavegotchiGameFacet.kinship(tokenId);
-
-      const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId);
-
-      const collateral = aavegotchi.collateral;
-      expect(selectedGhost.collateralType).to.equal(collateral);
-      expect(aavegotchi.status).to.equal(3);
-      expect(aavegotchi.hauntId).to.equal(2);
-      expect(aavegotchi.stakedAmount).to.equal(minStake);
-      expect(kinship).to.equal(50);
-    });
-  });
-
   describe("Wearables", async function () {
     it("Equip wearables and check", async function () {
-      const myPortals = await aavegotchiFacet.allAavegotchisOfOwner(account);
-
-      for (const wearableSvgId of [213,220,222,231,234,241,244]) {
+      for (const wearableSvgId of [213, 220, 222, 231, 234, 241, 244]) {
         let preview = await svgFacet.previewAavegotchi(
           "2",
           ghstTokenContract.address,
-          myPortals[0].numericTraits,
+          [0, 0, 0, 0, 0, 0],
           [wearableSvgId, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        )
-        console.log(`Body wearable ${wearableSvgId} preview`, preview)
+        );
+        console.log(`Body wearable ${wearableSvgId} preview`, preview);
       }
     });
   });
