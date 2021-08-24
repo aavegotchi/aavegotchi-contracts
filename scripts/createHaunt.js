@@ -4,12 +4,8 @@ const { collateralsSvgs } = require("../svgs/collateralsH2.js");
 const { eyeShapeSvgs } = require("../svgs/eyeShapesH2.js");
 const { addPayload } = require("./upgrades/upgrade-hauntPayload.js");
 
-let signer,
-  daoFacet,
-  collateralTypesAndSizes,
-  _collateralSvgs,
-  eyeShapeTypesAndSizes,
-  _eyeShapeSvgs;
+let signer, daoFacet, collateralTypesAndSizes, eyeShapeTypesAndSizes;
+
 async function main() {
   console.log("upgrading");
   await addPayload();
@@ -43,41 +39,22 @@ async function main() {
     return [svgItems.join(""), svgTypesAndSizes];
   }
 
-  // eslint-disable-next-line no-unused-vars
-  function printSizeInfo(svgTypesAndSizes) {
-    console.log("------------- SVG Size Info ---------------");
-    let sizes = 0;
-    for (const [svgType, size] of svgTypesAndSizes) {
-      console.log(ethers.utils.parseBytes32String(svgType) + ":" + size);
-      for (const nextSize of size) {
-        sizes += nextSize;
-      }
-    }
-    console.log("Total sizes:" + sizes);
-  }
-
   const _hauntMaxSize = 15000;
   const portalPrice = 0; //GBM
   const _bodyColor = "0x000000"; //test color
   const _collateralTypes = getCollaterals("matic");
-  // console.log(_collateralTypes);
-  // const H2Svgs = collateralsSvgs;
 
   //collaterals
   [collateralSvg, collateralTypesAndSizes] = setupSvg([
     "collaterals",
     collateralsSvgs,
   ]);
-  // printSizeInfo(collateralTypesAndSizes);
-  //console.log("the collateral types and sizes are", collateralTypesAndSizes);
+
   //eyeshapes
   [eyeShapeSvg, eyeShapeTypesAndSizes] = setupSvg([
     "eyeShapesH2",
     eyeShapeSvgs,
   ]);
-  // printSizeInfo(eyeShapeTypesAndSizes);
-  // console.log("these are the eyeShapes and sizes", eyeShapeTypesAndSizes);
-  //console.log("eyeshapeSvgs are", eyeShapeSvgs);
 
   const totalPayload = {
     _hauntMaxSize: _hauntMaxSize,
