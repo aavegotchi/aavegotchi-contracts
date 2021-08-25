@@ -290,11 +290,13 @@ contract SvgViewsFacet is Modifiers {
         }
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT];
+        console.log("Right HandWearable ID: ", wearableId);
         if (wearableId != 0) {
             layers.handLeft = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HAND_RIGHT);
         }
 
         wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_LEFT];
+        console.log("Left HandWearable ID: ", wearableId);
         if (wearableId != 0) {
             layers.handRight = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HAND_LEFT);
         }
@@ -307,6 +309,7 @@ contract SvgViewsFacet is Modifiers {
         console.log("WEARABLE");
         console.logBytes(layers.handRight);
         console.logBytes(layers.handLeft);
+        console.log("Aavegotchi Hands");
         console.logBytes(layers.hands);
         console.logBytes(layers.head);
         console.logBytes(layers.face);
@@ -345,10 +348,8 @@ contract SvgViewsFacet is Modifiers {
             svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head, layers.handRight, layers.hands, layers.sleeves, layers.pet);
         }
         else if (side == back) {
-            console.log("LEFT HAND");
-            console.logBytes(layers.handLeft);
-            console.log("RIGHT HAND");
-            console.logBytes(layers.handRight);
+          console.log("Aavegotchi Hands");
+          console.logBytes(layers.hands);
             svg_ = abi.encodePacked(layers.background);
             svg_ = abi.encodePacked(svg_, _body);
             svg_ = abi.encodePacked(svg_, layers.handRight, layers.handLeft, layers.hands);
@@ -418,7 +419,7 @@ contract SvgViewsFacet is Modifiers {
             console.log("wearableId: ", _wearableId);
             svg_ = abi.encodePacked(
               svg_,
-              LibStrings.strWithUint('<g transform="translate(-', 64 - (dimensions.x + 2)),
+              LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 64 - (dimensions.x + 4)),
               ', 0)">',
               LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-", _sideView), wearableType.svgId),
               "</g></svg></g>"
