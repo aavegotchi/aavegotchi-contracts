@@ -35,6 +35,7 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
+    "@ethersproject/experimental": "^5.4.0",
     "@ethersproject/hardware-wallets": "https://github.com/mudgen/ethers-ledger.git",
     "axios": "^0.21.1",
     "hardhat": "^2.2.1",

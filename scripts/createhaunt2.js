@@ -75,45 +75,6 @@ async function main() {
     signer
   );
 
-  // console.log("CREATING HAUNT 2!");
-
-  //First Add collateralTypes
-  /*
-  console.log("Adding Collateral Types");
-  await daoFacet.addCollateralTypes("2", totalPayload._collateralTypes, {
-    gasPrice: gasPrice,
-  });
-
-  //Upload collateralSvgs
-  console.log("Storing Collateral Shapes");
-  await svgFacet.storeSvg(
-    totalPayload._collateralSvg,
-    totalPayload._collateralTypesAndSizes,
-    { gasPrice: gasPrice }
-  );
-
-  //Upload eyeShapes
-  console.log("Storing Eye Shapes");
-  await svgFacet.storeSvg(
-    totalPayload._eyeShapeSvg,
-    totalPayload._eyeShapeTypesAndSizes,
-    { gasPrice: gasPrice }
-  );
-
-  //Remove payload
-
-  totalPayload = {
-    _hauntMaxSize: _hauntMaxSize,
-    _portalPrice: portalPrice,
-    _bodyColor: _bodyColor,
-    _collateralTypes: [],
-    _collateralSvg: "",
-    _collateralTypesAndSizes: [],
-    _eyeShapeSvg: "",
-    _eyeShapeTypesAndSizes: [],
-  };
-  */
-
   console.log("Creating Haunt");
   const tx = await daoFacet.createHauntWithPayload(totalPayload, {
     gasPrice: gasPrice,
