@@ -6,11 +6,10 @@ const { itemTypes } = require("../h2ItemTypes");
 
 const { wearablesSvgs, sleevesSvgs } = require("../../svgs/h2wearables.js");
 
-const gasPrice = 2000000000;
-
 let signer;
 const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
 const gasLimit = 15000000;
+const gasPrice = 20000000000;
 
 async function uploadSvgs(svgs, svgType) {
   let svgFacet = (
@@ -121,6 +120,8 @@ async function main() {
   await uploadSvgs(wearablesSvgs, "wearables", {
     gasPrice: gasPrice,
   });
+
+  console.log("Uploading Sleeves");
   await uploadSvgs(
     sleevesSvgs.map((value) => value.svg),
     "sleeves",
