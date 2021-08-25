@@ -1,9 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const truffleAsserts = require("truffle-assertions");
-const {
-  removeXingYun,
-} = require("../scripts/upgrades/upgrade-removeXingYun.js");
 
 describe("removing xingyun()", async function () {
   this.timeout(300000);
@@ -14,7 +11,6 @@ describe("removing xingyun()", async function () {
     aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   });
   it("should not allow the xingyun function to be called", async () => {
-    await removeXingYun();
     const Xing = await ethers.getContractAt(
       "XingyunFacet",
       aavegotchiDiamondAddress

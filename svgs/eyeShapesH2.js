@@ -48,7 +48,9 @@ const eyeShapeSvgs = [
   // 23, wmatic_collateral
   '<g class="gotchi-eyeColor"><path d="M43.46 23.91v-.64h-.64v-.64h-.64V22h-1.91v.64h-.64v.64H39v1.28h.64v-.64h.64v-.64h1.91v.64h.64v1.91h-.64v.64h-1.91v-.64h-.64v-.64h-1.28v-.64h-.64v-.64h-1.91v.64h-.64v.64h-.64v.64h-.63v1.91h.64v.64h.64v.64h.64v.64h1.91v-.64h.64v-.64H39V27.1h-.64v.64h-.64v.64h-1.91v-.64h-.64v-1.91h.64v-.64h1.91v.64h.64v.64h1.28v.64h.64v.64h1.91v-.65h.64v-.64h.64v-.64h.64v-1.91h-.65zm-14-.64h-.64v-.64h-.64V22h-1.91v.64h-.64v.64H25v1.28h.64v-.64h.64v-.64h1.91v.64h.64v1.91h-.64v.64h-1.91v-.64h-.64v-.64h-1.28v-.64h-.64v-.64h-1.91v.64h-.64v.64h-.64v.64h-.63v1.91h.64v.64h.64v.64h.64v.64h1.91v-.64h.64v-.64H25V27.1h-.64v.64h-.64v.64h-1.91v-.64h-.64v-1.91h.64v-.64h1.91v.64h.64v.64h1.28v.64h.64v.64h1.91v-.65h.64v-.64h.64v-.64h.64v-1.91h-.64v-.64z"/></g>',
   // 24, ghst_collateral
+  /*
   '<g class="gotchi-eyeColor gotchi-primary"><path d="M42 24v-1h-1v-1h-4v1h-1v1h-1v4h1v1h1v1h4v-1h1v-1h1v-4h-1z" fill="#ac15f9"/><path d="M41 23v-1h-4v1h-1v1h6v-1h-1z" fill="#fa34f3"/><path d="M35 24v2h8v-2h-8z" fill="#cf15f9"/><path d="M36 28v1h1v1h4v-1h1v-1h-6z" fill="#8f17f9"/><path d="M28 23h-1v-1h-4v1h-1v1h-1v4h1v1h1v1h4v-1h1v-1h1v-4h-1v-1z" fill="#ac15f9"/><path d="M27 22h-4v1h-1v1h6v-1h-1v-1z" fill="#fa34f3"/><path d="M21 24v2h8v-2h-8z" fill="#cf15f9"/><path d="M22 28v1h1v1h4v-1h1v-1h-6z" fill="#8f17f9"/></g>',
+  */
 ];
 
 exports.eyeShapeSvgs = eyeShapeSvgs;

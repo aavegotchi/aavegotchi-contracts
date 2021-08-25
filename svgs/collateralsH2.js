@@ -8,7 +8,9 @@ const collateralsSvgs = [
   // 11, WMATIC Collateral
   '<g class="gotchi-collateral"><path d="M37.25 17.04v-.75h-.75v-.75h-.75v-.75H33.5v.75h-.75v.75h-1.5v.75h-.75v.75h-2.25v-.75h-.75v-2.25h.75v-.75h2.25v.75h.75v.75H32v-1.5h-.75v-.75h-.75v-.75h-2.25v.75h-.75v.75h-.75v.75H26v2.25h.75v.75h.75v.75h.75v.75h2.25v-.75h.75v-.75h1.5v-.75h.75v-.75h2.25v.75h.75v2.25h-.75v.75H33.5v-.75h-.75v-.75H32v1.5h.75v.75h.75v.75h2.25v-.75h.75v-.75h.75v-.75H38v-2.25h-.75z" fill="#824ee2"/></g>',
   // 12, GHST Collateral
+  /*
   '<g class="gotchi-collateral"><path d="M36 15v-1h-1v-1h-1v-1h-4v1h-1v1h-1v1h-1v4h1v1h1v1h1v1h4v-1h1v-1h1v-1h1v-4h-1z" fill="#ac15f9"/><path d="M33 21h-3v1h4v-1h-1z" fill="#7e18f8"/><path d="M35 14v-1h-1v-1h-4v1h-1v1h-1v1h8v-1h-1z" fill="#fa34f3"/><path d="M36 15h-9v2h10v-2h-1z" fill="#cf15f9"/><path d="M35 19h-7v1h1v1h6v-1h1v-1h-1z" fill="#8f17f9"/></g>'
-]
+  */
+];
 
-exports.collateralsSvgs = collateralsSvgs
+exports.collateralsSvgs = collateralsSvgs;
