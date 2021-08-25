@@ -3,6 +3,8 @@ const { getCollaterals } = require("./collateralTypesHaunt2.js");
 const { collateralsSvgs } = require("../svgs/collateralsH2.js");
 const { eyeShapeSvgs } = require("../svgs/eyeShapesH2.js");
 
+const { LedgerSigner } = require("@ethersproject/hardware-wallets");
+
 let signer, daoFacet, collateralTypesAndSizes, eyeShapeTypesAndSizes;
 
 async function main() {
@@ -42,7 +44,6 @@ async function main() {
   const _bodyColor = "0x000000"; //test color
   const _collateralTypes = getCollaterals("matic");
 
-  //collaterals
   [collateralSvg, collateralTypesAndSizes] = setupSvg([
     "collaterals",
     collateralsSvgs,
@@ -54,7 +55,7 @@ async function main() {
     eyeShapeSvgs,
   ]);
 
-  const totalPayload = {
+  let totalPayload = {
     _hauntMaxSize: _hauntMaxSize,
     _portalPrice: portalPrice,
     _bodyColor: _bodyColor,
@@ -64,34 +65,77 @@ async function main() {
     _eyeShapeSvg: eyeShapeSvg,
     _eyeShapeTypesAndSizes: eyeShapeTypesAndSizes,
   };
-  // console.log(totalPayload);
   daoFacet = (
     await ethers.getContractAt("DAOFacet", aavegotchiDiamondAddress)
   ).connect(signer);
 
+  const svgFacet = await ethers.getContractAt(
+    "SvgFacet",
+    aavegotchiDiamondAddress,
+    signer
+  );
+
+  // console.log("CREATING HAUNT 2!");
+
+  //First Add collateralTypes
+  /*
+  console.log("Adding Collateral Types");
+  await daoFacet.addCollateralTypes("2", totalPayload._collateralTypes, {
+    gasPrice: gasPrice,
+  });
+
+  //Upload collateralSvgs
+  console.log("Storing Collateral Shapes");
+  await svgFacet.storeSvg(
+    totalPayload._collateralSvg,
+    totalPayload._collateralTypesAndSizes,
+    { gasPrice: gasPrice }
+  );
+
+  //Upload eyeShapes
+  console.log("Storing Eye Shapes");
+  await svgFacet.storeSvg(
+    totalPayload._eyeShapeSvg,
+    totalPayload._eyeShapeTypesAndSizes,
+    { gasPrice: gasPrice }
+  );
+
+  //Remove payload
+
+  totalPayload = {
+    _hauntMaxSize: _hauntMaxSize,
+    _portalPrice: portalPrice,
+    _bodyColor: _bodyColor,
+    _collateralTypes: [],
+    _collateralSvg: "",
+    _collateralTypesAndSizes: [],
+    _eyeShapeSvg: "",
+    _eyeShapeTypesAndSizes: [],
+  };
+  */
+
+  console.log("Creating Haunt");
+  const tx = await daoFacet.createHauntWithPayload(totalPayload, {
+    gasPrice: gasPrice,
+  });
+  console.log("hx:", tx.hash);
+
+  const receipt = await tx.wait();
+  if (!receipt.status) {
+    throw Error(`Error creating haunt: ${tx.hash}`);
+  }
+  console.log("Haunt created:", tx.hash);
+
+  const preview = await svgFacet.previewAavegotchi(
+    "2",
+    "0x8dF3aad3a84da6b69A4DA8aeC3eA40d9091B2Ac4",
+    [0, 0, 0, 0, 99, 99],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  );
+
+  console.log("preview:", preview);
+
   if (testing) {
-    const tx = await daoFacet.createHauntWithPayload(totalPayload, {
-      gasPrice: gasPrice,
-    });
-    const receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Error creating haunt: ${tx.hash}`);
-    }
-    console.log("Haunt created:", tx.hash);
-
-    const svgFacet = await ethers.getContractAt(
-      "SvgFacet",
-      aavegotchiDiamondAddress
-    );
-    const preview = await svgFacet.previewAavegotchi(
-      "2",
-      "0x8dF3aad3a84da6b69A4DA8aeC3eA40d9091B2Ac4",
-      [0, 0, 0, 0, 99, 99],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    );
-
-    console.log("preview:", preview);
-
     //can't buy portals
     const shopFacet = await ethers.getContractAt(
       "ShopFacet",
@@ -111,6 +155,13 @@ async function main() {
     const svg = await svgFacet.getAavegotchiSvg("10000");
 
     console.log("svg:", svg);
+
+    const gameFacet = await ethers.getContractAt(
+      "AavegotchiGameFacet",
+      aavegotchiDiamondAddress
+    );
+    const currentHaunt = await gameFacet.currentHaunt();
+    console.log("current haunt:", currentHaunt);
   }
 }
 

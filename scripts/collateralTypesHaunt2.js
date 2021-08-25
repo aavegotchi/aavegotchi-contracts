@@ -87,7 +87,7 @@ const collaterals = [
     cheekColor: "#F696C6",
     svgId: 11,
     eyeShapeSvgId: 23,
-    modifiers: [0, 1, 0, 0, 0, 0],
+    modifiers: [0, 0, 0, 1, 0, 0],
     conversionRate: 2,
   },
   /*
