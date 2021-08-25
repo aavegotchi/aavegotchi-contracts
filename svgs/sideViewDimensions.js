@@ -99,7 +99,7 @@ let sideViewDimensions = [
    itemId: 6,
    name: "M67 Grenade",
    side: "back",
-   dimensions: {x:51, y:31, width:9, height:11},
+   dimensions: {x:4, y:31, width:9, height:11},
 },
  {
    itemId: 6,
@@ -297,7 +297,7 @@ let sideViewDimensions = [
    itemId: 12,
    name: "Link Bubbly",
    side: "back",
-   dimensions: {x:4, y:25, width:5, height:19},
+   dimensions: {x:1, y:25, width:5, height:19},
 },
  {
    itemId: 12,
@@ -519,7 +519,7 @@ let sideViewDimensions = [
    itemId: 19,
    name: "Aave Hero Shirt",
    side: "back",
-   dimensions: {x:15, y:33, width:34, height:19},
+   dimensions: {x:12, y:32, width:34, height:19},
 },
  {
    itemId: 19,
