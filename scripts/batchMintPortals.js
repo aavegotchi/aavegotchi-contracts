@@ -3,10 +3,13 @@ const { NonceManager } = require("@ethersproject/experimental");
 async function batchMintPortals() {
   const accounts = await ethers.getSigners();
   const account = await accounts[0].getAddress();
-  let nonceManagedSigner;
-  const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 
-  const gasPrice = 20000000000;
+  console.log("account:", account);
+
+  let nonceManagedSigner;
+  const itemManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
+
+  const gasPrice = 50000000000;
 
   let testing = ["hardhat"].includes(hre.network.name);
 
@@ -18,7 +21,7 @@ async function batchMintPortals() {
     signer = await ethers.provider.getSigner(itemManager);
     nonceManagedSigner = new NonceManager(signer);
   } else if (hre.network.name === "matic") {
-    signer = new LedgerSigner(ethers.provider, "hid", "m/44'/60'/2'/0/0");
+    signer = accounts[0]; // new ethers.Wallet(process.env.ITEM_MANAGER);
   } else {
     throw Error("Incorrect network selected");
   }
@@ -37,8 +40,8 @@ async function batchMintPortals() {
     nonceManagedSigner
   );
 
-  let numberPerMint = 5;
-  const maxNumber = 11; //15000;
+  let numberPerMint = 50;
+  const maxNumber = 50; //15000;
   //Mint 2000 ERC721s
 
   const gameFacet = await ethers.getContractAt(
