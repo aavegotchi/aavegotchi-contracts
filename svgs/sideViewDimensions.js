@@ -423,7 +423,7 @@ let sideViewDimensions = [
     itemId: 16,
     name: "Blue Plaid",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:22},
+    dimensions: {x:12, y:32, width:34, height:24},
   },
   {
     itemId: 16,
@@ -447,7 +447,7 @@ let sideViewDimensions = [
     itemId: 16,
     name: "Blue Plaid",
     side: "left",
-    dimensions: {x:28, y:35, width:6, height:9},
+    dimensions: {x:20, y:32, width:6, height:9},
   },
   {
     itemId: 16,
@@ -471,13 +471,13 @@ let sideViewDimensions = [
     itemId: 16,
     name: "Blue Plaid",
     side: "right",
-    dimensions: {x:30, y:35, width:6, height:9},
+    dimensions: {x:20, y:32, width:6, height:9},
   },
   {
     itemId: 17,
     name: "Link Cube",
     side: "right back",
-    dimensions: {x:51, y:31, width:12, height:16},
+    dimensions: {x:51, y:17, width:12, height:16},
   },
   {
     itemId: 17,
@@ -615,7 +615,7 @@ let sideViewDimensions = [
     itemId: 22,
     name: "Captain Aave Suit",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:22},
+    dimensions: {x:7, y:31, width:34, height:22},
   },
   {
     itemId: 22,
@@ -639,7 +639,7 @@ let sideViewDimensions = [
     itemId: 22,
     name: "Captain Aave Suit",
     side: "left",
-    dimensions: {x:24, y:35, width:9, height:10},
+    dimensions: {x:20, y:28, width:9, height:10},
   },
   {
     itemId: 22,
@@ -663,7 +663,7 @@ let sideViewDimensions = [
     itemId: 22,
     name: "Captain Aave Suit",
     side: "right",
-    dimensions: {x:31, y:35, width:9, height:10},
+    dimensions: {x:20, y:28, width:9, height:10},
   },
   {
     itemId: 23,
@@ -804,7 +804,7 @@ let sideViewDimensions = [
     itemId: 28,
     name: "Marc Outfit",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:22},
+    dimensions: {x:12, y:32, width:34, height:22},
   },
   {
     itemId: 28,
@@ -828,7 +828,7 @@ let sideViewDimensions = [
     itemId: 28,
     name: "Marc Outfit",
     side: "left",
-    dimensions: {x:29, y:35, width:4, height:9},
+    dimensions: {x:20, y:33, width:4, height:9},
   },
   {
     itemId: 28,
@@ -852,7 +852,7 @@ let sideViewDimensions = [
     itemId: 28,
     name: "Marc Outfit",
     side: "right",
-    dimensions: {x:31, y:35, width:4, height:9},
+    dimensions: {x:20, y:33, width:4, height:9},
   },
   {
     itemId: 29,
@@ -900,7 +900,7 @@ let sideViewDimensions = [
     itemId: 31,
     name: "Jordan Suit",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:22},
+    dimensions: {x:12, y:32, width:34, height:22},
   },
   {
     itemId: 31,
@@ -924,7 +924,7 @@ let sideViewDimensions = [
     itemId: 31,
     name: "Jordan Suit",
     side: "left",
-    dimensions: {x:29, y:35, width:4, height:9},
+    dimensions: {x:20, y:33, width:4, height:9},
   },
   {
     itemId: 31,
@@ -948,7 +948,7 @@ let sideViewDimensions = [
     itemId: 31,
     name: "Jordan Suit",
     side: "right",
-    dimensions: {x:31, y:35, width:4, height:9},
+    dimensions: {x:20, y:33, width:4, height:9},
   },
   {
     itemId: 32,
