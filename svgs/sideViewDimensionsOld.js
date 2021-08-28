@@ -747,7 +747,7 @@ let sideViewDimensions = [
     itemId: 26,
     name: "Thaave Hammer",
     side: "left",
-    dimensions: {x:20, y:29, width:12, height:12},
+    dimensions: {x:32, y:29, width:12, height:12},
   },
   {
     itemId: 26,
@@ -848,8 +848,8 @@ let sideViewDimensions = [
   {
     itemId: 29,
     name: "REKT Sign",
-    side: "back",
-    dimensions: {x:0, y:24, width: 12, height:25},
+    side: "right back",
+    dimensions: {x:47, y:24, width:17, height:23},
   },
   {
     itemId: 29,
@@ -944,7 +944,7 @@ let sideViewDimensions = [
   {
     itemId: 32,
     name: "Aave Flag",
-    side: "back",
+    side: "left back",
     dimensions: {x:0, y:24, width:12, height:25},
   },
   {

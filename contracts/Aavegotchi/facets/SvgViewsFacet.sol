@@ -349,8 +349,8 @@ contract SvgViewsFacet is Modifiers {
           console.log("Aavegotchi Hands");
           console.logBytes(layers.hands);
             svg_ = abi.encodePacked(layers.background);
-            svg_ = abi.encodePacked(svg_, _body);
-            svg_ = abi.encodePacked(svg_, layers.handRight, layers.handLeft, layers.hands);
+            svg_ = abi.encodePacked(svg_,layers.handRight, layers.handLeft, layers.hands);
+            svg_ = abi.encodePacked(svg_,  _body);
             svg_ = abi.encodePacked(
                 svg_,
                 layers.bodyWearable,
@@ -397,27 +397,21 @@ contract SvgViewsFacet is Modifiers {
             '">'
         );
 
+        console.log("SVG -----");
+        console.logBytes(svg_);
+
         bytes32 back = LibSvg.bytesToBytes32("wearables-", "back");
         bytes32 side = LibSvg.bytesToBytes32("wearables-", _sideView);
 
         if (side == back && _slotPosition == LibItems.WEARABLE_SLOT_HAND_RIGHT) {
+            svg_ = abi.encodePacked(svg_, LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-", _sideView), wearableType.svgId), "</svg></g>");
+        }else if (side == back && _slotPosition == LibItems.WEARABLE_SLOT_HAND_LEFT) {
             console.log("### Back LEFT Side View Triggered ###");
             console.log("Dimensions X: ", dimensions.x);
             console.log("wearableId: ", _wearableId);
             svg_ = abi.encodePacked(
               svg_,
-              LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 9),
-              ', 0)">',
-              LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-", _sideView), wearableType.svgId),
-              "</g></svg></g>"
-              );
-        }else if (side == back && _slotPosition == LibItems.WEARABLE_SLOT_HAND_LEFT) {
-            console.log("### Back RIGHT Side View Triggered ###");
-            console.log("Dimensions X: ", dimensions.x);
-            console.log("wearableId: ", _wearableId);
-            svg_ = abi.encodePacked(
-              svg_,
-              LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 57),
+              LibStrings.strWithUint('<g transform="scale(-1, 1) translate(-', 64 - (dimensions.x * 2)),
               ', 0)">',
               LibSvg.getSvg(LibSvg.bytesToBytes32("wearables-", _sideView), wearableType.svgId),
               "</g></svg></g>"
@@ -447,7 +441,7 @@ contract SvgViewsFacet is Modifiers {
         );
         uint256 svgId = s.sleeves[_wearableId];
         console.log('svg Sleeve id:',svgId);
-        /* if (svgId != 0) { */
+        if (svgId == 0 && _wearableId == 8) {
             sleeves_ = abi.encodePacked(
                 // x
                 LibStrings.strWithUint('"><svg x="', dimensions.x),
@@ -457,7 +451,17 @@ contract SvgViewsFacet is Modifiers {
                 LibSvg.getSvg(LibSvg.bytesToBytes32("sleeves-", _sideView), svgId),
                 "</svg>"
             );
-        /* } */
+        } else if ( svgId != 0) {
+            sleeves_ = abi.encodePacked(
+                // x
+                LibStrings.strWithUint('"><svg x="', dimensions.x),
+                // y
+                LibStrings.strWithUint('" y="', dimensions.y),
+                '">',
+                LibSvg.getSvg(LibSvg.bytesToBytes32("sleeves-", _sideView), svgId),
+                "</svg>"
+            );
+          }
     }
 
     function getSleeveSideWearable(
