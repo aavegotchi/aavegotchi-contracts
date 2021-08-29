@@ -37,10 +37,13 @@ describe("Side Views", async function () {
     // uint8 internal constant WEARABLE_SLOT_PET = 6;
     // uint8 internal constant WEARABLE_SLOT_BG = 7;
 
+    // back x:12, y:32
+    // side x:20, y:33
+
     // const svgs = await svgViewsFacet.getAavegotchiSideSvgs(7623);
     // console.log('svgs:',svgs);
     const numTraits1 = [99, 99, 99, 99, 0, 0];
-    const wearables1 = [28, 36, 0, 33, 32, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const wearables1 = [81, 0, 73, 84, 82, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     const frontPreview = await svgFacet.previewAavegotchi("1", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
     console.log("Front Preview: ", frontPreview);
