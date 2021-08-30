@@ -43,7 +43,7 @@ describe("Side Views", async function () {
     // const svgs = await svgViewsFacet.getAavegotchiSideSvgs(7623);
     // console.log('svgs:',svgs);
     const numTraits1 = [99, 99, 99, 99, 0, 0];
-    const wearables1 = [112, 0, 0, 111, 113, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const wearables1 = [11, 0, 0, 0, 3, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     const frontPreview = await svgFacet.previewAavegotchi("1", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
     console.log("Front Preview: ", frontPreview);

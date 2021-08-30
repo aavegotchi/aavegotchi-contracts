@@ -47,7 +47,6 @@ function getSelector (func) {
 
 async function main () {
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
-  const gasLimit = 9000000
   let account1Signer
   let account1Address
   let signer
@@ -124,7 +123,7 @@ async function main () {
       console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`)
       printSizeInfo(svgTypesAndSizes)
       if (testing) {
-        let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, { gasLimit: gasLimit })
+        let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
         let receipt = await tx.wait()
         if (!receipt.status) {
           throw Error(`Error:: ${tx.hash}`)
@@ -203,7 +202,7 @@ async function main () {
 
   if (testing) {
     console.log('Diamond cut')
-    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 8000000 })
+    tx = await diamondCut.diamondCut(cut, ethers.constants.AddressZero, '0x')
     console.log('Diamond cut tx:', tx.hash)
     receipt = await tx.wait()
     if (!receipt.status) {
@@ -212,7 +211,7 @@ async function main () {
     console.log('Completed diamond cut: ', tx.hash)
   } else {
     console.log('Diamond cut')
-    tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x', { gasLimit: 800000 })
+    tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x')
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
 
@@ -222,56 +221,56 @@ async function main () {
 
   // console.log('dimensions:',sideViewDimensions)
 
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1, { gasLimit: gasLimit })
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1)
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
   console.log('Uploaded item side dimensions 1')
 
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2, { gasLimit: gasLimit })
-  receipt = await tx.wait()
-  if (!receipt.status) {
-    throw Error(`Error:: ${tx.hash}`)
-  }
-  console.log('Uploaded item side dimensions 2')
+  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2)
+  // receipt = await tx.wait()
+  // if (!receipt.status) {
+  //   throw Error(`Error:: ${tx.hash}`)
+  // }
+  // console.log('Uploaded item side dimensions 2')
 
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3, { gasLimit: gasLimit })
+  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3)
   // receipt = await tx.wait()
   // if (!receipt.status) {
   //   throw Error(`Error:: ${tx.hash}`)
   // }
   // console.log('Uploaded item side dimensions 3')
   //
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions4, { gasLimit: gasLimit })
+  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions4)
   // receipt = await tx.wait()
   // if (!receipt.status) {
   //   throw Error(`Error:: ${tx.hash}`)
   // }
   // console.log('Uploaded item side dimensions 4')
   //
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions5, { gasLimit: gasLimit })
+  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions5)
   // receipt = await tx.wait()
   // if (!receipt.status) {
   //   throw Error(`Error:: ${tx.hash}`)
   // }
   // console.log('Uploaded item side dimensions 5')
   //
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions6, { gasLimit: gasLimit })
+  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions6)
   // receipt = await tx.wait()
   // if (!receipt.status) {
   //   throw Error(`Error:: ${tx.hash}`)
   // }
   // console.log('Uploaded item side dimensions 6')
   //
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions7, { gasLimit: gasLimit })
+  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions7)
   // receipt = await tx.wait()
   // if (!receipt.status) {
   //   throw Error(`Error:: ${tx.hash}`)
   // }
   // console.log('Uploaded item side dimensions 7')
   //
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions8, { gasLimit: gasLimit })
+  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions8)
   // receipt = await tx.wait()
   // if (!receipt.status) {
   //   throw Error(`Error:: ${tx.hash}`)

@@ -153,45 +153,51 @@ contract SvgViewsFacet is Modifiers {
                 equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT] != 0)
         ) {
             //Open-hands aavegotchi
-            return
-                abi.encodePacked(
-                    "<style>.gotchi-primary{fill:#",
-                    _details.primaryColor,
-                    ";}.gotchi-secondary{fill:#",
-                    _details.secondaryColor,
-                    ";}.gotchi-cheek{fill:#",
-                    _details.cheekColor,
-                    ";}.gotchi-eyeColor{fill:#",
-                    _details.eyeColor,
-                    ";}.gotchi-primary-mouth{fill:#",
-                    _details.primaryColor,
-                    ";}.gotchi-sleeves-up{display:none;}",
-                    ".gotchi-handsUp{display:none;}",
-                    ".gotchi-handsDownOpen{display:block;}",
-                    ".gotchi-handsDownClosed{display:none;}",
-                    "</style>"
-                );
+            return applyOpenHandsAavegotchi(_details);
         } else {
             //Normal Aavegotchi, closed hands
-            return
-                abi.encodePacked(
-                    "<style>.gotchi-primary{fill:#",
-                    _details.primaryColor,
-                    ";}.gotchi-secondary{fill:#",
-                    _details.secondaryColor,
-                    ";}.gotchi-cheek{fill:#",
-                    _details.cheekColor,
-                    ";}.gotchi-eyeColor{fill:#",
-                    _details.eyeColor,
-                    ";}.gotchi-primary-mouth{fill:#",
-                    _details.primaryColor,
-                    ";}.gotchi-sleeves-up{display:none;}",
-                    ".gotchi-handsUp{display:none;}",
-                    ".gotchi-handsDownOpen{display:none;}",
-                    ".gotchi-handsDownClosed{display:block}",
-                    "</style>"
-                );
+            return applyClosedHandsAavegotchi(_details);
         }
+    }
+
+    function applyOpenHandsAavegotchi(SvgLayerDetails memory _details) internal pure returns (bytes memory) {
+      return abi.encodePacked(
+                  "<style>.gotchi-primary{fill:#",
+                  _details.primaryColor,
+                  ";}.gotchi-secondary{fill:#",
+                  _details.secondaryColor,
+                  ";}.gotchi-cheek{fill:#",
+                  _details.cheekColor,
+                  ";}.gotchi-eyeColor{fill:#",
+                  _details.eyeColor,
+                  ";}.gotchi-primary-mouth{fill:#",
+                  _details.primaryColor,
+                  ";}.gotchi-sleeves-up{display:none;}",
+                  ".gotchi-handsUp{display:none;}",
+                  ".gotchi-handsDownOpen{display:block;}",
+                  ".gotchi-handsDownClosed{display:none;}",
+                  "</style>"
+              );
+    }
+
+    function applyClosedHandsAavegotchi(SvgLayerDetails memory _details) internal pure returns (bytes memory) {
+      return abi.encodePacked(
+                  "<style>.gotchi-primary{fill:#",
+                  _details.primaryColor,
+                  ";}.gotchi-secondary{fill:#",
+                  _details.secondaryColor,
+                  ";}.gotchi-cheek{fill:#",
+                  _details.cheekColor,
+                  ";}.gotchi-eyeColor{fill:#",
+                  _details.eyeColor,
+                  ";}.gotchi-primary-mouth{fill:#",
+                  _details.primaryColor,
+                  ";}.gotchi-sleeves-up{display:none;}",
+                  ".gotchi-handsUp{display:none;}",
+                  ".gotchi-handsDownOpen{display:none;}",
+                  ".gotchi-handsDownClosed{display:block}",
+                  "</style>"
+              );
     }
 
     struct AavegotchiLayers {
