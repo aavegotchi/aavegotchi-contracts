@@ -27,7 +27,7 @@ const {
   wearablesBackSleeveSvgs
 } = require('../../svgs/wearables-sides.js')
 
-const { sideViewDimensions } = require('../../svgs/sideViewDimensions.js')
+const { sideViewDimensions1, sideViewDimensions2, sideViewDimensions3, sideViewDimensions4, sideViewDimensions5, sideViewDimensions6, sideViewDimensions7, sideViewDimensions8 } = require('../../svgs/sideViewDimensions.js')
 
 function getSelectors (contract) {
   const signatures = Object.keys(contract.interface.functions)
@@ -218,16 +218,65 @@ async function main () {
 
   const svgViewsFacet = await ethers.getContractAt('SvgViewsFacet', diamondAddress, itemSigner)
 
-  console.log("Side view Dimensions: ", sideViewDimensions[1]);
+  console.log("Side view Dimensions: ", sideViewDimensions1[1]);
 
   // console.log('dimensions:',sideViewDimensions)
 
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions, { gasLimit: gasLimit })
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1, { gasLimit: gasLimit })
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
-  console.log('Uploaded item side dimensions')
+  console.log('Uploaded item side dimensions 1')
+
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2, { gasLimit: gasLimit })
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Uploaded item side dimensions 2')
+
+  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3, { gasLimit: gasLimit })
+  // receipt = await tx.wait()
+  // if (!receipt.status) {
+  //   throw Error(`Error:: ${tx.hash}`)
+  // }
+  // console.log('Uploaded item side dimensions 3')
+  //
+  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions4, { gasLimit: gasLimit })
+  // receipt = await tx.wait()
+  // if (!receipt.status) {
+  //   throw Error(`Error:: ${tx.hash}`)
+  // }
+  // console.log('Uploaded item side dimensions 4')
+  //
+  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions5, { gasLimit: gasLimit })
+  // receipt = await tx.wait()
+  // if (!receipt.status) {
+  //   throw Error(`Error:: ${tx.hash}`)
+  // }
+  // console.log('Uploaded item side dimensions 5')
+  //
+  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions6, { gasLimit: gasLimit })
+  // receipt = await tx.wait()
+  // if (!receipt.status) {
+  //   throw Error(`Error:: ${tx.hash}`)
+  // }
+  // console.log('Uploaded item side dimensions 6')
+  //
+  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions7, { gasLimit: gasLimit })
+  // receipt = await tx.wait()
+  // if (!receipt.status) {
+  //   throw Error(`Error:: ${tx.hash}`)
+  // }
+  // console.log('Uploaded item side dimensions 7')
+  //
+  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions8, { gasLimit: gasLimit })
+  // receipt = await tx.wait()
+  // if (!receipt.status) {
+  //   throw Error(`Error:: ${tx.hash}`)
+  // }
+  // console.log('Uploaded item side dimensions 8')
 }
 
 
