@@ -185,11 +185,10 @@ contract SvgViewsFacet is Modifiers {
     ) external view returns (string[] memory ag_) {
         ag_ = new string[](4);
 
+        //Front
         ag_[0] = SvgFacet(address(this)).previewAavegotchi(_hauntId, _collateralType, _numericTraits, equippedWearables);
 
         bytes memory viewBox = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">';
-
-        //Todo: Return front view
 
         //Left
         bytes memory svg_ = getAavegotchiSideSvgLayers("left", _collateralType, _numericTraits, type(uint256).max - 1, _hauntId, equippedWearables);
