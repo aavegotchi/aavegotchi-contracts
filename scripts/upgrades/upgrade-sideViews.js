@@ -73,76 +73,9 @@ async function main () {
   } else {
     throw Error('Incorrect network selected')
   }
-
-  async function uploadSvgs (svgs, svgType, testing, uploadSigner) {
-    console.log("***", svgType, "***");
-    let svgFacet = await ethers.getContractAt('SvgFacet', diamondAddress, uploadSigner)
-    function setupSvg (...svgData) {
-      const svgTypesAndSizes = []
-      const svgItems = []
-      for (const [svgType, svg] of svgData) {
-        svgItems.push(svg.join(''))
-        svgTypesAndSizes.push([ethers.utils.formatBytes32String(svgType), svg.map(value => value.length)])
-      }
-      return [svgItems.join(''), svgTypesAndSizes]
-    }
-
-    // eslint-disable-next-line no-unused-vars
-    function printSizeInfo (svgTypesAndSizes) {
-      console.log('------------- SVG Size Info ---------------')
-      let sizes = 0
-      for (const [svgType, size] of svgTypesAndSizes) {
-        console.log(ethers.utils.parseBytes32String(svgType) + ':' + size)
-        for (const nextSize of size) {
-          sizes += nextSize
-        }
-      }
-      console.log('Total sizes:' + sizes)
-    }
-
-    console.log('Uploading ', svgs.length, ' svgs')
-    let svg, svgTypesAndSizes
-    console.log('Number of svg:' + svgs.length)
-    let svgItemsStart = 0
-    let svgItemsEnd = 0
-    while (true) {
-      let itemsSize = 0
-      while (true) {
-        if (svgItemsEnd === svgs.length) {
-          break
-        }
-        itemsSize += svgs[svgItemsEnd].length
-        if (itemsSize > 24576) {
-          break
-        }
-        svgItemsEnd++
-      }
-      ;[svg, svgTypesAndSizes] = setupSvg(
-        [svgType, svgs.slice(svgItemsStart, svgItemsEnd)]
-      )
-      console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`)
-      printSizeInfo(svgTypesAndSizes)
-      if (testing) {
-        let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes)
-        let receipt = await tx.wait()
-        if (!receipt.status) {
-          throw Error(`Error:: ${tx.hash}`)
-        }
-        console.log(svgItemsEnd, svg.length)
-      } else {
-        let tx = await svgFacet.populateTransaction.storeSvg(svg, svgTypesAndSizes)
-        await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
-      }
-      if (svgItemsEnd === svgs.length) {
-        break
-      }
-      svgItemsStart = svgItemsEnd
-    }
-  }
-
+  
   let tx
   let receipt
-  // console.log(aavegotchiSvgs)
   let itemSigner
   if (testing) {
     itemSigner = account1Signer
@@ -150,42 +83,10 @@ async function main () {
     itemSigner = signer
   }
 
-
-  await uploadSvgs(aavegotchiSvgs.left, 'aavegotchi-left', testing, itemSigner)
-  await uploadSvgs(aavegotchiSvgs.right, 'aavegotchi-right', testing, itemSigner)
-  await uploadSvgs(aavegotchiSvgs.back, 'aavegotchi-back', testing, itemSigner)
-
-  await uploadSvgs(wearablesLeftSvgs, 'wearables-left', testing, itemSigner)
-  await uploadSvgs(wearablesRightSvgs, 'wearables-right', testing, itemSigner)
-  await uploadSvgs(wearablesBackSvgs, 'wearables-back', testing, itemSigner)
-  await uploadSvgs(wearablesLeftSleeveSvgs, 'sleeves-left', testing, itemSigner)
-  await uploadSvgs(wearablesRightSleeveSvgs, 'sleeves-right', testing, itemSigner)
-  await uploadSvgs(wearablesBackSleeveSvgs, 'sleeves-back', testing, itemSigner)
-
-  await uploadSvgs(collateralsLeftSvgs, 'collaterals-left', testing, itemSigner)
-  await uploadSvgs(collateralsRightSvgs, 'collaterals-right', testing, itemSigner)
-  await uploadSvgs(collateralsRightSvgs, 'collaterals-back', testing, itemSigner)
-
-  await uploadSvgs(eyeShapesLeftSvgs, 'eyeShapes-left', testing, itemSigner)
-  await uploadSvgs(eyeShapesRightSvgs, 'eyeShapes-right', testing, itemSigner)
-  await uploadSvgs(eyeShapesRightSvgs, 'eyeShapes-back', testing, itemSigner)
-
-
   const Facet = await ethers.getContractFactory('SvgViewsFacet')
   facet = await Facet.deploy()
   await facet.deployed()
   console.log('Deployed facet:', facet.address)
-
-  // let existingFuncs = getSelectors(facet)
-  // for (const selector of newFuncs) {
-  //   if (!existingFuncs.includes(selector)) {
-  //     throw Error(`Selector ${selector} not found`)
-  //   }
-  // }
-  // existingFuncs = existingFuncs.filter(selector => !newFuncs.includes(selector))
-
-  // const sideViewsSelectors = getSelectors(facet)
-
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
@@ -214,68 +115,6 @@ async function main () {
     tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x')
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
-
-  const svgViewsFacet = await ethers.getContractAt('SvgViewsFacet', diamondAddress, itemSigner)
-
-  console.log("Side view Dimensions: ", sideViewDimensions1[1]);
-
-  // console.log('dimensions:',sideViewDimensions)
-
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1)
-  receipt = await tx.wait()
-  if (!receipt.status) {
-    throw Error(`Error:: ${tx.hash}`)
-  }
-  console.log('Uploaded item side dimensions 1')
-
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 2')
-
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 3')
-  //
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions4)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 4')
-  //
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions5)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 5')
-  //
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions6)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 6')
-  //
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions7)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 7')
-  //
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions8)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 8')
 }
 
 

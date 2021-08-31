@@ -59,6 +59,7 @@ contract SvgViewsFacet is Modifiers {
         uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables
     ) internal view returns (bytes memory svg_) {
         SvgLayerDetails memory details;
+
         details.primaryColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
         details.secondaryColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
         details.cheekColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
@@ -114,8 +115,11 @@ contract SvgViewsFacet is Modifiers {
             }
         }
 
+        bytes32 back = LibSvg.bytesToBytes32("wearables-", "back");
+        bytes32 side = LibSvg.bytesToBytes32("wearables-", _sideView);
+
         //Add wearables if tokenId isn't MAX_INT
-        if (_tokenId == type(uint256).max) {
+        if (_tokenId == type(uint256).max && back != side) {
             svg_ = abi.encodePacked(
                 applySideStyles(details, _tokenId, equippedWearables),
                 LibSvg.getSvg(LibSvg.bytesToBytes32("aavegotchi-", _sideView), LibSvg.BACKGROUND_SVG_ID),
@@ -123,8 +127,11 @@ contract SvgViewsFacet is Modifiers {
                 details.collateral,
                 details.eyeShape
             );
-        } else {
+        } else if(back != side){
             svg_ = abi.encodePacked(applySideStyles(details, _tokenId, equippedWearables), svg_, details.collateral, details.eyeShape);
+            svg_ = addBodyAndWearableSideSvgLayers(_sideView, svg_, equippedWearables);
+        } else {
+            svg_ = abi.encodePacked(applySideStyles(details, _tokenId, equippedWearables), svg_);
             svg_ = addBodyAndWearableSideSvgLayers(_sideView, svg_, equippedWearables);
         }
     }

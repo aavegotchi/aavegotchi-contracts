@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const { sideViewsUpgrade } = require('../scripts/upgrades/upgrade-sideViews.js');
+const { sideViewsUploadSvg1 } = require('../scripts/upgrades/upgrade-sideViewsUpload.js');
 
 describe("Side Views", async function () {
   this.timeout(1000000);
@@ -15,6 +16,7 @@ describe("Side Views", async function () {
     aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
 
     await sideViewsUpgrade();
+    await sideViewsUploadSvg1();
 
     svgViewsFacet = await ethers.getContractAt('SvgViewsFacet', aavegotchiDiamondAddress);
     svgFacet = await ethers.getContractAt('SvgFacet', aavegotchiDiamondAddress);
@@ -39,8 +41,8 @@ describe("Side Views", async function () {
 
     // const svgs = await svgViewsFacet.getAavegotchiSideSvgs(7623);
     // console.log('svgs:',svgs);
-    const numTraits1 = [99, 99, 99, 99, 0, 0];
-    const wearables1 = [43, 0, 0, 48, 23, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const numTraits1 = [99, 99, 99, 99, 1, 1];
+    const wearables1 = [43, 0, 0, 0, 23, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     const sidePreview = await svgViewsFacet.previewSideAavegotchi("1", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
     console.log("Side Preview: ", sidePreview);
