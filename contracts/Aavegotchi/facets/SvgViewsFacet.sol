@@ -67,24 +67,24 @@ contract SvgViewsFacet is Modifiers {
         svg_ = LibSvg.getSvg(LibSvg.bytesToBytes32("aavegotchi-", _sideView), LibSvg.AAVEGOTCHI_BODY_SVG_ID);
         details.collateral = LibSvg.getSvg(LibSvg.bytesToBytes32("collaterals-", _sideView), s.collateralTypeInfo[_collateralType].svgId);
 
-        bytes32 eyeSvgType = "eyeShapes";
+        bytes memory eyeSvgType = "eyeShapes-";
         if (_hauntId != 1) {
             //Convert Haunt into string to match the uploaded category name
             bytes memory haunt = abi.encodePacked(LibSvg.uint2str(_hauntId));
-            eyeSvgType = LibSvg.bytesToBytes32(abi.encodePacked("eyeShapesH"), haunt);
+            eyeSvgType = abi.encodePacked("eyeShapesH", haunt, "-");
         }
 
         details.trait = _numericTraits[4];
-        bytes memory eyeSvgTypeBase = abi.encodePacked(eyeSvgType, "-");
+
         if (details.trait < 0) {
-            details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32(eyeSvgTypeBase, _sideView), 0);
+            details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32(eyeSvgType, _sideView), 0);
         } else if (details.trait > 97) {
-            details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32(eyeSvgTypeBase, _sideView), s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
+            details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32(eyeSvgType, _sideView), s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
         } else {
             details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
             for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
                 if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
-                    details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32(eyeSvgTypeBase, _sideView), i);
+                    details.eyeShape = LibSvg.getSvg(LibSvg.bytesToBytes32(eyeSvgType, _sideView), i);
                     break;
                 }
             }
