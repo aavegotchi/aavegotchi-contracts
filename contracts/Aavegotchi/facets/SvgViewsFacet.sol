@@ -182,19 +182,21 @@ contract SvgViewsFacet is Modifiers {
         int16[NUMERIC_TRAITS_NUM] memory _numericTraits,
         uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables
     ) external view returns (string[] memory ag_) {
-        ag_ = new string[](5);
+        ag_ = new string[](4);
+
+        ag_[0] = SvgFacet(address(this)).previewAavegotchi(_hauntId, _collateralType, _numericTraits, equippedWearables);
 
         bytes memory svg_ = getAavegotchiSideSvgLayers("left", _collateralType, _numericTraits, type(uint256).max - 1, _hauntId, equippedWearables);
         svg_ = abi.encodePacked(addBodyAndWearableSideSvgLayers("left", svg_, equippedWearables));
-        ag_[0] = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg_, "</svg>"));
+        ag_[1] = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg_, "</svg>"));
 
         svg_ = getAavegotchiSideSvgLayers("right", _collateralType, _numericTraits, type(uint256).max - 1, _hauntId, equippedWearables);
         svg_ = abi.encodePacked(addBodyAndWearableSideSvgLayers("right", svg_, equippedWearables));
-        ag_[1] = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg_, "</svg>"));
+        ag_[2] = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg_, "</svg>"));
 
         svg_ = getAavegotchiSideSvgLayers("back", _collateralType, _numericTraits, type(uint256).max - 1, _hauntId, equippedWearables);
         svg_ = abi.encodePacked(addBodyAndWearableSideSvgLayers("back", svg_, equippedWearables));
-        ag_[2] = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg_, "</svg>"));
+        ag_[3] = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg_, "</svg>"));
     }
 
     //_sideView should either be left, right, front or back
@@ -240,69 +242,6 @@ contract SvgViewsFacet is Modifiers {
             layers.pet = sideview;
           }
         }
-        /* // If background is equipped
-        uint256 wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BG];
-        if (wearableId != 0) {
-            layers.background = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_BG);
-        } else {
-            //layers.background = LibSvg.getSvg(LibSvg.bytesToBytes32("aavegotchi-", _sideView), 4);
-            layers.background = LibSvg.getSvg("aavegotchi", 4);
-        }
-
-        console.log("BodyWearable ID before: ", LibItems.WEARABLE_SLOT_BODY);
-        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BODY];
-        console.log("BodyWearable ID: ", wearableId);
-        if (wearableId != 0) {
-            console.log("Wearable ID: ", wearableId);
-            (layers.bodyWearable, layers.sleeves) = getBodySideWearable(_sideView, wearableId);
-        }
-
-        // get hands
-        layers.hands = abi.encodePacked(svg_, LibSvg.getSvg(LibSvg.bytesToBytes32("aavegotchi-", _sideView), LibSvg.HANDS_SVG_ID));
-
-        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_FACE];
-        if (wearableId != 0) {
-            layers.face = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_FACE);
-        }
-
-        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_EYES];
-        if (wearableId != 0) {
-            layers.eyes = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_EYES);
-        }
-
-        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HEAD];
-        if (wearableId != 0) {
-            layers.head = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HEAD);
-        }
-
-        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_RIGHT];
-        console.log("Right HandWearable ID: ", wearableId);
-        if (wearableId != 0) {
-            layers.handLeft = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HAND_RIGHT);
-        }
-
-        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_HAND_LEFT];
-        console.log("Left HandWearable ID: ", wearableId);
-        if (wearableId != 0) {
-            layers.handRight = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_HAND_LEFT);
-        }
-
-        wearableId = equippedWearables[LibItems.WEARABLE_SLOT_PET];
-        if (wearableId != 0) {
-            layers.pet = getWearableSideView(_sideView, wearableId, LibItems.WEARABLE_SLOT_PET);
-        } */
-
-        //1. Background wearable
-        //2. Body
-        //3. Body wearable
-        //4. Hands
-        //5. Face
-        //6. Eyes
-        //7. Head
-        //8. Sleeves of body wearable
-        //9. Left hand wearable
-        //10. Right hand wearable
-        //11. Pet wearable
 
         bytes32 left = LibSvg.bytesToBytes32("wearables-", "left");
         bytes32 right = LibSvg.bytesToBytes32("wearables-", "right");
