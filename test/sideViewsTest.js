@@ -24,9 +24,6 @@ describe("Side Views", async function () {
 
     // let aavegotchiMarine = await aavegotchiFacet.getAavegotchi(7623);
     // let aavegotchiMess = await aavegotchiFacet.getAavegotchi(7624);
-    //
-    // console.log("Marine Items Array Length: ", aavegotchiMarine.items.length);
-    // console.log("Mess Items Array Length: ", aavegotchiMess.items.length);
 
     // uint8 internal constant WEARABLE_SLOT_BODY = 0;
     // uint8 internal constant WEARABLE_SLOT_FACE = 1;
