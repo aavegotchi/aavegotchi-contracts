@@ -124,10 +124,8 @@ contract SvgViewsFacet is Modifiers {
                 details.eyeShape
             );
         } else {
-            svg_ = abi.encodePacked(
-                applySideStyles(details, _tokenId, equippedWearables),
-                addBodyAndWearableSideSvgLayers(_sideView, svg_, equippedWearables)
-            );
+            svg_ = abi.encodePacked(applySideStyles(details, _tokenId, equippedWearables), svg_, details.collateral, details.eyeShape);
+            svg_ = addBodyAndWearableSideSvgLayers(_sideView, svg_, equippedWearables);
         }
     }
 
