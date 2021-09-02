@@ -17,7 +17,7 @@ contract SvgViewsFacet is Modifiers {
         // 2 == rightSide view
         // 3 == backSide view
         uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
-        ag_ = new string[](5);
+        ag_ = new string[](4);
         require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "SvgFacet: Aavegotchi not claimed");
         ag_[0] = SvgFacet(address(this)).getAavegotchiSvg(_tokenId);
 
