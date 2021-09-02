@@ -5818,3 +5818,7 @@ exports.sideViewDimensions1 = sideViewDimensions1
 exports.sideViewDimensions2 = sideViewDimensions2
 exports.sideViewDimensions3 = sideViewDimensions3
 exports.sideViewDimensions4 = sideViewDimensions4
+exports.sideViewDimensions5 = sideViewDimensions5
+exports.sideViewDimensions6 = sideViewDimensions6
+exports.sideViewDimensions7 = sideViewDimensions7
+exports.sideViewDimensions8 = sideViewDimensions8

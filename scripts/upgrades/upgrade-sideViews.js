@@ -8,27 +8,6 @@ const { sendToMultisig } = require('../libraries/multisig/multisig.js')
 
 const { aavegotchiSvgs } = require('../../svgs/aavegotchi-side.js')
 
-const {
-  collateralsLeftSvgs,
-  collateralsRightSvgs
-} = require('../../svgs/collaterals-sides.js')
-
-const {
-  eyeShapesLeftSvgs,
-  eyeShapesRightSvgs
-} = require('../../svgs/eyeShapes-sides.js')
-
-const {
-  wearablesLeftSvgs,
-  wearablesRightSvgs,
-  wearablesBackSvgs,
-  wearablesLeftSleeveSvgs,
-  wearablesRightSleeveSvgs,
-  wearablesBackSleeveSvgs
-} = require('../../svgs/wearables-sides.js')
-
-const { sideViewDimensions1, sideViewDimensions2, sideViewDimensions3, sideViewDimensions4, sideViewDimensions5, sideViewDimensions6, sideViewDimensions7, sideViewDimensions8 } = require('../../svgs/sideViewDimensions.js')
-
 function getSelectors (contract) {
   const signatures = Object.keys(contract.interface.functions)
   const selectors = signatures.reduce((acc, val) => {
@@ -73,7 +52,7 @@ async function main () {
   } else {
     throw Error('Incorrect network selected')
   }
-  
+
   let tx
   let receipt
   let itemSigner
