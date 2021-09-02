@@ -371,29 +371,6 @@ contract SvgViewsFacet is Modifiers {
         }
     }
 
-    function getSleeveSideWearable(
-        bytes memory _sideView,
-        uint256 _wearableId,
-        uint256 _slotPosition
-    ) internal view returns (bytes memory svg_) {
-        ItemType storage wearableType = s.itemTypes[_wearableId];
-        Dimensions memory dimensions = s.sideViewDimensions[_wearableId][_sideView];
-
-        string memory wearableClass = getSideWearableClass(_slotPosition);
-
-        svg_ = abi.encodePacked(
-            '<g class="gotchi-wearable ',
-            wearableClass,
-            // x
-            LibStrings.strWithUint('"><svg x="', dimensions.x),
-            // y
-            LibStrings.strWithUint('" y="', dimensions.y),
-            '">'
-        );
-
-        svg_ = abi.encodePacked(svg_, LibSvg.getSvg(LibSvg.bytesToBytes32("sleeves-", _sideView), wearableType.svgId), "</svg></g>");
-    }
-
     function prepareItemSvg(Dimensions storage _dimensions, bytes memory _svg) internal view returns (string memory svg_) {
         svg_ = string(
             abi.encodePacked(
