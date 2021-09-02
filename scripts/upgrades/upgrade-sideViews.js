@@ -29,7 +29,8 @@ async function main () {
   let account1Signer
   let account1Address
   let signer
-  let facet
+  let svgViewsFacet
+  let svgFacet
   let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner()
   const testing = ['hardhat', 'localhost'].includes(hre.network.name)
   if (testing) {
@@ -62,18 +63,28 @@ async function main () {
     itemSigner = signer
   }
 
-  const Facet = await ethers.getContractFactory('SvgViewsFacet')
-  facet = await Facet.deploy()
-  await facet.deployed()
-  console.log('Deployed facet:', facet.address)
+  const SvgViewsFacet = await ethers.getContractFactory('SvgViewsFacet')
+  svgViewsFacet = await SvgViewsFacet.deploy()
+  await svgViewsFacet.deployed()
+  console.log('Deployed facet:', svgViewsFacet.address)
+
+  const SvgFacet = await ethers.getContractFactory('SvgFacet')
+  svgFacet = await SvgFacet.deploy()
+  await svgFacet.deployed()
+  console.log('Deployed facet:', svgFacet.address)
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
   const cut = [
     {
-      facetAddress: facet.address,
+      facetAddress: svgViewsFacet.address,
       action: FacetCutAction.Add,
-      functionSelectors: getSelectors(facet)
+      functionSelectors: getSelectors(svgViewsFacet)
+    },
+    {
+      facetAddress: svgFacet.address,
+      action: FacetCutAction.Replace,
+      functionSelectors: getSelectors(svgFacet)
     }
   ]
   console.log(cut)

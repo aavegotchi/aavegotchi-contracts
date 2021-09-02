@@ -13,7 +13,7 @@ contract SvgFacet is Modifiers {
    |             Read Functions         |
    |__________________________________*/
 
-    function bytes3ToColorString(bytes3 _color) internal pure returns (string memory) {
+    /* function bytes3ToColorString(bytes3 _color) internal pure returns (string memory) {
         bytes memory numbers = "0123456789ABCDEF";
         bytes memory toString = new bytes(6);
         uint256 pos;
@@ -24,7 +24,7 @@ contract SvgFacet is Modifiers {
             pos++;
         }
         return string(toString);
-    }
+    } */
 
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
     function getAavegotchiSvg(uint256 _tokenId) public view returns (string memory ag_) {
@@ -66,9 +66,9 @@ contract SvgFacet is Modifiers {
         uint256 _hauntId
     ) internal view returns (bytes memory svg_) {
         SvgLayerDetails memory details;
-        details.primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
-        details.secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
-        details.cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
+        details.primaryColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
+        details.secondaryColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
+        details.cheekColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
 
         // aavegotchi body
         svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGOTCHI_BODY_SVG_ID);
