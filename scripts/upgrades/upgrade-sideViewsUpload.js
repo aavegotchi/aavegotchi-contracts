@@ -166,20 +166,20 @@ async function main () {
   }
   console.log('Uploaded item side dimensions 1')
 
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 2')
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Uploaded item side dimensions 2')
 
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 3')
-  //
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Uploaded item side dimensions 3')
+  
   // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions4)
   // receipt = await tx.wait()
   // if (!receipt.status) {
