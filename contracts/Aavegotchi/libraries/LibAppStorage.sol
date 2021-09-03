@@ -234,6 +234,8 @@ struct AppStorage {
     mapping(address => bool) itemManagers;
     mapping(address => GameManager) gameManagers;
     mapping(uint256 => address[]) hauntCollateralTypes;
+    // itemTypeId => (sideview => Dimensions)
+    mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
 }
 
 library LibAppStorage {

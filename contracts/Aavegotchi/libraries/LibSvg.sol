@@ -37,6 +37,19 @@ library LibSvg {
         }
     }
 
+    function bytes3ToColorString(bytes3 _color) internal pure returns (string memory) {
+        bytes memory numbers = "0123456789ABCDEF";
+        bytes memory toString = new bytes(6);
+        uint256 pos;
+        for (uint256 i; i < 3; i++) {
+            toString[pos] = numbers[uint8(_color[i] >> 4)];
+            pos++;
+            toString[pos] = numbers[uint8(_color[i] & 0x0f)];
+            pos++;
+        }
+        return string(toString);
+    }
+
     function bytesToBytes32(bytes memory _bytes1, bytes memory _bytes2) internal pure returns (bytes32 result_) {
         bytes memory theBytes = abi.encodePacked(_bytes1, _bytes2);
         require(theBytes.length <= 32, "LibSvg: bytes array greater than 32");

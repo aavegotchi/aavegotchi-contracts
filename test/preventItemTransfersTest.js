@@ -3,7 +3,7 @@
 
 const { expect } = require('chai')
 const { preventItemTransfers } = require('../scripts/upgrades/upgrade-preventItemTransfers')
-const { addLeaderboardBadges } = require('../scripts/addItemTypes/addLeaderboardBadges')
+// const { addLeaderboardBadges } = require('../scripts/addItemTypes/addLeaderboardBadges')
 const truffleAsserts = require('truffle-assertions')
 
 async function impersonate (address, contract) {
@@ -52,7 +52,7 @@ describe('Testing prevent item transfers', function () {
     itemsFacet = await ethers.getContractAt('contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet', diamondAddress)
 
     // First some reason this is running twice but it's not important
-    await addLeaderboardBadges()
+    // await addLeaderboardBadges()
   })
 
   it('Can upload the leaderboard badges', async function () {
