@@ -5,8 +5,6 @@ const { LedgerSigner } = require("@ethersproject/hardware-wallets");
 
 const { sendToMultisig } = require("../libraries/multisig/multisig.js");
 
-const { aavegotchiSvgs } = require("../../svgs/aavegotchi-side.js");
-
 function getSelectors(contract) {
   const signatures = Object.keys(contract.interface.functions);
   const selectors = signatures.reduce((acc, val) => {
@@ -16,11 +14,6 @@ function getSelectors(contract) {
     return acc;
   }, []);
   return selectors;
-}
-
-function getSelector(func) {
-  const abiInterface = new ethers.utils.Interface([func]);
-  return abiInterface.getSighash(ethers.utils.Fragment.from(func));
 }
 
 async function main() {
@@ -112,6 +105,9 @@ async function main() {
       ethers.constants.AddressZero,
       "0x"
     );
+
+    console.log("tx:", tx);
+    console.log("Sending to multisig");
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
   }
 }
