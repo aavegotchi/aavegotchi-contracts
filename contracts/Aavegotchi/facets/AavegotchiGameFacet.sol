@@ -1,15 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {
-    LibAavegotchi,
-    AavegotchiInfo,
-    NUMERIC_TRAITS_NUM,
-    AavegotchiCollateralTypeInfo,
-    PortalAavegotchiTraitsIO,
-    InternalPortalAavegotchiTraitsIO,
-    PORTAL_AAVEGOTCHIS_NUM
-} from "../libraries/LibAavegotchi.sol";
+import {LibAavegotchi, AavegotchiInfo, NUMERIC_TRAITS_NUM, AavegotchiCollateralTypeInfo, PortalAavegotchiTraitsIO, InternalPortalAavegotchiTraitsIO, PORTAL_AAVEGOTCHIS_NUM} from "../libraries/LibAavegotchi.sol";
 
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
 
@@ -56,6 +48,12 @@ contract AavegotchiGameFacet is Modifiers {
         address daoAddress;
         address rarityFarming;
         address pixelCraft;
+    }
+
+    struct AaveGotchiMinimal {
+        uint256 tokenId;
+        uint256 kinship;
+        uint256 lastInteracted;
     }
 
     function revenueShares() external view returns (RevenueSharesIO memory) {
@@ -116,6 +114,13 @@ contract AavegotchiGameFacet is Modifiers {
         score_ = LibAavegotchi.kinship(_tokenId);
     }
 
+    //Return minimal info about a gotchi
+    function aaveGotchiMinimal(uint256 _tokenId) external view returns (AaveGotchiMinimal memory gotchiMinimal_) {
+        gotchiMinimal_.tokenId = _tokenId;
+        gotchiMinimal_.kinship = LibAavegotchi.kinship(_tokenId);
+        gotchiMinimal_.lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
+    }
+
     function claimAavegotchi(
         uint256 _tokenId,
         uint256 _option,
@@ -164,9 +169,9 @@ contract AavegotchiGameFacet is Modifiers {
     // function pet() external {
     //     address sender = LibMeta.msgSender();
     //     uint256[] memory tokenIds = s.petOperatorTokenIds[sender];
-    //     address ghstContract = s.ghstContract;                
+    //     address ghstContract = s.ghstContract;
     //     for (uint256 i; i < tokenIds.length; i++) {
-    //         uint256 tokenId = tokenIds[i];            
+    //         uint256 tokenId = tokenIds[i];
     //         address owner = s.aavegotchis[tokenId].owner;
     //         uint256 balance = IERC20(ghstContract).balanceOf(owner);
     //         if(balance >= 3e17 && LibAavegotchi.interact(tokenId)) {
@@ -193,7 +198,7 @@ contract AavegotchiGameFacet is Modifiers {
     //         address owner = s.aavegotchis[tokenId].owner;
     //         require(owner == sender, "Must be owner to set petter");
     //         s.petOperatorTokenIds[_petOperator].push(tokenId);
-    //         s.petOperators[owner][tokenId] = _petOperator;    
+    //         s.petOperators[owner][tokenId] = _petOperator;
     //     }
 
     // }
