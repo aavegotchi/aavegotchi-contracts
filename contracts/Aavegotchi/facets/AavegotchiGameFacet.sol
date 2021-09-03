@@ -115,10 +115,16 @@ contract AavegotchiGameFacet is Modifiers {
     }
 
     //Return minimal info about a gotchi
-    function aaveGotchiMinimal(uint256 _tokenId) external view returns (AaveGotchiMinimal memory gotchiMinimal_) {
-        gotchiMinimal_.tokenId = _tokenId;
-        gotchiMinimal_.kinship = LibAavegotchi.kinship(_tokenId);
-        gotchiMinimal_.lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
+    function aaveGotchiMinimal(address _owner) external view returns (AaveGotchiMinimal[] memory gotchiMinimal_) {
+        uint32[] memory tokenIds = (s.ownerTokenIds[_owner]);
+        gotchiMinimal_ = new AaveGotchiMinimal[](tokenIds.length);
+        for (uint256 i; i < tokenIds.length; i++) {
+            if (s.aavegotchis[tokenIds[i]].status == 3) {
+                gotchiMinimal_[i].tokenId = tokenIds[i];
+                gotchiMinimal_[i].kinship = LibAavegotchi.kinship(tokenIds[i]);
+                gotchiMinimal_[i].lastInteracted = s.aavegotchis[tokenIds[i]].lastInteracted;
+            }
+        }
     }
 
     function claimAavegotchi(

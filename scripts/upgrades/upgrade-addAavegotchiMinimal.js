@@ -48,7 +48,7 @@ async function main() {
   console.log("Deployed AavegotchiGameFacet");
 
   const gotchiMinimalFunc = [
-    getSelector(`function aaveGotchiMinimal(uint256 _tokenId) external`),
+    getSelector(`function aaveGotchiMinimal(address _owner) external`),
   ];
 
   let existingAavegotchiGameGuncs = getSelectors(gotchiGamefacet);
