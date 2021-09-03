@@ -65,7 +65,7 @@ async function main() {
   async function updateSvgs(svg, svgType, svgId, testing, uploadSigner) {
     const svgFacet = await ethers.getContractAt('SvgFacet', diamondAddress, uploadSigner)
     let svgLength = new TextEncoder().encode(svg[svgId]).length;
-    const array = [ethers.utils.formatBytes32String(svgType), [svgId], [svgLength]];
+    const array = [{ svgType: ethers.utils.formatBytes32String(svgType), ids: [svgId], sizes: [svgLength] }];
 
     let tx = await svgFacet.updateSvg(svg[svgId], array)
     let receipt = await tx.wait()
