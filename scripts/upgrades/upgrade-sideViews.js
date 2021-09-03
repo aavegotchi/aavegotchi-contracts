@@ -74,18 +74,6 @@ async function main() {
   await svgFacet.deployed();
   console.log("Deployed facet:", svgFacet.address);
 
-  const removeFunction = getSelector(
-    "function bytes3ToColorString(bytes3 _color) external"
-  );
-
-  console.log("svg facet:", svgFacet);
-
-  const functionSelectors = getSelectors(svgFacet);
-
-  if (!functionSelectors.includes(removeFunction)) {
-    throw Error("Function selector to remove is already gone.");
-  }
-
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
   const cut = [
