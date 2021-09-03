@@ -7,6 +7,8 @@ const { sendToMultisig } = require("../libraries/multisig/multisig.js");
 
 const { aavegotchiSvgs } = require("../../svgs/aavegotchi-side.js");
 
+const { NonceManager } = require("@ethersproject/experimental");
+
 const {
   collateralsLeftSvgs,
   collateralsRightSvgs,
@@ -38,6 +40,8 @@ const {
 } = require("../../svgs/sideViewDimensions.js");
 
 async function main() {
+  const gasPrice = 150000000000;
+
   console.log("Upload SVG Start");
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let account1Signer;
@@ -64,7 +68,15 @@ async function main() {
     }
     console.log("assigned", account1Address, "as item manager");
   } else if (hre.network.name === "matic") {
-    signer = new LedgerSigner(ethers.provider);
+    const accounts = await ethers.getSigners();
+    const account = await accounts[0].getAddress();
+
+    console.log("account:", account);
+    signer = accounts[0];
+
+    nonceManagedSigner = new NonceManager(signer);
+
+    console.log("signer", nonceManagedSigner);
   } else {
     throw Error("Incorrect network selected");
   }
@@ -133,11 +145,21 @@ async function main() {
         }
         console.log(svgItemsEnd, svg.length);
       } else {
-        let tx = await svgFacet.populateTransaction.storeSvg(
-          svg,
-          svgTypesAndSizes
+        console.log(
+          `Storing Svg: ${svgType} with IDs: ${svgItemsStart} to ${svgItemsEnd}`
         );
-        await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
+
+        try {
+          const tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, {
+            gasPrice: gasPrice,
+          });
+          console.log("tx hash:", tx.hash);
+          await tx.wait();
+
+          console.log("tx confirmed!");
+        } catch (error) {
+          console.log("Tx failed!", error);
+        }
       }
       if (svgItemsEnd === svgs.length) {
         break;
@@ -163,6 +185,8 @@ async function main() {
     testing,
     itemSigner
   );
+
+  /*
   await uploadSvgs(aavegotchiSvgs.back, "aavegotchi-back", testing, itemSigner);
 
   await uploadSvgs(wearablesLeftSvgs, "wearables-left", testing, itemSigner);
@@ -205,6 +229,7 @@ async function main() {
     testing,
     itemSigner
   );
+  */
 
   await uploadSvgs(eyeShapesLeftSvgs, "eyeShapes-left", testing, itemSigner);
   await uploadSvgs(eyeShapesRightSvgs, "eyeShapes-right", testing, itemSigner);
