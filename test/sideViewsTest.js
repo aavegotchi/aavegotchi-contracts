@@ -22,7 +22,7 @@ describe("Side Views", async function () {
     svgFacet = await ethers.getContractAt('SvgFacet', aavegotchiDiamondAddress);
   });
 
-  it.only("Should render particular gotchi side view", async function() {
+  it("Should render particular gotchi side view", async function() {
 
     // let aavegotchiMarine = await aavegotchiFacet.getAavegotchi(7623);
     // let aavegotchiMess = await aavegotchiFacet.getAavegotchi(7624);
