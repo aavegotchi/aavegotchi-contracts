@@ -177,6 +177,7 @@ async function main() {
     itemSigner = signer;
   }
 
+  /*
   await uploadSvgs(aavegotchiSvgs.left, "aavegotchi-left", testing, itemSigner);
 
   await uploadSvgs(
@@ -185,6 +186,7 @@ async function main() {
     testing,
     itemSigner
   );
+  */
 
   /*
   await uploadSvgs(aavegotchiSvgs.back, "aavegotchi-back", testing, itemSigner);
@@ -229,11 +231,12 @@ async function main() {
     testing,
     itemSigner
   );
-  */
+
 
   await uploadSvgs(eyeShapesLeftSvgs, "eyeShapes-left", testing, itemSigner);
   await uploadSvgs(eyeShapesRightSvgs, "eyeShapes-right", testing, itemSigner);
   await uploadSvgs(eyeShapesRightSvgs, "eyeShapes-back", testing, itemSigner);
+    */
 
   console.log("Side view Dimensions: ", sideViewDimensions1[1]);
 
@@ -243,56 +246,87 @@ async function main() {
     itemSigner
   );
 
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1);
+  /*
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1, {
+    gasPrice: gasPrice,
+  });
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
+  */
+  /*
   console.log("Uploaded item side dimensions 1");
 
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2);
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2, {
+    gasPrice: gasPrice,
+  });
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
   console.log("Uploaded item side dimensions 2");
 
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3);
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3, {
+    gasPrice: gasPrice,
+  });
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
   console.log("Uploaded item side dimensions 3");
+  */
 
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions4);
+  console.log("dimensions 4:", sideViewDimensions4);
+
+  console.log("Uploading dimensions 3");
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions4, {
+    gasPrice: gasPrice,
+  });
+
   receipt = await tx.wait();
+
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
   console.log("Uploaded item side dimensions 4");
 
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions5);
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions5, {
+    gasPrice: gasPrice,
+  });
+
   receipt = await tx.wait();
+
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
   console.log("Uploaded item side dimensions 5");
 
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions6);
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions6, {
+    gasPrice: gasPrice,
+  });
+
   receipt = await tx.wait();
+
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
   console.log("Uploaded item side dimensions 6");
 
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions7);
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions7, {
+    gasPrice: gasPrice,
+  });
+
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
   console.log("Uploaded item side dimensions 7");
 
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions8);
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions8, {
+    gasPrice: gasPrice,
+  });
+
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
