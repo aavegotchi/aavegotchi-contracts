@@ -81,7 +81,12 @@ async function main() {
     itemSigner = signer
   }
 
-  await updateSvgs(wearablesLeftSvgs, 'wearables-left', 5, testing, itemSigner)
+  const updatingLeftSvgs = [5, 9, 17, 20, 23, 38, 44, 76]
+
+  for (var i = 0; i < updatingLeftSvgs.length; i++) {
+    await updateSvgs(wearablesLeftSvgs, 'wearables-left', updatingLeftSvgs[i], testing, itemSigner)
+  }
+  
 }
 
 
