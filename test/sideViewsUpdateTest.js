@@ -28,7 +28,7 @@ describe("Side Views", async function () {
     // uint8 internal constant WEARABLE_SLOT_BG = 7;
 
     const numTraits1 = [99, 99, 99, 99, 1, 1];
-    const wearables1 = [5, 0, 66, 48, 9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const wearables1 = [91, 0, 0, 48, 76, 76, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     const sidePreview = await svgViewsFacet.previewSideAavegotchi("1", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
     console.log("Side Preview: ", sidePreview);

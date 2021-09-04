@@ -81,12 +81,22 @@ async function main() {
     itemSigner = signer
   }
 
-  const updatingLeftSvgs = [5, 9, 17, 20, 23, 38, 44, 76]
+  const updatingLeftSvgs = [5, 9, 17, 20, 23, 38, 44, 66, 76]
+  const updatingRightSvgs = [66]
+  const updatingBackSvgs = [66]
 
   for (var i = 0; i < updatingLeftSvgs.length; i++) {
     await updateSvgs(wearablesLeftSvgs, 'wearables-left', updatingLeftSvgs[i], testing, itemSigner)
   }
-  
+
+  for (var i = 0; i < updatingRightSvgs.length; i++) {
+    await updateSvgs(wearablesRightSvgs, 'wearables-right', updatingRightSvgs[i], testing, itemSigner)
+  }
+
+  for (var i = 0; i < updatingBackSvgs.length; i++) {
+    await updateSvgs(wearablesBackSvgs, 'wearables-back', updatingBackSvgs[i], testing, itemSigner)
+  }
+
 }
 
 
