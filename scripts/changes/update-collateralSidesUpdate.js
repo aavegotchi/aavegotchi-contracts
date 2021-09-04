@@ -93,19 +93,19 @@ async function main() {
 
   for (var i = 0; i < updatingRightSvgs.length; i++) {
     await updateSvgs(
-      wearablesRightSvgs,
-      "wearables-right",
+      collateralsRightSvgs,
+      "collaterals-right",
       updatingRightSvgs[i],
       testing,
       itemSigner
     );
   }
 
-  for (var i = 0; i < updatingRightSvgs.length; i++) {
+  for (var i = 0; i < updatingLeftSvgs.length; i++) {
     await updateSvgs(
-      wearablesRightSvgs,
-      "wearables-right",
-      updatingRightSvgs[i],
+      collateralsLeftSvgs,
+      "collaterals-left",
+      updatingLeftSvgs[i],
       testing,
       itemSigner
     );
