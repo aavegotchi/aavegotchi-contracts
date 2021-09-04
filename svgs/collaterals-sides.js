@@ -30,7 +30,11 @@ const collateralsLeftSvgs = [
   collateral('Left-Collateral-USDC'),
   collateral('Left-Collateral-UNI'),
   collateral('Left-Collateral-YFI'),
-  collateral('Left-Collateral-TUSD')
+  collateral('Left-Collateral-TUSD'),
+  //h2
+  collateral('Left-Collateral-Polygon'),
+  collateral('Left-Collateral-wBTC'),
+  collateral('Left-Collateral-wETH'),
 ]
 
 const collateralsRightSvgs = [
@@ -42,7 +46,11 @@ const collateralsRightSvgs = [
   collateral('Right-Collateral-USDC'),
   collateral('Right-Collateral-UNI'),
   collateral('Right-Collateral-YFI'),
-  collateral('Right-Collateral-TUSD')
+  collateral('Right-Collateral-TUSD'),
+  //h2
+  collateral('Right-Collateral-Polygon'),
+  collateral('Right-Collateral-wBTC'),
+  collateral('Right-Collateral-wETH'),
 ]
 
 exports.collateralsLeftSvgs = collateralsLeftSvgs
