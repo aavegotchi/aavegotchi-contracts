@@ -83,10 +83,20 @@ async function main() {
 
   //141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244
 
+//wearables
   const updatingLeftSvgs = [5, 9, 17, 20, 23, 38, 44, 66, 76]
   const updatingRightSvgs = [66]
   const updatingBackSvgs = [66]
 
+//eyes
+  const updatingEyesLeftSvgs = []
+  const updatingEyesRightSvgs = []
+
+//collateral  
+  const updatingCollateralLeftSvgs = []
+  const updatingCollateralRightSvgs = []
+
+//wearables
   for (var i = 0; i < updatingLeftSvgs.length; i++) {
     await updateSvgs(wearablesLeftSvgs, 'wearables-left', updatingLeftSvgs[i], testing, itemSigner)
   }
@@ -97,6 +107,24 @@ async function main() {
 
   for (var i = 0; i < updatingBackSvgs.length; i++) {
     await updateSvgs(wearablesBackSvgs, 'wearables-back', updatingBackSvgs[i], testing, itemSigner)
+  }
+
+//eyes
+  for (var i = 0; i < updatingEyesLeftSvgs.length; i++) {
+    await updateSvgs(eyeShapesLeftSvgs, 'eyeShapes-left', updatingEyesLeftSvgs[i], testing, itemSigner)
+  }
+
+  for (var i = 0; i < updatingEyesRightSvgs.length; i++) {
+    await updateSvgs(eyeShapesRightSvgs, 'eyeShapes-right', updatingEyesRightSvgs[i], testing, itemSigner)
+  }
+
+//collateral
+  for (var i = 0; i < updatingCollateralLeftSvgs.length; i++) {
+    await updateSvgs(collateralsLeftSvgs, 'collaterals-left', updatingCollateralLeftSvgs[i], testing, itemSigner)
+  }
+
+  for (var i = 0; i < updatingCollateralRightSvgs.length; i++) {
+    await updateSvgs(collateralsRightSvgs, 'collaterals-right', updatingCollateralRightSvgs[i], testing, itemSigner)
   }
 
 }
