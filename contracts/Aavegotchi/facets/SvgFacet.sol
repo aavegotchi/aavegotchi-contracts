@@ -7,6 +7,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
+import "hardhat/console.sol";
 
 contract SvgFacet is Modifiers {
     /***********************************|
@@ -66,6 +67,8 @@ contract SvgFacet is Modifiers {
             //Convert Haunt into string to match the uploaded category name
             bytes memory haunt = abi.encodePacked(LibSvg.uint2str(_hauntId));
             eyeSvgType = LibSvg.bytesToBytes32(abi.encodePacked("eyeShapesH"), haunt);
+            console.log("____eyeSvgType____");
+            console.logBytes32(eyeSvgType);
         }
 
         details.trait = _numericTraits[4];

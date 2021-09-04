@@ -73,6 +73,8 @@ contract SvgViewsFacet is Modifiers {
             //Convert Haunt into string to match the uploaded category name
             bytes memory haunt = abi.encodePacked(LibSvg.uint2str(_hauntId));
             eyeSvgType = abi.encodePacked("eyeShapesH", haunt, "-");
+            console.log("____eyeSvgType side____");
+            console.logBytes(eyeSvgType);
         }
 
         details.trait = _numericTraits[4];
