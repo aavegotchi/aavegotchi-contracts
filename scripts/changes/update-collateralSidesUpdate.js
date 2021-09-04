@@ -10,31 +10,6 @@ const {
   collateralsRightSvgs,
 } = require("../../svgs/collaterals-sides.js");
 
-const {
-  eyeShapesLeftSvgs,
-  eyeShapesRightSvgs,
-} = require("../../svgs/eyeShapesH2-sides.js");
-
-const {
-  wearablesLeftSvgs,
-  wearablesRightSvgs,
-  wearablesBackSvgs,
-  wearablesLeftSleeveSvgs,
-  wearablesRightSleeveSvgs,
-  wearablesBackSleeveSvgs,
-} = require("../../svgs/wearables-sides.js");
-
-const {
-  sideViewDimensions1,
-  sideViewDimensions2,
-  sideViewDimensions3,
-  sideViewDimensions4,
-  sideViewDimensions5,
-  sideViewDimensions6,
-  sideViewDimensions7,
-  sideViewDimensions8,
-} = require("../../svgs/sideViewDimensions.js");
-
 async function main() {
   console.log("Update SVG Start");
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
@@ -110,32 +85,11 @@ async function main() {
 
   //141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244
 
-  let remaining = [
-    /* 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
-    156, 157, 158, 159, 160, 161, 162, 199, 200, 201, 202, 203, 204, 205, 206,
-    207, 208, 209, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222,
-    223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237,
-    238, 239, 240, 241,*/ 242,
-    243, 244,
-  ];
+  let remaining = [9, 10, 11];
 
   // const updatingLeftSvgs = remaining;
-  const updatingRightSvgs = remaining; //[66];
-  // const updatingBackSvgs = [104];
-
-  // console.log("updating left:", updatingLeftSvgs);
-
-  /* for (var i = 0; i < updatingLeftSvgs.length; i++) {
-    console.log(`Updating: ${i} ${updatingLeftSvgs[i]}`);
-    await updateSvgs(
-      wearablesLeftSvgs,
-      "wearables-left",
-      updatingLeftSvgs[i],
-      testing,
-      itemSigner
-    );
-  }
-  */
+  const updatingRightSvgs = remaining;
+  const updatingLeftSvgs = remaining;
 
   for (var i = 0; i < updatingRightSvgs.length; i++) {
     await updateSvgs(
@@ -147,17 +101,15 @@ async function main() {
     );
   }
 
-  /*
-  for (var i = 0; i < updatingBackSvgs.length; i++) {
+  for (var i = 0; i < updatingRightSvgs.length; i++) {
     await updateSvgs(
-      wearablesBackSvgs,
-      "wearables-back",
-      updatingBackSvgs[i],
+      wearablesRightSvgs,
+      "wearables-right",
+      updatingRightSvgs[i],
       testing,
       itemSigner
     );
   }
-  */
 }
 
 if (require.main === module) {
