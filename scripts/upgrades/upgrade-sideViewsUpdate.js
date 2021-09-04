@@ -92,9 +92,9 @@ async function main() {
   const updatingEyesLeftSvgs = []
   const updatingEyesRightSvgs = []
 
-//collateral  
-  const updatingCollateralLeftSvgs = []
-  const updatingCollateralRightSvgs = []
+//collateral
+  const updatingCollateralLeftSvgs = [9, 10, 11]
+  const updatingCollateralRightSvgs = [9, 10, 11]
 
 //wearables
   for (var i = 0; i < updatingLeftSvgs.length; i++) {
