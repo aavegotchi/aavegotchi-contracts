@@ -25,8 +25,8 @@ function eyeShape(name) {
 }
 
 const eyeShapesLeftSvgs = [
-  eyeShape("h2_mythical_low_1_left"),
-  eyeShape("h2_mythical_low_2_left"),
+  eyeShape("h2_mythical_low_1_left"), //h2
+  eyeShape("h2_mythical_low_2_left"), //h2
   eyeShape("rare_low_1_left"),
   eyeShape("rare_low_2_left"),
   eyeShape("rare_low_3_left"),
@@ -44,18 +44,17 @@ const eyeShapesLeftSvgs = [
   eyeShape("rare_high_3_left"),
   eyeShape("aave_collateral_left_eyeShapes"),
   eyeShape("dai_collateral_left_eyeShapes"),
-  eyeShape("eth_collateral_left_eyeShapes"),
-  eyeShape("link_collateral_left_eyeShapes"),
-  eyeShape("usdc_collateral_left_eyeShapes"),
-  eyeShape("yfi_collateral_left_eyeShapes"),
-  eyeShape("uni_collateral_left_eyeShapes"),
-  eyeShape("tusd_collateral_left_eyeShapes"),
+  //h2
+  eyeShape("weth_collateral_left_eyeShapes"),
   eyeShape("usdt_collateral_left_eyeShapes"),
+  eyeShape("usdc_collateral_left_eyeShapes"),
+  eyeShape("wbtc_collateral_left_eyeShapes"),
+  eyeShape("polygon_collateral_left_eyeShapes"),
 ];
 
 const eyeShapesRightSvgs = [
-  eyeShape("h2_mythical_low_1_right"),
-  eyeShape("h2_mythical_low_2_right"),
+  eyeShape("h2_mythical_low_1_right"), //h2
+  eyeShape("h2_mythical_low_2_right"), //h2
   eyeShape("rare_low_1_right"),
   eyeShape("rare_low_2_right"),
   eyeShape("rare_low_3_right"),
@@ -73,13 +72,13 @@ const eyeShapesRightSvgs = [
   eyeShape("rare_high_3_right"),
   eyeShape("aave_collateral_right_eyeShapes"),
   eyeShape("dai_collateral_right_eyeShapes"),
-  eyeShape("eth_collateral_right_eyeShapes"),
-  eyeShape("link_collateral_right_eyeShapes"),
-  eyeShape("usdc_collateral_right_eyeShapes"),
-  eyeShape("yfi_collateral_right_eyeShapes"),
-  eyeShape("uni_collateral_right_eyeShapes"),
-  eyeShape("tusd_collateral_right_eyeShapes"),
+
+  //h2
+  eyeShape("weth_collateral_right_eyeShapes"),
   eyeShape("usdt_collateral_right_eyeShapes"),
+  eyeShape("usdc_collateral_right_eyeShapes"),
+  eyeShape("wbtc_collateral_right_eyeShapes"),
+  eyeShape("polygon_collateral_right_eyeShapes"),
 ];
 
 exports.eyeShapesLeftSvgs = eyeShapesLeftSvgs;
