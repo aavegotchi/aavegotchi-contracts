@@ -68,6 +68,7 @@ contract SvgViewsFacet is Modifiers {
         svg_ = LibSvg.getSvg(LibSvg.bytesToBytes32("aavegotchi-", _sideView), LibSvg.AAVEGOTCHI_BODY_SVG_ID);
         details.collateral = LibSvg.getSvg(LibSvg.bytesToBytes32("collaterals-", _sideView), s.collateralTypeInfo[_collateralType].svgId);
         console.log("***getAavegotchiSvgLayers***");
+        console.log("Haunt id: ", _hauntId);
 
         bytes memory eyeSvgType = "eyeShapes-";
         if (_hauntId != 1) {

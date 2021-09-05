@@ -32,7 +32,9 @@ describe("Side Views", async function () {
     const numTraits1 = [99, 99, 99, 99, 12, 9];
     const wearables1 = [91, 0, 0, 48, 76, 76, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-    const sidePreview = await svgViewsFacet.previewSideAavegotchi("1", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
-    console.log("Side Preview: ", sidePreview);
+    // const sidePreview = await svgViewsFacet.previewSideAavegotchi("2", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
+    // console.log("Side Preview: ", sidePreview);
+
+    await svgViewsFacet.getAavegotchiSideSvgs(19688);
   });
 });
