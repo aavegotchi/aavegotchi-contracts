@@ -78,12 +78,12 @@ async function main () {
   const cut = [
     {
       facetAddress: svgViewsFacet.address,
-      action: FacetCutAction.Remove,
+      action: FacetCutAction.Replace,
       functionSelectors: getSelectors(svgViewsFacet)
     },
     {
       facetAddress: svgFacet.address,
-      action: FacetCutAction.Remove,
+      action: FacetCutAction.Replace,
       functionSelectors: getSelectors(svgFacet)
     }
   ]
@@ -105,6 +105,10 @@ async function main () {
     tx = await diamondCut.populateTransaction.diamondCut(cut, ethers.constants.AddressZero, '0x')
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx)
   }
+
+  // const numTraits1 = [99, 99, 99, 99, 1, 1];
+  // const wearables1 = [19, 0, 0, 48, 12, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  // await svgViewsFacet.previewSideAavegotchi("1", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
 }
 
 

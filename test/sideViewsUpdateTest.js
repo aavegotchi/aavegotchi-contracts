@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const { h2eyesSideViews } = require('../scripts/upgrades/upgrade-h2eyesSideViews.js');
+const { sideViewsUpdate } = require('../scripts/changes/update-eyeShapesH2sides.js');
 
 describe("Side Views", async function () {
   this.timeout(1000000);
@@ -13,6 +14,7 @@ describe("Side Views", async function () {
     aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
 
     await h2eyesSideViews();
+    await sideViewsUpdate();
 
     svgViewsFacet = await ethers.getContractAt('SvgViewsFacet', aavegotchiDiamondAddress);
   });
