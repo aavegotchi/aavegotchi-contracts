@@ -67,16 +67,12 @@ contract SvgViewsFacet is Modifiers {
         // aavagotchi body
         svg_ = LibSvg.getSvg(LibSvg.bytesToBytes32("aavegotchi-", _sideView), LibSvg.AAVEGOTCHI_BODY_SVG_ID);
         details.collateral = LibSvg.getSvg(LibSvg.bytesToBytes32("collaterals-", _sideView), s.collateralTypeInfo[_collateralType].svgId);
-        console.log("***getAavegotchiSvgLayers***");
-        console.log("Haunt id: ", _hauntId);
 
         bytes memory eyeSvgType = "eyeShapes-";
         if (_hauntId != 1) {
             //Convert Haunt into string to match the uploaded category name
             bytes memory haunt = abi.encodePacked(LibSvg.uint2str(_hauntId));
             eyeSvgType = abi.encodePacked("eyeShapesH", haunt, "-");
-            console.log("____H2 eyeSvgType side____");
-            console.logBytes(eyeSvgType);
         }
 
         details.trait = _numericTraits[4];
@@ -94,9 +90,6 @@ contract SvgViewsFacet is Modifiers {
                 }
             }
         }
-
-        console.log("____Not H2 eyeSvgType side____");
-        console.logBytes(eyeSvgType);
 
         details.trait = _numericTraits[5];
         details.eyeColorTraitRanges = [int256(0), 2, 10, 25, 75, 90, 98, 100];

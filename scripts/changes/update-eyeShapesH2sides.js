@@ -127,9 +127,9 @@ async function main() {
     itemSigner = signer;
   }
 
-  // await uploadSvgs("eyeShapesH2-right", eyeShapesRightSvgs, itemSigner);
+  await uploadSvgs("eyeShapesH2-back", eyeShapesRightSvgs, itemSigner);
 
-  await uploadSvgs("eyeShapesH2-left", eyeShapesLeftSvgs, itemSigner);
+  // await uploadSvgs("eyeShapesH2-left", eyeShapesLeftSvgs, itemSigner);
 }
 
 if (require.main === module) {
