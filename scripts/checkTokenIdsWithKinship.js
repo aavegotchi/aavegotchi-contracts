@@ -3,7 +3,7 @@ const { LedgerSigner } = require("@ethersproject/hardware-wallets");
 //const { ethers } = require("ethers");
 const {
   addGotchiMinimal,
-} = require("../scripts/upgrades/upgrade-addAavegotchiMinimal.js");
+} = require("../scripts/upgrades/upgrade-tokenIdsWithKinship.js");
 
 async function main() {
   this.timeout = 20000000;
