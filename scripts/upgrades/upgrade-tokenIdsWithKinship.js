@@ -71,11 +71,6 @@ async function main() {
       action: FacetCutAction.Add,
       functionSelectors: gotchiMinimalFunc,
     },
-    {
-      facetAddress: gotchiGamefacet.address,
-      action: FacetCutAction.Replace,
-      functionSelectors: existingAavegotchiGameGuncs,
-    },
   ];
 
   console.log(cut);
