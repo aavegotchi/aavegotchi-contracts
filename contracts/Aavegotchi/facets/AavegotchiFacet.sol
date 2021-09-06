@@ -120,6 +120,20 @@ contract AavegotchiFacet {
         LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
     }
 
+    function safeBatchTransferFrom(
+        address _from,
+        address _to,
+        uint256[] calldata _tokenIds,
+        bytes calldata _data
+    ) external {
+        address sender = LibMeta.msgSender();
+        for (uint256 index = 0; index < _tokenIds.length; index++) {
+            uint256 _tokenId = _tokenIds[index];
+            internalTransferFrom(sender, _from, _to, _tokenId);
+            LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
+        }
+    }
+
     /// @notice Transfers the ownership of an NFT from one address to another address
     /// @dev This works identically to the other function with an extra data parameter,
     ///  except this function just sets data to "".
