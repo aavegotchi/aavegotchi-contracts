@@ -150,7 +150,7 @@ describe("Testing Pet Operator Upgrade", async function () {
     let petOperatorShare = ethers.BigNumber.from(
       ethers.utils.parseEther("0.21")
     );
-    let pixelcraftShare = ethers.BigNumber.from(ethers.utils.parseEther("0.9"));
+    let pixelcraftShare = ethers.BigNumber.from(ethers.utils.parseEther("0.09"));
 
     // console.log('pet op share:',petOperatorShare.toString())
     // console.log('pc share:',pixelcraftShare.toString())
@@ -166,14 +166,14 @@ describe("Testing Pet Operator Upgrade", async function () {
     let beforePetAavegotchi = await aavegotchiFacet.getAavegotchi(tokenIdOne);
 
     const tx = await aavegotchiGameFacet.pet();
-
-    let afterPetAavegotchi = await aavegotchiFacet.getAavegotchi(tokenIdOne);
-    expect(afterPetAavegotchi.kinship).to.gt(beforePetAavegotchi.kinship);
-
     const receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Transaction failed: ${tx.hash}`);
     }
+
+    let afterPetAavegotchi = await aavegotchiFacet.getAavegotchi(tokenIdOne);
+    expect(afterPetAavegotchi.kinship).to.gt(beforePetAavegotchi.kinship);
+
     let operatorNewBal = ethers.BigNumber.from(
       await ghst.balanceOf(petOperator)
     );
