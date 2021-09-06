@@ -50,12 +50,6 @@ contract AavegotchiGameFacet is Modifiers {
         address pixelCraft;
     }
 
-    struct TokenIdsWithKinship {
-        uint256 tokenId;
-        uint256 kinship;
-        uint256 lastInteracted;
-    }
-
     function revenueShares() external view returns (RevenueSharesIO memory) {
         return RevenueSharesIO(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, s.daoTreasury, s.rarityFarming, s.pixelCraft);
     }
@@ -112,6 +106,12 @@ contract AavegotchiGameFacet is Modifiers {
 
     function kinship(uint256 _tokenId) external view returns (uint256 score_) {
         score_ = LibAavegotchi.kinship(_tokenId);
+    }
+
+    struct TokenIdsWithKinship {
+        uint256 tokenId;
+        uint256 kinship;
+        uint256 lastInteracted;
     }
 
     //Return an owner's tokenIds w/ kinship + lastInteracted for UI use
@@ -173,43 +173,6 @@ contract AavegotchiGameFacet is Modifiers {
         s.aavegotchis[_tokenId].name = _name;
         emit SetAavegotchiName(_tokenId, existingName, _name);
     }
-
-    // function pet() external {
-    //     address sender = LibMeta.msgSender();
-    //     uint256[] memory tokenIds = s.petOperatorTokenIds[sender];
-    //     address ghstContract = s.ghstContract;
-    //     for (uint256 i; i < tokenIds.length; i++) {
-    //         uint256 tokenId = tokenIds[i];
-    //         address owner = s.aavegotchis[tokenId].owner;
-    //         uint256 balance = IERC20(ghstContract).balanceOf(owner);
-    //         if(balance >= 3e17 && LibAavegotchi.interact(tokenId)) {
-    //             if(owner != address(0)) {
-    //                 LibERC20.transferFrom(ghstContract, owner, s.pixelCraft, 1e17);
-    //                 LibERC20.transferFrom(ghstContract, owner, sender, 2e17);
-    //             }
-    //         }
-    //     }
-    // }
-
-    // function petOperatorTokenIds(address _petOperator) external view returns (uint256[] memory tokenIds_) {
-    //     tokenIds_ = s.petOperatorTokenIds[_petOperator];
-    // }
-
-    // function removePetOperator(address _petOperator, uint256[] calldata _tokenIds) internal {
-
-    // }
-
-    // function addPetOperator(address _petOperator, uint256[] calldata _tokenIds) external {
-    //     address sender = LibMeta.msgSender();
-    //     for (uint256 i; i < _tokenIds.length; i++) {
-    //         uint256 tokenId = _tokenIds[i];
-    //         address owner = s.aavegotchis[tokenId].owner;
-    //         require(owner == sender, "Must be owner to set petter");
-    //         s.petOperatorTokenIds[_petOperator].push(tokenId);
-    //         s.petOperators[owner][tokenId] = _petOperator;
-    //     }
-
-    // }
 
     function interact(uint256[] calldata _tokenIds) external {
         address sender = LibMeta.msgSender();
