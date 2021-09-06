@@ -50,7 +50,7 @@ contract AavegotchiGameFacet is Modifiers {
         address pixelCraft;
     }
 
-    struct AaveGotchiMinimal {
+    struct TokenIdsWithKinship {
         uint256 tokenId;
         uint256 kinship;
         uint256 lastInteracted;
@@ -114,15 +114,17 @@ contract AavegotchiGameFacet is Modifiers {
         score_ = LibAavegotchi.kinship(_tokenId);
     }
 
-    //Return minimal info about a gotchi
-    function aaveGotchiMinimal(address _owner) external view returns (AaveGotchiMinimal[] memory gotchiMinimal_) {
-        uint32[] memory tokenIds = (s.ownerTokenIds[_owner]);
-        gotchiMinimal_ = new AaveGotchiMinimal[](tokenIds.length);
+    //Return an owner's tokenIds w/ kinship + lastInteracted for UI use
+    function tokenIdsWithKinship(address _owner) external view returns (TokenIdsWithKinship[] memory tokenIdsWithKinship_) {
+        uint32[] memory tokenIds = s.ownerTokenIds[_owner];
+        tokenIdsWithKinship_ = new TokenIdsWithKinship[](tokenIds.length);
         for (uint256 i; i < tokenIds.length; i++) {
+            //Only return claimed Aavegotchis
+            uint32 tokenId = tokenIds[i];
             if (s.aavegotchis[tokenIds[i]].status == 3) {
-                gotchiMinimal_[i].tokenId = tokenIds[i];
-                gotchiMinimal_[i].kinship = LibAavegotchi.kinship(tokenIds[i]);
-                gotchiMinimal_[i].lastInteracted = s.aavegotchis[tokenIds[i]].lastInteracted;
+                tokenIdsWithKinship_[i].tokenId = tokenId;
+                tokenIdsWithKinship_[i].kinship = LibAavegotchi.kinship(tokenId);
+                tokenIdsWithKinship_[i].lastInteracted = s.aavegotchis[tokenId].lastInteracted;
             }
         }
     }
