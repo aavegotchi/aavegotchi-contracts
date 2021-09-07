@@ -14,14 +14,16 @@ async function main() {
     "AavegotchiGameFacet",
     diamondAddress
   );
-  const minimalDetails = await gameFacet.aaveGotchiMinimal(
+  const minimalDetails = await gameFacet.tokenIdsWithKinship(
     "0x4e7bf3694962fc482a16d60fd78f99db9c4c52b0"
   );
   console.log(minimalDetails);
 }
 
-main()
-  .then(() => console.log("completed"))
-  .catch((error) => {
-    console.error(error);
-  });
+if (require.main === module) {
+  main()
+    .then(() => process.exit())
+    .catch((error) => {
+      console.error(error);
+    });
+}
