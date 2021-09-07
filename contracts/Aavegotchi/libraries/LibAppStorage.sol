@@ -153,7 +153,6 @@ struct GameManager {
 }
 
 struct PetOperatorInfo {
-    uint256 rate;
     string name;
     string description;
 }
@@ -271,30 +270,30 @@ contract Modifiers {
         _;
     }
 
-    modifier onlyOwner {
+    modifier onlyOwner() {
         LibDiamond.enforceIsContractOwner();
         _;
     }
 
-    modifier onlyDao {
+    modifier onlyDao() {
         address sender = LibMeta.msgSender();
         require(sender == s.dao, "Only DAO can call this function");
         _;
     }
 
-    modifier onlyDaoOrOwner {
+    modifier onlyDaoOrOwner() {
         address sender = LibMeta.msgSender();
         require(sender == s.dao || sender == LibDiamond.contractOwner(), "LibAppStorage: Do not have access");
         _;
     }
 
-    modifier onlyOwnerOrDaoOrGameManager {
+    modifier onlyOwnerOrDaoOrGameManager() {
         address sender = LibMeta.msgSender();
         bool isGameManager = s.gameManagers[sender].limit != 0;
         require(sender == s.dao || sender == LibDiamond.contractOwner() || isGameManager, "LibAppStorage: Do not have access");
         _;
     }
-    modifier onlyItemManager {
+    modifier onlyItemManager() {
         address sender = LibMeta.msgSender();
         require(s.itemManagers[sender] == true, "LibAppStorage: only an ItemManager can call this function");
         _;
