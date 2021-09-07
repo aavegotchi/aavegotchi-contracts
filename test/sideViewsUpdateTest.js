@@ -23,7 +23,7 @@ describe("Side Views", async function () {
     );
   });
 
-  it.only("Should update particular gotchi side view", async function () {
+  it("Should update particular gotchi side view", async function () {
     // uint8 internal constant WEARABLE_SLOT_BODY = 0;
     // uint8 internal constant WEARABLE_SLOT_FACE = 1;
     // uint8 internal constant WEARABLE_SLOT_EYES = 2;

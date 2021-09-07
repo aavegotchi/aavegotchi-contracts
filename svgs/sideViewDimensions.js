@@ -210,6 +210,12 @@ let sideViewDimensions1 = [
     dimensions: {x:37, y:31, width:7, height:15},
   },
   {
+    itemId: 9,
+    name: "Walkie Talkie",
+    side: "left",
+    dimensions: {x:24, y:31, width:7, height:15},
+  },
+  {
     itemId: 10,
     name: "Link White Hat",
     side: "back",
@@ -486,6 +492,12 @@ let sideViewDimensions1 = [
     dimensions: {x:32, y:31, width:12, height:16},
   },
   {
+    itemId: 17,
+    name: "Link Cube",
+    side: "left",
+    dimensions: {x:20, y:31, width:12, height:16},
+  },
+  {
     itemId: 18,
     name: "Aave Hero Mask",
     side: "back",
@@ -582,6 +594,12 @@ let sideViewDimensions1 = [
     dimensions: {x:37, y:32, width:2, height:13},
   },
   {
+    itemId: 20,
+    name: "Aave Plush",
+    side: "left",
+    dimensions: {x:25, y:32, width:2, height:13},
+  },
+  {
     itemId: 21,
     name: "Captain Aave Mask",
     side: "back",
@@ -676,6 +694,12 @@ let sideViewDimensions1 = [
     name: "Captain Aave Shield",
     side: "right",
     dimensions: {x:37, y:31, width:5, height:20},
+  },
+  {
+    itemId: 23,
+    name: "Captain Aave Shield",
+    side: "left",
+    dimensions: {x:22, y:31, width:5, height:20},
   },
   {
     itemId: 24,
@@ -1122,6 +1146,12 @@ let sideViewDimensions1 = [
     dimensions: {x:37, y:31, width:2, height:14},
   },
   {
+    itemId: 38,
+    name: "32 ETH Coin",
+    side: "left",
+    dimensions: {x:25, y:31, width:2, height:14},
+  },
+  {
     itemId: 39,
     name: "Foxy Mask",
     side: "back",
@@ -1300,6 +1330,12 @@ let sideViewDimensions1 = [
     name: "DAO Egg",
     side: "right",
     dimensions: {x:32, y:27, width:16, height:22},
+  },
+  {
+    itemId: 44,
+    name: "DAO Egg",
+    side: "left",
+    dimensions: {x:16, y:27, width:16, height:22},
   },
   {
     itemId: 45,
@@ -2112,6 +2148,12 @@ let sideViewDimensions1 = [
     dimensions: {x:37, y:33, width:2, height:12},
   },
   {
+    itemId: 76,
+    name: "Big GHST Token",
+    side: "left",
+    dimensions: {x:25, y:33, width:2, height:12},
+  },
+  {
     itemId: 77,
     name: "Bitcoin Beanie",
     side: "back",
@@ -2431,7 +2473,7 @@ let sideViewDimensions2 = [
     itemId: 91,
     name: "Pajama Pants",
     side: "right",
-    dimensions: {x:20, y:33, width:24, height:22},
+    dimensions: {x:20, y:32, width:24, height:22},
   },
   {
     itemId: 91,
@@ -2461,7 +2503,7 @@ let sideViewDimensions2 = [
     itemId: 91,
     name: "Pajama Pants",
     side: "left",
-    dimensions: {x:20, y:33, width:5, height:10},
+    dimensions: {x:20, y:32, width:5, height:10},
   },
   {
     itemId: 91,
@@ -2485,7 +2527,7 @@ let sideViewDimensions2 = [
     itemId: 91,
     name: "Pajama Pants",
     side: "right",
-    dimensions: {x:20, y:33, width:5, height:10},
+    dimensions: {x:20, y:32, width:5, height:10},
   },
   {
     itemId: 92,
@@ -3151,7 +3193,7 @@ let sideViewDimensions2 = [
     itemId: 114,
     name: "Red Hawaiian Shirt",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:18},
+    dimensions: {x:12, y:32, width:34, height:18},
   },
   {
     itemId: 114,
@@ -3175,7 +3217,7 @@ let sideViewDimensions2 = [
     itemId: 114,
     name: "Red Hawaiian Shirt",
     side: "left",
-    dimensions: {x:28, y:35, width:5, height:9},
+    dimensions: {x:20, y:32, width:5, height:9},
   },
   {
     itemId: 114,
@@ -3199,7 +3241,7 @@ let sideViewDimensions2 = [
     itemId: 114,
     name: "Red Hawaiian Shirt",
     side: "right",
-    dimensions: {x:31, y:35, width:5, height:9},
+    dimensions: {x:20, y:32, width:5, height:9},
   },
   {
     itemId: 115,
@@ -3217,7 +3259,7 @@ let sideViewDimensions2 = [
     itemId: 115,
     name: "Blue Hawaiian Shirt",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:18},
+    dimensions: {x:12, y:32, width:34, height:18},
   },
   {
     itemId: 115,
@@ -3241,7 +3283,7 @@ let sideViewDimensions2 = [
     itemId: 115,
     name: "Blue Hawaiian Shirt",
     side: "left",
-    dimensions: {x:28, y:35, width:5, height:9},
+    dimensions: {x:20, y:32, width:5, height:9},
   },
   {
     itemId: 115,
@@ -3265,7 +3307,7 @@ let sideViewDimensions2 = [
     itemId: 115,
     name: "Blue Hawaiian Shirt",
     side: "right",
-    dimensions: {x:31, y:35, width:5, height:9},
+    dimensions: {x:20, y:32, width:5, height:9},
   },
   {
     itemId: 116,
@@ -3282,8 +3324,8 @@ let sideViewDimensions2 = [
   {
     itemId: 116,
     name: "Coconut",
-    side: "right back",
-    dimensions: {x:51, y:27, width:12, height:18},
+    side: "back",
+    dimensions: {x:1, y:27, width:12, height:18},
   },
   {
     itemId: 116,
@@ -3324,8 +3366,8 @@ let sideViewDimensions2 = [
   {
     itemId: 118,
     name: "Water Jug",
-    side: "right back",
-    dimensions: {x:47, y:21, width:16, height:26},
+    side: "back",
+    dimensions: {x:1, y:21, width:16, height:26},
   },
   {
     itemId: 118,
@@ -3352,8 +3394,8 @@ let sideViewDimensions3 = [
   {
     itemId: 119,
     name: "Baby Bottle",
-    side: "right back",
-    dimensions: {x:51, y:27, width:7, height:17},
+    side: "back",
+    dimensions: {x:6, y:27, width:7, height:17},
   },
   {
     itemId: 119,
@@ -3376,8 +3418,8 @@ let sideViewDimensions3 = [
   {
     itemId: 120,
     name: "Martini",
-    side: "right back",
-    dimensions: {x:49, y:25, width:14, height:19},
+    side: "back",
+    dimensions: {x:1, y:25, width:14, height:19},
   },
   {
     itemId: 120,
@@ -3406,8 +3448,8 @@ let sideViewDimensions3 = [
   {
     itemId: 121,
     name: "Wine Bottle",
-    side: "right back",
-    dimensions: {x:51, y:23, width:7, height:22},
+    side: "back",
+    dimensions: {x:6, y:23, width:7, height:22},
   },
   {
     itemId: 122,
@@ -3424,8 +3466,8 @@ let sideViewDimensions3 = [
   {
     itemId: 122,
     name: "Milkshake",
-    side: "right back",
-    dimensions: {x:50, y:21, width:12, height:29},
+    side: "back",
+    dimensions: {x:2, y:21, width:12, height:29},
   },
   {
     itemId: 122,
@@ -3448,8 +3490,8 @@ let sideViewDimensions3 = [
   {
     itemId: 123,
     name: "Apple Juice",
-    side: "right back",
-    dimensions: {x:53, y:30, width:8, height:14},
+    side: "back",
+    dimensions: {x:3, y:30, width:8, height:14},
   },
   {
     itemId: 123,
@@ -3491,7 +3533,7 @@ let sideViewDimensions3 = [
     itemId: 125,
     name: "Track Suit",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:22},
+    dimensions: {x:11, y:31, width:34, height:22},
   },
   {
     itemId: 125,
@@ -3515,7 +3557,7 @@ let sideViewDimensions3 = [
     itemId: 125,
     name: "Track Suit",
     side: "left",
-    dimensions: {x:28, y:35, width:5, height:10},
+    dimensions: {x:20, y:32, width:5, height:10},
   },
   {
     itemId: 125,
@@ -3539,7 +3581,7 @@ let sideViewDimensions3 = [
     itemId: 125,
     name: "Track Suit",
     side: "right",
-    dimensions: {x:31, y:35, width:5, height:10},
+    dimensions: {x:20, y:32, width:5, height:10},
   },
   {
     itemId: 126,
@@ -3580,8 +3622,8 @@ let sideViewDimensions3 = [
   {
     itemId: 130,
     name: "Fireball",
-    side: "right back",
-    dimensions: {x:51, y:32, width:10, height:12},
+    side: "back",
+    dimensions: {x:3, y:32, width:10, height:12},
   },
   {
     itemId: 130,
@@ -3677,7 +3719,7 @@ let sideViewDimensions3 = [
     itemId: 135,
     name: "Polygon Shirt",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:20},
+    dimensions: {x:12, y:32, width:34, height:20},
   },
   {
     itemId: 135,
@@ -3701,7 +3743,7 @@ let sideViewDimensions3 = [
     itemId: 135,
     name: "Polygon Shirt",
     side: "left",
-    dimensions: {x:29, y:35, width:4, height:9},
+    dimensions: {x:20, y:33, width:4, height:9},
   },
   {
     itemId: 135,
@@ -3725,7 +3767,7 @@ let sideViewDimensions3 = [
     itemId: 135,
     name: "Polygon Shirt",
     side: "right",
-    dimensions: {x:31, y:35, width:4, height:9},
+    dimensions: {x:20, y:33, width:4, height:9},
   },
   {
     itemId: 136,
@@ -3748,7 +3790,7 @@ let sideViewDimensions3 = [
   {
     itemId: 137,
     name: "Vote Sign",
-    side: "left back",
+    side: "back",
     dimensions: {x:0, y:24, width:17, height:23},
   },
   {
@@ -3779,7 +3821,7 @@ let sideViewDimensions3 = [
     itemId: 138,
     name: "Snapshot Shirt",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:20},
+    dimensions: {x:12, y:32, width:34, height:20},
   },
   {
     itemId: 138,
@@ -3803,7 +3845,7 @@ let sideViewDimensions3 = [
     itemId: 138,
     name: "Snapshot Shirt",
     side: "left",
-    dimensions: {x:29, y:35, width:4, height:9},
+    dimensions: {x:20, y:33, width:4, height:9},
   },
   {
     itemId: 138,
@@ -3827,7 +3869,7 @@ let sideViewDimensions3 = [
     itemId: 138,
     name: "Snapshot Shirt",
     side: "right",
-    dimensions: {x:31, y:35, width:4, height:9},
+    dimensions: {x:20, y:33, width:4, height:9},
   },
   {
     itemId: 139,
@@ -3884,8 +3926,8 @@ let sideViewDimensions4 = [
   {
     itemId: 141,
     name: "Gemstone Ring",
-    side: "right back",
-    dimensions: {x:51, y:29, width:8, height:14},
+    side: "back",
+    dimensions: {x:5, y:29, width:8, height:14},
   },
   {
     itemId: 141,
@@ -4010,8 +4052,8 @@ let sideViewDimensions4 = [
   {
     itemId: 148,
     name: "Royal Scepter",
-    side: "right back",
-    dimensions: {x:51, y:28, width:6, height:21},
+    side: "back",
+    dimensions: {x:7, y:28, width:6, height:21},
   },
   {
     itemId: 148,
@@ -4077,7 +4119,7 @@ let sideViewDimensions4 = [
     itemId: 150,
     name: "Royal Robes",
     side: "left",
-    dimensions: {x:29, y:35, width:4, height:9},
+    dimensions: {x:20, y:30, width:4, height:9},
   },
   {
     itemId: 150,
@@ -4101,12 +4143,12 @@ let sideViewDimensions4 = [
     itemId: 150,
     name: "Royal Robes",
     side: "right",
-    dimensions: {x:31, y:35, width:4, height:9},
+    dimensions: {x:14, y:30, width:4, height:9},
   },
   {
     itemId: 151,
     name: "Common Rofl",
-    side: "back left",
+    side: "back",
     dimensions: {x:2, y:43, width:20, height:17},
   },
   {
@@ -4124,7 +4166,7 @@ let sideViewDimensions4 = [
   {
     itemId: 152,
     name: "Uncommon Rofl",
-    side: "back left",
+    side: "back",
     dimensions: {x:2, y:43, width:20, height:17},
   },
   {
@@ -4142,7 +4184,7 @@ let sideViewDimensions4 = [
   {
     itemId: 153,
     name: "Rare Rofl",
-    side: "back left",
+    side: "back",
     dimensions: {x:2, y:43, width:20, height:17},
   },
   {
@@ -4160,7 +4202,7 @@ let sideViewDimensions4 = [
   {
     itemId: 154,
     name: "Legendary Rofl",
-    side: "back left",
+    side: "back",
     dimensions: {x:2, y:43, width:20, height:17},
   },
   {
@@ -4226,8 +4268,8 @@ let sideViewDimensions4 = [
   {
     itemId: 158,
     name: "Lil Pump Drink",
-    side: "right back",
-    dimensions: {x:52, y:31, width:8, height:13},
+    side: "back",
+    dimensions: {x:4, y:31, width:8, height:13},
   },
   {
     itemId: 158,
@@ -4269,7 +4311,7 @@ let sideViewDimensions4 = [
     itemId: 160,
     name: "Lil Pump Threads",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:22},
+    dimensions: {x:11, y:31, width:34, height:22},
   },
   {
     itemId: 160,
@@ -4293,7 +4335,7 @@ let sideViewDimensions4 = [
     itemId: 160,
     name: "Lil Pump Threads",
     side: "left",
-    dimensions: {x:28, y:35, width:5, height:10},
+    dimensions: {x:20, y:32, width:5, height:10},
   },
   {
     itemId: 160,
@@ -4317,7 +4359,7 @@ let sideViewDimensions4 = [
     itemId: 160,
     name: "Lil Pump Threads",
     side: "right",
-    dimensions: {x:31, y:35, width:5, height:10},
+    dimensions: {x:20, y:32, width:5, height:10},
   },
   {
     itemId: 161,
@@ -4337,36 +4379,36 @@ let sideViewDimensions4 = [
     side: "right",
     dimensions: {x:20, y:6, width:23, height:28},
   },
-  {
-    itemId: "n/a",
-    name: "Aagent Radio Front",
-    side: "front",
-    dimensions: {x:53, y:31, width:5, height:13},
-  },
-  {
-    itemId: "n/a",
-    name: "Aagent Radio",
-    side: "left back",
-    dimensions: {x:6, y:31, width:5, height:13},
-  },
-  {
-    itemId: "n/a",
-    name: "Aagent Radio",
-    side: "left",
-    dimensions: {x:25, y:31, width:2, height:13},
-  },
-  {
-    itemId: "n/a",
-    name: "Aagent Radio",
-    side: "right back",
-    dimensions: {x:53, y:31, width:5, height:13},
-  },
-  {
-    itemId: "n/a",
-    name: "Aagent Radio",
-    side: "right",
-    dimensions: {x:37, y:31, width:2, height:13},
-  },
+  // {
+  //   itemId: "n/a",
+  //   name: "Aagent Radio Front",
+  //   side: "front",
+  //   dimensions: {x:53, y:31, width:5, height:13},
+  // },
+  // {
+  //   itemId: "n/a",
+  //   name: "Aagent Radio",
+  //   side: "left back",
+  //   dimensions: {x:6, y:31, width:5, height:13},
+  // },
+  // {
+  //   itemId: "n/a",
+  //   name: "Aagent Radio",
+  //   side: "left",
+  //   dimensions: {x:25, y:31, width:2, height:13},
+  // },
+  // {
+  //   itemId: "n/a",
+  //   name: "Aagent Radio",
+  //   side: "right back",
+  //   dimensions: {x:53, y:31, width:5, height:13},
+  // },
+  // {
+  //   itemId: "n/a",
+  //   name: "Aagent Radio",
+  //   side: "right",
+  //   dimensions: {x:37, y:31, width:2, height:13},
+  // },
   {
     itemId: 203,
     name: "Gamer Jacket",
