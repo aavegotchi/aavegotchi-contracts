@@ -4379,36 +4379,36 @@ let sideViewDimensions4 = [
     side: "right",
     dimensions: {x:20, y:6, width:23, height:28},
   },
-  // {
-  //   itemId: "n/a",
-  //   name: "Aagent Radio Front",
-  //   side: "front",
-  //   dimensions: {x:53, y:31, width:5, height:13},
-  // },
-  // {
-  //   itemId: "n/a",
-  //   name: "Aagent Radio",
-  //   side: "left back",
-  //   dimensions: {x:6, y:31, width:5, height:13},
-  // },
-  // {
-  //   itemId: "n/a",
-  //   name: "Aagent Radio",
-  //   side: "left",
-  //   dimensions: {x:25, y:31, width:2, height:13},
-  // },
-  // {
-  //   itemId: "n/a",
-  //   name: "Aagent Radio",
-  //   side: "right back",
-  //   dimensions: {x:53, y:31, width:5, height:13},
-  // },
-  // {
-  //   itemId: "n/a",
-  //   name: "Aagent Radio",
-  //   side: "right",
-  //   dimensions: {x:37, y:31, width:2, height:13},
-  // },
+  /*{
+    itemId: "n/a",
+    name: "Aagent Radio Front",
+    side: "front",
+    dimensions: {x:53, y:31, width:5, height:13},
+  },
+  {
+    itemId: "n/a",
+    name: "Aagent Radio",
+    side: "left back",
+    dimensions: {x:6, y:31, width:5, height:13},
+  },
+  {
+    itemId: "n/a",
+    name: "Aagent Radio",
+    side: "left",
+    dimensions: {x:25, y:31, width:2, height:13},
+  },
+  {
+    itemId: "n/a",
+    name: "Aagent Radio",
+    side: "right back",
+    dimensions: {x:53, y:31, width:5, height:13},
+  },
+  {
+    itemId: "n/a",
+    name: "Aagent Radio",
+    side: "right",
+    dimensions: {x:37, y:31, width:2, height:13},
+  },*/
   {
     itemId: 203,
     name: "Gamer Jacket",
@@ -4431,7 +4431,7 @@ let sideViewDimensions4 = [
     itemId: 203,
     name: "Gamer Jacket",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:20},
+    dimensions: {x:12, y:32, width:34, height:20},
   },
   {
     itemId: 203,
@@ -4467,7 +4467,7 @@ let sideViewDimensions4 = [
     itemId: 203,
     name: "Gamer Jacket",
     side: "left",
-    dimensions: {x:29, y:35, width:4, height:9},
+    dimensions: {x:20, y:32, width:4, height:9},
   },
   {
     itemId: 203,
@@ -4503,7 +4503,7 @@ let sideViewDimensions4 = [
     itemId: 203,
     name: "Gamer Jacket",
     side: "right",
-    dimensions: {x:31, y:35, width:4, height:9},
+    dimensions: {x:20, y:32, width:4, height:9},
   },
   {
     itemId: 202,
@@ -4550,8 +4550,8 @@ let sideViewDimensions4 = [
   {
     itemId: 204,
     name: "Cyberpunk Control",
-    side: "right back",
-    dimensions: {x:48, y:35, width:16, height:13},
+    side: "back",
+    dimensions: {x:0, y:35, width:16, height:13},
   },
   {
     itemId: 204,
@@ -4575,7 +4575,7 @@ let sideViewDimensions4 = [
     itemId: 202,
     name: "Cyberpunk Ear Plug",
     side: "left",
-    dimensions: {x:21, y:26, width:11, height:9},
+    dimensions: {x:19, y:6, width:11, height:9},
   },
   {
     itemId: 200,
@@ -4628,8 +4628,8 @@ let sideViewDimensions4 = [
   {
     itemId: 201,
     name: "Steampunk Glove",
-    side: "back right",
-    dimensions: {x:49, y:33, width:14, height:11},
+    side: "back",
+    dimensions: {x:1, y:33, width:14, height:11},
   },
   {
     itemId: 201,
@@ -4723,7 +4723,7 @@ let sideViewDimensions5 = [
     itemId: 162,
     name: "Miami Shirt",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:20},
+    dimensions: {x:12, y:32, width:34, height:20},
   },
   {
     itemId: 162,
@@ -4735,7 +4735,7 @@ let sideViewDimensions5 = [
     itemId: 162,
     name: "Miami Shirt",
     side: "left",
-    dimensions: {x:29, y:35, width:4, height:9},
+    dimensions: {x:20, y:32, width:4, height:9},
   },
   {
     itemId: 162,
@@ -4747,7 +4747,7 @@ let sideViewDimensions5 = [
     itemId: 162,
     name: "Miami Shirt",
     side: "right",
-    dimensions: {x:31, y:35, width:4, height:9},
+    dimensions: {x:20, y:32, width:4, height:9},
   },
   {
     itemId: 205,
@@ -4758,8 +4758,8 @@ let sideViewDimensions5 = [
   {
     itemId: 205,
     name: "Coffee Cup",
-    side: "back right",
-    dimensions: {x:50, y:29, width:13, height:15},
+    side: "back",
+    dimensions: {x:1, y:29, width:13, height:15},
   },
   {
     itemId: 205,
@@ -4895,12 +4895,18 @@ let sideViewDimensions6 = [
     itemId: 212,
     name: "1337 Laptop",
     side: "back",
-    dimensions: {x:48, y:30, width:16, height:14},
+    dimensions: {x:0, y:30, width:16, height:14},
   },
   {
     itemId: 212,
     name: "1339 Laptop",
     side: "right",
+    dimensions: {x:35, y:30, width:14, height:14},
+  },
+  {
+    itemId: 212,
+    name: "1339 Laptop",
+    side: "left",
     dimensions: {x:35, y:30, width:14, height:14},
   },
   {
@@ -4943,7 +4949,7 @@ let sideViewDimensions6 = [
     itemId: 213,
     name: "H4xx0r Shirt",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:20},
+    dimensions: {x:10, y:31, width:34, height:20},
   },
   {
     itemId: 213,
@@ -5024,8 +5030,8 @@ let sideViewDimensions7 = [
   {
     itemId: 217,
     name: "Energy Gun",
-    side: "back right",
-    dimensions: {x:49, y:33, width:13, height:11},
+    side: "back",
+    dimensions: {x:2, y:33, width:13, height:11},
   },
   {
     itemId: 217,
@@ -5127,7 +5133,7 @@ let sideViewDimensions7 = [
     itemId: 220,
     name: "Punk Shirt",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:20},
+    dimensions: {x:9, y:30, width:34, height:20},
   },
   {
     itemId: 220,
@@ -5211,7 +5217,7 @@ let sideViewDimensions7 = [
     itemId: 222,
     name: "Pirate Coat",
     side: "back",
-    dimensions: {x:14, y:31, width:36, height:24},
+    dimensions: {x:10, y:31, width:36, height:24},
   },
   {
     itemId: 222,
@@ -5289,13 +5295,19 @@ let sideViewDimensions7 = [
     itemId: 225,
     name: "Basketball",
     side: "back",
-    dimensions: {x:50, y:28, width:13, height:13},
+    dimensions: {x:1, y:28, width:13, height:13},
   },
   {
     itemId: 225,
     name: "Basketball",
     side: "right",
     dimensions: {x:33, y:28, width:13, height:13},
+  },
+  {
+    itemId: 225,
+    name: "Basketball",
+    side: "left",
+    dimensions: {x:17, y:28, width:13, height:13},
   },
   {
     itemId: 226,
@@ -5368,6 +5380,12 @@ let sideViewDimensions8 = [
     dimensions: {x:28, y:23, width:12, height:26},
   },
   {
+    itemId: 229,
+    name: "Lasso",
+    side: "left",
+    dimensions: {x:14, y:23, width:12, height:26},
+  },
+  {
     itemId: 230,
     name: "Wraangler Jeans",
     side: "back",
@@ -5425,7 +5443,7 @@ let sideViewDimensions8 = [
     itemId: 231,
     name: "Comfy Poncho",
     side: "back",
-    dimensions: {x:14, y:31, width:35, height:24},
+    dimensions: {x:12, y:31, width:35, height:24},
   },
   {
     itemId: 231,
@@ -5473,7 +5491,7 @@ let sideViewDimensions8 = [
     itemId: 233,
     name: "Uncommon Cacti",
     side: "back",
-    dimensions: {x:0, y:37, width:13, height:17},
+    dimensions: {x:0, y:45, width:13, height:17},
   },
   {
     itemId: 233,
@@ -5521,7 +5539,7 @@ let sideViewDimensions8 = [
     itemId: 234,
     name: "Shaaman Poncho",
     side: "back",
-    dimensions: {x:14, y:31, width:35, height:24},
+    dimensions: {x:12, y:31, width:35, height:24},
   },
   {
     itemId: 234,
@@ -5569,7 +5587,7 @@ let sideViewDimensions8 = [
     itemId: 236,
     name: "Blue Cacti",
     side: "back",
-    dimensions: {x:0, y:37, width:13, height:17},
+    dimensions: {x:0, y:45, width:13, height:17},
   },
   {
     itemId: 236,
@@ -5581,7 +5599,7 @@ let sideViewDimensions8 = [
     itemId: 237,
     name: "Mythical Cacti",
     side: "back",
-    dimensions: {x:0, y:37, width:13, height:17},
+    dimensions: {x:0, y:45, width:13, height:17},
   },
   {
     itemId: 237,
@@ -5593,7 +5611,7 @@ let sideViewDimensions8 = [
     itemId: 238,
     name: "Godlike Cacti",
     side: "back",
-    dimensions: {x:1, y:40, width:62, height:14},
+    dimensions: {x:1, y:45, width:62, height:14},
   },
   {
     itemId: 238,
@@ -5683,7 +5701,7 @@ let sideViewDimensions8 = [
     itemId: 241,
     name: "WGMI Shirt",
     side: "back",
-    dimensions: {x:15, y:33, width:34, height:20},
+    dimensions: {x:12, y:32, width:34, height:20},
   },
   {
     itemId: 241,
@@ -5785,7 +5803,7 @@ let sideViewDimensions8 = [
     itemId: 244,
     name: "V-Neck Shirt",
     side: "back",
-    dimensions: {x:14, y:33, width:35, height:22},
+    dimensions: {x:12, y:32, width:35, height:22},
   },
   {
     itemId: 244,

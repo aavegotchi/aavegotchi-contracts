@@ -61,77 +61,77 @@ async function main () {
 
   const svgViewsFacet = await ethers.getContractAt('SvgViewsFacet', diamondAddress, itemSigner)
 
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 1')
-
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 2')
-
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 3')
-
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions4)
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1)
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
-  console.log('Uploaded item side dimensions 4')
+  console.log('Uploaded item side dimensions 1')
+
+/*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Uploaded item side dimensions 2') */
+
+/*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Uploaded item side dimensions 3') */
+
+/*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions4)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Uploaded item side dimensions 4') */
   
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions5)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 5')
-  //
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions6)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 6')
-  //
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions7)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 7')
-  //
-  // tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions8)
-  // receipt = await tx.wait()
-  // if (!receipt.status) {
-  //   throw Error(`Error:: ${tx.hash}`)
-  // }
-  // console.log('Uploaded item side dimensions 8')
+/*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions5)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Uploaded item side dimensions 5') */
+  
+ /*  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions6)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Uploaded item side dimensions 6') */
+  
+ /*  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions7)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Uploaded item side dimensions 7') */
+  
+/*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions8)
+  receipt = await tx.wait()
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`)
+  }
+  console.log('Uploaded item side dimensions 8') */
 
 
-      // uint8 internal constant WEARABLE_SLOT_BODY = 0;
-    // uint8 internal constant WEARABLE_SLOT_FACE = 1;
-    // uint8 internal constant WEARABLE_SLOT_EYES = 2;
-    // uint8 internal constant WEARABLE_SLOT_HEAD = 3;
+    // BODY = 0;
+    // FACE = 1;
+    // EYES = 2;
+    // HEAD = 3;
     // RIGHT = 4;
     // LEFT = 5;
-    // uint8 internal constant WEARABLE_SLOT_PET = 6;
-    // uint8 internal constant WEARABLE_SLOT_BG = 7;
+    // PET = 6;
+    // BG = 7;
 
     // back x:12, y:32
     // side x:20, y:32
 
   const numTraits1 = [99, 99, 99, 99, 1, 1];
-  const wearables1 = [160, 159, 0, 161, 158, 158, 156, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  const wearables1 = [0, 0, 66, 0, 9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
   const sidePreview = await svgViewsFacet.previewSideAavegotchi("1", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
   console.log("Side Preview: ", sidePreview);
