@@ -84,6 +84,9 @@ async function main () {
   const updatingLeftSvgs = [205, 212, 223, 229]
   const updatingRightSvgs = [205, 212, 223, 229]
   const updatingBackSvgs = [201, 205, 212, 217, 223, 229]
+  const updatingSleevesLeft = [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45]
+  const updatingSleevesRight = [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45]
+  const updatingSleevesBack = [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45]
 
   //wearables
   for (var i = 0; i < updatingLeftSvgs.length; i++) {
@@ -98,6 +101,22 @@ async function main () {
     await updateSvgs(wearablesBackSvgs, 'wearables-back', updatingBackSvgs[i], testing, itemSigner)
   }
 
+  //sleeves
+/*   for (var i = 0; i < updatingSleevesLeft.length; i++) {
+    await updateSvgs(wearablesLeftSleeveSvgs, 'wearables-left', updatingSleevesLeft[i], testing, itemSigner)
+  }
+
+  for (var i = 0; i < updatingSleevesRight.length; i++) {
+    await updateSvgs(wearablesRightSleeveSvgs, 'wearables-right', updatingSleevesRight[i], testing, itemSigner)
+  }
+
+  for (var i = 0; i < updatingSleevesBack.length; i++) {
+    await updateSvgs(wearablesBackSleeveSvgs, 'wearables-back', updatingSleevesBack[i], testing, itemSigner)
+  } */
+  console.log("Sleeves Array Length: ", wearablesLeftSleeveSvgs.length)
+  console.log("Updating Sleeves Array Length: ", updatingSleevesLeft.length)
+
+  //dimensions
   const svgViewsFacet = await ethers.getContractAt('SvgViewsFacet', diamondAddress, itemSigner)
 
 /*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1)
@@ -170,7 +189,7 @@ async function main () {
     // side x:20, y:32
 
   const numTraits1 = [99, 99, 99, 99, 1, 1];
-  const wearables1 = [0, 0, 0, 0, 205, 205, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  const wearables1 = [203, 0, 0, 0, 205, 205, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
   const sidePreview = await svgViewsFacet.previewSideAavegotchi("1", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
   console.log("Side Preview: ", sidePreview);

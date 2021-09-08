@@ -4467,7 +4467,7 @@ let sideViewDimensions4 = [
     itemId: 203,
     name: "Gamer Jacket",
     side: "left",
-    dimensions: {x:20, y:32, width:4, height:9},
+    dimensions: {x:20, y:33, width:4, height:9},
   },
   {
     itemId: 203,
@@ -4503,7 +4503,7 @@ let sideViewDimensions4 = [
     itemId: 203,
     name: "Gamer Jacket",
     side: "right",
-    dimensions: {x:20, y:32, width:4, height:9},
+    dimensions: {x:20, y:33, width:4, height:9},
   },
   {
     itemId: 202,
@@ -4813,13 +4813,13 @@ let sideViewDimensions5 = [
     itemId: 207,
     name: "Biker Jacket",
     side: "right",
-    dimensions: {x:15, y:33, width:34, height:20},
+    dimensions: {x:20, y:33, width:34, height:20},
   },
   {
     itemId: 207,
     name: "Biker Jacket",
     side: "back",
-    dimensions: {x:20, y:33, width:24, height:20},
+    dimensions: {x:15, y:33, width:24, height:20},
   },
   {
     itemId: 207,
