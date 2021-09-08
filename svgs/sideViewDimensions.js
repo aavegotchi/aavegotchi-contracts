@@ -4616,7 +4616,7 @@ let sideViewDimensions4 = [
   {
     itemId: 201,
     name: "Steampunk Glove",
-    side: "back left",
+    side: "back",
     dimensions: {x:1, y:33, width:14, height:11},
   },
   {
@@ -4628,7 +4628,7 @@ let sideViewDimensions4 = [
   {
     itemId: 201,
     name: "Steampunk Glove",
-    side: "back",
+    side: "back right",
     dimensions: {x:1, y:33, width:14, height:11},
   },
   {
