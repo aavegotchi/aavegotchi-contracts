@@ -25,7 +25,7 @@ describe("testing tokenIdsWitKinship", async function () {
     expect(gotchis.length).to.equal(2);
   });
 
-  it("Should return all four gotch gotchis", async () => {
+  it("Should return all four user gotchis", async () => {
     const gotchis = await gameFacet.tokenIdsWithKinship(
       user,
       2, //input here does not matter
