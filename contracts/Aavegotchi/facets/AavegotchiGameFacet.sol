@@ -174,21 +174,15 @@ contract AavegotchiGameFacet is Modifiers {
         tokenIds_ = s.petOperatorTokenIds[_petOperator];
     }
 
-    function petOperator(uint256 _tokenId) external view returns (address petOperator_) {
-        petOperator_ = s.petOperators[_tokenId];
+    function petOperators(uint256 _tokenId) external view returns (address[] memory petOperators_) {
+        petOperators_ = s.petOperators[_tokenId];
     }
 
-    function removePetOperator(uint256[] calldata _tokenIds) external {
+    function removePetOperator(uint256 _tokenId, address _petOperator) external {
         address sender = LibMeta.msgSender();
-        for (uint256 i; i < _tokenIds.length; i++) {
-            uint256 tokenId = _tokenIds[i];
-            address l_petOperator = s.petOperators[tokenId];
-            if (l_petOperator != address(0)) {
-                address owner = s.aavegotchis[tokenId].owner;
-                require(owner == sender || l_petOperator == sender, "AavegotchiGameFacet: Not authorized to remove pet operator");
-                LibAavegotchi.removePetOperator(tokenId);
-            }
-        }
+        address owner = s.aavegotchis[_tokenId].owner;
+        require(owner == sender || _petOperator == sender, "AavegotchiGameFacet: Not authorized to remove pet operator");
+        LibAavegotchi.removePetOperator(_tokenId, _petOperator);
     }
 
     //Advertise your PO
@@ -211,31 +205,50 @@ contract AavegotchiGameFacet is Modifiers {
         info_.description_ = s.petOperatorInfo[_operator].description;
     }
 
-    function setPetOperator(address _petOperator, uint256[] calldata _tokenIds) external {
-        require(_petOperator != address(0), "AavegotchiGameFacet: pet operator can't be address(0)");
+    function isPetOperator(uint256 _tokenId, address _address) public view returns (bool) {
+        bool isOperator = false;
+        address[] memory operators = s.petOperators[_tokenId];
+        for (uint256 index = 0; index < operators.length; index++) {
+            if (_address == operators[index]) {
+                isOperator = true;
+                break;
+            }
+        }
+        return isOperator;
+    }
 
-        require(bytes(s.petOperatorInfo[_petOperator].name).length > 0, "AavegotchiGameFacet: Pet Operator not registered");
-
+    function setPetOperators(address[] memory _petOperators, uint256[] calldata _tokenIds) external {
         address sender = LibMeta.msgSender();
-        for (uint256 i; i < _tokenIds.length; i++) {
+
+        //Iterate through each token
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             address owner = s.aavegotchis[tokenId].owner;
-            require(owner == sender, "AavegotchiGameFacet: Must be owner to set petter");
 
-            //PO Already set
-            if (s.petOperators[tokenId] == _petOperator) {
-                continue;
+            //@todo -- modify to allow petOperator to also set petter
+            require(owner == sender || isPetOperator(tokenId, sender) == true, "AavegotchiGameFacet: Must be owner to set petter");
+
+            //First remove all Pet Operators for this tokenID
+            address[] memory currentPetOperators = s.petOperators[tokenId];
+            for (uint256 ind = 0; ind < currentPetOperators.length; ind++) {
+                LibAavegotchi.removePetOperator(tokenId, currentPetOperators[ind]);
             }
 
-            //Replace PO with new one
-            if (s.petOperators[tokenId] != address(0)) {
-                LibAavegotchi.removePetOperator(tokenId);
+            s.petOperators[tokenId] = _petOperators;
+
+            //Iterate through each petOperator and add it
+            for (uint256 index = 0; index < _petOperators.length; index++) {
+                address petOperator = _petOperators[index];
+
+                require(petOperator != address(0), "AavegotchiGameFacet: pet operator can't be address(0)");
+
+                require(s.petOperatorTokenIds[petOperator].length <= 100, "AavegotchiGameFacet: Pet operator can't have more than 100 aavegotchis");
+
+                s.petOperatorTokenIds[petOperator].push(tokenId);
+
+                emit PetOperatorSet(tokenId, petOperator);
             }
-            s.petOperatorTokenIds[_petOperator].push(tokenId);
-            s.petOperators[tokenId] = _petOperator;
-            emit PetOperatorSet(tokenId, _petOperator);
         }
-        require(s.petOperatorTokenIds[_petOperator].length <= 100, "AavegotchiGameFacet: Pet operator can't have more than 100 aavegotchis");
     }
 
     function interact(uint256[] calldata _tokenIds) external {

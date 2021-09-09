@@ -241,8 +241,7 @@ struct AppStorage {
     mapping(uint256 => uint256) sleeves;
     mapping(address => bool) itemManagers;
     mapping(address => GameManager) gameManagers;
-    //Pet operator
-    mapping(uint256 => address) petOperators;
+    mapping(uint256 => address[]) petOperators; //Pet operators for a token
     mapping(address => uint256[]) petOperatorTokenIds;
     mapping(address => PetOperatorInfo) petOperatorInfo;
 }

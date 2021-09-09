@@ -2,16 +2,7 @@
 pragma solidity 0.8.1;
 
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
-import {
-    LibAppStorage,
-    AavegotchiCollateralTypeInfo,
-    AppStorage,
-    Aavegotchi,
-    ItemType,
-    NUMERIC_TRAITS_NUM,
-    EQUIPPED_WEARABLE_SLOTS,
-    PORTAL_AAVEGOTCHIS_NUM
-} from "./LibAppStorage.sol";
+import {LibAppStorage, AavegotchiCollateralTypeInfo, AppStorage, Aavegotchi, ItemType, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM} from "./LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
@@ -242,13 +233,15 @@ library LibAavegotchi {
         return level_ + 1;
     }
 
-    function removePetOperator(uint256 tokenId) internal {
+    function removePetOperator(uint256 tokenId, address petOperator) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        address petOperator = s.petOperators[tokenId];
+
         if (petOperator != address(0)) {
+            //todo: Remove this tokenID from the array managed by petOperator
             uint256 index;
             uint256 length = s.petOperatorTokenIds[petOperator].length;
             for (; index < length; index++) {
+                //Get index of the tokenID in the array
                 if (s.petOperatorTokenIds[petOperator][index] == tokenId) {
                     break;
                 }
@@ -259,9 +252,32 @@ library LibAavegotchi {
                 s.petOperatorTokenIds[petOperator][index] = lastTokenId;
             }
             s.petOperatorTokenIds[petOperator].pop();
-            delete s.petOperators[tokenId];
+
+            uint256 operatorIndex;
+            uint256 operatorsLength = s.petOperators[tokenId].length;
+            for (; operatorIndex < length; operatorIndex++) {
+                //Get index of the tokenID in the array
+                if (s.petOperators[tokenId][operatorIndex] == petOperator) {
+                    break;
+                }
+            }
+            uint256 operatorLastIndex = operatorsLength - 1;
+            if (operatorLastIndex != operatorIndex) {
+                address lastOperator = s.petOperators[tokenId][operatorLastIndex];
+                s.petOperators[tokenId][operatorIndex] = lastOperator;
+            }
+            s.petOperators[tokenId].pop();
 
             emit PetOperatorRemoved(tokenId, petOperator);
+        }
+    }
+
+    function removeAllPetOperators(uint256 tokenId) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        address[] memory petOperators = s.petOperators[tokenId];
+
+        for (uint256 index = 0; index < petOperators.length; index++) {
+            removePetOperator(tokenId, petOperators[index]);
         }
     }
 
@@ -371,7 +387,7 @@ library LibAavegotchi {
 
         // remove pet operator if not transferring to Diamond
         if (_to != address(this)) {
-            removePetOperator(_tokenId);
+            removeAllPetOperators(_tokenId);
         }
 
         // remove
