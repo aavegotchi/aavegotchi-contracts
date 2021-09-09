@@ -47,20 +47,24 @@ async function main() {
   await gotchiGamefacet.deployed();
   console.log("Deployed AavegotchiGameFacet");
 
-  const gotchiMinimalFunc = [
-    getSelector(`function tokenIdsWithKinship(address _owner) external`),
+  const fetchGothiFunc = [
+    getSelector(` function tokenIdsWithKinship(
+      address _owner,
+      uint256 _count,
+      uint256 _skip,bool all
+  ) external`),
   ];
 
   let existingAavegotchiGameGuncs = getSelectors(gotchiGamefacet);
 
-  for (const selector of gotchiMinimalFunc) {
+  for (const selector of fetchGothiFunc) {
     if (!existingAavegotchiGameGuncs.includes(selector)) {
       throw Error(`Selector ${selector} not found`);
     }
   }
 
   existingAavegotchiGameGuncs = existingAavegotchiGameGuncs.filter(
-    (selector) => !gotchiMinimalFunc.includes(selector)
+    (selector) => !fetchGothiFunc.includes(selector)
   );
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
@@ -69,7 +73,12 @@ async function main() {
     {
       facetAddress: gotchiGamefacet.address,
       action: FacetCutAction.Add,
-      functionSelectors: gotchiMinimalFunc,
+      functionSelectors: fetchGothiFunc,
+    },
+    {
+      facetAddress: gotchiGamefacet.address,
+      action: FacetCutAction.Replace,
+      functionSelectors: existingAavegotchiGameGuncs,
     },
   ];
 
@@ -103,13 +112,12 @@ async function main() {
     await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx);
   }
 }
-
 if (require.main === module) {
   main()
-    .then(() => process.exit())
+    .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
+      process.exit(1);
     });
 }
-
-exports.addGotchiMinimal = main;
+exports.tokenIdsWithKinship = main;

@@ -129,16 +129,15 @@ contract AavegotchiGameFacet is Modifiers {
     //     }
     // }
 
-    function fetchGotchis(
+    function tokenIdsWithKinship(
         address _owner,
         uint256 _count,
         uint256 _skip,
         bool all
     ) external view returns (TokenIdsWithKinship[] memory tokenIdsWithKinship_) {
         uint32[] memory tokenIds = s.ownerTokenIds[_owner];
-        uint256 returnCount;
         if (all) {
-            returnCount = tokenIds.length;
+            tokenIdsWithKinship_ = new TokenIdsWithKinship[](tokenIds.length);
             for (uint256 i; i < tokenIds.length; i++) {
                 //Only return claimed Aavegotchis
                 uint32 tokenId = tokenIds[i];
@@ -152,8 +151,8 @@ contract AavegotchiGameFacet is Modifiers {
         if (!all) {
             tokenIdsWithKinship_ = new TokenIdsWithKinship[](_count);
             uint256 arrCounter = 0;
-            require(_skip + _count <= tokenIds.length, "fetchGotchis: Owner does not have up to that amount of tokens");
-            for (uint256 i = _skip - 1; i < _count + _skip; i++) {
+            require(_skip + _count <= tokenIds.length, "gameFacet: Owner does not have up to that amount of tokens");
+            for (uint256 i = _skip; i < _count + _skip; i++) {
                 uint32 tokenId = tokenIds[i];
                 if (s.aavegotchis[tokenIds[i]].status == 3) {
                     tokenIdsWithKinship_[arrCounter].tokenId = tokenId;
