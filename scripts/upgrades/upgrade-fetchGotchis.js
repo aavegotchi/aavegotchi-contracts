@@ -51,7 +51,7 @@ async function main() {
     getSelector(` function fetchGotchis(
       address _owner,
       uint256 _count,
-      uint256 _skip
+      uint256 _skip,bool all
   ) external`),
   ];
 

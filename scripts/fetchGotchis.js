@@ -15,7 +15,8 @@ async function main() {
   const minimalDetails = await gameFacet.fetchGotchis(
     "0x4e7bf3694962fc482a16d60fd78f99db9c4c52b0",
     30,
-    600
+    600,
+    false
   );
   console.log(minimalDetails);
 }

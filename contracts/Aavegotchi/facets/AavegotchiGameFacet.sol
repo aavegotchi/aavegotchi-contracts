@@ -132,19 +132,35 @@ contract AavegotchiGameFacet is Modifiers {
     function fetchGotchis(
         address _owner,
         uint256 _count,
-        uint256 _skip
+        uint256 _skip,
+        bool all
     ) external view returns (TokenIdsWithKinship[] memory tokenIdsWithKinship_) {
         uint32[] memory tokenIds = s.ownerTokenIds[_owner];
-        tokenIdsWithKinship_ = new TokenIdsWithKinship[](_count);
-        uint256 arrCounter = 0;
-        require(_skip + _count <= tokenIds.length, "fetchGotchis: Owner does not have up to that amount of tokens");
-        for (uint256 i = _skip - 1; i < _count + _skip; i++) {
-            uint32 tokenId = tokenIds[i];
-            if (s.aavegotchis[tokenIds[i]].status == 3) {
-                tokenIdsWithKinship_[arrCounter].tokenId = tokenId;
-                tokenIdsWithKinship_[arrCounter].kinship = LibAavegotchi.kinship(tokenId);
-                tokenIdsWithKinship_[arrCounter].lastInteracted = s.aavegotchis[tokenId].lastInteracted;
-                arrCounter++;
+        uint256 returnCount;
+        if (all) {
+            returnCount = tokenIds.length;
+            for (uint256 i; i < tokenIds.length; i++) {
+                //Only return claimed Aavegotchis
+                uint32 tokenId = tokenIds[i];
+                if (s.aavegotchis[tokenIds[i]].status == 3) {
+                    tokenIdsWithKinship_[i].tokenId = tokenId;
+                    tokenIdsWithKinship_[i].kinship = LibAavegotchi.kinship(tokenId);
+                    tokenIdsWithKinship_[i].lastInteracted = s.aavegotchis[tokenId].lastInteracted;
+                }
+            }
+        }
+        if (!all) {
+            tokenIdsWithKinship_ = new TokenIdsWithKinship[](_count);
+            uint256 arrCounter = 0;
+            require(_skip + _count <= tokenIds.length, "fetchGotchis: Owner does not have up to that amount of tokens");
+            for (uint256 i = _skip - 1; i < _count + _skip; i++) {
+                uint32 tokenId = tokenIds[i];
+                if (s.aavegotchis[tokenIds[i]].status == 3) {
+                    tokenIdsWithKinship_[arrCounter].tokenId = tokenId;
+                    tokenIdsWithKinship_[arrCounter].kinship = LibAavegotchi.kinship(tokenId);
+                    tokenIdsWithKinship_[arrCounter].lastInteracted = s.aavegotchis[tokenId].lastInteracted;
+                    arrCounter++;
+                }
             }
         }
     }
