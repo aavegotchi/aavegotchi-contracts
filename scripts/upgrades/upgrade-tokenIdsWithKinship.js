@@ -47,8 +47,8 @@ async function main() {
   await gotchiGamefacet.deployed();
   console.log("Deployed AavegotchiGameFacet");
 
-  const fetchGothiFunc = [
-    getSelector(` function tokenIdsWithKinship(
+  const fetchGotchiFunc = [
+    getSelector(`function tokenIdsWithKinship(
       address _owner,
       uint256 _count,
       uint256 _skip,bool all
@@ -57,14 +57,14 @@ async function main() {
 
   let existingAavegotchiGameGuncs = getSelectors(gotchiGamefacet);
 
-  for (const selector of fetchGothiFunc) {
+  for (const selector of fetchGotchiFunc) {
     if (!existingAavegotchiGameGuncs.includes(selector)) {
       throw Error(`Selector ${selector} not found`);
     }
   }
 
   existingAavegotchiGameGuncs = existingAavegotchiGameGuncs.filter(
-    (selector) => !fetchGothiFunc.includes(selector)
+    (selector) => !fetchGotchiFunc.includes(selector)
   );
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
