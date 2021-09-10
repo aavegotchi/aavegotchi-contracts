@@ -23,15 +23,20 @@ describe("testing tokenIdsWitKinship", async function () {
   it("Should only return the first two gotchis", async () => {
     const gotchis = await gameFacet.tokenIdsWithKinship(user, 2, 0, false);
     expect(gotchis.length).to.equal(2);
+
+    console.log("gotchis:", gotchis);
   });
 
   it("Should return all four user gotchis", async () => {
     const gotchis = await gameFacet.tokenIdsWithKinship(
       user,
-      2, //input here does not matter
+      0, //input here does not matter
       0, //inut here does not matter
       true
     );
+
+    console.log("gotchis:", gotchis);
+
     expect(gotchis.length).to.equal(4);
   });
 
