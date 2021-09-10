@@ -1,15 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {
-    LibAavegotchi,
-    AavegotchiInfo,
-    NUMERIC_TRAITS_NUM,
-    AavegotchiCollateralTypeInfo,
-    PortalAavegotchiTraitsIO,
-    InternalPortalAavegotchiTraitsIO,
-    PORTAL_AAVEGOTCHIS_NUM
-} from "../libraries/LibAavegotchi.sol";
+import {LibAavegotchi, AavegotchiInfo, NUMERIC_TRAITS_NUM, AavegotchiCollateralTypeInfo, PortalAavegotchiTraitsIO, InternalPortalAavegotchiTraitsIO, PORTAL_AAVEGOTCHIS_NUM} from "../libraries/LibAavegotchi.sol";
 
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
 
@@ -116,6 +108,37 @@ contract AavegotchiGameFacet is Modifiers {
         score_ = LibAavegotchi.kinship(_tokenId);
     }
 
+    struct TokenIdsWithKinship {
+        uint256 tokenId;
+        uint256 kinship;
+        uint256 lastInteracted;
+    }
+
+    function tokenIdsWithKinship(
+        address _owner,
+        uint256 _count,
+        uint256 _skip,
+        bool all
+    ) external view returns (TokenIdsWithKinship[] memory tokenIdsWithKinship_) {
+        uint32[] memory tokenIds = s.ownerTokenIds[_owner];
+        uint256 length = all ? tokenIds.length : _count;
+        tokenIdsWithKinship_ = new TokenIdsWithKinship[](length);
+
+        if (!all) {
+            require(_skip + _count <= tokenIds.length, "gameFacet: Owner does not have up to that amount of tokens");
+        }
+
+        for (uint256 i; i < length; i++) {
+            uint256 offset = i + _skip;
+            uint32 tokenId = tokenIds[offset];
+            if (s.aavegotchis[tokenId].status == 3) {
+                tokenIdsWithKinship_[i].tokenId = tokenId;
+                tokenIdsWithKinship_[i].kinship = LibAavegotchi.kinship(tokenId);
+                tokenIdsWithKinship_[i].lastInteracted = s.aavegotchis[tokenId].lastInteracted;
+            }
+        }
+    }
+
     function claimAavegotchi(
         uint256 _tokenId,
         uint256 _option,
@@ -160,43 +183,6 @@ contract AavegotchiGameFacet is Modifiers {
         s.aavegotchis[_tokenId].name = _name;
         emit SetAavegotchiName(_tokenId, existingName, _name);
     }
-
-    // function pet() external {
-    //     address sender = LibMeta.msgSender();
-    //     uint256[] memory tokenIds = s.petOperatorTokenIds[sender];
-    //     address ghstContract = s.ghstContract;                
-    //     for (uint256 i; i < tokenIds.length; i++) {
-    //         uint256 tokenId = tokenIds[i];            
-    //         address owner = s.aavegotchis[tokenId].owner;
-    //         uint256 balance = IERC20(ghstContract).balanceOf(owner);
-    //         if(balance >= 3e17 && LibAavegotchi.interact(tokenId)) {
-    //             if(owner != address(0)) {
-    //                 LibERC20.transferFrom(ghstContract, owner, s.pixelCraft, 1e17);
-    //                 LibERC20.transferFrom(ghstContract, owner, sender, 2e17);
-    //             }
-    //         }
-    //     }
-    // }
-
-    // function petOperatorTokenIds(address _petOperator) external view returns (uint256[] memory tokenIds_) {
-    //     tokenIds_ = s.petOperatorTokenIds[_petOperator];
-    // }
-
-    // function removePetOperator(address _petOperator, uint256[] calldata _tokenIds) internal {
-
-    // }
-
-    // function addPetOperator(address _petOperator, uint256[] calldata _tokenIds) external {
-    //     address sender = LibMeta.msgSender();
-    //     for (uint256 i; i < _tokenIds.length; i++) {
-    //         uint256 tokenId = _tokenIds[i];
-    //         address owner = s.aavegotchis[tokenId].owner;
-    //         require(owner == sender, "Must be owner to set petter");
-    //         s.petOperatorTokenIds[_petOperator].push(tokenId);
-    //         s.petOperators[owner][tokenId] = _petOperator;    
-    //     }
-
-    // }
 
     function interact(uint256[] calldata _tokenIds) external {
         address sender = LibMeta.msgSender();
