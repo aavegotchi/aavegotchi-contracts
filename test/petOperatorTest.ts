@@ -1,11 +1,19 @@
 /* global describe it before ethers network */
 /* eslint prefer-const: "off" */
 
+//@ts-ignore
+import { ethers, network } from "hardhat";
+import { upgradePetOperator } from "../scripts/upgrades/upgrade-petOperator";
+import { truffleAssert } from "truffle-assertions";
+import { expect } from "chai";
+
+/*
 const {
   upgradePetOperator,
 } = require("../scripts/upgrades/upgrade-petOperator.js");
 const truffleAssert = require("truffle-assertions");
 const { expect } = require("chai");
+*/
 
 async function impersonate(address, contract) {
   await network.provider.request({
@@ -30,11 +38,11 @@ describe("Testing Pet Operator Upgrade", async function () {
   let tokenIdOne;
   let tokenIdTwo;
   let tokenIdThree;
-  let ghst;
+  // let ghst;
 
   // this.timeout(300000)
   before(async function () {
-    await hre.network.provider.request({
+    await network.provider.request({
       method: "hardhat_reset",
       params: [
         {
@@ -55,10 +63,13 @@ describe("Testing Pet Operator Upgrade", async function () {
     //     }
     //   }]
     // })
+
+    /*
     ghst = await ethers.getContractAt(
       "IERC20",
       "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7"
     );
+    */
     aavegotchiFacet = await ethers.getContractAt(
       "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
       diamondAddress
@@ -80,6 +91,7 @@ describe("Testing Pet Operator Upgrade", async function () {
     thirdOwner = await aavegotchiFacet.ownerOf(tokenIdThree);
   });
 
+  /*
   it("Register Pet Operator", async function () {
     aavegotchiFacet = await impersonate(firstOwner, aavegotchiFacet);
     aavegotchiGameFacet = await impersonate(firstOwner, aavegotchiGameFacet);
@@ -89,6 +101,7 @@ describe("Testing Pet Operator Upgrade", async function () {
       "The best petting shop in town"
     );
   });
+  */
 
   it("Transfer Aavegotchi", async function () {
     aavegotchiFacet = await impersonate(firstOwner, aavegotchiFacet);
@@ -120,9 +133,10 @@ describe("Testing Pet Operator Upgrade", async function () {
   it("Should set Pet Operator when owner try to set Pet Operator", async function () {
     aavegotchiGameFacet = await impersonate(secondOwner, aavegotchiGameFacet);
 
-    const tx = await aavegotchiGameFacet.setPetOperators([petOperator], [
-      tokenIdOne /*tokenIdTwo*/,
-    ]);
+    const tx = await aavegotchiGameFacet.setPetOperators(
+      [petOperator],
+      [tokenIdOne /*tokenIdTwo*/]
+    );
     const receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Transaction failed: ${tx.hash}`);
@@ -137,9 +151,10 @@ describe("Testing Pet Operator Upgrade", async function () {
   it("Should set Pet Operator when pet operator try to set another Pet Operator", async function () {
     aavegotchiGameFacet = await impersonate(petOperator, aavegotchiGameFacet);
 
-    const tx = await aavegotchiGameFacet.setPetOperators([thirdOwner], [
-      tokenIdOne /*tokenIdTwo*/,
-    ]);
+    const tx = await aavegotchiGameFacet.setPetOperators(
+      [thirdOwner],
+      [tokenIdOne /*tokenIdTwo*/]
+    );
     const receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Transaction failed: ${tx.hash}`);
@@ -151,7 +166,7 @@ describe("Testing Pet Operator Upgrade", async function () {
     expect(tokenIds).to.have.members([tokenIdOne /*, tokenIdTwo*/]);
 
     // set new pet operator
-    petOperator = thirdOwner
+    petOperator = thirdOwner;
   });
 
   it("Remove pet operator by transfer", async function () {
