@@ -45,13 +45,14 @@ async function main () {
   console.log('Deployed facet:', facet.address)
 
   const newFuncs = [
-    getSelector('function pet() external'),
+    getSelector('function petAll() external'),
     getSelector('function petOperatorInfo(address _operator) external'),
     getSelector('function petOperatorTokenIds(address _petOperator) external view returns (uint256[] memory tokenIds_)'),
-    getSelector('function removePetOperator(uint256[] calldata _tokenIds) external'),
-    getSelector('function setPetOperator(address _petOperator, uint256[] calldata _tokenIds) external'),
-    getSelector('function petOperator(uint256 _tokenId) external view returns (address petOperator_)'),
-    getSelector('function registerAsPetOperator(uint256 _rate, string calldata _name, string calldata _description) external')
+    getSelector('function removePetOperator(uint256 _tokenId, address _petOperator) external'),
+    getSelector('function isPetOperator(uint256 _tokenId, address _address) public view returns (bool)'),
+    getSelector('function setPetOperators(address[] memory _petOperators, uint256[] calldata _tokenIds) external'),
+    getSelector('function petOperators(uint256 _tokenId) external view returns (address[] memory petOperators_)'),
+    getSelector('function registerAsPetOperator(string calldata _name, string calldata _description) external')
   ]
   let existingFuncs = getSelectors(facet)
   for (const selector of newFuncs) {

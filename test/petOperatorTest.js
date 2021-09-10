@@ -84,9 +84,7 @@ describe("Testing Pet Operator Upgrade", async function () {
     aavegotchiFacet = await impersonate(firstOwner, aavegotchiFacet);
     aavegotchiGameFacet = await impersonate(firstOwner, aavegotchiGameFacet);
 
-    const rate = ethers.utils.parseEther("0.3");
     await aavegotchiGameFacet.registerAsPetOperator(
-      rate,
       "Coder Dan's Pet Shop",
       "The best petting shop in town"
     );
@@ -110,19 +108,19 @@ describe("Testing Pet Operator Upgrade", async function () {
     expect(await aavegotchiFacet.ownerOf(tokenIdOne)).to.equal(secondOwner);
   });
 
-  it("Only owner can set Pet Operator", async function () {
+  it("Reject if no owner and pet operator when try to set Pet Operator", async function () {
     aavegotchiGameFacet = await impersonate(thirdOwner, aavegotchiGameFacet);
 
     await truffleAssert.reverts(
-      aavegotchiGameFacet.setPetOperator(petOperator, [tokenIdOne]),
+      aavegotchiGameFacet.setPetOperators([petOperator], [tokenIdOne]),
       "AavegotchiGameFacet: Must be owner to set petter"
     );
   });
 
-  it("Should set Pet Operator", async function () {
+  it("Should set Pet Operator when owner try to set Pet Operator", async function () {
     aavegotchiGameFacet = await impersonate(secondOwner, aavegotchiGameFacet);
 
-    const tx = await aavegotchiGameFacet.setPetOperator(petOperator, [
+    const tx = await aavegotchiGameFacet.setPetOperators([petOperator], [
       tokenIdOne /*tokenIdTwo*/,
     ]);
     const receipt = await tx.wait();
@@ -136,110 +134,24 @@ describe("Testing Pet Operator Upgrade", async function () {
     expect(tokenIds).to.have.members([tokenIdOne /*, tokenIdTwo*/]);
   });
 
-  it("Pet Operator should pet Aavegotchis and deduct funds from Owner", async function () {
+  it("Should set Pet Operator when pet operator try to set another Pet Operator", async function () {
     aavegotchiGameFacet = await impersonate(petOperator, aavegotchiGameFacet);
 
-    const details = await aavegotchiGameFacet.petOperatorInfo(petOperator);
-
-    const petRate = details.rate_;
-
-    expect(petRate).to.equal(ethers.utils.parseEther("0.3"));
-
-    // console.log('pet rate:',petRate.toString())
-
-    let petOperatorShare = ethers.BigNumber.from(
-      ethers.utils.parseEther("0.21")
-    );
-    let pixelcraftShare = ethers.BigNumber.from(ethers.utils.parseEther("0.09"));
-
-    // console.log('pet op share:',petOperatorShare.toString())
-    // console.log('pc share:',pixelcraftShare.toString())
-
-    let operatorOldBal = ethers.BigNumber.from(
-      await ghst.balanceOf(petOperator)
-    );
-    let ownerOldBal = ethers.BigNumber.from(await ghst.balanceOf(secondOwner));
-
-    // console.log('operator old bal:',operatorOldBal.toString())
-    // console.log('old bal:',ownerOldBal.toString())
-
-    let beforePetAavegotchi = await aavegotchiFacet.getAavegotchi(tokenIdOne);
-
-    const tx = await aavegotchiGameFacet.pet();
+    const tx = await aavegotchiGameFacet.setPetOperators([thirdOwner], [
+      tokenIdOne /*tokenIdTwo*/,
+    ]);
     const receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Transaction failed: ${tx.hash}`);
     }
 
-    let afterPetAavegotchi = await aavegotchiFacet.getAavegotchi(tokenIdOne);
-    expect(afterPetAavegotchi.kinship).to.gt(beforePetAavegotchi.kinship);
+    const tokenIds = (
+      await aavegotchiGameFacet.petOperatorTokenIds(thirdOwner)
+    ).map((x) => x.toNumber());
+    expect(tokenIds).to.have.members([tokenIdOne /*, tokenIdTwo*/]);
 
-    let operatorNewBal = ethers.BigNumber.from(
-      await ghst.balanceOf(petOperator)
-    );
-    let ownerNewBal = ethers.BigNumber.from(await ghst.balanceOf(secondOwner));
-
-    // console.log("owner new bal:", ownerNewBal.toString());
-    // console.log("operator new bal:", operatorNewBal.toString());
-
-    //The operator earns 0.2 GHST per Pet. Two gotchis were pet
-    expect(operatorNewBal).to.equal(operatorOldBal.add(petOperatorShare));
-
-    //The Owner spends 0.3 GHST per pet
-    expect(ownerNewBal).to.equal(ownerOldBal.sub(petRate));
-  });
-
-  it("Should not charge the owner if Pet within 12 hrs", async function () {
-    aavegotchiGameFacet = await impersonate(petOperator, aavegotchiGameFacet);
-
-    let operatorOldBal = ethers.BigNumber.from(
-      await ghst.balanceOf(petOperator)
-    );
-    let ownerOldBal = ethers.BigNumber.from(await ghst.balanceOf(secondOwner));
-
-    const tx = await aavegotchiGameFacet.pet();
-
-    const receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Transaction failed: ${tx.hash}`);
-    }
-
-    let operatorNewBal = ethers.BigNumber.from(
-      await ghst.balanceOf(firstOwner)
-    );
-    let ownerNewBal = ethers.BigNumber.from(await ghst.balanceOf(secondOwner));
-
-    //The operator earns 0.2 GHST per Pet
-    expect(operatorNewBal).to.equal(operatorOldBal);
-
-    //The Owner spends 0.3 GHST per pet
-    expect(ownerNewBal).to.equal(ownerOldBal);
-  });
-
-  it("Cannot change rate if Aavegotchis are being managed", async function () {
-    aavegotchiGameFacet = await impersonate(petOperator, aavegotchiGameFacet);
-
-    let details = await aavegotchiGameFacet.petOperatorInfo(petOperator);
-
-    // console.log("details:", details);
-
-    expect(details.rate_).to.equal(ethers.utils.parseEther("0.3"));
-
-    const rate = ethers.utils.parseEther("0.5");
-    await truffleAssert.reverts(
-      aavegotchiGameFacet.registerAsPetOperator(
-        rate,
-        "Coder Dan's Pet Shop",
-        "The best petting shop in town"
-      ),
-      "AavegotchiGameFacet: Cannot update Pet Operator information with managed Aavegotchis"
-    );
-
-    details = await aavegotchiGameFacet.petOperatorInfo(petOperator);
-
-    // console.log("details:", details);
-
-    expect(details.rate_).to.equal(ethers.utils.parseEther("0.3"));
+    // set new pet operator
+    petOperator = thirdOwner
   });
 
   it("Remove pet operator by transfer", async function () {
@@ -248,11 +160,11 @@ describe("Testing Pet Operator Upgrade", async function () {
     ).map((x) => x.toNumber());
     expect(tokenIds).to.have.members([tokenIdOne /*tokenIdTwo*/]);
 
-    const currentPetOperator = await aavegotchiGameFacet.petOperator(
+    const currentPetOperators = await aavegotchiGameFacet.petOperators(
       tokenIdOne
     );
 
-    expect(currentPetOperator).to.equal(petOperator);
+    expect(currentPetOperators[0]).to.equal(petOperator);
 
     aavegotchiFacet = await impersonate(secondOwner, aavegotchiFacet);
 
@@ -273,21 +185,9 @@ describe("Testing Pet Operator Upgrade", async function () {
       /*tokenIdTwo*/
     ]);
 
-    const newPetOperator = await aavegotchiGameFacet.petOperator(tokenIdOne);
+    const newPetOperators = await aavegotchiGameFacet.petOperators(tokenIdOne);
 
-    expect(newPetOperator).to.equal(ethers.constants.AddressZero);
-  });
-
-  it("Cannot set rate lower than 0.3 GHST", async function () {
-    const rate = ethers.utils.parseEther("0.2");
-    await truffleAssert.reverts(
-      aavegotchiGameFacet.registerAsPetOperator(
-        rate,
-        "Coder Dan's Pet Shop",
-        "The best petting shop in town"
-      ),
-      "AavegotchiGameFacet: Pet rate too low"
-    );
+    expect(newPetOperators.length).to.equal(0);
   });
 
   /*
