@@ -336,11 +336,6 @@ library LibAavegotchi {
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
-        // remove pet operator if not transferring to Diamond
-        if (_to != address(this)) {
-            removeAllPetOperators(_tokenId);
-        }
-
         // remove
         uint256 index = s.ownerTokenIdIndexes[_from][_tokenId];
         uint256 lastIndex = s.ownerTokenIds[_from].length - 1;
