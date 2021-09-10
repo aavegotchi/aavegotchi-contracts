@@ -55,15 +55,15 @@ async function main() {
   ) external`),
   ];
 
-  let existingAavegotchiGameGuncs = getSelectors(gotchiGamefacet);
+  let existingAavegotchiGameFuncs = getSelectors(gotchiGamefacet);
 
   for (const selector of fetchGotchiFunc) {
-    if (!existingAavegotchiGameGuncs.includes(selector)) {
+    if (!existingAavegotchiGameFuncs.includes(selector)) {
       throw Error(`Selector ${selector} not found`);
     }
   }
 
-  existingAavegotchiGameGuncs = existingAavegotchiGameGuncs.filter(
+  existingAavegotchiGameFuncs = existingAavegotchiGameFuncs.filter(
     (selector) => !fetchGotchiFunc.includes(selector)
   );
 
@@ -78,7 +78,7 @@ async function main() {
     {
       facetAddress: gotchiGamefacet.address,
       action: FacetCutAction.Replace,
-      functionSelectors: existingAavegotchiGameGuncs,
+      functionSelectors: existingAavegotchiGameFuncs,
     },
   ];
 
