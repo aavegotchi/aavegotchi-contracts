@@ -152,7 +152,6 @@ struct GameManager {
     uint256 refreshTime;
 }
 
-
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -238,7 +237,7 @@ struct AppStorage {
     mapping(address => bool) itemManagers;
     mapping(address => GameManager) gameManagers;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
-  
+}
 
 library LibAppStorage {
     function diamondStorage() internal pure returns (AppStorage storage ds) {

@@ -1,4 +1,8 @@
-async function impersonate(address, contract) {
+//@ts-ignore
+import { network, ethers } from "hardhat";
+import { Contract } from "@ethersproject/contracts";
+
+export async function impersonate(address: string, contract: Contract) {
   await network.provider.request({
     method: "hardhat_impersonateAccount",
     params: [address],
@@ -8,8 +12,8 @@ async function impersonate(address, contract) {
   return contract;
 }
 
-async function resetChain() {
-  await hre.network.provider.request({
+export async function resetChain() {
+  await network.provider.request({
     method: "hardhat_reset",
     params: [
       {
@@ -20,5 +24,3 @@ async function resetChain() {
     ],
   });
 }
-
-exports.impersonate = impersonate;

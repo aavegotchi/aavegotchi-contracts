@@ -10,3 +10,4 @@ coverage
 scripts/dep.js
 scripts/portals.js
 hardhat.config.js
+hardhat.config.ts
