@@ -37,6 +37,8 @@
   "dependencies": {
     "@ethersproject/experimental": "^5.4.0",
     "@ethersproject/hardware-wallets": "https://github.com/mudgen/ethers-ledger.git",
+    "@types/chai": "^4.2.21",
+    "@types/mocha": "^9.0.0",
     "axios": "^0.21.1",
     "hardhat": "^2.2.1",
     "node-hid": "^2.1.1"
