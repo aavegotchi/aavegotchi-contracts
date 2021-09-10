@@ -35,9 +35,6 @@ contract AavegotchiGameFacet is Modifiers {
     event LockAavegotchi(uint256 indexed _tokenId, uint256 _time);
     event UnLockAavegotchi(uint256 indexed _tokenId, uint256 _time);
 
-    event PetOperatorRegistered(address indexed _address);
-    event PetOperatorSet(uint256 indexed _tokenId, address indexed _petOperator);
-
     function aavegotchiNameAvailable(string calldata _name) external view returns (bool available_) {
         available_ = s.aavegotchiNamesUsed[LibAavegotchi.validateAndLowerName(_name)];
     }
@@ -156,110 +153,20 @@ contract AavegotchiGameFacet is Modifiers {
         emit SetAavegotchiName(_tokenId, existingName, _name);
     }
 
-    function petAll() external {
-        address operator = LibMeta.msgSender();
-
-        //Get all the tokenIDs attached to the petOperator (cannot exceed 100 for gas purposes)
-        uint256[] memory tokenIds = s.petOperatorTokenIds[operator];
-
-        for (uint256 i; i < tokenIds.length; i++) {
-            uint256 tokenId = tokenIds[i];
-            address owner = s.aavegotchis[tokenId].owner;
-            if (owner == address(0)) continue;
-            else LibAavegotchi.interact(tokenId);
-        }
-    }
-
-    function petOperatorTokenIds(address _petOperator) external view returns (uint256[] memory tokenIds_) {
-        tokenIds_ = s.petOperatorTokenIds[_petOperator];
-    }
-
-    function petOperators(uint256 _tokenId) external view returns (address[] memory petOperators_) {
-        petOperators_ = s.petOperators[_tokenId];
-    }
-
-    function removePetOperator(uint256 _tokenId, address _petOperator) external {
-        address sender = LibMeta.msgSender();
-        address owner = s.aavegotchis[_tokenId].owner;
-        require(owner == sender || _petOperator == sender, "AavegotchiGameFacet: Not authorized to remove pet operator");
-        LibAavegotchi.removePetOperator(_tokenId, _petOperator);
-    }
-
-    //Advertise your PO
-    function registerAsPetOperator(string calldata _name, string calldata _description) external {
-        address sender = LibMeta.msgSender();
-        require(s.petOperatorTokenIds[sender].length == 0, "AavegotchiGameFacet: Cannot update Pet Operator information with managed Aavegotchis");
-        s.petOperatorInfo[sender].name = _name;
-        s.petOperatorInfo[sender].description = _description;
-
-        emit PetOperatorRegistered(sender);
-    }
-
-    struct PetOperatorInfo {
-        string name_;
-        string description_;
-    }
-
-    function petOperatorInfo(address _operator) external view returns (PetOperatorInfo memory info_) {
-        info_.name_ = s.petOperatorInfo[_operator].name;
-        info_.description_ = s.petOperatorInfo[_operator].description;
-    }
-
-    function isPetOperator(uint256 _tokenId, address _address) public view returns (bool) {
-        bool isOperator = false;
-        address[] memory operators = s.petOperators[_tokenId];
-        for (uint256 index = 0; index < operators.length; index++) {
-            if (_address == operators[index]) {
-                isOperator = true;
-                break;
-            }
-        }
-        return isOperator;
-    }
-
-    function setPetOperators(address[] memory _petOperators, uint256[] calldata _tokenIds) external {
-        address sender = LibMeta.msgSender();
-
-        //Iterate through each token
-        for (uint256 i = 0; i < _tokenIds.length; i++) {
-            uint256 tokenId = _tokenIds[i];
-            address owner = s.aavegotchis[tokenId].owner;
-
-            //@todo -- modify to allow petOperator to also set petter
-            require(owner == sender || isPetOperator(tokenId, sender) == true, "AavegotchiGameFacet: Must be owner to set petter");
-
-            //First remove all Pet Operators for this tokenID
-            address[] memory currentPetOperators = s.petOperators[tokenId];
-            for (uint256 ind = 0; ind < currentPetOperators.length; ind++) {
-                LibAavegotchi.removePetOperator(tokenId, currentPetOperators[ind]);
-            }
-
-            s.petOperators[tokenId] = _petOperators;
-
-            //Iterate through each petOperator and add it
-            for (uint256 index = 0; index < _petOperators.length; index++) {
-                address petOperator = _petOperators[index];
-
-                require(petOperator != address(0), "AavegotchiGameFacet: pet operator can't be address(0)");
-
-                require(s.petOperatorTokenIds[petOperator].length <= 100, "AavegotchiGameFacet: Pet operator can't have more than 100 aavegotchis");
-
-                s.petOperatorTokenIds[petOperator].push(tokenId);
-
-                emit PetOperatorSet(tokenId, petOperator);
-            }
-        }
-    }
-
     function interact(uint256[] calldata _tokenIds) external {
         address sender = LibMeta.msgSender();
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             address owner = s.aavegotchis[tokenId].owner;
-            require(
-                sender == owner || s.operators[owner][sender] || s.approved[tokenId] == sender,
-                "AavegotchiGameFacet: Not owner of token or approved"
-            );
+
+            //If the owner is the bridge, anyone can pet the gotchis inside
+            if (owner != address(this)) {
+                require(
+                    sender == owner || s.operators[owner][sender] || s.approved[tokenId] == sender || s.petOperators[owner][sender],
+                    "AavegotchiGameFacet: Not owner of token or approved"
+                );
+            }
+
             require(s.aavegotchis[tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for Aavegotchi");
             LibAavegotchi.interact(tokenId);
         }

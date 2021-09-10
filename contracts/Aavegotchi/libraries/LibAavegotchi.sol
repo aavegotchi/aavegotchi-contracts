@@ -61,7 +61,6 @@ library LibAavegotchi {
     uint8 constant STATUS_AAVEGOTCHI = 3;
 
     event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
-    event PetOperatorRemoved(uint256 indexed _tokenId, address indexed _petOperator);
 
     function toNumericTraits(uint256 _randomNumber, int16[NUMERIC_TRAITS_NUM] memory _modifiers)
         internal
@@ -231,54 +230,6 @@ library LibAavegotchi {
 
         level_ = (sqrt(2 * _experience) / 10);
         return level_ + 1;
-    }
-
-    function removePetOperator(uint256 tokenId, address petOperator) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-
-        if (petOperator != address(0)) {
-            //todo: Remove this tokenID from the array managed by petOperator
-            uint256 index;
-            uint256 length = s.petOperatorTokenIds[petOperator].length;
-            for (; index < length; index++) {
-                //Get index of the tokenID in the array
-                if (s.petOperatorTokenIds[petOperator][index] == tokenId) {
-                    break;
-                }
-            }
-            uint256 lastIndex = length - 1;
-            if (lastIndex != index) {
-                uint256 lastTokenId = s.petOperatorTokenIds[petOperator][lastIndex];
-                s.petOperatorTokenIds[petOperator][index] = lastTokenId;
-            }
-            s.petOperatorTokenIds[petOperator].pop();
-
-            uint256 operatorIndex;
-            uint256 operatorsLength = s.petOperators[tokenId].length;
-            for (; operatorIndex < length; operatorIndex++) {
-                //Get index of the tokenID in the array
-                if (s.petOperators[tokenId][operatorIndex] == petOperator) {
-                    break;
-                }
-            }
-            uint256 operatorLastIndex = operatorsLength - 1;
-            if (operatorLastIndex != operatorIndex) {
-                address lastOperator = s.petOperators[tokenId][operatorLastIndex];
-                s.petOperators[tokenId][operatorIndex] = lastOperator;
-            }
-            s.petOperators[tokenId].pop();
-
-            emit PetOperatorRemoved(tokenId, petOperator);
-        }
-    }
-
-    function removeAllPetOperators(uint256 tokenId) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        address[] memory petOperators = s.petOperators[tokenId];
-
-        for (uint256 index = 0; index < petOperators.length; index++) {
-            removePetOperator(tokenId, petOperators[index]);
-        }
     }
 
     function interact(uint256 _tokenId) internal returns (bool) {

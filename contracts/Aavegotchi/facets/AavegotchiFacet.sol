@@ -14,6 +14,8 @@ import {IERC721TokenReceiver} from "../../shared/interfaces/IERC721TokenReceiver
 contract AavegotchiFacet {
     AppStorage internal s;
 
+    event PetOperatorApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+
     function totalSupply() external view returns (uint256 totalSupply_) {
         totalSupply_ = s.tokenIds.length;
     }
@@ -95,6 +97,10 @@ contract AavegotchiFacet {
     /// @return approved_ True if `_operator` is an approved operator for `_owner`, false otherwise
     function isApprovedForAll(address _owner, address _operator) external view returns (bool approved_) {
         approved_ = s.operators[_owner][_operator];
+    }
+
+    function isPetOperatorForAll(address _owner, address _operator) external view returns (bool approved_) {
+        approved_ = s.petOperators[_owner][_operator];
     }
 
     /// @notice Transfers the ownership of an NFT from one address to another address
@@ -194,6 +200,11 @@ contract AavegotchiFacet {
     function setApprovalForAll(address _operator, bool _approved) external {
         s.operators[LibMeta.msgSender()][_operator] = _approved;
         emit LibERC721.ApprovalForAll(LibMeta.msgSender(), _operator, _approved);
+    }
+
+    function setPetOperatorForAll(address _operator, bool _approved) external {
+        s.petOperators[LibMeta.msgSender()][_operator] = _approved;
+        emit PetOperatorApprovalForAll(LibMeta.msgSender(), _operator, _approved);
     }
 
     function name() external view returns (string memory) {

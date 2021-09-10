@@ -152,10 +152,6 @@ struct GameManager {
     uint256 refreshTime;
 }
 
-struct PetOperatorInfo {
-    string name;
-    string description;
-}
 
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
@@ -241,10 +237,8 @@ struct AppStorage {
     mapping(uint256 => uint256) sleeves;
     mapping(address => bool) itemManagers;
     mapping(address => GameManager) gameManagers;
-    mapping(uint256 => address[]) petOperators; //Pet operators for a token
-    mapping(address => uint256[]) petOperatorTokenIds;
-    mapping(address => PetOperatorInfo) petOperatorInfo;
-}
+    mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
+  
 
 library LibAppStorage {
     function diamondStorage() internal pure returns (AppStorage storage ds) {
