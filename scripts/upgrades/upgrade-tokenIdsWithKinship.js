@@ -73,7 +73,7 @@ async function main() {
     {
       facetAddress: gotchiGamefacet.address,
       action: FacetCutAction.Add,
-      functionSelectors: fetchGothiFunc,
+      functionSelectors: fetchGotchiFunc,
     },
     {
       facetAddress: gotchiGamefacet.address,
