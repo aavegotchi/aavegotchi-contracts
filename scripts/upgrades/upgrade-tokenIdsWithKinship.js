@@ -45,7 +45,7 @@ async function main() {
     gasPrice: gasPrice,
   });
   await gotchiGamefacet.deployed();
-  console.log("Deployed AavegotchiGameFacet");
+  console.log("Deployed AavegotchiGameFacet", gotchiGamefacet.address);
 
   const fetchGotchiFunc = [
     getSelector(`function tokenIdsWithKinship(
