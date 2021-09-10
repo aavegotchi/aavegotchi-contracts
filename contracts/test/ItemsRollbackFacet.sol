@@ -4,7 +4,12 @@ pragma solidity 0.8.1;
 import {LibItems} from "../Aavegotchi/libraries/LibItems.sol";
 
 contract ItemsRollbackFacet {
-    function rollback1() external {
+    function rollback() external {
+        rollback1();
+        rollback2();
+    }
+
+    function rollback1() internal {
         address aavegotchiDiamond = 0x86935F11C86623deC8a25696E1C19a8659CbF95d;
         address userAddress = 0xed3BBbe2e3eacE311a94b059508Bbdda9149AB23;
         uint256 tokenId = 1172;
@@ -17,7 +22,7 @@ contract ItemsRollbackFacet {
         }
     }
 
-    function rollback2() external {
+    function rollback2() internal {
         address aavegotchiDiamond = 0x86935F11C86623deC8a25696E1C19a8659CbF95d;
         address userAddress = 0x69aC8b337794dAD862C691b00ccc3a89F1F3293d;
         uint256[3] memory wearableIds = [uint256(57), uint256(58), uint256(59)];
