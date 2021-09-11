@@ -67,7 +67,7 @@ async function main() {
     itemSigner
   );
 
-  //ID's 1 - 79
+  /*  //ID's 1 - 79
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1, {
     gasPrice: gasPrice,
   });
@@ -76,6 +76,7 @@ async function main() {
     throw Error(`Error:: ${tx.hash}`);
   }
   console.log("Uploaded item side dimensions 1");
+  */
 
   //ID's 80 - 118
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2, {
@@ -88,6 +89,7 @@ async function main() {
   console.log("Uploaded item side dimensions 2");
 
   //ID's 119 - 140
+  /*
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3, {
     gasPrice: gasPrice,
   });
@@ -146,6 +148,7 @@ async function main() {
     throw Error(`Error:: ${tx.hash}`);
   }
   console.log("Uploaded item side dimensions 8");
+  */
 }
 
 if (require.main === module) {
