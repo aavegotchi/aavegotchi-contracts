@@ -44,13 +44,6 @@ async function main() {
     let dao = await ethers.getContractAt("DAOFacet", diamondAddress, signer);
     [account1Signer] = await ethers.getSigners();
     account1Address = await account1Signer.getAddress();
-    /*  let tx = await dao.addItemManagers([account1Address])
-    let receipt = await tx.wait()
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`)
-    }
-    console.log('assigned', account1Address, 'as item manager')
-    */
   } else if (hre.network.name === "matic") {
     signer = new LedgerSigner(ethers.provider);
   } else {
@@ -71,11 +64,6 @@ async function main() {
   await svgViewsFacet.deployed();
   console.log("Deployed facet:", svgViewsFacet.address);
 
-  const SvgFacet = await ethers.getContractFactory("SvgFacet");
-  svgFacet = await SvgFacet.deploy();
-  await svgFacet.deployed();
-  console.log("Deployed facet:", svgFacet.address);
-
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
   const cut = [
@@ -83,12 +71,7 @@ async function main() {
       facetAddress: svgViewsFacet.address,
       action: FacetCutAction.Replace,
       functionSelectors: getSelectors(svgViewsFacet),
-    },
-    {
-      facetAddress: svgFacet.address,
-      action: FacetCutAction.Replace,
-      functionSelectors: getSelectors(svgFacet),
-    },
+    }
   ];
   console.log(cut);
 
