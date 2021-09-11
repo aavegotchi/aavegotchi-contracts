@@ -8,6 +8,10 @@ const { sendToMultisig } = require('../libraries/multisig/multisig.js')
 
 const { aavegotchiSvgs } = require('../../svgs/aavegotchi-side.js')
 
+const { sideViewsLayers } = require('../upgrades/upgrade-sideViewsLayer.js')
+
+const { sideViewsUpdate } = require('../changes/update-sideViewsUpdate.js')
+
 const {
   sideViewDimensions1,
   sideViewDimensions2,
@@ -28,8 +32,20 @@ const {
   wearablesBackSleeveSvgs
 } = require('../../svgs/wearables-sides.js')
 
+const {
+  collateralsLeftSvgs,
+  collateralsRightSvgs
+} = require('../../svgs/collaterals-sides.js')
+
+const {
+  eyeShapesLeftSvgs,
+  eyeShapesRightSvgs
+} = require('../../svgs/eyeShapes-sides.js')
+
 
 async function main () {
+  await sideViewsLayers();
+  await sideViewsUpdate();
   console.log("Upload SVG Start");
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   let account1Signer
@@ -80,45 +96,10 @@ async function main () {
     itemSigner = signer
   }
 
-  //wearables
-  const updatingLeftSvgs = [205, 212, 223, 229]
-  const updatingRightSvgs = [205, 212, 223, 229]
-  const updatingBackSvgs = [201, 205, 212, 217, 223, 229]
-  const updatingSleevesLeft = [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45]
-  const updatingSleevesRight = [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45]
-  const updatingSleevesBack = [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45]
-
-  //wearables
-  for (var i = 0; i < updatingLeftSvgs.length; i++) {
-    await updateSvgs(wearablesLeftSvgs, 'wearables-left', updatingLeftSvgs[i], testing, itemSigner)
-  }
-
-  for (var i = 0; i < updatingRightSvgs.length; i++) {
-    await updateSvgs(wearablesRightSvgs, 'wearables-right', updatingRightSvgs[i], testing, itemSigner)
-  }
-
-  for (var i = 0; i < updatingBackSvgs.length; i++) {
-    await updateSvgs(wearablesBackSvgs, 'wearables-back', updatingBackSvgs[i], testing, itemSigner)
-  }
-
-  //sleeves
-/*   for (var i = 0; i < updatingSleevesLeft.length; i++) {
-    await updateSvgs(wearablesLeftSleeveSvgs, 'wearables-left', updatingSleevesLeft[i], testing, itemSigner)
-  }
-
-  for (var i = 0; i < updatingSleevesRight.length; i++) {
-    await updateSvgs(wearablesRightSleeveSvgs, 'wearables-right', updatingSleevesRight[i], testing, itemSigner)
-  }
-
-  for (var i = 0; i < updatingSleevesBack.length; i++) {
-    await updateSvgs(wearablesBackSleeveSvgs, 'wearables-back', updatingSleevesBack[i], testing, itemSigner)
-  } */
-  console.log("Sleeves Array Length: ", wearablesLeftSleeveSvgs.length)
-  console.log("Updating Sleeves Array Length: ", updatingSleevesLeft.length)
-
   //dimensions
   const svgViewsFacet = await ethers.getContractAt('SvgViewsFacet', diamondAddress, itemSigner)
 
+  //ID's 1 - 79
 /*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1)
   receipt = await tx.wait()
   if (!receipt.status) {
@@ -126,6 +107,7 @@ async function main () {
   }
   console.log('Uploaded item side dimensions 1') */
 
+  //ID's 80 - 118
 /*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2)
   receipt = await tx.wait()
   if (!receipt.status) {
@@ -133,6 +115,7 @@ async function main () {
   }
   console.log('Uploaded item side dimensions 2') */
 
+  //ID's 119 - 140
 /*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3)
   receipt = await tx.wait()
   if (!receipt.status) {
@@ -140,42 +123,47 @@ async function main () {
   }
   console.log('Uploaded item side dimensions 3') */
 
+  //ID's 141 - 161 & 201 - 204
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions4)
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
   console.log('Uploaded item side dimensions 4')
-  
+
+  //ID's 199 - 209
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions5)
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
   console.log('Uploaded item side dimensions 5')
-  
+
+  //ID's 211 - 216
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions6)
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
   console.log('Uploaded item side dimensions 6')
-  
+
+  //ID's 217 - 227
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions7)
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
   console.log('Uploaded item side dimensions 7')
-  
-/*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions8)
+
+/*   //ID's 228 - 244
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions8)
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
   console.log('Uploaded item side dimensions 8') */
 
-
+  //wearables
     // BODY = 0;
     // FACE = 1;
     // EYES = 2;
@@ -188,10 +176,14 @@ async function main () {
     // back x:12, y:32
     // side x:20, y:32
 
-  const numTraits1 = [99, 99, 99, 99, 1, 1];
-  const wearables1 = [203, 0, 0, 0, 205, 205, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  //eyes
+    // eye shape = 4
+    // eye color = 5  
 
-  const sidePreview = await svgViewsFacet.previewSideAavegotchi("1", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
+  const numTraits1 = [99, 99, 99, 99, 1, 1];
+  const wearables1 = [0, 199, 0, 0, 204, 217, 151, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+  const sidePreview = await svgViewsFacet.previewSideAavegotchi("1", "0x20D3922b4a1A8560E1aC99FBA4faDe0c849e2142", numTraits1, wearables1);
   console.log("Side Preview: ", sidePreview);
 }
 

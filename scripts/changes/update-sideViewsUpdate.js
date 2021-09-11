@@ -116,16 +116,29 @@ async function main() {
     207, 208, 209, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222,
     223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237,
     238, 239, 240, 241,*/ 242,
-    243, 244,
+    243, 244, 125, 205, 212, 223, 229
   ];
 
-  // const updatingLeftSvgs = remaining;
+  let remainingLeft = [
+    125, 205, 212, 223, 229,
+  ];
+
+  let remainingBack = [
+    125, 201, 205, 212, 217, 223, 229,
+  ];
+
+  const updatingSleevesLeft = [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34]
+  const updatingSleevesRight = [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34]
+  const updatingSleevesBack = [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34]
+
+  const updatingLeftSvgs = remainingLeft;
   const updatingRightSvgs = remaining; //[66];
-  // const updatingBackSvgs = [104];
+  const updatingBackSvgs = remainingBack;
 
   // console.log("updating left:", updatingLeftSvgs);
 
-  /* for (var i = 0; i < updatingLeftSvgs.length; i++) {
+  //left
+  for (var i = 0; i < updatingLeftSvgs.length; i++) {
     console.log(`Updating: ${i} ${updatingLeftSvgs[i]}`);
     await updateSvgs(
       wearablesLeftSvgs,
@@ -135,8 +148,8 @@ async function main() {
       itemSigner
     );
   }
-  */
 
+  //right
   for (var i = 0; i < updatingRightSvgs.length; i++) {
     await updateSvgs(
       wearablesRightSvgs,
@@ -147,7 +160,7 @@ async function main() {
     );
   }
 
-  /*
+  //back
   for (var i = 0; i < updatingBackSvgs.length; i++) {
     await updateSvgs(
       wearablesBackSvgs,
@@ -157,7 +170,21 @@ async function main() {
       itemSigner
     );
   }
-  */
+
+  //sleeves
+  for (var i = 0; i < updatingSleevesLeft.length; i++) {
+    await updateSvgs(wearablesLeftSleeveSvgs, 'wearables-left', updatingSleevesLeft[i], testing, itemSigner)
+  }
+
+  for (var i = 0; i < updatingSleevesRight.length; i++) {
+    await updateSvgs(wearablesRightSleeveSvgs, 'wearables-right', updatingSleevesRight[i], testing, itemSigner)
+  }
+
+  for (var i = 0; i < updatingSleevesBack.length; i++) {
+    await updateSvgs(wearablesBackSleeveSvgs, 'wearables-back', updatingSleevesBack[i], testing, itemSigner)
+  }
+  console.log("Sleeves Array Length: ", wearablesLeftSleeveSvgs.length)
+  console.log("Updating Sleeves Array Length: ", updatingSleevesBack.length)
 }
 
 if (require.main === module) {
