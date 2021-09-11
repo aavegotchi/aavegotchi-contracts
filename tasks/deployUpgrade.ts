@@ -31,7 +31,10 @@ interface Cut {
   functionSelectors: string[];
 }
 
-task("deployUpgrade", "Deploys a Diamond Cut, given an address, facers, and ")
+task(
+  "deployUpgrade",
+  "Deploys a Diamond Cut, given an address, facets, and addSelectors"
+)
   .addParam("diamondUpgrader", "Address of the multisig signer")
   .addParam("diamondAddress", "Address of the Diamond to upgrade")
   .addParam("facets", "Array of facet names to upgrade")
