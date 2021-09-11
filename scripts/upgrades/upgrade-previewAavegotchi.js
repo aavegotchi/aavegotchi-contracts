@@ -5,7 +5,7 @@ const {
   maticDiamondAddress: diamondAddress,
   contractOwner,
   getFunctionsForFacet,
-} = require("../helpers.js");
+} = require("../helperFunctions");
 const { sendToMultisig } = require("../libraries/multisig/multisig.js");
 
 async function main() {

@@ -1,6 +1,7 @@
 //@ts-ignore
 import { ethers, network } from "hardhat";
 import { Contract } from "@ethersproject/contracts";
+import { DiamondLoupeFacet } from "../typechain";
 
 export async function impersonate(address: string, contract: Contract) {
   await network.provider.request({
@@ -39,4 +40,19 @@ export function getSelectors(contract: Contract) {
 export function getSelector(func: string) {
   const abiInterface = new ethers.utils.Interface([func]);
   return abiInterface.getSighash(ethers.utils.Fragment.from(func));
+}
+
+export const maticDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+
+export async function diamondOwner(address: string) {
+  return await (await ethers.getContractAt("OwnershipFacet", address)).owner();
+}
+
+export async function getFunctionsForFacet(facetAddress: string) {
+  const Loupe = (await ethers.getContractAt(
+    "DiamondLoupeFacet",
+    maticDiamondAddress
+  )) as DiamondLoupeFacet;
+  const functions = await Loupe.facetFunctionSelectors(facetAddress);
+  return functions;
 }
