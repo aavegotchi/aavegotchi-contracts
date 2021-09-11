@@ -1,34 +1,65 @@
-import { BigNumber } from "@ethersproject/bignumber";
+import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { ethers } from "hardhat";
 
 type Category = 0 | 1 | 2 | 3;
 
+export interface SleeveObject {
+  id: string;
+  svg: string;
+}
+
 interface Dimensions {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  x: BigNumberish;
+  y: BigNumberish;
+  width: BigNumberish;
+  height: BigNumberish;
 }
 
 export interface ItemType {
   name: string;
   description: string;
-  svgId: number;
-  minLevel: number;
+  svgId: BigNumberish;
+  minLevel: BigNumberish;
   canbeTransferred: boolean;
-  totalQuantity: number;
-  maxQuantity: number;
-  setId: number[];
+  totalQuantity: BigNumberish;
+  maxQuantity: BigNumberish;
+  setId: BigNumberish[];
   author: string;
-  dimensions: Dimensions | string | number;
-  allowedCollaterals: number[];
-  ghstPrice: number | BigNumber;
-  traitModifiers: number[];
-  slotPositions: Slot | boolean[];
+  dimensions: Dimensions;
+  allowedCollaterals: BigNumberish[];
+  ghstPrice: BigNumberish | BigNumberish;
+  traitModifiers: [
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish
+  ];
+  slotPositions: [
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean
+  ];
   category: Category;
-  experienceBonus: number;
-  kinshipBonus: number;
-  rarityScoreModifier?: number;
+  experienceBonus: BigNumberish;
+  kinshipBonus: BigNumberish;
+  rarityScoreModifier: BigNumberish;
+  canPurchaseWithGhst: boolean;
+  canBeTransferred: boolean;
 }
 
 type Slot =
@@ -43,7 +74,26 @@ type Slot =
   | "pet"
   | "background";
 
-export function stringToSlotPositions(str: Slot | boolean[]) {
+export function stringToSlotPositions(
+  str: Slot | boolean[]
+): [
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean,
+  boolean
+] {
   if (str.length === 0)
     return [
       false,
@@ -267,7 +317,9 @@ export function stringToSlotPositions(str: Slot | boolean[]) {
   }
 }
 
-export function calculateRarityScoreModifier(maxQuantity: number) {
+export function calculateRarityScoreModifier(
+  maxQuantity: BigNumberish
+): BigNumberish {
   if (maxQuantity >= 1000) return 1;
   if (maxQuantity >= 500) return 2;
   if (maxQuantity >= 250) return 5;
@@ -282,9 +334,6 @@ export function getItemTypes(itemTypes: ItemType[]) {
   for (const itemType of itemTypes) {
     itemType.ghstPrice = ethers.utils.parseEther(itemType.ghstPrice.toString());
     itemType.slotPositions = stringToSlotPositions(itemType.slotPositions);
-    if (itemType.dimensions === "" || itemType.dimensions === 0) {
-      itemType.dimensions = { x: 0, y: 0, width: 0, height: 0 };
-    }
     itemType.rarityScoreModifier = calculateRarityScoreModifier(
       itemType.maxQuantity
     );

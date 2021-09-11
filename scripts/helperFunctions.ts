@@ -3,6 +3,8 @@ import { ethers, network } from "hardhat";
 import { Contract } from "@ethersproject/contracts";
 import { DiamondLoupeFacet } from "../typechain";
 
+export const gasPrice = 20000000000;
+
 export async function impersonate(address: string, contract: Contract) {
   await network.provider.request({
     method: "hardhat_impersonateAccount",
