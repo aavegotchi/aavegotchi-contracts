@@ -15,12 +15,41 @@ interface Dimensions {
   height: BigNumberish;
 }
 
-export interface ItemType {
+export interface ItemTypeInput {
   name: string;
   description: string;
   svgId: BigNumberish;
   minLevel: BigNumberish;
-  canbeTransferred: boolean;
+  canBeTransferred: boolean;
+  totalQuantity: BigNumberish;
+  maxQuantity: BigNumberish;
+  setId: BigNumberish[];
+  author: string;
+  dimensions: Dimensions;
+  allowedCollaterals: BigNumberish[];
+  ghstPrice: BigNumberish | BigNumberish;
+  traitModifiers: [
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish
+  ];
+  slotPositions: Slot;
+  category: Category;
+  experienceBonus: BigNumberish;
+  kinshipBonus: BigNumberish;
+  rarityScoreModifier?: BigNumberish;
+  canPurchaseWithGhst: boolean;
+}
+
+export interface ItemTypeOutput {
+  name: string;
+  description: string;
+  svgId: BigNumberish;
+  minLevel: BigNumberish;
+  canBeTransferred: boolean;
   totalQuantity: BigNumberish;
   maxQuantity: BigNumberish;
   setId: BigNumberish[];
@@ -59,7 +88,6 @@ export interface ItemType {
   kinshipBonus: BigNumberish;
   rarityScoreModifier: BigNumberish;
   canPurchaseWithGhst: boolean;
-  canBeTransferred: boolean;
 }
 
 type Slot =
@@ -75,7 +103,7 @@ type Slot =
   | "background";
 
 export function stringToSlotPositions(
-  str: Slot | boolean[]
+  str: Slot
 ): [
   boolean,
   boolean,
@@ -329,18 +357,20 @@ export function calculateRarityScoreModifier(
   return 0;
 }
 
-export function getItemTypes(itemTypes: ItemType[]) {
+export function getItemTypes(itemTypes: ItemTypeInput[]): ItemTypeOutput[] {
   const result = [];
   for (const itemType of itemTypes) {
-    itemType.ghstPrice = ethers.utils.parseEther(itemType.ghstPrice.toString());
-    itemType.slotPositions = stringToSlotPositions(itemType.slotPositions);
-    itemType.rarityScoreModifier = calculateRarityScoreModifier(
-      itemType.maxQuantity
-    );
+    let itemTypeOut: ItemTypeOutput = {
+      ...itemType,
+      slotPositions: stringToSlotPositions(itemType.slotPositions),
+      ghstPrice: ethers.utils.parseEther(itemType.ghstPrice.toString()),
+      rarityScoreModifier: calculateRarityScoreModifier(itemType.maxQuantity),
+    };
+
     if (!Array.isArray(itemType.allowedCollaterals)) {
       throw Error("Is not array.");
     }
-    result.push(itemType);
+    result.push(itemTypeOut);
   }
   return result;
 }

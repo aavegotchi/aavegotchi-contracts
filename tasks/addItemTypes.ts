@@ -9,7 +9,11 @@ import { ethers, network } from "hardhat";
 import { task } from "hardhat/config";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
-import { ItemType, SleeveObject } from "../scripts/itemTypeHelpers";
+import {
+  ItemTypeInput,
+  ItemTypeOutput,
+  SleeveObject,
+} from "../scripts/itemTypeHelpers";
 import { gasPrice } from "../scripts/helperFunctions";
 import { DAOFacet } from "../typechain/DAOFacet";
 import { SvgFacet } from "../typechain/SvgFacet";
@@ -68,7 +72,14 @@ async function uploadSvgs(
   }
 }
 
+function verifyItemTypes(itemTypes: ItemTypeOutput[]) {
+  itemTypes.forEach((itemType) => {
+    //Run any verifications necessary
+  });
+}
+
 task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
+  .addParam("itemManager")
   .addParam("diamondAddress", "Address of the Diamond to upgrade")
   .addParam("itemTypes", "Array of itemTypes to add")
   .addParam(
@@ -79,15 +90,14 @@ task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
   .addOptionalParam("sleeveStartId", "ID of the sleeve to start at")
 
   .setAction(async (taskArgs) => {
-    const itemTypes: ItemType[] = taskArgs.facets;
+    const itemTypes: ItemTypeOutput[] = taskArgs.facets;
     const diamondAddress: string = taskArgs.diamondAddress;
     const svgs: string[] = taskArgs.svgs;
     const sleeveSvgs: SleeveObject[] = taskArgs.sleeveSvgs;
     const sleeveStartId = taskArgs.sleeveStartId;
+    const itemManager = taskArgs.itemManager;
 
     let signer: Signer;
-
-    const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 
     let owner = itemManager;
     const testing = ["hardhat", "localhost"].includes(network.name);
@@ -118,6 +128,9 @@ task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
     )) as SvgFacet;
 
     console.log("Adding items", 0, "to", itemTypes.length);
+
+    //Run verification on all the itemTypes
+    verifyItemTypes(itemTypes);
 
     tx = await daoFacet.addItemTypes(itemTypes, { gasPrice: gasPrice });
 
