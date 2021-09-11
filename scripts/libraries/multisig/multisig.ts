@@ -1,7 +1,18 @@
 /* global ethers */
 /* eslint-disable  prefer-const */
 
-async function sendToMultisig(multisigAddress, signer, transaction) {
+import { ethers } from "hardhat";
+import { Signer } from "@ethersproject/abstract-signer";
+import {
+  ContractTransaction,
+  PopulatedTransaction,
+} from "@ethersproject/contracts";
+
+export async function sendToMultisig(
+  multisigAddress: string,
+  signer: Signer,
+  transaction: PopulatedTransaction
+) {
   const abi = [
     "function submitTransaction(address destination, uint value, bytes data) public returns (uint transactionId)",
   ];
@@ -11,7 +22,7 @@ async function sendToMultisig(multisigAddress, signer, transaction) {
     signer
   );
   console.log("Sending transaction to multisig:", multisigAddress);
-  let tx = await multisigContract.submitTransaction(
+  let tx: ContractTransaction = await multisigContract.submitTransaction(
     transaction.to,
     0,
     transaction.data,
@@ -62,5 +73,3 @@ async function sendToMultisig(multisigAddress, signer, transaction) {
 //       process.exit(1)
 //     })
 // }
-
-exports.sendToMultisig = sendToMultisig;
