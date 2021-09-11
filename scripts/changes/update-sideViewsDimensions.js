@@ -4,13 +4,7 @@
 
 const { LedgerSigner } = require('@ethersproject/hardware-wallets')
 
-const { sendToMultisig } = require('../libraries/multisig/multisig.js')
-
 const { aavegotchiSvgs } = require('../../svgs/aavegotchi-side.js')
-
-const { sideViewsLayers } = require('../upgrades/upgrade-sideViewsLayer.js')
-
-const { sideViewsUpdate } = require('../changes/update-sideViewsUpdate.js')
 
 const {
   sideViewDimensions1,
@@ -23,28 +17,8 @@ const {
   sideViewDimensions8
 } = require('../../svgs/sideViewDimensions.js')
 
-const {
-  wearablesLeftSvgs,
-  wearablesRightSvgs,
-  wearablesBackSvgs,
-  wearablesLeftSleeveSvgs,
-  wearablesRightSleeveSvgs,
-  wearablesBackSleeveSvgs
-} = require('../../svgs/wearables-sides.js')
-
-const {
-  collateralsLeftSvgs,
-  collateralsRightSvgs
-} = require('../../svgs/collaterals-sides.js')
-
-const {
-  eyeShapesLeftSvgs,
-  eyeShapesRightSvgs
-} = require('../../svgs/eyeShapes-sides.js')
-
 
 async function main () {
-  console.log("Upload SVG Start");
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   let account1Signer
   let account1Address
@@ -71,18 +45,6 @@ async function main () {
     signer = new LedgerSigner(ethers.provider)
   } else {
     throw Error('Incorrect network selected')
-  }
-
-  async function updateSvgs(svg, svgType, svgId, testing, uploadSigner) {
-    const svgFacet = await ethers.getContractAt('SvgFacet', diamondAddress, uploadSigner)
-    let svgLength = new TextEncoder().encode(svg[svgId]).length;
-    const array = [{ svgType: ethers.utils.formatBytes32String(svgType), ids: [svgId], sizes: [svgLength] }];
-
-    let tx = await svgFacet.updateSvg(svg[svgId], array)
-    let receipt = await tx.wait()
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`)
-    }
   }
 
   let tx
