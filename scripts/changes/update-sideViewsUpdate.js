@@ -36,7 +36,7 @@ const {
 } = require("../../svgs/sideViewDimensions.js");
 
 async function main() {
-  console.log("Update SVG Start");
+  /* console.log("Update SVG Start"); */
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let account1Signer;
   let account1Address;
@@ -61,11 +61,11 @@ async function main() {
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
     }
-    console.log("assigned", account1Address, "as item manager");
+    /* console.log("assigned", account1Address, "as item manager"); */
   } else if (hre.network.name === "matic") {
     const accounts = await ethers.getSigners();
     const account = await accounts[0].getAddress();
-    console.log("account:", account);
+    /* console.log("account:", account); */
 
     signer = accounts[0]; //new LedgerSigner(ethers.provider);
   } else {
@@ -87,14 +87,14 @@ async function main() {
       },
     ];
 
-    console.log(`Update: ${svgType}: ${svgId}`);
+    /* console.log(`Update: ${svgType}: ${svgId}`); */
 
     const gasPrice = 100000000000;
 
     let tx = await svgFacet.updateSvg(svg[svgId], array, {
       gasPrice: gasPrice,
     });
-    console.log("tx hash:", tx.hash);
+    /* console.log("tx hash:", tx.hash); */
     let receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
@@ -139,7 +139,7 @@ async function main() {
 
   //left
   for (var i = 0; i < updatingLeftSvgs.length; i++) {
-    console.log(`Updating: ${i} ${updatingLeftSvgs[i]}`);
+    /* console.log(`Updating: ${i} ${updatingLeftSvgs[i]}`); */
     await updateSvgs(
       wearablesLeftSvgs,
       "wearables-left",
@@ -173,18 +173,18 @@ async function main() {
 
   //sleeves
   for (var i = 0; i < updatingSleevesLeft.length; i++) {
-    await updateSvgs(wearablesLeftSleeveSvgs, 'wearables-left', updatingSleevesLeft[i], testing, itemSigner)
+    await updateSvgs(wearablesLeftSleeveSvgs, 'sleeves-left', updatingSleevesLeft[i], testing, itemSigner)
   }
 
   for (var i = 0; i < updatingSleevesRight.length; i++) {
-    await updateSvgs(wearablesRightSleeveSvgs, 'wearables-right', updatingSleevesRight[i], testing, itemSigner)
+    await updateSvgs(wearablesRightSleeveSvgs, 'sleeves-right', updatingSleevesRight[i], testing, itemSigner)
   }
 
   for (var i = 0; i < updatingSleevesBack.length; i++) {
-    await updateSvgs(wearablesBackSleeveSvgs, 'wearables-back', updatingSleevesBack[i], testing, itemSigner)
+    await updateSvgs(wearablesBackSleeveSvgs, 'sleeves-back', updatingSleevesBack[i], testing, itemSigner)
   }
-  console.log("Sleeves Array Length: ", wearablesLeftSleeveSvgs.length)
-  console.log("Updating Sleeves Array Length: ", updatingSleevesBack.length)
+/*   console.log("Sleeves Array Length: ", wearablesLeftSleeveSvgs.length)
+  console.log("Updating Sleeves Array Length: ", updatingSleevesBack.length) */
 }
 
 if (require.main === module) {

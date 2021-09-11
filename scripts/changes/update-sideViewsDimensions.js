@@ -44,8 +44,6 @@ const {
 
 
 async function main () {
-  await sideViewsLayers();
-  await sideViewsUpdate();
   console.log("Upload SVG Start");
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d'
   let account1Signer
@@ -100,28 +98,28 @@ async function main () {
   const svgViewsFacet = await ethers.getContractAt('SvgViewsFacet', diamondAddress, itemSigner)
 
   //ID's 1 - 79
-/*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1)
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1)
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
-  console.log('Uploaded item side dimensions 1') */
+  console.log('Uploaded item side dimensions 1')
 
   //ID's 80 - 118
-/*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2)
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2)
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
-  console.log('Uploaded item side dimensions 2') */
+  console.log('Uploaded item side dimensions 2')
 
   //ID's 119 - 140
-/*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3)
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3)
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
-  console.log('Uploaded item side dimensions 3') */
+  console.log('Uploaded item side dimensions 3')
 
   //ID's 141 - 161 & 201 - 204
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions4)
@@ -155,36 +153,13 @@ async function main () {
   }
   console.log('Uploaded item side dimensions 7')
 
-/*   //ID's 228 - 244
+  //ID's 228 - 24
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions8)
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`)
   }
-  console.log('Uploaded item side dimensions 8') */
-
-  //wearables
-    // BODY = 0;
-    // FACE = 1;
-    // EYES = 2;
-    // HEAD = 3;
-    // RIGHT = 4;
-    // LEFT = 5;
-    // PET = 6;
-    // BG = 7;
-
-    // back x:12, y:32
-    // side x:20, y:32
-
-  //eyes
-    // eye shape = 4
-    // eye color = 5  
-
-  const numTraits1 = [99, 99, 99, 99, 1, 1];
-  const wearables1 = [0, 199, 0, 0, 204, 217, 151, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-  const sidePreview = await svgViewsFacet.previewSideAavegotchi("1", "0x20D3922b4a1A8560E1aC99FBA4faDe0c849e2142", numTraits1, wearables1);
-  console.log("Side Preview: ", sidePreview);
+  console.log('Uploaded item side dimensions 8')
 }
 
 

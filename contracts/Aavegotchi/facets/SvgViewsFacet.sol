@@ -276,7 +276,7 @@ contract SvgViewsFacet is Modifiers {
 
         if (
             //both handwearables, pet and face exceptions
-            (equippedWearables[4] == 201 || equippedWearables[4] == 217 || equippedWearables[5] == 201 || equippedWearables[5] == 217) &&
+            ((equippedWearables[4] == 201 || equippedWearables[4] == 217 ) && (equippedWearables[5] == 201 || equippedWearables[5] == 217)) &&
             (equippedWearables[6] == 151 || equippedWearables[6] == 152 || equippedWearables[6] == 153 || equippedWearables[6] == 154 || equippedWearables[6] == 155 || equippedWearables[6] == 156) &&
             (equippedWearables[1] == 216)
         ) {
@@ -330,7 +330,7 @@ contract SvgViewsFacet is Modifiers {
             }
         } else if (
             //both handwearables and pet exceptions
-            (equippedWearables[4] == 201 || equippedWearables[4] == 217 || equippedWearables[5] == 201 || equippedWearables[5] == 217) &&
+            ((equippedWearables[4] == 201 || equippedWearables[4] == 217 ) && (equippedWearables[5] == 201 || equippedWearables[5] == 217)) &&
             (equippedWearables[6] == 151 || equippedWearables[6] == 152 || equippedWearables[6] == 153 || equippedWearables[6] == 154 || equippedWearables[6] == 155 || equippedWearables[6] == 156)
         ) {
             if (side == left) {
@@ -381,7 +381,7 @@ contract SvgViewsFacet is Modifiers {
             }  
         } else if (
             //both handwearables and face exceptions
-            (equippedWearables[4] == 201 || equippedWearables[4] == 217 || equippedWearables[5] == 201 || equippedWearables[5] == 217) &&
+            ((equippedWearables[4] == 201 || equippedWearables[4] == 217 ) && (equippedWearables[5] == 201 || equippedWearables[5] == 217)) &&
             (equippedWearables[1] == 216)
         ) {
             if (side == left) {
@@ -449,7 +449,7 @@ contract SvgViewsFacet is Modifiers {
             }
         } else if (
             //just both handwearables exception 
-            equippedWearables[4] == 201 || equippedWearables[4] == 217 || equippedWearables[5] == 201 || equippedWearables[5] == 217
+            ((equippedWearables[4] == 201 || equippedWearables[4] == 217 ) && (equippedWearables[5] == 201 || equippedWearables[5] == 217))
         ) {
             if (side == left) {
                 svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
