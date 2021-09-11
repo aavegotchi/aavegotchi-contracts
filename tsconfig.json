@@ -10,6 +10,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["./scripts", "./test", "*.ts", "**/*.ts", "tasks/verifyFacet.js"],
+  "include": ["./scripts", "./test", "*.ts", "**/*.ts", "./tasks"],
   "files": ["./hardhat.config.ts"]
 }
