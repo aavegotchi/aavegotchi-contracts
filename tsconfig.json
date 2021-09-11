@@ -7,6 +7,6 @@
     "outDir": "dist",
     "resolveJsonModule": true
   },
-  "include": ["./scripts", "./test", "*.ts", "**/*.ts"],
+  "include": ["./scripts", "./test", "*.ts", "**/*.ts", "tasks/verifyFacet.js"],
   "files": ["./hardhat.config.ts"]
 }
