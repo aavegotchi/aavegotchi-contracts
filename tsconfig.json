@@ -5,7 +5,10 @@
     "strict": true,
     "esModuleInterop": true,
     "outDir": "dist",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "include": ["./scripts", "./test", "*.ts", "**/*.ts", "tasks/verifyFacet.js"],
   "files": ["./hardhat.config.ts"]

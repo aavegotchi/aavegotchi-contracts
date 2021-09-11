@@ -1,19 +1,11 @@
-// npx hardhat flatten ./contracts/Aavegotchi/facets/AavegotchiFacet.sol > ./flat/AavegotchiFacet.sol.flat
-// npx hardhat verifyFacet --apikey xxx --contract 0xfa7a3bb12848A7856Dd2769Cd763310096c053F1 --facet AavegotchiGameFacet --noflatten true
-
 import { LedgerSigner } from "@ethersproject/hardware-wallets";
 
-//@ts-ignore
 import { ethers, network } from "hardhat";
 
 import { task } from "hardhat/config";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
-import {
-  ItemTypeInput,
-  ItemTypeOutput,
-  SleeveObject,
-} from "../scripts/itemTypeHelpers";
+import { ItemTypeOutput, SleeveObject } from "../scripts/itemTypeHelpers";
 import { gasPrice } from "../scripts/helperFunctions";
 import { DAOFacet } from "../typechain/DAOFacet";
 import { SvgFacet } from "../typechain/SvgFacet";
