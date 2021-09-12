@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prettier": "prettier --write contracts/**/*.sol"
+    "prettier": "prettier --write contracts/**/*.sol",
+    "solhint": "solhint 'contracts/**/*.sol'"
   },
   "repository": {
     "type": "git",
