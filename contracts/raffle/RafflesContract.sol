@@ -721,7 +721,7 @@ contract RafflesContract is IERC173, IERC165 {
     }
 
     /* This struct information can be gotten from the return results of the winners function */
-    struct TicketWinIO {
+    struct ticketWinIO {
         uint256 entryIndex; // index into a user's array of tickets (which staking attempt won)
         PrizesWinIO[] prizes;
     }
