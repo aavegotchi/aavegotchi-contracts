@@ -23,7 +23,7 @@ contract DAOFacet is Modifiers {
     event GameManagerAdded(address indexed gameManager_, uint256 indexed limit_, uint256 refreshTime_);
     event GameManagerRemoved(address indexed gameManager_);
     event ItemManagerAdded(address indexed newItemManager_);
-    event ItemManagerRemoved(address indexed ItemManager_);
+    event ItemManagerRemoved(address indexed itemManager_);
     event WearableSlotPositionsSet(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] _slotPositions);
     event ItemModifiersSet(uint256 _wearableId, int8[6] _traitModifiers, uint8 _rarityScoreModifier);
 

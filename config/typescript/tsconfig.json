@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "es2018",
+    "module": "commonjs",
+    "strict": true
+  },
+  "include": ["../../tasks/*.ts"],
+  "files": ["./hardhat.config.ts"]
+}

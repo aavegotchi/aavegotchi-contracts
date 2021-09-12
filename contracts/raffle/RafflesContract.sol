@@ -721,7 +721,7 @@ contract RafflesContract is IERC173, IERC165 {
     }
 
     /* This struct information can be gotten from the return results of the winners function */
-    struct ticketWinIO {
+    struct TicketWinIO {
         uint256 entryIndex; // index into a user's array of tickets (which staking attempt won)
         PrizesWinIO[] prizes;
     }
@@ -794,9 +794,9 @@ contract RafflesContract is IERC173, IERC165 {
                     uint256 prizeNumber = prize.winningPrizeNumbers[k];
                     // Serves two purposes: 1. Ensure is less than raffleItemPrize.prizeQuantity. 2. prevents duplicates
                     require(prizeNumber < lastValue, "Raffle: prizeNumber does not exist or is not lesser than last value");
-                    uint256 winningTicketNumber =
-                        uint256(keccak256(abi.encodePacked(randomNumber, entry.raffleItemIndex, prize.raffleItemPrizeIndex, prizeNumber))) %
-                            totalEntered;
+                    uint256 winningTicketNumber = uint256(
+                        keccak256(abi.encodePacked(randomNumber, entry.raffleItemIndex, prize.raffleItemPrizeIndex, prizeNumber))
+                    ) % totalEntered;
                     require(winningTicketNumber >= entry.rangeStart && winningTicketNumber < entry.rangeEnd, "Raffle: Did not win prize");
                     lastValue = prizeNumber;
                 }
