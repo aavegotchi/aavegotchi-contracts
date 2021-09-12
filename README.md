@@ -6,8 +6,8 @@ Aavegotchis are one of the world's first playable NFTs, with onchain attributes 
 
 We also have one of the frenliest communities in crypto, so don't hesitate to hop in!
 
-Aavegotchi Discord: discord.gg/aavegotchi
-Aavegotchi Aarchitects (Developers) Discord: https://discord.gg/dS3VnhzMbB
+* Aavegotchi Discord: https://discord.gg/aavegotchi
+* Aavegotchi Aarchitects (Developers) Discord: https://discord.gg/dS3VnhzMbB
 
 ## Deployed Contract Addresses
 
