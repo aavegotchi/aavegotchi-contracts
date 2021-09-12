@@ -1,47 +1,19 @@
-# Aavegotchi Diamonds
+# Welcome to the Aavegotchi Contracts!
 
-## Polygon Contract Addresses
+Aavegotchis are fully onchain NFTs, powered by the ERC721, ERC1155, and ERC998 standards. The contracts also implement the EIP2525 Diamonds standard, which allows for modular upgradeability. 
 
-Aavegotchi diamond: 0x86935F11C86623deC8a25696E1C19a8659CbF95d
+Aavegotchis are one of the world's first playable NFTs, with onchain attributes that can be increased by interacting with the NFT and the community. 
 
-RaffleContract: 0x6c723cac1E35FE29a175b287AE242d424c52c1CE
+We also have one of the frenliest communities in crypto, so don't hesitate to hop in!
 
-Facets:
+Aavegotchi Discord: discord.gg/aavegotchi
+Aavegotchi Aarchitects (Developers) Discord: https://discord.gg/dS3VnhzMbB
 
-BridgeFacet: 0xE3D9759Ab6E3d36c645b362E163cc667e1422eB7
---
-AavegotchiFacet: 0xFb2e9978B9E89D6a5e0E08508644913c55E8643b
---
-AavegotchiGameFacet: 0xDc11301F577C2f5fad2e56593173372301ec21D6
---
-SvgFacet: 0xDF250Bbb4A6c6beFb43EcA8ADed635AC972F0F36
---
-ItemsFacet: 0x487753c3E11ca739E4bF516dd6fFCFb654DdcD33
---
-ItemsTransferFacet: 0x884098e411BcaF1516ea9D06c68f3A4b837EDC72
---
-CollateralFacet: 0x3b9e81C33AE57b694D23d3Eb05B2EF34f01FC160
---
-DAOFacet: 0xaEe77EE9A33305D33B9524d2A793113c970f8367
---
-VrfFacet: 0x7bCE514bEb8327b73f08FA766D9C126348F8D1A5
---
-ShopFacet: 0xb8d96BfD75216C84EA54B572cd7Ef155075232d7
---
-MetaTransactionsFacet: 0x7410C54C2Ccd25ffaEA713fD02e94a6022A75F2E
---
-ERC1155MarketplaceFacet: 0xC057c4f2b12e3E0F35e03a4851063FB39A1850cD
---
-ERC721MarketplaceFacet: 0xFDdC3009B5AF4502DA6d9c1187Fa79db32ECF394
---
-VoucherMigrationFacet 0x9eB64b01860d694f615808C3c550166e265b83D3
+## Deployed Contract Addresses
 
-## Ethereum Contract Addresses
+* Polygon Diamond Address: 0x86935F11C86623deC8a25696E1C19a8659CbF95d
 
-Aavegotchi Diamond: 0x1906fd9c4AC440561F7197Da0A4BD2E88DF5fA70
-
-contracts/Ethereum/facets/AavegotchiFacet.sol:AavegotchiFacet: 0xb7fd49c7b662B5135D1bB03b51FfC51a6b908230
-
-contracts/Ethereum/facets/BridgeFacet.sol:BridgeFacet: 0xb81c32635524c24B02d8286B6Fc5157151e4c273
+* Ethereum Diamond Address: 0x1906fd9c4AC440561F7197Da0A4BD2E88DF5fA70
+*
 
 contracts/Ethereum/InitDiamond.sol:InitDiamond: 0x8eD0e2DdD3e298E1497578C21f719428A3d93134
