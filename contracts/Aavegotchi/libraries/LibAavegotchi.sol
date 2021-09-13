@@ -351,6 +351,7 @@ library LibAavegotchi {
         uint256 _tokenId
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
+
         // remove
         uint256 index = s.ownerTokenIdIndexes[_from][_tokenId];
         uint256 lastIndex = s.ownerTokenIds[_from].length - 1;

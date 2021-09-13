@@ -9,10 +9,11 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {Modifiers, Haunt, Aavegotchi} from "../libraries/LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
-// import "hardhat/console.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
+
+// import "hardhat/console.sol";
 
 contract AavegotchiGameFacet is Modifiers {
     /// @dev This emits when the approved address for an NFT is changed or
@@ -189,10 +190,15 @@ contract AavegotchiGameFacet is Modifiers {
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             address owner = s.aavegotchis[tokenId].owner;
-            require(
-                sender == owner || s.operators[owner][sender] || s.approved[tokenId] == sender,
-                "AavegotchiGameFacet: Not owner of token or approved"
-            );
+
+            //If the owner is the bridge, anyone can pet the gotchis inside
+            if (owner != address(this)) {
+                require(
+                    sender == owner || s.operators[owner][sender] || s.approved[tokenId] == sender || s.petOperators[owner][sender],
+                    "AavegotchiGameFacet: Not owner of token or approved"
+                );
+            }
+
             require(s.aavegotchis[tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for Aavegotchi");
             LibAavegotchi.interact(tokenId);
         }
