@@ -8,6 +8,8 @@ import { expect } from "chai";
 import { Contract } from "@ethersproject/contracts";
 import { impersonate } from "../scripts/helperFunctions";
 
+//@ts-ignore
+
 describe("Testing Pet Operator Upgrade", async function () {
   this.timeout(300000);
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
