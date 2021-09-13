@@ -7,13 +7,13 @@ import { upgradePetOperator } from "../scripts/upgrades/upgrade-petOperator";
 import { expect } from "chai";
 import { Contract } from "@ethersproject/contracts";
 import { impersonate } from "../scripts/helperFunctions";
-
-//@ts-ignore
+import { AavegotchiFacet } from "../typechain/AavegotchiFacet";
+import { AavegotchiGameFacet } from "../typechain/AavegotchiGameFacet";
 
 describe("Testing Pet Operator Upgrade", async function () {
   this.timeout(300000);
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-  let aavegotchiFacet: Contract;
+  let aavegotchiFacet: AavegotchiFacet;
   let aavegotchiGameFacet: Contract;
   let petOperator: string;
   let firstOwner: string;
@@ -38,15 +38,15 @@ describe("Testing Pet Operator Upgrade", async function () {
 
     await upgradePetOperator();
 
-    aavegotchiFacet = await ethers.getContractAt(
+    aavegotchiFacet = (await ethers.getContractAt(
       "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
       diamondAddress
-    );
+    )) as AavegotchiFacet;
 
-    aavegotchiGameFacet = await ethers.getContractAt(
+    aavegotchiGameFacet = (await ethers.getContractAt(
       "AavegotchiGameFacet",
       diamondAddress
-    );
+    )) as AavegotchiGameFacet;
 
     tokenIdOne = "9512";
     firstOwner = await aavegotchiFacet.ownerOf(tokenIdOne);

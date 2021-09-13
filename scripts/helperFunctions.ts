@@ -5,7 +5,7 @@ import { DiamondLoupeFacet } from "../typechain";
 
 export const gasPrice = 50000000000;
 
-export async function impersonate(address: string, contract: Contract) {
+export async function impersonate(address: string, contract: any) {
   await network.provider.request({
     method: "hardhat_impersonateAccount",
     params: [address],
