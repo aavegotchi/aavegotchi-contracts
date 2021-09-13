@@ -114,6 +114,13 @@ describe("Testing Pet Operator Upgrade", async function () {
     expect(approved).to.equal(false);
   });
 
+  it("Can't pet Aavegotchis not owned by you", async function () {
+    aavegotchiFacet = await impersonate(thirdOwner, aavegotchiFacet);
+    await expect(aavegotchiGameFacet.interact([tokenIdOne])).to.be.revertedWith(
+      "AavegotchiGameFacet: Not owner of token or approved"
+    );
+  });
+
   it("Bridged gotchis can be pet by anyone", async function () {
     aavegotchiFacet = await impersonate(thirdOwner, aavegotchiFacet);
 
