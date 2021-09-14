@@ -25,12 +25,14 @@ describe("Rolling back wearables", async function () {
     ).connect(signer);
 
     let tx = await itemsTransferFacet.extractItemsFromSacrificedGotchi(
+      itemManager,
       1172,
       [143, 197, 235, 236],
       [2, 1, 5, 10]
     );
     await tx.wait();
     tx = await itemsTransferFacet.extractItemsFromDiamond(
+      itemManager,
       [57, 58, 59],
       [1, 1, 1]
     );
