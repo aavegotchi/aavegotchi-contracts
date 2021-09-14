@@ -7,7 +7,7 @@ leftBody += '<g class="gotchi-shadow"><path d="M23 58v1h1v1h16v-1h1v-1z" opacity
 leftBody += '<path class="gotchi-cheek" d="M22 32h2v2h-2z" fill="#f696c6"/>'
 
 let leftHand = '<g class="gotchi-handsDown"><path d="M25 44h-1v-4h1v-1h2v-1h2v-1h1v-1h1v-1h2v7h-1v1h-1v1h-2v1h-4z" /><path d="M25 40h2v-1h2v-1h1v-1h1v-1h2v5h-1v1h-1v1h-2v1h-4z" fill="#fff"/><g ><path d="M33 40v1h-1v-1h1z"/><path d="M29,42v1h2v-1h1v-1h-1v1H29z"/><path d="M29 43v1h-4v-1h4z"/></g></g>'
-leftHand += '<g class="gotchi-handsUp"><path d="M26 29v-1h4v1h1v2h1v2h1v1h1v1h1v2h-7v-1h-1v-1h-1v-2h-1v-4z" /><path d="M30 29v2h1v2h1v1h1v1h1v2h-5v-1h-1v-1h-1v-2h-1v-4z" fill="#fff"/><g ><path d="M30 37h-1v-1h1v1z"/><path d="M28,33h-1v2h1v1h1v-1h-1V33z"/><path d="M27 33h-1v-4h1v4z"/></g></g>'
+leftHand += '<g class="gotchi-handsUp"><path d="M26 29v-1h4v1h1v2h1v2h1v1h1v1h1v2h-7v-1h-1v-1h-1v-2h-1v-4z" /><path d="M30 29v2h1v2h1v1h1v1h1v2h-5v-1h-1v-1h-1v-2h-1v-4z" fill="#fff"/><g><path d="M30 37h-1v-1h1v1z"/><path d="M28,33h-1v2h1v1h1v-1h-1V33z"/><path d="M27 33h-1v-4h1v4z"/></g></g>'
 
 // body
 let rightBody = '<g class="gotchi-body"><g class="gotchi-primary"><path d="M21 14v-2h2v-2h2V8h4V6h6v2h4v2h2v2h2v2h1v41h-3v-2h-3v2h-4v-2h-4v2h-4v-2h-3v2h-3V14z" /><path d="M23 14v-2h2v-2h4V8h6v2h4v2h2v2h2v39h-2v-2h-3v2h-4v-2h-4v2h-4v-2h-3v2h-2V14z" /><path d="M22,15h1v-2h2v-2h4V9h6v2h4v2h2v1h2v37h-2v-2h-3v2h-4v-2h-4v2h-4v-2h-3v2h-1V15z" fill="#fff"/></g></g>'

@@ -4731,7 +4731,7 @@ let sideViewDimensions5 = [
     itemId: 162,
     name: "Miami Shirt",
     side: "left",
-    dimensions: { x: 20, y: 32, width: 4, height: 9 },
+    dimensions: { x: 20, y: 33, width: 4, height: 9 },
   },
   {
     itemId: 162,
@@ -4743,7 +4743,7 @@ let sideViewDimensions5 = [
     itemId: 162,
     name: "Miami Shirt",
     side: "right",
-    dimensions: { x: 20, y: 32, width: 4, height: 9 },
+    dimensions: { x: 20, y: 33, width: 4, height: 9 },
   },
   {
     itemId: 205,
@@ -4908,13 +4908,13 @@ let sideViewDimensions6 = [
     itemId: 213,
     name: "H4xx0r Shirt",
     side: "left",
-    dimensions: { x: 20, y: 33, width: 24, height: 20 },
+    dimensions: { x: 20, y: 31, width: 24, height: 20 },
   },
   {
     itemId: 213,
     name: "H4xx0r Shirt",
     side: "right",
-    dimensions: { x: 20, y: 33, width: 24, height: 20 },
+    dimensions: { x: 20, y: 31, width: 24, height: 20 },
   },
   {
     itemId: 213,
