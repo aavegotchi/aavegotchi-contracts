@@ -615,6 +615,7 @@ contract SvgViewsFacet is Modifiers {
             "</svg></g>"
         );
         uint256 svgId = s.sleeves[_wearableId];
+        console.log("Sleeve ID: ", svgId);
         if (svgId == 0 && _wearableId == 8) {
             sleeves_ = abi.encodePacked(
                 // x

@@ -1317,15 +1317,8 @@ function bodyWearable (name) {
   const back = readSvg(`${name}Back`)
   const backLeftSleevesUp = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-up">' + readSvg(`${name}BackLeftUp`) + '</g>'
   const backLeft = readSvg(`${name}BackLeft`)
-  // const sideLeft = readSvg(`${name}SideLeft`)
-  // const sideLeftUp = readSvg(`${name}SideLeftUp`)
-  // const sideLeftDown = readSvg(`${name}SideLeftDown`)
-
   const backRightSleevesUp = '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-up">' + readSvg(`${name}BackRightUp`) + '</g>'
   const backRight = readSvg(`${name}BackRight`)
-  // const sideRight = readSvg(`${name}SideRight`)
-  // const sideRightUp = readSvg(`${name}SideRightUp`)
-  // const sideRightDown = readSvg(`${name}SideRightDown`)
 
   svg = '<g>' + back + backLeftSleevesUp + backLeft + backRightSleevesUp + backRight + '</g>'
   return svg

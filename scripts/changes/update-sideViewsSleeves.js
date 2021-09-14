@@ -1,0 +1,168 @@
+/* global ethers hre */
+/* eslint prefer-const: "off" */
+
+const { LedgerSigner } = require("@ethersproject/hardware-wallets");
+
+const { aavegotchiSvgs } = require("../../svgs/aavegotchi-side.js");
+
+const { sideViewsLayers } = require("../upgrades/upgrade-sideViewsLayer.js");
+
+const {
+  wearablesLeftSvgs,
+  wearablesRightSvgs,
+  wearablesBackSvgs,
+  wearablesLeftSleeveSvgs,
+  wearablesRightSleeveSvgs,
+  wearablesBackSleeveSvgs,
+} = require("../../svgs/wearables-sides.js");
+
+async function main() {
+  await sideViewsLayers();
+  
+  const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+  let account1Signer;
+  let account1Address;
+  let signer;
+
+  let owner = await (
+    await ethers.getContractAt("OwnershipFacet", diamondAddress)
+  ).owner();
+  const testing = ["hardhat", "localhost"].includes(hre.network.name);
+
+  if (testing) {
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [owner],
+    });
+    signer = await ethers.getSigner(owner);
+    let dao = await ethers.getContractAt("DAOFacet", diamondAddress, signer);
+    [account1Signer] = await ethers.getSigners();
+    account1Address = await account1Signer.getAddress();
+    let tx = await dao.addItemManagers([account1Address]);
+    let receipt = await tx.wait();
+    if (!receipt.status) {
+      throw Error(`Error:: ${tx.hash}`);
+    }
+    /* console.log("assigned", account1Address, "as item manager"); */
+  } else if (hre.network.name === "matic") {
+    const accounts = await ethers.getSigners();
+    const account = await accounts[0].getAddress();
+    /* console.log("account:", account); */
+
+    signer = accounts[0]; //new LedgerSigner(ethers.provider);
+  } else {
+    throw Error("Incorrect network selected");
+  }
+
+  async function updateSvgs(svg, svgType, svgId, testing, uploadSigner) {
+    const svgFacet = await ethers.getContractAt(
+      "SvgFacet",
+      diamondAddress,
+      uploadSigner
+    );
+    let svgLength = new TextEncoder().encode(svg[svgId]).length;
+    const array = [
+      {
+        svgType: ethers.utils.formatBytes32String(svgType),
+        ids: [svgId],
+        sizes: [svgLength],
+      },
+    ];
+
+    /* console.log(`Update: ${svgType}: ${svgId}`); */
+
+    const gasPrice = 100000000000;
+
+    let tx = await svgFacet.updateSvg(svg[svgId], array, {
+      gasPrice: gasPrice,
+    });
+    /* console.log("tx hash:", tx.hash); */
+    let receipt = await tx.wait();
+    if (!receipt.status) {
+      throw Error(`Error:: ${tx.hash}`);
+    }
+  }
+
+  let itemSigner;
+  if (testing) {
+    itemSigner = account1Signer;
+  } else {
+    itemSigner = signer;
+  }
+
+  //wearables
+  const updatingLeftSvgs = [125]
+  const updatingRightSvgs = [125]
+
+    //left
+    for (var i = 0; i < updatingLeftSvgs.length; i++) {
+      await updateSvgs(
+        wearablesLeftSvgs,
+        "wearables-left",
+        updatingLeftSvgs[i],
+        testing,
+        itemSigner
+      );
+    }
+  
+    //right
+    for (var i = 0; i < updatingRightSvgs.length; i++) {
+      await updateSvgs(
+        wearablesRightSvgs,
+        "wearables-right",
+        updatingRightSvgs[i],
+        testing,
+        itemSigner
+      );
+    }
+
+  const updatingSleevesLeft = [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
+  const updatingSleevesRight = [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
+  const updatingSleevesBack = [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
+
+  //sleeves
+  for (var i = 0; i < updatingSleevesLeft.length; i++) {
+    await updateSvgs(wearablesLeftSleeveSvgs, 'sleeves-left', updatingSleevesLeft[i], testing, itemSigner)
+  }
+
+  for (var i = 0; i < updatingSleevesRight.length; i++) {
+    await updateSvgs(wearablesRightSleeveSvgs, 'sleeves-right', updatingSleevesRight[i], testing, itemSigner)
+  }
+
+  for (var i = 0; i < updatingSleevesBack.length; i++) {
+    await updateSvgs(wearablesBackSleeveSvgs, 'sleeves-back', updatingSleevesBack[i], testing, itemSigner)
+  }
+/*   console.log("Sleeves Array Length: ", wearablesLeftSleeveSvgs.length)
+  console.log("Updating Sleeves Array Length: ", updatingSleevesBack.length) */
+
+  const svgViewsFacet = await ethers.getContractAt(
+    "SvgViewsFacet",
+    diamondAddress,
+    itemSigner
+  );
+    // BODY = 0;
+    // FACE = 1;
+    // EYES = 2;
+    // HEAD = 3;
+    // RIGHT = 4;
+    // LEFT = 5;
+    // PET = 6;
+    // BG = 7;
+
+    const numTraits1 = [99, 99, 99, 99, 12, 9];
+    const wearables1 = [91, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    const sidePreview = await svgViewsFacet.previewSideAavegotchi("2", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
+    console.log("Side Preview: ", sidePreview);
+}
+
+if (require.main === module) {
+  main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}
+
+exports.sideViewsUpdate = main;
