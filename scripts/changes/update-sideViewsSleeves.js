@@ -206,20 +206,6 @@ async function main() {
     await updateSvgs(wearablesBackSleeveSvgs, 'sleeves-back', updatingSleevesBack[i], testing, itemSigner)
   }
 
-    // BODY = 0;
-    // FACE = 1;
-    // EYES = 2;
-    // HEAD = 3;
-    // RIGHT = 4;
-    // LEFT = 5;
-    // PET = 6;
-    // BG = 7;
-
-    const numTraits1 = [99, 99, 99, 99, 12, 9];
-    const wearables1 = [220, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-    const sidePreview = await svgViewsFacet.previewSideAavegotchi("2", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
-    console.log("Side Preview: ", sidePreview);
 }
 
 if (require.main === module) {
