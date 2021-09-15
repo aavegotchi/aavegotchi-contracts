@@ -75,7 +75,12 @@ describe("Rolling back wearables", async function () {
   describe("Permissions", function () {
     it("Cannot remove wearables from non-sacrificed aavegotchis", async function () {
       await expect(
-        itemsTransferFacet.extractItemsFromSacrificedGotchi(7938, [211], [1])
+        itemsTransferFacet.extractItemsFromSacrificedGotchi(
+          itemManager,
+          7938,
+          [211],
+          [1]
+        )
       ).to.be.revertedWith("Aavegotchi has not been sacrificed");
     });
   });

@@ -55,7 +55,7 @@ async function main() {
       "function extractItemsFromSacrificedGotchi(address _to, uint256 _tokenId, uint256[] calldata _itemIds, uint256[] calldata _values) external"
     ),
     getSelector(
-      "function extractItemsFromDiamond(address_ to, uint256[] calldata _itemIds, uint256[] calldata _values) external"
+      "function extractItemsFromDiamond(address _to, uint256[] calldata _itemIds, uint256[] calldata _values) external"
     ),
   ];
   let existingFuncs = getSelectors(facet);
