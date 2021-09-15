@@ -5091,13 +5091,13 @@ let sideViewDimensions7 = [
     itemId: 220,
     name: "Punk Shirt",
     side: "left",
-    dimensions: { x: 20, y: 33, width: 24, height: 20 },
+    dimensions: { x: 20, y: 30, width: 24, height: 20 },
   },
   {
     itemId: 220,
     name: "Punk Shirt",
     side: "right",
-    dimensions: { x: 20, y: 33, width: 24, height: 20 },
+    dimensions: { x: 20, y: 30, width: 24, height: 20 },
   },
   {
     itemId: 220,
@@ -5127,7 +5127,7 @@ let sideViewDimensions7 = [
     itemId: 220,
     name: "Punk Shirt",
     side: "back",
-    dimensions: { x: 9, y: 30, width: 34, height: 20 },
+    dimensions: { x: 9, y: 32, width: 34, height: 20 },
   },
   {
     itemId: 220,

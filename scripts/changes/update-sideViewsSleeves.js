@@ -6,6 +6,9 @@ const { LedgerSigner } = require("@ethersproject/hardware-wallets");
 const { aavegotchiSvgs } = require("../../svgs/aavegotchi-side.js");
 
 const {
+  wearablesLeftSvgs,
+  wearablesRightSvgs,
+  wearablesBackSvgs,
   wearablesLeftSleeveSvgs,
   wearablesRightSleeveSvgs,
   wearablesBackSleeveSvgs,
@@ -13,7 +16,8 @@ const {
 
 const {
   sideViewDimensions5,
-  sideViewDimensions6
+  sideViewDimensions6,
+  sideViewDimensions7
 } = require("../../svgs/sideViewDimensions.js");
 
 async function main() {  
@@ -78,12 +82,79 @@ async function main() {
     }
   }
 
+  async function updateSvgs(svg, svgType, svgId, testing, uploadSigner) {
+    const svgFacet = await ethers.getContractAt(
+      "SvgFacet",
+      diamondAddress,
+      uploadSigner
+    );
+    let svgLength = new TextEncoder().encode(svg[svgId]).length;
+    const array = [
+      {
+        svgType: ethers.utils.formatBytes32String(svgType),
+        ids: [svgId],
+        sizes: [svgLength],
+      },
+    ];
+
+    /* console.log(`Update: ${svgType}: ${svgId}`); */
+
+    const gasPrice = 100000000000;
+
+    let tx = await svgFacet.updateSvg(svg[svgId], array, {
+      gasPrice: gasPrice,
+    });
+    /* console.log("tx hash:", tx.hash); */
+    let receipt = await tx.wait();
+    if (!receipt.status) {
+      throw Error(`Error:: ${tx.hash}`);
+    }
+  }
+
   let itemSigner;
   if (testing) {
     itemSigner = account1Signer;
   } else {
     itemSigner = signer;
   }
+
+  //wearables
+  const updatingLeftSvgs = [220]
+  const updatingRightSvgs = [220]
+  const updatingBackSvgs = [220]
+
+    //left
+    for (var i = 0; i < updatingLeftSvgs.length; i++) {
+      await updateSvgs(
+        wearablesLeftSvgs,
+        "wearables-left",
+        updatingLeftSvgs[i],
+        testing,
+        itemSigner
+      );
+    }
+
+    //right
+    for (var i = 0; i < updatingRightSvgs.length; i++) {
+      await updateSvgs(
+        wearablesRightSvgs,
+        "wearables-right",
+        updatingRightSvgs[i],
+        testing,
+        itemSigner
+      );
+    }
+
+    //back
+    for (var i = 0; i < updatingRightSvgs.length; i++) {
+      await updateSvgs(
+        wearablesBackSvgs,
+        "wearables-back",
+        updatingBackSvgs[i],
+        testing,
+        itemSigner
+      );
+    }
 
   const svgViewsFacet = await ethers.getContractAt(
     "SvgViewsFacet",
@@ -101,6 +172,14 @@ async function main() {
   } 
   
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions6, {
+    gasPrice: gasPrice,
+  });
+  receipt = await tx.wait();
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`);
+  }
+  
+  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions7, {
     gasPrice: gasPrice,
   });
   receipt = await tx.wait();
@@ -137,7 +216,7 @@ async function main() {
     // BG = 7;
 
     const numTraits1 = [99, 99, 99, 99, 12, 9];
-    const wearables1 = [213, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const wearables1 = [220, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     const sidePreview = await svgViewsFacet.previewSideAavegotchi("2", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1);
     console.log("Side Preview: ", sidePreview);
