@@ -111,4 +111,4 @@ if (require.main === module) {
     });
 }
 
-exports.sideViewsLayers = main;
+exports.sideViewsLayer = main;

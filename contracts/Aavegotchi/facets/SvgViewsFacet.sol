@@ -58,6 +58,8 @@ contract SvgViewsFacet is Modifiers {
         uint256 _hauntId,
         uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables
     ) internal view returns (bytes memory svg_) {
+        console.log("**** getAavegotchiSideSvgLayers function triggered ****");
+
         SvgLayerDetails memory details;
 
         details.primaryColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
@@ -121,12 +123,14 @@ contract SvgViewsFacet is Modifiers {
         //If tokenId is MAX_INT, we're rendering a Portal Aavegotchi, so no wearables.
         if (_tokenId == type(uint256).max) {
             if (side == back) {
+                console.log("Background Harcode because side == back && _tokenId == type(uint256).max");
                 svg_ = abi.encodePacked(
                     applySideStyles(details, _tokenId, equippedWearables),
                     LibSvg.getSvg(LibSvg.bytesToBytes32("aavegotchi-", _sideView), LibSvg.BACKGROUND_SVG_ID),
                     svg_
                 );
             } else {
+                console.log("Background Harcode because _tokenId == type(uint256).max ONLY");
                 svg_ = abi.encodePacked(
                     applySideStyles(details, _tokenId, equippedWearables),
                     LibSvg.getSvg(LibSvg.bytesToBytes32("aavegotchi-", _sideView), LibSvg.BACKGROUND_SVG_ID),
@@ -136,6 +140,7 @@ contract SvgViewsFacet is Modifiers {
                 );
             }
         } else {
+            console.log("_tokenId != type(uint256).max");
             if (back != side) {
                 svg_ = abi.encodePacked(applySideStyles(details, _tokenId, equippedWearables), svg_, details.collateral, details.eyeShape);
                 svg_ = addBodyAndWearableSideSvgLayers(_sideView, svg_, equippedWearables);
@@ -237,10 +242,13 @@ contract SvgViewsFacet is Modifiers {
             bytes memory sideview = getWearableSideView(_sideView, wearableId, i);
 
             if (i == LibItems.WEARABLE_SLOT_BG && wearableId != 0) {
+                console.log("Background ID: ", wearableId);
+                console.logBytes(layers.background);
                 layers.background = sideview;
             } else {
                 layers.background = LibSvg.getSvg("aavegotchi", 4);
             }
+
 
             if (i == LibItems.WEARABLE_SLOT_BODY && wearableId != 0) {
                 (layers.bodyWearable, layers.sleeves) = getBodySideWearable(_sideView, wearableId);
