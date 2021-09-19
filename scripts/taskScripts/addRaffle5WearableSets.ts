@@ -1,4 +1,5 @@
 import { run } from "hardhat";
+import { AddWearableSetsTaskArgs } from "../../tasks/addWearableSets";
 import { maticDiamondAddress } from "../helperFunctions";
 
 async function addWearableSets() {
@@ -6,11 +7,12 @@ async function addWearableSets() {
   const diamondAddress: string = maticDiamondAddress;
   const setsFile: string = "raffle5sets";
 
-  await run("addWearableSets", {
+  const args: AddWearableSetsTaskArgs = {
     itemManager: itemManager,
     diamondAddress: diamondAddress,
-    itemFile: setsFile,
-  });
+    setsFile: setsFile,
+  };
+  await run("addWearableSets", args);
 }
 
 addWearableSets()

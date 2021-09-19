@@ -1,4 +1,5 @@
 import { run } from "hardhat";
+import { AddItemTypesTaskArgs } from "../../tasks/addItemTypes";
 import { maticDiamondAddress } from "../helperFunctions";
 
 async function addItemTypes() {
@@ -8,13 +9,15 @@ async function addItemTypes() {
   const svgFile: string = "h2wearables";
   const sleeveStartId: string = "29"; //todo: get this programatically
 
-  await run("addItemTypes", {
+  const args: AddItemTypesTaskArgs = {
     itemManager: itemManager,
     diamondAddress: diamondAddress,
     itemFile: itemFile,
     svgFile: svgFile,
     sleeveStartId: sleeveStartId,
-  });
+  };
+
+  await run("addItemTypes", args);
 }
 
 addItemTypes()
