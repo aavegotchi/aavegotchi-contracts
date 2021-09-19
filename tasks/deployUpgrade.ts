@@ -80,24 +80,16 @@ task(
     "facetsAndAddSelectors",
     "Stringified array of facet names to upgrade, along with an array of add Selectors"
   )
-
   .addParam(
     "removeSelectors",
     "Stringifed array of selectors to remove from the Diamond, or empty"
   )
 
-  /*Example of addSelectors array: 
-   const newDaoFuncs = [
-    getSelector('function addItemManagers(address[] calldata _newItemManagers) external'),
-  ]
-  */
   .setAction(async (taskArgs: TaskArgs, hre: HardhatRuntimeEnvironment) => {
     const facets: string = taskArgs.facetsAndAddSelectors;
     const facetsAndAddSelectors: FacetsAndAddSelectors[] =
       convertStringToFacetAndSelectors(facets);
-
     const diamondUpgrader: string = taskArgs.diamondUpgrader;
-
     const removeSelectors: string = taskArgs.removeSelectors;
     const diamondAddress: string = taskArgs.diamondAddress;
 
@@ -151,8 +143,6 @@ task(
         (selector) => !newSelectors.includes(selector)
       );
 
-      console.log("existing selectors:", existingSelectors);
-
       if (newSelectors.length > 0) {
         cut.push({
           facetAddress: deployedFacet.address,
@@ -167,8 +157,6 @@ task(
         action: FacetCutAction.Replace,
         functionSelectors: existingSelectors,
       });
-
-      //todo: add Remove facets
     }
 
     if (JSON.parse(removeSelectors).length > 0) {
@@ -189,8 +177,6 @@ task(
       signer
     )) as IDiamondCut;
 
-    let receipt: ContractReceipt;
-
     if (testing) {
       console.log("Diamond cut");
       const tx: ContractTransaction = await diamondCut.diamondCut(
@@ -200,7 +186,7 @@ task(
         { gasLimit: 8000000 }
       );
       console.log("Diamond cut tx:", tx.hash);
-      receipt = await tx.wait();
+      let receipt: ContractReceipt = await tx.wait();
       if (!receipt.status) {
         throw Error(`Diamond upgrade failed: ${tx.hash}`);
       }
