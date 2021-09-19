@@ -1,6 +1,8 @@
 //All the new sets of Raffle 4
 
-export const sets = [
+import { WearableSet } from "../../tasks/addWearableSets";
+
+export const sets: WearableSet[] = [
   {
     name: "Venly Biker",
     wearableIds: [206, 207, 208, 209],

@@ -1,4 +1,4 @@
-import { ItemTypeInputNew } from "../itemTypeHelpers";
+import { ItemTypeInputNew } from "../../scripts/itemTypeHelpers";
 
 export const itemTypes: ItemTypeInputNew[] = [
   {

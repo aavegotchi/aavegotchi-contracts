@@ -1,4 +1,4 @@
-import { ItemTypeInput } from "./itemTypeHelpers";
+import { ItemTypeInput } from "../../scripts/itemTypeHelpers";
 
 /* global ethers */
 /*
