@@ -30,6 +30,8 @@ export interface DeployUpgradeTaskArgs {
   removeSelectors: string;
   useMultisig: boolean;
   useLedger: boolean;
+  // verifyFacets: boolean;
+  // updateDiamondABI: boolean;
 }
 
 interface Cut {
@@ -86,7 +88,12 @@ task(
     "removeSelectors",
     "Stringifed array of selectors to remove from the Diamond, or empty"
   )
-  .addFlag("useMultisig", "Set to true if multisig should be used for signing")
+  .addFlag(
+    "useMultisig",
+    "Set to true if multisig should be used for deploying"
+  )
+  .addFlag("useLedger", "Set to true if Ledger should be used for signing")
+  // .addFlag("verifyFacets","Set to true if facets should be verified after deployment")
 
   .setAction(
     async (taskArgs: DeployUpgradeTaskArgs, hre: HardhatRuntimeEnvironment) => {
