@@ -1,7 +1,5 @@
 import { LedgerSigner } from "@ethersproject/hardware-wallets";
 
-// import { ethers, network } from "hardhat";
-
 import { task } from "hardhat/config";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";

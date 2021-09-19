@@ -44,10 +44,12 @@ export async function upgradePetOperator() {
 
   const newFuncs = [
     getSelector(
-      "function isPetOperatorForAll(address _owner, address _operator) external view returns (bool approved_)"
+      "function isPetOperatorForAll(address _owner, address _operator) external view returns (bool approved_)",
+      ethers
     ),
     getSelector(
-      "function setPetOperatorForAll(address _operator, bool _approved) external"
+      "function setPetOperatorForAll(address _operator, bool _approved) external",
+      ethers
     ),
   ];
   let existingFuncs = getSelectors(facet1);
@@ -110,7 +112,8 @@ export async function upgradePetOperator() {
       { gasLimit: 800000 }
     );
     const diamondUpgrader = process.env.DIAMOND_UPGRADER;
-    if (diamondUpgrader) await sendToMultisig(diamondUpgrader, signer, tx);
+    if (diamondUpgrader)
+      await sendToMultisig(diamondUpgrader, signer, tx, ethers);
   }
   return diamondAddress;
 }

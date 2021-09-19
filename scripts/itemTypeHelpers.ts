@@ -1,5 +1,4 @@
 import { BigNumberish } from "@ethersproject/bignumber";
-// import { ethers } from "hardhat";
 
 type Category = 0 | 1 | 2 | 3;
 
@@ -408,7 +407,8 @@ export function getItemTypes(itemTypes: ItemTypeInputNew[]): ItemTypeOutput[] {
       ghstPrice: rarityLevelToGhstPrice(itemType.rarityLevel),
       rarityScoreModifier: calculateRarityScoreModifier(maxQuantity),
       maxQuantity: maxQuantity,
-      totalQuantity: 0,
+      totalQuantity: 0, //New items always start at 0
+      name: itemType.name.trim(), //Trim the name to remove empty spaces
     };
 
     if (!Array.isArray(itemType.allowedCollaterals)) {

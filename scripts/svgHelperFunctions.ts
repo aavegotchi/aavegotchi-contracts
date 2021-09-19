@@ -1,6 +1,5 @@
 import { BigNumberish } from "@ethersproject/bignumber";
 import { BytesLike } from "@ethersproject/bytes";
-// import { ethers } from "hardhat";
 
 export interface SvgTypesAndSizes {
   svgType: BytesLike;

@@ -20,6 +20,15 @@ export interface WearableSet {
   allowedCollaterals: BigNumberish[];
 }
 
+function trimSetNames(sets: WearableSet[]): WearableSet[] {
+  const output: WearableSet[] = [];
+  sets.forEach((set) => {
+    set.name = set.name.trim();
+    output.push(set);
+  });
+  return output;
+}
+
 task("addWearableSets", "Uploads Wearable Sets to the Aavegotchi Diamond")
   .addParam("itemManager", "Address of the item manager")
   .addParam("diamondAddress", "Address of the Diamond to add")
@@ -32,7 +41,8 @@ task("addWearableSets", "Uploads Wearable Sets to the Aavegotchi Diamond")
 
     const { wearableSets } = require(`../data/wearableSets/${itemFile}.ts`);
 
-    const finalWearableSets: WearableSet[] = wearableSets;
+    //Ensure no names have empty strings at the end
+    const finalWearableSets: WearableSet[] = trimSetNames(wearableSets);
 
     console.log("wearable sets:", finalWearableSets);
 

@@ -35,6 +35,10 @@ task(
     "addSelectors",
     "Array of selectors arrays to add. Must be the same length as the facets array"
   )
+  .addOptionalParam(
+    "removeSelectors",
+    "Array of selectors to remove from the Diamond"
+  )
 
   /*Example of addSelectors array: 
    const newDaoFuncs = [
@@ -46,6 +50,7 @@ task(
     const facets: string[] = taskArgs.facets;
     const diamondUpgrader: string = taskArgs.diamondUpgrader;
     const newSelectorsArray: string[][] = taskArgs.addSelectors;
+    const removeSelectors: string[] = taskArgs.removeSelectors;
     const diamondAddress: string = taskArgs.diamondAddress;
 
     if (facets.length !== newSelectorsArray.length) {
@@ -93,7 +98,6 @@ task(
       const newSelectors = newSelectorsArray[index];
 
       let existingSelectors = getSelectors(deployedFacet);
-
       existingSelectors = existingSelectors.filter(
         (selector) => !newSelectors.includes(selector)
       );
@@ -115,6 +119,15 @@ task(
 
       //todo: add Remove facets
     });
+
+    if (removeSelectors.length > 0) {
+      console.log("Removing selectors:", removeSelectors);
+      cut.push({
+        facetAddress: hre.ethers.constants.AddressZero,
+        action: FacetCutAction.Remove,
+        functionSelectors: removeSelectors,
+      });
+    }
 
     console.log(cut);
 
@@ -150,6 +163,6 @@ task(
           "0x",
           { gasLimit: 800000 }
         );
-      await sendToMultisig(diamondUpgrader, signer, tx);
+      await sendToMultisig(diamondUpgrader, signer, tx, hre.ethers);
     }
   });

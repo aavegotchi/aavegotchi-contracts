@@ -1,7 +1,6 @@
 /* global ethers */
 /* eslint-disable  prefer-const */
 
-import { ethers } from "hardhat";
 import { Signer } from "@ethersproject/abstract-signer";
 import {
   ContractTransaction,
@@ -11,7 +10,8 @@ import {
 export async function sendToMultisig(
   multisigAddress: string,
   signer: Signer,
-  transaction: PopulatedTransaction
+  transaction: PopulatedTransaction,
+  ethers: any
 ) {
   const abi = [
     "function submitTransaction(address destination, uint value, bytes data) public returns (uint transactionId)",

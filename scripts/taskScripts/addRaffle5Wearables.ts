@@ -6,7 +6,7 @@ async function addItemTypes() {
   const diamondAddress: string = maticDiamondAddress;
   const itemFile: string = "raffle5wearables";
   const svgFile: string = "h2wearables";
-  const sleeveStartId: string = "29";
+  const sleeveStartId: string = "29"; //todo: get this programatically
 
   await run("addItemTypes", {
     itemManager: itemManager,
