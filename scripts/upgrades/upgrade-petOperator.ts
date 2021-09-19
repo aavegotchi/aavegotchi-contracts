@@ -1,6 +1,7 @@
 import { run, ethers } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
+  DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
 import { getSelector, maticDiamondAddress } from "../helperFunctions";
@@ -27,12 +28,16 @@ async function upgrade() {
 
   const removeSelectors: string[] = [];
 
-  await run("deployUpgrade", {
+  const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     removeSelectors: JSON.stringify(removeSelectors),
-  });
+    useLedger: true,
+    useMultisig: true,
+  };
+
+  await run("deployUpgrade", args);
 }
 
 upgrade()
