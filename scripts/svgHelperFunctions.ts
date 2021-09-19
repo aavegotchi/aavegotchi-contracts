@@ -1,6 +1,6 @@
 import { BigNumberish } from "@ethersproject/bignumber";
 import { BytesLike } from "@ethersproject/bytes";
-import { ethers } from "hardhat";
+// import { ethers } from "hardhat";
 
 export interface SvgTypesAndSizes {
   svgType: BytesLike;
@@ -14,7 +14,8 @@ export interface SvgTypesAndSizesOutput {
 
 export function setupSvg(
   svgType: string,
-  svgs: string[]
+  svgs: string[],
+  ethers: any
 ): SvgTypesAndSizesOutput {
   const svgTypesAndSizes: SvgTypesAndSizes[] = [];
   const svgItems = [];
@@ -33,7 +34,11 @@ export function setupSvg(
   // return [svgItems.join(""), svgTypesAndSizes];
 }
 
-export function printSizeInfo(svgType: BytesLike, sizes: BigNumberish[]) {
+export function printSizeInfo(
+  svgType: BytesLike,
+  sizes: BigNumberish[],
+  ethers: any
+) {
   console.log("------------- SVG Size Info ---------------");
   let totalSize = 0;
   for (const size of sizes) {

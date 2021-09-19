@@ -1,22 +1,24 @@
 import { LedgerSigner } from "@ethersproject/hardware-wallets";
 
-import { ethers, network } from "hardhat";
+// import { ethers, network } from "hardhat";
 
 import { task } from "hardhat/config";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
 import { ItemTypeOutput, SleeveObject } from "../scripts/itemTypeHelpers";
-import { gasPrice } from "../scripts/helperFunctions";
+// import { gasPrice } from "../scripts/helperFunctions";
 import { DAOFacet } from "../typechain/DAOFacet";
 import { SvgFacet } from "../typechain/SvgFacet";
 import { BigNumberish } from "@ethersproject/bignumber";
 import { setupSvg, printSizeInfo } from "../scripts/svgHelperFunctions";
+import { gasPrice } from "../scripts/helperFunctions";
 
 async function uploadSvgs(
   signer: Signer,
   diamondAddress: string,
   svgs: string[],
-  svgType: string
+  svgType: string,
+  ethers: any
 ) {
   let svgFacet = (await ethers.getContractAt(
     "SvgFacet",
@@ -43,12 +45,13 @@ async function uploadSvgs(
     }
     const { svg, svgTypesAndSizes } = setupSvg(
       svgType,
-      svgs.slice(svgItemsStart, svgItemsEnd)
+      svgs.slice(svgItemsStart, svgItemsEnd),
+      ethers
     );
     console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`);
 
     //this might be incorrect
-    printSizeInfo(svgType, svgTypesAndSizes[0].sizes);
+    printSizeInfo(svgType, svgTypesAndSizes[0].sizes, ethers);
 
     let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes);
     let receipt = await tx.wait();
@@ -64,11 +67,13 @@ async function uploadSvgs(
   }
 }
 
+/*
 function verifyItemTypes(itemTypes: ItemTypeOutput[]) {
   itemTypes.forEach((itemType) => {
     //Run any verifications necessary
   });
 }
+*/
 
 task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
   .addParam("itemManager")
@@ -81,7 +86,7 @@ task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
   .addOptionalParam("sleeveSvgs", "Array of sleeve svgs to add")
   .addOptionalParam("sleeveStartId", "ID of the sleeve to start at")
 
-  .setAction(async (taskArgs) => {
+  .setAction(async (taskArgs, hre: any) => {
     const itemTypes: ItemTypeOutput[] = taskArgs.facets;
     const diamondAddress: string = taskArgs.diamondAddress;
     const svgs: string[] = taskArgs.svgs;
@@ -92,28 +97,29 @@ task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
     let signer: Signer;
 
     let owner = itemManager;
-    const testing = ["hardhat", "localhost"].includes(network.name);
+    const testing = ["hardhat", "localhost"].includes(hre.network.name);
     if (testing) {
-      await network.provider.request({
+      await hre.network.provider.request({
         method: "hardhat_impersonateAccount",
         params: [owner],
       });
-      signer = await ethers.provider.getSigner(owner);
-    } else if (network.name === "matic") {
-      signer = new LedgerSigner(ethers.provider, "hid", "m/44'/60'/2'/0/0");
+      signer = await hre.ethers.provider.getSigner(owner);
+    } else if (hre.network.name === "matic") {
+      signer = new LedgerSigner(hre.ethers.provider, "hid", "m/44'/60'/2'/0/0");
     } else {
       throw Error("Incorrect network selected");
     }
+
     let tx: ContractTransaction;
     let receipt: ContractReceipt;
 
-    let daoFacet = (await ethers.getContractAt(
+    let daoFacet = (await hre.ethers.getContractAt(
       "DAOFacet",
       diamondAddress,
       signer
     )) as DAOFacet;
 
-    let svgFacet = (await ethers.getContractAt(
+    let svgFacet = (await hre.ethers.getContractAt(
       "SvgFacet",
       diamondAddress,
       signer
@@ -122,8 +128,7 @@ task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
     console.log("Adding items", 0, "to", itemTypes.length);
 
     //Run verification on all the itemTypes
-    verifyItemTypes(itemTypes);
-
+    // verifyItemTypes(itemTypes);
     tx = await daoFacet.addItemTypes(itemTypes, { gasPrice: gasPrice });
 
     receipt = await tx.wait();
@@ -133,14 +138,16 @@ task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
     console.log("Items were added:", tx.hash);
 
     console.log("Upload SVGs");
-    await uploadSvgs(signer, diamondAddress, svgs, "wearables");
+    await uploadSvgs(signer, diamondAddress, svgs, "wearables", hre.ethers);
 
     console.log("Uploading Sleeves");
+
     await uploadSvgs(
       signer,
       diamondAddress,
       sleeveSvgs.map((value) => value.svg),
-      "sleeves"
+      "sleeves",
+      hre.ethers
     );
 
     interface SleeveInput {
@@ -159,9 +166,7 @@ task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
     }
 
     console.log("Associating sleeves svgs with body wearable svgs.");
-    tx = await svgFacet.setSleeves(sleeves, {
-      gasPrice: gasPrice,
-    });
+    tx = await svgFacet.setSleeves(sleeves, { gasPrice: gasPrice });
     receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);

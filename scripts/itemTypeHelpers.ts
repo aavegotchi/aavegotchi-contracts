@@ -1,5 +1,5 @@
-import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
-import { ethers } from "hardhat";
+import { BigNumberish } from "@ethersproject/bignumber";
+// import { ethers } from "hardhat";
 
 type Category = 0 | 1 | 2 | 3;
 
@@ -357,7 +357,10 @@ export function calculateRarityScoreModifier(
   return 0;
 }
 
-export function getItemTypes(itemTypes: ItemTypeInput[]): ItemTypeOutput[] {
+export function getItemTypes(
+  itemTypes: ItemTypeInput[],
+  ethers: any
+): ItemTypeOutput[] {
   const result = [];
   for (const itemType of itemTypes) {
     let itemTypeOut: ItemTypeOutput = {

@@ -1,22 +1,21 @@
-//@ts-ignore
-import { ethers, network } from "hardhat";
+// import { ethers, network } from "hardhat";
 import { Contract } from "@ethersproject/contracts";
 import { DiamondLoupeFacet } from "../typechain";
 
 export const gasPrice = 50000000000;
 
-export async function impersonate(address: string, contract: any) {
-  await network.provider.request({
+export async function impersonate(address: string, contract: any, hre: any) {
+  await hre.network.provider.request({
     method: "hardhat_impersonateAccount",
     params: [address],
   });
-  let signer = await ethers.getSigner(address);
+  let signer = await hre.ethers.getSigner(address);
   contract = contract.connect(signer);
   return contract;
 }
 
-export async function resetChain() {
-  await network.provider.request({
+export async function resetChain(hre: any) {
+  await hre.network.provider.request({
     method: "hardhat_reset",
     params: [
       {
@@ -39,18 +38,18 @@ export function getSelectors(contract: Contract) {
   return selectors;
 }
 
-export function getSelector(func: string) {
-  const abiInterface = new ethers.utils.Interface([func]);
-  return abiInterface.getSighash(ethers.utils.Fragment.from(func));
+export function getSelector(func: string, hre: any) {
+  const abiInterface = new hre.ethers.utils.Interface([func]);
+  return abiInterface.getSighash(hre.ethers.utils.Fragment.from(func));
 }
 
 export const maticDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
 
-export async function diamondOwner(address: string) {
+export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();
 }
 
-export async function getFunctionsForFacet(facetAddress: string) {
+export async function getFunctionsForFacet(facetAddress: string, ethers: any) {
   const Loupe = (await ethers.getContractAt(
     "DiamondLoupeFacet",
     maticDiamondAddress
