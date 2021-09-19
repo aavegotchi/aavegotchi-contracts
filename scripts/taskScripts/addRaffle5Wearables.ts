@@ -4,17 +4,15 @@ import { maticDiamondAddress } from "../helperFunctions";
 async function addItemTypes() {
   const itemManager: string = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
   const diamondAddress: string = maticDiamondAddress;
-  const itemTypes: string = "";
-  const svgs: string = "";
-  const sleeveSvgs: string = "h2wearables";
+  const itemFile: string = "raffle5wearables";
+  const svgFile: string = "h2wearables";
   const sleeveStartId: string = "29";
 
   await run("addItemTypes", {
     itemManager: itemManager,
     diamondAddress: diamondAddress,
-    itemTypes: itemTypes,
-    svgs: svgs,
-    sleeveSvgs: sleeveSvgs,
+    itemFile: itemFile,
+    svgFile: svgFile,
     sleeveStartId: sleeveStartId,
   });
 }

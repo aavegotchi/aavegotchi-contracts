@@ -73,32 +73,27 @@ async function uploadSvgs(
 task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
   .addParam("itemManager", "Address of the item manager", "0")
   .addParam("diamondAddress", "Address of the Diamond to upgrade")
-  .addParam("itemTypes", "File name of the items to add")
-  .addParam("svgs", "File name of the itemType SVGs")
-  .addOptionalParam(
-    "sleeveSvgs",
-    "File name of the sleeve SVGs. Must be in the /svgs/svgItems folder"
-  )
+  .addParam("itemFile", "File name of the items to add")
+  .addParam("svgFile", "File name of the itemType SVGs")
   .addOptionalParam("sleeveStartId", "ID of the sleeve to start at")
 
   .setAction(async (taskArgs, hre: any) => {
-    const items: string = taskArgs.itemTypes;
+    const itemFile: string = taskArgs.itemFile;
     const diamondAddress: string = taskArgs.diamondAddress;
-    const svgs: string = taskArgs.svgs;
-    const sleeveSvgs: string = taskArgs.sleeveSvgs;
+    const svgFile: string = taskArgs.svgFile;
     const sleeveStartId: string = taskArgs.sleeveStartId;
     const itemManager = taskArgs.itemManager;
 
-    const { itemTypes: currentItemTypes } = require("../scripts/itemTypes");
+    const {
+      itemTypes: currentItemTypes,
+    } = require(`../scripts/addItemTypes/${itemFile}.ts`);
 
-    console.log("items:", currentItemTypes);
+    const { wearables, sleeves } = require(`../svgs/${svgFile}.ts`);
 
-    const { wearables, sleeves } = require(`../svgs/${sleeveSvgs}.ts`);
+    const itemTypesArray: ItemTypeOutput[] = getItemTypes(currentItemTypes);
 
-    const itemTypesArray: ItemTypeOutput[] = getItemTypes(
-      currentItemTypes,
-      hre.ethers
-    );
+    console.log("item types array:", itemTypesArray);
+
     const svgsArray: string[] = wearables;
     const sleeveSvgsArray: SleeveObject[] = sleeves;
 
@@ -135,8 +130,6 @@ task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
 
     console.log("Adding items", 0, "to", currentItemTypes.length);
 
-    //Run verification on all the itemTypes
-    // verifyItemTypes(itemTypes);
     tx = await daoFacet.addItemTypes(itemTypesArray, { gasPrice: gasPrice });
 
     receipt = await tx.wait();

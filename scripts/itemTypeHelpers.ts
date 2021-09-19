@@ -48,6 +48,44 @@ export interface ItemTypeInput {
   canPurchaseWithGhst: boolean;
 }
 
+export type rarityLevel =
+  | "common"
+  | "uncommon"
+  | "rare"
+  | "legendary"
+  | "mythical"
+  | "godlike";
+
+export interface ItemTypeInputNew {
+  name: string;
+  description: string;
+  svgId: BigNumberish;
+  minLevel: BigNumberish;
+  canBeTransferred: boolean;
+  rarityLevel: rarityLevel;
+  setId: BigNumberish[];
+  author: string;
+  dimensions: Dimensions;
+  allowedCollaterals: BigNumberish[];
+  ghstPrice: BigNumberish | BigNumberish;
+  traitModifiers: [
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish,
+    BigNumberish
+  ];
+  slotPositions: Slot;
+  category: Category;
+  experienceBonus: BigNumberish;
+  kinshipBonus: BigNumberish;
+  rarityScoreModifier?: BigNumberish;
+  canPurchaseWithGhst: boolean;
+  totalQuantity?: number;
+  maxQuantity?: number;
+}
+
 export interface ItemTypeOutput {
   name: string;
   description: string;
@@ -349,9 +387,7 @@ export function stringToSlotPositions(
   }
 }
 
-export function calculateRarityScoreModifier(
-  maxQuantity: BigNumberish
-): BigNumberish {
+export function calculateRarityScoreModifier(maxQuantity: number): number {
   if (maxQuantity >= 1000) return 1;
   if (maxQuantity >= 500) return 2;
   if (maxQuantity >= 250) return 5;
@@ -361,17 +397,18 @@ export function calculateRarityScoreModifier(
   return 0;
 }
 
-export function getItemTypes(
-  itemTypes: ItemTypeInput[],
-  ethers: any
-): ItemTypeOutput[] {
+export function getItemTypes(itemTypes: ItemTypeInputNew[]): ItemTypeOutput[] {
   const result = [];
   for (const itemType of itemTypes) {
+    let maxQuantity: number = rarityLevelToMaxQuantity(itemType.rarityLevel);
+
     let itemTypeOut: ItemTypeOutput = {
       ...itemType,
       slotPositions: stringToSlotPositions(itemType.slotPositions),
-      ghstPrice: ethers.utils.parseEther(itemType.ghstPrice.toString()),
-      rarityScoreModifier: calculateRarityScoreModifier(itemType.maxQuantity),
+      ghstPrice: rarityLevelToGhstPrice(itemType.rarityLevel),
+      rarityScoreModifier: calculateRarityScoreModifier(maxQuantity),
+      maxQuantity: maxQuantity,
+      totalQuantity: 0,
     };
 
     if (!Array.isArray(itemType.allowedCollaterals)) {
@@ -380,4 +417,39 @@ export function getItemTypes(
     result.push(itemTypeOut);
   }
   return result;
+}
+
+function rarityLevelToGhstPrice(rarityLevel: rarityLevel): BigNumberish {
+  switch (rarityLevel) {
+    case "common":
+      return "5";
+    case "uncommon":
+      return "10";
+    case "rare":
+      return "100";
+    case "legendary":
+      return "300";
+
+    case "mythical":
+      return "2000";
+    case "godlike":
+      return "10000";
+  }
+}
+
+function rarityLevelToMaxQuantity(rarityLevel: rarityLevel): number {
+  switch (rarityLevel) {
+    case "common":
+      return 1000;
+    case "uncommon":
+      return 500;
+    case "rare":
+      return 250;
+    case "legendary":
+      return 100;
+    case "mythical":
+      return 50;
+    case "godlike":
+      return 5;
+  }
 }
