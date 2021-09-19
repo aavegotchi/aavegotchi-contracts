@@ -1,13 +1,11 @@
 import { LedgerSigner } from "@ethersproject/hardware-wallets";
-
 import { task } from "hardhat/config";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
-
 import { DAOFacet } from "../typechain/DAOFacet";
-
 import { gasPrice } from "../scripts/helperFunctions";
 import { BigNumberish } from "@ethersproject/bignumber";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 export interface WearableSet {
   name: string;
@@ -27,7 +25,7 @@ task("addWearableSets", "Uploads Wearable Sets to the Aavegotchi Diamond")
   .addParam("diamondAddress", "Address of the Diamond to add")
   .addParam("setsFile", "File name of the sets to add")
 
-  .setAction(async (taskArgs, hre: any) => {
+  .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
     const itemFile: string = taskArgs.setsFile;
     const diamondAddress: string = taskArgs.diamondAddress;
     const itemManager = taskArgs.itemManager;

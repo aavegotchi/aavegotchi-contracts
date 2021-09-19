@@ -1,5 +1,3 @@
-/* global ethers hre task */
-
 const fs = require("fs");
 import { AbiCoder } from "@ethersproject/abi";
 import { task } from "hardhat/config";

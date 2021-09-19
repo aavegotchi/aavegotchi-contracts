@@ -1,11 +1,5 @@
-// npx hardhat flatten ./contracts/Aavegotchi/facets/AavegotchiFacet.sol > ./flat/AavegotchiFacet.sol.flat
-// npx hardhat verifyFacet --apikey xxx --contract 0xfa7a3bb12848A7856Dd2769Cd763310096c053F1 --facet AavegotchiGameFacet --noflatten true
-
 import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { sendToMultisig } from "../scripts/libraries/multisig/multisig";
-
-//@ts-ignore
-import { ethers, network } from "hardhat";
 import { AddressZero } from "@ethersproject/constants";
 import { task } from "hardhat/config";
 import {
@@ -16,11 +10,10 @@ import {
   PopulatedTransaction,
 } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
-
 import { OwnershipFacet } from "../typechain/OwnershipFacet";
 import { IDiamondCut } from "../typechain/IDiamondCut";
-import { Transaction } from "@ethersproject/transactions";
 import { getSelectors } from "../scripts/helperFunctions";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 type FacetCutType = { Add: 0; Replace: 1; Remove: 2 };
 const FacetCutAction: FacetCutType = { Add: 0, Replace: 1, Remove: 2 };
@@ -49,7 +42,7 @@ task(
   ]
   */
 
-  .setAction(async (taskArgs) => {
+  .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
     const facets: string[] = taskArgs.facets;
     const diamondUpgrader: string = taskArgs.diamondUpgrader;
     const newSelectorsArray: string[][] = taskArgs.addSelectors;
@@ -62,21 +55,21 @@ task(
     //Instantiate the Signer
     let signer: Signer;
     const owner = await (
-      (await ethers.getContractAt(
+      (await hre.ethers.getContractAt(
         "OwnershipFacet",
         diamondAddress
       )) as OwnershipFacet
     ).owner();
-    const testing = ["hardhat", "localhost"].includes(network.name);
+    const testing = ["hardhat", "localhost"].includes(hre.network.name);
 
     if (testing) {
-      await network.provider.request({
+      await hre.network.provider.request({
         method: "hardhat_impersonateAccount",
         params: [owner],
       });
-      signer = await ethers.getSigner(owner);
-    } else if (network.name === "matic") {
-      signer = new LedgerSigner(ethers.provider);
+      signer = await hre.ethers.getSigner(owner);
+    } else if (hre.network.name === "matic") {
+      signer = new LedgerSigner(hre.ethers.provider);
     } else {
       throw Error("Incorrect network selected");
     }
@@ -86,7 +79,9 @@ task(
     let cut: Cut[] = [];
 
     facets.forEach(async (facet: string, index: number) => {
-      let factory = (await ethers.getContractFactory(facet)) as ContractFactory;
+      let factory = (await hre.ethers.getContractFactory(
+        facet
+      )) as ContractFactory;
       let deployedFacet: Contract = await factory.deploy();
       await deployedFacet.deployed();
       console.log(
@@ -124,7 +119,7 @@ task(
     console.log(cut);
 
     //Execute the Cut
-    const diamondCut = (await ethers.getContractAt(
+    const diamondCut = (await hre.ethers.getContractAt(
       "IDiamondCut",
       diamondAddress,
       signer
@@ -151,7 +146,7 @@ task(
       const tx: PopulatedTransaction =
         await diamondCut.populateTransaction.diamondCut(
           cut,
-          ethers.constants.AddressZero,
+          hre.ethers.constants.AddressZero,
           "0x",
           { gasLimit: 800000 }
         );

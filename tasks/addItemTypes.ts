@@ -15,6 +15,7 @@ import { SvgFacet } from "../typechain/SvgFacet";
 import { BigNumberish } from "@ethersproject/bignumber";
 import { setupSvg, printSizeInfo } from "../scripts/svgHelperFunctions";
 import { gasPrice } from "../scripts/helperFunctions";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 async function uploadSvgs(
   signer: Signer,
@@ -77,7 +78,7 @@ task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
   .addParam("svgFile", "File name of the itemType SVGs")
   .addOptionalParam("sleeveStartId", "ID of the sleeve to start at")
 
-  .setAction(async (taskArgs, hre: any) => {
+  .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
     const itemFile: string = taskArgs.itemFile;
     const diamondAddress: string = taskArgs.diamondAddress;
     const svgFile: string = taskArgs.svgFile;
