@@ -1,9 +1,11 @@
 /* eslint-disable  prefer-const */
 
+import { SleeveObject } from "../scripts/itemTypeHelpers";
+
 const fs = require("fs");
 
-const wearables = [];
-const sleeves = [];
+export const wearables: string[] = [];
+export const sleeves: SleeveObject[] = [];
 
 wearable("211_GuyFauwkesMask");
 wearable("212_1337Laptop");
@@ -40,7 +42,7 @@ wearable("242_YellowManbun");
 wearable("243_TintedShades");
 bodyWearable("244_VNeckShirt");
 
-function stripSvg(svg) {
+function stripSvg(svg: string) {
   // removes svg tag
   if (svg.includes("viewBox")) {
     svg = svg.slice(svg.indexOf(">") + 1);
@@ -49,16 +51,16 @@ function stripSvg(svg) {
   return svg;
 }
 
-function readSvg(name) {
+function readSvg(name: string) {
   return stripSvg(fs.readFileSync(`./svgs/svgItems/${name}.svg`, "utf8"));
 }
 
-function wearable(name) {
+function wearable(name: string) {
   const svg = readSvg(name);
   wearables.push(svg);
 }
 
-function bodyWearable(name) {
+function bodyWearable(name: string) {
   let svg = readSvg(name);
   // console.log(name, svg.length)
   const id = name.slice(0, name.indexOf("_"));
@@ -88,6 +90,3 @@ function bodyWearable(name) {
     "</g>";
   sleeves.push({ id: id, svg: svg });
 }
-
-exports.wearablesSvgs = wearables;
-exports.sleevesSvgs = sleeves;

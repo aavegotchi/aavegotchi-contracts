@@ -1,4 +1,4 @@
-const { run } = require("hardhat");
+import { run } from "hardhat";
 
 async function verify() {
   const address = "0x77E472722D7E4a0cFEB0B473b726EEaA55Ee1b19"; // deployed address

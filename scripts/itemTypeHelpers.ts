@@ -25,6 +25,10 @@ export interface ItemTypeInput {
   maxQuantity: BigNumberish;
   setId: BigNumberish[];
   author: string;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
   dimensions: Dimensions;
   allowedCollaterals: BigNumberish[];
   ghstPrice: BigNumberish | BigNumberish;

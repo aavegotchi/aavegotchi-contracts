@@ -1,6 +1,7 @@
 import { ItemTypeInput } from "./itemTypeHelpers";
 
 /* global ethers */
+/*
 const WEARABLE_SLOT_BODY = 0;
 const WEARABLE_SLOT_FACE = 1;
 const WEARABLE_SLOT_EYES = 2;
@@ -10,6 +11,7 @@ const WEARABLE_SLOT_HAND_RIGHT = 5;
 const WEARABLE_SLOT_PET_FRONT = 6;
 const WEARABLE_SLOT_PET_BACK = 7;
 const WEARABLE_SLOT_BG = 8;
+*/
 
 export const itemTypes: ItemTypeInput[] = [
   {
@@ -293,10 +295,7 @@ export const itemTypes: ItemTypeInput[] = [
     author: "Xibot",
     description: "",
     dimensions: { x: 15, y: 6, width: 34, height: 34 },
-    x: 15,
-    y: 6,
-    width: 34,
-    height: 34,
+
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 2000,
@@ -317,10 +316,7 @@ export const itemTypes: ItemTypeInput[] = [
     author: "Xibot",
     description: "",
     dimensions: { x: 22, y: 22, width: 20, height: 8 },
-    x: 22,
-    y: 22,
-    width: 20,
-    height: 8,
+
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 2000,
@@ -341,10 +337,7 @@ export const itemTypes: ItemTypeInput[] = [
     author: "Xibot",
     description: "",
     dimensions: { x: 12, y: 33, width: 40, height: 22 },
-    x: 12,
-    y: 33,
-    width: 40,
-    height: 23,
+
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 2000,
@@ -365,10 +358,7 @@ export const itemTypes: ItemTypeInput[] = [
     author: "Xibot",
     description: "",
     dimensions: { x: 12, y: 33, width: 40, height: 22 },
-    x: 12,
-    y: 33,
-    width: 40,
-    height: 23,
+
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 10000,
@@ -389,10 +379,7 @@ export const itemTypes: ItemTypeInput[] = [
     author: "Xibot",
     description: "",
     dimensions: { x: 1, y: 31, width: 12, height: 16 },
-    x: 1,
-    y: 31,
-    width: 12,
-    height: 16,
+
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 10000,
@@ -413,10 +400,7 @@ export const itemTypes: ItemTypeInput[] = [
     author: "Xibot",
     description: "",
     dimensions: { x: 15, y: 19, width: 38, height: 13 },
-    x: 15,
-    y: 19,
-    width: 38,
-    height: 13,
+
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 5,
@@ -437,10 +421,7 @@ export const itemTypes: ItemTypeInput[] = [
     author: "Xibot",
     description: "",
     dimensions: { x: 12, y: 32, width: 40, height: 19 },
-    x: 12,
-    y: 32,
-    width: 40,
-    height: 19,
+
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 5,
@@ -2709,11 +2690,6 @@ export const itemTypes: ItemTypeInput[] = [
     totalQuantity: 0,
     experienceBonus: 0,
     kinshipBonus: 0,
-    FIELD23: "",
-    FIELD24: "Total NRG",
-    FIELD25: "Total AGG",
-    FIELD26: "Total SPK",
-    FIELD27: "Total BRN",
   },
   {
     svgId: 114,
@@ -2738,11 +2714,6 @@ export const itemTypes: ItemTypeInput[] = [
     totalQuantity: 0,
     experienceBonus: 0,
     kinshipBonus: 0,
-    FIELD23: "Aggregate Sum:",
-    FIELD24: "#REF!",
-    FIELD25: "#REF!",
-    FIELD26: "#REF!",
-    FIELD27: "#REF!",
   },
   {
     svgId: 115,
@@ -3063,10 +3034,10 @@ export const itemTypes: ItemTypeInput[] = [
     author: "Xibot",
     description: "+50 to XP",
     dimensions: { x: 0, y: 0, width: 0, height: 0 },
-    x: null,
-    y: null,
-    width: null,
-    height: null,
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 50,
