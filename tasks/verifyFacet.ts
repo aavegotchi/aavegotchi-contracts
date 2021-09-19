@@ -1,19 +1,18 @@
-// npx hardhat flatten ./contracts/Aavegotchi/facets/AavegotchiFacet.sol > ./flat/AavegotchiFacet.sol.flat
-// npx hardhat verifyFacet --apikey xxx --contract 0xfa7a3bb12848A7856Dd2769Cd763310096c053F1 --facet AavegotchiGameFacet --noflatten true
+import axios from "axios";
+import fs from "fs";
+import { task } from "hardhat/config";
 
-const axios = require("axios");
-const fs = require("fs");
+const addresses: string[] = [];
 
-const addresses = [];
-function getCompilerVersion(code) {
-  try {
-    // TODO: not sure if we should use this
+function getCompilerVersion() {
+  /*try {
     const version = code.match(/pragma solidity (.*);/)[1];
   } catch (e) {}
+  */
   return "v0.8.1+commit.df193b15";
 }
 
-function verifyRequest(guid, apikey) {
+function verifyRequest(guid: string, apikey: string) {
   console.log("Fetching Verify Status...");
   // Check Status
   return axios
@@ -107,7 +106,7 @@ task(
       console.log("Writing Flattened Source Code Failed");
     }
 
-    const compilerversion = getCompilerVersion(sourceCode);
+    const compilerversion = getCompilerVersion();
     const codeformat = "solidity-single-file";
     const optimizationUsed = 1;
     const runs = 200;
@@ -121,6 +120,7 @@ task(
     };
 
     addresses.push(contractaddress);
+
     for (let i = 0; i < addresses.length; i++) {
       const address = addresses[i];
       try {
@@ -163,6 +163,7 @@ task(
         const params = new URLSearchParams();
 
         Object.keys(data).map((key) => {
+          //@ts-ignore
           params.append(key, data[key]);
         });
 
