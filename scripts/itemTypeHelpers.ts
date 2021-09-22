@@ -411,6 +411,14 @@ export function getItemTypes(itemTypes: ItemTypeInputNew[]): ItemTypeOutput[] {
       name: itemType.name.trim(), //Trim the name to remove empty spaces
     };
 
+    const reducer = (prev: BigNumberish, cur: BigNumberish) =>
+      Number(prev) + Math.abs(Number(cur));
+    let traitBoosters = itemType.traitModifiers.reduce(reducer, 0);
+
+    if (traitBoosters !== rarityLevelToTraitBoosters(itemType.rarityLevel)) {
+      throw Error(`Trait Booster for ${itemType.name} does not match rarity`);
+    }
+
     if (!Array.isArray(itemType.allowedCollaterals)) {
       throw Error("Is not array.");
     }
@@ -451,5 +459,22 @@ function rarityLevelToMaxQuantity(rarityLevel: rarityLevel): number {
       return 50;
     case "godlike":
       return 5;
+  }
+}
+
+export function rarityLevelToTraitBoosters(rarityLevel: rarityLevel): number {
+  switch (rarityLevel) {
+    case "common":
+      return 1;
+    case "uncommon":
+      return 2;
+    case "rare":
+      return 3;
+    case "legendary":
+      return 4;
+    case "mythical":
+      return 5;
+    case "godlike":
+      return 6;
   }
 }

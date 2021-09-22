@@ -1,7 +1,11 @@
 import { LedgerSigner } from "@ethersproject/hardware-wallets";
 
 import { task } from "hardhat/config";
-import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
+import {
+  Contract,
+  ContractReceipt,
+  ContractTransaction,
+} from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
 import {
   getItemTypes,
@@ -11,7 +15,11 @@ import {
 import { DAOFacet } from "../typechain/DAOFacet";
 import { SvgFacet } from "../typechain/SvgFacet";
 import { BigNumberish } from "@ethersproject/bignumber";
-import { setupSvg, printSizeInfo } from "../scripts/svgHelperFunctions";
+import {
+  setupSvg,
+  printSizeInfo,
+  svgTypeToBytes,
+} from "../scripts/svgHelperFunctions";
 import { gasPrice } from "../scripts/helperFunctions";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -53,7 +61,9 @@ async function uploadSvgs(
     console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`);
 
     //this might be incorrect
-    printSizeInfo(svgType, svgTypesAndSizes[0].sizes, ethers);
+    printSizeInfo(svgType, svgTypesAndSizes[0].sizes);
+
+    console.log("svg types and sizes:", svgTypesAndSizes);
 
     let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes);
     let receipt = await tx.wait();
@@ -69,20 +79,71 @@ async function uploadSvgs(
   }
 }
 
+async function updateSvgs(
+  svgs: string[],
+  svgType: string,
+  svgIds: number[],
+  svgFacet: SvgFacet,
+  hre: HardhatRuntimeEnvironment
+) {
+  console.log("svgs:", svgs);
+  console.log("ids:", svgIds);
+
+  for (let index = 0; index < svgIds.length; index++) {
+    const svgId = svgIds[index];
+    const svg = svgs[index];
+    let svgLength = new TextEncoder().encode(svg).length;
+    const array = [
+      {
+        svgType: svgTypeToBytes(svgType, hre.ethers),
+        ids: [svgId],
+        sizes: [svgLength],
+      },
+    ];
+
+    console.log(`Update: ${svgType}: ${svgId}`);
+
+    const gasPrice = 100000000000;
+
+    let tx = await svgFacet.updateSvg(svg, array, {
+      gasPrice: gasPrice,
+    });
+    console.log("tx hash:", tx.hash);
+    let receipt = await tx.wait();
+    if (!receipt.status) {
+      throw Error(`Error:: ${tx.hash}`);
+    }
+  }
+}
+
 export interface AddItemTypesTaskArgs {
   itemManager: string;
   diamondAddress: string;
   itemFile: string;
   svgFile: string;
   sleeveStartId: string;
+  uploadItemTypes: boolean;
+  uploadWearableSvgs: boolean;
+  associateSleeves: boolean;
+  sendToItemManager: boolean;
+  replaceWearableSvgs: boolean;
+  replaceSleeveSvgs: boolean;
+  uploadSleeveSvgs: boolean;
 }
 
-task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
+task("addItemTypes", "Adds itemTypes and SVGs ")
   .addParam("itemManager", "Address of the item manager", "0")
   .addParam("diamondAddress", "Address of the Diamond to upgrade")
   .addParam("itemFile", "File name of the items to add")
   .addParam("svgFile", "File name of the itemType SVGs")
   .addParam("sleeveStartId", "ID of the sleeve to start at")
+  .addFlag("uploadItemTypes", "Upload itemTypes")
+  .addFlag("uploadWearableSvgs", "Upload the SVGs")
+  .addFlag("uploadSleeveSvgs", "Upload sleeve svgs")
+  .addFlag("associateSleeves", "Associate the sleeves")
+  .addFlag("sendToItemManager", "Mint and send the items to itemManager")
+  .addFlag("replaceWearableSvgs", "Replace wearable SVGs instead of uploading")
+  .addFlag("replaceSleeveSvgs", "Replace sleeve SVGs instead of uploading")
 
   .setAction(
     async (taskArgs: AddItemTypesTaskArgs, hre: HardhatRuntimeEnvironment) => {
@@ -91,16 +152,22 @@ task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
       const svgFile: string = taskArgs.svgFile;
       const sleeveStartId: string = taskArgs.sleeveStartId;
       const itemManager = taskArgs.itemManager;
+      const sendToItemManager = taskArgs.sendToItemManager;
+      const uploadItemTypes = taskArgs.uploadItemTypes;
+      const uploadWearableSvgs = taskArgs.uploadWearableSvgs;
+      const associateSleeves = taskArgs.associateSleeves;
+      const uploadSleeveSvgs = taskArgs.uploadSleeveSvgs;
+      const replaceWearableSvgs = taskArgs.replaceWearableSvgs;
+      const replaceSleeveSvgs = taskArgs.replaceSleeveSvgs;
 
       const {
         itemTypes: currentItemTypes,
-      } = require(`../scripts/addItemTypes/${itemFile}.ts`);
+      } = require(`../data/itemTypes/${itemFile}.ts`);
 
-      const { wearables, sleeves } = require(`../svgs/${svgFile}.ts`);
+      const { getWearables } = require(`../svgs/${svgFile}.ts`);
+      const { sleeves, wearables } = getWearables();
 
       const itemTypesArray: ItemTypeOutput[] = getItemTypes(currentItemTypes);
-
-      console.log("item types array:", itemTypesArray);
 
       const svgsArray: string[] = wearables;
       const sleeveSvgsArray: SleeveObject[] = sleeves;
@@ -140,56 +207,111 @@ task("addItemTypes", "Deploys a Diamond Cut, given an address, facers, and ")
         signer
       )) as SvgFacet;
 
-      console.log("Adding items", 0, "to", currentItemTypes.length);
+      if (uploadItemTypes) {
+        console.log("Adding items", 0, "to", currentItemTypes.length);
 
-      tx = await daoFacet.addItemTypes(itemTypesArray, { gasPrice: gasPrice });
-
-      receipt = await tx.wait();
-      if (!receipt.status) {
-        throw Error(`Error:: ${tx.hash}`);
-      }
-      console.log("Items were added:", tx.hash);
-
-      console.log("Upload SVGs");
-      await uploadSvgs(
-        signer,
-        diamondAddress,
-        svgsArray,
-        "wearables",
-        hre.ethers
-      );
-
-      console.log("Uploading Sleeves");
-
-      await uploadSvgs(
-        signer,
-        diamondAddress,
-        sleeveSvgsArray.map((value) => value.svg),
-        "sleeves",
-        hre.ethers
-      );
-
-      interface SleeveInput {
-        sleeveId: BigNumberish;
-        wearableId: BigNumberish;
-      }
-
-      let sleevesSvgId: number = Number(sleeveStartId);
-      let sleevesInput: SleeveInput[] = [];
-      for (const sleeve of sleeveSvgsArray) {
-        sleevesInput.push({
-          sleeveId: sleevesSvgId,
-          wearableId: sleeve.id,
+        tx = await daoFacet.addItemTypes(itemTypesArray, {
+          gasPrice: gasPrice,
         });
-        sleevesSvgId++;
+
+        receipt = await tx.wait();
+        if (!receipt.status) {
+          throw Error(`Error:: ${tx.hash}`);
+        }
+        console.log("Items were added:", tx.hash);
       }
 
-      console.log("Associating sleeves svgs with body wearable svgs.");
-      tx = await svgFacet.setSleeves(sleevesInput, { gasPrice: gasPrice });
-      receipt = await tx.wait();
-      if (!receipt.status) {
-        throw Error(`Error:: ${tx.hash}`);
+      if (uploadWearableSvgs) {
+        console.log("svgs array:", svgsArray);
+
+        console.log("Upload SVGs");
+        await uploadSvgs(
+          signer,
+          diamondAddress,
+          svgsArray,
+          "wearables",
+          hre.ethers
+        );
       }
-      console.log("Sleeves associated:", tx.hash);
+
+      if (replaceWearableSvgs) {
+        await updateSvgs(
+          svgsArray,
+          "wearables",
+          itemTypesArray.map((value) => Number(value.svgId)),
+          svgFacet,
+          hre
+        );
+      }
+
+      if (uploadSleeveSvgs) {
+        console.log("Uploading Sleeves");
+
+        await uploadSvgs(
+          signer,
+          diamondAddress,
+          sleeveSvgsArray.map((value) => value.svg),
+          "sleeves",
+          hre.ethers
+        );
+      }
+
+      if (replaceSleeveSvgs) {
+        await updateSvgs(
+          sleeveSvgsArray.map((value) => value.svg),
+          "sleeves",
+          sleeveSvgsArray.map((value, index) => Number(sleeveStartId) + index),
+          svgFacet,
+          hre
+        );
+      }
+
+      if (associateSleeves) {
+        interface SleeveInput {
+          sleeveId: BigNumberish;
+          wearableId: BigNumberish;
+        }
+
+        let sleevesSvgId: number = Number(sleeveStartId);
+        let sleevesInput: SleeveInput[] = [];
+        for (const sleeve of sleeveSvgsArray) {
+          sleevesInput.push({
+            sleeveId: sleevesSvgId,
+            wearableId: sleeve.id,
+          });
+          sleevesSvgId++;
+        }
+
+        console.log("Associating sleeves svgs with body wearable svgs.");
+        tx = await svgFacet.setSleeves(sleevesInput, { gasPrice: gasPrice });
+        receipt = await tx.wait();
+        if (!receipt.status) {
+          throw Error(`Error:: ${tx.hash}`);
+        }
+        console.log("Sleeves associated:", tx.hash);
+      }
+
+      if (sendToItemManager) {
+        const itemIds: BigNumberish[] = [];
+        const quantities: BigNumberish[] = [];
+        itemTypesArray.forEach((itemType: ItemTypeOutput) => {
+          itemIds.push(itemType.svgId);
+          quantities.push(itemType.maxQuantity);
+        });
+
+        console.log("final quantities:", itemIds, quantities);
+
+        console.log("Mint prize items to Item Manager");
+
+        tx = await daoFacet.mintItems(itemManager, itemIds, quantities, {
+          gasPrice: gasPrice,
+        });
+        receipt = await tx.wait();
+        if (!receipt.status) {
+          throw Error(`Error:: ${tx.hash}`);
+        }
+
+        console.log("Prize items minted:", tx.hash);
+      }
     }
   );
