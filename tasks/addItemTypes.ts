@@ -301,7 +301,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
 
         console.log("final quantities:", itemIds, quantities);
 
-        console.log("Mint prize items to Item Manager");
+        console.log(`Mint prize items to Item Manager ${itemManager}`);
 
         tx = await daoFacet.mintItems(itemManager, itemIds, quantities, {
           gasPrice: gasPrice,
