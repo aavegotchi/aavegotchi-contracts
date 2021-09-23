@@ -15,6 +15,8 @@ contract VoucherMigrationFacet is Modifiers {
         uint256[] values;
     }
 
+    ///@notice Allow the aavegotchi diamond owner to convert vouchers to items and send them to respective owners
+    ///@param _vouchersOwners An array of structs, each struct containing details about a voucher, like the owner, identifiers of items and corresponding values
     function migrateVouchers(VouchersOwner[] calldata _vouchersOwners) external onlyOwner {
         address sender = LibMeta.msgSender();
         for (uint256 i; i < _vouchersOwners.length; i++) {

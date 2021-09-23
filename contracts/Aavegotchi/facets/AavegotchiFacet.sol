@@ -16,6 +16,8 @@ contract AavegotchiFacet {
 
     event PetOperatorApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
+///@notice Query the universal totalSupply of all NFTs ever minted
+///@return totalSupply_ the number of all NFTs that have been minted
     function totalSupply() external view returns (uint256 totalSupply_) {
         totalSupply_ = s.tokenIds.length;
     }
@@ -30,10 +32,17 @@ contract AavegotchiFacet {
         balance_ = s.ownerTokenIds[_owner].length;
     }
 
+///@notice Query all details relating to an NFT
+///@param _tokenId the identifier of the NFT to query
+///@return aavegotchiInfo_ a struct containing all details about 
     function getAavegotchi(uint256 _tokenId) external view returns (AavegotchiInfo memory aavegotchiInfo_) {
         aavegotchiInfo_ = LibAavegotchi.getAavegotchi(_tokenId);
     }
 
+///@notice returns the time an NFT was claimed
+///@dev will return 0 if the NFT is still an unclaimed portal
+///@param _tokenId the identifier of the NFT
+///@return claimTime_ the time the NFT was claimed
     function aavegotchiClaimTime(uint256 _tokenId) external view returns (uint256 claimTime_) {
         claimTime_ = s.aavegotchis[_tokenId].claimTime;
     }
@@ -60,10 +69,16 @@ contract AavegotchiFacet {
         tokenId_ = s.ownerTokenIds[_owner][_index];
     }
 
+    /// @notice Get all the Ids of NFTs owned by an address
+    /// @param _owner The address to check for the NFTs
+    /// @return tokenIds_ an array of unsigned integers,each representing the tokenId of each NFT
     function tokenIdsOfOwner(address _owner) external view returns (uint32[] memory tokenIds_) {
         tokenIds_ = s.ownerTokenIds[_owner];
     }
 
+    /// @notice Get all details about all the NFTs owned by an address
+    /// @param _owner The address to check for the NFTs
+    /// @return aavegotchiInfos_ an array of structs,where each struct contains all the details of each NFT
     function allAavegotchisOfOwner(address _owner) external view returns (AavegotchiInfo[] memory aavegotchiInfos_) {
         uint256 length = s.ownerTokenIds[_owner].length;
         aavegotchiInfos_ = new AavegotchiInfo[](length);
@@ -99,6 +114,10 @@ contract AavegotchiFacet {
         approved_ = s.operators[_owner][_operator];
     }
 
+///@notice Check if an address `_operator` is an authorized pet operator for another address `_owner`
+///@param _owner address of the original owner of the NFTs
+///@param _operator address that acts pets the gotchis on behalf of the owner
+///@return approved_ true id `operator` is an approved pet operator, False if otherwise
     function isPetOperatorForAll(address _owner, address _operator) external view returns (bool approved_) {
         approved_ = s.petOperators[_owner][_operator];
     }
@@ -125,6 +144,19 @@ contract AavegotchiFacet {
         internalTransferFrom(sender, _from, _to, _tokenId);
         LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
     }
+
+// @notice Transfers the ownership of multiple  NFTs from one address to another at once
+    /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
+    ///  operator, or the approved address of each of the NFTs in `_tokenIds`. Throws if `_from` is
+    ///  not the current owner. Throws if `_to` is the zero address. Throws if one of the NFTs in
+    ///  `_tokenIds` is not a valid NFT. When transfer is complete, this function
+    ///  checks if `_to` is a smart contract (code size > 0). If so, it calls
+    ///  `onERC721Received` on `_to` and throws if the return value is not
+    ///  `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
+    /// @param _from The current owner of the NFTs
+    /// @param _to The new owner
+    /// @param _tokenIds An array containing the identifiers of the NFTs to transfer
+    /// @param _data Additional data with no specified format, sent in call to `_to`
 
     function safeBatchTransferFrom(
         address _from,
@@ -216,10 +248,17 @@ contract AavegotchiFacet {
         emit LibERC721.ApprovalForAll(LibMeta.msgSender(), _operator, _approved);
     }
 
+/// @notice Enable or disable approval for a third party("operator") to help pet LibMeta.msgSender()'s gotchis
+///@dev Emits the PetOperatorApprovalForAll event
+///@param _operator Address to disable/enable as a pet operator
+///@param _approved True if operator is approved,False if approval is revoked
+
     function setPetOperatorForAll(address _operator, bool _approved) external {
         s.petOperators[LibMeta.msgSender()][_operator] = _approved;
         emit PetOperatorApprovalForAll(LibMeta.msgSender(), _operator, _approved);
     }
+
+///@notice Return the universal name of the NFT
 
     function name() external view returns (string memory) {
         // return "Aavegotchi";
@@ -227,6 +266,7 @@ contract AavegotchiFacet {
     }
 
     /// @notice An abbreviated name for NFTs in this contract
+
     function symbol() external view returns (string memory) {
         //return "GOTCHI";
         return s.symbol;
