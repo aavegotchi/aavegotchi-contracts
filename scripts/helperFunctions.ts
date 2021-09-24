@@ -9,6 +9,8 @@ export async function impersonate(
   ethers: any,
   network: any
 ) {
+  console.log("address:", address);
+
   await network.provider.request({
     method: "hardhat_impersonateAccount",
     params: [address],
