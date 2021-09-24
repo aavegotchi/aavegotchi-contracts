@@ -1,6 +1,4 @@
 import { run, ethers } from "hardhat";
-import {  } from "../../tasks/addItemTypes";
-import { maticDiamondAddress } from "../helperFunctions";
 
 import {
   wearablesLeftSvgs,
@@ -85,6 +83,23 @@ async function main(){
       updatingBackSvgs[i],
       itemSigner
     );
+  }
+
+  //sleeves
+  const updatingSleevesLeft = [36, 37, 38, 39, 40]
+  const updatingSleevesRight = [36, 37, 38, 39, 40]
+  const updatingSleevesBack = [36, 37, 38, 39, 40]
+
+  for (var i = 0; i < updatingSleevesLeft.length; i++) {
+    await updateSvgs(wearablesLeftSleeveSvgs, 'sleeves-left', updatingSleevesLeft[i], testing, itemSigner)
+  }
+
+  for (var i = 0; i < updatingSleevesRight.length; i++) {
+    await updateSvgs(wearablesRightSleeveSvgs, 'sleeves-right', updatingSleevesRight[i], testing, itemSigner)
+  }
+
+  for (var i = 0; i < updatingSleevesBack.length; i++) {
+    await updateSvgs(wearablesBackSleeveSvgs, 'sleeves-back', updatingSleevesBack[i], testing, itemSigner)
   }
 
   //dimensions
