@@ -6027,13 +6027,13 @@ let sideViewDimensions9 = [
       itemId: 251,
       name: "Candy Jaar",
       side: "back",
-      dimensions: { x:49, y:25, width:14, height:20 }
+      dimensions: { x:1, y:25, width:14, height:20 }
     },
     {
       itemId: 251,
       name: "Candy Jaar",
       side: "left",
-      dimensions: { x:0, y:0, width:0, height:0 }
+      dimensions: { x:17, y:25, width:14, height:20 }
     },
     {
       itemId: 251,
@@ -6129,7 +6129,7 @@ let sideViewDimensions9 = [
       itemId: 254,
       name: "uGOTCHI Token",
       side: "back",
-      dimensions: { x:52, y:34, width:12, height:12 }
+      dimensions: { x:0, y:34, width:12, height:12 }
     },
     {
       itemId: 254,
@@ -6231,13 +6231,13 @@ let sideViewDimensions9 = [
       itemId: 257,
       name: "Bitcoin Guitar",
       side: "back",
-      dimensions: { x:49, y:17, width:15, height:38 }
+      dimensions: { x:0, y:17, width:15, height:38 }
     },
     {
       itemId: 257,
       name: "Bitcoin Guitar",
       side: "left",
-      dimensions: { x:0, y:0, width:0, height:0 }
+      dimensions: { x:16, y:17, width:15, height:38 }
     },
     {
       itemId: 257,
