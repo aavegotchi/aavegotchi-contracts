@@ -91,15 +91,15 @@ async function main(){
   const updatingSleevesBack = [36, 37, 38, 39, 40]
 
   for (var i = 0; i < updatingSleevesLeft.length; i++) {
-    await updateSvgs(wearablesLeftSleeveSvgs, 'sleeves-left', updatingSleevesLeft[i], testing, itemSigner)
+    await updateSvgs(wearablesLeftSleeveSvgs, 'sleeves-left', updatingSleevesLeft[i], itemSigner)
   }
 
   for (var i = 0; i < updatingSleevesRight.length; i++) {
-    await updateSvgs(wearablesRightSleeveSvgs, 'sleeves-right', updatingSleevesRight[i], testing, itemSigner)
+    await updateSvgs(wearablesRightSleeveSvgs, 'sleeves-right', updatingSleevesRight[i], itemSigner)
   }
 
   for (var i = 0; i < updatingSleevesBack.length; i++) {
-    await updateSvgs(wearablesBackSleeveSvgs, 'sleeves-back', updatingSleevesBack[i], testing, itemSigner)
+    await updateSvgs(wearablesBackSleeveSvgs, 'sleeves-back', updatingSleevesBack[i], itemSigner)
   }
 
   //dimensions
