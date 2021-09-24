@@ -65,7 +65,9 @@ async function uploadSvgs(
 
     console.log("svg types and sizes:", svgTypesAndSizes);
 
-    let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes);
+    let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, {
+      gasPrice: gasPrice,
+    });
     let receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
@@ -102,8 +104,6 @@ async function updateSvgs(
     ];
 
     console.log(`Update: ${svgType}: ${svgId}`);
-
-    const gasPrice = 100000000000;
 
     let tx = await svgFacet.updateSvg(svg, array, {
       gasPrice: gasPrice,

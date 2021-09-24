@@ -3,7 +3,7 @@ import { AddItemTypesTaskArgs } from "../../tasks/addItemTypes";
 import { maticDiamondAddress } from "../helperFunctions";
 
 async function addItemTypes() {
-  const itemManager: string = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
+  const itemManager: string = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
   const diamondAddress: string = maticDiamondAddress;
   const itemFile: string = "raffle5wearables";
   const svgFile: string = "raffle5wearables";
