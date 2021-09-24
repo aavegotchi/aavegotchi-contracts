@@ -281,7 +281,7 @@ contract DAOFacet is Modifiers {
         }
     }
 
-    function setWearableSlotPositions(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] calldata _slotPositions) external onlyDaoOrOwner {
+    function setWearableSlotPositions(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] calldata _slotPositions) external onlyItemManager {
         require(_wearableId < s.itemTypes.length, "Error");
         s.itemTypes[_wearableId].slotPositions = _slotPositions;
         emit WearableSlotPositionsSet(_wearableId, _slotPositions);

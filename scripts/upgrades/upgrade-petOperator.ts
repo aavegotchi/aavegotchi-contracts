@@ -31,7 +31,7 @@ async function upgrade() {
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: maticDiamondAddress,
-    facetsAndAddSelectors: joined,
+
     removeSelectors: JSON.stringify(removeSelectors),
     useLedger: true,
     useMultisig: true,
