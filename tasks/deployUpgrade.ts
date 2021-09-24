@@ -32,8 +32,6 @@ export interface DeployUpgradeTaskArgs {
   facetsAndAddSelectors: string;
   useMultisig: boolean;
   useLedger: boolean;
-  // verifyFacets: boolean;
-  // updateDiamondABI: boolean;
 }
 
 interface Cut {
@@ -94,7 +92,6 @@ task(
     "Set to true if multisig should be used for deploying"
   )
   .addFlag("useLedger", "Set to true if Ledger should be used for signing")
-  // .addFlag("verifyFacets","Set to true if facets should be verified after deployment")
 
   .setAction(
     async (taskArgs: DeployUpgradeTaskArgs, hre: HardhatRuntimeEnvironment) => {

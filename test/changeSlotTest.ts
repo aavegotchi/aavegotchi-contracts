@@ -6,7 +6,6 @@ import { ethers, network } from "hardhat";
 import { upgrade } from "../scripts/upgrades/upgrade-erc1155CategoriesAndSlots";
 import { impersonate } from "../scripts/helperFunctions";
 import { DAOFacet, ItemsFacet } from "../typechain";
-import { expect } from "chai";
 
 describe("Testing Slot Change", async function () {
   this.timeout(300000);
