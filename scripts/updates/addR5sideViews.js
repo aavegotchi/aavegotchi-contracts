@@ -87,7 +87,7 @@ function main() {
                     _a.label = 1;
                 case 1:
                     if (!(i < updatingLeftSvgs)) return [3 /*break*/, 4];
-                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesLeftSvgs, "wearables-left", updatingLeftSvgs[i], itemSigner)];
+                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesLeftSvgs, "wearables-left", i, itemSigner)];
                 case 2:
                     _a.sent();
                     _a.label = 3;
@@ -99,7 +99,7 @@ function main() {
                     _a.label = 5;
                 case 5:
                     if (!(i < updatingRightSvgs)) return [3 /*break*/, 8];
-                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesRightSvgs, "wearables-right", updatingRightSvgs[i], itemSigner)];
+                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesRightSvgs, "wearables-right", i, itemSigner)];
                 case 6:
                     _a.sent();
                     _a.label = 7;
@@ -110,8 +110,8 @@ function main() {
                     i = 245;
                     _a.label = 9;
                 case 9:
-                    if (!(i < updatingRightSvgs)) return [3 /*break*/, 12];
-                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesBackSvgs, "wearables-back", updatingBackSvgs[i], itemSigner)];
+                    if (!(i < updatingBackSvgs)) return [3 /*break*/, 12];
+                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesBackSvgs, "wearables-back", i, itemSigner)];
                 case 10:
                     _a.sent();
                     _a.label = 11;

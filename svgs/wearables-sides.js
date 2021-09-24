@@ -517,7 +517,7 @@ const wearablesBackSvgs = [
   wearable('246_APYShadesBack'),
   wearable('247_UpArrowBack'),
   bodyWearable('248_UpOnlyShirt'),
-  wearable('249_CoinGeckoEyesBack'),
+  249,
   bodyWearable('250_CoinGeckoTee'),
   wearable('251_CoinGeckoCandiesBack'),
   wearable('252_AastronautHelmetBack'),

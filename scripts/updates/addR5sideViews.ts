@@ -60,7 +60,7 @@ async function main(){
     await updateSvgs(
       wearablesLeftSvgs,
       "wearables-left",
-      updatingLeftSvgs[i],
+      i,
       itemSigner
     );
   }
@@ -70,17 +70,17 @@ async function main(){
     await updateSvgs(
       wearablesRightSvgs,
       "wearables-right",
-      updatingRightSvgs[i],
+      i,
       itemSigner
     );
   }
 
   //back
-  for (var i = 245; i < updatingRightSvgs; i++) {
+  for (var i = 245; i < updatingBackSvgs; i++) {
     await updateSvgs(
       wearablesBackSvgs,
       "wearables-back",
-      updatingBackSvgs[i],
+      i,
       itemSigner
     );
   }
