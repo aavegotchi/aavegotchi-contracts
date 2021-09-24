@@ -374,7 +374,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "mythical",
     traitModifiers: [0, -2, 0, 3, 0, 0],
     canPurchaseWithGhst: false,
-    slotPositions: "eyes",
+    slotPositions: "face",
     category: 0,
     canBeTransferred: true,
     totalQuantity: 0,
