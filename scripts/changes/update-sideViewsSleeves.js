@@ -75,32 +75,6 @@ async function main() {
       },
     ];
 
-    const gasPrice = 100000000000;
-
-    let tx = await svgFacet.updateSvg(svg[svgId], array, {
-      gasPrice: gasPrice,
-    });
-    let receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`);
-    }
-  }
-
-  async function updateSvgs(svg, svgType, svgId, testing, uploadSigner) {
-    const svgFacet = await ethers.getContractAt(
-      "SvgFacet",
-      diamondAddress,
-      uploadSigner
-    );
-    let svgLength = new TextEncoder().encode(svg[svgId]).length;
-    const array = [
-      {
-        svgType: ethers.utils.formatBytes32String(svgType),
-        ids: [svgId],
-        sizes: [svgLength],
-      },
-    ];
-
     /* console.log(`Update: ${svgType}: ${svgId}`); */
 
     const gasPrice = 100000000000;
@@ -209,6 +183,35 @@ async function main() {
   for (var i = 0; i < updatingSleevesBack.length; i++) {
     await updateSvgs(wearablesBackSleeveSvgs, 'sleeves-back', updatingSleevesBack[i], testing, itemSigner)
   }
+
+  const rightHandExceptions = [
+    {
+      itemId: 201,
+      side: 4,
+      exceptionBool: true
+    },
+    {
+      itemId: 217,
+      side: 4,
+      exceptionBool: true
+    },
+  ]
+
+  const leftHandExceptions = [
+    {
+      itemId: 201,
+      side: 5,
+      exceptionBool: true
+    },
+    {
+      itemId: 217,
+      side: 5,
+      exceptionBool: true
+    },
+  ]
+
+  await svgViewsFacet.setSideViewExceptions(rightHandExceptions, {gasPrice: gasPrice});
+  await svgViewsFacet.setSideViewExceptions(leftHandExceptions, {gasPrice: gasPrice});
 
     // BODY = 0;
     // FACE = 1;

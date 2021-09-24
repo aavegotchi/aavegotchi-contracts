@@ -246,6 +246,25 @@ const wearablesRightSvgs = [
   wearable('242_YellowManbunRight'),
   wearable('243_TintedShadesRight'),
   bodyWearableRight('244_VNeckShirt'),
+  wearable('245_GeckoHatRight'),
+  wearable('246_APYShadesRight'),
+  wearable('247_UpArrowRight'),
+  bodyWearableRight('248_UpOnlyShirt'),
+  wearable('249_CoinGeckoEyesRight'),
+  bodyWearableRight('250_CoinGeckoTee'),
+  wearable('251_CoinGeckoCandiesRight'),
+  wearable('252_AastronautHelmetRight'),
+  bodyWearableRight('253_AastronautSuit'),
+  wearable('254_uGOTCHITokenRight'),
+  wearable('255_LilBubbleHelmetRight'),
+  bodyWearableRight('256_LilBubbleSpaceSuit'),
+  wearable('257_BitcoinGuitarRight'),
+  bodyWearableRight('258_Hanfu'),
+  wearable('259_BushyEyebrowsRight'),
+  wearable('260_AncientBeardRight'),
+  261,
+  wearable('262_RadarEyesRight'),
+  wearable('263_SignalHeadsetRight'),
 ]
 
 const wearablesBackSvgs = [
@@ -494,6 +513,25 @@ const wearablesBackSvgs = [
   wearable('242_YellowManbunBack'),
   wearable('243_TintedShadesBack'),
   bodyWearable('244_VNeckShirt'),
+  wearable('245_GeckoHatBack'),
+  wearable('246_APYShadesBack'),
+  wearable('247_UpArrowBack'),
+  bodyWearable('248_UpOnlyShirt'),
+  wearable('249_CoinGeckoEyesBack'),
+  bodyWearable('250_CoinGeckoTee'),
+  wearable('251_CoinGeckoCandiesBack'),
+  wearable('252_AastronautHelmetBack'),
+  bodyWearable('253_AastronautSuit'),
+  wearable('254_uGOTCHITokenBack'),
+  wearable('255_LilBubbleHelmetBack'),
+  bodyWearable('256_LilBubbleSpaceSuit'),
+  wearable('257_BitcoinGuitarBack'),
+  bodyWearable('258_Hanfu'),
+  258,
+  259,
+  wearable('261_AantenaBotBack'),
+  262,
+  wearable('263_SignalHeadsetBack'),
 ]
 
 const wearablesLeftSvgs = [
@@ -742,6 +780,25 @@ const wearablesLeftSvgs = [
   wearable('242_YellowManbunLeft'),
   wearable('243_TintedShadesLeft'),
   bodyWearableLeft('244_VNeckShirt'),
+  wearable('245_GeckoHatLeft'),
+  wearable('246_APYShadesLeft'),
+  wearable('247_UpArrowLeft'),
+  bodyWearableLeft('248_UpOnlyShirt'),
+  wearable('249_CoinGeckoEyesLeft'),
+  bodyWearableLeft('250_CoinGeckoTee'),
+  wearable('251_CoinGeckoCandiesLeft'),
+  wearable('252_AastronautHelmetLeft'),
+  bodyWearableLeft('253_AastronautSuit'),
+  wearable('254_uGOTCHITokenLeft'),
+  wearable('255_LilBubbleHelmetLeft'),
+  bodyWearableLeft('256_LilBubbleSpaceSuit'),
+  wearable('257_BitcoinGuitarLeft'),
+  bodyWearableLeft('258_Hanfu'),
+  wearable('259_BushyEyebrowsLeft'),
+  wearable('260_AncientBeardLeft'),
+  wearable('261_AantenaBotLeft'),
+  wearable('262_RadarEyesLeft'),
+  wearable('263_SignalHeadsetLeft'),
 ]
 
 const wearablesLeftSleeveSvgs = [
@@ -925,6 +982,11 @@ const wearablesLeftSleeveSvgs = [
   sleeveWearableLeft('234_ShaamanPoncho'),
   sleeveWearableLeft('241_WGMIShirt'),
   sleeveWearableLeft('244_VNeckShirt'),
+  sleeveWearableLeft('248_UpOnlyShirt'),
+  sleeveWearableLeft('250_CoinGeckoTee'),
+  sleeveWearableLeft('253_AastronautSuit'),
+  sleeveWearableLeft('256_LilBubbleSpaceSuit'),
+  sleeveWearableLeft('258_Hanfu'),
 ]
 
 const wearablesRightSleeveSvgs = [
@@ -1108,6 +1170,11 @@ const wearablesRightSleeveSvgs = [
   sleeveWearableRight('234_ShaamanPoncho'),
   sleeveWearableRight('241_WGMIShirt'),
   sleeveWearableRight('244_VNeckShirt'),
+  sleeveWearableRight('248_UpOnlyShirt'),
+  sleeveWearableRight('250_CoinGeckoTee'),
+  sleeveWearableRight('253_AastronautSuit'),
+  sleeveWearableRight('256_LilBubbleSpaceSuit'),
+  sleeveWearableRight('258_Hanfu'),
 ]
 
 const wearablesBackSleeveSvgs = [
@@ -1291,6 +1358,11 @@ const wearablesBackSleeveSvgs = [
   sleeveWearableRight('234_ShaamanPoncho'),
   sleeveWearableRight('241_WGMIShirt'),
   sleeveWearableRight('244_VNeckShirt'),
+  sleeveWearableRight('248_UpOnlyShirt'),
+  sleeveWearableRight('250_CoinGeckoTee'),
+  sleeveWearableRight('253_AastronautSuit'),
+  sleeveWearableRight('256_LilBubbleSpaceSuit'),
+  sleeveWearableRight('258_Hanfu'),
 ]
 
 function stripSvg (svg) {

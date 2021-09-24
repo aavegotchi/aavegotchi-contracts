@@ -64,13 +64,29 @@ async function main() {
   await svgViewsFacet.deployed();
   console.log("Deployed facet:", svgViewsFacet.address);
 
+  const newFuncs = [
+    getSelector('function setSideViewExceptions(SideViewExceptions[] calldata _sideViewExceptions) external onlyItemManager')
+  ]
+
+  let existingFuncs = getSelectors(svgViewsFacet);
+  for (const selector of newFuncs) {
+    if(!existingFuncs.includes(selector)) {
+      throw Error(`Selector ${selector} not found`);
+    }
+  }
+
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
 
   const cut = [
     {
       facetAddress: svgViewsFacet.address,
-      action: FacetCutAction.Replace,
-      functionSelectors: getSelectors(svgViewsFacet),
+      action: FacetCutAction.Add,
+      functionSelectors: newFuncs,
+    },
+    {
+      facetAddress: svgViewsFacet.address,
+      action: FacetCutAction.Remove,
+      functionSelectors: existingFuncs,
     }
   ];
   console.log(cut);

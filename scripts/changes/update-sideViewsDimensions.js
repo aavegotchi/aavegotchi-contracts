@@ -79,17 +79,17 @@ async function main() {
   */
 
   //ID's 80 - 118
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2, {
+/*   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions2, {
     gasPrice: gasPrice,
   });
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
-  console.log("Uploaded item side dimensions 2");
+  console.log("Uploaded item side dimensions 2"); */
 
   //ID's 119 - 140
-  /*
+  
   tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions3, {
     gasPrice: gasPrice,
   });
@@ -148,7 +148,7 @@ async function main() {
     throw Error(`Error:: ${tx.hash}`);
   }
   console.log("Uploaded item side dimensions 8");
-  */
+ 
 }
 
 if (require.main === module) {

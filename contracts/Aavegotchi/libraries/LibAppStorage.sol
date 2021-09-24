@@ -233,6 +233,8 @@ struct AppStorage {
     mapping(address => bool) itemManagers;
     // itemTypeId => (sideview => Dimensions)
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
+    // itemTypeId => (slotPosition => exception Bool)
+    mapping(uint256 => mapping(uint256 => bool)) isAnException;
 }
 
 library LibAppStorage {

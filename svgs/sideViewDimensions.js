@@ -5364,7 +5364,7 @@ let sideViewDimensions8 = [
     itemId: 229,
     name: "Lasso",
     side: "back",
-    dimensions: { x: 50, y: 23, width: 12, height: 26 },
+    dimensions: { x:2, y:23, width:12, height:26 },
   },
   {
     itemId: 229,
@@ -5824,6 +5824,561 @@ let sideViewDimensions8 = [
   },
 ];
 
+let sideViewDimensions9 = [
+    {
+      itemId: 245,
+      name: "Gecko Hat",
+      side: "back",
+      dimensions: { x:15, y:3, width:34, height:36 }
+    },
+    {
+      itemId: 245,
+      name: "Gecko Hat",
+      side: "left",
+      dimensions: { x:18, y:3, width:29, height:38 }
+    },
+    {
+      itemId: 245,
+      name: "Gecko Hat",
+      side: "right",
+      dimensions: { x:17, y:3, width:29, height:38 }
+    },
+    {
+      itemId: 246,
+      name: "APY Shades",
+      side: "back",
+      dimensions: { x:15, y:24, width:34, height:4 }
+    },
+    {
+      itemId: 246,
+      name: "APY Shades",
+      side: "left",
+      dimensions: { x:19, y:20, width:25, height:12 }
+    },
+    {
+      itemId: 246,
+      name: "APY Shades",
+      side: "right",
+      dimensions: { x:20, y:20, width:25, height:12 }
+    },
+    {
+      itemId: 247,
+      name: "Up Arrow",
+      side: "back",
+      dimensions: { x:0, y:24, width:16, height:26 }
+    },
+    {
+      itemId: 247,
+      name: "Up Arrow",
+      side: "left",
+      dimensions: { x:20, y:25, width:15, height:25 }
+    },
+    {
+      itemId: 247,
+      name: "Up Arrow",
+      side: "right",
+      dimensions: { x:29, y:25, width:15, height:25 }
+    },
+    {
+      itemId: 248,
+      name: "Up Only Shirt",
+      side: "left",
+      dimensions: { x:20, y:33, width:24, height:20 }
+    },
+    {
+      itemId: 248,
+      name: "Up Only Shirt",
+      side: "right",
+      dimensions: { x:20, y:33, width:24, height:20 }
+    },
+    {
+      itemId: 248,
+      name: "Up Only Shirt",
+      side: "back left up",
+      dimensions: { x:12, y:32, width:3, height:9 }
+    },
+    {
+      itemId: 248,
+      name: "Up Only Shirt",
+      side: "back left",
+      dimensions: { x:12, y:33, width:3, height:9 }
+    },
+    {
+      itemId: 248,
+      name: "Up Only Shirt",
+      side: "back right up",
+      dimensions: { x:49, y:32, width:3, height:9 }
+    },
+    {
+      itemId: 248,
+      name: "Up Only Shirt",
+      side: "back right",
+      dimensions: { x:49, y:33, width:3, height:9 }
+    },
+    {
+      itemId: 248,
+      name: "Up Only Shirt",
+      side: "back",
+      dimensions: { x:15, y:33, width:34, height:20 }
+    },
+    {
+      itemId: 248,
+      name: "Up Only Shirt",
+      side: "left up",
+      dimensions: { x:26, y:33, width:9, height:4 }
+    },
+    {
+      itemId: 248,
+      name: "Up Only Shirt",
+      side: "left down",
+      dimensions: { x:29, y:35, width:4, height:9 }
+    },
+    {
+      itemId: 248,
+      name: "Up Only Shirt",
+      side: "right up",
+      dimensions: { x:29, y:33, width:9, height:4 }
+    },
+    {
+      itemId: 248,
+      name: "Up Only Shirt",
+      side: "right down",
+      dimensions: { x:31, y:35, width:4, height:9 }
+    },
+    {
+      itemId: 249,
+      name: "Gecko Eyes",
+      side: "left",
+      dimensions: { x:20, y:20, width:6, height:12 }
+    },
+    {
+      itemId: 249,
+      name: "Gecko Eyes",
+      side: "right",
+      dimensions: { x:38, y:20, width:6, height:12 }
+    },
+    {
+      itemId: 250,
+      name: "CoinGecko Tee",
+      side: "left",
+      dimensions: { x:20, y:33, width:24, height:20 }
+    },
+    {
+      itemId: 250,
+      name: "CoinGecko Tee",
+      side: "right",
+      dimensions: { x:20, y:33, width:24, height:20 }
+    },
+    {
+      itemId: 250,
+      name: "CoinGecko Tee",
+      side: "back left up",
+      dimensions: { x:12, y:32, width:3, height:9 }
+    },
+    {
+      itemId: 250,
+      name: "CoinGecko Tee",
+      side: "back left",
+      dimensions: { x:12, y:33, width:3, height:9 }
+    },
+    {
+      itemId: 250,
+      name: "CoinGecko Tee",
+      side: "back right up",
+      dimensions: { x:49, y:32, width:3, height:9 }
+    },
+    {
+      itemId: 250,
+      name: "CoinGecko Tee",
+      side: "back right",
+      dimensions: { x:49, y:33, width:3, height:9 }
+    },
+    {
+      itemId: 250,
+      name: "CoinGecko Tee",
+      side: "back",
+      dimensions: { x:15, y:33, width:34, height:20 }
+    },
+    {
+      itemId: 250,
+      name: "CoinGecko Tee",
+      side: "left up",
+      dimensions: { x:26, y:33, width:9, height:4 }
+    },
+    {
+      itemId: 250,
+      name: "CoinGecko Tee",
+      side: "left down",
+      dimensions: { x:29, y:35, width:4, height:9 }
+    },
+    {
+      itemId: 250,
+      name: "CoinGecko Tee",
+      side: "right up",
+      dimensions: { x:29, y:33, width:9, height:4 }
+    },
+    {
+      itemId: 250,
+      name: "CoinGecko Tee",
+      side: "right down",
+      dimensions: { x:31, y:35, width:4, height:9 }
+    },
+    {
+      itemId: 251,
+      name: "Candy Jaar",
+      side: "back",
+      dimensions: { x:49, y:25, width:14, height:20 }
+    },
+    {
+      itemId: 251,
+      name: "Candy Jaar",
+      side: "left",
+      dimensions: { x:0, y:0, width:0, height:0 }
+    },
+    {
+      itemId: 251,
+      name: "Candy Jaar",
+      side: "right",
+      dimensions: { x:33, y:25, width:14, height:20 }
+    },
+    {
+      itemId: 252,
+      name: "Aastronaut Helmet",
+      side: "back",
+      dimensions: { x:12, y:5, width:40, height:29 }
+    },
+    {
+      itemId: 252,
+      name: "Aastronaut Helmet",
+      side: "left",
+      dimensions: { x:19, y:5, width:26, height:35 }
+    },
+    {
+      itemId: 252,
+      name: "Aastronaut Helmet",
+      side: "right",
+      dimensions: { x:19, y:5, width:26, height:35 }
+    },
+    {
+      itemId: 253,
+      name: "Aastronaut Suit",
+      side: "left",
+      dimensions: { x:20, y:33, width:24, height:22 }
+    },
+    {
+      itemId: 253,
+      name: "Aastronaut Suit",
+      side: "right",
+      dimensions: { x:20, y:33, width:24, height:22 }
+    },
+    {
+      itemId: 253,
+      name: "Aastronaut Suit",
+      side: "back left up",
+      dimensions: { x:7, y:31, width:8, height:10 }
+    },
+    {
+      itemId: 253,
+      name: "Aastronaut Suit",
+      side: "back left",
+      dimensions: { x:7, y:33, width:8, height:10 }
+    },
+    {
+      itemId: 253,
+      name: "Aastronaut Suit",
+      side: "back right up",
+      dimensions: { x:49, y:31, width:8, height:10 }
+    },
+    {
+      itemId: 253,
+      name: "Aastronaut Suit",
+      side: "back right",
+      dimensions: { x:49, y:33, width:8, height:10 }
+    },
+    {
+      itemId: 253,
+      name: "Aastronaut Suit",
+      side: "back",
+      dimensions: { x:15, y:33, width:34, height:22 }
+    },
+    {
+      itemId: 253,
+      name: "Aastronaut Suit",
+      side: "left up",
+      dimensions: { x:25, y:28, width:10, height:9 }
+    },
+    {
+      itemId: 253,
+      name: "Aastronaut Suit",
+      side: "left down",
+      dimensions: { x:24, y:35, width:9, height:10 }
+    },
+    {
+      itemId: 253,
+      name: "Aastronaut Suit",
+      side: "right up",
+      dimensions: { x:29, y:28, width:10, height:9 }
+    },
+    {
+      itemId: 253,
+      name: "Aastronaut Suit",
+      side: "right down",
+      dimensions: { x:31, y:35, width:9, height:10 }
+    },
+    {
+      itemId: 254,
+      name: "uGOTCHI Token",
+      side: "back",
+      dimensions: { x:52, y:34, width:12, height:12 }
+    },
+    {
+      itemId: 254,
+      name: "uGOTCHI Token",
+      side: "left",
+      dimensions: { x:0, y:0, width:0, height:0 }
+    },
+    {
+      itemId: 254,
+      name: "uGOTCHI Token",
+      side: "right",
+      dimensions: { x:37, y:33, width:2, height:12 }
+    },
+    {
+      itemId: 255,
+      name: "Space Helmet",
+      side: "back",
+      dimensions: { x:14, y:5, width:36, height:29 }
+    },
+    {
+      itemId: 255,
+      name: "Space Helmet",
+      side: "left",
+      dimensions: { x:19, y:5, width:26, height:35 }
+    },
+    {
+      itemId: 255,
+      name: "Space Helmet",
+      side: "right",
+      dimensions: { x:19, y:5, width:26, height:35 }
+    },
+    {
+      itemId: 256,
+      name: "Lil Bubble Space Suit",
+      side: "left",
+      dimensions: { x:20, y:33, width:24, height:22 }
+    },
+    {
+      itemId: 256,
+      name: "Lil Bubble Space Suit",
+      side: "right",
+      dimensions: { x:20, y:33, width:24, height:22 }
+    },
+    {
+      itemId: 256,
+      name: "Lil Bubble Space Suit",
+      side: "back left up",
+      dimensions: { x:7, y:31, width:8, height:10 }
+    },
+    {
+      itemId: 256,
+      name: "Lil Bubble Space Suit",
+      side: "back left",
+      dimensions: { x:7, y:33, width:8, height:10 }
+    },
+    {
+      itemId: 256,
+      name: "Lil Bubble Space Suit",
+      side: "back right up",
+      dimensions: { x:49, y:31, width:8, height:10 }
+    },
+    {
+      itemId: 256,
+      name: "Lil Bubble Space Suit",
+      side: "back right",
+      dimensions: { x:49, y:33, width:8, height:10 }
+    },
+    {
+      itemId: 256,
+      name: "Lil Bubble Space Suit",
+      side: "back",
+      dimensions: { x:15, y:33, width:34, height:22 }
+    },
+    {
+      itemId: 256,
+      name: "Lil Bubble Space Suit",
+      side: "left up",
+      dimensions: { x:25, y:28, width:10, height:9 }
+    },
+    {
+      itemId: 256,
+      name: "Lil Bubble Space Suit",
+      side: "left down",
+      dimensions: { x:24, y:35, width:9, height:10 }
+    },
+    {
+      itemId: 256,
+      name: "Lil Bubble Space Suit",
+      side: "right up",
+      dimensions: { x:29, y:28, width:10, height:9 }
+    },
+    {
+      itemId: 256,
+      name: "Lil Bubble Space Suit",
+      side: "right down",
+      dimensions: { x:31, y:35, width:9, height:10 }
+    },
+    {
+      itemId: 257,
+      name: "Bitcoin Guitar",
+      side: "back",
+      dimensions: { x:49, y:17, width:15, height:38 }
+    },
+    {
+      itemId: 257,
+      name: "Bitcoin Guitar",
+      side: "left",
+      dimensions: { x:0, y:0, width:0, height:0 }
+    },
+    {
+      itemId: 257,
+      name: "Bitcoin Guitar",
+      side: "right",
+      dimensions: { x:33, y:17, width:15, height:38 }
+    },
+    {
+      itemId: 258,
+      name: "Taoist Robe",
+      side: "left",
+      dimensions: { x:20, y:33, width:24, height:23 }
+    },
+    {
+      itemId: 258,
+      name: "Taoist Robe",
+      side: "right",
+      dimensions: { x:20, y:33, width:24, height:23 }
+    },
+    {
+      itemId: 258,
+      name: "Taoist Robe",
+      side: "back left up",
+      dimensions: { x:10, y:31, width:5, height:13 }
+    },
+    {
+      itemId: 258,
+      name: "Taoist Robe",
+      side: "back left",
+      dimensions: { x:10, y:33, width:5, height:13 }
+    },
+    {
+      itemId: 258,
+      name: "Taoist Robe",
+      side: "back right up",
+      dimensions: { x:49, y:31, width:5, height:13 }
+    },
+    {
+      itemId: 258,
+      name: "Taoist Robe",
+      side: "back right",
+      dimensions: { x:49, y:33, width:5, height:13 }
+    },
+    {
+      itemId: 258,
+      name: "Taoist Robe",
+      side: "back",
+      dimensions: { x:15, y:33, width:34, height:23 }
+    },
+    {
+      itemId: 258,
+      name: "Taoist Robe",
+      side: "left up",
+      dimensions: { x:22, y:31, width:13, height:6 }
+    },
+    {
+      itemId: 258,
+      name: "Taoist Robe",
+      side: "left down",
+      dimensions: { x:27, y:35, width:6, height:13 }
+    },
+    {
+      itemId: 258,
+      name: "Taoist Robe",
+      side: "right up",
+      dimensions: { x:29, y:31, width:13, height:6 }
+    },
+    {
+      itemId: 258,
+      name: "Taoist Robe",
+      side: "right down",
+      dimensions: { x:31, y:35, width:6, height:13 }
+    },
+    {
+      itemId: 259,
+      name: "Bushy Eyebrows",
+      side: "left",
+      dimensions: { x:19, y:18, width:10, height:9 }
+    },
+    {
+      itemId: 259,
+      name: "Bushy Eyebrows",
+      side: "right",
+      dimensions: { x:35, y:18, width:10, height:9 }
+    },
+    {
+      itemId: 260,
+      name: "Beard of Wisdom",
+      side: "left",
+      dimensions: { x:19, y:32, width:6, height:14 }
+    },
+    {
+      itemId: 260,
+      name: "Beard of Wisdom",
+      side: "right",
+      dimensions: { x:39, y:32, width:6, height:14 }
+    },
+    {
+      itemId: 261,
+      name: "Aantenna Bot",
+      side: "back",
+      dimensions: { x:3, y:33, width:17, height:26 }
+    },
+    {
+      itemId: 261,
+      name: "Aantenna Bot",
+      side: "left",
+      dimensions: { x:6, y:33, width:19, height:26 }
+    },
+    {
+      itemId: 262,
+      name: "Radar Eyes",
+      side: "left",
+      dimensions: { x:20, y:20, width:6, height:12 }
+    },
+    {
+      itemId: 262,
+      name: "Radar Eyes",
+      side: "right",
+      dimensions: { x:38, y:20, width:6, height:12 }
+    },
+    {
+      itemId: 263,
+      name: "Signal Headset",
+      side: "back",
+      dimensions: { x:11, y:6, width:42, height:25 }
+    },
+    {
+      itemId: 263,
+      name: "Signal Headset",
+      side: "left",
+      dimensions: { x:26, y:6, width:12, height:25 }
+    },
+    {
+      itemId: 263,
+      name: "Signal Headset",
+      side: "right",
+      dimensions: { x:26, y:6, width:12, height:25 }
+    }
+];
+
 sideViewDimensions1 = sideViewDimensions1.map((value) => {
   delete value.name;
   return value;
@@ -5864,6 +6419,11 @@ sideViewDimensions8 = sideViewDimensions8.map((value) => {
   return value;
 });
 
+sideViewDimensions9 = sideViewDimensions9.map((value) => {
+  delete value.name;
+  return value;
+});
+
 // console.log(sideViewDimensions)
 
 exports.sideViewDimensions1 = sideViewDimensions1;
@@ -5874,3 +6434,4 @@ exports.sideViewDimensions5 = sideViewDimensions5;
 exports.sideViewDimensions6 = sideViewDimensions6;
 exports.sideViewDimensions7 = sideViewDimensions7;
 exports.sideViewDimensions8 = sideViewDimensions8;
+exports.sideViewDimensions9 = sideViewDimensions9;
