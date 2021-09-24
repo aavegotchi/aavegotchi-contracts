@@ -22,18 +22,18 @@ describe('Escrow Transfering', async function ()  {
       failTransferAmount,
       erc20Standard;
 
-      
+
 
   before(async () => {
-    
-  
+
+
 
     //GHST
       erc20TokenConAddress = '0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7';
       aavegotchiDiamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
       holderAddress = '0x27DF5C6dcd360f372e23d5e63645eC0072D0C098';
       otherHolderAddress = '0x4C45c499FEd9B7d01C6CB45E5cD04bd1122eD0D5';
-      
+
 
       await escrowProject();
 
@@ -53,7 +53,7 @@ describe('Escrow Transfering', async function ()  {
 
   });
 
-  it.only('Should deposit erc20 token into escrow', async () => {
+  it('Should deposit erc20 token into escrow', async () => {
 
 
     await hre.network.provider.request({
@@ -85,7 +85,7 @@ describe('Escrow Transfering', async function ()  {
     let length = 2
     let tokenIds = new Array(length).fill(6335)
     let contractAddresses = new Array(length).fill(erc20TokenConAddress)
-    let depositAmounts = new Array(length).fill(depositAmount.div(length)) 
+    let depositAmounts = new Array(length).fill(depositAmount.div(length))
 
 
     let tx = await connectEscrowFacet.batchDepositERC20(tokenIds,contractAddresses, depositAmounts);
@@ -97,7 +97,7 @@ describe('Escrow Transfering', async function ()  {
     console.log("Balance: ", balance.toString());
   })
 
-  it.only('Cannot withdraw collateral from locked Aavegotchis', async function () {
+  it('Cannot withdraw collateral from locked Aavegotchis', async function () {
     await hre.network.provider.request({
       method: 'hardhat_stopImpersonatingAccount',
       params: [holderAddress]
@@ -125,7 +125,7 @@ describe('Escrow Transfering', async function ()  {
       "6335",
       ethers.utils.parseEther("10000")
   )
-  
+
       await expect(ownerEscrowFacet.transferEscrow(6335, erc20TokenConAddress, holderAddress, transferAmount)).to.be.revertedWith("LibAppStorage: Only callable on unlocked Aavegotchis");
 
       const listings = await marketplaceFacet.getOwnerERC721Listings(tokenOwner,"3","listed",100)
@@ -133,11 +133,11 @@ describe('Escrow Transfering', async function ()  {
       let listingId = listings[0].listingId.toString()
 
       await marketplaceFacet.cancelERC721Listing(listingId)
-      
+
 
   })
 
-  it.only("Can transfer collateral from the Aavegotchi", async function () {
+  it("Can transfer collateral from the Aavegotchi", async function () {
  //Unlock
 
  let owner = await ethers.getSigner(tokenOwner);
@@ -152,6 +152,6 @@ describe('Escrow Transfering', async function ()  {
    ownerEscrowFacet.transferEscrow(6335, erc20TokenConAddress, otherHolderAddress, ethers.utils.parseEther("10"))
  ).to.be.revertedWith("EscrowFacet: Cannot transfer more than current ERC20 escrow balance");
 
-  })   
-  
+  })
+
 })

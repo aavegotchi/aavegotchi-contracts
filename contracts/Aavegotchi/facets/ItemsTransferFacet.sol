@@ -300,4 +300,46 @@ contract ItemsTransferFacet is Modifiers {
     ) external pure returns (bytes4) {
         return LibERC1155.ERC1155_BATCH_ACCEPTED;
     }
+
+    ///@notice Used to extract items that have been accidentally burned with Aavegotchis
+    function extractItemsFromSacrificedGotchi(
+        address _to,
+        uint256 _tokenId,
+        uint256[] calldata _itemIds,
+        uint256[] calldata _values
+    ) external onlyItemManager {
+        address sender = LibMeta.msgSender();
+
+        Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
+        require(aavegotchi.owner == address(0), "Aavegotchi has not been sacrificed");
+
+        for (uint256 i; i < _itemIds.length; i++) {
+            uint256 itemId = _itemIds[i];
+            uint256 value = _values[i];
+            LibItems.removeFromParent(address(this), _tokenId, itemId, value);
+            LibItems.addToOwner(_to, itemId, value);
+
+            emit LibERC1155.TransferFromParent(sender, _tokenId, itemId, value);
+            emit LibERC1155.TransferSingle(sender, address(this), _to, itemId, value);
+        }
+    }
+
+    ///@notice Used to extract items that have been accidentally sent to the Diamond contract
+
+    function extractItemsFromDiamond(
+        address _to,
+        uint256[] calldata _itemIds,
+        uint256[] calldata _values
+    ) external onlyItemManager {
+        address sender = LibMeta.msgSender();
+
+        for (uint256 i; i < _itemIds.length; i++) {
+            uint256 itemId = _itemIds[i];
+            uint256 value = _values[i];
+            LibItems.removeFromOwner(address(this), itemId, value);
+            LibItems.addToOwner(_to, itemId, value);
+        }
+
+        emit LibERC1155.TransferBatch(sender, address(this), sender, _itemIds, _values);
+    }
 }

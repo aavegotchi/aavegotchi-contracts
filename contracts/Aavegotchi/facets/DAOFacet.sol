@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {Modifiers, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, AavegotchiCollateralTypeInfo} from "../libraries/LibAppStorage.sol";
 import {AavegotchiCollateralTypeIO} from "../libraries/LibAavegotchi.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibItems} from "../libraries/LibItems.sol";
@@ -23,7 +23,9 @@ contract DAOFacet is Modifiers {
     event GameManagerAdded(address indexed gameManager_, uint256 indexed limit_, uint256 refreshTime_);
     event GameManagerRemoved(address indexed gameManager_);
     event ItemManagerAdded(address indexed newItemManager_);
-    event ItemManagerRemoved(address indexed ItemManager_);
+    event ItemManagerRemoved(address indexed itemManager_);
+    event WearableSlotPositionsSet(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] _slotPositions);
+    event ItemModifiersSet(uint256 _wearableId, int8[6] _traitModifiers, uint8 _rarityScoreModifier);
 
     /***********************************|
    |             Read Functions         |
@@ -52,17 +54,37 @@ contract DAOFacet is Modifiers {
         s.daoTreasury = _newDaoTreasury;
     }
 
-    function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyDaoOrOwner {
+    function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) public onlyItemManager {
         for (uint256 i; i < _collateralTypes.length; i++) {
-            address collateralType = _collateralTypes[i].collateralType;
+            address newCollateralType = _collateralTypes[i].collateralType;
 
-            //Prevent the same collateral from being added multiple times
-            require(s.collateralTypeInfo[collateralType].cheekColor == 0, "DAOFacet: Collateral already added");
+            //Overwrite the collateralTypeInfo if it already exists
+            s.collateralTypeInfo[newCollateralType] = _collateralTypes[i].collateralTypeInfo;
 
-            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
-            s.collateralTypes.push(collateralType);
-            s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
-            emit AddCollateralType(_collateralTypes[i]);
+            //First handle global collateralTypes array
+            uint256 index = s.collateralTypeIndexes[newCollateralType];
+            bool collateralExists = index > 0 || s.collateralTypes[0] == newCollateralType;
+
+            if (!collateralExists) {
+                s.collateralTypes.push(newCollateralType);
+                s.collateralTypeIndexes[newCollateralType] = s.collateralTypes.length;
+            }
+
+            //Then handle hauntCollateralTypes array
+            bool hauntCollateralExists = false;
+            for (uint256 hauntIndex = 0; hauntIndex < s.hauntCollateralTypes[_hauntId].length; hauntIndex++) {
+                address existingHauntCollateral = s.hauntCollateralTypes[_hauntId][hauntIndex];
+
+                if (existingHauntCollateral == newCollateralType) {
+                    hauntCollateralExists = true;
+                    break;
+                }
+            }
+
+            if (!hauntCollateralExists) {
+                s.hauntCollateralTypes[_hauntId].push(newCollateralType);
+                emit AddCollateralType(_collateralTypes[i]);
+            }
         }
     }
 
@@ -115,6 +137,43 @@ contract DAOFacet is Modifiers {
         s.haunts[hauntId_].portalPrice = _portalPrice;
         s.haunts[hauntId_].bodyColor = _bodyColor;
         emit CreateHaunt(hauntId_, _hauntMaxSize, _portalPrice, _bodyColor);
+    }
+
+    struct CreateHauntPayload {
+        uint24 _hauntMaxSize;
+        uint96 _portalPrice;
+        bytes3 _bodyColor;
+        AavegotchiCollateralTypeIO[] _collateralTypes;
+        string _collateralSvg;
+        LibSvg.SvgTypeAndSizes[] _collateralTypesAndSizes;
+        string _eyeShapeSvg;
+        LibSvg.SvgTypeAndSizes[] _eyeShapeTypesAndSizes;
+    }
+
+    //May overload the block gas limit but worth trying
+    function createHauntWithPayload(CreateHauntPayload calldata _payload) external onlyItemManager returns (uint256 hauntId_) {
+        uint256 currentHauntId = s.currentHauntId;
+        require(
+            s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
+            "AavegotchiFacet: Haunt must be full before creating new"
+        );
+
+        hauntId_ = currentHauntId + 1;
+
+        //Upload collateralTypes
+        addCollateralTypes(hauntId_, _payload._collateralTypes);
+
+        //Upload collateralSvgs
+        LibSvg.storeSvg(_payload._collateralSvg, _payload._collateralTypesAndSizes);
+
+        //Upload eyeShapes
+        LibSvg.storeSvg(_payload._eyeShapeSvg, _payload._eyeShapeTypesAndSizes);
+
+        s.currentHauntId = uint16(hauntId_);
+        s.haunts[hauntId_].hauntMaxSize = _payload._hauntMaxSize;
+        s.haunts[hauntId_].portalPrice = _payload._portalPrice;
+        s.haunts[hauntId_].bodyColor = _payload._bodyColor;
+        emit CreateHaunt(hauntId_, _payload._hauntMaxSize, _payload._portalPrice, _payload._bodyColor);
     }
 
     function mintItems(
@@ -220,5 +279,22 @@ contract DAOFacet is Modifiers {
             gameManager.limit = 0;
             emit GameManagerRemoved(_gameManagers[index]);
         }
+    }
+
+    function setWearableSlotPositions(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] calldata _slotPositions) external onlyDaoOrOwner {
+        require(_wearableId < s.itemTypes.length, "Error");
+        s.itemTypes[_wearableId].slotPositions = _slotPositions;
+        emit WearableSlotPositionsSet(_wearableId, _slotPositions);
+    }
+
+    function setItemTraitModifiersAndRarityModifier(
+        uint256 _wearableId,
+        int8[6] calldata _traitModifiers,
+        uint8 _rarityScoreModifier
+    ) external onlyItemManager {
+        require(_wearableId < s.itemTypes.length, "Error");
+        s.itemTypes[_wearableId].traitModifiers = _traitModifiers;
+        s.itemTypes[_wearableId].rarityScoreModifier = _rarityScoreModifier;
+        emit ItemModifiersSet(_wearableId, _traitModifiers, _rarityScoreModifier);
     }
 }

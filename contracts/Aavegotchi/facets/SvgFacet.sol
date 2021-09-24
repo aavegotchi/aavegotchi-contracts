@@ -2,13 +2,7 @@
 pragma solidity 0.8.1;
 
 import {AppStorage, SvgLayer, Dimensions} from "../libraries/LibAppStorage.sol";
-import {
-    LibAavegotchi,
-    PortalAavegotchiTraitsIO,
-    EQUIPPED_WEARABLE_SLOTS,
-    PORTAL_AAVEGOTCHIS_NUM,
-    NUMERIC_TRAITS_NUM
-} from "../libraries/LibAavegotchi.sol";
+import {LibAavegotchi, PortalAavegotchiTraitsIO, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, NUMERIC_TRAITS_NUM} from "../libraries/LibAavegotchi.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
@@ -19,34 +13,22 @@ contract SvgFacet is Modifiers {
    |             Read Functions         |
    |__________________________________*/
 
-    function bytes3ToColorString(bytes3 _color) internal pure returns (string memory) {
-        bytes memory numbers = "0123456789ABCDEF";
-        bytes memory toString = new bytes(6);
-        uint256 pos;
-        for (uint256 i; i < 3; i++) {
-            toString[pos] = numbers[uint8(_color[i] >> 4)];
-            pos++;
-            toString[pos] = numbers[uint8(_color[i] & 0x0f)];
-            pos++;
-        }
-        return string(toString);
-    }
-
     // Given an aavegotchi token id, return the combined SVG of its layers and its wearables
     function getAavegotchiSvg(uint256 _tokenId) public view returns (string memory ag_) {
         require(s.aavegotchis[_tokenId].owner != address(0), "SvgFacet: _tokenId does not exist");
 
         bytes memory svg;
         uint8 status = s.aavegotchis[_tokenId].status;
+        uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
         if (status == LibAavegotchi.STATUS_CLOSED_PORTAL) {
             // sealed closed portal
-            svg = LibSvg.getSvg("aavegotchi", 0);
+            svg = LibSvg.getSvg("portal-closed", hauntId);
         } else if (status == LibAavegotchi.STATUS_OPEN_PORTAL) {
             // open portal
-            svg = LibSvg.getSvg("aavegotchi", 1);
+            svg = LibSvg.getSvg("portal-open", hauntId);
         } else if (status == LibAavegotchi.STATUS_AAVEGOTCHI) {
             address collateralType = s.aavegotchis[_tokenId].collateralType;
-            svg = getAavegotchiSvgLayers(collateralType, s.aavegotchis[_tokenId].numericTraits, _tokenId);
+            svg = getAavegotchiSvgLayers(collateralType, s.aavegotchis[_tokenId].numericTraits, _tokenId, hauntId);
         }
         ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg, "</svg>"));
     }
@@ -67,27 +49,36 @@ contract SvgFacet is Modifiers {
     function getAavegotchiSvgLayers(
         address _collateralType,
         int16[NUMERIC_TRAITS_NUM] memory _numericTraits,
-        uint256 _tokenId
+        uint256 _tokenId,
+        uint256 _hauntId
     ) internal view returns (bytes memory svg_) {
         SvgLayerDetails memory details;
-        details.primaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
-        details.secondaryColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
-        details.cheekColor = bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
+        details.primaryColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].primaryColor);
+        details.secondaryColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].secondaryColor);
+        details.cheekColor = LibSvg.bytes3ToColorString(s.collateralTypeInfo[_collateralType].cheekColor);
 
-        // aavagotchi body
-        svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGTOTCHI_BODY_SVG_ID);
+        // aavegotchi body
+        svg_ = LibSvg.getSvg("aavegotchi", LibSvg.AAVEGOTCHI_BODY_SVG_ID);
         details.collateral = LibSvg.getSvg("collaterals", s.collateralTypeInfo[_collateralType].svgId);
 
+        bytes32 eyeSvgType = "eyeShapes";
+        if (_hauntId != 1) {
+            //Convert Haunt into string to match the uploaded category name
+            bytes memory haunt = abi.encodePacked(LibSvg.uint2str(_hauntId));
+            eyeSvgType = LibSvg.bytesToBytes32(abi.encodePacked("eyeShapesH"), haunt);
+        }
+
         details.trait = _numericTraits[4];
+
         if (details.trait < 0) {
-            details.eyeShape = LibSvg.getSvg("eyeShapes", 0);
+            details.eyeShape = LibSvg.getSvg(eyeSvgType, 0);
         } else if (details.trait > 97) {
-            details.eyeShape = LibSvg.getSvg("eyeShapes", s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
+            details.eyeShape = LibSvg.getSvg(eyeSvgType, s.collateralTypeInfo[_collateralType].eyeShapeSvgId);
         } else {
             details.eyeShapeTraitRange = [int256(0), 1, 2, 5, 7, 10, 15, 20, 25, 42, 58, 75, 80, 85, 90, 93, 95, 98];
             for (uint256 i; i < details.eyeShapeTraitRange.length - 1; i++) {
                 if (details.trait >= details.eyeShapeTraitRange[i] && details.trait < details.eyeShapeTraitRange[i + 1]) {
-                    details.eyeShape = LibSvg.getSvg("eyeShapes", i);
+                    details.eyeShape = LibSvg.getSvg(eyeSvgType, i);
                     break;
                 }
             }
@@ -117,24 +108,43 @@ contract SvgFacet is Modifiers {
             }
         }
 
-        //Add wearables if tokenId isn't MAX_INT
+        //Load in all the equipped wearables
+        uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+
+        //Token ID is uint256 max: used for Portal Aavegotchis to close hands
         if (_tokenId == type(uint256).max) {
             svg_ = abi.encodePacked(
-                applyStyles(details, _tokenId),
+                applyStyles(details, _tokenId, equippedWearables),
                 LibSvg.getSvg("aavegotchi", LibSvg.BACKGROUND_SVG_ID),
                 svg_,
                 details.collateral,
                 details.eyeShape
             );
+        }
+        //Token ID is uint256 max - 1: used for Gotchi previews to open hands
+        else if (_tokenId == type(uint256).max - 1) {
+            equippedWearables[0] = 1;
+            svg_ = abi.encodePacked(
+                applyStyles(details, _tokenId, equippedWearables),
+                LibSvg.getSvg("aavegotchi", LibSvg.BACKGROUND_SVG_ID),
+                svg_,
+                details.collateral,
+                details.eyeShape
+            );
+
+            //Normal token ID
         } else {
-            svg_ = abi.encodePacked(applyStyles(details, _tokenId), addBodyAndWearableSvgLayers(svg_, details, _tokenId));
+            svg_ = abi.encodePacked(applyStyles(details, _tokenId, equippedWearables), svg_, details.collateral, details.eyeShape);
+            svg_ = addBodyAndWearableSvgLayers(svg_, equippedWearables);
         }
     }
 
     //Apply styles based on the traits and wearables
-    function applyStyles(SvgLayerDetails memory _details, uint256 _tokenId) internal view returns (bytes memory) {
-        uint16[EQUIPPED_WEARABLE_SLOTS] storage equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
-
+    function applyStyles(
+        SvgLayerDetails memory _details,
+        uint256 _tokenId,
+        uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables
+    ) internal pure returns (bytes memory) {
         if (
             _tokenId != type(uint256).max &&
             (equippedWearables[LibItems.WEARABLE_SLOT_BODY] != 0 ||
@@ -265,13 +275,27 @@ contract SvgFacet is Modifiers {
         bytes pet;
     }
 
-    function addBodyAndWearableSvgLayers(
-        bytes memory _body,
-        SvgLayerDetails memory details,
-        uint256 _tokenId
-    ) internal view returns (bytes memory svg_) {
-        //Wearables
-        uint16[EQUIPPED_WEARABLE_SLOTS] storage equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+    function previewAavegotchi(
+        uint256 _hauntId,
+        address _collateralType,
+        int16[NUMERIC_TRAITS_NUM] memory _numericTraits,
+        uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables
+    ) external view returns (string memory ag_) {
+        //Get base body layers
+        bytes memory svg_ = getAavegotchiSvgLayers(_collateralType, _numericTraits, type(uint256).max - 1, _hauntId);
+
+        //Add on body wearables
+        svg_ = abi.encodePacked(addBodyAndWearableSvgLayers(svg_, equippedWearables));
+
+        //Encode
+        ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg_, "</svg>"));
+    }
+
+    function addBodyAndWearableSvgLayers(bytes memory _body, uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables)
+        internal
+        view
+        returns (bytes memory svg_)
+    {
         AavegotchiLayers memory layers;
 
         // If background is equipped
@@ -332,7 +356,7 @@ contract SvgFacet is Modifiers {
         //10. Right hand wearable
         //11. Pet wearable
 
-        svg_ = abi.encodePacked(layers.background, _body, details.eyeShape, details.collateral, layers.bodyWearable);
+        svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
         svg_ = abi.encodePacked(
             svg_,
             layers.hands,
@@ -348,13 +372,15 @@ contract SvgFacet is Modifiers {
 
     function portalAavegotchisSvg(uint256 _tokenId) external view returns (string[PORTAL_AAVEGOTCHIS_NUM] memory svg_) {
         require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
+
+        uint256 hauntId = s.aavegotchis[_tokenId].hauntId;
         PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory l_portalAavegotchiTraits = LibAavegotchi.portalAavegotchiTraits(_tokenId);
         for (uint256 i; i < svg_.length; i++) {
             address collateralType = l_portalAavegotchiTraits[i].collateralType;
             svg_[i] = string(
                 abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">',
-                    getAavegotchiSvgLayers(collateralType, l_portalAavegotchiTraits[i].numericTraits, type(uint256).max),
+                    getAavegotchiSvgLayers(collateralType, l_portalAavegotchiTraits[i].numericTraits, type(uint256).max, hauntId),
                     // get hands
                     LibSvg.getSvg("aavegotchi", 3),
                     "</svg>"
@@ -407,7 +433,7 @@ contract SvgFacet is Modifiers {
     }
 
     function deleteLastSvgLayers(bytes32 _svgType, uint256 _numLayers) external onlyItemManager {
-        for(uint256 i; i < _numLayers; i++){
+        for (uint256 i; i < _numLayers; i++) {
             s.svgLayers[_svgType].pop();
         }
     }

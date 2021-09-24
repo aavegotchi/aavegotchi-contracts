@@ -3,15 +3,13 @@ pragma solidity 0.8.1;
 
 import {LibAppStorage, AppStorage, SvgLayer} from "./LibAppStorage.sol";
 
-//import "hardhat/console.sol";
-
 library LibSvg {
     event StoreSvg(LibSvg.SvgTypeAndSizes[] _typesAndSizes);
     event UpdateSvg(SvgTypeAndIdsAndSizes[] _typesAndIdsAndSizes);
     // svg type: "aavegotchiSvgs"
     uint256 internal constant CLOSED_PORTAL_SVG_ID = 0;
     uint256 internal constant OPEN_PORTAL_SVG_ID = 1;
-    uint256 internal constant AAVEGTOTCHI_BODY_SVG_ID = 2;
+    uint256 internal constant AAVEGOTCHI_BODY_SVG_ID = 2;
     uint256 internal constant HANDS_SVG_ID = 3;
     uint256 internal constant BACKGROUND_SVG_ID = 4;
 
@@ -28,7 +26,7 @@ library LibSvg {
 
     function getSvg(SvgLayer[] storage _svgLayers, uint256 _id) internal view returns (bytes memory svg_) {
         require(_id < _svgLayers.length, "LibSvg: SVG type or id does not exist");
-        //  console.log("length:", svgLayers.length);
+
         SvgLayer storage svgLayer = _svgLayers[_id];
         address svgContract = svgLayer.svgLayersContract;
         uint256 size = svgLayer.size;
@@ -37,6 +35,49 @@ library LibSvg {
         assembly {
             extcodecopy(svgContract, add(svg_, 32), offset, size)
         }
+    }
+
+    function bytes3ToColorString(bytes3 _color) internal pure returns (string memory) {
+        bytes memory numbers = "0123456789ABCDEF";
+        bytes memory toString = new bytes(6);
+        uint256 pos;
+        for (uint256 i; i < 3; i++) {
+            toString[pos] = numbers[uint8(_color[i] >> 4)];
+            pos++;
+            toString[pos] = numbers[uint8(_color[i] & 0x0f)];
+            pos++;
+        }
+        return string(toString);
+    }
+
+    function bytesToBytes32(bytes memory _bytes1, bytes memory _bytes2) internal pure returns (bytes32 result_) {
+        bytes memory theBytes = abi.encodePacked(_bytes1, _bytes2);
+        require(theBytes.length <= 32, "LibSvg: bytes array greater than 32");
+        assembly {
+            result_ := mload(add(theBytes, 32))
+        }
+    }
+
+    function uint2str(uint256 _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint256 j = _i;
+        uint256 len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint256 k = len;
+        while (_i != 0) {
+            k = k - 1;
+            uint8 temp = (48 + uint8(_i - (_i / 10) * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
     }
 
     function storeSvgInContract(string calldata _svg) internal returns (address svgContract) {
