@@ -1,4 +1,4 @@
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
+import { LedgerSigner } from "../../aavegotchi-contracts/node_modules/@ethersproject/hardware-wallets";
 import { sendToMultisig } from "../scripts/libraries/multisig/multisig";
 import { AddressZero } from "@ethersproject/constants";
 import { task } from "hardhat/config";
@@ -10,14 +10,17 @@ import {
   PopulatedTransaction,
 } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
+
 import { OwnershipFacet } from "../typechain/OwnershipFacet";
 import { IDiamondCut } from "../typechain/IDiamondCut";
-import { getSelectors } from "../scripts/helperFunctions";
+import { getSelectors, getSighashes } from "../scripts/helperFunctions";
+
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 export interface FacetsAndAddSelectors {
   facetName: string;
   addSelectors: string[];
+  removeSelectors: string[];
 }
 
 type FacetCutType = { Add: 0; Replace: 1; Remove: 2 };
@@ -27,7 +30,6 @@ export interface DeployUpgradeTaskArgs {
   diamondUpgrader: string;
   diamondAddress: string;
   facetsAndAddSelectors: string;
-  removeSelectors: string;
   useMultisig: boolean;
   useLedger: boolean;
   // verifyFacets: boolean;
@@ -47,7 +49,9 @@ export function convertFacetAndSelectorsToString(
 
   facets.forEach((facet) => {
     outputString = outputString.concat(
-      `#${facet.facetName}$$$${facet.addSelectors.join("*")}`
+      `#${facet.facetName}$$$${facet.addSelectors.join(
+        "*"
+      )}$$$${facet.removeSelectors.join("*")}`
     );
   });
 
@@ -68,6 +72,7 @@ export function convertStringToFacetAndSelectors(
     output.push({
       facetName: facetsAndAddSelectors[0],
       addSelectors: facetsAndAddSelectors[1].split("*"),
+      removeSelectors: facetsAndAddSelectors[2].split("*"),
     });
   });
 
@@ -84,10 +89,6 @@ task(
     "facetsAndAddSelectors",
     "Stringified array of facet names to upgrade, along with an array of add Selectors"
   )
-  .addParam(
-    "removeSelectors",
-    "Stringifed array of selectors to remove from the Diamond, or empty"
-  )
   .addFlag(
     "useMultisig",
     "Set to true if multisig should be used for deploying"
@@ -101,7 +102,6 @@ task(
       const facetsAndAddSelectors: FacetsAndAddSelectors[] =
         convertStringToFacetAndSelectors(facets);
       const diamondUpgrader: string = taskArgs.diamondUpgrader;
-      const removeSelectors: string = taskArgs.removeSelectors;
       const diamondAddress: string = taskArgs.diamondAddress;
       const useMultisig = taskArgs.useMultisig;
       const useLedger = taskArgs.useLedger;
@@ -143,14 +143,24 @@ task(
         const deployedFacet: Contract = await factory.deploy();
         await deployedFacet.deployed();
         console.log(
-          `Deployed Facet Address for ${facet}:`,
+          `Deployed Facet Address for ${facet.facetName}:`,
           deployedFacet.address
         );
         deployedFacets.push(deployedFacet);
 
-        const newSelectors = facet.addSelectors;
+        const newSelectors = getSighashes(facet.addSelectors, hre.ethers);
+        const removeSelectors = getSighashes(facet.removeSelectors, hre.ethers);
 
-        console.log("new selectors:", newSelectors);
+        let existingFuncs = getSelectors(deployedFacet);
+        for (const selector of newSelectors) {
+          if (!existingFuncs.includes(selector)) {
+            const index = newSelectors.findIndex((val) => val == selector);
+
+            throw Error(
+              `Selector ${selector} (${facet.addSelectors[index]}) not found`
+            );
+          }
+        }
 
         let existingSelectors = getSelectors(deployedFacet);
         existingSelectors = existingSelectors.filter(
@@ -165,20 +175,20 @@ task(
           });
         }
 
+        if (removeSelectors.length > 0) {
+          console.log("Removing selectors:", removeSelectors);
+          cut.push({
+            facetAddress: hre.ethers.constants.AddressZero,
+            action: FacetCutAction.Remove,
+            functionSelectors: removeSelectors,
+          });
+        }
+
         //Always replace the existing selectors to prevent duplications
         cut.push({
           facetAddress: deployedFacet.address,
           action: FacetCutAction.Replace,
           functionSelectors: existingSelectors,
-        });
-      }
-
-      if (JSON.parse(removeSelectors).length > 0) {
-        console.log("Removing selectors:", removeSelectors);
-        cut.push({
-          facetAddress: hre.ethers.constants.AddressZero,
-          action: FacetCutAction.Remove,
-          functionSelectors: JSON.parse(removeSelectors),
         });
       }
 
