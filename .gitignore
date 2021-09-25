@@ -10,4 +10,6 @@ coverage
 scripts/dep.js
 scripts/portals.js
 hardhat.config.js
-typechain
+hardhat.config.ts
+typechain/
+flat

@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {Modifiers, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, AavegotchiCollateralTypeInfo} from "../libraries/LibAppStorage.sol";
 import {AavegotchiCollateralTypeIO} from "../libraries/LibAavegotchi.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {GameManager} from "../libraries/LibAppStorage.sol";
 
 contract DAOFacet is Modifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
@@ -18,17 +19,28 @@ contract DAOFacet is Modifiers {
     event GrantExperience(uint256[] _tokenIds, uint256[] _xpValues);
     event AddWearableSet(WearableSet _wearableSet);
     event UpdateWearableSet(uint256 _setId, WearableSet _wearableSet);
-    event GameManagerTransferred(address indexed previousGameManager, address indexed newGameManager);
     event ItemTypeMaxQuantity(uint256[] _itemIds, uint256[] _maxQuanities);
+    event GameManagerAdded(address indexed gameManager_, uint256 indexed limit_, uint256 refreshTime_);
+    event GameManagerRemoved(address indexed gameManager_);
     event ItemManagerAdded(address indexed newItemManager_);
-    event ItemManagerRemoved(address indexed ItemManager_);
+    event ItemManagerRemoved(address indexed itemManager_);
+    event WearableSlotPositionsSet(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] _slotPositions);
+    event ItemModifiersSet(uint256 _wearableId, int8[6] _traitModifiers, uint8 _rarityScoreModifier);
 
     /***********************************|
    |             Read Functions         |
    |__________________________________*/
 
-    function gameManager() external view returns (address) {
-        return s.gameManager;
+    function isGameManager(address _manager) external view returns (bool) {
+        return s.gameManagers[_manager].limit != 0;
+    }
+
+    function gameManagerBalance(address _manager) external view returns (uint256) {
+        return s.gameManagers[_manager].balance;
+    }
+
+    function gameManagerRefreshTime(address _manager) external view returns (uint256) {
+        return s.gameManagers[_manager].refreshTime;
     }
 
     /***********************************|
@@ -42,17 +54,37 @@ contract DAOFacet is Modifiers {
         s.daoTreasury = _newDaoTreasury;
     }
 
-    function addCollateralTypes(AavegotchiCollateralTypeIO[] calldata _collateralTypes) external onlyDaoOrOwner {
+    function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) public onlyItemManager {
         for (uint256 i; i < _collateralTypes.length; i++) {
-            address collateralType = _collateralTypes[i].collateralType;
+            address newCollateralType = _collateralTypes[i].collateralType;
 
-            //Prevent the same collateral from being added multiple times
-            require(s.collateralTypeInfo[collateralType].cheekColor == 0, "DAOFacet: Collateral already added");
+            //Overwrite the collateralTypeInfo if it already exists
+            s.collateralTypeInfo[newCollateralType] = _collateralTypes[i].collateralTypeInfo;
 
-            s.collateralTypeIndexes[collateralType] = s.collateralTypes.length;
-            s.collateralTypes.push(collateralType);
-            s.collateralTypeInfo[collateralType] = _collateralTypes[i].collateralTypeInfo;
-            emit AddCollateralType(_collateralTypes[i]);
+            //First handle global collateralTypes array
+            uint256 index = s.collateralTypeIndexes[newCollateralType];
+            bool collateralExists = index > 0 || s.collateralTypes[0] == newCollateralType;
+
+            if (!collateralExists) {
+                s.collateralTypes.push(newCollateralType);
+                s.collateralTypeIndexes[newCollateralType] = s.collateralTypes.length;
+            }
+
+            //Then handle hauntCollateralTypes array
+            bool hauntCollateralExists = false;
+            for (uint256 hauntIndex = 0; hauntIndex < s.hauntCollateralTypes[_hauntId].length; hauntIndex++) {
+                address existingHauntCollateral = s.hauntCollateralTypes[_hauntId][hauntIndex];
+
+                if (existingHauntCollateral == newCollateralType) {
+                    hauntCollateralExists = true;
+                    break;
+                }
+            }
+
+            if (!hauntCollateralExists) {
+                s.hauntCollateralTypes[_hauntId].push(newCollateralType);
+                emit AddCollateralType(_collateralTypes[i]);
+            }
         }
     }
 
@@ -107,6 +139,43 @@ contract DAOFacet is Modifiers {
         emit CreateHaunt(hauntId_, _hauntMaxSize, _portalPrice, _bodyColor);
     }
 
+    struct CreateHauntPayload {
+        uint24 _hauntMaxSize;
+        uint96 _portalPrice;
+        bytes3 _bodyColor;
+        AavegotchiCollateralTypeIO[] _collateralTypes;
+        string _collateralSvg;
+        LibSvg.SvgTypeAndSizes[] _collateralTypesAndSizes;
+        string _eyeShapeSvg;
+        LibSvg.SvgTypeAndSizes[] _eyeShapeTypesAndSizes;
+    }
+
+    //May overload the block gas limit but worth trying
+    function createHauntWithPayload(CreateHauntPayload calldata _payload) external onlyItemManager returns (uint256 hauntId_) {
+        uint256 currentHauntId = s.currentHauntId;
+        require(
+            s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
+            "AavegotchiFacet: Haunt must be full before creating new"
+        );
+
+        hauntId_ = currentHauntId + 1;
+
+        //Upload collateralTypes
+        addCollateralTypes(hauntId_, _payload._collateralTypes);
+
+        //Upload collateralSvgs
+        LibSvg.storeSvg(_payload._collateralSvg, _payload._collateralTypesAndSizes);
+
+        //Upload eyeShapes
+        LibSvg.storeSvg(_payload._eyeShapeSvg, _payload._eyeShapeTypesAndSizes);
+
+        s.currentHauntId = uint16(hauntId_);
+        s.haunts[hauntId_].hauntMaxSize = _payload._hauntMaxSize;
+        s.haunts[hauntId_].portalPrice = _payload._portalPrice;
+        s.haunts[hauntId_].bodyColor = _payload._bodyColor;
+        emit CreateHaunt(hauntId_, _payload._hauntMaxSize, _payload._portalPrice, _payload._bodyColor);
+    }
+
     function mintItems(
         address _to,
         uint256[] calldata _itemIds,
@@ -133,16 +202,22 @@ contract DAOFacet is Modifiers {
 
     function grantExperience(uint256[] calldata _tokenIds, uint256[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {
         require(_tokenIds.length == _xpValues.length, "DAOFacet: IDs must match XP array length");
+        GameManager storage gameManager = s.gameManagers[LibMeta.msgSender()];
+
+        /*GameManager: If the refresh time has been reached, reset the gameManager's balance to the individual limit, and set the refreshTime to 1 day after the block timestamp.*/
+        if (gameManager.refreshTime < block.timestamp) {
+            gameManager.balance = gameManager.limit;
+            gameManager.refreshTime = uint32(block.timestamp + 1 days);
+        }
+
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             uint256 xp = _xpValues[i];
             require(xp <= 1000, "DAOFacet: Cannot grant more than 1000 XP at a time");
+            require(gameManager.balance >= xp, "DAOFacet: Game Manager's xp grant limit is reached");
 
-            //To test (Dan): Deal with overflow here? - Handling it just in case
-            uint256 experience = s.aavegotchis[tokenId].experience;
-            uint256 increasedExperience = experience + xp;
-            require(increasedExperience >= experience, "DAOFacet: Experience overflow");
-            s.aavegotchis[tokenId].experience = increasedExperience;
+            s.aavegotchis[tokenId].experience += xp;
+            gameManager.balance -= xp;
         }
         emit GrantExperience(_tokenIds, _xpValues);
     }
@@ -186,8 +261,40 @@ contract DAOFacet is Modifiers {
         }
     }
 
-    function setGameManager(address _gameManager) external onlyDaoOrOwner {
-        emit GameManagerTransferred(s.gameManager, _gameManager);
-        s.gameManager = _gameManager;
+    function addGameManagers(address[] calldata _newGameManagers, uint256[] calldata _limits) external onlyDaoOrOwner {
+        require(_newGameManagers.length == _limits.length, "DAOFacet: New Game Managers and Limits should have same length");
+        for (uint256 index = 0; index < _newGameManagers.length; index++) {
+            GameManager storage gameManager = s.gameManagers[_newGameManagers[index]];
+            gameManager.limit = _limits[index];
+            gameManager.balance = _limits[index];
+            gameManager.refreshTime = uint256(block.timestamp + 1 days);
+            emit GameManagerAdded(_newGameManagers[index], _limits[index], uint256(block.timestamp + 1 days));
+        }
+    }
+
+    function removeGameManagers(address[] calldata _gameManagers) external onlyDaoOrOwner {
+        for (uint256 index = 0; index < _gameManagers.length; index++) {
+            GameManager storage gameManager = s.gameManagers[_gameManagers[index]];
+            require(gameManager.limit != 0, "DAOFacet: GameManager does not exist or already removed");
+            gameManager.limit = 0;
+            emit GameManagerRemoved(_gameManagers[index]);
+        }
+    }
+
+    function setWearableSlotPositions(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] calldata _slotPositions) external onlyDaoOrOwner {
+        require(_wearableId < s.itemTypes.length, "Error");
+        s.itemTypes[_wearableId].slotPositions = _slotPositions;
+        emit WearableSlotPositionsSet(_wearableId, _slotPositions);
+    }
+
+    function setItemTraitModifiersAndRarityModifier(
+        uint256 _wearableId,
+        int8[6] calldata _traitModifiers,
+        uint8 _rarityScoreModifier
+    ) external onlyItemManager {
+        require(_wearableId < s.itemTypes.length, "Error");
+        s.itemTypes[_wearableId].traitModifiers = _traitModifiers;
+        s.itemTypes[_wearableId].rarityScoreModifier = _rarityScoreModifier;
+        emit ItemModifiersSet(_wearableId, _traitModifiers, _rarityScoreModifier);
     }
 }

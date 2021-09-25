@@ -14,6 +14,8 @@ import {IERC721TokenReceiver} from "../../shared/interfaces/IERC721TokenReceiver
 contract AavegotchiFacet {
     AppStorage internal s;
 
+    event PetOperatorApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+
     function totalSupply() external view returns (uint256 totalSupply_) {
         totalSupply_ = s.tokenIds.length;
     }
@@ -97,6 +99,10 @@ contract AavegotchiFacet {
         approved_ = s.operators[_owner][_operator];
     }
 
+    function isPetOperatorForAll(address _owner, address _operator) external view returns (bool approved_) {
+        approved_ = s.petOperators[_owner][_operator];
+    }
+
     /// @notice Transfers the ownership of an NFT from one address to another address
     /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
     ///  operator, or the approved address for this NFT. Throws if `_from` is
@@ -118,6 +124,20 @@ contract AavegotchiFacet {
         address sender = LibMeta.msgSender();
         internalTransferFrom(sender, _from, _to, _tokenId);
         LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
+    }
+
+    function safeBatchTransferFrom(
+        address _from,
+        address _to,
+        uint256[] calldata _tokenIds,
+        bytes calldata _data
+    ) external {
+        address sender = LibMeta.msgSender();
+        for (uint256 index = 0; index < _tokenIds.length; index++) {
+            uint256 _tokenId = _tokenIds[index];
+            internalTransferFrom(sender, _from, _to, _tokenId);
+            LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
+        }
     }
 
     /// @notice Transfers the ownership of an NFT from one address to another address
@@ -194,6 +214,11 @@ contract AavegotchiFacet {
     function setApprovalForAll(address _operator, bool _approved) external {
         s.operators[LibMeta.msgSender()][_operator] = _approved;
         emit LibERC721.ApprovalForAll(LibMeta.msgSender(), _operator, _approved);
+    }
+
+    function setPetOperatorForAll(address _operator, bool _approved) external {
+        s.petOperators[LibMeta.msgSender()][_operator] = _approved;
+        emit PetOperatorApprovalForAll(LibMeta.msgSender(), _operator, _approved);
     }
 
     function name() external view returns (string memory) {

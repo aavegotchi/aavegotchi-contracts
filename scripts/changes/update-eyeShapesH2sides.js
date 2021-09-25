@@ -45,78 +45,34 @@ async function main() {
     throw Error("Incorrect network selected");
   }
 
-  async function uploadSvgs(svgType, svgs, uploadSigner) {
+  async function updateSvgs(svg, svgType, svgId, testing, uploadSigner) {
     const svgFacet = await ethers.getContractAt(
       "SvgFacet",
       diamondAddress,
       uploadSigner
     );
 
-    function setupSvg(...svgData) {
-      const svgTypesAndSizes = [];
-      const svgItems = [];
-      for (const [svgType, svg] of svgData) {
-        svgItems.push(svg.join(""));
-        svgTypesAndSizes.push([
-          ethers.utils.formatBytes32String(svgType),
-          svg.map((value) => value.length),
-        ]);
-      }
-      return [svgItems.join(""), svgTypesAndSizes];
-    }
+    let svgLength = new TextEncoder().encode(svg[svgId]).length;
 
-    // eslint-disable-next-line no-unused-vars
-    function printSizeInfo(svgTypesAndSizes) {
-      console.log("------------- SVG Size Info ---------------");
-      let sizes = 0;
-      for (const [svgType, size] of svgTypesAndSizes) {
-        console.log(ethers.utils.parseBytes32String(svgType) + ":" + size);
-        for (const nextSize of size) {
-          sizes += nextSize;
-        }
-      }
-      console.log("Total sizes:" + sizes);
-    }
+    const array = [
+      {
+        svgType: ethers.utils.formatBytes32String(svgType),
+        ids: [svgId],
+        sizes: [svgLength],
+      },
+    ];
 
-    console.log("Uploading ", svgs.length, " svgs");
-    let svg, svgTypesAndSizes;
-    console.log("Number of svg:" + svgs.length);
-    let svgItemsStart = 0;
-    let svgItemsEnd = 0;
-    while (true) {
-      let itemsSize = 0;
-      while (true) {
-        if (svgItemsEnd === svgs.length) {
-          break;
-        }
+    console.log(`Update: ${svgType}: ${svgId}`);
 
-        itemsSize += svgs[svgItemsEnd].length;
-        if (itemsSize > 24576) {
-          break;
-        }
-        svgItemsEnd++;
-      }
-      [svg, svgTypesAndSizes] = setupSvg([
-        svgType,
-        svgs.slice(svgItemsStart, svgItemsEnd),
-      ]);
-      console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`);
-      printSizeInfo(svgTypesAndSizes);
+    const gasPrice = 100000000000;
 
-      let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, {
-        gasPrice: gasPrice,
-      });
-      console.log("tx hash:", tx.hash);
-      let receipt = await tx.wait();
-      if (!receipt.status) {
-        throw Error(`Error:: ${tx.hash}`);
-      }
-
-      console.log(svgItemsEnd, svg.length);
-      if (svgItemsEnd === svgs.length) {
-        break;
-      }
-      svgItemsStart = svgItemsEnd;
+    let tx = await svgFacet.updateSvg(svg[svgId], array, {
+      gasPrice: gasPrice,
+    });
+    console.log("tx hash:", tx.hash);
+    let receipt = await tx.wait();
+    if (!receipt.status) {
+      throw Error(`Error:: ${tx.hash}`);
     }
   }
 
@@ -127,9 +83,41 @@ async function main() {
     itemSigner = signer;
   }
 
-  await uploadSvgs("eyeShapesH2-back", eyeShapesRightSvgs, itemSigner);
+  for (var i = 0; i < eyeShapesRightSvgs.length; i++) {
+    await updateSvgs(
+      eyeShapesRightSvgs,
+      "eyeShapesH2-right",
+      i,
+      testing,
+      itemSigner
+    );
+  }
 
-  // await uploadSvgs("eyeShapesH2-left", eyeShapesLeftSvgs, itemSigner);
+  for (var i = 0; i < eyeShapesLeftSvgs.length; i++) {
+    await updateSvgs(
+      eyeShapesLeftSvgs,
+      "eyeShapesH2-left",
+      i,
+      testing,
+      itemSigner
+    );
+  }
+
+  for (var i = 0; i < eyeShapesRightSvgs.length; i++) {
+    await updateSvgs(
+      eyeShapesRightSvgs,
+      "eyeShapesH2-back",
+      i,
+      testing,
+      itemSigner
+    );
+  }
+
+  /*
+  await updateSvgs("eyeShapesH2-left", eyeShapesLeftSvgs, itemSigner);
+  await updateSvgs("eyeShapesH2-right", eyeShapesRightSvgs, itemSigner);
+  await updateSvgs("eyeShapesH2-back", eyeShapesRightSvgs, itemSigner);
+  */
 }
 
 if (require.main === module) {
