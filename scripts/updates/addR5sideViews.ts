@@ -7,9 +7,9 @@ import {
   wearablesLeftSleeveSvgs,
   wearablesRightSleeveSvgs,
   wearablesBackSleeveSvgs,
-} from "../../svgs/wearables-sides.js";
+} from "../../svgs/wearables-sides";
 
-import { sideViewDimensions9 } from "../../svgs/sideViewDimensions.js";
+import { sideViewDimensions9 } from "../../svgs/sideViewDimensions";
 
 /* const hre = require("hardhat"); */
 
