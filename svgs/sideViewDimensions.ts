@@ -1,4 +1,39 @@
-export const sideViewDimensions1 = [
+export interface SideViewDimensions {
+  itemId: number;
+  name: string;
+  side:
+    | "none"
+    | "back"
+    | "left"
+    | "right"
+    | "left back up"
+    | "left back"
+    | "right up"
+    | "right back"
+    | "left up"
+    | "right back up"
+    | "back left up"
+    | "back right up"
+    | "back left"
+    | "back right"
+    | "right down"
+    | "left down"
+    | "left front up"
+    | "left front"
+    | "right front"
+    | "right front up"
+    | "front";
+  dimensions: Dimensions;
+}
+
+export interface Dimensions {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export const sideViewDimensions1: SideViewDimensions[] = [
   {
     itemId: 0,
     name: "The Void",
@@ -2209,7 +2244,7 @@ export const sideViewDimensions1 = [
   },
 ];
 
-export const sideViewDimensions2 = [
+export const sideViewDimensions2: SideViewDimensions[] = [
   {
     itemId: 80,
     name: "Sushi Headband",
@@ -3376,7 +3411,7 @@ export const sideViewDimensions2 = [
   },
 ];
 
-export const sideViewDimensions3 = [
+export const sideViewDimensions3: SideViewDimensions[] = [
   {
     itemId: 119,
     name: "Baby Bottle",
@@ -3907,7 +3942,7 @@ export const sideViewDimensions3 = [
   },
 ];
 
-export const sideViewDimensions4 = [
+export const sideViewDimensions4: SideViewDimensions[] = [
   {
     itemId: 141,
     name: "Gemstone Ring",
@@ -4654,7 +4689,7 @@ export const sideViewDimensions4 = [
   },
 ];
 
-export const sideViewDimensions5 = [
+export const sideViewDimensions5: SideViewDimensions[] = [
   {
     itemId: 199,
     name: "Steampunk Glasses",
@@ -4867,7 +4902,7 @@ export const sideViewDimensions5 = [
   },
 ];
 
-export const sideViewDimensions6 = [
+export const sideViewDimensions6: SideViewDimensions[] = [
   {
     itemId: 211,
     name: "Guy Fauwkes Mask",
@@ -5020,7 +5055,7 @@ export const sideViewDimensions6 = [
   },
 ];
 
-export const sideViewDimensions7 = [
+export const sideViewDimensions7: SideViewDimensions[] = [
   {
     itemId: 217,
     name: "Energy Gun",
@@ -5341,7 +5376,7 @@ export const sideViewDimensions7 = [
   },
 ];
 
-export const sideViewDimensions8 = [
+export const sideViewDimensions8: SideViewDimensions[] = [
   {
     itemId: 228,
     name: "10 Gallon Hat",
@@ -5824,7 +5859,7 @@ export const sideViewDimensions8 = [
   },
 ];
 
-export const sideViewDimensions9 = [
+export const sideViewDimensions9: SideViewDimensions[] = [
   {
     itemId: 245,
     name: "Gecko Hat",

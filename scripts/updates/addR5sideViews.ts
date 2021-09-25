@@ -62,6 +62,7 @@ async function main() {
       diamondAddress,
       uploadSigner
     );
+
     let svgLength = new TextEncoder().encode(svg[svgId]).length;
     const array = [
       {
