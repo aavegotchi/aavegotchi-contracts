@@ -10,6 +10,7 @@ import {
 } from "../../svgs/wearables-sides";
 
 import { sideViewDimensions9 } from "../../svgs/sideViewDimensions";
+import { SvgFacet } from "../../typechain";
 
 /* const hre = require("hardhat"); */
 
@@ -57,11 +58,11 @@ async function main() {
     testing: boolean,
     uploadSigner: any
   ) {
-    const svgFacet = await ethers.getContractAt(
+    const svgFacet = (await ethers.getContractAt(
       "SvgFacet",
       diamondAddress,
       uploadSigner
-    );
+    )) as SvgFacet;
 
     let svgLength = new TextEncoder().encode(svg[svgId]).length;
     const array = [
@@ -94,7 +95,9 @@ async function main() {
   const updatingBackSvgs = 264;
 
   //left
+  console.log("Updating left side");
   for (var i = 245; i < updatingLeftSvgs; i++) {
+    console.log("i:", i);
     await updateSvgs(
       wearablesLeftSvgs,
       "wearables-left",
@@ -105,6 +108,7 @@ async function main() {
   }
 
   //right
+  console.log("Updating right side");
   for (var i = 245; i < updatingRightSvgs; i++) {
     await updateSvgs(
       wearablesRightSvgs,
@@ -116,6 +120,7 @@ async function main() {
   }
 
   //back
+  console.log("Updating back side");
   for (var i = 245; i < updatingBackSvgs; i++) {
     await updateSvgs(
       wearablesBackSvgs,
