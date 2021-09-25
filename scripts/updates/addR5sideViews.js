@@ -39,9 +39,10 @@ exports.__esModule = true;
 var hardhat_1 = require("hardhat");
 var wearables_sides_js_1 = require("../../svgs/wearables-sides.js");
 var sideViewDimensions_js_1 = require("../../svgs/sideViewDimensions.js");
+/* const hre = require("hardhat"); */
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        function updateSvgs(svg, svgType, svgId, uploadSigner) {
+        function updateSvgs(svg, svgType, svgId, testing, uploadSigner) {
             return __awaiter(this, void 0, void 0, function () {
                 var svgFacet, svgLength, array, tx, receipt;
                 return __generator(this, function (_a) {
@@ -73,100 +74,152 @@ function main() {
                 });
             });
         }
-        var gasPrice, diamondAddress, account1Signer, account1Address, signer, itemSigner, updatingLeftSvgs, updatingRightSvgs, updatingBackSvgs, i, i, i, updatingSleevesLeft, updatingSleevesRight, updatingSleevesBack, i, i, i, svgViewsFacet, tx, receipt, numTraits1, wearables1, sidePreview;
+        var gasPrice, diamondAddress, account1Signer, account1Address, signer, owner, testing, dao, tx_1, receipt_1, accounts, account, itemSigner, updatingLeftSvgs, updatingRightSvgs, updatingBackSvgs, i, i, i, updatingSleevesLeft, updatingSleevesRight, updatingSleevesBack, i, i, i, svgViewsFacet, tx, receipt, numTraits1, wearables1, sidePreview;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     gasPrice = 100000000000;
                     diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-                    itemSigner = signer;
+                    return [4 /*yield*/, hardhat_1.ethers.getContractAt("OwnershipFacet", diamondAddress)];
+                case 1: return [4 /*yield*/, (_a.sent()).owner()];
+                case 2:
+                    owner = _a.sent();
+                    testing = ["hardhat", "localhost"].includes(hre.network.name);
+                    if (!testing) return [3 /*break*/, 10];
+                    return [4 /*yield*/, hre.network.provider.request({
+                            method: "hardhat_impersonateAccount",
+                            params: [owner]
+                        })];
+                case 3:
+                    _a.sent();
+                    return [4 /*yield*/, hardhat_1.ethers.getSigner(owner)];
+                case 4:
+                    signer = _a.sent();
+                    return [4 /*yield*/, hardhat_1.ethers.getContractAt("DAOFacet", diamondAddress, signer)];
+                case 5:
+                    dao = _a.sent();
+                    return [4 /*yield*/, hardhat_1.ethers.getSigners()];
+                case 6:
+                    account1Signer = (_a.sent())[0];
+                    return [4 /*yield*/, account1Signer.getAddress()];
+                case 7:
+                    account1Address = _a.sent();
+                    return [4 /*yield*/, dao.addItemManagers([account1Address])];
+                case 8:
+                    tx_1 = _a.sent();
+                    return [4 /*yield*/, tx_1.wait()];
+                case 9:
+                    receipt_1 = _a.sent();
+                    if (!receipt_1.status) {
+                        throw Error("Error:: " + tx_1.hash);
+                    }
+                    return [3 /*break*/, 14];
+                case 10:
+                    if (!(hre.network.name === "matic")) return [3 /*break*/, 13];
+                    return [4 /*yield*/, hardhat_1.ethers.getSigners()];
+                case 11:
+                    accounts = _a.sent();
+                    return [4 /*yield*/, accounts[0].getAddress()];
+                case 12:
+                    account = _a.sent();
+                    /* console.log("account:", account); */
+                    signer = accounts[0]; //new LedgerSigner(ethers.provider);
+                    return [3 /*break*/, 14];
+                case 13: throw Error("Incorrect network selected");
+                case 14:
+                    if (testing) {
+                        itemSigner = account1Signer;
+                    }
+                    else {
+                        itemSigner = signer;
+                    }
                     updatingLeftSvgs = 264;
                     updatingRightSvgs = 264;
                     updatingBackSvgs = 264;
                     i = 245;
-                    _a.label = 1;
-                case 1:
-                    if (!(i < updatingLeftSvgs)) return [3 /*break*/, 4];
-                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesLeftSvgs, "wearables-left", i, itemSigner)];
-                case 2:
+                    _a.label = 15;
+                case 15:
+                    if (!(i < updatingLeftSvgs)) return [3 /*break*/, 18];
+                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesLeftSvgs, "wearables-left", i, testing, itemSigner)];
+                case 16:
                     _a.sent();
-                    _a.label = 3;
-                case 3:
+                    _a.label = 17;
+                case 17:
                     i++;
-                    return [3 /*break*/, 1];
-                case 4:
+                    return [3 /*break*/, 15];
+                case 18:
                     i = 245;
-                    _a.label = 5;
-                case 5:
-                    if (!(i < updatingRightSvgs)) return [3 /*break*/, 8];
-                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesRightSvgs, "wearables-right", i, itemSigner)];
-                case 6:
+                    _a.label = 19;
+                case 19:
+                    if (!(i < updatingRightSvgs)) return [3 /*break*/, 22];
+                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesRightSvgs, "wearables-right", i, testing, itemSigner)];
+                case 20:
                     _a.sent();
-                    _a.label = 7;
-                case 7:
+                    _a.label = 21;
+                case 21:
                     i++;
-                    return [3 /*break*/, 5];
-                case 8:
+                    return [3 /*break*/, 19];
+                case 22:
                     i = 245;
-                    _a.label = 9;
-                case 9:
-                    if (!(i < updatingBackSvgs)) return [3 /*break*/, 12];
-                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesBackSvgs, "wearables-back", i, itemSigner)];
-                case 10:
+                    _a.label = 23;
+                case 23:
+                    if (!(i < updatingBackSvgs)) return [3 /*break*/, 26];
+                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesBackSvgs, "wearables-back", i, testing, itemSigner)];
+                case 24:
                     _a.sent();
-                    _a.label = 11;
-                case 11:
+                    _a.label = 25;
+                case 25:
                     i++;
-                    return [3 /*break*/, 9];
-                case 12:
+                    return [3 /*break*/, 23];
+                case 26:
                     updatingSleevesLeft = [36, 37, 38, 39, 40];
                     updatingSleevesRight = [36, 37, 38, 39, 40];
                     updatingSleevesBack = [36, 37, 38, 39, 40];
                     i = 0;
-                    _a.label = 13;
-                case 13:
-                    if (!(i < updatingSleevesLeft.length)) return [3 /*break*/, 16];
-                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesLeftSleeveSvgs, 'sleeves-left', updatingSleevesLeft[i], itemSigner)];
-                case 14:
+                    _a.label = 27;
+                case 27:
+                    if (!(i < updatingSleevesLeft.length)) return [3 /*break*/, 30];
+                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesLeftSleeveSvgs, 'sleeves-left', updatingSleevesLeft[i], testing, itemSigner)];
+                case 28:
                     _a.sent();
-                    _a.label = 15;
-                case 15:
+                    _a.label = 29;
+                case 29:
                     i++;
-                    return [3 /*break*/, 13];
-                case 16:
+                    return [3 /*break*/, 27];
+                case 30:
                     i = 0;
-                    _a.label = 17;
-                case 17:
-                    if (!(i < updatingSleevesRight.length)) return [3 /*break*/, 20];
-                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesRightSleeveSvgs, 'sleeves-right', updatingSleevesRight[i], itemSigner)];
-                case 18:
+                    _a.label = 31;
+                case 31:
+                    if (!(i < updatingSleevesRight.length)) return [3 /*break*/, 34];
+                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesRightSleeveSvgs, 'sleeves-right', updatingSleevesRight[i], testing, itemSigner)];
+                case 32:
                     _a.sent();
-                    _a.label = 19;
-                case 19:
+                    _a.label = 33;
+                case 33:
                     i++;
-                    return [3 /*break*/, 17];
-                case 20:
+                    return [3 /*break*/, 31];
+                case 34:
                     i = 0;
-                    _a.label = 21;
-                case 21:
-                    if (!(i < updatingSleevesBack.length)) return [3 /*break*/, 24];
-                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesBackSleeveSvgs, 'sleeves-back', updatingSleevesBack[i], itemSigner)];
-                case 22:
+                    _a.label = 35;
+                case 35:
+                    if (!(i < updatingSleevesBack.length)) return [3 /*break*/, 38];
+                    return [4 /*yield*/, updateSvgs(wearables_sides_js_1.wearablesBackSleeveSvgs, 'sleeves-back', updatingSleevesBack[i], testing, itemSigner)];
+                case 36:
                     _a.sent();
-                    _a.label = 23;
-                case 23:
+                    _a.label = 37;
+                case 37:
                     i++;
-                    return [3 /*break*/, 21];
-                case 24: return [4 /*yield*/, hardhat_1.ethers.getContractAt("SvgViewsFacet", diamondAddress, itemSigner)];
-                case 25:
+                    return [3 /*break*/, 35];
+                case 38: return [4 /*yield*/, hardhat_1.ethers.getContractAt("SvgViewsFacet", diamondAddress, itemSigner)];
+                case 39:
                     svgViewsFacet = _a.sent();
                     return [4 /*yield*/, svgViewsFacet.setSideViewDimensions(sideViewDimensions_js_1.sideViewDimensions9, {
                             gasPrice: gasPrice
                         })];
-                case 26:
+                case 40:
                     tx = _a.sent();
                     return [4 /*yield*/, tx.wait()];
-                case 27:
+                case 41:
                     receipt = _a.sent();
                     if (!receipt.status) {
                         throw Error("Error:: " + tx.hash);
@@ -174,7 +227,7 @@ function main() {
                     numTraits1 = [99, 99, 99, 99, 12, 9];
                     wearables1 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
                     return [4 /*yield*/, svgViewsFacet.previewSideAavegotchi("2", "0xE0b22E0037B130A9F56bBb537684E6fA18192341", numTraits1, wearables1)];
-                case 28:
+                case 42:
                     sidePreview = _a.sent();
                     console.log("Side Preview: ", sidePreview);
                     return [2 /*return*/];
