@@ -51,11 +51,10 @@ async function main() {
     throw Error("Incorrect network selected");
   }
 
-  async function updateSvgs(
+  async function uploadSvgs(
     svg: any,
     svgType: string,
     svgId: number,
-    testing: boolean,
     uploadSigner: any
   ) {
     const svgFacet = (await ethers.getContractAt(
@@ -68,12 +67,11 @@ async function main() {
     const array = [
       {
         svgType: ethers.utils.formatBytes32String(svgType),
-        ids: [svgId],
         sizes: [svgLength],
       },
     ];
 
-    let tx = await svgFacet.updateSvg(svg[svgId], array, {
+    let tx = await svgFacet.storeSvg(svg[svgId], array, {
       gasPrice: gasPrice,
     });
     let receipt = await tx.wait();
@@ -98,11 +96,10 @@ async function main() {
   console.log("Updating left side");
   for (var i = 245; i < updatingLeftSvgs; i++) {
     console.log("i:", i);
-    await updateSvgs(
+    await uploadSvgs(
       wearablesLeftSvgs,
       "wearables-left",
       i,
-      testing,
       itemSigner
     );
   }
@@ -110,11 +107,10 @@ async function main() {
   //right
   console.log("Updating right side");
   for (var i = 245; i < updatingRightSvgs; i++) {
-    await updateSvgs(
+    await uploadSvgs(
       wearablesRightSvgs,
       "wearables-right",
       i,
-      testing,
       itemSigner
     );
   }
@@ -122,11 +118,10 @@ async function main() {
   //back
   console.log("Updating back side");
   for (var i = 245; i < updatingBackSvgs; i++) {
-    await updateSvgs(
+    await uploadSvgs(
       wearablesBackSvgs,
       "wearables-back",
       i,
-      testing,
       itemSigner
     );
   }
@@ -137,31 +132,28 @@ async function main() {
   const updatingSleevesBack = [36, 37, 38, 39, 40];
 
   for (var i = 0; i < updatingSleevesLeft.length; i++) {
-    await updateSvgs(
+    await uploadSvgs(
       wearablesLeftSleeveSvgs,
       "sleeves-left",
       updatingSleevesLeft[i],
-      testing,
       itemSigner
     );
   }
 
   for (var i = 0; i < updatingSleevesRight.length; i++) {
-    await updateSvgs(
+    await uploadSvgs(
       wearablesRightSleeveSvgs,
       "sleeves-right",
       updatingSleevesRight[i],
-      testing,
       itemSigner
     );
   }
 
   for (var i = 0; i < updatingSleevesBack.length; i++) {
-    await updateSvgs(
+    await uploadSvgs(
       wearablesBackSleeveSvgs,
       "sleeves-back",
       updatingSleevesBack[i],
-      testing,
       itemSigner
     );
   }
