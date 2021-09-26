@@ -12,10 +12,7 @@ import {
 import { sideViewDimensions9 } from "../../svgs/sideViewDimensions";
 import { SvgFacet } from "../../typechain";
 
-
 async function main() {
-
-
   const gasPrice = 7666197020;
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let account1Signer;
@@ -41,88 +38,59 @@ async function main() {
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
     }
+  } else if (network.name === "matic") {
+    const accounts = await ethers.getSigners();
+    const account = await accounts[0].getAddress();
+    /* console.log("account:", account); */
 
+    signer = accounts[0]; //new LedgerSigner(ethers.provider);
+  } else {
+    throw Error("Incorrect network selected");
+  }
 
-} else if (network.name === "matic") {
-  const accounts = await ethers.getSigners();
-  const account = await accounts[0].getAddress();
-  /* console.log("account:", account); */
+  //
+  let arrFixes = [245, 246, 247, 248, 249, 250, 251, 252, 253];
 
-  signer = accounts[0]; //new LedgerSigner(ethers.provider);
-} else {
-  throw Error("Incorrect network selected");
-}
+  let itemSigner;
+  if (testing) {
+    itemSigner = account1Signer;
+  } else {
+    itemSigner = signer;
+  }
+  // console.log("updating sideviews")
+  // await updateSvgs(wearablesLeftSvgs,"wearables-left",253,itemSigner)
+  // await updateSvgs(wearablesRightSvgs,"wearables-right",253,itemSigner)
+  // await updateSvgs(wearablesBackSvgs,"wearables-back",253,itemSigner)
+  console.log("upload sleeves");
 
-async function updateSvgs(svg: any, svgType:any,svgId:number,updatesigner:any){
-  const svgFacet = (await ethers.getContractAt(
-    "SvgFacet",
+  // //fix sleeves for Geckoshirt
+  // await updateSvgs(wearablesLeftSleeveSvgs,"sleeves-left",36,itemSigner)
+  // await updateSvgs(wearablesRightSleeveSvgs,"sleeves-right",36,itemSigner)
+
+  // //Update sleeves for Geckoshirt
+  // await updateSvgs(wearablesLeftSleeveSvgs,"sleeves-left",37,itemSigner)
+  // await updateSvgs(wearablesRightSleeveSvgs,"sleeves-right",37,itemSigner)
+
+  // //Fix sleeves for Astronaut suit
+  //  await updateSvgs(wearablesLeftSleeveSvgs,"sleeves-left",38,itemSigner)
+  //  await updateSvgs(wearablesRightSleeveSvgs,"sleeves-right",38,itemSigner)
+
+  console.log("updating dimensions");
+  const svgViewsFacet = await ethers.getContractAt(
+    "SvgViewsFacet",
     diamondAddress,
-    updatesigner
-  )) as SvgFacet;
-  let ids:[number]=[38]
-  let svgLength = new TextEncoder().encode(svg[svgId]).length;
-    const array = [
-      {
-        svgType: ethers.utils.formatBytes32String(svgType),
-        ids: ids,
-        sizes: [svgLength],
-      },
-    ];
-  
-    let tx=await svgFacet.updateSvg(svg[svgId],array,{gasPrice:gasPrice})
-    let receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`);
-    }
+    itemSigner
+  );
 
-  
-}
-//
-let arrFixes=[245,246,247,248,249,250,251,252,253]
+  //for all dimensions fixes
+  let tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions9, {
+    gasPrice: gasPrice,
+  });
 
-let itemSigner;
-if (testing) {
-  itemSigner = account1Signer;
-} else {
-  itemSigner = signer;
-}
-// console.log("updating sideviews")
-// await updateSvgs(wearablesLeftSvgs,"wearables-left",253,itemSigner)
-// await updateSvgs(wearablesRightSvgs,"wearables-right",253,itemSigner)
-// await updateSvgs(wearablesBackSvgs,"wearables-back",253,itemSigner)
-console.log("upload sleeves")
-
-// //fix sleeves for Geckoshirt
-// await updateSvgs(wearablesLeftSleeveSvgs,"sleeves-left",36,itemSigner)
-// await updateSvgs(wearablesRightSleeveSvgs,"sleeves-right",36,itemSigner)
-
-// //Update sleeves for Geckoshirt
-// await updateSvgs(wearablesLeftSleeveSvgs,"sleeves-left",37,itemSigner)
-// await updateSvgs(wearablesRightSleeveSvgs,"sleeves-right",37,itemSigner)
-
-// //Fix sleeves for Astronaut suit
-//  await updateSvgs(wearablesLeftSleeveSvgs,"sleeves-left",38,itemSigner)
-//  await updateSvgs(wearablesRightSleeveSvgs,"sleeves-right",38,itemSigner)
-
-console.log('updating dimensions')
-const svgViewsFacet = await ethers.getContractAt(
-  "SvgViewsFacet",
-  diamondAddress,
-  itemSigner
-);
-
-//for all dimensions fixes
-let tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions9, {
-  gasPrice: gasPrice,
- });
-
-// let receipt = await tx.wait();
-// if (!receipt.status) {
-//   throw Error(`Error:: ${tx.hash}`);
-// }
-
-
-
+  // let receipt = await tx.wait();
+  // if (!receipt.status) {
+  //   throw Error(`Error:: ${tx.hash}`);
+  // }
 }
 main()
   .then(() => process.exit(0))

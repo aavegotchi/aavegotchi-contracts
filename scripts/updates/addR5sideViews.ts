@@ -11,152 +11,101 @@ import {
 
 import { sideViewDimensions9 } from "../../svgs/sideViewDimensions";
 import { SvgFacet } from "../../typechain";
-
+import {
+  updateSvgs,
+  uploadOrUpdateSvg,
+  uploadSvgs,
+} from "../svgHelperFunctions";
+import { Signer } from "@ethersproject/abstract-signer";
 
 /* const hre = require("hardhat"); */
 
 async function main() {
-
   const gasPrice = 7666197020;
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-  let account1Signer;
+  let account1Signer = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
   let account1Address;
   let signer;
 
+  /*
   let owner = await (
     await ethers.getContractAt("OwnershipFacet", diamondAddress)
   ).owner();
+  */
   const testing = ["hardhat", "localhost"].includes(network.name);
+
+  // const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 
   if (testing) {
     await network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [owner],
+      params: [account1Signer],
     });
-    signer = await ethers.getSigner(owner);
-    let dao = await ethers.getContractAt("DAOFacet", diamondAddress, signer);
-    [account1Signer] = await ethers.getSigners();
-    account1Address = await account1Signer.getAddress();
-    let tx = await dao.addItemManagers([account1Address]);
-    let receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`);
-    }
-    /* console.log("assigned", account1Address, "as item manager"); */
+    signer = await ethers.getSigner(account1Signer);
   } else if (network.name === "matic") {
     const accounts = await ethers.getSigners();
-    const account = await accounts[0].getAddress();
-    /* console.log("account:", account); */
 
     signer = accounts[0]; //new LedgerSigner(ethers.provider);
   } else {
     throw Error("Incorrect network selected");
   }
 
-  async function uploadSvgs(
-    svg: any,
-    svgType: string,
-    svgId: number,
-    uploadSigner: any
-  ) {
-    const svgFacet = (await ethers.getContractAt(
-      "SvgFacet",
-      diamondAddress,
-      uploadSigner
-    )) as SvgFacet;
-
-    let svgLength = new TextEncoder().encode(svg[svgId]).length;
-    const array = [
-      {
-        svgType: ethers.utils.formatBytes32String(svgType),
-        sizes: [svgLength],
-      },
-    ];
-
-    let tx = await svgFacet.storeSvg(svg[svgId], array, {
-      gasPrice: gasPrice,
-    });
-    let receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`);
-    }
-  }
-
-  let itemSigner;
+  let itemSigner: Signer;
   if (testing) {
-    itemSigner = account1Signer;
+    itemSigner = signer;
   } else {
     itemSigner = signer;
   }
 
-  //wearables
-  const updatingLeftSvgs = 264;
-  const updatingRightSvgs = 264;
-  const updatingBackSvgs = 264;
+  console.log("Updating Wearables");
+  const itemIds = [
+    245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259,
+    260, 261, 262, 263,
+  ];
 
-  //left
-  console.log("Updating left side");
-  for (var i = 245; i < updatingLeftSvgs; i++) {
-    console.log("i:", i);
-    await uploadSvgs(
-      wearablesLeftSvgs,
-      "wearables-left",
-      i,
-      itemSigner
-    );
-  }
+  const svgFacet = (await ethers.getContractAt(
+    "SvgFacet",
+    diamondAddress,
+    signer
+  )) as SvgFacet;
 
-  //right
-  console.log("Updating right side");
-  for (var i = 245; i < updatingRightSvgs; i++) {
-    await uploadSvgs(
-      wearablesRightSvgs,
-      "wearables-right",
-      i,
-      itemSigner
-    );
-  }
+  for (let index = 0; index < itemIds.length; index++) {
+    const itemId = itemIds[index];
+    const left = wearablesLeftSvgs[itemId];
+    const right = wearablesRightSvgs[itemId];
+    const back = wearablesBackSvgs[itemId];
+    await uploadOrUpdateSvg(left, "wearables-left", itemId, svgFacet, ethers);
 
-  //back
-  console.log("Updating back side");
-  for (var i = 245; i < updatingBackSvgs; i++) {
-    await uploadSvgs(
-      wearablesBackSvgs,
-      "wearables-back",
-      i,
-      itemSigner
-    );
+    await uploadOrUpdateSvg(right, "wearables-right", itemId, svgFacet, ethers);
+    await uploadOrUpdateSvg(back, "wearables-back", itemId, svgFacet, ethers);
   }
 
   //sleeves
-  const updatingSleevesLeft = [36, 37, 38, 39, 40];
-  const updatingSleevesRight = [36, 37, 38, 39, 40];
-  const updatingSleevesBack = [36, 37, 38, 39, 40];
+  const sleeveIds = [36, 37, 38, 39, 40];
 
-  for (var i = 0; i < updatingSleevesLeft.length; i++) {
-    await uploadSvgs(
-      wearablesLeftSleeveSvgs,
+  for (var i = 0; i < sleeveIds.length; i++) {
+    const sleeveId = sleeveIds[i];
+
+    await uploadOrUpdateSvg(
+      wearablesLeftSleeveSvgs[sleeveId],
       "sleeves-left",
-      updatingSleevesLeft[i],
-      itemSigner
+      sleeveId,
+      svgFacet,
+      ethers
     );
-  }
-
-  for (var i = 0; i < updatingSleevesRight.length; i++) {
-    await uploadSvgs(
-      wearablesRightSleeveSvgs,
+    await uploadOrUpdateSvg(
+      wearablesRightSleeveSvgs[sleeveId],
       "sleeves-right",
-      updatingSleevesRight[i],
-      itemSigner
+      sleeveId,
+      svgFacet,
+      ethers
     );
-  }
-
-  for (var i = 0; i < updatingSleevesBack.length; i++) {
-    await uploadSvgs(
-      wearablesBackSleeveSvgs,
+    await uploadOrUpdateSvg(
+      wearablesBackSleeveSvgs[sleeveId],
       "sleeves-back",
-      updatingSleevesBack[i],
-      itemSigner
+      sleeveId,
+      svgFacet,
+      ethers
     );
   }
 
@@ -167,6 +116,7 @@ async function main() {
     itemSigner
   );
 
+  console.log("Update dimensions");
   let tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions9, {
     gasPrice: gasPrice,
   });
