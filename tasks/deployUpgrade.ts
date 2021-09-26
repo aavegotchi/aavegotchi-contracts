@@ -1,4 +1,4 @@
-import { LedgerSigner } from "../../aavegotchi-contracts/node_modules/@ethersproject/hardware-wallets";
+import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { sendToMultisig } from "../scripts/libraries/multisig/multisig";
 import { AddressZero } from "@ethersproject/constants";
 import { task } from "hardhat/config";
@@ -136,10 +136,11 @@ task(
       for (let index = 0; index < facetsAndAddSelectors.length; index++) {
         const facet = facetsAndAddSelectors[index];
 
-        console.log("facet:", facet);
+        // console.log("facet:", facet);
         const factory = (await hre.ethers.getContractFactory(
           facet.facetName
         )) as ContractFactory;
+
         const deployedFacet: Contract = await factory.deploy();
         await deployedFacet.deployed();
         console.log(
