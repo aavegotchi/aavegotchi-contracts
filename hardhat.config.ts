@@ -1,10 +1,10 @@
 /* global task ethers */
 import { task } from "hardhat/config";
-import "@nomiclabs/hardhat-waffle";
-import "@nomiclabs/hardhat-ethers";
-import "hardhat-contract-sizer";
-import "solidity-coverage";
-// import './tasks/generateDiamondABI.js';
+import '@nomiclabs/hardhat-waffle';
+import '@nomiclabs/hardhat-ethers';
+import 'hardhat-contract-sizer';
+import 'solidity-coverage';
+//import './tasks/generateDiamondABI.js';
 import * as dotenv from "dotenv";
 import "@typechain/hardhat";
 
@@ -20,9 +20,9 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
   const accounts = await hre.ethers.getSigners();
 
   for (const account of accounts) {
-    console.log(await account.getAddress());
+    console.log(await account.getAddress())
   }
-});
+})
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
@@ -33,17 +33,17 @@ export default {
     hardhat: {
       forking: {
         url: process.env.MATIC_URL,
-        timeout: 120000,
+        timeout: 12000000
         // blockNumber: 12552123
         // blockNumber: 13024371
       },
       blockGasLimit: 20000000,
       timeout: 120000,
-      gas: "auto",
+      gas: 'auto'
     },
-    // localhost: {
-    //   timeout: 160000
-    // },
+     localhost: {
+       timeout: 16000000
+     },
     // matic: {
     //   url: process.env.MATIC_URL,
     //   // url: 'https://rpc-mainnet.maticvigil.com/',
@@ -78,36 +78,37 @@ export default {
     // }
   },
   gasReporter: {
-    currency: "USD",
+    currency: 'USD',
     gasPrice: 100,
-    enabled: false,
+    enabled: false
   },
   contractSizer: {
     alphaSort: false,
     runOnCompile: false,
-    disambiguatePaths: true,
+    disambiguatePaths: true
   },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
     compilers: [
       {
-        version: "0.8.1",
+        version: '0.8.1',
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
-          },
-        },
+            runs: 200
+          }
+        }
       },
       {
-        version: "0.7.4",
+        version: '0.7.4',
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
-          },
-        },
-      },
-    ],
-  },
-};
+            runs: 200
+          }
+        }
+      }
+    ]
+
+  }
+}

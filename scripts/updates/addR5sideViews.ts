@@ -12,10 +12,12 @@ import {
 import { sideViewDimensions9 } from "../../svgs/sideViewDimensions";
 import { SvgFacet } from "../../typechain";
 
+
 /* const hre = require("hardhat"); */
 
 async function main() {
-  const gasPrice = 100000000000;
+
+  const gasPrice = 7666197020;
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let account1Signer;
   let account1Address;
@@ -183,8 +185,9 @@ async function main() {
   // PET = 6;
   // BG = 7;
 
-  const numTraits1 = [99, 99, 99, 99, 12, 9];
-  const wearables1 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+   let numTraits1 : [number,number,number,number,number,number]=[99, 99, 99, 99, 12, 9];
+
+  let wearables1 :[number,number,number,number,number,number,number,number,number,number,number,number,number,number,number,number]= [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
   const sidePreview = await svgViewsFacet.previewSideAavegotchi(
     "2",
