@@ -6135,13 +6135,13 @@ export const sideViewDimensions9 = [
     itemId: 254,
     name: "uGOTCHI Token",
     side: "left",
-    dimensions: { x: 0, y: 0, width: 0, height: 0 },
+    dimensions: { x:25, y:33, width:2, height:12 },
   },
   {
     itemId: 254,
     name: "uGOTCHI Token",
     side: "right",
-    dimensions: { x: 37, y: 33, width: 2, height: 12 },
+    dimensions: { x:37, y:33, width:2, height:12 },
   },
   {
     itemId: 255,
@@ -6165,13 +6165,13 @@ export const sideViewDimensions9 = [
     itemId: 256,
     name: "Lil Bubble Space Suit",
     side: "left",
-    dimensions: { x: 20, y: 33, width: 24, height: 22 },
+    dimensions: { x: 20, y: 28, width: 24, height: 22 },
   },
   {
     itemId: 256,
     name: "Lil Bubble Space Suit",
     side: "right",
-    dimensions: { x: 20, y: 33, width: 24, height: 22 },
+    dimensions: { x: 20, y: 28, width: 24, height: 22 },
   },
   {
     itemId: 256,
@@ -6201,7 +6201,7 @@ export const sideViewDimensions9 = [
     itemId: 256,
     name: "Lil Bubble Space Suit",
     side: "back",
-    dimensions: { x: 15, y: 33, width: 34, height: 22 },
+    dimensions: { x: 7, y: 31, width: 34, height: 22 },
   },
   {
     itemId: 256,
@@ -6249,13 +6249,13 @@ export const sideViewDimensions9 = [
     itemId: 258,
     name: "Taoist Robe",
     side: "left",
-    dimensions: { x: 20, y: 33, width: 24, height: 23 },
+    dimensions: { x: 20, y: 31, width: 24, height: 23 },
   },
   {
     itemId: 258,
     name: "Taoist Robe",
     side: "right",
-    dimensions: { x: 20, y: 33, width: 24, height: 23 },
+    dimensions: { x: 20, y: 31, width: 24, height: 23 },
   },
   {
     itemId: 258,
@@ -6285,7 +6285,7 @@ export const sideViewDimensions9 = [
     itemId: 258,
     name: "Taoist Robe",
     side: "back",
-    dimensions: { x: 15, y: 33, width: 34, height: 23 },
+    dimensions: { x: 10, y: 31, width: 34, height: 23 },
   },
   {
     itemId: 258,
