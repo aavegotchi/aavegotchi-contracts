@@ -11,11 +11,7 @@ import {
 
 import { sideViewDimensions9 } from "../../svgs/sideViewDimensions";
 import { SvgFacet } from "../../typechain";
-import {
-  updateSvgs,
-  uploadOrUpdateSvg,
-  uploadSvgs,
-} from "../svgHelperFunctions";
+import { uploadOrUpdateSvg } from "../svgHelperFunctions";
 import { Signer } from "@ethersproject/abstract-signer";
 
 /* const hre = require("hardhat"); */
@@ -23,38 +19,22 @@ import { Signer } from "@ethersproject/abstract-signer";
 async function main() {
   const gasPrice = 7666197020;
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-  let account1Signer = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
-  let account1Address;
-  let signer;
+  let itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+  let signer: Signer;
 
-  /*
-  let owner = await (
-    await ethers.getContractAt("OwnershipFacet", diamondAddress)
-  ).owner();
-  */
   const testing = ["hardhat", "localhost"].includes(network.name);
-
-  // const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 
   if (testing) {
     await network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [account1Signer],
+      params: [itemManager],
     });
-    signer = await ethers.getSigner(account1Signer);
+    signer = await ethers.getSigner(itemManager);
   } else if (network.name === "matic") {
     const accounts = await ethers.getSigners();
-
     signer = accounts[0]; //new LedgerSigner(ethers.provider);
   } else {
     throw Error("Incorrect network selected");
-  }
-
-  let itemSigner: Signer;
-  if (testing) {
-    itemSigner = signer;
-  } else {
-    itemSigner = signer;
   }
 
   console.log("Updating Wearables");
@@ -75,12 +55,12 @@ async function main() {
     const right = wearablesRightSvgs[itemId];
     const back = wearablesBackSvgs[itemId];
     await uploadOrUpdateSvg(left, "wearables-left", itemId, svgFacet, ethers);
-
     await uploadOrUpdateSvg(right, "wearables-right", itemId, svgFacet, ethers);
     await uploadOrUpdateSvg(back, "wearables-back", itemId, svgFacet, ethers);
   }
 
   //sleeves
+  console.log("Uploading sleeves");
   const sleeveIds = [36, 37, 38, 39, 40];
 
   for (var i = 0; i < sleeveIds.length; i++) {
@@ -113,7 +93,7 @@ async function main() {
   const svgViewsFacet = await ethers.getContractAt(
     "SvgViewsFacet",
     diamondAddress,
-    itemSigner
+    signer
   );
 
   console.log("Update dimensions");
