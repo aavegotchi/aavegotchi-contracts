@@ -12,6 +12,7 @@ import {
 import { sideViewDimensions9 } from "../../svgs/sideViewDimensions";
 import { SvgFacet } from "../../typechain";
 
+
 async function main() {
 
 
@@ -58,7 +59,7 @@ async function updateSvgs(svg: any, svgType:any,svgId:number,updatesigner:any){
     diamondAddress,
     updatesigner
   )) as SvgFacet;
-  let ids:[number]=[250]
+  let ids:[number]=[38]
   let svgLength = new TextEncoder().encode(svg[svgId]).length;
     const array = [
       {
@@ -77,7 +78,7 @@ async function updateSvgs(svg: any, svgType:any,svgId:number,updatesigner:any){
   
 }
 //
-let arrFixes=[245,246,247,248,249]
+let arrFixes=[245,246,247,248,249,250,251,252,253]
 
 let itemSigner;
 if (testing) {
@@ -85,16 +86,23 @@ if (testing) {
 } else {
   itemSigner = signer;
 }
-console.log("updating sideviews")
-await updateSvgs(wearablesLeftSvgs,"wearables-left",250,itemSigner)
-await updateSvgs(wearablesRightSvgs,"wearables-right",250,itemSigner)
-await updateSvgs(wearablesBackSvgs,"wearables-back",250,itemSigner)
-console.log("updating sleeves")
+// console.log("updating sideviews")
+// await updateSvgs(wearablesLeftSvgs,"wearables-left",253,itemSigner)
+// await updateSvgs(wearablesRightSvgs,"wearables-right",253,itemSigner)
+// await updateSvgs(wearablesBackSvgs,"wearables-back",253,itemSigner)
+console.log("upload sleeves")
 
-// //fix sleeves for upOnlyShirt,Geckoshirt
+// //fix sleeves for Geckoshirt
 // await updateSvgs(wearablesLeftSleeveSvgs,"sleeves-left",36,itemSigner)
 // await updateSvgs(wearablesRightSleeveSvgs,"sleeves-right",36,itemSigner)
-await updateSvgs(wearablesRightSleeveSvgs,"sleeves-right",37,itemSigner)
+
+// //Update sleeves for Geckoshirt
+// await updateSvgs(wearablesLeftSleeveSvgs,"sleeves-left",37,itemSigner)
+// await updateSvgs(wearablesRightSleeveSvgs,"sleeves-right",37,itemSigner)
+
+// //Fix sleeves for Astronaut suit
+//  await updateSvgs(wearablesLeftSleeveSvgs,"sleeves-left",38,itemSigner)
+//  await updateSvgs(wearablesRightSleeveSvgs,"sleeves-right",38,itemSigner)
 
 console.log('updating dimensions')
 const svgViewsFacet = await ethers.getContractAt(
@@ -103,6 +111,7 @@ const svgViewsFacet = await ethers.getContractAt(
   itemSigner
 );
 
+//for all dimensions fixes
 let tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions9, {
   gasPrice: gasPrice,
  });

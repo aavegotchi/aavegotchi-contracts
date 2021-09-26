@@ -6063,13 +6063,13 @@ export const sideViewDimensions9 = [
     itemId: 253,
     name: "Aastronaut Suit",
     side: "left",
-    dimensions: { x: 20, y: 33, width: 24, height: 22 },
+    dimensions: { x: 20, y: 28, width: 24, height: 22 },
   },
   {
     itemId: 253,
     name: "Aastronaut Suit",
     side: "right",
-    dimensions: { x: 20, y: 33, width: 24, height: 22 },
+    dimensions: { x: 20, y: 28, width: 24, height: 22 },
   },
   {
     itemId: 253,
@@ -6099,7 +6099,7 @@ export const sideViewDimensions9 = [
     itemId: 253,
     name: "Aastronaut Suit",
     side: "back",
-    dimensions: { x: 15, y: 33, width: 34, height: 22 },
+    dimensions: { x: 7, y: 31, width: 34, height: 22 },
   },
   {
     itemId: 253,
