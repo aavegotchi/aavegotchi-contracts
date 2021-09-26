@@ -5919,7 +5919,7 @@ export const sideViewDimensions9 = [
     itemId: 248,
     name: "Up Only Shirt",
     side: "back",
-    dimensions: { x: 10, y: 35, width: 34, height: 20 },
+    dimensions: { x: 12, y: 32, width: 33, height: 20 },
   },
   {
     itemId: 248,
@@ -5997,7 +5997,7 @@ export const sideViewDimensions9 = [
     itemId: 250,
     name: "CoinGecko Tee",
     side: "back",
-    dimensions: { x: 15, y: 33, width: 34, height: 20 },
+    dimensions: { x: 12, y: 32, width: 34, height: 20 },
   },
   {
     itemId: 250,
