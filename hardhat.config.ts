@@ -12,6 +12,7 @@ dotenv.config({ path: __dirname + "/.env" });
 
 //  require("./tasks/verifyFacet.js");
 require("./tasks/deployUpgrade.ts");
+require("./tasks/addWearableSets.ts");
 // require("./tasks/addItemTypes.ts");
 
 // You have to export an object to set up your config

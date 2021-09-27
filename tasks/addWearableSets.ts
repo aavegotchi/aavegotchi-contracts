@@ -8,6 +8,7 @@ import { BigNumberish } from "@ethersproject/bignumber";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 export interface WearableSet {
+  setId?: number | undefined;
   name: string;
   wearableIds: BigNumberish[];
   traitsBonuses: [
@@ -49,10 +50,12 @@ task("addWearableSets", "Uploads Wearable Sets to the Aavegotchi Diamond")
       const diamondAddress: string = taskArgs.diamondAddress;
       const itemManager = taskArgs.itemManager;
 
-      const { wearableSets } = require(`../data/wearableSets/${itemFile}.ts`);
+      const { sets } = require(`../data/wearableSets/${itemFile}.ts`);
+
+      console.log("sets:", sets);
 
       //Ensure no names have empty strings at the end
-      const finalWearableSets: WearableSet[] = trimSetNames(wearableSets);
+      const finalWearableSets: WearableSet[] = trimSetNames(sets);
 
       console.log("wearable sets:", finalWearableSets);
 
