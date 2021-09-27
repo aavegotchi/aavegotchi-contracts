@@ -1,5 +1,9 @@
+import { Signer } from "@ethersproject/abstract-signer";
 import { BigNumberish } from "@ethersproject/bignumber";
 import { BytesLike } from "@ethersproject/bytes";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { SvgFacet } from "../typechain";
+import { gasPrice } from "./helperFunctions";
 
 const fs = require("fs");
 import { SleeveObject } from "./itemTypeHelpers";
@@ -131,4 +135,103 @@ export function updateSvgsPayload(
 
 export function svgTypeToBytes(svgType: string, ethers: any): BytesLike {
   return ethers.utils.formatBytes32String(svgType);
+}
+
+export async function uploadSvgs(
+  svgFacet: SvgFacet,
+  svgs: string[],
+  svgType: string,
+  ethers: any
+) {
+  let svgItemsStart = 0;
+  let svgItemsEnd = 0;
+  while (true) {
+    let itemsSize = 0;
+    while (true) {
+      if (svgItemsEnd === svgs.length) {
+        break;
+      }
+      itemsSize += svgs[svgItemsEnd].length;
+      if (itemsSize > 24576) {
+        break;
+      }
+      svgItemsEnd++;
+    }
+    const { svg, svgTypesAndSizes } = setupSvg(
+      svgType,
+      svgs.slice(svgItemsStart, svgItemsEnd),
+      ethers
+    );
+
+    //this might be incorrect
+    // printSizeInfo(svgType, svgTypesAndSizes[0].sizes);
+
+    let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, {
+      gasPrice: gasPrice,
+    });
+    let receipt = await tx.wait();
+    if (!receipt.status) {
+      throw Error(`Error:: ${tx.hash}`);
+    }
+    // console.log("tx:", tx.hash);
+    // console.log(svgItemsEnd, svg.length);
+    if (svgItemsEnd === svgs.length) {
+      break;
+    }
+    svgItemsStart = svgItemsEnd;
+  }
+}
+
+export async function updateSvgs(
+  svgs: string[],
+  svgType: string,
+  svgIds: number[],
+  svgFacet: SvgFacet,
+  ethers: any
+) {
+  for (let index = 0; index < svgIds.length; index++) {
+    const svgId = svgIds[index];
+    const svg = svgs[index];
+    let svgLength = new TextEncoder().encode(svg).length;
+    const array = [
+      {
+        svgType: svgTypeToBytes(svgType, ethers),
+        ids: [svgId],
+        sizes: [svgLength],
+      },
+    ];
+
+    let tx = await svgFacet.updateSvg(svg, array, {
+      gasPrice: gasPrice,
+    });
+    // console.log("tx hash:", tx.hash);
+    let receipt = await tx.wait();
+    if (!receipt.status) {
+      throw Error(`Error:: ${tx.hash}`);
+    }
+  }
+}
+
+export async function uploadOrUpdateSvg(
+  svg: string | number,
+  svgType: string,
+  svgId: number,
+  svgFacet: SvgFacet,
+  ethers: any
+) {
+  if (typeof svg === "number") svg = "";
+
+  let exists = false;
+  try {
+    await svgFacet.getSvg(svgTypeToBytes(svgType, ethers), svgId);
+    exists = true;
+  } catch (error) {}
+
+  if (exists) {
+    await updateSvgs([svg], svgType, [svgId], svgFacet, ethers);
+    console.log(`Svg ${svgType} #${svgId} exists, updating`);
+  } else {
+    console.log(`Svg ${svgType} #${svgId} does not exist, uploading`);
+    await uploadSvgs(svgFacet, [svg], svgType, ethers);
+  }
 }
