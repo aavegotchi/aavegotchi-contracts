@@ -19,102 +19,11 @@ import {
   setupSvg,
   printSizeInfo,
   svgTypeToBytes,
+  uploadSvgs,
+  updateSvgs,
 } from "../scripts/svgHelperFunctions";
 import { gasPrice } from "../scripts/helperFunctions";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-
-async function uploadSvgs(
-  signer: Signer,
-  diamondAddress: string,
-  svgs: string[],
-  svgType: string,
-  ethers: any
-) {
-  let svgFacet = (await ethers.getContractAt(
-    "SvgFacet",
-    diamondAddress,
-    signer
-  )) as SvgFacet;
-
-  console.log("Uploading ", svgs.length, " svgs");
-
-  console.log("Number of svg:" + svgs.length);
-  let svgItemsStart = 0;
-  let svgItemsEnd = 0;
-  while (true) {
-    let itemsSize = 0;
-    while (true) {
-      if (svgItemsEnd === svgs.length) {
-        break;
-      }
-      itemsSize += svgs[svgItemsEnd].length;
-      if (itemsSize > 24576) {
-        break;
-      }
-      svgItemsEnd++;
-    }
-    const { svg, svgTypesAndSizes } = setupSvg(
-      svgType,
-      svgs.slice(svgItemsStart, svgItemsEnd),
-      ethers
-    );
-    console.log(`Uploading ${svgItemsStart} to ${svgItemsEnd} wearable SVGs`);
-
-    //this might be incorrect
-    printSizeInfo(svgType, svgTypesAndSizes[0].sizes);
-
-    console.log("svg types and sizes:", svgTypesAndSizes);
-
-    let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, {
-      gasPrice: gasPrice,
-    });
-    let receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`);
-    }
-    console.log("tx:", tx.hash);
-    console.log(svgItemsEnd, svg.length);
-    if (svgItemsEnd === svgs.length) {
-      break;
-    }
-    svgItemsStart = svgItemsEnd;
-  }
-}
-
-async function updateSvgs(
-  svgs: string[],
-  svgType: string,
-  svgIds: number[],
-  svgFacet: SvgFacet,
-  hre: HardhatRuntimeEnvironment
-) {
-  console.log("svgs:", svgs);
-  console.log("ids:", svgIds);
-
-  for (let index = 0; index < svgIds.length; index++) {
-    const svgId = svgIds[index];
-    const svg = svgs[index];
-    let svgLength = new TextEncoder().encode(svg).length;
-    const array = [
-      {
-        svgType: svgTypeToBytes(svgType, hre.ethers),
-        ids: [svgId],
-        sizes: [svgLength],
-      },
-    ];
-
-    console.log(`Update: ${svgType}: ${svgId}`);
-
-    let tx = await svgFacet.updateSvg(svg, array, {
-      gasPrice: gasPrice,
-    });
-    console.log("tx hash:", tx.hash);
-    let receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`);
-    }
-  }
-}
 
 export interface AddItemTypesTaskArgs {
   itemManager: string;
@@ -260,7 +169,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
         await updateSvgs(
           sleeveSvgsArray.map((value) => value.svg),
           "sleeves",
-          sleeveSvgsArray.map((value, index) => Number(sleeveStartId) + index),
+          sleeveSvgsArray.map((_, index) => Number(sleeveStartId) + index),
           svgFacet,
           hre
         );
