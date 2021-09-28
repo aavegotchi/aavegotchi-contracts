@@ -1,5 +1,3 @@
-/* global task ethers */
-import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-contract-sizer";
@@ -10,7 +8,7 @@ import "@typechain/hardhat";
 
 dotenv.config({ path: __dirname + "/.env" });
 
-//  require("./tasks/verifyFacet.js");
+require("./tasks/verifyFacet.ts");
 require("./tasks/deployUpgrade.ts");
 require("./tasks/addWearableSets.ts");
 // require("./tasks/addItemTypes.ts");
