@@ -12,6 +12,11 @@ contract EscrowFacet is Modifiers {
     event Erc20Deposited(uint256 indexed _tokenId, address indexed _erc20Contract, address indexed _from, address _to, uint256 _depositAmount);
     event TransferEscrow(uint256 indexed _tokenId, address indexed _erc20Contract, address _from, address indexed _to, uint256 _transferAmount);
 
+    ///@notice Allow the deposit of an ERC20 token to the escrow contract of a claimed aavegotchi
+    ///@dev Will throw if token being deposited is same as collateral token for the aavegotchi
+    ///@param _tokenId The identifier of the NFT receiving the ERC20 token
+    ///@param _erc20Contract The contract address of the ERC20 token to be deposited
+    ///@param _value The amount of ERC20 tokens to deposit
     function depositERC20(
         uint256 _tokenId,
         address _erc20Contract,
@@ -27,6 +32,11 @@ contract EscrowFacet is Modifiers {
         LibERC20.transferFrom(_erc20Contract, LibMeta.msgSender(), escrow, _value);
     }
 
+    ///@notice Allow the deposit of multiple ERC20 tokens to the escrow contract of a multiple claimed aavegotchis
+    ///@dev Will throw if one of the tokens being deposited is same as collateral token for the corresponding aavegotchi
+    ///@param _tokenIds An array containing the identifiers of the NFTs receiving the ERC20 tokens
+    ///@param _erc20Contracts An array containing the contract addresses of the ERC20 tokens to be deposited
+    ///@param _values An array containing the amounts of ERC20 tokens to deposit
     function batchDepositERC20(
         uint256[] calldata _tokenIds,
         address[] calldata _erc20Contracts,
@@ -43,6 +53,10 @@ contract EscrowFacet is Modifiers {
         }
     }
 
+    ///@notice Allow the deposit of GHST into the escrow of multiple aavegotchis
+    ///@param _tokenIds An array containing the identifiers of the NFTs receiving GHST
+    ///@param _values An array containing the amounts of ERC20 tokens to deposit into each aavegotchi
+
     function batchDepositGHST(uint256[] calldata _tokenIds, uint256[] calldata _values) external {
         require(_tokenIds.length == _values.length, "EscrowFacet: TokenIDs and Values length must match");
 
@@ -57,6 +71,10 @@ contract EscrowFacet is Modifiers {
         }
     }
 
+    ///@notice Query the balance of any ERC20 token being hekd in the escrow of an aavegotchi
+    ///@param _tokenId Identifier of NFT to query
+    ///@param _erc20Contract Contract address of ERC20 token to query
+    ///@return The balance of the escrow contract in `_erc20Contract` tokens
     function escrowBalance(uint256 _tokenId, address _erc20Contract) external view returns (uint256) {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "EscrowFacet: Does not have an escrow");
@@ -66,6 +84,12 @@ contract EscrowFacet is Modifiers {
         return balance;
     }
 
+    ///@notice Allow the owner of the aavegotchi to transfer out any ERC20 token in the escrow to an external address
+    ///@dev Will throw if there is an attempt to transfer out the collateral ERC20 token
+    ///@param _tokenId Identifier of NFT holding the ERC20 token
+    ///@param _erc20Contract Contract address of ERC20 token to transfer out
+    ///@param _recipient Address of the receiver
+    ///@param _transferAmount Amount of ERC20 tokens to transfer out
     function transferEscrow(
         uint256 _tokenId,
         address _erc20Contract,

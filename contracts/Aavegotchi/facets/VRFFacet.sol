@@ -189,6 +189,11 @@ contract VrfFacet is Modifiers {
         emit VrfRandomNumber(tokenId, _randomNumber, block.timestamp);
     }
 
+    ///@notice Allow the aavegotchi diamond owner to change the vrf details
+    //@param _newFee New VRF fee (in LINK)
+    //@param _keyHash New keyhash
+    //@param _vrfCoordinator The new vrf coordinator address
+    //@param _link New LINK token contract address
     function changeVrf(
         uint256 _newFee,
         bytes32 _keyHash,

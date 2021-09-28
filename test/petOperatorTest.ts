@@ -58,7 +58,12 @@ describe("Testing Pet Operator Upgrade", async function () {
   });
 
   it("Transfer Aavegotchi", async function () {
-    aavegotchiFacet = await impersonate(firstOwner, aavegotchiFacet);
+    aavegotchiFacet = await impersonate(
+      firstOwner,
+      aavegotchiFacet,
+      ethers,
+      network
+    );
 
     expect(firstOwner).to.not.equal(secondOwner);
     const tx = await aavegotchiFacet.transferFrom(
@@ -76,7 +81,12 @@ describe("Testing Pet Operator Upgrade", async function () {
   });
 
   it("Owner should set Pet Operator", async function () {
-    aavegotchiFacet = await impersonate(secondOwner, aavegotchiFacet);
+    aavegotchiFacet = await impersonate(
+      secondOwner,
+      aavegotchiFacet,
+      ethers,
+      network
+    );
 
     const tx = await aavegotchiFacet.setPetOperatorForAll(petOperator, true);
 
@@ -94,7 +104,12 @@ describe("Testing Pet Operator Upgrade", async function () {
   });
 
   it("Address without permission does not have approval ", async function () {
-    aavegotchiFacet = await impersonate(secondOwner, aavegotchiFacet);
+    aavegotchiFacet = await impersonate(
+      secondOwner,
+      aavegotchiFacet,
+      ethers,
+      network
+    );
 
     const tx = await aavegotchiFacet.transferFrom(
       secondOwner,
@@ -115,14 +130,24 @@ describe("Testing Pet Operator Upgrade", async function () {
   });
 
   it("Can't pet Aavegotchis not owned by you", async function () {
-    aavegotchiFacet = await impersonate(thirdOwner, aavegotchiFacet);
+    aavegotchiFacet = await impersonate(
+      thirdOwner,
+      aavegotchiFacet,
+      ethers,
+      network
+    );
     await expect(aavegotchiGameFacet.interact([tokenIdOne])).to.be.revertedWith(
       "AavegotchiGameFacet: Not owner of token or approved"
     );
   });
 
   it("Bridged gotchis can be pet by anyone", async function () {
-    aavegotchiFacet = await impersonate(thirdOwner, aavegotchiFacet);
+    aavegotchiFacet = await impersonate(
+      thirdOwner,
+      aavegotchiFacet,
+      ethers,
+      network
+    );
 
     let tx = await aavegotchiFacet.transferFrom(
       thirdOwner,
@@ -135,7 +160,12 @@ describe("Testing Pet Operator Upgrade", async function () {
       throw Error(`Transaction failed: ${tx.hash}`);
     }
 
-    aavegotchiGameFacet = await impersonate(secondOwner, aavegotchiGameFacet);
+    aavegotchiGameFacet = await impersonate(
+      secondOwner,
+      aavegotchiGameFacet,
+      ethers,
+      network
+    );
     tx = await aavegotchiGameFacet.interact([tokenIdTwo]);
     await tx.wait();
   });

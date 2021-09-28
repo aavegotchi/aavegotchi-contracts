@@ -31,14 +31,23 @@ contract DAOFacet is Modifiers {
    |             Read Functions         |
    |__________________________________*/
 
+    ///@notice Query if an address is a game manager
+    ///@param _manager Address to query
+    ///@return True if `_manager` is a game manager,False otherwise
     function isGameManager(address _manager) external view returns (bool) {
         return s.gameManagers[_manager].limit != 0;
     }
 
+    ///@notice Query the balance of a game manager
+    ///@param _manager Address to query
+    ///@return Balance of game manager `_manager`
     function gameManagerBalance(address _manager) external view returns (uint256) {
         return s.gameManagers[_manager].balance;
     }
 
+    ///@notice Query the refresh time of a game manager
+    ///@param _manager Address to query
+    ///@return Refresh time of game manager `_manager`
     function gameManagerRefreshTime(address _manager) external view returns (uint256) {
         return s.gameManagers[_manager].refreshTime;
     }
@@ -47,6 +56,9 @@ contract DAOFacet is Modifiers {
    |             Write Functions        |
    |__________________________________*/
 
+    ///@notice Allow the Diamond owner or DAO to set a new Dao address and Treasury address
+    ///@param _newDao New DAO address
+    ///@param _newDaoTreasury New treasury address
     function setDao(address _newDao, address _newDaoTreasury) external onlyDaoOrOwner {
         emit DaoTransferred(s.dao, _newDao);
         emit DaoTreasuryTransferred(s.daoTreasury, _newDaoTreasury);
@@ -54,6 +66,10 @@ contract DAOFacet is Modifiers {
         s.daoTreasury = _newDaoTreasury;
     }
 
+    ///@notice Allow an item manager to add new collateral types to a haunt
+    ///@dev If a certain collateral exists already, it will be overwritten
+    ///@param _hauntId Identifier for haunt to add the collaterals to
+    ///@param _collateralTypes An array of structs where each struct contains details about a particular collateral
     function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) public onlyItemManager {
         for (uint256 i; i < _collateralTypes.length; i++) {
             address newCollateralType = _collateralTypes[i].collateralType;
@@ -88,6 +104,8 @@ contract DAOFacet is Modifiers {
         }
     }
 
+    ///@notice Allow the Diamond owner or DAO to add item managers
+    ///@param _newItemManagers An array containing the addresses that need to be added as item managers
     function addItemManagers(address[] calldata _newItemManagers) external onlyDaoOrOwner {
         for (uint256 index = 0; index < _newItemManagers.length; index++) {
             address newItemManager = _newItemManagers[index];
@@ -96,6 +114,9 @@ contract DAOFacet is Modifiers {
         }
     }
 
+    ///@notice Allow the Diamond owner or DAO to remove item managers
+    ///@dev Will throw if one of the addresses in `_itemManagers` is not an item manager
+    ///@param _itemManagers An array containing the addresses that need to be removed from existing item managers
     function removeItemManagers(address[] calldata _itemManagers) external onlyDaoOrOwner {
         for (uint256 index = 0; index < _itemManagers.length; index++) {
             address itemManager = _itemManagers[index];
@@ -105,11 +126,18 @@ contract DAOFacet is Modifiers {
         }
     }
 
+    ///@notice Allow the Diamond owner or DAO to update the collateral modifiers of an existing collateral
+    ///@param _collateralType The address of the existing collateral to update
+    ///@param _modifiers An array containing the new numeric traits modifiers which will be applied to collateral `_collateralType`
     function updateCollateralModifiers(address _collateralType, int16[NUMERIC_TRAITS_NUM] calldata _modifiers) external onlyDaoOrOwner {
         emit UpdateCollateralModifiers(s.collateralTypeInfo[_collateralType].modifiers, _modifiers);
         s.collateralTypeInfo[_collateralType].modifiers = _modifiers;
     }
 
+    ///@notice Allow an item manager to increase the max quantity of an item
+    ///@dev Will throw if the new maxquantity is less than the existing quantity
+    ///@param _itemIds An array containing the identifiers of items whose quantites are to be increased
+    ///@param _maxQuantities An array containing the new max quantity of each item
     function updateItemTypeMaxQuantity(uint256[] calldata _itemIds, uint256[] calldata _maxQuantities) external onlyItemManager {
         require(_itemIds.length == _maxQuantities.length, "DAOFacet: _itemIds length not the same as _newQuantities length");
         for (uint256 i; i < _itemIds.length; i++) {
@@ -121,6 +149,11 @@ contract DAOFacet is Modifiers {
         emit ItemTypeMaxQuantity(_itemIds, _maxQuantities);
     }
 
+    ///@notice Allow the Diamond owner or DAO to create a new Haunt
+    ///@dev Will throw if the previous haunt is not full yet
+    ///@param _hauntMaxSize The maximum number of portals in the new haunt
+    ///@param _portalPrice The base price of portals in the new haunt(in $GHST)
+    ///@param _bodyColor The universal body color applied to NFTs in the new haunt
     function createHaunt(
         uint24 _hauntMaxSize,
         uint96 _portalPrice,
@@ -151,6 +184,8 @@ contract DAOFacet is Modifiers {
     }
 
     //May overload the block gas limit but worth trying
+    ///@notice allow an item manager to create a new Haunt, also uploagding the collateral types,collateral svgs,eyeshape types and eyeshape svgs all in one transaction
+    ///@param _payload A struct containing all details needed to be uploaded for a new Haunt
     function createHauntWithPayload(CreateHauntPayload calldata _payload) external onlyItemManager returns (uint256 hauntId_) {
         uint256 currentHauntId = s.currentHauntId;
         require(
@@ -176,6 +211,11 @@ contract DAOFacet is Modifiers {
         emit CreateHaunt(hauntId_, _payload._hauntMaxSize, _payload._portalPrice, _payload._bodyColor);
     }
 
+    ///@notice Allow an item manager to mint new ERC1155 items
+    ///@dev Will throw if a particular item current supply has reached its maximum supply
+    ///@param _to The address to mint the items to
+    ///@param _itemIds An array containing the identifiers of the items to mint
+    ///@param _quantities An array containing the number of items to mint
     function mintItems(
         address _to,
         uint256[] calldata _itemIds,
@@ -200,6 +240,10 @@ contract DAOFacet is Modifiers {
         LibERC1155.onERC1155BatchReceived(sender, address(0), _to, _itemIds, _quantities, "");
     }
 
+    ///@notice Allow the DAO, a game manager or the aavegotchi diamond owner to grant XP(experience points) to multiple aavegotchis
+    ///@dev recipients must be claimed aavegotchis
+    ///@param _tokenIds The identifiers of the aavegotchis to grant XP to
+    ///@param _xpValues The amount XP to grant each aavegotchi
     function grantExperience(uint256[] calldata _tokenIds, uint256[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {
         require(_tokenIds.length == _xpValues.length, "DAOFacet: IDs must match XP array length");
         GameManager storage gameManager = s.gameManagers[LibMeta.msgSender()];
@@ -222,10 +266,16 @@ contract DAOFacet is Modifiers {
         emit GrantExperience(_tokenIds, _xpValues);
     }
 
+    ///@notice Allow an item manager to add item types
+    ///@param _itemTypes An array of structs where each struct contains details about each item to be added
     function addItemTypes(ItemType[] memory _itemTypes) external onlyItemManager {
         insertItemTypes(_itemTypes);
     }
 
+    ///@notice Allow an item manager to add item types and their svgs
+    ///@param _itemTypes An array of structs where each struct contains details about each item to be added
+    ///@param _svg The svg to be added
+    ///@param _typesAndSizes An array of structs, each struct containing details about the item types and sizes
     function addItemTypesAndSvgs(
         ItemType[] memory _itemTypes,
         string calldata _svg,
@@ -246,6 +296,9 @@ contract DAOFacet is Modifiers {
         }
     }
 
+    ///@notice Allow an item manager to add a wearable set
+    ///@param _wearableSets An array of structs, each struct containing the details about each wearableset to be added
+
     function addWearableSets(WearableSet[] memory _wearableSets) external onlyItemManager {
         for (uint256 i; i < _wearableSets.length; i++) {
             s.wearableSets.push(_wearableSets[i]);
@@ -253,6 +306,9 @@ contract DAOFacet is Modifiers {
         }
     }
 
+    ///@notice Allow an item manager to update existing wearablesets
+    ///@param _setIds An array containing the identifiers of the wearablesets to be updated
+    ///@param _wearableSets An array oof structs,each struct representing the updated wearableset details
     function updateWearableSets(uint256[] calldata _setIds, WearableSet[] calldata _wearableSets) external onlyItemManager {
         require(_setIds.length == _wearableSets.length, "_setIds not same length as _wearableSets");
         for (uint256 i; i < _setIds.length; i++) {
@@ -261,6 +317,9 @@ contract DAOFacet is Modifiers {
         }
     }
 
+    ///@notice Allow the DAO or the aavegotchi diamond owner to add new game managers and  their corresponding limits
+    ///@param _newGameManagers An array containing the addresses to be added as game managers
+    ///@param _limits An array containing the corresponding limits applied to ech address in `_newGameManagers`
     function addGameManagers(address[] calldata _newGameManagers, uint256[] calldata _limits) external onlyDaoOrOwner {
         require(_newGameManagers.length == _limits.length, "DAOFacet: New Game Managers and Limits should have same length");
         for (uint256 index = 0; index < _newGameManagers.length; index++) {
@@ -272,6 +331,9 @@ contract DAOFacet is Modifiers {
         }
     }
 
+    ///@notice Allow the DAO or the aavegotchi diamond owner to remove existing  game managers
+    ///@dev It also resets the limit of each removed game manager to 0
+    ///@param _gameManagers An array containing the addresses to be removed from existing game managers
     function removeGameManagers(address[] calldata _gameManagers) external onlyDaoOrOwner {
         for (uint256 index = 0; index < _gameManagers.length; index++) {
             GameManager storage gameManager = s.gameManagers[_gameManagers[index]];
@@ -281,12 +343,20 @@ contract DAOFacet is Modifiers {
         }
     }
 
-    function setWearableSlotPositions(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] calldata _slotPositions) external onlyDaoOrOwner {
+    ///@notice Allow the DAO or the aavegotchi diamond owner to set the wearable slot position for a particular wearable
+    ///@param _wearableId The identifier of the wearable to change its slot position
+    ///@param _slotPositions An array of booleans pointing out where `_wearableId` is now assigned to. True if assigned to a slot, False if otherwise
+    function setWearableSlotPositions(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] calldata _slotPositions) external onlyItemManager {
         require(_wearableId < s.itemTypes.length, "Error");
         s.itemTypes[_wearableId].slotPositions = _slotPositions;
         emit WearableSlotPositionsSet(_wearableId, _slotPositions);
     }
 
+    ///@notice Allow an item manager to set the trait and rarity modifiers of an item/wearable
+    ///@dev Only valid for existing wearables
+    ///@param _wearableId The identifier of the wearable to set
+    ///@param _traitModifiers An array containing the new trait modifiers to be applied to a wearable with identifier `_wearableId`
+    ///@param _rarityScoreModifier The new rarityScore modifier of a wearable with identifier `_wearableId`
     function setItemTraitModifiersAndRarityModifier(
         uint256 _wearableId,
         int8[6] calldata _traitModifiers,

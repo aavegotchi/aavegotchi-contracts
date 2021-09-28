@@ -26,7 +26,9 @@ contract ItemsFacet is Modifiers {
         uint256 balance;
     }
 
-    // Returns balance for each item that exists for an account
+    ///@notice Returns balance for each item that exists for an account
+    ///@param _account Address of the account to query
+    ///@return bals_ An array of structs,each struct containing details about each item owned
     function itemBalances(address _account) external view returns (ItemIdIO[] memory bals_) {
         uint256 count = s.ownerItems[_account].length;
         bals_ = new ItemIdIO[](count);
@@ -37,6 +39,9 @@ contract ItemsFacet is Modifiers {
         }
     }
 
+    ///@notice Returns balance for each item(and their types) that exists for an account
+    ///@param _owner Address of the account to query
+    ///@return output_ An array of structs containing details about each item owned(including the item types)
     function itemBalancesWithTypes(address _owner) external view returns (ItemTypeIO[] memory output_) {
         uint256 count = s.ownerItems[_owner].length;
         output_ = new ItemTypeIO[](count);
@@ -71,7 +76,11 @@ contract ItemsFacet is Modifiers {
         value = s.nftItemBalances[_tokenContract][_tokenId][_id];
     }
 
-    // returns the balances for all items for a token
+    ///@notice Returns the balances for all ERC1155 items for a ERC721 token
+    ///@dev Only valid for claimed aavegotchis
+    ///@param _tokenContract Contract address for the token to query
+    ///@param _tokenId Identifier of the token to query
+    ///@return bals_ An array of structs containing details about each item owned
     function itemBalancesOfToken(address _tokenContract, uint256 _tokenId) external view returns (ItemIdIO[] memory bals_) {
         uint256 count = s.nftItems[_tokenContract][_tokenId].length;
         bals_ = new ItemIdIO[](count);
@@ -82,6 +91,11 @@ contract ItemsFacet is Modifiers {
         }
     }
 
+    ///@notice Returns the balances for all ERC1155 items for a ERC721 token
+    ///@dev Only valid for claimed aavegotchis
+    ///@param _tokenContract Contract address for the token to query
+    ///@param _tokenId Identifier of the token to query
+    ///@return itemBalancesOfTokenWithTypes_ An array of structs containing details about each item owned(including the types)
     function itemBalancesOfTokenWithTypes(address _tokenContract, uint256 _tokenId)
         external
         view
@@ -106,25 +120,39 @@ contract ItemsFacet is Modifiers {
         }
     }
 
+    ///@notice Query the current wearables equipped for an NFT
+    ///@dev only valid for claimed aavegotchis
+    ///@param _tokenId Identifier of the NFT to query
+    ///@return wearableIds_ An array containing the Identifiers of the wearable items currently equipped for the NFT
     function equippedWearables(uint256 _tokenId) external view returns (uint16[EQUIPPED_WEARABLE_SLOTS] memory wearableIds_) {
         wearableIds_ = s.aavegotchis[_tokenId].equippedWearables;
     }
 
-    // Called by off chain software so not too concerned about gas costs
+    ///@notice Query all available wearable sets
+    ///@dev Called by off chain software so not too concerned about gas costs
+    ///@return wearableSets_ Am array of structs, each struct containing details about a wearable set
     function getWearableSets() external view returns (WearableSet[] memory wearableSets_) {
         wearableSets_ = s.wearableSets;
     }
 
+    ///@notice Query a particular wearable set
+    ///@param _index Index of the set to query
+    ///@return wearableSet_ A struct containing details about a wearable set with index `_index`
     function getWearableSet(uint256 _index) public view returns (WearableSet memory wearableSet_) {
         uint256 length = s.wearableSets.length;
         require(_index < length, "ItemsFacet: Wearable set does not exist");
         wearableSet_ = s.wearableSets[_index];
     }
 
+    ///@notice Query how many wearable sets are available
+    ///@return The total number of wearable sets available
     function totalWearableSets() external view returns (uint256) {
         return s.wearableSets.length;
     }
 
+    ///@notice Query the wearable set identiiers that a wearable belongs to
+    ///@param _wearableIds An array containing the wearable identifiers to query
+    ///@return wearableSetIds_ An array containing the wearable set identifiers for each `_wearableIds`
     function findWearableSets(uint256[] calldata _wearableIds) external view returns (uint256[] memory wearableSetIds_) {
         unchecked {
             uint256 length = s.wearableSets.length;
@@ -158,11 +186,17 @@ contract ItemsFacet is Modifiers {
         }
     }
 
+    ///@notice Query the item type of a particular item
+    ///@param _itemId Item to query
+    ///@return itemType_ A struct containing details about the item type of an item with identifier `_itemId`
     function getItemType(uint256 _itemId) public view returns (ItemType memory itemType_) {
         require(_itemId < s.itemTypes.length, "ItemsFacet: Item type doesn't exist");
         itemType_ = s.itemTypes[_itemId];
     }
 
+    ///@notice Query the item type of multiple  items
+    ///@param _itemIds An array containing the identifiers of items to query
+    ///@return itemTypes_ An array of structs,each struct containing details about the item type of the corresponding item
     function getItemTypes(uint256[] calldata _itemIds) external view returns (ItemType[] memory itemTypes_) {
         if (_itemIds.length == 0) {
             itemTypes_ = s.itemTypes;
@@ -199,6 +233,12 @@ contract ItemsFacet is Modifiers {
    |             Write Functions        |
    |__________________________________*/
 
+    ///@notice Allow the owner of a claimed aavegotchi to equip/unequip wearables to his aavegotchi
+    ///@dev Only valid for claimed aavegotchis
+    ///@dev A zero value will unequip that slot and a non-zero value will equip that slot with the wearable whose identifier is provided
+    ///@dev A wearable cannot be equipped in the wrong slot
+    ///@param _tokenId The identifier of the aavegotchi to make changes to
+    ///@param _wearablesToEquip An array containing the identifiers of the wearables to equip
     function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip) external onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
@@ -285,6 +325,12 @@ contract ItemsFacet is Modifiers {
         LibAavegotchi.interact(_tokenId);
     }
 
+    ///@notice Allow the owner of an NFT to use multiple consumable items for his aavegotchi
+    ///@dev Only valid for claimed aavegotchis
+    ///@dev Consumables can be used to boost kinship/XP of an aavegotchi
+    ///@param _tokenId Identtifier of aavegotchi to use the consumables on
+    ///@param _itemIds An array containing the identifiers of the items/consumables to use
+    ///@param _quantities An array containing the quantity of each consumable to use
     function useConsumables(
         uint256 _tokenId,
         uint256[] calldata _itemIds,

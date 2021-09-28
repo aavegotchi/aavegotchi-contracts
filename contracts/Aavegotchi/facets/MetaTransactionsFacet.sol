@@ -39,6 +39,9 @@ contract MetaTransactionsFacet {
         return keccak256(abi.encode(META_TRANSACTION_TYPEHASH, metaTx.nonce, metaTx.from, keccak256(metaTx.functionSignature)));
     }
 
+    ///@notice Query the latest nonce of an address
+    ///@param user Address to query
+    ///@return nonce_ The latest nonce for the address
     function getNonce(address user) external view returns (uint256 nonce_) {
         nonce_ = s.metaNonces[user];
     }
