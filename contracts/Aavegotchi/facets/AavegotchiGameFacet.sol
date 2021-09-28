@@ -42,7 +42,7 @@ contract AavegotchiGameFacet is Modifiers {
 
     ///@notice Check the latest Haunt identifier and details
     ///@return hauntId_ The latest haunt identifier
-    ///@return haunt_ A struct containing the details about the latest hauntnumeric traits `_numerictraits`
+    ///@return haunt_ A struct containing the details about the latest haunt`
 
     function currentHaunt() external view returns (uint256 hauntId_, Haunt memory haunt_) {
         hauntId_ = s.currentHauntId;
