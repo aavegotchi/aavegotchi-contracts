@@ -78,7 +78,7 @@ contract ItemsTransferFacet is Modifiers {
         LibERC1155.onERC1155BatchReceived(sender, _from, _to, _ids, _values, _data);
     }
 
-    /// @notice Transfer tokens from owner address to a token
+    /// @notice Transfer token from owner address to a token
     /// @param _from The owner address
     /// @param _id ID of the token
     /// @param _toContract The ERC721 contract of the receiving token
@@ -101,6 +101,12 @@ contract ItemsTransferFacet is Modifiers {
         emit LibERC1155.TransferToParent(_toContract, _toTokenId, _id, _value);
     }
 
+    /// @notice Transfer ERC1155 tokens from owner address to a set of parent ERC721 tokens
+    /// @param _from The owner address
+    /// @param _toContract The ERC721 contract of the receiving token //will be the same for all the tokenIDs
+    /// @param _toTokenIds IDs of the tokens receiving
+    ///@param _ids IDs of the tokens to transfer
+    /// @param _values The amounts of tokens to transfer
     function batchBatchTransferToParent(
         address _from,
         address _toContract,
@@ -119,6 +125,12 @@ contract ItemsTransferFacet is Modifiers {
         }
     }
 
+    /// @notice Transfer ERC1155 tokens from owner address to a parent ERC721 token
+    /// @param _from The owner address
+    /// @param _toContract The ERC721 contract of the receiving token
+    /// @param _toTokenId ID of the token receiving
+    ///@param _ids IDs of the tokens to transfer
+    /// @param _values The amounts of tokens to transfer
     function batchTransferToParent(
         address _from,
         address _toContract,
@@ -190,6 +202,12 @@ contract ItemsTransferFacet is Modifiers {
         emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, _id, _value);
     }
 
+    /// @notice Transfer tokens from a token to an address
+    /// @param _fromContract The address of the owning contract
+    /// @param _fromTokenId The owning token
+    /// @param _to The address the token is transferred to
+    /// @param _ids IDs of the tokens to be transferred out
+    ///@param _values Values of the tokens to be transferred out
     function batchTransferFromParent(
         address _fromContract,
         uint256 _fromTokenId,
@@ -215,6 +233,13 @@ contract ItemsTransferFacet is Modifiers {
         emit LibERC1155.TransferBatch(sender, _fromContract, _to, _ids, _values);
     }
 
+    /// @notice Transfer item from an ERC721 parent token  to another ERC721 parent token
+    /// @param _fromContract The ERC721 contract of the sending token
+    /// @param _fromTokenId ID of the sending token
+    /// @param _toContract The ERC721 contract of the receiving token
+    /// @param _toTokenId The ID of the receiving token
+    /// @param _value The amount of tokens to transfer
+
     function transferAsChild(
         address _fromContract,
         uint256 _fromTokenId,
@@ -237,6 +262,12 @@ contract ItemsTransferFacet is Modifiers {
         emit LibERC1155.TransferToParent(_toContract, _toTokenId, _id, _value);
     }
 
+    /// @notice Transfer items from an ERC721 parent token  to another ERC721 parent token
+    /// @param _fromContract The ERC721 contract of the sending token
+    /// @param _fromTokenId ID of the sending token
+    /// @param _toContract The ERC721 contract of the receiving token
+    /// @param _ids The IDs of the tokens to send
+    /// @param _values The amounts of tokens to transfer
     function batchTransferAsChild(
         address _fromContract,
         uint256 _fromTokenId,

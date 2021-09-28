@@ -35,6 +35,10 @@ contract ShopFacet is Modifiers {
 
     event PurchaseItemsWithVouchers(address indexed _buyer, address indexed _to, uint256[] _itemIds, uint256[] _quantities);
 
+    ///@notice Allow an address to purchase a portal
+    ///@dev Only portals from haunt 1 can be purchased via the contract
+    ///@param _to Address to send the portal once purchased
+    ///@param _ghst The amount of GHST the buyer is willing to pay //calculation will be done to know how much portal he recieves based on the haunt's portal price
     function buyPortals(address _to, uint256 _ghst) external {
         uint256 currentHauntId = s.currentHauntId;
         require(currentHauntId == 1, "ShopFacet: Can only purchase from Haunt 1");
@@ -83,6 +87,10 @@ contract ShopFacet is Modifiers {
         LibAavegotchi.purchase(sender, totalPrice);
     }
 
+    ///@notice Allow an item manager to mint neew portals
+    ///@dev Will throw if the max number of portals for the current haunt has been reached
+    ///@param _to The destination of the minted portals
+    ///@param _amount the amunt of portals to mint
     function mintPortals(address _to, uint256 _amount) external onlyItemManager {
         uint256 currentHauntId = s.currentHauntId;
         Haunt storage haunt = s.haunts[currentHauntId];
@@ -105,6 +113,11 @@ contract ShopFacet is Modifiers {
         s.tokenIdCounter = tokenId;
     }
 
+    ///@notice Allow an address to purchase multiple items
+    ///@dev Buying an item typically mints it, it will throw if an item has reached its maximum quantity
+    ///@param _to Address to send the items once purchased
+    ///@param _itemIds The identifiers of the items to be purchased
+    ///@param _quantities The quantities of each item to be bought
     function purchaseItemsWithGhst(
         address _to,
         uint256[] calldata _itemIds,
@@ -131,6 +144,12 @@ contract ShopFacet is Modifiers {
         LibAavegotchi.purchase(sender, totalPrice);
         LibERC1155.onERC1155BatchReceived(sender, address(0), _to, _itemIds, _quantities, "");
     }
+
+    ///@notice Allow an address to purchase multiple items after they have been minted
+    ///@dev Only one item per transaction can be purchased from the Diamond contract
+    ///@param _to Address to send the items once purchased
+    ///@param _itemIds The identifiers of the items to be purchased
+    ///@param _quantities The quantities of each item to be bought
 
     function purchaseTransferItemsWithGhst(
         address _to,

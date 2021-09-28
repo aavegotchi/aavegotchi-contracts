@@ -11,6 +11,10 @@ import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import "hardhat/console.sol";
 
 contract SvgViewsFacet is Modifiers {
+    ///@notice Get the sideview svgs of an aavegotchi
+    ///@dev Only valid for claimed aavegotchis
+    ///@param _tokenId The identifier of the aavegotchi to query
+    ///@return ag_ An array of svgs, each one representing a certain perspective i.e front,left,right,back views respectively
     function getAavegotchiSideSvgs(uint256 _tokenId) public view returns (string[] memory ag_) {
         // 0 == front view
         // 1 == leftSide view
@@ -193,6 +197,12 @@ contract SvgViewsFacet is Modifiers {
         bytes pet;
     }
 
+    //@notice Allow the sideview preview of an aavegotchi given the haunt id,a set of traits,wearables and collateral type
+    ///@param _hauntId Haunt id to use in preview
+    ///@param _collateralType The type of collateral to use
+    ///@param _numericTraits The numeric traits to use for the aavegotchi
+    ///@param equippedWearables The set of wearables to wear for the aavegotchi
+    ///@return ag_ The final sideview svg strings being generated based on the given test parameters
     function previewSideAavegotchi(
         uint256 _hauntId,
         address _collateralType,
@@ -385,6 +395,9 @@ contract SvgViewsFacet is Modifiers {
         );
     }
 
+    ///@notice Query the sideview svg of an item
+    ///@param _itemId Identifier of the item to query
+    ///@return svg_ The sideview svg of the item`
     function getItemSvgs(uint256 _itemId) public view returns (string[] memory svg_) {
         require(_itemId < s.itemTypes.length, "ItemsFacet: _id not found for item");
         svg_ = new string[](4);
@@ -394,6 +407,9 @@ contract SvgViewsFacet is Modifiers {
         svg_[3] = prepareItemSvg(s.sideViewDimensions[_itemId]["back"], LibSvg.getSvg("wearables-back", _itemId));
     }
 
+    ///@notice Query the svg of multiple items
+    ///@param _itemIds Identifiers of the items to query
+    ///@return svgs_ The svgs of each item in `_itemIds`
     function getItemsSvgs(uint256[] calldata _itemIds) public view returns (string[][] memory svgs_) {
         svgs_ = new string[][](_itemIds.length);
         for (uint256 i; i < _itemIds.length; i++) {
@@ -407,6 +423,8 @@ contract SvgViewsFacet is Modifiers {
         Dimensions dimensions;
     }
 
+    ///@notice Allow an item manager to set the sideview dimensions of an existing item
+    ///@param _sideViewDimensions An array of structs, each struct onating details about the sideview dimensions like `itemId`,`side` amd `dimensions`
     function setSideViewDimensions(SideViewDimensionsArgs[] calldata _sideViewDimensions) external onlyItemManager {
         for (uint256 i; i < _sideViewDimensions.length; i++) {
             s.sideViewDimensions[_sideViewDimensions[i].itemId][bytes(_sideViewDimensions[i].side)] = _sideViewDimensions[i].dimensions;
