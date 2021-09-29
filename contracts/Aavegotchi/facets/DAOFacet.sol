@@ -26,6 +26,7 @@ contract DAOFacet is Modifiers {
     event ItemManagerRemoved(address indexed itemManager_);
     event WearableSlotPositionsSet(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] _slotPositions);
     event ItemModifiersSet(uint256 _wearableId, int8[6] _traitModifiers, uint8 _rarityScoreModifier);
+    event RemoveExperience(uint256[] _tokenIds, uint256[] _xpValues);
 
     /***********************************|
    |             Read Functions         |
@@ -264,6 +265,26 @@ contract DAOFacet is Modifiers {
             gameManager.balance -= xp;
         }
         emit GrantExperience(_tokenIds, _xpValues);
+    }
+
+    ///@notice Allow the DAO, a game manager or the aavegotchi diamond owner to remove XP(experience points) from multiple aavegotchis
+    ///@dev recipients must be claimed aavegotchis
+    ///@param _tokenIds The identifiers of the aavegotchis to grant XP to
+    ///@param _xpValues The amount XP to grant each aavegotchi
+    function removeExperience(uint256[] calldata _tokenIds, uint256[] calldata _xpValues) external onlyOwnerOrDaoOrGameManager {
+        require(_tokenIds.length == _xpValues.length, "DAOFacet: IDs must match XP array length");
+
+        //todo: Create new permission to only allow certain gameManagers to access this
+
+        for (uint256 i; i < _tokenIds.length; i++) {
+            uint256 tokenId = _tokenIds[i];
+            uint256 removeXp = _xpValues[i];
+
+            require(s.aavegotchis[tokenId].experience >= removeXp, "DAOFacet: Remove XP would underflow");
+
+            s.aavegotchis[tokenId].experience -= removeXp;
+        }
+        emit RemoveExperience(_tokenIds, _xpValues);
     }
 
     ///@notice Allow an item manager to add item types

@@ -22,6 +22,10 @@ interface Data {
   gotchisOwned: GotchisOwned[];
 }
 
+interface AddressCounts {
+  [key: string]: number;
+}
+
 function strDisplay(str: string) {
   return addCommas(str.toString());
 }
@@ -78,19 +82,42 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     // find duplicates:
     const duplicateAddresses: string[] = [];
     const processedAddresses: string[] = [];
+
+    const addressCounts: AddressCounts = {};
     for (const address of addresses) {
       if (processedAddresses.includes(address)) {
         duplicateAddresses.push(address);
       } else {
         processedAddresses.push(address);
       }
+
+      if (addressCounts[address])
+        addressCounts[address] = addressCounts[address] + 1;
+      else addressCounts[address] = 1;
     }
+
     if (duplicateAddresses.length > 0) {
       console.log(duplicateAddresses);
       throw Error("Duplicate addresses");
     }
 
-    console.log("duplicate:", duplicateAddresses);
+    // console.log("address countd:", addressCounts);
+
+    /*
+    let extraXpGiven = 0;
+    Object.keys(addressCounts).forEach((address) => {
+      const count = addressCounts[address];
+
+      if (count > 1) {
+        console.log(`${address} has: ${count}`);
+        extraXpGiven = extraXpGiven + (count - 1) * 10;
+      }
+    });
+
+    console.log("extra xp given:", extraXpGiven);
+    */
+
+    // console.log("duplicate:", duplicateAddresses);
 
     let totalGotchis = 0;
     let receivedTokenIds: string[] = [];
