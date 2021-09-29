@@ -6,6 +6,7 @@ import {
   ContractTransaction,
   PopulatedTransaction,
 } from "@ethersproject/contracts";
+import { gasPrice } from "../../helperFunctions";
 
 export async function sendToMultisig(
   multisigAddress: string,
@@ -26,7 +27,7 @@ export async function sendToMultisig(
     transaction.to,
     0,
     transaction.data,
-    { gasPrice: 50000000000 }
+    { gasPrice: gasPrice }
   );
   let receipt = await tx.wait();
   if (!receipt.status) {

@@ -29,6 +29,8 @@ export async function upgrade() {
     useMultisig: true,
   };
 
+  console.log("Running remove experience upgrade!");
+
   await run("deployUpgrade", args);
 }
 

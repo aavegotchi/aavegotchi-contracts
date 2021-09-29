@@ -13,7 +13,11 @@ import { Signer } from "@ethersproject/abstract-signer";
 
 import { OwnershipFacet } from "../typechain/OwnershipFacet";
 import { IDiamondCut } from "../typechain/IDiamondCut";
-import { getSelectors, getSighashes } from "../scripts/helperFunctions";
+import {
+  gasPrice,
+  getSelectors,
+  getSighashes,
+} from "../scripts/helperFunctions";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -141,7 +145,9 @@ task(
           facet.facetName
         )) as ContractFactory;
 
-        const deployedFacet: Contract = await factory.deploy();
+        const deployedFacet: Contract = await factory.deploy({
+          gasPrice: gasPrice,
+        });
         await deployedFacet.deployed();
         console.log(
           `Deployed Facet Address for ${facet.facetName}:`,

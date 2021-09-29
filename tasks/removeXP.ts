@@ -108,17 +108,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       const count = addressCounts[address];
 
       if (count > 1) {
-        const gotchisOwned = data.data.users.find(
-          (obj) => obj.id.toLowerCase() === address.toLowerCase()
-        )?.gotchisOwned;
-
-        if (gotchisOwned) {
-          gotchisOwned.forEach((gotchi) => {
-            console.log(`[[${gotchi.id}], [${(count - 1) * 10}]]`);
-          });
-        }
-
-        // console.log(`${address} has: ${count}`);
+        console.log(`${address} has: ${count}`);
         extraXpGiven = extraXpGiven + (count - 1) * 10;
       }
     });
