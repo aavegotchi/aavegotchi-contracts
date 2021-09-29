@@ -1,7 +1,7 @@
 import { run } from "hardhat";
 
 async function grantXP() {
-  await run("verifyFacet", {
+  await run("grantXP", {
     filename: "calls/raffle5",
     xpAmount: "10",
     batchSize: "500",

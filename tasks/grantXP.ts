@@ -1,6 +1,6 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { maticDiamondAddress } from "../scripts/helperFunctions";
+import { gasPrice, maticDiamondAddress } from "../scripts/helperFunctions";
 import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
@@ -10,7 +10,7 @@ import { SubgraphGotchis } from "../types";
 interface TaskArgs {
   filename: string;
   xpAmount: string;
-  maxProcess: string;
+  batchSize: string;
 }
 
 interface GotchisOwned {
@@ -49,12 +49,9 @@ task("grantXP", "Grants XP to Gotchis by addresses")
   .setAction(async (taskArgs: TaskArgs, hre: HardhatRuntimeEnvironment) => {
     const filename: string = taskArgs.filename;
     const xpAmount: number = Number(taskArgs.xpAmount);
-    const maxProcess: number = Number(taskArgs.maxProcess);
+    const batchSize: number = Number(taskArgs.batchSize);
 
-    const {
-      addresses,
-      gotchis,
-    } = require(`../../../data/airdrops/${filename}.tsx`);
+    const { addresses, gotchis } = require(`../data/airdrops/${filename}.ts`);
 
     const diamondAddress = maticDiamondAddress;
     const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119"; //await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
@@ -104,7 +101,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
         (obj) => obj.id.toLowerCase() === address.toLowerCase()
       );
       if (ownerRow) {
-        if (maxProcess < tokenIdsNum + ownerRow.gotchisOwned.length) {
+        if (batchSize < tokenIdsNum + ownerRow.gotchisOwned.length) {
           txData.push(txGroup);
           txGroup = [];
           tokenIdsNum = 0;
@@ -142,7 +139,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       const tx: ContractTransaction = await dao.grantExperience(
         tokenIds,
         Array(tokenIds.length).fill(xpAmount),
-        { gasPrice: 10000000000 }
+        { gasPrice: gasPrice }
       );
       console.log("tx:", tx.hash);
       let receipt: ContractReceipt = await tx.wait();
