@@ -5,6 +5,7 @@ import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
+import { SubgraphGotchis } from "../types";
 
 interface TaskArgs {
   filename: string;
@@ -75,7 +76,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     const dao = (
       await hre.ethers.getContractAt("DAOFacet", diamondAddress)
     ).connect(signer) as DAOFacet;
-    const data: Data[] = gotchis.data.users;
+    const data: SubgraphGotchis = gotchis;
 
     // find duplicates:
     const duplicateAddresses: string[] = [];
@@ -99,7 +100,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     let txGroup = [];
     let tokenIdsNum = 0;
     for (const address of addresses) {
-      const ownerRow = data.find(
+      const ownerRow = data.data.users.find(
         (obj) => obj.id.toLowerCase() === address.toLowerCase()
       );
       if (ownerRow) {
