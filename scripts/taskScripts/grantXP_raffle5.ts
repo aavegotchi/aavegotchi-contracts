@@ -4,7 +4,7 @@ async function grantXP() {
   await run("grantXP", {
     filename: "calls/raffle5",
     xpAmount: "10",
-    batchSize: "500",
+    batchSize: "50",
   });
 }
 

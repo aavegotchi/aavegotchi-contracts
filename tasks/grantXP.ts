@@ -77,12 +77,12 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     // find duplicates:
     const duplicateAddresses: string[] = [];
-    const processedAddresses = new Set();
+    const processedAddresses: string[] = [];
     for (const address of addresses) {
-      if (!processedAddresses.has(address)) {
-        processedAddresses.add(true);
-      } else {
+      if (processedAddresses.includes(address)) {
         duplicateAddresses.push(address);
+      } else {
+        processedAddresses.push(address);
       }
     }
     if (duplicateAddresses.length > 0) {
@@ -90,7 +90,11 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       throw Error("Duplicate addresses");
     }
 
+    console.log("duplicate:", duplicateAddresses);
+
     let totalGotchis = 0;
+    let receivedTokenIds: string[] = [];
+    let duplicatedTokenIds: string[] = [];
 
     // group the data
     const txData = [];
@@ -134,6 +138,19 @@ task("grantXP", "Grants XP to Gotchis by addresses")
         );
       }, []);
 
+      tokenIds.forEach((id) => {
+        if (receivedTokenIds.includes(id))
+          console.log(`${id} has already received XP!`);
+        duplicatedTokenIds.push(id);
+        //  throw `ID ${id} has already received XP!`;
+      });
+
+      console.log("token ids:", tokenIds);
+
+      tokenIds.forEach((id) => {
+        receivedTokenIds.push(id);
+      });
+
       console.log(`Sending ${xpAmount} XP to ${tokenIds.length} Aavegotchis `);
 
       const tx: ContractTransaction = await dao.grantExperience(
@@ -155,4 +172,6 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       console.log("Current address index:", addressIndex);
       console.log("");
     }
+
+    console.log("Final duplicated tokenIds:", duplicatedTokenIds);
   });
