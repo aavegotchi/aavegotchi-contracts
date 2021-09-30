@@ -9,6 +9,10 @@ import {
   wearablesBackSvgs,
 } from "../../svgs/wearables-sides";
 
+import {
+  wearablesSvgs,
+} from "../../svgs/wearables";
+
 import { sideViewDimensions1, sideViewDimensions8 } from "../../svgs/sideViewDimensions";
 import { SvgFacet } from "../../typechain";
 import { uploadOrUpdateSvg } from "../svgHelperFunctions";
@@ -56,6 +60,7 @@ async function main() {
     const left = wearablesLeftSvgs[itemId];
     const right = wearablesRightSvgs[itemId];
     const back = wearablesBackSvgs[itemId];
+    const front = wearablesSvgs[itemId];
 
     try {
       await uploadOrUpdateSvg(left, "wearables-left", itemId, svgFacet, ethers);
@@ -67,6 +72,7 @@ async function main() {
         ethers
       );
       await uploadOrUpdateSvg(back, "wearables-back", itemId, svgFacet, ethers);
+      await uploadOrUpdateSvg(front, "wearables", itemId, svgFacet, ethers);
     } catch (error) {
       console.log("error uploading", itemId);
     }
@@ -113,7 +119,7 @@ async function main() {
     number,number,number,number,
     number,number,number,number,
     number,number,number,number
-  ]= [0, 0, 0, 0, 69, 229, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  ]= [0, 0, 0, 0, 229, 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   const sidePreview = await svgViewsFacet.previewSideAavegotchi(
     "2",
     "0xE0b22E0037B130A9F56bBb537684E6fA18192341",
