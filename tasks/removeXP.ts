@@ -87,7 +87,7 @@ task("removeXP", "Removes XP from Gotchis")
 
     console.log(`Removing XP from ${gotchiIDs.length} gotchis`);
 
-    const tx: ContractTransaction = await dao.grantExperience(
+    const tx: ContractTransaction = await dao.removeExperience(
       gotchiIDs,
       xpAmount,
       { gasPrice: gasPrice }
