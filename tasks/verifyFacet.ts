@@ -12,11 +12,11 @@ function getCompilerVersion() {
   return "v0.8.1+commit.df193b15";
 }
 
-function verifyRequest(guid: string, apikey: string) {
+function verifyRequest(guid: string, apikey: string, apiUrl: string) {
   console.log("Fetching Verify Status...");
   // Check Status
   return axios
-    .get("https://api.polygonscan.com/api", {
+    .get(apiUrl, {
       params: {
         apikey,
         guid,
@@ -31,7 +31,7 @@ function verifyRequest(guid: string, apikey: string) {
         if (response.data.result == "Pending in queue") {
           return new Promise((resolve, reject) => {
             setTimeout(() => {
-              resolve(verifyRequest(guid, apikey));
+              resolve(verifyRequest(guid, apikey, apiUrl));
             }, 5000);
           });
         }
@@ -51,12 +51,14 @@ task(
   .addParam("contract", "Faucet contract address")
   .addParam("directory", "The directory of the facet")
   .addParam("facet", "Facet File name without extension")
+  .addParam("apiURL", "The API url")
   .setAction(async (taskArgs, { run }) => {
     const noFlatten = taskArgs.noflatten == "true";
     const apikey = taskArgs.apikey;
     const contractaddress = taskArgs.contract;
     const file = taskArgs.facet;
     const directory = taskArgs.directory;
+    const apiURL = taskArgs.apiURL;
     let contractname = file; // `contracts/Aavegotchi/facets/${file}.sol:${file}`; // file
 
     let sourceCode = null;
@@ -167,11 +169,7 @@ task(
           params.append(key, data[key]);
         });
 
-        const response = await axios.post(
-          "https://api.polygonscan.com/api",
-          params,
-          config
-        );
+        const response = await axios.post(apiURL, params, config);
         console.log("===============================");
         console.log("CONTRACT : " + address);
         if (response.data.status == 1) {
@@ -184,7 +182,7 @@ task(
         }
         const guid = response.data.result;
 
-        await verifyRequest(guid, apikey);
+        await verifyRequest(guid, apikey, apiURL);
       } catch (e) {
         console.log("CONTRACT : " + address);
         console.log("ERROR", e);
