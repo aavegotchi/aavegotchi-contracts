@@ -1,4 +1,9 @@
-export const gotchis = [
+export interface GotchiArray {
+  0: [number];
+  1: [number];
+}
+
+export const gotchis: GotchiArray[] = [
   [[6235], [10]],
   [[9280], [10]],
   [[10224], [10]],

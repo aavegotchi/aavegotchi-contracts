@@ -13,6 +13,7 @@ require("./tasks/deployUpgrade.ts");
 require("./tasks/addWearableSets.ts");
 require("./tasks/grantXP.ts");
 require("./tasks/generateDiamondABI.ts");
+require("./tasks/removeXP.ts");
 // require("./tasks/addItemTypes.ts");
 
 // You have to export an object to set up your config

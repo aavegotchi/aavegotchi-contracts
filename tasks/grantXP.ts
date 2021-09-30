@@ -114,7 +114,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
         if (gotchisOwned) {
           gotchisOwned.forEach((gotchi) => {
-            console.log(`[[${gotchi.id}], [${(count - 1) * 10}]]`);
+            console.log(`${gotchi.id},`);
           });
         }
 

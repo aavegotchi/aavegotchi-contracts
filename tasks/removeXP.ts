@@ -6,6 +6,7 @@ import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { SubgraphGotchis } from "../types";
+import { GotchiArray } from "../data/airdrops/calls/raffle5remove";
 
 interface TaskArgs {
   filename: string;
@@ -42,23 +43,16 @@ function addCommas(nStr: string) {
   return x1 + x2;
 }
 
-task("grantXP", "Grants XP to Gotchis by addresses")
+task("removeXP", "Removes XP from Gotchis")
   .addParam("filename", "File that contains the airdrop")
-  .addParam("xpAmount", "Amount of XP that each Aavegotchi should receive")
-  .addParam(
-    "batchSize",
-    "How many Aavegotchis to send at a time. Default is 500"
-  )
 
   .setAction(async (taskArgs: TaskArgs, hre: HardhatRuntimeEnvironment) => {
     const filename: string = taskArgs.filename;
-    const xpAmount: number = Number(taskArgs.xpAmount);
-    const batchSize: number = Number(taskArgs.batchSize);
 
-    const { addresses, gotchis } = require(`../data/airdrops/${filename}.ts`);
+    const { gotchis } = require(`../data/airdrops/${filename}.ts`);
 
     const diamondAddress = maticDiamondAddress;
-    const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119"; //await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
+    const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119"; //
     console.log(gameManager);
     let signer: Signer;
     const testing = ["hardhat", "localhost"].includes(hre.network.name);
@@ -77,126 +71,31 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     const dao = (
       await hre.ethers.getContractAt("DAOFacet", diamondAddress)
     ).connect(signer) as DAOFacet;
-    const data: SubgraphGotchis = gotchis;
 
-    // find duplicates:
-    const duplicateAddresses: string[] = [];
-    const processedAddresses: string[] = [];
+    let typedGotchis: GotchiArray[] = gotchis;
 
-    const addressCounts: AddressCounts = {};
-    for (const address of addresses) {
-      if (processedAddresses.includes(address)) {
-        duplicateAddresses.push(address);
-      } else {
-        processedAddresses.push(address);
-      }
+    let gotchiIDs: number[] = [];
+    let xpAmount: number[] = [];
 
-      if (addressCounts[address])
-        addressCounts[address] = addressCounts[address] + 1;
-      else addressCounts[address] = 1;
-    }
-
-    if (duplicateAddresses.length > 0) {
-      console.log(duplicateAddresses);
-      // throw Error("Duplicate addresses");
-    }
-
-    console.log("address countd:", addressCounts);
-
-    let extraXpGiven = 0;
-    Object.keys(addressCounts).forEach((address) => {
-      const count = addressCounts[address];
-
-      if (count > 1) {
-        console.log(`${address} has: ${count}`);
-        extraXpGiven = extraXpGiven + (count - 1) * 10;
-      }
+    typedGotchis.forEach((gotchi) => {
+      gotchiIDs.push(gotchi[0][0]);
+      xpAmount.push(gotchi[1][0]);
     });
 
-    console.log("extra xp given:", extraXpGiven);
+    console.log("gotchi ids:", gotchiIDs);
+    console.log("xp amount:", xpAmount);
 
-    // console.log("duplicate:", duplicateAddresses);
+    console.log(`Removing XP from ${gotchiIDs.length} gotchis`);
 
-    let totalGotchis = 0;
-    let receivedTokenIds: string[] = [];
-    let duplicatedTokenIds: string[] = [];
-
-    // group the data
-    const txData = [];
-    let txGroup = [];
-    let tokenIdsNum = 0;
-    for (const address of addresses) {
-      const ownerRow = data.data.users.find(
-        (obj) => obj.id.toLowerCase() === address.toLowerCase()
-      );
-      if (ownerRow) {
-        if (batchSize < tokenIdsNum + ownerRow.gotchisOwned.length) {
-          txData.push(txGroup);
-          txGroup = [];
-          tokenIdsNum = 0;
-        }
-        txGroup.push(ownerRow);
-        tokenIdsNum += ownerRow.gotchisOwned.length;
-        totalGotchis += ownerRow.gotchisOwned.length;
-      }
-    }
-    if (tokenIdsNum > 0) {
-      txData.push(txGroup);
-      txGroup = [];
-      tokenIdsNum = 0;
-    }
-
-    console.log(
-      `Sending ${xpAmount} XP to ${totalGotchis} Aavegotchis in ${addresses.length} addresses!`
+    const tx: ContractTransaction = await dao.grantExperience(
+      gotchiIDs,
+      xpAmount,
+      { gasPrice: gasPrice }
     );
+    console.log("tx:", tx.hash);
+    let receipt: ContractReceipt = await tx.wait();
 
-    // send transactions
-    let addressIndex = 0;
-    for (const [i, txGroup] of txData.entries()) {
-      console.log("i:", i);
-
-      const txAddresses: string[] = txGroup.map((obj) => obj.id);
-      addressIndex += txAddresses.length;
-      const tokenIds: string[] = txGroup.reduce((acc: string[], obj: Data) => {
-        return acc.concat(
-          obj.gotchisOwned.map((tokenObj: GotchisOwned) => tokenObj.id)
-        );
-      }, []);
-
-      tokenIds.forEach((id) => {
-        if (receivedTokenIds.includes(id))
-          console.log(`${id} has already received XP!`);
-        duplicatedTokenIds.push(id);
-        //  throw `ID ${id} has already received XP!`;
-      });
-
-      console.log("token ids:", tokenIds);
-
-      tokenIds.forEach((id) => {
-        receivedTokenIds.push(id);
-      });
-
-      console.log(`Sending ${xpAmount} XP to ${tokenIds.length} Aavegotchis `);
-
-      const tx: ContractTransaction = await dao.grantExperience(
-        tokenIds,
-        Array(tokenIds.length).fill(xpAmount),
-        { gasPrice: gasPrice }
-      );
-      console.log("tx:", tx.hash);
-      let receipt: ContractReceipt = await tx.wait();
-      console.log("Gas used:", strDisplay(receipt.gasUsed.toString()));
-      if (!receipt.status) {
-        throw Error(`Error:: ${tx.hash}`);
-      }
-      console.log(
-        "Airdropped XP to Aaavegotchis. Last address:",
-        txAddresses[txAddresses.length - 1]
-      );
-      console.log("A total of", tokenIds.length, "Aavegotchis");
-      console.log("Current address index:", addressIndex);
-      console.log("");
+    if (!receipt.status) {
+      throw Error(`Error:: ${tx.hash}`);
     }
-
-    console.log("Final duplicated tokenIds:", duplicatedTokenIds);
   });
