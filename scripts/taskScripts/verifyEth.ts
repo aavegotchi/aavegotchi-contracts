@@ -1,8 +1,8 @@
 import { run } from "hardhat";
 
 async function verify() {
-  const address = "0xb7fd49c7b662B5135D1bB03b51FfC51a6b908230"; // deployed address
-  const facet = "AavegotchiFacet"; // name of facet
+  const address = "0xb81c32635524c24B02d8286B6Fc5157151e4c273"; // deployed address
+  const facet = "BridgeFacet"; // name of facet
   await run("verifyFacet", {
     apikey: process.env.ETHERSCAN,
     contract: address,
