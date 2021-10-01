@@ -113,7 +113,11 @@ async function main() {
   // // PET = 6;
   // // BG = 7;
 
-  let numTraits1 : [number,number,number,number,number,number]=[99, 99, 99, 99, 12, 9];
+  let numTraits1 :[
+    number,number,number,number,
+    number,number
+  ]=[99, 99, 99, 99, 12, 9];
+
   let wearables1 :[
     number,number,number,number,
     number,number,number,number,
@@ -122,7 +126,8 @@ async function main() {
   ]= [0, 0, 0, 0, 229, 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   const sidePreview = await svgViewsFacet.previewSideAavegotchi(
     "2",
-    "0xE0b22E0037B130A9F56bBb537684E6fA18192341",
+    /* "0xE0b22E0037B130A9F56bBb537684E6fA18192341", //Dai */
+    "0x20D3922b4a1A8560E1aC99FBA4faDe0c849e2142", //aWEth
     numTraits1,
     wearables1
   );
