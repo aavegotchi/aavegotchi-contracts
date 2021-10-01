@@ -1,5 +1,5 @@
 
-//updating aWETH,
+//updating ETH, AAVE, USDT, USDC, YFI, TUSD
 
 import { ethers, network } from "hardhat";
 
@@ -43,7 +43,6 @@ async function main() {
     5, // "0x9719d867A500Ef117cC201206B8ab51e794d3F82" USDC
     7, // "0xe20f7d1f0eC39C4d5DB01f53554F2EF54c71f613" YFI
     8, // "0xF4b8888427b00d7caf21654408B7CBA2eCf4EbD9" TUSD
-    11 // "0x8dF3aad3a84da6b69A4DA8aeC3eA40d9091B2Ac4" MATIC
   ];
 
   const svgFacet = (await ethers.getContractAt(
@@ -104,7 +103,7 @@ async function main() {
 
   const sidePreview = await svgViewsFacet.previewSideAavegotchi(
     "2",
-    "0x8dF3aad3a84da6b69A4DA8aeC3eA40d9091B2Ac4",
+    "0x20D3922b4a1A8560E1aC99FBA4faDe0c849e2142",
     numTraits1,
     wearables1
   );
