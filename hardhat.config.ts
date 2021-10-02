@@ -12,6 +12,8 @@ dotenv.config({ path: __dirname + "/.env" });
 
 //  require("./tasks/verifyFacet.js");
 require("./tasks/deployUpgrade.ts");
+require("./tasks/updateItemDimensions.ts");
+require("./tasks/updateSvgs.ts");
 // require("./tasks/addItemTypes.ts");
 
 // You have to export an object to set up your config

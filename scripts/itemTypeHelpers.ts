@@ -7,7 +7,7 @@ export interface SleeveObject {
   svg: string;
 }
 
-interface Dimensions {
+export interface Dimensions {
   x: BigNumberish;
   y: BigNumberish;
   width: BigNumberish;
