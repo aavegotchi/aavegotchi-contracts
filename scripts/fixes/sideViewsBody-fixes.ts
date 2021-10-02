@@ -40,25 +40,6 @@ async function main() {
     signer
   )) as SvgFacet;
 
-
-/*     const pajamaFront = wearablesSvgs[pajamaPants];
-    const rastaFront = wearablesSvgs[rastaShirt];
-    const hawaiianFront = wearablesSvgs[hawaiianBlueShirt];
-
-    try {
-      await uploadOrUpdateSvg(pajamaFront, "wearables", pajamaPants, svgFacet, ethers);
-      await uploadOrUpdateSvg(
-        rastaFront,
-        "wearables",
-        rastaShirt,
-        svgFacet,
-        ethers
-      );
-      await uploadOrUpdateSvg(hawaiianFront, "wearables", hawaiianBlueShirt, svgFacet, ethers);
-    } catch (error) {
-      console.log("error uploading");
-    } */
-
   //dimensions
   console.log("Updating Dimensions");
   
