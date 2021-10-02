@@ -23,8 +23,12 @@ task("updateSvgs", "Updates SVGs, given svgType and a list of IDs")
 
   .setAction(
     async (taskArgs: UpdateSvgsTaskArgs, hre: HardhatRuntimeEnvironment) => {
-      const svgIDs: string[] = taskArgs.svgIds.split(",");
-      const svgs: string[] = taskArgs.svgs.split(",");
+      const svgIDs: string[] = taskArgs.svgIds
+        .split(",")
+        .filter((str) => str.length > 0);
+      const svgs: string[] = taskArgs.svgs
+        .split("***")
+        .filter((str) => str.length > 0);
       const svgType: string = taskArgs.svgType;
 
       const signer: Signer = await getDiamondSigner(hre, itemManager, false);
