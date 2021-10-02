@@ -103,7 +103,7 @@ async function main() {
 
   const sidePreview = await svgViewsFacet.previewSideAavegotchi(
     "2",
-    "0x20D3922b4a1A8560E1aC99FBA4faDe0c849e2142",
+    "0xF4b8888427b00d7caf21654408B7CBA2eCf4EbD9",
     numTraits1,
     wearables1
   );
