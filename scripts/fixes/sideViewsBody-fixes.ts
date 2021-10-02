@@ -40,20 +40,34 @@ async function main() {
     signer
   )) as SvgFacet;
 
-  //dimensions
-  console.log("Updating Dimensions");
-  
   const pajamaPants = [91];
   const rastaShirt = [109];
   const hawaiianBlueShirt = [115];
+
+  const rastaFront = wearablesSvgs[rastaShirt[0]];
+
+  try {
+    await uploadOrUpdateSvg(
+      rastaFront,
+      "wearables",
+      rastaShirt[0],
+      svgFacet,
+      ethers
+    );
+  } catch (error) {
+    console.log("error uploading");
+  }
+
+  //dimensions
+  console.log("Updating Dimensions");
 
   const pajamaDimensions = [
     { x:11, y:31, width:42, height:22 }
   ];
 
-/*   const rastaDimensions = [
-    { x:12, y:33, width:40, height:15 }
-  ]; */
+  const rastaDimensions = [
+    { x:12, y:32, width:40, height:15 }
+  ];
 
   const hawaiianDimensions = [
     { x:12, y:32, width:40, height:21 }
@@ -66,12 +80,12 @@ async function main() {
     throw Error(`Error with transaction: ${tx.hash}`)
   }
   
-/*   tx = await svgFacet.setItemsDimensions(rastaShirt, rastaDimensions)
+  tx = await svgFacet.setItemsDimensions(rastaShirt, rastaDimensions)
   console.log('Setting SVG dimensions')
   receipt = await tx.wait()
   if (!receipt.status) {
     throw Error(`Error with transaction: ${tx.hash}`)
-  } */
+  }
   
   tx = await svgFacet.setItemsDimensions(hawaiianBlueShirt, hawaiianDimensions)
   console.log('Setting SVG dimensions')
@@ -108,7 +122,7 @@ async function main() {
     number,number,number,number,
     number,number,number,number,
     number,number,number,number
-  ]= [115, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  ]= [109, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   const sidePreview = await svgViewsFacet.previewSideAavegotchi(
     "2",
     /* "0xE0b22E0037B130A9F56bBb537684E6fA18192341", //Dai */
