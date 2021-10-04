@@ -1,7 +1,7 @@
 
 //updating IDs 237 (Mythical Cacti) back, and 238 (Godlike Cacti) back 
 
-import { ethers, network } from "hardhat";
+import { run, ethers, network } from "hardhat";
 
 import {
   wearablesLeftSvgs,
@@ -10,6 +10,14 @@ import {
 } from "../../svgs/wearables-sides";
 
 import { sideViewDimensions6, sideViewDimensions8 } from "../../svgs/sideViewDimensions";
+
+import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
+import {
+  convertDimensionsArrayToString,
+  UpdateItemDimensionsTaskArgs,
+} from "../../tasks/updateItemDimensions";
+import { Dimensions } from "../itemTypeHelpers";
+
 import { SvgFacet } from "../../typechain";
 import { uploadOrUpdateSvg } from "../svgHelperFunctions";
 import { Signer } from "@ethersproject/abstract-signer";
@@ -57,7 +65,28 @@ async function main() {
     const right = wearablesRightSvgs[itemId];
     const back = wearablesBackSvgs[itemId];
 
-    try {
+    let taskArgsLeft: UpdateSvgsTaskArgs = {
+      svgIds: [itemId].join(","),
+      svgType: "wearables-left",
+      svgs: [left].join("***"),
+    }
+    await run("updateSvgs", taskArgsLeft);
+
+    let taskArgsRight: UpdateSvgsTaskArgs = {
+      svgIds: [itemId].join(","),
+      svgType: "wearables-right",
+      svgs: [right].join("***"),
+    }
+    await run("updateSvgs", taskArgsRight); 
+
+    let taskArgsBack: UpdateSvgsTaskArgs = {
+      svgIds: [itemId].join(","),
+      svgType: "wearables-back",
+      svgs: [right].join("***"),
+    }
+    await run("updateSvgs", taskArgsBack); 
+
+/*     try {
       await uploadOrUpdateSvg(left, "wearables-left", itemId, svgFacet, ethers);
       await uploadOrUpdateSvg(
         right,
@@ -69,7 +98,7 @@ async function main() {
       await uploadOrUpdateSvg(back, "wearables-back", itemId, svgFacet, ethers);
     } catch (error) {
       console.log("error uploading", itemId);
-    }
+    } */
   }
 
   //dimensions

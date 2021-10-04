@@ -7,10 +7,12 @@ import {
 } from "../scripts/helperFunctions";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { SvgFacet } from "../typechain";
+import { SvgViewsFacet } from "../typechain";
 import { Dimensions } from "../scripts/itemTypeHelpers";
 
 export interface UpdateItemDimensionsTaskArgs {
   itemIds: string;
+  side: string;
   dimensions: string;
 }
 
@@ -68,19 +70,32 @@ task(
 
       const signer: Signer = await getDiamondSigner(hre, itemManager, false);
 
-      const svgFacet = (await hre.ethers.getContractAt(
-        "SvgFacet",
-        maticDiamondAddress,
-        signer
-      )) as SvgFacet;
+      if (taskArgs.side === "front") {
+        const svgFacet = (await hre.ethers.getContractAt(
+          "SvgFacet",
+          maticDiamondAddress,
+          signer
+        )) as SvgFacet;
 
-      let tx = await svgFacet.setItemsDimensions(itemIds, dimensions);
-      console.log("tx hash:", tx.hash);
-      let receipt = await tx.wait();
-      console.log("New Dimensions set!");
+        let tx = await svgFacet.setItemsDimensions(itemIds, dimensions);
+        console.log("tx hash:", tx.hash);
+        let receipt = await tx.wait();
+        console.log("New Dimensions set!");
 
-      if (!receipt.status) {
-        throw Error(`Error with transaction: ${tx.hash}`);
+        if (!receipt.status) {
+          throw Error(`Error with transaction: ${tx.hash}`);
+        }
+      } else if (taskArgs.side === "left" || taskArgs.side === "right" || taskArgs.side === "back") {
+        const svgViewsFacet = (await hre.ethers.getContractAt(
+          "SvgViewsFacet",
+          maticDiamondAddress,
+          signer
+        )) as SvgViewsFacet;
+
+        let tx = await svgViewsFacet.setSideViewDimensions(dimensions);
+        console.log("tx hash:", tx.hash);
+        let receipt = await tx.wait();
+        console.log("New Dimensions set!");
       }
     }
   );

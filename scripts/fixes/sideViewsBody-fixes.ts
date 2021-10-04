@@ -15,6 +15,9 @@ async function main() {
   const rastaShirt = 109;
   const hawaiianBlueShirt = 115;
 
+  console.log("SVGs: ", rastaFront);
+  
+
   const itemIds = [pajamaPants, rastaShirt, hawaiianBlueShirt];
 
   const taskArgs: UpdateSvgsTaskArgs = {
@@ -42,6 +45,7 @@ async function main() {
 
   const dimensionsTaskArgs: UpdateItemDimensionsTaskArgs = {
     itemIds: itemIds.join(","),
+    side: "front",
     dimensions: convertDimensionsArrayToString(dimensions),
   };
   await run("updateItemDimensions", dimensionsTaskArgs);

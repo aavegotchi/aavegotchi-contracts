@@ -1,40 +1,16 @@
 
 //updating ETH, AAVE, USDT, USDC, YFI, TUSD
 
-import { ethers, network } from "hardhat";
+import { run } from "hardhat";
 
 import {
   collateralsLeftSvgs,
   collateralsRightSvgs,
 } from "../../svgs/collaterals-sides";
 
-import { SvgFacet } from "../../typechain";
-import { uploadOrUpdateSvg } from "../svgHelperFunctions";
-import { Signer } from "@ethersproject/abstract-signer";
-import { gasPrice } from "../helperFunctions";
+import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 
 async function main() {
-  const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-  let itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
-  let signer: Signer;
-
-  const testing = ["hardhat", "localhost"].includes(network.name);
-
-  if (testing) {
-    await network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [itemManager],
-    });
-    signer = await ethers.getSigner(itemManager);
-  } else if (network.name === "matic") {
-    const accounts = await ethers.getSigners();
-    signer = accounts[0]; //new LedgerSigner(ethers.provider);
-
-    console.log("signer:", signer);
-  } else {
-    throw Error("Incorrect network selected");
-  }
-
   console.log("Updating Wearables");
   const itemIds = [
     1, // "0x20D3922b4a1A8560E1aC99FBA4faDe0c849e2142" ETH
@@ -45,69 +21,28 @@ async function main() {
     8, // "0xF4b8888427b00d7caf21654408B7CBA2eCf4EbD9" TUSD
   ];
 
-  const svgFacet = (await ethers.getContractAt(
-    "SvgFacet",
-    diamondAddress,
-    signer
-  )) as SvgFacet;
-
   for (let index = 0; index < itemIds.length; index++) {
-    const itemId = itemIds[index];
+  const itemId = itemIds[index];
 
-    console.log("Updating SVGs for id: ", itemId);
+  console.log("Updating SVGs for id: ", itemId);
 
-    const left = collateralsLeftSvgs[itemId];
-    const right = collateralsRightSvgs[itemId];
+  const left = collateralsLeftSvgs[itemId];
+  const right = collateralsRightSvgs[itemId];
 
-    try {
-      await uploadOrUpdateSvg(left, "collaterals-left", itemId, svgFacet, ethers);
-      await uploadOrUpdateSvg(
-        right,
-        "collaterals-right",
-        itemId,
-        svgFacet,
-        ethers
-      );
-    } catch (error) {
-      console.log("error uploading", itemId);
-    }
+  let taskArgsLeft: UpdateSvgsTaskArgs = {
+    svgIds: [itemId].join(","),
+    svgType: "collaterals-left",
+    svgs: [left].join("***"),
   }
+  await run("updateSvgs", taskArgsLeft);
 
-    // // **** Test ****
-  // // BODY = 0;
-  // // FACE = 1;
-  // // EYES = 2;
-  // // HEAD = 3;
-  // // RIGHT = 4;
-  // // LEFT = 5;
-  // // PET = 6;
-  // // BG = 7;
-
-  let numTraits1 :[
-    number,number,number,number,
-    number,number
-  ]=[99, 99, 99, 99, 12, 9];
-
-  let wearables1 :[
-    number,number,number,number,
-    number,number,number,number,
-    number,number,number,number,
-    number,number,number,number
-  ]= [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-  const svgViewsFacet = await ethers.getContractAt(
-    "SvgViewsFacet",
-    diamondAddress,
-    signer
-  );
-
-  const sidePreview = await svgViewsFacet.previewSideAavegotchi(
-    "2",
-    "0xF4b8888427b00d7caf21654408B7CBA2eCf4EbD9",
-    numTraits1,
-    wearables1
-  );
-  console.log("Side Preview: ", sidePreview);
+  let taskArgsRight: UpdateSvgsTaskArgs = {
+    svgIds: [itemId].join(","),
+    svgType: "collaterals-right",
+    svgs: [right].join("***"),
+  }
+  await run("updateSvgs", taskArgsRight); 
+  }
 
 }
 
