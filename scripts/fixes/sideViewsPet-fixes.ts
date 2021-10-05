@@ -13,10 +13,11 @@ import { sideViewDimensions6, sideViewDimensions8 } from "../../svgs/sideViewDim
 
 import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 import {
+  convertSideDimensionsArrayToString,
   convertDimensionsArrayToString,
   UpdateItemDimensionsTaskArgs,
 } from "../../tasks/updateItemDimensions";
-import { Dimensions } from "../itemTypeHelpers";
+import { SideDimensions } from "../itemTypeHelpers";
 
 import { SvgFacet } from "../../typechain";
 import { uploadOrUpdateSvg } from "../svgHelperFunctions";
@@ -50,11 +51,11 @@ async function main() {
     237, 238,
   ];
 
-  const svgFacet = (await ethers.getContractAt(
+ /*  const svgFacet = (await ethers.getContractAt(
     "SvgFacet",
     diamondAddress,
     signer
-  )) as SvgFacet;
+  )) as SvgFacet; */
 
   for (let index = 0; index < itemIds.length; index++) {
     const itemId = itemIds[index];
@@ -82,7 +83,7 @@ async function main() {
     let taskArgsBack: UpdateSvgsTaskArgs = {
       svgIds: [itemId].join(","),
       svgType: "wearables-back",
-      svgs: [right].join("***"),
+      svgs: [back].join("***"),
     }
     await run("updateSvgs", taskArgsBack); 
 
@@ -102,13 +103,41 @@ async function main() {
   }
 
   //dimensions
+/*   const sideViewDimensions = [
+    sideViewDimensions6,
+    sideViewDimensions8,
+  ]; */
+  
+
+for (let index = 0; index < sideViewDimensions6.length; index++){
+  const itemId = sideViewDimensions6[index];
+
+  const sideDimensionsTaskArgs: UpdateItemDimensionsTaskArgs = {
+    itemIds: itemId.toString(),
+    side: itemId.side,
+    dimensions: convertSideDimensionsArrayToString(itemId.dimensions),
+  };
+  await run("updateItemDimensions", sideDimensionsTaskArgs);
+}
+
+for (let index = 0; index < sideViewDimensions8.length; index++){
+  const itemId = sideViewDimensions8[index];
+
+  const sideDimensionsTaskArgs: UpdateItemDimensionsTaskArgs = {
+    itemIds: itemId.toString(),
+    side: itemId.side,
+    dimensions: convertSideDimensionsArrayToString(itemId.dimensions),
+  };
+  await run("updateItemDimensions", sideDimensionsTaskArgs);
+}
+
   const svgViewsFacet = await ethers.getContractAt(
     "SvgViewsFacet",
     diamondAddress,
     signer
   );
 
-  console.log("Update dimensions6");
+  /* console.log("Update dimensions6");
   let tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions6, {
     gasPrice: gasPrice,
   });
@@ -125,7 +154,7 @@ async function main() {
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
-
+ */
     // // **** Test ****
   // // BODY = 0;
   // // FACE = 1;

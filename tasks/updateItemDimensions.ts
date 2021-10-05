@@ -8,7 +8,7 @@ import {
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { SvgFacet } from "../typechain";
 import { SvgViewsFacet } from "../typechain";
-import { Dimensions } from "../scripts/itemTypeHelpers";
+import { Dimensions, SideDimensions } from "../scripts/itemTypeHelpers";
 
 export interface UpdateItemDimensionsTaskArgs {
   itemIds: string;
@@ -24,6 +24,22 @@ export function convertDimensionsArrayToString(
   dimensionsArray.forEach((d) => {
     outputString = outputString.concat(
       `#$${d.x}$${d.y}$${d.width}$${d.height}`
+    );
+  });
+
+  return outputString;
+}
+
+export function convertSideDimensionsArrayToString(
+  dimensionsSideArray: SideDimensions[]
+): string {
+  let outputString = "";
+
+  dimensionsSideArray.forEach((d) => {
+    outputString = outputString.concat(
+      `#$${d.itemId}
+      $${d.side}
+      $${d.dimensions.x}$${d.dimensions.y}$${d.dimensions.width}$${d.dimensions.height}`
     );
   });
 
@@ -51,6 +67,31 @@ export function convertStringToDimensionsArray(string: string): Dimensions[] {
   return output;
 }
 
+export function convertStringToSideDimensionsArray(string: string): SideDimensions[] {
+  const sideDimensions: string[] = string
+    .split("#")
+    .filter((string) => string.length > 0);
+
+  const output: SideDimensions[] = [];
+
+  sideDimensions.forEach((string) => {
+    let array = string.split("$").filter((str) => str.length > 0);
+
+    output.push({
+      itemId: array[0],
+      side: array[1],
+      dimensions: {
+        x: array[2],
+        y: array[3],
+        width: array[4],
+        height: array[5],
+      },
+    });
+  });
+
+  return output;
+}
+
 task(
   "updateItemDimensions",
   "Updates item dimensions, given svgId and dimensions"
@@ -65,6 +106,9 @@ task(
     ) => {
       const itemIds: string[] = taskArgs.itemIds.split(",");
       const dimensions: Dimensions[] = convertStringToDimensionsArray(
+        taskArgs.dimensions
+      );
+      const sideDimensions: SideDimensions[] = convertStringToSideDimensionsArray(
         taskArgs.dimensions
       );
 
@@ -92,10 +136,13 @@ task(
           signer
         )) as SvgViewsFacet;
 
-        let tx = await svgViewsFacet.setSideViewDimensions(dimensions);
+        let tx = await svgViewsFacet.setSideViewDimensions(sideDimensions);
         console.log("tx hash:", tx.hash);
         let receipt = await tx.wait();
         console.log("New Dimensions set!");
+        if (!receipt.status) {
+          throw Error(`Error with transaction: ${tx.hash}`);
+        }
       }
     }
   );

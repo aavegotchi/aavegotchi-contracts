@@ -14,6 +14,12 @@ export interface Dimensions {
   height: BigNumberish;
 }
 
+export interface SideDimensions {
+  itemId: BigNumberish;
+  side: string;
+  dimensions: Dimensions;
+}
+
 export interface ItemTypeInput {
   name: string;
   description: string;
@@ -29,6 +35,7 @@ export interface ItemTypeInput {
   width?: number;
   height?: number;
   dimensions: Dimensions;
+  sideDimensions: SideDimensions;
   allowedCollaterals: BigNumberish[];
   ghstPrice: BigNumberish | BigNumberish;
   traitModifiers: [
