@@ -67,6 +67,7 @@ task("removeXP", "Removes XP from Gotchis")
 
     console.log(`Removing XP from ${gotchiIDs.length} gotchis`);
 
+    /*
     const tx: ContractTransaction = await dao.removeExperience(
       gotchiIDs,
       xpAmount,
@@ -78,4 +79,5 @@ task("removeXP", "Removes XP from Gotchis")
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
     }
+    */
   });
