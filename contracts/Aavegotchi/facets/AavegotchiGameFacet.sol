@@ -93,11 +93,25 @@ contract AavegotchiGameFacet is Modifiers {
     ///@param _tokenId The identifier of the NFT to query
     ///@return   An unsigned integer which represents the available skill points of an NFT with identifier `_tokenId`
     function availableSkillPoints(uint256 _tokenId) public view returns (uint256) {
-        uint256 level = LibAavegotchi.aavegotchiLevel(s.aavegotchis[_tokenId].experience);
-        uint256 skillPoints = (level / 3);
+        // uint256 level = LibAavegotchi.aavegotchiLevel(s.aavegotchis[_tokenId].experience);
+        uint256 skillPoints = _calculateSkillPoints(_tokenId); //(level / 3);
         uint256 usedSkillPoints = s.aavegotchis[_tokenId].usedSkillPoints;
         require(skillPoints >= usedSkillPoints, "AavegotchiGameFacet: Used skill points is greater than skill points");
         return skillPoints - usedSkillPoints;
+    }
+
+    function _calculateSkillPoints(uint256 _tokenId) internal view returns (uint256) {
+        uint256 level = LibAavegotchi.aavegotchiLevel(s.aavegotchis[_tokenId].experience);
+        uint256 skillPoints = (level / 3);
+
+        uint256 claimTime = s.aavegotchis[_tokenId].claimTime;
+        uint256 ageDifference = block.timestamp - claimTime;
+        return skillPoints + _skillPointsByAge(ageDifference);
+    }
+
+    function _skillPointsByAge(uint256 _age) internal pure returns (uint256) {
+        //Insert fibonacci sequence here
+        return 0;
     }
 
     ///@notice Calculate level given the XP(experience points)
