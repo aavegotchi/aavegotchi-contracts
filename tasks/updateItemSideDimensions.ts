@@ -18,18 +18,15 @@ export interface UpdateItemSideDimensionsTaskArgs {
 export function convertSideDimensionsToString (
   d: Dimensions
 ): string {
-  console.log("Converting to String");
   let outputString = "";
     outputString = outputString.concat(
       `$${d.x}$${d.y}$${d.width}$${d.height}`
     );
-  console.log("Returning Output", outputString);
   
   return outputString;
 }
 
 export function convertStringToSideDimensionsArray(itemId: string, side: string, dimensions: string): SideDimensions[] {
-  console.log("Converting to Array");
   const output: SideDimensions[] = [];
   const sideDimensions: string[] =  dimensions
     .split("$")
