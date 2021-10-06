@@ -12,12 +12,17 @@ import {
 import { sideViewDimensions6, sideViewDimensions8 } from "../../svgs/sideViewDimensions";
 
 import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
-import {
+/* import {
   convertSideDimensionsArrayToString,
   convertDimensionsArrayToString,
   UpdateItemDimensionsTaskArgs,
 } from "../../tasks/updateItemDimensions";
-import { SideDimensions } from "../itemTypeHelpers";
+import { SideDimensions } from "../itemTypeHelpers"; */
+
+import { 
+  UpdateItemSideDimensionsTaskArgs,
+  convertSideDimensionsToString
+} from "../../tasks/updateItemSideDimensions";
 
 import { SvgFacet } from "../../typechain";
 import { uploadOrUpdateSvg } from "../svgHelperFunctions";
@@ -108,25 +113,32 @@ async function main() {
     sideViewDimensions8,
   ]; */
   
+console.log("Update Dimensions:");
 
 for (let index = 0; index < sideViewDimensions6.length; index++){
-  const itemId = sideViewDimensions6[index];
+  const itemArray = sideViewDimensions6[index];
+  const itemId = [];
+  itemId.push(itemArray.itemId);
+  console.log("ItemId", itemArray);
+  
 
-  const sideDimensionsTaskArgs: UpdateItemDimensionsTaskArgs = {
-    itemIds: itemId.toString(),
-    side: itemId.side,
-    dimensions: convertSideDimensionsArrayToString(itemId.dimensions),
+  const sideDimensionsTaskArgs: UpdateItemSideDimensionsTaskArgs = {
+    itemIds: itemId.join(),
+    side: itemArray.side,
+    dimensions: convertSideDimensionsToString(itemArray.dimensions),
   };
   await run("updateItemDimensions", sideDimensionsTaskArgs);
 }
 
 for (let index = 0; index < sideViewDimensions8.length; index++){
-  const itemId = sideViewDimensions8[index];
+  const itemArray = sideViewDimensions8[index];
+  const itemId = [];
+  itemId.push(itemArray.itemId);
 
-  const sideDimensionsTaskArgs: UpdateItemDimensionsTaskArgs = {
-    itemIds: itemId.toString(),
-    side: itemId.side,
-    dimensions: convertSideDimensionsArrayToString(itemId.dimensions),
+  const sideDimensionsTaskArgs: UpdateItemSideDimensionsTaskArgs = {
+    itemIds: itemId.join(),
+    side: itemArray.side,
+    dimensions: convertSideDimensionsToString(itemArray.dimensions),
   };
   await run("updateItemDimensions", sideDimensionsTaskArgs);
 }
