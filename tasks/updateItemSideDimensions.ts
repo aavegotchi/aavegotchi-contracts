@@ -62,7 +62,7 @@ export function convertStringToSideDimensionsArray(
 
 task(
   "updateItemSideDimensions",
-  "Updates item side dimensions, given svgIds, sides, and dimensions"
+  "Updates item side dimensions, given svgIds, sidesf, and dimensions"
 )
   .addParam("itemIds", "Item IDs to update dimensions")
   .addParam("sides", "Item side to be updated dimensions")
@@ -79,8 +79,6 @@ task(
           taskArgs.sides,
           taskArgs.dimensions
         );
-
-      console.log("side dimensions:", sideDimensions);
 
       const signer: Signer = await getDiamondSigner(hre, itemManager, false);
       const svgViewsFacet = (await hre.ethers.getContractAt(
