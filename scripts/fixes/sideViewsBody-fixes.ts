@@ -45,7 +45,6 @@ async function main() {
 
   const dimensionsTaskArgs: UpdateItemDimensionsTaskArgs = {
     itemIds: itemIds.join(","),
-    side: "front",
     dimensions: convertDimensionsArrayToString(dimensions),
   };
   await run("updateItemDimensions", dimensionsTaskArgs);
