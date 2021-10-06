@@ -16,6 +16,7 @@ export interface Dimensions {
 
 export interface SideDimensions {
   itemId: BigNumberish;
+  name?: string;
   side: string;
   dimensions: Dimensions;
 }

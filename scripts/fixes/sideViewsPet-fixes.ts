@@ -1,5 +1,4 @@
-
-//updating IDs 237 (Mythical Cacti) back, and 238 (Godlike Cacti) back 
+//updating IDs 237 (Mythical Cacti) back, and 238 (Godlike Cacti) back
 
 import { run } from "hardhat";
 
@@ -9,18 +8,21 @@ import {
   wearablesBackSvgs,
 } from "../../svgs/wearables-sides";
 
-import { sideViewDimensions6, sideViewDimensions8 } from "../../svgs/sideViewDimensions";
+import {
+  sideViewDimensions6,
+  sideViewDimensions8,
+} from "../../svgs/sideViewDimensions";
 import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 
-import { 
+import {
+  convertSideDimensionsToTaskFormat,
   UpdateItemSideDimensionsTaskArgs,
-  convertSideDimensionsToString
 } from "../../tasks/updateItemSideDimensions";
 
-
 async function main() {
-  const itemIds = [ 237, 238, ];
+  let itemIds = [237, 238];
 
+  /*
   for (let index = 0; index < itemIds.length; index++) {
     const itemId = itemIds[index];
 
@@ -32,49 +34,33 @@ async function main() {
       svgIds: [itemId].join(","),
       svgType: "wearables-left",
       svgs: [left].join("***"),
-    }
+    };
     await run("updateSvgs", taskArgsLeft);
 
     let taskArgsRight: UpdateSvgsTaskArgs = {
       svgIds: [itemId].join(","),
       svgType: "wearables-right",
       svgs: [right].join("***"),
-    }
-    await run("updateSvgs", taskArgsRight); 
+    };
+    await run("updateSvgs", taskArgsRight);
 
     let taskArgsBack: UpdateSvgsTaskArgs = {
       svgIds: [itemId].join(","),
       svgType: "wearables-back",
       svgs: [back].join("***"),
-    }
-    await run("updateSvgs", taskArgsBack); 
-
-  for (let index = 0; index < sideViewDimensions6.length; index++){
-    const itemArray = sideViewDimensions6[index];
-    const itemId = [];
-    itemId.push(itemArray.itemId);
-
-    const sideDimensionsTaskArgs: UpdateItemSideDimensionsTaskArgs = {
-      itemIds: itemId.join(),
-      side: itemArray.side,
-      dimensions: convertSideDimensionsToString(itemArray.dimensions),
     };
-    await run("updateItemSideDimensions", sideDimensionsTaskArgs);
+    await run("updateSvgs", taskArgsBack);
   }
+  */
 
-  for (let index = 0; index < sideViewDimensions8.length; index++){
-    const itemArray = sideViewDimensions8[index];
-    const itemId = [];
-    itemId.push(itemArray.itemId);
-
-    const sideDimensionsTaskArgs: UpdateItemSideDimensionsTaskArgs = {
-      itemIds: itemId.join(),
-      side: itemArray.side,
-      dimensions: convertSideDimensionsToString(itemArray.dimensions),
-    };
-    await run("updateItemSideDimensions", sideDimensionsTaskArgs);
-    }
-  }
+  await run(
+    "updateItemSideDimensions",
+    convertSideDimensionsToTaskFormat(sideViewDimensions6)
+  );
+  await run(
+    "updateItemSideDimensions",
+    convertSideDimensionsToTaskFormat(sideViewDimensions8)
+  );
 }
 
 main()

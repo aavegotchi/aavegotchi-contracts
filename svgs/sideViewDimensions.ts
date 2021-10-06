@@ -1,4 +1,6 @@
-export const sideViewDimensions1 = [
+import { SideDimensions, Dimensions } from "../scripts/itemTypeHelpers";
+
+export const sideViewDimensions1: SideDimensions[] = [
   {
     itemId: 0,
     name: "The Void",
@@ -6135,13 +6137,13 @@ export const sideViewDimensions9 = [
     itemId: 254,
     name: "uGOTCHI Token",
     side: "left",
-    dimensions: { x:25, y:33, width:2, height:12 },
+    dimensions: { x: 25, y: 33, width: 2, height: 12 },
   },
   {
     itemId: 254,
     name: "uGOTCHI Token",
     side: "right",
-    dimensions: { x:37, y:33, width:2, height:12 },
+    dimensions: { x: 37, y: 33, width: 2, height: 12 },
   },
   {
     itemId: 255,
