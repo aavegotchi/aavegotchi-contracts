@@ -12,8 +12,8 @@ import {
   sideViewDimensions6,
   sideViewDimensions8,
 } from "../../svgs/sideViewDimensions";
-import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 
+import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 import { convertSideDimensionsToTaskFormat } from "../../tasks/updateItemSideDimensions";
 
 async function main() {
@@ -65,4 +65,4 @@ main()
     process.exit(1);
   });
 
-exports.addR5sideViews = main;
+exports.petFixes = main;

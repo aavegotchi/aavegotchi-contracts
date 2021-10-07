@@ -51,4 +51,4 @@ main()
     process.exit(1);
   });
 
-exports.addR5sideViews = main;
+exports.collateralFixes = main;

@@ -1,6 +1,6 @@
 //updating IDs 69 (farmer pitchfork) 229 (Lasso),
 
-import { ethers, network } from "hardhat";
+import { run } from "hardhat";
 
 import {
   wearablesLeftSvgs,
@@ -8,98 +8,57 @@ import {
   wearablesBackSvgs,
 } from "../../svgs/wearables-sides";
 
-import { wearablesSvgs } from "../../svgs/wearables";
-
 import {
   sideViewDimensions1,
   sideViewDimensions8,
 } from "../../svgs/sideViewDimensions";
-import { SvgFacet } from "../../typechain";
-import { uploadOrUpdateSvg } from "../svgHelperFunctions";
-import { Signer } from "@ethersproject/abstract-signer";
-import { gasPrice } from "../helperFunctions";
+
+import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
+import { convertSideDimensionsToTaskFormat } from "../../tasks/updateItemSideDimensions";
 
 async function main() {
-  const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-  let itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
-  let signer: Signer;
-
-  const testing = ["hardhat", "localhost"].includes(network.name);
-
-  if (testing) {
-    await network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [itemManager],
-    });
-    signer = await ethers.getSigner(itemManager);
-  } else if (network.name === "matic") {
-    const accounts = await ethers.getSigners();
-    signer = accounts[0]; //new LedgerSigner(ethers.provider);
-
-    console.log("signer:", signer);
-  } else {
-    throw Error("Incorrect network selected");
-  }
-
   console.log("Updating Wearables");
   const itemIds = [69, 229];
 
-  const svgFacet = (await ethers.getContractAt(
-    "SvgFacet",
-    diamondAddress,
-    signer
-  )) as SvgFacet;
-
+  //hand wearables
   for (let index = 0; index < itemIds.length; index++) {
     const itemId = itemIds[index];
-
-    console.log("Updating SVGs for id: ", itemId);
 
     const left = wearablesLeftSvgs[itemId];
     const right = wearablesRightSvgs[itemId];
     const back = wearablesBackSvgs[itemId];
-    const front = wearablesSvgs[itemId];
 
-    try {
-      await uploadOrUpdateSvg(left, "wearables-left", itemId, svgFacet, ethers);
-      await uploadOrUpdateSvg(
-        right,
-        "wearables-right",
-        itemId,
-        svgFacet,
-        ethers
-      );
-      await uploadOrUpdateSvg(back, "wearables-back", itemId, svgFacet, ethers);
-      await uploadOrUpdateSvg(front, "wearables", itemId, svgFacet, ethers);
-    } catch (error) {
-      console.log("error uploading", itemId);
-    }
+    let taskArgsLeft: UpdateSvgsTaskArgs = {
+      svgIds: [itemId].join(","),
+      svgType: "wearables-left",
+      svgs: [left].join("***"),
+    };
+    await run("updateSvgs", taskArgsLeft);
+
+    let taskArgsRight: UpdateSvgsTaskArgs = {
+      svgIds: [itemId].join(","),
+      svgType: "wearables-right",
+      svgs: [right].join("***"),
+    };
+    await run("updateSvgs", taskArgsRight);
+
+    let taskArgsBack: UpdateSvgsTaskArgs = {
+      svgIds: [itemId].join(","),
+      svgType: "wearables-back",
+      svgs: [back].join("***"),
+    };
+    await run("updateSvgs", taskArgsBack);
   }
 
   //dimensions
-  const svgViewsFacet = await ethers.getContractAt(
-    "SvgViewsFacet",
-    diamondAddress,
-    signer
+  await run(
+    "updateItemSideDimensions",
+    convertSideDimensionsToTaskFormat(sideViewDimensions1)
   );
-
-  console.log("Update dimensions1");
-  let tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions1, {
-    gasPrice: gasPrice,
-  });
-  let receipt = await tx.wait();
-  if (!receipt.status) {
-    throw Error(`Error:: ${tx.hash}`);
-  }
-
-  console.log("Update dimensions8");
-  tx = await svgViewsFacet.setSideViewDimensions(sideViewDimensions8, {
-    gasPrice: gasPrice,
-  });
-  receipt = await tx.wait();
-  if (!receipt.status) {
-    throw Error(`Error:: ${tx.hash}`);
-  }
+  await run(
+    "updateItemSideDimensions",
+    convertSideDimensionsToTaskFormat(sideViewDimensions8)
+  );
 }
 
 main()
@@ -109,4 +68,4 @@ main()
     process.exit(1);
   });
 
-exports.addR5sideViews = main;
+exports.handFixes = main;
