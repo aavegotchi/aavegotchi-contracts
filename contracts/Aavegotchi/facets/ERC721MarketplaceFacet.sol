@@ -32,17 +32,33 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 time
     );
 
+    ///@notice Get an aavegotchi listing details through an identifier
+    ///@dev Will throw if the listing does not exist
+    ///@param _listingId The identifier of the listing to query
+    ///@return listing_ A struct containing certain details about the listing like timeCreated etc
+    ///@return aavegotchiInfo_ A struct containing details about the aavegotchi
     function getAavegotchiListing(uint256 _listingId) external view returns (ERC721Listing memory listing_, AavegotchiInfo memory aavegotchiInfo_) {
         listing_ = s.erc721Listings[_listingId];
         require(listing_.timeCreated != 0, "ERC721Marketplace: ERC721 listing does not exist");
         aavegotchiInfo_ = LibAavegotchi.getAavegotchi(listing_.erc721TokenId);
     }
 
+    ///@notice Get an ERC721 listing details through an identifier
+    ///@dev Will throw if the listing does not exist
+    ///@param _listingId The identifier of the ERC721 listing to query
+    ///@return listing_ A struct containing certain details about the ERC721 listing like timeCreated etc
+
     function getERC721Listing(uint256 _listingId) external view returns (ERC721Listing memory listing_) {
         listing_ = s.erc721Listings[_listingId];
         require(listing_.timeCreated != 0, "ERC721Marketplace: ERC721 listing does not exist");
     }
 
+    ///@notice Get an ERC721 listing details through an NFT
+    ///@dev Will throw if the listing does not exist
+    ///@param _erc721TokenAddress The address of the NFT associated with the listing
+    ///@param _erc721TokenId The identifier of the NFT associated with the listing
+    ///@param _owner The owner of the NFT associated with the listing
+    ///@return listing_ A struct containing certain details about the ERC721 listing associated with an NFT of contract address `_erc721TokenAddress` and identifier `_erc721TokenId`
     function getERC721ListingFromToken(
         address _erc721TokenAddress,
         uint256 _erc721TokenId,
@@ -53,6 +69,12 @@ contract ERC721MarketplaceFacet is Modifiers {
         listing_ = s.erc721Listings[listingId];
     }
 
+    ///@notice Query a certain amount of ERC721 listings created by an address based on their category and sortings
+    ///@param _owner Creator of the listings to query
+    ///@param _category Category of listings to query // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi.
+    ///@param _sort Sortings of listings to query // "listed" or "purchased"
+    ///@param _length How many ERC721 listings to return
+    ///@return listings_ An array of structs, each struct containing details about each listing being returned
     function getOwnerERC721Listings(
         address _owner,
         uint256 _category,
@@ -76,6 +98,12 @@ contract ERC721MarketplaceFacet is Modifiers {
         AavegotchiInfo aavegotchiInfo_;
     }
 
+    ///@notice Query a certain amount of aavegotchi listings created by an address based on their category and sortings
+    ///@param _owner Creator of the listings to query
+    ///@param _category Category of listings to query  // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi.
+    ///@param _sort Sortings of listings to query // "listed" or "purchased"
+    ///@param _length How many aavegotchi listings to return
+    ///@return listings_ An array of structs, each struct containing details about each listing being returned
     function getOwnerAavegotchiListings(
         address _owner,
         uint256 _category,
@@ -96,6 +124,11 @@ contract ERC721MarketplaceFacet is Modifiers {
         }
     }
 
+    ///@notice Query a certain amount of ERC721 listings
+    ///@param _category Category of listings to query // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi.
+    ///@param _sort Sortings of listings to query  // "listed" or "purchased"
+    ///@param _length How many listings to return
+    ///@return listings_ An array of structs, each struct containing details about each listing being returned
     function getERC721Listings(
         uint256 _category, // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi.
         string memory _sort, // "listed" or "purchased"
@@ -113,6 +146,11 @@ contract ERC721MarketplaceFacet is Modifiers {
         }
     }
 
+    ///@notice Query a certain amount of aavegotchi listings
+    ///@param _category Category of listings to query // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi.
+    ///@param _sort Sortings of listings to query
+    ///@param _length How many listings to return
+    ///@return listings_ An array of structs, each struct containing details about each listing being returned
     function getAavegotchiListings(
         uint256 _category, // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi
         string memory _sort, // "listed" or "purchased"
@@ -132,10 +170,21 @@ contract ERC721MarketplaceFacet is Modifiers {
         }
     }
 
+    ///@notice Query the category of an NFT
+    ///@param _erc721TokenAddress The contract address of the NFT to query
+    ///@param _erc721TokenId The identifier of the NFT to query
+    ///@return category_ Category of the NFT // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi.
     function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view returns (uint256 category_) {
         require(_erc721TokenAddress == address(this), "ERC721Marketplace: ERC721 category does not exist");
         category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
     }
+
+    ///@notice Allow an ERC721 owner to list his NFT for sale
+    ///@dev If the NFT has been listed before,it cancels it and replaces it with the new one
+    ///@dev NFTs that are listed are immediately locked
+    ///@param _erc721TokenAddress The contract address of the NFT to be listed
+    ///@param _erc721TokenId The identifier of the NFT to be listed
+    ///@param _priceInWei The cost price of the NFT in $GHST
 
     function addERC721Listing(
         address _erc721TokenAddress,
@@ -187,14 +236,23 @@ contract ERC721MarketplaceFacet is Modifiers {
         }
     }
 
+    ///@notice Allow an ERC721 owner to cancel his NFT listing by providing the NFT contract address and identifier
+    ///@param _erc721TokenAddress The contract address of the NFT to be delisted
+    ///@param _erc721TokenId The identifier of the NFT to be delisted
     function cancelERC721ListingByToken(address _erc721TokenAddress, uint256 _erc721TokenId) external {
         LibERC721Marketplace.cancelERC721Listing(_erc721TokenAddress, _erc721TokenId, LibMeta.msgSender());
     }
+
+    ///@notice Allow an ERC721 owner to cancel his NFT listing through the listingID
+    ///@param _listingId The identifier of the listing to be cancelled
 
     function cancelERC721Listing(uint256 _listingId) external {
         LibERC721Marketplace.cancelERC721Listing(_listingId, LibMeta.msgSender());
     }
 
+    ///@notice Allow a buyer to execute an open listing i.e buy the NFT
+    ///@dev Will throw if the NFT has been sold or if the listing has been cancelled already
+    ///@param _listingId The identifier of the listing to execute
     function executeERC721Listing(uint256 _listingId) external {
         ERC721Listing storage listing = s.erc721Listings[_listingId];
         require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
@@ -244,6 +302,10 @@ contract ERC721MarketplaceFacet is Modifiers {
         );
     }
 
+    ///@notice Update the ERC721 listing of an address
+    ///@param _erc721TokenAddress Contract address of the ERC721 token
+    ///@param _erc721TokenId Identifier of the ERC721 token
+    ///@param _owner Owner of the ERC721 token
     function updateERC721Listing(
         address _erc721TokenAddress,
         uint256 _erc721TokenId,
@@ -252,6 +314,8 @@ contract ERC721MarketplaceFacet is Modifiers {
         LibERC721Marketplace.updateERC721Listing(_erc721TokenAddress, _erc721TokenId, _owner);
     }
 
+    ///@notice Allow an ERC721 owner to cancel his NFT listings through the listingIDs
+    ///@param _listingIds An array containing the identifiers of the listings to be cancelled
     function cancelERC721Listings(uint256[] calldata _listingIds) external onlyOwner {
         for (uint256 i; i < _listingIds.length; i++) {
             uint256 listingId = _listingIds[i];
