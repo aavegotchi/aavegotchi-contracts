@@ -1,4 +1,3 @@
-
 //updating IDs 69 (farmer pitchfork) 229 (Lasso),
 
 import { ethers, network } from "hardhat";
@@ -9,11 +8,12 @@ import {
   wearablesBackSvgs,
 } from "../../svgs/wearables-sides";
 
-import {
-  wearablesSvgs,
-} from "../../svgs/wearables";
+import { wearablesSvgs } from "../../svgs/wearables";
 
-import { sideViewDimensions1, sideViewDimensions8 } from "../../svgs/sideViewDimensions";
+import {
+  sideViewDimensions1,
+  sideViewDimensions8,
+} from "../../svgs/sideViewDimensions";
 import { SvgFacet } from "../../typechain";
 import { uploadOrUpdateSvg } from "../svgHelperFunctions";
 import { Signer } from "@ethersproject/abstract-signer";
@@ -42,9 +42,7 @@ async function main() {
   }
 
   console.log("Updating Wearables");
-  const itemIds = [
-    69, 229,
-  ];
+  const itemIds = [69, 229];
 
   const svgFacet = (await ethers.getContractAt(
     "SvgFacet",
@@ -102,37 +100,6 @@ async function main() {
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
-
-    // // **** Test ****
-  // // BODY = 0;
-  // // FACE = 1;
-  // // EYES = 2;
-  // // HEAD = 3;
-  // // RIGHT = 4;
-  // // LEFT = 5;
-  // // PET = 6;
-  // // BG = 7;
-
-  let numTraits1 :[
-    number,number,number,number,
-    number,number
-  ]=[99, 99, 99, 99, 12, 9];
-
-  let wearables1 :[
-    number,number,number,number,
-    number,number,number,number,
-    number,number,number,number,
-    number,number,number,number
-  ]= [0, 0, 0, 0, 229, 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  const sidePreview = await svgViewsFacet.previewSideAavegotchi(
-    "2",
-    /* "0xE0b22E0037B130A9F56bBb537684E6fA18192341", //Dai */
-    "0x20D3922b4a1A8560E1aC99FBA4faDe0c849e2142", //aWEth
-    numTraits1,
-    wearables1
-  );
-  console.log("Side Preview: ", sidePreview);
-
 }
 
 main()

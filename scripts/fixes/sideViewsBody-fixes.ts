@@ -16,7 +16,6 @@ async function main() {
   const hawaiianBlueShirt = 115;
 
   console.log("SVGs: ", rastaFront);
-  
 
   const itemIds = [pajamaPants, rastaShirt, hawaiianBlueShirt];
 

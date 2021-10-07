@@ -1,4 +1,3 @@
-
 //updating ETH, AAVE, USDT, USDC, YFI, TUSD
 
 import { run } from "hardhat";
@@ -22,28 +21,27 @@ async function main() {
   ];
 
   for (let index = 0; index < itemIds.length; index++) {
-  const itemId = itemIds[index];
+    const itemId = itemIds[index];
 
-  console.log("Updating SVGs for id: ", itemId);
+    console.log("Updating SVGs for id: ", itemId);
 
-  const left = collateralsLeftSvgs[itemId];
-  const right = collateralsRightSvgs[itemId];
+    const left = collateralsLeftSvgs[itemId];
+    const right = collateralsRightSvgs[itemId];
 
-  let taskArgsLeft: UpdateSvgsTaskArgs = {
-    svgIds: [itemId].join(","),
-    svgType: "collaterals-left",
-    svgs: [left].join("***"),
+    let taskArgsLeft: UpdateSvgsTaskArgs = {
+      svgIds: [itemId].join(","),
+      svgType: "collaterals-left",
+      svgs: [left].join("***"),
+    };
+    await run("updateSvgs", taskArgsLeft);
+
+    let taskArgsRight: UpdateSvgsTaskArgs = {
+      svgIds: [itemId].join(","),
+      svgType: "collaterals-right",
+      svgs: [right].join("***"),
+    };
+    await run("updateSvgs", taskArgsRight);
   }
-  await run("updateSvgs", taskArgsLeft);
-
-  let taskArgsRight: UpdateSvgsTaskArgs = {
-    svgIds: [itemId].join(","),
-    svgType: "collaterals-right",
-    svgs: [right].join("***"),
-  }
-  await run("updateSvgs", taskArgsRight); 
-  }
-
 }
 
 main()

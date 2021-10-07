@@ -14,15 +14,11 @@ import {
 } from "../../svgs/sideViewDimensions";
 import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 
-import {
-  convertSideDimensionsToTaskFormat,
-  UpdateItemSideDimensionsTaskArgs,
-} from "../../tasks/updateItemSideDimensions";
+import { convertSideDimensionsToTaskFormat } from "../../tasks/updateItemSideDimensions";
 
 async function main() {
   let itemIds = [237, 238];
 
-  /*
   for (let index = 0; index < itemIds.length; index++) {
     const itemId = itemIds[index];
 
@@ -51,7 +47,6 @@ async function main() {
     };
     await run("updateSvgs", taskArgsBack);
   }
-  */
 
   await run(
     "updateItemSideDimensions",
