@@ -1,8 +1,4 @@
-import {
-  SubgraphGotchis,
-  SubgraphGotchiUsers,
-  UserGotchisOwned,
-} from "../../../types";
+import { SubgraphGotchis } from "../../../types";
 export const addresses: string[] = [
   "0x02206509a713e003bd099fd12a2edfef9af84665",
   "0x02aee0ce756fa0157294ff3ff48c1dd02adccf04",
