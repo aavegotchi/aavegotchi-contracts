@@ -3,8 +3,12 @@ const {
   addresses,
 } = require("../../data/airdrops/coreprop/LiquidityManagerFrens.ts");
 let queryData: any;
+const maticGraphUrl: string =
+  "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic";
+const ethGraphUrl: string =
+  "https://thegraph.com/hosted-service/subgraph/aavegotchi/aavegotchi-ethereum";
 
-async function out() {
+async function getPolygonGotchis() {
   queryData = `
   {users(where:{id_in:[${addresses.map(
     (add: string) => '"' + add + '"'
@@ -14,21 +18,11 @@ async function out() {
       id
     }}
     
-    users(where:{id_in:[${addresses.map(
-      (add: string) => '"' + add + '"'
-    )}]},first:100,skip:100) {
-      id
-      gotchisOwned(first:1000) {
-        id
-      }
-  }
+
   }
 `;
 
-  request(
-    "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic",
-    queryData
-  ).then((data: { users: any }) =>
+  request(maticGraphUrl, queryData).then((data: { users: any }) =>
     console.log(JSON.stringify(data.users), data.users.length)
   );
 }
@@ -43,12 +37,9 @@ async function getMainnetGotchis() {
       id
     }}}
   `;
-  request(
-    "https://api.thegraph.com/subgraphs/name/froid1911/aavegotchi-eth-subgraph",
-    queryData
-  ).then((data: { users: any }) =>
+  request(ethGraphUrl, queryData).then((data: { users: any }) =>
     console.log(JSON.stringify(data.users), data.users.length)
   );
 }
-//out();
-getMainnetGotchis();
+//getPolygonGotchis();
+//getMainnetGotchis();
