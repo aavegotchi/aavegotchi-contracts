@@ -82,12 +82,13 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     // find duplicates:
     const duplicateAddresses: string[] = [];
     const processedAddresses: string[] = [];
-
+    let address: string;
     const addressCounts: AddressCounts = {};
-    for (const address of addresses) {
+    for (address of addresses) {
       if (processedAddresses.includes(address)) {
         duplicateAddresses.push(address);
-      } else {
+      }
+      if (!processedAddresses.includes(address)) {
         processedAddresses.push(address);
       }
 
@@ -103,27 +104,27 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     console.log("address countd:", addressCounts);
 
-    let extraXpGiven = 0;
-    Object.keys(addressCounts).forEach((address) => {
-      const count = addressCounts[address];
+    // let extraXpGiven = 0;
+    // Object.keys(addressCounts).forEach((address) => {
+    //   const count = addressCounts[address];
 
-      if (count > 1) {
-        const gotchisOwned = data.data.users.find(
-          (obj) => obj.id.toLowerCase() === address.toLowerCase()
-        )?.gotchisOwned;
+    //   if (count > 1) {
+    //     const gotchisOwned = data.data.users.find(
+    //       (obj) => obj.id.toLowerCase() === address.toLowerCase()
+    //     )?.gotchisOwned;
 
-        if (gotchisOwned) {
-          gotchisOwned.forEach((gotchi) => {
-            console.log(`${gotchi.id},`);
-          });
-        }
+    //     if (gotchisOwned) {
+    //       gotchisOwned.forEach((gotchi) => {
+    //         console.log(`${gotchi.id},`);
+    //       });
+    //     }
 
-        // console.log(`${address} has: ${count}`);
-        extraXpGiven = extraXpGiven + (count - 1) * 10;
-      }
-    });
+    //     // console.log(`${address} has: ${count}`);
+    //     extraXpGiven = extraXpGiven + (count - 1) * 10;
+    //   }
+    // });
 
-    console.log("extra xp given:", extraXpGiven);
+    // console.log("extra xp given:", extraXpGiven);
 
     // console.log("duplicate:", duplicateAddresses);
 
@@ -135,6 +136,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     const txData = [];
     let txGroup = [];
     let tokenIdsNum = 0;
+    console.log(data);
     for (const address of addresses) {
       const ownerRow = data.data.users.find(
         (obj) => obj.id.toLowerCase() === address.toLowerCase()

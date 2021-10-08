@@ -24,6 +24,7 @@ async function out() {
   }
   }
 `;
+
   request(
     "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic",
     queryData
@@ -31,4 +32,23 @@ async function out() {
     console.log(JSON.stringify(data.users), data.users.length)
   );
 }
-out();
+
+async function getMainnetGotchis() {
+  queryData = `
+  {users(where:{id_in:[${LiquidityManagerSigProp.map(
+    (add: string) => '"' + add + '"'
+  )}]},first:1000) {
+    id
+    gotchisOwned(first:1000) {
+      id
+    }}}
+  `;
+  request(
+    "https://api.thegraph.com/subgraphs/name/froid1911/aavegotchi-eth-subgraph",
+    queryData
+  ).then((data: { users: any }) =>
+    console.log(JSON.stringify(data.users), data.users.length)
+  );
+}
+//out();
+getMainnetGotchis();
