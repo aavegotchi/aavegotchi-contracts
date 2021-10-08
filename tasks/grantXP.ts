@@ -175,13 +175,6 @@ task("grantXP", "Grants XP to Gotchis by addresses")
         );
       }, []);
 
-      tokenIds.forEach((id) => {
-        if (receivedTokenIds.includes(id))
-          console.log(`${id} has already received XP!`);
-        duplicatedTokenIds.push(id);
-        //  throw `ID ${id} has already received XP!`;
-      });
-
       console.log("token ids:", tokenIds);
 
       tokenIds.forEach((id) => {
@@ -210,5 +203,5 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       console.log("");
     }
 
-    console.log("Final duplicated tokenIds:", duplicatedTokenIds);
+    console.log("Final duplicated addresses:", duplicateAddresses);
   });

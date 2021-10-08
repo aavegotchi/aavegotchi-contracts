@@ -1,12 +1,12 @@
 const { request, gql } = require("graphql-request");
 const {
-  LiquidityManagerSigProp,
-} = require("../../data/airdrops/sigprop/LiquidityManagerSigProp.ts");
+  addresses,
+} = require("../../data/airdrops/coreprop/LiquidityManagerFrens.ts");
 let queryData: any;
 
 async function out() {
   queryData = `
-  {users(where:{id_in:[${LiquidityManagerSigProp.map(
+  {users(where:{id_in:[${addresses.map(
     (add: string) => '"' + add + '"'
   )}]},first:1000) {
     id
@@ -14,7 +14,7 @@ async function out() {
       id
     }}
     
-    users(where:{id_in:[${LiquidityManagerSigProp.map(
+    users(where:{id_in:[${addresses.map(
       (add: string) => '"' + add + '"'
     )}]},first:100,skip:100) {
       id
@@ -35,7 +35,7 @@ async function out() {
 
 async function getMainnetGotchis() {
   queryData = `
-  {users(where:{id_in:[${LiquidityManagerSigProp.map(
+  {users(where:{id_in:[${addresses.map(
     (add: string) => '"' + add + '"'
   )}]},first:1000) {
     id
