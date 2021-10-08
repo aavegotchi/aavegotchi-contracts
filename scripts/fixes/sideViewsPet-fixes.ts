@@ -35,7 +35,20 @@ async function main() {
     }
   }
 
-  const newDimensions: SideDimensions[] = [];
+  const newDimensions: SideDimensions[] = [
+    {
+      itemId: 237,
+      name: "Mythical Cacti",
+      side: "back",
+      dimensions: { x: 0, y: 45, width: 15, height: 15 },
+    },
+    {
+      itemId: 238,
+      name: "Godlike Cacti",
+      side: "back",
+      dimensions: { x: 1, y: 44, width: 62, height: 10 },
+    },
+  ];
 
   await run(
     "updateItemSideDimensions",
