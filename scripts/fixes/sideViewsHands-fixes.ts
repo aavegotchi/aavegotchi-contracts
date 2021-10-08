@@ -101,11 +101,7 @@ async function main() {
 
   await run(
     "updateItemSideDimensions",
-    convertSideDimensionsToTaskFormat(sideViewDimensions1)
-  );
-  await run(
-    "updateItemSideDimensions",
-    convertSideDimensionsToTaskFormat(sideViewDimensions8)
+    convertSideDimensionsToTaskFormat(newDimensions)
   );
 }
 
