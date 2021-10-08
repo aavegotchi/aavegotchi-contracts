@@ -3,18 +3,14 @@
 import { run } from "hardhat";
 
 import {
-  wearablesLeftSvgs,
-  wearablesRightSvgs,
-  wearablesBackSvgs,
+  wearablesLeftSvgs as left,
+  wearablesRightSvgs as right,
+  wearablesBackSvgs as back,
 } from "../../svgs/wearables-sides";
-
-import {
-  sideViewDimensions6,
-  sideViewDimensions8,
-} from "../../svgs/sideViewDimensions";
 
 import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 import { convertSideDimensionsToTaskFormat } from "../../tasks/updateItemSideDimensions";
+import { SideDimensions } from "../itemTypeHelpers";
 
 async function main() {
   let itemIds = [237, 238];
@@ -22,39 +18,28 @@ async function main() {
   for (let index = 0; index < itemIds.length; index++) {
     const itemId = itemIds[index];
 
-    const left = wearablesLeftSvgs[itemId];
-    const right = wearablesRightSvgs[itemId];
-    const back = wearablesBackSvgs[itemId];
+    const sides = ["left", "right", "back"];
+    const sideArrays = [left[itemId], right[itemId], back[itemId]];
 
-    let taskArgsLeft: UpdateSvgsTaskArgs = {
-      svgIds: [itemId].join(","),
-      svgType: "wearables-left",
-      svgs: [left].join("***"),
-    };
-    await run("updateSvgs", taskArgsLeft);
+    for (let index = 0; index < sides.length; index++) {
+      const side = sides[index];
+      const sideArray = sideArrays[index];
 
-    let taskArgsRight: UpdateSvgsTaskArgs = {
-      svgIds: [itemId].join(","),
-      svgType: "wearables-right",
-      svgs: [right].join("***"),
-    };
-    await run("updateSvgs", taskArgsRight);
+      let taskArgsLeft: UpdateSvgsTaskArgs = {
+        svgIds: [itemId].join(","),
+        svgType: `wearables-${side}`,
+        svgs: [sideArray].join("***"),
+      };
 
-    let taskArgsBack: UpdateSvgsTaskArgs = {
-      svgIds: [itemId].join(","),
-      svgType: "wearables-back",
-      svgs: [back].join("***"),
-    };
-    await run("updateSvgs", taskArgsBack);
+      await run("updateSvgs", taskArgsLeft);
+    }
   }
 
+  const newDimensions: SideDimensions[] = [];
+
   await run(
     "updateItemSideDimensions",
-    convertSideDimensionsToTaskFormat(sideViewDimensions6)
-  );
-  await run(
-    "updateItemSideDimensions",
-    convertSideDimensionsToTaskFormat(sideViewDimensions8)
+    convertSideDimensionsToTaskFormat(newDimensions)
   );
 }
 
