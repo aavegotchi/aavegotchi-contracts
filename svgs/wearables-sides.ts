@@ -239,7 +239,7 @@ export const wearablesRightSvgs = [
   wearable("235_ShaamanHoodieRight"),
   "236_BlueCactiRight",
   "237_MythicalCactiRight",
-  "238_GodlikeCactiRight",
+  wearable("238_GodlikeCactiRight"),
   wearable("239_WagieCapRight"),
   wearable("240_HeadphonesRight"),
   bodyWearableRight("241_WGMIShirt"),
