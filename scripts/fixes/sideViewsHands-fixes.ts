@@ -47,9 +47,6 @@ async function main() {
     const sideArrays = [front[itemId]];
 
     for (let index = 0; index < sides.length; index++) {
-      const side = sides[index];
-      const sideArray = sideArrays[index];
-
       let taskArgsFront: UpdateSvgsTaskArgs = {
         svgIds: [itemId].join(","),
         svgType: `wearables`,

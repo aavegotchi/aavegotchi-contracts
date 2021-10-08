@@ -1,4 +1,4 @@
-import { ethers, run } from "hardhat";
+import { run } from "hardhat";
 
 import { wearablesSvgs } from "../../svgs/wearables";
 
@@ -25,9 +25,7 @@ async function main() {
     svgs: [rastaFront].join("***"),
   };
 
-  console.log("task args:", taskArgs);
-
-  // await run("updateSvgs", taskArgs);
+  await run("updateSvgs", taskArgs);
 
   //dimensions
   console.log("Updating Dimensions");
