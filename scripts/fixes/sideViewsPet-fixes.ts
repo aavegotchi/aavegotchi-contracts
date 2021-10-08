@@ -14,11 +14,11 @@ import { SideDimensions } from "../itemTypeHelpers";
 
 async function main() {
   let itemIds = [237, 238];
+  const sides = ["left", "right", "back"];
 
   for (let index = 0; index < itemIds.length; index++) {
     const itemId = itemIds[index];
 
-    const sides = ["left", "right", "back"];
     const sideArrays = [left[itemId], right[itemId], back[itemId]];
 
     for (let index = 0; index < sides.length; index++) {
