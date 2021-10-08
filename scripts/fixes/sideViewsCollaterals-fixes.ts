@@ -3,8 +3,8 @@
 import { run } from "hardhat";
 
 import {
-  collateralsLeftSvgs,
-  collateralsRightSvgs,
+  collateralsLeftSvgs as left,
+  collateralsRightSvgs as right,
 } from "../../svgs/collaterals-sides";
 
 import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
@@ -20,27 +20,25 @@ async function main() {
     8, // "0xF4b8888427b00d7caf21654408B7CBA2eCf4EbD9" TUSD
   ];
 
+  const sides = ["left", "right"];
+
   for (let index = 0; index < itemIds.length; index++) {
     const itemId = itemIds[index];
 
-    console.log("Updating SVGs for id: ", itemId);
+    const sideArrays = [left[itemId], right[itemId]];
 
-    const left = collateralsLeftSvgs[itemId];
-    const right = collateralsRightSvgs[itemId];
+    for (let index = 0; index < sides.length; index++) {
+      const side = sides[index];
+      const sideArray = sideArrays[index];
 
-    let taskArgsLeft: UpdateSvgsTaskArgs = {
-      svgIds: [itemId].join(","),
-      svgType: "collaterals-left",
-      svgs: [left].join("***"),
-    };
-    await run("updateSvgs", taskArgsLeft);
+      let taskArgsLeft: UpdateSvgsTaskArgs = {
+        svgIds: [itemId].join(","),
+        svgType: `collaterals-${side}`,
+        svgs: [sideArray].join("***"),
+      };
 
-    let taskArgsRight: UpdateSvgsTaskArgs = {
-      svgIds: [itemId].join(","),
-      svgType: "collaterals-right",
-      svgs: [right].join("***"),
-    };
-    await run("updateSvgs", taskArgsRight);
+      await run("updateSvgs", taskArgsLeft);
+    }
   }
 }
 

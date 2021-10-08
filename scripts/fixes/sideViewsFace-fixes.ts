@@ -2,22 +2,33 @@
 
 import { run } from "hardhat";
 
-import { wearablesBackSvgs } from "../../svgs/wearables-sides";
+import { wearablesBackSvgs as back } from "../../svgs/wearables-sides";
 
 import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 
 async function main() {
   console.log("Updating Wearables");
   const itemIds = [216];
-  const rainbowVomit = 216;
-  const back = wearablesBackSvgs[216];
+  const sides = ["back"];
 
-  const taskArgs: UpdateSvgsTaskArgs = {
-    svgIds: [rainbowVomit].join(),
-    svgType: "wearables-back",
-    svgs: [back].join("***"),
-  };
-  await run("updateSvgs", taskArgs);
+  for (let index = 0; index < itemIds.length; index++) {
+    const itemId = itemIds[index];
+
+    const sideArrays = [back[itemId]];
+
+    for (let index = 0; index < sides.length; index++) {
+      const side = sides[index];
+      const sideArray = sideArrays[index];
+
+      let taskArgsLeft: UpdateSvgsTaskArgs = {
+        svgIds: [itemId].join(","),
+        svgType: `wearables-${side}`,
+        svgs: [sideArray].join("***"),
+      };
+
+      await run("updateSvgs", taskArgsLeft);
+    }
+  }
 }
 
 main()
