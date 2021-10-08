@@ -8,7 +8,7 @@ const { aavegotchiSvgs } = require("../../svgs/aavegotchi-side.js");
 const {
   collateralsLeftSvgs,
   collateralsRightSvgs,
-} = require("../../svgs/collaterals-sides.js");
+} = require("../../svgs/collaterals-sidesOld.js");
 
 async function main() {
   console.log("Update SVG Start");

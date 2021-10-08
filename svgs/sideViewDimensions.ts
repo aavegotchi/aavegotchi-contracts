@@ -1,4 +1,6 @@
-export const sideViewDimensions1 = [
+import { SideDimensions, Dimensions } from "../scripts/itemTypeHelpers";
+
+export const sideViewDimensions1: SideDimensions[] = [
   {
     itemId: 0,
     name: "The Void",
@@ -5376,7 +5378,7 @@ export const sideViewDimensions8 = [
     itemId: 229,
     name: "Lasso",
     side: "left",
-    dimensions: { x: 14, y: 23, width: 12, height: 26 },
+    dimensions: { x: 24, y: 23, width: 12, height: 26 },
   },
   {
     itemId: 230,
@@ -5592,7 +5594,7 @@ export const sideViewDimensions8 = [
     itemId: 237,
     name: "Mythical Cacti",
     side: "back",
-    dimensions: { x: 0, y: 45, width: 13, height: 17 },
+    dimensions: { x: 0, y: 45, width: 15, height: 15 },
   },
   {
     itemId: 237,
@@ -5604,7 +5606,7 @@ export const sideViewDimensions8 = [
     itemId: 238,
     name: "Godlike Cacti",
     side: "back",
-    dimensions: { x: 1, y: 45, width: 62, height: 14 },
+    dimensions: { x: 1, y: 44, width: 62, height: 10 },
   },
   {
     itemId: 238,
@@ -6135,13 +6137,13 @@ export const sideViewDimensions9 = [
     itemId: 254,
     name: "uGOTCHI Token",
     side: "left",
-    dimensions: { x:25, y:33, width:2, height:12 },
+    dimensions: { x: 25, y: 33, width: 2, height: 12 },
   },
   {
     itemId: 254,
     name: "uGOTCHI Token",
     side: "right",
-    dimensions: { x:37, y:33, width:2, height:12 },
+    dimensions: { x: 37, y: 33, width: 2, height: 12 },
   },
   {
     itemId: 255,

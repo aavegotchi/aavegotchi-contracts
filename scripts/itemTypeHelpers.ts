@@ -7,11 +7,18 @@ export interface SleeveObject {
   svg: string;
 }
 
-interface Dimensions {
+export interface Dimensions {
   x: BigNumberish;
   y: BigNumberish;
   width: BigNumberish;
   height: BigNumberish;
+}
+
+export interface SideDimensions {
+  itemId: BigNumberish;
+  name?: string;
+  side: string;
+  dimensions: Dimensions;
 }
 
 export interface ItemTypeInput {
@@ -29,6 +36,7 @@ export interface ItemTypeInput {
   width?: number;
   height?: number;
   dimensions: Dimensions;
+  sideDimensions: SideDimensions;
   allowedCollaterals: BigNumberish[];
   ghstPrice: BigNumberish | BigNumberish;
   traitModifiers: [

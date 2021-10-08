@@ -10,11 +10,17 @@ dotenv.config({ path: __dirname + "/.env" });
 
 require("./tasks/verifyFacet.ts");
 require("./tasks/deployUpgrade.ts");
+<<<<<<< HEAD
 require("./tasks/addWearableSets.ts");
 require("./tasks/grantXP.ts");
 require("./tasks/generateDiamondABI.ts");
 require("./tasks/generateDiamondABI_eth.ts");
 require("./tasks/removeXP.ts");
+=======
+require("./tasks/updateItemDimensions.ts");
+require("./tasks/updateSvgs.ts");
+require("./tasks/updateItemSideDimensions.ts");
+>>>>>>> svg-fixes
 // require("./tasks/addItemTypes.ts");
 
 // You have to export an object to set up your config
@@ -37,6 +43,7 @@ export default {
     localhost: {
       timeout: 16000000,
     },
+<<<<<<< HEAD
     matic: {
       url: process.env.MATIC_URL,
       // url: 'https://rpc-mainnet.maticvigil.com/',
@@ -46,6 +53,17 @@ export default {
       // gasPrice: 1000000000,
       // timeout: 90000,
     },
+=======
+    // matic: {
+    //   url: process.env.MATIC_URL,
+    //   // url: 'https://rpc-mainnet.maticvigil.com/',
+    //   accounts: [process.env.SECRET],
+    //   // blockGasLimit: 20000000,
+    //   blockGasLimit: 20000000,
+    //   gasPrice: 1000000000,
+    //   timeout: 90000
+    // }
+>>>>>>> svg-fixes
     // mumbai: {
     //   url: 'https://rpc-mumbai.matic.today',
     //   accounts: [process.env.SECRET],
