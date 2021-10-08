@@ -12,6 +12,12 @@ import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 import { convertSideDimensionsToTaskFormat } from "../../tasks/updateItemSideDimensions";
 import { SideDimensions } from "../itemTypeHelpers";
 
+import {
+  convertDimensionsArrayToString,
+  UpdateItemDimensionsTaskArgs,
+} from "../../tasks/updateItemDimensions";
+import { Dimensions } from "../itemTypeHelpers";
+
 async function main() {
   let itemIds = [237, 238];
   const sides = ["left", "right", "back"];
@@ -54,6 +60,16 @@ async function main() {
     "updateItemSideDimensions",
     convertSideDimensionsToTaskFormat(newDimensions)
   );
+
+  const mythicalCactiId = 237;
+  const mythicalCactiDimensions = { x: 40, y: 45, width: 23, height: 17 };
+  const dimensions: Dimensions[] = [mythicalCactiDimensions];
+
+  const dimensionsTaskArgs: UpdateItemDimensionsTaskArgs = {
+    itemIds: [mythicalCactiId].join(","),
+    dimensions: convertDimensionsArrayToString(dimensions),
+  };
+  await run("updateItemDimensions", dimensionsTaskArgs);
 }
 
 main()

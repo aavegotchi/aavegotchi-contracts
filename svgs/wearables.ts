@@ -1,7 +1,7 @@
-const fs = require('fs')
+const fs = require("fs");
 
 export const wearablesSvgs = [
-wearable("0_Void"),
+  wearable("0_Void"),
   wearable("1_CamoHat"),
   wearable("2_CamoPants"), // body but doesn't have sleeves
   wearable("3_MK2Grenade"),
@@ -111,13 +111,13 @@ wearable("0_Void"),
   wearable("107_PortalMageBlackAxe"),
   wearable("108_RastaDreds"),
   bodyWearable("109_RastaShirt"),
-/*  wearable("110_JamaicanFlag"),
+  wearable("110_JamaicanFlag"),
   wearable("111_HazmatHood"),
   bodyWearable("112_HazmatSuit"),
   wearable("113_UraniumRod"),
   bodyWearable("114_RedHawaiianShirt"),
   bodyWearable("115_BlueHawaiianShirt"),
-  wearable("116_Coconut"),
+  /* wearable("116_Coconut"),
   wearable("117_DealWithItShades"),
   wearable("118_WaterJug"),
   wearable("119_BabyBottle"),
@@ -265,35 +265,54 @@ wearable("0_Void"),
   wearable("261_AantenaBot"),
   262,
   wearable("263_SignalHeadset"), */
-]
+];
 
-function stripSvg (svg: string) {
+function stripSvg(svg: string) {
   // removes svg tag
-  if (svg.includes('viewBox')) {
-    svg = svg.slice(svg.indexOf('>') + 1)
-    svg = svg.replace('</svg>', '')
+  if (svg.includes("viewBox")) {
+    svg = svg.slice(svg.indexOf(">") + 1);
+    svg = svg.replace("</svg>", "");
   }
-  return svg
+  return svg;
 }
 
-function readSvg (name: string) {
-  return stripSvg(fs.readFileSync(`./svgs/svgitems/${name}.svg`, 'utf8'))
+function readSvg(name: string) {
+  return stripSvg(fs.readFileSync(`./svgs/svgitems/${name}.svg`, "utf8"));
 }
 
-function wearable (name: string) {
-  const svg = readSvg(name)
+function wearable(name: string) {
+  const svg = readSvg(name);
   // svg = `<g>${svg}</g>`
-  return svg
+  return svg;
 }
 
-function bodyWearable (name: string) {
-  let svg = readSvg(name)
-  const leftSleevesUp = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-up">' + readSvg(`${name}LeftUp`) + '</g>'
-  const leftSleeves = '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' + readSvg(`${name}Left`) + '</g>'
-  const rightSleevesUp = '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-up">' + readSvg(`${name}RightUp`) + '</g>'
-  const rightSleeves = '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-down">' + readSvg(`${name}Right`) + '</g>'
-  svg = '<g>' + svg + leftSleevesUp + leftSleeves + rightSleevesUp + rightSleeves + '</g>'
-  return svg
+function bodyWearable(name: string) {
+  let svg = readSvg(name);
+  const leftSleevesUp =
+    '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-up">' +
+    readSvg(`${name}LeftUp`) +
+    "</g>";
+  const leftSleeves =
+    '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' +
+    readSvg(`${name}Left`) +
+    "</g>";
+  const rightSleevesUp =
+    '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-up">' +
+    readSvg(`${name}RightUp`) +
+    "</g>";
+  const rightSleeves =
+    '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-down">' +
+    readSvg(`${name}Right`) +
+    "</g>";
+  svg =
+    "<g>" +
+    svg +
+    leftSleevesUp +
+    leftSleeves +
+    rightSleevesUp +
+    rightSleeves +
+    "</g>";
+  return svg;
 }
 
 /* exports.wearablesSvgs = wearablesSvgs */
