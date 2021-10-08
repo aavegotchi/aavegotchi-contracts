@@ -8,6 +8,8 @@ import {
   wearablesBackSvgs as back,
 } from "../../svgs/wearables-sides";
 
+import { wearablesSvgs } from "../../svgs/wearables";
+
 import {
   sideViewDimensions1,
   sideViewDimensions8,
@@ -32,14 +34,29 @@ async function main() {
       const side = sides[index];
       const sideArray = sideArrays[index];
 
-      let taskArgsLeft: UpdateSvgsTaskArgs = {
+      let taskArgsSides: UpdateSvgsTaskArgs = {
         svgIds: [itemId].join(","),
         svgType: `wearables-${side}`,
         svgs: [sideArray].join("***"),
       };
 
-      await run("updateSvgs", taskArgsLeft);
+      await run("updateSvgs", taskArgsSides);
     }
+  }
+
+  let frontItemIds = [69];
+  let pitchforkFront = wearablesSvgs[69];
+
+  for (let index = 0; index < frontItemIds.length; index++) {
+    const itemId = frontItemIds[index];
+
+    let taskArgsFront: UpdateSvgsTaskArgs = {
+      svgIds: [itemId].join(","),
+      svgType: `wearables`,
+      svgs: [pitchforkFront].join("***"),
+    };
+
+    await run("updateSvgs", taskArgsFront);
   }
 
   //dimensions
