@@ -8,12 +8,7 @@ import {
   wearablesBackSvgs as back,
 } from "../../svgs/wearables-sides";
 
-import { wearablesSvgs } from "../../svgs/wearables";
-
-import {
-  sideViewDimensions1,
-  sideViewDimensions8,
-} from "../../svgs/sideViewDimensions";
+import { wearablesSvgs as front } from "../../svgs/wearables";
 
 import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 import { convertSideDimensionsToTaskFormat } from "../../tasks/updateItemSideDimensions";
@@ -45,18 +40,24 @@ async function main() {
   }
 
   let frontItemIds = [69];
-  let pitchforkFront = wearablesSvgs[69];
 
   for (let index = 0; index < frontItemIds.length; index++) {
     const itemId = frontItemIds[index];
 
-    let taskArgsFront: UpdateSvgsTaskArgs = {
-      svgIds: [itemId].join(","),
-      svgType: `wearables`,
-      svgs: [pitchforkFront].join("***"),
-    };
+    const sideArrays = [front[itemId]];
 
-    await run("updateSvgs", taskArgsFront);
+    for (let index = 0; index < sides.length; index++) {
+      const side = sides[index];
+      const sideArray = sideArrays[index];
+
+      let taskArgsFront: UpdateSvgsTaskArgs = {
+        svgIds: [itemId].join(","),
+        svgType: `wearables`,
+        svgs: [sideArrays].join("***"),
+      };
+
+      await run("updateSvgs", taskArgsFront);
+    }
   }
 
   //dimensions
