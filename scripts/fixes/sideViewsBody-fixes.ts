@@ -1,6 +1,6 @@
 import { run } from "hardhat";
 
-import { wearablesSvgs } from "../../svgs/wearables";
+import { wearablesSvgs as front } from "../../svgs/wearables";
 
 import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 import {
@@ -10,22 +10,24 @@ import {
 import { Dimensions } from "../itemTypeHelpers";
 
 async function main() {
-  const rastaFront = wearablesSvgs[109];
-  const pajamaPants = 91;
-  const rastaShirt = 109;
-  const hawaiianBlueShirt = 115;
+  let frontItemIds = [91, 109, 115];
+  const side = ["front"];
 
-  console.log("SVGs: ", rastaFront);
+  for (let index = 0; index < frontItemIds.length; index++) {
+    const itemId = frontItemIds[index];
 
-  const itemIds = [pajamaPants, rastaShirt, hawaiianBlueShirt];
+    const sideArrays = [front[itemId]];
 
-  const taskArgs: UpdateSvgsTaskArgs = {
-    svgIds: [pajamaPants, rastaShirt, hawaiianBlueShirt].join(","),
-    svgType: "wearables",
-    svgs: [rastaFront].join("***"),
-  };
+    for (let index = 0; index < side.length; index++) {
+      let taskArgsFront: UpdateSvgsTaskArgs = {
+        svgIds: [itemId].join(","),
+        svgType: `wearables`,
+        svgs: [sideArrays].join("***"),
+      };
 
-  await run("updateSvgs", taskArgs);
+      await run("updateSvgs", taskArgsFront);
+    }
+  }
 
   //dimensions
   console.log("Updating Dimensions");
@@ -41,7 +43,7 @@ async function main() {
   ];
 
   const dimensionsTaskArgs: UpdateItemDimensionsTaskArgs = {
-    itemIds: itemIds.join(","),
+    itemIds: frontItemIds.join(","),
     dimensions: convertDimensionsArrayToString(dimensions),
   };
   await run("updateItemDimensions", dimensionsTaskArgs);
