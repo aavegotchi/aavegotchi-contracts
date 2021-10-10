@@ -6,6 +6,10 @@ import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { SubgraphGotchis } from "../types";
+import {
+  getPolygonGotchis,
+  getMainnetGotchis,
+} from "../scripts/query/queryAavegotchis";
 
 interface TaskArgs {
   filename: string;
@@ -77,6 +81,10 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     const dao = (
       await hre.ethers.getContractAt("DAOFacet", diamondAddress)
     ).connect(signer) as DAOFacet;
+
+    const polygonGotchis = await getPolygonGotchis(addresses);
+    const mainnetGotchis = await getMainnetGotchis(addresses);
+
     const data: SubgraphGotchis = gotchis;
 
     // find duplicates:

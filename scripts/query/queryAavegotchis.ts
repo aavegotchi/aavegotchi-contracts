@@ -1,14 +1,12 @@
 const { request, gql } = require("graphql-request");
-const {
-  addresses,
-} = require("../../data/airdrops/coreprop/LiquidityManagerFrens.ts");
+
 let queryData: any;
 const maticGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic";
 const ethGraphUrl: string =
   "https://thegraph.com/hosted-service/subgraph/aavegotchi/aavegotchi-ethereum";
 
-async function getPolygonGotchis() {
+export async function getPolygonGotchis(addresses: string[]) {
   queryData = `
   {users(where:{id_in:[${addresses.map(
     (add: string) => '"' + add + '"'
@@ -17,8 +15,6 @@ async function getPolygonGotchis() {
     gotchisOwned(first:1000) {
       id
     }}
-    
-
   }
 `;
 
@@ -27,7 +23,7 @@ async function getPolygonGotchis() {
   );
 }
 
-async function getMainnetGotchis() {
+export async function getMainnetGotchis(addresses: string[]) {
   queryData = `
   {users(where:{id_in:[${addresses.map(
     (add: string) => '"' + add + '"'
