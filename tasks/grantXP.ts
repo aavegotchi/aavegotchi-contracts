@@ -5,7 +5,7 @@ import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
-import { SubgraphGotchis } from "../types";
+import { UserGotchisOwned } from "../types";
 import {
   getPolygonGotchis,
   getMainnetGotchis,
@@ -59,7 +59,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     const xpAmount: number = Number(taskArgs.xpAmount);
     const batchSize: number = Number(taskArgs.batchSize);
 
-    const { addresses, gotchis } = require(`../data/airdrops/${filename}.ts`);
+    const { addresses } = require(`../data/airdrops/${filename}.ts`);
 
     const diamondAddress = maticDiamondAddress;
     const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119"; //await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
@@ -82,13 +82,17 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       await hre.ethers.getContractAt("DAOFacet", diamondAddress)
     ).connect(signer) as DAOFacet;
 
-    const polygonGotchis = await getPolygonGotchis(addresses);
-    // const mainnetGotchis = await getMainnetGotchis(addresses);
+    const polygonGotchis: UserGotchisOwned[] = await getPolygonGotchis(
+      addresses
+    );
+    const mainnetGotchis: UserGotchisOwned[] = await getMainnetGotchis(
+      addresses
+    );
 
-    console.log("polygon gtchis:", polygonGotchis);
+    const finalGotchis = polygonGotchis.concat(mainnetGotchis);
+
+    console.log("polygon gtchis:", finalGotchis);
     // console.log("mainnet gotchis:", mainnetGotchis);
-
-    const data: SubgraphGotchis = gotchis;
 
     // find duplicates:
     const duplicateAddresses: string[] = [];
@@ -145,9 +149,9 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     const txData = [];
     let txGroup = [];
     let tokenIdsNum = 0;
-    console.log(data);
+
     for (const address of addresses) {
-      const ownerRow = data.data.users.find(
+      const ownerRow = finalGotchis.find(
         (obj) => obj.id.toLowerCase() === address.toLowerCase()
       );
       if (ownerRow) {

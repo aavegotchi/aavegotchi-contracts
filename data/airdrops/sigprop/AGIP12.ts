@@ -1,5 +1,3 @@
-import { SubgraphGotchis } from "../../../types";
-
 export const addresses: string[] = [
   "0x7e4724c60718a9f87ce51bcf8812bf90d0b7b9db",
   "0x742656e138c5162290259a5da0182fdf054ee4f6",
