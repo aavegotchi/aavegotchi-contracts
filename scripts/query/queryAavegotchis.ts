@@ -11,16 +11,18 @@ export async function getSubgraphGotchis(
   network: "matic" | "eth"
 ): Promise<UserGotchisOwned[]> {
   const batches = Math.ceil(addresses.length / 1000);
-  console.log("batches:", batches);
 
   let queryData = `{`;
 
   for (let index = 0; index < batches; index++) {
     const batchId = index;
+    const offset = batchId * 1000;
     queryData = queryData.concat(`
-    batch${batchId}: users(where:{id_in:[${addresses.map(
-      (add: string) => '"' + add.toLowerCase() + '"'
-    )}]},first:1000) {
+    batch${batchId}: users(where:{id_in:[${addresses
+      .slice(offset, offset + 1000)
+      .map(
+        (add: string) => '"' + add.toLowerCase() + '"'
+      )}]},first:1000, skip:${offset}) {
       id
       gotchisOwned(first:1000) {
         id

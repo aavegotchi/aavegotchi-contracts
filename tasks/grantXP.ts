@@ -59,7 +59,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     const { addresses } = require(`../data/airdrops/${filename}.ts`);
 
     const diamondAddress = maticDiamondAddress;
-    const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119"; //await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
+    const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
     console.log(gameManager);
     let signer: Signer;
     const testing = ["hardhat", "localhost"].includes(hre.network.name);
@@ -79,21 +79,75 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       await hre.ethers.getContractAt("DAOFacet", diamondAddress)
     ).connect(signer) as DAOFacet;
 
-    const polygonGotchis: UserGotchisOwned[] = await getSubgraphGotchis(
+    const polygonUsers: UserGotchisOwned[] = await getSubgraphGotchis(
       addresses,
       "matic"
     );
-    console.log("Polygon Gotchis:", polygonGotchis.length);
+    const polygonGotchis = polygonUsers
+      .map((item) => item.gotchisOwned.length)
+      .reduce((agg, cur) => agg + cur);
+    console.log(
+      `Found ${polygonUsers.length} Polygon Users with ${polygonGotchis} Gotchis`
+    );
 
-    const mainnetGotchis: UserGotchisOwned[] = await getSubgraphGotchis(
+    const mainnetUsers: UserGotchisOwned[] = await getSubgraphGotchis(
       addresses,
       "eth"
     );
-    console.log("Eth Gotchis:", mainnetGotchis.length);
 
-    const finalGotchis = polygonGotchis.concat(mainnetGotchis);
+    const mainnetGotchis = mainnetUsers
+      .map((item) => item.gotchisOwned.length)
+      .reduce((agg, cur) => agg + cur);
+    console.log(
+      `Found ${mainnetUsers.length} Ethereum Users with ${mainnetGotchis} Gotchis`
+    );
 
-    // find duplicates:
+    const finalUsers = polygonUsers.concat(mainnetUsers);
+
+    const overlappingAddresses: string[] = [];
+
+    const tokenIds: string[] = [];
+
+    polygonUsers.forEach((user) => {
+      user.gotchisOwned.forEach((gotchi) => {
+        if (tokenIds.includes(gotchi.id))
+          throw new Error(`Duplicate token ID: ${gotchi.id}`);
+        else tokenIds.push(gotchi.id);
+      });
+    });
+
+    mainnetUsers.forEach((user) => {
+      user.gotchisOwned.forEach((gotchi) => {
+        if (tokenIds.includes(gotchi.id))
+          throw new Error(`Duplicate token ID: ${gotchi.id}`);
+        else tokenIds.push(gotchi.id);
+      });
+    });
+
+    polygonUsers.forEach((user) => {
+      const found = mainnetUsers.find((item) => item.id === user.id);
+      if (found) {
+        overlappingAddresses.push(user.id);
+      }
+    });
+
+    console.log(`Found ${overlappingAddresses.length} overlapping addresses`);
+
+    //Check how many unused addresses there are (addresses that voted, but do not have Aavegotchis)
+    const unusedAddresses: string[] = [];
+    const lowerCaseAddresses = addresses.map((address: string) =>
+      address.toLowerCase()
+    );
+    lowerCaseAddresses.forEach((address: string) => {
+      const found = finalUsers.find((val) => val.id === address);
+      if (!found) unusedAddresses.push(address);
+    });
+
+    console.log(
+      `There were ${unusedAddresses.length} voting addresses without Gotchis.`
+    );
+
+    //Find duplicate addresses:
     const duplicateAddresses: string[] = [];
     const processedAddresses: string[] = [];
     let address: string;
@@ -116,88 +170,27 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       throw Error("Duplicate addresses");
     }
 
-    // let extraXpGiven = 0;
-    // Object.keys(addressCounts).forEach((address) => {
-    //   const count = addressCounts[address];
-
-    //   if (count > 1) {
-    //     const gotchisOwned = data.data.users.find(
-    //       (obj) => obj.id.toLowerCase() === address.toLowerCase()
-    //     )?.gotchisOwned;
-
-    //     if (gotchisOwned) {
-    //       gotchisOwned.forEach((gotchi) => {
-    //         console.log(`${gotchi.id},`);
-    //       });
-    //     }
-
-    //     // console.log(`${address} has: ${count}`);
-    //     extraXpGiven = extraXpGiven + (count - 1) * 10;
-    //   }
-    // });
-
-    // console.log("extra xp given:", extraXpGiven);
-
-    // console.log("duplicate:", duplicateAddresses);
-
-    let totalGotchis = 0;
-    let receivedTokenIds: string[] = [];
-    let duplicatedTokenIds: string[] = [];
-
-    // group the data
-    const txData = [];
-    let txGroup = [];
-    let tokenIdsNum = 0;
-
-    for (const address of addresses) {
-      const ownerRow = finalGotchis.find(
-        (obj) => obj.id.toLowerCase() === address.toLowerCase()
-      );
-      if (ownerRow) {
-        if (batchSize < tokenIdsNum + ownerRow.gotchisOwned.length) {
-          txData.push(txGroup);
-          txGroup = [];
-          tokenIdsNum = 0;
-        }
-        txGroup.push(ownerRow);
-        tokenIdsNum += ownerRow.gotchisOwned.length;
-        totalGotchis += ownerRow.gotchisOwned.length;
-      }
-    }
-    if (tokenIdsNum > 0) {
-      txData.push(txGroup);
-      txGroup = [];
-      tokenIdsNum = 0;
-    }
+    const batches = Math.ceil(tokenIds.length / batchSize);
 
     console.log(
-      `Sending ${xpAmount} XP to ${totalGotchis} Aavegotchis in ${addresses.length} addresses!`
+      `Sending ${xpAmount} XP to ${tokenIds.length} Aavegotchis in ${finalUsers.length} addresses!`
     );
 
-    // send transactions
-    let addressIndex = 0;
-    for (const [i, txGroup] of txData.entries()) {
-      console.log("i:", i);
+    for (let index = 0; index < batches; index++) {
+      console.log("Current batch id:", index);
 
-      const txAddresses: string[] = txGroup.map((obj) => obj.id);
-      addressIndex += txAddresses.length;
-      const tokenIds: string[] = txGroup.reduce((acc: string[], obj: Data) => {
-        return acc.concat(
-          obj.gotchisOwned.map((tokenObj: GotchisOwned) => tokenObj.id)
-        );
-      }, []);
+      const offset = batchSize * index;
+      const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
 
-      console.log("token ids:", tokenIds);
+      console.log("send token ids:", sendTokenIds);
 
-      tokenIds.forEach((id) => {
-        receivedTokenIds.push(id);
-      });
-
-      console.log(`Sending ${xpAmount} XP to ${tokenIds.length} Aavegotchis `);
+      console.log(
+        `Sending ${xpAmount} XP to ${sendTokenIds.length} Aavegotchis `
+      );
 
       const tx: ContractTransaction = await dao.grantExperience(
-        tokenIds,
-        Array(tokenIds.length).fill(xpAmount),
+        sendTokenIds,
+        Array(sendTokenIds.length).fill(xpAmount),
         { gasPrice: gasPrice }
       );
       console.log("tx:", tx.hash);
@@ -207,13 +200,8 @@ task("grantXP", "Grants XP to Gotchis by addresses")
         throw Error(`Error:: ${tx.hash}`);
       }
       console.log(
-        "Airdropped XP to Aaavegotchis. Last address:",
-        txAddresses[txAddresses.length - 1]
+        "Airdropped XP to Aaavegotchis. Last tokenID:",
+        sendTokenIds[sendTokenIds.length - 1]
       );
-      console.log("A total of", tokenIds.length, "Aavegotchis");
-      console.log("Current address index:", addressIndex);
-      console.log("");
     }
-
-    console.log("Final duplicated addresses:", duplicateAddresses);
   });
