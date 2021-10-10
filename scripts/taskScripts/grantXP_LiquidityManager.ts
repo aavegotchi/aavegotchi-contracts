@@ -2,7 +2,7 @@ import { run } from "hardhat";
 
 async function grantXP() {
   await run("grantXP", {
-    filename: "coreprop/LiquidityManagerFrens",
+    filename: "sigprop/AGIP12",
     xpAmount: "10",
     batchSize: "50",
   });

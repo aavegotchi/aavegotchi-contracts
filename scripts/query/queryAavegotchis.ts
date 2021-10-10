@@ -1,8 +1,9 @@
-const { request, gql } = require("graphql-request");
+const { request } = require("graphql-request");
 
 let queryData: any;
 const maticGraphUrl: string =
-  "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic";
+  "https://aavegotchi.stakesquid-frens.gq/subgraphs/name/aavegotchi/aavegotchi-core-matic";
+//"https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic";
 const ethGraphUrl: string =
   "https://thegraph.com/hosted-service/subgraph/aavegotchi/aavegotchi-ethereum";
 
@@ -18,9 +19,10 @@ export async function getPolygonGotchis(addresses: string[]) {
   }
 `;
 
-  request(maticGraphUrl, queryData).then((data: { users: any }) =>
-    console.log(JSON.stringify(data.users), data.users.length)
-  );
+  await request(maticGraphUrl, queryData).then((data: { users: any }) => {
+    return JSON.stringify(data.users);
+    // console.log(JSON.stringify(data.users), data.users.length)
+  });
 }
 
 export async function getMainnetGotchis(addresses: string[]) {
@@ -33,9 +35,10 @@ export async function getMainnetGotchis(addresses: string[]) {
       id
     }}}
   `;
-  request(ethGraphUrl, queryData).then((data: { users: any }) =>
-    console.log(JSON.stringify(data.users), data.users.length)
-  );
+  await request(ethGraphUrl, queryData).then((data: { users: any }) => {
+    return JSON.stringify(data.users);
+    // console.log(JSON.stringify(data.users), data.users.length)
+  });
 }
 //getPolygonGotchis();
 //getMainnetGotchis();

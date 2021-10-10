@@ -83,7 +83,10 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     ).connect(signer) as DAOFacet;
 
     const polygonGotchis = await getPolygonGotchis(addresses);
-    const mainnetGotchis = await getMainnetGotchis(addresses);
+    // const mainnetGotchis = await getMainnetGotchis(addresses);
+
+    console.log("polygon gtchis:", polygonGotchis);
+    // console.log("mainnet gotchis:", mainnetGotchis);
 
     const data: SubgraphGotchis = gotchis;
 
@@ -109,8 +112,6 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       console.log(duplicateAddresses);
       // throw Error("Duplicate addresses");
     }
-
-    console.log("address countd:", addressCounts);
 
     // let extraXpGiven = 0;
     // Object.keys(addressCounts).forEach((address) => {
