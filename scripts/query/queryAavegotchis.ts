@@ -1,44 +1,45 @@
 import { request } from "graphql-request";
 import { UserGotchisOwned } from "../../types";
 
-let queryData: any;
 const maticGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic";
-//"https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic";
 const ethGraphUrl: string =
-  "https://thegraph.com/hosted-service/subgraph/aavegotchi/aavegotchi-ethereum";
+  "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-ethereum";
 
-export async function getPolygonGotchis(
-  addresses: string[]
+export async function getSubgraphGotchis(
+  addresses: string[],
+  network: "matic" | "eth"
 ): Promise<UserGotchisOwned[]> {
-  queryData = `
-  {users(where:{id_in:[${addresses.map(
-    (add: string) => '"' + add + '"'
-  )}]},first:1000) {
-    id
-    gotchisOwned(first:1000) {
+  const batches = Math.ceil(addresses.length / 1000);
+  console.log("batches:", batches);
+
+  let queryData = `{`;
+
+  for (let index = 0; index < batches; index++) {
+    const batchId = index;
+    queryData = queryData.concat(`
+    batch${batchId}: users(where:{id_in:[${addresses.map(
+      (add: string) => '"' + add + '"'
+    )}]},first:1000) {
       id
-    }}
+      gotchisOwned(first:1000) {
+        id
+      }}
+`);
   }
-`;
 
-  const res = await request(maticGraphUrl, queryData);
-  return res.users;
-}
+  queryData = queryData.concat(`}`);
 
-export async function getMainnetGotchis(
-  addresses: string[]
-): Promise<UserGotchisOwned[]> {
-  queryData = `
-  {users(where:{id_in:[${addresses.map(
-    (add: string) => '"' + add + '"'
-  )}]},first:1000) {
-    id
-    gotchisOwned(first:1000) {
-      id
-    }}}
-  `;
+  const res = await request(
+    network === "matic" ? maticGraphUrl : ethGraphUrl,
+    queryData
+  );
 
-  const res = await request(maticGraphUrl, queryData);
-  return res.users;
+  let finalResponse: UserGotchisOwned[] = [];
+  for (let index = 0; index < batches; index++) {
+    const batch: UserGotchisOwned[] = res[`batch${index}`];
+    finalResponse = finalResponse.concat(batch);
+  }
+
+  return finalResponse;
 }

@@ -6,10 +6,7 @@ import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { UserGotchisOwned } from "../types";
-import {
-  getPolygonGotchis,
-  getMainnetGotchis,
-} from "../scripts/query/queryAavegotchis";
+import { getSubgraphGotchis } from "../scripts/query/queryAavegotchis";
 
 interface TaskArgs {
   filename: string;
@@ -82,17 +79,19 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       await hre.ethers.getContractAt("DAOFacet", diamondAddress)
     ).connect(signer) as DAOFacet;
 
-    const polygonGotchis: UserGotchisOwned[] = await getPolygonGotchis(
-      addresses
+    const polygonGotchis: UserGotchisOwned[] = await getSubgraphGotchis(
+      addresses,
+      "matic"
     );
-    const mainnetGotchis: UserGotchisOwned[] = await getMainnetGotchis(
-      addresses
+    console.log("Polygon Gotchis:", polygonGotchis.length);
+
+    const mainnetGotchis: UserGotchisOwned[] = await getSubgraphGotchis(
+      addresses,
+      "eth"
     );
+    console.log("Eth Gotchis:", mainnetGotchis.length);
 
     const finalGotchis = polygonGotchis.concat(mainnetGotchis);
-
-    console.log("polygon gtchis:", finalGotchis);
-    // console.log("mainnet gotchis:", mainnetGotchis);
 
     // find duplicates:
     const duplicateAddresses: string[] = [];
@@ -114,7 +113,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     if (duplicateAddresses.length > 0) {
       console.log(duplicateAddresses);
-      // throw Error("Duplicate addresses");
+      throw Error("Duplicate addresses");
     }
 
     // let extraXpGiven = 0;
