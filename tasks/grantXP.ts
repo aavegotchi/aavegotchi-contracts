@@ -75,10 +75,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       throw Error("Incorrect network selected");
     }
 
-    const dao = (
-      await hre.ethers.getContractAt("DAOFacet", diamondAddress)
-    ).connect(signer) as DAOFacet;
-
+    //Get Polygon
     const polygonUsers: UserGotchisOwned[] = await getSubgraphGotchis(
       addresses,
       "matic"
@@ -90,11 +87,11 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       `Found ${polygonUsers.length} Polygon Users with ${polygonGotchis} Gotchis`
     );
 
+    //Get mainnet
     const mainnetUsers: UserGotchisOwned[] = await getSubgraphGotchis(
       addresses,
       "eth"
     );
-
     const mainnetGotchis = mainnetUsers
       .map((item) => item.gotchisOwned.length)
       .reduce((agg, cur) => agg + cur);
@@ -104,10 +101,9 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     const finalUsers = polygonUsers.concat(mainnetUsers);
 
-    const overlappingAddresses: string[] = [];
-
     const tokenIds: string[] = [];
 
+    //Extract token ids
     polygonUsers.forEach((user) => {
       user.gotchisOwned.forEach((gotchi) => {
         if (tokenIds.includes(gotchi.id))
@@ -124,16 +120,8 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       });
     });
 
-    polygonUsers.forEach((user) => {
-      const found = mainnetUsers.find((item) => item.id === user.id);
-      if (found) {
-        overlappingAddresses.push(user.id);
-      }
-    });
-
-    console.log(`Found ${overlappingAddresses.length} overlapping addresses`);
-
     //Check how many unused addresses there are (addresses that voted, but do not have Aavegotchis)
+    /*
     const unusedAddresses: string[] = [];
     const lowerCaseAddresses = addresses.map((address: string) =>
       address.toLowerCase()
@@ -146,35 +134,17 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     console.log(
       `There were ${unusedAddresses.length} voting addresses without Gotchis.`
     );
-
-    //Find duplicate addresses:
-    const duplicateAddresses: string[] = [];
-    const processedAddresses: string[] = [];
-    let address: string;
-    const addressCounts: AddressCounts = {};
-    for (address of addresses) {
-      if (processedAddresses.includes(address)) {
-        duplicateAddresses.push(address);
-      }
-      if (!processedAddresses.includes(address)) {
-        processedAddresses.push(address);
-      }
-
-      if (addressCounts[address])
-        addressCounts[address] = addressCounts[address] + 1;
-      else addressCounts[address] = 1;
-    }
-
-    if (duplicateAddresses.length > 0) {
-      console.log(duplicateAddresses);
-      throw Error("Duplicate addresses");
-    }
+    */
 
     const batches = Math.ceil(tokenIds.length / batchSize);
 
     console.log(
       `Sending ${xpAmount} XP to ${tokenIds.length} Aavegotchis in ${finalUsers.length} addresses!`
     );
+
+    const dao = (
+      await hre.ethers.getContractAt("DAOFacet", diamondAddress)
+    ).connect(signer) as DAOFacet;
 
     for (let index = 0; index < batches; index++) {
       console.log("Current batch id:", index);
