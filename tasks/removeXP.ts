@@ -4,8 +4,7 @@ import { gasPrice, maticDiamondAddress } from "../scripts/helperFunctions";
 import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
-import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
-import { SubgraphGotchis } from "../types";
+
 import { GotchiArray } from "../data/airdrops/calls/raffle5remove";
 
 interface TaskArgs {

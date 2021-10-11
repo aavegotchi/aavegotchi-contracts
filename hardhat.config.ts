@@ -28,7 +28,7 @@ export default {
     hardhat: {
       forking: {
         url: process.env.MATIC_URL,
-        timeout: 12000000,
+        timeout: 120000000,
         // blockNumber: 12552123
         // blockNumber: 13024371
       },

@@ -5,41 +5,13 @@ import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
-import { SubgraphGotchis } from "../types";
+import { UserGotchisOwned } from "../types";
+import { getSubgraphGotchis } from "../scripts/query/queryAavegotchis";
 
 interface TaskArgs {
   filename: string;
   xpAmount: string;
   batchSize: string;
-}
-
-interface GotchisOwned {
-  id: string;
-}
-
-interface Data {
-  id: string;
-  gotchisOwned: GotchisOwned[];
-}
-
-interface AddressCounts {
-  [key: string]: number;
-}
-
-function strDisplay(str: string) {
-  return addCommas(str.toString());
-}
-
-function addCommas(nStr: string) {
-  nStr += "";
-  const x = nStr.split(".");
-  let x1 = x[0];
-  const x2 = x.length > 1 ? "." + x[1] : "";
-  var rgx = /(\d+)(\d{3})/;
-  while (rgx.test(x1)) {
-    x1 = x1.replace(rgx, "$1" + "," + "$2");
-  }
-  return x1 + x2;
 }
 
 task("grantXP", "Grants XP to Gotchis by addresses")
@@ -55,10 +27,10 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     const xpAmount: number = Number(taskArgs.xpAmount);
     const batchSize: number = Number(taskArgs.batchSize);
 
-    const { addresses, gotchis } = require(`../data/airdrops/${filename}.ts`);
+    const { addresses } = require(`../data/airdrops/${filename}.ts`);
 
     const diamondAddress = maticDiamondAddress;
-    const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119"; //await (await ethers.getContractAt('DAOFacet', diamondAddress)).gameManager()
+    const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
     console.log(gameManager);
     let signer: Signer;
     const testing = ["hardhat", "localhost"].includes(hre.network.name);
@@ -74,139 +46,104 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       throw Error("Incorrect network selected");
     }
 
+    //Get Polygon
+    const polygonUsers: UserGotchisOwned[] = await getSubgraphGotchis(
+      addresses,
+      "matic"
+    );
+    const polygonGotchis = polygonUsers
+      .map((item) => item.gotchisOwned.length)
+      .reduce((agg, cur) => agg + cur);
+    console.log(
+      `Found ${polygonUsers.length} Polygon Users with ${polygonGotchis} Gotchis`
+    );
+
+    //Get mainnet
+    const mainnetUsers: UserGotchisOwned[] = await getSubgraphGotchis(
+      addresses,
+      "eth"
+    );
+    const mainnetGotchis = mainnetUsers
+      .map((item) => item.gotchisOwned.length)
+      .reduce((agg, cur) => agg + cur);
+    console.log(
+      `Found ${mainnetUsers.length} Ethereum Users with ${mainnetGotchis} Gotchis`
+    );
+
+    const finalUsers = polygonUsers.concat(mainnetUsers);
+
+    const tokenIds: string[] = [];
+
+    //Extract token ids
+    polygonUsers.forEach((user) => {
+      user.gotchisOwned.forEach((gotchi) => {
+        if (tokenIds.includes(gotchi.id))
+          throw new Error(`Duplicate token ID: ${gotchi.id}`);
+        else tokenIds.push(gotchi.id);
+      });
+    });
+
+    mainnetUsers.forEach((user) => {
+      user.gotchisOwned.forEach((gotchi) => {
+        console.log("mainnet:", gotchi.id);
+        if (tokenIds.includes(gotchi.id))
+          throw new Error(`Duplicate token ID: ${gotchi.id}`);
+        else tokenIds.push(gotchi.id);
+      });
+    });
+
+    //Check how many unused addresses there are (addresses that voted, but do not have Aavegotchis)
+    /*
+    const unusedAddresses: string[] = [];
+    const lowerCaseAddresses = addresses.map((address: string) =>
+      address.toLowerCase()
+    );
+    lowerCaseAddresses.forEach((address: string) => {
+      const found = finalUsers.find((val) => val.id === address);
+      if (!found) unusedAddresses.push(address);
+    });
+
+    console.log(
+      `There were ${unusedAddresses.length} voting addresses without Gotchis.`
+    );
+    */
+
+    const batches = Math.ceil(tokenIds.length / batchSize);
+
+    console.log(
+      `Sending ${xpAmount} XP to ${tokenIds.length} Aavegotchis in ${finalUsers.length} addresses!`
+    );
+
     const dao = (
       await hre.ethers.getContractAt("DAOFacet", diamondAddress)
     ).connect(signer) as DAOFacet;
-    const data: SubgraphGotchis = gotchis;
 
-    // find duplicates:
-    const duplicateAddresses: string[] = [];
-    const processedAddresses: string[] = [];
+    for (let index = 0; index < batches; index++) {
+      console.log("Current batch id:", index);
 
-    const addressCounts: AddressCounts = {};
-    for (const address of addresses) {
-      if (processedAddresses.includes(address)) {
-        duplicateAddresses.push(address);
-      } else {
-        processedAddresses.push(address);
-      }
+      const offset = batchSize * index;
+      const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
 
-      if (addressCounts[address])
-        addressCounts[address] = addressCounts[address] + 1;
-      else addressCounts[address] = 1;
-    }
+      console.log("send token ids:", sendTokenIds);
 
-    if (duplicateAddresses.length > 0) {
-      console.log(duplicateAddresses);
-      // throw Error("Duplicate addresses");
-    }
-
-    console.log("address countd:", addressCounts);
-
-    let extraXpGiven = 0;
-    Object.keys(addressCounts).forEach((address) => {
-      const count = addressCounts[address];
-
-      if (count > 1) {
-        const gotchisOwned = data.data.users.find(
-          (obj) => obj.id.toLowerCase() === address.toLowerCase()
-        )?.gotchisOwned;
-
-        if (gotchisOwned) {
-          gotchisOwned.forEach((gotchi) => {
-            console.log(`${gotchi.id},`);
-          });
-        }
-
-        // console.log(`${address} has: ${count}`);
-        extraXpGiven = extraXpGiven + (count - 1) * 10;
-      }
-    });
-
-    console.log("extra xp given:", extraXpGiven);
-
-    // console.log("duplicate:", duplicateAddresses);
-
-    let totalGotchis = 0;
-    let receivedTokenIds: string[] = [];
-    let duplicatedTokenIds: string[] = [];
-
-    // group the data
-    const txData = [];
-    let txGroup = [];
-    let tokenIdsNum = 0;
-    for (const address of addresses) {
-      const ownerRow = data.data.users.find(
-        (obj) => obj.id.toLowerCase() === address.toLowerCase()
+      console.log(
+        `Sending ${xpAmount} XP to ${sendTokenIds.length} Aavegotchis `
       );
-      if (ownerRow) {
-        if (batchSize < tokenIdsNum + ownerRow.gotchisOwned.length) {
-          txData.push(txGroup);
-          txGroup = [];
-          tokenIdsNum = 0;
-        }
-        txGroup.push(ownerRow);
-        tokenIdsNum += ownerRow.gotchisOwned.length;
-        totalGotchis += ownerRow.gotchisOwned.length;
-      }
-    }
-    if (tokenIdsNum > 0) {
-      txData.push(txGroup);
-      txGroup = [];
-      tokenIdsNum = 0;
-    }
-
-    console.log(
-      `Sending ${xpAmount} XP to ${totalGotchis} Aavegotchis in ${addresses.length} addresses!`
-    );
-
-    // send transactions
-    let addressIndex = 0;
-    for (const [i, txGroup] of txData.entries()) {
-      console.log("i:", i);
-
-      const txAddresses: string[] = txGroup.map((obj) => obj.id);
-      addressIndex += txAddresses.length;
-      const tokenIds: string[] = txGroup.reduce((acc: string[], obj: Data) => {
-        return acc.concat(
-          obj.gotchisOwned.map((tokenObj: GotchisOwned) => tokenObj.id)
-        );
-      }, []);
-
-      tokenIds.forEach((id) => {
-        if (receivedTokenIds.includes(id))
-          console.log(`${id} has already received XP!`);
-        duplicatedTokenIds.push(id);
-        //  throw `ID ${id} has already received XP!`;
-      });
-
-      console.log("token ids:", tokenIds);
-
-      tokenIds.forEach((id) => {
-        receivedTokenIds.push(id);
-      });
-
-      console.log(`Sending ${xpAmount} XP to ${tokenIds.length} Aavegotchis `);
 
       const tx: ContractTransaction = await dao.grantExperience(
-        tokenIds,
-        Array(tokenIds.length).fill(xpAmount),
+        sendTokenIds,
+        Array(sendTokenIds.length).fill(xpAmount),
         { gasPrice: gasPrice }
       );
       console.log("tx:", tx.hash);
       let receipt: ContractReceipt = await tx.wait();
-      console.log("Gas used:", strDisplay(receipt.gasUsed.toString()));
+      // console.log("Gas used:", strDisplay(receipt.gasUsed.toString()));
       if (!receipt.status) {
         throw Error(`Error:: ${tx.hash}`);
       }
       console.log(
-        "Airdropped XP to Aaavegotchis. Last address:",
-        txAddresses[txAddresses.length - 1]
+        "Airdropped XP to Aaavegotchis. Last tokenID:",
+        sendTokenIds[sendTokenIds.length - 1]
       );
-      console.log("A total of", tokenIds.length, "Aavegotchis");
-      console.log("Current address index:", addressIndex);
-      console.log("");
     }
-
-    console.log("Final duplicated tokenIds:", duplicatedTokenIds);
   });
