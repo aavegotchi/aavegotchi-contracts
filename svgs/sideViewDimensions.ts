@@ -5243,7 +5243,7 @@ export const sideViewDimensions7 = [
     itemId: 223,
     name: "Hook Hand",
     side: "back",
-    dimensions: { x: 54, y: 35, width: 9, height: 9 },
+    dimensions: { x: 1, y: 35, width: 9, height: 9 },
   },
   {
     itemId: 223,
