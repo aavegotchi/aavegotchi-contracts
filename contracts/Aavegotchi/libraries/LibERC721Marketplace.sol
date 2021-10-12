@@ -2,6 +2,7 @@
 pragma solidity 0.8.1;
 
 import {LibAppStorage, AppStorage, ListingListItem, ERC721Listing} from "./LibAppStorage.sol";
+import {LibBuyOrderFacet} from "./LibBuyOrderFacet.sol";
 
 import "../../shared/interfaces/IERC721.sol";
 
@@ -113,6 +114,8 @@ library LibERC721Marketplace {
         listingItem.parentListingId = 0;
         listingItem.childListingId = 0;
 
+        LibBuyOrderFacet.cancelERC721BuyOrderByToken(listing.erc721TokenId);
+
         emit ERC721ListingRemoved(_listingId, listing.category, block.timestamp);
     }
 
@@ -135,4 +138,5 @@ library LibERC721Marketplace {
             LibERC721Marketplace.cancelERC721Listing(listingId, listing.seller);
         }
     }
+
 }

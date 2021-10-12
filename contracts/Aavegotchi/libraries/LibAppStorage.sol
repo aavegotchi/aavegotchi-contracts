@@ -152,6 +152,18 @@ struct GameManager {
     uint256 refreshTime;
 }
 
+struct ERC721BuyOrder {
+    uint256 buyOrderId;
+    address buyer;
+    address erc721TokenAddress;
+    uint256 erc721TokenId;
+    uint256 category; // 0 is closed portal, 1 is vrf pending, 2 is open portal, 3 is Aavegotchi
+    uint256 priceInWei;
+    uint256 timeCreated;
+    uint256 timePurchased;
+    bool cancelled;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -237,6 +249,13 @@ struct AppStorage {
     // itemTypeId => (sideview => Dimensions)
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
+    // states for buy order staking
+    mapping(address => uint256) buyOrderFrens;
+    // states for buy orders
+    uint256 nextERC721BuyOrderId;
+    mapping(uint256 => ERC721BuyOrder) erc721BuyOrders; // buyOrderId => data
+    mapping(uint256 => uint256) erc721BuyOrderHead; // erc721TokenId => buyOrderId
+    mapping(uint256 => uint256) erc721BuyOrderLocked; // erc721TokenId => timestamp
 }
 
 library LibAppStorage {
@@ -259,6 +278,10 @@ contract Modifiers {
     }
     modifier onlyUnlocked(uint256 _tokenId) {
         require(s.aavegotchis[_tokenId].locked == false, "LibAppStorage: Only callable on unlocked Aavegotchis");
+        _;
+    }
+    modifier onlyLocked(uint256 _tokenId) {
+        require(s.aavegotchis[_tokenId].locked == true, "LibAppStorage: Only callable on locked Aavegotchis");
         _;
     }
 
