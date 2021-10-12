@@ -80,6 +80,8 @@ contract ERC721BuyOrderFacet is Modifiers {
     function cancelERC721BuyOrder(uint256 _buyOrderId) external {
         address sender = LibMeta.msgSender();
         ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
+
+        require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrderFacet: ERC721 buyOrder does not exist");
         require((sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner) || (sender == erc721BuyOrder.buyer), "ERC721BuyOrderFacet: Only aavegotchi owner or buyer can call this function");
 
         LibBuyOrderFacet.cancelERC721BuyOrder(_buyOrderId);

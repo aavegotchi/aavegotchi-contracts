@@ -17,7 +17,8 @@ library LibBuyOrderFacet {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
         ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
-        require((erc721BuyOrder.cancelled == false) || (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrderFacet: Already processed");
+        require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrderFacet: ERC721 buyOrder does not exist");
+        require((erc721BuyOrder.cancelled == false) || (erc721BuyOrder.timePurchased != 0), "LibBuyOrderFacet: Already processed");
 
         s.erc721BuyOrderHead[erc721BuyOrder.erc721TokenId] = 0;
         s.erc721BuyOrders[_buyOrderId].cancelled = true;
