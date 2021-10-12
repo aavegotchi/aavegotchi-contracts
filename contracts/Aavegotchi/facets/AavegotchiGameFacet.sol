@@ -111,7 +111,7 @@ contract AavegotchiGameFacet is Modifiers {
 
     function _skillPointsByAge(uint256 _age) internal pure returns (uint256) {
         uint256 skillPointsByAge = 0;
-        uint256[15] memory fibSequence = [uint256(1), 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987];
+        uint256[10] memory fibSequence = [uint256(1), 2, 3, 5, 8, 13, 21, 34, 55, 89];
         for (uint256 i = 0; i < fibSequence.length; i++) {
             if (_age > fibSequence[i] * 2300000) {
                 skillPointsByAge++;
