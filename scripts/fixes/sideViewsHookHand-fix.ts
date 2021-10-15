@@ -2,61 +2,31 @@
 
 import { run } from "hardhat";
 
-import {
-  wearablesLeftSvgs as left,
-  wearablesRightSvgs as right,
-  wearablesBackSvgs as back,
-} from "../../svgs/wearables-sides";
-
-import { wearablesSvgs as front } from "../../svgs/wearables";
-
-import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 import { convertSideDimensionsToTaskFormat } from "../../tasks/updateItemSideDimensions";
 import { SideDimensions } from "../itemTypeHelpers";
+import {
+  updateSvgTaskForSideViews,
+  updateSvgTaskFront,
+} from "../../scripts/svgHelperFunctions";
 
 async function main() {
   console.log("Updating Wearables");
-  let itemIds = [223];
-  const sides = ["left", "right", "back"];
-
-  //hand wearables
-  for (let index = 0; index < itemIds.length; index++) {
-    const itemId = itemIds[index];
-
-    const sideArrays = [left[itemId], right[itemId], back[itemId]];
-
-    for (let index = 0; index < sides.length; index++) {
-      const side = sides[index];
-      const sideArray = sideArrays[index];
-
-      let taskArgsSides: UpdateSvgsTaskArgs = {
-        svgIds: [itemId].join(","),
-        svgType: `wearables-${side}`,
-        svgs: [sideArray].join("***"),
-      };
-
-      await run("updateSvgs", taskArgsSides);
-    }
-  }
-
+  let sideViewsItemIds = [223];
   let frontItemIds = [223];
 
-  for (let index = 0; index < frontItemIds.length; index++) {
-    const itemId = frontItemIds[index];
+  //svg upload
+  let frontTaskArray = await updateSvgTaskFront(frontItemIds);
+  let sideViewsTaskArray = await updateSvgTaskForSideViews(sideViewsItemIds);
 
-    const sideArrays = [front[itemId]];
-
-    for (let index = 0; index < sides.length; index++) {
-      let taskArgsFront: UpdateSvgsTaskArgs = {
-        svgIds: [itemId].join(","),
-        svgType: `wearables`,
-        svgs: [sideArrays].join("***"),
-      };
-
-      await run("updateSvgs", taskArgsFront);
-    }
+  for (let index = 0; index < frontTaskArray.length; index++) {
+    await run("updateSvgs", frontTaskArray[index]);
   }
 
+  for (let index = 0; index < sideViewsTaskArray.length; index++) {
+    await run("updateSvgs", sideViewsTaskArray[index]);
+  }
+
+  //dimensions
   const newDimensions: SideDimensions[] = [
     {
       itemId: 223,

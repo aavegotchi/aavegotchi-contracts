@@ -6,61 +6,31 @@
 
 import { run } from "hardhat";
 
-import { wearablesSvgs as front } from "../../svgs/wearables";
-import {
-  wearablesLeftSvgs as left,
-  wearablesRightSvgs as right,
-  wearablesBackSvgs as back,
-} from "../../svgs/wearables-sides";
-
-import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 import {
   convertDimensionsArrayToString,
   UpdateItemDimensionsTaskArgs,
 } from "../../tasks/updateItemDimensions";
 import { Dimensions, SideDimensions } from "../itemTypeHelpers";
 import { convertSideDimensionsToTaskFormat } from "../../tasks/updateItemSideDimensions";
+import {
+  updateSvgTaskForSideViews,
+  updateSvgTaskFront,
+} from "../../scripts/svgHelperFunctions";
 
 async function main() {
   let frontItemIds = [46, 50, 54, 56, 105];
   let sideViewsItemIds = [46, 50, 54, 56, 105];
-  const side = ["front"];
-  const sideViews = ["left", "right", "back"];
 
-  //svg
-  for (let index = 0; index < frontItemIds.length; index++) {
-    const itemId = frontItemIds[index];
+  //svg upload
+  let frontTaskArray = await updateSvgTaskFront(frontItemIds);
+  let sideViewsTaskArray = await updateSvgTaskForSideViews(sideViewsItemIds);
 
-    const sideArrays = [front[itemId]];
-
-    for (let index = 0; index < side.length; index++) {
-      let taskArgsFront: UpdateSvgsTaskArgs = {
-        svgIds: [itemId].join(","),
-        svgType: `wearables`,
-        svgs: [sideArrays].join("***"),
-      };
-
-      await run("updateSvgs", taskArgsFront);
-    }
+  for (let index = 0; index < frontTaskArray.length; index++) {
+    await run("updateSvgs", frontTaskArray[index]);
   }
 
-  for (let index = 0; index < sideViewsItemIds.length; index++) {
-    const itemId = sideViewsItemIds[index];
-
-    const sideArrays = [left[itemId], right[itemId], back[itemId]];
-
-    for (let index = 0; index < sideViews.length; index++) {
-      const side = sideViews[index];
-      const sideArray = sideArrays[index];
-
-      let taskArgsSides: UpdateSvgsTaskArgs = {
-        svgIds: [itemId].join(","),
-        svgType: `wearables-${side}`,
-        svgs: [sideArray].join("***"),
-      };
-
-      await run("updateSvgs", taskArgsSides);
-    }
+  for (let index = 0; index < sideViewsTaskArray.length; index++) {
+    await run("updateSvgs", sideViewsTaskArray[index]);
   }
 
   //Dimensions
