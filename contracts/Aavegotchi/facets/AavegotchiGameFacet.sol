@@ -114,6 +114,8 @@ contract AavegotchiGameFacet is Modifiers {
         for (uint256 i = 0; i < fibSequence.length; i++) {
             if (_age > fibSequence[i] * 2300000) {
                 skillPointsByAge++;
+            } else {
+                break;
             }
         }
         return skillPointsByAge;
