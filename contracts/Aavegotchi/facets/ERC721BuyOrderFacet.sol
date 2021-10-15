@@ -3,8 +3,10 @@ pragma solidity 0.8.1;
 
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {LibBuyOrder} from "../libraries/LibBuyOrder.sol";
+import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
+import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {Modifiers, ERC721BuyOrder} from "../libraries/LibAppStorage.sol";
 
@@ -12,6 +14,17 @@ contract ERC721BuyOrderFacet is Modifiers {
     event ERC721BuyOrderAdd(
         uint256 indexed buyOrderId,
         address indexed buyer,
+        address erc721TokenAddress,
+        uint256 erc721TokenId,
+        uint256 indexed category,
+        uint256 priceInWei,
+        uint256 time
+    );
+
+    event ERC721BuyOrderExecuted(
+        uint256 indexed buyOrderId,
+        address indexed buyer,
+        address seller,
         address erc721TokenAddress,
         uint256 erc721TokenId,
         uint256 indexed category,
@@ -39,6 +52,7 @@ contract ERC721BuyOrderFacet is Modifiers {
 
         uint256 category = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
         require(category != LibAavegotchi.STATUS_VRF_PENDING, "ERC721BuyOrder: Cannot buy a portal that is pending VRF");
+        require(sender != s.aavegotchis[_erc721TokenId].owner, "ERC721BuyOrder: Owner can't be buyer");
 
         require(block.timestamp > s.erc721BuyOrderLocked[_erc721TokenId] + 10 minutes, "ERC721BuyOrder: Buy order locked for this Aavegotchi");
 
@@ -85,5 +99,49 @@ contract ERC721BuyOrderFacet is Modifiers {
         require((sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner) || (sender == erc721BuyOrder.buyer), "ERC721BuyOrder: Only aavegotchi owner or buyer can call this function");
 
         LibBuyOrder.cancelERC721BuyOrder(_buyOrderId);
+    }
+
+    function executeERC721BuyOrder(uint256 _buyOrderId) external {
+        address sender = LibMeta.msgSender();
+        ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
+
+        require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
+        require(sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner, "ERC721BuyOrder: Only aavegotchi owner can call this function");
+        require((erc721BuyOrder.cancelled == false) || (erc721BuyOrder.timePurchased != 0), "ERC721BuyOrder: Already processed");
+
+        erc721BuyOrder.timePurchased = block.timestamp;
+
+        uint256 _listingId = s.erc721TokenToListingId[erc721BuyOrder.erc721TokenAddress][erc721BuyOrder.erc721TokenId][sender];
+        LibERC721Marketplace.removeERC721ListingItem(_listingId, sender);
+        LibERC721Marketplace.addERC721ListingItem(sender, erc721BuyOrder.category, "purchased", _listingId);
+
+        uint256 daoShare = erc721BuyOrder.priceInWei / 100;
+        uint256 pixelCraftShare = (erc721BuyOrder.priceInWei * 2) / 100;
+        //AGIP6 adds on 0.5%
+        uint256 playerRewardsShare = erc721BuyOrder.priceInWei / 200;
+
+        uint256 transferAmount = erc721BuyOrder.priceInWei - (daoShare + pixelCraftShare + playerRewardsShare);
+        LibERC20.transfer(s.ghstContract, s.pixelCraft, pixelCraftShare);
+        LibERC20.transfer(s.ghstContract, s.daoTreasury, daoShare);
+        LibERC20.transfer(s.ghstContract, sender, transferAmount);
+        //AGIP6 adds on 0.5%
+        LibERC20.transfer((s.ghstContract), s.rarityFarming, playerRewardsShare);
+
+        s.aavegotchis[erc721BuyOrder.erc721TokenId].locked = false;
+
+        //To do (Nick) -- Explain why this is necessary
+        if (erc721BuyOrder.erc721TokenAddress == address(this)) {
+            LibAavegotchi.transfer(sender, erc721BuyOrder.buyer, erc721BuyOrder.erc721TokenId);
+        } else {
+            // GHSTStakingDiamond
+            IERC721(erc721BuyOrder.erc721TokenAddress).safeTransferFrom(sender, erc721BuyOrder.buyer, erc721BuyOrder.erc721TokenId);
+        }
+
+        s.erc721BuyOrderHead[erc721BuyOrder.erc721TokenId] = 0;
+        s.erc721BuyOrders[_buyOrderId].timePurchased = block.timestamp;
+
+        LibBuyOrder.updateFrens(_buyOrderId);
+
+        emit ERC721BuyOrderExecuted(_buyOrderId, erc721BuyOrder.buyer, sender, erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId, erc721BuyOrder.category, erc721BuyOrder.priceInWei, block.timestamp);
     }
 }

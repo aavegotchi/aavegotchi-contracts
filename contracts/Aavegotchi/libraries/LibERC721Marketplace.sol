@@ -27,6 +27,8 @@ library LibERC721Marketplace {
         s.aavegotchis[listing.erc721TokenId].locked = false;
         emit ERC721ListingCancelled(_listingId, listing.category, block.number);
         removeERC721ListingItem(_listingId, _owner);
+
+        LibBuyOrder.cancelERC721BuyOrderByToken(listing.erc721TokenId);
     }
 
     function cancelERC721Listing(
@@ -113,8 +115,6 @@ library LibERC721Marketplace {
         listingItem.listingId = 0;
         listingItem.parentListingId = 0;
         listingItem.childListingId = 0;
-
-        LibBuyOrder.cancelERC721BuyOrderByToken(listing.erc721TokenId);
 
         emit ERC721ListingRemoved(_listingId, listing.category, block.timestamp);
     }
