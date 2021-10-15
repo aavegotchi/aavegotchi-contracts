@@ -20,9 +20,7 @@ export async function getSubgraphGotchis(
     queryData = queryData.concat(`
     batch${batchId}: users(where:{id_in:[${addresses
       .slice(offset, offset + 1000)
-      .map(
-        (add: string) => '"' + add.toLowerCase() + '"'
-      )}]},first:1000, skip:${offset}) {
+      .map((add: string) => '"' + add.toLowerCase() + '"')}]},first:1000) {
       id
       gotchisOwned(first:1000) {
         id
