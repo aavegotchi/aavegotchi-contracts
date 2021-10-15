@@ -69,11 +69,11 @@ describe("Testing ERC721 Buy Order", async function () {
     });
     it("Should revert if price is lower than 1 GHST", async function () {
       await expect(erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, 0))
-        .to.be.revertedWith("ERC721BuyOrderFacet: price should be 1 GHST or larger");
+        .to.be.revertedWith("ERC721BuyOrder: price should be 1 GHST or larger");
     });
     it("Should revert if buyer have not enough GHST", async function () {
       await expect(erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, ethers.utils.parseUnits('1000000000', 'ether')))
-        .to.be.revertedWith("ERC721BuyOrderFacet: Not enough GHST!");
+        .to.be.revertedWith("ERC721BuyOrder: Not enough GHST!");
     });
     describe("If there's no buy order", async function () {
       it("Should succeed", async function () {
@@ -89,7 +89,7 @@ describe("Testing ERC721 Buy Order", async function () {
     describe("If there's already buy order", async function () {
       it("Should revert if price is equal or lower than already exist buy order", async function () {
         await expect(erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, price))
-          .to.be.revertedWith("ERC721BuyOrderFacet: Higher price buy order already exist");
+          .to.be.revertedWith("ERC721BuyOrder: Higher price buy order already exist");
       });
       it("Should succeed if price is greater than price of exist buy order", async function () {
         const oldBalance = await ghstERC20.balanceOf(ghstHolder);
@@ -106,7 +106,7 @@ describe("Testing ERC721 Buy Order", async function () {
   describe("Testing getERC721BuyOrder", async function () {
     it("Should revert when try to get buy order with wrong id", async function () {
       await expect(erc721BuyOrderFacet.getERC721BuyOrder(secondBuyOrderId.add(1)))
-        .to.be.revertedWith("ERC721BuyOrderFacet: ERC721 buyOrder does not exist");
+        .to.be.revertedWith("ERC721BuyOrder: ERC721 buyOrder does not exist");
     });
     it("Should fetch buy order data with correct buy order id", async function () {
       const buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(firstBuyOrderId);
@@ -118,7 +118,7 @@ describe("Testing ERC721 Buy Order", async function () {
   describe("Testing getERC721BuyOrderByTokenId", async function () {
     it("Should revert when try to get buy order with wrong aavegotchi id", async function () {
       await expect(erc721BuyOrderFacet.getERC721BuyOrderByTokenId(unlockedAavegotchiId))
-        .to.be.revertedWith("ERC721BuyOrderFacet: buyOrder doesn't exist");
+        .to.be.revertedWith("ERC721BuyOrder: buyOrder doesn't exist");
     });
     it("Should fetch buy order data with correct aavegotchi id", async function () {
       const buyOrder = await erc721BuyOrderFacet.getERC721BuyOrderByTokenId(lockedAavegotchiId);
@@ -130,15 +130,15 @@ describe("Testing ERC721 Buy Order", async function () {
   describe("Testing cancelERC721BuyOrder", async function () {
     it("Should revert when try to cancel buy order with wrong id", async function () {
       await expect(erc721BuyOrderFacet.cancelERC721BuyOrder(secondBuyOrderId.add(1)))
-        .to.be.revertedWith("ERC721BuyOrderFacet: ERC721 buyOrder does not exist");
+        .to.be.revertedWith("ERC721BuyOrder: ERC721 buyOrder does not exist");
     });
     it("Should revert when try to cancel buy order with wrong account", async function () {
       await expect((await erc721BuyOrderFacet.connect(maticHolder)).cancelERC721BuyOrder(firstBuyOrderId))
-        .to.be.revertedWith("ERC721BuyOrderFacet: Only aavegotchi owner or buyer can call this function");
+        .to.be.revertedWith("ERC721BuyOrder: Only aavegotchi owner or buyer can call this function");
     });
     it("Should revert when try to cancel canceled buy order", async function () {
       await expect(erc721BuyOrderFacet.cancelERC721BuyOrder(firstBuyOrderId))
-        .to.be.revertedWith("LibBuyOrder: Already processed");
+        .to.be.revertedWith("ERC721BuyOrder: Already processed");
     });
     it("Should succeed if cancel valid buy order", async function () {
       const oldBalance = await ghstERC20.balanceOf(ghstHolder);
@@ -168,9 +168,9 @@ describe("Testing ERC721 Buy Order", async function () {
     });
     it("Should revert when try to place buy order in 10 minutes from batch canceled", async function () {
       await expect(erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, highestPrice))
-        .to.be.revertedWith("ERC721BuyOrderFacet: Buy order locked for this Aavegotchi");
+        .to.be.revertedWith("ERC721BuyOrder: Buy order locked for this Aavegotchi");
     });
-    it("Should revert when try to place buy order in 10 minutes from batch canceled", async function () {
+    it("Should succeed when place buy order after 10 minutes from batch canceled", async function () {
       ethers.provider.send('evm_increaseTime', [601]);
       ethers.provider.send('evm_mine', []);
 

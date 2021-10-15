@@ -21,31 +21,31 @@ contract ERC721BuyOrderFacet is Modifiers {
 
     function getERC721BuyOrder(uint256 _buyOrderId) external view returns (ERC721BuyOrder memory buyOrder_) {
         buyOrder_ = s.erc721BuyOrders[_buyOrderId];
-        require(buyOrder_.timeCreated != 0, "ERC721BuyOrderFacet: ERC721 buyOrder does not exist");
+        require(buyOrder_.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
     }
 
     function getERC721BuyOrderByTokenId(uint256 _erc721TokenId) external view returns (ERC721BuyOrder memory buyOrder_) {
         uint256 buyOrderId = s.erc721BuyOrderHead[_erc721TokenId];
-        require(buyOrderId != 0, "ERC721BuyOrderFacet: buyOrder doesn't exist");
+        require(buyOrderId != 0, "ERC721BuyOrder: buyOrder doesn't exist");
         buyOrder_ = s.erc721BuyOrders[buyOrderId];
     }
 
     function placeERC721BuyOrder(address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei) external onlyLocked(_erc721TokenId) {
-        require(_priceInWei >= 1e18, "ERC721BuyOrderFacet: price should be 1 GHST or larger");
+        require(_priceInWei >= 1e18, "ERC721BuyOrder: price should be 1 GHST or larger");
 
         address sender = LibMeta.msgSender();
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
-        require(ghstBalance >= _priceInWei, "ERC721BuyOrderFacet: Not enough GHST!");
+        require(ghstBalance >= _priceInWei, "ERC721BuyOrder: Not enough GHST!");
 
         uint256 category = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
-        require(category != LibAavegotchi.STATUS_VRF_PENDING, "ERC721BuyOrderFacet: Cannot buy a portal that is pending VRF");
+        require(category != LibAavegotchi.STATUS_VRF_PENDING, "ERC721BuyOrder: Cannot buy a portal that is pending VRF");
 
-        require(block.timestamp > s.erc721BuyOrderLocked[_erc721TokenId] + 10 minutes, "ERC721BuyOrderFacet: Buy order locked for this Aavegotchi");
+        require(block.timestamp > s.erc721BuyOrderLocked[_erc721TokenId] + 10 minutes, "ERC721BuyOrder: Buy order locked for this Aavegotchi");
 
         uint256 oldBuyOrderId = s.erc721BuyOrderHead[_erc721TokenId];
         if (oldBuyOrderId != 0) {
             ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[oldBuyOrderId];
-            require((erc721BuyOrder.cancelled == true) || (erc721BuyOrder.priceInWei < _priceInWei), "ERC721BuyOrderFacet: Higher price buy order already exist");
+            require((erc721BuyOrder.cancelled == true) || (erc721BuyOrder.priceInWei < _priceInWei), "ERC721BuyOrder: Higher price buy order already exist");
             LibBuyOrder.cancelERC721BuyOrder(oldBuyOrderId);
         }
 
@@ -81,8 +81,8 @@ contract ERC721BuyOrderFacet is Modifiers {
         address sender = LibMeta.msgSender();
         ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
 
-        require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrderFacet: ERC721 buyOrder does not exist");
-        require((sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner) || (sender == erc721BuyOrder.buyer), "ERC721BuyOrderFacet: Only aavegotchi owner or buyer can call this function");
+        require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
+        require((sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner) || (sender == erc721BuyOrder.buyer), "ERC721BuyOrder: Only aavegotchi owner or buyer can call this function");
 
         LibBuyOrder.cancelERC721BuyOrder(_buyOrderId);
     }
