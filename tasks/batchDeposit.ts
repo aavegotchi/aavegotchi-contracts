@@ -6,9 +6,9 @@ import { ItemsTransferFacet } from "../typechain";
 import { gasPrice, maticDiamondAddress } from "../scripts/helperFunctions";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-function removeDuplicates(gotchiIds: number[]) {
-  const uniqueGotchis: number[] = [];
-  const duplicateGotchis: number[] = [];
+function removeDuplicates(gotchiIds: string[]) {
+  const uniqueGotchis: string[] = [];
+  const duplicateGotchis: string[] = [];
   let index: number = 0;
   for (index; index < gotchiIds.length; index++) {
     if (uniqueGotchis.includes(gotchiIds[index])) {
@@ -23,7 +23,7 @@ function removeDuplicates(gotchiIds: number[]) {
 }
 
 interface TaskArgs {
-  filename: string;
+  gotchiIds: string;
   quantity: string;
   itemId: string;
 }
@@ -32,19 +32,19 @@ task(
   "batchDeposit",
   "Allows the batch deposit of ERC1155 to multiple ERC721 tokens"
 )
-  .addParam("filename", "File that contains the ERC721 tokens to deposit into")
+  .addParam("gotchiIds", "String array of Gotchi IDs")
   .addParam(
     "quantity",
     "The amount of ERC1155 tokens to deposit into each ERC721 token"
   )
   .addParam("itemId", "The item to deposit")
   .setAction(async (taskArgs: TaskArgs, hre: HardhatRuntimeEnvironment) => {
-    const filename: string = taskArgs.filename;
+    const gotchiIDs: string[] = taskArgs.gotchiIds.split(",");
     const quantity: number = Number(taskArgs.quantity);
     const itemId: number = Number(taskArgs.itemId);
 
     //assuming all item drops are in the data/airdrops/itemdrops folder
-    const { gotchis } = require(`../data/airdrops/itemdrops/${filename}.ts`);
+    // const { gotchis } = require(`../data/airdrops/itemdrops/${filename}.ts`);
     const diamondAddress = maticDiamondAddress;
     const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
     let signer: Signer;
@@ -64,7 +64,7 @@ task(
     const itemsTransfer = (
       await hre.ethers.getContractAt("ItemsTransferFacet", diamondAddress)
     ).connect(signer) as ItemsTransferFacet;
-    const uniqueIds: number[] = removeDuplicates(gotchis);
+    const uniqueIds: string[] = removeDuplicates(gotchiIDs);
     console.log(
       "Batch Depositing",
       quantity,
@@ -74,15 +74,15 @@ task(
       uniqueIds.length,
       "gotchis"
     );
-    let eachGotchi: number[] = Array(1).fill(itemId);
-    let eachValue: number[] = Array(1).fill(quantity);
+    // let eachGotchi: number[] = Array(1).fill(itemId);
+    // let eachValue: number[] = Array(1).fill(quantity);
     const tx: ContractTransaction =
       await itemsTransfer.batchBatchTransferToParent(
         itemManager,
         diamondAddress,
         uniqueIds,
-        Array(uniqueIds.length).fill(eachGotchi),
-        Array(uniqueIds.length).fill(eachValue),
+        Array(uniqueIds.length).fill([itemId]),
+        Array(uniqueIds.length).fill([quantity]),
         { gasPrice: gasPrice }
       );
     console.log("tx:", tx.hash);

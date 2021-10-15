@@ -17,6 +17,7 @@ require("./tasks/removeXP.ts");
 require("./tasks/updateItemDimensions.ts");
 require("./tasks/updateSvgs.ts");
 require("./tasks/updateItemSideDimensions.ts");
+require("./tasks/batchDeposit.ts");
 // require("./tasks/addItemTypes.ts");
 
 // You have to export an object to set up your config
