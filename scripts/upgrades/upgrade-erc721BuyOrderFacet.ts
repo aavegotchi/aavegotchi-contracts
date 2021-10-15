@@ -21,6 +21,26 @@ export async function upgrade() {
       ],
       removeSelectors: [],
     },
+    {
+      facetName: "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+    {
+      facetName: "ERC721MarketplaceFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+    {
+      facetName: "AavegotchiGameFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+    {
+      facetName: "VrfFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);

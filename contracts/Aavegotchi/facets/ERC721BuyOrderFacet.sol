@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
-import {LibBuyOrderFacet} from "../libraries/LibBuyOrderFacet.sol";
+import {LibBuyOrder} from "../libraries/LibBuyOrder.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -46,11 +46,11 @@ contract ERC721BuyOrderFacet is Modifiers {
         if (oldBuyOrderId != 0) {
             ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[oldBuyOrderId];
             require((erc721BuyOrder.cancelled == true) || (erc721BuyOrder.priceInWei < _priceInWei), "ERC721BuyOrderFacet: Higher price buy order already exist");
-            LibBuyOrderFacet.cancelERC721BuyOrder(oldBuyOrderId);
+            LibBuyOrder.cancelERC721BuyOrder(oldBuyOrderId);
         }
 
         // Transfer GHST
-        LibERC20.transferFrom(s.ghstContract, sender, s.pixelCraft, _priceInWei);
+        LibERC20.transferFrom(s.ghstContract, sender, address(this), _priceInWei);
 
         // Place new buy order
         s.nextERC721BuyOrderId++;
@@ -72,7 +72,7 @@ contract ERC721BuyOrderFacet is Modifiers {
     }
 
     function cancelERC721BuyOrderByToken(uint256 _erc721TokenId) onlyAavegotchiOwner(_erc721TokenId) external {
-        LibBuyOrderFacet.cancelERC721BuyOrderByToken(_erc721TokenId);
+        LibBuyOrder.cancelERC721BuyOrderByToken(_erc721TokenId);
 
         s.erc721BuyOrderLocked[_erc721TokenId] = block.timestamp;
     }
@@ -84,6 +84,6 @@ contract ERC721BuyOrderFacet is Modifiers {
         require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrderFacet: ERC721 buyOrder does not exist");
         require((sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner) || (sender == erc721BuyOrder.buyer), "ERC721BuyOrderFacet: Only aavegotchi owner or buyer can call this function");
 
-        LibBuyOrderFacet.cancelERC721BuyOrder(_buyOrderId);
+        LibBuyOrder.cancelERC721BuyOrder(_buyOrderId);
     }
 }

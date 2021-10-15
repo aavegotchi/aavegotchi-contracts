@@ -16,7 +16,6 @@ describe("Testing ERC721 Buy Order", async function () {
 
   const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-  const pixelCraftAddress = '0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64';
   const maticHolderAddress = "0x3507e4978e0eb83315d20df86ca0b976c0e40ccb";
   const ghstHolder = "0xBC67F26c2b87e16e304218459D2BB60Dac5C80bC";
   const lockedAavegotchiId = 23501;
@@ -52,15 +51,6 @@ describe("Testing ERC721 Buy Order", async function () {
       params: [maticHolderAddress]
     });
     maticHolder = await ethers.getSigner(maticHolderAddress);
-    await maticHolder.sendTransaction({to: pixelCraftAddress, value: ethers.utils.parseEther("100")});
-
-    // This is needed for moving GHST by Aavegotchi
-    await network.provider.request({
-      method: 'hardhat_impersonateAccount',
-      params: [pixelCraftAddress]
-    });
-    const pixelCraftAccount = await ethers.getSigner(pixelCraftAddress);
-    await (await ghstERC20.connect(pixelCraftAccount)).approve(diamondAddress, ethers.constants.MaxUint256);
 
     // This is needed for impersonating owner of test aavegotchi
     const ownerAddress = await aavegotchiFacet.ownerOf(lockedAavegotchiId);
@@ -148,7 +138,7 @@ describe("Testing ERC721 Buy Order", async function () {
     });
     it("Should revert when try to cancel canceled buy order", async function () {
       await expect(erc721BuyOrderFacet.cancelERC721BuyOrder(firstBuyOrderId))
-        .to.be.revertedWith("LibBuyOrderFacet: Already processed");
+        .to.be.revertedWith("LibBuyOrder: Already processed");
     });
     it("Should succeed if cancel valid buy order", async function () {
       const oldBalance = await ghstERC20.balanceOf(ghstHolder);
