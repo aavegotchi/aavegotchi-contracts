@@ -5,6 +5,14 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { SvgFacet } from "../typechain";
 import { gasPrice } from "./helperFunctions";
 
+import { wearablesSvgs as front } from "../svgs/wearables";
+import {
+  wearablesLeftSvgs as left,
+  wearablesRightSvgs as right,
+  wearablesBackSvgs as back,
+} from "../svgs/wearables-sides";
+import { UpdateSvgsTaskArgs } from "../tasks/updateSvgs";
+
 const fs = require("fs");
 import { SleeveObject } from "./itemTypeHelpers";
 
@@ -234,4 +242,44 @@ export async function uploadOrUpdateSvg(
     console.log(`Svg ${svgType} #${svgId} does not exist, uploading`);
     await uploadSvgs(svgFacet, [svg], svgType, ethers);
   }
+}
+
+export async function updateSvgTaskFront(_itemIds: number[]) {
+  let taskArray = [];
+
+  for (let index = 0; index < _itemIds.length; index++) {
+    const itemId = _itemIds[index];
+    const sideArrays = [front[itemId]];
+
+    let taskArgsFront: UpdateSvgsTaskArgs = {
+      svgIds: [itemId].join(","),
+      svgType: `wearables`,
+      svgs: [sideArrays].join("***"),
+    };
+    taskArray.push(taskArgsFront);
+  }
+  return taskArray;
+}
+
+export async function updateSvgTaskForSideViews(_itemIds: number[]) {
+  const sideViews = ["left", "right", "back"];
+  let taskArray = [];
+
+  for (let index = 0; index < _itemIds.length; index++) {
+    const itemId = _itemIds[index];
+    const sideArrays = [left[itemId], right[itemId], back[itemId]];
+
+    for (let index = 0; index < sideViews.length; index++) {
+      const side = sideViews[index];
+      const sideArray = sideArrays[index];
+
+      let taskArgsSides: UpdateSvgsTaskArgs = {
+        svgIds: [itemId].join(","),
+        svgType: `wearables-${side}`,
+        svgs: [sideArray].join("***"),
+      };
+      taskArray.push(taskArgsSides);
+    }
+  }
+  return taskArray;
 }
