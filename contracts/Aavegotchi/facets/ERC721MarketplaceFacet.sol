@@ -253,11 +253,17 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@notice Allow a buyer to execute an open listing i.e buy the NFT
     ///@dev Will throw if the NFT has been sold or if the listing has been cancelled already
     ///@param _listingId The identifier of the listing to execute
-    function executeERC721Listing(uint256 _listingId) external {
+    function executeERC721Listing(
+        uint256 _listingId,
+        uint256 _tokenId,
+        uint256 _amount
+    ) external {
         ERC721Listing storage listing = s.erc721Listings[_listingId];
         require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
         require(listing.cancelled == false, "ERC721Marketplace: listing cancelled");
         require(listing.timeCreated != 0, "ERC721Marketplace: listing not found");
+        require(_tokenId == listing.erc721TokenId, "ERC721Marketplace: provided tokenId does not match tokenId in listing");
+        require(_amount == listing.priceInWei, "ERC721Marketplace:Provided amount does not match item amount in listing");
         uint256 priceInWei = listing.priceInWei;
         address buyer = LibMeta.msgSender();
         address seller = listing.seller;
