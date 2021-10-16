@@ -60,6 +60,9 @@ contract ERC721BuyOrderFacet is Modifiers {
         if (oldBuyOrderId != 0) {
             ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[oldBuyOrderId];
             require((erc721BuyOrder.cancelled == true) || (erc721BuyOrder.priceInWei < _priceInWei), "ERC721BuyOrder: Higher price buy order already exist");
+            require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
+            require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
+
             LibBuyOrder.cancelERC721BuyOrder(oldBuyOrderId);
         }
 
@@ -86,7 +89,12 @@ contract ERC721BuyOrderFacet is Modifiers {
     }
 
     function cancelERC721BuyOrderByToken(uint256 _erc721TokenId) onlyAavegotchiOwner(_erc721TokenId) external {
-        LibBuyOrder.cancelERC721BuyOrderByToken(_erc721TokenId);
+        uint256 _buyOrderId = s.erc721BuyOrderHead[_erc721TokenId];
+        ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
+        require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
+        require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
+
+        LibBuyOrder.cancelERC721BuyOrder(_buyOrderId);
 
         s.erc721BuyOrderLocked[_erc721TokenId] = block.timestamp;
     }
@@ -97,6 +105,7 @@ contract ERC721BuyOrderFacet is Modifiers {
 
         require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
         require((sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner) || (sender == erc721BuyOrder.buyer), "ERC721BuyOrder: Only aavegotchi owner or buyer can call this function");
+        require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
 
         LibBuyOrder.cancelERC721BuyOrder(_buyOrderId);
     }
@@ -107,7 +116,7 @@ contract ERC721BuyOrderFacet is Modifiers {
 
         require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
         require(sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner, "ERC721BuyOrder: Only aavegotchi owner can call this function");
-        require((erc721BuyOrder.cancelled == false) || (erc721BuyOrder.timePurchased != 0), "ERC721BuyOrder: Already processed");
+        require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
 
         erc721BuyOrder.timePurchased = block.timestamp;
 

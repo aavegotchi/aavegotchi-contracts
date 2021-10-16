@@ -6,8 +6,7 @@ import { ethers, network } from "hardhat";
 import chai from "chai";
 import { upgrade } from "../scripts/upgrades/upgrade-erc721BuyOrderFacet";
 import { impersonate } from "../scripts/helperFunctions";
-import { AavegotchiFacet, ERC721BuyOrderFacet } from "../typechain";
-import { ERC20Token } from "../typechain";
+import { AavegotchiFacet, ERC20Token, ERC721BuyOrderFacet, ERC721MarketplaceFacet } from "../typechain";
 
 const { expect } = chai;
 
@@ -202,7 +201,7 @@ describe("Testing ERC721 Buy Order", async function () {
     });
   });
 
-  describe("Testing executeERC721Listing", async function () {
+  describe("Testing executeERC721BuyOrder", async function () {
     it("Should revert when try to execute buy order with wrong buy order id", async function () {
       await expect(erc721BuyOrderFacet.executeERC721BuyOrder(fourthBuyOrderId.add(10)))
         .to.be.revertedWith("ERC721BuyOrder: ERC721 buyOrder does not exist");
