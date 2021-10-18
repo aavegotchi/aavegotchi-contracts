@@ -6,7 +6,7 @@ import { ethers, network } from "hardhat";
 import chai from "chai";
 import { upgrade } from "../scripts/upgrades/upgrade-erc721BuyOrderFacet";
 import { impersonate } from "../scripts/helperFunctions";
-import { AavegotchiFacet, ERC20Token, ERC721BuyOrderFacet, ERC721MarketplaceFacet } from "../typechain";
+import { AavegotchiFacet, ERC20Token, ERC721BuyOrderFacet, ERC721MarketplaceFacet, OwnershipFacet } from "../typechain";
 
 const { expect } = chai;
 
@@ -19,15 +19,18 @@ describe("Testing ERC721 Buy Order", async function () {
   const ghstHolderAddress = "0xBC67F26c2b87e16e304218459D2BB60Dac5C80bC";
   const pixelcraftAddress = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
   const daoAddress = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
-  const lockedAavegotchiId = 23501;
+  const lockedAavegotchiId = 15951;
   const unlockedAavegotchiId = 10000;
   const price = ethers.utils.parseUnits('100', 'ether');
   const mediumPrice = ethers.utils.parseUnits('105', 'ether');
   const highPrice = ethers.utils.parseUnits('110', 'ether');
   const highestPrice = ethers.utils.parseUnits('115', 'ether');
+  const listPrice = ethers.utils.parseUnits('1', 'ether');
   let erc721BuyOrderFacet: ERC721BuyOrderFacet;
   let aavegotchiFacet: AavegotchiFacet;
+  let erc721MarketplaceFacet: ERC721MarketplaceFacet;
   let ghstERC20: ERC20Token;
+  let contractOwner: any;
   let aavegotchiOwnerAddress: any;
   let aavegotchiOwner: any;
   let maticHolder: any;
@@ -47,6 +50,14 @@ describe("Testing ERC721 Buy Order", async function () {
       "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
       diamondAddress
     )) as AavegotchiFacet;
+    erc721MarketplaceFacet = (await ethers.getContractAt(
+      "ERC721MarketplaceFacet",
+      diamondAddress
+    )) as ERC721MarketplaceFacet;
+    const ownerFacet = (await ethers.getContractAt(
+      "OwnershipFacet",
+      diamondAddress
+    )) as OwnershipFacet;
 
     ghstERC20 = (await ethers.getContractAt('ERC20Token', ghstAddress)) as ERC20Token;
 
@@ -70,7 +81,15 @@ describe("Testing ERC721 Buy Order", async function () {
     });
     aavegotchiOwner = await ethers.getSigner(aavegotchiOwnerAddress);
 
+    const contractOwnerAddress = await ownerFacet.owner();
+    await network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: [contractOwnerAddress]
+    });
+    contractOwner = await ethers.getSigner(contractOwnerAddress);
+
     erc721BuyOrderFacet = await impersonate(ghstHolderAddress, erc721BuyOrderFacet, ethers, network);
+    erc721MarketplaceFacet = await impersonate(aavegotchiOwnerAddress, erc721MarketplaceFacet, ethers, network);
   });
 
   describe("Testing placeERC721BuyOrder", async function () {
@@ -245,6 +264,57 @@ describe("Testing ERC721 Buy Order", async function () {
       const buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(fourthBuyOrderId);
       expect(buyOrder.buyOrderId).to.equal(fourthBuyOrderId);
       expect(buyOrder.timePurchased.gt(0)).to.equal(true);
+    });
+  });
+  describe("Testing ERC721MarketplaceFacet", async function () {
+    before(async function () {
+      await (await aavegotchiFacet.connect(ghstHolder)).approve(aavegotchiOwnerAddress, lockedAavegotchiId);
+      await (await (await aavegotchiFacet.connect(aavegotchiOwner))["safeTransferFrom(address,address,uint256)"](ghstHolderAddress, aavegotchiOwnerAddress, lockedAavegotchiId)).wait();
+    });
+    it("Buy order should be canceled when cancelERC721Listing", async function () {
+      let receipt = await (await erc721MarketplaceFacet.addERC721Listing(erc721MarketplaceFacet.address, lockedAavegotchiId, listPrice)).wait();
+      let event = receipt!.events!.find(event => event.event === 'ERC721ListingAdd');
+      const listingId = event!.args!.listingId;
+
+      receipt = await (await erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, highestPrice)).wait();
+      event = receipt!.events!.find(event => event.event === 'ERC721BuyOrderAdd');
+      const buyOrderId = event!.args!.buyOrderId;
+
+      await (await erc721MarketplaceFacet.cancelERC721Listing(listingId)).wait();
+
+      const buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(buyOrderId);
+      expect(buyOrder.buyOrderId).to.equal(buyOrderId);
+      expect(buyOrder.cancelled).to.equal(true);
+    });
+    it("Buy order should be canceled when cancelERC721Listings", async function () {
+      let receipt = await (await erc721MarketplaceFacet.addERC721Listing(erc721MarketplaceFacet.address, lockedAavegotchiId, listPrice)).wait();
+      let event = receipt!.events!.find(event => event.event === 'ERC721ListingAdd');
+      const listingId = event!.args!.listingId;
+
+      receipt = await (await erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, highestPrice)).wait();
+      event = receipt!.events!.find(event => event.event === 'ERC721BuyOrderAdd');
+      const buyOrderId = event!.args!.buyOrderId;
+
+      await (await (await erc721MarketplaceFacet.connect(contractOwner)).cancelERC721Listings([listingId])).wait();
+
+      const buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(buyOrderId);
+      expect(buyOrder.buyOrderId).to.equal(buyOrderId);
+      expect(buyOrder.cancelled).to.equal(true);
+    });
+    it("Buy order should be canceled when executeERC721Listing", async function () {
+      let receipt = await (await erc721MarketplaceFacet.addERC721Listing(erc721MarketplaceFacet.address, lockedAavegotchiId, listPrice)).wait();
+      let event = receipt!.events!.find(event => event.event === 'ERC721ListingAdd');
+      const listingId = event!.args!.listingId;
+
+      receipt = await (await erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, highestPrice)).wait();
+      event = receipt!.events!.find(event => event.event === 'ERC721BuyOrderAdd');
+      const buyOrderId = event!.args!.buyOrderId;
+
+      await (await (await erc721MarketplaceFacet.connect(ghstHolder)).executeERC721Listing(listingId)).wait();
+
+      const buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(buyOrderId);
+      expect(buyOrder.buyOrderId).to.equal(buyOrderId);
+      expect(buyOrder.cancelled).to.equal(true);
     });
   });
 });
