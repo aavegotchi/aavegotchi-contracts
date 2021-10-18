@@ -19,7 +19,7 @@ describe("Testing ERC721 Buy Order", async function () {
   const ghstHolderAddress = "0xBC67F26c2b87e16e304218459D2BB60Dac5C80bC";
   const pixelcraftAddress = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
   const daoAddress = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
-  const lockedAavegotchiId = 15951;
+  const lockedAavegotchiId = 13996;
   const unlockedAavegotchiId = 10000;
   const price = ethers.utils.parseUnits('100', 'ether');
   const mediumPrice = ethers.utils.parseUnits('105', 'ether');

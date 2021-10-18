@@ -388,4 +388,8 @@ contract DAOFacet is Modifiers {
         s.itemTypes[_wearableId].rarityScoreModifier = _rarityScoreModifier;
         emit ItemModifiersSet(_wearableId, _traitModifiers, _rarityScoreModifier);
     }
+
+    function setGhstStakingContract(address _newGhstStaking) external onlyOwner {
+        s.ghstStaking = _newGhstStaking;
+    }
 }

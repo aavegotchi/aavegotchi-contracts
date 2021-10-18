@@ -5,6 +5,7 @@ import {LibAppStorage, AppStorage, ERC721BuyOrder} from "./LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 
 import "../../shared/interfaces/IERC721.sol";
+import "../interfaces/IStakingFacet.sol";
 
 library LibBuyOrder {
     function cancelERC721BuyOrderByToken(uint256 _erc721TokenId) internal {
@@ -37,8 +38,6 @@ library LibBuyOrder {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
         ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
-        uint256 timePeriod = block.timestamp - erc721BuyOrder.timeCreated;
-        s.buyOrderFrens[erc721BuyOrder.buyer] += (erc721BuyOrder.priceInWei * timePeriod) / 24 hours;
-        // TODO: Check availability to connect with GHST Staking
+        IStakingFacet(s.ghstStaking).increaseFrens(erc721BuyOrder.buyer, erc721BuyOrder.priceInWei, erc721BuyOrder.timeCreated);
     }
 }

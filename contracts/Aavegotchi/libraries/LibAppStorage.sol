@@ -250,7 +250,7 @@ struct AppStorage {
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
     // states for buy order staking
-    mapping(address => uint256) buyOrderFrens;
+    address ghstStaking;
     // states for buy orders
     uint256 nextERC721BuyOrderId;
     mapping(uint256 => ERC721BuyOrder) erc721BuyOrders; // buyOrderId => data
