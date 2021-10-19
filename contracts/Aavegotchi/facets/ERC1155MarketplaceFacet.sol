@@ -225,13 +225,18 @@ contract ERC1155MarketplaceFacet is Modifiers {
     function executeERC1155Listing(
         uint256 _listingId,
         uint256 _quantity,
-        uint256 _priceInWei
+        uint256 _priceInWei,
+        uint256 _erc1155TypeId,
+        address _erc1155TokenAddress
     ) external {
         ERC1155Listing storage listing = s.erc1155Listings[_listingId];
         require(_priceInWei == listing.priceInWei, "ERC1155Marketplace: wrong price or price changed");
         require(listing.timeCreated != 0, "ERC1155Marketplace: listing not found");
         require(listing.sold == false, "ERC1155Marketplace: listing is sold out");
         require(listing.cancelled == false, "ERC1155Marketplace: listing is cancelled");
+
+        require(listing.erc1155TypeId == _erc1155TypeId, "ERC1155Marketplace: listing typeId incorrect");
+        require(listing.erc1155TokenAddress == _erc1155TokenAddress, "ERC1155Marketplace: Token address incorrect");
         address buyer = LibMeta.msgSender();
         address seller = listing.seller;
         require(seller != buyer, "ERC1155Marketplace: buyer can't be seller");
