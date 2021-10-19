@@ -3,8 +3,8 @@ import { run } from "hardhat";
 async function grantXP() {
   await run("grantXP", {
     filename: "coreprop/AGIP13",
-    xpAmount: "10",
-    batchSize: "50",
+    xpAmount: "20",
+    batchSize: "500",
   });
 }
 

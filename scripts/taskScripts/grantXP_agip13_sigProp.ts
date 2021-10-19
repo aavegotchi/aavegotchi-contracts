@@ -4,7 +4,7 @@ async function grantXP() {
   await run("grantXP", {
     filename: "sigprop/AGIP13",
     xpAmount: "10",
-    batchSize: "50",
+    batchSize: "500",
   });
 }
 
