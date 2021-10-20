@@ -85,7 +85,6 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     mainnetUsers.forEach((user) => {
       user.gotchisOwned.forEach((gotchi) => {
-        console.log("mainnet:", gotchi.id);
         if (tokenIds.includes(gotchi.id))
           throw new Error(`Duplicate token ID: ${gotchi.id}`);
         else tokenIds.push(gotchi.id);
