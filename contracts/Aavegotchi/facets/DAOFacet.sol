@@ -27,6 +27,7 @@ contract DAOFacet is Modifiers {
     event WearableSlotPositionsSet(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] _slotPositions);
     event ItemModifiersSet(uint256 _wearableId, int8[6] _traitModifiers, uint8 _rarityScoreModifier);
     event RemoveExperience(uint256[] _tokenIds, uint256[] _xpValues);
+    event UpdateItemPrice(uint256 _itemId, uint256 _priceInWei);
 
     /***********************************|
    |             Read Functions         |
@@ -400,6 +401,7 @@ contract DAOFacet is Modifiers {
             ItemType storage item = s.itemTypes[itemId];
             require(item.canPurchaseWithGhst, "DAOFacet: Can't purchase item type with GHST");
             item.ghstPrice = _newPrices[i];
+            emit UpdateItemPrice(itemId, _newPrices[i]);
         }
     }
 }
