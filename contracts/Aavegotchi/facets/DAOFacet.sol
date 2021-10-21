@@ -388,4 +388,18 @@ contract DAOFacet is Modifiers {
         s.itemTypes[_wearableId].rarityScoreModifier = _rarityScoreModifier;
         emit ItemModifiersSet(_wearableId, _traitModifiers, _rarityScoreModifier);
     }
+
+    ///@notice Allow an item manager to set the price of multiple items in GHST
+    ///@dev Only valid for existing items that can be purchased with GHST
+    ///@param _itemIds The items whose price is to be changed
+    ///@param _newPrices The new prices of the items
+    function batchUpdateItemsPrice(uint256[] calldata _itemIds, uint256[] calldata _newPrices) public onlyItemManager {
+        require(_itemIds.length == _newPrices.length, "DAOFacet: Items must be the same length as prices");
+        for (uint256 i; i < _itemIds.length; i++) {
+            uint256 itemId = _itemIds[i];
+            ItemType storage item = s.itemTypes[itemId];
+            require(item.canPurchaseWithGhst, "DAOFacet: Can't purchase item type with GHST");
+            item.ghstPrice = _newPrices[i];
+        }
+    }
 }
