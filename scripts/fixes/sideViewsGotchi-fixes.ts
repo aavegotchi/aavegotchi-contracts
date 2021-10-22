@@ -4,7 +4,7 @@ import { aavegotchiSvgs } from "../../svgs/aavegotchi-side-typeScript";
 import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 
 async function main() {
-  const itemIds = [1, 3];
+  const itemIds = [2, 3];
   const sides = ["left", "right"];
   const sideArrays = [aavegotchiSvgs.left, aavegotchiSvgs.right];
 
