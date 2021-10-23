@@ -35,7 +35,7 @@ async function main() {
   )) as SvgFacet;
 
   async function updateSvgs(
-    svg: any,
+    svg: string[],
     svgType: string,
     svgId: number,
     uploadSigner: any
