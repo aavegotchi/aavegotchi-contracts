@@ -399,7 +399,6 @@ contract DAOFacet is Modifiers {
         for (uint256 i; i < _itemIds.length; i++) {
             uint256 itemId = _itemIds[i];
             ItemType storage item = s.itemTypes[itemId];
-            require(item.canPurchaseWithGhst, "DAOFacet: Can't purchase item type with GHST");
             item.ghstPrice = _newPrices[i];
             emit UpdateItemPrice(itemId, _newPrices[i]);
         }

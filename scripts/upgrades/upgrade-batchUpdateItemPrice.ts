@@ -12,9 +12,7 @@ export async function upgrade() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "DAOFacet",
-      addSelectors: [
-        "function batchUpdateItemsPrice(uint256[] calldata _itemIds, uint256[] calldata _newPrices) public",
-      ],
+      addSelectors: [],
       removeSelectors: [],
     },
   ];
