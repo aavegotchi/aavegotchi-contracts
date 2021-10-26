@@ -37,6 +37,8 @@ function strDisplay(str: string) {
 export interface RarityPayoutTaskArgs {
   rarityDataFile: string;
   season: string;
+  rounds: string;
+  totalAmount: string;
 }
 
 interface TxArgs {
@@ -71,6 +73,8 @@ task("rarityPayout")
       } else {
         throw Error("Incorrect network selected");
       }
+
+      const rounds = Number(taskArgs.rounds);
 
       //Get rewards for this season
       const {
@@ -107,41 +111,77 @@ task("rarityPayout")
           rarity[index],
           kinship[index],
           xp[index],
-          rookieKinship[index],
-          rookieXp[index],
+          // rookieKinship[index],
+          // rookieXp[index],
         ];
+
+        console.log("gotchis:", gotchis);
 
         const rewardNames = [
           "rarity",
           "kinship",
           "xp",
-          "rookieKinship",
-          "rookieXp",
+          // "rookieKinship",
+          // "rookieXp",
         ];
 
         const rewards: string[][] = [
           rarityRoundRewards,
           kinshipRoundRewards,
           xpRoundRewards,
-          rookieKinshipRoundRewards,
-          rookieXpRoundRewards,
+          // rookieKinshipRoundRewards,
+          // rookieXpRoundRewards,
         ];
 
-        rewards.forEach((rewards, index) => {
-          const rewardName = rewardNames[index];
-          const gotchi = gotchis[index];
-          const reward = rewards[index];
+        rewards.forEach((leaderboard, i) => {
+          const rewardName = rewardNames[i];
+          const gotchi = gotchis[i];
+          const reward = leaderboard[index];
 
           console.log(
             `Adding ${reward} GHST to #${gotchi} in leaderboard ${rewardName}`
           );
 
           //Add rewards divided by 4 (per season)
-          if (finalRewards[gotchi]) finalRewards[gotchi] += Number(reward) / 4;
+          if (finalRewards[gotchi])
+            finalRewards[gotchi] += Number(reward) / rounds;
           else {
-            finalRewards[gotchi] = Number(reward) / 4;
+            finalRewards[gotchi] = Number(reward) / rounds;
           }
         });
+      }
+
+      //Check that sent amount matches total amount per round
+      const roundAmount = Number(taskArgs.totalAmount) / rounds;
+      let talliedAmount = 0;
+
+      Object.keys(finalRewards).map((gotchiId) => {
+        const amount = finalRewards[gotchiId];
+
+        if (!isNaN(amount)) {
+          talliedAmount = talliedAmount + amount;
+        }
+      });
+
+      console.log("tallied amount:", talliedAmount);
+
+      console.log("final rewards:", finalRewards);
+
+      const sorted: string[] = [];
+      const sortedKeys = Object.keys(finalRewards).sort((a, b) => {
+        return finalRewards[b] - finalRewards[a];
+      });
+
+      sortedKeys.forEach((key) => {
+        sorted.push(`${key}: ${finalRewards[key]}`);
+      });
+
+      console.log("sorted:", sorted);
+
+      if (talliedAmount !== roundAmount) {
+        throw new Error(
+          `Tallied amount of ${talliedAmount} does not match round amount of ${roundAmount}`
+        );
       }
 
       let totalGhstSent = BigNumber.from(0);

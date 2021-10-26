@@ -3,8 +3,10 @@ import { RarityPayoutTaskArgs } from "../../tasks/rarityPayouts";
 
 async function rarityPayout() {
   const args: RarityPayoutTaskArgs = {
-    season: "1",
-    rarityDataFile: "rarityFarmingRoundFour",
+    season: "2",
+    rarityDataFile: "rnd1",
+    rounds: "4",
+    totalAmount: "2000000",
   };
   await run("rarityPayout", args);
 }
