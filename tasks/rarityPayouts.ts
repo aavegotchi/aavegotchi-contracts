@@ -136,10 +136,10 @@ task("rarityPayout")
             `Adding ${reward} GHST to #${gotchi} in leaderboard ${rewardName}`
           );
 
-          //Add rewards
-          if (finalRewards[gotchi]) finalRewards[gotchi] += Number(reward);
+          //Add rewards divided by 4 (per season)
+          if (finalRewards[gotchi]) finalRewards[gotchi] += Number(reward) / 4;
           else {
-            finalRewards[gotchi] = Number(reward);
+            finalRewards[gotchi] = Number(reward) / 4;
           }
         });
       }
