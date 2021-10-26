@@ -1,9 +1,12 @@
 import { run } from "hardhat";
+import { RarityPayoutTaskArgs } from "../../tasks/rarityPayouts";
 
 async function rarityPayout() {
-  await run("rarityPayout", {
-    rarityDataFile: "rarityFarmingRoundFour"
-  });
+  const args: RarityPayoutTaskArgs = {
+    season: "1",
+    rarityDataFile: "rarityFarmingRoundFour",
+  };
+  await run("rarityPayout", args);
 }
 
 rarityPayout()

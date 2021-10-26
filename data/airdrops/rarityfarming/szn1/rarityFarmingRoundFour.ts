@@ -1,4 +1,4 @@
-import { RarityFarmingData} from '../../../types'
+import { RarityFarmingData } from "../../../../types";
 const rarityRoundFour = [
   "8845",
   "5535",
@@ -15008,4 +15008,10 @@ const xpRoundFour = [
   "1191",
 ];
 
-export const dataArgs: RarityFarmingData = {rarityGotchis:rarityRoundFour,kinshipGotchis:kinshipRoundFour,xpGotchis:xpRoundFour}
+export const dataArgs: RarityFarmingData = {
+  rarityGotchis: rarityRoundFour,
+  kinshipGotchis: kinshipRoundFour,
+  xpGotchis: xpRoundFour,
+  rookieXpGotchis: [],
+  rookieKinshipGotchis: [],
+};

@@ -1,4 +1,4 @@
-import { RarityFarmingRewardArgs } from "../../../types";
+import { RarityFarmingRewardArgs } from "../../../../types";
 export const rarityRoundRewards: string[] = [
   "23834.0693048969",
   "12167.43688262270",
@@ -5002,7 +5002,7 @@ export const rarityRoundRewards: string[] = [
   "6.154564020802080",
 ];
 
-export const kinshipRoundRewards:string[] = [
+export const kinshipRoundRewards: string[] = [
   "2450.098863865660",
   "1446.7743890010900",
   "1063.093481771740",
@@ -10005,7 +10005,7 @@ export const kinshipRoundRewards:string[] = [
   "3.784133118379100",
 ];
 
-export const xpRoundRewards:string[] = [
+export const xpRoundRewards: string[] = [
   "648.0982644339000",
   "413.0202652406980",
   "317.330665759015",
@@ -15008,7 +15008,10 @@ export const xpRoundRewards:string[] = [
   "2.554526166621730",
 ];
 
-export const rewardArgs: RarityFarmingRewardArgs = { xp:xpRoundRewards,rarity: rarityRoundRewards, kinship:kinshipRoundRewards }
-
-
-
+export const rewardArgs: RarityFarmingRewardArgs = {
+  xp: xpRoundRewards,
+  rarity: rarityRoundRewards,
+  kinship: kinshipRoundRewards,
+  rookieXp: [],
+  rookieKinship: [],
+};

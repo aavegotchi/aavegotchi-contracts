@@ -6,18 +6,22 @@ export interface UserGotchisOwned {
   gotchisOwned: GotchisOwned[];
 }
 
-export interface RarityFarmingRewardArgs{
+export interface RarityFarmingRewardArgs {
   rarity: string[];
   kinship: string[];
   xp: string[];
+  rookieXp: string[];
+  rookieKinship: string[];
 }
 
-export interface RarityFarmingData{
+export interface RarityFarmingData {
   rarityGotchis: string[];
   kinshipGotchis: string[];
-  xpGotchis:string[]
+  xpGotchis: string[];
+  rookieXpGotchis: string[];
+  rookieKinshipGotchis: string[];
 }
 
-export interface rarityRewards{
-  [id:string]: number
+export interface rarityRewards {
+  [id: string]: number;
 }
