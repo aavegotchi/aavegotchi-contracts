@@ -1,5 +1,5 @@
 import { run } from "hardhat";
-import { RarityPayoutTaskArgs } from "../../tasks/rarityPayouts";
+import { RarityPayoutTaskArgs } from "../../../../tasks/rarityPayouts";
 
 async function rarityPayout() {
   const args: RarityPayoutTaskArgs = {
