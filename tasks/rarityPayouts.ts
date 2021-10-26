@@ -197,8 +197,8 @@ task("rarityPayout")
           rarityRoundRewards,
           kinshipRoundRewards,
           xpRoundRewards,
-          // rookieKinshipRoundRewards,
-          // rookieXpRoundRewards,
+          rookieKinshipRoundRewards,
+          rookieXpRoundRewards,
         ];
 
         rewards.forEach((leaderboard, i) => {
