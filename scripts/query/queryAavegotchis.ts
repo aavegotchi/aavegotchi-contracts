@@ -1,9 +1,9 @@
 import { request } from "graphql-request";
 import { UserGotchisOwned } from "../../types";
 
-const maticGraphUrl: string =
+export const maticGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic";
-const ethGraphUrl: string =
+export const ethGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-ethereum";
 
 export async function getSubgraphGotchis(

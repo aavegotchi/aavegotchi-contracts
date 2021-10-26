@@ -7,6 +7,7 @@ async function rarityPayout() {
     rarityDataFile: "rnd1",
     rounds: "4",
     totalAmount: "2000000",
+    blockNumber: "",
   };
   await run("rarityPayout", args);
 }
