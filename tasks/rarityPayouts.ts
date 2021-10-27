@@ -6,11 +6,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { parseEther, formatEther, parseUnits } from "@ethersproject/units";
 import { EscrowFacet } from "../typechain";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import {
-  maticDiamondAddress,
-  gameManager,
-  gasPrice,
-} from "../scripts/helperFunctions";
+import { maticDiamondAddress, gasPrice } from "../scripts/helperFunctions";
 
 import {
   RarityFarmingData,
@@ -96,6 +92,7 @@ export interface RarityPayoutTaskArgs {
   rounds: string;
   totalAmount: string;
   blockNumber: string;
+  deployerAddress: string;
 }
 
 interface TxArgs {
@@ -109,30 +106,37 @@ task("rarityPayout")
     "rarityDataFile",
     "File that contains all the data related to the particular rarity round"
   )
+  .addParam("deployerAddress")
   .setAction(
     async (taskArgs: RarityPayoutTaskArgs, hre: HardhatRuntimeEnvironment) => {
       const filename: string = taskArgs.rarityDataFile;
       const diamondAddress = maticDiamondAddress;
+      const deployerAddress = taskArgs.deployerAddress;
+      const accounts = await hre.ethers.getSigners();
+
       const testing = ["hardhat", "localhost"].includes(hre.network.name);
       let signer: Signer;
       if (testing) {
         await hre.network.provider.request({
           method: "hardhat_impersonateAccount",
-          params: [gameManager],
+          params: [deployerAddress],
         });
-        signer = await hre.ethers.provider.getSigner(gameManager);
+        signer = await hre.ethers.provider.getSigner(deployerAddress);
       } else if (hre.network.name === "matic") {
-        signer = new LedgerSigner(
-          hre.ethers.provider,
-          "hid",
-          "m/44'/60'/2'/0/0"
-        );
+        signer = accounts[0];
       } else {
         throw Error("Incorrect network selected");
       }
 
       const rounds = Number(taskArgs.rounds);
       const blockNumber = taskArgs.blockNumber;
+
+      const signerAddress = await signer.getAddress();
+      if (signerAddress !== deployerAddress) {
+        throw new Error(
+          `Deployer ${deployerAddress} does not match signer ${signerAddress}`
+        );
+      }
 
       //Get rewards for this season
       const {
@@ -207,7 +211,9 @@ task("rarityPayout")
           const reward = leaderboard[index];
 
           console.log(
-            `Adding ${reward} GHST to #${gotchi} in leaderboard ${rewardName}`
+            `Adding ${
+              Number(reward) / rounds
+            } GHST to #${gotchi} in leaderboard ${rewardName}`
           );
 
           //Add rewards divided by 4 (per season)
@@ -242,11 +248,15 @@ task("rarityPayout")
 
       console.log("sorted:", sorted);
 
-      if (talliedAmount !== roundAmount) {
+      /* if (talliedAmount !== roundAmount) {
         throw new Error(
           `Tallied amount of ${talliedAmount} does not match round amount of ${roundAmount}`
         );
       }
+      */
+
+      console.log("Total GHST to send:", talliedAmount);
+      console.log("Round amount:", roundAmount);
 
       let totalGhstSent = BigNumber.from(0);
       let txData = [];
@@ -280,11 +290,6 @@ task("rarityPayout")
       for (const [i, txGroup] of txData.entries()) {
         console.log("current index:", i);
 
-        if (i === 0) {
-          console.log("skip!");
-          continue;
-        }
-
         let tokenIds: string[] = [];
         let amounts: string[] = [];
 
@@ -306,7 +311,6 @@ task("rarityPayout")
           } Gotchis (from ${tokenIds[0]} to ${tokenIds[tokenIds.length - 1]})`
         );
 
-        // const escrowFacet = await ethers.getContractAt("EscrowFacet",diamondAddress,signer)
         const escrowFacet = (
           await hre.ethers.getContractAt("EscrowFacet", diamondAddress)
         ).connect(signer) as EscrowFacet;
