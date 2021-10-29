@@ -29,27 +29,10 @@ describe("Testing ERC721 categories", async function () {
     const categories: ERC721Category[] = [];
     categories.push({
       erc721TokenAddress: diamondAddress,
-      status: 0,
       category: 0,
     });
     categories.push({
-      erc721TokenAddress: diamondAddress,
-      status: 1,
-      category: 1,
-    });
-    categories.push({
-      erc721TokenAddress: diamondAddress,
-      status: 2,
-      category: 2,
-    });
-    categories.push({
-      erc721TokenAddress: diamondAddress,
-      status: 3,
-      category: 3,
-    });
-    categories.push({
       erc721TokenAddress: maticRealmDiamondAddress,
-      status: 0,
       category: 4,
     });
     await expect(

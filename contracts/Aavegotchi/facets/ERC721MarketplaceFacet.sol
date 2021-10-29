@@ -170,18 +170,20 @@ contract ERC721MarketplaceFacet is Modifiers {
 
     struct Category {
         address erc721TokenAddress;
-        uint256 status; // 0 == portal/Realm, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
-        uint256 category; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi 4 == Realm.
+        uint256 category; // 0,1,2,3 == Aavegotchi diamond, 4 == Realm diamond.
     }
 
     ///@notice Allow the aavegotchi diamond owner or DAO to set the category details for different types of ERC721 NFTs
-    ///@param _categories An array of structs where each struct contains details about each ERC721 category //erc721TokenAddress, status and category
+    ///@param _categories An array of structs where each struct contains details about each ERC721 category //erc721TokenAddress and category
     function setERC721Categories(Category[] calldata _categories) external onlyItemManager {
         for (uint256 i; i < _categories.length; i++) {
             if (_categories[i].erc721TokenAddress != address(this)) {
-                require(_categories[i].status == 0, "ERC721Marketplace: Only one category for external address");
+                require(
+                    s.erc721SimpleCategories[_categories[i].erc721TokenAddress] == 0,
+                    "ERC721Marketplace: Only one category for external address"
+                );
             }
-            s.erc721Categories[_categories[i].erc721TokenAddress][_categories[i].status] = _categories[i].category;
+            s.erc721SimpleCategories[_categories[i].erc721TokenAddress] = _categories[i].category;
         }
     }
 
@@ -191,11 +193,11 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@return category_ Category of the NFT // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi 4 == Realm.
     function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view returns (uint256 category_) {
         require(
-            _erc721TokenAddress == address(this) || s.erc721Categories[_erc721TokenAddress][0] != 0,
+            _erc721TokenAddress == address(this) || s.erc721SimpleCategories[_erc721TokenAddress] != 0,
             "ERC721Marketplace: ERC721 category does not exist"
         );
         if (_erc721TokenAddress != address(this)) {
-            category_ = s.erc721Categories[_erc721TokenAddress][0];
+            category_ = s.erc721SimpleCategories[_erc721TokenAddress];
         } else {
             category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
         }

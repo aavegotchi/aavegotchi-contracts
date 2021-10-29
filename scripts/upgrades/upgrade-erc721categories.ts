@@ -9,8 +9,7 @@ import { maticDiamondAddress } from "../helperFunctions";
 export async function upgrade() {
   const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 
-  const category =
-    "(address erc721TokenAddress, uint256 status, uint256 category)";
+  const category = "(address erc721TokenAddress, uint256 category)";
 
   const facets: FacetsAndAddSelectors[] = [
     {

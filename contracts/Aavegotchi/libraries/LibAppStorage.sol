@@ -225,10 +225,9 @@ struct AppStorage {
     // user address => category => sort => listingId => ListingListItem
     mapping(uint256 => ListingListItem) erc721OwnerListingListItem;
     mapping(address => mapping(uint256 => mapping(string => uint256))) erc721OwnerListingHead;
-    // erc721Token => status => erc721 category
+    // erc1155Token => (erc1155TypeId => category)
+    // not really in use now, for the future
     mapping(address => mapping(uint256 => uint256)) erc721Categories;
-    // erc721 category => erc721Token
-    mapping(uint256 => address) erc721CategoriesTaken;
     // erc721 token address, erc721 tokenId, user address => listingId
     mapping(address => mapping(uint256 => mapping(address => uint256))) erc721TokenToListingId;
     mapping(uint256 => uint256) sleeves;
@@ -238,6 +237,7 @@ struct AppStorage {
     // itemTypeId => (sideview => Dimensions)
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
+    mapping(address => uint256) erc721SimpleCategories;
 }
 
 library LibAppStorage {

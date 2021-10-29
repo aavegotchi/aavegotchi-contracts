@@ -28,6 +28,5 @@ export interface rarityRewards {
 
 export interface ERC721Category {
   erc721TokenAddress: string;
-  status: number;
   category: number;
 }
