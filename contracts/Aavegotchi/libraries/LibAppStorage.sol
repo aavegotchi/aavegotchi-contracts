@@ -225,9 +225,10 @@ struct AppStorage {
     // user address => category => sort => listingId => ListingListItem
     mapping(uint256 => ListingListItem) erc721OwnerListingListItem;
     mapping(address => mapping(uint256 => mapping(string => uint256))) erc721OwnerListingHead;
-    // erc1155Token => (erc1155TypeId => category)
-    // not really in use now, for the future
+    // erc721Token => status => erc721 category
     mapping(address => mapping(uint256 => uint256)) erc721Categories;
+    // erc721 category => erc721Token
+    mapping(uint256 => address) erc721CategoriesTaken;
     // erc721 token address, erc721 tokenId, user address => listingId
     mapping(address => mapping(uint256 => mapping(address => uint256))) erc721TokenToListingId;
     mapping(uint256 => uint256) sleeves;

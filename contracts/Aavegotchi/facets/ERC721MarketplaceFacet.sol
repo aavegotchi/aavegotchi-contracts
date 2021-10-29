@@ -9,8 +9,6 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketplace.sol";
 import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
 
-// import "hardhat/console.sol";
-
 contract ERC721MarketplaceFacet is Modifiers {
     event ERC721ListingAdd(
         uint256 indexed listingId,
@@ -170,13 +168,37 @@ contract ERC721MarketplaceFacet is Modifiers {
         }
     }
 
+    struct Category {
+        address erc721TokenAddress;
+        uint256 status; // 0 == portal/Realm, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
+        uint256 category; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi 4 == Realm.
+    }
+
+    ///@notice Allow the aavegotchi diamond owner or DAO to set the category details for different types of ERC721 NFTs
+    ///@param _categories An array of structs where each struct contains details about each ERC721 category //erc721TokenAddress, status and category
+    function setERC721Categories(Category[] calldata _categories) external onlyItemManager {
+        for (uint256 i; i < _categories.length; i++) {
+            if (_categories[i].erc721TokenAddress != address(this)) {
+                require(_categories[i].status == 0, "ERC721Marketplace: Only one category for external address");
+            }
+            s.erc721Categories[_categories[i].erc721TokenAddress][_categories[i].status] = _categories[i].category;
+        }
+    }
+
     ///@notice Query the category of an NFT
     ///@param _erc721TokenAddress The contract address of the NFT to query
     ///@param _erc721TokenId The identifier of the NFT to query
-    ///@return category_ Category of the NFT // 0 == portal, 1 == vrf pending, 1 == open portal, 2 == Aavegotchi.
+    ///@return category_ Category of the NFT // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi 4 == Realm.
     function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view returns (uint256 category_) {
-        require(_erc721TokenAddress == address(this), "ERC721Marketplace: ERC721 category does not exist");
-        category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
+        require(
+            _erc721TokenAddress == address(this) || s.erc721Categories[_erc721TokenAddress][0] != 0,
+            "ERC721Marketplace: ERC721 category does not exist"
+        );
+        if (_erc721TokenAddress != address(this)) {
+            category_ = s.erc721Categories[_erc721TokenAddress][0];
+        } else {
+            category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
+        }
     }
 
     ///@notice Allow an ERC721 owner to list his NFT for sale

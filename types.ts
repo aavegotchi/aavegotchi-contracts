@@ -25,3 +25,9 @@ export interface RarityFarmingData {
 export interface rarityRewards {
   [id: string]: number;
 }
+
+export interface ERC721Category {
+  erc721TokenAddress: string;
+  status: number;
+  category: number;
+}
