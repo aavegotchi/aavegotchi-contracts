@@ -136,6 +136,6 @@ describe("Testing ERC721 categories", async function () {
       "100"
     );
     console.log("listings:", listings);
-    expect(listings[0].cancelled).to.equal(true);
+    expect(listings.length).to.equal(0);
   });
 });
