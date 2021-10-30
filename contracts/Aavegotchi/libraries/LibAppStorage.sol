@@ -237,7 +237,7 @@ struct AppStorage {
     // itemTypeId => (sideview => Dimensions)
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
-    // mapping(address => uint256) erc721Categories;
+    mapping(uint256 => address) categoryToTokenAddress;
 }
 
 library LibAppStorage {

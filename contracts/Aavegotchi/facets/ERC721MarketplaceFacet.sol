@@ -170,20 +170,26 @@ contract ERC721MarketplaceFacet is Modifiers {
 
     struct Category {
         address erc721TokenAddress;
-        // uint256 status;
         uint256 category; // 0,1,2,3 == Aavegotchi diamond, 4 == Realm diamond.
+        // uint256 status; can add this in later if necessary
     }
 
     ///@notice Allow the aavegotchi diamond owner or DAO to set the category details for different types of ERC721 NFTs
     ///@param _categories An array of structs where each struct contains details about each ERC721 category //erc721TokenAddress and category
     function setERC721Categories(Category[] calldata _categories) external onlyItemManager {
         for (uint256 i; i < _categories.length; i++) {
-            Category memory category = _categories[i];
+            uint256 category = _categories[i].category;
+            address tokenAddress = _categories[i].erc721TokenAddress;
 
-            if (category.erc721TokenAddress != address(this)) {
-                require(s.erc721Categories[category.erc721TokenAddress][0] == 0, "ERC721Marketplace: Only one category for external address");
+            //Categories should be above 4 to prevent interference w/ Gotchi diamond
+            require(category > 3, "ERC721Marketplace: Added category should be above 3");
+
+            if (tokenAddress != address(this)) {
+                require(s.categoryToTokenAddress[category] == address(0), "ERC721Marketplace: Category has already been set");
             }
-            s.erc721Categories[category.erc721TokenAddress][0] = category.category;
+
+            s.erc721Categories[tokenAddress][0] = category;
+            s.categoryToTokenAddress[category] = tokenAddress;
         }
     }
 
