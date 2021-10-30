@@ -41,7 +41,20 @@ describe("Testing ERC721 categories", async function () {
       maticRealmDiamondAddress,
       "59"
     );
-    console.log("found categories:", foundCategories);
+    expect(foundCategories).to.equal(4);
+  });
+  it("Aavegotchi categories should still be the same", async function () {
+    const unopenedPortal = await ERC721MarketplaceFacet.getERC721Category(
+      maticDiamondAddress,
+      "2"
+    );
+    expect(unopenedPortal).to.equal(0);
+
+    const gotchiCategory = await ERC721MarketplaceFacet.getERC721Category(
+      maticDiamondAddress,
+      "1484"
+    );
+    expect(gotchiCategory).to.equal(3);
   });
   it("Can list different ERC721, including REALM", async function () {
     ERC721MarketplaceFacet = await impersonate(
@@ -129,7 +142,40 @@ describe("Testing ERC721 categories", async function () {
       "listed",
       "100"
     );
-    console.log("listings:", listings);
     expect(listings.length).to.equal(0);
+  });
+
+  it("Cannot duplicate a category for another contract address", async function () {
+    ERC721MarketplaceFacet = await impersonate(
+      itemManager,
+      ERC721MarketplaceFacet,
+      ethers,
+      network
+    );
+    await expect(
+      ERC721MarketplaceFacet.setERC721Categories([
+        {
+          erc721TokenAddress: testAddress,
+          category: 4,
+        },
+      ])
+    ).to.be.revertedWith("ERC721Marketplace: Category has already been set");
+  });
+
+  it("Cannot create categories under 4", async function () {
+    ERC721MarketplaceFacet = await impersonate(
+      itemManager,
+      ERC721MarketplaceFacet,
+      ethers,
+      network
+    );
+    await expect(
+      ERC721MarketplaceFacet.setERC721Categories([
+        {
+          erc721TokenAddress: testAddress,
+          category: 3,
+        },
+      ])
+    ).to.be.revertedWith("ERC721Marketplace: Added category should be above 3");
   });
 });
