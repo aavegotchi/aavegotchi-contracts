@@ -257,11 +257,15 @@ contract ERC721MarketplaceFacet is Modifiers {
 
         LibERC721Marketplace.addERC721ListingItem(owner, category, "listed", listingId);
         emit ERC721ListingAdd(listingId, owner, _erc721TokenAddress, _erc721TokenId, category, _priceInWei);
-        s.aavegotchis[_erc721TokenId].locked = true;
+
+        //Lock Aavegotchis when listing is created
+        if (_erc721TokenAddress == address(this)) {
+            s.aavegotchis[_erc721TokenId].locked = true;
+        }
+
         // Check if there's a publication fee and
         // transfer the amount to burn address
         if (s.listingFeeInWei > 0) {
-            // burn address: address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)
             LibERC20.transferFrom(s.ghstContract, owner, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), s.listingFeeInWei);
         }
     }
@@ -310,13 +314,11 @@ contract ERC721MarketplaceFacet is Modifiers {
         //AGIP6 adds on 0.5%
         LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, playerRewardsShare);
 
-        s.aavegotchis[listing.erc721TokenId].locked = false;
-
-        //To do (Nick) -- Explain why this is necessary
         if (listing.erc721TokenAddress == address(this)) {
+            s.aavegotchis[listing.erc721TokenId].locked = false;
             LibAavegotchi.transfer(seller, buyer, listing.erc721TokenId);
         } else {
-            // GHSTStakingDiamond
+            // External contracts
             IERC721(listing.erc721TokenAddress).safeTransferFrom(seller, buyer, listing.erc721TokenId);
         }
 
