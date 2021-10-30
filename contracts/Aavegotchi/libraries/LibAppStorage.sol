@@ -291,4 +291,12 @@ contract Modifiers {
         require(s.itemManagers[sender] == true, "LibAppStorage: only an ItemManager can call this function");
         _;
     }
+    modifier onlyOwnerOrItemManager() {
+        address sender = LibMeta.msgSender();
+        require(
+            sender == LibDiamond.contractOwner() || s.itemManagers[sender] == true,
+            "LibAppStorage: only an Owner or ItemManager can call this function"
+        );
+        _;
+    }
 }

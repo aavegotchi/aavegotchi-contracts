@@ -1,10 +1,18 @@
-import { run } from "hardhat";
+import { ethers, run } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
-import { maticDiamondAddress } from "../helperFunctions";
+import {
+  ERC721MarketplaceFacet,
+  ERC721MarketplaceFacet__factory,
+} from "../../typechain";
+import { ERC721MarketplaceFacetInterface } from "../../typechain/ERC721MarketplaceFacet";
+import {
+  maticDiamondAddress,
+  maticRealmDiamondAddress,
+} from "../helperFunctions";
 
 export async function upgrade() {
   const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
@@ -23,12 +31,29 @@ export async function upgrade() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
+  let iface: ERC721MarketplaceFacetInterface = new ethers.utils.Interface(
+    ERC721MarketplaceFacet__factory.abi
+  ) as ERC721MarketplaceFacetInterface;
+
+  const categories = [
+    {
+      erc721TokenAddress: maticRealmDiamondAddress,
+      category: 4,
+    },
+  ];
+
+  const calldata = iface.encodeFunctionData("setERC721Categories", [
+    categories,
+  ]);
+
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: true,
+    initAddress: maticDiamondAddress,
+    initCalldata: calldata,
   };
 
   await run("deployUpgrade", args);

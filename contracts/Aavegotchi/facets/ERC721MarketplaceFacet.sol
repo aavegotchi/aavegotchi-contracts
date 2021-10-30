@@ -176,7 +176,7 @@ contract ERC721MarketplaceFacet is Modifiers {
 
     ///@notice Allow the aavegotchi diamond owner or DAO to set the category details for different types of ERC721 NFTs
     ///@param _categories An array of structs where each struct contains details about each ERC721 category //erc721TokenAddress and category
-    function setERC721Categories(Category[] calldata _categories) external onlyItemManager {
+    function setERC721Categories(Category[] calldata _categories) external onlyOwnerOrItemManager {
         for (uint256 i; i < _categories.length; i++) {
             uint256 category = _categories[i].category;
             address tokenAddress = _categories[i].erc721TokenAddress;

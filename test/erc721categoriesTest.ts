@@ -29,25 +29,19 @@ describe("Testing ERC721 categories", async function () {
       diamondAddress
     )) as ERC721MarketplaceFacet;
   });
-  it("Set ERC721 categories", async function () {
-    const categories: ERC721Category[] = [];
-
-    categories.push({
-      erc721TokenAddress: maticRealmDiamondAddress,
-      category: 4,
-    });
-    await expect(
-      ERC721MarketplaceFacet.setERC721Categories(categories)
-    ).to.be.revertedWith(
-      "LibAppStorage: only an ItemManager can call this function"
-    );
+  it("ERC721 categories should be set during upgade", async function () {
     ERC721MarketplaceFacet = await impersonate(
       itemManager,
       ERC721MarketplaceFacet,
       ethers,
       network
     );
-    await ERC721MarketplaceFacet.setERC721Categories(categories);
+
+    const foundCategories = await ERC721MarketplaceFacet.getERC721Category(
+      maticRealmDiamondAddress,
+      "59"
+    );
+    console.log("found categories:", foundCategories);
   });
   it("Can list different ERC721, including REALM", async function () {
     ERC721MarketplaceFacet = await impersonate(
@@ -107,7 +101,7 @@ describe("Testing ERC721 categories", async function () {
     // console.log("listings:", listings);
   });
 
-  it("Transferring REALM parcel should invalidate listing", async function () {
+  it("Transferring REALM parcel should invalidate listing (requires Aavegotchi Realm Diamond upgrade on localhost)", async function () {
     //Listing REALM parcels from GBM (current owner)
     const gbm = "0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFe";
     let erc721 = (await ethers.getContractAt(
