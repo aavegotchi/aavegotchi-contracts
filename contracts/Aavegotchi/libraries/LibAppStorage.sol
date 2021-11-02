@@ -238,6 +238,8 @@ struct AppStorage {
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
     mapping(uint256 => address) categoryToTokenAddress;
+    // itemTypeId => (slotPosition => exception Bool)
+    mapping(uint256 => mapping(uint256 => bool)) isAnException;
 }
 
 library LibAppStorage {
