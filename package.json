@@ -49,7 +49,8 @@
     "@types/chai": "^4.2.21",
     "@types/mocha": "^9.0.0",
     "axios": "^0.21.1",
-    "graphql-request": "^3.5.0",
+    "graphql": "^16.0.1",
+    "graphql-request": "^3.6.1",
     "hardhat": "^2.2.1",
     "node-hid": "^2.1.1",
     "solc": "^0.8.7-fixed"
