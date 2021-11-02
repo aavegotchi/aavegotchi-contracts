@@ -1,5 +1,4 @@
 import { ethers } from "hardhat";
-import { expect } from "chai";
 import { SvgViewsFacet } from "../../typechain";
 import { upgrade } from "../../scripts/upgrades/upgrade-sideViewsExceptions";
 import { maticDiamondAddress } from "../../scripts/helperFunctions";
@@ -19,26 +18,26 @@ export async function main() {
   //hand exceptions
   const rightExceptions: Exceptions[] = [
     {
-      itemId: 201,
-      slotPosition: 4,
-      exceptionBool: true,
+      _itemId: 201,
+      _slotPosition: 4,
+      _exceptionBool: true,
     },
     {
-      itemId: 217,
-      slotPosition: 4,
-      exceptionBool: true,
+      _itemId: 217,
+      _slotPosition: 4,
+      _exceptionBool: true,
     },
   ];
   const leftExceptions: Exceptions[] = [
     {
-      itemId: 201,
-      slotPosition: 5,
-      exceptionBool: true,
+      _itemId: 201,
+      _slotPosition: 5,
+      _exceptionBool: true,
     },
     {
-      itemId: 217,
-      slotPosition: 5,
-      exceptionBool: true,
+      _itemId: 217,
+      _slotPosition: 5,
+      _exceptionBool: true,
     },
   ];
 

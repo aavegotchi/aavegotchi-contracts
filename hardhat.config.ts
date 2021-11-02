@@ -1,24 +1,20 @@
+/* global task ethers */
+import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-contract-sizer";
 import "solidity-coverage";
+//import './tasks/generateDiamondABI.js';
 import * as dotenv from "dotenv";
 import "@typechain/hardhat";
 
 dotenv.config({ path: __dirname + "/.env" });
 
-require("./tasks/verifyFacet.ts");
+//  require("./tasks/verifyFacet.js");
 require("./tasks/deployUpgrade.ts");
-require("./tasks/addWearableSets.ts");
-require("./tasks/grantXP.ts");
-require("./tasks/generateDiamondABI.ts");
-require("./tasks/generateDiamondABI_eth.ts");
-require("./tasks/removeXP.ts");
-require("./tasks/updateItemDimensions.ts");
+/* require("./tasks/updateItemDimensions.ts");
 require("./tasks/updateSvgs.ts");
-require("./tasks/updateItemSideDimensions.ts");
-require("./tasks/batchDeposit.ts");
-require("./tasks/rarityPayouts");
+require("./tasks/updateItemSideDimensions.ts"); */
 // require("./tasks/addItemTypes.ts");
 
 // You have to export an object to set up your config
@@ -30,7 +26,7 @@ export default {
     hardhat: {
       forking: {
         url: process.env.MATIC_URL,
-        timeout: 120000000,
+        timeout: 12000000,
         // blockNumber: 12552123
         // blockNumber: 13024371
       },
@@ -41,15 +37,15 @@ export default {
     localhost: {
       timeout: 16000000,
     },
-    matic: {
-      url: process.env.MATIC_URL,
-      // url: 'https://rpc-mainnet.maticvigil.com/',
-      accounts: [process.env.ITEM_MANAGER],
-      // blockGasLimit: 20000000,
-      // blockGasLimit: 20000000,
-      // gasPrice: 1000000000,
-      // timeout: 90000,
-    },
+    // matic: {
+    //   url: process.env.MATIC_URL,
+    //   // url: 'https://rpc-mainnet.maticvigil.com/',
+    //   accounts: [process.env.SECRET],
+    //   // blockGasLimit: 20000000,
+    //   blockGasLimit: 20000000,
+    //   gasPrice: 1000000000,
+    //   timeout: 90000
+    // }
     // mumbai: {
     //   url: 'https://rpc-mumbai.matic.today',
     //   accounts: [process.env.SECRET],

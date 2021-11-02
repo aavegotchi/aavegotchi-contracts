@@ -21,6 +21,12 @@ export interface SideDimensions {
   dimensions: Dimensions;
 }
 
+export interface Exceptions {
+  _itemId: BigNumberish;
+  _slotPosition: BigNumberish;
+  _exceptionBool: boolean;
+}
+
 export interface Sleeves {
   sleeveId: BigNumberish;
   wearableId: BigNumberish;
