@@ -2,11 +2,12 @@ import { ethers } from "hardhat";
 import { expect } from "chai";
 import { SvgViewsFacet } from "../typechain";
 import { upgrade } from "../scripts/upgrades/upgrade-sideViewsExceptions";
-import { maticDiamondAddress } from "../scripts/helperFunctions";
+import { maticDiamondAddress, impersonate } from "../scripts/helperFunctions";
 
 describe("Testing Exceptions", async function () {
   const diamondAddress = maticDiamondAddress;
   let svgViewsFacet: SvgViewsFacet;
+  let txData: string, owner: string, signer: any;
 
   const rightExceptions: any[] = [];
   const leftExceptions: any[] = [];
@@ -17,6 +18,13 @@ describe("Testing Exceptions", async function () {
       "SvgViewsFacet",
       diamondAddress
     )) as SvgViewsFacet;
+
+    owner = await (
+      await ethers.getContractAt("OwnershipFacet", diamondAddress)
+    ).owner();
+    signer = await ethers.provider.getSigner(owner);
+
+    await impersonate(signer, diamondAddress, ethers);
 
     await upgrade();
   });
