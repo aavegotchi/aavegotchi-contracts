@@ -265,6 +265,11 @@ export const wearablesRightSvgs = [
   261,
   wearable("262_RadarEyesRight"),
   wearable("263_SignalHeadsetRight"),
+
+  //duplicates for missing sleeves
+  bodyWearableRight("264_MarineJacket"), // duplicate of id 8, needed because of missing sleeves on front view
+  bodyWearableRight("265_ThaaveSuit"), // duplicate of id 25, needed because of missing sleeves on front view
+  bodyWearableRight("266_TrackSuit"), // duplicate of id 125, needed because of missing sleeves on front view
 ];
 
 export const wearablesBackSvgs = [
@@ -532,6 +537,11 @@ export const wearablesBackSvgs = [
   wearable("261_AantenaBotBack"),
   262,
   wearable("263_SignalHeadsetBack"),
+
+  //duplicates for missing sleeves
+  bodyWearable("264_MarineJacket"), // duplicate of id 8, needed because of missing sleeves on front view
+  wearable("265_ThaaveSuitBack"), // duplicate of id 25, needed because of missing sleeves on front view
+  bodyWearable("266_TrackSuit"), // duplicate of id 125, needed because of missing sleeves on front view
 ];
 
 export const wearablesLeftSvgs = [
@@ -799,6 +809,10 @@ export const wearablesLeftSvgs = [
   wearable("261_AantenaBotLeft"),
   wearable("262_RadarEyesLeft"),
   wearable("263_SignalHeadsetLeft"),
+
+  bodyWearableLeft("264_MarineJacket"), // duplicate of id 8, needed because of missing sleeves on front view
+  bodyWearableLeft("265_ThaaveSuit"), // duplicate of id 25, needed because of missing sleeves on front view
+  bodyWearableLeft("266_TrackSuit"), // duplicate of id 125, needed because of missing sleeves on front view
 ];
 
 export const wearablesLeftSleeveSvgs = [
@@ -807,7 +821,7 @@ export const wearablesLeftSleeveSvgs = [
   // '2_CamoPantsLeft', // body but doesn't have sleeves
   // '3_MK2GrenadeLeft',
   // '4_SnowCamoHatLeft',
-  "5_SnowCamoPantsLeft", // body but no sleeves
+  // "5_SnowCamoPantsLeft", // body but no sleeves
   // '6_M67GrenadeLeft',
   // '7_MarineCapLeft',
   sleeveWearableLeft("8_MarineJacket"), // sleeveWearableLeft("8_MarineJacket"),
@@ -988,8 +1002,9 @@ export const wearablesLeftSleeveSvgs = [
   sleeveWearableLeft("256_LilBubbleSpaceSuit"),
   sleeveWearableLeft("258_Hanfu"),
 
-  /*   sleeveWearableLeft("25_ThaaveSuit"),
-  sleeveWearableLeft("125_TrackSuit"), */
+  sleeveWearableLeft("264_MarineJacket"),
+  sleeveWearableLeft("265_ThaaveSuit"),
+  sleeveWearableLeft("266_TrackSuit"),
 ];
 
 export const wearablesRightSleeveSvgs = [
@@ -998,7 +1013,7 @@ export const wearablesRightSleeveSvgs = [
   // '2_CamoPantsRight', // body but doesn't have sleeves
   // '3_MK2GrenadeRight',
   // '4_SnowCamoHatRight',
-  "5_SnowCamoPantsRight", // body but no sleeves
+  // "5_SnowCamoPantsRight", // body but no sleeves
   // '6_M67GrenadeRight',
   // '7_MarineCapRight',
   sleeveWearableRight("8_MarineJacket"), // sleeveWearableRight("8_MarineJacket"),
@@ -1179,8 +1194,9 @@ export const wearablesRightSleeveSvgs = [
   sleeveWearableRight("256_LilBubbleSpaceSuit"),
   sleeveWearableRight("258_Hanfu"),
 
-  /*   sleeveWearableRight("25_ThaaveSuit"),
-  sleeveWearableRight("125_TrackSuit"), */
+  sleeveWearableRight("264_MarineJacket"),
+  sleeveWearableRight("265_ThaaveSuit"),
+  sleeveWearableRight("266_TrackSuit"),
 ];
 
 export const wearablesBackSleeveSvgs = [
@@ -1189,7 +1205,7 @@ export const wearablesBackSleeveSvgs = [
   // '2_CamoPantsRight', // body but doesn't have sleeves
   // '3_MK2GrenadeRight',
   // '4_SnowCamoHatRight',
-  "5_SnowCamoPantsRight", // body but no sleeves
+  // "5_SnowCamoPantsRight", // body but no sleeves
   // '6_M67GrenadeRight',
   // '7_MarineCapRight',
   sleeveWearableRight("8_MarineJacket"), // sleeveWearableRight("8_MarineJacket"),
@@ -1370,8 +1386,9 @@ export const wearablesBackSleeveSvgs = [
   sleeveWearableRight("256_LilBubbleSpaceSuit"),
   sleeveWearableRight("258_Hanfu"),
 
-  /*   sleeveWearableRight("25_ThaaveSuit"),
-  sleeveWearableRight("125_TrackSuit"), */
+  sleeveWearableRight("264_MarineJacket"),
+  sleeveWearableRight("265_ThaaveSuit"),
+  sleeveWearableRight("266_TrackSuit"),
 ];
 
 function stripSvg(svg: string) {

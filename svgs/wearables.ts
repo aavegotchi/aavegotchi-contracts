@@ -262,9 +262,14 @@ export const wearablesSvgs = [
   bodyWearable("258_Hanfu"),
   259,
   260,
-  /*   wearable("261_AantenaBot"),
+  wearable("261_AantenaBot"),
   262,
-  wearable("263_SignalHeadset"), */
+  wearable("263_SignalHeadset"),
+
+  //duplicate added for missing sleeves
+  bodyWearable("264_MarineJacket"), //duplicate of id 8
+  bodyWearable("265_ThaaveSuit"), //duplicate of id 26
+  bodyWearable("125_TrackSuit"), //duplicate of id 125
 ];
 
 function stripSvg(svg: string) {

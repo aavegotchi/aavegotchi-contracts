@@ -14,6 +14,7 @@ import { Sleeves } from "../itemTypeHelpers";
 import {
   updateSvgTaskForSideSleeves,
   updateSvgTaskFront,
+  updateSvgTaskForSideViews,
 } from "../svgHelperFunctions";
 import {
   wearablesLeftSvgs as left,
@@ -25,150 +26,76 @@ import {
 } from "../../svgs/wearables-sides";
 
 async function main() {
-  console.log("Sleeves Length: ", leftSleeve.length);
-  const side = ["front"];
-  let sleevesTotalIds = 44;
-  let bodyWearableIds = [
-    0, 8, 11, 15, 16, 19, 22, 25, 28, 31, 37, 43, 46, 50, 54, 56, 74, 85, 91,
-    102, 105, 109, 112, 114, 115, 125, 135, 138, 150, 160, 162, 203, 213, 220,
-    222, 231, 234, 241, 244, 248, 250, 253, 256, 258,
-  ];
+  console.log("Sleeves Left Length: ", leftSleeve.length);
+  console.log("Sleeves Right Length: ", rightSleeve.length);
+  console.log("Sleeves Back Length: ", backSleeve.length);
+  const itemIds = [264, 265, 266];
 
-  /*   for (let index = 0; index < frontItemIds.length; index++) {
-    const itemId = frontItemIds[index];
-
-    const sideArrays = [front[itemId]];
-
-    for (let index = 0; index < side.length; index++) {
-      let taskArgsFront: UpdateSvgsTaskArgs = {
-        svgIds: [itemId].join(","),
-        svgType: `sleeves`,
-        svgs: [sideArrays].join("***"),
-      };
-
-      await run("updateSvgs", taskArgsFront);
-    }
-  } */
-
-  /*   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-  let itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
-  let signer: Signer;
-
-  const testing = ["hardhat", "localhost"].includes(network.name);
-
-  if (testing) {
-    await network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [itemManager],
-    });
-    signer = await ethers.getSigner(itemManager);
-  } else if (network.name === "matic") {
-    const accounts = await ethers.getSigners();
-    signer = accounts[0]; //new LedgerSigner(ethers.provider);
-
-    console.log("signer:", signer);
-  } else {
-    throw Error("Incorrect network selected");
-  }
-
-  const svgFacet = (await ethers.getContractAt(
-    "SvgFacet",
-    diamondAddress,
-    signer
-  )) as SvgFacet;
-
-  async function updateSvgs(
-    svg: any[],
-    svgType: string,
-    svgId: number,
-    uploadSigner: any
-  ) {
-    const svgFacet = await ethers.getContractAt(
-      "SvgFacet",
-      diamondAddress,
-      uploadSigner
-    );
-    let svgLength = new TextEncoder().encode(svg[svgId]).length;
-    const array = [
-      {
-        svgType: ethers.utils.formatBytes32String(svgType),
-        ids: [svgId],
-        sizes: [svgLength],
-      },
-    ];
-
-    let tx = await svgFacet.updateSvg(svg[svgId], array);
-    let receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`);
-    }
-  }
-
-  for (var i = 0; i < bodyWearableIds.length; i++) {
-    await updateSvgs(front, "sleeves", bodyWearableIds[i], signer);
-  } */
-
-  //front wearables
-  /*   let frontItemIds = [];
-
-  for (let index = 0; index < front.length; index++) {
-    frontItemIds.push(index);
-  }
-
-  let frontViewTaskArray = await updateSvgTaskFront(frontItemIds);
+  let frontViewTaskArray = await updateSvgTaskFront(itemIds);
   for (let index = 0; index < frontViewTaskArray.length; index++) {
     await run("updateSvgs", frontViewTaskArray[index]);
-  } */
+  }
 
-  /*   for (let index = 0; index < bodyWearableIds.length; index++) {
-    const itemId = bodyWearableIds[index];
+  const sideViewSleeves = [43, 44, 45];
 
-    const sideArrays = [front[itemId]];
+  const sides = ["left", "right", "back"];
 
-    for (let index = 0; index < side.length; index++) {
-      let taskArgsFront: UpdateSvgsTaskArgs = {
+  for (let index = 0; index < sideViewSleeves.length; index++) {
+    const itemId = sideViewSleeves[index];
+
+    const sideArrays = [
+      leftSleeve[itemId],
+      rightSleeve[itemId],
+      backSleeve[itemId],
+    ];
+
+    for (let index = 0; index < sides.length; index++) {
+      const side = sides[index];
+      const sideArray = sideArrays[index];
+
+      let taskArgsLeft: UpdateSvgsTaskArgs = {
         svgIds: [itemId].join(","),
-        svgType: `sleeves`,
-        svgs: [sideArrays].join("***"),
+        svgType: `sleeves-${side}`,
+        svgs: [sideArray].join("***"),
       };
 
-      await run("updateSvgs", taskArgsFront);
+      await run("updateSvgs", taskArgsLeft);
     }
-  } */
-
-  //side sleeves
-  let sideSleeveIds = [];
-
-  for (let index = 0; index < sleevesTotalIds; index++) {
-    sideSleeveIds.push(index);
   }
 
-  let sideViewsTaskArray = await updateSvgTaskForSideSleeves(sideSleeveIds);
-  for (let index = 0; index < sideViewsTaskArray.length; index++) {
-    await run("updateSvgs", sideViewsTaskArray[index]);
+  for (let index = 0; index < itemIds.length; index++) {
+    const itemId = itemIds[index];
+
+    const sideArrays = [left[itemId], right[itemId], back[itemId]];
+
+    for (let index = 0; index < sides.length; index++) {
+      const side = sides[index];
+      const sideArray = sideArrays[index];
+
+      let taskArgsLeft: UpdateSvgsTaskArgs = {
+        svgIds: [itemId].join(","),
+        svgType: `wearables-${side}`,
+        svgs: [sideArray].join("***"),
+      };
+
+      await run("updateSvgs", taskArgsLeft);
+    }
   }
 
-  /*   let sleeves: Sleeves[] = [
+  let sleeves: Sleeves[] = [
     {
-      sleeveId: 41,
+      sleeveId: 43,
+      wearableId: 8,
+    },
+    {
+      sleeveId: 44,
       wearableId: 25,
     },
     {
-      sleeveId: 42,
+      sleeveId: 45,
       wearableId: 125,
     },
-  ]; */
-
-  console.log("Bodywearables Length: ", bodyWearableIds.length);
-
-  let sleeves: Sleeves[] = [];
-
-  for (let index = 0; index < sleevesTotalIds; index++) {
-    sleeves.push({
-      sleeveId: index,
-      wearableId: bodyWearableIds[index],
-    });
-  }
+  ];
 
   await run("updateSleeves", convertSleevesToTaskFormat(sleeves));
 }
