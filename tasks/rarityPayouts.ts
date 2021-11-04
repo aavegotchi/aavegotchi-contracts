@@ -3,10 +3,23 @@ import { task } from "hardhat/config";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
 import { BigNumber } from "@ethersproject/bignumber";
-import { parseEther, formatEther, parseUnits } from "@ethersproject/units";
+import { parseEther, formatEther } from "@ethersproject/units";
 import { EscrowFacet } from "../typechain";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { maticDiamondAddress, gasPrice } from "../scripts/helperFunctions";
+import { LeaderboardAavegotchi, LeaderboardType } from "../types";
+import {
+  _sortByBRS,
+  findSets,
+  calculateRarityScore,
+  _sortByKinship,
+  _sortByExperience,
+  stripGotchis,
+  confirmCorrectness,
+} from "../scripts/raritySortHelpers";
+
+export let tiebreakerIndex: string;
+const totalResults: number = 6000;
 
 import {
   RarityFarmingData,
@@ -15,6 +28,9 @@ import {
 } from "../types";
 import request from "graphql-request";
 import { maticGraphUrl } from "../scripts/query/queryAavegotchis";
+
+let eachFinalResult: LeaderboardAavegotchi[] = [];
+let finalll: LeaderboardAavegotchi[];
 
 function addCommas(nStr: string) {
   nStr += "";
@@ -92,6 +108,7 @@ export interface RarityPayoutTaskArgs {
   rounds: string;
   totalAmount: string;
   blockNumber: string;
+  tieBreakerIndex: string;
   deployerAddress: string;
 }
 
@@ -107,12 +124,14 @@ task("rarityPayout")
     "File that contains all the data related to the particular rarity round"
   )
   .addParam("deployerAddress")
+  .addParam("tieBreakerIndex", "The Tiebreaker index")
   .setAction(
     async (taskArgs: RarityPayoutTaskArgs, hre: HardhatRuntimeEnvironment) => {
       const filename: string = taskArgs.rarityDataFile;
       const diamondAddress = maticDiamondAddress;
       const deployerAddress = taskArgs.deployerAddress;
       const accounts = await hre.ethers.getSigners();
+      tiebreakerIndex = taskArgs.tieBreakerIndex;
 
       const testing = ["hardhat", "localhost"].includes(hre.network.name);
       let signer: Signer;
@@ -131,6 +150,96 @@ task("rarityPayout")
       const rounds = Number(taskArgs.rounds);
       const blockNumber = taskArgs.blockNumber;
 
+      async function masterQuery(
+        category: "withSetsRarityScore" | "kinship" | "experience"
+      ) {
+        const query = leaderboardQuery(`${category}`, "desc", blockNumber);
+        const queryresponse = await request(maticGraphUrl, query);
+
+        for (let i = 1; i <= totalResults / 1000; i++) {
+          eachFinalResult = eachFinalResult.concat(queryresponse[`top${i}000`]);
+        }
+
+        eachFinalResult = eachFinalResult.slice(0, 5000);
+
+        //Add in set bonuses
+        eachFinalResult.map((leaderboardGotchi) => {
+          //  if (leaderboardGotchi.withSetsRarityScore === null) {
+          const foundSets = findSets(leaderboardGotchi.equippedWearables);
+
+          if (foundSets.length > 0) {
+            const bestSet = foundSets[0];
+
+            const setTraitBonuses: number[] = bestSet.traitsBonuses;
+            const brsBonus = setTraitBonuses[0];
+
+            const nrg = setTraitBonuses[1];
+            const agg = setTraitBonuses[2];
+            const spk = setTraitBonuses[3];
+            const brn = setTraitBonuses[4];
+            const setBonusArray = [nrg, agg, spk, brn];
+
+            leaderboardGotchi.equippedSetName = bestSet.name;
+
+            const withSetsNumericTraits =
+              leaderboardGotchi.modifiedNumericTraits;
+
+            const beforeSetBonus = calculateRarityScore(
+              leaderboardGotchi.modifiedNumericTraits
+            );
+
+            setBonusArray.forEach((trait, index) => {
+              withSetsNumericTraits[index] =
+                withSetsNumericTraits[index] + setBonusArray[index];
+            });
+
+            const afterSetBonus = calculateRarityScore(withSetsNumericTraits);
+
+            const bonusDifference = afterSetBonus - beforeSetBonus;
+
+            leaderboardGotchi.withSetsNumericTraits = withSetsNumericTraits;
+
+            leaderboardGotchi.withSetsRarityScore = Number(
+              Number(leaderboardGotchi.modifiedRarityScore) +
+                Number(bonusDifference) +
+                Number(brsBonus)
+            ).toString();
+          } else {
+            leaderboardGotchi.withSetsRarityScore =
+              leaderboardGotchi.modifiedRarityScore;
+            leaderboardGotchi.withSetsNumericTraits =
+              leaderboardGotchi.modifiedNumericTraits;
+          }
+          // }
+          return leaderboardGotchi;
+        });
+
+        const sortingOptions: {
+          [k in LeaderboardType]: (
+            a: LeaderboardAavegotchi,
+            b: LeaderboardAavegotchi
+          ) => number;
+        } = {
+          withSetsRarityScore: _sortByBRS,
+          kinship: _sortByKinship,
+          experience: _sortByExperience,
+        };
+
+        const sortedData = eachFinalResult.sort(sortingOptions[`${category}`]);
+
+        eachFinalResult = sortedData.slice(0, 5000);
+
+        //Set position
+        const resultsWithPositions = eachFinalResult.map((result, i) => {
+          return {
+            ...result,
+            position: i + 1,
+          };
+        });
+        finalll = resultsWithPositions;
+        console.log("the results with positions is", stripGotchis(finalll));
+        return eachFinalResult;
+      }
       const signerAddress = await signer.getAddress();
       if (signerAddress !== deployerAddress) {
         throw new Error(
@@ -147,30 +256,27 @@ task("rarityPayout")
       const maxProcess = 500;
       const finalRewards: rarityRewards = {};
 
-      //Get data for this round
+      //Get data for this round from file
       const {
         dataArgs,
       } = require(`../data/airdrops/rarityfarming/szn${taskArgs.season}/${filename}.ts`);
       const data: RarityFarmingData = dataArgs;
 
-      /*
-      const query = leaderboardQuery(
-        "withSetsRarityScore",
-        "desc",
-        blockNumber,
-        "hauntId:2"
+      //get gotchi data for this round directly from subgraph
+      const rarity: string[] = stripGotchis(
+        await masterQuery("withSetsRarityScore")
       );
-      const queryresponse = await request(maticGraphUrl, query);
+      // console.log(rarity);
+      // console.log(data.rarityGotchis);
+      const kinship: string[] = stripGotchis(await masterQuery("kinship"));
+      const xp: string[] = stripGotchis(await masterQuery("experience"));
 
-      console.log("query response:", queryresponse);
-      */
-
-      //get gotchi data for this round
-      const rarity: string[] = data.rarityGotchis;
-      const kinship: string[] = data.kinshipGotchis;
-      const xp: string[] = data.xpGotchis;
-      const rookieXp = data.rookieXpGotchis;
-      const rookieKinship = data.rookieKinshipGotchis;
+      ///Confirming correctness
+      //confirmCorrectness(rarity, data.rarityGotchis);
+      // confirmCorrectness(kinship, data.kinshipGotchis);
+      // confirmCorrectness(xp, data.xpGotchis);
+      // const rookieXp = data.rookieXpGotchis;
+      // const rookieKinship = data.rookieKinshipGotchis;
 
       //get rewards
       const rarityRoundRewards: string[] = rewards.rarity;
@@ -185,8 +291,8 @@ task("rarityPayout")
           rarity[index],
           kinship[index],
           xp[index],
-          rookieKinship[index],
-          rookieXp[index],
+          // rookieKinship[index],
+          // rookieXp[index],
         ];
 
         const rewardNames = [
@@ -210,11 +316,11 @@ task("rarityPayout")
           const gotchi = gotchis[i];
           const reward = leaderboard[index];
 
-          console.log(
-            `Adding ${
-              Number(reward) / rounds
-            } GHST to #${gotchi} in leaderboard ${rewardName}`
-          );
+          // console.log(
+          //   `Adding ${
+          //     Number(reward) / rounds
+          //   } GHST to #${gotchi} in leaderboard ${rewardName}`
+          // );
 
           //Add rewards divided by 4 (per season)
           if (finalRewards[gotchi])
@@ -246,7 +352,7 @@ task("rarityPayout")
         sorted.push(`${key}: ${finalRewards[key]}`);
       });
 
-      console.log("sorted:", sorted);
+      // console.log("sorted:", sorted);
 
       /* if (talliedAmount !== roundAmount) {
         throw new Error(
