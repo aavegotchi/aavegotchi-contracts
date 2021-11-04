@@ -22,9 +22,9 @@ export interface SideDimensions {
 }
 
 export interface Exceptions {
-  _itemId: BigNumberish;
-  _slotPosition: BigNumberish;
-  _exceptionBool: boolean;
+  itemId: BigNumberish;
+  slotPosition: BigNumberish;
+  exceptionBool: boolean;
 }
 
 export interface Sleeves {

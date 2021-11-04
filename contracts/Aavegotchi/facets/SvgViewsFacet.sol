@@ -476,15 +476,15 @@ contract SvgViewsFacet is Modifiers {
 
     //exceptions
     struct SideViewExceptions {
-        uint256 _itemId;
-        uint256 _slotPosition;
-        bool _exceptionBool;
+        uint256 itemId;
+        uint256 slotPosition;
+        bool exceptionBool;
     }
 
     //adding svg id exceptions for layering order
     function setSideViewExceptions(SideViewExceptions[] calldata _sideViewExceptions) external onlyItemManager {
         for (uint256 i; i < _sideViewExceptions.length; i++) {
-            s.isAnException[_sideViewExceptions[i]._itemId][_sideViewExceptions[i]._slotPosition] = _sideViewExceptions[i]._exceptionBool;
+            s.isAnException[_sideViewExceptions[i].itemId][_sideViewExceptions[i].slotPosition] = _sideViewExceptions[i].exceptionBool;
         }
     }
 }
