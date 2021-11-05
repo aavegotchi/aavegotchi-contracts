@@ -39,9 +39,6 @@ export async function main() {
     signer
   )) as SvgViewsFacet;
 
-  //calls upgrade script
-  await upgrade();
-
   //exceptions
   const rightExceptions: Exceptions[] = [
     {
