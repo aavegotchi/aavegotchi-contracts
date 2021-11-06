@@ -29,9 +29,6 @@ import {
 import request from "graphql-request";
 import { maticGraphUrl } from "../scripts/query/queryAavegotchis";
 
-let eachFinalResult: LeaderboardAavegotchi[] = [];
-let finalll: LeaderboardAavegotchi[];
-
 function addCommas(nStr: string) {
   nStr += "";
   const x = nStr.split(".");
@@ -153,6 +150,7 @@ task("rarityPayout")
       async function masterQuery(
         category: "withSetsRarityScore" | "kinship" | "experience"
       ) {
+        let eachFinalResult: LeaderboardAavegotchi[] = [];
         const query = leaderboardQuery(`${category}`, "desc", blockNumber);
         const queryresponse = await request(maticGraphUrl, query);
 
@@ -236,8 +234,6 @@ task("rarityPayout")
             position: i + 1,
           };
         });
-        finalll = resultsWithPositions;
-        console.log("the results with positions is", stripGotchis(finalll));
         return eachFinalResult;
       }
       const signerAddress = await signer.getAddress();
@@ -263,18 +259,16 @@ task("rarityPayout")
       const data: RarityFarmingData = dataArgs;
 
       //get gotchi data for this round directly from subgraph
+      const kinship: string[] = stripGotchis(await masterQuery("kinship"));
+      const xp: string[] = stripGotchis(await masterQuery("experience"));
       const rarity: string[] = stripGotchis(
         await masterQuery("withSetsRarityScore")
       );
-      // console.log(rarity);
-      // console.log(data.rarityGotchis);
-      const kinship: string[] = stripGotchis(await masterQuery("kinship"));
-      const xp: string[] = stripGotchis(await masterQuery("experience"));
 
       ///Confirming correctness
-      //confirmCorrectness(rarity, data.rarityGotchis);
-      // confirmCorrectness(kinship, data.kinshipGotchis);
-      // confirmCorrectness(xp, data.xpGotchis);
+      confirmCorrectness(rarity, data.rarityGotchis);
+      confirmCorrectness(kinship, data.kinshipGotchis);
+      confirmCorrectness(xp, data.xpGotchis);
       // const rookieXp = data.rookieXpGotchis;
       // const rookieKinship = data.rookieKinshipGotchis;
 

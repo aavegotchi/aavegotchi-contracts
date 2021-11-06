@@ -6,6 +6,14 @@
 // spk
 // brn
 import { BigNumber } from "@ethersproject/bignumber";
+/* global ethers */
+
+// Rarity bonus
+// nrg
+// agg
+// spk
+// brn
+
 export const wearableSetArrays = [
   {
     name: "Infantry",
@@ -40,13 +48,13 @@ export const wearableSetArrays = [
   {
     name: "Godlike Sergey",
     wearableIds: [13, 14, 16],
-    traitsBonuses: [6, 0, 3, 0, 0],
+    traitsBonuses: [6, -3, 0, 0, 0],
     allowedCollaterals: [],
   },
   {
     name: "Apex Sergey",
     wearableIds: [13, 14, 16, 17],
-    traitsBonuses: [6, 1, 3, 0, 0],
+    traitsBonuses: [6, -4, 0, 0, 0],
     allowedCollaterals: [3],
   },
   {
@@ -232,13 +240,13 @@ export const wearableSetArrays = [
   {
     name: "Sushi Chef",
     wearableIds: [80, 81, 82],
-    traitsBonuses: [3, 0, 2, 0, 0],
+    traitsBonuses: [4, 0, 2, 0, 0],
     allowedCollaterals: [],
   },
   {
     name: "Sushi Chef",
     wearableIds: [80, 81, 83],
-    traitsBonuses: [4, 0, 2, 0, 0],
+    traitsBonuses: [3, 0, 2, 0, 0],
     allowedCollaterals: [],
   },
   {
@@ -285,7 +293,7 @@ export const wearableSetArrays = [
   },
   {
     name: "Runner",
-    wearableIds: [94, 95, 121],
+    wearableIds: [94, 95, 118],
     traitsBonuses: [2, 1, 0, 0, 0],
     allowedCollaterals: [],
   },
@@ -297,7 +305,7 @@ export const wearableSetArrays = [
   },
   {
     name: "Long Distance Runner",
-    wearableIds: [94, 125, 121],
+    wearableIds: [94, 125, 118],
     traitsBonuses: [4, 2, 0, 0, 0],
     allowedCollaterals: [],
   },
@@ -425,6 +433,358 @@ export const wearableSetArrays = [
     name: "Party Animal",
     wearableIds: [109, 40, 124],
     traitsBonuses: [5, 0, 0, 0, -3],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Snapshot Voter",
+    wearableIds: [137, 138, 139],
+    traitsBonuses: [3, 0, -2, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Polygonist",
+    wearableIds: [134, 135, 136],
+    traitsBonuses: [3, 0, -1, 0, 1],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Quickswap Dragon",
+    wearableIds: [130, 131, 132],
+    traitsBonuses: [3, 0, 1, 1, 0],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Swappy the Dragon",
+    wearableIds: [130, 132, 133],
+    traitsBonuses: [4, 0, 1, 1, 0],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Gotchi Elf",
+    wearableIds: [140, 141, 142],
+    traitsBonuses: [3, 0, 0, -1, 1],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Gotchi Princess",
+    wearableIds: [140, 141, 142, 143],
+    traitsBonuses: [4, 1, 1, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Gotchi Queen",
+    wearableIds: [140, 141, 144, 143],
+    traitsBonuses: [5, 0, 0, -2, 1],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Godli Locks",
+    wearableIds: [140, 141, 145, 143],
+    traitsBonuses: [6, 0, 0, -2, 2],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Gotchi Baron",
+    wearableIds: [146, 147, 148],
+    traitsBonuses: [3, -1, 0, 0, -1],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Gotchi Lord",
+    wearableIds: [146, 147, 148, 150],
+    traitsBonuses: [5, -1, 0, 0, -2],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Gotchi King",
+    wearableIds: [146, 149, 148, 150],
+    traitsBonuses: [5, -2, 0, 0, -1],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Gotchi Emperor",
+    wearableIds: [146, 149, 148, 150, 156],
+    traitsBonuses: [6, -2, 0, 0, -2],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Lil Pumpagotchi",
+    wearableIds: [157, 158, 159, 160, 161],
+    traitsBonuses: [6, 2, 2, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Soundcloud Rapper",
+    wearableIds: [108, 157, 158, 159, 160],
+    traitsBonuses: [5, 1, 2, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    name: "REALM Tycoon",
+    wearableIds: [84, 85, 86, 146],
+    traitsBonuses: [4, -1, -1, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Yegres the Dragon",
+    wearableIds: [14, 131, 132, 44],
+    traitsBonuses: [5, 0, 0, 1, 2],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Vacation Santa",
+    wearableIds: [71, 114, 120, 117],
+    traitsBonuses: [5, -1, -1, -1, 0],
+    allowedCollaterals: [],
+  },
+
+  //new
+
+  {
+    name: "VR Gamer",
+    wearableIds: [202, 203, 204],
+    traitsBonuses: [5, 2, 1, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Steampunk",
+    wearableIds: [199, 200, 201],
+    traitsBonuses: [4, 0, 0, 2, 0],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Casual Gamer",
+    wearableIds: [117, 203, 204],
+    traitsBonuses: [3, 1, 1, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Gentleman Farmer",
+    wearableIds: [69, 146, 200],
+    traitsBonuses: [2, 0, 0, 1, 0],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Cyberpunk",
+    wearableIds: [43, 48, 202],
+    traitsBonuses: [5, 3, 0, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    name: "Steampunk Grenadier",
+    wearableIds: [1, 2, 6, 199],
+    traitsBonuses: [3, 0, 0, 2, 0],
+    allowedCollaterals: [],
+  },
+
+  {
+    setId: 93,
+    name: "Venly Biker",
+    wearableIds: [206, 207, 208, 209],
+    traitsBonuses: [4, 1, 1, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 94,
+    name: "Hacker Aanon",
+    wearableIds: [211, 212, 213],
+    traitsBonuses: [5, -2, 0, 0, 1],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 95,
+    name: "Shadowy Supercoder",
+    wearableIds: [212, 213, 214],
+    traitsBonuses: [6, -2, 0, 0, 1],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 96,
+    name: "Cyborg ",
+    wearableIds: [215, 216, 217],
+    traitsBonuses: [5, 0, 3, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 97,
+    name: "Punk Rocker",
+    wearableIds: [218, 219, 220],
+    traitsBonuses: [4, 0, 2, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 98,
+    name: "Piraate",
+    wearableIds: [221, 222, 223, 224],
+    traitsBonuses: [3, 0, 0, 0, -2],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 99,
+    name: "Aair Gotchi",
+    wearableIds: [225, 226, 227],
+    traitsBonuses: [3, 2, 0, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 100,
+    name: "Wraangler",
+    wearableIds: [228, 229, 230],
+    traitsBonuses: [2, 0, 1, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 101,
+    name: "Ranchero",
+    wearableIds: [231, 232, 233],
+    traitsBonuses: [2, -1, 0, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 102,
+    name: "Ranchero",
+    wearableIds: [231, 232, 236],
+    traitsBonuses: [2, -1, 0, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 103,
+    name: "Ranchero",
+    wearableIds: [231, 232, 237],
+    traitsBonuses: [2, -1, 0, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 104,
+    name: "Ranchero",
+    wearableIds: [231, 232, 238],
+    traitsBonuses: [2, -1, 0, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 105,
+    name: "Novice Shaaman",
+    wearableIds: [233, 234, 235],
+    traitsBonuses: [5, -3, 0, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 106,
+    name: "Shaaman Priest",
+    wearableIds: [234, 235, 236],
+    traitsBonuses: [5, -3, 0, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 107,
+    name: "Shaaman Mystic",
+    wearableIds: [234, 235, 237],
+    traitsBonuses: [5, -3, 0, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 108,
+    name: "Master Shaaman",
+    wearableIds: [234, 235, 238],
+    traitsBonuses: [6, -3, 0, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 109,
+    name: "WGMI Wagie ",
+    wearableIds: [239, 240, 241],
+    traitsBonuses: [3, 0, -2, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 110,
+    name: "YOLO Guy",
+    wearableIds: [242, 243, 244],
+    traitsBonuses: [4, -1, -1, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 111,
+    name: "Psychonaut",
+    wearableIds: [234, 235, 238, 53],
+    traitsBonuses: [7, -3, 0, 0, 1],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 112,
+    name: "Tech Bro",
+    wearableIds: [242, 243, 244, 212],
+    traitsBonuses: [5, -2, 0, 0, 1],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 113,
+    name: "Gunslinger",
+    wearableIds: [231, 228, 58, 58],
+    traitsBonuses: [3, 0, 2, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 114,
+    name: "We Are Legion",
+    wearableIds: [85, 211, 212],
+    traitsBonuses: [5, 0, 0, 3, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 115,
+    name: "Aastronaut",
+    wearableIds: [252, 253, 254],
+    traitsBonuses: [1, 0, 0, 1, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 116,
+    name: "Geckogotchi",
+    wearableIds: [249, 250, 251],
+    traitsBonuses: [2, 1, 0, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 117,
+    name: "Super Geckogotchi",
+    wearableIds: [245, 249, 250, 251],
+    traitsBonuses: [3, 0, 0, -1, -1],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 118,
+    name: "Lil Bubble",
+    wearableIds: [255, 256, 257],
+    traitsBonuses: [4, 2, -1, 0, 0],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 119,
+    name: "Radar",
+    wearableIds: [261, 262, 263],
+    traitsBonuses: [5, 0, -1, 0, 2],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 120,
+    name: "Laozigotchi",
+    wearableIds: [258, 259, 260],
+    traitsBonuses: [6, -2, 0, 0, 1],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 121,
+    name: "Wandering Sage",
+    wearableIds: [65, 258, 259, 260],
+    traitsBonuses: [7, -2, 0, 0, 2],
+    allowedCollaterals: [],
+  },
+  {
+    setId: 122,
+    name: "APY Visionary",
+    wearableIds: [246, 247, 248],
+    traitsBonuses: [2, 1, 0, 0, 0],
     allowedCollaterals: [],
   },
 ];

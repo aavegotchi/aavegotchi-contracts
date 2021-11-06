@@ -130,12 +130,15 @@ export function stripGotchis(_in: LeaderboardAavegotchi[]) {
 }
 
 export function confirmCorrectness(table1: string[], table2: string[]) {
+  let j = 0;
   if (table1.length != table2.length) {
     console.log("length mismatch, exiting");
   }
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < table1.length; i++) {
     if (table1[i] === table2[i]) {
-      console.log(`${table1[i]} matches ${table2[i]}`);
-    } else console.log(`${table1[i]} does not match ${table2[i]}`);
+      j++;
+      //  console.log(`${table1[i]} matches ${table2[i]}`);
+    }
   }
+  console.log(j);
 }
