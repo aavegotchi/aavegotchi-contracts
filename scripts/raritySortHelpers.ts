@@ -5,8 +5,10 @@ import {
   FoundSet,
   LeaderboardSortingOption,
 } from "../types";
+import request from "graphql-request";
 
 import { wearableSetArrays } from "./wearableSets";
+import { maticGraphUrl } from "./query/queryAavegotchis";
 const tiebreakerIndex = 0;
 const totalResults: number = 6000;
 
@@ -121,17 +123,13 @@ export function _aavegotchiNumericTraits(aavegotchi: LeaderboardAavegotchi) {
   else return aavegotchi.modifiedNumericTraits;
 }
 
-export function stripGotchis(_in: LeaderboardAavegotchi[]) {
-  const allIds: string[] = [];
-  for (let i = 0; i < _in.length; i++) {
-    allIds.push(_in[i].id);
-  }
-  return allIds;
+export function stripGotchis(ids: LeaderboardAavegotchi[]) {
+  return ids.map((gotchi: LeaderboardAavegotchi) => gotchi.id);
 }
 
 export function confirmCorrectness(table1: string[], table2: string[]) {
   let j = 0;
-  if (table1.length != table2.length) {
+  if (table1.length !== table2.length) {
     console.log("length mismatch, exiting");
   }
   for (let i = 0; i < table1.length; i++) {
@@ -141,4 +139,139 @@ export function confirmCorrectness(table1: string[], table2: string[]) {
     }
   }
   console.log(j);
+}
+
+export function leaderboardQuery(
+  orderBy: string,
+  orderDirection: string,
+  blockNumber: string,
+  extraFilters?: string
+): string {
+  const extraWhere = extraFilters ? "," + extraFilters : "";
+  const where = `where:{baseRarityScore_gt:0, owner_not:"0x0000000000000000000000000000000000000000" ${extraWhere}}`;
+  const aavegotchi = `
+    id
+    name
+    baseRarityScore
+    modifiedRarityScore
+    withSetsRarityScore
+    numericTraits
+    modifiedNumericTraits
+    withSetsNumericTraits
+    stakedAmount
+    equippedWearables
+    kinship
+    equippedSetID
+    equippedSetName
+    experience
+    level
+    collateral
+    hauntId
+    lastInteracted
+    owner {
+        id
+    }`;
+  return `
+    {
+      top1000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, ${where}) {
+        ${aavegotchi}
+      }
+      top2000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:1000, ${where}) {
+        ${aavegotchi}
+      }
+      top3000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:2000, ${where}) {
+        ${aavegotchi}
+      }
+      top4000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:3000, ${where}) {
+        ${aavegotchi}
+      }
+      top5000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:4000, ${where}) {
+        ${aavegotchi}
+      }
+      top6000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:5000, ${where}) {
+        ${aavegotchi}
+      }
+    }
+  `;
+}
+
+export async function fetchAndSortLeaderboard(
+  category: "withSetsRarityScore" | "kinship" | "experience",
+  blockNumber: string
+) {
+  let eachFinalResult: LeaderboardAavegotchi[] = [];
+  const query = leaderboardQuery(`${category}`, "desc", blockNumber);
+  const queryresponse = await request(maticGraphUrl, query);
+
+  for (let i = 1; i <= totalResults / 1000; i++) {
+    eachFinalResult = eachFinalResult.concat(queryresponse[`top${i}000`]);
+  }
+
+  //Add in set bonuses
+  eachFinalResult.map((leaderboardGotchi) => {
+    //  if (leaderboardGotchi.withSetsRarityScore === null) {
+    const foundSets = findSets(leaderboardGotchi.equippedWearables);
+
+    if (foundSets.length > 0) {
+      const bestSet = foundSets[0];
+
+      const setTraitBonuses: number[] = bestSet.traitsBonuses;
+      const brsBonus = setTraitBonuses[0];
+
+      const nrg = setTraitBonuses[1];
+      const agg = setTraitBonuses[2];
+      const spk = setTraitBonuses[3];
+      const brn = setTraitBonuses[4];
+      const setBonusArray = [nrg, agg, spk, brn];
+
+      leaderboardGotchi.equippedSetName = bestSet.name;
+
+      const withSetsNumericTraits = leaderboardGotchi.modifiedNumericTraits;
+
+      const beforeSetBonus = calculateRarityScore(
+        leaderboardGotchi.modifiedNumericTraits
+      );
+
+      setBonusArray.forEach((trait, index) => {
+        withSetsNumericTraits[index] =
+          withSetsNumericTraits[index] + setBonusArray[index];
+      });
+
+      const afterSetBonus = calculateRarityScore(withSetsNumericTraits);
+
+      const bonusDifference = afterSetBonus - beforeSetBonus;
+
+      leaderboardGotchi.withSetsNumericTraits = withSetsNumericTraits;
+
+      leaderboardGotchi.withSetsRarityScore = Number(
+        Number(leaderboardGotchi.modifiedRarityScore) +
+          Number(bonusDifference) +
+          Number(brsBonus)
+      ).toString();
+    } else {
+      leaderboardGotchi.withSetsRarityScore =
+        leaderboardGotchi.modifiedRarityScore;
+      leaderboardGotchi.withSetsNumericTraits =
+        leaderboardGotchi.modifiedNumericTraits;
+    }
+    // }
+    return leaderboardGotchi;
+  });
+
+  const sortingOptions: {
+    [k in LeaderboardType]: (
+      a: LeaderboardAavegotchi,
+      b: LeaderboardAavegotchi
+    ) => number;
+  } = {
+    withSetsRarityScore: _sortByBRS,
+    kinship: _sortByKinship,
+    experience: _sortByExperience,
+  };
+
+  const sortedData = eachFinalResult.sort(sortingOptions[`${category}`]);
+
+  eachFinalResult = sortedData.slice(0, 5000);
+
+  return eachFinalResult;
 }

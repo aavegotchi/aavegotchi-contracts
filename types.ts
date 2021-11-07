@@ -27,6 +27,13 @@ export interface rarityRewards {
 }
 export type LeaderboardType = "withSetsRarityScore" | "kinship" | "experience";
 
+export type LeaderboardDataName =
+  | "rarityGotchis"
+  | "kinshipGotchis"
+  | "xpGotchis"
+  | "rookieXpGotchis"
+  | "rookieKinshipGotchis";
+
 export interface LeaderboardAavegotchi {
   id: string;
   position?: number;

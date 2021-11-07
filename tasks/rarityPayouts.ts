@@ -7,7 +7,11 @@ import { parseEther, formatEther } from "@ethersproject/units";
 import { EscrowFacet } from "../typechain";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { maticDiamondAddress, gasPrice } from "../scripts/helperFunctions";
-import { LeaderboardAavegotchi, LeaderboardType } from "../types";
+import {
+  LeaderboardAavegotchi,
+  LeaderboardDataName,
+  LeaderboardType,
+} from "../types";
 import {
   _sortByBRS,
   findSets,
@@ -16,6 +20,7 @@ import {
   _sortByExperience,
   stripGotchis,
   confirmCorrectness,
+  fetchAndSortLeaderboard,
 } from "../scripts/raritySortHelpers";
 
 export let tiebreakerIndex: string;
@@ -26,7 +31,7 @@ import {
   RarityFarmingRewardArgs,
   rarityRewards,
 } from "../types";
-import request from "graphql-request";
+
 import { maticGraphUrl } from "../scripts/query/queryAavegotchis";
 
 function addCommas(nStr: string) {
@@ -43,60 +48,6 @@ function addCommas(nStr: string) {
 
 function strDisplay(str: string) {
   return addCommas(str.toString());
-}
-
-export function leaderboardQuery(
-  orderBy: string,
-  orderDirection: string,
-  blockNumber: string,
-  extraFilters?: string
-): string {
-  const extraWhere = extraFilters ? "," + extraFilters : "";
-  const where = `where:{baseRarityScore_gt:0, owner_not:"0x0000000000000000000000000000000000000000" ${extraWhere}}`;
-  const aavegotchi = `
-    id
-    name
-    baseRarityScore
-    modifiedRarityScore
-    withSetsRarityScore
-    numericTraits
-    modifiedNumericTraits
-    withSetsNumericTraits
-    stakedAmount
-    equippedWearables
-    kinship
-    equippedSetID
-    equippedSetName
-    experience
-    level
-    collateral
-    hauntId
-    lastInteracted
-    owner {
-        id
-    }`;
-  return `
-    {
-      top1000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, ${where}) {
-        ${aavegotchi}
-      }
-      top2000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:1000, ${where}) {
-        ${aavegotchi}
-      }
-      top3000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:2000, ${where}) {
-        ${aavegotchi}
-      }
-      top4000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:3000, ${where}) {
-        ${aavegotchi}
-      }
-      top5000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:4000, ${where}) {
-        ${aavegotchi}
-      }
-      top6000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:5000, ${where}) {
-        ${aavegotchi}
-      }
-    }
-  `;
 }
 
 export interface RarityPayoutTaskArgs {
@@ -147,95 +98,6 @@ task("rarityPayout")
       const rounds = Number(taskArgs.rounds);
       const blockNumber = taskArgs.blockNumber;
 
-      async function masterQuery(
-        category: "withSetsRarityScore" | "kinship" | "experience"
-      ) {
-        let eachFinalResult: LeaderboardAavegotchi[] = [];
-        const query = leaderboardQuery(`${category}`, "desc", blockNumber);
-        const queryresponse = await request(maticGraphUrl, query);
-
-        for (let i = 1; i <= totalResults / 1000; i++) {
-          eachFinalResult = eachFinalResult.concat(queryresponse[`top${i}000`]);
-        }
-
-        eachFinalResult = eachFinalResult.slice(0, 5000);
-
-        //Add in set bonuses
-        eachFinalResult.map((leaderboardGotchi) => {
-          //  if (leaderboardGotchi.withSetsRarityScore === null) {
-          const foundSets = findSets(leaderboardGotchi.equippedWearables);
-
-          if (foundSets.length > 0) {
-            const bestSet = foundSets[0];
-
-            const setTraitBonuses: number[] = bestSet.traitsBonuses;
-            const brsBonus = setTraitBonuses[0];
-
-            const nrg = setTraitBonuses[1];
-            const agg = setTraitBonuses[2];
-            const spk = setTraitBonuses[3];
-            const brn = setTraitBonuses[4];
-            const setBonusArray = [nrg, agg, spk, brn];
-
-            leaderboardGotchi.equippedSetName = bestSet.name;
-
-            const withSetsNumericTraits =
-              leaderboardGotchi.modifiedNumericTraits;
-
-            const beforeSetBonus = calculateRarityScore(
-              leaderboardGotchi.modifiedNumericTraits
-            );
-
-            setBonusArray.forEach((trait, index) => {
-              withSetsNumericTraits[index] =
-                withSetsNumericTraits[index] + setBonusArray[index];
-            });
-
-            const afterSetBonus = calculateRarityScore(withSetsNumericTraits);
-
-            const bonusDifference = afterSetBonus - beforeSetBonus;
-
-            leaderboardGotchi.withSetsNumericTraits = withSetsNumericTraits;
-
-            leaderboardGotchi.withSetsRarityScore = Number(
-              Number(leaderboardGotchi.modifiedRarityScore) +
-                Number(bonusDifference) +
-                Number(brsBonus)
-            ).toString();
-          } else {
-            leaderboardGotchi.withSetsRarityScore =
-              leaderboardGotchi.modifiedRarityScore;
-            leaderboardGotchi.withSetsNumericTraits =
-              leaderboardGotchi.modifiedNumericTraits;
-          }
-          // }
-          return leaderboardGotchi;
-        });
-
-        const sortingOptions: {
-          [k in LeaderboardType]: (
-            a: LeaderboardAavegotchi,
-            b: LeaderboardAavegotchi
-          ) => number;
-        } = {
-          withSetsRarityScore: _sortByBRS,
-          kinship: _sortByKinship,
-          experience: _sortByExperience,
-        };
-
-        const sortedData = eachFinalResult.sort(sortingOptions[`${category}`]);
-
-        eachFinalResult = sortedData.slice(0, 5000);
-
-        //Set position
-        const resultsWithPositions = eachFinalResult.map((result, i) => {
-          return {
-            ...result,
-            position: i + 1,
-          };
-        });
-        return eachFinalResult;
-      }
       const signerAddress = await signer.getAddress();
       if (signerAddress !== deployerAddress) {
         throw new Error(
@@ -258,19 +120,35 @@ task("rarityPayout")
       } = require(`../data/airdrops/rarityfarming/szn${taskArgs.season}/${filename}.ts`);
       const data: RarityFarmingData = dataArgs;
 
-      //get gotchi data for this round directly from subgraph
-      const kinship: string[] = stripGotchis(await masterQuery("kinship"));
-      const xp: string[] = stripGotchis(await masterQuery("experience"));
-      const rarity: string[] = stripGotchis(
-        await masterQuery("withSetsRarityScore")
-      );
+      const leaderboards = ["withSetsRarityScore", "kinship", "experience"];
+      const dataNames: LeaderboardDataName[] = [
+        "rarityGotchis",
+        "kinshipGotchis",
+        "xpGotchis",
+      ];
 
-      ///Confirming correctness
-      confirmCorrectness(rarity, data.rarityGotchis);
-      confirmCorrectness(kinship, data.kinshipGotchis);
-      confirmCorrectness(xp, data.xpGotchis);
-      // const rookieXp = data.rookieXpGotchis;
-      // const rookieKinship = data.rookieKinshipGotchis;
+      //handle rookie now
+
+      const leaderboardResults: RarityFarmingData = {
+        rarityGotchis: [],
+        xpGotchis: [],
+        kinshipGotchis: [],
+        rookieXpGotchis: [],
+        rookieKinshipGotchis: [],
+      };
+
+      for (let index = 0; index < leaderboards.length; index++) {
+        const element: LeaderboardType = leaderboards[index] as LeaderboardType;
+        const result = stripGotchis(
+          await fetchAndSortLeaderboard(element, blockNumber)
+        );
+        const dataName: LeaderboardDataName = dataNames[
+          index
+        ] as LeaderboardDataName;
+        confirmCorrectness(result, data[dataName]);
+
+        leaderboardResults[dataName] = result;
+      }
 
       //get rewards
       const rarityRoundRewards: string[] = rewards.rarity;
@@ -282,9 +160,9 @@ task("rarityPayout")
       //Iterate through all 5000 spots
       for (let index = 0; index < 5000; index++) {
         const gotchis: string[] = [
-          rarity[index],
-          kinship[index],
-          xp[index],
+          leaderboardResults.rarityGotchis[index],
+          leaderboardResults.kinshipGotchis[index],
+          leaderboardResults.xpGotchis[index],
           // rookieKinship[index],
           // rookieXp[index],
         ];
