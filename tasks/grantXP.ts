@@ -92,7 +92,6 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     });
 
     //Check how many unused addresses there are (addresses that voted, but do not have Aavegotchis)
-    /*
     const unusedAddresses: string[] = [];
     const lowerCaseAddresses = addresses.map((address: string) =>
       address.toLowerCase()
@@ -105,7 +104,6 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     console.log(
       `There were ${unusedAddresses.length} voting addresses without Gotchis.`
     );
-    */
 
     const batches = Math.ceil(tokenIds.length / batchSize);
 
