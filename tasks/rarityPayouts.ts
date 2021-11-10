@@ -1,9 +1,8 @@
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { task } from "hardhat/config";
-import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
+import { ContractReceipt } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
 import { BigNumber } from "@ethersproject/bignumber";
-import { parseEther, formatEther, parseUnits } from "@ethersproject/units";
+import { parseEther, formatEther } from "@ethersproject/units";
 import { EscrowFacet } from "../typechain";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { maticDiamondAddress, gasPrice } from "../scripts/helperFunctions";
@@ -13,8 +12,6 @@ import {
   RarityFarmingRewardArgs,
   rarityRewards,
 } from "../types";
-import request from "graphql-request";
-import { maticGraphUrl } from "../scripts/query/queryAavegotchis";
 
 function addCommas(nStr: string) {
   nStr += "";
@@ -30,60 +27,6 @@ function addCommas(nStr: string) {
 
 function strDisplay(str: string) {
   return addCommas(str.toString());
-}
-
-export function leaderboardQuery(
-  orderBy: string,
-  orderDirection: string,
-  blockNumber: string,
-  extraFilters?: string
-): string {
-  const extraWhere = extraFilters ? "," + extraFilters : "";
-  const where = `where:{baseRarityScore_gt:0, owner_not:"0x0000000000000000000000000000000000000000" ${extraWhere}}`;
-  const aavegotchi = `
-    id
-    name
-    baseRarityScore
-    modifiedRarityScore
-    withSetsRarityScore
-    numericTraits
-    modifiedNumericTraits
-    withSetsNumericTraits
-    stakedAmount
-    equippedWearables
-    kinship
-    equippedSetID
-    equippedSetName
-    experience
-    level
-    collateral
-    hauntId
-    lastInteracted
-    owner {
-        id
-    }`;
-  return `
-    {
-      top1000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, ${where}) {
-        ${aavegotchi}
-      }
-      top2000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:1000, ${where}) {
-        ${aavegotchi}
-      }
-      top3000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:2000, ${where}) {
-        ${aavegotchi}
-      }
-      top4000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:3000, ${where}) {
-        ${aavegotchi}
-      }
-      top5000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:4000, ${where}) {
-        ${aavegotchi}
-      }
-      top6000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:5000, ${where}) {
-        ${aavegotchi}
-      }
-    }
-  `;
 }
 
 export interface RarityPayoutTaskArgs {
@@ -129,7 +72,6 @@ task("rarityPayout")
       }
 
       const rounds = Number(taskArgs.rounds);
-      const blockNumber = taskArgs.blockNumber;
 
       const signerAddress = await signer.getAddress();
       if (signerAddress !== deployerAddress) {
@@ -152,18 +94,6 @@ task("rarityPayout")
         dataArgs,
       } = require(`../data/airdrops/rarityfarming/szn${taskArgs.season}/${filename}.ts`);
       const data: RarityFarmingData = dataArgs;
-
-      /*
-      const query = leaderboardQuery(
-        "withSetsRarityScore",
-        "desc",
-        blockNumber,
-        "hauntId:2"
-      );
-      const queryresponse = await request(maticGraphUrl, query);
-
-      console.log("query response:", queryresponse);
-      */
 
       //get gotchi data for this round
       const rarity: string[] = data.rarityGotchis;
