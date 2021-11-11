@@ -1,4 +1,4 @@
-//exceptions for : pet - rofls(153, 154, 155, 156), antenna bot(261)
+//exceptions for : pet - rofls(151, 152, 153, 154, 155, 156), antenna bot(261)
 //                 hand - mechanical glove(201), energy gun(217), hook hand(223)
 
 import { ethers, network } from "hardhat";
@@ -81,6 +81,16 @@ export async function main() {
       exceptionBool: true,
     },
     {
+      itemId: 151,
+      slotPosition: 6,
+      exceptionBool: true,
+    },
+    {
+      itemId: 152,
+      slotPosition: 6,
+      exceptionBool: true,
+    },
+    {
       itemId: 153,
       slotPosition: 6,
       exceptionBool: true,
@@ -102,7 +112,7 @@ export async function main() {
     },
   ];
 
-  console.log("Testing");
+  console.log("Creating Exceptions");
   await svgViewsFacet.setSideViewExceptions(rightExceptions);
   await svgViewsFacet.setSideViewExceptions(leftExceptions);
   await svgViewsFacet.setSideViewExceptions(petExceptions);
