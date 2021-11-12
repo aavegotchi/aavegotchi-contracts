@@ -1,21 +1,14 @@
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { task } from "hardhat/config";
-import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
+import { ContractReceipt } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
 import { BigNumber } from "@ethersproject/bignumber";
 import { parseEther, formatEther } from "@ethersproject/units";
 import { EscrowFacet } from "../typechain";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { maticDiamondAddress, gasPrice } from "../scripts/helperFunctions";
-import {
-  LeaderboardAavegotchi,
-  LeaderboardDataName,
-  LeaderboardType,
-} from "../types";
+import { LeaderboardDataName, LeaderboardType } from "../types";
 import {
   _sortByBRS,
-  findSets,
-  calculateRarityScore,
   _sortByKinship,
   _sortByExperience,
   stripGotchis,
@@ -25,14 +18,13 @@ import {
 
 export let tiebreakerIndex: string;
 const totalResults: number = 6000;
+const rookieFilter: string = "hauntId:2";
 
 import {
   RarityFarmingData,
   RarityFarmingRewardArgs,
   rarityRewards,
 } from "../types";
-
-import { maticGraphUrl } from "../scripts/query/queryAavegotchis";
 
 function addCommas(nStr: string) {
   nStr += "";
@@ -120,11 +112,19 @@ task("rarityPayout")
       } = require(`../data/airdrops/rarityfarming/szn${taskArgs.season}/${filename}.ts`);
       const data: RarityFarmingData = dataArgs;
 
-      const leaderboards = ["withSetsRarityScore", "kinship", "experience"];
+      const leaderboards = [
+        "withSetsRarityScore",
+        "kinship",
+        "experience",
+        "experience",
+        "kinship",
+      ];
       const dataNames: LeaderboardDataName[] = [
         "rarityGotchis",
         "kinshipGotchis",
         "xpGotchis",
+        "rookieXpGotchis",
+        "rookieKinshipGotchis",
       ];
 
       //handle rookie now
@@ -136,18 +136,29 @@ task("rarityPayout")
         rookieXpGotchis: [],
         rookieKinshipGotchis: [],
       };
-
+      let extraFilter: string = "";
       for (let index = 0; index < leaderboards.length; index++) {
-        const element: LeaderboardType = leaderboards[index] as LeaderboardType;
+        if (
+          index === leaderboards.length - 1 ||
+          index === leaderboards.length - 2
+        ) {
+          console.log("getting rookies");
+          extraFilter = rookieFilter;
+        }
+        let element: LeaderboardType = leaderboards[index] as LeaderboardType;
+
         const result = stripGotchis(
-          await fetchAndSortLeaderboard(element, blockNumber)
+          await fetchAndSortLeaderboard(element, blockNumber, extraFilter)
         );
         const dataName: LeaderboardDataName = dataNames[
           index
         ] as LeaderboardDataName;
         confirmCorrectness(result, data[dataName]);
+        //
 
+        //  console.log(result);
         leaderboardResults[dataName] = result;
+        console.log("leaderboard sort is", element);
       }
 
       //get rewards
@@ -163,8 +174,8 @@ task("rarityPayout")
           leaderboardResults.rarityGotchis[index],
           leaderboardResults.kinshipGotchis[index],
           leaderboardResults.xpGotchis[index],
-          // rookieKinship[index],
-          // rookieXp[index],
+          leaderboardResults.rookieKinshipGotchis[index],
+          leaderboardResults.rookieXpGotchis[index],
         ];
 
         const rewardNames = [
@@ -184,7 +195,7 @@ task("rarityPayout")
         ];
 
         rewards.forEach((leaderboard, i) => {
-          const rewardName = rewardNames[i];
+          // const rewardName = rewardNames[i];
           const gotchi = gotchis[i];
           const reward = leaderboard[index];
 

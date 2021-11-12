@@ -9,7 +9,7 @@ import request from "graphql-request";
 
 import { wearableSetArrays } from "./wearableSets";
 import { maticGraphUrl } from "./query/queryAavegotchis";
-const tiebreakerIndex = 0;
+const tiebreakerIndex = 1;
 const totalResults: number = 6000;
 
 export function findSets(equipped: number[]) {
@@ -197,10 +197,17 @@ export function leaderboardQuery(
 
 export async function fetchAndSortLeaderboard(
   category: "withSetsRarityScore" | "kinship" | "experience",
-  blockNumber: string
+  blockNumber: string,
+  filter?: string
 ) {
   let eachFinalResult: LeaderboardAavegotchi[] = [];
-  const query = leaderboardQuery(`${category}`, "desc", blockNumber);
+  const query = leaderboardQuery(
+    `${category}`,
+    "desc",
+    blockNumber,
+    `${filter}`
+  );
+
   const queryresponse = await request(maticGraphUrl, query);
 
   for (let i = 1; i <= totalResults / 1000; i++) {
