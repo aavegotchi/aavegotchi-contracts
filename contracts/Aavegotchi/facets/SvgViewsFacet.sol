@@ -482,7 +482,7 @@ contract SvgViewsFacet is Modifiers {
     }
 
     //adding svg id exceptions for layering order
-    function setSideViewExceptions(SideViewExceptions[] calldata _sideViewExceptions) external onlyItemManager {
+    function setSideViewExceptions(SideViewExceptions[] calldata _sideViewExceptions) external onlyOwnerOrItemManager {
         for (uint256 i; i < _sideViewExceptions.length; i++) {
             s.isAnException[_sideViewExceptions[i].itemId][_sideViewExceptions[i].slotPosition] = _sideViewExceptions[i].exceptionBool;
         }
