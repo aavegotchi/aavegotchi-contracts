@@ -28,6 +28,7 @@ contract DAOFacet is Modifiers {
     event ItemModifiersSet(uint256 _wearableId, int8[6] _traitModifiers, uint8 _rarityScoreModifier);
     event RemoveExperience(uint256[] _tokenIds, uint256[] _xpValues);
     event UpdateItemPrice(uint256 _itemId, uint256 _priceInWei);
+    event RevenueTokenAdded(address indexed newRevenueToken_);
 
     /***********************************|
    |             Read Functions         |
@@ -401,6 +402,19 @@ contract DAOFacet is Modifiers {
             ItemType storage item = s.itemTypes[itemId];
             item.ghstPrice = _newPrices[i];
             emit UpdateItemPrice(itemId, _newPrices[i]);
+        }
+    }
+
+    ///@notice Allow the owner to add a revenue tokens
+    ///@param _revenueTokens An array of addresses, revenue token addresses to be added
+    function addRevenueTokens(address[] memory _revenueTokens) external onlyOwner {
+        for (uint256 i; i < _revenueTokens.length; i++) {
+            address _revenueToken = _revenueTokens[i];
+            if ((_revenueToken != address(0)) && !s.revenueTokenIndexes[_revenueToken]) {
+                s.revenueTokenIndexes[_revenueToken] = true;
+                s.revenueTokens.push(_revenueToken);
+                emit RevenueTokenAdded(_revenueToken);
+            }
         }
     }
 }

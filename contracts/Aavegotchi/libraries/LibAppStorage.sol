@@ -152,6 +152,24 @@ struct GameManager {
     uint256 refreshTime;
 }
 
+struct AavegotchiRental {
+    uint256 rentalId;
+    uint256 amountPerDay; // GHST in wei, can be zero
+    uint256 period;
+    address originalOwner;
+    address renter;
+    address receiver; // can be address(0)
+    uint256[3] revenueSplit; // originalOwner, renter, receiver
+    address erc721TokenAddress;
+    uint256 erc721TokenId;
+    uint256 category; // 0 is closed portal, 1 is vrf pending, 2 is open portal, 3 is Aavegotchi
+    uint256 timeCreated;
+    uint256 timeAgreed;
+    uint256 lastClaimed;
+    bool canceled;
+    bool completed;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -238,6 +256,13 @@ struct AppStorage {
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
     mapping(uint256 => address) categoryToTokenAddress;
+    uint256 nextAavegotchiRentalId;
+    mapping(uint256 => AavegotchiRental) aavegotchiRentals; // rentalId => data
+    mapping(uint256 => uint256) aavegotchiRentalHead; // aavegotchiId => rentalId
+    mapping(address => uint256[]) lentTokenIds; // address => lent token ids
+    mapping(address => mapping(uint256 => uint256)) lentTokenIdIndexes; // address => lent token id => index
+    address[] revenueTokens; // GHST, FUD, FOMO, ALPHA, KEK
+    mapping(address => bool) revenueTokenIndexes;
 }
 
 library LibAppStorage {
