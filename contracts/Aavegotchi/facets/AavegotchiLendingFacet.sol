@@ -80,7 +80,7 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256 _period,
         uint256[3] memory _revenueSplit,
         address _receiver
-    ) external {
+    ) onlyUnlocked(_erc721TokenId) external {
         IERC721 erc721Token = IERC721(_erc721TokenAddress);
         address sender = LibMeta.msgSender();
         require(erc721Token.ownerOf(_erc721TokenId) == sender, "AavegotchiLending: Not owner of aavegotchi");
@@ -174,7 +174,7 @@ contract AavegotchiLendingFacet is Modifiers {
         s.lentTokenIds[originalOwner].push(tokenId);
 
         if (rental.erc721TokenAddress == address(this)) {
-//            s.aavegotchis[tokenId].locked = false;
+            s.aavegotchis[tokenId].locked = false;
             LibAavegotchi.transfer(originalOwner, renter, tokenId);
         } else {
             // External contracts
@@ -249,7 +249,7 @@ contract AavegotchiLendingFacet is Modifiers {
         rental.lastClaimed = block.timestamp;
         if (completionTime <= block.timestamp) {
             if (rental.erc721TokenAddress == address(this)) {
-//                s.aavegotchis[tokenId].locked = false;
+                s.aavegotchis[tokenId].locked = false;
                 LibAavegotchi.transfer(renter, originalOwner, tokenId);
             } else {
                 // External contracts

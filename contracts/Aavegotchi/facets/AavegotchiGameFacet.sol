@@ -12,6 +12,7 @@ import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
+import {LibAavegotchiLending} from "../libraries/LibAavegotchiLending.sol";
 
 contract AavegotchiGameFacet is Modifiers {
     /// @dev This emits when the approved address for an NFT is changed or
@@ -225,6 +226,8 @@ contract AavegotchiGameFacet is Modifiers {
         uint256 _option,
         uint256 _stakeAmount
     ) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+        LibAavegotchiLending.enforceAavegotchiNotInRental(_tokenId);
+
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiGameFacet: Portal not open");
         require(_option < PORTAL_AAVEGOTCHIS_NUM, "AavegotchiGameFacet: Only 10 aavegotchi options available");

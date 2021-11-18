@@ -8,6 +8,7 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketplace.sol";
 import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
+import {LibAavegotchiLending} from "../libraries/LibAavegotchiLending.sol";
 
 contract ERC721MarketplaceFacet is Modifiers {
     event ERC721ListingAdd(
@@ -205,6 +206,8 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 _erc721TokenId,
         uint256 _priceInWei
     ) external {
+        LibAavegotchiLending.enforceAavegotchiNotInRental(_erc721TokenId);
+
         IERC721 erc721Token = IERC721(_erc721TokenAddress);
         address owner = LibMeta.msgSender();
         require(erc721Token.ownerOf(_erc721TokenId) == owner, "ERC721Marketplace: Not owner of ERC721 token");

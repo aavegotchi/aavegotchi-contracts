@@ -5,6 +5,7 @@ import {LibAavegotchi, AavegotchiInfo} from "../libraries/LibAavegotchi.sol";
 
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {AppStorage} from "../libraries/LibAppStorage.sol";
+import {LibAavegotchiLending} from "../libraries/LibAavegotchiLending.sol";
 // import "hardhat/console.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
@@ -213,6 +214,8 @@ contract AavegotchiFacet {
         address _to,
         uint256 _tokenId
     ) internal {
+        LibAavegotchiLending.enforceAavegotchiNotInRental(_tokenId);
+
         require(_to != address(0), "AavegotchiFacet: Can't transfer to 0 address");
         require(_from != address(0), "AavegotchiFacet: _from can't be 0 address");
         require(_from == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: _from is not owner, transfer failed");

@@ -7,6 +7,7 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
+import {LibAavegotchiLending} from "../libraries/LibAavegotchiLending.sol";
 
 contract EscrowFacet is Modifiers {
     event Erc20Deposited(uint256 indexed _tokenId, address indexed _erc20Contract, address indexed _from, address _to, uint256 _depositAmount);
@@ -96,6 +97,8 @@ contract EscrowFacet is Modifiers {
         address _recipient,
         uint256 _transferAmount
     ) external onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
+        LibAavegotchiLending.enforceAavegotchiNotInRental(_tokenId);
+
         address escrow = s.aavegotchis[_tokenId].escrow;
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         require(escrow != address(0), "EscrowFacet: Does not have an escrow");

@@ -57,4 +57,9 @@ library LibAavegotchiLending {
         s.lentTokenIds[_owner].pop();
         delete s.lentTokenIdIndexes[_owner][_tokenId];
     }
+
+    function enforceAavegotchiNotInRental(uint256 _tokenId) internal view {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        require(s.aavegotchiRentalHead[_tokenId] == 0, "AavegotchiLending: Aavegotchi is in rental");
+    }
 }
