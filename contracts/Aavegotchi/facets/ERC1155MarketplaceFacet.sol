@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ListingListItem, Royalties} from "../libraries/LibAppStorage.sol";
 import {LibERC1155Marketplace, ERC1155Listing} from "../libraries/LibERC1155Marketplace.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
@@ -39,6 +39,10 @@ contract ERC1155MarketplaceFacet is Modifiers {
     event ERC1155ListingCancelled(uint256 indexed listingId);
 
     event ChangedListingFee(uint256 listingFeeInWei);
+
+    event RoyaltySet(uint256 indexed erc1155TypeId, address indexed royaltyRecipient, uint256 indexed royaltyPercentage);
+
+    event RoyaltiesPaid(uint256 indexed erc1155TypeId, address indexed royaltyRecipient, uint256 royaltyPercentage, uint256 indexed royaltyInWei);
 
     ///@notice Get the standard listing fee in wei
     ///@return The listing fee(Fee for listing NFTs on the baazaar)
@@ -241,13 +245,28 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 cost = _quantity * _priceInWei;
         require(IERC20(s.ghstContract).balanceOf(buyer) >= cost, "ERC1155Marketplace: not enough GHST");
         {
+            bool royaltyPay = s.paysRoyalties[listing.erc1155TypeId];
+            uint256 transferAmount;
+
             // handles stack too deep error
             uint256 daoShare = cost / 100;
             uint256 pixelCraftShare = (cost * 2) / 100;
             //AGIP6 adds on 0.5%
             uint256 playerRewardsShare = cost / 200;
 
-            uint256 transferAmount = cost - (daoShare + pixelCraftShare + playerRewardsShare);
+            if (royaltyPay) {
+                Royalties memory _royalties = s.royaltiesInfo[listing.erc1155TypeId];
+                uint256 royaltyShare = (_priceInWei * _royalties.royaltyPercentage) / 100;
+                transferAmount = cost - (daoShare + pixelCraftShare + playerRewardsShare + royaltyShare);
+                require(transferAmount <= 0, "Total shares are too high");
+
+                LibERC20.transferFrom(s.ghstContract, buyer, _royalties.royaltyRecipient, royaltyShare);
+
+                emit RoyaltiesPaid(listing.erc1155TypeId, _royalties.royaltyRecipient, _royalties.royaltyPercentage, royaltyShare);
+            } else {
+                transferAmount = cost - (daoShare + pixelCraftShare + playerRewardsShare);
+            }
+
             LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, pixelCraftShare);
             LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, daoShare);
             LibERC20.transferFrom(s.ghstContract, buyer, seller, transferAmount);
@@ -340,5 +359,32 @@ contract ERC1155MarketplaceFacet is Modifiers {
             emit LibERC1155Marketplace.ERC1155ListingCancelled(listingId, listing.category, block.number);
             LibERC1155Marketplace.removeERC1155ListingItem(listingId, listing.seller);
         }
+    }
+
+    struct RoyaltyArgs {
+        uint256 erc1155TypeId;
+        Royalties royalties;
+    }
+
+    function setTokenRoyalty(RoyaltyArgs[] calldata _royaltiesArgs) external onlyDaoOrOwner {
+        for (uint256 i; i < _royaltiesArgs.length; i++) {
+            require(s.paysRoyalties[_royaltiesArgs[i].erc1155TypeId] == false, "ERC1155 ID is already pays royalties");
+            require(_royaltiesArgs[i].royalties.royaltyPercentage < 100, "Royalty Percentage is too high");
+
+            s.royaltiesInfo[_royaltiesArgs[i].erc1155TypeId] = _royaltiesArgs[i].royalties;
+            emit RoyaltySet(
+                _royaltiesArgs[i].erc1155TypeId,
+                _royaltiesArgs[i].royalties.royaltyRecipient,
+                _royaltiesArgs[i].royalties.royaltyPercentage
+            );
+        }
+    }
+
+    function getRoyaltiesInfo(uint256 _erc1155TypeId, uint256 _priceInWei) external view returns (address receiver, uint256 royaltyAmount) {
+        require(s.paysRoyalties[_erc1155TypeId] == true, "ERC1155 ID does not pay any royalties");
+
+        Royalties memory _royalties = s.royaltiesInfo[_erc1155TypeId];
+        receiver = _royalties.royaltyRecipient;
+        royaltyAmount = (_priceInWei * _royalties.royaltyPercentage) / 100;
     }
 }

@@ -152,6 +152,11 @@ struct GameManager {
     uint256 refreshTime;
 }
 
+struct Royalties {
+    address royaltyRecipient;
+    uint256 royaltyPercentage;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -238,6 +243,9 @@ struct AppStorage {
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
     mapping(uint256 => address) categoryToTokenAddress;
+    // Royalties
+    mapping(uint256 => bool) paysRoyalties;
+    mapping(uint256 => Royalties) royaltiesInfo;
 }
 
 library LibAppStorage {
