@@ -6,8 +6,7 @@ import {LibAppStorage, AppStorage, AavegotchiRental} from "./LibAppStorage.sol";
 import "../../shared/interfaces/IERC721.sol";
 
 library LibAavegotchiLending {
-    event AavegotchiRentalCanceled(uint256 indexed rentalId, uint256 category, uint256 time);
-    event AavegotchiRentalRemoved(uint256 indexed rentalId, uint256 category, uint256 time);
+    event AavegotchiRentalCanceled(uint256 indexed rentalId, uint256 time);
 
     function cancelAavegotchiRental(uint256 _rentalId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
@@ -26,7 +25,7 @@ library LibAavegotchiLending {
             s.aavegotchis[rental.erc721TokenId].locked = false;
         }
 
-        emit AavegotchiRentalCanceled(_rentalId, rental.category, block.number);
+        emit AavegotchiRentalCanceled(_rentalId, block.number);
         removeAavegotchiRental(rental.erc721TokenId, _owner);
     }
 

@@ -46,11 +46,6 @@ export async function upgrade() {
       removeSelectors: [],
     },
     {
-      facetName: "AavegotchiGameFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
       facetName: "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
       addSelectors: [],
       removeSelectors: [],

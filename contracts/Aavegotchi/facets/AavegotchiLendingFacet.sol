@@ -16,7 +16,6 @@ contract AavegotchiLendingFacet is Modifiers {
         address indexed originalOwner,
         address erc721TokenAddress,
         uint256 erc721TokenId,
-        uint256 indexed category,
         uint256 amountPerDay,
         uint256 period,
         uint256 time
@@ -28,7 +27,6 @@ contract AavegotchiLendingFacet is Modifiers {
         address renter,
         address erc721TokenAddress,
         uint256 erc721TokenId,
-        uint256 indexed category,
         uint256 amountPerDay,
         uint256 period,
         uint256 time
@@ -101,8 +99,7 @@ contract AavegotchiLendingFacet is Modifiers {
         s.nextAavegotchiRentalId++;
         uint256 rentalId = s.nextAavegotchiRentalId;
 
-        uint256 category = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
-        require(category != LibAavegotchi.STATUS_VRF_PENDING, "AavegotchiLending: Cannot list a portal that is pending VRF");
+        require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "AavegotchiLending: Only aavegotchi available");
 
         uint256 oldRentalId = s.aavegotchiRentalHead[_erc721TokenId];
         if (oldRentalId != 0) {
@@ -120,7 +117,6 @@ contract AavegotchiLendingFacet is Modifiers {
             receiver: _receiver,
             erc721TokenAddress: _erc721TokenAddress,
             erc721TokenId: _erc721TokenId,
-            category: category,
             timeCreated: block.timestamp,
             timeAgreed: 0,
             lastClaimed: 0,
@@ -128,7 +124,7 @@ contract AavegotchiLendingFacet is Modifiers {
             completed: false
         });
 
-        emit AavegotchiRentalAdd(rentalId, sender, _erc721TokenAddress, _erc721TokenId, category, _amountPerDay, _period, block.timestamp);
+        emit AavegotchiRentalAdd(rentalId, sender, _erc721TokenAddress, _erc721TokenId, _amountPerDay, _period, block.timestamp);
 
         // Lock Aavegotchis when listing is created
         if (_erc721TokenAddress == address(this)) {
@@ -190,7 +186,6 @@ contract AavegotchiLendingFacet is Modifiers {
             renter,
             rental.erc721TokenAddress,
             tokenId,
-            rental.category,
             rental.amountPerDay,
             rental.period,
             block.timestamp
