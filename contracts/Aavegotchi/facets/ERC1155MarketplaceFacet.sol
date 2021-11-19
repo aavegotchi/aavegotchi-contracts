@@ -254,6 +254,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
             //AGIP6 adds on 0.5%
             uint256 playerRewardsShare = cost / 200;
 
+            //determines if royalties are to be paid for erc1155
             if (royaltyPay) {
                 Royalties memory _royalties = s.royaltiesInfo[listing.erc1155TypeId];
                 uint256 royaltyShare = (_priceInWei * _royalties.royaltyPercentage) / 100;
@@ -366,6 +367,8 @@ contract ERC1155MarketplaceFacet is Modifiers {
         Royalties royalties;
     }
 
+    ///@notice allow Doa or owner to set erc1155 to pay royalties upon sale
+    ///@param _royaltiesArgs an array containing identifier for erc1155, said erc1155 royalty reciepent address and erc1155 royalty percentage
     function setTokenRoyalty(RoyaltyArgs[] calldata _royaltiesArgs) external onlyDaoOrOwner {
         for (uint256 i; i < _royaltiesArgs.length; i++) {
             require(s.paysRoyalties[_royaltiesArgs[i].erc1155TypeId] == false, "ERC1155 ID is already pays royalties");
@@ -380,6 +383,10 @@ contract ERC1155MarketplaceFacet is Modifiers {
         }
     }
 
+    ///@notice _erc1155TypeId is identifier for erc1155 that pays a royalty
+    ///@notice _priceInWei is sale price that is paying royalteies
+    ///@notice receiver is recipient address of royalties from sale of _erc1155TypeId
+    ///@notice royaltyAmount is amount to be paid to recipient address after being sold for _priceInWei
     function getRoyaltiesInfo(uint256 _erc1155TypeId, uint256 _priceInWei) external view returns (address receiver, uint256 royaltyAmount) {
         require(s.paysRoyalties[_erc1155TypeId] == true, "ERC1155 ID does not pay any royalties");
 

@@ -153,8 +153,8 @@ struct GameManager {
 }
 
 struct Royalties {
-    address royaltyRecipient;
-    uint256 royaltyPercentage;
+    address royaltyRecipient; // address that receives royalties upon sale
+    uint256 royaltyPercentage; // percentage calculated as x integer then * by erc1155 cost then /100 in executeERC1155Listing (example: royaltyPercentage = 8, cost = 50, (50 * 8)/100 = 4)
 }
 
 struct AppStorage {
