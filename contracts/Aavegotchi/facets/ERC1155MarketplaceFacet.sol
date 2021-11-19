@@ -383,10 +383,10 @@ contract ERC1155MarketplaceFacet is Modifiers {
         }
     }
 
-    ///@notice _erc1155TypeId is identifier for erc1155 that pays a royalty
-    ///@notice _priceInWei is sale price that is paying royalteies
-    ///@notice receiver is recipient address of royalties from sale of _erc1155TypeId
-    ///@notice royaltyAmount is amount to be paid to recipient address after being sold for _priceInWei
+    ///@param _erc1155TypeId is identifier for erc1155 that pays a royalty
+    ///@param _priceInWei is sale price that is paying royalteies
+    ///@param receiver is recipient address of royalties from sale of _erc1155TypeId
+    ///@param royaltyAmount is amount to be paid to recipient address after being sold for _priceInWei
     function getRoyaltiesInfo(uint256 _erc1155TypeId, uint256 _priceInWei) external view returns (address receiver, uint256 royaltyAmount) {
         require(s.paysRoyalties[_erc1155TypeId] == true, "ERC1155 ID does not pay any royalties");
 
