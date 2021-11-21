@@ -57,19 +57,23 @@ async function getVotingAddresses(proposalId: string) {
   });
 
   addresses.second1000.forEach((voter: Voter) => {
-    votingAddresses.push(voter.voter);
+    if (!votingAddresses.includes(voter.voter))
+      votingAddresses.push(voter.voter);
   });
 
   addresses.third1000.forEach((voter: Voter) => {
-    votingAddresses.push(voter.voter);
+    if (!votingAddresses.includes(voter.voter))
+      votingAddresses.push(voter.voter);
   });
 
   addresses.fourth1000.forEach((voter: Voter) => {
-    votingAddresses.push(voter.voter);
+    if (!votingAddresses.includes(voter.voter))
+      votingAddresses.push(voter.voter);
   });
 
   addresses.fifth1000.forEach((voter: Voter) => {
-    votingAddresses.push(voter.voter);
+    if (!votingAddresses.includes(voter.voter))
+      votingAddresses.push(voter.voter);
   });
 
   console.log("final voting addresses:", votingAddresses);
@@ -126,11 +130,12 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
         });
         signer = await hre.ethers.provider.getSigner(gameManager);
       } else if (hre.network.name === "matic") {
-        signer = new LedgerSigner(
+        const accounts = await hre.ethers.getSigners();
+        signer = accounts[0]; /* new LedgerSigner(
           hre.ethers.provider,
           "hid",
           "m/44'/60'/2'/0/0"
-        );
+        ); */
       } else {
         throw Error("Incorrect network selected");
       }
@@ -196,7 +201,7 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
 
       const batches = Math.ceil(tokenIds.length / batchSize);
 
-      console.log(`Deploying ${propDetails.title}!!!`);
+      console.log(`Deploying ${taskArgs.propType}: ${propDetails.title}!!!`);
 
       console.log(
         `Sending ${xpAmount} XP to ${tokenIds.length} Aavegotchis in ${finalUsers.length} addresses!`
