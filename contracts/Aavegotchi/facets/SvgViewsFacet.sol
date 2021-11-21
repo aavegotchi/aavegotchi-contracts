@@ -8,7 +8,6 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
-import "hardhat/console.sol";
 
 contract SvgViewsFacet is Modifiers {
     ///@notice Get the sideview svgs of an aavegotchi
@@ -247,8 +246,6 @@ contract SvgViewsFacet is Modifiers {
             bytes memory sideview = getWearableSideView(_sideView, wearableId, i);
 
             if (i == LibItems.WEARABLE_SLOT_BG && wearableId != 0) {
-                console.log("Background ID: ", wearableId);
-                console.logBytes(layers.background);
                 layers.background = sideview;
             } else {
                 layers.background = LibSvg.getSvg("aavegotchi", 4);
@@ -285,10 +282,10 @@ contract SvgViewsFacet is Modifiers {
         bytes32 back = LibSvg.bytesToBytes32("wearables-", "back");
         bytes32 side = LibSvg.bytesToBytes32("wearables-", _sideView);
 
-        bool face = s.isAnException[equippedWearables[1]][1];
-        bool rightHand = s.isAnException[equippedWearables[4]][4];
-        bool leftHand = s.isAnException[equippedWearables[5]][5];
-        bool pet = s.isAnException[equippedWearables[6]][6];
+        bool face = s.wearableExceptions[equippedWearables[1]][1];
+        bool rightHand = s.wearableExceptions[equippedWearables[4]][4];
+        bool leftHand = s.wearableExceptions[equippedWearables[5]][5];
+        bool pet = s.wearableExceptions[equippedWearables[6]][6];
 
         svg_ = abi.encodePacked(layers.background);
         if (side == back) {
@@ -484,7 +481,7 @@ contract SvgViewsFacet is Modifiers {
     //adding svg id exceptions for layering order
     function setSideViewExceptions(SideViewExceptions[] calldata _sideViewExceptions) external onlyOwnerOrItemManager {
         for (uint256 i; i < _sideViewExceptions.length; i++) {
-            s.isAnException[_sideViewExceptions[i].itemId][_sideViewExceptions[i].slotPosition] = _sideViewExceptions[i].exceptionBool;
+            s.wearableExceptions[_sideViewExceptions[i].itemId][_sideViewExceptions[i].slotPosition] = _sideViewExceptions[i].exceptionBool;
         }
     }
 }
