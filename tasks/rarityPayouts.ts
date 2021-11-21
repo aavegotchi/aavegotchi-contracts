@@ -6,6 +6,19 @@ import { parseEther, formatEther } from "@ethersproject/units";
 import { EscrowFacet } from "../typechain";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { maticDiamondAddress, gasPrice } from "../scripts/helperFunctions";
+import { LeaderboardDataName, LeaderboardType } from "../types";
+import {
+  _sortByBRS,
+  _sortByKinship,
+  _sortByExperience,
+  stripGotchis,
+  confirmCorrectness,
+  fetchAndSortLeaderboard,
+} from "../scripts/raritySortHelpers";
+
+export let tiebreakerIndex: string;
+const totalResults: number = 6000;
+const rookieFilter: string = "hauntId:2";
 
 import {
   RarityFarmingData,
@@ -35,6 +48,7 @@ export interface RarityPayoutTaskArgs {
   rounds: string;
   totalAmount: string;
   blockNumber: string;
+  tieBreakerIndex: string;
   deployerAddress: string;
 }
 
@@ -50,12 +64,14 @@ task("rarityPayout")
     "File that contains all the data related to the particular rarity round"
   )
   .addParam("deployerAddress")
+  .addParam("tieBreakerIndex", "The Tiebreaker index")
   .setAction(
     async (taskArgs: RarityPayoutTaskArgs, hre: HardhatRuntimeEnvironment) => {
       const filename: string = taskArgs.rarityDataFile;
       const diamondAddress = maticDiamondAddress;
       const deployerAddress = taskArgs.deployerAddress;
       const accounts = await hre.ethers.getSigners();
+      tiebreakerIndex = taskArgs.tieBreakerIndex;
 
       const testing = ["hardhat", "localhost"].includes(hre.network.name);
       let signer: Signer;
@@ -89,18 +105,60 @@ task("rarityPayout")
       const maxProcess = 500;
       const finalRewards: rarityRewards = {};
 
-      //Get data for this round
+      //Get data for this round from file
       const {
         dataArgs,
       } = require(`../data/airdrops/rarityfarming/szn${taskArgs.season}/${filename}.ts`);
       const data: RarityFarmingData = dataArgs;
 
-      //get gotchi data for this round
-      const rarity: string[] = data.rarityGotchis;
-      const kinship: string[] = data.kinshipGotchis;
-      const xp: string[] = data.xpGotchis;
-      const rookieXp = data.rookieXpGotchis;
-      const rookieKinship = data.rookieKinshipGotchis;
+      const leaderboards = [
+        "withSetsRarityScore",
+        "kinship",
+        "experience",
+        "experience",
+        "kinship",
+      ];
+      const dataNames: LeaderboardDataName[] = [
+        "rarityGotchis",
+        "kinshipGotchis",
+        "xpGotchis",
+        "rookieXpGotchis",
+        "rookieKinshipGotchis",
+      ];
+
+      //handle rookie now
+
+      const leaderboardResults: RarityFarmingData = {
+        rarityGotchis: [],
+        xpGotchis: [],
+        kinshipGotchis: [],
+        rookieXpGotchis: [],
+        rookieKinshipGotchis: [],
+      };
+      let extraFilter: string = "";
+      for (let index = 0; index < leaderboards.length; index++) {
+        if (
+          index === leaderboards.length - 1 ||
+          index === leaderboards.length - 2
+        ) {
+          console.log("getting rookies");
+          extraFilter = rookieFilter;
+        }
+        let element: LeaderboardType = leaderboards[index] as LeaderboardType;
+
+        const result = stripGotchis(
+          await fetchAndSortLeaderboard(element, blockNumber, extraFilter)
+        );
+        const dataName: LeaderboardDataName = dataNames[
+          index
+        ] as LeaderboardDataName;
+        confirmCorrectness(result, data[dataName]);
+        //
+
+        //  console.log(result);
+        leaderboardResults[dataName] = result;
+        console.log("leaderboard sort is", element);
+      }
 
       //get rewards
       const rarityRoundRewards: string[] = rewards.rarity;
@@ -112,11 +170,11 @@ task("rarityPayout")
       //Iterate through all 5000 spots
       for (let index = 0; index < 5000; index++) {
         const gotchis: string[] = [
-          rarity[index],
-          kinship[index],
-          xp[index],
-          rookieKinship[index],
-          rookieXp[index],
+          leaderboardResults.rarityGotchis[index],
+          leaderboardResults.kinshipGotchis[index],
+          leaderboardResults.xpGotchis[index],
+          leaderboardResults.rookieKinshipGotchis[index],
+          leaderboardResults.rookieXpGotchis[index],
         ];
 
         const rewardNames = [
@@ -136,15 +194,15 @@ task("rarityPayout")
         ];
 
         rewards.forEach((leaderboard, i) => {
-          const rewardName = rewardNames[i];
+          // const rewardName = rewardNames[i];
           const gotchi = gotchis[i];
           const reward = leaderboard[index];
 
-          console.log(
-            `Adding ${
-              Number(reward) / rounds
-            } GHST to #${gotchi} in leaderboard ${rewardName}`
-          );
+          // console.log(
+          //   `Adding ${
+          //     Number(reward) / rounds
+          //   } GHST to #${gotchi} in leaderboard ${rewardName}`
+          // );
 
           //Add rewards divided by 4 (per season)
           if (finalRewards[gotchi])
@@ -176,7 +234,7 @@ task("rarityPayout")
         sorted.push(`${key}: ${finalRewards[key]}`);
       });
 
-      console.log("sorted:", sorted);
+      // console.log("sorted:", sorted);
 
       /* if (talliedAmount !== roundAmount) {
         throw new Error(
