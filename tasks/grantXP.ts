@@ -27,7 +27,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     const xpAmount: number = Number(taskArgs.xpAmount);
     const batchSize: number = Number(taskArgs.batchSize);
 
-    const { addresses } = require(`../data/airdrops/${filename}.ts`);
+    let { addresses } = require(`../data/airdrops/${filename}.ts`);
 
     const diamondAddress = maticDiamondAddress;
     const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
@@ -41,10 +41,36 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       });
       signer = await hre.ethers.provider.getSigner(gameManager);
     } else if (hre.network.name === "matic") {
-      signer = new LedgerSigner(hre.ethers.provider, "hid", "m/44'/60'/2'/0/0");
+      const accounts = await hre.ethers.getSigners();
+      signer = accounts[0]; /* new LedgerSigner(
+        hre.ethers.provider,
+        "hid",
+        "m/44'/60'/2'/0/0"
+      ); */
     } else {
       throw Error("Incorrect network selected");
     }
+
+    const finalAddresses: string[] = [];
+
+    for (let index = 0; index < addresses.length; index++) {
+      let address = addresses[index];
+      if (address.includes(".eth")) {
+        let ethSigner = new hre.ethers.providers.JsonRpcProvider(
+          process.env.MAINNET_URL
+        );
+
+        const resolved = await ethSigner.resolveName(address);
+        address = resolved;
+      }
+
+      if (await hre.ethers.utils.isAddress(address)) {
+        finalAddresses.push(address);
+      }
+    }
+
+    //Set new addresses after replacing .eth addresses with resolved names
+    addresses = finalAddresses;
 
     //Get Polygon
     const polygonUsers: UserGotchisOwned[] = await getSubgraphGotchis(
@@ -102,7 +128,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     });
 
     console.log(
-      `There were ${unusedAddresses.length} voting addresses without Gotchis.`
+      `There were ${unusedAddresses.length} addresses without Gotchis.`
     );
 
     const batches = Math.ceil(tokenIds.length / batchSize);
