@@ -170,7 +170,6 @@ contract AavegotchiLendingFacet is Modifiers {
         s.lentTokenIds[originalOwner].push(tokenId);
 
         if (rental.erc721TokenAddress == address(this)) {
-            s.aavegotchis[tokenId].locked = false;
             LibAavegotchi.transfer(originalOwner, renter, tokenId);
         } else {
             // External contracts

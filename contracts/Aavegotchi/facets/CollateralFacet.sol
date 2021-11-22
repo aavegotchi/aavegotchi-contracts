@@ -8,7 +8,6 @@ import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
-import {LibAavegotchiLending} from "../libraries/LibAavegotchiLending.sol";
 
 // import "hardhat/console.sol";
 
@@ -103,8 +102,6 @@ contract CollateralFacet is Modifiers {
 ///@param _tokenId The identifier of the NFT to decrease
 ///@param _reduceAmount The amount of collateral tokens to decrease the current collateral by
     function decreaseStake(uint256 _tokenId, uint256 _reduceAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
-        LibAavegotchiLending.enforceAavegotchiNotInRental(_tokenId);
-
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 
@@ -124,8 +121,6 @@ contract CollateralFacet is Modifiers {
 ///@param _toId Identifier of another claimed aavegotchi where the XP of the sacrificed aavegotchi will be sent
 
     function decreaseAndDestroy(uint256 _tokenId, uint256 _toId) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
-        LibAavegotchiLending.enforceAavegotchiNotInRental(_tokenId);
-
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 

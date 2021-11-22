@@ -8,7 +8,6 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
-import {LibAavegotchiLending} from "../libraries/LibAavegotchiLending.sol";
 
 contract BridgeFacet is Modifiers {
     event WithdrawnBatch(address indexed owner, uint256[] tokenIds);
@@ -59,7 +58,6 @@ contract BridgeFacet is Modifiers {
             uint256 tokenId = _tokenIds[i];
             require(owner == s.aavegotchis[tokenId].owner, "BridgeFacet: Not owner of token");
             require(s.aavegotchis[tokenId].locked == false, "BridgeFacet: Can't withdraw locked token");
-            LibAavegotchiLending.enforceAavegotchiNotInRental(tokenId);
             LibAavegotchi.transfer(owner, address(this), tokenId);
         }
         emit WithdrawnBatch(owner, _tokenIds);

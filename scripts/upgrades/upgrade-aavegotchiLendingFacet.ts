@@ -34,13 +34,6 @@ export async function upgrade() {
       removeSelectors: [],
     },
     {
-      facetName: "ERC721MarketplaceFacet",
-      addSelectors: [],
-      removeSelectors: [
-        "function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view",
-      ],
-    },
-    {
       facetName: "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
       addSelectors: [],
       removeSelectors: [],
@@ -50,21 +43,11 @@ export async function upgrade() {
       addSelectors: [],
       removeSelectors: [],
     },
-    {
-      facetName: "CollateralFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "EscrowFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "VrfFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "VrfFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
