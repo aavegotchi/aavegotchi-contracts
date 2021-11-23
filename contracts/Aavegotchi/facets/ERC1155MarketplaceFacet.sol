@@ -40,6 +40,8 @@ contract ERC1155MarketplaceFacet is Modifiers {
 
     event ChangedListingFee(uint256 listingFeeInWei);
 
+    event RoyaltySet(uint256 indexed erc1155TypeId, address indexed royaltyRecipient, uint256 indexed royaltyPercentage);
+
     ///@notice Get the standard listing fee in wei
     ///@return The listing fee(Fee for listing NFTs on the baazaar)
     function getListingFeeInWei() external view returns (uint256) {
@@ -352,6 +354,25 @@ contract ERC1155MarketplaceFacet is Modifiers {
             listing.cancelled = true;
             emit LibERC1155Marketplace.ERC1155ListingCancelled(listingId, listing.category, block.number);
             LibERC1155Marketplace.removeERC1155ListingItem(listingId, listing.seller);
+        }
+    }
+
+    struct RoyaltyArgs {
+        uint256 erc1155TypeId;
+        address royaltyRecipient;
+        uint256 royaltyPercentage;
+    }
+
+    ///@notice allow Doa or owner to set erc1155 to pay royalties upon sale
+    ///@param _royaltiesArgs an array containing identifier for erc1155, said erc1155 royalty reciepent address and erc1155 royalty percentage
+    function setERC1155Royalty(RoyaltyArgs[] calldata _royaltiesArgs) external onlyDaoOrOwner {
+        for (uint256 i; i < _royaltiesArgs.length; i++) {
+            require(s.itemTypes[_royaltiesArgs[i].erc1155TypeId].royaltyPercentage == 0, "ERC1155 ID is already pays royalties");
+            require(_royaltiesArgs[i].royaltyPercentage <= 10, "Royalty Percentage is too high");
+
+            s.itemTypes[_royaltiesArgs[i].erc1155TypeId].royaltyRecipient = _royaltiesArgs[i].royaltyRecipient;
+            s.itemTypes[_royaltiesArgs[i].erc1155TypeId].royaltyPercentage = _royaltiesArgs[i].royaltyPercentage;
+            emit RoyaltySet(_royaltiesArgs[i].erc1155TypeId, _royaltiesArgs[i].royaltyRecipient, _royaltiesArgs[i].royaltyPercentage);
         }
     }
 }
