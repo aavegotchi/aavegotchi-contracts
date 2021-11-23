@@ -146,6 +146,10 @@ task("rarityPayout")
         }
         let element: LeaderboardType = leaderboards[index] as LeaderboardType;
 
+        const blockNumber = await (
+          await hre.ethers.provider.getBlockNumber()
+        ).toString();
+
         const result = stripGotchis(
           await fetchAndSortLeaderboard(element, blockNumber, extraFilter)
         );
