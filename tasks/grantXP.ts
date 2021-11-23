@@ -103,17 +103,21 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     //Extract token ids
     polygonUsers.forEach((user) => {
       user.gotchisOwned.forEach((gotchi) => {
-        if (tokenIds.includes(gotchi.id))
-          throw new Error(`Duplicate token ID: ${gotchi.id}`);
-        else tokenIds.push(gotchi.id);
+        if (gotchi.status === "3") {
+          if (tokenIds.includes(gotchi.id))
+            throw new Error(`Duplicate token ID: ${gotchi.id}`);
+          else tokenIds.push(gotchi.id);
+        }
       });
     });
 
     mainnetUsers.forEach((user) => {
       user.gotchisOwned.forEach((gotchi) => {
-        if (tokenIds.includes(gotchi.id))
-          throw new Error(`Duplicate token ID: ${gotchi.id}`);
-        else tokenIds.push(gotchi.id);
+        if (gotchi.status === "3") {
+          if (tokenIds.includes(gotchi.id))
+            throw new Error(`Duplicate token ID: ${gotchi.id}`);
+          else tokenIds.push(gotchi.id);
+        }
       });
     });
 

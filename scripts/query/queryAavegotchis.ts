@@ -24,6 +24,7 @@ export async function getSubgraphGotchis(
       id
       gotchisOwned(first:1000) {
         id
+        status
       }}
 `);
   }

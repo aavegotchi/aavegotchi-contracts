@@ -1,5 +1,6 @@
 export interface GotchisOwned {
   id: string;
+  status: string;
 }
 export interface UserGotchisOwned {
   id: string;
