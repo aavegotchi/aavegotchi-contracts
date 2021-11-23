@@ -10,6 +10,9 @@ import {
   wearablesLeftSvgs as left,
   wearablesRightSvgs as right,
   wearablesBackSvgs as back,
+  wearablesLeftSleeveSvgs as leftSleeve,
+  wearablesRightSleeveSvgs as rightSleeve,
+  wearablesBackSleeveSvgs as backSleeve,
 } from "../svgs/wearables-sides";
 import { UpdateSvgsTaskArgs } from "../tasks/updateSvgs";
 
@@ -276,6 +279,33 @@ export async function updateSvgTaskForSideViews(_itemIds: number[]) {
       let taskArgsSides: UpdateSvgsTaskArgs = {
         svgIds: [itemId].join(","),
         svgType: `wearables-${side}`,
+        svgs: [sideArray].join("***"),
+      };
+      taskArray.push(taskArgsSides);
+    }
+  }
+  return taskArray;
+}
+
+export async function updateSvgTaskForSideSleeves(_itemIds: number[]) {
+  const sideViews = ["left", "right", "back"];
+  let taskArray = [];
+
+  for (let index = 0; index < _itemIds.length; index++) {
+    const itemId = _itemIds[index];
+    const sideArrays = [
+      leftSleeve[itemId],
+      rightSleeve[itemId],
+      backSleeve[itemId],
+    ];
+
+    for (let index = 0; index < sideViews.length; index++) {
+      const side = sideViews[index];
+      const sideArray = sideArrays[index];
+
+      let taskArgsSides: UpdateSvgsTaskArgs = {
+        svgIds: [itemId].join(","),
+        svgType: `sleeves-${side}`,
         svgs: [sideArray].join("***"),
       };
       taskArray.push(taskArgsSides);
