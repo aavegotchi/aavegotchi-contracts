@@ -271,54 +271,89 @@ contract SvgViewsFacet is Modifiers {
         svg_ = applyLayerExceptions(equippedWearables, layers, _body, _sideView);
     }
 
+    struct ExceptionsLayers {
+        bool rightHand;
+        bool leftHand;
+        bool pet;
+        bool body;
+        bool face;
+        bool head;
+        bool eyes;
+    }
+
     function applyLayerExceptions(
         uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables,
         AavegotchiLayers memory layers,
         bytes memory _body,
         bytes memory _sideView
     ) internal view returns (bytes memory svg_) {
+        ExceptionsLayers memory exceptionLayers;
+
         bytes32 left = LibSvg.bytesToBytes32("wearables-", "left");
         bytes32 right = LibSvg.bytesToBytes32("wearables-", "right");
         bytes32 back = LibSvg.bytesToBytes32("wearables-", "back");
         bytes32 side = LibSvg.bytesToBytes32("wearables-", _sideView);
 
-        bool rightHand = s.wearableExceptions[equippedWearables[4]][4];
-        bool leftHand = s.wearableExceptions[equippedWearables[5]][5];
-        bool pet = s.wearableExceptions[equippedWearables[6]][6];
+        exceptionLayers.rightHand = s.wearableExceptions[equippedWearables[4]][4];
+        exceptionLayers.leftHand = s.wearableExceptions[equippedWearables[5]][5];
+        exceptionLayers.pet = s.wearableExceptions[equippedWearables[6]][6];
+        exceptionLayers.body = s.wearableExceptions[equippedWearables[0]][0];
+        exceptionLayers.face = s.wearableExceptions[equippedWearables[1]][1];
+        exceptionLayers.head = s.wearableExceptions[equippedWearables[3]][3];
 
         svg_ = abi.encodePacked(layers.background);
         if (side == back) {
-            if (pet) svg_ = abi.encodePacked(svg_, layers.pet);
-            if (rightHand && leftHand) {
-                // both handwearables exceptions
-                svg_ = abi.encodePacked(svg_, layers.hands, _body, layers.bodyWearable);
-                svg_ = abi.encodePacked(svg_, layers.handRight, layers.handLeft);
-            } else if (rightHand) {
-                // right handwearables exceptions
-                svg_ = abi.encodePacked(svg_, layers.handLeft, layers.hands, _body);
-                svg_ = abi.encodePacked(svg_, layers.bodyWearable, layers.handRight);
-            } else if (leftHand) {
-                // left handwearables exceptions
-                svg_ = abi.encodePacked(svg_, layers.handRight, layers.hands, _body);
-                svg_ = abi.encodePacked(svg_, layers.bodyWearable, layers.handLeft);
+            if (exceptionLayers.pet) svg_ = abi.encodePacked(svg_, layers.pet);
+            if (exceptionLayers.rightHand && exceptionLayers.leftHand) {
+                //body wearable exception
+                if (exceptionLayers.body) {
+                    svg_ = abi.encodePacked(svg_, layers.hands, layers.handRight, layers.handLeft);
+                    svg_ = abi.encodePacked(svg_, _body, layers.bodyWearable);
+                } else {
+                    // both handwearables exceptions
+                    svg_ = abi.encodePacked(svg_, layers.hands, _body, layers.bodyWearable);
+                    svg_ = abi.encodePacked(svg_, layers.handRight, layers.handLeft);
+                }
+            } else if (exceptionLayers.rightHand) {
+                if (exceptionLayers.body) {
+                    // right handwearables exceptions
+                    svg_ = abi.encodePacked(svg_, layers.handLeft, layers.hands, layers.handRight);
+                    svg_ = abi.encodePacked(svg_, _body, layers.bodyWearable);
+                } else {
+                    svg_ = abi.encodePacked(svg_, layers.handLeft, layers.hands, _body);
+                    svg_ = abi.encodePacked(svg_, layers.bodyWearable, layers.handRight);
+                }
+            } else if (exceptionLayers.leftHand) {
+                if (exceptionLayers.body) {
+                    svg_ = abi.encodePacked(svg_, layers.handRight, layers.hands, layers.handLeft);
+                    svg_ = abi.encodePacked(svg_, _body, layers.bodyWearable);
+                } else {
+                    // left handwearables exceptions
+                    svg_ = abi.encodePacked(svg_, layers.handRight, layers.hands, _body);
+                    svg_ = abi.encodePacked(svg_, layers.bodyWearable, layers.handLeft);
+                }
             } else {
                 // normal
                 svg_ = abi.encodePacked(svg_, layers.handRight, layers.handLeft, layers.hands);
                 svg_ = abi.encodePacked(svg_, _body, layers.bodyWearable);
             }
             svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head);
-            if (!pet) svg_ = abi.encodePacked(svg_, layers.pet);
+            if (!exceptionLayers.pet) svg_ = abi.encodePacked(svg_, layers.pet);
         } else {
             svg_ = abi.encodePacked(svg_, _body, layers.bodyWearable);
-            svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head);
+            if (exceptionLayers.face && exceptionLayers.head) {
+                svg_ = abi.encodePacked(svg_, layers.eyes, layers.head, layers.face);
+            } else {
+                svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head);
+            }
             if (side == left) {
-                if (leftHand) {
+                if (exceptionLayers.leftHand) {
                     svg_ = abi.encodePacked(svg_, layers.hands, layers.sleeves, layers.handLeft);
                 } else {
                     svg_ = abi.encodePacked(svg_, layers.handLeft, layers.hands, layers.sleeves);
                 }
             } else if (side == right) {
-                if (rightHand) {
+                if (exceptionLayers.rightHand) {
                     svg_ = abi.encodePacked(svg_, layers.hands, layers.sleeves, layers.handRight);
                 } else {
                     svg_ = abi.encodePacked(svg_, layers.handRight, layers.hands, layers.sleeves);

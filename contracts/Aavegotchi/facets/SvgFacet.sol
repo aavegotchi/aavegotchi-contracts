@@ -365,18 +365,24 @@ contract SvgFacet is Modifiers {
         //10. Right hand wearable
         //11. Pet wearable
 
-        svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
-        svg_ = abi.encodePacked(
-            svg_,
-            layers.hands,
-            layers.face,
-            layers.eyes,
-            layers.head,
-            layers.sleeves,
-            layers.handLeft,
-            layers.handRight,
-            layers.pet
-        );
+        svg_ = applyFrontLayerExceptions(equippedWearables, layers, _body);
+    }
+
+    function applyFrontLayerExceptions(
+        uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables,
+        AavegotchiLayers memory layers,
+        bytes memory _body
+    ) internal view returns (bytes memory svg_) {
+        bool face = s.wearableExceptions[equippedWearables[1]][1];
+        bool head = s.wearableExceptions[equippedWearables[3]][3];
+
+        svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable, layers.hands);
+        if (face && head) {
+            svg_ = abi.encodePacked(svg_, layers.eyes, layers.head, layers.face);
+        } else {
+            svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head);
+        }
+        svg_ = abi.encodePacked(svg_, layers.sleeves, layers.handLeft, layers.handRight, layers.pet);
     }
 
     ///@notice Query the svg data for all aavegotchis with the portals as bg (10 in total)

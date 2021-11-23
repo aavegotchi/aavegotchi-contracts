@@ -6,7 +6,7 @@ import {
 } from "../../tasks/deployUpgrade";
 import { maticDiamondAddress } from "../helperFunctions";
 import { SvgViewsFacetInterface } from "../../typechain/SvgViewsFacet";
-import { SvgViewsFacet, SvgViewsFacet__factory } from "../../typechain";
+import { SvgViewsFacet__factory } from "../../typechain";
 import { Exceptions } from "../../scripts/itemTypeHelpers";
 
 export async function upgrade() {
@@ -16,8 +16,13 @@ export async function upgrade() {
     {
       facetName: "SvgViewsFacet",
       addSelectors: [
-        `function setSideViewExceptions(tuple(uint256 _itemId,uint256 _slotPosition,bool _exceptionBool)[] _sideViewExceptions) external`,
+        `function setSideViewExceptions(tuple(uint256 itemId,uint256 slotPosition,bool exceptionBool)[] _sideViewExceptions) external`,
       ],
+      removeSelectors: [],
+    },
+    {
+      facetName: "SvgFacet",
+      addSelectors: [],
       removeSelectors: [],
     },
   ];
@@ -92,6 +97,26 @@ export async function upgrade() {
     {
       itemId: 156,
       slotPosition: 6,
+      exceptionBool: true,
+    },
+    {
+      itemId: 132,
+      slotPosition: 0,
+      exceptionBool: true,
+    },
+    {
+      itemId: 39,
+      slotPosition: 3,
+      exceptionBool: true,
+    },
+    {
+      itemId: 45,
+      slotPosition: 3,
+      exceptionBool: true,
+    },
+    {
+      itemId: 216,
+      slotPosition: 1,
       exceptionBool: true,
     },
   ];
