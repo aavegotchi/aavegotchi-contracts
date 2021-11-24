@@ -43,11 +43,6 @@ export async function upgrade() {
       addSelectors: [],
       removeSelectors: [],
     },
-    // {
-    //   facetName: "VrfFacet",
-    //   addSelectors: [],
-    //   removeSelectors: [],
-    // },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);

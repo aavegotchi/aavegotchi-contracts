@@ -78,7 +78,7 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256 _period,
         uint256[3] memory _revenueSplit,
         address _receiver
-    ) onlyUnlocked(_erc721TokenId) external {
+    ) external {
         IERC721 erc721Token = IERC721(_erc721TokenAddress);
         address sender = LibMeta.msgSender();
         require(erc721Token.ownerOf(_erc721TokenId) == sender, "AavegotchiLending: Not owner of aavegotchi");
@@ -90,21 +90,23 @@ contract AavegotchiLendingFacet is Modifiers {
         );
 
         require(_period > 0, "AavegotchiLending: period should be larger than 0");
-        require(_revenueSplit.length == 3, "AavegotchiLending: revenues plit should consists of 3 values");
+        require(_revenueSplit.length == 3, "AavegotchiLending: revenues split should consists of 3 values");
         require(_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] == 100, "AavegotchiLending: sum of revenue split should be 100");
         if (_receiver == address(0)) {
             require(_revenueSplit[2] == 0, "AavegotchiLending: revenue split for invalid receiver should be zero");
         }
-
-        s.nextAavegotchiRentalId++;
-        uint256 rentalId = s.nextAavegotchiRentalId;
 
         require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "AavegotchiLending: Only aavegotchi available");
 
         uint256 oldRentalId = s.aavegotchiRentalHead[_erc721TokenId];
         if (oldRentalId != 0) {
             LibAavegotchiLending.cancelAavegotchiRental(oldRentalId, sender);
+        } else {
+            require(s.aavegotchis[_erc721TokenId].locked == false, "AavegotchiLending: Only callable on unlocked Aavegotchis");
         }
+
+        s.nextAavegotchiRentalId++;
+        uint256 rentalId = s.nextAavegotchiRentalId;
 
         s.aavegotchiRentalHead[_erc721TokenId] = rentalId;
         s.aavegotchiRentals[rentalId] = AavegotchiRental({
@@ -204,7 +206,7 @@ contract AavegotchiLendingFacet is Modifiers {
         address originalOwner = rental.originalOwner;
         address renter = rental.renter;
         address receiver = rental.receiver;
-        uint256 completionTime = rental.timeAgreed + rental.period;
+        uint256 completionTime = rental.timeAgreed + rental.period * 1 days;
         if (completionTime + 1 days > block.timestamp) {
             require(originalOwner == sender, "AavegotchiLending: only owner can claim during agreement");
         }
@@ -236,7 +238,6 @@ contract AavegotchiLendingFacet is Modifiers {
             if (receiver != address(0)) {
                 uint256 receiverAmount = balance * rental.revenueSplit[2] / 100;
                 LibERC20.transferFrom(revenueToken, escrow, receiver, receiverAmount);
-
             }
         }
 
@@ -251,7 +252,9 @@ contract AavegotchiLendingFacet is Modifiers {
             }
 
             rental.completed = true;
-            LibAavegotchiLending.removeAavegotchiRental(tokenId, originalOwner);
+            s.aavegotchiRentalHead[tokenId] = 0;
+
+            LibAavegotchiLending.removeLentAavegotchi(tokenId, originalOwner);
 
             // TODO: remove pet operator
         }

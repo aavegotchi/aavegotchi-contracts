@@ -2,7 +2,6 @@
 pragma solidity 0.8.1;
 
 import {LibAppStorage, AppStorage, AavegotchiRental} from "./LibAppStorage.sol";
-
 import "../../shared/interfaces/IERC721.sol";
 
 library LibAavegotchiLending {
@@ -24,9 +23,9 @@ library LibAavegotchiLending {
         if (rental.erc721TokenAddress == address(this)) {
             s.aavegotchis[rental.erc721TokenId].locked = false;
         }
+        s.aavegotchiRentalHead[rental.erc721TokenId] = 0;
 
         emit AavegotchiRentalCanceled(_rentalId, block.number);
-        removeAavegotchiRental(rental.erc721TokenId, _owner);
     }
 
     function cancelAavegotchiRentalFromToken(
@@ -34,16 +33,11 @@ library LibAavegotchiLending {
         address _owner
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 rentalId = s.aavegotchiRentalHead[_erc721TokenId];
-        if (rentalId == 0) {
-            return;
-        }
-        cancelAavegotchiRental(rentalId, _owner);
+        cancelAavegotchiRental(s.aavegotchiRentalHead[_erc721TokenId], _owner);
     }
 
-    function removeAavegotchiRental(uint256 _tokenId, address _owner) internal {
+    function removeLentAavegotchi(uint256 _tokenId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        s.aavegotchiRentalHead[_tokenId] = 0;
 
         // Remove indexed data for original owner
         uint256 index = s.lentTokenIdIndexes[_owner][_tokenId];
