@@ -2,7 +2,11 @@ import { ethers, network } from "hardhat";
 import { expect } from "chai";
 import { ERC1155MarketplaceFacet, ERC20Token } from "../typechain";
 import { upgrade } from "../scripts/upgrades/upgrade-royalties";
-import { maticDiamondAddress, impersonate } from "../scripts/helperFunctions";
+import {
+  maticDiamondAddress,
+  impersonate,
+  itemManager,
+} from "../scripts/helperFunctions";
 import { Signer } from "@ethersproject/abstract-signer";
 
 describe("Testing Royalties", async function () {
@@ -32,12 +36,12 @@ describe("Testing Royalties", async function () {
       signer
     )) as ERC20Token;
 
-    /* await upgrade(); */
+    await upgrade();
   });
 
   it.only("Should allow contractOwner to assign an erc1155TypeId to pay royalties to an address", async function () {
     erc1155MarketplaceFacet = await impersonate(
-      maticDiamondAddress,
+      itemManager,
       erc1155MarketplaceFacet,
       ethers,
       network
@@ -51,14 +55,14 @@ describe("Testing Royalties", async function () {
 
     await erc1155MarketplaceFacet.setERC1155Royalty(royaltiesArg);
 
-    /*     let beforeBalance = await erc20Token.balanceOf(royaltyAddress);
-    console.log("Royalty Recipient Before Balance: ", beforeBalance);
+    let beforeBalance = await erc20Token.balanceOf(royaltyAddress);
+    console.log("Royalty Recipient Before Balance: ", beforeBalance.toString());
 
     const erc1155Listings = await erc1155MarketplaceFacet.getERC1155Listings(
       0,
       "listed",
       10
     );
-    console.log("Listings: ", erc1155Listings); */
+    console.log("Listings: ", erc1155Listings.toString());
   });
 });

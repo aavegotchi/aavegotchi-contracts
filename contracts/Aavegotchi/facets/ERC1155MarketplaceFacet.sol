@@ -365,7 +365,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
 
     ///@notice allow Doa or owner to set erc1155 to pay royalties upon sale
     ///@param _royaltiesArgs an array containing identifier for erc1155, said erc1155 royalty reciepent address and erc1155 royalty percentage
-    function setERC1155Royalty(RoyaltyArgs[] calldata _royaltiesArgs) external onlyDaoOrOwner {
+    function setERC1155Royalty(RoyaltyArgs[] calldata _royaltiesArgs) external onlyOwnerOrItemManager {
         for (uint256 i; i < _royaltiesArgs.length; i++) {
             require(s.itemTypes[_royaltiesArgs[i].erc1155TypeId].royaltyPercentage == 0, "ERC1155 ID is already pays royalties");
             require(_royaltiesArgs[i].royaltyPercentage <= 10, "Royalty Percentage is too high");
