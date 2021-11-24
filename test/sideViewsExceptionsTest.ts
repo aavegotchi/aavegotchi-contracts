@@ -2,7 +2,7 @@ import { ethers, network } from "hardhat";
 import { expect } from "chai";
 import { SvgViewsFacet } from "../typechain";
 import { upgrade } from "../scripts/upgrades/upgrade-sideViewsExceptions";
-import { itemManager } from "../scripts/helperFunctions";
+import { itemManager, impersonate } from "../scripts/helperFunctions";
 import { Signer } from "@ethersproject/abstract-signer";
 
 describe("Testing Exceptions", async function () {
@@ -53,19 +53,18 @@ describe("Testing Exceptions", async function () {
   });
 
   it.only("Should remove right hand id's 201 and 217 from exceptions", async function () {
-    const testing = ["hardhat", "localhost"].includes(network.name);
-
-    await network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [itemManager],
-    });
-    signer = await ethers.getSigner(itemManager);
-
     svgViewsFacet = (await ethers.getContractAt(
       "SvgViewsFacet",
       diamondAddress,
       signer
     )) as SvgViewsFacet;
+
+    svgViewsFacet = await impersonate(
+      itemManager,
+      svgViewsFacet,
+      ethers,
+      network
+    );
 
     //hand exceptions
     rightExceptions.push(
