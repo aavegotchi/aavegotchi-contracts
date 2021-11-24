@@ -369,6 +369,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         for (uint256 i; i < _royaltiesArgs.length; i++) {
             require(s.itemTypes[_royaltiesArgs[i].erc1155TypeId].royaltyPercentage == 0, "ERC1155 ID is already pays royalties");
             require(_royaltiesArgs[i].royaltyPercentage <= 10, "Royalty Percentage is too high");
+            require(_royaltiesArgs[i].royaltyRecipient != address(0), "RoyaltyRecipient: Can't transfer to 0 address");
 
             s.itemTypes[_royaltiesArgs[i].erc1155TypeId].royaltyRecipient = _royaltiesArgs[i].royaltyRecipient;
             s.itemTypes[_royaltiesArgs[i].erc1155TypeId].royaltyPercentage = _royaltiesArgs[i].royaltyPercentage;
