@@ -55,20 +55,11 @@ describe("Testing Exceptions", async function () {
   it.only("Should remove right hand id's 201 and 217 from exceptions", async function () {
     const testing = ["hardhat", "localhost"].includes(network.name);
 
-    if (testing) {
-      await network.provider.request({
-        method: "hardhat_impersonateAccount",
-        params: [itemManager],
-      });
-      signer = await ethers.getSigner(itemManager);
-    } else if (network.name === "matic") {
-      const accounts = await ethers.getSigners();
-      signer = accounts[0]; //new LedgerSigner(ethers.provider);
-
-      console.log("signer:", signer);
-    } else {
-      throw Error("Incorrect network selected");
-    }
+    await network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [itemManager],
+    });
+    signer = await ethers.getSigner(itemManager);
 
     svgViewsFacet = (await ethers.getContractAt(
       "SvgViewsFacet",
