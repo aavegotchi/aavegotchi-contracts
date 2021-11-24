@@ -17,7 +17,6 @@ import {
 } from "../scripts/raritySortHelpers";
 
 export let tiebreakerIndex: string;
-const totalResults: number = 6000;
 const rookieFilter: string = "hauntId:2";
 
 import {
@@ -115,15 +114,15 @@ task("rarityPayout")
         "withSetsRarityScore",
         "kinship",
         "experience",
-        "experience",
         "kinship",
+        "experience",
       ];
       const dataNames: LeaderboardDataName[] = [
         "rarityGotchis",
         "kinshipGotchis",
         "xpGotchis",
-        "rookieXpGotchis",
         "rookieKinshipGotchis",
+        "rookieXpGotchis",
       ];
 
       //handle rookie now
@@ -132,34 +131,31 @@ task("rarityPayout")
         rarityGotchis: [],
         xpGotchis: [],
         kinshipGotchis: [],
-        rookieXpGotchis: [],
         rookieKinshipGotchis: [],
+        rookieXpGotchis: [],
       };
+
       let extraFilter: string = "";
       for (let index = 0; index < leaderboards.length; index++) {
-        if (
-          index === leaderboards.length - 1 ||
-          index === leaderboards.length - 2
-        ) {
-          console.log("getting rookies");
+        if (dataNames[index].includes("rookie")) {
           extraFilter = rookieFilter;
-        }
+        } else extraFilter = "";
+
         let element: LeaderboardType = leaderboards[index] as LeaderboardType;
 
-        const blockNumber = await (
-          await hre.ethers.provider.getBlockNumber()
-        ).toString();
-
         const result = stripGotchis(
-          await fetchAndSortLeaderboard(element, blockNumber, extraFilter)
+          await fetchAndSortLeaderboard(element, taskArgs.blockNumber)
         );
         const dataName: LeaderboardDataName = dataNames[
           index
         ] as LeaderboardDataName;
+
         confirmCorrectness(result, data[dataName]);
         //
 
-        //  console.log(result);
+        console.log(`subgraph result for ${dataName}:`, result);
+        console.log("local result:", data[dataName]);
+        console;
         leaderboardResults[dataName] = result;
         console.log("leaderboard sort is", element);
       }
@@ -179,14 +175,6 @@ task("rarityPayout")
           leaderboardResults.xpGotchis[index],
           leaderboardResults.rookieKinshipGotchis[index],
           leaderboardResults.rookieXpGotchis[index],
-        ];
-
-        const rewardNames = [
-          "rarity",
-          "kinship",
-          "xp",
-          "rookieKinship",
-          "rookieXp",
         ];
 
         const rewards: string[][] = [
