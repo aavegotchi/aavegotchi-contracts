@@ -294,12 +294,13 @@ contract SvgViewsFacet is Modifiers {
         bytes32 back = LibSvg.bytesToBytes32("wearables-", "back");
         bytes32 side = LibSvg.bytesToBytes32("wearables-", _sideView);
 
+        exceptionLayers.body = s.wearableExceptions[equippedWearables[0]][0];
+        exceptionLayers.face = s.wearableExceptions[equippedWearables[1]][1];
+        exceptionLayers.eyes = s.wearableExceptions[equippedWearables[2]][2];
+        exceptionLayers.head = s.wearableExceptions[equippedWearables[3]][3];
         exceptionLayers.rightHand = s.wearableExceptions[equippedWearables[4]][4];
         exceptionLayers.leftHand = s.wearableExceptions[equippedWearables[5]][5];
         exceptionLayers.pet = s.wearableExceptions[equippedWearables[6]][6];
-        exceptionLayers.body = s.wearableExceptions[equippedWearables[0]][0];
-        exceptionLayers.face = s.wearableExceptions[equippedWearables[1]][1];
-        exceptionLayers.head = s.wearableExceptions[equippedWearables[3]][3];
 
         bytes memory bodySvg = abi.encodePacked(_body, layers.bodyWearable);
 
