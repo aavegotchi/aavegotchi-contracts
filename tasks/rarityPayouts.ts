@@ -236,10 +236,6 @@ task("rarityPayout")
         let parsedAmount = BigNumber.from(parseEther(amount.toString()));
         let finalParsed = parsedAmount.toString();
 
-        if (Number(gotchiID) <= 521) continue;
-        if (Number(gotchiID) > 600) continue;
-        if ([2366, 7568, 592, 7109].includes(Number(gotchiID))) continue;
-
         if (maxProcess < tokenIdsNum + 1) {
           txData.push(txGroup);
           txGroup = [];
@@ -262,8 +258,6 @@ task("rarityPayout")
 
       for (const [i, txGroup] of txData.entries()) {
         console.log("current index:", i);
-
-        // if (i === 0) continue;
 
         let tokenIds: string[] = [];
         let amounts: string[] = [];
