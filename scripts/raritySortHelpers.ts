@@ -1,15 +1,9 @@
-import { all } from "underscore";
-import {
-  LeaderboardAavegotchi,
-  LeaderboardType,
-  FoundSet,
-  LeaderboardSortingOption,
-} from "../types";
+import { LeaderboardAavegotchi, LeaderboardType, FoundSet } from "../types";
 import request from "graphql-request";
 
 import { wearableSetArrays } from "./wearableSets";
 import { maticGraphUrl } from "./query/queryAavegotchis";
-const tiebreakerIndex = 1;
+const tiebreakerIndex = 2;
 const totalResults: number = 6000;
 
 export function findSets(equipped: number[]) {
@@ -73,9 +67,9 @@ export function _sortByKinship(
   a: LeaderboardAavegotchi,
   b: LeaderboardAavegotchi
 ) {
-  if (a.kinship == b.kinship) {
+  if (a.kinship === b.kinship) {
     //Kinship and XP are the same
-    if (a.experience == b.experience) {
+    if (a.experience === b.experience) {
       return (
         _distanceFrom50(Number(_aavegotchiNumericTraits(b)[tiebreakerIndex])) -
         _distanceFrom50(Number(_aavegotchiNumericTraits(a)[tiebreakerIndex]))
@@ -89,9 +83,9 @@ export function _sortByExperience(
   a: LeaderboardAavegotchi,
   b: LeaderboardAavegotchi
 ) {
-  if (a.experience == b.experience) {
+  if (a.experience === b.experience) {
     if (
-      _distanceFrom50(_aavegotchiNumericTraits(a)[tiebreakerIndex]) ==
+      _distanceFrom50(_aavegotchiNumericTraits(a)[tiebreakerIndex]) ===
       _distanceFrom50(_aavegotchiNumericTraits(b)[tiebreakerIndex])
     ) {
       return Number(b.kinship) - Number(a.kinship);
@@ -135,10 +129,10 @@ export function confirmCorrectness(table1: string[], table2: string[]) {
   for (let i = 0; i < table1.length; i++) {
     if (table1[i] === table2[i]) {
       j++;
-      // console.log(`${table1[i]} matches ${table2[i]}`);
     }
   }
-  console.log("Matching entries:", j);
+
+  return j;
 }
 
 export function leaderboardQuery(
@@ -197,10 +191,17 @@ export function leaderboardQuery(
 
 export async function fetchAndSortLeaderboard(
   category: "withSetsRarityScore" | "kinship" | "experience",
-  blockNumber: string
+  blockNumber: string,
+  filter?: string
 ) {
   let eachFinalResult: LeaderboardAavegotchi[] = [];
-  const query = leaderboardQuery(`${category}`, "desc", blockNumber);
+  const query = leaderboardQuery(
+    `${category}`,
+    "desc",
+    blockNumber,
+    `${filter}`
+  );
+
   const queryresponse = await request(maticGraphUrl, query);
 
   for (let i = 1; i <= totalResults / 1000; i++) {

@@ -137,27 +137,33 @@ task("rarityPayout")
 
       let extraFilter: string = "";
       for (let index = 0; index < leaderboards.length; index++) {
-        if (dataNames[index].includes("rookie")) {
+        if (
+          index === leaderboards.length - 1 ||
+          index === leaderboards.length - 2
+        ) {
+          console.log("getting rookies");
           extraFilter = rookieFilter;
-        } else extraFilter = "";
-
+        }
         let element: LeaderboardType = leaderboards[index] as LeaderboardType;
 
         const result = stripGotchis(
-          await fetchAndSortLeaderboard(element, taskArgs.blockNumber)
+          await fetchAndSortLeaderboard(
+            element,
+            taskArgs.blockNumber,
+            extraFilter
+          )
         );
         const dataName: LeaderboardDataName = dataNames[
           index
         ] as LeaderboardDataName;
 
-        confirmCorrectness(result, data[dataName]);
-        //
+        const correct = confirmCorrectness(result, data[dataName]);
 
-        console.log(`subgraph result for ${dataName}:`, result);
-        console.log("local result:", data[dataName]);
-        console;
+        if (correct !== 5000) {
+          throw new Error("Results do not line up with subgraph");
+        }
+
         leaderboardResults[dataName] = result;
-        console.log("leaderboard sort is", element);
       }
 
       //get rewards
@@ -186,17 +192,9 @@ task("rarityPayout")
         ];
 
         rewards.forEach((leaderboard, i) => {
-          // const rewardName = rewardNames[i];
           const gotchi = gotchis[i];
           const reward = leaderboard[index];
 
-          // console.log(
-          //   `Adding ${
-          //     Number(reward) / rounds
-          //   } GHST to #${gotchi} in leaderboard ${rewardName}`
-          // );
-
-          //Add rewards divided by 4 (per season)
           if (finalRewards[gotchi])
             finalRewards[gotchi] += Number(reward) / rounds;
           else {
@@ -226,15 +224,6 @@ task("rarityPayout")
         sorted.push(`${key}: ${finalRewards[key]}`);
       });
 
-      // console.log("sorted:", sorted);
-
-      /* if (talliedAmount !== roundAmount) {
-        throw new Error(
-          `Tallied amount of ${talliedAmount} does not match round amount of ${roundAmount}`
-        );
-      }
-      */
-
       console.log("Total GHST to send:", talliedAmount);
       console.log("Round amount:", roundAmount);
 
@@ -246,6 +235,10 @@ task("rarityPayout")
         let amount = finalRewards[gotchiID];
         let parsedAmount = BigNumber.from(parseEther(amount.toString()));
         let finalParsed = parsedAmount.toString();
+
+        if (Number(gotchiID) <= 521) continue;
+        if (Number(gotchiID) > 600) continue;
+        if ([2366, 7568, 592, 7109].includes(Number(gotchiID))) continue;
 
         if (maxProcess < tokenIdsNum + 1) {
           txData.push(txGroup);
@@ -270,13 +263,14 @@ task("rarityPayout")
       for (const [i, txGroup] of txData.entries()) {
         console.log("current index:", i);
 
+        // if (i === 0) continue;
+
         let tokenIds: string[] = [];
         let amounts: string[] = [];
 
         txGroup.forEach((sendData) => {
           tokenIds.push(sendData.tokenID);
           amounts.push(sendData.parsedAmount);
-          //  console.log(`Sending ${sendData.amount} to ${sendData.tokenID}`)
         });
 
         let totalAmount = amounts.reduce((prev, curr) => {
@@ -297,6 +291,7 @@ task("rarityPayout")
         const tx = await escrowFacet.batchDepositGHST(tokenIds, amounts, {
           gasPrice: gasPrice,
         });
+
         let receipt: ContractReceipt = await tx.wait();
         console.log("receipt:", receipt.transactionHash);
         console.log("Gas used:", strDisplay(receipt.gasUsed.toString()));
