@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ListingListItem, Royalties} from "../libraries/LibAppStorage.sol";
 import {LibERC1155Marketplace, ERC1155Listing} from "../libraries/LibERC1155Marketplace.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
@@ -9,8 +9,7 @@ import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
-
-// import "hardhat/console.sol";
+import "hardhat/console.sol";
 
 contract ERC1155MarketplaceFacet is Modifiers {
     event ERC1155ListingAdd(
@@ -243,7 +242,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 cost = _quantity * _priceInWei;
         require(IERC20(s.ghstContract).balanceOf(buyer) >= cost, "ERC1155Marketplace: not enough GHST");
         {
-            uint256 royaltyPercentage = s.itemTypes[listing.erc1155TypeId].royaltyPercentage;
+            uint256 royaltyPercentage = s.royalties[listing.erc1155TypeId].royaltyPercentage;
             uint256 transferAmount;
 
             // handles stack too deep error
@@ -252,13 +251,16 @@ contract ERC1155MarketplaceFacet is Modifiers {
             //AGIP6 adds on 0.5%
             uint256 playerRewardsShare = cost / 200;
 
+            console.log("Recipient Address: ", s.royalties[listing.erc1155TypeId].royaltyRecipient);
+            console.log("Royalty Percentage: ", s.royalties[listing.erc1155TypeId].royaltyPercentage);
+
             //determines if royalties are to be paid for erc1155
             if (royaltyPercentage > 0) {
                 uint256 royaltyShare = (_priceInWei * royaltyPercentage) / 100;
                 transferAmount = cost - (daoShare + pixelCraftShare + playerRewardsShare + royaltyShare);
-                require(transferAmount <= 0, "Total shares are too high");
+                require(transferAmount > 0, "Total shares are too high");
 
-                LibERC20.transferFrom(s.ghstContract, buyer, s.itemTypes[listing.erc1155TypeId].royaltyRecipient, royaltyShare);
+                LibERC20.transferFrom(s.ghstContract, buyer, s.royalties[listing.erc1155TypeId].royaltyRecipient, royaltyShare);
             } else {
                 transferAmount = cost - (daoShare + pixelCraftShare + playerRewardsShare);
             }
@@ -357,23 +359,30 @@ contract ERC1155MarketplaceFacet is Modifiers {
         }
     }
 
-    struct RoyaltyArgs {
-        uint256 erc1155TypeId;
-        address royaltyRecipient;
-        uint256 royaltyPercentage;
+    ///@notice allow Doa or owner to set erc1155 to pay royalties upon sale
+    ///@param _royalties an array containing identifier for erc1155, said erc1155 royalty reciepent address and erc1155 royalty percentage
+    function setERC1155Royalty(Royalties[] calldata _royalties) external onlyOwnerOrItemManager {
+        for (uint256 i; i < _royalties.length; i++) {
+            require(s.royalties[_royalties[i].erc1155TypeId].royaltyPercentage == 0, "ERC1155 ID already pays royalties");
+            require(_royalties[i].royaltyPercentage == 10, "Royalty Percentage is too high");
+            require(_royalties[i].royaltyRecipient != address(0), "RoyaltyRecipient: Can't transfer to 0 address");
+
+            s.royalties[_royalties[i].erc1155TypeId] = _royalties[i];
+            emit RoyaltySet(_royalties[i].erc1155TypeId, _royalties[i].royaltyRecipient, _royalties[i].royaltyPercentage);
+        }
     }
 
-    ///@notice allow Doa or owner to set erc1155 to pay royalties upon sale
-    ///@param _royaltiesArgs an array containing identifier for erc1155, said erc1155 royalty reciepent address and erc1155 royalty percentage
-    function setERC1155Royalty(RoyaltyArgs[] calldata _royaltiesArgs) external onlyOwnerOrItemManager {
-        for (uint256 i; i < _royaltiesArgs.length; i++) {
-            require(s.itemTypes[_royaltiesArgs[i].erc1155TypeId].royaltyPercentage == 0, "ERC1155 ID is already pays royalties");
-            require(_royaltiesArgs[i].royaltyPercentage <= 10, "Royalty Percentage is too high");
-            require(_royaltiesArgs[i].royaltyRecipient != address(0), "RoyaltyRecipient: Can't transfer to 0 address");
-
-            s.itemTypes[_royaltiesArgs[i].erc1155TypeId].royaltyRecipient = _royaltiesArgs[i].royaltyRecipient;
-            s.itemTypes[_royaltiesArgs[i].erc1155TypeId].royaltyPercentage = _royaltiesArgs[i].royaltyPercentage;
-            emit RoyaltySet(_royaltiesArgs[i].erc1155TypeId, _royaltiesArgs[i].royaltyRecipient, _royaltiesArgs[i].royaltyPercentage);
-        }
+    function getRoyaltiesInfo(uint256 _erc1155TypeId, uint256 _priceInWei)
+        external
+        view
+        returns (
+            address royaltyRecipient,
+            uint8 royaltyPercentage,
+            uint256 payout
+        )
+    {
+        royaltyRecipient = s.royalties[_erc1155TypeId].royaltyRecipient;
+        royaltyPercentage = s.royalties[_erc1155TypeId].royaltyPercentage;
+        payout = (_priceInWei * s.royalties[_erc1155TypeId].royaltyPercentage) / 100;
     }
 }

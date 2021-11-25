@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
-import { ERC1155MarketplaceFacet, ERC20Token } from "../typechain";
+import { ERC1155MarketplaceFacet, ERC20Token, ItemsFacet } from "../typechain";
 import { upgrade } from "../scripts/upgrades/upgrade-royalties";
 import {
   maticDiamondAddress,
@@ -17,6 +17,7 @@ describe("Testing Royalties", async function () {
 
   let erc1155MarketplaceFacet: ERC1155MarketplaceFacet;
   let erc20Token: ERC20Token;
+  let itemFacet: ItemsFacet;
   let signer: Signer;
 
   const royaltiesArg: any[] = [];
@@ -36,6 +37,12 @@ describe("Testing Royalties", async function () {
       signer
     )) as ERC20Token;
 
+    itemFacet = (await ethers.getContractAt(
+      "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
+      maticDiamondAddress,
+      signer
+    )) as ItemsFacet;
+
     await upgrade();
   });
 
@@ -47,14 +54,6 @@ describe("Testing Royalties", async function () {
       network
     );
 
-    royaltiesArg.push({
-      erc1155TypeId: 11,
-      royaltyRecipient: royaltyAddress,
-      royaltyPercentage: 10,
-    });
-
-    await erc1155MarketplaceFacet.setERC1155Royalty(royaltiesArg);
-
     let beforeBalance = await erc20Token.balanceOf(royaltyAddress);
     console.log("Royalty Recipient Before Balance: ", beforeBalance.toString());
 
@@ -63,6 +62,61 @@ describe("Testing Royalties", async function () {
       "listed",
       10
     );
-    console.log("Listings: ", erc1155Listings.toString());
+    /* console.log("Listings: ", erc1155Listings.toString()); */
+    let itemId = parseInt(erc1155Listings[0].erc1155TypeId.toString());
+    console.log("item Id: ", itemId);
+    let listingId = erc1155Listings[0].listingId.toString();
+    console.log("listing Id: ", listingId);
+    let itemCost = erc1155Listings[0].priceInWei.toString();
+    console.log("listing price: ", itemCost);
+
+    /*     let itemType = await itemFacet.getItemType(itemId);
+    console.log("Royalty Percentage: ", itemType.royaltyPercentage.toString());
+    console.log("Royalty Address: ", itemType.royaltyRecipient.toString()); */
+
+    royaltiesArg.push({
+      erc1155TypeId: itemId,
+      royaltyRecipient: royaltyAddress,
+      royaltyPercentage: 10,
+    });
+
+    await erc1155MarketplaceFacet.setERC1155Royalty(royaltiesArg);
+
+    let royaltyInfo = await erc1155MarketplaceFacet.getRoyaltiesInfo(
+      itemId,
+      itemCost
+    );
+    console.log("Royalties Address: ", royaltyInfo.royaltyRecipient);
+    console.log("Royalties Percentage: ", royaltyInfo.royaltyPercentage);
+    console.log("Royalties Payout: ", royaltyInfo.payout.toString());
+
+    /*     let afterItemType = await itemFacet.getItemType(itemId);
+    console.log(
+      "Change Royalty Address: ",
+      afterItemType.royaltyRecipient.toString()
+    );
+    console.log(
+      "Change Royalty Percentage: ",
+      afterItemType.royaltyPercentage.toString()
+    ); */
+
+    await network.provider.request({
+      method: "hardhat_stopImpersonatingAccount",
+      params: [itemManager],
+    });
+
+    erc1155MarketplaceFacet = await impersonate(
+      ghstWhale,
+      erc1155MarketplaceFacet,
+      ethers,
+      network
+    );
+
+    await erc1155MarketplaceFacet.executeERC1155Listing(listingId, 1, itemCost);
+    console.log("Sale completed for listingId: ", listingId);
+    console.log("Sale completed for itemId: ", itemId);
+
+    let afterBalance = await erc20Token.balanceOf(royaltyAddress);
+    console.log("Royalty Recipient After Balance: ", afterBalance.toString());
   });
 });
