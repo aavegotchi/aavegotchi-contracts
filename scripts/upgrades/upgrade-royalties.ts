@@ -14,14 +14,6 @@ export async function upgrade() {
       facetName: "ERC1155MarketplaceFacet",
       addSelectors: [
         `function setERC1155Royalty(tuple(uint256 erc1155TypeId, address royaltyRecipient, uint8 royaltyPercentage)[] _royaltiesArgs) external`,
-        `function getRoyaltiesInfo(uint256 _erc1155TypeId, uint256 _priceInWei)
-        external
-        view
-        returns (
-            address royaltyRecipient,
-            uint8 royaltyPercentage,
-            uint256 payout
-        )`,
       ],
       removeSelectors: [],
     },

@@ -79,6 +79,9 @@ struct ItemType {
     uint8 category; // 0 is wearable, 1 is badge, 2 is consumable
     int16 kinshipBonus; //[CONSUMABLE ONLY] How much this consumable boosts (or reduces) kinship score
     uint32 experienceBonus; //[CONSUMABLE ONLY]
+    //royalties
+    address royaltyRecipient;
+    uint8 royaltyPercentage;
 }
 
 struct WearableSet {
@@ -150,12 +153,6 @@ struct GameManager {
     uint256 limit;
     uint256 balance;
     uint256 refreshTime;
-}
-
-struct Royalties {
-    uint256 erc1155TypeId;
-    address royaltyRecipient;
-    uint8 royaltyPercentage;
 }
 
 struct AppStorage {
@@ -245,7 +242,7 @@ struct AppStorage {
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
     mapping(uint256 => address) categoryToTokenAddress;
     // Royalties typeId, recipient, percentage
-    mapping(uint256 => Royalties) royalties;
+    /* mapping(uint256 => Royalties) royalties; */
 }
 
 library LibAppStorage {
