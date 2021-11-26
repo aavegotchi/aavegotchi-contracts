@@ -35,8 +35,8 @@ export interface DeployUpgradeTaskArgs {
   facetsAndAddSelectors: string;
   useMultisig: boolean;
   useLedger: boolean;
-  initAddress: string;
-  initCalldata: string;
+  initAddress?: string;
+  initCalldata?: string;
   // verifyFacets: boolean;
   // updateDiamondABI: boolean;
 }
@@ -220,8 +220,8 @@ task(
         console.log("Diamond cut");
         const tx: ContractTransaction = await diamondCut.diamondCut(
           cut,
-          initAddress,
-          initCalldata,
+          initAddress? initAddress:hre.ethers.constants.AddressZero,
+          initCalldata? initCalldata:"0x",
           { gasLimit: 8000000 }
         );
         console.log("Diamond cut tx:", tx.hash);
@@ -237,16 +237,16 @@ task(
           const tx: PopulatedTransaction =
             await diamondCut.populateTransaction.diamondCut(
               cut,
-              initAddress,
-              initCalldata,
+              initAddress? initAddress:hre.ethers.constants.AddressZero,
+              initCalldata? initCalldata:"0x",
               { gasLimit: 800000 }
             );
           // await sendToMultisig(diamondUpgrader, signer, tx, hre.ethers);
         } else {
           const tx: ContractTransaction = await diamondCut.diamondCut(
             cut,
-            initAddress,
-            initCalldata,
+            initAddress? initAddress:hre.ethers.constants.AddressZero,
+            initCalldata? initCalldata:"0x",
             { gasLimit: 800000 }
           );
 
