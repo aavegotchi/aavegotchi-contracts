@@ -113,3 +113,14 @@ export interface FoundSet {
 
 type FilterType = "all" | "only mine" | "only haunt 2";
 const filterOptions: FilterType[] = ["all", "only mine", "only haunt 2"];
+
+export interface MinigameResult {
+  tokenId: string;
+  score: number;
+  name: string;
+}
+
+export interface MinigameGroup {
+  aavegotchis: MinigameResult[];
+  xpAmount: number;
+}

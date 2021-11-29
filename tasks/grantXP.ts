@@ -5,8 +5,12 @@ import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
-import { UserGotchisOwned } from "../types";
-import { getSubgraphGotchis } from "../scripts/query/queryAavegotchis";
+import { GotchisOwned, UserGotchisOwned } from "../types";
+import {
+  getEthSubgraphGotchis,
+  getSubgraphGotchis,
+  queryAavegotchis,
+} from "../scripts/query/queryAavegotchis";
 
 interface TaskArgs {
   filename: string;
@@ -85,7 +89,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     );
 
     //Get mainnet
-    const mainnetUsers: UserGotchisOwned[] = await getSubgraphGotchis(
+    const mainnetUsers: UserGotchisOwned[] = await getEthSubgraphGotchis(
       addresses,
       "eth"
     );
@@ -100,7 +104,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     const tokenIds: string[] = [];
 
-    //Extract token ids
+    //Handle Polygon gotchis
     polygonUsers.forEach((user) => {
       user.gotchisOwned.forEach((gotchi) => {
         if (gotchi.status === "3") {
@@ -111,15 +115,38 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       });
     });
 
+    //Handle mainnet Gotchis
+    let mainnetTokenIds: string[] = [];
+
+    //first get all gotchis
     mainnetUsers.forEach((user) => {
       user.gotchisOwned.forEach((gotchi) => {
-        if (gotchi.status === "3") {
-          if (tokenIds.includes(gotchi.id))
-            throw new Error(`Duplicate token ID: ${gotchi.id}`);
-          else tokenIds.push(gotchi.id);
-        }
+        if (tokenIds.includes(gotchi.id))
+          throw new Error(`Duplicate token ID: ${gotchi.id}`);
+        else mainnetTokenIds.push(gotchi.id);
       });
     });
+
+    //then get gotchi object on polygon for those gotchi ids to ensure they are gotchis (not portals)
+    const finalMainnetIds = await queryAavegotchis(mainnetTokenIds);
+    finalMainnetIds.aavegotchis.forEach((gotchi: GotchisOwned) => {
+      if (gotchi.status === "3") {
+        if (tokenIds.includes(gotchi.id))
+          throw new Error(`Duplicate token ID: ${gotchi.id}`);
+        else tokenIds.push(gotchi.id);
+      }
+    });
+
+    //final check to prevent duplicate token ids
+    const checkedIds: string[] = [];
+    tokenIds.forEach((id) => {
+      if (checkedIds.includes(id)) {
+        throw new Error("Duplicate id");
+      }
+      checkedIds.push(id);
+    });
+
+    console.log("final token ids:", tokenIds);
 
     //Check how many unused addresses there are (addresses that voted, but do not have Aavegotchis)
     const unusedAddresses: string[] = [];
