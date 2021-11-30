@@ -101,6 +101,28 @@ describe("Testing Royalties", async function () {
     ).to.be.revertedWith("ERC1155 ID already pays royalties");
   });
 
+  it("Should NOT allow contractOwner to assign royalties with royalties percentage over 10", async function () {
+    const erc1155Listings = await erc1155MarketplaceFacet.getERC1155Listings(
+      0,
+      "listed",
+      10
+    );
+
+    let itemId = parseInt(erc1155Listings[1].erc1155TypeId.toString());
+
+    let royaltiesArg: any[] = [
+      {
+        erc1155TypeId: itemId,
+        royaltyRecipient: royaltyAddress,
+        royaltyPercentage: 11,
+      },
+    ];
+
+    await expect(
+      erc1155MarketplaceFacet.setERC1155Royalty(royaltiesArg)
+    ).to.be.revertedWith("Royalty Percentage is too high");
+  });
+
   it("Should NOT allow an address that is NOT Owner Or ItemManager to assign royalties", async function () {
     erc1155MarketplaceFacet = await impersonate(
       royaltyAddress,
