@@ -90,7 +90,7 @@ contract AavegotchiLendingFacet is Modifiers {
         );
 
         require(_period > 0, "AavegotchiLending: period should be larger than 0");
-        require(_revenueSplit.length == 3, "AavegotchiLending: revenues split should consists of 3 values");
+//        require(_revenueSplit.length == 3, "AavegotchiLending: revenues split should consists of 3 values");
         require(_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] == 100, "AavegotchiLending: sum of revenue split should be 100");
         if (_receiver == address(0)) {
             require(_revenueSplit[2] == 0, "AavegotchiLending: revenue split for invalid receiver should be zero");
@@ -149,11 +149,23 @@ contract AavegotchiLendingFacet is Modifiers {
     ///@notice Allow a renter to agree an rental for the NFT
     ///@dev Will throw if the NFT has been lent or if the rental has been canceled already
     ///@param _rentalId The identifier of the rental to agree
-    function agreeAavegotchiRental(uint256 _rentalId) external {
+    function agreeAavegotchiRental(
+        uint256 _rentalId,
+        uint256 _erc721TokenId,
+        uint256 _amountPerDay,
+        uint256 _period,
+        uint256[3] memory _revenueSplit
+    ) external {
         AavegotchiRental storage rental = s.aavegotchiRentals[_rentalId];
         require(rental.timeCreated != 0, "AavegotchiLending: rental not found");
         require(rental.timeAgreed == 0, "AavegotchiLending: rental already agreed");
         require(rental.canceled == false, "AavegotchiLending: rental canceled");
+        require(rental.erc721TokenId == _erc721TokenId, "AavegotchiLending: Invalid token id");
+        require(rental.amountPerDay == _amountPerDay, "AavegotchiLending: Invalid amount per day");
+        require(rental.period == _period, "AavegotchiLending: Invalid rental period");
+        for (uint256 i; i < 3; i++) {
+            require(rental.revenueSplit[i] == _revenueSplit[i], "AavegotchiLending: Invalid revenue split");
+        }
         address renter = LibMeta.msgSender();
         address originalOwner = rental.originalOwner;
         require(originalOwner != renter, "AavegotchiLending: renter can't be original owner");

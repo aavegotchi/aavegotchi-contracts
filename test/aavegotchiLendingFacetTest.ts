@@ -226,26 +226,42 @@ describe("Testing Aavegotchi Lending", async function () {
       fourthRentalId = event!.args!.rentalId
     });
     it("Should revert when try to agree rental with wrong rental id", async function () {
-      await expect(lendingFacetWithRenter.agreeAavegotchiRental(fourthRentalId.add(10)))
+      await expect(lendingFacetWithRenter.agreeAavegotchiRental(fourthRentalId.add(10), unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver))
         .to.be.revertedWith("AavegotchiLending: rental not found");
     });
     it("Should revert when try to agree canceled rental", async function () {
-      await expect(lendingFacetWithRenter.agreeAavegotchiRental(secondRentalId))
+      await expect(lendingFacetWithRenter.agreeAavegotchiRental(secondRentalId, unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver))
         .to.be.revertedWith("AavegotchiLending: rental canceled");
     });
+    it("Should revert when try to agree rental with wrong token id", async function () {
+      await expect(lendingFacetWithRenter.agreeAavegotchiRental(fourthRentalId, lockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver))
+        .to.be.revertedWith("AavegotchiLending: Invalid token id");
+    });
+    it("Should revert when try to agree rental with wrong amount per day", async function () {
+      await expect(lendingFacetWithRenter.agreeAavegotchiRental(fourthRentalId, unlockedAavegotchiId, ethers.utils.parseUnits('1.1', 'ether'), period, revenueSplitForReceiver))
+        .to.be.revertedWith("AavegotchiLending: Invalid amount per day");
+    });
+    it("Should revert when try to agree rental with wrong rental period", async function () {
+      await expect(lendingFacetWithRenter.agreeAavegotchiRental(fourthRentalId, unlockedAavegotchiId, amountPerDay, period + 1, revenueSplitForReceiver))
+        .to.be.revertedWith("AavegotchiLending: Invalid rental period");
+    });
+    it("Should revert when try to agree rental with wrong revenue split", async function () {
+      await expect(lendingFacetWithRenter.agreeAavegotchiRental(fourthRentalId, unlockedAavegotchiId, amountPerDay, period, revenueSplitWithoutReceiver))
+        .to.be.revertedWith("AavegotchiLending: Invalid revenue split");
+    });
     it("Should revert when try to agree rental with original owner", async function () {
-      await expect(lendingFacetWithOwner.agreeAavegotchiRental(fourthRentalId))
+      await expect(lendingFacetWithOwner.agreeAavegotchiRental(fourthRentalId, unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver))
         .to.be.revertedWith("AavegotchiLending: renter can't be original owner");
     });
     it("Should revert when non GHST holder try to agree rental whose amount per day is not zero", async function () {
       const lendingFacetWithNonGhstHolder = await impersonate(nonGhstHolderAddress, lendingFacetWithOwner, ethers, network);
-      await expect(lendingFacetWithNonGhstHolder.agreeAavegotchiRental(fourthRentalId))
+      await expect(lendingFacetWithNonGhstHolder.agreeAavegotchiRental(fourthRentalId, unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver))
         .to.be.revertedWith("AavegotchiLending: not enough GHST");
     });
     it("Should succeed when agree rental with valid data", async function () {
       const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
       const ownerOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
-      const receipt = await (await lendingFacetWithRenter.agreeAavegotchiRental(fourthRentalId)).wait();
+      const receipt = await (await lendingFacetWithRenter.agreeAavegotchiRental(fourthRentalId, unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver)).wait();
       const event = receipt!.events!.find(event => event.event === 'ERC721ExecutedRental');
       expect(event!.args!.renter).to.equal(renterAddress);
       const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
@@ -268,7 +284,7 @@ describe("Testing Aavegotchi Lending", async function () {
       escrowAddress = rentalInfo[1].escrow
     });
     it("Should revert when try to agree agreed rental", async function () {
-      await expect(lendingFacetWithRenter.agreeAavegotchiRental(fourthRentalId))
+      await expect(lendingFacetWithRenter.agreeAavegotchiRental(fourthRentalId, unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver))
         .to.be.revertedWith("AavegotchiLending: rental already agreed");
     });
   });
