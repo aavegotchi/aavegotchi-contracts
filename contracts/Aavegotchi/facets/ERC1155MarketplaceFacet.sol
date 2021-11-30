@@ -262,6 +262,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
 
                 LibERC20.transferFrom(s.ghstContract, buyer, s.royalties[listing.erc1155TypeId].royaltyRecipient, royaltyShare);
             } else {
+                console.log("No Royalties");
                 transferAmount = cost - (daoShare + pixelCraftShare + playerRewardsShare);
             }
 
