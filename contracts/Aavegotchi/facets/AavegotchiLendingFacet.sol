@@ -37,7 +37,11 @@ contract AavegotchiLendingFacet is Modifiers {
     ///@param _rentalId The identifier of the rental to query
     ///@return rental_ A struct containing certain details about the rental like timeCreated etc
     ///@return aavegotchiInfo_ A struct containing details about the aavegotchi
-    function getAavegotchiRentalInfo(uint256 _rentalId) external view returns (AavegotchiRental memory rental_, AavegotchiInfo memory aavegotchiInfo_) {
+    function getAavegotchiRentalInfo(uint256 _rentalId)
+        external
+        view
+        returns (AavegotchiRental memory rental_, AavegotchiInfo memory aavegotchiInfo_)
+    {
         rental_ = s.aavegotchiRentals[_rentalId];
         require(rental_.timeCreated != 0, "AavegotchiLending: rental does not exist");
         aavegotchiInfo_ = LibAavegotchi.getAavegotchi(rental_.erc721TokenId);
@@ -90,7 +94,7 @@ contract AavegotchiLendingFacet is Modifiers {
         );
 
         require(_period > 0, "AavegotchiLending: period should be larger than 0");
-//        require(_revenueSplit.length == 3, "AavegotchiLending: revenues split should consists of 3 values");
+        //        require(_revenueSplit.length == 3, "AavegotchiLending: revenues split should consists of 3 values");
         require(_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] == 100, "AavegotchiLending: sum of revenue split should be 100");
         if (_receiver == address(0)) {
             require(_revenueSplit[2] == 0, "AavegotchiLending: revenue split for invalid receiver should be zero");
@@ -238,17 +242,17 @@ contract AavegotchiLendingFacet is Modifiers {
                 CollateralEscrow(escrow).approveAavegotchiDiamond(revenueToken);
             }
             if ((completionTime + 1 days <= block.timestamp) && (sender != originalOwner)) {
-                uint256 senderAmount = balance * 3 / 100;
+                uint256 senderAmount = (balance * 3) / 100;
                 LibERC20.transferFrom(revenueToken, escrow, sender, senderAmount);
-                balance = balance * 97 / 100;
+                balance = (balance * 97) / 100;
             }
 
-            uint256 ownerAmount = balance * rental.revenueSplit[0] / 100;
-            uint256 renterAmount = balance * rental.revenueSplit[1] / 100;
+            uint256 ownerAmount = (balance * rental.revenueSplit[0]) / 100;
+            uint256 renterAmount = (balance * rental.revenueSplit[1]) / 100;
             LibERC20.transferFrom(revenueToken, escrow, originalOwner, ownerAmount);
             LibERC20.transferFrom(revenueToken, escrow, renter, renterAmount);
             if (receiver != address(0)) {
-                uint256 receiverAmount = balance * rental.revenueSplit[2] / 100;
+                uint256 receiverAmount = (balance * rental.revenueSplit[2]) / 100;
                 LibERC20.transferFrom(revenueToken, escrow, receiver, receiverAmount);
             }
         }

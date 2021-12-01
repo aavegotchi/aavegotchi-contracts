@@ -28,10 +28,7 @@ library LibAavegotchiLending {
         emit AavegotchiRentalCanceled(_rentalId, block.number);
     }
 
-    function cancelAavegotchiRentalFromToken(
-        uint256 _erc721TokenId,
-        address _owner
-    ) internal {
+    function cancelAavegotchiRentalFromToken(uint256 _erc721TokenId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         cancelAavegotchiRental(s.aavegotchiRentalHead[_erc721TokenId], _owner);
     }
