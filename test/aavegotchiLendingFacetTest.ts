@@ -8,6 +8,7 @@ import { upgrade } from "../scripts/upgrades/upgrade-aavegotchiLendingFacet";
 import { impersonate } from "../scripts/helperFunctions";
 import {
   AavegotchiFacet,
+  AavegotchiGameFacet,
   AavegotchiLendingFacet,
   ERC20Token,
   ERC721MarketplaceFacet
@@ -27,6 +28,7 @@ describe("Testing Aavegotchi Lending", async function () {
   const nonWhitelistedAddress = "0xaa3b1fdc3aa57bf24418e397f8c80e7385aaa594"; // non-whitelisted address should be GHST holder
   const ghstHolderAddress = "0x3721546e51258065bfdb9746b2e442c7671b0298";
   const receiver = "0x382038b034fa8Ea64C74C81d680669bDaC4D0636";
+  const originalPetOperator = "0x4E59235b35d504D1372ABf67a835031F98114d64"; // original pet operator should be MATIC holder
   const lockedPortalId = 0;
   const lockedAavegotchiId = 16911;
   const unlockedAavegotchiId = 15589;
@@ -40,6 +42,7 @@ describe("Testing Aavegotchi Lending", async function () {
   let lendingFacetWithPortalOwner: AavegotchiLendingFacet;
   let aavegotchiFacet: AavegotchiFacet;
   let erc721MarketplaceFacet: ERC721MarketplaceFacet;
+  let aavegotchiGameFacet: AavegotchiGameFacet;
   let ghstERC20: ERC20Token;
   let aavegotchiOwnerAddress: any;
   let escrowAddress: any;
@@ -64,6 +67,10 @@ describe("Testing Aavegotchi Lending", async function () {
       "ERC721MarketplaceFacet",
       diamondAddress
     )) as ERC721MarketplaceFacet;
+    aavegotchiGameFacet = (await ethers.getContractAt(
+      "AavegotchiGameFacet",
+      diamondAddress
+    )) as AavegotchiGameFacet;
 
     ghstERC20 = (await ethers.getContractAt('ERC20Token', ghstAddress)) as ERC20Token;
 
@@ -71,12 +78,18 @@ describe("Testing Aavegotchi Lending", async function () {
     aavegotchiOwnerAddress = await aavegotchiFacet.ownerOf(lockedAavegotchiId);
     const portalOwnerAddress = await aavegotchiFacet.ownerOf(lockedPortalId);
 
+    // set pet operator
+    aavegotchiFacet = await impersonate(aavegotchiOwnerAddress, aavegotchiFacet, ethers, network);
+    await (await aavegotchiFacet.setPetOperatorForAll(originalPetOperator, true)).wait();
+
+    // Impersonating facets for test
     lendingFacetWithOwner = await impersonate(aavegotchiOwnerAddress, aavegotchiLendingFacet, ethers, network);
     lendingFacetWithRenter = await impersonate(renterAddress, aavegotchiLendingFacet, ethers, network);
     lendingFacetWithClaimer = await impersonate(claimerAddress, aavegotchiLendingFacet, ethers, network);
     lendingFacetWithPortalOwner = await impersonate(portalOwnerAddress, aavegotchiLendingFacet, ethers, network);
     erc721MarketplaceFacet = await impersonate(portalOwnerAddress, erc721MarketplaceFacet, ethers, network);
     aavegotchiFacet = await impersonate(renterAddress, aavegotchiFacet, ethers, network);
+    aavegotchiGameFacet = await impersonate(originalPetOperator, aavegotchiGameFacet, ethers, network);
     ghstERC20 = await impersonate(ghstHolderAddress, ghstERC20, ethers, network);
   });
 
@@ -353,6 +366,10 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert when try to send aavegotchi in rental", async function () {
       await expect(aavegotchiFacet.transferFrom(renterAddress, aavegotchiOwnerAddress, unlockedAavegotchiId))
         .to.be.revertedWith("AavegotchiLending: Aavegotchi is in rental");
+    });
+    it("Should allow original pet operators interact during the agreement", async function () {
+      const receipt = await (await aavegotchiGameFacet.interact([unlockedAavegotchiId])).wait();
+      expect(receipt.status).to.equal(1);
     });
   });
 

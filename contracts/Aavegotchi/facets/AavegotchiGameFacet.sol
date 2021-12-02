@@ -283,8 +283,19 @@ contract AavegotchiGameFacet is Modifiers {
 
             //If the owner is the bridge, anyone can pet the gotchis inside
             if (owner != address(this)) {
+                // Check rental status of aavegotchi and allow original pet operators
+                bool isOriginalPetOperator;
+                uint256 rentalId = s.aavegotchiRentalHead[tokenId];
+                if ((rentalId != 0) && (s.aavegotchiRentals[rentalId].timeAgreed > 0)) {
+                    address originalOwner = s.aavegotchiRentals[rentalId].originalOwner;
+                    isOriginalPetOperator = s.operators[originalOwner][sender] || s.petOperators[originalOwner][sender];
+                }
                 require(
-                    sender == owner || s.operators[owner][sender] || s.approved[tokenId] == sender || s.petOperators[owner][sender],
+                    sender == owner ||
+                        s.operators[owner][sender] ||
+                        s.approved[tokenId] == sender ||
+                        s.petOperators[owner][sender] ||
+                        isOriginalPetOperator,
                     "AavegotchiGameFacet: Not owner of token or approved"
                 );
             }
