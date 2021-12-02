@@ -7,7 +7,7 @@ import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibAavegotchiLending} from "../libraries/LibAavegotchiLending.sol";
-import {Modifiers, AavegotchiRental} from "../libraries/LibAppStorage.sol";
+import {Modifiers, AavegotchiRental, WHITELIST_LIMIT} from "../libraries/LibAppStorage.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
 
 contract AavegotchiLendingFacet is Modifiers {
@@ -31,6 +31,10 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256 period,
         uint256 time
     );
+
+    event WhitelistCreated(uint256 indexed whitelistId, address indexed owner, address[] addresses);
+
+    event WhitelistUpdated(uint256 indexed whitelistId, address indexed owner, address[] addresses);
 
     ///@notice Get an aavegotchi rental details through an identifier
     ///@dev Will throw if the rental does not exist
@@ -75,13 +79,15 @@ contract AavegotchiLendingFacet is Modifiers {
     ///@param _period The rental period of the aavegotchi
     ///@param _revenueSplit The revenue split of the rental, 3 values, sum of the should be 100
     ///@param _receiver The 3rd account for receive revenue split, can be address(0)
+    ///@param _whitelistId The identifier of whitelist for agree rental, if 0, allow everyone
     function addAavegotchiRental(
         address _erc721TokenAddress,
         uint256 _erc721TokenId,
         uint256 _amountPerDay,
         uint256 _period,
         uint256[3] memory _revenueSplit,
-        address _receiver
+        address _receiver,
+        uint256 _whitelistId
     ) external {
         IERC721 erc721Token = IERC721(_erc721TokenAddress);
         address sender = LibMeta.msgSender();
@@ -99,6 +105,7 @@ contract AavegotchiLendingFacet is Modifiers {
         if (_receiver == address(0)) {
             require(_revenueSplit[2] == 0, "AavegotchiLending: revenue split for invalid receiver should be zero");
         }
+        require(_whitelistId == 0 || s.whitelistOwners[_whitelistId] == sender, "AavegotchiLending: Not owner of whitelist");
 
         require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "AavegotchiLending: Only aavegotchi available");
 
@@ -123,6 +130,7 @@ contract AavegotchiLendingFacet is Modifiers {
             receiver: _receiver,
             erc721TokenAddress: _erc721TokenAddress,
             erc721TokenId: _erc721TokenId,
+            whitelistId: _whitelistId,
             timeCreated: block.timestamp,
             timeAgreed: 0,
             lastClaimed: 0,
@@ -173,6 +181,7 @@ contract AavegotchiLendingFacet is Modifiers {
         address renter = LibMeta.msgSender();
         address originalOwner = rental.originalOwner;
         require(originalOwner != renter, "AavegotchiLending: renter can't be original owner");
+        require(rental.whitelistId == 0 || s.isWhitelisted[rental.whitelistId][renter], "AavegotchiLending: Not whitelisted address");
 
         if (rental.amountPerDay > 0) {
             uint256 transferAmount = rental.amountPerDay * rental.period;
@@ -273,6 +282,53 @@ contract AavegotchiLendingFacet is Modifiers {
             LibAavegotchiLending.removeLentAavegotchi(tokenId, originalOwner);
 
             // TODO: remove pet operator
+        }
+    }
+
+    function createWhitelist(address[] memory _whitelistAddresses) external {
+        uint256 whitelistLength = _whitelistAddresses.length;
+        require(whitelistLength > 0, "Whitelisting: Whitelist length should be larger than zero");
+        require(whitelistLength <= WHITELIST_LIMIT, "Whitelisting: Whitelist length exceeds limit");
+        for (uint256 i; i < whitelistLength; i++) {
+            require(_whitelistAddresses[i] != address(0), "Whitelisting: There's invalid address in the list");
+        }
+
+        address sender = LibMeta.msgSender();
+        s.nextWhitelistId++;
+        uint256 whitelistId = s.nextWhitelistId;
+
+        addAddressesToWhitelist(whitelistId, _whitelistAddresses);
+
+        s.whitelistOwners[whitelistId] = sender;
+        s.ownerWhitelistIds[sender].push(whitelistId);
+
+        emit WhitelistCreated(whitelistId, sender, s.whitelists[whitelistId]);
+    }
+
+    function updateWhitelist(uint256 _whitelistId, address[] memory _whitelistAddresses) external {
+        address sender = LibMeta.msgSender();
+        uint256 currentWhitelistLength = s.whitelists[_whitelistId].length;
+        require(currentWhitelistLength != 0, "Whitelisting: whitelist not found");
+        require(s.whitelistOwners[_whitelistId] == sender, "Whitelisting: not whitelist owner");
+
+        uint256 whitelistLength = _whitelistAddresses.length;
+        require(whitelistLength > 0, "Whitelisting: Whitelist length should be larger than zero");
+        require(whitelistLength + currentWhitelistLength <= WHITELIST_LIMIT, "Whitelisting: Whitelist length exceeds limit");
+        for (uint256 i; i < whitelistLength; i++) {
+            require(_whitelistAddresses[i] != address(0), "Whitelisting: There's invalid address in the list");
+        }
+
+        addAddressesToWhitelist(_whitelistId, _whitelistAddresses);
+
+        emit WhitelistUpdated(_whitelistId, sender, s.whitelists[_whitelistId]);
+    }
+
+    function addAddressesToWhitelist(uint256 _whitelistId, address[] memory _whitelistAddresses) internal {
+        for (uint256 i; i < _whitelistAddresses.length; i++) {
+            if (!s.isWhitelisted[_whitelistId][_whitelistAddresses[i]]) {
+                s.whitelists[_whitelistId].push(_whitelistAddresses[i]);
+                s.isWhitelisted[_whitelistId][_whitelistAddresses[i]] = true;
+            }
         }
     }
 }

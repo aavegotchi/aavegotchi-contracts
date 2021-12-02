@@ -10,6 +10,7 @@ uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
 uint256 constant TRAIT_BONUSES_NUM = 5;
 uint256 constant PORTAL_AAVEGOTCHIS_NUM = 10;
+uint256 constant WHITELIST_LIMIT = 100;
 
 //  switch (traitType) {
 //         case 0:
@@ -162,6 +163,7 @@ struct AavegotchiRental {
     uint256[3] revenueSplit; // originalOwner, renter, receiver
     address erc721TokenAddress;
     uint256 erc721TokenId;
+    uint256 whitelistId; // can be zero
     uint256 timeCreated;
     uint256 timeAgreed;
     uint256 lastClaimed;
@@ -262,6 +264,11 @@ struct AppStorage {
     mapping(address => mapping(uint256 => uint256)) lentTokenIdIndexes; // address => lent token id => index
     address[] revenueTokens; // GHST, FUD, FOMO, ALPHA, KEK
     mapping(address => bool) revenueTokenIndexes;
+    uint256 nextWhitelistId;
+    mapping(uint256 => address[]) whitelists; // whitelistId => whitelistAddresses
+    mapping(uint256 => mapping(address => bool)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
+    mapping(uint256 => address) whitelistOwners; // whitelistId => owner addresses
+    mapping(address => uint256[]) ownerWhitelistIds; // owner addresses => whitelistIds
 }
 
 library LibAppStorage {

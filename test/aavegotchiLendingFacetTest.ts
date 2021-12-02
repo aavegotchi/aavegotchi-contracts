@@ -24,6 +24,7 @@ describe("Testing Aavegotchi Lending", async function () {
   const claimerAddress = "0x3507e4978e0eb83315d20df86ca0b976c0e40ccb";
   const renterAddress = "0xBC67F26c2b87e16e304218459D2BB60Dac5C80bC"; // renter should be GHST holder
   const nonGhstHolderAddress = "0x725Fe4790fC6435B5161f88636C2A50e43247A4b"; // GHST holder balance should be 0
+  const nonWhitelistedAddress = "0xaa3b1fdc3aa57bf24418e397f8c80e7385aaa594"; // non-whitelisted address should be GHST holder
   const ghstHolderAddress = "0x3721546e51258065bfdb9746b2e442c7671b0298";
   const receiver = "0x382038b034fa8Ea64C74C81d680669bDaC4D0636";
   const lockedPortalId = 0;
@@ -36,6 +37,7 @@ describe("Testing Aavegotchi Lending", async function () {
   let lendingFacetWithOwner: AavegotchiLendingFacet;
   let lendingFacetWithRenter: AavegotchiLendingFacet;
   let lendingFacetWithClaimer: AavegotchiLendingFacet;
+  let lendingFacetWithPortalOwner: AavegotchiLendingFacet;
   let aavegotchiFacet: AavegotchiFacet;
   let erc721MarketplaceFacet: ERC721MarketplaceFacet;
   let ghstERC20: ERC20Token;
@@ -44,6 +46,8 @@ describe("Testing Aavegotchi Lending", async function () {
   let firstRentalId: any;
   let secondRentalId: any;
   let fourthRentalId: any;
+  let whitelistId: any;
+  let secondWhitelistId: any;
 
   before(async function () {
     await upgrade();
@@ -65,51 +69,102 @@ describe("Testing Aavegotchi Lending", async function () {
 
     // This is needed for impersonating owner of test aavegotchi
     aavegotchiOwnerAddress = await aavegotchiFacet.ownerOf(lockedAavegotchiId);
+    const portalOwnerAddress = await aavegotchiFacet.ownerOf(lockedPortalId);
 
     lendingFacetWithOwner = await impersonate(aavegotchiOwnerAddress, aavegotchiLendingFacet, ethers, network);
     lendingFacetWithRenter = await impersonate(renterAddress, aavegotchiLendingFacet, ethers, network);
     lendingFacetWithClaimer = await impersonate(claimerAddress, aavegotchiLendingFacet, ethers, network);
+    lendingFacetWithPortalOwner = await impersonate(portalOwnerAddress, aavegotchiLendingFacet, ethers, network);
+    erc721MarketplaceFacet = await impersonate(portalOwnerAddress, erc721MarketplaceFacet, ethers, network);
     aavegotchiFacet = await impersonate(renterAddress, aavegotchiFacet, ethers, network);
     ghstERC20 = await impersonate(ghstHolderAddress, ghstERC20, ethers, network);
   });
 
+  describe("Testing createWhitelist", async function () {
+    it("Should revert if whitelist is empty", async function () {
+      await expect(lendingFacetWithOwner.createWhitelist([])).to.be.revertedWith("Whitelisting: Whitelist length should be larger than zero");
+    });
+    it("Should revert if whitelist length exceeds limit", async function () {
+      const whitelistLargerThanLimit = Array(101).fill(renterAddress);
+      await expect(lendingFacetWithOwner.createWhitelist(whitelistLargerThanLimit)).to.be.revertedWith("Whitelisting: Whitelist length exceeds limit");
+    });
+    it("Should revert if whitelist contains address-zero", async function () {
+      await expect(lendingFacetWithOwner.createWhitelist([renterAddress, ethers.constants.AddressZero])).to.be.revertedWith("Whitelisting: There's invalid address in the list");
+    });
+    it("Should succeed if whitelist is valid", async function() {
+      const receipt = await (await lendingFacetWithOwner.createWhitelist([renterAddress])).wait();
+      const event = receipt!.events!.find(event => event.event === 'WhitelistCreated');
+      whitelistId = event!.args!.whitelistId
+      expect(event!.args!.owner).to.equal(aavegotchiOwnerAddress);
+      expect(event!.args!.addresses.length).to.equal(1);
+      expect(event!.args!.addresses[0]).to.equal(renterAddress);
+    });
+  });
+
+  describe("Testing updateWhitelist", async function () {
+    it("Should revert if invalid whitelist id", async function () {
+      await expect(lendingFacetWithOwner.updateWhitelist(whitelistId + 1, [])).to.be.revertedWith("Whitelisting: whitelist not found");
+    });
+    it("Should revert if invalid whitelist id", async function () {
+      const receipt = await (await lendingFacetWithPortalOwner.createWhitelist([nonWhitelistedAddress])).wait();
+      const event = receipt!.events!.find(event => event.event === 'WhitelistCreated');
+      secondWhitelistId = event!.args!.whitelistId
+      await expect(lendingFacetWithOwner.updateWhitelist(secondWhitelistId, [])).to.be.revertedWith("Whitelisting: not whitelist owner");
+    });
+    it("Should revert if whitelist is empty", async function () {
+      await expect(lendingFacetWithOwner.updateWhitelist(whitelistId, [])).to.be.revertedWith("Whitelisting: Whitelist length should be larger than zero");
+    });
+    it("Should revert if whitelist length exceeds limit", async function () {
+      const whitelistLargerThanLimit = Array(100).fill(renterAddress);
+      await expect(lendingFacetWithOwner.updateWhitelist(whitelistId, whitelistLargerThanLimit)).to.be.revertedWith("Whitelisting: Whitelist length exceeds limit");
+    });
+    it("Should revert if whitelist contains address-zero", async function () {
+      await expect(lendingFacetWithOwner.updateWhitelist(whitelistId, [nonGhstHolderAddress, ethers.constants.AddressZero])).to.be.revertedWith("Whitelisting: There's invalid address in the list");
+    });
+    it("Should succeed if all parameters are valid", async function() {
+      const receipt = await (await lendingFacetWithOwner.updateWhitelist(whitelistId,[nonGhstHolderAddress, renterAddress])).wait();
+      const event = receipt!.events!.find(event => event.event === 'WhitelistUpdated');
+      expect(event!.args!.whitelistId).to.equal(whitelistId);
+      expect(event!.args!.owner).to.equal(aavegotchiOwnerAddress);
+      expect(event!.args!.addresses.length).to.equal(2);
+    });
+  });
+
   describe("Testing addAavegotchiRental", async function () {
     it("Should revert if non-owner try to add", async function () {
-      await expect(lendingFacetWithRenter.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero))
+      await expect(lendingFacetWithRenter.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero, whitelistId))
         .to.be.revertedWith("AavegotchiLending: Not owner of aavegotchi");
     });
     it("Should revert if period is zero", async function () {
-      await expect(lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, 0, revenueSplitWithoutReceiver, ethers.constants.AddressZero))
+      await expect(lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, 0, revenueSplitWithoutReceiver, ethers.constants.AddressZero, whitelistId))
         .to.be.revertedWith("AavegotchiLending: period should be larger than 0");
     });
     it("Should revert if sum of revenue split values is invalid", async function () {
       const invalidRevenueSplit: [BigNumberish, BigNumberish, BigNumberish] = [10, 50, 0];
-      await expect(lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, invalidRevenueSplit, ethers.constants.AddressZero))
+      await expect(lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, invalidRevenueSplit, ethers.constants.AddressZero, whitelistId))
         .to.be.revertedWith("AavegotchiLending: sum of revenue split should be 100");
     });
     it("Should revert if revenue split values is invalid when receiver exist", async function () {
-      await expect(lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver, ethers.constants.AddressZero))
+      await expect(lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver, ethers.constants.AddressZero, whitelistId))
         .to.be.revertedWith("AavegotchiLending: revenue split for invalid receiver should be zero");
     });
+    it("Should revert if whitelist id is invalid", async function () {
+      await expect(lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero, whitelistId + 10))
+        .to.be.revertedWith("AavegotchiLending: Not owner of whitelist");
+    });
     it("Should revert if try to add rental for not aavegotchi", async function () {
-      const portalOwnerAddress = await aavegotchiFacet.ownerOf(lockedPortalId);
-      await network.provider.request({
-        method: 'hardhat_impersonateAccount',
-        params: [portalOwnerAddress]
-      });
-      const portalOwner = await ethers.getSigner(portalOwnerAddress);
-      await (await (await erc721MarketplaceFacet.connect(portalOwner)).cancelERC721ListingByToken(diamondAddress, lockedPortalId)).wait()
+      await (await erc721MarketplaceFacet.cancelERC721ListingByToken(diamondAddress, lockedPortalId)).wait()
 
-      await expect((await lendingFacetWithOwner.connect(portalOwner)).addAavegotchiRental(diamondAddress, lockedPortalId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero))
+      await expect(lendingFacetWithPortalOwner.addAavegotchiRental(diamondAddress, lockedPortalId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero, secondWhitelistId))
         .to.be.revertedWith("AavegotchiLending: Only aavegotchi available");
     });
     describe("If there's no rental for the aavegotchi", async function () {
       it("Should revert if aavegotchi is locked", async function() {
-        await expect(lendingFacetWithOwner.addAavegotchiRental(diamondAddress, lockedAavegotchiId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero))
+        await expect(lendingFacetWithOwner.addAavegotchiRental(diamondAddress, lockedAavegotchiId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero, whitelistId))
           .to.be.revertedWith("AavegotchiLending: Only callable on unlocked Aavegotchis");
       });
       it("Should succeed if all parameters are valid", async function() {
-        const receipt = await (await lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero)).wait();
+        const receipt = await (await lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero, 0)).wait();
         const event = receipt!.events!.find(event => event.event === 'AavegotchiRentalAdd');
         firstRentalId = event!.args!.rentalId
         expect(event!.args!.originalOwner).to.equal(aavegotchiOwnerAddress);
@@ -120,7 +175,7 @@ describe("Testing Aavegotchi Lending", async function () {
     });
     describe("If there's already rental for the aavegotchi", async function () {
       it("Should succeed and if all parameters are valid", async function() {
-        const receipt = await (await lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero)).wait();
+        const receipt = await (await lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero, whitelistId)).wait();
         const event = receipt!.events!.find(event => event.event === 'AavegotchiRentalAdd');
         secondRentalId = event!.args!.rentalId
         expect(event!.args!.originalOwner).to.equal(aavegotchiOwnerAddress);
@@ -200,7 +255,7 @@ describe("Testing Aavegotchi Lending", async function () {
 
   describe("Testing cancelAavegotchiRentalByToken", async function () {
     before(async function () {
-      await (await lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero)).wait();
+      await (await lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero, whitelistId)).wait();
     });
     it("Should revert when try to cancel rental with wrong aavegotchi id", async function () {
       await expect(lendingFacetWithOwner.cancelAavegotchiRentalByToken(lockedAavegotchiId))
@@ -221,7 +276,7 @@ describe("Testing Aavegotchi Lending", async function () {
 
   describe("Testing agreeAavegotchiRental", async function () {
     before(async function () {
-      const receipt = await (await lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver, receiver)).wait();
+      const receipt = await (await lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver, receiver, whitelistId)).wait();
       const event = receipt!.events!.find(event => event.event === 'AavegotchiRentalAdd');
       fourthRentalId = event!.args!.rentalId
     });
@@ -252,6 +307,11 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert when try to agree rental with original owner", async function () {
       await expect(lendingFacetWithOwner.agreeAavegotchiRental(fourthRentalId, unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver))
         .to.be.revertedWith("AavegotchiLending: renter can't be original owner");
+    });
+    it("Should revert when non whitelisted account try to agree rental", async function () {
+      const lendingFacetWithNonWhitelisted = await impersonate(nonWhitelistedAddress, lendingFacetWithOwner, ethers, network);
+      await expect(lendingFacetWithNonWhitelisted.agreeAavegotchiRental(fourthRentalId, unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver))
+        .to.be.revertedWith("AavegotchiLending: Not whitelisted address");
     });
     it("Should revert when non GHST holder try to agree rental whose amount per day is not zero", async function () {
       const lendingFacetWithNonGhstHolder = await impersonate(nonGhstHolderAddress, lendingFacetWithOwner, ethers, network);
