@@ -373,10 +373,21 @@ library LibAavegotchi {
         emit LibERC721.Transfer(_from, _to, _tokenId);
     }
 
+    ///@notice Query the category of an NFT
+    ///@param _erc721TokenAddress The contract address of the NFT to query
+    ///@param _erc721TokenId The identifier of the NFT to query
+    ///@return category_ Category of the NFT // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi 4 == Realm.
     function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) internal view returns (uint256 category_) {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
-        require(_erc721TokenAddress == address(this), "ERC721Marketplace: ERC721 category does not exist");
-        category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
+        require(
+            _erc721TokenAddress == address(this) || s.erc721Categories[_erc721TokenAddress][0] != 0,
+            "ERC721Marketplace: ERC721 category does not exist"
+        );
+        if (_erc721TokenAddress != address(this)) {
+            category_ = s.erc721Categories[_erc721TokenAddress][0];
+        } else {
+            category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
+        }
     }
 }

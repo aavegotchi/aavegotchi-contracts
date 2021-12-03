@@ -1,4 +1,4 @@
-import { run } from "hardhat";
+import { ethers, run } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
@@ -54,6 +54,8 @@ export async function upgrade() {
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: true,
+    initAddress: ethers.constants.AddressZero,
+    initCalldata: '0x'
   };
 
   await run("deployUpgrade", args);
