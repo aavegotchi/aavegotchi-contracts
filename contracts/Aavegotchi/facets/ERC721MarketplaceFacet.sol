@@ -10,8 +10,6 @@ import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketp
 import {LibBuyOrder} from "../libraries/LibBuyOrder.sol";
 import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
 
-// import "hardhat/console.sol";
-
 contract ERC721MarketplaceFacet is Modifiers {
     event ERC721ListingAdd(
         uint256 indexed listingId,
@@ -171,6 +169,47 @@ contract ERC721MarketplaceFacet is Modifiers {
         }
     }
 
+    struct Category {
+        address erc721TokenAddress;
+        uint256 category; // 0,1,2,3 == Aavegotchi diamond, 4 == Realm diamond.
+        // uint256 status; can add this in later if necessary
+    }
+
+    ///@notice Allow the aavegotchi diamond owner or DAO to set the category details for different types of ERC721 NFTs
+    ///@param _categories An array of structs where each struct contains details about each ERC721 category //erc721TokenAddress and category
+    function setERC721Categories(Category[] calldata _categories) external onlyOwnerOrItemManager {
+        for (uint256 i; i < _categories.length; i++) {
+            uint256 category = _categories[i].category;
+            address tokenAddress = _categories[i].erc721TokenAddress;
+
+            //Categories should be above 4 to prevent interference w/ Gotchi diamond
+            require(category > 3, "ERC721Marketplace: Added category should be above 3");
+
+            if (tokenAddress != address(this)) {
+                require(s.categoryToTokenAddress[category] == address(0), "ERC721Marketplace: Category has already been set");
+            }
+
+            s.erc721Categories[tokenAddress][0] = category;
+            s.categoryToTokenAddress[category] = tokenAddress;
+        }
+    }
+
+    ///@notice Query the category of an NFT
+    ///@param _erc721TokenAddress The contract address of the NFT to query
+    ///@param _erc721TokenId The identifier of the NFT to query
+    ///@return category_ Category of the NFT // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi 4 == Realm.
+    function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view returns (uint256 category_) {
+        require(
+            _erc721TokenAddress == address(this) || s.erc721Categories[_erc721TokenAddress][0] != 0,
+            "ERC721Marketplace: ERC721 category does not exist"
+        );
+        if (_erc721TokenAddress != address(this)) {
+            category_ = s.erc721Categories[_erc721TokenAddress][0];
+        } else {
+            category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
+        }
+    }
+
     ///@notice Allow an ERC721 owner to list his NFT for sale
     ///@dev If the NFT has been listed before,it cancels it and replaces it with the new one
     ///@dev NFTs that are listed are immediately locked
@@ -219,11 +258,15 @@ contract ERC721MarketplaceFacet is Modifiers {
 
         LibERC721Marketplace.addERC721ListingItem(owner, category, "listed", listingId);
         emit ERC721ListingAdd(listingId, owner, _erc721TokenAddress, _erc721TokenId, category, _priceInWei);
-        s.aavegotchis[_erc721TokenId].locked = true;
+
+        //Lock Aavegotchis when listing is created
+        if (_erc721TokenAddress == address(this)) {
+            s.aavegotchis[_erc721TokenId].locked = true;
+        }
+
         // Check if there's a publication fee and
         // transfer the amount to burn address
         if (s.listingFeeInWei > 0) {
-            // burn address: address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)
             LibERC20.transferFrom(s.ghstContract, owner, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), s.listingFeeInWei);
         }
     }
@@ -272,13 +315,11 @@ contract ERC721MarketplaceFacet is Modifiers {
         //AGIP6 adds on 0.5%
         LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, playerRewardsShare);
 
-        s.aavegotchis[listing.erc721TokenId].locked = false;
-
-        //To do (Nick) -- Explain why this is necessary
         if (listing.erc721TokenAddress == address(this)) {
+            s.aavegotchis[listing.erc721TokenId].locked = false;
             LibAavegotchi.transfer(seller, buyer, listing.erc721TokenId);
         } else {
-            // GHSTStakingDiamond
+            // External contracts
             IERC721(listing.erc721TokenAddress).safeTransferFrom(seller, buyer, listing.erc721TokenId);
         }
 

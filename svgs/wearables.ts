@@ -1,7 +1,7 @@
 const fs = require("fs");
 
 export const wearablesSvgs = [
-  wearable("0_Void"),
+  bodyWearable("0_Void"),
   wearable("1_CamoHat"),
   wearable("2_CamoPants"), // body but doesn't have sleeves
   wearable("3_MK2Grenade"),
@@ -26,7 +26,7 @@ export const wearablesSvgs = [
   bodyWearable("22_CaptainAaveSuit"), // bodyWearable("22_CaptainAaveSuit"),
   wearable("23_CaptainAaveShield"),
   wearable("24_ThaaveHelmet"),
-  wearable("25_ThaaveSuit"), // bodyWearable("25_ThaaveSuit"),
+  bodyWearable("25_ThaaveSuit"), // bodyWearable("25_ThaaveSuit"),
   wearable("26_ThaaveHammer"),
   wearable("27_MarcHair"),
   bodyWearable("28_MarcOutfit"), // bodyWearable("28_MarcOutfit"),
@@ -117,7 +117,7 @@ export const wearablesSvgs = [
   wearable("113_UraniumRod"),
   bodyWearable("114_RedHawaiianShirt"),
   bodyWearable("115_BlueHawaiianShirt"),
-  /* wearable("116_Coconut"),
+  wearable("116_Coconut"),
   wearable("117_DealWithItShades"),
   wearable("118_WaterJug"),
   wearable("119_BabyBottle"),
@@ -201,11 +201,11 @@ export const wearablesSvgs = [
   197,
   198,
   wearable("199_SteampunkGlasses"),
-  wearable("200_Steampunk"),
+  "200_Steampunk",
   wearable("201_SteampunkGlove"),
-  wearable("202_CyberpunkVR"),
+  "202_CyberpunkVR",
   bodyWearable("203_GamerJacket"),
-  wearable("204_CyberpunkControl"),
+  "204_CyberpunkControl",
   wearable("205_GotchiMug"),
   wearable("206_BikerHelmet"),
   wearable("207_BikerJacket"),
@@ -246,25 +246,30 @@ export const wearablesSvgs = [
   wearable("242_YellowManbun"),
   wearable("243_TintedShades"),
   bodyWearable("244_VNeckShirt"),
-  wearable("245_GeckoHat"),
-  wearable("246_APYShades"),
-  wearable("247_UpArrow"),
-  bodyWearable("248_UpOnlyShirt"),
+  "245_GeckoHat",
+  "246_APYShades",
+  "247_UpArrow",
+  "248_UpOnlyShirt",
   249,
-  bodyWearable("250_CoinGeckoTee"),
-  wearable("251_CoinGeckoCandies"),
-  wearable("252_AastronautHelmet"),
-  bodyWearable("253_AastronautSuit"),
-  wearable("254_uGOTCHIToken"),
-  wearable("255_LilBubbleHelmet"),
-  bodyWearable("256_LilBubbleSpaceSuit"),
+  "250_CoinGeckoTee",
+  "251_CoinGeckoCandies",
+  "252_AastronautHelmet",
+  "253_AastronautSuit",
+  "254_uGOTCHIToken",
+  "255_LilBubbleHelmet",
+  "256_LilBubbleSpaceSuit",
   wearable("257_BitcoinGuitar"),
   bodyWearable("258_Hanfu"),
-  258,
   259,
+  260,
   wearable("261_AantenaBot"),
   262,
-  wearable("263_SignalHeadset"), */
+  wearable("263_SignalHeadset"),
+
+  //duplicate added for missing sleeves
+  bodyWearable("264_MarineJacket"), //duplicate of id 8
+  bodyWearable("265_ThaaveSuit"), //duplicate of id 26
+  bodyWearable("125_TrackSuit"), //duplicate of id 125
 ];
 
 function stripSvg(svg: string) {

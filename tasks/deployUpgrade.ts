@@ -1,6 +1,5 @@
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
-import { sendToMultisig } from "../scripts/libraries/multisig/multisig";
-import { AddressZero } from "@ethersproject/constants";
+// import { sendToMultisig } from "../scripts/libraries/multisig/multisig";
+// import { AddressZero } from "@ethersproject/constants";
 import { task } from "hardhat/config";
 import {
   Contract,
@@ -36,6 +35,8 @@ export interface DeployUpgradeTaskArgs {
   facetsAndAddSelectors: string;
   useMultisig: boolean;
   useLedger: boolean;
+  initAddress: string;
+  initCalldata: string;
   // verifyFacets: boolean;
   // updateDiamondABI: boolean;
 }
@@ -93,6 +94,8 @@ task(
     "facetsAndAddSelectors",
     "Stringified array of facet names to upgrade, along with an array of add Selectors"
   )
+  .addParam("initAddress", "The facet address to call init function on")
+  .addParam("initCalldata", "The calldata for init function")
   .addFlag(
     "useMultisig",
     "Set to true if multisig should be used for deploying"
@@ -109,6 +112,8 @@ task(
       const diamondAddress: string = taskArgs.diamondAddress;
       const useMultisig = taskArgs.useMultisig;
       const useLedger = taskArgs.useLedger;
+      const initAddress = taskArgs.initAddress;
+      const initCalldata = taskArgs.initCalldata;
 
       //Instantiate the Signer
       let signer: Signer;
@@ -127,8 +132,12 @@ task(
         });
         signer = await hre.ethers.getSigner(owner);
       } else if (hre.network.name === "matic") {
-        if (useLedger) signer = new LedgerSigner(hre.ethers.provider);
-        else signer = (await hre.ethers.getSigners())[0];
+        if (useLedger) {
+          const {
+            LedgerSigner,
+          } = require("../../aavegotchi-contracts/node_modules/@ethersproject/hardware-wallets");
+          signer = new LedgerSigner(hre.ethers.provider);
+        } else signer = (await hre.ethers.getSigners())[0];
       } else {
         throw Error("Incorrect network selected");
       }
@@ -144,7 +153,6 @@ task(
         const factory = (await hre.ethers.getContractFactory(
           facet.facetName
         )) as ContractFactory;
-
         const deployedFacet: Contract = await factory.deploy({
           gasPrice: gasPrice,
         });
@@ -182,21 +190,21 @@ task(
           });
         }
 
-        if (removeSelectors.length > 0) {
-          console.log("Removing selectors:", removeSelectors);
-          cut.push({
-            facetAddress: hre.ethers.constants.AddressZero,
-            action: FacetCutAction.Remove,
-            functionSelectors: removeSelectors,
-          });
-        }
-
         //Always replace the existing selectors to prevent duplications
         if (existingSelectors.length > 0) {
           cut.push({
             facetAddress: deployedFacet.address,
             action: FacetCutAction.Replace,
             functionSelectors: existingSelectors,
+          });
+        }
+
+        if (removeSelectors.length > 0) {
+          console.log("Removing selectors:", removeSelectors);
+          cut.push({
+            facetAddress: hre.ethers.constants.AddressZero,
+            action: FacetCutAction.Remove,
+            functionSelectors: removeSelectors,
           });
         }
       }
@@ -214,8 +222,8 @@ task(
         console.log("Diamond cut");
         const tx: ContractTransaction = await diamondCut.diamondCut(
           cut,
-          AddressZero,
-          "0x",
+          initAddress,
+          initCalldata,
           { gasLimit: 8000000 }
         );
         console.log("Diamond cut tx:", tx.hash);
@@ -231,16 +239,16 @@ task(
           const tx: PopulatedTransaction =
             await diamondCut.populateTransaction.diamondCut(
               cut,
-              hre.ethers.constants.AddressZero,
-              "0x",
+              initAddress,
+              initCalldata,
               { gasLimit: 800000 }
             );
-          await sendToMultisig(diamondUpgrader, signer, tx, hre.ethers);
+          // await sendToMultisig(diamondUpgrader, signer, tx, hre.ethers);
         } else {
           const tx: ContractTransaction = await diamondCut.diamondCut(
             cut,
-            AddressZero,
-            "0x",
+            initAddress,
+            initCalldata,
             { gasLimit: 800000 }
           );
 

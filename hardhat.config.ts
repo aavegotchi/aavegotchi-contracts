@@ -17,6 +17,9 @@ require("./tasks/removeXP.ts");
 require("./tasks/updateItemDimensions.ts");
 require("./tasks/updateSvgs.ts");
 require("./tasks/updateItemSideDimensions.ts");
+require("./tasks/batchDeposit.ts");
+require("./tasks/rarityPayouts");
+require("./tasks/grantXP_snapshot");
 // require("./tasks/addItemTypes.ts");
 
 // You have to export an object to set up your config
@@ -65,12 +68,12 @@ export default {
     //   accounts: [process.env.SECRET],
     //   gasPrice: 5000000000
     // },
-    // ethereum: {
-    //   url: process.env.MAINNET_URL,
-    //   accounts: [process.env.SECRET],
-    //   blockGasLimit: 20000000,
-    //   gasPrice: 2100000000
-    // }
+    ethereum: {
+      url: process.env.MAINNET_URL,
+      accounts: [process.env.SECRET],
+      blockGasLimit: 20000000,
+      gasPrice: 2100000000,
+    },
   },
   gasReporter: {
     currency: "USD",

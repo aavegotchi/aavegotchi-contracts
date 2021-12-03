@@ -21,6 +21,11 @@ export interface SideDimensions {
   dimensions: Dimensions;
 }
 
+export interface Sleeves {
+  sleeveId: BigNumberish;
+  wearableId: BigNumberish;
+}
+
 export interface ItemTypeInput {
   name: string;
   description: string;
@@ -37,6 +42,7 @@ export interface ItemTypeInput {
   height?: number;
   dimensions: Dimensions;
   sideDimensions: SideDimensions;
+  sleeves: Sleeves;
   allowedCollaterals: BigNumberish[];
   ghstPrice: BigNumberish | BigNumberish;
   traitModifiers: [

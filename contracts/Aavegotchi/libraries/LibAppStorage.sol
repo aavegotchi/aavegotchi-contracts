@@ -249,6 +249,7 @@ struct AppStorage {
     // itemTypeId => (sideview => Dimensions)
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
+    mapping(uint256 => address) categoryToTokenAddress;
     // states for buy order staking
     address ghstStaking;
     // states for buy orders
@@ -311,6 +312,14 @@ contract Modifiers {
     modifier onlyItemManager() {
         address sender = LibMeta.msgSender();
         require(s.itemManagers[sender] == true, "LibAppStorage: only an ItemManager can call this function");
+        _;
+    }
+    modifier onlyOwnerOrItemManager() {
+        address sender = LibMeta.msgSender();
+        require(
+            sender == LibDiamond.contractOwner() || s.itemManagers[sender] == true,
+            "LibAppStorage: only an Owner or ItemManager can call this function"
+        );
         _;
     }
 }

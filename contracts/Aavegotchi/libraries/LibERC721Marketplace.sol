@@ -24,7 +24,12 @@ library LibERC721Marketplace {
         }
         require(listing.seller == _owner, "Marketplace: owner not seller");
         listing.cancelled = true;
-        s.aavegotchis[listing.erc721TokenId].locked = false;
+
+        //Unlock Aavegotchis when listing is created
+        if (listing.erc721TokenAddress == address(this)) {
+            s.aavegotchis[listing.erc721TokenId].locked = false;
+        }
+
         emit ERC721ListingCancelled(_listingId, listing.category, block.number);
         removeERC721ListingItem(_listingId, _owner);
 

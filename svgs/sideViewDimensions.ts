@@ -1481,13 +1481,13 @@ export const sideViewDimensions1: SideDimensions[] = [
     itemId: 50,
     name: "Gldn Xross Robe",
     side: "left",
-    dimensions: { x: 20, y: 33, width: 24, height: 22 },
+    dimensions: { x: 20, y: 31, width: 24, height: 22 },
   },
   {
     itemId: 50,
     name: "Gldn Xross Robe",
     side: "right",
-    dimensions: { x: 20, y: 33, width: 24, height: 22 },
+    dimensions: { x: 20, y: 31, width: 24, height: 22 },
   },
   {
     itemId: 50,
@@ -1517,7 +1517,7 @@ export const sideViewDimensions1: SideDimensions[] = [
     itemId: 50,
     name: "GldnXross Robe",
     side: "left",
-    dimensions: { x: 20, y: 33, width: 6, height: 10 },
+    dimensions: { x: 20, y: 31, width: 6, height: 10 },
   },
   {
     itemId: 50,
@@ -1541,7 +1541,7 @@ export const sideViewDimensions1: SideDimensions[] = [
     itemId: 50,
     name: "GldnXross Robe",
     side: "right",
-    dimensions: { x: 20, y: 33, width: 6, height: 10 },
+    dimensions: { x: 20, y: 31, width: 6, height: 10 },
   },
   {
     itemId: 51,
@@ -2063,19 +2063,19 @@ export const sideViewDimensions1: SideDimensions[] = [
     itemId: 74,
     name: "Jaay Hao Suit",
     side: "left",
-    dimensions: { x: 20, y: 33, width: 24, height: 22 },
+    dimensions: { x: 20, y: 32, width: 24, height: 22 },
   },
   {
     itemId: 74,
     name: "Jaay Hao Suit",
     side: "right",
-    dimensions: { x: 20, y: 33, width: 24, height: 22 },
+    dimensions: { x: 20, y: 32, width: 24, height: 22 },
   },
   {
     itemId: 74,
     name: "Jaay Hao Suit",
     side: "back",
-    dimensions: { x: 11, y: 32, width: 34, height: 23 },
+    dimensions: { x: 11, y: 31, width: 34, height: 23 },
   },
   {
     itemId: 74,
@@ -2099,7 +2099,7 @@ export const sideViewDimensions1: SideDimensions[] = [
     itemId: 74,
     name: "Jaay Hao Suit",
     side: "left",
-    dimensions: { x: 20, y: 33, width: 5, height: 10 },
+    dimensions: { x: 20, y: 32, width: 5, height: 10 },
   },
   {
     itemId: 74,
@@ -2123,7 +2123,7 @@ export const sideViewDimensions1: SideDimensions[] = [
     itemId: 74,
     name: "Jaay Hao Suit",
     side: "right",
-    dimensions: { x: 20, y: 33, width: 5, height: 10 },
+    dimensions: { x: 20, y: 32, width: 5, height: 10 },
   },
   {
     itemId: 75,
@@ -4904,7 +4904,7 @@ export const sideViewDimensions6 = [
     itemId: 212,
     name: "1339 Laptop",
     side: "left",
-    dimensions: { x: 35, y: 30, width: 14, height: 14 },
+    dimensions: { x: 15, y: 30, width: 14, height: 14 },
   },
   {
     itemId: 213,
@@ -5243,7 +5243,7 @@ export const sideViewDimensions7 = [
     itemId: 223,
     name: "Hook Hand",
     side: "back",
-    dimensions: { x: 54, y: 35, width: 9, height: 9 },
+    dimensions: { x: 1, y: 35, width: 9, height: 9 },
   },
   {
     itemId: 223,

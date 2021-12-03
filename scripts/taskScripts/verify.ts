@@ -1,7 +1,7 @@
 import { run } from "hardhat";
 
 async function verify() {
-  const address = "0x8a9005F1d6c079551C7Ee90D399e27aA10Cc4732"; // deployed address
+  const address = "0x6C7CE64BB23dB2981A3769020F67d1d718167705"; // deployed address
   const facet = "DAOFacet"; // name of facet
   await run("verifyFacet", {
     apikey: process.env.POLYGON_API_KEY,
