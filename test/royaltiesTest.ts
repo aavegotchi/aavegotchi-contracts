@@ -16,6 +16,9 @@ describe("Testing Royalties", async function () {
   const royaltyAddress: string = "0x0d2026b3EE6eC71FC6746ADb6311F6d3Ba1C000B";
   const ghstWhale: string = "0xBC67F26c2b87e16e304218459D2BB60Dac5C80bC";
   const gbm = "0xa44c8e0eCAEFe668947154eE2b803Bd4e6310EFe";
+  const daoAddress = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
+  const rarityFarmingAddress = "0x27DF5C6dcd360f372e23d5e63645eC0072D0C098";
+  const pixelCraftAddress = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
 
   let erc1155MarketplaceFacet: ERC1155MarketplaceFacet;
 
@@ -58,7 +61,7 @@ describe("Testing Royalties", async function () {
       {
         erc1155TypeId: itemId,
         royaltyRecipient: royaltyAddress,
-        royaltyPercentage: 10,
+        royaltyPercentage: 999000,
       },
     ];
 
@@ -73,9 +76,14 @@ describe("Testing Royalties", async function () {
     console.log("Royalties Payout: ", royaltyInfo.payout.toString());
 
     expect(royaltyInfo.royaltyRecipient).to.equal(royaltyAddress);
-    expect(royaltyInfo.royaltyPercentage).to.equal(10);
+    expect(royaltyInfo.royaltyPercentage).to.equal(
+      royaltiesArg[0].royaltyPercentage
+    );
     expect(royaltyInfo.payout.toString()).to.equal(
-      ((parseInt(itemCost) * 10) / 100).toString()
+      (
+        (parseInt(itemCost) * royaltiesArg[0].royaltyPercentage) /
+        10000000
+      ).toString()
     );
   });
 
@@ -92,7 +100,7 @@ describe("Testing Royalties", async function () {
       {
         erc1155TypeId: itemId,
         royaltyRecipient: royaltyAddress,
-        royaltyPercentage: 10,
+        royaltyPercentage: 999000,
       },
     ];
 
@@ -101,7 +109,7 @@ describe("Testing Royalties", async function () {
     ).to.be.revertedWith("ERC1155 ID already pays royalties");
   });
 
-  it("Should NOT allow contractOwner to assign royalties with royalties percentage over 10", async function () {
+  it("Should NOT allow contractOwner to assign royalties with royalties percentage over 10%", async function () {
     const erc1155Listings = await erc1155MarketplaceFacet.getERC1155Listings(
       0,
       "listed",
@@ -114,7 +122,7 @@ describe("Testing Royalties", async function () {
       {
         erc1155TypeId: itemId,
         royaltyRecipient: royaltyAddress,
-        royaltyPercentage: 11,
+        royaltyPercentage: 1000001,
       },
     ];
 
@@ -143,7 +151,7 @@ describe("Testing Royalties", async function () {
       {
         erc1155TypeId: itemId,
         royaltyRecipient: royaltyAddress,
-        royaltyPercentage: 10,
+        royaltyPercentage: 999000,
       },
     ];
 
@@ -176,7 +184,7 @@ describe("Testing Royalties", async function () {
       {
         erc1155TypeId: itemId,
         royaltyRecipient: royaltyAddress,
-        royaltyPercentage: 10,
+        royaltyPercentage: 999000,
       },
     ];
 
@@ -234,12 +242,67 @@ describe("Testing Royalties", async function () {
       {
         erc1155TypeId: itemId,
         royaltyRecipient: royaltyAddress,
-        royaltyPercentage: 10,
+        royaltyPercentage: 999000,
       },
     ];
 
     await expect(erc1155MarketplaceFacet.setERC1155Royalty(royaltiesArg))
       .to.emit(erc1155MarketplaceFacet, "RoyaltySet")
-      .withArgs(itemId, royaltyAddress, 10);
+      .withArgs(itemId, royaltyAddress, royaltiesArg[0].royaltyPercentage);
   });
+
+  /*   it.only("Should NOT pay royalties", async function () {
+    const erc1155Listings = await erc1155MarketplaceFacet.getERC1155Listings(
+      0,
+      "listed",
+      10
+    );
+
+    let listingId: string = erc1155Listings[3].listingId.toString();
+    let itemCost: any = erc1155Listings[3].priceInWei.toString();
+
+    let erc20 = await ethers.getContractAt(
+      "GHSTFacet",
+      "0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7"
+    );
+    erc20 = (await impersonate(gbm, erc20, ethers, network)) as GHSTFacet;
+    await erc20.approve(diamondAddress, ethers.constants.MaxUint256);
+
+    let beforeBalance = await erc20.balanceOf(erc1155Listings[3].seller);
+    console.log("Royalty Recipient Before Balance: ", beforeBalance.toString());
+
+    erc1155MarketplaceFacet = await impersonate(
+      ghstWhale,
+      erc1155MarketplaceFacet,
+      ethers,
+      network
+    );
+
+    let dao = parseInt(await (await erc20.balanceOf(daoAddress)).toString());
+    let rarityFarming = parseInt(
+      await (await erc20.balanceOf(rarityFarmingAddress)).toString()
+    );
+    let pixelCraft = parseInt(
+      await (await erc20.balanceOf(pixelCraftAddress)).toString()
+    );
+
+    await erc1155MarketplaceFacet.executeERC1155Listing(listingId, 1, itemCost);
+
+    itemCost = parseInt(itemCost);
+
+    let afterBalance = await erc20.balanceOf(erc1155Listings[3].seller);
+    console.log("Royalty Recipient Before Balance: ", afterBalance.toString());
+    let daoAfter =
+      parseInt((await erc20.balanceOf(daoAddress)).toString()) - dao;
+    let rarityFarmingAfter =
+      parseInt((await erc20.balanceOf(rarityFarmingAddress)).toString()) -
+      rarityFarming;
+    let pixelCraftAfter =
+      parseInt((await erc20.balanceOf(pixelCraftAddress)).toString()) -
+      pixelCraft;
+
+    expect(parseInt(afterBalance.toString())).to.equal(
+      itemCost - (daoAfter + rarityFarmingAfter + pixelCraftAfter)
+    );
+  }); */
 });

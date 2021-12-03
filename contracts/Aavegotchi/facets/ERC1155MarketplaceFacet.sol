@@ -242,7 +242,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 cost = _quantity * _priceInWei;
         require(IERC20(s.ghstContract).balanceOf(buyer) >= cost, "ERC1155Marketplace: not enough GHST");
         {
-            uint256 royaltyPercentage = s.royalties[listing.erc1155TypeId].royaltyPercentage;
+            uint64 royaltyPercentage = s.royalties[listing.erc1155TypeId].royaltyPercentage;
             uint256 transferAmount;
 
             // handles stack too deep error
@@ -256,9 +256,9 @@ contract ERC1155MarketplaceFacet is Modifiers {
 
             //determines if royalties are to be paid for erc1155
             if (royaltyPercentage > 0) {
-                uint256 royaltyShare = (_priceInWei * royaltyPercentage) / 100;
+                uint256 royaltyShare = (_priceInWei * royaltyPercentage) / 10000000;
+                require((daoShare + pixelCraftShare + playerRewardsShare + royaltyShare) < cost, "Total shares cannot exceed cost of listing");
                 transferAmount = cost - (daoShare + pixelCraftShare + playerRewardsShare + royaltyShare);
-                require(transferAmount > 0, "Total shares are too high");
 
                 LibERC20.transferFrom(s.ghstContract, buyer, s.royalties[listing.erc1155TypeId].royaltyRecipient, royaltyShare);
             } else {
@@ -362,10 +362,11 @@ contract ERC1155MarketplaceFacet is Modifiers {
 
     ///@notice allow Doa or owner to set erc1155 to pay royalties upon sale
     ///@param _royalties an array containing identifier for erc1155, said erc1155 royalty reciepent address and erc1155 royalty percentage
+    ///@dev royaltyPercentage will be divided by 10,000,000 to calculate percentage of sell value that will be paid to royaltyRecipient (i.e. royaltyPercentage = 10 will pay 0.000001% and royaltyPercentage = 1,000,000 pays 10%)
     function setERC1155Royalty(Royalties[] calldata _royalties) external onlyOwnerOrItemManager {
         for (uint256 i; i < _royalties.length; i++) {
             require(s.royalties[_royalties[i].erc1155TypeId].royaltyPercentage == 0, "ERC1155 ID already pays royalties");
-            require(_royalties[i].royaltyPercentage == 10, "Royalty Percentage is too high");
+            require(_royalties[i].royaltyPercentage <= 1000000, "Royalty Percentage is too high");
             require(_royalties[i].royaltyRecipient != address(0), "RoyaltyRecipient: Can't transfer to 0 address");
 
             s.royalties[_royalties[i].erc1155TypeId] = _royalties[i];
@@ -379,12 +380,12 @@ contract ERC1155MarketplaceFacet is Modifiers {
         view
         returns (
             address royaltyRecipient,
-            uint8 royaltyPercentage,
+            uint64 royaltyPercentage,
             uint256 payout
         )
     {
         royaltyRecipient = s.royalties[_erc1155TypeId].royaltyRecipient;
         royaltyPercentage = s.royalties[_erc1155TypeId].royaltyPercentage;
-        payout = (_priceInWei * s.royalties[_erc1155TypeId].royaltyPercentage) / 100;
+        payout = (_priceInWei * s.royalties[_erc1155TypeId].royaltyPercentage) / 10000000;
     }
 }

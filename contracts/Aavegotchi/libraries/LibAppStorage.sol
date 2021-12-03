@@ -155,7 +155,7 @@ struct GameManager {
 struct Royalties {
     uint256 erc1155TypeId;
     address royaltyRecipient;
-    uint8 royaltyPercentage;
+    uint64 royaltyPercentage;
 }
 
 struct AppStorage {
