@@ -61,7 +61,7 @@ describe("Testing Royalties", async function () {
       {
         erc1155TypeId: itemId,
         royaltyRecipient: royaltyAddress,
-        royaltyPercentage: 999000,
+        royaltyPercentage: 9990000,
       },
     ];
 
@@ -72,7 +72,10 @@ describe("Testing Royalties", async function () {
       itemCost
     );
     console.log("Royalties Address: ", royaltyInfo.royaltyRecipient);
-    console.log("Royalties Percentage: ", royaltyInfo.royaltyPercentage);
+    console.log(
+      "Royalties Percentage: ",
+      royaltyInfo.royaltyPercentage.toString()
+    );
     console.log("Royalties Payout: ", royaltyInfo.payout.toString());
 
     expect(royaltyInfo.royaltyRecipient).to.equal(royaltyAddress);
@@ -82,7 +85,7 @@ describe("Testing Royalties", async function () {
     expect(royaltyInfo.payout.toString()).to.equal(
       (
         (parseInt(itemCost) * royaltiesArg[0].royaltyPercentage) /
-        10000000
+        100000000
       ).toString()
     );
   });
@@ -100,7 +103,7 @@ describe("Testing Royalties", async function () {
       {
         erc1155TypeId: itemId,
         royaltyRecipient: royaltyAddress,
-        royaltyPercentage: 999000,
+        royaltyPercentage: 9990000,
       },
     ];
 
@@ -122,7 +125,7 @@ describe("Testing Royalties", async function () {
       {
         erc1155TypeId: itemId,
         royaltyRecipient: royaltyAddress,
-        royaltyPercentage: 1000001,
+        royaltyPercentage: 10000001,
       },
     ];
 
@@ -151,7 +154,7 @@ describe("Testing Royalties", async function () {
       {
         erc1155TypeId: itemId,
         royaltyRecipient: royaltyAddress,
-        royaltyPercentage: 999000,
+        royaltyPercentage: 9990000,
       },
     ];
 
@@ -184,7 +187,7 @@ describe("Testing Royalties", async function () {
       {
         erc1155TypeId: itemId,
         royaltyRecipient: royaltyAddress,
-        royaltyPercentage: 999000,
+        royaltyPercentage: 9990000,
       },
     ];
 
@@ -242,7 +245,7 @@ describe("Testing Royalties", async function () {
       {
         erc1155TypeId: itemId,
         royaltyRecipient: royaltyAddress,
-        royaltyPercentage: 999000,
+        royaltyPercentage: 9990000,
       },
     ];
 
