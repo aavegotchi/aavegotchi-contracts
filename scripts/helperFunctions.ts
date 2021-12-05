@@ -60,6 +60,9 @@ export function getSelector(func: string, ethers: any) {
 
 export const maticDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
 
+export const maticDiamondUpgrader =
+  "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
+
 export const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 
 export const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";

@@ -12,6 +12,10 @@ contract EscrowFacet is Modifiers {
     event Erc20Deposited(uint256 indexed _tokenId, address indexed _erc20Contract, address indexed _from, address _to, uint256 _depositAmount);
     event TransferEscrow(uint256 indexed _tokenId, address indexed _erc20Contract, address _from, address indexed _to, uint256 _transferAmount);
 
+    function gotchiEscrow(uint256 _tokenId) public view returns (address) {
+        return s.aavegotchis[_tokenId].escrow;
+    }
+
     ///@notice Allow the deposit of an ERC20 token to the escrow contract of a claimed aavegotchi
     ///@dev Will throw if token being deposited is same as collateral token for the aavegotchi
     ///@param _tokenId The identifier of the NFT receiving the ERC20 token
