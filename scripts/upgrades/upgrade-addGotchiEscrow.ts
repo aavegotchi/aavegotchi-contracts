@@ -1,9 +1,10 @@
-import { run } from "hardhat";
+import { ethers, run } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
+import { EscrowFacet } from "../../typechain";
 import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
 
 export async function upgrade() {
@@ -28,6 +29,13 @@ export async function upgrade() {
   };
 
   await run("deployUpgrade", args);
+
+  const escrowFacet = (await ethers.getContractAt(
+    "EscrowFacet",
+    maticDiamondAddress
+  )) as EscrowFacet;
+  const escrow = await escrowFacet.gotchiEscrow("1474");
+  console.log("escrow:", escrow);
 }
 
 if (require.main === module) {
