@@ -3,7 +3,11 @@ import { BigNumberish } from "@ethersproject/bignumber";
 import { BytesLike } from "@ethersproject/bytes";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { SvgFacet } from "../typechain";
-import { gasPrice } from "./helperFunctions";
+import {
+  gasPrice,
+  itemManager,
+  maticRealmDiamondAddress,
+} from "./helperFunctions";
 
 import { wearablesSvgs as front } from "../svgs/wearables";
 import {
@@ -15,9 +19,10 @@ import {
   wearablesBackSleeveSvgs as backSleeve,
 } from "../svgs/wearables-sides";
 import { UpdateSvgsTaskArgs } from "../tasks/updateSvgs";
-
+import { AddItemTypesTaskArgs } from "../tasks/addBaadgeSvgs";
+import { AirdropBaadgeTaskArgs } from "../tasks/baadgeAirdrop";
 const fs = require("fs");
-import { SleeveObject } from "./itemTypeHelpers";
+import { SleeveObject, ItemTypeInputNew } from "./itemTypeHelpers";
 
 export interface SvgTypesAndSizes {
   svgType: BytesLike;
@@ -310,6 +315,48 @@ export async function updateSvgTaskForSideSleeves(_itemIds: number[]) {
       };
       taskArray.push(taskArgsSides);
     }
+  }
+  return taskArray;
+}
+
+export async function uploadSvgTaskForBaadges(
+  itemTypeInput: ItemTypeInputNew[],
+  fileName: string
+) {
+  let taskArray = [];
+
+  for (let index = 0; index < itemTypeInput.length; index++) {
+    if (itemTypeInput[index].canBeTransferred) {
+      let taskArgs: AddItemTypesTaskArgs = {
+        itemManager: itemManager,
+        diamondAddress: maticRealmDiamondAddress,
+        itemFile: fileName,
+        svgFile: itemTypeInput[index].name,
+        svgIds: [itemTypeInput[index].svgId].join(","),
+        uploadItemTypes: true,
+        sendToItemManager: true,
+      };
+      taskArray.push(taskArgs);
+    } else {
+      console.log(itemTypeInput[index].name + " is NOT transferable");
+    }
+  }
+  return taskArray;
+}
+
+export async function airdropTaskForBaadges(
+  itemTypeInput: ItemTypeInputNew[],
+  awardsArray: number[]
+) {
+  let taskArray = [];
+
+  for (let index = 0; index < itemTypeInput.length; index++) {
+    let taskArgs: AirdropBaadgeTaskArgs = {
+      maxProcess: [itemTypeInput[index].maxQuantity].join(","),
+      badgeIds: [itemTypeInput[index].svgId].join(","),
+      awardsArray: [awardsArray].join("***"),
+    };
+    taskArray.push(taskArgs);
   }
   return taskArray;
 }
