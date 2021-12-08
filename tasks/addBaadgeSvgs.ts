@@ -46,12 +46,11 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
         itemTypes: currentItemTypes,
       } = require(`../data/itemTypes/${itemFile}.ts`);
 
-      const { getWearables } = require(`../svgs/${svgFile}.ts`);
-      const { wearables } = getWearables();
+      const { badgeSvgs } = require(`../svgs/${svgFile}.ts`);
 
       const itemTypesArray: ItemTypeOutput[] = getItemTypes(currentItemTypes);
 
-      const svgsArray: string[] = wearables;
+      const svgsArray: string[] = badgeSvgs;
 
       let signer: Signer;
 
