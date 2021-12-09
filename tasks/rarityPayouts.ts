@@ -8,9 +8,6 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { maticDiamondAddress, gasPrice } from "../scripts/helperFunctions";
 import { LeaderboardDataName, LeaderboardType } from "../types";
 import {
-  _sortByBRS,
-  _sortByKinship,
-  _sortByExperience,
   stripGotchis,
   confirmCorrectness,
   fetchAndSortLeaderboard,
@@ -150,6 +147,7 @@ task("rarityPayout")
           await fetchAndSortLeaderboard(
             element,
             taskArgs.blockNumber,
+            Number(taskArgs.tieBreakerIndex),
             extraFilter
           )
         );
@@ -158,6 +156,8 @@ task("rarityPayout")
         ] as LeaderboardDataName;
 
         const correct = confirmCorrectness(result, data[dataName]);
+
+        console.log("correct:", correct);
 
         if (correct !== 5000) {
           throw new Error("Results do not line up with subgraph");

@@ -3,7 +3,6 @@ import request from "graphql-request";
 
 import { wearableSetArrays } from "./wearableSets";
 import { maticGraphUrl } from "./query/queryAavegotchis";
-const tiebreakerIndex = 2;
 const totalResults: number = 6000;
 
 export function findSets(equipped: number[]) {
@@ -56,49 +55,6 @@ export function calculateRarityScore(traitArray: number[]) {
   return energy + aggressiveness + spookiness + brainSize + eyeShape + eyeColor;
 }
 
-export function _sortByBRS(a: LeaderboardAavegotchi, b: LeaderboardAavegotchi) {
-  if (a.withSetsRarityScore == b.withSetsRarityScore) {
-    return Number(b.kinship) - Number(a.kinship);
-  }
-  return Number(b.withSetsRarityScore) - Number(a.withSetsRarityScore);
-}
-
-export function _sortByKinship(
-  a: LeaderboardAavegotchi,
-  b: LeaderboardAavegotchi
-) {
-  if (a.kinship === b.kinship) {
-    //Kinship and XP are the same
-    if (a.experience === b.experience) {
-      return (
-        _distanceFrom50(Number(_aavegotchiNumericTraits(b)[tiebreakerIndex])) -
-        _distanceFrom50(Number(_aavegotchiNumericTraits(a)[tiebreakerIndex]))
-      );
-    } else return Number(b.experience) - Number(a.experience);
-  }
-  return Number(b.kinship) - Number(a.kinship);
-}
-
-export function _sortByExperience(
-  a: LeaderboardAavegotchi,
-  b: LeaderboardAavegotchi
-) {
-  if (a.experience === b.experience) {
-    if (
-      _distanceFrom50(_aavegotchiNumericTraits(a)[tiebreakerIndex]) ===
-      _distanceFrom50(_aavegotchiNumericTraits(b)[tiebreakerIndex])
-    ) {
-      return Number(b.kinship) - Number(a.kinship);
-    } else {
-      //Kinship and XP are the same
-      return (
-        _distanceFrom50(Number(_aavegotchiNumericTraits(b)[tiebreakerIndex])) -
-        _distanceFrom50(Number(_aavegotchiNumericTraits(a)[tiebreakerIndex]))
-      );
-    }
-  } else return Number(b.experience) - Number(a.experience);
-}
-
 function returnRarity(number: number) {
   if (number < 50) return 100 - number;
   else return number + 1;
@@ -108,9 +64,11 @@ function _distanceFrom50(trait: number) {
 }
 
 export function _aavegotchiNumericTraits(aavegotchi: LeaderboardAavegotchi) {
-  const val = aavegotchi.withSetsNumericTraits?.reduce((total, val) => {
-    return total + val;
-  });
+  const val = aavegotchi.withSetsNumericTraits?.reduce(
+    (total: number, val: number) => {
+      return total + val;
+    }
+  );
 
   if (val === 0) return aavegotchi.modifiedNumericTraits;
   if (aavegotchi.withSetsNumericTraits) return aavegotchi.withSetsNumericTraits;
@@ -192,6 +150,7 @@ export function leaderboardQuery(
 export async function fetchAndSortLeaderboard(
   category: "withSetsRarityScore" | "kinship" | "experience",
   blockNumber: string,
+  tieBreakerIndex: number,
   filter?: string
 ) {
   let eachFinalResult: LeaderboardAavegotchi[] = [];
@@ -258,6 +217,50 @@ export async function fetchAndSortLeaderboard(
     // }
     return leaderboardGotchi;
   });
+
+  function _sortByBRS(a: LeaderboardAavegotchi, b: LeaderboardAavegotchi) {
+    if (a.withSetsRarityScore == b.withSetsRarityScore) {
+      return Number(b.kinship) - Number(a.kinship);
+    }
+    return Number(b.withSetsRarityScore) - Number(a.withSetsRarityScore);
+  }
+
+  function _sortByKinship(a: LeaderboardAavegotchi, b: LeaderboardAavegotchi) {
+    if (a.kinship === b.kinship) {
+      //Kinship and XP are the same
+      if (a.experience === b.experience) {
+        return (
+          _distanceFrom50(
+            Number(_aavegotchiNumericTraits(b)[tieBreakerIndex])
+          ) -
+          _distanceFrom50(Number(_aavegotchiNumericTraits(a)[tieBreakerIndex]))
+        );
+      } else return Number(b.experience) - Number(a.experience);
+    }
+    return Number(b.kinship) - Number(a.kinship);
+  }
+
+  function _sortByExperience(
+    a: LeaderboardAavegotchi,
+    b: LeaderboardAavegotchi
+  ) {
+    if (a.experience === b.experience) {
+      if (
+        _distanceFrom50(_aavegotchiNumericTraits(a)[tieBreakerIndex]) ===
+        _distanceFrom50(_aavegotchiNumericTraits(b)[tieBreakerIndex])
+      ) {
+        return Number(b.kinship) - Number(a.kinship);
+      } else {
+        //Kinship and XP are the same
+        return (
+          _distanceFrom50(
+            Number(_aavegotchiNumericTraits(b)[tieBreakerIndex])
+          ) -
+          _distanceFrom50(Number(_aavegotchiNumericTraits(a)[tieBreakerIndex]))
+        );
+      }
+    } else return Number(b.experience) - Number(a.experience);
+  }
 
   const sortingOptions: {
     [k in LeaderboardType]: (
