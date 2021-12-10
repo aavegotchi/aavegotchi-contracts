@@ -37,9 +37,9 @@ task(
       let batchIds: any[] = [];
       let batchValues: any[] = [];
 
-      let tokenIdsNum = 0;
+      let amountDropped = 0;
 
-      while (Number(maxProcess) < tokenIdsNum + 1) {
+      while (Number(maxProcess) >= amountDropped) {
         for (let index = 0; index < awardsArray.length; index++) {
           for (let index = 0; index < badgeIds.length; index++) {
             _ids.push(Number(badgeIds[index]));
@@ -49,7 +49,7 @@ task(
           batchIds.push(_ids);
           batchValues.push(_values);
         }
-        tokenIdsNum += 1;
+        amountDropped += 1;
       }
 
       const signer: Signer = await getDiamondSigner(hre, gameManager, false);
