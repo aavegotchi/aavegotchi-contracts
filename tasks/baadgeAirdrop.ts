@@ -39,7 +39,7 @@ task(
 
       let amountDropped = 0;
 
-      while (Number(maxProcess) >= amountDropped) {
+      if (Number(maxProcess) >= amountDropped) {
         for (let index = 0; index < awardsArray.length; index++) {
           for (let index = 0; index < badgeIds.length; index++) {
             _ids.push(Number(badgeIds[index]));
