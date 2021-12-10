@@ -6,7 +6,6 @@ import {
   gameManager,
   getDiamondSigner,
 } from "../scripts/helperFunctions";
-import { BaadgeAirdrop } from "../scripts/itemTypeHelpers";
 
 export interface AirdropBaadgeTaskArgs {
   maxProcess: string;
@@ -32,24 +31,28 @@ task(
         .split(",")
         .filter((str) => str.length > 0);
 
+      const finalRewards: any = {};
       let tokenIds: number[] = [];
       let _ids: any[] = [];
       let _values: any[] = [];
 
-      for (let index = 0; index < awardsArray.length; index++) {
-        let finalRewards: any = {};
+      awardsArray.forEach((winnersArray, index) => {
+        console.log("winners array:", winnersArray);
+        let badgeId = badgeIds[index];
+        for (let index = 0; index < winnersArray.length; index++) {
+          /* finalRewards[winnersArray[index]] = [badgeId]; */
+          finalRewards.recipients = winnersArray[index];
+          finalRewards.badgeId = [badgeId];
+          finalRewards.value = 1;
+        }
+      });
 
-        finalRewards.recipients = awardsArray[index];
-        finalRewards.badgeId = badgeIds[index];
-        finalRewards.value = 1;
-
-        Object.keys(finalRewards).forEach((key) => {
-          let values = finalRewards[key];
-          tokenIds.push(Number(finalRewards.recipients));
-          _ids.push(Number(finalRewards.badgeId));
-          _values.push(Array(values.length).fill(1));
-        });
-      }
+      Object.keys(finalRewards).forEach((key) => {
+        let values = finalRewards[key];
+        tokenIds.push(Number(key));
+        _ids.push(Number(values));
+        _values.push(Array(values.length).fill(1));
+      });
 
       const txData = [];
 
