@@ -15,8 +15,6 @@ export async function upgrade() {
     {
       facetName: "AavegotchiLendingFacet",
       addSelectors: [
-        "function createWhitelist(address[] memory _whitelistAddresses) external",
-        "function updateWhitelist(uint256 _whitelistId, address[] memory _whitelistAddresses) external",
         "function getAavegotchiRentalInfo(uint256 _rentalId) external view",
         "function getAavegotchiRental(uint256 _rentalId) external view",
         "function getAavegotchiRentalFromToken(uint256 _erc721TokenId) external view",
@@ -25,6 +23,14 @@ export async function upgrade() {
         "function cancelAavegotchiRental(uint256 _rentalId) external",
         "function agreeAavegotchiRental(uint256 _rentalId, uint256 _erc721TokenId, uint256 _amountPerDay, uint256 _period, uint256[3] memory _revenueSplit) external",
         "function claimAavegotchiRental(uint256 _rentalId) external",
+      ],
+      removeSelectors: [],
+    },
+    {
+      facetName: "WhitelistFacet",
+      addSelectors: [
+        "function createWhitelist(address[] memory _whitelistAddresses) external",
+        "function updateWhitelist(uint256 _whitelistId, address[] memory _whitelistAddresses) external",
       ],
       removeSelectors: [],
     },

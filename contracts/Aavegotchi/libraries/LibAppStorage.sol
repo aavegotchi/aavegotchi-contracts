@@ -262,7 +262,7 @@ struct AppStorage {
     mapping(uint256 => uint256) aavegotchiRentalHead; // aavegotchiId => rentalId
     mapping(address => uint256[]) lentTokenIds; // address => lent token ids
     mapping(address => mapping(uint256 => uint256)) lentTokenIdIndexes; // address => lent token id => index
-    address[] revenueTokens; // GHST, FUD, FOMO, ALPHA, KEK
+    address[] revenueTokens; // FUD, FOMO, ALPHA, KEK, then GHST
     mapping(address => bool) revenueTokenIndexes;
     uint256 nextWhitelistId;
     mapping(uint256 => address[]) whitelists; // whitelistId => whitelistAddresses
