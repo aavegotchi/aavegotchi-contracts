@@ -253,6 +253,17 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
+  describe("Testing isAavegotchiLent before and after aavegotchi rental added", async function () {
+    it("Should return false if aavegotchi is not lent", async function() {
+      const status = await lendingFacetWithOwner.isAavegotchiLent(lockedAavegotchiId);
+      expect(status).to.equal(false);
+    });
+    it("Should return true if aavegotchi rental is not agreed yet", async function() {
+      const status = await lendingFacetWithOwner.isAavegotchiLent(unlockedAavegotchiId);
+      expect(status).to.equal(false);
+    });
+  })
+
   describe("Testing cancelAavegotchiRental", async function () {
     it("Should revert when try to cancel rental with wrong id", async function () {
       await expect(lendingFacetWithOwner.cancelAavegotchiRental(secondRentalId.add(10)))
@@ -293,6 +304,10 @@ describe("Testing Aavegotchi Lending", async function () {
       await (await lendingFacetWithOwner.cancelAavegotchiRentalByToken(unlockedAavegotchiId)).wait();
       await expect(lendingFacetWithOwner.getAavegotchiRentalFromToken(unlockedAavegotchiId))
         .to.be.revertedWith("AavegotchiLending: rental doesn't exist");
+    });
+    it("isAavegotchiLent function should return true if aavegotchi rental is canceld", async function() {
+      const status = await lendingFacetWithOwner.isAavegotchiLent(unlockedAavegotchiId);
+      expect(status).to.equal(false);
     });
   });
 
@@ -368,6 +383,10 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert when try to agree agreed rental", async function () {
       await expect(lendingFacetWithRenter.agreeAavegotchiRental(fourthRentalId, unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver))
         .to.be.revertedWith("AavegotchiLending: rental already agreed");
+    });
+    it("isAavegotchiLent function should return true if aavegotchi rental is agreed", async function() {
+      const status = await lendingFacetWithOwner.isAavegotchiLent(unlockedAavegotchiId);
+      expect(status).to.equal(true);
     });
   });
 
@@ -477,6 +496,10 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert when try to claim completed rental", async function () {
       await expect(lendingFacetWithRenter.claimAavegotchiRental(fourthRentalId))
         .to.be.revertedWith("AavegotchiLending: rental already completed");
+    });
+    it("isAavegotchiLent function should return false if aavegotchi rental is completed", async function() {
+      const status = await lendingFacetWithOwner.isAavegotchiLent(unlockedAavegotchiId);
+      expect(status).to.equal(false);
     });
   });
 });

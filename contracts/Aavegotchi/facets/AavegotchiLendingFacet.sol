@@ -66,6 +66,14 @@ contract AavegotchiLendingFacet is Modifiers {
         rental_ = s.aavegotchiRentals[rentalId];
     }
 
+    function isAavegotchiLent(uint256 _erc721TokenId) external view returns (bool) {
+        uint256 rentalId = s.aavegotchiRentalHead[_erc721TokenId];
+        if (rentalId == 0) return false;
+        AavegotchiRental storage rental_ = s.aavegotchiRentals[rentalId];
+        if (rental_.timeCreated == 0 || rental_.timeAgreed == 0) return false;
+        return rental_.completed == false;
+    }
+
     ///@notice Allow an original aavegotchi owner to add request for rental
     ///@dev If the rental request exist, cancel it and replaces it with the new one
     ///@dev If the rental is active, unable to cancel
