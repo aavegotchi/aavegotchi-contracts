@@ -265,6 +265,11 @@ export const wearablesRightSvgs = [
   261,
   wearable("262_RadarEyesRight"),
   wearable("263_SignalHeadsetRight"),
+
+  //duplicates for missing sleeves
+  bodyWearableRight("264_MarineJacket"), // duplicate of id 8, needed because of missing sleeves on front view
+  bodyWearableRight("265_ThaaveSuit"), // duplicate of id 25, needed because of missing sleeves on front view
+  bodyWearableRight("266_TrackSuit"), // duplicate of id 125, needed because of missing sleeves on front view
 ];
 
 export const wearablesBackSvgs = [
@@ -532,6 +537,11 @@ export const wearablesBackSvgs = [
   wearable("261_AantenaBotBack"),
   262,
   wearable("263_SignalHeadsetBack"),
+
+  //duplicates for missing sleeves
+  bodyWearable("264_MarineJacket"), // duplicate of id 8, needed because of missing sleeves on front view
+  wearable("265_ThaaveSuitBack"), // duplicate of id 25, needed because of missing sleeves on front view
+  bodyWearable("266_TrackSuit"), // duplicate of id 125, needed because of missing sleeves on front view
 ];
 
 export const wearablesLeftSvgs = [
@@ -799,6 +809,10 @@ export const wearablesLeftSvgs = [
   wearable("261_AantenaBotLeft"),
   wearable("262_RadarEyesLeft"),
   wearable("263_SignalHeadsetLeft"),
+
+  bodyWearableLeft("264_MarineJacket"), // duplicate of id 8, needed because of missing sleeves on front view
+  bodyWearableLeft("265_ThaaveSuit"), // duplicate of id 25, needed because of missing sleeves on front view
+  bodyWearableLeft("266_TrackSuit"), // duplicate of id 125, needed because of missing sleeves on front view
 ];
 
 export const wearablesLeftSleeveSvgs = [
@@ -807,7 +821,7 @@ export const wearablesLeftSleeveSvgs = [
   // '2_CamoPantsLeft', // body but doesn't have sleeves
   // '3_MK2GrenadeLeft',
   // '4_SnowCamoHatLeft',
-  // '5_SnowCamoPantsLeft', // body but no sleeves
+  // "5_SnowCamoPantsLeft", // body but no sleeves
   // '6_M67GrenadeLeft',
   // '7_MarineCapLeft',
   sleeveWearableLeft("8_MarineJacket"), // sleeveWearableLeft("8_MarineJacket"),
@@ -827,7 +841,7 @@ export const wearablesLeftSleeveSvgs = [
   sleeveWearableLeft("22_CaptainAaveSuit"), // sleeveWearableLeft("22_CaptainAaveSuit"),
   // '23_CaptainAaveShieldLeft',
   // '24_ThaaveHelmetLeft',
-  // sleeveWearableLeft('25_ThaaveSuit'), // sleeveWearableLeft("25_ThaaveSuit"),
+  sleeveWearableLeft("25_ThaaveSuit"),
   // '26_ThaaveHammerLeft',
   // '27_MarcHairLeft',
   sleeveWearableLeft("28_MarcOutfit"), // sleeveWearableLeft("28_MarcOutfit"),
@@ -927,7 +941,7 @@ export const wearablesLeftSleeveSvgs = [
   // '122_MilkshakeLeft',
   // '123_AppleJuiceLeft',
   // '124_BeerHelmetLeft',
-  // sleeveWearableLeft('125_TrackSuit'),
+  sleeveWearableLeft("125_TrackSuit"),
   // '126_KinshipPotionLeft',
   // '127_GreaterKinshipPotionLeft',
   // '128_XPPotionLeft',
@@ -987,6 +1001,10 @@ export const wearablesLeftSleeveSvgs = [
   sleeveWearableLeft("253_AastronautSuit"),
   sleeveWearableLeft("256_LilBubbleSpaceSuit"),
   sleeveWearableLeft("258_Hanfu"),
+
+  sleeveWearableLeft("264_MarineJacket"),
+  sleeveWearableLeft("265_ThaaveSuit"),
+  sleeveWearableLeft("266_TrackSuit"),
 ];
 
 export const wearablesRightSleeveSvgs = [
@@ -995,7 +1013,7 @@ export const wearablesRightSleeveSvgs = [
   // '2_CamoPantsRight', // body but doesn't have sleeves
   // '3_MK2GrenadeRight',
   // '4_SnowCamoHatRight',
-  // '5_SnowCamoPantsRight', // body but no sleeves
+  // "5_SnowCamoPantsRight", // body but no sleeves
   // '6_M67GrenadeRight',
   // '7_MarineCapRight',
   sleeveWearableRight("8_MarineJacket"), // sleeveWearableRight("8_MarineJacket"),
@@ -1015,7 +1033,7 @@ export const wearablesRightSleeveSvgs = [
   sleeveWearableRight("22_CaptainAaveSuit"), // sleeveWearableRight("22_CaptainAaveSuit"),
   // '23_CaptainAaveShieldRight',
   // '24_ThaaveHelmetRight',
-  // sleeveWearableRight('25_ThaaveSuit'), // sleeveWearableRight("25_ThaaveSuit"),
+  sleeveWearableRight("25_ThaaveSuit"),
   // '26_ThaaveHammerRight',
   // '27_MarcHairRight',
   sleeveWearableRight("28_MarcOutfit"), // sleeveWearableRight("28_MarcOutfit"),
@@ -1115,7 +1133,7 @@ export const wearablesRightSleeveSvgs = [
   // '122_MilkshakeRight',
   // '123_AppleJuiceRight',
   // '124_BeerHelmetRight',
-  // sleeveWearableRight('125_TrackSuit'),
+  sleeveWearableRight("125_TrackSuit"),
   // '126_KinshipPotionRight',
   // '127_GreaterKinshipPotionRight',
   // '128_XPPotionRight',
@@ -1175,6 +1193,10 @@ export const wearablesRightSleeveSvgs = [
   sleeveWearableRight("253_AastronautSuit"),
   sleeveWearableRight("256_LilBubbleSpaceSuit"),
   sleeveWearableRight("258_Hanfu"),
+
+  sleeveWearableRight("264_MarineJacket"),
+  sleeveWearableRight("265_ThaaveSuit"),
+  sleeveWearableRight("266_TrackSuit"),
 ];
 
 export const wearablesBackSleeveSvgs = [
@@ -1183,7 +1205,7 @@ export const wearablesBackSleeveSvgs = [
   // '2_CamoPantsRight', // body but doesn't have sleeves
   // '3_MK2GrenadeRight',
   // '4_SnowCamoHatRight',
-  // '5_SnowCamoPantsRight', // body but no sleeves
+  // "5_SnowCamoPantsRight", // body but no sleeves
   // '6_M67GrenadeRight',
   // '7_MarineCapRight',
   sleeveWearableRight("8_MarineJacket"), // sleeveWearableRight("8_MarineJacket"),
@@ -1203,7 +1225,7 @@ export const wearablesBackSleeveSvgs = [
   sleeveWearableRight("22_CaptainAaveSuit"), // sleeveWearableRight("22_CaptainAaveSuit"),
   // '23_CaptainAaveShieldRight',
   // '24_ThaaveHelmetRight',
-  // '25_ThaaveSuitRight', // sleeveWearableRight("25_ThaaveSuit"),
+  sleeveWearableRight("25_ThaaveSuit"),
   // '26_ThaaveHammerRight',
   // '27_MarcHairRight',
   sleeveWearableRight("28_MarcOutfit"), // sleeveWearableRight("28_MarcOutfit"),
@@ -1303,7 +1325,7 @@ export const wearablesBackSleeveSvgs = [
   // '122_MilkshakeRight',
   // '123_AppleJuiceRight',
   // '124_BeerHelmetRight',
-  // sleeveWearableRight('125_TrackSuit'),
+  sleeveWearableRight("125_TrackSuit"),
   // '126_KinshipPotionRight',
   // '127_GreaterKinshipPotionRight',
   // '128_XPPotionRight',
@@ -1363,6 +1385,10 @@ export const wearablesBackSleeveSvgs = [
   sleeveWearableRight("253_AastronautSuit"),
   sleeveWearableRight("256_LilBubbleSpaceSuit"),
   sleeveWearableRight("258_Hanfu"),
+
+  sleeveWearableRight("264_MarineJacket"),
+  sleeveWearableRight("265_ThaaveSuit"),
+  sleeveWearableRight("266_TrackSuit"),
 ];
 
 function stripSvg(svg: string) {

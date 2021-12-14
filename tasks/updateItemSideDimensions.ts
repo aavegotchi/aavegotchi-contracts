@@ -1,6 +1,7 @@
 import { task } from "hardhat/config";
 import { Signer } from "@ethersproject/abstract-signer";
 import {
+  gasPrice,
   getDiamondSigner,
   itemManager,
   maticDiamondAddress,
@@ -87,7 +88,9 @@ task(
         signer
       )) as SvgViewsFacet;
 
-      let tx = await svgViewsFacet.setSideViewDimensions(sideDimensions);
+      let tx = await svgViewsFacet.setSideViewDimensions(sideDimensions, {
+        gasPrice: gasPrice,
+      });
       console.log("tx hash:", tx.hash);
       let receipt = await tx.wait();
       console.log("New Dimensions set!");

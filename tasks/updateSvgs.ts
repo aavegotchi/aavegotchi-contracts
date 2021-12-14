@@ -43,7 +43,7 @@ task("updateSvgs", "Updates SVGs, given svgType and a list of IDs")
       for (let index = 0; index < svgIDs.length; index++) {
         const svgId = svgIDs[index];
 
-        console.log("Updating SVG for id: ", svgId);
+        /* console.log("Updating SVG for id: ", svgId); */
 
         try {
           await uploadOrUpdateSvg(

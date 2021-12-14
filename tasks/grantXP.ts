@@ -5,8 +5,12 @@ import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
-import { UserGotchisOwned } from "../types";
-import { getSubgraphGotchis } from "../scripts/query/queryAavegotchis";
+import { GotchisOwned, UserGotchisOwned } from "../types";
+import {
+  getEthSubgraphGotchis,
+  getSubgraphGotchis,
+  queryAavegotchis,
+} from "../scripts/query/queryAavegotchis";
 
 interface TaskArgs {
   filename: string;
@@ -27,7 +31,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     const xpAmount: number = Number(taskArgs.xpAmount);
     const batchSize: number = Number(taskArgs.batchSize);
 
-    const { addresses } = require(`../data/airdrops/${filename}.ts`);
+    let { addresses } = require(`../data/airdrops/${filename}.ts`);
 
     const diamondAddress = maticDiamondAddress;
     const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
@@ -41,10 +45,36 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       });
       signer = await hre.ethers.provider.getSigner(gameManager);
     } else if (hre.network.name === "matic") {
-      signer = new LedgerSigner(hre.ethers.provider, "hid", "m/44'/60'/2'/0/0");
+      const accounts = await hre.ethers.getSigners();
+      signer = accounts[0]; /* new LedgerSigner(
+        hre.ethers.provider,
+        "hid",
+        "m/44'/60'/2'/0/0"
+      ); */
     } else {
       throw Error("Incorrect network selected");
     }
+
+    const finalAddresses: string[] = [];
+
+    for (let index = 0; index < addresses.length; index++) {
+      let address = addresses[index];
+      if (address.includes(".eth")) {
+        let ethSigner = new hre.ethers.providers.JsonRpcProvider(
+          process.env.MAINNET_URL
+        );
+
+        const resolved = await ethSigner.resolveName(address);
+        address = resolved;
+      }
+
+      if (await hre.ethers.utils.isAddress(address)) {
+        finalAddresses.push(address);
+      }
+    }
+
+    //Set new addresses after replacing .eth addresses with resolved names
+    addresses = finalAddresses;
 
     //Get Polygon
     const polygonUsers: UserGotchisOwned[] = await getSubgraphGotchis(
@@ -59,7 +89,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     );
 
     //Get mainnet
-    const mainnetUsers: UserGotchisOwned[] = await getSubgraphGotchis(
+    const mainnetUsers: UserGotchisOwned[] = await getEthSubgraphGotchis(
       addresses,
       "eth"
     );
@@ -74,22 +104,49 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     const tokenIds: string[] = [];
 
-    //Extract token ids
+    //Handle Polygon gotchis
     polygonUsers.forEach((user) => {
       user.gotchisOwned.forEach((gotchi) => {
-        if (tokenIds.includes(gotchi.id))
-          throw new Error(`Duplicate token ID: ${gotchi.id}`);
-        else tokenIds.push(gotchi.id);
+        if (gotchi.status === "3") {
+          if (tokenIds.includes(gotchi.id))
+            throw new Error(`Duplicate token ID: ${gotchi.id}`);
+          else tokenIds.push(gotchi.id);
+        }
       });
     });
 
+    //Handle mainnet Gotchis
+    let mainnetTokenIds: string[] = [];
+
+    //first get all gotchis
     mainnetUsers.forEach((user) => {
       user.gotchisOwned.forEach((gotchi) => {
         if (tokenIds.includes(gotchi.id))
           throw new Error(`Duplicate token ID: ${gotchi.id}`);
-        else tokenIds.push(gotchi.id);
+        else mainnetTokenIds.push(gotchi.id);
       });
     });
+
+    //then get gotchi object on polygon for those gotchi ids to ensure they are gotchis (not portals)
+    const finalMainnetIds = await queryAavegotchis(mainnetTokenIds);
+    finalMainnetIds.aavegotchis.forEach((gotchi: GotchisOwned) => {
+      if (gotchi.status === "3") {
+        if (tokenIds.includes(gotchi.id))
+          throw new Error(`Duplicate token ID: ${gotchi.id}`);
+        else tokenIds.push(gotchi.id);
+      }
+    });
+
+    //final check to prevent duplicate token ids
+    const checkedIds: string[] = [];
+    tokenIds.forEach((id) => {
+      if (checkedIds.includes(id)) {
+        throw new Error("Duplicate id");
+      }
+      checkedIds.push(id);
+    });
+
+    console.log("final token ids:", tokenIds);
 
     //Check how many unused addresses there are (addresses that voted, but do not have Aavegotchis)
     const unusedAddresses: string[] = [];
@@ -102,7 +159,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     });
 
     console.log(
-      `There were ${unusedAddresses.length} voting addresses without Gotchis.`
+      `There were ${unusedAddresses.length} addresses without Gotchis.`
     );
 
     const batches = Math.ceil(tokenIds.length / batchSize);

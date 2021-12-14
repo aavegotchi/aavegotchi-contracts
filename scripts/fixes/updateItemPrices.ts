@@ -18,6 +18,10 @@ async function main() {
     2000, 2000, 2000, 100, 2000, 2000, 2000, 2000,
   ];
 
+  const ghstPricesFinal = ghstPrice.map((price) =>
+    ethers.utils.parseEther(price.toString())
+  );
+
   let signer: Signer;
 
   let owner = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
@@ -40,7 +44,7 @@ async function main() {
     signer
   )) as DAOFacet;
 
-  const tx = await daoFacet.batchUpdateItemsPrice(itemIds, ghstPrice);
+  const tx = await daoFacet.batchUpdateItemsPrice(itemIds, ghstPricesFinal);
   console.log("tx hash:", tx.hash);
   await tx.wait();
   console.log("Updated item prices");
