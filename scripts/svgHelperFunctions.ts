@@ -23,7 +23,7 @@ import { UpdateSvgsTaskArgs } from "../tasks/updateSvgs";
 import { AddBaadgeTaskArgs } from "../tasks/addBaadgeSvgs";
 import { AirdropBaadgeTaskArgs } from "../tasks/baadgeAirdrop";
 const fs = require("fs");
-import { SleeveObject, ItemTypeOutput } from "./itemTypeHelpers";
+import { SleeveObject, ItemTypeInputNew } from "./itemTypeHelpers";
 
 export interface SvgTypesAndSizes {
   svgType: BytesLike;
@@ -321,7 +321,7 @@ export async function updateSvgTaskForSideSleeves(_itemIds: number[]) {
 }
 
 export async function uploadSvgTaskForBaadges(
-  itemTypeInput: ItemTypeOutput[],
+  itemTypeInput: ItemTypeInputNew[],
   fileName: string,
   svgFileName: string
 ) {
@@ -348,7 +348,7 @@ export async function uploadSvgTaskForBaadges(
 }
 
 export async function airdropTaskForBaadges(
-  itemTypeInput: ItemTypeOutput[],
+  itemTypeInput: ItemTypeInputNew[],
   awardsArray: number[]
 ) {
   let taskArray = [];

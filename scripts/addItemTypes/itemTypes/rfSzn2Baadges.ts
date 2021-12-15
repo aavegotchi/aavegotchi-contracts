@@ -1,6 +1,6 @@
-import { ItemTypeOutput } from "../../../scripts/itemTypeHelpers";
+import { ItemTypeInputNew } from "../../../scripts/itemTypeHelpers";
 
-export const itemTypes: ItemTypeOutput[] = [
+export const itemTypes: ItemTypeInputNew[] = [
   {
     name: "Aavegotchi-RF-SZN2-Baadges-KINSHIP-ROOKIE-T10", //0
     description:
@@ -8,7 +8,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 264,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 7,
     setId: [],
@@ -17,6 +17,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -29,7 +30,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 265,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 90,
     setId: [],
@@ -38,6 +39,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -50,7 +52,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 266,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 7,
     setId: [],
@@ -59,6 +61,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -71,7 +74,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 267,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 90,
     setId: [],
@@ -80,6 +83,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -92,7 +96,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 268,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -101,6 +105,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -113,7 +118,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 269,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 7,
     setId: [],
@@ -122,6 +127,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -134,7 +140,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 270,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 90,
     setId: [],
@@ -143,6 +149,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -155,6 +162,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 271,
     minLevel: 0,
     canBeTransferred: false,
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -163,6 +171,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -175,6 +184,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 272,
     minLevel: 0,
     canBeTransferred: false,
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 7,
     setId: [],
@@ -183,6 +193,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -195,6 +206,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 273,
     minLevel: 0,
     canBeTransferred: false,
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 90,
     setId: [],
@@ -203,6 +215,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -215,6 +228,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 274,
     minLevel: 0,
     canBeTransferred: false,
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 7,
     setId: [],
@@ -223,6 +237,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -235,6 +250,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 275,
     minLevel: 0,
     canBeTransferred: false,
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 90,
     setId: [],
@@ -243,6 +259,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -255,6 +272,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 276,
     minLevel: 0,
     canBeTransferred: false,
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -263,6 +281,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -275,6 +294,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 277,
     minLevel: 0,
     canBeTransferred: false,
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -283,6 +303,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -295,6 +316,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 278,
     minLevel: 0,
     canBeTransferred: false,
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -303,7 +325,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -316,7 +338,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 279,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -325,7 +347,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -338,7 +360,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 280,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -347,7 +369,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -360,7 +382,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 281,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -369,7 +391,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -382,7 +404,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 282,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -391,7 +413,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -404,7 +426,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 283,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -413,7 +435,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -426,7 +448,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 284,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -435,7 +457,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -448,7 +470,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 285,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -457,7 +479,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -470,7 +492,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 286,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -479,7 +501,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -492,7 +514,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 287,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -501,7 +523,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -514,7 +536,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 288,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -523,7 +545,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -536,7 +558,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 289,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -545,7 +567,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,
@@ -558,7 +580,7 @@ export const itemTypes: ItemTypeOutput[] = [
     svgId: 290,
     minLevel: 0,
     canBeTransferred: false,
-
+    rarityLevel: "common",
     totalQuantity: 0,
     maxQuantity: 1,
     setId: [],
@@ -567,7 +589,7 @@ export const itemTypes: ItemTypeOutput[] = [
     allowedCollaterals: [],
     ghstPrice: 0,
     traitModifiers: [0, 0, 0, 0, 0, 0],
-
+    slotPositions: "none",
     category: 1,
     experienceBonus: 0,
     kinshipBonus: 0,

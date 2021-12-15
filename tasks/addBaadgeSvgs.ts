@@ -50,7 +50,7 @@ task("addBaadgeSvgs", "Adds itemTypes and SVGs")
 
       const { baadges } = require(`../svgs/${svgFile}.ts`);
 
-      /* const itemTypesArray: ItemTypeOutput[] = getItemTypes(currentItemTypes); */
+      const itemTypesArray: ItemTypeOutput[] = getItemTypes(currentItemTypes);
 
       const svgsArray: string[] = baadges;
 
@@ -108,7 +108,7 @@ task("addBaadgeSvgs", "Adds itemTypes and SVGs")
       if (uploadItemTypes) {
         console.log("Adding items", 0, "to", currentItemTypes.length);
 
-        tx = await daoFacet.addItemTypes(currentItemTypes, {
+        tx = await daoFacet.addItemTypes(itemTypesArray, {
           gasPrice: gasPrice,
         });
 
