@@ -18,11 +18,12 @@ import {
   wearablesRightSleeveSvgs as rightSleeve,
   wearablesBackSleeveSvgs as backSleeve,
 } from "../svgs/wearables-sides";
+
 import { UpdateSvgsTaskArgs } from "../tasks/updateSvgs";
-import { AddItemTypesTaskArgs } from "../tasks/addBaadgeSvgs";
+import { AddBaadgeTaskArgs } from "../tasks/addBaadgeSvgs";
 import { AirdropBaadgeTaskArgs } from "../tasks/baadgeAirdrop";
 const fs = require("fs");
-import { SleeveObject, ItemTypeInputNew } from "./itemTypeHelpers";
+import { SleeveObject, ItemTypeOutput } from "./itemTypeHelpers";
 
 export interface SvgTypesAndSizes {
   svgType: BytesLike;
@@ -320,32 +321,34 @@ export async function updateSvgTaskForSideSleeves(_itemIds: number[]) {
 }
 
 export async function uploadSvgTaskForBaadges(
-  itemTypeInput: ItemTypeInputNew[],
-  fileName: string
+  itemTypeInput: ItemTypeOutput[],
+  fileName: string,
+  svgFileName: string
 ) {
   let taskArray = [];
 
   for (let index = 0; index < itemTypeInput.length; index++) {
-    if (itemTypeInput[index].canBeTransferred) {
-      let taskArgs: AddItemTypesTaskArgs = {
+    if (!itemTypeInput[index].canBeTransferred) {
+      let taskArgs: AddBaadgeTaskArgs = {
         itemManager: itemManager,
-        diamondAddress: maticRealmDiamondAddress,
         itemFile: fileName,
-        svgFile: itemTypeInput[index].name,
+        svgFile: svgFileName,
         svgIds: [itemTypeInput[index].svgId].join(","),
         uploadItemTypes: true,
         sendToItemManager: true,
       };
       taskArray.push(taskArgs);
     } else {
-      console.log(itemTypeInput[index].name + " is NOT transferable");
+      console.log(
+        itemTypeInput[index].name + " canBeTransferred must be set to FALSE"
+      );
     }
   }
   return taskArray;
 }
 
 export async function airdropTaskForBaadges(
-  itemTypeInput: ItemTypeInputNew[],
+  itemTypeInput: ItemTypeOutput[],
   awardsArray: number[]
 ) {
   let taskArray = [];

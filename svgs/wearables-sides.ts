@@ -266,10 +266,10 @@ export const wearablesRightSvgs = [
   wearable("262_RadarEyesRight"),
   wearable("263_SignalHeadsetRight"),
 
-  //duplicates for missing sleeves
+  /*   //duplicates for missing sleeves
   bodyWearableRight("264_MarineJacket"), // duplicate of id 8, needed because of missing sleeves on front view
   bodyWearableRight("265_ThaaveSuit"), // duplicate of id 25, needed because of missing sleeves on front view
-  bodyWearableRight("266_TrackSuit"), // duplicate of id 125, needed because of missing sleeves on front view
+  bodyWearableRight("266_TrackSuit"), // duplicate of id 125, needed because of missing sleeves on front view */
 ];
 
 export const wearablesBackSvgs = [
@@ -538,10 +538,10 @@ export const wearablesBackSvgs = [
   262,
   wearable("263_SignalHeadsetBack"),
 
-  //duplicates for missing sleeves
+  /*   //duplicates for missing sleeves
   bodyWearable("264_MarineJacket"), // duplicate of id 8, needed because of missing sleeves on front view
   wearable("265_ThaaveSuitBack"), // duplicate of id 25, needed because of missing sleeves on front view
-  bodyWearable("266_TrackSuit"), // duplicate of id 125, needed because of missing sleeves on front view
+  bodyWearable("266_TrackSuit"), // duplicate of id 125, needed because of missing sleeves on front view */
 ];
 
 export const wearablesLeftSvgs = [
@@ -810,9 +810,9 @@ export const wearablesLeftSvgs = [
   wearable("262_RadarEyesLeft"),
   wearable("263_SignalHeadsetLeft"),
 
-  bodyWearableLeft("264_MarineJacket"), // duplicate of id 8, needed because of missing sleeves on front view
+  /*   bodyWearableLeft("264_MarineJacket"), // duplicate of id 8, needed because of missing sleeves on front view
   bodyWearableLeft("265_ThaaveSuit"), // duplicate of id 25, needed because of missing sleeves on front view
-  bodyWearableLeft("266_TrackSuit"), // duplicate of id 125, needed because of missing sleeves on front view
+  bodyWearableLeft("266_TrackSuit"), // duplicate of id 125, needed because of missing sleeves on front view */
 ];
 
 export const wearablesLeftSleeveSvgs = [

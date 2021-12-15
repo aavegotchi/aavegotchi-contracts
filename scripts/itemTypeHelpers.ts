@@ -120,7 +120,7 @@ export interface ItemTypeOutput {
     BigNumberish,
     BigNumberish
   ];
-  slotPositions: [
+  slotPositions?: [
     boolean,
     boolean,
     boolean,
@@ -141,7 +141,7 @@ export interface ItemTypeOutput {
   category: Category;
   experienceBonus: BigNumberish;
   kinshipBonus: BigNumberish;
-  rarityScoreModifier: BigNumberish;
+  rarityScoreModifier?: BigNumberish;
   canPurchaseWithGhst: boolean;
 }
 
