@@ -15,7 +15,7 @@ Aavegotchis were born on the Polygon sidechain, and have since been bridged back
 
 * Polygon Diamond Address: 0x86935F11C86623deC8a25696E1C19a8659CbF95d <a href="https://polygonscan.com/address/0x86935F11C86623deC8a25696E1C19a8659CbF95d">View on Polygonscan </a>
 
-* Ethereum Diamond Address: 0x1906fd9c4AC440561F7197Da0A4BD2E88DF5fA70 <a href="https://polygonscan.com/address/0x1906fd9c4AC440561F7197Da0A4BD2E88DF5fA70">View on Etherscan </a>
+* Ethereum Diamond Address: 0x1906fd9c4AC440561F7197Da0A4BD2E88DF5fA70 <a href="https://etherscan.io/address/0x1906fd9c4AC440561F7197Da0A4BD2E88DF5fA70">View on Etherscan </a>
 
 ## Resources
 
