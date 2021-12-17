@@ -22,6 +22,7 @@ import {
 import { UpdateSvgsTaskArgs } from "../tasks/updateSvgs";
 import { AddBaadgeTaskArgs } from "../tasks/addBaadgeSvgs";
 import { AirdropBaadgeTaskArgs } from "../tasks/baadgeAirdrop";
+import { MintBaadgeTaskArgs } from "../tasks/mintBaadgeSvgs";
 const fs = require("fs");
 import { SleeveObject, ItemTypeInputNew } from "./itemTypeHelpers";
 
@@ -322,7 +323,6 @@ export async function updateSvgTaskForSideSleeves(_itemIds: number[]) {
 
 export async function uploadSvgTaskForBaadges(
   itemTypeInput: ItemTypeInputNew[],
-  fileName: string,
   svgFileName: string
 ) {
   let taskArray = [];
@@ -331,11 +331,8 @@ export async function uploadSvgTaskForBaadges(
     if (!itemTypeInput[index].canBeTransferred) {
       let taskArgs: AddBaadgeTaskArgs = {
         itemManager: itemManager,
-        itemFile: fileName,
         svgFile: svgFileName,
         svgIds: [itemTypeInput[index].svgId].join(","),
-        uploadItemTypes: true,
-        sendToItemManager: true,
       };
       taskArray.push(taskArgs);
     } else {
@@ -347,19 +344,27 @@ export async function uploadSvgTaskForBaadges(
   return taskArray;
 }
 
+export async function mintSvgTaskForBaadges(fileName: string) {
+  let taskArgs: MintBaadgeTaskArgs = {
+    itemManager: itemManager,
+    itemFile: fileName,
+    uploadItemTypes: true,
+    sendToItemManager: true,
+  };
+
+  return taskArgs;
+}
+
 export async function airdropTaskForBaadges(
   itemTypeInput: ItemTypeInputNew[],
   awardsArray: number[]
 ) {
-  let taskArray = [];
+  const itemInfo = itemTypeInput[0];
 
-  for (let index = 0; index < itemTypeInput.length; index++) {
-    let taskArgs: AirdropBaadgeTaskArgs = {
-      maxProcess: [itemTypeInput[index].maxQuantity].join(","),
-      badgeIds: [itemTypeInput[index].svgId].join(","),
-      awardsArray: [awardsArray].join("***"),
-    };
-    taskArray.push(taskArgs);
-  }
-  return taskArray;
+  let taskArgs: AirdropBaadgeTaskArgs = {
+    maxProcess: [itemInfo.maxQuantity].join(","),
+    badgeIds: [itemInfo.svgId].join(","),
+    awardsArray: [awardsArray].join("***"),
+  };
+  return taskArgs;
 }

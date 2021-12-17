@@ -39,18 +39,20 @@ task(
 
       let amountDropped = 0;
 
+      console.log("BadgeIds: ", badgeIds);
+      _ids.push(Number(badgeIds));
+      _values.push(1);
+
       if (Number(maxProcess) >= amountDropped) {
         for (let index = 0; index < awardsArray.length; index++) {
-          for (let index = 0; index < badgeIds.length; index++) {
-            _ids.push(Number(badgeIds[index]));
-            _values.push(1);
-          }
           tokenIds.push(Number(awardsArray[index]));
           batchIds.push(_ids);
           batchValues.push(_values);
         }
         amountDropped += 1;
       }
+
+      console.log("Batch Ids for airdrop: ", batchIds);
 
       const signer: Signer = await getDiamondSigner(hre, gameManager, false);
 
@@ -69,6 +71,8 @@ task(
       );
       console.log("Tx hash:", tx.hash);
       let receipt = await tx.wait();
+      console.log("Airdropped SvgIds: ", batchIds);
+      console.log("Airdropped to Gotchi Ids: ", tokenIds);
 
       if (!receipt.status) {
         throw Error(`Error:: ${tx.hash}`);

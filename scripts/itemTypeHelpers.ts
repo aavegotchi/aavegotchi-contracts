@@ -429,8 +429,10 @@ export function getItemTypes(itemTypes: ItemTypeInputNew[]): ItemTypeOutput[] {
       Number(prev) + Math.abs(Number(cur));
     let traitBoosters = itemType.traitModifiers.reduce(reducer, 0);
 
-    if (traitBoosters !== rarityLevelToTraitBoosters(itemType.rarityLevel)) {
-      throw Error(`Trait Booster for ${itemType.name} does not match rarity`);
+    if (itemType.category !== 1) {
+      if (traitBoosters !== rarityLevelToTraitBoosters(itemType.rarityLevel)) {
+        throw Error(`Trait Booster for ${itemType.name} does not match rarity`);
+      }
     }
 
     if (!Array.isArray(itemType.allowedCollaterals)) {

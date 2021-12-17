@@ -13,6 +13,7 @@ dotenv.config({ path: __dirname + "/.env" });
 //  require("./tasks/verifyFacet.js");
 require("./tasks/deployUpgrade.ts");
 require("./tasks/addBaadgeSvgs.ts");
+require("./tasks/mintBaadgeSvgs.ts");
 require("./tasks/baadgeAirdrop.ts");
 require("./tasks/updateItemDimensions.ts");
 require("./tasks/updateSvgs.ts");

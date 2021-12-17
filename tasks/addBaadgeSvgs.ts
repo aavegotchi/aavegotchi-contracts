@@ -18,39 +18,25 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 export interface AddBaadgeTaskArgs {
   itemManager: string;
-  itemFile: string;
   svgFile: string;
   svgIds: string;
-  uploadItemTypes: boolean;
-  sendToItemManager: boolean;
 }
 
 task("addBaadgeSvgs", "Adds itemTypes and SVGs")
   .addParam("itemManager", "Address of the item manager", "0")
-  .addParam("itemFile", "File name of the items to add")
+
   .addParam("svgFile", "Name of the itemType SVGs")
   .addParam("svgIds", "List of SVG IDs to add or update")
-  .addFlag("uploadItemTypes", "Upload itemTypes")
-  .addFlag("sendToItemManager", "Mint and send the items to itemManager")
 
   .setAction(
     async (taskArgs: AddBaadgeTaskArgs, hre: HardhatRuntimeEnvironment) => {
-      const itemFile: string = taskArgs.itemFile;
       const svgFile: string = taskArgs.svgFile;
       const itemManager = taskArgs.itemManager;
       const svgIds: string[] = taskArgs.svgIds
         .split(",")
         .filter((str) => str.length > 0);
-      const sendToItemManager = taskArgs.sendToItemManager;
-      const uploadItemTypes = taskArgs.uploadItemTypes;
-
-      const {
-        itemTypes: currentItemTypes,
-      } = require(`../scripts/addItemTypes/itemTypes/${itemFile}.ts`);
 
       const { baadges } = require(`../svgs/${svgFile}.ts`);
-
-      const itemTypesArray: ItemTypeOutput[] = getItemTypes(currentItemTypes);
 
       const svgsArray: string[] = baadges;
 
@@ -74,15 +60,6 @@ task("addBaadgeSvgs", "Adds itemTypes and SVGs")
         throw Error("Incorrect network selected");
       }
 
-      let tx: ContractTransaction;
-      let receipt: ContractReceipt;
-
-      let daoFacet = (await hre.ethers.getContractAt(
-        "DAOFacet",
-        maticDiamondAddress,
-        signer
-      )) as DAOFacet;
-
       let svgFacet = (await hre.ethers.getContractAt(
         "SvgFacet",
         maticDiamondAddress,
@@ -103,43 +80,6 @@ task("addBaadgeSvgs", "Adds itemTypes and SVGs")
         } catch (error) {
           console.log("error uploading", svgId, error);
         }
-      }
-
-      if (uploadItemTypes) {
-        console.log("Adding items", 0, "to", currentItemTypes.length);
-
-        tx = await daoFacet.addItemTypes(itemTypesArray, {
-          gasPrice: gasPrice,
-        });
-
-        receipt = await tx.wait();
-        if (!receipt.status) {
-          throw Error(`Error:: ${tx.hash}`);
-        }
-        console.log("Items were added:", tx.hash);
-      }
-
-      if (sendToItemManager) {
-        const itemIds: BigNumberish[] = [];
-        const quantities: BigNumberish[] = [];
-        currentItemTypes.forEach((itemType: ItemTypeOutput) => {
-          itemIds.push(itemType.svgId);
-          quantities.push(itemType.maxQuantity);
-        });
-
-        console.log("final quantities:", itemIds, quantities);
-
-        console.log(`Mint prize items to Item Manager ${itemManager}`);
-
-        tx = await daoFacet.mintItems(itemManager, itemIds, quantities, {
-          gasPrice: gasPrice,
-        });
-        receipt = await tx.wait();
-        if (!receipt.status) {
-          throw Error(`Error:: ${tx.hash}`);
-        }
-
-        console.log("Prize items minted:", tx.hash);
       }
     }
   );
