@@ -34,7 +34,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     let { addresses } = require(`../data/airdrops/${filename}.ts`);
 
     const diamondAddress = maticDiamondAddress;
-    const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+    const gameManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
     console.log(gameManager);
     let signer: Signer;
     const testing = ["hardhat", "localhost"].includes(hre.network.name);
@@ -111,7 +111,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
           if (tokenIds.includes(gotchi.id))
             throw new Error(`Duplicate token ID: ${gotchi.id}`);
           else tokenIds.push(gotchi.id);
-        }
+        } else console.log(`${gotchi.id} is not a gotchi!`);
       });
     });
 
@@ -134,7 +134,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
         if (tokenIds.includes(gotchi.id))
           throw new Error(`Duplicate token ID: ${gotchi.id}`);
         else tokenIds.push(gotchi.id);
-      }
+      } else console.log(`${gotchi.id} is not a gotchi!`);
     });
 
     //final check to prevent duplicate token ids
