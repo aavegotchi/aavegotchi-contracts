@@ -5,7 +5,6 @@ import {
   mintSvgTaskForBaadges,
   airdropTaskForBaadges,
 } from "../../scripts/svgHelperFunctions";
-import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
 import {
   kinship,
   rarity,
@@ -23,11 +22,10 @@ import {
   topTenXP,
   top100XP,
 } from "../../scripts/airdrops/airdropTokenIdArrays";
-import { BigNumberish } from "@ethersproject/bignumber";
 import { upgrade } from "../../scripts/upgrades/upgrade-aging";
 
-async function main() {
-  await upgrade();
+export async function main() {
+  // await upgrade();
 
   let upload = await uploadSvgTaskForBaadges(itemTypes, "rfSzn2BaadgeSvgs");
   for (let index = 0; index < upload.length; index++) {
@@ -36,26 +34,6 @@ async function main() {
 
   let mint = await mintSvgTaskForBaadges("rfSzn2Baadges");
   await run("mintBaadgeSvgs", mint);
-
-  // const kinship1ST: number[] = [kinship[0]];
-  // const kinship2ND: number[] = [kinship[1]];
-  // const kinship3RD: number[] = [kinship[2]];
-
-  // const rookKin1ST: number[] = [rookKin[0]];
-  // const rookKin2ND: number[] = [rookKin[1]];
-  // const rookKin3RD: number[] = [rookKin[2]];
-
-  // const xp1ST: number[] = [xp[0]];
-  // const xp2ND: number[] = [xp[1]];
-  // const xp3RD: number[] = [xp[2]];
-
-  // const rookXP1ST: number[] = [rookXP[0]];
-  // const rookXP2ND: number[] = [rookXP[1]];
-  // const rookXP3RD: number[] = [rookXP[2]];
-
-  // const rarity1ST: number[] = [rarity[0]];
-  // const rarity2ND: number[] = [rarity[1]];
-  // const rarity3RD: number[] = [rarity[2]];
 
   let top10RookKinAirdrop = await airdropTaskForBaadges(
     [itemTypes[0]],
@@ -161,19 +139,19 @@ async function main() {
 
   let rarity1STAirdrop = await airdropTaskForBaadges(
     [itemTypes[18]],
-    [rookKin[0]]
+    [rarity[0]]
   );
   await run("airdropBaadges", rarity1STAirdrop);
 
   let rarity2NDAirdrop = await airdropTaskForBaadges(
     [itemTypes[19]],
-    [rookKin[1]]
+    [rarity[1]]
   );
   await run("airdropBaadges", rarity2NDAirdrop);
 
   let rarity3RDAirdrop = await airdropTaskForBaadges(
     [itemTypes[20]],
-    [rookKin[2]]
+    [rarity[2]]
   );
   await run("airdropBaadges", rarity3RDAirdrop);
 
@@ -186,13 +164,22 @@ async function main() {
   let xp3RDAirdrop = await airdropTaskForBaadges([itemTypes[23]], [xp[2]]);
   await run("airdropBaadges", xp3RDAirdrop);
 
-  let rookXP1STAirdrop = await airdropTaskForBaadges([itemTypes[24]], [xp[0]]);
+  let rookXP1STAirdrop = await airdropTaskForBaadges(
+    [itemTypes[24]],
+    [rookXP[0]]
+  );
   await run("airdropBaadges", rookXP1STAirdrop);
 
-  let rookXP2NDAirdrop = await airdropTaskForBaadges([itemTypes[25]], [xp[1]]);
+  let rookXP2NDAirdrop = await airdropTaskForBaadges(
+    [itemTypes[25]],
+    [rookXP[1]]
+  );
   await run("airdropBaadges", rookXP2NDAirdrop);
 
-  let rookXP3RDAirdrop = await airdropTaskForBaadges([itemTypes[26]], [xp[2]]);
+  let rookXP3RDAirdrop = await airdropTaskForBaadges(
+    [itemTypes[26]],
+    [rookXP[2]]
+  );
   await run("airdropBaadges", rookXP3RDAirdrop);
 }
 
