@@ -68,7 +68,7 @@ export async function main() {
   );
   await run("airdropBaadges", top100KinshipAirdrop);
 
-  /*   let plaayerAirdrop1 = await airdropTaskForBaadges(
+  let plaayerAirdrop1 = await airdropTaskForBaadges(
     [itemTypes[4]],
     plaayerSet1
   );
@@ -114,7 +114,7 @@ export async function main() {
     [itemTypes[4]],
     plaayerSet8
   );
-  await run("airdropBaadges", plaayerAirdrop8); */
+  await run("airdropBaadges", plaayerAirdrop8);
 
   let top10RarityAirdrop = await airdropTaskForBaadges(
     [itemTypes[5]],
