@@ -1,3 +1,5 @@
+import { concatTotal } from "./rfSzn2participation";
+
 export const kinship = [
   7765, 8396, 7422, 7848, 1743, 1998, 8557, 4441, 4350, 8095, 3541, 8121, 6912,
   4557, 5935, 1836, 1014, 7653, 1840, 1838, 8612, 1876, 4567, 6615, 4564, 4561,
@@ -68,3 +70,26 @@ export const topTenRookXP = rookXP.slice(3, 10);
 export const top100RookXP = rookXP.slice(10, 100);
 export const topTenXP = xp.slice(3, 10);
 export const top100XP = xp.slice(10, 100);
+
+export const plaayerTotal = [...new Set(concatTotal)];
+export const plaayerSet1 = plaayerTotal.slice(0, 1375);
+export const plaayerSet2 = plaayerTotal.slice(1375, 2750);
+export const plaayerSet3 = plaayerTotal.slice(2750, 4125);
+export const plaayerSet4 = plaayerTotal.slice(4125, 5500);
+export const plaayerSet5 = plaayerTotal.slice(5500, 6875);
+export const plaayerSet6 = plaayerTotal.slice(6875, 8250);
+export const plaayerSet7 = plaayerTotal.slice(8250, 9625);
+export const plaayerSet8 = plaayerTotal.slice(9625, 10975);
+
+console.log("Plaayer Total: ", plaayerTotal.length);
+console.log(
+  "Plaayersets total: ",
+  plaayerSet1.length +
+    plaayerSet2.length +
+    plaayerSet3.length +
+    plaayerSet4.length +
+    plaayerSet5.length +
+    plaayerSet6.length +
+    plaayerSet7.length +
+    plaayerSet8.length
+);

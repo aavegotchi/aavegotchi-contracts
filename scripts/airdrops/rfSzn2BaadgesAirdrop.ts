@@ -21,6 +21,15 @@ import {
   top100RookXP,
   topTenXP,
   top100XP,
+  plaayerTotal,
+  plaayerSet1,
+  plaayerSet2,
+  plaayerSet3,
+  plaayerSet4,
+  plaayerSet5,
+  plaayerSet6,
+  plaayerSet7,
+  plaayerSet8,
 } from "../../scripts/airdrops/airdropTokenIdArrays";
 import { upgrade } from "../../scripts/upgrades/upgrade-aging";
 
@@ -59,11 +68,53 @@ export async function main() {
   );
   await run("airdropBaadges", top100KinshipAirdrop);
 
-  /*   let plaayerAirdrop = await airdropTaskForBaadges(
+  /*   let plaayerAirdrop1 = await airdropTaskForBaadges(
     [itemTypes[4]],
-    something here
+    plaayerSet1
   );
-  await run("airdropBaadges", plaayerAirdrop); */
+  await run("airdropBaadges", plaayerAirdrop1);
+
+  let plaayerAirdrop2 = await airdropTaskForBaadges(
+    [itemTypes[4]],
+    plaayerSet2
+  );
+  await run("airdropBaadges", plaayerAirdrop2);
+
+  let plaayerAirdrop3 = await airdropTaskForBaadges(
+    [itemTypes[4]],
+    plaayerSet3
+  );
+  await run("airdropBaadges", plaayerAirdrop3);
+
+  let plaayerAirdrop4 = await airdropTaskForBaadges(
+    [itemTypes[4]],
+    plaayerSet4
+  );
+  await run("airdropBaadges", plaayerAirdrop4);
+
+  let plaayerAirdrop5 = await airdropTaskForBaadges(
+    [itemTypes[4]],
+    plaayerSet5
+  );
+  await run("airdropBaadges", plaayerAirdrop5);
+
+  let plaayerAirdrop6 = await airdropTaskForBaadges(
+    [itemTypes[4]],
+    plaayerSet6
+  );
+  await run("airdropBaadges", plaayerAirdrop6);
+
+  let plaayerAirdrop7 = await airdropTaskForBaadges(
+    [itemTypes[4]],
+    plaayerSet7
+  );
+  await run("airdropBaadges", plaayerAirdrop7);
+
+  let plaayerAirdrop8 = await airdropTaskForBaadges(
+    [itemTypes[4]],
+    plaayerSet8
+  );
+  await run("airdropBaadges", plaayerAirdrop8); */
 
   let top10RarityAirdrop = await airdropTaskForBaadges(
     [itemTypes[5]],

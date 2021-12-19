@@ -3,7 +3,7 @@ import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { task } from "hardhat/config";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
-import { getItemTypes, ItemTypeOutput } from "../scripts/itemTypeHelpers";
+import { getBaadgeItemTypes, ItemTypeOutput } from "../scripts/itemTypeHelpers";
 import {
   getDiamondSigner,
   itemManager,
@@ -38,7 +38,8 @@ task("mintBaadgeSvgs", "Adds itemTypes and SVGs")
         itemTypes: currentItemTypes,
       } = require(`../scripts/addItemTypes/itemTypes/${itemFile}.ts`);
 
-      const itemTypesArray: ItemTypeOutput[] = getItemTypes(currentItemTypes);
+      const itemTypesArray: ItemTypeOutput[] =
+        getBaadgeItemTypes(currentItemTypes);
 
       let signer: Signer;
 
