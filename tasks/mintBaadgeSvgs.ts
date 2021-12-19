@@ -4,11 +4,7 @@ import { task } from "hardhat/config";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
 import { getBaadgeItemTypes, ItemTypeOutput } from "../scripts/itemTypeHelpers";
-import {
-  getDiamondSigner,
-  itemManager,
-  maticDiamondAddress,
-} from "../scripts/helperFunctions";
+import { maticDiamondAddress } from "../scripts/helperFunctions";
 import { DAOFacet } from "../typechain/DAOFacet";
 import { BigNumberish } from "@ethersproject/bignumber";
 import { gasPrice } from "../scripts/helperFunctions";

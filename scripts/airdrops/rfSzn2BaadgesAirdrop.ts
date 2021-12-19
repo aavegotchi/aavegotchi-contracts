@@ -31,16 +31,16 @@ import {
   plaayerSet7,
   plaayerSet8,
 } from "../../scripts/airdrops/airdropTokenIdArrays";
-import { upgrade } from "../../scripts/upgrades/upgrade-aging";
 
 export async function main() {
-  // await upgrade();
-
   let upload = await uploadSvgTaskForBaadges(itemTypes, "rfSzn2BaadgeSvgs");
+
+  //Upload SVGs
   for (let index = 0; index < upload.length; index++) {
     await run("addBaadgeSvgs", upload[index]);
   }
 
+  //Upload baadge item types
   let mint = await mintSvgTaskForBaadges("rfSzn2Baadges");
   await run("mintBaadgeSvgs", mint);
 
@@ -48,6 +48,8 @@ export async function main() {
     [itemTypes[0]],
     topTenRookKin
   );
+
+  //Top 10 Kinship -- Normal and Rookie
   await run("airdropBaadges", top10RookKinAirdrop);
 
   let top100RookKinAirdrop = await airdropTaskForBaadges(
@@ -68,6 +70,7 @@ export async function main() {
   );
   await run("airdropBaadges", top100KinshipAirdrop);
 
+  //Particiation Badge
   let plaayerAirdrop1 = await airdropTaskForBaadges(
     [itemTypes[4]],
     plaayerSet1
@@ -116,6 +119,7 @@ export async function main() {
   );
   await run("airdropBaadges", plaayerAirdrop8);
 
+  //Rarity -- Top 10 and Top 100
   let top10RarityAirdrop = await airdropTaskForBaadges(
     [itemTypes[5]],
     topTenRarity
@@ -128,12 +132,14 @@ export async function main() {
   );
   await run("airdropBaadges", top100RarityAirdrop);
 
+  //Rookie of the Year
   let rookOfTheYrAirdrop = await airdropTaskForBaadges(
     [itemTypes[7]],
     [rarity[0]]
   );
   await run("airdropBaadges", rookOfTheYrAirdrop);
 
+  //Top 10 and Top 100 XP -- Normal and Rookie
   let top10RookXPAirdrop = await airdropTaskForBaadges(
     [itemTypes[8]],
     topTenRookXP
@@ -152,6 +158,7 @@ export async function main() {
   let top100XPAirdrop = await airdropTaskForBaadges([itemTypes[11]], top100XP);
   await run("airdropBaadges", top100XPAirdrop);
 
+  //Top 1,2,3 Kinship
   let kinship1STAirdrop = await airdropTaskForBaadges(
     [itemTypes[12]],
     [kinship[0]]
@@ -170,6 +177,7 @@ export async function main() {
   );
   await run("airdropBaadges", kinship3RDAirdrop);
 
+  //Top 1,2,3 Rookie Kinship
   let rookKin1STAirdrop = await airdropTaskForBaadges(
     [itemTypes[15]],
     [rookKin[0]]
@@ -188,6 +196,7 @@ export async function main() {
   );
   await run("airdropBaadges", rookKin3RDAirdrop);
 
+  //Top 1,2,3 Rarity
   let rarity1STAirdrop = await airdropTaskForBaadges(
     [itemTypes[18]],
     [rarity[0]]
@@ -206,6 +215,7 @@ export async function main() {
   );
   await run("airdropBaadges", rarity3RDAirdrop);
 
+  //Top 1,2,3 XP
   let xp1STAirdrop = await airdropTaskForBaadges([itemTypes[21]], [xp[0]]);
   await run("airdropBaadges", xp1STAirdrop);
 
@@ -215,6 +225,7 @@ export async function main() {
   let xp3RDAirdrop = await airdropTaskForBaadges([itemTypes[23]], [xp[2]]);
   await run("airdropBaadges", xp3RDAirdrop);
 
+  //Top 1,2,3 Rookie XP
   let rookXP1STAirdrop = await airdropTaskForBaadges(
     [itemTypes[24]],
     [rookXP[0]]

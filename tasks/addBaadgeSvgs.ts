@@ -1,19 +1,10 @@
 import { LedgerSigner } from "@ethersproject/hardware-wallets";
 
 import { task } from "hardhat/config";
-import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
-import { getItemTypes, ItemTypeOutput } from "../scripts/itemTypeHelpers";
-import {
-  getDiamondSigner,
-  itemManager,
-  maticDiamondAddress,
-} from "../scripts/helperFunctions";
-import { DAOFacet } from "../typechain/DAOFacet";
+import { maticDiamondAddress } from "../scripts/helperFunctions";
 import { SvgFacet } from "../typechain/SvgFacet";
-import { BigNumberish } from "@ethersproject/bignumber";
 import { uploadOrUpdateSvg } from "../scripts/svgHelperFunctions";
-import { gasPrice } from "../scripts/helperFunctions";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 export interface AddBaadgeTaskArgs {
