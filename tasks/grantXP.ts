@@ -81,6 +81,15 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       addresses,
       "matic"
     );
+
+    polygonUsers.forEach((address) => {
+      console.log(
+        `address:" ${address.id} and gotchis owned: ${address.gotchisOwned.map(
+          (got) => got.id
+        )}`
+      );
+    });
+
     const polygonGotchis = polygonUsers
       .map((item) => item.gotchisOwned.length)
       .reduce((agg, cur) => agg + cur);
