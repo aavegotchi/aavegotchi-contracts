@@ -128,11 +128,11 @@ export async function main() {
   );
   await run("airdropBaadges", top100RarityAirdrop);
 
-  /*   let rookOfTheYrAirdrop = await airdropTaskForBaadges(
+  let rookOfTheYrAirdrop = await airdropTaskForBaadges(
     [itemTypes[7]],
-    something here
+    [rarity[0]]
   );
-  await run("airdropBaadges", rookOfTheYrAirdrop); */
+  await run("airdropBaadges", rookOfTheYrAirdrop);
 
   let top10RookXPAirdrop = await airdropTaskForBaadges(
     [itemTypes[8]],
