@@ -40,7 +40,7 @@ export async function main() {
     await run("addBaadgeSvgs", upload[index]);
   }
 
-  //Upload baadge item types
+  //mint baadge item types
   let mint = await mintSvgTaskForBaadges("rfSzn2Baadges");
   await run("mintBaadgeSvgs", mint);
 

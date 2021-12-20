@@ -1,6 +1,5 @@
-import { ethers, network } from "hardhat";
-import { upgrade } from "../scripts/upgrades/upgrade-batchUpdateItemPrice";
-import { impersonate, maticDiamondAddress } from "../scripts/helperFunctions";
+import { ethers } from "hardhat";
+import { maticDiamondAddress } from "../scripts/helperFunctions";
 import { AavegotchiFacet } from "../typechain";
 import { Signer } from "@ethersproject/abstract-signer";
 import { expect } from "chai";
@@ -23,7 +22,6 @@ import {
   topTenXP,
   top100XP,
 } from "../scripts/airdrops/airdropTokenIdArrays";
-import { rarityTotal } from "../scripts/airdrops/rfSzn2participation";
 
 describe("Airdrop SZN2 Baadges", async function () {
   this.timeout(200000000);
