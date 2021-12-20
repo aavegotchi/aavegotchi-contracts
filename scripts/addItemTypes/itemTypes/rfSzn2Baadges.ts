@@ -96,7 +96,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     svgId: 269,
     minLevel: 0,
     canBeTransferred: false,
-    rarityLevel: "godlike",
+    rarityLevel: "common",
     maxQuantity: 11000,
     totalQuantity: 0,
     setId: [],
