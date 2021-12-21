@@ -67,11 +67,7 @@ contract AavegotchiLendingFacet is Modifiers {
     }
 
     function isAavegotchiLent(uint256 _erc721TokenId) external view returns (bool) {
-        uint256 rentalId = s.aavegotchiRentalHead[_erc721TokenId];
-        if (rentalId == 0) return false;
-        AavegotchiRental storage rental_ = s.aavegotchiRentals[rentalId];
-        if (rental_.timeCreated == 0 || rental_.timeAgreed == 0) return false;
-        return rental_.completed == false;
+        return LibAavegotchiLending.isAavegotchiLent(_erc721TokenId);
     }
 
     ///@notice Allow an original aavegotchi owner to add request for rental
@@ -89,7 +85,7 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256 _erc721TokenId,
         uint256 _amountPerDay,
         uint256 _period,
-        uint256[3] memory _revenueSplit,
+        uint256[3] calldata _revenueSplit,
         address _receiver,
         uint256 _whitelistId
     ) external {
@@ -170,7 +166,7 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256 _erc721TokenId,
         uint256 _amountPerDay,
         uint256 _period,
-        uint256[3] memory _revenueSplit
+        uint256[3] calldata _revenueSplit
     ) external {
         AavegotchiRental storage rental = s.aavegotchiRentals[_rentalId];
         require(rental.timeCreated != 0, "AavegotchiLending: rental not found");
@@ -224,12 +220,11 @@ contract AavegotchiLendingFacet is Modifiers {
 
     ///@notice Allow a original owner to claim revenue from the rental
     ///@dev Will throw if the NFT has not been lent or if the rental has been canceled already
-    ///@param _rentalId The identifier of the rental to claim
-    function claimAavegotchiRental(uint256 _rentalId) external {
-        AavegotchiRental storage rental = s.aavegotchiRentals[_rentalId];
-        require(rental.timeCreated != 0, "AavegotchiLending: rental not found");
-        require(rental.timeAgreed != 0, "AavegotchiLending: rental not agreed");
-        require(rental.completed == false, "AavegotchiLending: rental already completed");
+    ///@param _tokenId The identifier of the lent aavegotchi to claim
+    function claimAavegotchiRental(uint256 _tokenId) external {
+        uint256 rentalId = s.aavegotchiRentalHead[_tokenId];
+        require(rentalId != 0, "AavegotchiLending: rental not found");
+        AavegotchiRental storage rental = s.aavegotchiRentals[rentalId];
 
         address sender = LibMeta.msgSender();
         address originalOwner = rental.originalOwner;
@@ -257,7 +252,7 @@ contract AavegotchiLendingFacet is Modifiers {
             if ((completionTime + 1 days <= block.timestamp) && (sender != originalOwner)) {
                 uint256 senderAmount = (balance * 3) / 100;
                 LibERC20.transferFrom(revenueToken, escrow, sender, senderAmount);
-                balance = (balance * 97) / 100;
+                balance -= senderAmount;
             }
 
             uint256 ownerAmount = (balance * rental.revenueSplit[0]) / 100;

@@ -19,27 +19,32 @@ export async function upgrade() {
         "function getAavegotchiRental(uint256 _rentalId) external view",
         "function getAavegotchiRentalFromToken(uint256 _erc721TokenId) external view",
         "function isAavegotchiLent(uint256 _erc721TokenId) external view",
-        "function addAavegotchiRental(address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _amountPerDay, uint256 _period, uint256[3] memory _revenueSplit, address _receiver, uint256 _whitelistId) external",
+        "function addAavegotchiRental(address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _amountPerDay, uint256 _period, uint256[3] calldata _revenueSplit, address _receiver, uint256 _whitelistId) external",
         "function cancelAavegotchiRentalByToken(uint256 _erc721TokenId) external",
         "function cancelAavegotchiRental(uint256 _rentalId) external",
-        "function agreeAavegotchiRental(uint256 _rentalId, uint256 _erc721TokenId, uint256 _amountPerDay, uint256 _period, uint256[3] memory _revenueSplit) external",
-        "function claimAavegotchiRental(uint256 _rentalId) external",
+        "function agreeAavegotchiRental(uint256 _rentalId, uint256 _erc721TokenId, uint256 _amountPerDay, uint256 _period, uint256[3] calldata _revenueSplit) external",
+        "function claimAavegotchiRental(uint256 _tokenId) external",
       ],
       removeSelectors: [],
     },
     {
       facetName: "WhitelistFacet",
       addSelectors: [
-        "function createWhitelist(address[] memory _whitelistAddresses) external",
-        "function updateWhitelist(uint256 _whitelistId, address[] memory _whitelistAddresses) external",
+        "function createWhitelist(address[] calldata _whitelistAddresses) external",
+        "function updateWhitelist(uint256 _whitelistId, address[] calldata _whitelistAddresses) external",
       ],
       removeSelectors: [],
     },
     {
       facetName: "DAOFacet",
       addSelectors: [
-        "function addRevenueTokens(address[] memory _revenueTokens) external",
+        "function addRevenueTokens(address[] calldata _revenueTokens) external",
       ],
+      removeSelectors: [],
+    },
+    {
+      facetName: "ERC721MarketplaceFacet",
+      addSelectors: [],
       removeSelectors: [],
     },
     {

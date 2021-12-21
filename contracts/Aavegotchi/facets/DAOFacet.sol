@@ -407,7 +407,7 @@ contract DAOFacet is Modifiers {
 
     ///@notice Allow the owner to add a revenue tokens
     ///@param _revenueTokens An array of addresses, revenue token addresses to be added
-    function addRevenueTokens(address[] memory _revenueTokens) external onlyOwner {
+    function addRevenueTokens(address[] calldata _revenueTokens) external onlyOwner {
         for (uint256 i; i < _revenueTokens.length; i++) {
             address _revenueToken = _revenueTokens[i];
             if ((_revenueToken != address(0)) && !s.revenueTokenIndexes[_revenueToken]) {

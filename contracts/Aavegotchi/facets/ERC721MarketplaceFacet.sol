@@ -8,6 +8,7 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketplace.sol";
 import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
+import {LibAavegotchiLending} from "../libraries/LibAavegotchiLending.sol";
 
 contract ERC721MarketplaceFacet is Modifiers {
     event ERC721ListingAdd(
@@ -232,6 +233,9 @@ contract ERC721MarketplaceFacet is Modifiers {
         );
 
         require(_priceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
+
+        require(!LibAavegotchiLending.isAavegotchiLent(_erc721TokenId), "ERC721Marketplace: Aavegotchi is in rental agreement");
+
         s.nextERC721ListingId++;
         uint256 listingId = s.nextERC721ListingId;
 

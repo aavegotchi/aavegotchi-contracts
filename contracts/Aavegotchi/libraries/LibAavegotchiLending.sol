@@ -52,4 +52,13 @@ library LibAavegotchiLending {
         AppStorage storage s = LibAppStorage.diamondStorage();
         require(s.aavegotchiRentalHead[_tokenId] == 0, "AavegotchiLending: Aavegotchi is in rental");
     }
+
+    function isAavegotchiLent(uint256 _tokenId) internal view returns (bool) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        uint256 rentalId = s.aavegotchiRentalHead[_tokenId];
+        if (rentalId == 0) return false;
+        AavegotchiRental storage rental_ = s.aavegotchiRentals[rentalId];
+        if (rental_.timeCreated == 0 || rental_.timeAgreed == 0) return false;
+        return rental_.completed == false;
+    }
 }
