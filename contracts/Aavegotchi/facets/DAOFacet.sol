@@ -28,7 +28,6 @@ contract DAOFacet is Modifiers {
     event ItemModifiersSet(uint256 _wearableId, int8[6] _traitModifiers, uint8 _rarityScoreModifier);
     event RemoveExperience(uint256[] _tokenIds, uint256[] _xpValues);
     event UpdateItemPrice(uint256 _itemId, uint256 _priceInWei);
-    event RevenueTokenAdded(address indexed newRevenueToken_);
 
     /***********************************|
    |             Read Functions         |
