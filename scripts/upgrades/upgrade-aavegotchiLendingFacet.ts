@@ -23,7 +23,7 @@ export async function upgrade() {
         "function cancelAavegotchiRentalByToken(uint256 _erc721TokenId) external",
         "function cancelAavegotchiRental(uint256 _rentalId) external",
         "function agreeAavegotchiRental(uint256 _rentalId, uint256 _erc721TokenId, uint256 _amountPerDay, uint256 _period, uint256[3] calldata _revenueSplit) external",
-        "function claimAavegotchiRental(uint256 _tokenId) external",
+        "function claimAavegotchiRental(uint256 _tokenId, address[] calldata _revenueTokens) external",
       ],
       removeSelectors: [],
     },
@@ -32,13 +32,6 @@ export async function upgrade() {
       addSelectors: [
         "function createWhitelist(address[] calldata _whitelistAddresses) external",
         "function updateWhitelist(uint256 _whitelistId, address[] calldata _whitelistAddresses) external",
-      ],
-      removeSelectors: [],
-    },
-    {
-      facetName: "DAOFacet",
-      addSelectors: [
-        "function addRevenueTokens(address[] calldata _revenueTokens) external",
       ],
       removeSelectors: [],
     },
@@ -66,26 +59,12 @@ export async function upgrade() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
-  let iface: DAOFacetInterface = new ethers.utils.Interface(
-    DAOFacet__factory.abi
-  ) as DAOFacetInterface;
-
-  const revenueTokens = [
-    '0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7' // GHST
-  ];
-
-  const calldata = iface.encodeFunctionData("addRevenueTokens", [
-    revenueTokens,
-  ]);
-
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
-    useMultisig: true,
-    initAddress: maticDiamondAddress,
-    initCalldata: calldata,
+    useMultisig: true
   };
 
   await run("deployUpgrade", args);

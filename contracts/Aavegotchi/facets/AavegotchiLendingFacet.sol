@@ -221,7 +221,8 @@ contract AavegotchiLendingFacet is Modifiers {
     ///@notice Allow a original owner to claim revenue from the rental
     ///@dev Will throw if the NFT has not been lent or if the rental has been canceled already
     ///@param _tokenId The identifier of the lent aavegotchi to claim
-    function claimAavegotchiRental(uint256 _tokenId) external {
+    ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
+    function claimAavegotchiRental(uint256 _tokenId, address[] calldata _revenueTokens) external {
         uint256 rentalId = s.aavegotchiRentalHead[_tokenId];
         require(rentalId != 0, "AavegotchiLending: rental not found");
         AavegotchiRental storage rental = s.aavegotchiRentals[rentalId];
@@ -238,8 +239,8 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256 tokenId = rental.erc721TokenId;
         address escrow = s.aavegotchis[tokenId].escrow;
         address collateralType = s.aavegotchis[tokenId].collateralType;
-        for (uint256 i; i < s.revenueTokens.length; i++) {
-            address revenueToken = s.revenueTokens[i];
+        for (uint256 i; i < _revenueTokens.length; i++) {
+            address revenueToken = _revenueTokens[i];
             if (escrow == address(0)) continue;
             if (collateralType == revenueToken) continue;
 

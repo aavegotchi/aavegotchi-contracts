@@ -404,17 +404,4 @@ contract DAOFacet is Modifiers {
             emit UpdateItemPrice(itemId, _newPrices[i]);
         }
     }
-
-    ///@notice Allow the owner to add a revenue tokens
-    ///@param _revenueTokens An array of addresses, revenue token addresses to be added
-    function addRevenueTokens(address[] calldata _revenueTokens) external onlyOwner {
-        for (uint256 i; i < _revenueTokens.length; i++) {
-            address _revenueToken = _revenueTokens[i];
-            if ((_revenueToken != address(0)) && !s.revenueTokenIndexes[_revenueToken]) {
-                s.revenueTokenIndexes[_revenueToken] = true;
-                s.revenueTokens.push(_revenueToken);
-                emit RevenueTokenAdded(_revenueToken);
-            }
-        }
-    }
 }
