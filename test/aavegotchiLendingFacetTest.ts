@@ -402,18 +402,18 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing claimAavegotchiRental", async function () {
-    // it("Should revert when try to claim rental with wrong rental id", async function () {
-    //   await expect(lendingFacetWithRenter.claimAavegotchiRental(fourthRentalId.add(10), revenueTokens))
-    //     .to.be.revertedWith("AavegotchiLending: rental not found");
-    // });
-    // it("Should revert when try to claim canceled rental", async function () {
-    //   await expect(lendingFacetWithRenter.claimAavegotchiRental(secondRentalId, revenueTokens))
-    //     .to.be.revertedWith("AavegotchiLending: rental not agreed");
-    // });
+  describe("Testing claimAavegotchiRental and claimAndEndAavegotchiRental", async function () {
     it("Should revert when try to claim rental with non original owner during agreement", async function () {
       await expect(lendingFacetWithClaimer.claimAavegotchiRental(unlockedAavegotchiId, revenueTokens))
         .to.be.revertedWith("AavegotchiLending: only owner can claim during agreement");
+    });
+    it("Should revert when try to end rental with non original owner or non renter", async function () {
+      await expect(lendingFacetWithClaimer.claimAndEndAavegotchiRental(unlockedAavegotchiId, revenueTokens))
+        .to.be.revertedWith("AavegotchiLending: only owner or renter can claim and end agreement");
+    });
+    it("Should revert when try to end rental with original owner or renter during agreement", async function () {
+      await expect(lendingFacetWithOwner.claimAndEndAavegotchiRental(unlockedAavegotchiId, revenueTokens))
+        .to.be.revertedWith("AavegotchiLending: not allowed during agreement");
     });
     it("Should succeed when claim rental with original owner during agreement", async function () {
       // Impersonate revenue
@@ -481,6 +481,30 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(renterNewBalance.sub(renterOldBalance)).to.equal(revenue.mul(revenueSplitForReceiver[1]).mul(97).div(10000));
       expect(receiverNewBalance.sub(receiverOldBalance)).to.equal(revenue.mul(revenueSplitForReceiver[2]).mul(97).div(10000));
       expect(claimerNewBalance.sub(claimerOldBalance)).to.equal(revenue.mul(3).div(100));
+    });
+    it("isAavegotchiLent function should return true if aavegotchi rental is not completed", async function() {
+      const status = await lendingFacetWithOwner.isAavegotchiLent(unlockedAavegotchiId);
+      expect(status).to.equal(true);
+    });
+    it("Should succeed when claim rental with original owner after agreement", async function () {
+      // Impersonate revenue
+      await (await ghstERC20.transfer(escrowAddress, ethers.utils.parseUnits('100', 'ether'))).wait();
+
+      const revenue = await ghstERC20.balanceOf(escrowAddress);
+      const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
+      const ownerOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const receiverOldBalance = await ghstERC20.balanceOf(receiver);
+      await (await lendingFacetWithOwner.claimAndEndAavegotchiRental(unlockedAavegotchiId, revenueTokens)).wait();
+      const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
+      const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
+      const ownerNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const receiverNewBalance = await ghstERC20.balanceOf(receiver);
+
+      // Check ghst balance changes
+      expect(escrowNewBalance).to.equal(0);
+      expect(ownerNewBalance.sub(ownerOldBalance)).to.equal(revenue.mul(revenueSplitForReceiver[0]).div(100));
+      expect(renterNewBalance.sub(renterOldBalance)).to.equal(revenue.mul(revenueSplitForReceiver[1]).div(100));
+      expect(receiverNewBalance.sub(receiverOldBalance)).to.equal(revenue.mul(revenueSplitForReceiver[2]).div(100));
 
       // Check rental and aavegotchi status
       const rentalInfo = await lendingFacetWithRenter.getAavegotchiRentalInfo(fourthRentalId);
@@ -494,10 +518,6 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(rentalInfo[1].owner).to.equal(aavegotchiOwnerAddress);
       expect(rentalInfo[1].locked).to.equal(false);
     });
-    // it("Should revert when try to claim completed rental", async function () {
-    //   await expect(lendingFacetWithRenter.claimAavegotchiRental(unlockedAavegotchiId, revenueTokens))
-    //     .to.be.revertedWith("AavegotchiLending: rental already completed");
-    // });
     it("isAavegotchiLent function should return false if aavegotchi rental is completed", async function() {
       const status = await lendingFacetWithOwner.isAavegotchiLent(unlockedAavegotchiId);
       expect(status).to.equal(false);

@@ -218,7 +218,7 @@ contract AavegotchiLendingFacet is Modifiers {
         );
     }
 
-    ///@notice Allow a original owner to claim revenue from the rental
+    ///@notice Allow to claim revenue from the rental
     ///@dev Will throw if the NFT has not been lent or if the rental has been canceled already
     ///@param _tokenId The identifier of the lent aavegotchi to claim
     ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
@@ -267,21 +267,65 @@ contract AavegotchiLendingFacet is Modifiers {
         }
 
         rental.lastClaimed = block.timestamp;
-        if (completionTime <= block.timestamp) {
-            if (rental.erc721TokenAddress == address(this)) {
-                s.aavegotchis[tokenId].locked = false;
-                LibAavegotchi.transfer(renter, originalOwner, tokenId);
-            } else {
-                // External contracts
-                IERC721(rental.erc721TokenAddress).safeTransferFrom(renter, originalOwner, tokenId);
+    }
+
+    ///@notice Allow a original owner to claim revenue from the rental
+    ///@dev Will throw if the NFT has not been lent or if the rental has been canceled already
+    ///@param _tokenId The identifier of the lent aavegotchi to claim
+    ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
+    function claimAndEndAavegotchiRental(uint256 _tokenId, address[] calldata _revenueTokens) external {
+        uint256 rentalId = s.aavegotchiRentalHead[_tokenId];
+        require(rentalId != 0, "AavegotchiLending: rental not found");
+        AavegotchiRental storage rental = s.aavegotchiRentals[rentalId];
+
+        address sender = LibMeta.msgSender();
+        address originalOwner = rental.originalOwner;
+        address renter = rental.renter;
+        address receiver = rental.receiver;
+        require((originalOwner == sender) || (renter == sender), "AavegotchiLending: only owner or renter can claim and end agreement");
+        uint256 completionTime = rental.timeAgreed + rental.period * 1 days;
+        require(completionTime <= block.timestamp, "AavegotchiLending: not allowed during agreement");
+
+        uint256 tokenId = rental.erc721TokenId;
+        address escrow = s.aavegotchis[tokenId].escrow;
+        address collateralType = s.aavegotchis[tokenId].collateralType;
+        for (uint256 i; i < _revenueTokens.length; i++) {
+            address revenueToken = _revenueTokens[i];
+            if (escrow == address(0)) continue;
+            if (collateralType == revenueToken) continue;
+
+            uint256 balance = IERC20(revenueToken).balanceOf(escrow);
+            if (balance == 0) continue;
+
+            if (IERC20(revenueToken).allowance(escrow, address(this)) < balance) {
+                CollateralEscrow(escrow).approveAavegotchiDiamond(revenueToken);
             }
 
-            rental.completed = true;
-            s.aavegotchiRentalHead[tokenId] = 0;
-
-            LibAavegotchiLending.removeLentAavegotchi(tokenId, originalOwner);
-
-            // TODO: remove pet operator
+            uint256 ownerAmount = (balance * rental.revenueSplit[0]) / 100;
+            uint256 renterAmount = (balance * rental.revenueSplit[1]) / 100;
+            LibERC20.transferFrom(revenueToken, escrow, originalOwner, ownerAmount);
+            LibERC20.transferFrom(revenueToken, escrow, renter, renterAmount);
+            if (receiver != address(0)) {
+                uint256 receiverAmount = (balance * rental.revenueSplit[2]) / 100;
+                LibERC20.transferFrom(revenueToken, escrow, receiver, receiverAmount);
+            }
         }
+
+        rental.lastClaimed = block.timestamp;
+
+        // end rental agreement
+        if (rental.erc721TokenAddress == address(this)) {
+            s.aavegotchis[tokenId].locked = false;
+            LibAavegotchi.transfer(renter, originalOwner, tokenId);
+        } else {
+            // External contracts
+            IERC721(rental.erc721TokenAddress).safeTransferFrom(renter, originalOwner, tokenId);
+        }
+
+        rental.completed = true;
+        s.aavegotchiRentalHead[tokenId] = 0;
+
+        LibAavegotchiLending.removeLentAavegotchi(tokenId, originalOwner);
+        // TODO: remove pet operator
     }
 }
