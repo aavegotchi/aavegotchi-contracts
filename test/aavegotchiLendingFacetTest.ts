@@ -405,7 +405,7 @@ describe("Testing Aavegotchi Lending", async function () {
   describe("Testing claimAavegotchiRental and claimAndEndAavegotchiRental", async function () {
     it("Should revert when try to claim rental with non original owner during agreement", async function () {
       await expect(lendingFacetWithClaimer.claimAavegotchiRental(unlockedAavegotchiId, revenueTokens))
-        .to.be.revertedWith("AavegotchiLending: only owner can claim during agreement");
+        .to.be.revertedWith("AavegotchiLending: only owner or renter can claim");
     });
     it("Should revert when try to end rental with non original owner or non renter", async function () {
       await expect(lendingFacetWithClaimer.claimAndEndAavegotchiRental(unlockedAavegotchiId, revenueTokens))
@@ -447,40 +447,13 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(rentalInfo[1].owner).to.equal(renterAddress);
       expect(rentalInfo[1].locked).to.equal(true);
     });
-    it("Should revert when try to claim rental with non original owner with in 1 days after agreement", async function () {
+    it("Should revert when try to claim rental with non original owner after agreement", async function () {
       // Simulate within 1 days after agreement
       await ethers.provider.send("evm_increaseTime", [24 * 3600 * period])
       await ethers.provider.send("evm_mine", [])
 
       await expect(lendingFacetWithClaimer.claimAavegotchiRental(unlockedAavegotchiId, revenueTokens))
-        .to.be.revertedWith("AavegotchiLending: only owner can claim during agreement");
-    });
-    it("Should succeed when claim rental with any account after agreement", async function () {
-      // Simulate 1 days after agreement
-      await ethers.provider.send("evm_increaseTime", [24 * 3600])
-      await ethers.provider.send("evm_mine", [])
-
-      // Impersonate revenue
-      await (await ghstERC20.transfer(escrowAddress, ethers.utils.parseUnits('100', 'ether'))).wait();
-
-      const revenue = await ghstERC20.balanceOf(escrowAddress);
-      const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
-      const ownerOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
-      const receiverOldBalance = await ghstERC20.balanceOf(receiver);
-      const claimerOldBalance = await ghstERC20.balanceOf(claimerAddress);
-      await (await lendingFacetWithClaimer.claimAavegotchiRental(unlockedAavegotchiId, revenueTokens)).wait();
-      const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
-      const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
-      const ownerNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
-      const receiverNewBalance = await ghstERC20.balanceOf(receiver);
-      const claimerNewBalance = await ghstERC20.balanceOf(claimerAddress);
-
-      // Check ghst balance changes
-      expect(escrowNewBalance).to.equal(0);
-      expect(ownerNewBalance.sub(ownerOldBalance)).to.equal(revenue.mul(revenueSplitForReceiver[0]).mul(97).div(10000));
-      expect(renterNewBalance.sub(renterOldBalance)).to.equal(revenue.mul(revenueSplitForReceiver[1]).mul(97).div(10000));
-      expect(receiverNewBalance.sub(receiverOldBalance)).to.equal(revenue.mul(revenueSplitForReceiver[2]).mul(97).div(10000));
-      expect(claimerNewBalance.sub(claimerOldBalance)).to.equal(revenue.mul(3).div(100));
+        .to.be.revertedWith("AavegotchiLending: only owner or renter can claim");
     });
     it("isAavegotchiLent function should return true if aavegotchi rental is not completed", async function() {
       const status = await lendingFacetWithOwner.isAavegotchiLent(unlockedAavegotchiId);

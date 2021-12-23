@@ -3,6 +3,9 @@ pragma solidity 0.8.1;
 
 import {LibAppStorage, AppStorage, AavegotchiRental} from "./LibAppStorage.sol";
 import "../../shared/interfaces/IERC721.sol";
+import {LibERC20} from "../../shared/libraries/LibERC20.sol";
+import {IERC20} from "../../shared/interfaces/IERC20.sol";
+import {CollateralEscrow} from "../CollateralEscrow.sol";
 
 library LibAavegotchiLending {
     event AavegotchiRentalCanceled(uint256 indexed rentalId, uint256 time);
@@ -46,6 +49,41 @@ library LibAavegotchiLending {
         }
         s.lentTokenIds[_owner].pop();
         delete s.lentTokenIdIndexes[_owner][_tokenId];
+    }
+
+    function claimAavegotchiRental(uint256 rentalId, address[] calldata _revenueTokens) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        AavegotchiRental storage rental = s.aavegotchiRentals[rentalId];
+
+        address originalOwner = rental.originalOwner;
+        address renter = rental.renter;
+        address receiver = rental.receiver;
+        uint256 tokenId = rental.erc721TokenId;
+        address escrow = s.aavegotchis[tokenId].escrow;
+        address collateralType = s.aavegotchis[tokenId].collateralType;
+        for (uint256 i; i < _revenueTokens.length; i++) {
+            address revenueToken = _revenueTokens[i];
+            if (escrow == address(0)) continue;
+            if (collateralType == revenueToken) continue;
+
+            uint256 balance = IERC20(revenueToken).balanceOf(escrow);
+            if (balance == 0) continue;
+
+            if (IERC20(revenueToken).allowance(escrow, address(this)) < balance) {
+                CollateralEscrow(escrow).approveAavegotchiDiamond(revenueToken);
+            }
+
+            uint256 ownerAmount = (balance * rental.revenueSplit[0]) / 100;
+            uint256 renterAmount = (balance * rental.revenueSplit[1]) / 100;
+            LibERC20.transferFrom(revenueToken, escrow, originalOwner, ownerAmount);
+            LibERC20.transferFrom(revenueToken, escrow, renter, renterAmount);
+            if (receiver != address(0)) {
+                uint256 receiverAmount = (balance * rental.revenueSplit[2]) / 100;
+                LibERC20.transferFrom(revenueToken, escrow, receiver, receiverAmount);
+            }
+        }
+
+        rental.lastClaimed = block.timestamp;
     }
 
     function enforceAavegotchiNotInRental(uint256 _tokenId) internal view {

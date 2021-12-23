@@ -8,7 +8,6 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibAavegotchiLending} from "../libraries/LibAavegotchiLending.sol";
 import {Modifiers, AavegotchiRental} from "../libraries/LibAppStorage.sol";
-import {CollateralEscrow} from "../CollateralEscrow.sol";
 
 contract AavegotchiLendingFacet is Modifiers {
     event AavegotchiRentalAdd(
@@ -228,45 +227,9 @@ contract AavegotchiLendingFacet is Modifiers {
         AavegotchiRental storage rental = s.aavegotchiRentals[rentalId];
 
         address sender = LibMeta.msgSender();
-        address originalOwner = rental.originalOwner;
-        address renter = rental.renter;
-        address receiver = rental.receiver;
-        uint256 completionTime = rental.timeAgreed + rental.period * 1 days;
-        if (completionTime + 1 days > block.timestamp) {
-            require(originalOwner == sender, "AavegotchiLending: only owner can claim during agreement");
-        }
+        require((rental.originalOwner == sender) || (rental.renter == sender), "AavegotchiLending: only owner or renter can claim");
 
-        uint256 tokenId = rental.erc721TokenId;
-        address escrow = s.aavegotchis[tokenId].escrow;
-        address collateralType = s.aavegotchis[tokenId].collateralType;
-        for (uint256 i; i < _revenueTokens.length; i++) {
-            address revenueToken = _revenueTokens[i];
-            if (escrow == address(0)) continue;
-            if (collateralType == revenueToken) continue;
-
-            uint256 balance = IERC20(revenueToken).balanceOf(escrow);
-            if (balance == 0) continue;
-
-            if (IERC20(revenueToken).allowance(escrow, address(this)) < balance) {
-                CollateralEscrow(escrow).approveAavegotchiDiamond(revenueToken);
-            }
-            if ((completionTime + 1 days <= block.timestamp) && (sender != originalOwner)) {
-                uint256 senderAmount = (balance * 3) / 100;
-                LibERC20.transferFrom(revenueToken, escrow, sender, senderAmount);
-                balance -= senderAmount;
-            }
-
-            uint256 ownerAmount = (balance * rental.revenueSplit[0]) / 100;
-            uint256 renterAmount = (balance * rental.revenueSplit[1]) / 100;
-            LibERC20.transferFrom(revenueToken, escrow, originalOwner, ownerAmount);
-            LibERC20.transferFrom(revenueToken, escrow, renter, renterAmount);
-            if (receiver != address(0)) {
-                uint256 receiverAmount = (balance * rental.revenueSplit[2]) / 100;
-                LibERC20.transferFrom(revenueToken, escrow, receiver, receiverAmount);
-            }
-        }
-
-        rental.lastClaimed = block.timestamp;
+        LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
     }
 
     ///@notice Allow a original owner to claim revenue from the rental
@@ -281,51 +244,25 @@ contract AavegotchiLendingFacet is Modifiers {
         address sender = LibMeta.msgSender();
         address originalOwner = rental.originalOwner;
         address renter = rental.renter;
-        address receiver = rental.receiver;
         require((originalOwner == sender) || (renter == sender), "AavegotchiLending: only owner or renter can claim and end agreement");
-        uint256 completionTime = rental.timeAgreed + rental.period * 1 days;
-        require(completionTime <= block.timestamp, "AavegotchiLending: not allowed during agreement");
+        require(rental.timeAgreed + rental.period * 1 days <= block.timestamp, "AavegotchiLending: not allowed during agreement");
 
-        uint256 tokenId = rental.erc721TokenId;
-        address escrow = s.aavegotchis[tokenId].escrow;
-        address collateralType = s.aavegotchis[tokenId].collateralType;
-        for (uint256 i; i < _revenueTokens.length; i++) {
-            address revenueToken = _revenueTokens[i];
-            if (escrow == address(0)) continue;
-            if (collateralType == revenueToken) continue;
-
-            uint256 balance = IERC20(revenueToken).balanceOf(escrow);
-            if (balance == 0) continue;
-
-            if (IERC20(revenueToken).allowance(escrow, address(this)) < balance) {
-                CollateralEscrow(escrow).approveAavegotchiDiamond(revenueToken);
-            }
-
-            uint256 ownerAmount = (balance * rental.revenueSplit[0]) / 100;
-            uint256 renterAmount = (balance * rental.revenueSplit[1]) / 100;
-            LibERC20.transferFrom(revenueToken, escrow, originalOwner, ownerAmount);
-            LibERC20.transferFrom(revenueToken, escrow, renter, renterAmount);
-            if (receiver != address(0)) {
-                uint256 receiverAmount = (balance * rental.revenueSplit[2]) / 100;
-                LibERC20.transferFrom(revenueToken, escrow, receiver, receiverAmount);
-            }
-        }
-
-        rental.lastClaimed = block.timestamp;
+        LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
 
         // end rental agreement
         if (rental.erc721TokenAddress == address(this)) {
-            s.aavegotchis[tokenId].locked = false;
-            LibAavegotchi.transfer(renter, originalOwner, tokenId);
+            s.aavegotchis[_tokenId].locked = false;
+            LibAavegotchi.transfer(renter, originalOwner, _tokenId);
         } else {
             // External contracts
-            IERC721(rental.erc721TokenAddress).safeTransferFrom(renter, originalOwner, tokenId);
+            IERC721(rental.erc721TokenAddress).safeTransferFrom(renter, originalOwner, _tokenId);
         }
 
         rental.completed = true;
-        s.aavegotchiRentalHead[tokenId] = 0;
+        s.aavegotchiRentalHead[_tokenId] = 0;
 
-        LibAavegotchiLending.removeLentAavegotchi(tokenId, originalOwner);
+        LibAavegotchiLending.removeLentAavegotchi(_tokenId, originalOwner);
         // TODO: remove pet operator
     }
+
 }
