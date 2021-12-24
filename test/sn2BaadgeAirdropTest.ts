@@ -54,7 +54,7 @@ describe("Airdrop SZN2 Baadges", async function () {
 
     console.log("topTenRookKin: ", concatInteger);
 
-    expect(itemTypes[0].svgId.toString()).to.equal(concatInteger.toString());
+    expect(itemTypes[24].svgId.toString()).to.equal(concatInteger.toString());
 
     //rookie kin top 100
     let rookKinTop100 = await aavegotchiFacet.getAavegotchi(rookKin[99]);
@@ -67,7 +67,7 @@ describe("Airdrop SZN2 Baadges", async function () {
 
     console.log("top100RookKin: ", concatInteger2);
 
-    expect(itemTypes[1].svgId.toString()).to.equal(concatInteger2.toString());
+    expect(itemTypes[26].svgId.toString()).to.equal(concatInteger2.toString());
   });
 
   it.only("Should airdrop szn2 kinship baadges", async function () {
@@ -82,7 +82,7 @@ describe("Airdrop SZN2 Baadges", async function () {
 
     console.log("topTenKinship: ", concatInteger);
 
-    expect(itemTypes[2].svgId.toString()).to.equal(concatInteger.toString());
+    expect(itemTypes[18].svgId.toString()).to.equal(concatInteger.toString());
 
     //kinship top 100
     let kinshipTop100 = await aavegotchiFacet.getAavegotchi(kinship[99]);
@@ -95,7 +95,7 @@ describe("Airdrop SZN2 Baadges", async function () {
 
     console.log("top100Kinship: ", concatInteger2);
 
-    expect(itemTypes[3].svgId.toString()).to.equal(concatInteger2.toString());
+    expect(itemTypes[21].svgId.toString()).to.equal(concatInteger2.toString());
   });
 
   it.only("Should airdrop szn2 kinship top3 baadges", async function () {
@@ -110,7 +110,7 @@ describe("Airdrop SZN2 Baadges", async function () {
 
     console.log("kinship1st: ", concatInteger);
 
-    expect(itemTypes[12].svgId.toString()).to.equal(concatInteger.toString());
+    expect(itemTypes[1].svgId.toString()).to.equal(concatInteger.toString());
 
     //2nd
     let kinship2nd = await aavegotchiFacet.getAavegotchi(kinship[1]);
@@ -123,7 +123,7 @@ describe("Airdrop SZN2 Baadges", async function () {
 
     console.log("kinship2nd: ", concatInteger2);
 
-    expect(itemTypes[13].svgId.toString()).to.equal(concatInteger2.toString());
+    expect(itemTypes[4].svgId.toString()).to.equal(concatInteger2.toString());
 
     //3rd
     let kinship3rd = await aavegotchiFacet.getAavegotchi(kinship[2]);
@@ -136,7 +136,7 @@ describe("Airdrop SZN2 Baadges", async function () {
 
     console.log("kinship2nd: ", concatInteger3);
 
-    expect(itemTypes[14].svgId.toString()).to.equal(concatInteger3.toString());
+    expect(itemTypes[7].svgId.toString()).to.equal(concatInteger3.toString());
   });
 
   it.only("Should airdrop szn2 rarity 1st baadges", async function () {
@@ -151,7 +151,7 @@ describe("Airdrop SZN2 Baadges", async function () {
 
     console.log("rarity1st: ", concatInteger);
 
-    expect(itemTypes[18].svgId.toString()).to.equal(concatInteger.toString());
+    expect(itemTypes[0].svgId.toString()).to.equal(concatInteger.toString());
   });
 
   it.only("Should airdrop szn2 rookie xp top3 baadges", async function () {
@@ -166,7 +166,7 @@ describe("Airdrop SZN2 Baadges", async function () {
 
     console.log("rookXP1st: ", concatInteger);
 
-    expect(itemTypes[24].svgId.toString()).to.equal(concatInteger.toString());
+    expect(itemTypes[12].svgId.toString()).to.equal(concatInteger.toString());
 
     //2nd
     let rookXP2nd = await aavegotchiFacet.getAavegotchi(rookXP[1]);
@@ -179,7 +179,7 @@ describe("Airdrop SZN2 Baadges", async function () {
 
     console.log("kinship2nd: ", concatInteger2);
 
-    expect(itemTypes[25].svgId.toString()).to.equal(concatInteger2.toString());
+    expect(itemTypes[14].svgId.toString()).to.equal(concatInteger2.toString());
 
     //3rd
     let rookXP3rd = await aavegotchiFacet.getAavegotchi(rookXP[2]);
@@ -192,6 +192,6 @@ describe("Airdrop SZN2 Baadges", async function () {
 
     console.log("kinship3rd: ", concatInteger3);
 
-    expect(itemTypes[26].svgId.toString()).to.equal(concatInteger3.toString());
+    expect(itemTypes[16].svgId.toString()).to.equal(concatInteger3.toString());
   });
 });
