@@ -5,8 +5,8 @@ import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
-import { UserGotchisOwned } from "../types";
-import { getSubgraphGotchis } from "../scripts/query/queryAavegotchis";
+
+import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import request from "graphql-request";
 
 export interface GrantXPSnapshotTaskArgs {
@@ -76,7 +76,7 @@ async function getVotingAddresses(proposalId: string) {
       votingAddresses.push(voter.voter);
   });
 
-  console.log("final voting addresses:", votingAddresses);
+  console.log("Found voting addresses:", votingAddresses.length);
   return votingAddresses;
 }
 
@@ -140,54 +140,10 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
         throw Error("Incorrect network selected");
       }
 
-      //Get Polygon
-      const polygonUsers: UserGotchisOwned[] = await getSubgraphGotchis(
+      const { tokenIds, finalUsers } = await getPolygonAndMainnetGotchis(
         addresses,
-        "matic"
+        hre
       );
-      const polygonGotchis = polygonUsers
-        .map((item) => item.gotchisOwned.length)
-        .reduce((agg, cur) => agg + cur);
-      console.log(
-        `Found ${polygonUsers.length} Polygon Users with ${polygonGotchis} Gotchis`
-      );
-
-      //Get mainnet
-      const mainnetUsers: UserGotchisOwned[] = await getSubgraphGotchis(
-        addresses,
-        "eth"
-      );
-      const mainnetGotchis = mainnetUsers
-        .map((item) => item.gotchisOwned.length)
-        .reduce((agg, cur) => agg + cur);
-      console.log(
-        `Found ${mainnetUsers.length} Ethereum Users with ${mainnetGotchis} Gotchis`
-      );
-
-      const finalUsers = polygonUsers.concat(mainnetUsers);
-
-      const tokenIds: string[] = [];
-
-      //Extract token ids
-      polygonUsers.forEach((user) => {
-        user.gotchisOwned.forEach((gotchi) => {
-          if (gotchi.status === "3") {
-            if (tokenIds.includes(gotchi.id))
-              throw new Error(`Duplicate token ID: ${gotchi.id}`);
-            else tokenIds.push(gotchi.id);
-          }
-        });
-      });
-
-      mainnetUsers.forEach((user) => {
-        user.gotchisOwned.forEach((gotchi) => {
-          if (gotchi.status === "3") {
-            if (tokenIds.includes(gotchi.id))
-              throw new Error(`Duplicate token ID: ${gotchi.id}`);
-            else tokenIds.push(gotchi.id);
-          }
-        });
-      });
 
       //Check how many unused addresses there are (addresses that voted, but do not have Aavegotchis)
       const unusedAddresses: string[] = [];
@@ -196,7 +152,10 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
       );
       lowerCaseAddresses.forEach((address: string) => {
         const found = finalUsers.find((val) => val.id === address);
-        if (!found) unusedAddresses.push(address);
+        if (!found) {
+          console.log("unused address:", address);
+          unusedAddresses.push(address);
+        }
       });
 
       console.log(
@@ -220,8 +179,6 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
 
         const offset = batchSize * index;
         const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
-
-        console.log("send token ids:", sendTokenIds);
 
         console.log(
           `Sending ${xpAmount} XP to ${sendTokenIds.length} Aavegotchis `

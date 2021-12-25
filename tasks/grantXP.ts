@@ -8,6 +8,7 @@ import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { GotchisOwned, UserGotchisOwned } from "../types";
 import {
   getEthSubgraphGotchis,
+  getPolygonAndMainnetGotchis,
   getSubgraphGotchis,
   queryAavegotchis,
 } from "../scripts/query/queryAavegotchis";
@@ -33,6 +34,11 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     let { addresses } = require(`../data/airdrops/${filename}.ts`);
 
+    const { finalUsers, tokenIds } = await getPolygonAndMainnetGotchis(
+      addresses,
+      hre
+    );
+
     const diamondAddress = maticDiamondAddress;
     const gameManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
     console.log(gameManager);
@@ -54,122 +60,6 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     } else {
       throw Error("Incorrect network selected");
     }
-
-    const finalAddresses: string[] = [];
-
-    for (let index = 0; index < addresses.length; index++) {
-      let address = addresses[index];
-      if (address.includes(".eth")) {
-        let ethSigner = new hre.ethers.providers.JsonRpcProvider(
-          process.env.MAINNET_URL
-        );
-
-        const resolved = await ethSigner.resolveName(address);
-        address = resolved;
-      }
-
-      if (await hre.ethers.utils.isAddress(address)) {
-        finalAddresses.push(address);
-      }
-    }
-
-    //Set new addresses after replacing .eth addresses with resolved names
-    addresses = finalAddresses;
-
-    //Get Polygon
-    const polygonUsers: UserGotchisOwned[] = await getSubgraphGotchis(
-      addresses,
-      "matic"
-    );
-
-    polygonUsers.forEach((address) => {
-      console.log(
-        `address:" ${address.id} and gotchis owned: ${address.gotchisOwned.map(
-          (got) => got.id
-        )}`
-      );
-    });
-
-    const polygonGotchis = polygonUsers
-      .map((item) => item.gotchisOwned.length)
-      .reduce((agg, cur) => agg + cur);
-    console.log(
-      `Found ${polygonUsers.length} Polygon Users with ${polygonGotchis} Gotchis`
-    );
-
-    //Get mainnet
-    const mainnetUsers: UserGotchisOwned[] = await getEthSubgraphGotchis(
-      addresses,
-      "eth"
-    );
-    const mainnetGotchis = mainnetUsers
-      .map((item) => item.gotchisOwned.length)
-      .reduce((agg, cur) => agg + cur);
-    console.log(
-      `Found ${mainnetUsers.length} Ethereum Users with ${mainnetGotchis} Gotchis`
-    );
-
-    const finalUsers = polygonUsers.concat(mainnetUsers);
-
-    const tokenIds: string[] = [];
-
-    //Handle Polygon gotchis
-    polygonUsers.forEach((user) => {
-      user.gotchisOwned.forEach((gotchi) => {
-        if (gotchi.status === "3") {
-          if (tokenIds.includes(gotchi.id))
-            throw new Error(`Duplicate token ID: ${gotchi.id}`);
-          else tokenIds.push(gotchi.id);
-        } else console.log(`${gotchi.id} is not a gotchi!`);
-      });
-    });
-
-    //Handle mainnet Gotchis
-    let mainnetTokenIds: string[] = [];
-
-    //first get all gotchis
-    mainnetUsers.forEach((user) => {
-      user.gotchisOwned.forEach((gotchi) => {
-        if (tokenIds.includes(gotchi.id))
-          throw new Error(`Duplicate token ID: ${gotchi.id}`);
-        else mainnetTokenIds.push(gotchi.id);
-      });
-    });
-
-    //then get gotchi object on polygon for those gotchi ids to ensure they are gotchis (not portals)
-    const finalMainnetIds = await queryAavegotchis(mainnetTokenIds);
-    finalMainnetIds.aavegotchis.forEach((gotchi: GotchisOwned) => {
-      if (gotchi.status === "3") {
-        if (tokenIds.includes(gotchi.id))
-          throw new Error(`Duplicate token ID: ${gotchi.id}`);
-        else tokenIds.push(gotchi.id);
-      } else console.log(`${gotchi.id} is not a gotchi!`);
-    });
-
-    //final check to prevent duplicate token ids
-    const checkedIds: string[] = [];
-    tokenIds.forEach((id) => {
-      if (checkedIds.includes(id)) {
-        throw new Error("Duplicate id");
-      }
-      checkedIds.push(id);
-    });
-
-    console.log("final token ids:", tokenIds);
-
-    //Check how many unused addresses there are (addresses that voted, but do not have Aavegotchis)
-    const unusedAddresses: string[] = [];
-    const lowerCaseAddresses = addresses.map((address: string) =>
-      address.toLowerCase()
-    );
-    lowerCaseAddresses.forEach((address: string) => {
-      const found = finalUsers.find((val) => val.id === address);
-      if (!found) unusedAddresses.push(address);
-    });
-
-    console.log(
-      `There were ${unusedAddresses.length} addresses without Gotchis.`
-    );
 
     const batches = Math.ceil(tokenIds.length / batchSize);
 
