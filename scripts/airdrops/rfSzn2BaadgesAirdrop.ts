@@ -95,7 +95,7 @@ export async function main() {
   //Rookie of the Year
   let rookOfTheYrAirdrop = await airdropTaskForBaadges(
     [itemTypes[10]],
-    [rookieOfYear[0]]
+    rookieOfYear
   );
   await run("airdropBaadges", rookOfTheYrAirdrop);
 
