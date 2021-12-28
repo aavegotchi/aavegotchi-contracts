@@ -10,7 +10,6 @@ import {
   rarity,
   rookKin,
   rookXP,
-  rookieOfYear,
   xp,
   topTenKinship,
   top100Kinship,

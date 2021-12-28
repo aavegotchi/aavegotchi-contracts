@@ -10,7 +10,6 @@ import {
   rarity,
   rookKin,
   rookXP,
-  rookieOfYear,
   xp,
   topTenKinship,
   top100Kinship,
@@ -32,6 +31,8 @@ import {
   plaayerSet7,
   plaayerSet8,
 } from "../../scripts/airdrops/airdropTokenIdArrays";
+
+import { rookieOfYear } from "../../scripts/airdrops/rfSzn2ROY";
 
 export async function main() {
   let upload = await uploadSvgTaskForBaadges(itemTypes, "rfSzn2BaadgeSvgs");
