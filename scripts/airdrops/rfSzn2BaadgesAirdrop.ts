@@ -10,6 +10,7 @@ import {
   rarity,
   rookKin,
   rookXP,
+  rookieOfYear,
   xp,
   topTenKinship,
   top100Kinship,
@@ -46,11 +47,11 @@ export async function main() {
 
   //Airdrops
   //Particiation Badge
-  /*   let plaayerAirdrop = await airdropTaskForBaadges(
+  let plaayerAirdrop = await airdropTaskForBaadges(
     [itemTypes[9]],
     plaayerTotal
   );
-  await run("airdropBaadges", plaayerAirdrop); */
+  await run("airdropBaadges", plaayerAirdrop);
 
   //Top Kinship -- Normal and Rookie
   let top10RookKinAirdrop = await airdropTaskForBaadges(
@@ -93,7 +94,7 @@ export async function main() {
   //Rookie of the Year
   let rookOfTheYrAirdrop = await airdropTaskForBaadges(
     [itemTypes[10]],
-    [rarity[0]]
+    [rookieOfYear[0]]
   );
   await run("airdropBaadges", rookOfTheYrAirdrop);
 

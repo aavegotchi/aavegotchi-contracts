@@ -60,6 +60,8 @@ export const xp = [
   4797, 9753, 9681, 3288, 3585, 9760, 14557, 1177, 8605, 3934, 6376,
 ];
 
+export const rookieOfYear = [17344];
+
 export const topTenKinship = kinship.slice(0, 10); //ranks 4 to 10
 export const top100Kinship = kinship.slice(10, 100); // ranks 10 to 100
 export const topTenRarity = rarity.slice(0, 10);
