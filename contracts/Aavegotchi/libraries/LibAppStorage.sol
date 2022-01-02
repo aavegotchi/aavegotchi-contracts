@@ -10,7 +10,6 @@ uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
 uint256 constant TRAIT_BONUSES_NUM = 5;
 uint256 constant PORTAL_AAVEGOTCHIS_NUM = 10;
-uint256 constant WHITELIST_LIMIT = 100;
 
 //  switch (traitType) {
 //         case 0:

@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
-import {Modifiers, WHITELIST_LIMIT} from "../libraries/LibAppStorage.sol";
+import {Modifiers} from "../libraries/LibAppStorage.sol";
 
 contract WhitelistFacet is Modifiers {
     event WhitelistCreated(uint256 indexed whitelistId, address indexed owner, address[] addresses);
@@ -12,7 +12,6 @@ contract WhitelistFacet is Modifiers {
     function createWhitelist(address[] calldata _whitelistAddresses) external {
         uint256 whitelistLength = _whitelistAddresses.length;
         require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
-        require(whitelistLength <= WHITELIST_LIMIT, "WhitelistFacet: Whitelist length exceeds limit");
 
         address sender = LibMeta.msgSender();
         s.nextWhitelistId++;
@@ -34,7 +33,6 @@ contract WhitelistFacet is Modifiers {
 
         uint256 whitelistLength = _whitelistAddresses.length;
         require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
-        require(whitelistLength + currentWhitelistLength <= WHITELIST_LIMIT, "WhitelistFacet: Whitelist length exceeds limit");
 
         _addAddressesToWhitelist(_whitelistId, _whitelistAddresses);
 
