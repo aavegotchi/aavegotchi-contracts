@@ -31,8 +31,10 @@ export async function upgrade() {
     {
       facetName: "WhitelistFacet",
       addSelectors: [
-        "function createWhitelist(address[] calldata _whitelistAddresses) external",
+        "function createWhitelist(string calldata _name, address[] calldata _whitelistAddresses) external",
         "function updateWhitelist(uint256 _whitelistId, address[] calldata _whitelistAddresses) external",
+        "function getWhitelist(uint256 _whitelistId) external view",
+        "function getWhitelists() external view",
       ],
       removeSelectors: [],
     },

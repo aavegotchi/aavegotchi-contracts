@@ -104,7 +104,8 @@ contract AavegotchiLendingFacet is Modifiers {
         if (_receiver == address(0)) {
             require(_revenueSplit[2] == 0, "AavegotchiLending: revenue split for invalid receiver should be zero");
         }
-        require(_whitelistId == 0 || s.whitelists[_whitelistId].owner == sender, "AavegotchiLending: Not owner of whitelist");
+        require(s.whitelists.length > _whitelistId, "AavegotchiLending: whitelist not found");
+        require(s.whitelists[_whitelistId].owner == sender, "AavegotchiLending: Not owner of whitelist");
 
         require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "AavegotchiLending: Only aavegotchi available");
 
@@ -180,7 +181,7 @@ contract AavegotchiLendingFacet is Modifiers {
         address renter = LibMeta.msgSender();
         address originalOwner = rental.originalOwner;
         require(originalOwner != renter, "AavegotchiLending: renter can't be original owner");
-        require(rental.whitelistId == 0 || s.isWhitelisted[rental.whitelistId][renter], "AavegotchiLending: Not whitelisted address");
+        require(s.isWhitelisted[rental.whitelistId][renter], "AavegotchiLending: Not whitelisted address");
 
         if (rental.amountPerDay > 0) {
             uint256 transferAmount = rental.amountPerDay * rental.period;

@@ -267,11 +267,8 @@ struct AppStorage {
     mapping(uint256 => uint256) aavegotchiRentalHead; // aavegotchiId => rentalId
     mapping(address => uint256[]) lentTokenIds; // address => lent token ids
     mapping(address => mapping(uint256 => uint256)) lentTokenIdIndexes; // address => lent token id => index
-    // uint256 nextWhitelistId;
-    Whitelist[] whitelists; // whitelistId => whitelistAddresses
+    Whitelist[] whitelists;
     mapping(uint256 => mapping(address => bool)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
-    // mapping(uint256 => address) whitelistOwners; // whitelistId => owner addresses
-    // mapping(address => uint256[]) ownerWhitelistIds; // owner addresses => whitelistIds
 }
 
 library LibAppStorage {
