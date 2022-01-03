@@ -104,7 +104,7 @@ contract AavegotchiLendingFacet is Modifiers {
         if (_receiver == address(0)) {
             require(_revenueSplit[2] == 0, "AavegotchiLending: revenue split for invalid receiver should be zero");
         }
-        require(_whitelistId == 0 || s.whitelistOwners[_whitelistId] == sender, "AavegotchiLending: Not owner of whitelist");
+        require(_whitelistId == 0 || s.whitelists[_whitelistId].owner == sender, "AavegotchiLending: Not owner of whitelist");
 
         require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "AavegotchiLending: Only aavegotchi available");
 
@@ -264,5 +264,4 @@ contract AavegotchiLendingFacet is Modifiers {
         LibAavegotchiLending.removeLentAavegotchi(_tokenId, originalOwner);
         // TODO: remove pet operator
     }
-
 }
