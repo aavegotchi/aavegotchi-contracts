@@ -25,9 +25,9 @@ describe("Testing Aavegotchi Lending", async function () {
   const revenueTokens: string[] = [ghstAddress];
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   const claimerAddress = "0x3507e4978e0eb83315d20df86ca0b976c0e40ccb";
-  const renterAddress = "0xBC67F26c2b87e16e304218459D2BB60Dac5C80bC"; // renter should be GHST holder
+  const renterAddress = "0x5A27DBBfF05F36DC927137855E3381f0c20C1CDd"; // renter should be GHST holder
   const nonGhstHolderAddress = "0x725Fe4790fC6435B5161f88636C2A50e43247A4b"; // GHST holder balance should be 0
-  const nonWhitelistedAddress = "0xaa3b1fdc3aa57bf24418e397f8c80e7385aaa594"; // non-whitelisted address should be GHST holder
+  const nonWhitelistedAddress = "0xaA3B1fDC3Aa57Bf24418E397f8c80e7385aAa594"; // non-whitelisted address should be GHST holder
   const ghstHolderAddress = "0x3721546e51258065bfdb9746b2e442c7671b0298";
   const receiver = "0x382038b034fa8Ea64C74C81d680669bDaC4D0636";
   const originalPetOperator = "0x4E59235b35d504D1372ABf67a835031F98114d64"; // original pet operator should be MATIC holder
@@ -105,22 +105,20 @@ describe("Testing Aavegotchi Lending", async function () {
 
   describe("Testing createWhitelist", async function () {
     it("Should revert if whitelist is empty", async function () {
-      await expect(whitelistFacetWithOwner.createWhitelist([])).to.be.revertedWith("WhitelistFacet: Whitelist length should be larger than zero");
+      await expect(whitelistFacetWithOwner.createWhitelist('', [])).to.be.revertedWith("WhitelistFacet: Whitelist length should be larger than zero");
     });
-    it("Should revert if whitelist length exceeds limit", async function () {
-      const whitelistLargerThanLimit = Array(101).fill(renterAddress);
-      await expect(whitelistFacetWithOwner.createWhitelist(whitelistLargerThanLimit)).to.be.revertedWith("WhitelistFacet: Whitelist length exceeds limit");
-    });
+    // it("Should revert if whitelist length exceeds limit", async function () {
+    //   const whitelistLargerThanLimit = Array(101).fill(renterAddress);
+    //   await expect(whitelistFacetWithOwner.createWhitelist('', whitelistLargerThanLimit)).to.be.revertedWith("WhitelistFacet: Whitelist length exceeds limit");
+    // });
     // it("Should revert if whitelist contains address-zero", async function () {
     //   await expect(whitelistFacetWithOwner.createWhitelist([renterAddress, ethers.constants.AddressZero])).to.be.revertedWith("WhitelistFacet: There's invalid address in the list");
     // });
     it("Should succeed if whitelist is valid", async function() {
-      const receipt = await (await whitelistFacetWithOwner.createWhitelist([renterAddress])).wait();
+      const receipt = await (await whitelistFacetWithOwner.createWhitelist('', [renterAddress])).wait();
       const event = receipt!.events!.find(event => event.event === 'WhitelistCreated');
       whitelistId = event!.args!.whitelistId
-      expect(event!.args!.owner).to.equal(aavegotchiOwnerAddress);
-      expect(event!.args!.addresses.length).to.equal(1);
-      expect(event!.args!.addresses[0]).to.equal(renterAddress);
+      expect(whitelistId).to.equal(0);
     });
   });
 
@@ -129,7 +127,7 @@ describe("Testing Aavegotchi Lending", async function () {
       await expect(whitelistFacetWithOwner.updateWhitelist(whitelistId + 1, [])).to.be.revertedWith("WhitelistFacet: whitelist not found");
     });
     it("Should revert if invalid whitelist id", async function () {
-      const receipt = await (await whitelistFacetWithPortalOwner.createWhitelist([nonWhitelistedAddress])).wait();
+      const receipt = await (await whitelistFacetWithPortalOwner.createWhitelist('',[nonWhitelistedAddress])).wait();
       const event = receipt!.events!.find(event => event.event === 'WhitelistCreated');
       secondWhitelistId = event!.args!.whitelistId
       await expect(whitelistFacetWithOwner.updateWhitelist(secondWhitelistId, [])).to.be.revertedWith("WhitelistFacet: not whitelist owner");
@@ -137,10 +135,10 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert if whitelist is empty", async function () {
       await expect(whitelistFacetWithOwner.updateWhitelist(whitelistId, [])).to.be.revertedWith("WhitelistFacet: Whitelist length should be larger than zero");
     });
-    it("Should revert if whitelist length exceeds limit", async function () {
-      const whitelistLargerThanLimit = Array(100).fill(renterAddress);
-      await expect(whitelistFacetWithOwner.updateWhitelist(whitelistId, whitelistLargerThanLimit)).to.be.revertedWith("WhitelistFacet: Whitelist length exceeds limit");
-    });
+    // it("Should revert if whitelist length exceeds limit", async function () {
+    //   const whitelistLargerThanLimit = Array(100).fill(renterAddress);
+    //   await expect(whitelistFacetWithOwner.updateWhitelist(whitelistId, whitelistLargerThanLimit)).to.be.revertedWith("WhitelistFacet: Whitelist length exceeds limit");
+    // });
     // it("Should revert if whitelist contains address-zero", async function () {
     //   await expect(whitelistFacetWithOwner.updateWhitelist(whitelistId, [nonGhstHolderAddress, ethers.constants.AddressZero])).to.be.revertedWith("WhitelistFacet: There's invalid address in the list");
     // });
@@ -148,8 +146,30 @@ describe("Testing Aavegotchi Lending", async function () {
       const receipt = await (await whitelistFacetWithOwner.updateWhitelist(whitelistId,[nonGhstHolderAddress, renterAddress])).wait();
       const event = receipt!.events!.find(event => event.event === 'WhitelistUpdated');
       expect(event!.args!.whitelistId).to.equal(whitelistId);
-      expect(event!.args!.owner).to.equal(aavegotchiOwnerAddress);
-      expect(event!.args!.addresses.length).to.equal(2);
+    });
+  });
+
+  describe("Testing getWhitelist", async function () {
+    it("Should revert if invalid whitelist id", async function () {
+      await expect(whitelistFacetWithOwner.getWhitelist(secondWhitelistId + 1)).to.be.revertedWith("WhitelistFacet: whitelist not found");
+    });
+    it("Should return array if valid whitelist id", async function () {
+      const whitelist = await whitelistFacetWithOwner.getWhitelist(whitelistId);
+      expect(whitelist.owner).to.equal(aavegotchiOwnerAddress);
+      expect(whitelist.addresses.length).to.equal(2);
+      expect(whitelist.addresses[0]).to.equal(renterAddress);
+    });
+  });
+
+  describe("Testing getWhitelists", async function () {
+    it("Should return array", async function () {
+      const whitelists = await whitelistFacetWithOwner.getWhitelists();
+      expect(whitelists.length).to.equal(2);
+      expect(whitelists[0].owner).to.equal(aavegotchiOwnerAddress);
+      expect(whitelists[0].addresses.length).to.equal(2);
+      expect(whitelists[0].addresses[0]).to.equal(renterAddress);
+      expect(whitelists[1].addresses.length).to.equal(1);
+      expect(whitelists[1].addresses[0]).to.equal(nonWhitelistedAddress);
     });
   });
 
@@ -173,7 +193,7 @@ describe("Testing Aavegotchi Lending", async function () {
     });
     it("Should revert if whitelist id is invalid", async function () {
       await expect(lendingFacetWithOwner.addAavegotchiRental(diamondAddress, unlockedAavegotchiId, amountPerDay, period, revenueSplitWithoutReceiver, ethers.constants.AddressZero, whitelistId + 10))
-        .to.be.revertedWith("AavegotchiLending: Not owner of whitelist");
+        .to.be.revertedWith("AavegotchiLending: whitelist not found");
     });
     it("Should revert if try to add rental for not aavegotchi", async function () {
       await (await erc721MarketplaceFacet.cancelERC721ListingByToken(diamondAddress, lockedPortalId)).wait()
@@ -359,6 +379,8 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should succeed when agree rental with valid data", async function () {
       const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
       const ownerOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const ghstERC20WithRenter = await impersonate(renterAddress, ghstERC20, ethers, network);
+      await ghstERC20WithRenter.approve(diamondAddress, amountPerDay.mul(period));
       const receipt = await (await lendingFacetWithRenter.agreeAavegotchiRental(fourthRentalId, unlockedAavegotchiId, amountPerDay, period, revenueSplitForReceiver)).wait();
       const event = receipt!.events!.find(event => event.event === 'ERC721ExecutedRental');
       expect(event!.args!.renter).to.equal(renterAddress);
