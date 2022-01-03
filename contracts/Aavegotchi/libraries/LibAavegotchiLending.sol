@@ -23,9 +23,7 @@ library LibAavegotchiLending {
         rental.canceled = true;
 
         //Unlock Aavegotchis when rental is created
-        if (rental.erc721TokenAddress == address(this)) {
-            s.aavegotchis[rental.erc721TokenId].locked = false;
-        }
+        s.aavegotchis[rental.erc721TokenId].locked = false;
         s.aavegotchiRentalHead[rental.erc721TokenId] = 0;
 
         emit AavegotchiRentalCanceled(_rentalId, block.number);

@@ -13,7 +13,6 @@ contract AavegotchiLendingFacet is Modifiers {
     event AavegotchiRentalAdd(
         uint256 indexed rentalId,
         address indexed originalOwner,
-        address erc721TokenAddress,
         uint256 erc721TokenId,
         uint256 amountPerDay,
         uint256 period,
@@ -24,7 +23,6 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256 indexed rentalId,
         address indexed originalOwner,
         address renter,
-        address erc721TokenAddress,
         uint256 erc721TokenId,
         uint256 amountPerDay,
         uint256 period,
@@ -72,7 +70,6 @@ contract AavegotchiLendingFacet is Modifiers {
     ///@notice Allow an original aavegotchi owner to add request for rental
     ///@dev If the rental request exist, cancel it and replaces it with the new one
     ///@dev If the rental is active, unable to cancel
-    ///@param _erc721TokenAddress The contract address of the NFT to rent
     ///@param _erc721TokenId The identifier of the NFT to rent
     ///@param _amountPerDay The rental fee of the aavegotchi in $GHST
     ///@param _period The rental period of the aavegotchi
@@ -80,7 +77,6 @@ contract AavegotchiLendingFacet is Modifiers {
     ///@param _receiver The 3rd account for receive revenue split, can be address(0)
     ///@param _whitelistId The identifier of whitelist for agree rental, if 0, allow everyone
     function addAavegotchiRental(
-        address _erc721TokenAddress,
         uint256 _erc721TokenId,
         uint256 _amountPerDay,
         uint256 _period,
@@ -88,13 +84,11 @@ contract AavegotchiLendingFacet is Modifiers {
         address _receiver,
         uint256 _whitelistId
     ) external {
-        IERC721 erc721Token = IERC721(_erc721TokenAddress);
+        IERC721 erc721Token = IERC721(address(this));
         address sender = LibMeta.msgSender();
         require(erc721Token.ownerOf(_erc721TokenId) == sender, "AavegotchiLending: Not owner of aavegotchi");
         require(
-            _erc721TokenAddress == address(this) ||
-                erc721Token.isApprovedForAll(sender, address(this)) ||
-                erc721Token.getApproved(_erc721TokenId) == address(this),
+            erc721Token.isApprovedForAll(sender, address(this)) || erc721Token.getApproved(_erc721TokenId) == address(this),
             "AavegotchiLending: Not approved for transfer"
         );
 
@@ -128,7 +122,6 @@ contract AavegotchiLendingFacet is Modifiers {
             originalOwner: sender,
             renter: address(0),
             receiver: _receiver,
-            erc721TokenAddress: _erc721TokenAddress,
             erc721TokenId: _erc721TokenId,
             whitelistId: _whitelistId,
             timeCreated: block.timestamp,
@@ -138,12 +131,10 @@ contract AavegotchiLendingFacet is Modifiers {
             completed: false
         });
 
-        emit AavegotchiRentalAdd(rentalId, sender, _erc721TokenAddress, _erc721TokenId, _amountPerDay, _period, block.timestamp);
+        emit AavegotchiRentalAdd(rentalId, sender, _erc721TokenId, _amountPerDay, _period, block.timestamp);
 
         // Lock Aavegotchis when listing is created
-        if (_erc721TokenAddress == address(this)) {
-            s.aavegotchis[_erc721TokenId].locked = true;
-        }
+        s.aavegotchis[_erc721TokenId].locked = true;
     }
 
     ///@notice Allow an original aavegotchi owner to cancel his NFT rental by providing the NFT contract address and identifier
@@ -196,26 +187,12 @@ contract AavegotchiLendingFacet is Modifiers {
         s.lentTokenIdIndexes[originalOwner][tokenId] = s.lentTokenIds[originalOwner].length;
         s.lentTokenIds[originalOwner].push(tokenId);
 
-        if (rental.erc721TokenAddress == address(this)) {
-            LibAavegotchi.transfer(originalOwner, renter, tokenId);
-        } else {
-            // External contracts
-            IERC721(rental.erc721TokenAddress).safeTransferFrom(originalOwner, renter, tokenId);
-        }
+        LibAavegotchi.transfer(originalOwner, renter, tokenId);
 
         // set original owner as pet operator
         s.petOperators[renter][originalOwner] = true;
 
-        emit ERC721ExecutedRental(
-            _rentalId,
-            originalOwner,
-            renter,
-            rental.erc721TokenAddress,
-            tokenId,
-            rental.amountPerDay,
-            rental.period,
-            block.timestamp
-        );
+        emit ERC721ExecutedRental(_rentalId, originalOwner, renter, tokenId, rental.amountPerDay, rental.period, block.timestamp);
     }
 
     ///@notice Allow to claim revenue from the rental
@@ -251,13 +228,8 @@ contract AavegotchiLendingFacet is Modifiers {
         LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
 
         // end rental agreement
-        if (rental.erc721TokenAddress == address(this)) {
-            s.aavegotchis[_tokenId].locked = false;
-            LibAavegotchi.transfer(renter, originalOwner, _tokenId);
-        } else {
-            // External contracts
-            IERC721(rental.erc721TokenAddress).safeTransferFrom(renter, originalOwner, _tokenId);
-        }
+        s.aavegotchis[_tokenId].locked = false;
+        LibAavegotchi.transfer(renter, originalOwner, _tokenId);
 
         rental.completed = true;
         s.aavegotchiRentalHead[_tokenId] = 0;
