@@ -162,6 +162,7 @@ struct AavegotchiRental {
     uint256[3] revenueSplit; // originalOwner, renter, receiver
     uint256 erc721TokenId;
     uint256 whitelistId; // can be zero
+    address[] excludeList;
     uint256 timeCreated;
     uint256 timeAgreed;
     uint256 lastClaimed;

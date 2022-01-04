@@ -58,11 +58,20 @@ library LibAavegotchiLending {
         address receiver = rental.receiver;
         uint256 tokenId = rental.erc721TokenId;
         address escrow = s.aavegotchis[tokenId].escrow;
+        if (escrow == address(0)) return;
         address collateralType = s.aavegotchis[tokenId].collateralType;
         for (uint256 i; i < _revenueTokens.length; i++) {
             address revenueToken = _revenueTokens[i];
-            if (escrow == address(0)) continue;
             if (collateralType == revenueToken) continue;
+
+            bool isExcluded;
+            for (uint256 j; j < rental.excludeList.length; j++) {
+                if (rental.excludeList[j] == revenueToken) {
+                    isExcluded = true;
+                    break;
+                }
+            }
+            if (isExcluded) continue;
 
             uint256 balance = IERC20(revenueToken).balanceOf(escrow);
             if (balance == 0) continue;

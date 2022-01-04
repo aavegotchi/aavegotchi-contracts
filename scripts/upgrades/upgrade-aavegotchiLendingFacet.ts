@@ -17,7 +17,7 @@ export async function upgrade() {
         "function getAavegotchiRental(uint256 _rentalId) external view",
         "function getAavegotchiRentalFromToken(uint256 _erc721TokenId) external view",
         "function isAavegotchiLent(uint256 _erc721TokenId) external view",
-        "function addAavegotchiRental(uint256 _erc721TokenId, uint256 _amountPerDay, uint256 _period, uint256[3] calldata _revenueSplit, address _receiver, uint256 _whitelistId) external",
+        "function addAavegotchiRental(uint256 _erc721TokenId, uint256 _amountPerDay, uint256 _period, uint256[3] calldata _revenueSplit, address _receiver, uint256 _whitelistId, address[] calldata _excludes) external",
         "function cancelAavegotchiRentalByToken(uint256 _erc721TokenId) external",
         "function cancelAavegotchiRental(uint256 _rentalId) external",
         "function agreeAavegotchiRental(uint256 _rentalId, uint256 _erc721TokenId, uint256 _amountPerDay, uint256 _period, uint256[3] calldata _revenueSplit) external",
