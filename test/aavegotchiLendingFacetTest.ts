@@ -34,7 +34,7 @@ describe("Testing Aavegotchi Lending", async function () {
   const lockedPortalId = 0;
   const lockedAavegotchiId = 16911;
   const unlockedAavegotchiId = 15589;
-  const amountPerDay = ethers.utils.parseUnits("1", "ether");
+  const initialCost = ethers.utils.parseUnits("1", "ether");
   const period = 10;
   const revenueSplitWithoutReceiver: [
     BigNumberish,
@@ -293,7 +293,7 @@ describe("Testing Aavegotchi Lending", async function () {
       await expect(
         lendingFacetWithRenter.addAavegotchiRental(
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitWithoutReceiver,
           ethers.constants.AddressZero,
@@ -306,7 +306,7 @@ describe("Testing Aavegotchi Lending", async function () {
       await expect(
         lendingFacetWithOwner.addAavegotchiRental(
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           0,
           revenueSplitWithoutReceiver,
           ethers.constants.AddressZero,
@@ -322,7 +322,7 @@ describe("Testing Aavegotchi Lending", async function () {
       await expect(
         lendingFacetWithOwner.addAavegotchiRental(
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           invalidRevenueSplit,
           ethers.constants.AddressZero,
@@ -337,7 +337,7 @@ describe("Testing Aavegotchi Lending", async function () {
       await expect(
         lendingFacetWithOwner.addAavegotchiRental(
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitForReceiver,
           ethers.constants.AddressZero,
@@ -352,7 +352,7 @@ describe("Testing Aavegotchi Lending", async function () {
       await expect(
         lendingFacetWithOwner.addAavegotchiRental(
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitWithoutReceiver,
           ethers.constants.AddressZero,
@@ -372,7 +372,7 @@ describe("Testing Aavegotchi Lending", async function () {
       await expect(
         lendingFacetWithPortalOwner.addAavegotchiRental(
           lockedPortalId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitWithoutReceiver,
           ethers.constants.AddressZero,
@@ -386,7 +386,7 @@ describe("Testing Aavegotchi Lending", async function () {
         await expect(
           lendingFacetWithOwner.addAavegotchiRental(
             lockedAavegotchiId,
-            amountPerDay,
+            initialCost,
             period,
             revenueSplitWithoutReceiver,
             ethers.constants.AddressZero,
@@ -401,7 +401,7 @@ describe("Testing Aavegotchi Lending", async function () {
         const receipt = await (
           await lendingFacetWithOwner.addAavegotchiRental(
             unlockedAavegotchiId,
-            amountPerDay,
+            initialCost,
             period,
             revenueSplitWithoutReceiver,
             ethers.constants.AddressZero,
@@ -415,7 +415,7 @@ describe("Testing Aavegotchi Lending", async function () {
         firstRentalId = event!.args!.rentalId;
         expect(event!.args!.originalOwner).to.equal(aavegotchiOwnerAddress);
         expect(event!.args!.erc721TokenId).to.equal(unlockedAavegotchiId);
-        expect(event!.args!.amountPerDay).to.equal(amountPerDay);
+        expect(event!.args!.initialCost).to.equal(initialCost);
         expect(event!.args!.period).to.equal(period);
       });
     });
@@ -424,7 +424,7 @@ describe("Testing Aavegotchi Lending", async function () {
         const receipt = await (
           await lendingFacetWithOwner.addAavegotchiRental(
             unlockedAavegotchiId,
-            amountPerDay,
+            initialCost,
             period,
             revenueSplitWithoutReceiver,
             ethers.constants.AddressZero,
@@ -438,7 +438,7 @@ describe("Testing Aavegotchi Lending", async function () {
         secondRentalId = event!.args!.rentalId;
         expect(event!.args!.originalOwner).to.equal(aavegotchiOwnerAddress);
         expect(event!.args!.erc721TokenId).to.equal(unlockedAavegotchiId);
-        expect(event!.args!.amountPerDay).to.equal(amountPerDay);
+        expect(event!.args!.initialCost).to.equal(initialCost);
         expect(event!.args!.period).to.equal(period);
       });
     });
@@ -548,7 +548,7 @@ describe("Testing Aavegotchi Lending", async function () {
       await (
         await lendingFacetWithOwner.addAavegotchiRental(
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitWithoutReceiver,
           ethers.constants.AddressZero,
@@ -596,7 +596,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const receipt = await (
         await lendingFacetWithOwner.addAavegotchiRental(
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitForReceiver,
           receiver,
@@ -614,7 +614,7 @@ describe("Testing Aavegotchi Lending", async function () {
         lendingFacetWithRenter.agreeAavegotchiRental(
           fourthRentalId.add(10),
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitForReceiver
         )
@@ -625,7 +625,7 @@ describe("Testing Aavegotchi Lending", async function () {
         lendingFacetWithRenter.agreeAavegotchiRental(
           secondRentalId,
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitForReceiver
         )
@@ -636,13 +636,13 @@ describe("Testing Aavegotchi Lending", async function () {
         lendingFacetWithRenter.agreeAavegotchiRental(
           fourthRentalId,
           lockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitForReceiver
         )
       ).to.be.revertedWith("AavegotchiLending: Invalid token id");
     });
-    it("Should revert when try to agree rental with wrong amount per day", async function () {
+    it("Should revert when try to agree rental with wrong initial cost", async function () {
       await expect(
         lendingFacetWithRenter.agreeAavegotchiRental(
           fourthRentalId,
@@ -651,14 +651,14 @@ describe("Testing Aavegotchi Lending", async function () {
           period,
           revenueSplitForReceiver
         )
-      ).to.be.revertedWith("AavegotchiLending: Invalid amount per day");
+      ).to.be.revertedWith("AavegotchiLending: Invalid initial cost");
     });
     it("Should revert when try to agree rental with wrong rental period", async function () {
       await expect(
         lendingFacetWithRenter.agreeAavegotchiRental(
           fourthRentalId,
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period + 1,
           revenueSplitForReceiver
         )
@@ -669,7 +669,7 @@ describe("Testing Aavegotchi Lending", async function () {
         lendingFacetWithRenter.agreeAavegotchiRental(
           fourthRentalId,
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitWithoutReceiver
         )
@@ -680,7 +680,7 @@ describe("Testing Aavegotchi Lending", async function () {
         lendingFacetWithOwner.agreeAavegotchiRental(
           fourthRentalId,
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitForReceiver
         )
@@ -697,13 +697,13 @@ describe("Testing Aavegotchi Lending", async function () {
         lendingFacetWithNonWhitelisted.agreeAavegotchiRental(
           fourthRentalId,
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitForReceiver
         )
       ).to.be.revertedWith("AavegotchiLending: Not whitelisted address");
     });
-    it("Should revert when non GHST holder try to agree rental whose amount per day is not zero", async function () {
+    it("Should revert when non GHST holder try to agree rental whose initial cost is not zero", async function () {
       const lendingFacetWithNonGhstHolder = await impersonate(
         nonGhstHolderAddress,
         lendingFacetWithOwner,
@@ -714,7 +714,7 @@ describe("Testing Aavegotchi Lending", async function () {
         lendingFacetWithNonGhstHolder.agreeAavegotchiRental(
           fourthRentalId,
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitForReceiver
         )
@@ -731,13 +731,13 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       await ghstERC20WithRenter.approve(
         diamondAddress,
-        amountPerDay.mul(period)
+        initialCost.mul(period)
       );
       const receipt = await (
         await lendingFacetWithRenter.agreeAavegotchiRental(
           fourthRentalId,
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitForReceiver
         )
@@ -751,10 +751,10 @@ describe("Testing Aavegotchi Lending", async function () {
 
       // Check ghst balance changes
       expect(renterOldBalance.sub(renterNewBalance)).to.equal(
-        amountPerDay.mul(period)
+        initialCost.mul(period)
       );
       expect(ownerNewBalance.sub(ownerOldBalance)).to.equal(
-        amountPerDay.mul(period)
+        initialCost.mul(period)
       );
 
       // Check rental and aavegotchi status
@@ -776,7 +776,7 @@ describe("Testing Aavegotchi Lending", async function () {
         lendingFacetWithRenter.agreeAavegotchiRental(
           fourthRentalId,
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitForReceiver
         )
@@ -967,7 +967,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const receipt = await (
         await lendingFacetWithOwner.addAavegotchiRental(
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitForReceiver,
           receiver,
@@ -985,15 +985,12 @@ describe("Testing Aavegotchi Lending", async function () {
         ethers,
         network
       );
-      await ghstERC20WithRenter.approve(
-        diamondAddress,
-        amountPerDay.mul(period)
-      );
+      await ghstERC20WithRenter.approve(diamondAddress, initialCost);
       await (
         await lendingFacetWithRenter.agreeAavegotchiRental(
           fifthRentalId,
           unlockedAavegotchiId,
-          amountPerDay,
+          initialCost,
           period,
           revenueSplitForReceiver
         )

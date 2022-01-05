@@ -154,7 +154,7 @@ struct GameManager {
 
 struct AavegotchiRental {
     uint256 rentalId;
-    uint256 amountPerDay; // GHST in wei, can be zero
+    uint256 initialCost; // GHST in wei, can be zero
     uint256 period;
     address originalOwner;
     address renter;

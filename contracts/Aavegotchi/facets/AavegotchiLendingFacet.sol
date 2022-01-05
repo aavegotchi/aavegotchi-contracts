@@ -14,7 +14,7 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256 indexed rentalId,
         address indexed originalOwner,
         uint256 erc721TokenId,
-        uint256 amountPerDay,
+        uint256 initialCost,
         uint256 period,
         uint256 time
     );
@@ -24,7 +24,7 @@ contract AavegotchiLendingFacet is Modifiers {
         address indexed originalOwner,
         address renter,
         uint256 erc721TokenId,
-        uint256 amountPerDay,
+        uint256 initialCost,
         uint256 period,
         uint256 time
     );
@@ -71,14 +71,14 @@ contract AavegotchiLendingFacet is Modifiers {
     ///@dev If the rental request exist, cancel it and replaces it with the new one
     ///@dev If the rental is active, unable to cancel
     ///@param _erc721TokenId The identifier of the NFT to rent
-    ///@param _amountPerDay The rental fee of the aavegotchi in $GHST
+    ///@param _initialCost The rental fee of the aavegotchi in $GHST
     ///@param _period The rental period of the aavegotchi
     ///@param _revenueSplit The revenue split of the rental, 3 values, sum of the should be 100
     ///@param _receiver The 3rd account for receive revenue split, can be address(0)
     ///@param _whitelistId The identifier of whitelist for agree rental, if 0, allow everyone
     function addAavegotchiRental(
         uint256 _erc721TokenId,
-        uint256 _amountPerDay,
+        uint256 _initialCost,
         uint256 _period,
         uint256[3] calldata _revenueSplit,
         address _receiver,
@@ -117,7 +117,7 @@ contract AavegotchiLendingFacet is Modifiers {
         s.aavegotchiRentalHead[_erc721TokenId] = rentalId;
         s.aavegotchiRentals[rentalId] = AavegotchiRental({
             rentalId: rentalId,
-            amountPerDay: _amountPerDay,
+            initialCost: _initialCost,
             period: _period,
             revenueSplit: _revenueSplit,
             originalOwner: sender,
@@ -133,7 +133,7 @@ contract AavegotchiLendingFacet is Modifiers {
             completed: false
         });
 
-        emit AavegotchiRentalAdd(rentalId, sender, _erc721TokenId, _amountPerDay, _period, block.timestamp);
+        emit AavegotchiRentalAdd(rentalId, sender, _erc721TokenId, _initialCost, _period, block.timestamp);
 
         // Lock Aavegotchis when listing is created
         s.aavegotchis[_erc721TokenId].locked = true;
@@ -157,7 +157,7 @@ contract AavegotchiLendingFacet is Modifiers {
     function agreeAavegotchiRental(
         uint256 _rentalId,
         uint256 _erc721TokenId,
-        uint256 _amountPerDay,
+        uint256 _initialCost,
         uint256 _period,
         uint256[3] calldata _revenueSplit
     ) external {
@@ -166,7 +166,7 @@ contract AavegotchiLendingFacet is Modifiers {
         require(rental.timeAgreed == 0, "AavegotchiLending: rental already agreed");
         require(rental.canceled == false, "AavegotchiLending: rental canceled");
         require(rental.erc721TokenId == _erc721TokenId, "AavegotchiLending: Invalid token id");
-        require(rental.amountPerDay == _amountPerDay, "AavegotchiLending: Invalid amount per day");
+        require(rental.initialCost == _initialCost, "AavegotchiLending: Invalid amount per day");
         require(rental.period == _period, "AavegotchiLending: Invalid rental period");
         for (uint256 i; i < 3; i++) {
             require(rental.revenueSplit[i] == _revenueSplit[i], "AavegotchiLending: Invalid revenue split");
@@ -176,8 +176,8 @@ contract AavegotchiLendingFacet is Modifiers {
         require(originalOwner != renter, "AavegotchiLending: renter can't be original owner");
         require(s.isWhitelisted[rental.whitelistId][renter], "AavegotchiLending: Not whitelisted address");
 
-        if (rental.amountPerDay > 0) {
-            uint256 transferAmount = rental.amountPerDay * rental.period;
+        if (rental.initialCost > 0) {
+            uint256 transferAmount = rental.initialCost;
             require(IERC20(s.ghstContract).balanceOf(renter) >= transferAmount, "AavegotchiLending: not enough GHST");
             LibERC20.transferFrom(s.ghstContract, renter, originalOwner, transferAmount);
         }
@@ -194,7 +194,7 @@ contract AavegotchiLendingFacet is Modifiers {
         // set original owner as pet operator
         s.petOperators[renter][originalOwner] = true;
 
-        emit ERC721ExecutedRental(_rentalId, originalOwner, renter, tokenId, rental.amountPerDay, rental.period, block.timestamp);
+        emit ERC721ExecutedRental(_rentalId, originalOwner, renter, tokenId, rental.initialCost, rental.period, block.timestamp);
     }
 
     ///@notice Allow to claim revenue from the rental
