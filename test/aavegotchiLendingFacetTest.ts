@@ -729,10 +729,7 @@ describe("Testing Aavegotchi Lending", async function () {
         ethers,
         network
       );
-      await ghstERC20WithRenter.approve(
-        diamondAddress,
-        initialCost.mul(period)
-      );
+      await ghstERC20WithRenter.approve(diamondAddress, initialCost);
       const receipt = await (
         await lendingFacetWithRenter.agreeAavegotchiRental(
           fourthRentalId,
@@ -750,12 +747,8 @@ describe("Testing Aavegotchi Lending", async function () {
       const ownerNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
 
       // Check ghst balance changes
-      expect(renterOldBalance.sub(renterNewBalance)).to.equal(
-        initialCost.mul(period)
-      );
-      expect(ownerNewBalance.sub(ownerOldBalance)).to.equal(
-        initialCost.mul(period)
-      );
+      expect(renterOldBalance.sub(renterNewBalance)).to.equal(initialCost);
+      expect(ownerNewBalance.sub(ownerOldBalance)).to.equal(initialCost);
 
       // Check rental and aavegotchi status
       const rentalInfo = await lendingFacetWithRenter.getAavegotchiRentalInfo(

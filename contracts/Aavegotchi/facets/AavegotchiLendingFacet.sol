@@ -166,7 +166,7 @@ contract AavegotchiLendingFacet is Modifiers {
         require(rental.timeAgreed == 0, "AavegotchiLending: rental already agreed");
         require(rental.canceled == false, "AavegotchiLending: rental canceled");
         require(rental.erc721TokenId == _erc721TokenId, "AavegotchiLending: Invalid token id");
-        require(rental.initialCost == _initialCost, "AavegotchiLending: Invalid amount per day");
+        require(rental.initialCost == _initialCost, "AavegotchiLending: Invalid initial cost");
         require(rental.period == _period, "AavegotchiLending: Invalid rental period");
         for (uint256 i; i < 3; i++) {
             require(rental.revenueSplit[i] == _revenueSplit[i], "AavegotchiLending: Invalid revenue split");
@@ -177,9 +177,8 @@ contract AavegotchiLendingFacet is Modifiers {
         require(s.isWhitelisted[rental.whitelistId][renter], "AavegotchiLending: Not whitelisted address");
 
         if (rental.initialCost > 0) {
-            uint256 transferAmount = rental.initialCost;
-            require(IERC20(s.ghstContract).balanceOf(renter) >= transferAmount, "AavegotchiLending: not enough GHST");
-            LibERC20.transferFrom(s.ghstContract, renter, originalOwner, transferAmount);
+            require(IERC20(s.ghstContract).balanceOf(renter) >= rental.initialCost, "AavegotchiLending: not enough GHST");
+            LibERC20.transferFrom(s.ghstContract, renter, originalOwner, rental.initialCost);
         }
 
         rental.renter = renter;
