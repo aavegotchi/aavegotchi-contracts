@@ -1,4 +1,6 @@
-export const rankings = [
+import { RankingObject } from "./rfSzn2ROY";
+
+export const rankings: RankingObject[] = [
   {
     cumulatedRanks: 539,
     id: 3,
@@ -53220,43 +53222,3 @@ export const rankings = [
     id: 24985,
   },
 ];
-
-export const rookieOfYear: number[] = [findRoy(rankings)];
-
-interface RookieInfo {
-  cumulatedRanks: number;
-  id: number;
-}
-
-function findRoy(_array: any[]) {
-  const royArray: any[] = [];
-  let topRoy: number = 20000;
-
-  for (let index = 0; index < _array.length; index++) {
-    if (index < _array.length - 3) {
-      if (_array[index].id === _array[index + 2].id) {
-        let cumalated: number;
-        cumalated =
-          _array[index].cumulatedRanks +
-          _array[index + 1].cumulatedRanks +
-          _array[index + 2].cumulatedRanks;
-
-        if (cumalated < topRoy) {
-          topRoy = cumalated;
-          console.log("Top ROY cumulated: ", topRoy);
-          let rookie: RookieInfo = {
-            cumulatedRanks: cumalated,
-            id: _array[index].id,
-          };
-          royArray.pop();
-          royArray.push(rookie);
-        }
-      }
-    }
-  }
-  console.log("ROY info: ", royArray);
-
-  return royArray[0].id;
-}
-
-console.log("ROY is: ", rookieOfYear);

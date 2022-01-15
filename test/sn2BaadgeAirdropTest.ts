@@ -21,7 +21,7 @@ import {
   top100RookXP,
   topTenXP,
   top100XP,
-} from "../scripts/airdrops/airdropTokenIdArrays";
+} from "../data/airdrops/badges/airdropTokenIdArrays";
 
 describe("Airdrop SZN2 Baadges", async function () {
   this.timeout(200000000);

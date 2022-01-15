@@ -30,9 +30,9 @@ import {
   plaayerSet6,
   plaayerSet7,
   plaayerSet8,
-} from "../../scripts/airdrops/airdropTokenIdArrays";
+} from "../../data/airdrops/badges/airdropTokenIdArrays";
 
-import { rookieOfYear } from "../../scripts/airdrops/rfSzn2ROY";
+import { rookieOfYear } from "../../data/airdrops/badges/rfSzn2ROY";
 
 export async function main() {
   let upload = await uploadSvgTaskForBaadges(itemTypes, "rfSzn2BaadgeSvgs");
@@ -95,7 +95,7 @@ export async function main() {
   //Rookie of the Year
   let rookOfTheYrAirdrop = await airdropTaskForBaadges(
     [itemTypes[10]],
-    rookieOfYear
+    [Number(rookieOfYear)]
   );
   await run("airdropBaadges", rookOfTheYrAirdrop);
 
