@@ -59,17 +59,18 @@ task("grantXP_minigame", "Grants XP to Gotchis by addresses")
       const xp10 = Number(taskArgs.xp10);
       const xp5min = Number(taskArgs.xpMin);
 
+      //10xp (0,99)
       let game15 = finalResults.slice(0, xp15);
       if (game15.length !== xp15) throw new Error("XP 15 length incorrect");
       console.log("game15:", game15.length);
 
-      //10xp (101,500)
-      let game10 = finalResults.slice(xp15 + 1, xp15 + 1 + xp10);
+      //10xp (100,500)
+      let game10 = finalResults.slice(xp15, xp15 + xp10);
       if (game10.length !== xp10) throw new Error("XP 15 length incorrect");
       console.log("game 10:", game10.length);
 
-      //5xp (501 and above)
-      let game5 = finalResults.slice(xp15 + xp10 + 1, finalResults.length);
+      //5xp (500 and above)
+      let game5 = finalResults.slice(xp15 + xp10, finalResults.length);
       game5 = game5.filter((obj: any) => {
         return obj.score >= xp5min;
       });
