@@ -2,7 +2,7 @@ import { ItemTypeInputNew } from "../../../scripts/itemTypeHelpers";
 
 export const itemTypes: ItemTypeInputNew[] = [
   {
-    name: "Rarity Farming SZN2 RARITY 1ST", //0
+    name: "CHAAMPION of Rarity Farming SZN2 (Rarity)", //0
     description:
       "Scored across all four rounds, this Aavegotchi is the ultimate chaampion of rarity for Rarity Farming SZN 2. Aamazing! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 265,
@@ -24,7 +24,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 KINSHIP 1ST", //1
+    name: "CHAAMPION of Rarity Farming SZN2 (Kinship)", //1
     description:
       "Scored across all four rounds, this Aavegotchi is the ultimate chaampion of kinship for Rarity Farming SZN 2. Aamazing! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 266,
@@ -46,7 +46,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 XP 1ST", //2
+    name: "CHAAMPION of Rarity Farming SZN2 (XP)", //2
     description:
       "Scored across all four rounds, this Aavegotchi is the ultimate chaampion of XP for Rarity Farming SZN 2. Aamazing! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 267,
@@ -68,7 +68,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 RARITY 2ND", //3
+    name: "Rarity Farming SZN2 RARITY 2nd Place", //3
     description:
       "Scored across all four rounds, this Aavegotchi is the 2nd highest ranked of all gotchis in the rarity category for Rarity Farming SZN 2. Incredible! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 268,
@@ -90,7 +90,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 KINSHIP 2ND", //4
+    name: "Rarity Farming SZN2 KINSHIP 2nd Place", //4
     description:
       "Scored across all four rounds, this Aavegotchi is the 2nd highest ranked of all gotchis in the kinship category for Rarity Farming SZN 2. Incredible! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 269,
@@ -112,7 +112,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 XP 2ND", //5
+    name: "Rarity Farming SZN2 XP 2nd Place", //5
     description:
       "Scored across all four rounds, this Aavegotchi is the 2nd highest ranked of all gotchis in the XP category for Rarity Farming SZN 2. Incredible! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 270,
@@ -134,7 +134,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 RARITY 3RD", //6
+    name: "Rarity Farming SZN2 RARITY 3rd Place", //6
     description:
       "Scored across all four rounds, this Aavegotchi is the 3rd highest ranked of all gotchis in the rarity category for Rarity Farming SZN 2. Impressive! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 271,
@@ -156,7 +156,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 KINSHIP 3RD", //7
+    name: "Rarity Farming SZN2 KINSHIP 3rd Place", //7
     description:
       "Scored across all four rounds, this Aavegotchi is the 3rd highest ranked of all gotchis in the kinship category for Rarity Farming SZN 2. Impressive! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 272,
@@ -178,7 +178,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 XP 3RD", //8
+    name: "Rarity Farming SZN2 XP 3rd Place", //8
     description:
       "Scored across all four rounds, this Aavegotchi is the 3rd highest ranked of all gotchis in the XP category for Rarity Farming SZN 2. Impressive! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 273,
@@ -244,7 +244,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 KINSHIP ROOKIE 1ST", //11
+    name: "CHAAMPION of Rarity Farming SZN2 (Rookie Kinship)", //11
     description:
       "Scored across all four rounds, this Aavegotchi delivered the best rookie kinship scores for Rarity Farming SZN 2! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 276,
@@ -266,7 +266,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 XP ROOKIE 1ST", //12
+    name: "CHAAMPION of Rarity Farming SZN2 (Rookie XP)", //12
     description:
       "Scored across all four rounds, this Aavegotchi delivered the best rookie XP scores for Rarity Farming SZN 2! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 277,
@@ -288,7 +288,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 KINSHIP ROOKIE 2ND", //13
+    name: "Rarity Farming SZN2 KINSHIP ROOKIE 2nd Place", //13
     description:
       "Scored across all four rounds, this Aavegotchi ranked 2nd overall for Rarity Farming SZN 2 rookie kinship scores! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 278,
@@ -310,7 +310,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 XP ROOKIE 2ND", //14
+    name: "Rarity Farming SZN2 XP ROOKIE 2nd Place", //14
     description:
       "Scored across all four rounds, this Aavegotchi ranked 2nd overall for Rarity Farming SZN 2 rookie XP scores! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 279,
@@ -332,7 +332,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 KINSHIP ROOKIE 3RD", //15
+    name: "Rarity Farming SZN2 KINSHIP ROOKIE 3rd Place", //15
     description:
       "Scored across all four rounds, this Aavegotchi ranked 3rd overall for Rarity Farming SZN 2 rookie kinship scores! From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 280,
@@ -354,7 +354,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN2 XP ROOKIE 3RD", //16
+    name: "Rarity Farming SZN2 XP ROOKIE 3rd Place", //16
     description:
       "Scored across all four rounds, this Aavegotchi ranked 3rd overall for Rarity Farming SZN 2 rookie XP scores!   From October 12 to Dec 7, 2021, the second season of Rarity Farming distributed a staggering 2 million GHST. The frenly competition featured three main leaderboards that any summoned Aavegotchi could participate in plus two additional Rookie Leaderboards for Haunt 2 Aavegotchis.",
     svgId: 281,
