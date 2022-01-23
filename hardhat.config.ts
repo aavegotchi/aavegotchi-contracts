@@ -31,7 +31,7 @@ export default {
         url: process.env.MATIC_URL,
         timeout: 12000000,
         // blockNumber: 12552123
-        // blockNumber: 13024371
+        // blockNumber: 20024371,
       },
       blockGasLimit: 20000000,
       timeout: 120000,

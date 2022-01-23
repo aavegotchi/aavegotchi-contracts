@@ -10,6 +10,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 export interface AddBaadgeTaskArgs {
   itemManager: string;
   svgFile: string;
+  svgArrayIndex: string;
   svgIds: string;
 }
 
@@ -26,6 +27,9 @@ task("addBaadgeSvgs", "Adds itemTypes and SVGs")
       const svgIds: string[] = taskArgs.svgIds
         .split(",")
         .filter((str) => str.length > 0);
+      const svgArrayIndex = Number(taskArgs.svgArrayIndex);
+
+      console.log("svg ids:", svgIds);
 
       const { baadges } = require(`../svgs/${svgFile}.ts`);
 
@@ -60,9 +64,12 @@ task("addBaadgeSvgs", "Adds itemTypes and SVGs")
       for (let index = 0; index < svgIds.length; index++) {
         const svgId = svgIds[index];
 
+        console.log("array id:", svgArrayIndex);
+        console.log("svg length:", svgsArray[svgArrayIndex].length);
+
         try {
           await uploadOrUpdateSvg(
-            svgsArray[index],
+            svgsArray[svgArrayIndex],
             "wearables",
             Number(svgId),
             svgFacet,

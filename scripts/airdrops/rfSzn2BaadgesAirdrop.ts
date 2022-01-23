@@ -37,22 +37,26 @@ import { rookieOfYear } from "../../data/airdrops/badges/rfSzn2ROY";
 export async function main() {
   let upload = await uploadSvgTaskForBaadges(itemTypes, "rfSzn2BaadgeSvgs");
 
+  console.log("upload:", upload);
+
   //Upload SVGs
-  for (let index = 0; index < upload.length; index++) {
-    await run("addBaadgeSvgs", upload[index]);
-  }
+  // for (let index = 0; index < upload.length; index++) {
+  //   await run("addBaadgeSvgs", upload[index]);
+  // }
 
   //Mint baadge item types
   let mint = await mintSvgTaskForBaadges("rfSzn2Baadges");
+
+  console.log("mint:", mint);
   await run("mintBaadgeSvgs", mint);
 
   //Airdrops
   //Particiation Badge
-  let plaayerAirdrop = await airdropTaskForBaadges(
-    [itemTypes[9]],
-    plaayerTotal
-  );
-  await run("airdropBaadges", plaayerAirdrop);
+  // let plaayerAirdrop = await airdropTaskForBaadges(
+  //   [itemTypes[9]],
+  //   plaayerTotal
+  // );
+  // await run("airdropBaadges", plaayerAirdrop);
 
   //Top Kinship -- Normal and Rookie
   let top10RookKinAirdrop = await airdropTaskForBaadges(

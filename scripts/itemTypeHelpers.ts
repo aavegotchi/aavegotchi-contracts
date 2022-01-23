@@ -451,8 +451,8 @@ export function getBaadgeItemTypes(
     let itemTypeOut: ItemTypeOutput = {
       ...itemType,
       slotPositions: stringToSlotPositions(itemType.slotPositions),
-      ghstPrice: rarityLevelToGhstPrice(itemType.rarityLevel),
-      rarityScoreModifier: calculateRarityScoreModifier(itemType.maxQuantity),
+      ghstPrice: "0",
+      rarityScoreModifier: "0",
       maxQuantity: itemType.maxQuantity,
       totalQuantity: 0, //New items always start at 0
       name: itemType.name.trim(), //Trim the name to remove empty spaces

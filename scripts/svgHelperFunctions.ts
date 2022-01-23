@@ -333,6 +333,7 @@ export async function uploadSvgTaskForBaadges(
         itemManager: itemManager,
         svgFile: svgFileName,
         svgIds: [itemTypeInput[index].svgId].join(","),
+        svgArrayIndex: index.toString(),
       };
       taskArray.push(taskArgs);
     } else {
