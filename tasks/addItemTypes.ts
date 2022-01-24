@@ -134,13 +134,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
         console.log("svgs array:", svgsArray);
 
         console.log("Upload SVGs");
-        await uploadSvgs(
-          signer,
-          diamondAddress,
-          svgsArray,
-          "wearables",
-          hre.ethers
-        );
+        await uploadSvgs(svgFacet, svgsArray, "wearables", hre.ethers);
       }
 
       if (replaceWearableSvgs) {
@@ -157,8 +151,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
         console.log("Uploading Sleeves");
 
         await uploadSvgs(
-          signer,
-          diamondAddress,
+          svgFacet,
           sleeveSvgsArray.map((value) => value.svg),
           "sleeves",
           hre.ethers
