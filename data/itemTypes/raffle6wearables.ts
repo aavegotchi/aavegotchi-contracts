@@ -4,7 +4,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 292,
     name: "Brunette Ponytail",
-    setId: [],
+    setId: [123, 142],
     author: "xibot",
     description: "",
     dimensions: { x: 15, y: 2, width: 48, height: 21 },
@@ -24,7 +24,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 293,
     name: "Leather Tunic",
-    setId: [],
+    setId: [123, 125, 132, 142, 143],
     author: "xibot",
     description: "",
     dimensions: { x: 10, y: 31, width: 44, height: 24 },
@@ -43,8 +43,8 @@ export const itemTypes: ItemTypeInputNew[] = [
   },
   {
     svgId: 294,
-    name: "Bow Arrow",
-    setId: [],
+    name: "Bow and Arrow",
+    setId: [123, 132, 142],
     author: "xibot",
     description: "",
     dimensions: { x: 0, y: 26, width: 12, height: 27 },
@@ -64,7 +64,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 295,
     name: "Forked Beard",
-    setId: [],
+    setId: [124],
     author: "xibot",
     description: "",
     dimensions: { x: 21, y: 32, width: 22, height: 11 },
@@ -84,7 +84,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 296,
     name: "Doublesided Axe",
-    setId: [],
+    setId: [124, 141],
     author: "xibot",
     description: "",
     dimensions: { x: 0, y: 28, width: 15, height: 15 },
@@ -104,7 +104,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 297,
     name: "Animal Skins",
-    setId: [],
+    setId: [124, 141],
     author: "xibot",
     description: "",
     dimensions: { x: 13, y: 32, width: 38, height: 22 },
@@ -124,7 +124,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 298,
     name: "Horned Helmet",
-    setId: [],
+    setId: [124, 141],
     author: "xibot",
     description: "",
     dimensions: { x: 11, y: 4, width: 42, height: 20 },
@@ -144,7 +144,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 299,
     name: "Longbow",
-    setId: [],
+    setId: [125, 143],
     author: "xibot",
     description: "",
     dimensions: { x: 0, y: 25, width: 13, height: 30 },
@@ -164,7 +164,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 300,
     name: "Feathered Cap",
-    setId: [],
+    setId: [125, 132, 143],
     author: "xibot",
     description: "",
     dimensions: { x: 14, y: 1, width: 36, height: 21 },
@@ -184,7 +184,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 301,
     name: "Alluring Eyes",
-    setId: [],
+    setId: [126, 133],
     author: "xibot",
     description: "",
     dimensions: { x: 20, y: 21, width: 24, height: 10 },
@@ -204,7 +204,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 302,
     name: "Geisha Headpiece",
-    setId: [],
+    setId: [126, 133, 134],
     author: "xibot",
     description: "",
     dimensions: { x: 15, y: 1, width: 34, height: 32 },
@@ -224,7 +224,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 303,
     name: "Kimono",
-    setId: [],
+    setId: [126, 133, 134],
     author: "xibot",
     description: "",
     dimensions: { x: 10, y: 31, width: 44, height: 24 },
@@ -244,7 +244,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 304,
     name: "Paper Fan",
-    setId: [],
+    setId: [126, 133, 134],
     author: "xibot",
     description: "",
     dimensions: { x: 1, y: 31, width: 18, height: 12 },
@@ -264,7 +264,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 305,
     name: "Sus Butterfly",
-    setId: [],
+    setId: [128],
     author: "xibot",
     description: "",
     dimensions: { x: 3, y: 2, width: 15, height: 14 },
@@ -284,7 +284,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 306,
     name: "Flower Studs",
-    setId: [],
+    setId: [127, 128, 135, 136, 137],
     author: "xibot",
     description: "",
     dimensions: { x: 13, y: 23, width: 38, height: 5 },
