@@ -182,6 +182,8 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
           sleevesSvgId++;
         }
 
+        console.log("sleeves input:", sleevesInput);
+
         console.log("Associating sleeves svgs with body wearable svgs.");
         tx = await svgFacet.setSleeves(sleevesInput, { gasPrice: gasPrice });
         receipt = await tx.wait();

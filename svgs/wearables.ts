@@ -295,7 +295,7 @@ export const wearablesSvgs = [
   291,
   wearable("292_BrunettePonytail"),
   bodyWearable("293_LeatherTunic"),
-  wearable("294_BowArrow"),
+  wearable("294_BowandArrow"),
   wearable("295_ForkedBeard"),
   wearable("296_DoublesidedAxe"),
   bodyWearable("297_AnimalSkins"),
