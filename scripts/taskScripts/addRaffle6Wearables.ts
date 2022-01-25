@@ -1,7 +1,6 @@
 import { run } from "hardhat";
 import { AddItemTypesTaskArgs } from "../../tasks/addItemTypes";
 import { maticDiamondAddress, itemManager } from "../helperFunctions";
-import { setDimensionsObjectFromArray } from "../svgHelperFunctions";
 import { itemTypes } from "../../data/itemTypes/raffle6wearables";
 import {
   convertDimensionsArrayToString,
@@ -31,10 +30,6 @@ async function addItemTypes() {
   };
 
   await run("addItemTypes", args);
-
-  const itemsArray = setDimensionsObjectFromArray(itemTypes);
-
-  await run("updateItemDimensions", itemsArray);
 }
 
 addItemTypes()

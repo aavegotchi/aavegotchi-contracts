@@ -386,18 +386,3 @@ export async function updateSvgTaskForSideSleeves(_itemIds: number[]) {
   }
   return taskArray;
 }
-
-export async function setDimensionsObjectFromArray(
-  _itemTypes: ItemTypeInputNew[]
-) {
-  let itemsArray = [];
-  for (let index = 0; index < _itemTypes.length; index++) {
-    const dimensions: Dimensions[] = [_itemTypes[index].dimensions];
-    const dimensionsTaskArgs: UpdateItemDimensionsTaskArgs = {
-      itemIds: [_itemTypes[index].svgId].join(","),
-      dimensions: convertDimensionsArrayToString(dimensions),
-    };
-    itemsArray.push(dimensionsTaskArgs);
-  }
-  return itemsArray;
-}

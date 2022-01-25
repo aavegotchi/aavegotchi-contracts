@@ -131,8 +131,6 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       }
 
       if (uploadWearableSvgs) {
-        console.log("svgs array:", svgsArray);
-
         console.log("Upload SVGs");
         await uploadSvgs(svgFacet, svgsArray, "wearables", hre.ethers);
       }
