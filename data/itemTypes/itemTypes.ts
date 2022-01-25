@@ -21,7 +21,6 @@ export const itemTypes: ItemTypeInput[] = [
     author: "Xibot",
     description: "The Void",
     dimensions: { x: 0, y: 0, width: 0, height: 0 },
-
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 0,

@@ -41,8 +41,8 @@ export interface ItemTypeInput {
   width?: number;
   height?: number;
   dimensions: Dimensions;
-  sideDimensions: SideDimensions;
-  sleeves: Sleeves;
+  sideDimensions?: SideDimensions;
+  sleeves?: Sleeves;
   allowedCollaterals: BigNumberish[];
   ghstPrice: BigNumberish | BigNumberish;
   traitModifiers: [
@@ -96,7 +96,7 @@ export interface ItemTypeInputNew {
   rarityScoreModifier?: BigNumberish;
   canPurchaseWithGhst: boolean;
   totalQuantity?: number;
-  maxQuantity?: number;
+  maxQuantity: number;
 }
 
 export interface ItemTypeOutput {
@@ -429,8 +429,43 @@ export function getItemTypes(itemTypes: ItemTypeInputNew[]): ItemTypeOutput[] {
       Number(prev) + Math.abs(Number(cur));
     let traitBoosters = itemType.traitModifiers.reduce(reducer, 0);
 
-    if (traitBoosters !== rarityLevelToTraitBoosters(itemType.rarityLevel)) {
-      throw Error(`Trait Booster for ${itemType.name} does not match rarity`);
+    if (itemType.category !== 1) {
+      if (traitBoosters !== rarityLevelToTraitBoosters(itemType.rarityLevel)) {
+        throw Error(`Trait Booster for ${itemType.name} does not match rarity`);
+      }
+    }
+
+    if (!Array.isArray(itemType.allowedCollaterals)) {
+      throw Error("Is not array.");
+    }
+    result.push(itemTypeOut);
+  }
+  return result;
+}
+
+export function getBaadgeItemTypes(
+  itemTypes: ItemTypeInputNew[]
+): ItemTypeOutput[] {
+  const result = [];
+  for (const itemType of itemTypes) {
+    let itemTypeOut: ItemTypeOutput = {
+      ...itemType,
+      slotPositions: stringToSlotPositions(itemType.slotPositions),
+      ghstPrice: "0",
+      rarityScoreModifier: "0",
+      maxQuantity: itemType.maxQuantity,
+      totalQuantity: 0, //New items always start at 0
+      name: itemType.name.trim(), //Trim the name to remove empty spaces
+    };
+
+    const reducer = (prev: BigNumberish, cur: BigNumberish) =>
+      Number(prev) + Math.abs(Number(cur));
+    let traitBoosters = itemType.traitModifiers.reduce(reducer, 0);
+
+    if (itemType.category !== 1) {
+      if (traitBoosters !== rarityLevelToTraitBoosters(itemType.rarityLevel)) {
+        throw Error(`Trait Booster for ${itemType.name} does not match rarity`);
+      }
     }
 
     if (!Array.isArray(itemType.allowedCollaterals)) {

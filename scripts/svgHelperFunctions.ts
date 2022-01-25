@@ -3,7 +3,12 @@ import { BigNumberish } from "@ethersproject/bignumber";
 import { BytesLike } from "@ethersproject/bytes";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { SvgFacet } from "../typechain";
-import { gasPrice } from "./helperFunctions";
+import {
+  gasPrice,
+  itemManager,
+  itemManagerAlt,
+  maticRealmDiamondAddress,
+} from "./helperFunctions";
 
 import { wearablesSvgs as front } from "../svgs/wearables";
 import {
@@ -14,10 +19,13 @@ import {
   wearablesRightSleeveSvgs as rightSleeve,
   wearablesBackSleeveSvgs as backSleeve,
 } from "../svgs/wearables-sides";
-import { UpdateSvgsTaskArgs } from "../tasks/updateSvgs";
 
+import { UpdateSvgsTaskArgs } from "../tasks/updateSvgs";
+import { AddBaadgeTaskArgs } from "../tasks/addBaadgeSvgs";
+import { AirdropBaadgeTaskArgs } from "../tasks/baadgeAirdrop";
+import { MintBaadgeTaskArgs } from "../tasks/mintBaadgeSvgs";
 const fs = require("fs");
-import { SleeveObject } from "./itemTypeHelpers";
+import { SleeveObject, ItemTypeInputNew } from "./itemTypeHelpers";
 
 export interface SvgTypesAndSizes {
   svgType: BytesLike;
@@ -312,4 +320,53 @@ export async function updateSvgTaskForSideSleeves(_itemIds: number[]) {
     }
   }
   return taskArray;
+}
+
+export async function uploadSvgTaskForBaadges(
+  itemTypeInput: ItemTypeInputNew[],
+  svgFileName: string
+) {
+  let taskArray = [];
+
+  for (let index = 0; index < itemTypeInput.length; index++) {
+    if (!itemTypeInput[index].canBeTransferred) {
+      let taskArgs: AddBaadgeTaskArgs = {
+        itemManager: itemManager,
+        svgFile: svgFileName,
+        svgIds: [itemTypeInput[index].svgId].join(","),
+        svgArrayIndex: index.toString(),
+      };
+      taskArray.push(taskArgs);
+    } else {
+      console.log(
+        itemTypeInput[index].name + " canBeTransferred must be set to FALSE"
+      );
+    }
+  }
+  return taskArray;
+}
+
+export async function mintSvgTaskForBaadges(fileName: string) {
+  let taskArgs: MintBaadgeTaskArgs = {
+    itemManager: itemManagerAlt,
+    itemFile: fileName,
+    uploadItemTypes: true,
+    sendToItemManager: true,
+  };
+
+  return taskArgs;
+}
+
+export async function airdropTaskForBaadges(
+  itemTypeInput: ItemTypeInputNew[],
+  awardsArray: number[]
+) {
+  const itemInfo = itemTypeInput[0];
+
+  let taskArgs: AirdropBaadgeTaskArgs = {
+    maxProcess: [itemInfo.maxQuantity].join(","),
+    badgeIds: [itemInfo.svgId].join(","),
+    awardsArray: [awardsArray].join("***"),
+  };
+  return taskArgs;
 }
