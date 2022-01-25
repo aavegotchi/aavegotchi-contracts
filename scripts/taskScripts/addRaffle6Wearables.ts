@@ -20,12 +20,12 @@ async function addItemTypes() {
     itemFile: itemFile,
     svgFile: svgFile,
     sleeveStartId: sleeveStartId,
-    uploadItemTypes: true,
+    uploadItemTypes: false,
     uploadWearableSvgs: true,
-    uploadSleeveSvgs: false,
+    uploadSleeveSvgs: true,
 
     replaceWearableSvgs: false,
-    replaceSleeveSvgs: true,
+    replaceSleeveSvgs: false,
     associateSleeves: true,
     sendToItemManager: true,
   };
