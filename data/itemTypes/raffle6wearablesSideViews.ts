@@ -1,6 +1,6 @@
 import { SideDimensions } from "../../scripts/itemTypeHelpers";
 
-export const sideViewDimensions1: SideDimensions[] = [
+export const sideViewDimensions: SideDimensions[] = [
   {
     itemId: 292,
     name: "Brunette Ponytail",
