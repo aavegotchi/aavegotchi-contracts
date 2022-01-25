@@ -68,7 +68,7 @@ export const topTenRookKin = rookKin.slice(0, 10);
 export const top100RookKin = rookKin.slice(10, 100);
 export const topTenRookXP = rookXP.slice(0, 10);
 export const top100RookXP = rookXP.slice(10, 100);
-export const topTenXP = xp.slice(3, 10);
+export const topTenXP = xp.slice(0, 3);
 export const top100XP = xp.slice(10, 100);
 
 export const plaayerTotal = [...new Set(concatTotal)];

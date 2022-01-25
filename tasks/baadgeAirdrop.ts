@@ -3,8 +3,9 @@ import { Signer } from "@ethersproject/abstract-signer";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import {
   maticDiamondAddress,
-  gameManager,
   getDiamondSigner,
+  itemManagerAlt,
+  gasPrice,
 } from "../scripts/helperFunctions";
 
 export interface AirdropBaadgeTaskArgs {
@@ -53,8 +54,9 @@ task(
       }
 
       console.log("Batch Ids for airdrop: ", batchIds);
+      console.log("tokenids:", tokenIds);
 
-      const signer: Signer = await getDiamondSigner(hre, gameManager, false);
+      const signer: Signer = await getDiamondSigner(hre, itemManagerAlt, false);
 
       const itemsTransferFacet = await hre.ethers.getContractAt(
         "ItemsTransferFacet",
@@ -63,11 +65,12 @@ task(
       );
 
       const tx = await itemsTransferFacet.batchBatchTransferToParent(
-        gameManager,
+        itemManagerAlt,
         maticDiamondAddress,
         tokenIds,
         batchIds,
-        batchValues
+        batchValues,
+        { gasPrice: gasPrice }
       );
       console.log("Tx hash:", tx.hash);
       let receipt = await tx.wait();
