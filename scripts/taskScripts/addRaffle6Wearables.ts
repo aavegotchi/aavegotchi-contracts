@@ -20,7 +20,7 @@ async function addItemTypes() {
     itemFile: itemFile,
     svgFile: svgFile,
     sleeveStartId: sleeveStartId,
-    uploadItemTypes: false,
+    uploadItemTypes: true,
     uploadWearableSvgs: true,
     uploadSleeveSvgs: true,
 
