@@ -10,13 +10,21 @@ import "@typechain/hardhat";
 
 dotenv.config({ path: __dirname + "/.env" });
 
-//  require("./tasks/verifyFacet.js");
+require("./tasks/verifyFacet.ts");
 require("./tasks/deployUpgrade.ts");
+require("./tasks/addItemTypes.ts");
+require("./tasks/addWearableSets.ts");
+require("./tasks/grantXP.ts");
+require("./tasks/generateDiamondABI.ts");
+require("./tasks/generateDiamondABI_eth.ts");
+require("./tasks/removeXP.ts");
 require("./tasks/updateItemDimensions.ts");
 require("./tasks/updateSvgs.ts");
 require("./tasks/updateItemSideDimensions.ts");
-require("./tasks/addItemTypes.ts");
-// require("./tasks/addItemTypes.ts");
+require("./tasks/batchDeposit.ts");
+require("./tasks/rarityPayouts");
+require("./tasks/grantXP_snapshot");
+require("./tasks/grantXP_minigame");
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
