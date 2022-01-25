@@ -4,7 +4,10 @@ import { task } from "hardhat/config";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
 import { getBaadgeItemTypes, ItemTypeOutput } from "../scripts/itemTypeHelpers";
-import { maticDiamondAddress } from "../scripts/helperFunctions";
+import {
+  itemManagerAlt,
+  maticDiamondAddress,
+} from "../scripts/helperFunctions";
 import { DAOFacet } from "../typechain/DAOFacet";
 import { BigNumberish } from "@ethersproject/bignumber";
 import { gasPrice } from "../scripts/helperFunctions";
@@ -25,6 +28,12 @@ task("mintBaadgeSvgs", "Adds itemTypes and SVGs")
 
   .setAction(
     async (taskArgs: MintBaadgeTaskArgs, hre: HardhatRuntimeEnvironment) => {
+      console.log("item manager:", taskArgs.itemManager);
+
+      if (taskArgs.itemManager !== itemManagerAlt) {
+        throw new Error("Wrong item manager");
+      }
+
       const itemFile: string = taskArgs.itemFile;
       const itemManager = taskArgs.itemManager;
       const sendToItemManager = taskArgs.sendToItemManager;
@@ -48,14 +57,17 @@ task("mintBaadgeSvgs", "Adds itemTypes and SVGs")
         });
         signer = await hre.ethers.provider.getSigner(owner);
       } else if (hre.network.name === "matic") {
-        signer = new LedgerSigner(
-          hre.ethers.provider,
-          "hid",
-          "m/44'/60'/2'/0/0"
-        );
+        signer = await (await hre.ethers.getSigners())[0];
+        // signer = new LedgerSigner(
+        //   hre.ethers.provider,
+        //   "hid",
+        //   "m/44'/60'/2'/0/0"
+        // );
       } else {
         throw Error("Incorrect network selected");
       }
+
+      console.log("signer:", await signer.getAddress());
 
       let tx: ContractTransaction;
       let receipt: ContractReceipt;
@@ -72,6 +84,8 @@ task("mintBaadgeSvgs", "Adds itemTypes and SVGs")
         tx = await daoFacet.addItemTypes(itemTypesArray, {
           gasPrice: gasPrice,
         });
+
+        console.log("tx hash:", tx.hash);
 
         receipt = await tx.wait();
         if (!receipt.status) {

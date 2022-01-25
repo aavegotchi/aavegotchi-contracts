@@ -41,8 +41,8 @@ export interface ItemTypeInput {
   width?: number;
   height?: number;
   dimensions: Dimensions;
-  sideDimensions: SideDimensions;
-  sleeves: Sleeves;
+  sideDimensions?: SideDimensions;
+  sleeves?: Sleeves;
   allowedCollaterals: BigNumberish[];
   ghstPrice: BigNumberish | BigNumberish;
   traitModifiers: [

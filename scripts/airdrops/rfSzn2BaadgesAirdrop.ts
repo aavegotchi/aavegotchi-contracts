@@ -40,15 +40,17 @@ export async function main() {
   console.log("upload:", upload);
 
   //Upload SVGs
-  // for (let index = 0; index < upload.length; index++) {
-  //   await run("addBaadgeSvgs", upload[index]);
-  // }
+  for (let index = 0; index < upload.length; index++) {
+    await run("addBaadgeSvgs", upload[index]);
+  }
+
+  return;
 
   //Mint baadge item types
-  let mint = await mintSvgTaskForBaadges("rfSzn2Baadges");
+  // let mint = await mintSvgTaskForBaadges("rfSzn2Baadges");
 
-  console.log("mint:", mint);
-  await run("mintBaadgeSvgs", mint);
+  // console.log("mint:", mint);
+  // await run("mintBaadgeSvgs", mint);
 
   //Airdrops
   //Particiation Badge

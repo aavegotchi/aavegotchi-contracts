@@ -6,6 +6,7 @@ import { SvgFacet } from "../typechain";
 import {
   gasPrice,
   itemManager,
+  itemManagerAlt,
   maticRealmDiamondAddress,
 } from "./helperFunctions";
 
@@ -347,7 +348,7 @@ export async function uploadSvgTaskForBaadges(
 
 export async function mintSvgTaskForBaadges(fileName: string) {
   let taskArgs: MintBaadgeTaskArgs = {
-    itemManager: itemManager,
+    itemManager: itemManagerAlt,
     itemFile: fileName,
     uploadItemTypes: true,
     sendToItemManager: true,

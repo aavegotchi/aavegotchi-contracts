@@ -46,11 +46,12 @@ task("addBaadgeSvgs", "Adds itemTypes and SVGs")
         });
         signer = await hre.ethers.provider.getSigner(owner);
       } else if (hre.network.name === "matic") {
-        signer = new LedgerSigner(
-          hre.ethers.provider,
-          "hid",
-          "m/44'/60'/2'/0/0"
-        );
+        signer = await (await hre.ethers.getSigners())[0];
+        // signer = new LedgerSigner(
+        //   hre.ethers.provider,
+        //   "hid",
+        //   "m/44'/60'/2'/0/0"
+        // );
       } else {
         throw Error("Incorrect network selected");
       }
