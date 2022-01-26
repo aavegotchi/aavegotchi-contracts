@@ -1,12 +1,6 @@
 import { run } from "hardhat";
 import { AddItemTypesTaskArgs } from "../../tasks/addItemTypes";
-import { maticDiamondAddress, itemManager } from "../helperFunctions";
-import { itemTypes } from "../../data/itemTypes/raffle6wearables";
-import {
-  convertDimensionsArrayToString,
-  UpdateItemDimensionsTaskArgs,
-} from "../../tasks/updateItemDimensions";
-import { Dimensions } from "../itemTypeHelpers";
+import { maticDiamondAddress, itemManagerAlt } from "../helperFunctions";
 
 async function addItemTypes() {
   const itemFile: string = "raffle6wearables";
@@ -14,7 +8,7 @@ async function addItemTypes() {
   const sleeveStartId: string = "43"; // last sleeve id for this set is 48
 
   const args: AddItemTypesTaskArgs = {
-    itemManager: itemManager,
+    itemManager: itemManagerAlt,
     diamondAddress: maticDiamondAddress,
     itemFile: itemFile,
     svgFile: svgFile,

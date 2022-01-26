@@ -96,7 +96,7 @@ export interface ItemTypeInputNew {
   rarityScoreModifier?: BigNumberish;
   canPurchaseWithGhst: boolean;
   totalQuantity?: number;
-  maxQuantity: number;
+  maxQuantity?: number;
 }
 
 export interface ItemTypeOutput {
@@ -410,7 +410,10 @@ export function calculateRarityScoreModifier(maxQuantity: number): number {
   return 0;
 }
 
-export function getItemTypes(itemTypes: ItemTypeInputNew[]): ItemTypeOutput[] {
+export function getItemTypes(
+  itemTypes: ItemTypeInputNew[],
+  ethers: any
+): ItemTypeOutput[] {
   const result = [];
   for (const itemType of itemTypes) {
     let maxQuantity: number = rarityLevelToMaxQuantity(itemType.rarityLevel);
@@ -418,7 +421,9 @@ export function getItemTypes(itemTypes: ItemTypeInputNew[]): ItemTypeOutput[] {
     let itemTypeOut: ItemTypeOutput = {
       ...itemType,
       slotPositions: stringToSlotPositions(itemType.slotPositions),
-      ghstPrice: rarityLevelToGhstPrice(itemType.rarityLevel),
+      ghstPrice: ethers.utils.parseEther(
+        rarityLevelToGhstPrice(itemType.rarityLevel)
+      ),
       rarityScoreModifier: calculateRarityScoreModifier(maxQuantity),
       maxQuantity: maxQuantity,
       totalQuantity: 0, //New items always start at 0
@@ -453,7 +458,7 @@ export function getBaadgeItemTypes(
       slotPositions: stringToSlotPositions(itemType.slotPositions),
       ghstPrice: "0",
       rarityScoreModifier: "0",
-      maxQuantity: itemType.maxQuantity,
+      maxQuantity: itemType.maxQuantity ? itemType.maxQuantity : 0,
       totalQuantity: 0, //New items always start at 0
       name: itemType.name.trim(), //Trim the name to remove empty spaces
     };
