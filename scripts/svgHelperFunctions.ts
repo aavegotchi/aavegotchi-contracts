@@ -1,14 +1,7 @@
-import { Signer } from "@ethersproject/abstract-signer";
 import { BigNumberish } from "@ethersproject/bignumber";
 import { BytesLike } from "@ethersproject/bytes";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { SvgFacet } from "../typechain";
-import {
-  gasPrice,
-  itemManager,
-  itemManagerAlt,
-  maticRealmDiamondAddress,
-} from "./helperFunctions";
+import { gasPrice, itemManager, itemManagerAlt } from "./helperFunctions";
 
 import { wearablesSvgs as front } from "../svgs/wearables";
 import {
@@ -128,6 +121,75 @@ export function bodyWearable(name: string, folder: string): BodyWearableOutput {
     "</g>";
 
   return { wearable: baseSvg, sleeves: { id: id, svg: sleevesSvg } };
+}
+
+export function bodyWearableBack(name: string, folder: string) {
+  let svg;
+
+  const back = readSvg(`${name}Back`, folder);
+  const backLeftSleevesUp =
+    '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-up">' +
+    readSvg(`${name}BackLeftUp`, folder) +
+    "</g>";
+  const backLeft = readSvg(`${name}BackLeft`, folder);
+  const backRightSleevesUp =
+    '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-up">' +
+    readSvg(`${name}BackRightUp`, folder) +
+    "</g>";
+  const backRight = readSvg(`${name}BackRight`, folder);
+
+  svg =
+    "<g>" +
+    back +
+    backLeftSleevesUp +
+    backLeft +
+    backRightSleevesUp +
+    backRight +
+    "</g>";
+
+  return svg;
+}
+
+export function bodyWearableLeft(name: string, folder: string) {
+  let svg;
+  const left = readSvg(`${name}SideLeft`, folder);
+  svg = "<g>" + left + "</g>";
+  return svg;
+}
+
+export function bodyWearableRight(name: string, folder: string) {
+  let svg;
+  const right = readSvg(`${name}SideRight`, folder);
+  svg = "<g>" + right + "</g>";
+  return svg;
+}
+
+export function sleeveWearableLeft(name: string, folder: string) {
+  let svg;
+  const leftSleevesUp =
+    '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-up">' +
+    readSvg(`${name}SideLeftUp`, folder) +
+    "</g>";
+  const leftSleevesDown =
+    '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' +
+    readSvg(`${name}SideLeftDown`, folder) +
+    "</g>";
+  svg = "<g>" + leftSleevesUp + leftSleevesDown + "</g>";
+  return svg;
+}
+
+export function sleeveWearableRight(name: string, folder: string) {
+  let svg;
+  const rightSleevesUp =
+    '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-up">' +
+    readSvg(`${name}SideRightUp`, folder) +
+    "</g>";
+  const rightSleevesDown =
+    '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-down">' +
+    readSvg(`${name}SideRightDown`, folder) +
+    "</g>";
+  svg = "<g>" + rightSleevesUp + rightSleevesDown + "</g>";
+  return svg;
 }
 
 export interface UpdateSvgPayload {

@@ -131,8 +131,6 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       }
 
       if (uploadWearableSvgs) {
-        console.log("svgs array:", svgsArray);
-
         console.log("Upload SVGs");
         await uploadSvgs(svgFacet, svgsArray, "wearables", hre.ethers);
       }
@@ -183,6 +181,8 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
           });
           sleevesSvgId++;
         }
+
+        console.log("sleeves input:", sleevesInput);
 
         console.log("Associating sleeves svgs with body wearable svgs.");
         tx = await svgFacet.setSleeves(sleevesInput, { gasPrice: gasPrice });
