@@ -304,7 +304,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 307,
     name: "Fairy Wings",
-    setId: [],
+    setId: [144, 128, 135, 136, 137],
     author: "xibot",
     description: "",
     dimensions: { x: 6, y: 17, width: 52, height: 38 },
@@ -324,7 +324,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 308,
     name: "Red Hair",
-    setId: [],
+    setId: [127, 128, 135, 136],
     author: "xibot",
     description: "",
     dimensions: { x: 13, y: 2, width: 50, height: 29 },
@@ -344,7 +344,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 309,
     name: "Citaadel Helm",
-    setId: [],
+    setId: [129, 130],
     author: "xibot",
     description: "",
     dimensions: { x: 13, y: 0, width: 38, height: 30 },
@@ -364,7 +364,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 310,
     name: "Plate Armor",
-    setId: [],
+    setId: [129, 130, 138],
     author: "xibot",
     description: "",
     dimensions: { x: 7, y: 31, width: 50, height: 24 },
@@ -384,7 +384,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 311,
     name: "Spirit Sword",
-    setId: [],
+    setId: [129, 130],
     author: "xibot",
     description: "",
     dimensions: { x: 6, y: 10, width: 7, height: 35 },
@@ -404,7 +404,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 312,
     name: "Plate Shield",
-    setId: [],
+    setId: [130],
     author: "xibot",
     description: "",
     dimensions: { x: 0, y: 30, width: 18, height: 22 },
@@ -424,7 +424,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 313,
     name: "Kabuto Helmet",
-    setId: [],
+    setId: [131, 139, 140],
     author: "xibot",
     description: "",
     dimensions: { x: 9, y: 2, width: 46, height: 40 },
@@ -444,7 +444,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 314,
     name: "Yoroi Armor",
-    setId: [],
+    setId: [131, 139, 140],
     author: "xibot",
     description: "",
     dimensions: { x: 10, y: 32, width: 44, height: 23 },
@@ -464,7 +464,7 @@ export const itemTypes: ItemTypeInputNew[] = [
   {
     svgId: 315,
     name: "Haanzo Katana",
-    setId: [],
+    setId: [131, 139, 140],
     author: "xibot",
     description: "",
     dimensions: { x: 3, y: 2, width: 9, height: 44 },
