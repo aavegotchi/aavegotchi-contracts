@@ -11,7 +11,7 @@ import { Dimensions } from "../itemTypeHelpers";
 async function addItemTypes() {
   const itemFile: string = "raffle6wearables";
   const svgFile: string = "raffle6wearables";
-  const sleeveStartId: string = "51";
+  const sleeveStartId: string = "43"; // last sleeve id for this set is 48
 
   const args: AddItemTypesTaskArgs = {
     itemManager: itemManager,

@@ -187,7 +187,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     setId: [126, 133],
     author: "xibot",
     description: "",
-    dimensions: { x: 20, y: 21, width: 24, height: 10 },
+    dimensions: { x: 20, y: 20, width: 25, height: 11 },
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: "",
