@@ -1,6 +1,6 @@
 # Welcome to the Aavegotchi Contracts!
 
-Aavegotchis are fully onchain NFTs, powered by the ERC721, ERC1155, and ERC998 standards. The contracts also implement the EIP2525 Diamonds standard, which allows for modular upgradeability. 
+Aavegotchis are fully onchain NFTs, powered by the ERC721, ERC1155, and ERC998 standards. The contracts also implement the EIP-2535 Diamonds standard, which allows for modular upgradeability. 
 
 Aavegotchis are one of the world's first playable NFTs, with onchain attributes that can be increased by interacting with the NFT and the community. 
 
