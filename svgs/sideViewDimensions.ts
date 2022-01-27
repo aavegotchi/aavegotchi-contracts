@@ -4904,7 +4904,7 @@ export const sideViewDimensions6 = [
     itemId: 212,
     name: "1339 Laptop",
     side: "left",
-    dimensions: { x: 35, y: 30, width: 14, height: 14 },
+    dimensions: { x: 15, y: 30, width: 14, height: 14 },
   },
   {
     itemId: 213,

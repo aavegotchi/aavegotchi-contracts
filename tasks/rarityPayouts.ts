@@ -1,20 +1,26 @@
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { task } from "hardhat/config";
-import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
+import { ContractReceipt } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
 import { BigNumber } from "@ethersproject/bignumber";
-import { parseEther, formatEther, parseUnits } from "@ethersproject/units";
+import { parseEther, formatEther } from "@ethersproject/units";
 import { EscrowFacet } from "../typechain";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { maticDiamondAddress, gasPrice } from "../scripts/helperFunctions";
+import { LeaderboardDataName, LeaderboardType } from "../types";
+import {
+  stripGotchis,
+  confirmCorrectness,
+  fetchAndSortLeaderboard,
+} from "../scripts/raritySortHelpers";
+
+export let tiebreakerIndex: string;
+const rookieFilter: string = "hauntId:2";
 
 import {
   RarityFarmingData,
   RarityFarmingRewardArgs,
   rarityRewards,
 } from "../types";
-import request from "graphql-request";
-import { maticGraphUrl } from "../scripts/query/queryAavegotchis";
 
 function addCommas(nStr: string) {
   nStr += "";
@@ -32,66 +38,13 @@ function strDisplay(str: string) {
   return addCommas(str.toString());
 }
 
-export function leaderboardQuery(
-  orderBy: string,
-  orderDirection: string,
-  blockNumber: string,
-  extraFilters?: string
-): string {
-  const extraWhere = extraFilters ? "," + extraFilters : "";
-  const where = `where:{baseRarityScore_gt:0, owner_not:"0x0000000000000000000000000000000000000000" ${extraWhere}}`;
-  const aavegotchi = `
-    id
-    name
-    baseRarityScore
-    modifiedRarityScore
-    withSetsRarityScore
-    numericTraits
-    modifiedNumericTraits
-    withSetsNumericTraits
-    stakedAmount
-    equippedWearables
-    kinship
-    equippedSetID
-    equippedSetName
-    experience
-    level
-    collateral
-    hauntId
-    lastInteracted
-    owner {
-        id
-    }`;
-  return `
-    {
-      top1000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, ${where}) {
-        ${aavegotchi}
-      }
-      top2000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:1000, ${where}) {
-        ${aavegotchi}
-      }
-      top3000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:2000, ${where}) {
-        ${aavegotchi}
-      }
-      top4000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:3000, ${where}) {
-        ${aavegotchi}
-      }
-      top5000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:4000, ${where}) {
-        ${aavegotchi}
-      }
-      top6000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:5000, ${where}) {
-        ${aavegotchi}
-      }
-    }
-  `;
-}
-
 export interface RarityPayoutTaskArgs {
   rarityDataFile: string;
   season: string;
   rounds: string;
   totalAmount: string;
   blockNumber: string;
+  tieBreakerIndex: string;
   deployerAddress: string;
 }
 
@@ -107,12 +60,14 @@ task("rarityPayout")
     "File that contains all the data related to the particular rarity round"
   )
   .addParam("deployerAddress")
+  .addParam("tieBreakerIndex", "The Tiebreaker index")
   .setAction(
     async (taskArgs: RarityPayoutTaskArgs, hre: HardhatRuntimeEnvironment) => {
       const filename: string = taskArgs.rarityDataFile;
       const diamondAddress = maticDiamondAddress;
       const deployerAddress = taskArgs.deployerAddress;
       const accounts = await hre.ethers.getSigners();
+      tiebreakerIndex = taskArgs.tieBreakerIndex;
 
       const testing = ["hardhat", "localhost"].includes(hre.network.name);
       let signer: Signer;
@@ -129,7 +84,6 @@ task("rarityPayout")
       }
 
       const rounds = Number(taskArgs.rounds);
-      const blockNumber = taskArgs.blockNumber;
 
       const signerAddress = await signer.getAddress();
       if (signerAddress !== deployerAddress) {
@@ -147,30 +101,70 @@ task("rarityPayout")
       const maxProcess = 500;
       const finalRewards: rarityRewards = {};
 
-      //Get data for this round
+      //Get data for this round from file
       const {
         dataArgs,
       } = require(`../data/airdrops/rarityfarming/szn${taskArgs.season}/${filename}.ts`);
       const data: RarityFarmingData = dataArgs;
 
-      /*
-      const query = leaderboardQuery(
+      const leaderboards = [
         "withSetsRarityScore",
-        "desc",
-        blockNumber,
-        "hauntId:2"
-      );
-      const queryresponse = await request(maticGraphUrl, query);
+        "kinship",
+        "experience",
+        "kinship",
+        "experience",
+      ];
+      const dataNames: LeaderboardDataName[] = [
+        "rarityGotchis",
+        "kinshipGotchis",
+        "xpGotchis",
+        "rookieKinshipGotchis",
+        "rookieXpGotchis",
+      ];
 
-      console.log("query response:", queryresponse);
-      */
+      //handle rookie now
 
-      //get gotchi data for this round
-      const rarity: string[] = data.rarityGotchis;
-      const kinship: string[] = data.kinshipGotchis;
-      const xp: string[] = data.xpGotchis;
-      const rookieXp = data.rookieXpGotchis;
-      const rookieKinship = data.rookieKinshipGotchis;
+      const leaderboardResults: RarityFarmingData = {
+        rarityGotchis: [],
+        xpGotchis: [],
+        kinshipGotchis: [],
+        rookieKinshipGotchis: [],
+        rookieXpGotchis: [],
+      };
+
+      let extraFilter: string = "";
+      for (let index = 0; index < leaderboards.length; index++) {
+        if (
+          index === leaderboards.length - 1 ||
+          index === leaderboards.length - 2
+        ) {
+          console.log("getting rookies");
+          extraFilter = rookieFilter;
+        }
+        let element: LeaderboardType = leaderboards[index] as LeaderboardType;
+
+        const result = stripGotchis(
+          await fetchAndSortLeaderboard(
+            element,
+            taskArgs.blockNumber,
+            Number(taskArgs.tieBreakerIndex),
+            extraFilter
+          )
+        );
+        const dataName: LeaderboardDataName = dataNames[
+          index
+        ] as LeaderboardDataName;
+
+        const correct = confirmCorrectness(result, data[dataName]);
+
+        console.log("correct:", correct);
+
+        if (correct !== 5000) {
+          throw new Error("Results do not line up with subgraph");
+        }
+
+        leaderboardResults[dataName] = result;
+      }
 
       //get rewards
       const rarityRoundRewards: string[] = rewards.rarity;
@@ -182,19 +176,11 @@ task("rarityPayout")
       //Iterate through all 5000 spots
       for (let index = 0; index < 5000; index++) {
         const gotchis: string[] = [
-          rarity[index],
-          kinship[index],
-          xp[index],
-          rookieKinship[index],
-          rookieXp[index],
-        ];
-
-        const rewardNames = [
-          "rarity",
-          "kinship",
-          "xp",
-          "rookieKinship",
-          "rookieXp",
+          leaderboardResults.rarityGotchis[index],
+          leaderboardResults.kinshipGotchis[index],
+          leaderboardResults.xpGotchis[index],
+          leaderboardResults.rookieKinshipGotchis[index],
+          leaderboardResults.rookieXpGotchis[index],
         ];
 
         const rewards: string[][] = [
@@ -206,17 +192,9 @@ task("rarityPayout")
         ];
 
         rewards.forEach((leaderboard, i) => {
-          const rewardName = rewardNames[i];
           const gotchi = gotchis[i];
           const reward = leaderboard[index];
 
-          console.log(
-            `Adding ${
-              Number(reward) / rounds
-            } GHST to #${gotchi} in leaderboard ${rewardName}`
-          );
-
-          //Add rewards divided by 4 (per season)
           if (finalRewards[gotchi])
             finalRewards[gotchi] += Number(reward) / rounds;
           else {
@@ -245,15 +223,6 @@ task("rarityPayout")
       sortedKeys.forEach((key) => {
         sorted.push(`${key}: ${finalRewards[key]}`);
       });
-
-      console.log("sorted:", sorted);
-
-      /* if (talliedAmount !== roundAmount) {
-        throw new Error(
-          `Tallied amount of ${talliedAmount} does not match round amount of ${roundAmount}`
-        );
-      }
-      */
 
       console.log("Total GHST to send:", talliedAmount);
       console.log("Round amount:", roundAmount);
@@ -296,7 +265,6 @@ task("rarityPayout")
         txGroup.forEach((sendData) => {
           tokenIds.push(sendData.tokenID);
           amounts.push(sendData.parsedAmount);
-          //  console.log(`Sending ${sendData.amount} to ${sendData.tokenID}`)
         });
 
         let totalAmount = amounts.reduce((prev, curr) => {
@@ -317,6 +285,7 @@ task("rarityPayout")
         const tx = await escrowFacet.batchDepositGHST(tokenIds, amounts, {
           gasPrice: gasPrice,
         });
+
         let receipt: ContractReceipt = await tx.wait();
         console.log("receipt:", receipt.transactionHash);
         console.log("Gas used:", strDisplay(receipt.gasUsed.toString()));

@@ -12,10 +12,17 @@ dotenv.config({ path: __dirname + "/.env" });
 
 //  require("./tasks/verifyFacet.js");
 require("./tasks/deployUpgrade.ts");
-/* require("./tasks/updateItemDimensions.ts");
+require("./tasks/addBaadgeSvgs.ts");
+require("./tasks/mintBaadgeSvgs.ts");
+require("./tasks/baadgeAirdrop.ts");
+require("./tasks/updateItemDimensions.ts");
 require("./tasks/updateSvgs.ts");
-require("./tasks/updateItemSideDimensions.ts"); */
-// require("./tasks/addItemTypes.ts");
+require("./tasks/updateItemSideDimensions.ts");
+require("./tasks/batchDeposit.ts");
+require("./tasks/rarityPayouts");
+require("./tasks/grantXP_snapshot");
+require("./tasks/grantXP_minigame");
+require("./tasks/addItemTypes");
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
@@ -28,7 +35,7 @@ export default {
         url: process.env.MATIC_URL,
         timeout: 12000000,
         // blockNumber: 12552123
-        // blockNumber: 13024371
+        // blockNumber: 20024371,
       },
       blockGasLimit: 20000000,
       timeout: 120000,
@@ -37,15 +44,15 @@ export default {
     localhost: {
       timeout: 16000000,
     },
-    // matic: {
-    //   url: process.env.MATIC_URL,
-    //   // url: 'https://rpc-mainnet.maticvigil.com/',
-    //   accounts: [process.env.SECRET],
-    //   // blockGasLimit: 20000000,
-    //   blockGasLimit: 20000000,
-    //   gasPrice: 1000000000,
-    //   timeout: 90000
-    // }
+    matic: {
+      url: process.env.MATIC_URL,
+      // url: 'https://rpc-mainnet.maticvigil.com/',
+      accounts: [process.env.ITEM_MANAGER],
+      // blockGasLimit: 20000000,
+      blockGasLimit: 20000000,
+      gasPrice: 1000000000,
+      timeout: 90000,
+    },
     // mumbai: {
     //   url: 'https://rpc-mumbai.matic.today',
     //   accounts: [process.env.SECRET],

@@ -5,8 +5,13 @@ import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
-import { UserGotchisOwned } from "../types";
-import { getSubgraphGotchis } from "../scripts/query/queryAavegotchis";
+import { GotchisOwned, UserGotchisOwned } from "../types";
+import {
+  getEthSubgraphGotchis,
+  getPolygonAndMainnetGotchis,
+  getSubgraphGotchis,
+  queryAavegotchis,
+} from "../scripts/query/queryAavegotchis";
 
 interface TaskArgs {
   filename: string;
@@ -27,10 +32,15 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     const xpAmount: number = Number(taskArgs.xpAmount);
     const batchSize: number = Number(taskArgs.batchSize);
 
-    const { addresses } = require(`../data/airdrops/${filename}.ts`);
+    let { addresses } = require(`../data/airdrops/${filename}.ts`);
+
+    const { finalUsers, tokenIds } = await getPolygonAndMainnetGotchis(
+      addresses,
+      hre
+    );
 
     const diamondAddress = maticDiamondAddress;
-    const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+    const gameManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
     console.log(gameManager);
     let signer: Signer;
     const testing = ["hardhat", "localhost"].includes(hre.network.name);
@@ -41,71 +51,15 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       });
       signer = await hre.ethers.provider.getSigner(gameManager);
     } else if (hre.network.name === "matic") {
-      signer = new LedgerSigner(hre.ethers.provider, "hid", "m/44'/60'/2'/0/0");
+      const accounts = await hre.ethers.getSigners();
+      signer = accounts[0]; /* new LedgerSigner(
+        hre.ethers.provider,
+        "hid",
+        "m/44'/60'/2'/0/0"
+      ); */
     } else {
       throw Error("Incorrect network selected");
     }
-
-    //Get Polygon
-    const polygonUsers: UserGotchisOwned[] = await getSubgraphGotchis(
-      addresses,
-      "matic"
-    );
-    const polygonGotchis = polygonUsers
-      .map((item) => item.gotchisOwned.length)
-      .reduce((agg, cur) => agg + cur);
-    console.log(
-      `Found ${polygonUsers.length} Polygon Users with ${polygonGotchis} Gotchis`
-    );
-
-    //Get mainnet
-    const mainnetUsers: UserGotchisOwned[] = await getSubgraphGotchis(
-      addresses,
-      "eth"
-    );
-    const mainnetGotchis = mainnetUsers
-      .map((item) => item.gotchisOwned.length)
-      .reduce((agg, cur) => agg + cur);
-    console.log(
-      `Found ${mainnetUsers.length} Ethereum Users with ${mainnetGotchis} Gotchis`
-    );
-
-    const finalUsers = polygonUsers.concat(mainnetUsers);
-
-    const tokenIds: string[] = [];
-
-    //Extract token ids
-    polygonUsers.forEach((user) => {
-      user.gotchisOwned.forEach((gotchi) => {
-        if (tokenIds.includes(gotchi.id))
-          throw new Error(`Duplicate token ID: ${gotchi.id}`);
-        else tokenIds.push(gotchi.id);
-      });
-    });
-
-    mainnetUsers.forEach((user) => {
-      user.gotchisOwned.forEach((gotchi) => {
-        if (tokenIds.includes(gotchi.id))
-          throw new Error(`Duplicate token ID: ${gotchi.id}`);
-        else tokenIds.push(gotchi.id);
-      });
-    });
-
-    //Check how many unused addresses there are (addresses that voted, but do not have Aavegotchis)
-    /*
-    const unusedAddresses: string[] = [];
-    const lowerCaseAddresses = addresses.map((address: string) =>
-      address.toLowerCase()
-    );
-    lowerCaseAddresses.forEach((address: string) => {
-      const found = finalUsers.find((val) => val.id === address);
-      if (!found) unusedAddresses.push(address);
-    });
-
-    console.log(
-      `There were ${unusedAddresses.length} voting addresses without Gotchis.`
-    );
-    */
 
     const batches = Math.ceil(tokenIds.length / batchSize);
 
