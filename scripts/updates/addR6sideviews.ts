@@ -22,8 +22,6 @@ async function main() {
   //uploading svg files
   let sideViewsTaskArray = await updateSvgTaskForSideViews(itemIds);
   for (let index = 0; index < sideViewsTaskArray.length; index++) {
-    // console.log("Side View Index: ", sideViewsTaskArray[index]);
-
     await run("updateSvgs", sideViewsTaskArray[index]);
   }
 
