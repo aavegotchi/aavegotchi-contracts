@@ -11,6 +11,10 @@ import { sideViewDimensions } from "../../data/itemTypes/raffle6wearablesSideVie
 
 async function main() {
   const itemIds: number[] = [];
+  let arrayEnd = 292;
+  for (let index = 264; index < arrayEnd; index++) {
+    itemIds.push(index);
+  }
   for (let index = 0; index < itemTypes.length; index++) {
     itemIds.push(Number(itemTypes[index].svgId));
   }
@@ -18,6 +22,8 @@ async function main() {
   //uploading svg files
   let sideViewsTaskArray = await updateSvgTaskForSideViews(itemIds);
   for (let index = 0; index < sideViewsTaskArray.length; index++) {
+    // console.log("Side View Index: ", sideViewsTaskArray[index]);
+
     await run("updateSvgs", sideViewsTaskArray[index]);
   }
 
