@@ -64,7 +64,7 @@ async function main() {
   console.log("Left Sleeve: ", leftSleeve.length);
   console.log("Back Sleeve: ", backSleeve.length);
 
-  let signer: Signer;
+  /* let signer: Signer;
   const testing = ["hardhat", "localhost"].includes(network.name);
 
   if (testing) {
@@ -126,7 +126,7 @@ async function main() {
     numTraits1,
     wearables1
   );
-  console.log("Side Preview: ", sidePreview);
+  console.log("Side Preview: ", sidePreview); */
 }
 
 main()

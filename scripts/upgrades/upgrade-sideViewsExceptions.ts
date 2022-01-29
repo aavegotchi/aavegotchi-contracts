@@ -1,17 +1,15 @@
-import { run, ethers } from "hardhat";
+import { run, ethers, network } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
-import { maticDiamondAddress } from "../helperFunctions";
+import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
 import { SvgViewsFacetInterface } from "../../typechain/SvgViewsFacet";
 import { SvgViewsFacet__factory } from "../../typechain";
 import { Exceptions } from "../../scripts/itemTypeHelpers";
 
 export async function upgrade() {
-  const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
-
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "SvgViewsFacet",
@@ -33,6 +31,11 @@ export async function upgrade() {
     SvgViewsFacet__factory.abi
   ) as SvgViewsFacetInterface;
 
+  // await network.provider.send("hardhat_setBalance", [
+  //   "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+  //   "0x0de0b6b3a7640000",
+  // ]);
+
   const payload: Exceptions[] = [
     {
       itemId: 201,
@@ -50,6 +53,11 @@ export async function upgrade() {
       exceptionBool: true,
     },
     {
+      itemId: 312,
+      slotPosition: 4,
+      exceptionBool: true,
+    },
+    {
       itemId: 201,
       slotPosition: 5,
       exceptionBool: true,
@@ -61,6 +69,11 @@ export async function upgrade() {
     },
     {
       itemId: 223,
+      slotPosition: 5,
+      exceptionBool: true,
+    },
+    {
+      itemId: 312,
       slotPosition: 5,
       exceptionBool: true,
     },
@@ -100,7 +113,17 @@ export async function upgrade() {
       exceptionBool: true,
     },
     {
+      itemId: 305,
+      slotPosition: 6,
+      exceptionBool: true,
+    },
+    {
       itemId: 132,
+      slotPosition: 0,
+      exceptionBool: true,
+    },
+    {
+      itemId: 307,
       slotPosition: 0,
       exceptionBool: true,
     },
@@ -124,7 +147,7 @@ export async function upgrade() {
   const calldata = iface.encodeFunctionData("setSideViewExceptions", [payload]);
 
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: diamondUpgrader,
+    diamondUpgrader: maticDiamondUpgrader,
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,

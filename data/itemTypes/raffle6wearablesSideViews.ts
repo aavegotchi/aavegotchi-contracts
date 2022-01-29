@@ -347,7 +347,7 @@ export const sideViewDimensions: SideDimensions[] = [
     itemId: 305,
     name: "Sus Butterfly",
     side: "back",
-    dimensions: { x: 3, y: 2, width: 15, height: 14 },
+    dimensions: { x: 46, y: 2, width: 15, height: 14 },
   },
   {
     itemId: 305,
