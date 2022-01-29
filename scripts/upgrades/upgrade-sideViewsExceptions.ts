@@ -156,8 +156,6 @@ export async function upgrade() {
     initCalldata: calldata,
   };
 
-  console.log("Running remove experience upgrade!");
-
   await run("deployUpgrade", args);
 }
 
