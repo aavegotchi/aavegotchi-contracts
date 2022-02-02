@@ -31,11 +31,6 @@ export async function upgrade() {
     SvgViewsFacet__factory.abi
   ) as SvgViewsFacetInterface;
 
-  // await network.provider.send("hardhat_setBalance", [
-  //   "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
-  //   "0x0de0b6b3a7640000",
-  // ]);
-
   const payload: Exceptions[] = [
     {
       itemId: 201,
@@ -127,19 +122,29 @@ export async function upgrade() {
       slotPosition: 0,
       exceptionBool: true,
     },
-    {
-      itemId: 39,
-      slotPosition: 3,
-      exceptionBool: true,
-    },
-    {
-      itemId: 45,
-      slotPosition: 3,
-      exceptionBool: true,
-    },
+    // {
+    //   itemId: 39,
+    //   slotPosition: 3,
+    //   exceptionBool: true,
+    // },
+    // {
+    //   itemId: 45,
+    //   slotPosition: 3,
+    //   exceptionBool: true,
+    // },
     {
       itemId: 216,
       slotPosition: 1,
+      exceptionBool: true,
+    },
+    {
+      itemId: 306,
+      slotPosition: 1,
+      exceptionBool: true,
+    },
+    {
+      itemId: 301,
+      slotPosition: 2,
       exceptionBool: true,
     },
   ];
@@ -157,6 +162,8 @@ export async function upgrade() {
   };
 
   await run("deployUpgrade", args);
+
+  console.log("Side view exceptions set");
 }
 
 if (require.main === module) {

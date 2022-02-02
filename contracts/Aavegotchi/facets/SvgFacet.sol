@@ -374,10 +374,12 @@ contract SvgFacet is Modifiers {
         bytes memory _body
     ) internal view returns (bytes memory svg_) {
         bool face = s.wearableExceptions[equippedWearables[1]][1];
-        bool head = s.wearableExceptions[equippedWearables[3]][3];
+        bool eyes = s.wearableExceptions[equippedWearables[2]][2];
 
         svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable, layers.hands);
-        if (face && head) {
+        if (eyes && !face) {
+            svg_ = abi.encodePacked(svg_, layers.eyes, layers.face, layers.head);
+        } else if (face) {
             svg_ = abi.encodePacked(svg_, layers.eyes, layers.head, layers.face);
         } else {
             svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head);
