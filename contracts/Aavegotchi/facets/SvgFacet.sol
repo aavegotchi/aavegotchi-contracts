@@ -373,13 +373,15 @@ contract SvgFacet is Modifiers {
         AavegotchiLayers memory layers,
         bytes memory _body
     ) internal view returns (bytes memory svg_) {
-        bool face = s.wearableExceptions[equippedWearables[1]][1];
-        bool eyes = s.wearableExceptions[equippedWearables[2]][2];
+        /* bool face = s.wearableExceptions[equippedWearables[1]][1];
+        bool eyes = s.wearableExceptions[equippedWearables[2]][2]; */
+
+        bytes32 front = 0x66726f6e74000000000000000000000000000000000000000000000000000000;
 
         svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable, layers.hands);
-        if (eyes && !face) {
+        if (s.wearableExceptions[front][equippedWearables[2]][2] && !s.wearableExceptions[front][equippedWearables[1]][1]) {
             svg_ = abi.encodePacked(svg_, layers.eyes, layers.face, layers.head);
-        } else if (face) {
+        } else if (s.wearableExceptions[front][equippedWearables[1]][1]) {
             svg_ = abi.encodePacked(svg_, layers.eyes, layers.head, layers.face);
         } else {
             svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head);

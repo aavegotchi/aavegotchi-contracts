@@ -239,7 +239,7 @@ struct AppStorage {
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
     mapping(uint256 => address) categoryToTokenAddress;
     // itemTypeId => (slotPosition => exception Bool)
-    mapping(uint256 => mapping(uint256 => bool)) wearableExceptions;
+    mapping(bytes32 => mapping(uint256 => mapping(uint256 => bool))) wearableExceptions;
 }
 
 library LibAppStorage {

@@ -24,6 +24,7 @@ export interface SideDimensions {
 export interface Exceptions {
   itemId: BigNumberish;
   slotPosition: BigNumberish;
+  side: string;
   exceptionBool: boolean;
 }
 
