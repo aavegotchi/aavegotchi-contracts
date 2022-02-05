@@ -25,20 +25,16 @@ export async function upgrade() {
     },
   ];
 
-  const front = ethers.utils.formatBytes32String("front");
-  const back = ethers.utils.formatBytes32String("back");
-  const left = ethers.utils.formatBytes32String("left");
-  const right = ethers.utils.formatBytes32String("right");
-  console.log("Front: ", front);
-  console.log("Back: ", back);
-  console.log("Left: ", left);
-  console.log("Right: ", right);
-
   const joined = convertFacetAndSelectorsToString(facets);
 
   let iface: SvgViewsFacetInterface = new ethers.utils.Interface(
     SvgViewsFacet__factory.abi
   ) as SvgViewsFacetInterface;
+
+  const front = ethers.utils.formatBytes32String("front");
+  const back = ethers.utils.formatBytes32String("back");
+  const left = ethers.utils.formatBytes32String("left");
+  const right = ethers.utils.formatBytes32String("right");
 
   const payload: Exceptions[] = [
     //body
@@ -410,7 +406,6 @@ export async function upgrade() {
 if (require.main === module) {
   upgrade()
     .then(() => process.exit(0))
-    // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {
       console.error(error);
       process.exit(1);
