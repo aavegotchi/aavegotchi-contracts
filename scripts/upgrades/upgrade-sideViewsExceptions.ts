@@ -166,17 +166,6 @@ export async function upgrade() {
       side: front,
       exceptionBool: true,
     },
-    //head
-    /* {
-      itemId: 39,
-      slotPosition: 3,
-      exceptionBool: true,
-    },
-    {
-      itemId: 45,
-      slotPosition: 3,
-      exceptionBool: true,
-    }, */
     //right hand
     {
       itemId: 23,

@@ -196,7 +196,7 @@ contract SvgViewsFacet is Modifiers {
         bytes pet;
     }
 
-    //@notice Allow the sideview preview of an aavegotchi given the haunt id,a set of traits,wearables and collateral type
+    ///@notice Allow the sideview preview of an aavegotchi given the haunt id,a set of traits,wearables and collateral type
     ///@param _hauntId Haunt id to use in preview
     ///@param _collateralType The type of collateral to use
     ///@param _numericTraits The numeric traits to use for the aavegotchi
@@ -231,7 +231,6 @@ contract SvgViewsFacet is Modifiers {
         ag_[3] = string(abi.encodePacked(viewBox, svg_, "</svg>"));
     }
 
-    //_sideView should either be left, right, front or back
     function addBodyAndWearableSideSvgLayers(
         bytes memory _sideView,
         bytes memory _body,
@@ -271,16 +270,12 @@ contract SvgViewsFacet is Modifiers {
         svg_ = applyLayerExceptions(equippedWearables, layers, _body, _sideView);
     }
 
-    struct ExceptionsLayers {
-        bool rightHand;
-        bool leftHand;
-        bool pet;
-        bool body;
-        bool face;
-        bool head;
-        bool eyes;
-    }
-
+    ///@notice determines layering order dependent on wearables being an exception
+    ///@param equippedWearables The set of wearables to wear for the aavegotchi
+    ///@param layers wearable id for slot position
+    ///@param _body is gotchi body
+    ///@param _sideView is which side of the gotchi body is being rendered
+    ///@return svg_ of what is to be rendered dependent of the layering order
     function applyLayerExceptions(
         uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables,
         AavegotchiLayers memory layers,
