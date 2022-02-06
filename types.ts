@@ -2,9 +2,18 @@ export interface GotchisOwned {
   id: string;
   status: string;
 }
+export interface VaultGotchis {
+  id: string;
+}
+
 export interface UserGotchisOwned {
   id: string;
   gotchisOwned: GotchisOwned[];
+}
+
+export interface VaultGotchisOwned {
+  id: string;
+  gotchis: VaultGotchis[];
 }
 
 export interface RarityFarmingRewardArgs {
