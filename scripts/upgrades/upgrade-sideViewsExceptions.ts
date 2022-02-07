@@ -326,12 +326,6 @@ export async function upgrade() {
     },
     //pet
     {
-      itemId: 261,
-      slotPosition: 6,
-      side: back,
-      exceptionBool: true,
-    },
-    {
       itemId: 151,
       slotPosition: 6,
       side: back,
@@ -363,6 +357,36 @@ export async function upgrade() {
     },
     {
       itemId: 156,
+      slotPosition: 6,
+      side: back,
+      exceptionBool: true,
+    },
+    {
+      itemId: 233,
+      slotPosition: 6,
+      side: back,
+      exceptionBool: true,
+    },
+    {
+      itemId: 236,
+      slotPosition: 6,
+      side: back,
+      exceptionBool: true,
+    },
+    {
+      itemId: 237,
+      slotPosition: 6,
+      side: back,
+      exceptionBool: true,
+    },
+    {
+      itemId: 238,
+      slotPosition: 6,
+      side: back,
+      exceptionBool: true,
+    },
+    {
+      itemId: 261,
       slotPosition: 6,
       side: back,
       exceptionBool: true,
