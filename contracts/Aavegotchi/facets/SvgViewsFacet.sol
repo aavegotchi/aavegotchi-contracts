@@ -511,10 +511,18 @@ contract SvgViewsFacet is Modifiers {
 
     //adding svg id exceptions for layering order
     function setSideViewExceptions(SideViewExceptions[] calldata _sideViewExceptions) external onlyOwnerOrItemManager {
+        bytes32 frontExcep = 0x66726f6e74000000000000000000000000000000000000000000000000000000;
+        bytes32 leftExcep = 0x6c65667400000000000000000000000000000000000000000000000000000000;
+        bytes32 rightExcep = 0x7269676874000000000000000000000000000000000000000000000000000000;
+        bytes32 backExcep = 0x6261636b00000000000000000000000000000000000000000000000000000000;
+
         for (uint256 i; i < _sideViewExceptions.length; i++) {
-            s.wearableExceptions[_sideViewExceptions[i].side][_sideViewExceptions[i].itemId][
-                _sideViewExceptions[i].slotPosition
-            ] = _sideViewExceptions[i].exceptionBool;
+            bytes32 _side = _sideViewExceptions[i].side;
+            require(
+                _side == frontExcep || _side == leftExcep || _side == rightExcep || _side == backExcep,
+                "Exception side must be set as either front, left, right or back"
+            );
+            s.wearableExceptions[_side][_sideViewExceptions[i].itemId][_sideViewExceptions[i].slotPosition] = _sideViewExceptions[i].exceptionBool;
         }
     }
 }
