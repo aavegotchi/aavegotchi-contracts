@@ -520,9 +520,7 @@ contract SvgViewsFacet is Modifiers {
                 _side == frontExcep || _side == leftExcep || _side == rightExcep || _side == backExcep,
                 "Exception side must be set as either front, left, right or back"
             );
-            s.wearableExceptions[_sideViewExceptions[i].side][_sideViewExceptions[i].itemId][
-                _sideViewExceptions[i].slotPosition
-            ] = _sideViewExceptions[i].exceptionBool;
+            s.wearableExceptions[_side][_sideViewExceptions[i].itemId][_sideViewExceptions[i].slotPosition] = _sideViewExceptions[i].exceptionBool;
         }
     }
 }
