@@ -282,41 +282,39 @@ contract SvgViewsFacet is Modifiers {
         bytes memory _body,
         bytes memory _sideView
     ) internal view returns (bytes memory svg_) {
-        bytes32 leftExcep = 0x6c65667400000000000000000000000000000000000000000000000000000000;
-        bytes32 rightExcep = 0x7269676874000000000000000000000000000000000000000000000000000000;
-        bytes32 backExcep = 0x6261636b00000000000000000000000000000000000000000000000000000000;
+        bytes32 side = LibSvg.bytesToBytes32("wearables-", _sideView);
 
         bytes memory bodySvg = abi.encodePacked(_body, layers.bodyWearable);
         bytes memory faceHeadBodyWearable = abi.encodePacked(_body, layers.face, layers.head, layers.bodyWearable);
         bytes memory headFace = abi.encodePacked(layers.head, layers.face);
 
         svg_ = abi.encodePacked(layers.background);
-        if (LibSvg.bytesToBytes32("wearables-", _sideView) == LibSvg.bytesToBytes32("wearables-", "back")) {
-            if (s.wearableExceptions[backExcep][equippedWearables[6]][6]) svg_ = abi.encodePacked(svg_, layers.pet);
-            if (s.wearableExceptions[backExcep][equippedWearables[4]][4] && s.wearableExceptions[backExcep][equippedWearables[5]][5]) {
+        if (side == LibSvg.bytesToBytes32("wearables-", "back")) {
+            if (s.wearableExceptions[side][equippedWearables[6]][6]) svg_ = abi.encodePacked(svg_, layers.pet);
+            if (s.wearableExceptions[side][equippedWearables[4]][4] && s.wearableExceptions[side][equippedWearables[5]][5]) {
                 //body wearable exception
-                if (s.wearableExceptions[backExcep][equippedWearables[0]][0]) {
+                if (s.wearableExceptions[side][equippedWearables[0]][0]) {
                     svg_ = abi.encodePacked(svg_, _body, layers.hands, layers.handRight, layers.handLeft, faceHeadBodyWearable);
                 } else {
                     // both handwearables exceptions
                     svg_ = abi.encodePacked(svg_, layers.hands, bodySvg, layers.handRight, layers.handLeft, headFace);
                 }
-            } else if (s.wearableExceptions[backExcep][equippedWearables[4]][4]) {
-                if (s.wearableExceptions[backExcep][equippedWearables[0]][0]) {
+            } else if (s.wearableExceptions[side][equippedWearables[4]][4]) {
+                if (s.wearableExceptions[side][equippedWearables[0]][0]) {
                     // right handwearables exceptions
                     svg_ = abi.encodePacked(svg_, _body, layers.handLeft, layers.hands, layers.handRight, faceHeadBodyWearable);
                 } else {
                     svg_ = abi.encodePacked(svg_, layers.handLeft, layers.hands, bodySvg, layers.handRight, headFace);
                 }
-            } else if (s.wearableExceptions[backExcep][equippedWearables[5]][5]) {
-                if (s.wearableExceptions[backExcep][equippedWearables[0]][0]) {
+            } else if (s.wearableExceptions[side][equippedWearables[5]][5]) {
+                if (s.wearableExceptions[side][equippedWearables[0]][0]) {
                     svg_ = abi.encodePacked(svg_, _body, layers.handRight, layers.hands, layers.handLeft, faceHeadBodyWearable);
                 } else {
                     // left handwearables exceptions
                     svg_ = abi.encodePacked(svg_, layers.handRight, layers.hands, bodySvg, layers.handLeft, headFace);
                 }
             } else {
-                if (s.wearableExceptions[backExcep][equippedWearables[0]][0]) {
+                if (s.wearableExceptions[side][equippedWearables[0]][0]) {
                     svg_ = abi.encodePacked(svg_, _body, layers.handRight, layers.handLeft, layers.hands, faceHeadBodyWearable);
                 } else {
                     // normal
@@ -324,31 +322,31 @@ contract SvgViewsFacet is Modifiers {
                 }
             }
             svg_ = abi.encodePacked(svg_, layers.eyes);
-            if (!s.wearableExceptions[backExcep][equippedWearables[6]][6]) svg_ = abi.encodePacked(svg_, layers.pet);
+            if (!s.wearableExceptions[side][equippedWearables[6]][6]) svg_ = abi.encodePacked(svg_, layers.pet);
         } else {
-            if (s.wearableExceptions[rightExcep][equippedWearables[1]][1] || s.wearableExceptions[leftExcep][equippedWearables[1]][1]) {
-                if (s.wearableExceptions[rightExcep][equippedWearables[0]][0] || s.wearableExceptions[leftExcep][equippedWearables[0]][0]) {
+            if (s.wearableExceptions[side][equippedWearables[1]][1] || s.wearableExceptions[side][equippedWearables[1]][1]) {
+                if (s.wearableExceptions[side][equippedWearables[0]][0] || s.wearableExceptions[side][equippedWearables[0]][0]) {
                     svg_ = abi.encodePacked(svg_, _body, layers.eyes, layers.head);
                     svg_ = abi.encodePacked(svg_, layers.bodyWearable, layers.face);
                 } else {
                     svg_ = abi.encodePacked(svg_, bodySvg, layers.eyes, headFace);
                 }
             } else {
-                if (s.wearableExceptions[rightExcep][equippedWearables[0]][0] || s.wearableExceptions[leftExcep][equippedWearables[0]][0]) {
+                if (s.wearableExceptions[side][equippedWearables[0]][0] || s.wearableExceptions[side][equippedWearables[0]][0]) {
                     svg_ = abi.encodePacked(svg_, _body, layers.face, layers.eyes);
                     svg_ = abi.encodePacked(svg_, layers.head, layers.bodyWearable);
                 } else {
                     svg_ = abi.encodePacked(svg_, bodySvg, layers.face, layers.eyes, layers.head);
                 }
             }
-            if (LibSvg.bytesToBytes32("wearables-", _sideView) == LibSvg.bytesToBytes32("wearables-", "left")) {
-                if (s.wearableExceptions[leftExcep][equippedWearables[5]][5]) {
+            if (side == LibSvg.bytesToBytes32("wearables-", "left")) {
+                if (s.wearableExceptions[side][equippedWearables[5]][5]) {
                     svg_ = abi.encodePacked(svg_, layers.hands, layers.sleeves, layers.handLeft);
                 } else {
                     svg_ = abi.encodePacked(svg_, layers.handLeft, layers.hands, layers.sleeves);
                 }
-            } else if (LibSvg.bytesToBytes32("wearables-", _sideView) == LibSvg.bytesToBytes32("wearables-", "right")) {
-                if (s.wearableExceptions[rightExcep][equippedWearables[4]][4]) {
+            } else if (side == LibSvg.bytesToBytes32("wearables-", "right")) {
+                if (s.wearableExceptions[side][equippedWearables[4]][4]) {
                     svg_ = abi.encodePacked(svg_, layers.hands, layers.sleeves, layers.handRight);
                 } else {
                     svg_ = abi.encodePacked(svg_, layers.handRight, layers.hands, layers.sleeves);
@@ -511,10 +509,10 @@ contract SvgViewsFacet is Modifiers {
 
     //adding svg id exceptions for layering order
     function setSideViewExceptions(SideViewExceptions[] calldata _sideViewExceptions) external onlyOwnerOrItemManager {
-        bytes32 frontExcep = 0x66726f6e74000000000000000000000000000000000000000000000000000000;
-        bytes32 leftExcep = 0x6c65667400000000000000000000000000000000000000000000000000000000;
-        bytes32 rightExcep = 0x7269676874000000000000000000000000000000000000000000000000000000;
-        bytes32 backExcep = 0x6261636b00000000000000000000000000000000000000000000000000000000;
+        bytes32 frontExcep = LibSvg.bytesToBytes32("wearables-", "front");
+        bytes32 leftExcep = LibSvg.bytesToBytes32("wearables-", "left");
+        bytes32 rightExcep = LibSvg.bytesToBytes32("wearables-", "right");
+        bytes32 backExcep = LibSvg.bytesToBytes32("wearables-", "back");
 
         for (uint256 i; i < _sideViewExceptions.length; i++) {
             bytes32 _side = _sideViewExceptions[i].side;
@@ -522,7 +520,9 @@ contract SvgViewsFacet is Modifiers {
                 _side == frontExcep || _side == leftExcep || _side == rightExcep || _side == backExcep,
                 "Exception side must be set as either front, left, right or back"
             );
-            s.wearableExceptions[_side][_sideViewExceptions[i].itemId][_sideViewExceptions[i].slotPosition] = _sideViewExceptions[i].exceptionBool;
+            s.wearableExceptions[_sideViewExceptions[i].side][_sideViewExceptions[i].itemId][
+                _sideViewExceptions[i].slotPosition
+            ] = _sideViewExceptions[i].exceptionBool;
         }
     }
 }

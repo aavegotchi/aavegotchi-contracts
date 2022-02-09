@@ -31,10 +31,10 @@ export async function upgrade() {
     SvgViewsFacet__factory.abi
   ) as SvgViewsFacetInterface;
 
-  const front = ethers.utils.formatBytes32String("front");
-  const back = ethers.utils.formatBytes32String("back");
-  const left = ethers.utils.formatBytes32String("left");
-  const right = ethers.utils.formatBytes32String("right");
+  const front = ethers.utils.formatBytes32String("wearables-front");
+  const back = ethers.utils.formatBytes32String("wearables-back");
+  const left = ethers.utils.formatBytes32String("wearables-left");
+  const right = ethers.utils.formatBytes32String("wearables-right");
 
   const payload: Exceptions[] = [
     //body
