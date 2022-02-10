@@ -11,6 +11,8 @@ import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {IERC721TokenReceiver} from "../../shared/interfaces/IERC721TokenReceiver.sol";
 
+import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
+
 contract AavegotchiFacet {
     AppStorage internal s;
 
@@ -278,5 +280,11 @@ contract AavegotchiFacet {
     ///  Metadata JSON Schema".
     function tokenURI(uint256 _tokenId) external pure returns (string memory) {
         return LibStrings.strWithUint("https://aavegotchi.com/metadata/aavegotchis/", _tokenId); //Here is your URL!
+    }
+
+    function addInterfaces() external {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        ds.supportedInterfaces[0xd9b67a26] = true; //erc1155
+        ds.supportedInterfaces[0x80ac58cd] = true; //erc721
     }
 }
