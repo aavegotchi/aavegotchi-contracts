@@ -329,7 +329,7 @@ function stripSvg(svg: string) {
 }
 
 function readSvg(name: string) {
-  return stripSvg(fs.readFileSync(`./svgs/svgitems/${name}.svg`, "utf8"));
+  return stripSvg(fs.readFileSync(`./svgs/svgItems/${name}.svg`, "utf8"));
 }
 
 function wearable(name: string) {
