@@ -9,13 +9,12 @@ import { AavegotchiFacetInterface } from "../../typechain/AavegotchiFacet";
 import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
 
 export async function upgrade() {
-  const func = "function addInterfaces() external";
 
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName:
         "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-      addSelectors: [func],
+      addSelectors: ["function addInterfaces() external"],
       removeSelectors: [],
     },
   ];
@@ -44,7 +43,7 @@ export async function upgrade() {
       facetName:
         "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
       addSelectors: [],
-      removeSelectors: [func],
+      removeSelectors: ["function addInterfaces() external"],
     },
   ];
 
