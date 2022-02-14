@@ -36,11 +36,13 @@ describe("Testing Exceptions", async function () {
       {
         itemId: 3,
         slotPosition: 4,
+        side: ethers.utils.formatBytes32String("wearables-back"),
         exceptionBool: true,
       },
       {
         itemId: 6,
         slotPosition: 4,
+        side: ethers.utils.formatBytes32String("wearables-back"),
         exceptionBool: true,
       }
     );
@@ -71,11 +73,13 @@ describe("Testing Exceptions", async function () {
       {
         itemId: 201,
         slotPosition: 4,
+        side: ethers.utils.formatBytes32String("wearables-back"),
         exceptionBool: false,
       },
       {
         itemId: 217,
         slotPosition: 4,
+        side: ethers.utils.formatBytes32String("wearables-back"),
         exceptionBool: false,
       }
     );
