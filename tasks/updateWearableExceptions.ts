@@ -37,7 +37,8 @@ export function convertStringToExceptionsArray(
   itemIds: string,
   slotPositions: string,
   sides: string,
-  exceptionBools: string
+  exceptionBools: string,
+  ethers: any
 ): Exceptions[] {
   const output: Exceptions[] = [];
   const itemIdsOutput = itemIds.split(",");
@@ -49,7 +50,7 @@ export function convertStringToExceptionsArray(
     output.push({
       itemId: itemIdsOutput[index],
       slotPosition: slotPositionsOutput[index],
-      side: sidesOutput[index],
+      side: ethers.utils.formatBytes32String(sidesOutput[index]),
       exceptionBool:
         exceptionBoolsOutput[index].toLowerCase() === "true" ? true : false,
     });
@@ -82,7 +83,8 @@ task(
         taskArgs.itemIds,
         taskArgs.slotPositions,
         taskArgs.sides,
-        taskArgs.exceptionBools
+        taskArgs.exceptionBools,
+        hre.ethers
       );
 
       const signer: Signer = await getDiamondSigner(hre, itemManager, false);
