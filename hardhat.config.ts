@@ -23,6 +23,7 @@ require("./tasks/rarityPayouts");
 require("./tasks/grantXP_snapshot");
 require("./tasks/grantXP_minigame");
 require("./tasks/addItemTypes");
+require("./tasks/updateWearableExceptions");
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
