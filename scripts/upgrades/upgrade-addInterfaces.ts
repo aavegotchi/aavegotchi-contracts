@@ -9,7 +9,6 @@ import { AavegotchiFacetInterface } from "../../typechain/AavegotchiFacet";
 import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
 
 export async function upgrade() {
-
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName:
@@ -18,6 +17,7 @@ export async function upgrade() {
       removeSelectors: [],
     },
   ];
+
   let iface: AavegotchiFacetInterface = new ethers.utils.Interface(
     AavegotchiFacet__factory.abi
   ) as AavegotchiFacetInterface;
@@ -36,28 +36,6 @@ export async function upgrade() {
   };
 
   await run("deployUpgrade", args);
-
-  //remove function
-  const facets2: FacetsAndAddSelectors[] = [
-    {
-      facetName:
-        "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-      addSelectors: [],
-      removeSelectors: ["function addInterfaces() external"],
-    },
-  ];
-
-  const joined2 = convertFacetAndSelectorsToString(facets2);
-
-  const args2: DeployUpgradeTaskArgs = {
-    diamondUpgrader: maticDiamondUpgrader,
-    diamondAddress: maticDiamondAddress,
-    facetsAndAddSelectors: joined2,
-    useLedger: false,
-    useMultisig: false,
-  };
-
-  await run("deployUpgrade", args2);
 
   //confirm interfaces
   const loupe = (await ethers.getContractAt(
