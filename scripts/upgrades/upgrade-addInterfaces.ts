@@ -29,8 +29,8 @@ export async function upgrade() {
     diamondUpgrader: maticDiamondUpgrader,
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
-    useLedger: false,
-    useMultisig: false,
+    useLedger: true,
+    useMultisig: true,
     initAddress: maticDiamondAddress,
     initCalldata: payload,
   };
