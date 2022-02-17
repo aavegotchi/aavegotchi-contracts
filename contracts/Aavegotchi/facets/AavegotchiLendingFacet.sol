@@ -83,7 +83,7 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256[3] calldata _revenueSplit,
         address _receiver,
         uint256 _whitelistId,
-        address[] calldata _excludes
+        address[] calldata _includes
     ) external {
         IERC721 erc721Token = IERC721(address(this));
         address sender = LibMeta.msgSender();
@@ -125,7 +125,7 @@ contract AavegotchiLendingFacet is Modifiers {
             receiver: _receiver,
             erc721TokenId: _erc721TokenId,
             whitelistId: _whitelistId,
-            excludeList: _excludes,
+            includeList: _includes,
             timeCreated: block.timestamp,
             timeAgreed: 0,
             lastClaimed: 0,

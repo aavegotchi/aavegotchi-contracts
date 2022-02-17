@@ -64,14 +64,14 @@ library LibAavegotchiLending {
             address revenueToken = _revenueTokens[i];
             if (collateralType == revenueToken) continue;
 
-            bool isExcluded;
-            for (uint256 j; j < rental.excludeList.length; j++) {
-                if (rental.excludeList[j] == revenueToken) {
-                    isExcluded = true;
+            bool isIncluded;
+            for (uint256 j; j < rental.includeList.length; j++) {
+                if (rental.includeList[j] == revenueToken) {
+                    isIncluded = true;
                     break;
                 }
             }
-            if (isExcluded) continue;
+            if (!isIncluded) continue;
 
             uint256 balance = IERC20(revenueToken).balanceOf(escrow);
             if (balance == 0) continue;

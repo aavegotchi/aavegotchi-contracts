@@ -25,7 +25,7 @@ describe("Testing Aavegotchi Lending", async function () {
   const revenueTokens: string[] = [ghstAddress];
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   const claimerAddress = "0x3507e4978e0eb83315d20df86ca0b976c0e40ccb";
-  const renterAddress = "0x5A27DBBfF05F36DC927137855E3381f0c20C1CDd"; // renter should be GHST holder
+  const renterAddress = "0xb4473cfEeDC9a0E94612c6ce883677b63f830DB8"; // renter should be GHST holder
   const nonGhstHolderAddress = "0x725Fe4790fC6435B5161f88636C2A50e43247A4b"; // GHST holder balance should be 0
   const nonWhitelistedAddress = "0xaA3B1fDC3Aa57Bf24418E397f8c80e7385aAa594"; // non-whitelisted address should be GHST holder
   const ghstHolderAddress = "0x3721546e51258065bfdb9746b2e442c7671b0298";
@@ -601,7 +601,7 @@ describe("Testing Aavegotchi Lending", async function () {
           revenueSplitForReceiver,
           receiver,
           whitelistId,
-          []
+          [ghstAddress]
         )
       ).wait();
       const event = receipt!.events!.find(
@@ -954,7 +954,7 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing exclude logic", async function () {
+  describe("Testing include logic", async function () {
     let fifthRentalId;
     before(async function () {
       const receipt = await (
@@ -965,7 +965,7 @@ describe("Testing Aavegotchi Lending", async function () {
           revenueSplitForReceiver,
           receiver,
           whitelistId,
-          [ghstAddress]
+          []
         )
       ).wait();
       const event = receipt!.events!.find(
@@ -1013,7 +1013,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const ownerNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
       const receiverNewBalance = await ghstERC20.balanceOf(receiver);
 
-      // Check ghst balance not changed
+      // Check ghst balance changed
       expect(escrowNewBalance).to.equal(revenue);
       expect(ownerNewBalance).to.equal(ownerOldBalance);
       expect(renterNewBalance).to.equal(renterOldBalance);
