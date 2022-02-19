@@ -26,7 +26,7 @@ export interface SvgTypesAndSizes {
 }
 
 export interface SvgTypesAndSizesOutput {
-  svg: string;
+  svg: string[];
   svgTypesAndSizes: SvgTypesAndSizes[];
 }
 
@@ -45,7 +45,7 @@ export function setupSvg(
   });
 
   return {
-    svg: svgItems.join(""),
+    svg: svgItems,
     svgTypesAndSizes: svgTypesAndSizes,
   };
 
@@ -270,6 +270,9 @@ export async function updateSvgs(
   svgFacet: SvgFacet,
   ethers: any
 ) {
+  let svgTypeAndIdsAndSizesArray: any[] = [];
+  let arrayOfSvgTypeAndIdsAndSizesArray: any[] = [];
+  let svgArray: string[] = [];
   for (let index = 0; index < svgIds.length; index++) {
     const svgId = svgIds[index];
     const svg = svgs[index];
@@ -281,15 +284,22 @@ export async function updateSvgs(
         sizes: [svgLength],
       },
     ];
+    svgTypeAndIdsAndSizesArray.push(array);
+    svgArray.push(svg);
+  }
+  arrayOfSvgTypeAndIdsAndSizesArray.push(svgTypeAndIdsAndSizesArray);
 
-    let tx = await svgFacet.updateSvg(svg, array, {
+  let tx = await svgFacet.updateSvg(
+    svgArray,
+    arrayOfSvgTypeAndIdsAndSizesArray,
+    {
       gasPrice: gasPrice,
-    });
-    // console.log("tx hash:", tx.hash);
-    let receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`);
     }
+  );
+  // console.log("tx hash:", tx.hash);
+  let receipt = await tx.wait();
+  if (!receipt.status) {
+    throw Error(`Error:: ${tx.hash}`);
   }
 }
 

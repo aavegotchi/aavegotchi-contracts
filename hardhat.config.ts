@@ -2,7 +2,6 @@
 import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
-import "@nomiclabs/hardhat-etherscan";
 import "hardhat-contract-sizer";
 import "solidity-coverage";
 //import './tasks/generateDiamondABI.js';
@@ -11,6 +10,7 @@ import "@typechain/hardhat";
 
 dotenv.config({ path: __dirname + "/.env" });
 
+//  require("./tasks/verifyFacet.js");
 require("./tasks/deployUpgrade.ts");
 require("./tasks/addBaadgeSvgs.ts");
 require("./tasks/mintBaadgeSvgs.ts");
@@ -20,21 +20,15 @@ require("./tasks/updateSvgs.ts");
 require("./tasks/updateItemSideDimensions.ts");
 require("./tasks/batchDeposit.ts");
 require("./tasks/rarityPayouts");
-require("./tasks/grantXP");
 require("./tasks/grantXP_snapshot");
 require("./tasks/grantXP_minigame");
-require("./tasks/grantXP_aavegotchis");
 require("./tasks/addItemTypes");
-require("./tasks/addWearableSets");
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
 // defaultNetwork, networks, solc, and paths.
 // Go to https://buidler.dev/config/ to learn more
 export default {
-  etherscan: {
-    apiKey: process.env.POLYGON_API_KEY,
-  },
   networks: {
     hardhat: {
       forking: {
@@ -50,14 +44,15 @@ export default {
     localhost: {
       timeout: 16000000,
     },
-    matic: {
-      url: process.env.MATIC_URL,
-      // url: 'https://rpc-mainnet.maticvigil.com/',
-      accounts: [process.env.ITEM_MANAGER],
-      // blockGasLimit: 20000000,
-      // gasPrice: 1000000000,
-      timeout: 90000,
-    },
+    // matic: {
+    //   url: process.env.MATIC_URL,
+    //   // url: 'https://rpc-mainnet.maticvigil.com/',
+    //   accounts: [process.env.ITEM_MANAGER],
+    //   // blockGasLimit: 20000000,
+    //   blockGasLimit: 20000000,
+    //   gasPrice: 1000000000,
+    //   timeout: 90000,
+    // },
     // mumbai: {
     //   url: 'https://rpc-mumbai.matic.today',
     //   accounts: [process.env.SECRET],
