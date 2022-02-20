@@ -454,22 +454,16 @@ contract SvgFacet is Modifiers {
     ///@notice Allow an item manager to store a new  svg
     ///@param _svg the new svg string
     ///@param _typesAndSizes An array of structs, each struct containing the types and sizes data for `_svg`
-    function storeSvg(string[] calldata _svg, LibSvg.SvgTypeAndSizes[][] calldata _typesAndSizes) external onlyItemManager {
-        require(_svg.length == _typesAndSizes.length, "SvgFacet: Svg and TypesAndSizes length must match");
-        for (uint256 i; i < _svg.length; i++) {
-            LibSvg.storeSvg(_svg[i], _typesAndSizes[i]);
-        }
+    function storeSvg(string calldata _svg, LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes) external onlyItemManager {
+        LibSvg.storeSvg(_svg, _typesAndSizes);
     }
 
     ///@notice Allow an item manager to update an existing svg
     ///@param _svg the new svg string
     ///@param _typesAndIdsAndSizes An array of structs, each struct containing the types,identifier and sizes data for `_svg`
 
-    function updateSvg(string[] calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[][] calldata _typesAndIdsAndSizes) external onlyItemManager {
-        require(_svg.length == _typesAndIdsAndSizes.length, "SvgFacet: Svg and TypesAndIdsAndSizes length must match");
-        for (uint256 i; i < _svg.length; i++) {
-            LibSvg.updateSvg(_svg[i], _typesAndIdsAndSizes[i]);
-        }
+    function updateSvg(string calldata _svg, LibSvg.SvgTypeAndIdsAndSizes[] calldata _typesAndIdsAndSizes) external onlyItemManager {
+        LibSvg.updateSvg(_svg, _typesAndIdsAndSizes);
     }
 
     ///@notice Allow  an item manager to delete the svg layers of an  svg
