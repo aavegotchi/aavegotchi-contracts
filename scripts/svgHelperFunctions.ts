@@ -294,26 +294,38 @@ export async function updateSvgs(
 }
 
 export async function uploadOrUpdateSvg(
-  svg: string | number,
+  svg: string[],
   svgType: string,
-  svgId: number,
+  svgId: number[],
   svgFacet: SvgFacet,
   ethers: any
 ) {
-  if (typeof svg === "number") svg = "";
+  // if (typeof svg === "number") svg = [""];
+  const idUpload = [];
+  const svgUpload = [];
+  const idUpdate = [];
+  const svgUpdate = [];
 
-  let exists = false;
-  try {
-    await svgFacet.getSvg(svgTypeToBytes(svgType, ethers), svgId);
-    exists = true;
-  } catch (error) {}
+  for (let i = 0; i < svgId.length; i++) {
+    // let exists = false;
+    try {
+      await svgFacet.getSvg(svgTypeToBytes(svgType, ethers), svgId[i]);
+      // exists = true;
+      idUpdate.push(svgId[i]);
+      svgUpdate.push(svg[i]);
+    } catch (error) {
+      idUpload.push(svgId[i]);
+      svgUpload.push(svg[i]);
+    }
+  }
 
-  if (exists) {
-    await updateSvgs([svg], svgType, [svgId], svgFacet, ethers);
-    console.log(`Svg ${svgType} #${svgId} exists, updating`);
-  } else {
-    console.log(`Svg ${svgType} #${svgId} does not exist, uploading`);
-    await uploadSvgs(svgFacet, [svg], svgType, ethers);
+  if (idUpdate.length > 0) {
+    await updateSvgs(svgUpdate, svgType, idUpdate, svgFacet, ethers);
+    console.log(`Svg ${svgType} #${idUpdate} exists, updating`);
+  }
+  if (idUpload.length > 0) {
+    console.log(`Svg ${svgType} #${idUpload} does not exist, uploading`);
+    await uploadSvgs(svgFacet, svgUpload, svgType, ethers);
   }
 }
 
@@ -332,6 +344,106 @@ export async function updateSvgTaskFront(_itemIds: number[]) {
     taskArray.push(taskArgsFront);
   }
   return taskArray;
+}
+
+export async function updateSvgTaskForSvgType(
+  _itemIds: number[],
+  _side: string
+) {
+  let taskArgs: UpdateSvgsTaskArgs;
+  const frontSvg = [];
+  const leftSvg = [];
+  const rightSvg = [];
+  const backSvg = [];
+
+  if ("front" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      frontSvg.push(front[_itemIds[i]]);
+    }
+
+    return (taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `wearables`,
+      svgs: [frontSvg].join("***"),
+    });
+  }
+  if ("left" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      leftSvg.push(left[_itemIds[i]]);
+    }
+
+    return (taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `wearables-left`,
+      svgs: [leftSvg].join("***"),
+    });
+  }
+  if ("right" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      rightSvg.push(right[_itemIds[i]]);
+    }
+
+    return (taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `wearables-right`,
+      svgs: [rightSvg].join("***"),
+    });
+  }
+  if ("back" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      backSvg.push(back[_itemIds[i]]);
+    }
+
+    return (taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `wearables-back`,
+      svgs: [backSvg].join("***"),
+    });
+  }
+}
+
+export async function updateSleevesTaskForSvgType(
+  _itemIds: number[],
+  _side: string
+) {
+  let taskArgs: UpdateSvgsTaskArgs;
+  const leftSvg = [];
+  const rightSvg = [];
+  const backSvg = [];
+
+  if ("left" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      leftSvg.push(leftSleeve[_itemIds[i]]);
+    }
+
+    return (taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `sleeves-left`,
+      svgs: [leftSvg].join("***"),
+    });
+  }
+  if ("right" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      rightSvg.push(rightSleeve[_itemIds[i]]);
+    }
+
+    return (taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `sleeves-right`,
+      svgs: [rightSvg].join("***"),
+    });
+  }
+  if ("back" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      backSvg.push(backSleeve[_itemIds[i]]);
+    }
+
+    return (taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `sleeves-back`,
+      svgs: [backSvg].join("***"),
+    });
+  }
 }
 
 export async function updateSvgTaskForSideViews(_itemIds: number[]) {

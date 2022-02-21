@@ -40,22 +40,17 @@ task("updateSvgs", "Updates SVGs, given svgType and a list of IDs")
       )) as SvgFacet;
 
       //todo: Handle more than one SVG at a time
-      for (let index = 0; index < svgIDs.length; index++) {
-        const svgId = svgIDs[index];
+      const idsArray: number[] = [];
+      for (let i = 0; i < svgIDs.length; i++) {
+        idsArray.push(Number(svgIDs[i]));
+      }
 
-        /* console.log("Updating SVG for id: ", svgId); */
+      /* console.log("Updating SVG for id: ", svgId); */
 
-        try {
-          await uploadOrUpdateSvg(
-            svgs[index],
-            svgType,
-            Number(svgId),
-            svgFacet,
-            hre.ethers
-          );
-        } catch (error) {
-          console.log("error uploading", svgId, error);
-        }
+      try {
+        await uploadOrUpdateSvg(svgs, svgType, idsArray, svgFacet, hre.ethers);
+      } catch (error) {
+        console.log("error uploading", svgIDs, error);
       }
     }
   );
