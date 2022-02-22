@@ -72,7 +72,7 @@ contract AavegotchiLendingFacet is Modifiers {
     ///@dev If the rental is active, unable to cancel
     ///@param _erc721TokenId The identifier of the NFT to rent
     ///@param _initialCost The rental fee of the aavegotchi in $GHST
-    ///@param _period The rental period of the aavegotchi
+    ///@param _period The rental period of the aavegotchi, unit: second
     ///@param _revenueSplit The revenue split of the rental, 3 values, sum of the should be 100
     ///@param _receiver The 3rd account for receive revenue split, can be address(0)
     ///@param _whitelistId The identifier of whitelist for agree rental, if 0, allow everyone
@@ -224,7 +224,7 @@ contract AavegotchiLendingFacet is Modifiers {
         address originalOwner = rental.originalOwner;
         address renter = rental.renter;
         require((originalOwner == sender) || (renter == sender), "AavegotchiLending: only owner or renter can claim and end agreement");
-        require(rental.timeAgreed + rental.period * 1 days <= block.timestamp, "AavegotchiLending: not allowed during agreement");
+        require(rental.timeAgreed + rental.period <= block.timestamp, "AavegotchiLending: not allowed during agreement");
 
         LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
 

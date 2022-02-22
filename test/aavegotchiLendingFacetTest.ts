@@ -35,7 +35,7 @@ describe("Testing Aavegotchi Lending", async function () {
   const lockedAavegotchiId = 16911;
   const unlockedAavegotchiId = 15589;
   const initialCost = ethers.utils.parseUnits("1", "ether");
-  const period = 10;
+  const period = 10 * 86400; // 10 days
   const revenueSplitWithoutReceiver: [
     BigNumberish,
     BigNumberish,
@@ -880,7 +880,7 @@ describe("Testing Aavegotchi Lending", async function () {
     });
     it("Should revert when try to claim rental with non original owner after agreement", async function () {
       // Simulate within 1 days after agreement
-      await ethers.provider.send("evm_increaseTime", [24 * 3600 * period]);
+      await ethers.provider.send("evm_increaseTime", [period]);
       await ethers.provider.send("evm_mine", []);
 
       await expect(
