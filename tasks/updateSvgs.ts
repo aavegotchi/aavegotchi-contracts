@@ -41,6 +41,9 @@ task("updateSvgs", "Updates SVGs, given svgType and a list of IDs")
 
       //todo: Handle more than one SVG at a time
       const idsArray: number[] = [];
+      console.log("SvgIDs length: ", svgIDs.length);
+      console.log("Svgs length: ", svgs.length);
+
       for (let i = 0; i < svgIDs.length; i++) {
         idsArray.push(Number(svgIDs[i]));
       }

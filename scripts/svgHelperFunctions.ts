@@ -346,6 +346,7 @@ export async function updateSvgTaskFront(_itemIds: number[]) {
   return taskArray;
 }
 
+//side must be front, left, right or back only
 export async function updateSvgTaskForSvgType(
   _itemIds: number[],
   _side: string
@@ -358,50 +359,63 @@ export async function updateSvgTaskForSvgType(
 
   if ("front" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
-      frontSvg.push(front[_itemIds[i]]);
+      frontSvg.push(`***${front[_itemIds[i]]}`);
     }
 
-    return (taskArgs = {
+    taskArgs = {
       svgIds: [_itemIds].join(","),
       svgType: `wearables`,
       svgs: [frontSvg].join("***"),
-    });
-  }
-  if ("left" === _side) {
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
+  } else if ("left" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
-      leftSvg.push(left[_itemIds[i]]);
+      leftSvg.push(`***${left[_itemIds[i]]}`);
     }
+    console.log("Left Svg: ", leftSvg);
+    console.log("Left Svg Length: ", leftSvg.length);
 
-    return (taskArgs = {
+    taskArgs = {
       svgIds: [_itemIds].join(","),
       svgType: `wearables-left`,
       svgs: [leftSvg].join("***"),
-    });
-  }
-  if ("right" === _side) {
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    console.log("Task Left Svg: ", taskArgs.svgs);
+    return taskArgs;
+  } else if ("right" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
-      rightSvg.push(right[_itemIds[i]]);
+      rightSvg.push(`***${right[_itemIds[i]]}`);
     }
 
-    return (taskArgs = {
+    taskArgs = {
       svgIds: [_itemIds].join(","),
       svgType: `wearables-right`,
       svgs: [rightSvg].join("***"),
-    });
-  }
-  if ("back" === _side) {
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
+  } else if ("back" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
-      backSvg.push(back[_itemIds[i]]);
+      backSvg.push(`***${back[_itemIds[i]]}`);
     }
 
-    return (taskArgs = {
+    taskArgs = {
       svgIds: [_itemIds].join(","),
       svgType: `wearables-back`,
       svgs: [backSvg].join("***"),
-    });
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
+  } else {
+    console.log(
+      "Not a proper wearables side, must be string of front, left, right or back ONLY"
+    );
   }
 }
 
+//side must be left, right or back only
 export async function updateSleevesTaskForSvgType(
   _itemIds: number[],
   _side: string
@@ -413,7 +427,7 @@ export async function updateSleevesTaskForSvgType(
 
   if ("left" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
-      leftSvg.push(leftSleeve[_itemIds[i]]);
+      leftSvg.push(`***${leftSleeve[_itemIds[i]]}`);
     }
 
     return (taskArgs = {
@@ -421,10 +435,9 @@ export async function updateSleevesTaskForSvgType(
       svgType: `sleeves-left`,
       svgs: [leftSvg].join("***"),
     });
-  }
-  if ("right" === _side) {
+  } else if ("right" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
-      rightSvg.push(rightSleeve[_itemIds[i]]);
+      rightSvg.push(`***${rightSleeve[_itemIds[i]]}`);
     }
 
     return (taskArgs = {
@@ -432,10 +445,9 @@ export async function updateSleevesTaskForSvgType(
       svgType: `sleeves-right`,
       svgs: [rightSvg].join("***"),
     });
-  }
-  if ("back" === _side) {
+  } else if ("back" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
-      backSvg.push(backSleeve[_itemIds[i]]);
+      backSvg.push(`***${backSleeve[_itemIds[i]]}`);
     }
 
     return (taskArgs = {
@@ -443,6 +455,10 @@ export async function updateSleevesTaskForSvgType(
       svgType: `sleeves-back`,
       svgs: [backSvg].join("***"),
     });
+  } else {
+    console.log(
+      "Not a proper sleeve side, must be string of left, right or back ONLY"
+    );
   }
 }
 
