@@ -373,8 +373,6 @@ export async function updateSvgTaskForSvgType(
     for (let i = 0; i < _itemIds.length; i++) {
       leftSvg.push(`***${left[_itemIds[i]]}`);
     }
-    console.log("Left Svg: ", leftSvg);
-    console.log("Left Svg Length: ", leftSvg.length);
 
     taskArgs = {
       svgIds: [_itemIds].join(","),
@@ -382,7 +380,6 @@ export async function updateSvgTaskForSvgType(
       svgs: [leftSvg].join("***"),
     };
     console.log("Task Arg IDs: ", taskArgs.svgIds);
-    console.log("Task Left Svg: ", taskArgs.svgs);
     return taskArgs;
   } else if ("right" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
@@ -421,40 +418,59 @@ export async function updateSleevesTaskForSvgType(
   _side: string
 ) {
   let taskArgs: UpdateSvgsTaskArgs;
+  const frontSvg = [];
   const leftSvg = [];
   const rightSvg = [];
   const backSvg = [];
 
-  if ("left" === _side) {
+  if ("front" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      frontSvg.push(`***${front[_itemIds[i]]}`);
+    }
+
+    taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `sleeves`,
+      svgs: [frontSvg].join("***"),
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
+  } else if ("left" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
       leftSvg.push(`***${leftSleeve[_itemIds[i]]}`);
     }
 
-    return (taskArgs = {
+    taskArgs = {
       svgIds: [_itemIds].join(","),
       svgType: `sleeves-left`,
       svgs: [leftSvg].join("***"),
-    });
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
   } else if ("right" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
       rightSvg.push(`***${rightSleeve[_itemIds[i]]}`);
     }
 
-    return (taskArgs = {
+    taskArgs = {
       svgIds: [_itemIds].join(","),
       svgType: `sleeves-right`,
       svgs: [rightSvg].join("***"),
-    });
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
   } else if ("back" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
       backSvg.push(`***${backSleeve[_itemIds[i]]}`);
     }
 
-    return (taskArgs = {
+    taskArgs = {
       svgIds: [_itemIds].join(","),
       svgType: `sleeves-back`,
       svgs: [backSvg].join("***"),
-    });
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
   } else {
     console.log(
       "Not a proper sleeve side, must be string of left, right or back ONLY"
