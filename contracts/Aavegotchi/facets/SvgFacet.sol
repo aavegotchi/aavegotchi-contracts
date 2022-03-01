@@ -481,11 +481,21 @@ contract SvgFacet is Modifiers {
     }
 
     ///@notice Allow  an item manager to set the sleeves of multiple items at once
+    ///@notice sets starting id for next sleeve set upload
     ///@dev each sleeve in `_sleeves` already contains the `_itemId` to apply to
     ///@param _sleeves An array of structs,each struct containing details about the new sleeves of each item `
     function setSleeves(Sleeve[] calldata _sleeves) external onlyItemManager {
+        bool setNextId;
+        uint256 nextId;
         for (uint256 i; i < _sleeves.length; i++) {
             s.sleeves[_sleeves[i].wearableId] = _sleeves[i].sleeveId;
+            if (_sleeves[i].sleeveId >= s.nextSleeveId[LibSvg.bytesToBytes32("sleeves", "")] && _sleeves[i].sleeveId > nextId) {
+                nextId = _sleeves[i].sleeveId;
+                setNextId = true;
+            }
+        }
+        if (setNextId) {
+            s.nextSleeveId[LibSvg.bytesToBytes32("sleeves", "")] = (nextId + 1);
         }
     }
 
@@ -498,5 +508,11 @@ contract SvgFacet is Modifiers {
         for (uint256 i; i < _itemIds.length; i++) {
             s.itemTypes[_itemIds[i]].dimensions = _dimensions[i];
         }
+    }
+
+    ///@notice used for setting starting id for new sleeve set uploads
+    ///@return next available sleeve id to start new set upload
+    function getNextSleeveId() external view returns (uint256) {
+        return s.nextSleeveId[LibSvg.bytesToBytes32("sleeves", "")];
     }
 }
