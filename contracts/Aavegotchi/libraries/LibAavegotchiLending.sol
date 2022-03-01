@@ -100,7 +100,7 @@ library LibAavegotchiLending {
         uint256 _rentalId = s.aavegotchiToRentalId[_tokenId];
         if (_rentalId > 0) {
             AavegotchiRental storage _rental = s.aavegotchiRentals[_rentalId];
-            require(_rental.originalOwner == _sender, "AavegotchiLending: not original owner");
+            require(_rental.originalOwner == _sender, "AavegotchiLending: Aavegotchi is in rental");
             if (_rental.timeAgreed > 0) {
                 // revert if agreed rental
                 revert("AavegotchiLending: Aavegotchi is in rental");

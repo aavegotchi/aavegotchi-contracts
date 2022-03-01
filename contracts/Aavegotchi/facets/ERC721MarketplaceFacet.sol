@@ -234,7 +234,7 @@ contract ERC721MarketplaceFacet is Modifiers {
 
         require(_priceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
 
-        require(!LibAavegotchiLending.isAavegotchiLent(_erc721TokenId), "ERC721Marketplace: Aavegotchi is in rental agreement");
+        require(s.aavegotchis[_erc721TokenId].locked == false, "LibAppStorage: Only callable on unlocked Aavegotchis");
 
         s.nextERC721ListingId++;
         uint256 listingId = s.nextERC721ListingId;

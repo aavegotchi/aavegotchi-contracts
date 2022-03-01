@@ -23,6 +23,8 @@ export async function upgrade() {
         "function agreeAavegotchiRental(uint256 _rentalId, uint256 _erc721TokenId, uint256 _initialCost, uint256 _period, uint256[3] calldata _revenueSplit) external",
         "function claimAavegotchiRental(uint256 _tokenId, address[] calldata _revenueTokens) external",
         "function claimAndEndAavegotchiRental(uint256 _tokenId, address[] calldata _revenueTokens) external",
+        "function getOwnerAavegotchiRentals(address _owner, uint256 _length) external view",
+        "function getAavegotchiRentals(uint256 _length) external view",
       ],
       removeSelectors: [],
     },

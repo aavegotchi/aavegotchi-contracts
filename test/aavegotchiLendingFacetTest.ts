@@ -498,6 +498,17 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
+  describe("Testing getOwnerAavegotchiRentals and getAavegotchiRentals after aavegotchi rental added", async function () {
+    it("Should fetch rental list", async function () {
+      let rentals = await lendingFacetWithOwner.getAavegotchiRentals(5);
+      expect(rentals[0].rentalId).to.equal(secondRentalId);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, 5);
+      expect(rentals[0].rentalId).to.equal(secondRentalId);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(receiver, 5);
+      expect(rentals.length).to.equal(0);
+    });
+  });
+
   describe("Testing isAavegotchiLent before and after aavegotchi rental added", async function () {
     it("Should return false if aavegotchi is not lent", async function () {
       const status = await lendingFacetWithOwner.isAavegotchiLent(
@@ -540,6 +551,17 @@ describe("Testing Aavegotchi Lending", async function () {
       ).wait();
       rental = await lendingFacetWithOwner.getAavegotchiRental(secondRentalId);
       expect(rental.canceled).to.equal(true);
+    });
+  });
+
+  describe("Testing getOwnerAavegotchiRentals and getAavegotchiRentals after canceled", async function () {
+    it("Should fetch rental list", async function () {
+      let rentals = await lendingFacetWithOwner.getAavegotchiRentals(5);
+      expect(rentals.length).to.equal(0);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, 5);
+      expect(rentals.length).to.equal(0);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(receiver, 5);
+      expect(rentals.length).to.equal(0);
     });
   });
 
@@ -780,6 +802,17 @@ describe("Testing Aavegotchi Lending", async function () {
         unlockedAavegotchiId
       );
       expect(status).to.equal(true);
+    });
+
+    describe("Testing getOwnerAavegotchiRentals and getAavegotchiRentals after agree", async function () {
+      it("Should fetch rental list", async function () {
+        let rentals = await lendingFacetWithOwner.getAavegotchiRentals(5);
+        expect(rentals.length).to.equal(0);
+        rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, 5);
+        expect(rentals.length).to.equal(0);
+        rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(escrowAddress, 5);
+        expect(rentals.length).to.equal(0);
+      });
     });
   });
 
