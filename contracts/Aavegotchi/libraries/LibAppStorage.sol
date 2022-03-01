@@ -264,7 +264,7 @@ struct AppStorage {
     mapping(uint256 => address) categoryToTokenAddress;
     uint256 nextAavegotchiRentalId;
     mapping(uint256 => AavegotchiRental) aavegotchiRentals; // rentalId => data
-    mapping(uint256 => uint256) aavegotchiRentalHead; // aavegotchiId => rentalId
+    mapping(uint256 => uint256) aavegotchiToRentalId; // aavegotchiId => rentalId
     mapping(address => uint256[]) lentTokenIds; // address => lent token ids
     mapping(address => mapping(uint256 => uint256)) lentTokenIdIndexes; // address => lent token id => index
     Whitelist[] whitelists;

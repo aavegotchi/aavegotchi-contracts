@@ -58,7 +58,7 @@ contract AavegotchiLendingFacet is Modifiers {
     ///@param _erc721TokenId The identifier of the NFT associated with the rental
     ///@return rental_ A struct containing certain details about the rental associated with an NFT of contract identifier `_erc721TokenId`
     function getAavegotchiRentalFromToken(uint256 _erc721TokenId) external view returns (AavegotchiRental memory rental_) {
-        uint256 rentalId = s.aavegotchiRentalHead[_erc721TokenId];
+        uint256 rentalId = s.aavegotchiToRentalId[_erc721TokenId];
         require(rentalId != 0, "AavegotchiLending: rental doesn't exist");
         rental_ = s.aavegotchiRentals[rentalId];
     }
@@ -104,7 +104,7 @@ contract AavegotchiLendingFacet is Modifiers {
 
         require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "AavegotchiLending: Only aavegotchi available");
 
-        uint256 oldRentalId = s.aavegotchiRentalHead[_erc721TokenId];
+        uint256 oldRentalId = s.aavegotchiToRentalId[_erc721TokenId];
         if (oldRentalId != 0) {
             LibAavegotchiLending.cancelAavegotchiRental(oldRentalId, sender);
         } else {
@@ -114,7 +114,7 @@ contract AavegotchiLendingFacet is Modifiers {
         s.nextAavegotchiRentalId++;
         uint256 rentalId = s.nextAavegotchiRentalId;
 
-        s.aavegotchiRentalHead[_erc721TokenId] = rentalId;
+        s.aavegotchiToRentalId[_erc721TokenId] = rentalId;
         s.aavegotchiRentals[rentalId] = AavegotchiRental({
             rentalId: rentalId,
             initialCost: _initialCost,
@@ -135,7 +135,7 @@ contract AavegotchiLendingFacet is Modifiers {
 
         emit AavegotchiRentalAdd(rentalId, sender, _erc721TokenId, _initialCost, _period, block.timestamp);
 
-        // Lock Aavegotchis when listing is created
+        // Lock Aavegotchis when rental is created
         s.aavegotchis[_erc721TokenId].locked = true;
     }
 
@@ -145,7 +145,7 @@ contract AavegotchiLendingFacet is Modifiers {
         LibAavegotchiLending.cancelAavegotchiRentalFromToken(_erc721TokenId, LibMeta.msgSender());
     }
 
-    ///@notice Allow an original aavegotchi owner to cancel his NFT rental through the listingID
+    ///@notice Allow an original aavegotchi owner to cancel his NFT rental through the rentalID
     ///@param _rentalId The identifier of the rental to be cancelled
     function cancelAavegotchiRental(uint256 _rentalId) external {
         LibAavegotchiLending.cancelAavegotchiRental(_rentalId, LibMeta.msgSender());
@@ -201,7 +201,7 @@ contract AavegotchiLendingFacet is Modifiers {
     ///@param _tokenId The identifier of the lent aavegotchi to claim
     ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
     function claimAavegotchiRental(uint256 _tokenId, address[] calldata _revenueTokens) external {
-        uint256 rentalId = s.aavegotchiRentalHead[_tokenId];
+        uint256 rentalId = s.aavegotchiToRentalId[_tokenId];
         require(rentalId != 0, "AavegotchiLending: rental not found");
         AavegotchiRental storage rental = s.aavegotchiRentals[rentalId];
 
@@ -216,7 +216,7 @@ contract AavegotchiLendingFacet is Modifiers {
     ///@param _tokenId The identifier of the lent aavegotchi to claim
     ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
     function claimAndEndAavegotchiRental(uint256 _tokenId, address[] calldata _revenueTokens) external {
-        uint256 rentalId = s.aavegotchiRentalHead[_tokenId];
+        uint256 rentalId = s.aavegotchiToRentalId[_tokenId];
         require(rentalId != 0, "AavegotchiLending: rental not found");
         AavegotchiRental storage rental = s.aavegotchiRentals[rentalId];
 
@@ -233,7 +233,7 @@ contract AavegotchiLendingFacet is Modifiers {
         LibAavegotchi.transfer(renter, originalOwner, _tokenId);
 
         rental.completed = true;
-        s.aavegotchiRentalHead[_tokenId] = 0;
+        s.aavegotchiToRentalId[_tokenId] = 0;
 
         LibAavegotchiLending.removeLentAavegotchi(_tokenId, originalOwner);
         // TODO: remove pet operator

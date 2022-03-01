@@ -285,7 +285,7 @@ contract AavegotchiGameFacet is Modifiers {
             if (owner != address(this)) {
                 // Check rental status of aavegotchi and allow original pet operators
                 bool isOriginalPetOperator;
-                uint256 rentalId = s.aavegotchiRentalHead[tokenId];
+                uint256 rentalId = s.aavegotchiToRentalId[tokenId];
                 if ((rentalId != 0) && (s.aavegotchiRentals[rentalId].timeAgreed > 0)) {
                     address originalOwner = s.aavegotchiRentals[rentalId].originalOwner;
                     isOriginalPetOperator = s.operators[originalOwner][sender] || s.petOperators[originalOwner][sender];

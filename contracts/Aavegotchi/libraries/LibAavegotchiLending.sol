@@ -24,14 +24,14 @@ library LibAavegotchiLending {
 
         //Unlock Aavegotchis when rental is created
         s.aavegotchis[rental.erc721TokenId].locked = false;
-        s.aavegotchiRentalHead[rental.erc721TokenId] = 0;
+        s.aavegotchiToRentalId[rental.erc721TokenId] = 0;
 
         emit AavegotchiRentalCanceled(_rentalId, block.number);
     }
 
     function cancelAavegotchiRentalFromToken(uint256 _erc721TokenId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        cancelAavegotchiRental(s.aavegotchiRentalHead[_erc721TokenId], _owner);
+        cancelAavegotchiRental(s.aavegotchiToRentalId[_erc721TokenId], _owner);
     }
 
     function removeLentAavegotchi(uint256 _tokenId, address _owner) internal {
@@ -93,14 +93,25 @@ library LibAavegotchiLending {
         rental.lastClaimed = block.timestamp;
     }
 
-    function enforceAavegotchiNotInRental(uint256 _tokenId) internal view {
+    function enforceAavegotchiNotInRental(uint256 _tokenId, address _sender) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        require(s.aavegotchiRentalHead[_tokenId] == 0, "AavegotchiLending: Aavegotchi is in rental");
+        uint256 _rentalId = s.aavegotchiToRentalId[_tokenId];
+        if (_rentalId > 0) {
+            AavegotchiRental storage _rental = s.aavegotchiRentals[_rentalId];
+            require(_rental.originalOwner == _sender, "AavegotchiLending: not original owner");
+            if (_rental.timeAgreed > 0) {
+                // revert if agreed rental
+                revert("AavegotchiLending: Aavegotchi is in rental");
+            } else {
+                // cancel if not agreed rental
+                cancelAavegotchiRental(_rentalId, _sender);
+            }
+        }
     }
 
     function isAavegotchiLent(uint256 _tokenId) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 rentalId = s.aavegotchiRentalHead[_tokenId];
+        uint256 rentalId = s.aavegotchiToRentalId[_tokenId];
         if (rentalId == 0) return false;
         AavegotchiRental storage rental_ = s.aavegotchiRentals[rentalId];
         if (rental_.timeCreated == 0 || rental_.timeAgreed == 0) return false;
