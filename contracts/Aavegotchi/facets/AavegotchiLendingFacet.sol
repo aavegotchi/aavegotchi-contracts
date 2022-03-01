@@ -63,6 +63,39 @@ contract AavegotchiLendingFacet is Modifiers {
         rental_ = s.aavegotchiRentals[rentalId];
     }
 
+    ///@notice Query a certain amount of aavegotchi rentals created by an address
+    ///@param _owner Creator of the rentals to query
+    ///@param _length How many aavegotchi rentals to return
+    ///@return rentals_ An array of rental
+    function getOwnerAavegotchiRentals(address _owner, uint256 _length) external view returns (AavegotchiRental[] memory rentals_) {
+        uint256 rentalId = s.aavegotchiOwnerRentalHead[_owner];
+        rentals_ = new AavegotchiRental[](_length);
+        uint256 listIndex;
+        for (; rentalId != 0 && listIndex < _length; listIndex++) {
+            rentals_[listIndex] = s.aavegotchiRentals[rentalId];
+            rentalId = s.aavegotchiOwnerRentalListItem[rentalId].childRentalId;
+        }
+        assembly {
+            mstore(rentals_, listIndex)
+        }
+    }
+
+    ///@notice Query a certain amount of aavegotchi rentals
+    ///@param _length How many rentals to return
+    ///@return rentals_ An array of rental
+    function getAavegotchiRentals(uint256 _length) external view returns (AavegotchiRental[] memory rentals_) {
+        uint256 rentalId = s.aavegotchiRentalHead;
+        rentals_ = new AavegotchiRental[](_length);
+        uint256 listIndex;
+        for (; rentalId != 0 && listIndex < _length; listIndex++) {
+            rentals_[listIndex] = s.aavegotchiRentals[rentalId];
+            rentalId = s.aavegotchiRentalListItem[rentalId].childRentalId;
+        }
+        assembly {
+            mstore(rentals_, listIndex)
+        }
+    }
+
     function isAavegotchiLent(uint256 _erc721TokenId) external view returns (bool) {
         return LibAavegotchiLending.isAavegotchiLent(_erc721TokenId);
     }
@@ -133,6 +166,8 @@ contract AavegotchiLendingFacet is Modifiers {
             completed: false
         });
 
+        LibAavegotchiLending.addRentalListItem(sender, rentalId);
+
         emit AavegotchiRentalAdd(rentalId, sender, _erc721TokenId, _initialCost, _period, block.timestamp);
 
         // Lock Aavegotchis when rental is created
@@ -183,6 +218,8 @@ contract AavegotchiLendingFacet is Modifiers {
 
         rental.renter = renter;
         rental.timeAgreed = block.timestamp;
+
+        LibAavegotchiLending.removeRentalListItem(_rentalId, originalOwner);
 
         uint256 tokenId = rental.erc721TokenId;
         s.lentTokenIdIndexes[originalOwner][tokenId] = s.lentTokenIds[originalOwner].length;
@@ -236,6 +273,5 @@ contract AavegotchiLendingFacet is Modifiers {
         s.aavegotchiToRentalId[_tokenId] = 0;
 
         LibAavegotchiLending.removeLentAavegotchi(_tokenId, originalOwner);
-        // TODO: remove pet operator
     }
 }

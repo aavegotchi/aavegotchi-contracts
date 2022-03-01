@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {LibAppStorage, AppStorage, AavegotchiRental} from "./LibAppStorage.sol";
+import {LibAppStorage, AppStorage, AavegotchiRental, RentalListItem} from "./LibAppStorage.sol";
 import "../../shared/interfaces/IERC721.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
@@ -21,6 +21,8 @@ library LibAavegotchiLending {
         require(rental.timeAgreed == 0, "AavegotchiLending: rental already agreed");
         require(rental.originalOwner == _owner, "AavegotchiLending: not original owner");
         rental.canceled = true;
+
+        removeRentalListItem(_rentalId, _owner);
 
         //Unlock Aavegotchis when rental is created
         s.aavegotchis[rental.erc721TokenId].locked = false;
@@ -116,5 +118,74 @@ library LibAavegotchiLending {
         AavegotchiRental storage rental_ = s.aavegotchiRentals[rentalId];
         if (rental_.timeCreated == 0 || rental_.timeAgreed == 0) return false;
         return rental_.completed == false;
+    }
+
+    function addRentalListItem(address _owner, uint256 _rentalId) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+
+        uint256 headRentalId = s.aavegotchiOwnerRentalHead[_owner];
+        if (headRentalId != 0) {
+            RentalListItem storage headRentalItem = s.aavegotchiOwnerRentalListItem[headRentalId];
+            headRentalItem.parentRentalId = _rentalId;
+        }
+        RentalListItem storage rentalItem = s.aavegotchiOwnerRentalListItem[_rentalId];
+        rentalItem.childRentalId = headRentalId;
+        s.aavegotchiOwnerRentalHead[_owner] = _rentalId;
+        rentalItem.rentalId = _rentalId;
+
+        headRentalId = s.aavegotchiRentalHead;
+        if (headRentalId != 0) {
+            RentalListItem storage headRentalItem = s.aavegotchiRentalListItem[headRentalId];
+            headRentalItem.parentRentalId = _rentalId;
+        }
+        rentalItem = s.aavegotchiRentalListItem[_rentalId];
+        rentalItem.childRentalId = headRentalId;
+        s.aavegotchiRentalHead = _rentalId;
+        rentalItem.rentalId = _rentalId;
+    }
+
+    function removeRentalListItem(uint256 _rentalId, address _owner) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+
+        RentalListItem storage rentalItem = s.aavegotchiRentalListItem[_rentalId];
+        if (rentalItem.rentalId == 0) {
+            return;
+        }
+        uint256 parentRentalId = rentalItem.parentRentalId;
+        if (parentRentalId != 0) {
+            RentalListItem storage parentRentalItem = s.aavegotchiRentalListItem[parentRentalId];
+            parentRentalItem.childRentalId = rentalItem.childRentalId;
+        }
+        uint256 childRentalId = rentalItem.childRentalId;
+        if (childRentalId != 0) {
+            RentalListItem storage childRentalItem = s.aavegotchiRentalListItem[childRentalId];
+            childRentalItem.parentRentalId = rentalItem.parentRentalId;
+        }
+
+        if (s.aavegotchiRentalHead == _rentalId) {
+            s.aavegotchiRentalHead = rentalItem.childRentalId;
+        }
+        rentalItem.rentalId = 0;
+        rentalItem.parentRentalId = 0;
+        rentalItem.childRentalId = 0;
+
+        rentalItem = s.aavegotchiOwnerRentalListItem[_rentalId];
+        parentRentalId = rentalItem.parentRentalId;
+        if (parentRentalId != 0) {
+            RentalListItem storage parentRentalItem = s.aavegotchiOwnerRentalListItem[parentRentalId];
+            parentRentalItem.childRentalId = rentalItem.childRentalId;
+        }
+        childRentalId = rentalItem.childRentalId;
+        if (childRentalId != 0) {
+            RentalListItem storage childRentalItem = s.aavegotchiOwnerRentalListItem[childRentalId];
+            childRentalItem.parentRentalId = rentalItem.parentRentalId;
+        }
+
+        if (s.aavegotchiOwnerRentalHead[_owner] == _rentalId) {
+            s.aavegotchiOwnerRentalHead[_owner] = rentalItem.childRentalId;
+        }
+        rentalItem.rentalId = 0;
+        rentalItem.parentRentalId = 0;
+        rentalItem.childRentalId = 0;
     }
 }

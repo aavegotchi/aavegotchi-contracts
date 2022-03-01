@@ -170,6 +170,12 @@ struct AavegotchiRental {
     bool completed;
 }
 
+struct RentalListItem {
+    uint256 parentRentalId;
+    uint256 rentalId;
+    uint256 childRentalId;
+}
+
 struct Whitelist {
     address owner;
     string name;
@@ -267,6 +273,10 @@ struct AppStorage {
     mapping(uint256 => uint256) aavegotchiToRentalId; // aavegotchiId => rentalId
     mapping(address => uint256[]) lentTokenIds; // address => lent token ids
     mapping(address => mapping(uint256 => uint256)) lentTokenIdIndexes; // address => lent token id => index
+    mapping(uint256 => RentalListItem) aavegotchiRentalListItem; // rentalId => RentalListItem
+    uint256 aavegotchiRentalHead;
+    mapping(uint256 => RentalListItem) aavegotchiOwnerRentalListItem;
+    mapping(address => uint256) aavegotchiOwnerRentalHead; // user address => rentalId => RentalListItem
     Whitelist[] whitelists;
     mapping(uint256 => mapping(address => bool)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
 }
