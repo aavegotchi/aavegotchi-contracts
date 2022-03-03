@@ -13,7 +13,7 @@ contract WhitelistFacet is Modifiers {
         require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
 
         address sender = LibMeta.msgSender();
-        uint256 whitelistId = s.whitelists.length;
+        uint256 whitelistId = s.whitelists.length + 1;
         address[] memory addresses;
         Whitelist memory whitelist = Whitelist({owner: sender, name: _name, addresses: addresses});
         s.whitelists.push(whitelist);
@@ -25,8 +25,8 @@ contract WhitelistFacet is Modifiers {
     function updateWhitelist(uint256 _whitelistId, address[] calldata _whitelistAddresses) external {
         address sender = LibMeta.msgSender();
 
-        require(s.whitelists.length > _whitelistId, "WhitelistFacet: whitelist not found");
-        require(s.whitelists[_whitelistId].owner == sender, "WhitelistFacet: not whitelist owner");
+        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: whitelist not found");
+        require(s.whitelists[_whitelistId - 1].owner == sender, "WhitelistFacet: not whitelist owner");
 
         uint256 whitelistLength = _whitelistAddresses.length;
         require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
@@ -37,8 +37,8 @@ contract WhitelistFacet is Modifiers {
     }
 
     function getWhitelist(uint256 _whitelistId) external view returns (Whitelist memory) {
-        require(s.whitelists.length > _whitelistId, "WhitelistFacet: whitelist not found");
-        return s.whitelists[_whitelistId];
+        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: whitelist not found");
+        return s.whitelists[_whitelistId - 1];
     }
 
     function getWhitelists() external view returns (Whitelist[] memory) {
@@ -48,7 +48,7 @@ contract WhitelistFacet is Modifiers {
     function _addAddressesToWhitelist(uint256 _whitelistId, address[] calldata _whitelistAddresses) internal {
         for (uint256 i; i < _whitelistAddresses.length; i++) {
             if (!s.isWhitelisted[_whitelistId][_whitelistAddresses[i]]) {
-                s.whitelists[_whitelistId].addresses.push(_whitelistAddresses[i]);
+                s.whitelists[_whitelistId - 1].addresses.push(_whitelistAddresses[i]);
                 s.isWhitelisted[_whitelistId][_whitelistAddresses[i]] = true;
             }
         }

@@ -210,7 +210,7 @@ describe("Testing Aavegotchi Lending", async function () {
         (event) => event.event === "WhitelistCreated"
       );
       whitelistId = event!.args!.whitelistId;
-      expect(whitelistId).to.equal(0);
+      expect(whitelistId).to.equal(1);
     });
   });
 
