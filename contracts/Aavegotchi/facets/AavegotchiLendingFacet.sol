@@ -121,10 +121,10 @@ contract AavegotchiLendingFacet is Modifiers {
         IERC721 erc721Token = IERC721(address(this));
         address sender = LibMeta.msgSender();
         require(erc721Token.ownerOf(_erc721TokenId) == sender, "AavegotchiLending: Not owner of aavegotchi");
-        require(
-            erc721Token.isApprovedForAll(sender, address(this)) || erc721Token.getApproved(_erc721TokenId) == address(this),
-            "AavegotchiLending: Not approved for transfer"
-        );
+//        require(
+//            erc721Token.isApprovedForAll(sender, address(this)) || erc721Token.getApproved(_erc721TokenId) == address(this),
+//            "AavegotchiLending: Not approved for transfer"
+//        );
 
         require(_period > 0, "AavegotchiLending: period should be larger than 0");
         //        require(_revenueSplit.length == 3, "AavegotchiLending: revenues split should consists of 3 values");
