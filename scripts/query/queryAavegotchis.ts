@@ -197,7 +197,7 @@ async function resolveAddresses(
     let address = addresses[index];
     if (address.includes(".eth")) {
       const resolved = await ethSigner.resolveName(address);
-      address = resolved;
+      address = resolved ? resolved : address;
     }
 
     if (await hre.ethers.utils.isAddress(address)) {

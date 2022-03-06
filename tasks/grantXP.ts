@@ -5,6 +5,9 @@ import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
+import { NonceManager } from "@ethersproject/experimental";
+
+import { LedgerSigner } from "@ethersproject/hardware-wallets";
 
 interface TaskArgs {
   filename: string;
@@ -54,9 +57,13 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       });
       signer = await hre.ethers.provider.getSigner(gameManager);
     } else if (hre.network.name === "matic") {
-      const accounts = await hre.ethers.getSigners();
-      signer = accounts[0];
+      // const accounts = await hre.ethers.getSigners();
+      //signer = accounts[0];
+
+      signer = new LedgerSigner(hre.ethers.provider, "hid", "m/44'/60'/2'/0/0");
     } else throw Error("Incorrect network selected");
+
+    const managedSigner = new NonceManager(signer);
 
     const batches = Math.ceil(tokenIds.length / batchSize);
 
@@ -66,15 +73,21 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     const dao = (
       await hre.ethers.getContractAt("DAOFacet", diamondAddress)
-    ).connect(signer) as DAOFacet;
+    ).connect(managedSigner) as DAOFacet;
 
     for (let index = 0; index < batches; index++) {
       console.log("Current batch id:", index);
+
+      if (index < 9) continue;
 
       const offset = batchSize * index;
       const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
 
       console.log("send token ids:", sendTokenIds);
+
+      sendTokenIds.forEach((id) => {
+        console.log(id);
+      });
 
       console.log(
         `Sending ${xpAmount} XP to ${sendTokenIds.length} Aavegotchis `
