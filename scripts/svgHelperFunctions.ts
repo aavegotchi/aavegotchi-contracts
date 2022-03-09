@@ -415,6 +415,7 @@ export async function updateSvgTaskForSvgType(
 //side must be left, right or back only
 export async function updateSleevesTaskForSvgType(
   _itemIds: number[],
+  _sleeveId: number[],
   _side: string
 ) {
   let taskArgs: UpdateSvgsTaskArgs;
@@ -422,14 +423,16 @@ export async function updateSleevesTaskForSvgType(
   const leftSvg = [];
   const rightSvg = [];
   const backSvg = [];
+  const sleeveId = [];
 
   if ("front" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
       frontSvg.push(`***${front[_itemIds[i]]}`);
+      sleeveId.push(_sleeveId[i]);
     }
 
     taskArgs = {
-      svgIds: [_itemIds].join(","),
+      svgIds: sleeveId.join(","),
       svgType: `sleeves`,
       svgs: [frontSvg].join("***"),
     };
@@ -438,10 +441,11 @@ export async function updateSleevesTaskForSvgType(
   } else if ("left" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
       leftSvg.push(`***${leftSleeve[_itemIds[i]]}`);
+      sleeveId.push(_sleeveId[i]);
     }
 
     taskArgs = {
-      svgIds: [_itemIds].join(","),
+      svgIds: sleeveId.join(","),
       svgType: `sleeves-left`,
       svgs: [leftSvg].join("***"),
     };
@@ -450,10 +454,11 @@ export async function updateSleevesTaskForSvgType(
   } else if ("right" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
       rightSvg.push(`***${rightSleeve[_itemIds[i]]}`);
+      sleeveId.push(_sleeveId[i]);
     }
 
     taskArgs = {
-      svgIds: [_itemIds].join(","),
+      svgIds: sleeveId.join(","),
       svgType: `sleeves-right`,
       svgs: [rightSvg].join("***"),
     };
@@ -462,10 +467,11 @@ export async function updateSleevesTaskForSvgType(
   } else if ("back" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
       backSvg.push(`***${backSleeve[_itemIds[i]]}`);
+      sleeveId.push(_sleeveId[i]);
     }
 
     taskArgs = {
-      svgIds: [_itemIds].join(","),
+      svgIds: sleeveId.join(","),
       svgType: `sleeves-back`,
       svgs: [backSvg].join("***"),
     };
