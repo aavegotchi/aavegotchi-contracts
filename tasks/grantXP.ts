@@ -57,10 +57,10 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       });
       signer = await hre.ethers.provider.getSigner(gameManager);
     } else if (hre.network.name === "matic") {
-      // const accounts = await hre.ethers.getSigners();
-      //signer = accounts[0];
+      const accounts = await hre.ethers.getSigners();
+      signer = accounts[0];
 
-      signer = new LedgerSigner(hre.ethers.provider, "hid", "m/44'/60'/2'/0/0");
+      // signer = new LedgerSigner(hre.ethers.provider, "hid", "m/44'/60'/2'/0/0");
     } else throw Error("Incorrect network selected");
 
     const managedSigner = new NonceManager(signer);
@@ -77,8 +77,6 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     for (let index = 0; index < batches; index++) {
       console.log("Current batch id:", index);
-
-      if (index < 9) continue;
 
       const offset = batchSize * index;
       const sendTokenIds = tokenIds.slice(offset, offset + batchSize);

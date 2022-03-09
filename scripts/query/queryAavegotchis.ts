@@ -226,6 +226,7 @@ export async function getPolygonAndMainnetGotchis(
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
     //Get Polygon
     const users: UserGotchisOwned[] = await getSubgraphGotchis(batch);
+
     console.log(
       `Found ${users.length} users with ${users
         .map((val) => val.gotchisOwned.length)
@@ -243,20 +244,25 @@ export async function getPolygonAndMainnetGotchis(
   for (let index = 0; index < batches; index++) {
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
     const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(batch);
-    console.log(
-      `Found ${vaultUsers.length} users with ${vaultUsers
-        .map((val) => val.gotchisOwned.length)
-        .reduce((prev, current) => prev + current)} Gotchis in Vault subgraph`
-    );
 
-    polygonUsers = polygonUsers.concat(vaultUsers);
+    if (vaultUsers.length > 0) {
+      console.log(
+        `Found ${vaultUsers.length} users with ${vaultUsers
+          .map((val) => val.gotchisOwned.length)
+          .reduce((prev, current) => prev + current)} Gotchis in Vault subgraph`
+      );
+      polygonUsers = polygonUsers.concat(vaultUsers);
+    }
   }
 
   //Ethereum
   for (let index = 0; index < batches; index++) {
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
     const users: UserGotchisOwned[] = await getEthSubgraphGotchis(batch);
-    mainnetUsers = mainnetUsers.concat(users);
+
+    if (users.length > 0) {
+      mainnetUsers = mainnetUsers.concat(users);
+    }
   }
 
   let tokenIds: string[] = [];
@@ -303,12 +309,14 @@ export async function getPolygonAndMainnetGotchis(
     `Found ${polygonUsers.length} Polygon Users with ${polygonGotchis} Gotchis`
   );
 
-  const mainnetGotchis = mainnetUsers
-    .map((item) => item.gotchisOwned.length)
-    .reduce((agg, cur) => agg + cur);
-  console.log(
-    `Found ${mainnetUsers.length} Ethereum Users with ${mainnetGotchis} Gotchis`
-  );
+  if (mainnetUsers.length > 0) {
+    const mainnetGotchis = mainnetUsers
+      .map((item) => item.gotchisOwned.length)
+      .reduce((agg, cur) => agg + cur);
+    console.log(
+      `Found ${mainnetUsers.length} Ethereum Users with ${mainnetGotchis} Gotchis`
+    );
+  }
 
   return { finalUsers: finalUsers, tokenIds: tokenIds };
 }
