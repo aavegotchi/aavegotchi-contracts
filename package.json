@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@ethersproject/experimental": "^5.4.0",
-    "@ethersproject/hardware-wallets": "https://github.com/mudgen/ethers-ledger.git",
+    "@ethersproject/hardware-wallets": "github:mudgen/ethers-ledger",
     "@nomiclabs/hardhat-etherscan": "^3.0.0",
     "@types/chai": "^4.2.21",
     "@types/mocha": "^9.0.0",

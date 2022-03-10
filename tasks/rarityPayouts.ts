@@ -111,15 +111,15 @@ task("rarityPayout")
         "withSetsRarityScore",
         "kinship",
         "experience",
-        "kinship",
-        "experience",
+        // "kinship",
+        // "experience",
       ];
       const dataNames: LeaderboardDataName[] = [
         "rarityGotchis",
         "kinshipGotchis",
         "xpGotchis",
-        "rookieKinshipGotchis",
-        "rookieXpGotchis",
+        // "rookieKinshipGotchis",
+        // "rookieXpGotchis",
       ];
 
       //handle rookie now
@@ -128,8 +128,8 @@ task("rarityPayout")
         rarityGotchis: [],
         xpGotchis: [],
         kinshipGotchis: [],
-        rookieKinshipGotchis: [],
-        rookieXpGotchis: [],
+        // rookieKinshipGotchis: [],
+        // rookieXpGotchis: [],
       };
 
       let extraFilter: string = "";
@@ -147,8 +147,7 @@ task("rarityPayout")
           await fetchAndSortLeaderboard(
             element,
             taskArgs.blockNumber,
-            Number(taskArgs.tieBreakerIndex),
-            extraFilter
+            Number(taskArgs.tieBreakerIndex)
           )
         );
         const dataName: LeaderboardDataName = dataNames[
@@ -159,7 +158,7 @@ task("rarityPayout")
 
         console.log("correct:", correct);
 
-        if (correct !== 5000) {
+        if (correct !== 7500) {
           throw new Error("Results do not line up with subgraph");
         }
 
@@ -179,8 +178,8 @@ task("rarityPayout")
           leaderboardResults.rarityGotchis[index],
           leaderboardResults.kinshipGotchis[index],
           leaderboardResults.xpGotchis[index],
-          leaderboardResults.rookieKinshipGotchis[index],
-          leaderboardResults.rookieXpGotchis[index],
+          // leaderboardResults.rookieKinshipGotchis[index],
+          // leaderboardResults.rookieXpGotchis[index],
         ];
 
         const rewards: string[][] = [

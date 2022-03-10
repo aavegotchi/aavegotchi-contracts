@@ -20,16 +20,16 @@ export interface RarityFarmingRewardArgs {
   rarity: string[];
   kinship: string[];
   xp: string[];
-  rookieXp: string[];
-  rookieKinship: string[];
+  // rookieXp: string[];
+  // rookieKinship: string[];
 }
 
 export interface RarityFarmingData {
   rarityGotchis: string[];
   kinshipGotchis: string[];
   xpGotchis: string[];
-  rookieXpGotchis: string[];
-  rookieKinshipGotchis: string[];
+  // rookieXpGotchis: string[];
+  // rookieKinshipGotchis: string[];
 }
 
 export interface rarityRewards {
@@ -45,9 +45,9 @@ export type LeaderboardType = "withSetsRarityScore" | "kinship" | "experience";
 export type LeaderboardDataName =
   | "rarityGotchis"
   | "kinshipGotchis"
-  | "xpGotchis"
-  | "rookieXpGotchis"
-  | "rookieKinshipGotchis";
+  | "xpGotchis";
+// | "rookieXpGotchis"
+// | "rookieKinshipGotchis";
 
 export interface LeaderboardAavegotchi {
   id: string;
