@@ -56,6 +56,8 @@ task("grantXP_aavegotchis", "Grants XP to Aavegotchis by ID")
           (index + 1) * maxProcess
         );
 
+        if (index < 9) continue;
+
         console.log("batch:", batch);
 
         console.log(

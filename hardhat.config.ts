@@ -1,5 +1,5 @@
 /* global task ethers */
-import { task } from "hardhat/config";
+
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-etherscan";
@@ -26,6 +26,7 @@ require("./tasks/grantXP_minigame");
 require("./tasks/grantXP_aavegotchis");
 require("./tasks/addItemTypes");
 require("./tasks/addWearableSets");
+require("./tasks/grantXP_customValues");
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
