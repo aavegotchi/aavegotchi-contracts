@@ -7,6 +7,7 @@ import { EscrowFacet } from "../typechain";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { maticDiamondAddress, gasPrice } from "../scripts/helperFunctions";
 import { LeaderboardDataName, LeaderboardType } from "../types";
+import { NonceManager } from "@ethersproject/experimental";
 import {
   stripGotchis,
   confirmCorrectness,
@@ -14,7 +15,7 @@ import {
 } from "../scripts/raritySortHelpers";
 
 export let tiebreakerIndex: string;
-const rookieFilter: string = "hauntId:2";
+// const rookieFilter: string = "hauntId:2";
 
 import {
   RarityFarmingData,
@@ -83,6 +84,8 @@ task("rarityPayout")
         throw Error("Incorrect network selected");
       }
 
+      const managedSigner = new NonceManager(signer);
+
       const rounds = Number(taskArgs.rounds);
 
       const signerAddress = await signer.getAddress();
@@ -128,19 +131,17 @@ task("rarityPayout")
         rarityGotchis: [],
         xpGotchis: [],
         kinshipGotchis: [],
-        // rookieKinshipGotchis: [],
-        // rookieXpGotchis: [],
       };
 
-      let extraFilter: string = "";
+      // let extraFilter: string = "";
       for (let index = 0; index < leaderboards.length; index++) {
-        if (
-          index === leaderboards.length - 1 ||
-          index === leaderboards.length - 2
-        ) {
-          console.log("getting rookies");
-          extraFilter = rookieFilter;
-        }
+        // if (
+        //   index === leaderboards.length - 1 ||
+        //   index === leaderboards.length - 2
+        // ) {
+        //   console.log("getting rookies");
+        //   // extraFilter = rookieFilter;
+        // }
         let element: LeaderboardType = leaderboards[index] as LeaderboardType;
 
         const result = stripGotchis(
@@ -150,6 +151,7 @@ task("rarityPayout")
             Number(taskArgs.tieBreakerIndex)
           )
         );
+
         const dataName: LeaderboardDataName = dataNames[
           index
         ] as LeaderboardDataName;
@@ -169,11 +171,11 @@ task("rarityPayout")
       const rarityRoundRewards: string[] = rewards.rarity;
       const kinshipRoundRewards: string[] = rewards.kinship;
       const xpRoundRewards: string[] = rewards.xp;
-      const rookieKinshipRoundRewards: string[] = rewards.rookieKinship;
-      const rookieXpRoundRewards: string[] = rewards.rookieXp;
+      // const rookieKinshipRoundRewards: string[] = rewards.rookieKinship;
+      // const rookieXpRoundRewards: string[] = rewards.rookieXp;
 
       //Iterate through all 5000 spots
-      for (let index = 0; index < 5000; index++) {
+      for (let index = 0; index < 7500; index++) {
         const gotchis: string[] = [
           leaderboardResults.rarityGotchis[index],
           leaderboardResults.kinshipGotchis[index],
@@ -186,8 +188,8 @@ task("rarityPayout")
           rarityRoundRewards,
           kinshipRoundRewards,
           xpRoundRewards,
-          rookieKinshipRoundRewards,
-          rookieXpRoundRewards,
+          // rookieKinshipRoundRewards,
+          // rookieXpRoundRewards,
         ];
 
         rewards.forEach((leaderboard, i) => {
@@ -258,6 +260,8 @@ task("rarityPayout")
       for (const [i, txGroup] of txData.entries()) {
         console.log("current index:", i);
 
+        if (i < 7) continue;
+
         let tokenIds: string[] = [];
         let amounts: string[] = [];
 
@@ -280,7 +284,7 @@ task("rarityPayout")
 
         const escrowFacet = (
           await hre.ethers.getContractAt("EscrowFacet", diamondAddress)
-        ).connect(signer) as EscrowFacet;
+        ).connect(managedSigner) as EscrowFacet;
         const tx = await escrowFacet.batchDepositGHST(tokenIds, amounts, {
           gasPrice: gasPrice,
         });

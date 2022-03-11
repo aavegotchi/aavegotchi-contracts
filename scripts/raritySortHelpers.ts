@@ -79,13 +79,19 @@ export function stripGotchis(ids: LeaderboardAavegotchi[]) {
   return ids.map((gotchi: LeaderboardAavegotchi) => gotchi.id);
 }
 
-export function confirmCorrectness(table1: string[], table2: string[]) {
+export function confirmCorrectness(
+  subgraphData: string[],
+  localData: string[]
+) {
   let j = 0;
-  if (table1.length !== table2.length) {
+
+  if (subgraphData.length !== localData.length) {
     console.log("length mismatch, exiting");
   }
-  for (let i = 0; i < table1.length; i++) {
-    if (table1[i] === table2[i]) {
+  for (let i = 0; i < subgraphData.length; i++) {
+    // console.log("table1 & 2:", table1[i], table2[i]);
+
+    if (subgraphData[i] === localData[i]) {
       j++;
     }
   }
@@ -96,10 +102,11 @@ export function confirmCorrectness(table1: string[], table2: string[]) {
 export function leaderboardQuery(
   orderBy: string,
   orderDirection: string,
+  blockNumber: string,
   extraFilters?: string
 ): string {
-  const extraWhere = extraFilters ? "," + extraFilters : "";
-  const where = `where:{baseRarityScore_gt:0, owner_not:"0x0000000000000000000000000000000000000000" ${extraWhere}}`;
+  // const extraWhere = extraFilters ? "," + extraFilters : "";
+  // const where = `where:{baseRarityScore_gt:0, owner_not:"0x0000000000000000000000000000000000000000" ${extraWhere}}`;
   const aavegotchi = `
     id
     name
@@ -127,8 +134,8 @@ export function leaderboardQuery(
   for (let i = 0; i < max_runs; i++) {
     reqs.push(`first${
       i * 1000
-    }:aavegotchis(first:1000, orderBy: gotchiId, where: {
-        gotchiId_gt: ${i * 1000}, gotchiId_lt: ${
+    }:aavegotchis(block:{number: ${blockNumber}} first:1000, orderBy: gotchiId, where: {
+        gotchiId_gt: ${i * 1000}, gotchiId_lte: ${
       (i + 1) * 1000
     } , baseRarityScore_gt: 0
       }) {
@@ -208,8 +215,6 @@ export async function fetchAndSortLeaderboard(
     queryresponse
   ).flat(1) as LeaderboardAavegotchi[];
 
-  console.log("length:", leaderboardResults.length);
-
   //Add in set bonuses
   leaderboardResults.map((leaderboardGotchi) => {
     //  if (leaderboardGotchi.withSetsRarityScore === null) {
@@ -257,6 +262,8 @@ export async function fetchAndSortLeaderboard(
       leaderboardGotchi.withSetsNumericTraits =
         leaderboardGotchi.modifiedNumericTraits;
     }
+
+    eachFinalResult.push(leaderboardGotchi);
     // }
     return leaderboardGotchi;
   });
@@ -316,9 +323,10 @@ export async function fetchAndSortLeaderboard(
     experience: _sortByExperience,
   };
 
+  console.log("category:", category);
   const sortedData = eachFinalResult.sort(sortingOptions[`${category}`]);
 
-  eachFinalResult = sortedData.slice(0, 5000);
+  // eachFinalResult = sortedData.slice(0, 7500);
 
-  return eachFinalResult;
+  return sortedData.slice(0, 7500);
 }

@@ -3,7 +3,7 @@ import { Contract } from "@ethersproject/contracts";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
 
-export const gasPrice = 100000000000;
+export const gasPrice = 60000000000;
 
 export async function impersonate(
   address: string,
