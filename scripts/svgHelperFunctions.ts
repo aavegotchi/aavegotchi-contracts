@@ -3,7 +3,10 @@ import { BytesLike } from "@ethersproject/bytes";
 import { SvgFacet } from "../typechain";
 import { gasPrice, itemManager, itemManagerAlt } from "./helperFunctions";
 
-import { wearablesSvgs as front } from "../svgs/wearables";
+import {
+  wearablesSvgs as front,
+  sleeveSvgs as frontSleeve,
+} from "../svgs/wearables";
 import {
   wearablesLeftSvgs as left,
   wearablesRightSvgs as right,
@@ -427,7 +430,8 @@ export async function updateSleevesTaskForSvgType(
 
   if ("front" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
-      frontSvg.push(`***${front[_itemIds[i]]}`);
+      console.log("Front Sleeve Svg: ", frontSleeve[_sleeveId[i]]);
+      frontSvg.push(`***${frontSleeve[_sleeveId[i]]}`);
       sleeveId.push(_sleeveId[i]);
     }
 
@@ -484,7 +488,33 @@ export async function updateSleevesTaskForSvgType(
   }
 }
 
-export async function updateSvgTaskForSideViews(_itemIds: number[]) {
+//name and _itemIds arrays must have the same length
+export async function updateBaadgeTaskForSvgType(
+  name: string[],
+  folder: string,
+  _itemIds: number[]
+) {
+  let taskArgs: UpdateSvgsTaskArgs;
+  const baadgeSvg: string[] = [];
+
+  for (let i = 0; i < _itemIds.length; i++) {
+    const item: string = fs.readFileSync(
+      `./svgs/${folder}/${name[i]}.svg`,
+      "utf8"
+    );
+
+    baadgeSvg.push(`***${item}`);
+  }
+
+  taskArgs = {
+    svgIds: [_itemIds].join(","),
+    svgType: `wearables`,
+    svgs: [baadgeSvg].join("***"),
+  };
+  return taskArgs;
+}
+
+/* export async function updateSvgTaskForSideViews(_itemIds: number[]) {
   const sideViews = ["left", "right", "back"];
   let taskArray = [];
 
@@ -532,7 +562,7 @@ export async function updateSvgTaskForSideSleeves(_itemIds: number[]) {
     }
   }
   return taskArray;
-}
+} */
 
 export async function uploadSvgTaskForBaadges(
   itemTypeInput: ItemTypeInputNew[],

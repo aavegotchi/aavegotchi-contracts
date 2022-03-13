@@ -6,7 +6,7 @@ import {
 
 async function main() {
   const ids = [105];
-  const sleeveIds = [18];
+  const sleeveIds = [19];
 
   const body = await updateSvgTaskForSvgType(ids, "front");
   const sleeves = await updateSleevesTaskForSvgType(ids, sleeveIds, "front");
