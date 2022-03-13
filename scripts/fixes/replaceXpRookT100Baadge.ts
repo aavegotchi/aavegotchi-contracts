@@ -2,7 +2,7 @@ import { run } from "hardhat";
 import { updateBaadgeTaskForSvgType } from "../../scripts/svgHelperFunctions";
 
 async function main() {
-  const ids = [274];
+  const ids = [290];
 
   const fix = await updateBaadgeTaskForSvgType(
     ["Aavegotchi-RF-SZN2-Baadges-XP-ROOKIE-T100"],
