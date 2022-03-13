@@ -21,6 +21,8 @@ const { expect } = chai;
 describe("Testing Aavegotchi Lending", async function () {
   this.timeout(300000);
 
+  const listedFilter = ethers.utils.formatBytes32String("listed");
+  const agreedFilter = ethers.utils.formatBytes32String("agreed");
   const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
   const revenueTokens: string[] = [ghstAddress];
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
@@ -500,11 +502,11 @@ describe("Testing Aavegotchi Lending", async function () {
 
   describe("Testing getOwnerAavegotchiRentals and getAavegotchiRentals after aavegotchi rental added", async function () {
     it("Should fetch rental list", async function () {
-      let rentals = await lendingFacetWithOwner.getAavegotchiRentals(5);
+      let rentals = await lendingFacetWithOwner.getAavegotchiRentals(listedFilter, 5);
       expect(rentals[0].rentalId).to.equal(secondRentalId);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, 5);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, listedFilter, 5);
       expect(rentals[0].rentalId).to.equal(secondRentalId);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(receiver, 5);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(receiver, listedFilter, 5);
       expect(rentals.length).to.equal(0);
     });
   });
@@ -556,11 +558,11 @@ describe("Testing Aavegotchi Lending", async function () {
 
   describe("Testing getOwnerAavegotchiRentals and getAavegotchiRentals after canceled", async function () {
     it("Should fetch rental list", async function () {
-      let rentals = await lendingFacetWithOwner.getAavegotchiRentals(5);
+      let rentals = await lendingFacetWithOwner.getAavegotchiRentals(listedFilter, 5);
       expect(rentals.length).to.equal(0);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, 5);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, listedFilter, 5);
       expect(rentals.length).to.equal(0);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(receiver, 5);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(receiver, listedFilter, 5);
       expect(rentals.length).to.equal(0);
     });
   });
@@ -806,11 +808,17 @@ describe("Testing Aavegotchi Lending", async function () {
 
     describe("Testing getOwnerAavegotchiRentals and getAavegotchiRentals after agree", async function () {
       it("Should fetch rental list", async function () {
-        let rentals = await lendingFacetWithOwner.getAavegotchiRentals(5);
+        let rentals = await lendingFacetWithOwner.getAavegotchiRentals(listedFilter, 5);
         expect(rentals.length).to.equal(0);
-        rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, 5);
+        rentals = await lendingFacetWithOwner.getAavegotchiRentals(agreedFilter, 5);
+        expect(rentals.length).to.equal(1);
+        rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, listedFilter, 5);
         expect(rentals.length).to.equal(0);
-        rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(escrowAddress, 5);
+        rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(escrowAddress, listedFilter, 5);
+        expect(rentals.length).to.equal(0);
+        rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, agreedFilter, 5);
+        expect(rentals.length).to.equal(1);
+        rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(escrowAddress, agreedFilter, 5);
         expect(rentals.length).to.equal(0);
       });
     });
@@ -984,6 +992,23 @@ describe("Testing Aavegotchi Lending", async function () {
         unlockedAavegotchiId
       );
       expect(status).to.equal(false);
+    });
+  });
+
+  describe("Testing getOwnerAavegotchiRentals and getAavegotchiRentals after agreement is ended", async function () {
+    it("Should fetch rental list", async function () {
+      let rentals = await lendingFacetWithOwner.getAavegotchiRentals(listedFilter, 5);
+      expect(rentals.length).to.equal(0);
+      rentals = await lendingFacetWithOwner.getAavegotchiRentals(agreedFilter, 5);
+      expect(rentals.length).to.equal(0);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, listedFilter, 5);
+      expect(rentals.length).to.equal(0);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(escrowAddress, listedFilter, 5);
+      expect(rentals.length).to.equal(0);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, agreedFilter, 5);
+      expect(rentals.length).to.equal(0);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(escrowAddress, agreedFilter, 5);
+      expect(rentals.length).to.equal(0);
     });
   });
 

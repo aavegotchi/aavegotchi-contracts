@@ -273,10 +273,10 @@ struct AppStorage {
     mapping(uint256 => uint256) aavegotchiToRentalId; // aavegotchiId => rentalId
     mapping(address => uint256[]) lentTokenIds; // address => lent token ids
     mapping(address => mapping(uint256 => uint256)) lentTokenIdIndexes; // address => lent token id => index
-    mapping(uint256 => RentalListItem) aavegotchiRentalListItem; // rentalId => RentalListItem
-    uint256 aavegotchiRentalHead;
-    mapping(uint256 => RentalListItem) aavegotchiOwnerRentalListItem;
-    mapping(address => uint256) aavegotchiOwnerRentalHead; // user address => rentalId => RentalListItem
+    mapping(bytes32 => mapping(uint256 => RentalListItem)) aavegotchiRentalListItem; // ("listed" or "agreed") => rentalId => RentalListItem
+    mapping(bytes32 => uint256) aavegotchiRentalHead; // ("listed" or "agreed") => rentalId
+    mapping(bytes32 => mapping(uint256 => RentalListItem)) aavegotchiOwnerRentalListItem; // ("listed" or "agreed") => rentalId => RentalListItem
+    mapping(address => mapping(bytes32 => uint256)) aavegotchiOwnerRentalHead; // user address => ("listed" or "agreed") => rentalId => RentalListItem
     Whitelist[] whitelists;
     mapping(uint256 => mapping(address => bool)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
 }

@@ -22,7 +22,7 @@ library LibAavegotchiLending {
         require(rental.originalOwner == _owner, "AavegotchiLending: not original owner");
         rental.canceled = true;
 
-        removeRentalListItem(_rentalId, _owner);
+        removeRentalListItem(_owner, _rentalId, "listed");
 
         //Unlock Aavegotchis when rental is created
         s.aavegotchis[rental.erc721TokenId].locked = false;
@@ -120,69 +120,77 @@ library LibAavegotchiLending {
         return rental_.completed == false;
     }
 
-    function addRentalListItem(address _owner, uint256 _rentalId) internal {
+    function addRentalListItem(
+        address _owner,
+        uint256 _rentalId,
+        bytes32 _status
+    ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
-        uint256 headRentalId = s.aavegotchiOwnerRentalHead[_owner];
+        uint256 headRentalId = s.aavegotchiOwnerRentalHead[_owner][_status];
         if (headRentalId != 0) {
-            RentalListItem storage headRentalItem = s.aavegotchiOwnerRentalListItem[headRentalId];
+            RentalListItem storage headRentalItem = s.aavegotchiOwnerRentalListItem[_status][headRentalId];
             headRentalItem.parentRentalId = _rentalId;
         }
-        RentalListItem storage rentalItem = s.aavegotchiOwnerRentalListItem[_rentalId];
+        RentalListItem storage rentalItem = s.aavegotchiOwnerRentalListItem[_status][_rentalId];
         rentalItem.childRentalId = headRentalId;
-        s.aavegotchiOwnerRentalHead[_owner] = _rentalId;
+        s.aavegotchiOwnerRentalHead[_owner][_status] = _rentalId;
         rentalItem.rentalId = _rentalId;
 
-        headRentalId = s.aavegotchiRentalHead;
+        headRentalId = s.aavegotchiRentalHead[_status];
         if (headRentalId != 0) {
-            RentalListItem storage headRentalItem = s.aavegotchiRentalListItem[headRentalId];
+            RentalListItem storage headRentalItem = s.aavegotchiRentalListItem[_status][headRentalId];
             headRentalItem.parentRentalId = _rentalId;
         }
-        rentalItem = s.aavegotchiRentalListItem[_rentalId];
+        rentalItem = s.aavegotchiRentalListItem[_status][_rentalId];
         rentalItem.childRentalId = headRentalId;
-        s.aavegotchiRentalHead = _rentalId;
+        s.aavegotchiRentalHead[_status] = _rentalId;
         rentalItem.rentalId = _rentalId;
     }
 
-    function removeRentalListItem(uint256 _rentalId, address _owner) internal {
+    function removeRentalListItem(
+        address _owner,
+        uint256 _rentalId,
+        bytes32 _status
+    ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
-        RentalListItem storage rentalItem = s.aavegotchiRentalListItem[_rentalId];
+        RentalListItem storage rentalItem = s.aavegotchiRentalListItem[_status][_rentalId];
         if (rentalItem.rentalId == 0) {
             return;
         }
         uint256 parentRentalId = rentalItem.parentRentalId;
         if (parentRentalId != 0) {
-            RentalListItem storage parentRentalItem = s.aavegotchiRentalListItem[parentRentalId];
+            RentalListItem storage parentRentalItem = s.aavegotchiRentalListItem[_status][parentRentalId];
             parentRentalItem.childRentalId = rentalItem.childRentalId;
         }
         uint256 childRentalId = rentalItem.childRentalId;
         if (childRentalId != 0) {
-            RentalListItem storage childRentalItem = s.aavegotchiRentalListItem[childRentalId];
+            RentalListItem storage childRentalItem = s.aavegotchiRentalListItem[_status][childRentalId];
             childRentalItem.parentRentalId = rentalItem.parentRentalId;
         }
 
-        if (s.aavegotchiRentalHead == _rentalId) {
-            s.aavegotchiRentalHead = rentalItem.childRentalId;
+        if (s.aavegotchiRentalHead[_status] == _rentalId) {
+            s.aavegotchiRentalHead[_status] = rentalItem.childRentalId;
         }
         rentalItem.rentalId = 0;
         rentalItem.parentRentalId = 0;
         rentalItem.childRentalId = 0;
 
-        rentalItem = s.aavegotchiOwnerRentalListItem[_rentalId];
+        rentalItem = s.aavegotchiOwnerRentalListItem[_status][_rentalId];
         parentRentalId = rentalItem.parentRentalId;
         if (parentRentalId != 0) {
-            RentalListItem storage parentRentalItem = s.aavegotchiOwnerRentalListItem[parentRentalId];
+            RentalListItem storage parentRentalItem = s.aavegotchiOwnerRentalListItem[_status][parentRentalId];
             parentRentalItem.childRentalId = rentalItem.childRentalId;
         }
         childRentalId = rentalItem.childRentalId;
         if (childRentalId != 0) {
-            RentalListItem storage childRentalItem = s.aavegotchiOwnerRentalListItem[childRentalId];
+            RentalListItem storage childRentalItem = s.aavegotchiOwnerRentalListItem[_status][childRentalId];
             childRentalItem.parentRentalId = rentalItem.parentRentalId;
         }
 
-        if (s.aavegotchiOwnerRentalHead[_owner] == _rentalId) {
-            s.aavegotchiOwnerRentalHead[_owner] = rentalItem.childRentalId;
+        if (s.aavegotchiOwnerRentalHead[_owner][_status] == _rentalId) {
+            s.aavegotchiOwnerRentalHead[_owner][_status] = rentalItem.childRentalId;
         }
         rentalItem.rentalId = 0;
         rentalItem.parentRentalId = 0;

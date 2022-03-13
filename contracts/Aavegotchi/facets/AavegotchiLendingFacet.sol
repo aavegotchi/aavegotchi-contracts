@@ -65,15 +65,20 @@ contract AavegotchiLendingFacet is Modifiers {
 
     ///@notice Query a certain amount of aavegotchi rentals created by an address
     ///@param _owner Creator of the rentals to query
+    ///@param _status Status of the rentals to query, "listed" or "agreed"
     ///@param _length How many aavegotchi rentals to return
     ///@return rentals_ An array of rental
-    function getOwnerAavegotchiRentals(address _owner, uint256 _length) external view returns (AavegotchiRental[] memory rentals_) {
-        uint256 rentalId = s.aavegotchiOwnerRentalHead[_owner];
+    function getOwnerAavegotchiRentals(
+        address _owner,
+        bytes32 _status,
+        uint256 _length
+    ) external view returns (AavegotchiRental[] memory rentals_) {
+        uint256 rentalId = s.aavegotchiOwnerRentalHead[_owner][_status];
         rentals_ = new AavegotchiRental[](_length);
         uint256 listIndex;
         for (; rentalId != 0 && listIndex < _length; listIndex++) {
             rentals_[listIndex] = s.aavegotchiRentals[rentalId];
-            rentalId = s.aavegotchiOwnerRentalListItem[rentalId].childRentalId;
+            rentalId = s.aavegotchiOwnerRentalListItem[_status][rentalId].childRentalId;
         }
         assembly {
             mstore(rentals_, listIndex)
@@ -81,15 +86,16 @@ contract AavegotchiLendingFacet is Modifiers {
     }
 
     ///@notice Query a certain amount of aavegotchi rentals
+    ///@param _status Status of the rentals to query, "listed" or "agreed"
     ///@param _length How many rentals to return
     ///@return rentals_ An array of rental
-    function getAavegotchiRentals(uint256 _length) external view returns (AavegotchiRental[] memory rentals_) {
-        uint256 rentalId = s.aavegotchiRentalHead;
+    function getAavegotchiRentals(bytes32 _status, uint256 _length) external view returns (AavegotchiRental[] memory rentals_) {
+        uint256 rentalId = s.aavegotchiRentalHead[_status];
         rentals_ = new AavegotchiRental[](_length);
         uint256 listIndex;
         for (; rentalId != 0 && listIndex < _length; listIndex++) {
             rentals_[listIndex] = s.aavegotchiRentals[rentalId];
-            rentalId = s.aavegotchiRentalListItem[rentalId].childRentalId;
+            rentalId = s.aavegotchiRentalListItem[_status][rentalId].childRentalId;
         }
         assembly {
             mstore(rentals_, listIndex)
@@ -121,10 +127,10 @@ contract AavegotchiLendingFacet is Modifiers {
         IERC721 erc721Token = IERC721(address(this));
         address sender = LibMeta.msgSender();
         require(erc721Token.ownerOf(_erc721TokenId) == sender, "AavegotchiLending: Not owner of aavegotchi");
-//        require(
-//            erc721Token.isApprovedForAll(sender, address(this)) || erc721Token.getApproved(_erc721TokenId) == address(this),
-//            "AavegotchiLending: Not approved for transfer"
-//        );
+        //        require(
+        //            erc721Token.isApprovedForAll(sender, address(this)) || erc721Token.getApproved(_erc721TokenId) == address(this),
+        //            "AavegotchiLending: Not approved for transfer"
+        //        );
 
         require(_period > 0, "AavegotchiLending: period should be larger than 0");
         //        require(_revenueSplit.length == 3, "AavegotchiLending: revenues split should consists of 3 values");
@@ -165,7 +171,7 @@ contract AavegotchiLendingFacet is Modifiers {
             completed: false
         });
 
-        LibAavegotchiLending.addRentalListItem(sender, rentalId);
+        LibAavegotchiLending.addRentalListItem(sender, rentalId, "listed");
 
         emit AavegotchiRentalAdd(rentalId, sender, _erc721TokenId, _initialCost, _period, block.timestamp);
 
@@ -208,7 +214,7 @@ contract AavegotchiLendingFacet is Modifiers {
         address renter = LibMeta.msgSender();
         address originalOwner = rental.originalOwner;
         require(originalOwner != renter, "AavegotchiLending: renter can't be original owner");
-        if(rental.whitelistId > 0) {
+        if (rental.whitelistId > 0) {
             require(s.isWhitelisted[rental.whitelistId][renter], "AavegotchiLending: Not whitelisted address");
         }
 
@@ -220,7 +226,8 @@ contract AavegotchiLendingFacet is Modifiers {
         rental.renter = renter;
         rental.timeAgreed = block.timestamp;
 
-        LibAavegotchiLending.removeRentalListItem(_rentalId, originalOwner);
+        LibAavegotchiLending.removeRentalListItem(originalOwner, _rentalId, "listed");
+        LibAavegotchiLending.addRentalListItem(originalOwner, _rentalId, "agreed");
 
         uint256 tokenId = rental.erc721TokenId;
         s.lentTokenIdIndexes[originalOwner][tokenId] = s.lentTokenIds[originalOwner].length;
@@ -274,5 +281,6 @@ contract AavegotchiLendingFacet is Modifiers {
         s.aavegotchiToRentalId[_tokenId] = 0;
 
         LibAavegotchiLending.removeLentAavegotchi(_tokenId, originalOwner);
+        LibAavegotchiLending.removeRentalListItem(originalOwner, rentalId, "agreed");
     }
 }
