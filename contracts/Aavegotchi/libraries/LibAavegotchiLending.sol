@@ -8,7 +8,7 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
 
 library LibAavegotchiLending {
-    event AavegotchiRentalCanceled(uint256 indexed rentalId, uint256 time);
+    event AavegotchiRentalCancel(uint256 indexed rentalId, uint256 time);
 
     function cancelAavegotchiRental(uint256 _rentalId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
@@ -28,7 +28,7 @@ library LibAavegotchiLending {
         s.aavegotchis[rental.erc721TokenId].locked = false;
         s.aavegotchiToRentalId[rental.erc721TokenId] = 0;
 
-        emit AavegotchiRentalCanceled(_rentalId, block.number);
+        emit AavegotchiRentalCancel(_rentalId, block.number);
     }
 
     function cancelAavegotchiRentalFromToken(uint256 _erc721TokenId, address _owner) internal {

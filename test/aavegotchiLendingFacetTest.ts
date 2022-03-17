@@ -764,7 +764,7 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).wait();
       const event = receipt!.events!.find(
-        (event) => event.event === "ERC721ExecutedRental"
+        (event) => event.event === "AavegotchiRentalExecute"
       );
       expect(event!.args!.renter).to.equal(renterAddress);
       const renterNewBalance = await ghstERC20.balanceOf(renterAddress);

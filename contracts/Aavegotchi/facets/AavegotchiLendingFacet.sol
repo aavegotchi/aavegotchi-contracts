@@ -16,20 +16,24 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256 erc721TokenId,
         uint256 initialCost,
         uint256 period,
+        uint256[3] _revenueSplit,
+        address[] _includes,
         uint256 time
     );
 
-    event ERC721ExecutedRental(
+    event AavegotchiRentalExecute(
         uint256 indexed rentalId,
         address indexed originalOwner,
         address renter,
         uint256 erc721TokenId,
         uint256 initialCost,
         uint256 period,
+        uint256[3] _revenueSplit,
+        address[] _includes,
         uint256 time
     );
 
-    event ERC721RentalClaimed(
+    event AavegotchiRentalClaim(
         uint256 indexed rentalId,
         uint256 indexed erc721tokenId,
         address originalOwner,
@@ -40,7 +44,7 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256[3] revenueSplit
     );
 
-    event ERC721RentalClaimedAndEnded(
+    event AavegotchiRentalClaimAndEnd(
         uint256 indexed rentalId,
         uint256 indexed erc721tokenId,
         address originalOwner,
@@ -195,7 +199,7 @@ contract AavegotchiLendingFacet is Modifiers {
 
         LibAavegotchiLending.addRentalListItem(sender, rentalId, "listed");
 
-        emit AavegotchiRentalAdd(rentalId, sender, _erc721TokenId, _initialCost, _period, block.timestamp);
+        emit AavegotchiRentalAdd(rentalId, sender, _erc721TokenId, _initialCost, _period, _revenueSplit, _includes, block.timestamp);
 
         // Lock Aavegotchis when rental is created
         s.aavegotchis[_erc721TokenId].locked = true;
@@ -260,7 +264,17 @@ contract AavegotchiLendingFacet is Modifiers {
         // set original owner as pet operator
         s.petOperators[renter][originalOwner] = true;
 
-        emit ERC721ExecutedRental(_rentalId, originalOwner, renter, tokenId, rental.initialCost, rental.period, block.timestamp);
+        emit AavegotchiRentalExecute(
+            _rentalId,
+            originalOwner,
+            renter,
+            tokenId,
+            rental.initialCost,
+            rental.period,
+            _revenueSplit,
+            rental.includeList,
+            block.timestamp
+        );
     }
 
     ///@notice Allow to claim revenue from the rental
@@ -277,7 +291,7 @@ contract AavegotchiLendingFacet is Modifiers {
 
         uint256[] memory amounts = LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
 
-        emit ERC721RentalClaimed(
+        emit AavegotchiRentalClaim(
             rentalId,
             _tokenId,
             rental.originalOwner,
@@ -316,7 +330,7 @@ contract AavegotchiLendingFacet is Modifiers {
         LibAavegotchiLending.removeLentAavegotchi(_tokenId, originalOwner);
         LibAavegotchiLending.removeRentalListItem(originalOwner, rentalId, "agreed");
 
-        emit ERC721RentalClaimedAndEnded(
+        emit AavegotchiRentalClaimAndEnd(
             rentalId,
             _tokenId,
             rental.originalOwner,
