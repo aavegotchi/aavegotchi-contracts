@@ -29,6 +29,28 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256 time
     );
 
+    event ERC721RentalClaimed(
+        uint256 indexed rentalId,
+        uint256 indexed erc721tokenId,
+        address originalOwner,
+        address renter,
+        address receiver,
+        address[] tokenAddresses,
+        uint256[] amounts,
+        uint256[3] revenueSplit
+    );
+
+    event ERC721RentalClaimedAndEnded(
+        uint256 indexed rentalId,
+        uint256 indexed erc721tokenId,
+        address originalOwner,
+        address renter,
+        address receiver,
+        address[] tokenAddresses,
+        uint256[] amounts,
+        uint256[3] revenueSplit
+    );
+
     ///@notice Get an aavegotchi rental details through an identifier
     ///@dev Will throw if the rental does not exist
     ///@param _rentalId The identifier of the rental to query
@@ -253,7 +275,18 @@ contract AavegotchiLendingFacet is Modifiers {
         address sender = LibMeta.msgSender();
         require((rental.originalOwner == sender) || (rental.renter == sender), "AavegotchiLending: only owner or renter can claim");
 
-        LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
+        uint256[] memory amounts = LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
+
+        emit ERC721RentalClaimed(
+            rentalId,
+            _tokenId,
+            rental.originalOwner,
+            rental.renter,
+            rental.receiver,
+            _revenueTokens,
+            amounts,
+            rental.revenueSplit
+        );
     }
 
     ///@notice Allow a original owner to claim revenue from the rental
@@ -271,7 +304,7 @@ contract AavegotchiLendingFacet is Modifiers {
         require((originalOwner == sender) || (renter == sender), "AavegotchiLending: only owner or renter can claim and end agreement");
         require(rental.timeAgreed + rental.period <= block.timestamp, "AavegotchiLending: not allowed during agreement");
 
-        LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
+        uint256[] memory amounts = LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
 
         // end rental agreement
         s.aavegotchis[_tokenId].locked = false;
@@ -282,5 +315,16 @@ contract AavegotchiLendingFacet is Modifiers {
 
         LibAavegotchiLending.removeLentAavegotchi(_tokenId, originalOwner);
         LibAavegotchiLending.removeRentalListItem(originalOwner, rentalId, "agreed");
+
+        emit ERC721RentalClaimedAndEnded(
+            rentalId,
+            _tokenId,
+            rental.originalOwner,
+            rental.renter,
+            rental.receiver,
+            _revenueTokens,
+            amounts,
+            rental.revenueSplit
+        );
     }
 }

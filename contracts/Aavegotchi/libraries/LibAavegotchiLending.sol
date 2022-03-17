@@ -51,16 +51,17 @@ library LibAavegotchiLending {
         delete s.lentTokenIdIndexes[_owner][_tokenId];
     }
 
-    function claimAavegotchiRental(uint256 rentalId, address[] calldata _revenueTokens) internal {
+    function claimAavegotchiRental(uint256 rentalId, address[] calldata _revenueTokens) internal returns (uint256[] memory) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         AavegotchiRental storage rental = s.aavegotchiRentals[rentalId];
 
+        uint256[] memory amounts = new uint256[](_revenueTokens.length);
         address originalOwner = rental.originalOwner;
         address renter = rental.renter;
         address receiver = rental.receiver;
         uint256 tokenId = rental.erc721TokenId;
         address escrow = s.aavegotchis[tokenId].escrow;
-        if (escrow == address(0)) return;
+        if (escrow == address(0)) return amounts;
         address collateralType = s.aavegotchis[tokenId].collateralType;
         for (uint256 i; i < _revenueTokens.length; i++) {
             address revenueToken = _revenueTokens[i];
@@ -77,6 +78,7 @@ library LibAavegotchiLending {
 
             uint256 balance = IERC20(revenueToken).balanceOf(escrow);
             if (balance == 0) continue;
+            amounts[i] = balance;
 
             if (IERC20(revenueToken).allowance(escrow, address(this)) < balance) {
                 CollateralEscrow(escrow).approveAavegotchiDiamond(revenueToken);
@@ -93,6 +95,8 @@ library LibAavegotchiLending {
         }
 
         rental.lastClaimed = block.timestamp;
+
+        return amounts;
     }
 
     function enforceAavegotchiNotInRental(uint256 _tokenId, address _sender) internal {
