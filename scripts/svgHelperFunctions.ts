@@ -497,21 +497,25 @@ export async function updateBaadgeTaskForSvgType(
   let taskArgs: UpdateSvgsTaskArgs;
   const baadgeSvg: string[] = [];
 
-  for (let i = 0; i < _itemIds.length; i++) {
-    const item: string = fs.readFileSync(
-      `./svgs/${folder}/${name[i]}.svg`,
-      "utf8"
-    );
+  if (name.length === _itemIds.length) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      const item: string = fs.readFileSync(
+        `./svgs/${folder}/${name[i]}.svg`,
+        "utf8"
+      );
 
-    baadgeSvg.push(`***${item}`);
+      baadgeSvg.push(`***${item}`);
+    }
+
+    taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `wearables`,
+      svgs: [baadgeSvg].join("***"),
+    };
+    return taskArgs;
+  } else {
+    console.log("File Names array is not equal to IDs array");
   }
-
-  taskArgs = {
-    svgIds: [_itemIds].join(","),
-    svgType: `wearables`,
-    svgs: [baadgeSvg].join("***"),
-  };
-  return taskArgs;
 }
 
 /* export async function updateSvgTaskForSideViews(_itemIds: number[]) {

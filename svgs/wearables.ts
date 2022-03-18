@@ -275,7 +275,7 @@ export const wearablesSvgs = [
   271,
   272,
   273,
-  wearable("Aavegotchi-RF-SZN2-Baadges-XP-ROOKIE-T100"), //274
+  274,
   275,
   276,
   277,
