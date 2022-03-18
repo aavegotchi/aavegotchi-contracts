@@ -299,6 +299,7 @@ describe("Testing Aavegotchi Lending", async function () {
           period,
           revenueSplitWithoutReceiver,
           ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
           whitelistId,
           []
         )
@@ -311,6 +312,7 @@ describe("Testing Aavegotchi Lending", async function () {
           initialCost,
           0,
           revenueSplitWithoutReceiver,
+          ethers.constants.AddressZero,
           ethers.constants.AddressZero,
           whitelistId,
           []
@@ -328,6 +330,7 @@ describe("Testing Aavegotchi Lending", async function () {
           period,
           invalidRevenueSplit,
           ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
           whitelistId,
           []
         )
@@ -343,6 +346,7 @@ describe("Testing Aavegotchi Lending", async function () {
           period,
           revenueSplitForReceiver,
           ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
           whitelistId,
           []
         )
@@ -357,6 +361,7 @@ describe("Testing Aavegotchi Lending", async function () {
           initialCost,
           period,
           revenueSplitWithoutReceiver,
+          ethers.constants.AddressZero,
           ethers.constants.AddressZero,
           whitelistId + 10,
           []
@@ -378,6 +383,7 @@ describe("Testing Aavegotchi Lending", async function () {
           period,
           revenueSplitWithoutReceiver,
           ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
           secondWhitelistId,
           []
         )
@@ -391,6 +397,7 @@ describe("Testing Aavegotchi Lending", async function () {
             initialCost,
             period,
             revenueSplitWithoutReceiver,
+            ethers.constants.AddressZero,
             ethers.constants.AddressZero,
             whitelistId,
             []
@@ -406,6 +413,7 @@ describe("Testing Aavegotchi Lending", async function () {
             initialCost,
             period,
             revenueSplitWithoutReceiver,
+            ethers.constants.AddressZero,
             ethers.constants.AddressZero,
             0,
             []
@@ -429,6 +437,7 @@ describe("Testing Aavegotchi Lending", async function () {
             initialCost,
             period,
             revenueSplitWithoutReceiver,
+            ethers.constants.AddressZero,
             ethers.constants.AddressZero,
             whitelistId,
             []
@@ -576,6 +585,7 @@ describe("Testing Aavegotchi Lending", async function () {
           period,
           revenueSplitWithoutReceiver,
           ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
           whitelistId,
           []
         )
@@ -623,6 +633,7 @@ describe("Testing Aavegotchi Lending", async function () {
           initialCost,
           period,
           revenueSplitForReceiver,
+          ethers.constants.AddressZero,
           receiver,
           whitelistId,
           [ghstAddress]
@@ -1021,6 +1032,7 @@ describe("Testing Aavegotchi Lending", async function () {
           initialCost,
           period,
           revenueSplitForReceiver,
+          ethers.constants.AddressZero,
           receiver,
           whitelistId,
           []

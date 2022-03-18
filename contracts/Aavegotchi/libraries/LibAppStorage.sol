@@ -158,6 +158,7 @@ struct AavegotchiRental {
     uint256 period;
     address lender;
     address renter;
+    address originalOwner; // if original owner is lender, same as lender
     address receiver; // can be address(0)
     uint256[3] revenueSplit; // lender/original owner, renter, receiver
     uint256 erc721TokenId;

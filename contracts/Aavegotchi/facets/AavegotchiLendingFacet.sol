@@ -139,6 +139,7 @@ contract AavegotchiLendingFacet is Modifiers {
     ///@param _initialCost The rental fee of the aavegotchi in $GHST
     ///@param _period The rental period of the aavegotchi, unit: second
     ///@param _revenueSplit The revenue split of the rental, 3 values, sum of the should be 100
+    ///@param _originalOwner The account for original owner, can be address(0) if original owner is lender
     ///@param _receiver The 3rd account for receive revenue split, can be address(0)
     ///@param _whitelistId The identifier of whitelist for agree rental, if 0, allow everyone
     function addAavegotchiRental(
@@ -146,6 +147,7 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256 _initialCost,
         uint256 _period,
         uint256[3] calldata _revenueSplit,
+        address _originalOwner,
         address _receiver,
         uint256 _whitelistId,
         address[] calldata _includes
@@ -186,6 +188,7 @@ contract AavegotchiLendingFacet is Modifiers {
             revenueSplit: _revenueSplit,
             lender: sender,
             renter: address(0),
+            originalOwner: _originalOwner == address(0) ? sender : _originalOwner,
             receiver: _receiver,
             erc721TokenId: _erc721TokenId,
             whitelistId: _whitelistId,
