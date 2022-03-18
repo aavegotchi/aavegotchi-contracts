@@ -636,7 +636,7 @@ describe("Testing Aavegotchi Lending", async function () {
           ethers.constants.AddressZero,
           receiver,
           whitelistId,
-          [ghstAddress]
+          revenueTokens
         )
       ).wait();
       const event = receipt!.events!.find(
@@ -757,7 +757,7 @@ describe("Testing Aavegotchi Lending", async function () {
     });
     it("Should succeed when agree rental with valid data", async function () {
       const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
-      const ownerOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const lenderOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
       const ghstERC20WithRenter = await impersonate(
         renterAddress,
         ghstERC20,
@@ -779,11 +779,11 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       expect(event!.args!.renter).to.equal(renterAddress);
       const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
-      const ownerNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const lenderNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
 
       // Check ghst balance changes
       expect(renterOldBalance.sub(renterNewBalance)).to.equal(initialCost);
-      expect(ownerNewBalance.sub(ownerOldBalance)).to.equal(initialCost);
+      expect(lenderNewBalance.sub(lenderOldBalance)).to.equal(initialCost);
 
       // Check rental and aavegotchi status
       const rentalInfo = await lendingFacetWithRenter.getAavegotchiRentalInfo(
@@ -891,7 +891,7 @@ describe("Testing Aavegotchi Lending", async function () {
 
       const revenue = await ghstERC20.balanceOf(escrowAddress);
       const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
-      const ownerOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const lenderOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
       const receiverOldBalance = await ghstERC20.balanceOf(receiver);
       await (
         await lendingFacetWithOwner.claimAavegotchiRental(
@@ -901,12 +901,12 @@ describe("Testing Aavegotchi Lending", async function () {
       ).wait();
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
       const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
-      const ownerNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const lenderNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
       const receiverNewBalance = await ghstERC20.balanceOf(receiver);
 
       // Check ghst balance changes
       expect(escrowNewBalance).to.equal(0);
-      expect(ownerNewBalance.sub(ownerOldBalance)).to.equal(
+      expect(lenderNewBalance.sub(lenderOldBalance)).to.equal(
         revenue.mul(revenueSplitForReceiver[0]).div(100)
       );
       expect(renterNewBalance.sub(renterOldBalance)).to.equal(
@@ -959,7 +959,7 @@ describe("Testing Aavegotchi Lending", async function () {
 
       const revenue = await ghstERC20.balanceOf(escrowAddress);
       const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
-      const ownerOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const lenderOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
       const receiverOldBalance = await ghstERC20.balanceOf(receiver);
       await (
         await lendingFacetWithOwner.claimAndEndAavegotchiRental(
@@ -969,12 +969,12 @@ describe("Testing Aavegotchi Lending", async function () {
       ).wait();
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
       const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
-      const ownerNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const lenderNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
       const receiverNewBalance = await ghstERC20.balanceOf(receiver);
 
       // Check ghst balance changes
       expect(escrowNewBalance).to.equal(0);
-      expect(ownerNewBalance.sub(ownerOldBalance)).to.equal(
+      expect(lenderNewBalance.sub(lenderOldBalance)).to.equal(
         revenue.mul(revenueSplitForReceiver[0]).div(100)
       );
       expect(renterNewBalance.sub(renterOldBalance)).to.equal(
@@ -1024,7 +1024,7 @@ describe("Testing Aavegotchi Lending", async function () {
   });
 
   describe("Testing include logic", async function () {
-    let fifthRentalId;
+    let rentalId;
     before(async function () {
       const receipt = await (
         await lendingFacetWithOwner.addAavegotchiRental(
@@ -1041,7 +1041,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const event = receipt!.events!.find(
         (event) => event.event === "AavegotchiRentalAdd"
       );
-      fifthRentalId = event!.args!.rentalId;
+      rentalId = event!.args!.rentalId;
       const ghstERC20WithRenter = await impersonate(
         renterAddress,
         ghstERC20,
@@ -1051,7 +1051,7 @@ describe("Testing Aavegotchi Lending", async function () {
       await ghstERC20WithRenter.approve(diamondAddress, initialCost);
       await (
         await lendingFacetWithRenter.agreeAavegotchiRental(
-          fifthRentalId,
+          rentalId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -1060,6 +1060,9 @@ describe("Testing Aavegotchi Lending", async function () {
       ).wait();
     });
     it("Should not change excluded revenue tokens when claim", async function () {
+      await ethers.provider.send("evm_increaseTime", [period]);
+      await ethers.provider.send("evm_mine", []);
+
       // Impersonate revenue
       await (
         await ghstERC20.transfer(
@@ -1070,7 +1073,77 @@ describe("Testing Aavegotchi Lending", async function () {
 
       const revenue = await ghstERC20.balanceOf(escrowAddress);
       const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
-      const ownerOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const lenderOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const receiverOldBalance = await ghstERC20.balanceOf(receiver);
+      await (
+        await lendingFacetWithOwner.claimAndEndAavegotchiRental(
+          unlockedAavegotchiId,
+          revenueTokens
+        )
+      ).wait();
+      const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
+      const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
+      const lenderNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const receiverNewBalance = await ghstERC20.balanceOf(receiver);
+
+      // Check ghst balance changed
+      expect(escrowNewBalance).to.equal(revenue);
+      expect(lenderNewBalance).to.equal(lenderOldBalance);
+      expect(renterNewBalance).to.equal(renterOldBalance);
+      expect(receiverNewBalance).to.equal(receiverOldBalance);
+    });
+  });
+
+  describe("Testing logic for GotchiVault", async function () {
+    let rentalId;
+    let mockOriginalOwner = '0x0E93AD7C720177d4E2c48465C83A50579Bd521C1';
+    before(async function () {
+      const receipt = await (
+        await lendingFacetWithOwner.addAavegotchiRental(
+          unlockedAavegotchiId,
+          initialCost,
+          period,
+          revenueSplitForReceiver,
+          mockOriginalOwner,
+          receiver,
+          whitelistId,
+          revenueTokens
+        )
+      ).wait();
+      const event = receipt!.events!.find(
+        (event) => event.event === "AavegotchiRentalAdd"
+      );
+      rentalId = event!.args!.rentalId;
+      const ghstERC20WithRenter = await impersonate(
+        renterAddress,
+        ghstERC20,
+        ethers,
+        network
+      );
+      await ghstERC20WithRenter.approve(diamondAddress, initialCost);
+      await (
+        await lendingFacetWithRenter.agreeAavegotchiRental(
+          rentalId,
+          unlockedAavegotchiId,
+          initialCost,
+          period,
+          revenueSplitForReceiver
+        )
+      ).wait();
+    });
+    it("Balance of original owner should be changed, but no for lender when claim", async function () {
+      // Impersonate revenue
+      await (
+        await ghstERC20.transfer(
+          escrowAddress,
+          ethers.utils.parseUnits("100", "ether")
+        )
+      ).wait();
+
+      const revenue = await ghstERC20.balanceOf(escrowAddress);
+      const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
+      const lenderOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const originalOwnerOldBalance = await ghstERC20.balanceOf(mockOriginalOwner);
       const receiverOldBalance = await ghstERC20.balanceOf(receiver);
       await (
         await lendingFacetWithOwner.claimAavegotchiRental(
@@ -1080,14 +1153,22 @@ describe("Testing Aavegotchi Lending", async function () {
       ).wait();
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
       const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
-      const ownerNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const lenderNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
+      const originalOwnerNewBalance = await ghstERC20.balanceOf(mockOriginalOwner);
       const receiverNewBalance = await ghstERC20.balanceOf(receiver);
 
       // Check ghst balance changed
-      expect(escrowNewBalance).to.equal(revenue);
-      expect(ownerNewBalance).to.equal(ownerOldBalance);
-      expect(renterNewBalance).to.equal(renterOldBalance);
-      expect(receiverNewBalance).to.equal(receiverOldBalance);
+      expect(escrowNewBalance).to.equal(0);
+      expect(lenderNewBalance).to.equal(lenderOldBalance);
+      expect(originalOwnerNewBalance.sub(originalOwnerOldBalance)).to.equal(
+        revenue.mul(revenueSplitForReceiver[0]).div(100)
+      );
+      expect(renterNewBalance.sub(renterOldBalance)).to.equal(
+        revenue.mul(revenueSplitForReceiver[1]).div(100)
+      );
+      expect(receiverNewBalance.sub(receiverOldBalance)).to.equal(
+        revenue.mul(revenueSplitForReceiver[2]).div(100)
+      );
     });
   });
 });
