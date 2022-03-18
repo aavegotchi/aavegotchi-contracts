@@ -12,7 +12,7 @@ import {Modifiers, AavegotchiRental} from "../libraries/LibAppStorage.sol";
 contract AavegotchiLendingFacet is Modifiers {
     event AavegotchiRentalAdd(
         uint256 indexed rentalId,
-        address indexed originalOwner,
+        address indexed lender,
         uint256 erc721TokenId,
         uint256 initialCost,
         uint256 period,
@@ -23,7 +23,7 @@ contract AavegotchiLendingFacet is Modifiers {
 
     event AavegotchiRentalExecute(
         uint256 indexed rentalId,
-        address indexed originalOwner,
+        address indexed lender,
         address renter,
         uint256 erc721TokenId,
         uint256 initialCost,
@@ -36,7 +36,7 @@ contract AavegotchiLendingFacet is Modifiers {
     event AavegotchiRentalClaim(
         uint256 indexed rentalId,
         uint256 indexed erc721tokenId,
-        address originalOwner,
+        address lender,
         address renter,
         address receiver,
         address[] tokenAddresses,
@@ -47,7 +47,7 @@ contract AavegotchiLendingFacet is Modifiers {
     event AavegotchiRentalClaimAndEnd(
         uint256 indexed rentalId,
         uint256 indexed erc721tokenId,
-        address originalOwner,
+        address lender,
         address renter,
         address receiver,
         address[] tokenAddresses,
@@ -90,21 +90,21 @@ contract AavegotchiLendingFacet is Modifiers {
     }
 
     ///@notice Query a certain amount of aavegotchi rentals created by an address
-    ///@param _owner Creator of the rentals to query
+    ///@param _lender Creator of the rentals to query
     ///@param _status Status of the rentals to query, "listed" or "agreed"
     ///@param _length How many aavegotchi rentals to return
     ///@return rentals_ An array of rental
     function getOwnerAavegotchiRentals(
-        address _owner,
+        address _lender,
         bytes32 _status,
         uint256 _length
     ) external view returns (AavegotchiRental[] memory rentals_) {
-        uint256 rentalId = s.aavegotchiOwnerRentalHead[_owner][_status];
+        uint256 rentalId = s.aavegotchiLenderRentalHead[_lender][_status];
         rentals_ = new AavegotchiRental[](_length);
         uint256 listIndex;
         for (; rentalId != 0 && listIndex < _length; listIndex++) {
             rentals_[listIndex] = s.aavegotchiRentals[rentalId];
-            rentalId = s.aavegotchiOwnerRentalListItem[_status][rentalId].childRentalId;
+            rentalId = s.aavegotchiLenderRentalListItem[_status][rentalId].childRentalId;
         }
         assembly {
             mstore(rentals_, listIndex)
@@ -132,7 +132,7 @@ contract AavegotchiLendingFacet is Modifiers {
         return LibAavegotchiLending.isAavegotchiLent(_erc721TokenId);
     }
 
-    ///@notice Allow an original aavegotchi owner to add request for rental
+    ///@notice Allow an aavegotchi lender to add request for rental
     ///@dev If the rental request exist, cancel it and replaces it with the new one
     ///@dev If the rental is active, unable to cancel
     ///@param _erc721TokenId The identifier of the NFT to rent
@@ -184,7 +184,7 @@ contract AavegotchiLendingFacet is Modifiers {
             initialCost: _initialCost,
             period: _period,
             revenueSplit: _revenueSplit,
-            originalOwner: sender,
+            lender: sender,
             renter: address(0),
             receiver: _receiver,
             erc721TokenId: _erc721TokenId,
@@ -205,13 +205,13 @@ contract AavegotchiLendingFacet is Modifiers {
         s.aavegotchis[_erc721TokenId].locked = true;
     }
 
-    ///@notice Allow an original aavegotchi owner to cancel his NFT rental by providing the NFT contract address and identifier
+    ///@notice Allow an aavegotchi lender to cancel his NFT rental by providing the NFT contract address and identifier
     ///@param _erc721TokenId The identifier of the NFT to be delisted from rental
     function cancelAavegotchiRentalByToken(uint256 _erc721TokenId) external {
         LibAavegotchiLending.cancelAavegotchiRentalFromToken(_erc721TokenId, LibMeta.msgSender());
     }
 
-    ///@notice Allow an original aavegotchi owner to cancel his NFT rental through the rentalID
+    ///@notice Allow an aavegotchi lender to cancel his NFT rental through the rentalID
     ///@param _rentalId The identifier of the rental to be cancelled
     function cancelAavegotchiRental(uint256 _rentalId) external {
         LibAavegotchiLending.cancelAavegotchiRental(_rentalId, LibMeta.msgSender());
@@ -238,35 +238,35 @@ contract AavegotchiLendingFacet is Modifiers {
             require(rental.revenueSplit[i] == _revenueSplit[i], "AavegotchiLending: Invalid revenue split");
         }
         address renter = LibMeta.msgSender();
-        address originalOwner = rental.originalOwner;
-        require(originalOwner != renter, "AavegotchiLending: renter can't be original owner");
+        address lender = rental.lender;
+        require(lender != renter, "AavegotchiLending: renter can't be lender");
         if (rental.whitelistId > 0) {
             require(s.isWhitelisted[rental.whitelistId][renter], "AavegotchiLending: Not whitelisted address");
         }
 
         if (rental.initialCost > 0) {
             require(IERC20(s.ghstContract).balanceOf(renter) >= rental.initialCost, "AavegotchiLending: not enough GHST");
-            LibERC20.transferFrom(s.ghstContract, renter, originalOwner, rental.initialCost);
+            LibERC20.transferFrom(s.ghstContract, renter, lender, rental.initialCost);
         }
 
         rental.renter = renter;
         rental.timeAgreed = block.timestamp;
 
-        LibAavegotchiLending.removeRentalListItem(originalOwner, _rentalId, "listed");
-        LibAavegotchiLending.addRentalListItem(originalOwner, _rentalId, "agreed");
+        LibAavegotchiLending.removeRentalListItem(lender, _rentalId, "listed");
+        LibAavegotchiLending.addRentalListItem(lender, _rentalId, "agreed");
 
         uint256 tokenId = rental.erc721TokenId;
-        s.lentTokenIdIndexes[originalOwner][tokenId] = s.lentTokenIds[originalOwner].length;
-        s.lentTokenIds[originalOwner].push(tokenId);
+        s.lentTokenIdIndexes[lender][tokenId] = s.lentTokenIds[lender].length;
+        s.lentTokenIds[lender].push(tokenId);
 
-        LibAavegotchi.transfer(originalOwner, renter, tokenId);
+        LibAavegotchi.transfer(lender, renter, tokenId);
 
-        // set original owner as pet operator
-        s.petOperators[renter][originalOwner] = true;
+        // set lender as pet operator
+        s.petOperators[renter][lender] = true;
 
         emit AavegotchiRentalExecute(
             _rentalId,
-            originalOwner,
+            lender,
             renter,
             tokenId,
             rental.initialCost,
@@ -287,14 +287,14 @@ contract AavegotchiLendingFacet is Modifiers {
         AavegotchiRental storage rental = s.aavegotchiRentals[rentalId];
 
         address sender = LibMeta.msgSender();
-        require((rental.originalOwner == sender) || (rental.renter == sender), "AavegotchiLending: only owner or renter can claim");
+        require((rental.lender == sender) || (rental.renter == sender), "AavegotchiLending: only lender or renter can claim");
 
         uint256[] memory amounts = LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
 
         emit AavegotchiRentalClaim(
             rentalId,
             _tokenId,
-            rental.originalOwner,
+            rental.lender,
             rental.renter,
             rental.receiver,
             _revenueTokens,
@@ -303,7 +303,7 @@ contract AavegotchiLendingFacet is Modifiers {
         );
     }
 
-    ///@notice Allow a original owner to claim revenue from the rental
+    ///@notice Allow a lender to claim revenue from the rental
     ///@dev Will throw if the NFT has not been lent or if the rental has been canceled already
     ///@param _tokenId The identifier of the lent aavegotchi to claim
     ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
@@ -313,27 +313,27 @@ contract AavegotchiLendingFacet is Modifiers {
         AavegotchiRental storage rental = s.aavegotchiRentals[rentalId];
 
         address sender = LibMeta.msgSender();
-        address originalOwner = rental.originalOwner;
+        address lender = rental.lender;
         address renter = rental.renter;
-        require((originalOwner == sender) || (renter == sender), "AavegotchiLending: only owner or renter can claim and end agreement");
+        require((lender == sender) || (renter == sender), "AavegotchiLending: only lender or renter can claim and end agreement");
         require(rental.timeAgreed + rental.period <= block.timestamp, "AavegotchiLending: not allowed during agreement");
 
         uint256[] memory amounts = LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
 
         // end rental agreement
         s.aavegotchis[_tokenId].locked = false;
-        LibAavegotchi.transfer(renter, originalOwner, _tokenId);
+        LibAavegotchi.transfer(renter, lender, _tokenId);
 
         rental.completed = true;
         s.aavegotchiToRentalId[_tokenId] = 0;
 
-        LibAavegotchiLending.removeLentAavegotchi(_tokenId, originalOwner);
-        LibAavegotchiLending.removeRentalListItem(originalOwner, rentalId, "agreed");
+        LibAavegotchiLending.removeLentAavegotchi(_tokenId, lender);
+        LibAavegotchiLending.removeRentalListItem(lender, rentalId, "agreed");
 
         emit AavegotchiRentalClaimAndEnd(
             rentalId,
             _tokenId,
-            rental.originalOwner,
+            rental.lender,
             rental.renter,
             rental.receiver,
             _revenueTokens,

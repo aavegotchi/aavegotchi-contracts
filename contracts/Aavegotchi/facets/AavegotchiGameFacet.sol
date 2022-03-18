@@ -287,8 +287,8 @@ contract AavegotchiGameFacet is Modifiers {
                 bool isOriginalPetOperator;
                 uint256 rentalId = s.aavegotchiToRentalId[tokenId];
                 if ((rentalId != 0) && (s.aavegotchiRentals[rentalId].timeAgreed > 0)) {
-                    address originalOwner = s.aavegotchiRentals[rentalId].originalOwner;
-                    isOriginalPetOperator = s.operators[originalOwner][sender] || s.petOperators[originalOwner][sender];
+                    address lender = s.aavegotchiRentals[rentalId].lender;
+                    isOriginalPetOperator = s.operators[lender][sender] || s.petOperators[lender][sender];
                 }
                 require(
                     sender == owner ||

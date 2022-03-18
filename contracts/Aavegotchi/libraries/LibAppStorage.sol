@@ -156,10 +156,10 @@ struct AavegotchiRental {
     uint256 rentalId;
     uint256 initialCost; // GHST in wei, can be zero
     uint256 period;
-    address originalOwner;
+    address lender;
     address renter;
     address receiver; // can be address(0)
-    uint256[3] revenueSplit; // originalOwner, renter, receiver
+    uint256[3] revenueSplit; // lender/original owner, renter, receiver
     uint256 erc721TokenId;
     uint256 whitelistId; // can be zero
     address[] includeList;
@@ -275,8 +275,8 @@ struct AppStorage {
     mapping(address => mapping(uint256 => uint256)) lentTokenIdIndexes; // address => lent token id => index
     mapping(bytes32 => mapping(uint256 => RentalListItem)) aavegotchiRentalListItem; // ("listed" or "agreed") => rentalId => RentalListItem
     mapping(bytes32 => uint256) aavegotchiRentalHead; // ("listed" or "agreed") => rentalId
-    mapping(bytes32 => mapping(uint256 => RentalListItem)) aavegotchiOwnerRentalListItem; // ("listed" or "agreed") => rentalId => RentalListItem
-    mapping(address => mapping(bytes32 => uint256)) aavegotchiOwnerRentalHead; // user address => ("listed" or "agreed") => rentalId => RentalListItem
+    mapping(bytes32 => mapping(uint256 => RentalListItem)) aavegotchiLenderRentalListItem; // ("listed" or "agreed") => rentalId => RentalListItem
+    mapping(address => mapping(bytes32 => uint256)) aavegotchiLenderRentalHead; // user address => ("listed" or "agreed") => rentalId => RentalListItem
     Whitelist[] whitelists;
     mapping(uint256 => mapping(address => bool)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
 }

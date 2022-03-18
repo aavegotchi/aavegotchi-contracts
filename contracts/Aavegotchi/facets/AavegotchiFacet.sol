@@ -116,7 +116,7 @@ contract AavegotchiFacet {
     }
 
     ///@notice Check if an address `_operator` is an authorized pet operator for another address `_owner`
-    ///@param _owner address of the original owner of the NFTs
+    ///@param _owner address of the lender of the NFTs
     ///@param _operator address that acts pets the gotchis on behalf of the owner
     ///@return approved_ true if `operator` is an approved pet operator, False if otherwise
     function isPetOperatorForAll(address _owner, address _operator) external view returns (bool approved_) {
