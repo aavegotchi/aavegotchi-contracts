@@ -44,16 +44,7 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256[3] revenueSplit
     );
 
-    event AavegotchiRentalClaimAndEnd(
-        uint256 indexed rentalId,
-        uint256 indexed erc721tokenId,
-        address lender,
-        address renter,
-        address receiver,
-        address[] tokenAddresses,
-        uint256[] amounts,
-        uint256[3] revenueSplit
-    );
+    event AavegotchiRentalEnd(uint256 indexed rentalId);
 
     ///@notice Get an aavegotchi rental details through an identifier
     ///@dev Will throw if the rental does not exist
@@ -294,16 +285,7 @@ contract AavegotchiLendingFacet is Modifiers {
 
         uint256[] memory amounts = LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
 
-        emit AavegotchiRentalClaim(
-            rentalId,
-            _tokenId,
-            rental.lender,
-            rental.renter,
-            rental.receiver,
-            _revenueTokens,
-            amounts,
-            rental.revenueSplit
-        );
+        emit AavegotchiRentalClaim(rentalId, _tokenId, rental.lender, rental.renter, rental.receiver, _revenueTokens, amounts, rental.revenueSplit);
     }
 
     ///@notice Allow a lender to claim revenue from the rental
@@ -333,15 +315,7 @@ contract AavegotchiLendingFacet is Modifiers {
         LibAavegotchiLending.removeLentAavegotchi(_tokenId, lender);
         LibAavegotchiLending.removeRentalListItem(lender, rentalId, "agreed");
 
-        emit AavegotchiRentalClaimAndEnd(
-            rentalId,
-            _tokenId,
-            rental.lender,
-            rental.renter,
-            rental.receiver,
-            _revenueTokens,
-            amounts,
-            rental.revenueSplit
-        );
+        emit AavegotchiRentalClaim(rentalId, _tokenId, rental.lender, rental.renter, rental.receiver, _revenueTokens, amounts, rental.revenueSplit);
+        emit AavegotchiRentalEnd(rentalId);
     }
 }
