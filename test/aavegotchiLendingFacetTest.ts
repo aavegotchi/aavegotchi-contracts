@@ -31,19 +31,19 @@ describe("Testing Aavegotchi Lending", async function () {
   const nonGhstHolderAddress = "0x725Fe4790fC6435B5161f88636C2A50e43247A4b"; // GHST holder balance should be 0
   const nonWhitelistedAddress = "0xaA3B1fDC3Aa57Bf24418E397f8c80e7385aAa594"; // non-whitelisted address should be GHST holder
   const ghstHolderAddress = "0x3721546e51258065bfdb9746b2e442c7671b0298";
-  const receiver = "0x382038b034fa8Ea64C74C81d680669bDaC4D0636";
+  const thirdParty = "0x382038b034fa8Ea64C74C81d680669bDaC4D0636";
   const originalPetOperator = "0x4E59235b35d504D1372ABf67a835031F98114d64"; // original pet operator should be MATIC holder
   const lockedPortalId = 0;
   const lockedAavegotchiId = 16911;
   const unlockedAavegotchiId = 15589;
   const initialCost = ethers.utils.parseUnits("1", "ether");
   const period = 10 * 86400; // 10 days
-  const revenueSplitWithoutReceiver: [
+  const revenueSplitWithoutThirdParty: [
     BigNumberish,
     BigNumberish,
     BigNumberish
   ] = [50, 50, 0];
-  const revenueSplitForReceiver: [BigNumberish, BigNumberish, BigNumberish] = [
+  const revenueSplitForThirdParty: [BigNumberish, BigNumberish, BigNumberish] = [
     25, 50, 25,
   ];
   let lendingFacetWithOwner: AavegotchiLendingFacet;
@@ -297,7 +297,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitWithoutReceiver,
+          revenueSplitWithoutThirdParty,
           ethers.constants.AddressZero,
           ethers.constants.AddressZero,
           whitelistId,
@@ -311,7 +311,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           0,
-          revenueSplitWithoutReceiver,
+          revenueSplitWithoutThirdParty,
           ethers.constants.AddressZero,
           ethers.constants.AddressZero,
           whitelistId,
@@ -338,20 +338,20 @@ describe("Testing Aavegotchi Lending", async function () {
         "AavegotchiLending: sum of revenue split should be 100"
       );
     });
-    it("Should revert if revenue split values is invalid when receiver exist", async function () {
+    it("Should revert if revenue split values is invalid when thirdParty exist", async function () {
       await expect(
         lendingFacetWithOwner.addAavegotchiRental(
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver,
+          revenueSplitForThirdParty,
           ethers.constants.AddressZero,
           ethers.constants.AddressZero,
           whitelistId,
           []
         )
       ).to.be.revertedWith(
-        "AavegotchiLending: revenue split for invalid receiver should be zero"
+        "AavegotchiLending: revenue split for invalid thirdParty should be zero"
       );
     });
     it("Should revert if whitelist id is invalid", async function () {
@@ -360,7 +360,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitWithoutReceiver,
+          revenueSplitWithoutThirdParty,
           ethers.constants.AddressZero,
           ethers.constants.AddressZero,
           whitelistId + 10,
@@ -381,7 +381,7 @@ describe("Testing Aavegotchi Lending", async function () {
           lockedPortalId,
           initialCost,
           period,
-          revenueSplitWithoutReceiver,
+          revenueSplitWithoutThirdParty,
           ethers.constants.AddressZero,
           ethers.constants.AddressZero,
           secondWhitelistId,
@@ -396,7 +396,7 @@ describe("Testing Aavegotchi Lending", async function () {
             lockedAavegotchiId,
             initialCost,
             period,
-            revenueSplitWithoutReceiver,
+            revenueSplitWithoutThirdParty,
             ethers.constants.AddressZero,
             ethers.constants.AddressZero,
             whitelistId,
@@ -412,7 +412,7 @@ describe("Testing Aavegotchi Lending", async function () {
             unlockedAavegotchiId,
             initialCost,
             period,
-            revenueSplitWithoutReceiver,
+            revenueSplitWithoutThirdParty,
             ethers.constants.AddressZero,
             ethers.constants.AddressZero,
             0,
@@ -436,7 +436,7 @@ describe("Testing Aavegotchi Lending", async function () {
             unlockedAavegotchiId,
             initialCost,
             period,
-            revenueSplitWithoutReceiver,
+            revenueSplitWithoutThirdParty,
             ethers.constants.AddressZero,
             ethers.constants.AddressZero,
             whitelistId,
@@ -515,7 +515,7 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(rentals[0].rentalId).to.equal(secondRentalId);
       rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, listedFilter, 5);
       expect(rentals[0].rentalId).to.equal(secondRentalId);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(receiver, listedFilter, 5);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(thirdParty, listedFilter, 5);
       expect(rentals.length).to.equal(0);
     });
   });
@@ -571,7 +571,7 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(rentals.length).to.equal(0);
       rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(aavegotchiOwnerAddress, listedFilter, 5);
       expect(rentals.length).to.equal(0);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(receiver, listedFilter, 5);
+      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(thirdParty, listedFilter, 5);
       expect(rentals.length).to.equal(0);
     });
   });
@@ -583,7 +583,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitWithoutReceiver,
+          revenueSplitWithoutThirdParty,
           ethers.constants.AddressZero,
           ethers.constants.AddressZero,
           whitelistId,
@@ -632,9 +632,9 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver,
+          revenueSplitForThirdParty,
           ethers.constants.AddressZero,
-          receiver,
+          thirdParty,
           whitelistId,
           revenueTokens
         )
@@ -651,7 +651,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver
+          revenueSplitForThirdParty
         )
       ).to.be.revertedWith("AavegotchiLending: rental not found");
     });
@@ -662,7 +662,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver
+          revenueSplitForThirdParty
         )
       ).to.be.revertedWith("AavegotchiLending: rental canceled");
     });
@@ -673,7 +673,7 @@ describe("Testing Aavegotchi Lending", async function () {
           lockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver
+          revenueSplitForThirdParty
         )
       ).to.be.revertedWith("AavegotchiLending: Invalid token id");
     });
@@ -684,7 +684,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           ethers.utils.parseUnits("1.1", "ether"),
           period,
-          revenueSplitForReceiver
+          revenueSplitForThirdParty
         )
       ).to.be.revertedWith("AavegotchiLending: Invalid initial cost");
     });
@@ -695,7 +695,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period + 1,
-          revenueSplitForReceiver
+          revenueSplitForThirdParty
         )
       ).to.be.revertedWith("AavegotchiLending: Invalid rental period");
     });
@@ -706,7 +706,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitWithoutReceiver
+          revenueSplitWithoutThirdParty
         )
       ).to.be.revertedWith("AavegotchiLending: Invalid revenue split");
     });
@@ -717,7 +717,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver
+          revenueSplitForThirdParty
         )
       ).to.be.revertedWith("AavegotchiLending: renter can't be lender");
     });
@@ -734,7 +734,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver
+          revenueSplitForThirdParty
         )
       ).to.be.revertedWith("AavegotchiLending: Not whitelisted address");
     });
@@ -751,7 +751,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver
+          revenueSplitForThirdParty
         )
       ).to.be.revertedWith("AavegotchiLending: not enough GHST");
     });
@@ -771,7 +771,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver
+          revenueSplitForThirdParty
         )
       ).wait();
       const event = receipt!.events!.find(
@@ -806,7 +806,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver
+          revenueSplitForThirdParty
         )
       ).to.be.revertedWith("AavegotchiLending: rental already agreed");
     });
@@ -892,7 +892,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const revenue = await ghstERC20.balanceOf(escrowAddress);
       const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
       const lenderOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
-      const receiverOldBalance = await ghstERC20.balanceOf(receiver);
+      const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
         await lendingFacetWithOwner.claimAavegotchiRental(
           unlockedAavegotchiId,
@@ -902,18 +902,18 @@ describe("Testing Aavegotchi Lending", async function () {
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
       const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
       const lenderNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
-      const receiverNewBalance = await ghstERC20.balanceOf(receiver);
+      const thirdPartyNewBalance = await ghstERC20.balanceOf(thirdParty);
 
       // Check ghst balance changes
       expect(escrowNewBalance).to.equal(0);
       expect(lenderNewBalance.sub(lenderOldBalance)).to.equal(
-        revenue.mul(revenueSplitForReceiver[0]).div(100)
+        revenue.mul(revenueSplitForThirdParty[0]).div(100)
       );
       expect(renterNewBalance.sub(renterOldBalance)).to.equal(
-        revenue.mul(revenueSplitForReceiver[1]).div(100)
+        revenue.mul(revenueSplitForThirdParty[1]).div(100)
       );
-      expect(receiverNewBalance.sub(receiverOldBalance)).to.equal(
-        revenue.mul(revenueSplitForReceiver[2]).div(100)
+      expect(thirdPartyNewBalance.sub(thirdPartyOldBalance)).to.equal(
+        revenue.mul(revenueSplitForThirdParty[2]).div(100)
       );
 
       // Check rental and aavegotchi status
@@ -960,7 +960,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const revenue = await ghstERC20.balanceOf(escrowAddress);
       const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
       const lenderOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
-      const receiverOldBalance = await ghstERC20.balanceOf(receiver);
+      const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
         await lendingFacetWithOwner.claimAndEndAavegotchiRental(
           unlockedAavegotchiId,
@@ -970,18 +970,18 @@ describe("Testing Aavegotchi Lending", async function () {
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
       const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
       const lenderNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
-      const receiverNewBalance = await ghstERC20.balanceOf(receiver);
+      const thirdPartyNewBalance = await ghstERC20.balanceOf(thirdParty);
 
       // Check ghst balance changes
       expect(escrowNewBalance).to.equal(0);
       expect(lenderNewBalance.sub(lenderOldBalance)).to.equal(
-        revenue.mul(revenueSplitForReceiver[0]).div(100)
+        revenue.mul(revenueSplitForThirdParty[0]).div(100)
       );
       expect(renterNewBalance.sub(renterOldBalance)).to.equal(
-        revenue.mul(revenueSplitForReceiver[1]).div(100)
+        revenue.mul(revenueSplitForThirdParty[1]).div(100)
       );
-      expect(receiverNewBalance.sub(receiverOldBalance)).to.equal(
-        revenue.mul(revenueSplitForReceiver[2]).div(100)
+      expect(thirdPartyNewBalance.sub(thirdPartyOldBalance)).to.equal(
+        revenue.mul(revenueSplitForThirdParty[2]).div(100)
       );
 
       // Check rental and aavegotchi status
@@ -1031,9 +1031,9 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver,
+          revenueSplitForThirdParty,
           ethers.constants.AddressZero,
-          receiver,
+          thirdParty,
           whitelistId,
           []
         )
@@ -1055,7 +1055,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver
+          revenueSplitForThirdParty
         )
       ).wait();
     });
@@ -1074,7 +1074,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const revenue = await ghstERC20.balanceOf(escrowAddress);
       const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
       const lenderOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
-      const receiverOldBalance = await ghstERC20.balanceOf(receiver);
+      const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
         await lendingFacetWithOwner.claimAndEndAavegotchiRental(
           unlockedAavegotchiId,
@@ -1084,13 +1084,13 @@ describe("Testing Aavegotchi Lending", async function () {
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
       const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
       const lenderNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
-      const receiverNewBalance = await ghstERC20.balanceOf(receiver);
+      const thirdPartyNewBalance = await ghstERC20.balanceOf(thirdParty);
 
       // Check ghst balance changed
       expect(escrowNewBalance).to.equal(revenue);
       expect(lenderNewBalance).to.equal(lenderOldBalance);
       expect(renterNewBalance).to.equal(renterOldBalance);
-      expect(receiverNewBalance).to.equal(receiverOldBalance);
+      expect(thirdPartyNewBalance).to.equal(thirdPartyOldBalance);
     });
   });
 
@@ -1103,9 +1103,9 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver,
+          revenueSplitForThirdParty,
           mockOriginalOwner,
-          receiver,
+          thirdParty,
           whitelistId,
           revenueTokens
         )
@@ -1127,7 +1127,7 @@ describe("Testing Aavegotchi Lending", async function () {
           unlockedAavegotchiId,
           initialCost,
           period,
-          revenueSplitForReceiver
+          revenueSplitForThirdParty
         )
       ).wait();
     });
@@ -1144,7 +1144,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
       const lenderOldBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
       const originalOwnerOldBalance = await ghstERC20.balanceOf(mockOriginalOwner);
-      const receiverOldBalance = await ghstERC20.balanceOf(receiver);
+      const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
         await lendingFacetWithOwner.claimAavegotchiRental(
           unlockedAavegotchiId,
@@ -1155,19 +1155,19 @@ describe("Testing Aavegotchi Lending", async function () {
       const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
       const lenderNewBalance = await ghstERC20.balanceOf(aavegotchiOwnerAddress);
       const originalOwnerNewBalance = await ghstERC20.balanceOf(mockOriginalOwner);
-      const receiverNewBalance = await ghstERC20.balanceOf(receiver);
+      const thirdPartyNewBalance = await ghstERC20.balanceOf(thirdParty);
 
       // Check ghst balance changed
       expect(escrowNewBalance).to.equal(0);
       expect(lenderNewBalance).to.equal(lenderOldBalance);
       expect(originalOwnerNewBalance.sub(originalOwnerOldBalance)).to.equal(
-        revenue.mul(revenueSplitForReceiver[0]).div(100)
+        revenue.mul(revenueSplitForThirdParty[0]).div(100)
       );
       expect(renterNewBalance.sub(renterOldBalance)).to.equal(
-        revenue.mul(revenueSplitForReceiver[1]).div(100)
+        revenue.mul(revenueSplitForThirdParty[1]).div(100)
       );
-      expect(receiverNewBalance.sub(receiverOldBalance)).to.equal(
-        revenue.mul(revenueSplitForReceiver[2]).div(100)
+      expect(thirdPartyNewBalance.sub(thirdPartyOldBalance)).to.equal(
+        revenue.mul(revenueSplitForThirdParty[2]).div(100)
       );
     });
   });

@@ -159,8 +159,8 @@ struct AavegotchiRental {
     address lender;
     address renter;
     address originalOwner; // if original owner is lender, same as lender
-    address receiver; // can be address(0)
-    uint256[3] revenueSplit; // lender/original owner, renter, receiver
+    address thirdParty; // can be address(0)
+    uint256[3] revenueSplit; // lender/original owner, renter, thirdParty
     uint256 erc721TokenId;
     uint256 whitelistId; // can be zero
     address[] includeList;

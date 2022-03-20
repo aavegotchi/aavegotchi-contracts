@@ -38,7 +38,7 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256 indexed erc721tokenId,
         address lender,
         address renter,
-        address receiver,
+        address thirdParty,
         address[] tokenAddresses,
         uint256[] amounts,
         uint256[3] revenueSplit
@@ -131,7 +131,7 @@ contract AavegotchiLendingFacet is Modifiers {
     ///@param _period The rental period of the aavegotchi, unit: second
     ///@param _revenueSplit The revenue split of the rental, 3 values, sum of the should be 100
     ///@param _originalOwner The account for original owner, can be address(0) if original owner is lender
-    ///@param _receiver The 3rd account for receive revenue split, can be address(0)
+    ///@param _thirdParty The 3rd account for receive revenue split, can be address(0)
     ///@param _whitelistId The identifier of whitelist for agree rental, if 0, allow everyone
     function addAavegotchiRental(
         uint256 _erc721TokenId,
@@ -139,7 +139,7 @@ contract AavegotchiLendingFacet is Modifiers {
         uint256 _period,
         uint256[3] calldata _revenueSplit,
         address _originalOwner,
-        address _receiver,
+        address _thirdParty,
         uint256 _whitelistId,
         address[] calldata _includes
     ) external {
@@ -154,8 +154,8 @@ contract AavegotchiLendingFacet is Modifiers {
         require(_period > 0, "AavegotchiLending: period should be larger than 0");
         //        require(_revenueSplit.length == 3, "AavegotchiLending: revenues split should consists of 3 values");
         require(_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] == 100, "AavegotchiLending: sum of revenue split should be 100");
-        if (_receiver == address(0)) {
-            require(_revenueSplit[2] == 0, "AavegotchiLending: revenue split for invalid receiver should be zero");
+        if (_thirdParty == address(0)) {
+            require(_revenueSplit[2] == 0, "AavegotchiLending: revenue split for invalid thirdParty should be zero");
         }
         require((s.whitelists.length >= _whitelistId) || (_whitelistId == 0), "AavegotchiLending: whitelist not found");
 
@@ -180,7 +180,7 @@ contract AavegotchiLendingFacet is Modifiers {
             lender: sender,
             renter: address(0),
             originalOwner: _originalOwner == address(0) ? sender : _originalOwner,
-            receiver: _receiver,
+            thirdParty: _thirdParty,
             erc721TokenId: _erc721TokenId,
             whitelistId: _whitelistId,
             includeList: _includes,
@@ -285,7 +285,7 @@ contract AavegotchiLendingFacet is Modifiers {
 
         uint256[] memory amounts = LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
 
-        emit AavegotchiRentalClaim(rentalId, _tokenId, rental.lender, rental.renter, rental.receiver, _revenueTokens, amounts, rental.revenueSplit);
+        emit AavegotchiRentalClaim(rentalId, _tokenId, rental.lender, rental.renter, rental.thirdParty, _revenueTokens, amounts, rental.revenueSplit);
     }
 
     ///@notice Allow a lender to claim revenue from the rental
@@ -315,7 +315,7 @@ contract AavegotchiLendingFacet is Modifiers {
         LibAavegotchiLending.removeLentAavegotchi(_tokenId, lender);
         LibAavegotchiLending.removeRentalListItem(lender, rentalId, "agreed");
 
-        emit AavegotchiRentalClaim(rentalId, _tokenId, rental.lender, rental.renter, rental.receiver, _revenueTokens, amounts, rental.revenueSplit);
+        emit AavegotchiRentalClaim(rentalId, _tokenId, rental.lender, rental.renter, rental.thirdParty, _revenueTokens, amounts, rental.revenueSplit);
         emit AavegotchiRentalEnd(rentalId);
     }
 }
