@@ -14,12 +14,12 @@ library LibGotchiLending {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
         GotchiLending storage lending = s.gotchiLendings[_listingId];
-        require(lending.timeCreated != 0, "GotchiLending: lending not found");
+        require(lending.timeCreated != 0, "GotchiLending: Listing not found");
         if (lending.canceled) {
             return;
         }
-        require(lending.timeAgreed == 0, "GotchiLending: lending already agreed");
-        require(lending.lender == _lender, "GotchiLending: not lender");
+        require(lending.timeAgreed == 0, "GotchiLending: Listing already agreed");
+        require(lending.lender == _lender, "GotchiLending: Not lender");
         lending.canceled = true;
 
         removeLendingListItem(_lender, _listingId, "listed");

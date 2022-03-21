@@ -45,7 +45,7 @@ contract GotchiLendingFacet is Modifiers {
     ///@return listing_ A struct containing certain details about the lending associated with an NFT of contract identifier `_erc721TokenId`
     function getGotchiLendingFromToken(uint256 _erc721TokenId) external view returns (GotchiLending memory listing_) {
         uint256 listingId = s.aavegotchiToListingId[_erc721TokenId];
-        require(listingId != 0, "GotchiLending: lending doesn't exist");
+        require(listingId != 0, "GotchiLending: Listing doesn't exist");
         listing_ = s.gotchiLendings[listingId];
     }
 
@@ -114,14 +114,14 @@ contract GotchiLendingFacet is Modifiers {
     ) external {
         address sender = LibMeta.msgSender();
         require(IERC721(address(this)).ownerOf(_erc721TokenId) == sender, "GotchiLending: Not owner of aavegotchi");
-        require(_period > 0, "GotchiLending: period should be larger than 0");
-        require(_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] == 100, "GotchiLending: sum of revenue split should be 100");
+        require(_period > 0, "GotchiLending: Period should be larger than 0");
+        require(_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] == 100, "GotchiLending: Sum of revenue split should be 100");
         if (_thirdParty == address(0)) {
-            require(_revenueSplit[2] == 0, "GotchiLending: revenue split for invalid thirdParty should be zero");
+            require(_revenueSplit[2] == 0, "GotchiLending: Revenue split for invalid thirdParty should be zero");
         }
-        require((s.whitelists.length >= _whitelistId) || (_whitelistId == 0), "GotchiLending: whitelist not found");
+        require((s.whitelists.length >= _whitelistId) || (_whitelistId == 0), "GotchiLending: Whitelist not found");
 
-        require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "GotchiLending: Only aavegotchi available");
+        require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "GotchiLending: Can only lend Aavegotchi");
 
         uint256 oldListingId = s.aavegotchiToListingId[_erc721TokenId];
         if (oldListingId != 0) {
@@ -195,13 +195,13 @@ contract GotchiLendingFacet is Modifiers {
         }
         address borrower = LibMeta.msgSender();
         address lender = lending.lender;
-        require(lender != borrower, "GotchiLending: borrower can't be lender");
+        require(lender != borrower, "GotchiLending: Borrower can't be lender");
         if (lending.whitelistId > 0) {
             require(s.isWhitelisted[lending.whitelistId][borrower], "GotchiLending: Not whitelisted address");
         }
 
         if (lending.initialCost > 0) {
-            require(IERC20(s.ghstContract).balanceOf(borrower) >= lending.initialCost, "GotchiLending: not enough GHST");
+            require(IERC20(s.ghstContract).balanceOf(borrower) >= lending.initialCost, "GotchiLending: Not enough GHST");
             LibERC20.transferFrom(s.ghstContract, borrower, lender, lending.initialCost);
         }
 
@@ -229,11 +229,11 @@ contract GotchiLendingFacet is Modifiers {
     ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
     function claimGotchiLending(uint256 _tokenId, address[] calldata _revenueTokens) external {
         uint256 listingId = s.aavegotchiToListingId[_tokenId];
-        require(listingId != 0, "GotchiLending: lending not found");
+        require(listingId != 0, "GotchiLending: Listing not found");
         GotchiLending storage lending = s.gotchiLendings[listingId];
 
         address sender = LibMeta.msgSender();
-        require((lending.lender == sender) || (lending.borrower == sender), "GotchiLending: only lender or borrower can claim");
+        require((lending.lender == sender) || (lending.borrower == sender), "GotchiLending: Only lender or borrower can claim");
 
         uint256[] memory amounts = LibGotchiLending.claimGotchiLending(listingId, _revenueTokens);
 
@@ -246,13 +246,13 @@ contract GotchiLendingFacet is Modifiers {
     ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
     function claimAndEndGotchiLending(uint256 _tokenId, address[] calldata _revenueTokens) external {
         uint256 listingId = s.aavegotchiToListingId[_tokenId];
-        require(listingId != 0, "GotchiLending: lending not found");
+        require(listingId != 0, "GotchiLending: Listing not found");
         GotchiLending storage lending = s.gotchiLendings[listingId];
 
         address sender = LibMeta.msgSender();
         address lender = lending.lender;
         address borrower = lending.borrower;
-        require((lender == sender) || (borrower == sender), "GotchiLending: only lender or borrower can claim and end agreement");
+        require((lender == sender) || (borrower == sender), "GotchiLending: Only lender or borrower can claim and end agreement");
         require(lending.timeAgreed + lending.period <= block.timestamp, "GotchiLending: not allowed during agreement");
 
         uint256[] memory amounts = LibGotchiLending.claimGotchiLending(listingId, _revenueTokens);
