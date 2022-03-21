@@ -184,9 +184,9 @@ contract GotchiLendingFacet is Modifiers {
         uint256[3] calldata _revenueSplit
     ) external {
         GotchiLending storage lending = s.gotchiLendings[_listingId];
-        require(lending.timeCreated != 0, "GotchiLending: lending not found");
-        require(lending.timeAgreed == 0, "GotchiLending: lending already agreed");
-        require(lending.canceled == false, "GotchiLending: lending canceled");
+        require(lending.timeCreated != 0, "GotchiLending: Listing not found");
+        require(lending.timeAgreed == 0, "GotchiLending: Listing already agreed");
+        require(lending.canceled == false, "GotchiLending: Listing canceled");
         require(lending.erc721TokenId == _erc721TokenId, "GotchiLending: Invalid token id");
         require(lending.initialCost == _initialCost, "GotchiLending: Invalid initial cost");
         require(lending.period == _period, "GotchiLending: Invalid lending period");
@@ -253,7 +253,7 @@ contract GotchiLendingFacet is Modifiers {
         address lender = lending.lender;
         address borrower = lending.borrower;
         require((lender == sender) || (borrower == sender), "GotchiLending: Only lender or borrower can claim and end agreement");
-        require(lending.timeAgreed + lending.period <= block.timestamp, "GotchiLending: not allowed during agreement");
+        require(lending.timeAgreed + lending.period <= block.timestamp, "GotchiLending: Not allowed during agreement");
 
         uint256[] memory amounts = LibGotchiLending.claimGotchiLending(listingId, _revenueTokens);
 

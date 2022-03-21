@@ -13,8 +13,8 @@ export async function upgrade() {
     {
       facetName: "GotchiLendingFacet",
       addSelectors: [
-        "function getGotchiLendingInfo(uint256 _listingId) external view",
-        "function getGotchiLending(uint256 _listingId) external view",
+        "function getGotchiLendingListingInfo(uint256 _listingId) external view",
+        "function getLendingListingInfo(uint256 _listingId) external view",
         "function getGotchiLendingFromToken(uint256 _erc721TokenId) external view",
         "function isAavegotchiLent(uint256 _erc721TokenId) external view",
         "function addGotchiLending(uint256 _erc721TokenId, uint256 _initialCost, uint256 _period, uint256[3] calldata _revenueSplit, address _originalOwner, address _thirdParty, uint256 _whitelistId, address[] calldata _includes) external",
