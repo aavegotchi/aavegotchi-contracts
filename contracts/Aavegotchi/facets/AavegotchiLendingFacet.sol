@@ -10,43 +10,9 @@ import {LibAavegotchiLending} from "../libraries/LibAavegotchiLending.sol";
 import {Modifiers, AavegotchiRental} from "../libraries/LibAppStorage.sol";
 
 contract AavegotchiLendingFacet is Modifiers {
-    event AavegotchiRentalAdd(
-        uint256 indexed rentalId,
-        uint256 indexed erc721TokenId,
-        address indexed lender,
-        address originalOwner,
-        uint256 initialCost,
-        uint256 period,
-        uint256[3] _revenueSplit,
-        address[] _includes,
-        uint256 time
-    );
-
-    event AavegotchiRentalExecute(
-        uint256 indexed rentalId,
-        uint256 indexed erc721TokenId,
-        address indexed lender,
-        address originalOwner,
-        address renter,
-        uint256 initialCost,
-        uint256 period,
-        uint256[3] _revenueSplit,
-        address[] _includes,
-        uint256 time
-    );
-
-    event AavegotchiRentalClaim(
-        uint256 indexed rentalId,
-        uint256 indexed erc721tokenId,
-        address indexed lender,
-        address originalOwner,
-        address renter,
-        address thirdParty,
-        address[] tokenAddresses,
-        uint256[] amounts,
-        uint256[3] revenueSplit
-    );
-
+    event AavegotchiRentalAdd(uint256 indexed rentalId);
+    event AavegotchiRentalExecute(uint256 indexed rentalId);
+    event AavegotchiRentalClaim(uint256 indexed rentalId, address[] tokenAddresses, uint256[] amounts);
     event AavegotchiRentalEnd(uint256 indexed rentalId);
 
     ///@notice Get an aavegotchi rental details through an identifier
@@ -175,7 +141,7 @@ contract AavegotchiLendingFacet is Modifiers {
             revenueSplit: _revenueSplit,
             lender: sender,
             renter: address(0),
-            originalOwner: _originalOwner == address(0) ? sender : _originalOwner,
+            originalOwner: _originalOwner,
             thirdParty: _thirdParty,
             erc721TokenId: _erc721TokenId,
             whitelistId: _whitelistId,
@@ -189,17 +155,7 @@ contract AavegotchiLendingFacet is Modifiers {
 
         LibAavegotchiLending.addRentalListItem(sender, rentalId, "listed");
 
-        emit AavegotchiRentalAdd(
-            rentalId,
-            _erc721TokenId,
-            sender,
-            _originalOwner == address(0) ? sender : _originalOwner,
-            _initialCost,
-            _period,
-            _revenueSplit,
-            _includes,
-            block.timestamp
-        );
+        emit AavegotchiRentalAdd(rentalId);
 
         // Lock Aavegotchis when rental is created
         s.aavegotchis[_erc721TokenId].locked = true;
@@ -264,18 +220,7 @@ contract AavegotchiLendingFacet is Modifiers {
         // set lender as pet operator
         s.petOperators[renter][lender] = true;
 
-        emit AavegotchiRentalExecute(
-            _rentalId,
-            tokenId,
-            lender,
-            rental.originalOwner,
-            renter,
-            rental.initialCost,
-            rental.period,
-            _revenueSplit,
-            rental.includeList,
-            block.timestamp
-        );
+        emit AavegotchiRentalExecute(_rentalId);
     }
 
     ///@notice Allow to claim revenue from the rental
@@ -292,17 +237,7 @@ contract AavegotchiLendingFacet is Modifiers {
 
         uint256[] memory amounts = LibAavegotchiLending.claimAavegotchiRental(rentalId, _revenueTokens);
 
-        emit AavegotchiRentalClaim(
-            rentalId,
-            _tokenId,
-            rental.lender,
-            rental.originalOwner,
-            rental.renter,
-            rental.thirdParty,
-            _revenueTokens,
-            amounts,
-            rental.revenueSplit
-        );
+        emit AavegotchiRentalClaim(rentalId, _revenueTokens, amounts);
     }
 
     ///@notice Allow a lender to claim revenue from the rental
@@ -332,17 +267,7 @@ contract AavegotchiLendingFacet is Modifiers {
         LibAavegotchiLending.removeLentAavegotchi(_tokenId, lender);
         LibAavegotchiLending.removeRentalListItem(lender, rentalId, "agreed");
 
-        emit AavegotchiRentalClaim(
-            rentalId,
-            _tokenId,
-            rental.lender,
-            rental.originalOwner,
-            rental.renter,
-            rental.thirdParty,
-            _revenueTokens,
-            amounts,
-            rental.revenueSplit
-        );
+        emit AavegotchiRentalClaim(rentalId, _revenueTokens, amounts);
         emit AavegotchiRentalEnd(rentalId);
     }
 }
