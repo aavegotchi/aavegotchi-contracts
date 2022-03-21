@@ -83,7 +83,8 @@ library LibAavegotchiLending {
 
             uint256 ownerAmount = (balance * rental.revenueSplit[0]) / 100;
             uint256 renterAmount = (balance * rental.revenueSplit[1]) / 100;
-            LibERC20.transferFrom(revenueToken, escrow, rental.originalOwner, ownerAmount);
+            address owner = rental.originalOwner == address(0) ? rental.lender : rental.originalOwner;
+            LibERC20.transferFrom(revenueToken, escrow, owner, ownerAmount);
             LibERC20.transferFrom(revenueToken, escrow, rental.renter, renterAmount);
             if (rental.thirdParty != address(0)) {
                 uint256 thirdPartyAmount = (balance * rental.revenueSplit[2]) / 100;
