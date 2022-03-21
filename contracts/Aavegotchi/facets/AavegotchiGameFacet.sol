@@ -286,8 +286,8 @@ contract AavegotchiGameFacet is Modifiers {
                 // Check lending status of aavegotchi and allow original pet operators
                 bool isOriginalPetOperator;
                 uint256 lendingId = s.aavegotchiToLendingId[tokenId];
-                if ((lendingId != 0) && (s.aavegotchiLendings[lendingId].timeAgreed > 0)) {
-                    address lender = s.aavegotchiLendings[lendingId].lender;
+                if ((lendingId != 0) && (s.gotchiLendings[lendingId].timeAgreed > 0)) {
+                    address lender = s.gotchiLendings[lendingId].lender;
                     isOriginalPetOperator = s.operators[lender][sender] || s.petOperators[lender][sender];
                 }
                 require(

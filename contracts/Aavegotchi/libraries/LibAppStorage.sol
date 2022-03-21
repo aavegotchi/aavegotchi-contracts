@@ -152,7 +152,7 @@ struct GameManager {
     uint256 refreshTime;
 }
 
-struct AavegotchiLending {
+struct GotchiLending {
     uint256 lendingId;
     uint256 initialCost; // GHST in wei, can be zero
     uint256 period;
@@ -269,13 +269,13 @@ struct AppStorage {
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
     mapping(uint256 => address) categoryToTokenAddress;
-    uint256 nextAavegotchiLendingId;
-    mapping(uint256 => AavegotchiLending) aavegotchiLendings; // lendingId => data
+    uint256 nextGotchiLendingId;
+    mapping(uint256 => GotchiLending) gotchiLendings; // lendingId => data
     mapping(uint256 => uint256) aavegotchiToLendingId; // aavegotchiId => lendingId
     mapping(address => uint256[]) lentTokenIds; // address => lent token ids
     mapping(address => mapping(uint256 => uint256)) lentTokenIdIndexes; // address => lent token id => index
-    mapping(bytes32 => mapping(uint256 => LendingListItem)) aavegotchiLendingListItem; // ("listed" or "agreed") => lendingId => LendingListItem
-    mapping(bytes32 => uint256) aavegotchiLendingHead; // ("listed" or "agreed") => lendingId
+    mapping(bytes32 => mapping(uint256 => LendingListItem)) gotchiLendingListItem; // ("listed" or "agreed") => lendingId => LendingListItem
+    mapping(bytes32 => uint256) gotchiLendingHead; // ("listed" or "agreed") => lendingId
     mapping(bytes32 => mapping(uint256 => LendingListItem)) aavegotchiLenderLendingListItem; // ("listed" or "agreed") => lendingId => LendingListItem
     mapping(address => mapping(bytes32 => uint256)) aavegotchiLenderLendingHead; // user address => ("listed" or "agreed") => lendingId => LendingListItem
     Whitelist[] whitelists;

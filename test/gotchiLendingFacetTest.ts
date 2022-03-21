@@ -4,12 +4,12 @@
 //@ts-ignore
 import { ethers, network } from "hardhat";
 import chai from "chai";
-import { upgrade } from "../scripts/upgrades/upgrade-aavegotchiLendingFacet";
+import { upgrade } from "../scripts/upgrades/upgrade-gotchiLendingFacet";
 import { impersonate } from "../scripts/helperFunctions";
 import {
   AavegotchiFacet,
   AavegotchiGameFacet,
-  AavegotchiLendingFacet,
+  GotchiLendingFacet,
   ERC20Token,
   ERC721MarketplaceFacet,
   WhitelistFacet,
@@ -45,10 +45,10 @@ describe("Testing Aavegotchi Lending", async function () {
   ] = [50, 50, 0];
   const revenueSplitForThirdParty: [BigNumberish, BigNumberish, BigNumberish] =
     [25, 50, 25];
-  let lendingFacetWithOwner: AavegotchiLendingFacet;
-  let lendingFacetWithBorrower: AavegotchiLendingFacet;
-  let lendingFacetWithClaimer: AavegotchiLendingFacet;
-  let lendingFacetWithPortalOwner: AavegotchiLendingFacet;
+  let lendingFacetWithOwner: GotchiLendingFacet;
+  let lendingFacetWithBorrower: GotchiLendingFacet;
+  let lendingFacetWithClaimer: GotchiLendingFacet;
+  let lendingFacetWithPortalOwner: GotchiLendingFacet;
   let whitelistFacetWithOwner: WhitelistFacet;
   let whitelistFacetWithPortalOwner: WhitelistFacet;
   let aavegotchiFacet: AavegotchiFacet;
@@ -66,10 +66,10 @@ describe("Testing Aavegotchi Lending", async function () {
   before(async function () {
     await upgrade();
 
-    const aavegotchiLendingFacet = (await ethers.getContractAt(
-      "AavegotchiLendingFacet",
+    const gotchiLendingFacet = (await ethers.getContractAt(
+      "GotchiLendingFacet",
       diamondAddress
-    )) as AavegotchiLendingFacet;
+    )) as GotchiLendingFacet;
     const whitelistFacet = (await ethers.getContractAt(
       "WhitelistFacet",
       diamondAddress
@@ -103,9 +103,9 @@ describe("Testing Aavegotchi Lending", async function () {
       ethers,
       network
     );
-    await (
-      await aavegotchiFacet.setPetOperatorForAll(originalPetOperator, true)
-    ).wait();
+
+    //@ts-ignore
+    await aavegotchiFacet.setPetOperatorForAll(originalPetOperator, true);
 
     // set approval
     await (
@@ -128,25 +128,25 @@ describe("Testing Aavegotchi Lending", async function () {
     // Impersonating facets for test
     lendingFacetWithOwner = await impersonate(
       aavegotchiOwnerAddress,
-      aavegotchiLendingFacet,
+      gotchiLendingFacet,
       ethers,
       network
     );
     lendingFacetWithBorrower = await impersonate(
       borrowerAddress,
-      aavegotchiLendingFacet,
+      gotchiLendingFacet,
       ethers,
       network
     );
     lendingFacetWithClaimer = await impersonate(
       claimerAddress,
-      aavegotchiLendingFacet,
+      gotchiLendingFacet,
       ethers,
       network
     );
     lendingFacetWithPortalOwner = await impersonate(
       portalOwnerAddress,
-      aavegotchiLendingFacet,
+      gotchiLendingFacet,
       ethers,
       network
     );
@@ -289,10 +289,10 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing addAavegotchiLending", async function () {
+  describe("Testing addGotchiLending", async function () {
     it("Should revert if non-owner try to add", async function () {
       await expect(
-        lendingFacetWithBorrower.addAavegotchiLending(
+        lendingFacetWithBorrower.addGotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -302,11 +302,11 @@ describe("Testing Aavegotchi Lending", async function () {
           whitelistId,
           []
         )
-      ).to.be.revertedWith("AavegotchiLending: Not owner of aavegotchi");
+      ).to.be.revertedWith("GotchiLending: Not owner of aavegotchi");
     });
     it("Should revert if period is zero", async function () {
       await expect(
-        lendingFacetWithOwner.addAavegotchiLending(
+        lendingFacetWithOwner.addGotchiLending(
           unlockedAavegotchiId,
           initialCost,
           0,
@@ -316,14 +316,14 @@ describe("Testing Aavegotchi Lending", async function () {
           whitelistId,
           []
         )
-      ).to.be.revertedWith("AavegotchiLending: period should be larger than 0");
+      ).to.be.revertedWith("GotchiLending: period should be larger than 0");
     });
     it("Should revert if sum of revenue split values is invalid", async function () {
       const invalidRevenueSplit: [BigNumberish, BigNumberish, BigNumberish] = [
         10, 50, 0,
       ];
       await expect(
-        lendingFacetWithOwner.addAavegotchiLending(
+        lendingFacetWithOwner.addGotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -333,13 +333,11 @@ describe("Testing Aavegotchi Lending", async function () {
           whitelistId,
           []
         )
-      ).to.be.revertedWith(
-        "AavegotchiLending: sum of revenue split should be 100"
-      );
+      ).to.be.revertedWith("GotchiLending: sum of revenue split should be 100");
     });
     it("Should revert if revenue split values is invalid when thirdParty exist", async function () {
       await expect(
-        lendingFacetWithOwner.addAavegotchiLending(
+        lendingFacetWithOwner.addGotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -350,12 +348,12 @@ describe("Testing Aavegotchi Lending", async function () {
           []
         )
       ).to.be.revertedWith(
-        "AavegotchiLending: revenue split for invalid thirdParty should be zero"
+        "GotchiLending: revenue split for invalid thirdParty should be zero"
       );
     });
     it("Should revert if whitelist id is invalid", async function () {
       await expect(
-        lendingFacetWithOwner.addAavegotchiLending(
+        lendingFacetWithOwner.addGotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -365,7 +363,7 @@ describe("Testing Aavegotchi Lending", async function () {
           whitelistId + 10,
           []
         )
-      ).to.be.revertedWith("AavegotchiLending: whitelist not found");
+      ).to.be.revertedWith("GotchiLending: whitelist not found");
     });
     it("Should revert if try to add lending for not aavegotchi", async function () {
       await (
@@ -376,7 +374,7 @@ describe("Testing Aavegotchi Lending", async function () {
       ).wait();
 
       await expect(
-        lendingFacetWithPortalOwner.addAavegotchiLending(
+        lendingFacetWithPortalOwner.addGotchiLending(
           lockedPortalId,
           initialCost,
           period,
@@ -386,12 +384,12 @@ describe("Testing Aavegotchi Lending", async function () {
           secondWhitelistId,
           []
         )
-      ).to.be.revertedWith("AavegotchiLending: Only aavegotchi available");
+      ).to.be.revertedWith("GotchiLending: Only aavegotchi available");
     });
     describe("If there's no lending for the aavegotchi", async function () {
       it("Should revert if aavegotchi is locked", async function () {
         await expect(
-          lendingFacetWithOwner.addAavegotchiLending(
+          lendingFacetWithOwner.addGotchiLending(
             lockedAavegotchiId,
             initialCost,
             period,
@@ -402,12 +400,12 @@ describe("Testing Aavegotchi Lending", async function () {
             []
           )
         ).to.be.revertedWith(
-          "AavegotchiLending: Only callable on unlocked Aavegotchis"
+          "GotchiLending: Only callable on unlocked Aavegotchis"
         );
       });
       it("Should succeed if all parameters are valid", async function () {
         const receipt = await (
-          await lendingFacetWithOwner.addAavegotchiLending(
+          await lendingFacetWithOwner.addGotchiLending(
             unlockedAavegotchiId,
             initialCost,
             period,
@@ -419,7 +417,7 @@ describe("Testing Aavegotchi Lending", async function () {
           )
         ).wait();
         const event = receipt!.events!.find(
-          (event) => event.event === "AavegotchiLendingAdd"
+          (event: any) => event.event === "GotchiLendingAdd"
         );
         firstLendingId = event!.args!.lendingId;
         // expect(event!.args!.lender).to.equal(aavegotchiOwnerAddress);
@@ -431,7 +429,7 @@ describe("Testing Aavegotchi Lending", async function () {
     describe("If there's already lending for the aavegotchi", async function () {
       it("Should succeed and if all parameters are valid", async function () {
         const receipt = await (
-          await lendingFacetWithOwner.addAavegotchiLending(
+          await lendingFacetWithOwner.addGotchiLending(
             unlockedAavegotchiId,
             initialCost,
             period,
@@ -443,7 +441,7 @@ describe("Testing Aavegotchi Lending", async function () {
           )
         ).wait();
         const event = receipt!.events!.find(
-          (event) => event.event === "AavegotchiLendingAdd"
+          (event: any) => event.event === "GotchiLendingAdd"
         );
         secondLendingId = event!.args!.lendingId;
         // expect(event!.args!.lender).to.equal(aavegotchiOwnerAddress);
@@ -454,14 +452,14 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing getAavegotchiLending", async function () {
+  describe("Testing getGotchiLending", async function () {
     it("Should revert when try to get lending with wrong id", async function () {
       await expect(
-        lendingFacetWithOwner.getAavegotchiLending(secondLendingId.add(10))
-      ).to.be.revertedWith("AavegotchiLending: lending does not exist");
+        lendingFacetWithOwner.getGotchiLending(secondLendingId.add(10))
+      ).to.be.revertedWith("GotchiLending: lending does not exist");
     });
     it("Should fetch lending data with correct lending id", async function () {
-      const lending = await lendingFacetWithOwner.getAavegotchiLending(
+      const lending = await lendingFacetWithOwner.getGotchiLending(
         firstLendingId
       );
       expect(lending.lendingId).to.equal(firstLendingId);
@@ -471,14 +469,14 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing getAavegotchiLendingInfo", async function () {
+  describe("Testing getGotchiLendingInfo", async function () {
     it("Should revert when try to get lending with wrong id", async function () {
       await expect(
-        lendingFacetWithOwner.getAavegotchiLendingInfo(secondLendingId.add(10))
-      ).to.be.revertedWith("AavegotchiLending: lending does not exist");
+        lendingFacetWithOwner.getGotchiLendingInfo(secondLendingId.add(10))
+      ).to.be.revertedWith("GotchiLending: lending does not exist");
     });
     it("Should fetch lending data with correct lending id", async function () {
-      const lendingInfo = await lendingFacetWithOwner.getAavegotchiLendingInfo(
+      const lendingInfo = await lendingFacetWithOwner.getGotchiLendingInfo(
         firstLendingId
       );
       expect(lendingInfo[0].lendingId).to.equal(firstLendingId);
@@ -491,14 +489,14 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing getAavegotchiLendingFromToken", async function () {
+  describe("Testing getGotchiLendingFromToken", async function () {
     it("Should revert when try to get lending with wrong aavegotchi id", async function () {
       await expect(
-        lendingFacetWithOwner.getAavegotchiLendingFromToken(lockedAavegotchiId)
-      ).to.be.revertedWith("AavegotchiLending: lending doesn't exist");
+        lendingFacetWithOwner.getGotchiLendingFromToken(lockedAavegotchiId)
+      ).to.be.revertedWith("GotchiLending: lending doesn't exist");
     });
     it("Should fetch lending data with correct aavegotchi id", async function () {
-      const lending = await lendingFacetWithOwner.getAavegotchiLendingFromToken(
+      const lending = await lendingFacetWithOwner.getGotchiLendingFromToken(
         unlockedAavegotchiId
       );
       expect(lending.lendingId).to.equal(secondLendingId);
@@ -508,20 +506,20 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing getOwnerAavegotchiLendings and getAavegotchiLendings after aavegotchi lending added", async function () {
+  describe("Testing getOwnerGotchiLendings and getGotchiLendings after aavegotchi lending added", async function () {
     it("Should fetch lending list", async function () {
-      let lendings = await lendingFacetWithOwner.getAavegotchiLendings(
+      let lendings = await lendingFacetWithOwner.getGotchiLendings(
         listedFilter,
         5
       );
       expect(lendings[0].lendingId).to.equal(secondLendingId);
-      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
+      lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
         aavegotchiOwnerAddress,
         listedFilter,
         5
       );
       expect(lendings[0].lendingId).to.equal(secondLendingId);
-      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
+      lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
         thirdParty,
         listedFilter,
         5
@@ -545,50 +543,50 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing cancelAavegotchiLending", async function () {
+  describe("Testing cancelGotchiLending", async function () {
     it("Should revert when try to cancel lending with wrong id", async function () {
       await expect(
-        lendingFacetWithOwner.cancelAavegotchiLending(secondLendingId.add(10))
-      ).to.be.revertedWith("AavegotchiLending: lending not found");
+        lendingFacetWithOwner.cancelGotchiLending(secondLendingId.add(10))
+      ).to.be.revertedWith("GotchiLending: lending not found");
     });
     it("Should revert when try to cancel lending with non lender", async function () {
       await expect(
-        lendingFacetWithClaimer.cancelAavegotchiLending(secondLendingId)
-      ).to.be.revertedWith("AavegotchiLending: not lender");
+        lendingFacetWithClaimer.cancelGotchiLending(secondLendingId)
+      ).to.be.revertedWith("GotchiLending: not lender");
     });
     it("Should succeed, but no event when try to cancel canceled lending", async function () {
       const receipt = await (
-        await lendingFacetWithOwner.cancelAavegotchiLending(firstLendingId)
+        await lendingFacetWithOwner.cancelGotchiLending(firstLendingId)
       ).wait();
       expect(receipt!.events!.length).to.equal(0);
     });
     it("Should succeed if cancel valid lending", async function () {
-      let lending = await lendingFacetWithOwner.getAavegotchiLending(
+      let lending = await lendingFacetWithOwner.getGotchiLending(
         secondLendingId
       );
       expect(lending.canceled).to.equal(false);
       await (
-        await lendingFacetWithOwner.cancelAavegotchiLending(secondLendingId)
+        await lendingFacetWithOwner.cancelGotchiLending(secondLendingId)
       ).wait();
-      lending = await lendingFacetWithOwner.getAavegotchiLending(secondLendingId);
+      lending = await lendingFacetWithOwner.getGotchiLending(secondLendingId);
       expect(lending.canceled).to.equal(true);
     });
   });
 
-  describe("Testing getOwnerAavegotchiLendings and getAavegotchiLendings after canceled", async function () {
+  describe("Testing getOwnerGotchiLendings and getGotchiLendings after canceled", async function () {
     it("Should fetch lending list", async function () {
-      let lendings = await lendingFacetWithOwner.getAavegotchiLendings(
+      let lendings = await lendingFacetWithOwner.getGotchiLendings(
         listedFilter,
         5
       );
       expect(lendings.length).to.equal(0);
-      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
+      lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
         aavegotchiOwnerAddress,
         listedFilter,
         5
       );
       expect(lendings.length).to.equal(0);
-      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
+      lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
         thirdParty,
         listedFilter,
         5
@@ -597,10 +595,10 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing cancelAavegotchiLendingByToken", async function () {
+  describe("Testing cancelGotchiLendingByToken", async function () {
     before(async function () {
       await (
-        await lendingFacetWithOwner.addAavegotchiLending(
+        await lendingFacetWithOwner.addGotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -614,29 +612,27 @@ describe("Testing Aavegotchi Lending", async function () {
     });
     it("Should revert when try to cancel lending with wrong aavegotchi id", async function () {
       await expect(
-        lendingFacetWithOwner.cancelAavegotchiLendingByToken(lockedAavegotchiId)
-      ).to.be.revertedWith("AavegotchiLending: lending not found");
+        lendingFacetWithOwner.cancelGotchiLendingByToken(lockedAavegotchiId)
+      ).to.be.revertedWith("GotchiLending: lending not found");
     });
     it("Should revert when try to cancel lending with non lender", async function () {
       await expect(
-        lendingFacetWithClaimer.cancelAavegotchiLendingByToken(
-          unlockedAavegotchiId
-        )
-      ).to.be.revertedWith("AavegotchiLending: not lender");
+        lendingFacetWithClaimer.cancelGotchiLendingByToken(unlockedAavegotchiId)
+      ).to.be.revertedWith("GotchiLending: not lender");
     });
     it("Should succeed if cancel lending with valid aavegotchi id", async function () {
-      let lending = await lendingFacetWithOwner.getAavegotchiLendingFromToken(
+      let lending = await lendingFacetWithOwner.getGotchiLendingFromToken(
         unlockedAavegotchiId
       );
       expect(lending.canceled).to.equal(false);
       await (
-        await lendingFacetWithOwner.cancelAavegotchiLendingByToken(
+        await lendingFacetWithOwner.cancelGotchiLendingByToken(
           unlockedAavegotchiId
         )
       ).wait();
       await expect(
-        lendingFacetWithOwner.getAavegotchiLendingFromToken(unlockedAavegotchiId)
-      ).to.be.revertedWith("AavegotchiLending: lending doesn't exist");
+        lendingFacetWithOwner.getGotchiLendingFromToken(unlockedAavegotchiId)
+      ).to.be.revertedWith("GotchiLending: lending doesn't exist");
     });
     it("isAavegotchiLent function should return true if aavegotchi lending is canceld", async function () {
       const status = await lendingFacetWithOwner.isAavegotchiLent(
@@ -646,10 +642,10 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing agreeAavegotchiLending", async function () {
+  describe("Testing agreeGotchiLending", async function () {
     before(async function () {
       const receipt = await (
-        await lendingFacetWithOwner.addAavegotchiLending(
+        await lendingFacetWithOwner.addGotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -661,86 +657,86 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).wait();
       const event = receipt!.events!.find(
-        (event) => event.event === "AavegotchiLendingAdd"
+        (event: any) => event.event === "GotchiLendingAdd"
       );
       fourthLendingId = event!.args!.lendingId;
     });
     it("Should revert when try to agree lending with wrong lending id", async function () {
       await expect(
-        lendingFacetWithBorrower.agreeAavegotchiLending(
+        lendingFacetWithBorrower.agreeGotchiLending(
           fourthLendingId.add(10),
           unlockedAavegotchiId,
           initialCost,
           period,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: lending not found");
+      ).to.be.revertedWith("GotchiLending: lending not found");
     });
     it("Should revert when try to agree canceled lending", async function () {
       await expect(
-        lendingFacetWithBorrower.agreeAavegotchiLending(
+        lendingFacetWithBorrower.agreeGotchiLending(
           secondLendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: lending canceled");
+      ).to.be.revertedWith("GotchiLending: lending canceled");
     });
     it("Should revert when try to agree lending with wrong token id", async function () {
       await expect(
-        lendingFacetWithBorrower.agreeAavegotchiLending(
+        lendingFacetWithBorrower.agreeGotchiLending(
           fourthLendingId,
           lockedAavegotchiId,
           initialCost,
           period,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: Invalid token id");
+      ).to.be.revertedWith("GotchiLending: Invalid token id");
     });
     it("Should revert when try to agree lending with wrong initial cost", async function () {
       await expect(
-        lendingFacetWithBorrower.agreeAavegotchiLending(
+        lendingFacetWithBorrower.agreeGotchiLending(
           fourthLendingId,
           unlockedAavegotchiId,
           ethers.utils.parseUnits("1.1", "ether"),
           period,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: Invalid initial cost");
+      ).to.be.revertedWith("GotchiLending: Invalid initial cost");
     });
     it("Should revert when try to agree lending with wrong lending period", async function () {
       await expect(
-        lendingFacetWithBorrower.agreeAavegotchiLending(
+        lendingFacetWithBorrower.agreeGotchiLending(
           fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
           period + 1,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: Invalid lending period");
+      ).to.be.revertedWith("GotchiLending: Invalid lending period");
     });
     it("Should revert when try to agree lending with wrong revenue split", async function () {
       await expect(
-        lendingFacetWithBorrower.agreeAavegotchiLending(
+        lendingFacetWithBorrower.agreeGotchiLending(
           fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
           revenueSplitWithoutThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: Invalid revenue split");
+      ).to.be.revertedWith("GotchiLending: Invalid revenue split");
     });
     it("Should revert when try to agree lending with lender", async function () {
       await expect(
-        lendingFacetWithOwner.agreeAavegotchiLending(
+        lendingFacetWithOwner.agreeGotchiLending(
           fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: borrower can't be lender");
+      ).to.be.revertedWith("GotchiLending: borrower can't be lender");
     });
     it("Should revert when non whitelisted account try to agree lending", async function () {
       const lendingFacetWithNonWhitelisted = await impersonate(
@@ -750,14 +746,14 @@ describe("Testing Aavegotchi Lending", async function () {
         network
       );
       await expect(
-        lendingFacetWithNonWhitelisted.agreeAavegotchiLending(
+        lendingFacetWithNonWhitelisted.agreeGotchiLending(
           fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: Not whitelisted address");
+      ).to.be.revertedWith("GotchiLending: Not whitelisted address");
     });
     it("Should revert when non GHST holder try to agree lending whose initial cost is not zero", async function () {
       const lendingFacetWithNonGhstHolder = await impersonate(
@@ -767,14 +763,14 @@ describe("Testing Aavegotchi Lending", async function () {
         network
       );
       await expect(
-        lendingFacetWithNonGhstHolder.agreeAavegotchiLending(
+        lendingFacetWithNonGhstHolder.agreeGotchiLending(
           fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: not enough GHST");
+      ).to.be.revertedWith("GotchiLending: not enough GHST");
     });
     it("Should succeed when agree lending with valid data", async function () {
       const borrowerOldBalance = await ghstERC20.balanceOf(borrowerAddress);
@@ -789,7 +785,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       await ghstERC20WithBorrower.approve(diamondAddress, initialCost);
       const receipt = await (
-        await lendingFacetWithBorrower.agreeAavegotchiLending(
+        await lendingFacetWithBorrower.agreeGotchiLending(
           fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
@@ -798,7 +794,7 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).wait();
       // const event = receipt!.events!.find(
-      //   (event) => event.event === "AavegotchiLendingExecute"
+      //   (event) => event.event === "GotchiLendingExecute"
       // );
       // expect(event!.args!.borrower).to.equal(borrowerAddress);
       const borrowerNewBalance = await ghstERC20.balanceOf(borrowerAddress);
@@ -811,7 +807,7 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(lenderNewBalance.sub(lenderOldBalance)).to.equal(initialCost);
 
       // Check lending and aavegotchi status
-      const lendingInfo = await lendingFacetWithBorrower.getAavegotchiLendingInfo(
+      const lendingInfo = await lendingFacetWithBorrower.getGotchiLendingInfo(
         fourthLendingId
       );
       expect(lendingInfo[0].lendingId).to.equal(fourthLendingId);
@@ -826,14 +822,14 @@ describe("Testing Aavegotchi Lending", async function () {
     });
     it("Should revert when try to agree agreed lending", async function () {
       await expect(
-        lendingFacetWithBorrower.agreeAavegotchiLending(
+        lendingFacetWithBorrower.agreeGotchiLending(
           fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: lending already agreed");
+      ).to.be.revertedWith("GotchiLending: lending already agreed");
     });
     it("isAavegotchiLent function should return true if aavegotchi lending is agreed", async function () {
       const status = await lendingFacetWithOwner.isAavegotchiLent(
@@ -842,37 +838,37 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(status).to.equal(true);
     });
 
-    describe("Testing getOwnerAavegotchiLendings and getAavegotchiLendings after agree", async function () {
+    describe("Testing getOwnerGotchiLendings and getGotchiLendings after agree", async function () {
       it("Should fetch lending list", async function () {
-        let lendings = await lendingFacetWithOwner.getAavegotchiLendings(
+        let lendings = await lendingFacetWithOwner.getGotchiLendings(
           listedFilter,
           5
         );
         expect(lendings.length).to.equal(0);
-        lendings = await lendingFacetWithOwner.getAavegotchiLendings(
+        lendings = await lendingFacetWithOwner.getGotchiLendings(
           agreedFilter,
           5
         );
         expect(lendings.length).to.equal(1);
-        lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
+        lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
           aavegotchiOwnerAddress,
           listedFilter,
           5
         );
         expect(lendings.length).to.equal(0);
-        lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
+        lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
           escrowAddress,
           listedFilter,
           5
         );
         expect(lendings.length).to.equal(0);
-        lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
+        lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
           aavegotchiOwnerAddress,
           agreedFilter,
           5
         );
         expect(lendings.length).to.equal(1);
-        lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
+        lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
           escrowAddress,
           agreedFilter,
           5
@@ -890,7 +886,7 @@ describe("Testing Aavegotchi Lending", async function () {
           aavegotchiOwnerAddress,
           unlockedAavegotchiId
         )
-      ).to.be.revertedWith("AavegotchiLending: Aavegotchi is in lending");
+      ).to.be.revertedWith("GotchiLending: Aavegotchi is in lending");
     });
     it("Should allow original pet operators interact during the agreement", async function () {
       const receipt = await (
@@ -900,34 +896,32 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing claimAavegotchiLending and claimAndEndAavegotchiLending", async function () {
+  describe("Testing claimGotchiLending and claimAndEndGotchiLending", async function () {
     it("Should revert when try to claim lending with non lender during agreement", async function () {
       await expect(
-        lendingFacetWithClaimer.claimAavegotchiLending(
+        lendingFacetWithClaimer.claimGotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
-      ).to.be.revertedWith(
-        "AavegotchiLending: only lender or borrower can claim"
-      );
+      ).to.be.revertedWith("GotchiLending: only lender or borrower can claim");
     });
     it("Should revert when try to end lending with non lender or non borrower", async function () {
       await expect(
-        lendingFacetWithClaimer.claimAndEndAavegotchiLending(
+        lendingFacetWithClaimer.claimAndEndGotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
       ).to.be.revertedWith(
-        "AavegotchiLending: only lender or borrower can claim and end agreement"
+        "GotchiLending: only lender or borrower can claim and end agreement"
       );
     });
     it("Should revert when try to end lending with lender or borrower during agreement", async function () {
       await expect(
-        lendingFacetWithOwner.claimAndEndAavegotchiLending(
+        lendingFacetWithOwner.claimAndEndGotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
-      ).to.be.revertedWith("AavegotchiLending: not allowed during agreement");
+      ).to.be.revertedWith("GotchiLending: not allowed during agreement");
     });
     it("Should succeed when claim lending with lender during agreement", async function () {
       // Impersonate revenue
@@ -945,7 +939,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
-        await lendingFacetWithOwner.claimAavegotchiLending(
+        await lendingFacetWithOwner.claimGotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
@@ -970,7 +964,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
 
       // Check lending and aavegotchi status
-      const lendingInfo = await lendingFacetWithBorrower.getAavegotchiLendingInfo(
+      const lendingInfo = await lendingFacetWithBorrower.getGotchiLendingInfo(
         fourthLendingId
       );
       expect(lendingInfo[0].lendingId).to.equal(fourthLendingId);
@@ -989,13 +983,11 @@ describe("Testing Aavegotchi Lending", async function () {
       await ethers.provider.send("evm_mine", []);
 
       await expect(
-        lendingFacetWithClaimer.claimAavegotchiLending(
+        lendingFacetWithClaimer.claimGotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
-      ).to.be.revertedWith(
-        "AavegotchiLending: only lender or borrower can claim"
-      );
+      ).to.be.revertedWith("GotchiLending: only lender or borrower can claim");
     });
     it("isAavegotchiLent function should return true if aavegotchi lending is not completed", async function () {
       const status = await lendingFacetWithOwner.isAavegotchiLent(
@@ -1019,7 +1011,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
-        await lendingFacetWithOwner.claimAndEndAavegotchiLending(
+        await lendingFacetWithOwner.claimAndEndGotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
@@ -1044,7 +1036,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
 
       // Check lending and aavegotchi status
-      const lendingInfo = await lendingFacetWithBorrower.getAavegotchiLendingInfo(
+      const lendingInfo = await lendingFacetWithBorrower.getGotchiLendingInfo(
         fourthLendingId
       );
       expect(lendingInfo[0].lendingId).to.equal(fourthLendingId);
@@ -1065,37 +1057,34 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing getOwnerAavegotchiLendings and getAavegotchiLendings after agreement is ended", async function () {
+  describe("Testing getOwnerGotchiLendings and getGotchiLendings after agreement is ended", async function () {
     it("Should fetch lending list", async function () {
-      let lendings = await lendingFacetWithOwner.getAavegotchiLendings(
+      let lendings = await lendingFacetWithOwner.getGotchiLendings(
         listedFilter,
         5
       );
       expect(lendings.length).to.equal(0);
-      lendings = await lendingFacetWithOwner.getAavegotchiLendings(
-        agreedFilter,
-        5
-      );
+      lendings = await lendingFacetWithOwner.getGotchiLendings(agreedFilter, 5);
       expect(lendings.length).to.equal(0);
-      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
+      lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
         aavegotchiOwnerAddress,
         listedFilter,
         5
       );
       expect(lendings.length).to.equal(0);
-      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
+      lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
         escrowAddress,
         listedFilter,
         5
       );
       expect(lendings.length).to.equal(0);
-      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
+      lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
         aavegotchiOwnerAddress,
         agreedFilter,
         5
       );
       expect(lendings.length).to.equal(0);
-      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
+      lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
         escrowAddress,
         agreedFilter,
         5
@@ -1108,7 +1097,7 @@ describe("Testing Aavegotchi Lending", async function () {
     let lendingId;
     before(async function () {
       const receipt = await (
-        await lendingFacetWithOwner.addAavegotchiLending(
+        await lendingFacetWithOwner.addGotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -1120,7 +1109,7 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).wait();
       const event = receipt!.events!.find(
-        (event) => event.event === "AavegotchiLendingAdd"
+        (event: any) => event.event === "GotchiLendingAdd"
       );
       lendingId = event!.args!.lendingId;
       const ghstERC20WithBorrower = await impersonate(
@@ -1131,7 +1120,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       await ghstERC20WithBorrower.approve(diamondAddress, initialCost);
       await (
-        await lendingFacetWithBorrower.agreeAavegotchiLending(
+        await lendingFacetWithBorrower.agreeGotchiLending(
           lendingId,
           unlockedAavegotchiId,
           initialCost,
@@ -1159,7 +1148,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
-        await lendingFacetWithOwner.claimAndEndAavegotchiLending(
+        await lendingFacetWithOwner.claimAndEndGotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
@@ -1184,7 +1173,7 @@ describe("Testing Aavegotchi Lending", async function () {
     let mockOriginalOwner = "0x0E93AD7C720177d4E2c48465C83A50579Bd521C1";
     before(async function () {
       const receipt = await (
-        await lendingFacetWithOwner.addAavegotchiLending(
+        await lendingFacetWithOwner.addGotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -1196,7 +1185,7 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).wait();
       const event = receipt!.events!.find(
-        (event) => event.event === "AavegotchiLendingAdd"
+        (event: any) => event.event === "GotchiLendingAdd"
       );
       lendingId = event!.args!.lendingId;
       const ghstERC20WithBorrower = await impersonate(
@@ -1207,7 +1196,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       await ghstERC20WithBorrower.approve(diamondAddress, initialCost);
       await (
-        await lendingFacetWithBorrower.agreeAavegotchiLending(
+        await lendingFacetWithBorrower.agreeGotchiLending(
           lendingId,
           unlockedAavegotchiId,
           initialCost,
@@ -1235,7 +1224,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
-        await lendingFacetWithOwner.claimAavegotchiLending(
+        await lendingFacetWithOwner.claimGotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
