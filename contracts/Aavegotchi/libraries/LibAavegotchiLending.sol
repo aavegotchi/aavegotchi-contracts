@@ -1,39 +1,39 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {LibAppStorage, AppStorage, AavegotchiRental, RentalListItem} from "./LibAppStorage.sol";
+import {LibAppStorage, AppStorage, AavegotchiLending, LendingListItem} from "./LibAppStorage.sol";
 import "../../shared/interfaces/IERC721.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
 
 library LibAavegotchiLending {
-    event AavegotchiRentalCancel(uint256 indexed rentalId, uint256 time);
+    event AavegotchiLendingCancel(uint256 indexed lendingId, uint256 time);
 
-    function cancelAavegotchiRental(uint256 _rentalId, address _lender) internal {
+    function cancelAavegotchiLending(uint256 _lendingId, address _lender) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
-        AavegotchiRental storage rental = s.aavegotchiRentals[_rentalId];
-        require(rental.timeCreated != 0, "AavegotchiLending: rental not found");
-        if (rental.canceled) {
+        AavegotchiLending storage lending = s.aavegotchiLendings[_lendingId];
+        require(lending.timeCreated != 0, "AavegotchiLending: lending not found");
+        if (lending.canceled) {
             return;
         }
-        require(rental.timeAgreed == 0, "AavegotchiLending: rental already agreed");
-        require(rental.lender == _lender, "AavegotchiLending: not lender");
-        rental.canceled = true;
+        require(lending.timeAgreed == 0, "AavegotchiLending: lending already agreed");
+        require(lending.lender == _lender, "AavegotchiLending: not lender");
+        lending.canceled = true;
 
-        removeRentalListItem(_lender, _rentalId, "listed");
+        removeLendingListItem(_lender, _lendingId, "listed");
 
-        //Unlock Aavegotchis when rental is created
-        s.aavegotchis[rental.erc721TokenId].locked = false;
-        s.aavegotchiToRentalId[rental.erc721TokenId] = 0;
+        //Unlock Aavegotchis when lending is created
+        s.aavegotchis[lending.erc721TokenId].locked = false;
+        s.aavegotchiToLendingId[lending.erc721TokenId] = 0;
 
-        emit AavegotchiRentalCancel(_rentalId, block.number);
+        emit AavegotchiLendingCancel(_lendingId, block.number);
     }
 
-    function cancelAavegotchiRentalFromToken(uint256 _erc721TokenId, address _lender) internal {
+    function cancelAavegotchiLendingFromToken(uint256 _erc721TokenId, address _lender) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        cancelAavegotchiRental(s.aavegotchiToRentalId[_erc721TokenId], _lender);
+        cancelAavegotchiLending(s.aavegotchiToLendingId[_erc721TokenId], _lender);
     }
 
     function removeLentAavegotchi(uint256 _tokenId, address _lender) internal {
@@ -51,12 +51,12 @@ library LibAavegotchiLending {
         delete s.lentTokenIdIndexes[_lender][_tokenId];
     }
 
-    function claimAavegotchiRental(uint256 rentalId, address[] calldata _revenueTokens) internal returns (uint256[] memory) {
+    function claimAavegotchiLending(uint256 lendingId, address[] calldata _revenueTokens) internal returns (uint256[] memory) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        AavegotchiRental storage rental = s.aavegotchiRentals[rentalId];
+        AavegotchiLending storage lending = s.aavegotchiLendings[lendingId];
 
         uint256[] memory amounts = new uint256[](_revenueTokens.length);
-        uint256 tokenId = rental.erc721TokenId;
+        uint256 tokenId = lending.erc721TokenId;
         address escrow = s.aavegotchis[tokenId].escrow;
         if (escrow == address(0)) return amounts;
         address collateralType = s.aavegotchis[tokenId].collateralType;
@@ -65,8 +65,8 @@ library LibAavegotchiLending {
             if (collateralType == revenueToken) continue;
 
             bool isIncluded;
-            for (uint256 j; j < rental.includeList.length; j++) {
-                if (rental.includeList[j] == revenueToken) {
+            for (uint256 j; j < lending.includeList.length; j++) {
+                if (lending.includeList[j] == revenueToken) {
                     isIncluded = true;
                     break;
                 }
@@ -81,121 +81,121 @@ library LibAavegotchiLending {
                 CollateralEscrow(escrow).approveAavegotchiDiamond(revenueToken);
             }
 
-            uint256 ownerAmount = (balance * rental.revenueSplit[0]) / 100;
-            uint256 renterAmount = (balance * rental.revenueSplit[1]) / 100;
-            address owner = rental.originalOwner == address(0) ? rental.lender : rental.originalOwner;
+            uint256 ownerAmount = (balance * lending.revenueSplit[0]) / 100;
+            uint256 borrowerAmount = (balance * lending.revenueSplit[1]) / 100;
+            address owner = lending.originalOwner == address(0) ? lending.lender : lending.originalOwner;
             LibERC20.transferFrom(revenueToken, escrow, owner, ownerAmount);
-            LibERC20.transferFrom(revenueToken, escrow, rental.renter, renterAmount);
-            if (rental.thirdParty != address(0)) {
-                uint256 thirdPartyAmount = (balance * rental.revenueSplit[2]) / 100;
-                LibERC20.transferFrom(revenueToken, escrow, rental.thirdParty, thirdPartyAmount);
+            LibERC20.transferFrom(revenueToken, escrow, lending.borrower, borrowerAmount);
+            if (lending.thirdParty != address(0)) {
+                uint256 thirdPartyAmount = (balance * lending.revenueSplit[2]) / 100;
+                LibERC20.transferFrom(revenueToken, escrow, lending.thirdParty, thirdPartyAmount);
             }
         }
 
-        rental.lastClaimed = block.timestamp;
+        lending.lastClaimed = block.timestamp;
 
         return amounts;
     }
 
-    function enforceAavegotchiNotInRental(uint256 _tokenId, address _sender) internal {
+    function enforceAavegotchiNotInLending(uint256 _tokenId, address _sender) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 _rentalId = s.aavegotchiToRentalId[_tokenId];
-        if (_rentalId > 0) {
-            AavegotchiRental storage _rental = s.aavegotchiRentals[_rentalId];
-            require(_rental.lender == _sender, "AavegotchiLending: Aavegotchi is in rental");
-            if (_rental.timeAgreed > 0) {
-                // revert if agreed rental
-                revert("AavegotchiLending: Aavegotchi is in rental");
+        uint256 _lendingId = s.aavegotchiToLendingId[_tokenId];
+        if (_lendingId > 0) {
+            AavegotchiLending storage _lending = s.aavegotchiLendings[_lendingId];
+            require(_lending.lender == _sender, "AavegotchiLending: Aavegotchi is in lending");
+            if (_lending.timeAgreed > 0) {
+                // revert if agreed lending
+                revert("AavegotchiLending: Aavegotchi is in lending");
             } else {
-                // cancel if not agreed rental
-                cancelAavegotchiRental(_rentalId, _sender);
+                // cancel if not agreed lending
+                cancelAavegotchiLending(_lendingId, _sender);
             }
         }
     }
 
     function isAavegotchiLent(uint256 _tokenId) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 rentalId = s.aavegotchiToRentalId[_tokenId];
-        if (rentalId == 0) return false;
-        AavegotchiRental storage rental_ = s.aavegotchiRentals[rentalId];
-        if (rental_.timeCreated == 0 || rental_.timeAgreed == 0) return false;
-        return rental_.completed == false;
+        uint256 lendingId = s.aavegotchiToLendingId[_tokenId];
+        if (lendingId == 0) return false;
+        AavegotchiLending storage lending_ = s.aavegotchiLendings[lendingId];
+        if (lending_.timeCreated == 0 || lending_.timeAgreed == 0) return false;
+        return lending_.completed == false;
     }
 
-    function addRentalListItem(
+    function addLendingListItem(
         address _lender,
-        uint256 _rentalId,
+        uint256 _lendingId,
         bytes32 _status
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
-        uint256 headRentalId = s.aavegotchiLenderRentalHead[_lender][_status];
-        if (headRentalId != 0) {
-            RentalListItem storage headRentalItem = s.aavegotchiLenderRentalListItem[_status][headRentalId];
-            headRentalItem.parentRentalId = _rentalId;
+        uint256 headLendingId = s.aavegotchiLenderLendingHead[_lender][_status];
+        if (headLendingId != 0) {
+            LendingListItem storage headLendingItem = s.aavegotchiLenderLendingListItem[_status][headLendingId];
+            headLendingItem.parentLendingId = _lendingId;
         }
-        RentalListItem storage rentalItem = s.aavegotchiLenderRentalListItem[_status][_rentalId];
-        rentalItem.childRentalId = headRentalId;
-        s.aavegotchiLenderRentalHead[_lender][_status] = _rentalId;
-        rentalItem.rentalId = _rentalId;
+        LendingListItem storage lendingItem = s.aavegotchiLenderLendingListItem[_status][_lendingId];
+        lendingItem.childLendingId = headLendingId;
+        s.aavegotchiLenderLendingHead[_lender][_status] = _lendingId;
+        lendingItem.lendingId = _lendingId;
 
-        headRentalId = s.aavegotchiRentalHead[_status];
-        if (headRentalId != 0) {
-            RentalListItem storage headRentalItem = s.aavegotchiRentalListItem[_status][headRentalId];
-            headRentalItem.parentRentalId = _rentalId;
+        headLendingId = s.aavegotchiLendingHead[_status];
+        if (headLendingId != 0) {
+            LendingListItem storage headLendingItem = s.aavegotchiLendingListItem[_status][headLendingId];
+            headLendingItem.parentLendingId = _lendingId;
         }
-        rentalItem = s.aavegotchiRentalListItem[_status][_rentalId];
-        rentalItem.childRentalId = headRentalId;
-        s.aavegotchiRentalHead[_status] = _rentalId;
-        rentalItem.rentalId = _rentalId;
+        lendingItem = s.aavegotchiLendingListItem[_status][_lendingId];
+        lendingItem.childLendingId = headLendingId;
+        s.aavegotchiLendingHead[_status] = _lendingId;
+        lendingItem.lendingId = _lendingId;
     }
 
-    function removeRentalListItem(
+    function removeLendingListItem(
         address _lender,
-        uint256 _rentalId,
+        uint256 _lendingId,
         bytes32 _status
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
-        RentalListItem storage rentalItem = s.aavegotchiRentalListItem[_status][_rentalId];
-        if (rentalItem.rentalId == 0) {
+        LendingListItem storage lendingItem = s.aavegotchiLendingListItem[_status][_lendingId];
+        if (lendingItem.lendingId == 0) {
             return;
         }
-        uint256 parentRentalId = rentalItem.parentRentalId;
-        if (parentRentalId != 0) {
-            RentalListItem storage parentRentalItem = s.aavegotchiRentalListItem[_status][parentRentalId];
-            parentRentalItem.childRentalId = rentalItem.childRentalId;
+        uint256 parentLendingId = lendingItem.parentLendingId;
+        if (parentLendingId != 0) {
+            LendingListItem storage parentLendingItem = s.aavegotchiLendingListItem[_status][parentLendingId];
+            parentLendingItem.childLendingId = lendingItem.childLendingId;
         }
-        uint256 childRentalId = rentalItem.childRentalId;
-        if (childRentalId != 0) {
-            RentalListItem storage childRentalItem = s.aavegotchiRentalListItem[_status][childRentalId];
-            childRentalItem.parentRentalId = rentalItem.parentRentalId;
-        }
-
-        if (s.aavegotchiRentalHead[_status] == _rentalId) {
-            s.aavegotchiRentalHead[_status] = rentalItem.childRentalId;
-        }
-        rentalItem.rentalId = 0;
-        rentalItem.parentRentalId = 0;
-        rentalItem.childRentalId = 0;
-
-        rentalItem = s.aavegotchiLenderRentalListItem[_status][_rentalId];
-        parentRentalId = rentalItem.parentRentalId;
-        if (parentRentalId != 0) {
-            RentalListItem storage parentRentalItem = s.aavegotchiLenderRentalListItem[_status][parentRentalId];
-            parentRentalItem.childRentalId = rentalItem.childRentalId;
-        }
-        childRentalId = rentalItem.childRentalId;
-        if (childRentalId != 0) {
-            RentalListItem storage childRentalItem = s.aavegotchiLenderRentalListItem[_status][childRentalId];
-            childRentalItem.parentRentalId = rentalItem.parentRentalId;
+        uint256 childLendingId = lendingItem.childLendingId;
+        if (childLendingId != 0) {
+            LendingListItem storage childLendingItem = s.aavegotchiLendingListItem[_status][childLendingId];
+            childLendingItem.parentLendingId = lendingItem.parentLendingId;
         }
 
-        if (s.aavegotchiLenderRentalHead[_lender][_status] == _rentalId) {
-            s.aavegotchiLenderRentalHead[_lender][_status] = rentalItem.childRentalId;
+        if (s.aavegotchiLendingHead[_status] == _lendingId) {
+            s.aavegotchiLendingHead[_status] = lendingItem.childLendingId;
         }
-        rentalItem.rentalId = 0;
-        rentalItem.parentRentalId = 0;
-        rentalItem.childRentalId = 0;
+        lendingItem.lendingId = 0;
+        lendingItem.parentLendingId = 0;
+        lendingItem.childLendingId = 0;
+
+        lendingItem = s.aavegotchiLenderLendingListItem[_status][_lendingId];
+        parentLendingId = lendingItem.parentLendingId;
+        if (parentLendingId != 0) {
+            LendingListItem storage parentLendingItem = s.aavegotchiLenderLendingListItem[_status][parentLendingId];
+            parentLendingItem.childLendingId = lendingItem.childLendingId;
+        }
+        childLendingId = lendingItem.childLendingId;
+        if (childLendingId != 0) {
+            LendingListItem storage childLendingItem = s.aavegotchiLenderLendingListItem[_status][childLendingId];
+            childLendingItem.parentLendingId = lendingItem.parentLendingId;
+        }
+
+        if (s.aavegotchiLenderLendingHead[_lender][_status] == _lendingId) {
+            s.aavegotchiLenderLendingHead[_lender][_status] = lendingItem.childLendingId;
+        }
+        lendingItem.lendingId = 0;
+        lendingItem.parentLendingId = 0;
+        lendingItem.childLendingId = 0;
     }
 }

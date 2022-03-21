@@ -27,7 +27,7 @@ describe("Testing Aavegotchi Lending", async function () {
   const revenueTokens: string[] = [ghstAddress];
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   const claimerAddress = "0x3507e4978e0eb83315d20df86ca0b976c0e40ccb";
-  const renterAddress = "0xb4473cfEeDC9a0E94612c6ce883677b63f830DB8"; // renter should be GHST holder
+  const borrowerAddress = "0xb4473cfEeDC9a0E94612c6ce883677b63f830DB8"; // borrower should be GHST holder
   const nonGhstHolderAddress = "0x725Fe4790fC6435B5161f88636C2A50e43247A4b"; // GHST holder balance should be 0
   const nonWhitelistedAddress = "0xaA3B1fDC3Aa57Bf24418E397f8c80e7385aAa594"; // non-whitelisted address should be GHST holder
   const ghstHolderAddress = "0x3721546e51258065bfdb9746b2e442c7671b0298";
@@ -46,7 +46,7 @@ describe("Testing Aavegotchi Lending", async function () {
   const revenueSplitForThirdParty: [BigNumberish, BigNumberish, BigNumberish] =
     [25, 50, 25];
   let lendingFacetWithOwner: AavegotchiLendingFacet;
-  let lendingFacetWithRenter: AavegotchiLendingFacet;
+  let lendingFacetWithBorrower: AavegotchiLendingFacet;
   let lendingFacetWithClaimer: AavegotchiLendingFacet;
   let lendingFacetWithPortalOwner: AavegotchiLendingFacet;
   let whitelistFacetWithOwner: WhitelistFacet;
@@ -57,9 +57,9 @@ describe("Testing Aavegotchi Lending", async function () {
   let ghstERC20: ERC20Token;
   let aavegotchiOwnerAddress: any;
   let escrowAddress: any;
-  let firstRentalId: any;
-  let secondRentalId: any;
-  let fourthRentalId: any;
+  let firstLendingId: any;
+  let secondLendingId: any;
+  let fourthLendingId: any;
   let whitelistId: any;
   let secondWhitelistId: any;
 
@@ -132,8 +132,8 @@ describe("Testing Aavegotchi Lending", async function () {
       ethers,
       network
     );
-    lendingFacetWithRenter = await impersonate(
-      renterAddress,
+    lendingFacetWithBorrower = await impersonate(
+      borrowerAddress,
       aavegotchiLendingFacet,
       ethers,
       network
@@ -169,7 +169,7 @@ describe("Testing Aavegotchi Lending", async function () {
       network
     );
     aavegotchiFacet = await impersonate(
-      renterAddress,
+      borrowerAddress,
       aavegotchiFacet,
       ethers,
       network
@@ -197,15 +197,15 @@ describe("Testing Aavegotchi Lending", async function () {
       );
     });
     // it("Should revert if whitelist length exceeds limit", async function () {
-    //   const whitelistLargerThanLimit = Array(101).fill(renterAddress);
+    //   const whitelistLargerThanLimit = Array(101).fill(borrowerAddress);
     //   await expect(whitelistFacetWithOwner.createWhitelist('', whitelistLargerThanLimit)).to.be.revertedWith("WhitelistFacet: Whitelist length exceeds limit");
     // });
     // it("Should revert if whitelist contains address-zero", async function () {
-    //   await expect(whitelistFacetWithOwner.createWhitelist([renterAddress, ethers.constants.AddressZero])).to.be.revertedWith("WhitelistFacet: There's invalid address in the list");
+    //   await expect(whitelistFacetWithOwner.createWhitelist([borrowerAddress, ethers.constants.AddressZero])).to.be.revertedWith("WhitelistFacet: There's invalid address in the list");
     // });
     it("Should succeed if whitelist is valid", async function () {
       const receipt = await (
-        await whitelistFacetWithOwner.createWhitelist("", [renterAddress])
+        await whitelistFacetWithOwner.createWhitelist("", [borrowerAddress])
       ).wait();
       const event = receipt!.events!.find(
         (event) => event.event === "WhitelistCreated"
@@ -243,7 +243,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
     });
     // it("Should revert if whitelist length exceeds limit", async function () {
-    //   const whitelistLargerThanLimit = Array(100).fill(renterAddress);
+    //   const whitelistLargerThanLimit = Array(100).fill(borrowerAddress);
     //   await expect(whitelistFacetWithOwner.updateWhitelist(whitelistId, whitelistLargerThanLimit)).to.be.revertedWith("WhitelistFacet: Whitelist length exceeds limit");
     // });
     // it("Should revert if whitelist contains address-zero", async function () {
@@ -253,7 +253,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const receipt = await (
         await whitelistFacetWithOwner.updateWhitelist(whitelistId, [
           nonGhstHolderAddress,
-          renterAddress,
+          borrowerAddress,
         ])
       ).wait();
       const event = receipt!.events!.find(
@@ -273,7 +273,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const whitelist = await whitelistFacetWithOwner.getWhitelist(whitelistId);
       expect(whitelist.owner).to.equal(aavegotchiOwnerAddress);
       expect(whitelist.addresses.length).to.equal(2);
-      expect(whitelist.addresses[0]).to.equal(renterAddress);
+      expect(whitelist.addresses[0]).to.equal(borrowerAddress);
     });
   });
 
@@ -283,16 +283,16 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(whitelists.length).to.equal(2);
       expect(whitelists[0].owner).to.equal(aavegotchiOwnerAddress);
       expect(whitelists[0].addresses.length).to.equal(2);
-      expect(whitelists[0].addresses[0]).to.equal(renterAddress);
+      expect(whitelists[0].addresses[0]).to.equal(borrowerAddress);
       expect(whitelists[1].addresses.length).to.equal(1);
       expect(whitelists[1].addresses[0]).to.equal(nonWhitelistedAddress);
     });
   });
 
-  describe("Testing addAavegotchiRental", async function () {
+  describe("Testing addAavegotchiLending", async function () {
     it("Should revert if non-owner try to add", async function () {
       await expect(
-        lendingFacetWithRenter.addAavegotchiRental(
+        lendingFacetWithBorrower.addAavegotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -306,7 +306,7 @@ describe("Testing Aavegotchi Lending", async function () {
     });
     it("Should revert if period is zero", async function () {
       await expect(
-        lendingFacetWithOwner.addAavegotchiRental(
+        lendingFacetWithOwner.addAavegotchiLending(
           unlockedAavegotchiId,
           initialCost,
           0,
@@ -323,7 +323,7 @@ describe("Testing Aavegotchi Lending", async function () {
         10, 50, 0,
       ];
       await expect(
-        lendingFacetWithOwner.addAavegotchiRental(
+        lendingFacetWithOwner.addAavegotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -339,7 +339,7 @@ describe("Testing Aavegotchi Lending", async function () {
     });
     it("Should revert if revenue split values is invalid when thirdParty exist", async function () {
       await expect(
-        lendingFacetWithOwner.addAavegotchiRental(
+        lendingFacetWithOwner.addAavegotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -355,7 +355,7 @@ describe("Testing Aavegotchi Lending", async function () {
     });
     it("Should revert if whitelist id is invalid", async function () {
       await expect(
-        lendingFacetWithOwner.addAavegotchiRental(
+        lendingFacetWithOwner.addAavegotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -367,7 +367,7 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).to.be.revertedWith("AavegotchiLending: whitelist not found");
     });
-    it("Should revert if try to add rental for not aavegotchi", async function () {
+    it("Should revert if try to add lending for not aavegotchi", async function () {
       await (
         await erc721MarketplaceFacet.cancelERC721ListingByToken(
           diamondAddress,
@@ -376,7 +376,7 @@ describe("Testing Aavegotchi Lending", async function () {
       ).wait();
 
       await expect(
-        lendingFacetWithPortalOwner.addAavegotchiRental(
+        lendingFacetWithPortalOwner.addAavegotchiLending(
           lockedPortalId,
           initialCost,
           period,
@@ -388,10 +388,10 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).to.be.revertedWith("AavegotchiLending: Only aavegotchi available");
     });
-    describe("If there's no rental for the aavegotchi", async function () {
+    describe("If there's no lending for the aavegotchi", async function () {
       it("Should revert if aavegotchi is locked", async function () {
         await expect(
-          lendingFacetWithOwner.addAavegotchiRental(
+          lendingFacetWithOwner.addAavegotchiLending(
             lockedAavegotchiId,
             initialCost,
             period,
@@ -407,7 +407,7 @@ describe("Testing Aavegotchi Lending", async function () {
       });
       it("Should succeed if all parameters are valid", async function () {
         const receipt = await (
-          await lendingFacetWithOwner.addAavegotchiRental(
+          await lendingFacetWithOwner.addAavegotchiLending(
             unlockedAavegotchiId,
             initialCost,
             period,
@@ -419,19 +419,19 @@ describe("Testing Aavegotchi Lending", async function () {
           )
         ).wait();
         const event = receipt!.events!.find(
-          (event) => event.event === "AavegotchiRentalAdd"
+          (event) => event.event === "AavegotchiLendingAdd"
         );
-        firstRentalId = event!.args!.rentalId;
+        firstLendingId = event!.args!.lendingId;
         // expect(event!.args!.lender).to.equal(aavegotchiOwnerAddress);
         // expect(event!.args!.erc721TokenId).to.equal(unlockedAavegotchiId);
         // expect(event!.args!.initialCost).to.equal(initialCost);
         // expect(event!.args!.period).to.equal(period);
       });
     });
-    describe("If there's already rental for the aavegotchi", async function () {
+    describe("If there's already lending for the aavegotchi", async function () {
       it("Should succeed and if all parameters are valid", async function () {
         const receipt = await (
-          await lendingFacetWithOwner.addAavegotchiRental(
+          await lendingFacetWithOwner.addAavegotchiLending(
             unlockedAavegotchiId,
             initialCost,
             period,
@@ -443,9 +443,9 @@ describe("Testing Aavegotchi Lending", async function () {
           )
         ).wait();
         const event = receipt!.events!.find(
-          (event) => event.event === "AavegotchiRentalAdd"
+          (event) => event.event === "AavegotchiLendingAdd"
         );
-        secondRentalId = event!.args!.rentalId;
+        secondLendingId = event!.args!.lendingId;
         // expect(event!.args!.lender).to.equal(aavegotchiOwnerAddress);
         // expect(event!.args!.erc721TokenId).to.equal(unlockedAavegotchiId);
         // expect(event!.args!.initialCost).to.equal(initialCost);
@@ -454,90 +454,90 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing getAavegotchiRental", async function () {
-    it("Should revert when try to get rental with wrong id", async function () {
+  describe("Testing getAavegotchiLending", async function () {
+    it("Should revert when try to get lending with wrong id", async function () {
       await expect(
-        lendingFacetWithOwner.getAavegotchiRental(secondRentalId.add(10))
-      ).to.be.revertedWith("AavegotchiLending: rental does not exist");
+        lendingFacetWithOwner.getAavegotchiLending(secondLendingId.add(10))
+      ).to.be.revertedWith("AavegotchiLending: lending does not exist");
     });
-    it("Should fetch rental data with correct rental id", async function () {
-      const rental = await lendingFacetWithOwner.getAavegotchiRental(
-        firstRentalId
+    it("Should fetch lending data with correct lending id", async function () {
+      const lending = await lendingFacetWithOwner.getAavegotchiLending(
+        firstLendingId
       );
-      expect(rental.rentalId).to.equal(firstRentalId);
-      expect(rental.lender).to.equal(aavegotchiOwnerAddress);
-      expect(rental.erc721TokenId).to.equal(unlockedAavegotchiId);
-      expect(rental.completed).to.equal(false);
+      expect(lending.lendingId).to.equal(firstLendingId);
+      expect(lending.lender).to.equal(aavegotchiOwnerAddress);
+      expect(lending.erc721TokenId).to.equal(unlockedAavegotchiId);
+      expect(lending.completed).to.equal(false);
     });
   });
 
-  describe("Testing getAavegotchiRentalInfo", async function () {
-    it("Should revert when try to get rental with wrong id", async function () {
+  describe("Testing getAavegotchiLendingInfo", async function () {
+    it("Should revert when try to get lending with wrong id", async function () {
       await expect(
-        lendingFacetWithOwner.getAavegotchiRentalInfo(secondRentalId.add(10))
-      ).to.be.revertedWith("AavegotchiLending: rental does not exist");
+        lendingFacetWithOwner.getAavegotchiLendingInfo(secondLendingId.add(10))
+      ).to.be.revertedWith("AavegotchiLending: lending does not exist");
     });
-    it("Should fetch rental data with correct rental id", async function () {
-      const rentalInfo = await lendingFacetWithOwner.getAavegotchiRentalInfo(
-        firstRentalId
+    it("Should fetch lending data with correct lending id", async function () {
+      const lendingInfo = await lendingFacetWithOwner.getAavegotchiLendingInfo(
+        firstLendingId
       );
-      expect(rentalInfo[0].rentalId).to.equal(firstRentalId);
-      expect(rentalInfo[0].lender).to.equal(aavegotchiOwnerAddress);
-      expect(rentalInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
-      expect(rentalInfo[0].completed).to.equal(false);
-      expect(rentalInfo[1].tokenId).to.equal(unlockedAavegotchiId);
-      expect(rentalInfo[1].owner).to.equal(aavegotchiOwnerAddress);
-      expect(rentalInfo[1].locked).to.equal(true);
+      expect(lendingInfo[0].lendingId).to.equal(firstLendingId);
+      expect(lendingInfo[0].lender).to.equal(aavegotchiOwnerAddress);
+      expect(lendingInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
+      expect(lendingInfo[0].completed).to.equal(false);
+      expect(lendingInfo[1].tokenId).to.equal(unlockedAavegotchiId);
+      expect(lendingInfo[1].owner).to.equal(aavegotchiOwnerAddress);
+      expect(lendingInfo[1].locked).to.equal(true);
     });
   });
 
-  describe("Testing getAavegotchiRentalFromToken", async function () {
-    it("Should revert when try to get rental with wrong aavegotchi id", async function () {
+  describe("Testing getAavegotchiLendingFromToken", async function () {
+    it("Should revert when try to get lending with wrong aavegotchi id", async function () {
       await expect(
-        lendingFacetWithOwner.getAavegotchiRentalFromToken(lockedAavegotchiId)
-      ).to.be.revertedWith("AavegotchiLending: rental doesn't exist");
+        lendingFacetWithOwner.getAavegotchiLendingFromToken(lockedAavegotchiId)
+      ).to.be.revertedWith("AavegotchiLending: lending doesn't exist");
     });
-    it("Should fetch rental data with correct aavegotchi id", async function () {
-      const rental = await lendingFacetWithOwner.getAavegotchiRentalFromToken(
+    it("Should fetch lending data with correct aavegotchi id", async function () {
+      const lending = await lendingFacetWithOwner.getAavegotchiLendingFromToken(
         unlockedAavegotchiId
       );
-      expect(rental.rentalId).to.equal(secondRentalId);
-      expect(rental.lender).to.equal(aavegotchiOwnerAddress);
-      expect(rental.erc721TokenId).to.equal(unlockedAavegotchiId);
-      expect(rental.completed).to.equal(false);
+      expect(lending.lendingId).to.equal(secondLendingId);
+      expect(lending.lender).to.equal(aavegotchiOwnerAddress);
+      expect(lending.erc721TokenId).to.equal(unlockedAavegotchiId);
+      expect(lending.completed).to.equal(false);
     });
   });
 
-  describe("Testing getOwnerAavegotchiRentals and getAavegotchiRentals after aavegotchi rental added", async function () {
-    it("Should fetch rental list", async function () {
-      let rentals = await lendingFacetWithOwner.getAavegotchiRentals(
+  describe("Testing getOwnerAavegotchiLendings and getAavegotchiLendings after aavegotchi lending added", async function () {
+    it("Should fetch lending list", async function () {
+      let lendings = await lendingFacetWithOwner.getAavegotchiLendings(
         listedFilter,
         5
       );
-      expect(rentals[0].rentalId).to.equal(secondRentalId);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(
+      expect(lendings[0].lendingId).to.equal(secondLendingId);
+      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
         aavegotchiOwnerAddress,
         listedFilter,
         5
       );
-      expect(rentals[0].rentalId).to.equal(secondRentalId);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(
+      expect(lendings[0].lendingId).to.equal(secondLendingId);
+      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
         thirdParty,
         listedFilter,
         5
       );
-      expect(rentals.length).to.equal(0);
+      expect(lendings.length).to.equal(0);
     });
   });
 
-  describe("Testing isAavegotchiLent before and after aavegotchi rental added", async function () {
+  describe("Testing isAavegotchiLent before and after aavegotchi lending added", async function () {
     it("Should return false if aavegotchi is not lent", async function () {
       const status = await lendingFacetWithOwner.isAavegotchiLent(
         lockedAavegotchiId
       );
       expect(status).to.equal(false);
     });
-    it("Should return true if aavegotchi rental is not agreed yet", async function () {
+    it("Should return true if aavegotchi lending is not agreed yet", async function () {
       const status = await lendingFacetWithOwner.isAavegotchiLent(
         unlockedAavegotchiId
       );
@@ -545,62 +545,62 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing cancelAavegotchiRental", async function () {
-    it("Should revert when try to cancel rental with wrong id", async function () {
+  describe("Testing cancelAavegotchiLending", async function () {
+    it("Should revert when try to cancel lending with wrong id", async function () {
       await expect(
-        lendingFacetWithOwner.cancelAavegotchiRental(secondRentalId.add(10))
-      ).to.be.revertedWith("AavegotchiLending: rental not found");
+        lendingFacetWithOwner.cancelAavegotchiLending(secondLendingId.add(10))
+      ).to.be.revertedWith("AavegotchiLending: lending not found");
     });
-    it("Should revert when try to cancel rental with non lender", async function () {
+    it("Should revert when try to cancel lending with non lender", async function () {
       await expect(
-        lendingFacetWithClaimer.cancelAavegotchiRental(secondRentalId)
+        lendingFacetWithClaimer.cancelAavegotchiLending(secondLendingId)
       ).to.be.revertedWith("AavegotchiLending: not lender");
     });
-    it("Should succeed, but no event when try to cancel canceled rental", async function () {
+    it("Should succeed, but no event when try to cancel canceled lending", async function () {
       const receipt = await (
-        await lendingFacetWithOwner.cancelAavegotchiRental(firstRentalId)
+        await lendingFacetWithOwner.cancelAavegotchiLending(firstLendingId)
       ).wait();
       expect(receipt!.events!.length).to.equal(0);
     });
-    it("Should succeed if cancel valid rental", async function () {
-      let rental = await lendingFacetWithOwner.getAavegotchiRental(
-        secondRentalId
+    it("Should succeed if cancel valid lending", async function () {
+      let lending = await lendingFacetWithOwner.getAavegotchiLending(
+        secondLendingId
       );
-      expect(rental.canceled).to.equal(false);
+      expect(lending.canceled).to.equal(false);
       await (
-        await lendingFacetWithOwner.cancelAavegotchiRental(secondRentalId)
+        await lendingFacetWithOwner.cancelAavegotchiLending(secondLendingId)
       ).wait();
-      rental = await lendingFacetWithOwner.getAavegotchiRental(secondRentalId);
-      expect(rental.canceled).to.equal(true);
+      lending = await lendingFacetWithOwner.getAavegotchiLending(secondLendingId);
+      expect(lending.canceled).to.equal(true);
     });
   });
 
-  describe("Testing getOwnerAavegotchiRentals and getAavegotchiRentals after canceled", async function () {
-    it("Should fetch rental list", async function () {
-      let rentals = await lendingFacetWithOwner.getAavegotchiRentals(
+  describe("Testing getOwnerAavegotchiLendings and getAavegotchiLendings after canceled", async function () {
+    it("Should fetch lending list", async function () {
+      let lendings = await lendingFacetWithOwner.getAavegotchiLendings(
         listedFilter,
         5
       );
-      expect(rentals.length).to.equal(0);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(
+      expect(lendings.length).to.equal(0);
+      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
         aavegotchiOwnerAddress,
         listedFilter,
         5
       );
-      expect(rentals.length).to.equal(0);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(
+      expect(lendings.length).to.equal(0);
+      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
         thirdParty,
         listedFilter,
         5
       );
-      expect(rentals.length).to.equal(0);
+      expect(lendings.length).to.equal(0);
     });
   });
 
-  describe("Testing cancelAavegotchiRentalByToken", async function () {
+  describe("Testing cancelAavegotchiLendingByToken", async function () {
     before(async function () {
       await (
-        await lendingFacetWithOwner.addAavegotchiRental(
+        await lendingFacetWithOwner.addAavegotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -612,33 +612,33 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).wait();
     });
-    it("Should revert when try to cancel rental with wrong aavegotchi id", async function () {
+    it("Should revert when try to cancel lending with wrong aavegotchi id", async function () {
       await expect(
-        lendingFacetWithOwner.cancelAavegotchiRentalByToken(lockedAavegotchiId)
-      ).to.be.revertedWith("AavegotchiLending: rental not found");
+        lendingFacetWithOwner.cancelAavegotchiLendingByToken(lockedAavegotchiId)
+      ).to.be.revertedWith("AavegotchiLending: lending not found");
     });
-    it("Should revert when try to cancel rental with non lender", async function () {
+    it("Should revert when try to cancel lending with non lender", async function () {
       await expect(
-        lendingFacetWithClaimer.cancelAavegotchiRentalByToken(
+        lendingFacetWithClaimer.cancelAavegotchiLendingByToken(
           unlockedAavegotchiId
         )
       ).to.be.revertedWith("AavegotchiLending: not lender");
     });
-    it("Should succeed if cancel rental with valid aavegotchi id", async function () {
-      let rental = await lendingFacetWithOwner.getAavegotchiRentalFromToken(
+    it("Should succeed if cancel lending with valid aavegotchi id", async function () {
+      let lending = await lendingFacetWithOwner.getAavegotchiLendingFromToken(
         unlockedAavegotchiId
       );
-      expect(rental.canceled).to.equal(false);
+      expect(lending.canceled).to.equal(false);
       await (
-        await lendingFacetWithOwner.cancelAavegotchiRentalByToken(
+        await lendingFacetWithOwner.cancelAavegotchiLendingByToken(
           unlockedAavegotchiId
         )
       ).wait();
       await expect(
-        lendingFacetWithOwner.getAavegotchiRentalFromToken(unlockedAavegotchiId)
-      ).to.be.revertedWith("AavegotchiLending: rental doesn't exist");
+        lendingFacetWithOwner.getAavegotchiLendingFromToken(unlockedAavegotchiId)
+      ).to.be.revertedWith("AavegotchiLending: lending doesn't exist");
     });
-    it("isAavegotchiLent function should return true if aavegotchi rental is canceld", async function () {
+    it("isAavegotchiLent function should return true if aavegotchi lending is canceld", async function () {
       const status = await lendingFacetWithOwner.isAavegotchiLent(
         unlockedAavegotchiId
       );
@@ -646,10 +646,10 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing agreeAavegotchiRental", async function () {
+  describe("Testing agreeAavegotchiLending", async function () {
     before(async function () {
       const receipt = await (
-        await lendingFacetWithOwner.addAavegotchiRental(
+        await lendingFacetWithOwner.addAavegotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -661,36 +661,36 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).wait();
       const event = receipt!.events!.find(
-        (event) => event.event === "AavegotchiRentalAdd"
+        (event) => event.event === "AavegotchiLendingAdd"
       );
-      fourthRentalId = event!.args!.rentalId;
+      fourthLendingId = event!.args!.lendingId;
     });
-    it("Should revert when try to agree rental with wrong rental id", async function () {
+    it("Should revert when try to agree lending with wrong lending id", async function () {
       await expect(
-        lendingFacetWithRenter.agreeAavegotchiRental(
-          fourthRentalId.add(10),
+        lendingFacetWithBorrower.agreeAavegotchiLending(
+          fourthLendingId.add(10),
           unlockedAavegotchiId,
           initialCost,
           period,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: rental not found");
+      ).to.be.revertedWith("AavegotchiLending: lending not found");
     });
-    it("Should revert when try to agree canceled rental", async function () {
+    it("Should revert when try to agree canceled lending", async function () {
       await expect(
-        lendingFacetWithRenter.agreeAavegotchiRental(
-          secondRentalId,
+        lendingFacetWithBorrower.agreeAavegotchiLending(
+          secondLendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: rental canceled");
+      ).to.be.revertedWith("AavegotchiLending: lending canceled");
     });
-    it("Should revert when try to agree rental with wrong token id", async function () {
+    it("Should revert when try to agree lending with wrong token id", async function () {
       await expect(
-        lendingFacetWithRenter.agreeAavegotchiRental(
-          fourthRentalId,
+        lendingFacetWithBorrower.agreeAavegotchiLending(
+          fourthLendingId,
           lockedAavegotchiId,
           initialCost,
           period,
@@ -698,10 +698,10 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).to.be.revertedWith("AavegotchiLending: Invalid token id");
     });
-    it("Should revert when try to agree rental with wrong initial cost", async function () {
+    it("Should revert when try to agree lending with wrong initial cost", async function () {
       await expect(
-        lendingFacetWithRenter.agreeAavegotchiRental(
-          fourthRentalId,
+        lendingFacetWithBorrower.agreeAavegotchiLending(
+          fourthLendingId,
           unlockedAavegotchiId,
           ethers.utils.parseUnits("1.1", "ether"),
           period,
@@ -709,21 +709,21 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).to.be.revertedWith("AavegotchiLending: Invalid initial cost");
     });
-    it("Should revert when try to agree rental with wrong rental period", async function () {
+    it("Should revert when try to agree lending with wrong lending period", async function () {
       await expect(
-        lendingFacetWithRenter.agreeAavegotchiRental(
-          fourthRentalId,
+        lendingFacetWithBorrower.agreeAavegotchiLending(
+          fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
           period + 1,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: Invalid rental period");
+      ).to.be.revertedWith("AavegotchiLending: Invalid lending period");
     });
-    it("Should revert when try to agree rental with wrong revenue split", async function () {
+    it("Should revert when try to agree lending with wrong revenue split", async function () {
       await expect(
-        lendingFacetWithRenter.agreeAavegotchiRental(
-          fourthRentalId,
+        lendingFacetWithBorrower.agreeAavegotchiLending(
+          fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -731,18 +731,18 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).to.be.revertedWith("AavegotchiLending: Invalid revenue split");
     });
-    it("Should revert when try to agree rental with lender", async function () {
+    it("Should revert when try to agree lending with lender", async function () {
       await expect(
-        lendingFacetWithOwner.agreeAavegotchiRental(
-          fourthRentalId,
+        lendingFacetWithOwner.agreeAavegotchiLending(
+          fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: renter can't be lender");
+      ).to.be.revertedWith("AavegotchiLending: borrower can't be lender");
     });
-    it("Should revert when non whitelisted account try to agree rental", async function () {
+    it("Should revert when non whitelisted account try to agree lending", async function () {
       const lendingFacetWithNonWhitelisted = await impersonate(
         nonWhitelistedAddress,
         lendingFacetWithOwner,
@@ -750,8 +750,8 @@ describe("Testing Aavegotchi Lending", async function () {
         network
       );
       await expect(
-        lendingFacetWithNonWhitelisted.agreeAavegotchiRental(
-          fourthRentalId,
+        lendingFacetWithNonWhitelisted.agreeAavegotchiLending(
+          fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -759,7 +759,7 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).to.be.revertedWith("AavegotchiLending: Not whitelisted address");
     });
-    it("Should revert when non GHST holder try to agree rental whose initial cost is not zero", async function () {
+    it("Should revert when non GHST holder try to agree lending whose initial cost is not zero", async function () {
       const lendingFacetWithNonGhstHolder = await impersonate(
         nonGhstHolderAddress,
         lendingFacetWithOwner,
@@ -767,8 +767,8 @@ describe("Testing Aavegotchi Lending", async function () {
         network
       );
       await expect(
-        lendingFacetWithNonGhstHolder.agreeAavegotchiRental(
-          fourthRentalId,
+        lendingFacetWithNonGhstHolder.agreeAavegotchiLending(
+          fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -776,21 +776,21 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).to.be.revertedWith("AavegotchiLending: not enough GHST");
     });
-    it("Should succeed when agree rental with valid data", async function () {
-      const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
+    it("Should succeed when agree lending with valid data", async function () {
+      const borrowerOldBalance = await ghstERC20.balanceOf(borrowerAddress);
       const lenderOldBalance = await ghstERC20.balanceOf(
         aavegotchiOwnerAddress
       );
-      const ghstERC20WithRenter = await impersonate(
-        renterAddress,
+      const ghstERC20WithBorrower = await impersonate(
+        borrowerAddress,
         ghstERC20,
         ethers,
         network
       );
-      await ghstERC20WithRenter.approve(diamondAddress, initialCost);
+      await ghstERC20WithBorrower.approve(diamondAddress, initialCost);
       const receipt = await (
-        await lendingFacetWithRenter.agreeAavegotchiRental(
-          fourthRentalId,
+        await lendingFacetWithBorrower.agreeAavegotchiLending(
+          fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -798,99 +798,99 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).wait();
       // const event = receipt!.events!.find(
-      //   (event) => event.event === "AavegotchiRentalExecute"
+      //   (event) => event.event === "AavegotchiLendingExecute"
       // );
-      // expect(event!.args!.renter).to.equal(renterAddress);
-      const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
+      // expect(event!.args!.borrower).to.equal(borrowerAddress);
+      const borrowerNewBalance = await ghstERC20.balanceOf(borrowerAddress);
       const lenderNewBalance = await ghstERC20.balanceOf(
         aavegotchiOwnerAddress
       );
 
       // Check ghst balance changes
-      expect(renterOldBalance.sub(renterNewBalance)).to.equal(initialCost);
+      expect(borrowerOldBalance.sub(borrowerNewBalance)).to.equal(initialCost);
       expect(lenderNewBalance.sub(lenderOldBalance)).to.equal(initialCost);
 
-      // Check rental and aavegotchi status
-      const rentalInfo = await lendingFacetWithRenter.getAavegotchiRentalInfo(
-        fourthRentalId
+      // Check lending and aavegotchi status
+      const lendingInfo = await lendingFacetWithBorrower.getAavegotchiLendingInfo(
+        fourthLendingId
       );
-      expect(rentalInfo[0].rentalId).to.equal(fourthRentalId);
-      expect(rentalInfo[0].lender).to.equal(aavegotchiOwnerAddress);
-      expect(rentalInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
-      expect(rentalInfo[0].completed).to.equal(false);
-      expect(rentalInfo[0].timeAgreed.gt(0)).to.equal(true);
-      expect(rentalInfo[1].tokenId).to.equal(unlockedAavegotchiId);
-      expect(rentalInfo[1].owner).to.equal(renterAddress);
-      expect(rentalInfo[1].locked).to.equal(true);
-      escrowAddress = rentalInfo[1].escrow;
+      expect(lendingInfo[0].lendingId).to.equal(fourthLendingId);
+      expect(lendingInfo[0].lender).to.equal(aavegotchiOwnerAddress);
+      expect(lendingInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
+      expect(lendingInfo[0].completed).to.equal(false);
+      expect(lendingInfo[0].timeAgreed.gt(0)).to.equal(true);
+      expect(lendingInfo[1].tokenId).to.equal(unlockedAavegotchiId);
+      expect(lendingInfo[1].owner).to.equal(borrowerAddress);
+      expect(lendingInfo[1].locked).to.equal(true);
+      escrowAddress = lendingInfo[1].escrow;
     });
-    it("Should revert when try to agree agreed rental", async function () {
+    it("Should revert when try to agree agreed lending", async function () {
       await expect(
-        lendingFacetWithRenter.agreeAavegotchiRental(
-          fourthRentalId,
+        lendingFacetWithBorrower.agreeAavegotchiLending(
+          fourthLendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
           revenueSplitForThirdParty
         )
-      ).to.be.revertedWith("AavegotchiLending: rental already agreed");
+      ).to.be.revertedWith("AavegotchiLending: lending already agreed");
     });
-    it("isAavegotchiLent function should return true if aavegotchi rental is agreed", async function () {
+    it("isAavegotchiLent function should return true if aavegotchi lending is agreed", async function () {
       const status = await lendingFacetWithOwner.isAavegotchiLent(
         unlockedAavegotchiId
       );
       expect(status).to.equal(true);
     });
 
-    describe("Testing getOwnerAavegotchiRentals and getAavegotchiRentals after agree", async function () {
-      it("Should fetch rental list", async function () {
-        let rentals = await lendingFacetWithOwner.getAavegotchiRentals(
+    describe("Testing getOwnerAavegotchiLendings and getAavegotchiLendings after agree", async function () {
+      it("Should fetch lending list", async function () {
+        let lendings = await lendingFacetWithOwner.getAavegotchiLendings(
           listedFilter,
           5
         );
-        expect(rentals.length).to.equal(0);
-        rentals = await lendingFacetWithOwner.getAavegotchiRentals(
+        expect(lendings.length).to.equal(0);
+        lendings = await lendingFacetWithOwner.getAavegotchiLendings(
           agreedFilter,
           5
         );
-        expect(rentals.length).to.equal(1);
-        rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(
+        expect(lendings.length).to.equal(1);
+        lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
           aavegotchiOwnerAddress,
           listedFilter,
           5
         );
-        expect(rentals.length).to.equal(0);
-        rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(
+        expect(lendings.length).to.equal(0);
+        lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
           escrowAddress,
           listedFilter,
           5
         );
-        expect(rentals.length).to.equal(0);
-        rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(
+        expect(lendings.length).to.equal(0);
+        lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
           aavegotchiOwnerAddress,
           agreedFilter,
           5
         );
-        expect(rentals.length).to.equal(1);
-        rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(
+        expect(lendings.length).to.equal(1);
+        lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
           escrowAddress,
           agreedFilter,
           5
         );
-        expect(rentals.length).to.equal(0);
+        expect(lendings.length).to.equal(0);
       });
     });
   });
 
   describe("Testing other functions during agreement", async function () {
-    it("Should revert when try to send aavegotchi in rental", async function () {
+    it("Should revert when try to send aavegotchi in lending", async function () {
       await expect(
         aavegotchiFacet.transferFrom(
-          renterAddress,
+          borrowerAddress,
           aavegotchiOwnerAddress,
           unlockedAavegotchiId
         )
-      ).to.be.revertedWith("AavegotchiLending: Aavegotchi is in rental");
+      ).to.be.revertedWith("AavegotchiLending: Aavegotchi is in lending");
     });
     it("Should allow original pet operators interact during the agreement", async function () {
       const receipt = await (
@@ -900,36 +900,36 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing claimAavegotchiRental and claimAndEndAavegotchiRental", async function () {
-    it("Should revert when try to claim rental with non lender during agreement", async function () {
+  describe("Testing claimAavegotchiLending and claimAndEndAavegotchiLending", async function () {
+    it("Should revert when try to claim lending with non lender during agreement", async function () {
       await expect(
-        lendingFacetWithClaimer.claimAavegotchiRental(
+        lendingFacetWithClaimer.claimAavegotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
       ).to.be.revertedWith(
-        "AavegotchiLending: only lender or renter can claim"
+        "AavegotchiLending: only lender or borrower can claim"
       );
     });
-    it("Should revert when try to end rental with non lender or non renter", async function () {
+    it("Should revert when try to end lending with non lender or non borrower", async function () {
       await expect(
-        lendingFacetWithClaimer.claimAndEndAavegotchiRental(
+        lendingFacetWithClaimer.claimAndEndAavegotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
       ).to.be.revertedWith(
-        "AavegotchiLending: only lender or renter can claim and end agreement"
+        "AavegotchiLending: only lender or borrower can claim and end agreement"
       );
     });
-    it("Should revert when try to end rental with lender or renter during agreement", async function () {
+    it("Should revert when try to end lending with lender or borrower during agreement", async function () {
       await expect(
-        lendingFacetWithOwner.claimAndEndAavegotchiRental(
+        lendingFacetWithOwner.claimAndEndAavegotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
       ).to.be.revertedWith("AavegotchiLending: not allowed during agreement");
     });
-    it("Should succeed when claim rental with lender during agreement", async function () {
+    it("Should succeed when claim lending with lender during agreement", async function () {
       // Impersonate revenue
       await (
         await ghstERC20.transfer(
@@ -939,19 +939,19 @@ describe("Testing Aavegotchi Lending", async function () {
       ).wait();
 
       const revenue = await ghstERC20.balanceOf(escrowAddress);
-      const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
+      const borrowerOldBalance = await ghstERC20.balanceOf(borrowerAddress);
       const lenderOldBalance = await ghstERC20.balanceOf(
         aavegotchiOwnerAddress
       );
       const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
-        await lendingFacetWithOwner.claimAavegotchiRental(
+        await lendingFacetWithOwner.claimAavegotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
       ).wait();
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
-      const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
+      const borrowerNewBalance = await ghstERC20.balanceOf(borrowerAddress);
       const lenderNewBalance = await ghstERC20.balanceOf(
         aavegotchiOwnerAddress
       );
@@ -962,48 +962,48 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(lenderNewBalance.sub(lenderOldBalance)).to.equal(
         revenue.mul(revenueSplitForThirdParty[0]).div(100)
       );
-      expect(renterNewBalance.sub(renterOldBalance)).to.equal(
+      expect(borrowerNewBalance.sub(borrowerOldBalance)).to.equal(
         revenue.mul(revenueSplitForThirdParty[1]).div(100)
       );
       expect(thirdPartyNewBalance.sub(thirdPartyOldBalance)).to.equal(
         revenue.mul(revenueSplitForThirdParty[2]).div(100)
       );
 
-      // Check rental and aavegotchi status
-      const rentalInfo = await lendingFacetWithRenter.getAavegotchiRentalInfo(
-        fourthRentalId
+      // Check lending and aavegotchi status
+      const lendingInfo = await lendingFacetWithBorrower.getAavegotchiLendingInfo(
+        fourthLendingId
       );
-      expect(rentalInfo[0].rentalId).to.equal(fourthRentalId);
-      expect(rentalInfo[0].lender).to.equal(aavegotchiOwnerAddress);
-      expect(rentalInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
-      expect(rentalInfo[0].completed).to.equal(false);
-      expect(rentalInfo[0].timeAgreed.gt(0)).to.equal(true);
-      expect(rentalInfo[0].lastClaimed.gt(0)).to.equal(true);
-      expect(rentalInfo[1].tokenId).to.equal(unlockedAavegotchiId);
-      expect(rentalInfo[1].owner).to.equal(renterAddress);
-      expect(rentalInfo[1].locked).to.equal(true);
+      expect(lendingInfo[0].lendingId).to.equal(fourthLendingId);
+      expect(lendingInfo[0].lender).to.equal(aavegotchiOwnerAddress);
+      expect(lendingInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
+      expect(lendingInfo[0].completed).to.equal(false);
+      expect(lendingInfo[0].timeAgreed.gt(0)).to.equal(true);
+      expect(lendingInfo[0].lastClaimed.gt(0)).to.equal(true);
+      expect(lendingInfo[1].tokenId).to.equal(unlockedAavegotchiId);
+      expect(lendingInfo[1].owner).to.equal(borrowerAddress);
+      expect(lendingInfo[1].locked).to.equal(true);
     });
-    it("Should revert when try to claim rental with non lender after agreement", async function () {
+    it("Should revert when try to claim lending with non lender after agreement", async function () {
       // Simulate within 1 days after agreement
       await ethers.provider.send("evm_increaseTime", [period]);
       await ethers.provider.send("evm_mine", []);
 
       await expect(
-        lendingFacetWithClaimer.claimAavegotchiRental(
+        lendingFacetWithClaimer.claimAavegotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
       ).to.be.revertedWith(
-        "AavegotchiLending: only lender or renter can claim"
+        "AavegotchiLending: only lender or borrower can claim"
       );
     });
-    it("isAavegotchiLent function should return true if aavegotchi rental is not completed", async function () {
+    it("isAavegotchiLent function should return true if aavegotchi lending is not completed", async function () {
       const status = await lendingFacetWithOwner.isAavegotchiLent(
         unlockedAavegotchiId
       );
       expect(status).to.equal(true);
     });
-    it("Should succeed when claim rental with lender after agreement", async function () {
+    it("Should succeed when claim lending with lender after agreement", async function () {
       // Impersonate revenue
       await (
         await ghstERC20.transfer(
@@ -1013,19 +1013,19 @@ describe("Testing Aavegotchi Lending", async function () {
       ).wait();
 
       const revenue = await ghstERC20.balanceOf(escrowAddress);
-      const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
+      const borrowerOldBalance = await ghstERC20.balanceOf(borrowerAddress);
       const lenderOldBalance = await ghstERC20.balanceOf(
         aavegotchiOwnerAddress
       );
       const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
-        await lendingFacetWithOwner.claimAndEndAavegotchiRental(
+        await lendingFacetWithOwner.claimAndEndAavegotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
       ).wait();
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
-      const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
+      const borrowerNewBalance = await ghstERC20.balanceOf(borrowerAddress);
       const lenderNewBalance = await ghstERC20.balanceOf(
         aavegotchiOwnerAddress
       );
@@ -1036,28 +1036,28 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(lenderNewBalance.sub(lenderOldBalance)).to.equal(
         revenue.mul(revenueSplitForThirdParty[0]).div(100)
       );
-      expect(renterNewBalance.sub(renterOldBalance)).to.equal(
+      expect(borrowerNewBalance.sub(borrowerOldBalance)).to.equal(
         revenue.mul(revenueSplitForThirdParty[1]).div(100)
       );
       expect(thirdPartyNewBalance.sub(thirdPartyOldBalance)).to.equal(
         revenue.mul(revenueSplitForThirdParty[2]).div(100)
       );
 
-      // Check rental and aavegotchi status
-      const rentalInfo = await lendingFacetWithRenter.getAavegotchiRentalInfo(
-        fourthRentalId
+      // Check lending and aavegotchi status
+      const lendingInfo = await lendingFacetWithBorrower.getAavegotchiLendingInfo(
+        fourthLendingId
       );
-      expect(rentalInfo[0].rentalId).to.equal(fourthRentalId);
-      expect(rentalInfo[0].lender).to.equal(aavegotchiOwnerAddress);
-      expect(rentalInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
-      expect(rentalInfo[0].completed).to.equal(true);
-      expect(rentalInfo[0].timeAgreed.gt(0)).to.equal(true);
-      expect(rentalInfo[0].lastClaimed.gt(0)).to.equal(true);
-      expect(rentalInfo[1].tokenId).to.equal(unlockedAavegotchiId);
-      expect(rentalInfo[1].owner).to.equal(aavegotchiOwnerAddress);
-      expect(rentalInfo[1].locked).to.equal(false);
+      expect(lendingInfo[0].lendingId).to.equal(fourthLendingId);
+      expect(lendingInfo[0].lender).to.equal(aavegotchiOwnerAddress);
+      expect(lendingInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
+      expect(lendingInfo[0].completed).to.equal(true);
+      expect(lendingInfo[0].timeAgreed.gt(0)).to.equal(true);
+      expect(lendingInfo[0].lastClaimed.gt(0)).to.equal(true);
+      expect(lendingInfo[1].tokenId).to.equal(unlockedAavegotchiId);
+      expect(lendingInfo[1].owner).to.equal(aavegotchiOwnerAddress);
+      expect(lendingInfo[1].locked).to.equal(false);
     });
-    it("isAavegotchiLent function should return false if aavegotchi rental is completed", async function () {
+    it("isAavegotchiLent function should return false if aavegotchi lending is completed", async function () {
       const status = await lendingFacetWithOwner.isAavegotchiLent(
         unlockedAavegotchiId
       );
@@ -1065,50 +1065,50 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing getOwnerAavegotchiRentals and getAavegotchiRentals after agreement is ended", async function () {
-    it("Should fetch rental list", async function () {
-      let rentals = await lendingFacetWithOwner.getAavegotchiRentals(
+  describe("Testing getOwnerAavegotchiLendings and getAavegotchiLendings after agreement is ended", async function () {
+    it("Should fetch lending list", async function () {
+      let lendings = await lendingFacetWithOwner.getAavegotchiLendings(
         listedFilter,
         5
       );
-      expect(rentals.length).to.equal(0);
-      rentals = await lendingFacetWithOwner.getAavegotchiRentals(
+      expect(lendings.length).to.equal(0);
+      lendings = await lendingFacetWithOwner.getAavegotchiLendings(
         agreedFilter,
         5
       );
-      expect(rentals.length).to.equal(0);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(
+      expect(lendings.length).to.equal(0);
+      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
         aavegotchiOwnerAddress,
         listedFilter,
         5
       );
-      expect(rentals.length).to.equal(0);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(
+      expect(lendings.length).to.equal(0);
+      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
         escrowAddress,
         listedFilter,
         5
       );
-      expect(rentals.length).to.equal(0);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(
+      expect(lendings.length).to.equal(0);
+      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
         aavegotchiOwnerAddress,
         agreedFilter,
         5
       );
-      expect(rentals.length).to.equal(0);
-      rentals = await lendingFacetWithOwner.getOwnerAavegotchiRentals(
+      expect(lendings.length).to.equal(0);
+      lendings = await lendingFacetWithOwner.getOwnerAavegotchiLendings(
         escrowAddress,
         agreedFilter,
         5
       );
-      expect(rentals.length).to.equal(0);
+      expect(lendings.length).to.equal(0);
     });
   });
 
   describe("Testing include logic", async function () {
-    let rentalId;
+    let lendingId;
     before(async function () {
       const receipt = await (
-        await lendingFacetWithOwner.addAavegotchiRental(
+        await lendingFacetWithOwner.addAavegotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -1120,19 +1120,19 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).wait();
       const event = receipt!.events!.find(
-        (event) => event.event === "AavegotchiRentalAdd"
+        (event) => event.event === "AavegotchiLendingAdd"
       );
-      rentalId = event!.args!.rentalId;
-      const ghstERC20WithRenter = await impersonate(
-        renterAddress,
+      lendingId = event!.args!.lendingId;
+      const ghstERC20WithBorrower = await impersonate(
+        borrowerAddress,
         ghstERC20,
         ethers,
         network
       );
-      await ghstERC20WithRenter.approve(diamondAddress, initialCost);
+      await ghstERC20WithBorrower.approve(diamondAddress, initialCost);
       await (
-        await lendingFacetWithRenter.agreeAavegotchiRental(
-          rentalId,
+        await lendingFacetWithBorrower.agreeAavegotchiLending(
+          lendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -1153,19 +1153,19 @@ describe("Testing Aavegotchi Lending", async function () {
       ).wait();
 
       const revenue = await ghstERC20.balanceOf(escrowAddress);
-      const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
+      const borrowerOldBalance = await ghstERC20.balanceOf(borrowerAddress);
       const lenderOldBalance = await ghstERC20.balanceOf(
         aavegotchiOwnerAddress
       );
       const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
-        await lendingFacetWithOwner.claimAndEndAavegotchiRental(
+        await lendingFacetWithOwner.claimAndEndAavegotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
       ).wait();
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
-      const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
+      const borrowerNewBalance = await ghstERC20.balanceOf(borrowerAddress);
       const lenderNewBalance = await ghstERC20.balanceOf(
         aavegotchiOwnerAddress
       );
@@ -1174,17 +1174,17 @@ describe("Testing Aavegotchi Lending", async function () {
       // Check ghst balance changed
       expect(escrowNewBalance).to.equal(revenue);
       expect(lenderNewBalance).to.equal(lenderOldBalance);
-      expect(renterNewBalance).to.equal(renterOldBalance);
+      expect(borrowerNewBalance).to.equal(borrowerOldBalance);
       expect(thirdPartyNewBalance).to.equal(thirdPartyOldBalance);
     });
   });
 
   describe("Testing logic for GotchiVault", async function () {
-    let rentalId;
+    let lendingId;
     let mockOriginalOwner = "0x0E93AD7C720177d4E2c48465C83A50579Bd521C1";
     before(async function () {
       const receipt = await (
-        await lendingFacetWithOwner.addAavegotchiRental(
+        await lendingFacetWithOwner.addAavegotchiLending(
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -1196,19 +1196,19 @@ describe("Testing Aavegotchi Lending", async function () {
         )
       ).wait();
       const event = receipt!.events!.find(
-        (event) => event.event === "AavegotchiRentalAdd"
+        (event) => event.event === "AavegotchiLendingAdd"
       );
-      rentalId = event!.args!.rentalId;
-      const ghstERC20WithRenter = await impersonate(
-        renterAddress,
+      lendingId = event!.args!.lendingId;
+      const ghstERC20WithBorrower = await impersonate(
+        borrowerAddress,
         ghstERC20,
         ethers,
         network
       );
-      await ghstERC20WithRenter.approve(diamondAddress, initialCost);
+      await ghstERC20WithBorrower.approve(diamondAddress, initialCost);
       await (
-        await lendingFacetWithRenter.agreeAavegotchiRental(
-          rentalId,
+        await lendingFacetWithBorrower.agreeAavegotchiLending(
+          lendingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -1226,7 +1226,7 @@ describe("Testing Aavegotchi Lending", async function () {
       ).wait();
 
       const revenue = await ghstERC20.balanceOf(escrowAddress);
-      const renterOldBalance = await ghstERC20.balanceOf(renterAddress);
+      const borrowerOldBalance = await ghstERC20.balanceOf(borrowerAddress);
       const lenderOldBalance = await ghstERC20.balanceOf(
         aavegotchiOwnerAddress
       );
@@ -1235,13 +1235,13 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
-        await lendingFacetWithOwner.claimAavegotchiRental(
+        await lendingFacetWithOwner.claimAavegotchiLending(
           unlockedAavegotchiId,
           revenueTokens
         )
       ).wait();
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
-      const renterNewBalance = await ghstERC20.balanceOf(renterAddress);
+      const borrowerNewBalance = await ghstERC20.balanceOf(borrowerAddress);
       const lenderNewBalance = await ghstERC20.balanceOf(
         aavegotchiOwnerAddress
       );
@@ -1256,7 +1256,7 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(originalOwnerNewBalance.sub(originalOwnerOldBalance)).to.equal(
         revenue.mul(revenueSplitForThirdParty[0]).div(100)
       );
-      expect(renterNewBalance.sub(renterOldBalance)).to.equal(
+      expect(borrowerNewBalance.sub(borrowerOldBalance)).to.equal(
         revenue.mul(revenueSplitForThirdParty[1]).div(100)
       );
       expect(thirdPartyNewBalance.sub(thirdPartyOldBalance)).to.equal(

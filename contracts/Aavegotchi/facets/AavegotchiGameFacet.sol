@@ -283,11 +283,11 @@ contract AavegotchiGameFacet is Modifiers {
 
             //If the owner is the bridge, anyone can pet the gotchis inside
             if (owner != address(this)) {
-                // Check rental status of aavegotchi and allow original pet operators
+                // Check lending status of aavegotchi and allow original pet operators
                 bool isOriginalPetOperator;
-                uint256 rentalId = s.aavegotchiToRentalId[tokenId];
-                if ((rentalId != 0) && (s.aavegotchiRentals[rentalId].timeAgreed > 0)) {
-                    address lender = s.aavegotchiRentals[rentalId].lender;
+                uint256 lendingId = s.aavegotchiToLendingId[tokenId];
+                if ((lendingId != 0) && (s.aavegotchiLendings[lendingId].timeAgreed > 0)) {
+                    address lender = s.aavegotchiLendings[lendingId].lender;
                     isOriginalPetOperator = s.operators[lender][sender] || s.petOperators[lender][sender];
                 }
                 require(

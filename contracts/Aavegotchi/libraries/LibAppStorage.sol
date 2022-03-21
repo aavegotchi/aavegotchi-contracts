@@ -152,15 +152,15 @@ struct GameManager {
     uint256 refreshTime;
 }
 
-struct AavegotchiRental {
-    uint256 rentalId;
+struct AavegotchiLending {
+    uint256 lendingId;
     uint256 initialCost; // GHST in wei, can be zero
     uint256 period;
     address lender;
-    address renter;
+    address borrower;
     address originalOwner; // if original owner is lender, same as lender
     address thirdParty; // can be address(0)
-    uint256[3] revenueSplit; // lender/original owner, renter, thirdParty
+    uint256[3] revenueSplit; // lender/original owner, borrower, thirdParty
     uint256 erc721TokenId;
     uint256 whitelistId; // can be zero
     address[] includeList;
@@ -171,10 +171,10 @@ struct AavegotchiRental {
     bool completed;
 }
 
-struct RentalListItem {
-    uint256 parentRentalId;
-    uint256 rentalId;
-    uint256 childRentalId;
+struct LendingListItem {
+    uint256 parentLendingId;
+    uint256 lendingId;
+    uint256 childLendingId;
 }
 
 struct Whitelist {
@@ -269,15 +269,15 @@ struct AppStorage {
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
     mapping(uint256 => address) categoryToTokenAddress;
-    uint256 nextAavegotchiRentalId;
-    mapping(uint256 => AavegotchiRental) aavegotchiRentals; // rentalId => data
-    mapping(uint256 => uint256) aavegotchiToRentalId; // aavegotchiId => rentalId
+    uint256 nextAavegotchiLendingId;
+    mapping(uint256 => AavegotchiLending) aavegotchiLendings; // lendingId => data
+    mapping(uint256 => uint256) aavegotchiToLendingId; // aavegotchiId => lendingId
     mapping(address => uint256[]) lentTokenIds; // address => lent token ids
     mapping(address => mapping(uint256 => uint256)) lentTokenIdIndexes; // address => lent token id => index
-    mapping(bytes32 => mapping(uint256 => RentalListItem)) aavegotchiRentalListItem; // ("listed" or "agreed") => rentalId => RentalListItem
-    mapping(bytes32 => uint256) aavegotchiRentalHead; // ("listed" or "agreed") => rentalId
-    mapping(bytes32 => mapping(uint256 => RentalListItem)) aavegotchiLenderRentalListItem; // ("listed" or "agreed") => rentalId => RentalListItem
-    mapping(address => mapping(bytes32 => uint256)) aavegotchiLenderRentalHead; // user address => ("listed" or "agreed") => rentalId => RentalListItem
+    mapping(bytes32 => mapping(uint256 => LendingListItem)) aavegotchiLendingListItem; // ("listed" or "agreed") => lendingId => LendingListItem
+    mapping(bytes32 => uint256) aavegotchiLendingHead; // ("listed" or "agreed") => lendingId
+    mapping(bytes32 => mapping(uint256 => LendingListItem)) aavegotchiLenderLendingListItem; // ("listed" or "agreed") => lendingId => LendingListItem
+    mapping(address => mapping(bytes32 => uint256)) aavegotchiLenderLendingHead; // user address => ("listed" or "agreed") => lendingId => LendingListItem
     Whitelist[] whitelists;
     mapping(uint256 => mapping(address => bool)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
 }
