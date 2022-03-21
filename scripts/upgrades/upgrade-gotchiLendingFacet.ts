@@ -13,14 +13,14 @@ export async function upgrade() {
     {
       facetName: "GotchiLendingFacet",
       addSelectors: [
-        "function getGotchiLendingInfo(uint256 _lendingId) external view",
-        "function getGotchiLending(uint256 _lendingId) external view",
+        "function getGotchiLendingInfo(uint256 _listingId) external view",
+        "function getGotchiLending(uint256 _listingId) external view",
         "function getGotchiLendingFromToken(uint256 _erc721TokenId) external view",
         "function isAavegotchiLent(uint256 _erc721TokenId) external view",
         "function addGotchiLending(uint256 _erc721TokenId, uint256 _initialCost, uint256 _period, uint256[3] calldata _revenueSplit, address _originalOwner, address _thirdParty, uint256 _whitelistId, address[] calldata _includes) external",
         "function cancelGotchiLendingByToken(uint256 _erc721TokenId) external",
-        "function cancelGotchiLending(uint256 _lendingId) external",
-        "function agreeGotchiLending(uint256 _lendingId, uint256 _erc721TokenId, uint256 _initialCost, uint256 _period, uint256[3] calldata _revenueSplit) external",
+        "function cancelGotchiLending(uint256 _listingId) external",
+        "function agreeGotchiLending(uint256 _listingId, uint256 _erc721TokenId, uint256 _initialCost, uint256 _period, uint256[3] calldata _revenueSplit) external",
         "function claimGotchiLending(uint256 _tokenId, address[] calldata _revenueTokens) external",
         "function claimAndEndGotchiLending(uint256 _tokenId, address[] calldata _revenueTokens) external",
         "function getOwnerGotchiLendings(address _owner, bytes32 _status, uint256 _length) external view",

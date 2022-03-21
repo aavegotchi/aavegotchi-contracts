@@ -57,9 +57,9 @@ describe("Testing Aavegotchi Lending", async function () {
   let ghstERC20: ERC20Token;
   let aavegotchiOwnerAddress: any;
   let escrowAddress: any;
-  let firstLendingId: any;
-  let secondLendingId: any;
-  let fourthLendingId: any;
+  let firstListingId: any;
+  let secondListingId: any;
+  let fourthListingId: any;
   let whitelistId: any;
   let secondWhitelistId: any;
 
@@ -419,7 +419,7 @@ describe("Testing Aavegotchi Lending", async function () {
         const event = receipt!.events!.find(
           (event: any) => event.event === "GotchiLendingAdd"
         );
-        firstLendingId = event!.args!.lendingId;
+        firstListingId = event!.args!.listingId;
         // expect(event!.args!.lender).to.equal(aavegotchiOwnerAddress);
         // expect(event!.args!.erc721TokenId).to.equal(unlockedAavegotchiId);
         // expect(event!.args!.initialCost).to.equal(initialCost);
@@ -443,7 +443,7 @@ describe("Testing Aavegotchi Lending", async function () {
         const event = receipt!.events!.find(
           (event: any) => event.event === "GotchiLendingAdd"
         );
-        secondLendingId = event!.args!.lendingId;
+        secondListingId = event!.args!.listingId;
         // expect(event!.args!.lender).to.equal(aavegotchiOwnerAddress);
         // expect(event!.args!.erc721TokenId).to.equal(unlockedAavegotchiId);
         // expect(event!.args!.initialCost).to.equal(initialCost);
@@ -455,14 +455,14 @@ describe("Testing Aavegotchi Lending", async function () {
   describe("Testing getGotchiLending", async function () {
     it("Should revert when try to get lending with wrong id", async function () {
       await expect(
-        lendingFacetWithOwner.getGotchiLending(secondLendingId.add(10))
+        lendingFacetWithOwner.getGotchiLending(secondListingId.add(10))
       ).to.be.revertedWith("GotchiLending: lending does not exist");
     });
     it("Should fetch lending data with correct lending id", async function () {
       const lending = await lendingFacetWithOwner.getGotchiLending(
-        firstLendingId
+        firstListingId
       );
-      expect(lending.lendingId).to.equal(firstLendingId);
+      expect(lending.listingId).to.equal(firstListingId);
       expect(lending.lender).to.equal(aavegotchiOwnerAddress);
       expect(lending.erc721TokenId).to.equal(unlockedAavegotchiId);
       expect(lending.completed).to.equal(false);
@@ -472,14 +472,14 @@ describe("Testing Aavegotchi Lending", async function () {
   describe("Testing getGotchiLendingInfo", async function () {
     it("Should revert when try to get lending with wrong id", async function () {
       await expect(
-        lendingFacetWithOwner.getGotchiLendingInfo(secondLendingId.add(10))
+        lendingFacetWithOwner.getGotchiLendingInfo(secondListingId.add(10))
       ).to.be.revertedWith("GotchiLending: lending does not exist");
     });
     it("Should fetch lending data with correct lending id", async function () {
       const lendingInfo = await lendingFacetWithOwner.getGotchiLendingInfo(
-        firstLendingId
+        firstListingId
       );
-      expect(lendingInfo[0].lendingId).to.equal(firstLendingId);
+      expect(lendingInfo[0].listingId).to.equal(firstListingId);
       expect(lendingInfo[0].lender).to.equal(aavegotchiOwnerAddress);
       expect(lendingInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
       expect(lendingInfo[0].completed).to.equal(false);
@@ -499,7 +499,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const lending = await lendingFacetWithOwner.getGotchiLendingFromToken(
         unlockedAavegotchiId
       );
-      expect(lending.lendingId).to.equal(secondLendingId);
+      expect(lending.listingId).to.equal(secondListingId);
       expect(lending.lender).to.equal(aavegotchiOwnerAddress);
       expect(lending.erc721TokenId).to.equal(unlockedAavegotchiId);
       expect(lending.completed).to.equal(false);
@@ -512,13 +512,13 @@ describe("Testing Aavegotchi Lending", async function () {
         listedFilter,
         5
       );
-      expect(lendings[0].lendingId).to.equal(secondLendingId);
+      expect(lendings[0].listingId).to.equal(secondListingId);
       lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
         aavegotchiOwnerAddress,
         listedFilter,
         5
       );
-      expect(lendings[0].lendingId).to.equal(secondLendingId);
+      expect(lendings[0].listingId).to.equal(secondListingId);
       lendings = await lendingFacetWithOwner.getOwnerGotchiLendings(
         thirdParty,
         listedFilter,
@@ -546,29 +546,29 @@ describe("Testing Aavegotchi Lending", async function () {
   describe("Testing cancelGotchiLending", async function () {
     it("Should revert when try to cancel lending with wrong id", async function () {
       await expect(
-        lendingFacetWithOwner.cancelGotchiLending(secondLendingId.add(10))
+        lendingFacetWithOwner.cancelGotchiLending(secondListingId.add(10))
       ).to.be.revertedWith("GotchiLending: lending not found");
     });
     it("Should revert when try to cancel lending with non lender", async function () {
       await expect(
-        lendingFacetWithClaimer.cancelGotchiLending(secondLendingId)
+        lendingFacetWithClaimer.cancelGotchiLending(secondListingId)
       ).to.be.revertedWith("GotchiLending: not lender");
     });
     it("Should succeed, but no event when try to cancel canceled lending", async function () {
       const receipt = await (
-        await lendingFacetWithOwner.cancelGotchiLending(firstLendingId)
+        await lendingFacetWithOwner.cancelGotchiLending(firstListingId)
       ).wait();
       expect(receipt!.events!.length).to.equal(0);
     });
     it("Should succeed if cancel valid lending", async function () {
       let lending = await lendingFacetWithOwner.getGotchiLending(
-        secondLendingId
+        secondListingId
       );
       expect(lending.canceled).to.equal(false);
       await (
-        await lendingFacetWithOwner.cancelGotchiLending(secondLendingId)
+        await lendingFacetWithOwner.cancelGotchiLending(secondListingId)
       ).wait();
-      lending = await lendingFacetWithOwner.getGotchiLending(secondLendingId);
+      lending = await lendingFacetWithOwner.getGotchiLending(secondListingId);
       expect(lending.canceled).to.equal(true);
     });
   });
@@ -659,12 +659,12 @@ describe("Testing Aavegotchi Lending", async function () {
       const event = receipt!.events!.find(
         (event: any) => event.event === "GotchiLendingAdd"
       );
-      fourthLendingId = event!.args!.lendingId;
+      fourthListingId = event!.args!.listingId;
     });
     it("Should revert when try to agree lending with wrong lending id", async function () {
       await expect(
         lendingFacetWithBorrower.agreeGotchiLending(
-          fourthLendingId.add(10),
+          fourthListingId.add(10),
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -675,7 +675,7 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert when try to agree canceled lending", async function () {
       await expect(
         lendingFacetWithBorrower.agreeGotchiLending(
-          secondLendingId,
+          secondListingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -686,7 +686,7 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert when try to agree lending with wrong token id", async function () {
       await expect(
         lendingFacetWithBorrower.agreeGotchiLending(
-          fourthLendingId,
+          fourthListingId,
           lockedAavegotchiId,
           initialCost,
           period,
@@ -697,7 +697,7 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert when try to agree lending with wrong initial cost", async function () {
       await expect(
         lendingFacetWithBorrower.agreeGotchiLending(
-          fourthLendingId,
+          fourthListingId,
           unlockedAavegotchiId,
           ethers.utils.parseUnits("1.1", "ether"),
           period,
@@ -708,7 +708,7 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert when try to agree lending with wrong lending period", async function () {
       await expect(
         lendingFacetWithBorrower.agreeGotchiLending(
-          fourthLendingId,
+          fourthListingId,
           unlockedAavegotchiId,
           initialCost,
           period + 1,
@@ -719,7 +719,7 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert when try to agree lending with wrong revenue split", async function () {
       await expect(
         lendingFacetWithBorrower.agreeGotchiLending(
-          fourthLendingId,
+          fourthListingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -730,7 +730,7 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert when try to agree lending with lender", async function () {
       await expect(
         lendingFacetWithOwner.agreeGotchiLending(
-          fourthLendingId,
+          fourthListingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -747,7 +747,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       await expect(
         lendingFacetWithNonWhitelisted.agreeGotchiLending(
-          fourthLendingId,
+          fourthListingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -764,7 +764,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       await expect(
         lendingFacetWithNonGhstHolder.agreeGotchiLending(
-          fourthLendingId,
+          fourthListingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -786,7 +786,7 @@ describe("Testing Aavegotchi Lending", async function () {
       await ghstERC20WithBorrower.approve(diamondAddress, initialCost);
       const receipt = await (
         await lendingFacetWithBorrower.agreeGotchiLending(
-          fourthLendingId,
+          fourthListingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -808,9 +808,9 @@ describe("Testing Aavegotchi Lending", async function () {
 
       // Check lending and aavegotchi status
       const lendingInfo = await lendingFacetWithBorrower.getGotchiLendingInfo(
-        fourthLendingId
+        fourthListingId
       );
-      expect(lendingInfo[0].lendingId).to.equal(fourthLendingId);
+      expect(lendingInfo[0].listingId).to.equal(fourthListingId);
       expect(lendingInfo[0].lender).to.equal(aavegotchiOwnerAddress);
       expect(lendingInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
       expect(lendingInfo[0].completed).to.equal(false);
@@ -823,7 +823,7 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert when try to agree agreed lending", async function () {
       await expect(
         lendingFacetWithBorrower.agreeGotchiLending(
-          fourthLendingId,
+          fourthListingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -965,9 +965,9 @@ describe("Testing Aavegotchi Lending", async function () {
 
       // Check lending and aavegotchi status
       const lendingInfo = await lendingFacetWithBorrower.getGotchiLendingInfo(
-        fourthLendingId
+        fourthListingId
       );
-      expect(lendingInfo[0].lendingId).to.equal(fourthLendingId);
+      expect(lendingInfo[0].listingId).to.equal(fourthListingId);
       expect(lendingInfo[0].lender).to.equal(aavegotchiOwnerAddress);
       expect(lendingInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
       expect(lendingInfo[0].completed).to.equal(false);
@@ -1037,9 +1037,9 @@ describe("Testing Aavegotchi Lending", async function () {
 
       // Check lending and aavegotchi status
       const lendingInfo = await lendingFacetWithBorrower.getGotchiLendingInfo(
-        fourthLendingId
+        fourthListingId
       );
-      expect(lendingInfo[0].lendingId).to.equal(fourthLendingId);
+      expect(lendingInfo[0].listingId).to.equal(fourthListingId);
       expect(lendingInfo[0].lender).to.equal(aavegotchiOwnerAddress);
       expect(lendingInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
       expect(lendingInfo[0].completed).to.equal(true);
@@ -1094,7 +1094,7 @@ describe("Testing Aavegotchi Lending", async function () {
   });
 
   describe("Testing include logic", async function () {
-    let lendingId;
+    let listingId;
     before(async function () {
       const receipt = await (
         await lendingFacetWithOwner.addGotchiLending(
@@ -1111,7 +1111,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const event = receipt!.events!.find(
         (event: any) => event.event === "GotchiLendingAdd"
       );
-      lendingId = event!.args!.lendingId;
+      listingId = event!.args!.listingId;
       const ghstERC20WithBorrower = await impersonate(
         borrowerAddress,
         ghstERC20,
@@ -1121,7 +1121,7 @@ describe("Testing Aavegotchi Lending", async function () {
       await ghstERC20WithBorrower.approve(diamondAddress, initialCost);
       await (
         await lendingFacetWithBorrower.agreeGotchiLending(
-          lendingId,
+          listingId,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -1169,7 +1169,7 @@ describe("Testing Aavegotchi Lending", async function () {
   });
 
   describe("Testing logic for GotchiVault", async function () {
-    let lendingId;
+    let listingId;
     let mockOriginalOwner = "0x0E93AD7C720177d4E2c48465C83A50579Bd521C1";
     before(async function () {
       const receipt = await (
@@ -1187,7 +1187,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const event = receipt!.events!.find(
         (event: any) => event.event === "GotchiLendingAdd"
       );
-      lendingId = event!.args!.lendingId;
+      listingId = event!.args!.listingId;
       const ghstERC20WithBorrower = await impersonate(
         borrowerAddress,
         ghstERC20,
@@ -1197,7 +1197,7 @@ describe("Testing Aavegotchi Lending", async function () {
       await ghstERC20WithBorrower.approve(diamondAddress, initialCost);
       await (
         await lendingFacetWithBorrower.agreeGotchiLending(
-          lendingId,
+          listingId,
           unlockedAavegotchiId,
           initialCost,
           period,

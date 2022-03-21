@@ -153,7 +153,7 @@ struct GameManager {
 }
 
 struct GotchiLending {
-    uint256 lendingId;
+    uint256 listingId;
     uint256 initialCost; // GHST in wei, can be zero
     uint256 period;
     address lender;
@@ -172,9 +172,9 @@ struct GotchiLending {
 }
 
 struct LendingListItem {
-    uint256 parentLendingId;
-    uint256 lendingId;
-    uint256 childLendingId;
+    uint256 parentListingId;
+    uint256 listingId;
+    uint256 childListingId;
 }
 
 struct Whitelist {
@@ -269,15 +269,15 @@ struct AppStorage {
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
     mapping(uint256 => address) categoryToTokenAddress;
-    uint256 nextGotchiLendingId;
-    mapping(uint256 => GotchiLending) gotchiLendings; // lendingId => data
-    mapping(uint256 => uint256) aavegotchiToLendingId; // aavegotchiId => lendingId
+    uint256 nextGotchiListingId;
+    mapping(uint256 => GotchiLending) gotchiLendings; // listingId => data
+    mapping(uint256 => uint256) aavegotchiToListingId; // aavegotchiId => listingId
     mapping(address => uint256[]) lentTokenIds; // address => lent token ids
     mapping(address => mapping(uint256 => uint256)) lentTokenIdIndexes; // address => lent token id => index
-    mapping(bytes32 => mapping(uint256 => LendingListItem)) gotchiLendingListItem; // ("listed" or "agreed") => lendingId => LendingListItem
-    mapping(bytes32 => uint256) gotchiLendingHead; // ("listed" or "agreed") => lendingId
-    mapping(bytes32 => mapping(uint256 => LendingListItem)) aavegotchiLenderLendingListItem; // ("listed" or "agreed") => lendingId => LendingListItem
-    mapping(address => mapping(bytes32 => uint256)) aavegotchiLenderLendingHead; // user address => ("listed" or "agreed") => lendingId => LendingListItem
+    mapping(bytes32 => mapping(uint256 => LendingListItem)) gotchiLendingListItem; // ("listed" or "agreed") => listingId => LendingListItem
+    mapping(bytes32 => uint256) gotchiLendingHead; // ("listed" or "agreed") => listingId
+    mapping(bytes32 => mapping(uint256 => LendingListItem)) aavegotchiLenderLendingListItem; // ("listed" or "agreed") => listingId => LendingListItem
+    mapping(address => mapping(bytes32 => uint256)) aavegotchiLenderLendingHead; // user address => ("listed" or "agreed") => listingId => LendingListItem
     Whitelist[] whitelists;
     mapping(uint256 => mapping(address => bool)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
 }

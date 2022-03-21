@@ -10,77 +10,81 @@ import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 import {Modifiers, GotchiLending} from "../libraries/LibAppStorage.sol";
 
 contract GotchiLendingFacet is Modifiers {
-    event GotchiLendingAdd(uint256 indexed lendingId);
-    event GotchiLendingExecute(uint256 indexed lendingId);
-    event GotchiLendingClaim(uint256 indexed lendingId, address[] tokenAddresses, uint256[] amounts);
-    event GotchiLendingEnd(uint256 indexed lendingId);
+    event GotchiLendingAdd(uint256 indexed listingId);
+    event GotchiLendingExecute(uint256 indexed listingId);
+    event GotchiLendingClaim(uint256 indexed listingId, address[] tokenAddresses, uint256[] amounts);
+    event GotchiLendingEnd(uint256 indexed listingId);
 
     ///@notice Get an aavegotchi lending details through an identifier
     ///@dev Will throw if the lending does not exist
-    ///@param _lendingId The identifier of the lending to query
-    ///@return lending_ A struct containing certain details about the lending like timeCreated etc
+    ///@param _listingId The identifier of the lending to query
+    ///@return listing_ A struct containing certain details about the lending like timeCreated etc
     ///@return aavegotchiInfo_ A struct containing details about the aavegotchi
-    function getGotchiLendingInfo(uint256 _lendingId) external view returns (GotchiLending memory lending_, AavegotchiInfo memory aavegotchiInfo_) {
-        lending_ = s.gotchiLendings[_lendingId];
-        require(lending_.timeCreated != 0, "GotchiLending: lending does not exist");
-        aavegotchiInfo_ = LibAavegotchi.getAavegotchi(lending_.erc721TokenId);
+    function getGotchiLendingListingInfo(uint256 _listingId)
+        external
+        view
+        returns (GotchiLending memory listing_, AavegotchiInfo memory aavegotchiInfo_)
+    {
+        listing_ = s.gotchiLendings[_listingId];
+        require(listing_.timeCreated != 0, "GotchiLending: Listing does not exist");
+        aavegotchiInfo_ = LibAavegotchi.getAavegotchi(listing_.erc721TokenId);
     }
 
     ///@notice Get an ERC721 lending details through an identifier
     ///@dev Will throw if the lending does not exist
-    ///@param _lendingId The identifier of the lending to query
-    ///@return lending_ A struct containing certain details about the ERC721 lending like timeCreated etc
-    function getGotchiLending(uint256 _lendingId) external view returns (GotchiLending memory lending_) {
-        lending_ = s.gotchiLendings[_lendingId];
-        require(lending_.timeCreated != 0, "GotchiLending: lending does not exist");
+    ///@param _listingId The identifier of the lending to query
+    ///@return listing_ A struct containing certain details about the ERC721 lending like timeCreated etc
+    function getLendingListingInfo(uint256 _listingId) external view returns (GotchiLending memory listing_) {
+        listing_ = s.gotchiLendings[_listingId];
+        require(listing_.timeCreated != 0, "GotchiLending: Listing does not exist");
     }
 
     ///@notice Get an aavegotchi lending details through an NFT
     ///@dev Will throw if the lending does not exist
     ///@param _erc721TokenId The identifier of the NFT associated with the lending
-    ///@return lending_ A struct containing certain details about the lending associated with an NFT of contract identifier `_erc721TokenId`
-    function getGotchiLendingFromToken(uint256 _erc721TokenId) external view returns (GotchiLending memory lending_) {
-        uint256 lendingId = s.aavegotchiToLendingId[_erc721TokenId];
-        require(lendingId != 0, "GotchiLending: lending doesn't exist");
-        lending_ = s.gotchiLendings[lendingId];
+    ///@return listing_ A struct containing certain details about the lending associated with an NFT of contract identifier `_erc721TokenId`
+    function getGotchiLendingFromToken(uint256 _erc721TokenId) external view returns (GotchiLending memory listing_) {
+        uint256 listingId = s.aavegotchiToListingId[_erc721TokenId];
+        require(listingId != 0, "GotchiLending: lending doesn't exist");
+        listing_ = s.gotchiLendings[listingId];
     }
 
-    ///@notice Query a certain amount of aavegotchi lendings created by an address
-    ///@param _lender Creator of the lendings to query
-    ///@param _status Status of the lendings to query, "listed" or "agreed"
-    ///@param _length How many aavegotchi lendings to return
-    ///@return lendings_ An array of lending
+    ///@notice Query a certain amount of aavegotchi lending listings created by an address
+    ///@param _lender Creator of the listings to query
+    ///@param _status Status of the listings to query, "listed" or "agreed"
+    ///@param _length How many aavegotchi listings to return
+    ///@return listings_ An array of lending
     function getOwnerGotchiLendings(
         address _lender,
         bytes32 _status,
         uint256 _length
-    ) external view returns (GotchiLending[] memory lendings_) {
-        uint256 lendingId = s.aavegotchiLenderLendingHead[_lender][_status];
-        lendings_ = new GotchiLending[](_length);
+    ) external view returns (GotchiLending[] memory listings_) {
+        uint256 listingId = s.aavegotchiLenderLendingHead[_lender][_status];
+        listings_ = new GotchiLending[](_length);
         uint256 listIndex;
-        for (; lendingId != 0 && listIndex < _length; listIndex++) {
-            lendings_[listIndex] = s.gotchiLendings[lendingId];
-            lendingId = s.aavegotchiLenderLendingListItem[_status][lendingId].childLendingId;
+        for (; listingId != 0 && listIndex < _length; listIndex++) {
+            listings_[listIndex] = s.gotchiLendings[listingId];
+            listingId = s.aavegotchiLenderLendingListItem[_status][listingId].childListingId;
         }
         assembly {
-            mstore(lendings_, listIndex)
+            mstore(listings_, listIndex)
         }
     }
 
-    ///@notice Query a certain amount of aavegotchi lendings
-    ///@param _status Status of the lendings to query, "listed" or "agreed"
-    ///@param _length How many lendings to return
-    ///@return lendings_ An array of lending
-    function getGotchiLendings(bytes32 _status, uint256 _length) external view returns (GotchiLending[] memory lendings_) {
-        uint256 lendingId = s.gotchiLendingHead[_status];
-        lendings_ = new GotchiLending[](_length);
+    ///@notice Query a certain amount of aavegotchi lending listings
+    ///@param _status Status of the listings to query, "listed" or "agreed"
+    ///@param _length How many listings to return
+    ///@return listings_ An array of lending
+    function getGotchiLendings(bytes32 _status, uint256 _length) external view returns (GotchiLending[] memory listings_) {
+        uint256 listingId = s.gotchiLendingHead[_status];
+        listings_ = new GotchiLending[](_length);
         uint256 listIndex;
-        for (; lendingId != 0 && listIndex < _length; listIndex++) {
-            lendings_[listIndex] = s.gotchiLendings[lendingId];
-            lendingId = s.gotchiLendingListItem[_status][lendingId].childLendingId;
+        for (; listingId != 0 && listIndex < _length; listIndex++) {
+            listings_[listIndex] = s.gotchiLendings[listingId];
+            listingId = s.gotchiLendingListItem[_status][listingId].childListingId;
         }
         assembly {
-            mstore(lendings_, listIndex)
+            mstore(listings_, listIndex)
         }
     }
 
@@ -119,19 +123,19 @@ contract GotchiLendingFacet is Modifiers {
 
         require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "GotchiLending: Only aavegotchi available");
 
-        uint256 oldLendingId = s.aavegotchiToLendingId[_erc721TokenId];
-        if (oldLendingId != 0) {
-            LibGotchiLending.cancelGotchiLending(oldLendingId, sender);
+        uint256 oldListingId = s.aavegotchiToListingId[_erc721TokenId];
+        if (oldListingId != 0) {
+            LibGotchiLending.cancelGotchiLending(oldListingId, sender);
         } else {
             require(s.aavegotchis[_erc721TokenId].locked == false, "GotchiLending: Only callable on unlocked Aavegotchis");
         }
 
-        s.nextGotchiLendingId++;
-        uint256 lendingId = s.nextGotchiLendingId;
+        s.nextGotchiListingId++;
+        uint256 listingId = s.nextGotchiListingId;
 
-        s.aavegotchiToLendingId[_erc721TokenId] = lendingId;
-        s.gotchiLendings[lendingId] = GotchiLending({
-            lendingId: lendingId,
+        s.aavegotchiToListingId[_erc721TokenId] = listingId;
+        s.gotchiLendings[listingId] = GotchiLending({
+            listingId: listingId,
             initialCost: _initialCost,
             period: _period,
             revenueSplit: _revenueSplit,
@@ -149,9 +153,9 @@ contract GotchiLendingFacet is Modifiers {
             completed: false
         });
 
-        LibGotchiLending.addLendingListItem(sender, lendingId, "listed");
+        LibGotchiLending.addLendingListItem(sender, listingId, "listed");
 
-        emit GotchiLendingAdd(lendingId);
+        emit GotchiLendingAdd(listingId);
 
         // Lock Aavegotchis when lending is created
         s.aavegotchis[_erc721TokenId].locked = true;
@@ -163,23 +167,23 @@ contract GotchiLendingFacet is Modifiers {
         LibGotchiLending.cancelGotchiLendingFromToken(_erc721TokenId, LibMeta.msgSender());
     }
 
-    ///@notice Allow an aavegotchi lender to cancel his NFT lending through the lendingID
-    ///@param _lendingId The identifier of the lending to be cancelled
-    function cancelGotchiLending(uint256 _lendingId) external {
-        LibGotchiLending.cancelGotchiLending(_lendingId, LibMeta.msgSender());
+    ///@notice Allow an aavegotchi lender to cancel his NFT lending through the listingId
+    ///@param _listingId The identifier of the lending to be cancelled
+    function cancelGotchiLending(uint256 _listingId) external {
+        LibGotchiLending.cancelGotchiLending(_listingId, LibMeta.msgSender());
     }
 
     ///@notice Allow a borrower to agree an lending for the NFT
     ///@dev Will throw if the NFT has been lent or if the lending has been canceled already
-    ///@param _lendingId The identifier of the lending to agree
+    ///@param _listingId The identifier of the lending to agree
     function agreeGotchiLending(
-        uint256 _lendingId,
+        uint256 _listingId,
         uint256 _erc721TokenId,
         uint256 _initialCost,
         uint256 _period,
         uint256[3] calldata _revenueSplit
     ) external {
-        GotchiLending storage lending = s.gotchiLendings[_lendingId];
+        GotchiLending storage lending = s.gotchiLendings[_listingId];
         require(lending.timeCreated != 0, "GotchiLending: lending not found");
         require(lending.timeAgreed == 0, "GotchiLending: lending already agreed");
         require(lending.canceled == false, "GotchiLending: lending canceled");
@@ -204,8 +208,8 @@ contract GotchiLendingFacet is Modifiers {
         lending.borrower = borrower;
         lending.timeAgreed = block.timestamp;
 
-        LibGotchiLending.removeLendingListItem(lender, _lendingId, "listed");
-        LibGotchiLending.addLendingListItem(lender, _lendingId, "agreed");
+        LibGotchiLending.removeLendingListItem(lender, _listingId, "listed");
+        LibGotchiLending.addLendingListItem(lender, _listingId, "agreed");
 
         uint256 tokenId = lending.erc721TokenId;
         s.lentTokenIdIndexes[lender][tokenId] = s.lentTokenIds[lender].length;
@@ -216,7 +220,7 @@ contract GotchiLendingFacet is Modifiers {
         // set lender as pet operator
         s.petOperators[borrower][lender] = true;
 
-        emit GotchiLendingExecute(_lendingId);
+        emit GotchiLendingExecute(_listingId);
     }
 
     ///@notice Allow to claim revenue from the lending
@@ -224,16 +228,16 @@ contract GotchiLendingFacet is Modifiers {
     ///@param _tokenId The identifier of the lent aavegotchi to claim
     ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
     function claimGotchiLending(uint256 _tokenId, address[] calldata _revenueTokens) external {
-        uint256 lendingId = s.aavegotchiToLendingId[_tokenId];
-        require(lendingId != 0, "GotchiLending: lending not found");
-        GotchiLending storage lending = s.gotchiLendings[lendingId];
+        uint256 listingId = s.aavegotchiToListingId[_tokenId];
+        require(listingId != 0, "GotchiLending: lending not found");
+        GotchiLending storage lending = s.gotchiLendings[listingId];
 
         address sender = LibMeta.msgSender();
         require((lending.lender == sender) || (lending.borrower == sender), "GotchiLending: only lender or borrower can claim");
 
-        uint256[] memory amounts = LibGotchiLending.claimGotchiLending(lendingId, _revenueTokens);
+        uint256[] memory amounts = LibGotchiLending.claimGotchiLending(listingId, _revenueTokens);
 
-        emit GotchiLendingClaim(lendingId, _revenueTokens, amounts);
+        emit GotchiLendingClaim(listingId, _revenueTokens, amounts);
     }
 
     ///@notice Allow a lender to claim revenue from the lending
@@ -241,9 +245,9 @@ contract GotchiLendingFacet is Modifiers {
     ///@param _tokenId The identifier of the lent aavegotchi to claim
     ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
     function claimAndEndGotchiLending(uint256 _tokenId, address[] calldata _revenueTokens) external {
-        uint256 lendingId = s.aavegotchiToLendingId[_tokenId];
-        require(lendingId != 0, "GotchiLending: lending not found");
-        GotchiLending storage lending = s.gotchiLendings[lendingId];
+        uint256 listingId = s.aavegotchiToListingId[_tokenId];
+        require(listingId != 0, "GotchiLending: lending not found");
+        GotchiLending storage lending = s.gotchiLendings[listingId];
 
         address sender = LibMeta.msgSender();
         address lender = lending.lender;
@@ -251,19 +255,19 @@ contract GotchiLendingFacet is Modifiers {
         require((lender == sender) || (borrower == sender), "GotchiLending: only lender or borrower can claim and end agreement");
         require(lending.timeAgreed + lending.period <= block.timestamp, "GotchiLending: not allowed during agreement");
 
-        uint256[] memory amounts = LibGotchiLending.claimGotchiLending(lendingId, _revenueTokens);
+        uint256[] memory amounts = LibGotchiLending.claimGotchiLending(listingId, _revenueTokens);
 
         // end lending agreement
         s.aavegotchis[_tokenId].locked = false;
         LibAavegotchi.transfer(borrower, lender, _tokenId);
 
         lending.completed = true;
-        s.aavegotchiToLendingId[_tokenId] = 0;
+        s.aavegotchiToListingId[_tokenId] = 0;
 
         LibGotchiLending.removeLentAavegotchi(_tokenId, lender);
-        LibGotchiLending.removeLendingListItem(lender, lendingId, "agreed");
+        LibGotchiLending.removeLendingListItem(lender, listingId, "agreed");
 
-        emit GotchiLendingClaim(lendingId, _revenueTokens, amounts);
-        emit GotchiLendingEnd(lendingId);
+        emit GotchiLendingClaim(listingId, _revenueTokens, amounts);
+        emit GotchiLendingEnd(listingId);
     }
 }

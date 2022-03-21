@@ -8,12 +8,12 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
 
 library LibGotchiLending {
-    event GotchiLendingCancel(uint256 indexed lendingId, uint256 time);
+    event GotchiLendingCancel(uint256 indexed listingId, uint256 time);
 
-    function cancelGotchiLending(uint256 _lendingId, address _lender) internal {
+    function cancelGotchiLending(uint256 _listingId, address _lender) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
-        GotchiLending storage lending = s.gotchiLendings[_lendingId];
+        GotchiLending storage lending = s.gotchiLendings[_listingId];
         require(lending.timeCreated != 0, "GotchiLending: lending not found");
         if (lending.canceled) {
             return;
@@ -22,18 +22,18 @@ library LibGotchiLending {
         require(lending.lender == _lender, "GotchiLending: not lender");
         lending.canceled = true;
 
-        removeLendingListItem(_lender, _lendingId, "listed");
+        removeLendingListItem(_lender, _listingId, "listed");
 
         //Unlock Aavegotchis when lending is created
         s.aavegotchis[lending.erc721TokenId].locked = false;
-        s.aavegotchiToLendingId[lending.erc721TokenId] = 0;
+        s.aavegotchiToListingId[lending.erc721TokenId] = 0;
 
-        emit GotchiLendingCancel(_lendingId, block.number);
+        emit GotchiLendingCancel(_listingId, block.number);
     }
 
     function cancelGotchiLendingFromToken(uint256 _erc721TokenId, address _lender) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        cancelGotchiLending(s.aavegotchiToLendingId[_erc721TokenId], _lender);
+        cancelGotchiLending(s.aavegotchiToListingId[_erc721TokenId], _lender);
     }
 
     function removeLentAavegotchi(uint256 _tokenId, address _lender) internal {
@@ -51,9 +51,9 @@ library LibGotchiLending {
         delete s.lentTokenIdIndexes[_lender][_tokenId];
     }
 
-    function claimGotchiLending(uint256 lendingId, address[] calldata _revenueTokens) internal returns (uint256[] memory) {
+    function claimGotchiLending(uint256 listingId, address[] calldata _revenueTokens) internal returns (uint256[] memory) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        GotchiLending storage lending = s.gotchiLendings[lendingId];
+        GotchiLending storage lending = s.gotchiLendings[listingId];
 
         uint256[] memory amounts = new uint256[](_revenueTokens.length);
         uint256 tokenId = lending.erc721TokenId;
@@ -99,103 +99,103 @@ library LibGotchiLending {
 
     function enforceAavegotchiNotInLending(uint256 _tokenId, address _sender) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 _lendingId = s.aavegotchiToLendingId[_tokenId];
-        if (_lendingId > 0) {
-            GotchiLending storage _lending = s.gotchiLendings[_lendingId];
+        uint256 _listingId = s.aavegotchiToListingId[_tokenId];
+        if (_listingId > 0) {
+            GotchiLending storage _lending = s.gotchiLendings[_listingId];
             require(_lending.lender == _sender, "GotchiLending: Aavegotchi is in lending");
             if (_lending.timeAgreed > 0) {
                 // revert if agreed lending
                 revert("GotchiLending: Aavegotchi is in lending");
             } else {
                 // cancel if not agreed lending
-                cancelGotchiLending(_lendingId, _sender);
+                cancelGotchiLending(_listingId, _sender);
             }
         }
     }
 
     function isAavegotchiLent(uint256 _tokenId) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 lendingId = s.aavegotchiToLendingId[_tokenId];
-        if (lendingId == 0) return false;
-        GotchiLending storage lending_ = s.gotchiLendings[lendingId];
-        if (lending_.timeCreated == 0 || lending_.timeAgreed == 0) return false;
-        return lending_.completed == false;
+        uint256 listingId = s.aavegotchiToListingId[_tokenId];
+        if (listingId == 0) return false;
+        GotchiLending storage listing_ = s.gotchiLendings[listingId];
+        if (listing_.timeCreated == 0 || listing_.timeAgreed == 0) return false;
+        return listing_.completed == false;
     }
 
     function addLendingListItem(
         address _lender,
-        uint256 _lendingId,
+        uint256 _listingId,
         bytes32 _status
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
-        uint256 headLendingId = s.aavegotchiLenderLendingHead[_lender][_status];
-        if (headLendingId != 0) {
-            LendingListItem storage headLendingItem = s.aavegotchiLenderLendingListItem[_status][headLendingId];
-            headLendingItem.parentLendingId = _lendingId;
+        uint256 headListingId = s.aavegotchiLenderLendingHead[_lender][_status];
+        if (headListingId != 0) {
+            LendingListItem storage headLendingItem = s.aavegotchiLenderLendingListItem[_status][headListingId];
+            headLendingItem.parentListingId = _listingId;
         }
-        LendingListItem storage lendingItem = s.aavegotchiLenderLendingListItem[_status][_lendingId];
-        lendingItem.childLendingId = headLendingId;
-        s.aavegotchiLenderLendingHead[_lender][_status] = _lendingId;
-        lendingItem.lendingId = _lendingId;
+        LendingListItem storage lendingItem = s.aavegotchiLenderLendingListItem[_status][_listingId];
+        lendingItem.childListingId = headListingId;
+        s.aavegotchiLenderLendingHead[_lender][_status] = _listingId;
+        lendingItem.listingId = _listingId;
 
-        headLendingId = s.gotchiLendingHead[_status];
-        if (headLendingId != 0) {
-            LendingListItem storage headLendingItem = s.gotchiLendingListItem[_status][headLendingId];
-            headLendingItem.parentLendingId = _lendingId;
+        headListingId = s.gotchiLendingHead[_status];
+        if (headListingId != 0) {
+            LendingListItem storage headLendingItem = s.gotchiLendingListItem[_status][headListingId];
+            headLendingItem.parentListingId = _listingId;
         }
-        lendingItem = s.gotchiLendingListItem[_status][_lendingId];
-        lendingItem.childLendingId = headLendingId;
-        s.gotchiLendingHead[_status] = _lendingId;
-        lendingItem.lendingId = _lendingId;
+        lendingItem = s.gotchiLendingListItem[_status][_listingId];
+        lendingItem.childListingId = headListingId;
+        s.gotchiLendingHead[_status] = _listingId;
+        lendingItem.listingId = _listingId;
     }
 
     function removeLendingListItem(
         address _lender,
-        uint256 _lendingId,
+        uint256 _listingId,
         bytes32 _status
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
-        LendingListItem storage lendingItem = s.gotchiLendingListItem[_status][_lendingId];
-        if (lendingItem.lendingId == 0) {
+        LendingListItem storage lendingItem = s.gotchiLendingListItem[_status][_listingId];
+        if (lendingItem.listingId == 0) {
             return;
         }
-        uint256 parentLendingId = lendingItem.parentLendingId;
-        if (parentLendingId != 0) {
-            LendingListItem storage parentLendingItem = s.gotchiLendingListItem[_status][parentLendingId];
-            parentLendingItem.childLendingId = lendingItem.childLendingId;
+        uint256 parentListingId = lendingItem.parentListingId;
+        if (parentListingId != 0) {
+            LendingListItem storage parentLendingItem = s.gotchiLendingListItem[_status][parentListingId];
+            parentLendingItem.childListingId = lendingItem.childListingId;
         }
-        uint256 childLendingId = lendingItem.childLendingId;
-        if (childLendingId != 0) {
-            LendingListItem storage childLendingItem = s.gotchiLendingListItem[_status][childLendingId];
-            childLendingItem.parentLendingId = lendingItem.parentLendingId;
-        }
-
-        if (s.gotchiLendingHead[_status] == _lendingId) {
-            s.gotchiLendingHead[_status] = lendingItem.childLendingId;
-        }
-        lendingItem.lendingId = 0;
-        lendingItem.parentLendingId = 0;
-        lendingItem.childLendingId = 0;
-
-        lendingItem = s.aavegotchiLenderLendingListItem[_status][_lendingId];
-        parentLendingId = lendingItem.parentLendingId;
-        if (parentLendingId != 0) {
-            LendingListItem storage parentLendingItem = s.aavegotchiLenderLendingListItem[_status][parentLendingId];
-            parentLendingItem.childLendingId = lendingItem.childLendingId;
-        }
-        childLendingId = lendingItem.childLendingId;
-        if (childLendingId != 0) {
-            LendingListItem storage childLendingItem = s.aavegotchiLenderLendingListItem[_status][childLendingId];
-            childLendingItem.parentLendingId = lendingItem.parentLendingId;
+        uint256 childListingId = lendingItem.childListingId;
+        if (childListingId != 0) {
+            LendingListItem storage childLendingItem = s.gotchiLendingListItem[_status][childListingId];
+            childLendingItem.parentListingId = lendingItem.parentListingId;
         }
 
-        if (s.aavegotchiLenderLendingHead[_lender][_status] == _lendingId) {
-            s.aavegotchiLenderLendingHead[_lender][_status] = lendingItem.childLendingId;
+        if (s.gotchiLendingHead[_status] == _listingId) {
+            s.gotchiLendingHead[_status] = lendingItem.childListingId;
         }
-        lendingItem.lendingId = 0;
-        lendingItem.parentLendingId = 0;
-        lendingItem.childLendingId = 0;
+        lendingItem.listingId = 0;
+        lendingItem.parentListingId = 0;
+        lendingItem.childListingId = 0;
+
+        lendingItem = s.aavegotchiLenderLendingListItem[_status][_listingId];
+        parentListingId = lendingItem.parentListingId;
+        if (parentListingId != 0) {
+            LendingListItem storage parentLendingItem = s.aavegotchiLenderLendingListItem[_status][parentListingId];
+            parentLendingItem.childListingId = lendingItem.childListingId;
+        }
+        childListingId = lendingItem.childListingId;
+        if (childListingId != 0) {
+            LendingListItem storage childLendingItem = s.aavegotchiLenderLendingListItem[_status][childListingId];
+            childLendingItem.parentListingId = lendingItem.parentListingId;
+        }
+
+        if (s.aavegotchiLenderLendingHead[_lender][_status] == _listingId) {
+            s.aavegotchiLenderLendingHead[_lender][_status] = lendingItem.childListingId;
+        }
+        lendingItem.listingId = 0;
+        lendingItem.parentListingId = 0;
+        lendingItem.childListingId = 0;
     }
 }
