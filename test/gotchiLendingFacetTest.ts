@@ -219,7 +219,7 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert if invalid whitelist id", async function () {
       await expect(
         whitelistFacetWithOwner.updateWhitelist(whitelistId + 1, [])
-      ).to.be.revertedWith("WhitelistFacet: whitelist not found");
+      ).to.be.revertedWith("WhitelistFacet: Whitelist not found");
     });
     it("Should revert if invalid whitelist id", async function () {
       const receipt = await (
@@ -233,7 +233,7 @@ describe("Testing Aavegotchi Lending", async function () {
       secondWhitelistId = event!.args!.whitelistId;
       await expect(
         whitelistFacetWithOwner.updateWhitelist(secondWhitelistId, [])
-      ).to.be.revertedWith("WhitelistFacet: not whitelist owner");
+      ).to.be.revertedWith("WhitelistFacet: Not whitelist owner");
     });
     it("Should revert if whitelist is empty", async function () {
       await expect(
@@ -267,7 +267,7 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert if invalid whitelist id", async function () {
       await expect(
         whitelistFacetWithOwner.getWhitelist(secondWhitelistId + 1)
-      ).to.be.revertedWith("WhitelistFacet: whitelist not found");
+      ).to.be.revertedWith("WhitelistFacet: Whitelist not found");
     });
     it("Should return array if valid whitelist id", async function () {
       const whitelist = await whitelistFacetWithOwner.getWhitelist(whitelistId);
@@ -384,7 +384,7 @@ describe("Testing Aavegotchi Lending", async function () {
           secondWhitelistId,
           []
         )
-      ).to.be.revertedWith("GotchiLending: Only aavegotchi available");
+      ).to.be.revertedWith("GotchiLending: Can only lend Aavegotchi");
     });
     describe("If there's no lending for the aavegotchi", async function () {
       it("Should revert if aavegotchi is locked", async function () {

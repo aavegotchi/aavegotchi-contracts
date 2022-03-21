@@ -25,8 +25,8 @@ contract WhitelistFacet is Modifiers {
     function updateWhitelist(uint256 _whitelistId, address[] calldata _whitelistAddresses) external {
         address sender = LibMeta.msgSender();
 
-        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: whitelist not found");
-        require(s.whitelists[_whitelistId - 1].owner == sender, "WhitelistFacet: not whitelist owner");
+        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
+        require(s.whitelists[_whitelistId - 1].owner == sender, "WhitelistFacet: Not whitelist owner");
 
         uint256 whitelistLength = _whitelistAddresses.length;
         require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
@@ -37,7 +37,7 @@ contract WhitelistFacet is Modifiers {
     }
 
     function getWhitelist(uint256 _whitelistId) external view returns (Whitelist memory) {
-        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: whitelist not found");
+        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
         return s.whitelists[_whitelistId - 1];
     }
 
