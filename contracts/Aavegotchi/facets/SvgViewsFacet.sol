@@ -333,10 +333,19 @@ contract SvgViewsFacet is Modifiers {
                 }
             } else {
                 if (s.wearableExceptions[side][equippedWearables[0]][0] || s.wearableExceptions[side][equippedWearables[0]][0]) {
-                    svg_ = abi.encodePacked(svg_, _body, layers.face, layers.eyes);
-                    svg_ = abi.encodePacked(svg_, layers.head, layers.bodyWearable);
+                    if (s.wearableExceptions[side][equippedWearables[2]][2] && !s.wearableExceptions[side][equippedWearables[1]][1]) {
+                        svg_ = abi.encodePacked(svg_, _body, layers.eyes, layers.face);
+                        svg_ = abi.encodePacked(svg_, layers.head, layers.bodyWearable);
+                    } else {
+                        svg_ = abi.encodePacked(svg_, _body, layers.face, layers.eyes);
+                        svg_ = abi.encodePacked(svg_, layers.head, layers.bodyWearable);
+                    }
                 } else {
-                    svg_ = abi.encodePacked(svg_, bodySvg, layers.face, layers.eyes, layers.head);
+                    if (s.wearableExceptions[side][equippedWearables[2]][2] && !s.wearableExceptions[side][equippedWearables[1]][1]) {
+                        svg_ = abi.encodePacked(svg_, bodySvg, layers.eyes, layers.face, layers.head);
+                    } else {
+                        svg_ = abi.encodePacked(svg_, bodySvg, layers.face, layers.eyes, layers.head);
+                    }
                 }
             }
             if (side == LibSvg.bytesToBytes32("wearables-", "left")) {

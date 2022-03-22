@@ -166,6 +166,18 @@ export async function upgrade() {
       side: front,
       exceptionBool: true,
     },
+    {
+      itemId: 301,
+      slotPosition: 2,
+      side: left,
+      exceptionBool: true,
+    },
+    {
+      itemId: 301,
+      slotPosition: 2,
+      side: right,
+      exceptionBool: true,
+    },
     //right hand
     {
       itemId: 23,
