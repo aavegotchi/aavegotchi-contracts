@@ -7,8 +7,6 @@ import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import { NonceManager } from "@ethersproject/experimental";
 
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
-
 interface TaskArgs {
   filename: string;
   xpAmount: string;
@@ -83,9 +81,9 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
       console.log("send token ids:", sendTokenIds);
 
-      sendTokenIds.forEach((id) => {
-        console.log(id);
-      });
+      // sendTokenIds.forEach((id: string) => {
+      //   console.log(id);
+      // });
 
       console.log(
         `Sending ${xpAmount} XP to ${sendTokenIds.length} Aavegotchis `
