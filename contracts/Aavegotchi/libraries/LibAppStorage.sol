@@ -269,10 +269,13 @@ struct AppStorage {
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
     mapping(uint256 => address) categoryToTokenAddress;
+    //***
+    //Gotchi Lending
+    //***
     uint256 nextGotchiListingId;
-    mapping(uint256 => GotchiLending) gotchiLendings; // listingId => data
-    mapping(uint256 => uint256) aavegotchiToListingId; // aavegotchiId => listingId
-    mapping(address => uint256[]) lentTokenIds; // address => lent token ids
+    mapping(uint256 => GotchiLending) gotchiLendings;
+    mapping(uint256 => uint256) aavegotchiToListingId;
+    mapping(address => uint256[]) lentTokenIds;
     mapping(address => mapping(uint256 => uint256)) lentTokenIdIndexes; // address => lent token id => index
     mapping(bytes32 => mapping(uint256 => LendingListItem)) gotchiLendingListItem; // ("listed" or "agreed") => listingId => LendingListItem
     mapping(bytes32 => uint256) gotchiLendingHead; // ("listed" or "agreed") => listingId
