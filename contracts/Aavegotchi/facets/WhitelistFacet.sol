@@ -36,6 +36,18 @@ contract WhitelistFacet is Modifiers {
         emit WhitelistUpdated(_whitelistId);
     }
 
+    function removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external {
+        address sender = LibMeta.msgSender();
+
+        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
+        require(s.whitelists[_whitelistId - 1].owner == sender, "WhitelistFacet: Not whitelist owner");
+
+        uint32 whitelistLength = uint32(_whitelistAddresses.length);
+        require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
+
+        _removeAddressesFromWhitelist(_whitelistId, _whitelistAddresses);
+    }
+
     function getWhitelist(uint32 _whitelistId) external view returns (Whitelist memory) {
         require((uint32(s.whitelists.length) >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
         return s.whitelists[_whitelistId - 1];
@@ -47,10 +59,33 @@ contract WhitelistFacet is Modifiers {
 
     function _addAddressesToWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) internal {
         for (uint256 i; i < _whitelistAddresses.length; i++) {
-            if (!s.isWhitelisted[_whitelistId][_whitelistAddresses[i]]) {
-                s.whitelists[_whitelistId - 1].addresses.push(_whitelistAddresses[i]);
-                s.isWhitelisted[_whitelistId][_whitelistAddresses[i]] = true;
-            }
+            _addAddressToWhitelist(_whitelistId, _whitelistAddresses[i]);
+        }
+    }
+
+    function _addAddressToWhitelist(uint32 _whitelistId, address _whitelistAddress) internal {
+        if (s.isWhitelisted[_whitelistId][_whitelistAddress] == 0) {
+            s.whitelists[_whitelistId - 1].addresses.push(_whitelistAddress);
+            s.isWhitelisted[_whitelistId][_whitelistAddress] = s.whitelists.length; // Index of the whitelist entry + 1
+        }
+    }
+
+    function _removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) internal {
+        for (uint256 i; i < _whitelistAddresses.length; i++) {
+            _removeAddressFromWhitelist(_whitelistId, _whitelistAddresses[i]);
+        }
+    }
+
+    function _removeAddressFromWhitelist(uint32 _whitelistId, address _whitelistAddress) internal {
+        if (s.isWhitelisted[_whitelistId][_whitelistAddress] > 0) {
+            uint256 index = s.isWhitelisted[_whitelistId][_whitelistAddress] - 1;
+            uint256 lastIndex = s.whitelists[_whitelistId - 1].addresses.length - 1;
+            // Swap the last element with the element to be removed
+            s.whitelists[_whitelistId - 1].addresses[index] = s.whitelists[_whitelistId - 1].addresses[lastIndex];
+            // Remove the last element (now the one to be removed)
+            s.whitelists[_whitelistId - 1].addresses.pop();
+            // Now they aren't whitelisted
+            s.isWhitelisted[_whitelistId][_whitelistAddress] = 0;
         }
     }
 }

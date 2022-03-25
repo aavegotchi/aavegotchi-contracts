@@ -287,7 +287,7 @@ struct AppStorage {
     mapping(bytes32 => mapping(uint32 => LendingListItem)) aavegotchiLenderLendingListItem; // ("listed" or "agreed") => listingId => LendingListItem
     mapping(address => mapping(bytes32 => uint32)) aavegotchiLenderLendingHead; // user address => ("listed" or "agreed") => listingId => LendingListItem
     Whitelist[] whitelists;
-    mapping(uint32 => mapping(address => bool)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
+    mapping(uint32 => mapping(address => uint256)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
 }
 
 library LibAppStorage {
