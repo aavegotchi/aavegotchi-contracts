@@ -81,12 +81,14 @@ contract WhitelistFacet is Modifiers {
         if (s.isWhitelisted[_whitelistId][_whitelistAddress] > 0) {
             uint256 index = s.isWhitelisted[_whitelistId][_whitelistAddress] - 1;
             uint256 lastIndex = s.whitelists[_whitelistId - 1].addresses.length - 1;
-            // Swap the last element with the element to be removed
+            // Replaces the element to be removed with the last element
             s.whitelists[_whitelistId - 1].addresses[index] = s.whitelists[_whitelistId - 1].addresses[lastIndex];
-            // Remove the last element (now the one to be removed)
-            s.whitelists[_whitelistId - 1].addresses.pop();
-            // Now they aren't whitelisted
+            // Remove the last element
+            address lastElement = s.whitelists[_whitelistId - 1].addresses.pop();
+            // Update the index of the removed element
             s.isWhitelisted[_whitelistId][_whitelistAddress] = 0;
+            // Update the index of the last element that was swapped
+            s.isWhitelisted[_whitelistId][lastElement] = index + 1;
         }
     }
 }
