@@ -89,7 +89,7 @@ export function confirmCorrectness(
     console.log("length mismatch, exiting");
   }
   for (let i = 0; i < subgraphData.length; i++) {
-    // console.log("table1 & 2:", table1[i], table2[i]);
+    // console.log("subgraph vs local:", subgraphData[i], localData[i]);
 
     if (subgraphData[i] === localData[i]) {
       j++;
@@ -135,13 +135,14 @@ export function leaderboardQuery(
     reqs.push(`first${
       i * 1000
     }:aavegotchis(block:{number: ${blockNumber}} first:1000, orderBy: gotchiId, where: {
-        gotchiId_gt: ${i * 1000}, gotchiId_lte: ${
+        gotchiId_gte: ${i * 1000}, gotchiId_lt: ${
       (i + 1) * 1000
     } , baseRarityScore_gt: 0
       }) {
         ${aavegotchi}
       }`);
   }
+
   return `{
     ${reqs.join("")}
   }`;
@@ -324,7 +325,9 @@ export async function fetchAndSortLeaderboard(
   };
 
   console.log("category:", category);
-  const sortedData = eachFinalResult.sort(sortingOptions[`${category}`]);
+  let sortedData = eachFinalResult.sort(sortingOptions[`${category}`]);
+
+  sortedData = [...new Set(sortedData)];
 
   // eachFinalResult = sortedData.slice(0, 7500);
 
