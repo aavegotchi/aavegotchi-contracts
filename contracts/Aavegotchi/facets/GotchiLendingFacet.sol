@@ -49,6 +49,10 @@ contract GotchiLendingFacet is Modifiers {
         listing_ = s.gotchiLendings[listingId];
     }
 
+    function getGotchiLendingIdByToken(uint32 _erc721TokenId) external view returns (uint32) {
+        return s.aavegotchiToListingId[_erc721TokenId];
+    }
+
     ///@notice Query a certain amount of aavegotchi lending listings created by an address
     ///@param _lender Creator of the listings to query
     ///@param _status Status of the listings to query, "listed" or "agreed"

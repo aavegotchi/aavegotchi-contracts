@@ -25,6 +25,7 @@ export async function upgrade() {
         "function claimAndEndGotchiLending(uint32 _tokenId, address[] calldata _revenueTokens) external",
         "function getOwnerGotchiLendings(address _owner, bytes32 _status, uint256 _length) external view",
         "function getGotchiLendings(bytes32 _status, uint256 _length) external view",
+        "function getGotchiLendingIdByToken(uint32 _erc721TokenId) external view",
       ],
       removeSelectors: [],
     },
