@@ -160,12 +160,12 @@ struct GotchiLending {
     address borrower;
     uint32 listingId;
     uint32 erc721TokenId;
-    uint32 period;
+    uint40 period; //in seconds
     // storage slot 3
     address originalOwner; // if original owner is lender, same as lender
-    uint32 timeCreated;
-    uint32 timeAgreed;
-    uint32 lastClaimed;
+    uint40 timeCreated; //timestamp
+    uint40 timeAgreed; //timestamp
+    uint40 lastClaimed; //timestamp
     // storage slot 4
     address thirdParty; // can be address(0)
     uint8[3] revenueSplit; // lender/original owner, borrower, thirdParty

@@ -105,7 +105,7 @@ contract GotchiLendingFacet is Modifiers {
     function addGotchiLending(
         uint32 _erc721TokenId,
         uint96 _initialCost,
-        uint32 _period,
+        uint40 _period,
         uint8[3] calldata _revenueSplit,
         address _originalOwner,
         address _thirdParty,
@@ -146,7 +146,7 @@ contract GotchiLendingFacet is Modifiers {
             erc721TokenId: _erc721TokenId,
             whitelistId: _whitelistId,
             includeList: _includes,
-            timeCreated: uint32(block.timestamp),
+            timeCreated: uint40(block.timestamp),
             timeAgreed: 0,
             lastClaimed: 0,
             canceled: false,
