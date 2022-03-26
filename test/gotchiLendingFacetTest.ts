@@ -455,7 +455,7 @@ describe("Testing Aavegotchi Lending", async function () {
   describe("Testing getGotchiLending", async function () {
     it("Should revert when try to get lending with wrong id", async function () {
       await expect(
-        lendingFacetWithOwner.getLendingListingInfo(secondListingId.add(10))
+        lendingFacetWithOwner.getLendingListingInfo(secondListingId + 10)
       ).to.be.revertedWith("GotchiLending: Listing does not exist");
     });
     it("Should fetch lending data with correct lending id", async function () {
@@ -472,9 +472,7 @@ describe("Testing Aavegotchi Lending", async function () {
   describe("Testing getGotchiLendingInfo", async function () {
     it("Should revert when try to get lending with wrong id", async function () {
       await expect(
-        lendingFacetWithOwner.getGotchiLendingListingInfo(
-          secondListingId.add(10)
-        )
+        lendingFacetWithOwner.getGotchiLendingListingInfo(secondListingId + 10)
       ).to.be.revertedWith("GotchiLending: Listing does not exist");
     });
     it("Should fetch lending data with correct lending id", async function () {
@@ -547,7 +545,7 @@ describe("Testing Aavegotchi Lending", async function () {
   describe("Testing cancelGotchiLending", async function () {
     it("Should revert when try to cancel lending with wrong id", async function () {
       await expect(
-        lendingFacetWithOwner.cancelGotchiLending(secondListingId.add(10))
+        lendingFacetWithOwner.cancelGotchiLending(secondListingId + 10)
       ).to.be.revertedWith("GotchiLending: Listing not found");
     });
     it("Should revert when try to cancel lending with non lender", async function () {
@@ -667,7 +665,7 @@ describe("Testing Aavegotchi Lending", async function () {
     it("Should revert when try to agree lending with wrong lending id", async function () {
       await expect(
         lendingFacetWithBorrower.agreeGotchiLending(
-          fourthListingId.add(10),
+          fourthListingId + 10,
           unlockedAavegotchiId,
           initialCost,
           period,
@@ -818,7 +816,7 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(lendingInfo[0].lender).to.equal(aavegotchiOwnerAddress);
       expect(lendingInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
       expect(lendingInfo[0].completed).to.equal(false);
-      expect(lendingInfo[0].timeAgreed.gt(0)).to.equal(true);
+      expect(lendingInfo[0].timeAgreed > 0).to.equal(true);
       expect(lendingInfo[1].tokenId).to.equal(unlockedAavegotchiId);
       expect(lendingInfo[1].owner).to.equal(borrowerAddress);
       expect(lendingInfo[1].locked).to.equal(true);
@@ -976,8 +974,8 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(lendingInfo[0].lender).to.equal(aavegotchiOwnerAddress);
       expect(lendingInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
       expect(lendingInfo[0].completed).to.equal(false);
-      expect(lendingInfo[0].timeAgreed.gt(0)).to.equal(true);
-      expect(lendingInfo[0].lastClaimed.gt(0)).to.equal(true);
+      expect(lendingInfo[0].timeAgreed > 0).to.equal(true);
+      expect(lendingInfo[0].lastClaimed > 0).to.equal(true);
       expect(lendingInfo[1].tokenId).to.equal(unlockedAavegotchiId);
       expect(lendingInfo[1].owner).to.equal(borrowerAddress);
       expect(lendingInfo[1].locked).to.equal(true);
@@ -1049,8 +1047,8 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(lendingInfo[0].lender).to.equal(aavegotchiOwnerAddress);
       expect(lendingInfo[0].erc721TokenId).to.equal(unlockedAavegotchiId);
       expect(lendingInfo[0].completed).to.equal(true);
-      expect(lendingInfo[0].timeAgreed.gt(0)).to.equal(true);
-      expect(lendingInfo[0].lastClaimed.gt(0)).to.equal(true);
+      expect(lendingInfo[0].timeAgreed > 0).to.equal(true);
+      expect(lendingInfo[0].lastClaimed > 0).to.equal(true);
       expect(lendingInfo[1].tokenId).to.equal(unlockedAavegotchiId);
       expect(lendingInfo[1].owner).to.equal(aavegotchiOwnerAddress);
       expect(lendingInfo[1].locked).to.equal(false);

@@ -153,28 +153,33 @@ struct GameManager {
 }
 
 struct GotchiLending {
-    uint256 listingId;
-    uint256 initialCost; // GHST in wei, can be zero
-    uint256 period;
+    // storage slot 1
     address lender;
+    uint96 initialCost; // GHST in wei, can be zero
+    // storage slot 2
     address borrower;
+    uint32 listingId;
+    uint32 erc721TokenId;
+    uint32 period;
+    // storage slot 3
     address originalOwner; // if original owner is lender, same as lender
+    uint32 timeCreated;
+    uint32 timeAgreed;
+    uint32 lastClaimed;
+    // storage slot 4
     address thirdParty; // can be address(0)
-    uint256[3] revenueSplit; // lender/original owner, borrower, thirdParty
-    uint256 erc721TokenId;
-    uint256 whitelistId; // can be zero
-    address[] includeList;
-    uint256 timeCreated;
-    uint256 timeAgreed;
-    uint256 lastClaimed;
+    uint8[3] revenueSplit; // lender/original owner, borrower, thirdParty
+    uint32 whitelistId; // can be zero
     bool canceled;
     bool completed;
+    // storage slot 5
+    address[] includeList;
 }
 
 struct LendingListItem {
-    uint256 parentListingId;
+    uint32 parentListingId;
     uint256 listingId;
-    uint256 childListingId;
+    uint32 childListingId;
 }
 
 struct Whitelist {
@@ -272,17 +277,17 @@ struct AppStorage {
     //***
     //Gotchi Lending
     //***
-    uint256 nextGotchiListingId;
-    mapping(uint256 => GotchiLending) gotchiLendings;
-    mapping(uint256 => uint256) aavegotchiToListingId;
-    mapping(address => uint256[]) lentTokenIds;
-    mapping(address => mapping(uint256 => uint256)) lentTokenIdIndexes; // address => lent token id => index
-    mapping(bytes32 => mapping(uint256 => LendingListItem)) gotchiLendingListItem; // ("listed" or "agreed") => listingId => LendingListItem
-    mapping(bytes32 => uint256) gotchiLendingHead; // ("listed" or "agreed") => listingId
-    mapping(bytes32 => mapping(uint256 => LendingListItem)) aavegotchiLenderLendingListItem; // ("listed" or "agreed") => listingId => LendingListItem
-    mapping(address => mapping(bytes32 => uint256)) aavegotchiLenderLendingHead; // user address => ("listed" or "agreed") => listingId => LendingListItem
+    uint32 nextGotchiListingId;
+    mapping(uint32 => GotchiLending) gotchiLendings;
+    mapping(uint32 => uint32) aavegotchiToListingId;
+    mapping(address => uint32[]) lentTokenIds;
+    mapping(address => mapping(uint32 => uint32)) lentTokenIdIndexes; // address => lent token id => index
+    mapping(bytes32 => mapping(uint32 => LendingListItem)) gotchiLendingListItem; // ("listed" or "agreed") => listingId => LendingListItem
+    mapping(bytes32 => uint32) gotchiLendingHead; // ("listed" or "agreed") => listingId
+    mapping(bytes32 => mapping(uint32 => LendingListItem)) aavegotchiLenderLendingListItem; // ("listed" or "agreed") => listingId => LendingListItem
+    mapping(address => mapping(bytes32 => uint32)) aavegotchiLenderLendingHead; // user address => ("listed" or "agreed") => listingId => LendingListItem
     Whitelist[] whitelists;
-    mapping(uint256 => mapping(address => bool)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
+    mapping(uint32 => mapping(address => bool)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
 }
 
 library LibAppStorage {

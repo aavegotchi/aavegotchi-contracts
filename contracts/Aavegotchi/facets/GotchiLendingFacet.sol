@@ -10,17 +10,17 @@ import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 import {Modifiers, GotchiLending} from "../libraries/LibAppStorage.sol";
 
 contract GotchiLendingFacet is Modifiers {
-    event GotchiLendingAdd(uint256 indexed listingId);
-    event GotchiLendingExecute(uint256 indexed listingId);
-    event GotchiLendingClaim(uint256 indexed listingId, address[] tokenAddresses, uint256[] amounts);
-    event GotchiLendingEnd(uint256 indexed listingId);
+    event GotchiLendingAdd(uint32 indexed listingId);
+    event GotchiLendingExecute(uint32 indexed listingId);
+    event GotchiLendingClaim(uint32 indexed listingId, address[] tokenAddresses, uint256[] amounts);
+    event GotchiLendingEnd(uint32 indexed listingId);
 
     ///@notice Get an aavegotchi lending details through an identifier
     ///@dev Will throw if the lending does not exist
     ///@param _listingId The identifier of the lending to query
     ///@return listing_ A struct containing certain details about the lending like timeCreated etc
     ///@return aavegotchiInfo_ A struct containing details about the aavegotchi
-    function getGotchiLendingListingInfo(uint256 _listingId)
+    function getGotchiLendingListingInfo(uint32 _listingId)
         external
         view
         returns (GotchiLending memory listing_, AavegotchiInfo memory aavegotchiInfo_)
@@ -34,7 +34,7 @@ contract GotchiLendingFacet is Modifiers {
     ///@dev Will throw if the lending does not exist
     ///@param _listingId The identifier of the lending to query
     ///@return listing_ A struct containing certain details about the ERC721 lending like timeCreated etc
-    function getLendingListingInfo(uint256 _listingId) external view returns (GotchiLending memory listing_) {
+    function getLendingListingInfo(uint32 _listingId) external view returns (GotchiLending memory listing_) {
         listing_ = s.gotchiLendings[_listingId];
         require(listing_.timeCreated != 0, "GotchiLending: Listing does not exist");
     }
@@ -43,8 +43,8 @@ contract GotchiLendingFacet is Modifiers {
     ///@dev Will throw if the lending does not exist
     ///@param _erc721TokenId The identifier of the NFT associated with the lending
     ///@return listing_ A struct containing certain details about the lending associated with an NFT of contract identifier `_erc721TokenId`
-    function getGotchiLendingFromToken(uint256 _erc721TokenId) external view returns (GotchiLending memory listing_) {
-        uint256 listingId = s.aavegotchiToListingId[_erc721TokenId];
+    function getGotchiLendingFromToken(uint32 _erc721TokenId) external view returns (GotchiLending memory listing_) {
+        uint32 listingId = s.aavegotchiToListingId[_erc721TokenId];
         require(listingId != 0, "GotchiLending: Listing doesn't exist");
         listing_ = s.gotchiLendings[listingId];
     }
@@ -59,7 +59,7 @@ contract GotchiLendingFacet is Modifiers {
         bytes32 _status,
         uint256 _length
     ) external view returns (GotchiLending[] memory listings_) {
-        uint256 listingId = s.aavegotchiLenderLendingHead[_lender][_status];
+        uint32 listingId = s.aavegotchiLenderLendingHead[_lender][_status];
         listings_ = new GotchiLending[](_length);
         uint256 listIndex;
         for (; listingId != 0 && listIndex < _length; listIndex++) {
@@ -76,7 +76,7 @@ contract GotchiLendingFacet is Modifiers {
     ///@param _length How many listings to return
     ///@return listings_ An array of lending
     function getGotchiLendings(bytes32 _status, uint256 _length) external view returns (GotchiLending[] memory listings_) {
-        uint256 listingId = s.gotchiLendingHead[_status];
+        uint32 listingId = s.gotchiLendingHead[_status];
         listings_ = new GotchiLending[](_length);
         uint256 listIndex;
         for (; listingId != 0 && listIndex < _length; listIndex++) {
@@ -88,7 +88,7 @@ contract GotchiLendingFacet is Modifiers {
         }
     }
 
-    function isAavegotchiLent(uint256 _erc721TokenId) external view returns (bool) {
+    function isAavegotchiLent(uint32 _erc721TokenId) external view returns (bool) {
         return LibGotchiLending.isAavegotchiLent(_erc721TokenId);
     }
 
@@ -103,13 +103,13 @@ contract GotchiLendingFacet is Modifiers {
     ///@param _thirdParty The 3rd account for receive revenue split, can be address(0)
     ///@param _whitelistId The identifier of whitelist for agree lending, if 0, allow everyone
     function addGotchiLending(
-        uint256 _erc721TokenId,
-        uint256 _initialCost,
-        uint256 _period,
-        uint256[3] calldata _revenueSplit,
+        uint32 _erc721TokenId,
+        uint96 _initialCost,
+        uint32 _period,
+        uint8[3] calldata _revenueSplit,
         address _originalOwner,
         address _thirdParty,
-        uint256 _whitelistId,
+        uint32 _whitelistId,
         address[] calldata _includes
     ) external {
         address sender = LibMeta.msgSender();
@@ -123,7 +123,7 @@ contract GotchiLendingFacet is Modifiers {
 
         require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "GotchiLending: Can only lend Aavegotchi");
 
-        uint256 oldListingId = s.aavegotchiToListingId[_erc721TokenId];
+        uint32 oldListingId = s.aavegotchiToListingId[_erc721TokenId];
         if (oldListingId != 0) {
             LibGotchiLending.cancelGotchiLending(oldListingId, sender);
         } else {
@@ -131,7 +131,7 @@ contract GotchiLendingFacet is Modifiers {
         }
 
         s.nextGotchiListingId++;
-        uint256 listingId = s.nextGotchiListingId;
+        uint32 listingId = s.nextGotchiListingId;
 
         s.aavegotchiToListingId[_erc721TokenId] = listingId;
         s.gotchiLendings[listingId] = GotchiLending({
@@ -146,7 +146,7 @@ contract GotchiLendingFacet is Modifiers {
             erc721TokenId: _erc721TokenId,
             whitelistId: _whitelistId,
             includeList: _includes,
-            timeCreated: block.timestamp,
+            timeCreated: uint32(block.timestamp),
             timeAgreed: 0,
             lastClaimed: 0,
             canceled: false,
@@ -163,13 +163,13 @@ contract GotchiLendingFacet is Modifiers {
 
     ///@notice Allow an aavegotchi lender to cancel his NFT lending by providing the NFT contract address and identifier
     ///@param _erc721TokenId The identifier of the NFT to be delisted from lending
-    function cancelGotchiLendingByToken(uint256 _erc721TokenId) external {
+    function cancelGotchiLendingByToken(uint32 _erc721TokenId) external {
         LibGotchiLending.cancelGotchiLendingFromToken(_erc721TokenId, LibMeta.msgSender());
     }
 
     ///@notice Allow an aavegotchi lender to cancel his NFT lending through the listingId
     ///@param _listingId The identifier of the lending to be cancelled
-    function cancelGotchiLending(uint256 _listingId) external {
+    function cancelGotchiLending(uint32 _listingId) external {
         LibGotchiLending.cancelGotchiLending(_listingId, LibMeta.msgSender());
     }
 
@@ -177,11 +177,11 @@ contract GotchiLendingFacet is Modifiers {
     ///@dev Will throw if the NFT has been lent or if the lending has been canceled already
     ///@param _listingId The identifier of the lending to agree
     function agreeGotchiLending(
-        uint256 _listingId,
-        uint256 _erc721TokenId,
-        uint256 _initialCost,
-        uint256 _period,
-        uint256[3] calldata _revenueSplit
+        uint32 _listingId,
+        uint32 _erc721TokenId,
+        uint96 _initialCost,
+        uint32 _period,
+        uint8[3] calldata _revenueSplit
     ) external {
         GotchiLending storage lending = s.gotchiLendings[_listingId];
         require(lending.timeCreated != 0, "GotchiLending: Listing not found");
@@ -206,13 +206,13 @@ contract GotchiLendingFacet is Modifiers {
         }
 
         lending.borrower = borrower;
-        lending.timeAgreed = block.timestamp;
+        lending.timeAgreed = uint32(block.timestamp);
 
         LibGotchiLending.removeLendingListItem(lender, _listingId, "listed");
         LibGotchiLending.addLendingListItem(lender, _listingId, "agreed");
 
-        uint256 tokenId = lending.erc721TokenId;
-        s.lentTokenIdIndexes[lender][tokenId] = s.lentTokenIds[lender].length;
+        uint32 tokenId = lending.erc721TokenId;
+        s.lentTokenIdIndexes[lender][tokenId] = uint32(s.lentTokenIds[lender].length);
         s.lentTokenIds[lender].push(tokenId);
 
         LibAavegotchi.transfer(lender, borrower, tokenId);
@@ -227,8 +227,8 @@ contract GotchiLendingFacet is Modifiers {
     ///@dev Will throw if the NFT has not been lent or if the lending has been canceled already
     ///@param _tokenId The identifier of the lent aavegotchi to claim
     ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
-    function claimGotchiLending(uint256 _tokenId, address[] calldata _revenueTokens) external {
-        uint256 listingId = s.aavegotchiToListingId[_tokenId];
+    function claimGotchiLending(uint32 _tokenId, address[] calldata _revenueTokens) external {
+        uint32 listingId = s.aavegotchiToListingId[_tokenId];
         require(listingId != 0, "GotchiLending: Listing not found");
         GotchiLending storage lending = s.gotchiLendings[listingId];
 
@@ -244,8 +244,8 @@ contract GotchiLendingFacet is Modifiers {
     ///@dev Will throw if the NFT has not been lent or if the lending has been canceled already
     ///@param _tokenId The identifier of the lent aavegotchi to claim
     ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
-    function claimAndEndGotchiLending(uint256 _tokenId, address[] calldata _revenueTokens) external {
-        uint256 listingId = s.aavegotchiToListingId[_tokenId];
+    function claimAndEndGotchiLending(uint32 _tokenId, address[] calldata _revenueTokens) external {
+        uint32 listingId = s.aavegotchiToListingId[_tokenId];
         require(listingId != 0, "GotchiLending: Listing not found");
         GotchiLending storage lending = s.gotchiLendings[listingId];
 

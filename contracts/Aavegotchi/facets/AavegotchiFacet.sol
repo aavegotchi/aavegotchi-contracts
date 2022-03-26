@@ -214,7 +214,7 @@ contract AavegotchiFacet {
         address _to,
         uint256 _tokenId
     ) internal {
-        LibGotchiLending.enforceAavegotchiNotInLending(_tokenId, _sender);
+        LibGotchiLending.enforceAavegotchiNotInLending(uint32(_tokenId), _sender);
 
         require(_to != address(0), "AavegotchiFacet: Can't transfer to 0 address");
         require(_from != address(0), "AavegotchiFacet: _from can't be 0 address");
