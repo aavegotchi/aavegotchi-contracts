@@ -320,6 +320,15 @@ describe("Testing Aavegotchi Lending", async function () {
       expect(await whitelistFacetWithOwner.isWhitelisted(whitelists.length, addresses[0])).to.be.eq(0);
       expect(await whitelistFacetWithOwner.isWhitelisted(whitelists.length, addresses[5])).to.be.eq(0);
       expect(await whitelistFacetWithOwner.isWhitelisted(whitelists.length, addresses[9])).to.be.eq(0);
+
+      // REMOVE THEM ALLLLLL
+      await whitelistFacetWithOwner.removeAddressesFromWhitelist(whitelists.length, addresses);
+      whitelists = await whitelistFacetWithOwner.getWhitelists();
+      expect(whitelists.length).to.equal(3);
+      expect(whitelists[2].addresses.length).to.equal(0);
+      for(let i = 0; i < 10; i++) {
+        expect(await whitelistFacetWithOwner.isWhitelisted(whitelists.length, addresses[i])).to.be.eq(0);
+      }
     });
   })
 
