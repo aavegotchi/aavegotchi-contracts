@@ -232,6 +232,7 @@ task("rarityPayout")
       let txData = [];
       let txGroup: TxArgs[] = [];
       let tokenIdsNum = 0;
+
       for (const gotchiID of Object.keys(finalRewards)) {
         let amount = finalRewards[gotchiID];
         let parsedAmount = BigNumber.from(parseEther(amount.toString()));
@@ -259,8 +260,6 @@ task("rarityPayout")
 
       for (const [i, txGroup] of txData.entries()) {
         console.log("current index:", i);
-
-        if (i < 7) continue;
 
         let tokenIds: string[] = [];
         let amounts: string[] = [];
