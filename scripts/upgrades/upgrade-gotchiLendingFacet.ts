@@ -17,7 +17,7 @@ export async function upgrade() {
         "function getLendingListingInfo(uint32 _listingId) external view",
         "function getGotchiLendingFromToken(uint32 _erc721TokenId) external view",
         "function isAavegotchiLent(uint32 _erc721TokenId) external view",
-        "function addGotchiLending(uint32 _erc721TokenId, uint96 _initialCost, uint40 _period, uint8[3] calldata _revenueSplit, address _originalOwner, address _thirdParty, uint32 _whitelistId, address[] calldata _includes) external",
+        "function addGotchiLending(uint32 _erc721TokenId, uint96 _initialCost, uint32 _period, uint8[3] calldata _revenueSplit, address _originalOwner, address _thirdParty, uint32 _whitelistId, address[] calldata _includes) external",
         "function cancelGotchiLendingByToken(uint32 _erc721TokenId) external",
         "function cancelGotchiLending(uint32 _listingId) external",
         "function agreeGotchiLending(uint32 _listingId, uint32 _erc721TokenId, uint96 _initialCost, uint32 _period, uint8[3] calldata _revenueSplit) external",
