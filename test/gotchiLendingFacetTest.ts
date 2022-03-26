@@ -292,6 +292,37 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
+  describe("Testing remove from whitelist", async() => {
+    it("Should remove elements from whitelist", async() => {
+      let addresses: string[] = [];
+      for(let i = 0; i < 10; i++) {
+        addresses.push(
+          ethers.utils.computeAddress(
+            ethers.utils.keccak256(
+              ethers.utils.hexlify(i))));
+      }
+      await whitelistFacetWithOwner.createWhitelist("OMEGALUL", addresses);
+      let whitelists = await whitelistFacetWithOwner.getWhitelists();
+      expect(whitelists.length).to.equal(3);
+      expect(whitelists[2].addresses.length).to.equal(10);
+
+      await whitelistFacetWithOwner.removeAddressesFromWhitelist(whitelists.length, [addresses[0], addresses[5], addresses[9]]);
+
+      whitelists = await whitelistFacetWithOwner.getWhitelists();
+      expect(whitelists.length).to.equal(3);
+      expect(whitelists[2].addresses.length).to.equal(7);
+
+      for(let i = 1; i < 9; i++) {
+        expect(whitelists[2].addresses).to.include(addresses[i]);
+        expect(await whitelistFacetWithOwner.isWhitelisted(whitelists.length, addresses[i])).to.be.gt(0);
+        if(i == 4) i++;
+      }
+      expect(await whitelistFacetWithOwner.isWhitelisted(whitelists.length, addresses[0])).to.be.eq(0);
+      expect(await whitelistFacetWithOwner.isWhitelisted(whitelists.length, addresses[5])).to.be.eq(0);
+      expect(await whitelistFacetWithOwner.isWhitelisted(whitelists.length, addresses[9])).to.be.eq(0);
+    });
+  })
+
   describe("Testing addGotchiLending", async function () {
     it("Should revert if non-owner try to add", async function () {
       await expect(
