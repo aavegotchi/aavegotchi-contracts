@@ -46,7 +46,8 @@ contract WhitelistFacet is Modifiers {
         require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
 
         _removeAddressesFromWhitelist(_whitelistId, _whitelistAddresses);
-        emit WhitelistUpdated(uint32 indexed whitelistId);
+
+        emit WhitelistUpdated(_whitelistId);
     }
 
     function getWhitelist(uint32 _whitelistId) external view returns (Whitelist memory) {
@@ -67,7 +68,7 @@ contract WhitelistFacet is Modifiers {
     function _addAddressToWhitelist(uint32 _whitelistId, address _whitelistAddress) internal {
         if (s.isWhitelisted[_whitelistId][_whitelistAddress] == 0) {
             s.whitelists[_whitelistId - 1].addresses.push(_whitelistAddress);
-            s.isWhitelisted[_whitelistId][_whitelistAddress] = s.whitelists.length; // Index of the whitelist entry + 1
+            s.isWhitelisted[_whitelistId][_whitelistAddress] = s.whitelists[_whitelistId - 1].addresses.length; // Index of the whitelist entry + 1
         }
     }
 
@@ -83,8 +84,10 @@ contract WhitelistFacet is Modifiers {
             uint256 lastIndex = s.whitelists[_whitelistId - 1].addresses.length - 1;
             // Replaces the element to be removed with the last element
             s.whitelists[_whitelistId - 1].addresses[index] = s.whitelists[_whitelistId - 1].addresses[lastIndex];
-            // Remove the last element
-            address lastElement = s.whitelists[_whitelistId - 1].addresses.pop();
+            // Store the last element in memory
+            address lastElement = s.whitelists[_whitelistId - 1].addresses[lastIndex];
+            // Remove the last element from storage
+            s.whitelists[_whitelistId - 1].addresses.pop();
             // Update the index of the removed element
             s.isWhitelisted[_whitelistId][_whitelistAddress] = 0;
             // Update the index of the last element that was swapped
