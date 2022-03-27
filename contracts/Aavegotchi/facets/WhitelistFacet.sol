@@ -13,7 +13,7 @@ contract WhitelistFacet is Modifiers {
         require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
 
         address sender = LibMeta.msgSender();
-        uint32 whitelistId = uint32(s.whitelists.length + 1);
+        uint32 whitelistId = uint32(s.whitelists.length + 1); //whitelistId 0 is reserved for "none" in GotchiLending struct
         address[] memory addresses;
         Whitelist memory whitelist = Whitelist({owner: sender, name: _name, addresses: addresses});
         s.whitelists.push(whitelist);
