@@ -276,4 +276,67 @@ contract GotchiLendingFacet is Modifiers {
 
         emit GotchiLendingEnd(listingId);
     }
+
+    //To be added in a future update
+
+    // struct AddGotchiLending {
+    //     uint32[] _erc721TokenIds;
+    //     uint96[] _initialCosts;
+    //     uint32[] _periods;
+    //     uint8[3][] _revenueSplits;
+    //     address[] _originalOwners;
+    //     address[] _thirdParties;
+    //     uint32[] _whitelistIds;
+    //     address[][] _revenueTokens;
+    // }
+
+    // function batchAddGotchiLending(AddGotchiLending calldata _add) external {
+    //     require(
+    //         _add._erc721TokenIds.length == _add._initialCosts.length &&
+    //             _add._initialCosts.length == _add._periods.length &&
+    //             _add._periods.length == _add._revenueSplits.length &&
+    //             _add._revenueSplits.length == _add._originalOwners.length &&
+    //             _add._originalOwners.length == _add._thirdParties.length &&
+    //             _add._thirdParties.length == _add._whitelistIds.length &&
+    //             _add._whitelistIds.length == _add._revenueTokens.length,
+    //         "GotchiLending: Array lengths mismatch"
+    //     );
+    //     for (uint256 i = 0; i < _add._erc721TokenIds.length; i++) {
+    //         addGotchiLending(
+    //             _add._erc721TokenIds[i],
+    //             _add._initialCosts[i],
+    //             _add._periods[i],
+    //             _add._revenueSplits[i],
+    //             _add._originalOwners[i],
+    //             _add._thirdParties[i],
+    //             _add._whitelistIds[i],
+    //             _add._revenueTokens[i]
+    //         );
+    //     }
+    // }
+
+    // function batchCancelGotchiLending(uint32[] calldata _listingIds) external {
+    //     for (uint256 i = 0; i < _listingIds.length; i++) {
+    //         LibGotchiLending.cancelGotchiLending(_listingIds[i], LibMeta.msgSender());
+    //     }
+    // }
+
+    // function batchAgreeGotchiLending(
+    //     uint32[] calldata _listingIds,
+    //     uint32[] calldata _erc721TokenIds,
+    //     uint96[] calldata _initialCosts,
+    //     uint32[] calldata _periods,
+    //     uint8[3][] calldata _revenueSplits
+    // ) external {
+    //     require(
+    //         _listingIds.length == _erc721TokenIds.length &&
+    //             _erc721TokenIds.length == _initialCosts.length &&
+    //             _initialCosts.length == _periods.length &&
+    //             _periods.length == _revenueSplits.length,
+    //         "GotchiLending: Array length mismatch"
+    //     );
+    //     for (uint256 i = 0; i < _listingIds.length; i++) {
+    //         agreeGotchiLending(_listingIds[i], _erc721TokenIds[i], _initialCosts[i], _periods[i], _revenueSplits[i]);
+    //     }
+    // }
 }
