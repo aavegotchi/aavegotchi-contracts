@@ -36,19 +36,19 @@ contract WhitelistFacet is Modifiers {
         emit WhitelistUpdated(_whitelistId);
     }
 
-    function removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external {
-        address sender = LibMeta.msgSender();
+    // function removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external {
+    //     address sender = LibMeta.msgSender();
 
-        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
-        require(s.whitelists[_whitelistId - 1].owner == sender, "WhitelistFacet: Not whitelist owner");
+    //     require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
+    //     require(s.whitelists[_whitelistId - 1].owner == sender, "WhitelistFacet: Not whitelist owner");
 
-        uint32 whitelistLength = uint32(_whitelistAddresses.length);
-        require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
+    //     uint32 whitelistLength = uint32(_whitelistAddresses.length);
+    //     require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
 
-        _removeAddressesFromWhitelist(_whitelistId, _whitelistAddresses);
-        
-        emit WhitelistUpdated(_whitelistId);
-    }
+    //     _removeAddressesFromWhitelist(_whitelistId, _whitelistAddresses);
+
+    //     emit WhitelistUpdated(_whitelistId);
+    // }
 
     function getWhitelist(uint32 _whitelistId) external view returns (Whitelist memory) {
         require((uint32(s.whitelists.length) >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
@@ -72,26 +72,26 @@ contract WhitelistFacet is Modifiers {
         }
     }
 
-    function _removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) internal {
-        for (uint256 i; i < _whitelistAddresses.length; i++) {
-            _removeAddressFromWhitelist(_whitelistId, _whitelistAddresses[i]);
-        }
-    }
+    // function _removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) internal {
+    //     for (uint256 i; i < _whitelistAddresses.length; i++) {
+    //         _removeAddressFromWhitelist(_whitelistId, _whitelistAddresses[i]);
+    //     }
+    // }
 
-    function _removeAddressFromWhitelist(uint32 _whitelistId, address _whitelistAddress) internal {
-        if (s.isWhitelisted[_whitelistId][_whitelistAddress] > 0) {
-            uint256 index = s.isWhitelisted[_whitelistId][_whitelistAddress] - 1;
-            uint256 lastIndex = s.whitelists[_whitelistId - 1].addresses.length - 1;
-            // Replaces the element to be removed with the last element
-            s.whitelists[_whitelistId - 1].addresses[index] = s.whitelists[_whitelistId - 1].addresses[lastIndex];
-            // Store the last element in memory
-            address lastElement = s.whitelists[_whitelistId - 1].addresses[lastIndex];
-            // Remove the last element from storage
-            s.whitelists[_whitelistId - 1].addresses.pop();
-            // Update the index of the removed element
-            s.isWhitelisted[_whitelistId][_whitelistAddress] = 0;
-            // Update the index of the last element that was swapped
-            s.isWhitelisted[_whitelistId][lastElement] = index + 1;
-        }
-    }
+    // function _removeAddressFromWhitelist(uint32 _whitelistId, address _whitelistAddress) internal {
+    //     if (s.isWhitelisted[_whitelistId][_whitelistAddress] > 0) {
+    //         uint256 index = s.isWhitelisted[_whitelistId][_whitelistAddress] - 1;
+    //         uint256 lastIndex = s.whitelists[_whitelistId - 1].addresses.length - 1;
+    //         // Replaces the element to be removed with the last element
+    //         s.whitelists[_whitelistId - 1].addresses[index] = s.whitelists[_whitelistId - 1].addresses[lastIndex];
+    //         // Store the last element in memory
+    //         address lastElement = s.whitelists[_whitelistId - 1].addresses[lastIndex];
+    //         // Remove the last element from storage
+    //         s.whitelists[_whitelistId - 1].addresses.pop();
+    //         // Update the index of the removed element
+    //         s.isWhitelisted[_whitelistId][_whitelistAddress] = 0;
+    //         // Update the index of the last element that was swapped
+    //         s.isWhitelisted[_whitelistId][lastElement] = index + 1;
+    //     }
+    // }
 }
