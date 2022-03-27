@@ -46,7 +46,7 @@ contract WhitelistFacet is Modifiers {
         require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
 
         _removeAddressesFromWhitelist(_whitelistId, _whitelistAddresses);
-
+        
         emit WhitelistUpdated(_whitelistId);
     }
 

@@ -12,7 +12,6 @@ import {Modifiers, GotchiLending} from "../libraries/LibAppStorage.sol";
 contract GotchiLendingFacet is Modifiers {
     event GotchiLendingAdd(uint32 indexed listingId);
     event GotchiLendingExecute(uint32 indexed listingId);
-    event GotchiLendingClaim(uint32 indexed listingId, address[] tokenAddresses, uint256[] amounts);
     event GotchiLendingEnd(uint32 indexed listingId);
 
     ///@notice Get an aavegotchi lending details through an identifier
@@ -103,7 +102,7 @@ contract GotchiLendingFacet is Modifiers {
     ///@param _initialCost The lending fee of the aavegotchi in $GHST
     ///@param _period The lending period of the aavegotchi, unit: second
     ///@param _revenueSplit The revenue split of the lending, 3 values, sum of the should be 100
-    ///@param _originalOwner The account for original owner, can be address(0) if original owner is lender
+    ///@param _originalOwner The account for original owner, can be set to another address if the owner wishes to have profit split there.
     ///@param _thirdParty The 3rd account for receive revenue split, can be address(0)
     ///@param _whitelistId The identifier of whitelist for agree lending, if 0, allow everyone
     function addGotchiLending(
@@ -114,10 +113,10 @@ contract GotchiLendingFacet is Modifiers {
         address _originalOwner,
         address _thirdParty,
         uint32 _whitelistId,
-        address[] calldata _includes
-    ) external {
+        address[] calldata _revenueTokens
+    ) external onlyAavegotchiOwner(_erc721TokenId) {
         address sender = LibMeta.msgSender();
-        require(IERC721(address(this)).ownerOf(_erc721TokenId) == sender, "GotchiLending: Not owner of aavegotchi");
+        require(_originalOwner != address(0), "GotchiLending: Original owner cannot be zero address");
         require(_period > 0, "GotchiLending: Period should be larger than 0");
         require(_period <= 31536000, "GotchiLending: Period too long"); //No reason to have a period longer than a year
         require(_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] == 100, "GotchiLending: Sum of revenue split should be 100");
@@ -128,13 +127,18 @@ contract GotchiLendingFacet is Modifiers {
 
         require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "GotchiLending: Can only lend Aavegotchi");
 
+        require(_revenueTokens.length <= 10, "GotchiLending: Too many revenue tokens"); //Prevent claimAndEnd from reverting due to Out of Gas
+
         uint32 oldListingId = s.aavegotchiToListingId[_erc721TokenId];
         if (oldListingId != 0) {
+            //Cancel old listing
             LibGotchiLending.cancelGotchiLending(oldListingId, sender);
         } else {
+            //Listings cannot be created if the Aavegotchi is listed in the Baazaar
             require(s.aavegotchis[_erc721TokenId].locked == false, "GotchiLending: Only callable on unlocked Aavegotchis");
         }
 
+        //Listings will always start from 1
         s.nextGotchiListingId++;
         uint32 listingId = s.nextGotchiListingId;
 
@@ -150,7 +154,7 @@ contract GotchiLendingFacet is Modifiers {
             thirdParty: _thirdParty,
             erc721TokenId: _erc721TokenId,
             whitelistId: _whitelistId,
-            includeList: _includes,
+            revenueTokens: _revenueTokens,
             timeCreated: uint40(block.timestamp),
             timeAgreed: 0,
             lastClaimed: 0,
@@ -160,10 +164,10 @@ contract GotchiLendingFacet is Modifiers {
 
         LibGotchiLending.addLendingListItem(sender, listingId, "listed");
 
-        emit GotchiLendingAdd(listingId);
-
         // Lock Aavegotchis when lending is created
         s.aavegotchis[_erc721TokenId].locked = true;
+
+        emit GotchiLendingAdd(listingId);
     }
 
     ///@notice Allow an aavegotchi lender to cancel his NFT lending by providing the NFT contract address and identifier
@@ -211,7 +215,7 @@ contract GotchiLendingFacet is Modifiers {
         }
 
         lending.borrower = borrower;
-        lending.timeAgreed = uint32(block.timestamp);
+        lending.timeAgreed = uint40(block.timestamp);
 
         LibGotchiLending.removeLendingListItem(lender, _listingId, "listed");
         LibGotchiLending.addLendingListItem(lender, _listingId, "agreed");
@@ -231,8 +235,8 @@ contract GotchiLendingFacet is Modifiers {
     ///@notice Allow to claim revenue from the lending
     ///@dev Will throw if the NFT has not been lent or if the lending has been canceled already
     ///@param _tokenId The identifier of the lent aavegotchi to claim
-    ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
-    function claimGotchiLending(uint32 _tokenId, address[] calldata _revenueTokens) external {
+
+    function claimGotchiLending(uint32 _tokenId) external {
         uint32 listingId = s.aavegotchiToListingId[_tokenId];
         require(listingId != 0, "GotchiLending: Listing not found");
         GotchiLending storage lending = s.gotchiLendings[listingId];
@@ -240,16 +244,14 @@ contract GotchiLendingFacet is Modifiers {
         address sender = LibMeta.msgSender();
         require((lending.lender == sender) || (lending.borrower == sender), "GotchiLending: Only lender or borrower can claim");
 
-        uint256[] memory amounts = LibGotchiLending.claimGotchiLending(listingId, _revenueTokens);
-
-        emit GotchiLendingClaim(listingId, _revenueTokens, amounts);
+        LibGotchiLending.claimGotchiLending(listingId);
     }
 
     ///@notice Allow a lender to claim revenue from the lending
     ///@dev Will throw if the NFT has not been lent or if the lending has been canceled already
     ///@param _tokenId The identifier of the lent aavegotchi to claim
-    ///@param _revenueTokens The address array of the revenue tokens to claim; FUD, FOMO, ALPHA, KEK, then GHST
-    function claimAndEndGotchiLending(uint32 _tokenId, address[] calldata _revenueTokens) external {
+
+    function claimAndEndGotchiLending(uint32 _tokenId) external {
         uint32 listingId = s.aavegotchiToListingId[_tokenId];
         require(listingId != 0, "GotchiLending: Listing not found");
         GotchiLending storage lending = s.gotchiLendings[listingId];
@@ -260,7 +262,7 @@ contract GotchiLendingFacet is Modifiers {
         require((lender == sender) || (borrower == sender), "GotchiLending: Only lender or borrower can claim and end agreement");
         require(lending.timeAgreed + lending.period <= block.timestamp, "GotchiLending: Not allowed during agreement");
 
-        uint256[] memory amounts = LibGotchiLending.claimGotchiLending(listingId, _revenueTokens);
+        LibGotchiLending.claimGotchiLending(listingId);
 
         // end lending agreement
         s.aavegotchis[_tokenId].locked = false;
@@ -272,7 +274,69 @@ contract GotchiLendingFacet is Modifiers {
         LibGotchiLending.removeLentAavegotchi(_tokenId, lender);
         LibGotchiLending.removeLendingListItem(lender, listingId, "agreed");
 
-        emit GotchiLendingClaim(listingId, _revenueTokens, amounts);
         emit GotchiLendingEnd(listingId);
     }
+
+    //To be added in a future update
+
+    // struct AddGotchiLending {
+    //     uint32[] _erc721TokenIds;
+    //     uint96[] _initialCosts;
+    //     uint32[] _periods;
+    //     uint8[3][] _revenueSplits;
+    //     address[] _originalOwners;
+    //     address[] _thirdParties;
+    //     uint32[] _whitelistIds;
+    //     address[][] _revenueTokens;
+    // }
+
+    // function batchAddGotchiLending(AddGotchiLending calldata _add) external {
+    //     require(
+    //         _add._erc721TokenIds.length == _add._initialCosts.length &&
+    //             _add._initialCosts.length == _add._periods.length &&
+    //             _add._periods.length == _add._revenueSplits.length &&
+    //             _add._revenueSplits.length == _add._originalOwners.length &&
+    //             _add._originalOwners.length == _add._thirdParties.length &&
+    //             _add._thirdParties.length == _add._whitelistIds.length &&
+    //             _add._whitelistIds.length == _add._revenueTokens.length,
+    //         "GotchiLending: Array lengths mismatch"
+    //     );
+    //     for (uint256 i = 0; i < _add._erc721TokenIds.length; i++) {
+    //         addGotchiLending(
+    //             _add._erc721TokenIds[i],
+    //             _add._initialCosts[i],
+    //             _add._periods[i],
+    //             _add._revenueSplits[i],
+    //             _add._originalOwners[i],
+    //             _add._thirdParties[i],
+    //             _add._whitelistIds[i],
+    //             _add._revenueTokens[i]
+    //         );
+    //     }
+    // }
+
+    // function batchCancelGotchiLending(uint32[] calldata _listingIds) external {
+    //     for (uint256 i = 0; i < _listingIds.length; i++) {
+    //         LibGotchiLending.cancelGotchiLending(_listingIds[i], LibMeta.msgSender());
+    //     }
+    // }
+
+    // function batchAgreeGotchiLending(
+    //     uint32[] calldata _listingIds,
+    //     uint32[] calldata _erc721TokenIds,
+    //     uint96[] calldata _initialCosts,
+    //     uint32[] calldata _periods,
+    //     uint8[3][] calldata _revenueSplits
+    // ) external {
+    //     require(
+    //         _listingIds.length == _erc721TokenIds.length &&
+    //             _erc721TokenIds.length == _initialCosts.length &&
+    //             _initialCosts.length == _periods.length &&
+    //             _periods.length == _revenueSplits.length,
+    //         "GotchiLending: Array length mismatch"
+    //     );
+    //     for (uint256 i = 0; i < _listingIds.length; i++) {
+    //         agreeGotchiLending(_listingIds[i], _erc721TokenIds[i], _initialCosts[i], _periods[i], _revenueSplits[i]);
+    //     }
+    // }
 }

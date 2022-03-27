@@ -24,7 +24,10 @@ describe("Testing Aavegotchi Lending", async function () {
   const listedFilter = ethers.utils.formatBytes32String("listed");
   const agreedFilter = ethers.utils.formatBytes32String("agreed");
   const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
-  const revenueTokens: string[] = [ghstAddress];
+
+  const collateral = "0x8df3aad3a84da6b69a4da8aec3ea40d9091b2ac4";
+
+  const revenueTokens: string[] = [ghstAddress, collateral];
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   const claimerAddress = "0x3507e4978e0eb83315d20df86ca0b976c0e40ccb";
   const borrowerAddress = "0xb4473cfEeDC9a0E94612c6ce883677b63f830DB8"; // borrower should be GHST holder
@@ -297,12 +300,14 @@ describe("Testing Aavegotchi Lending", async function () {
           initialCost,
           period,
           revenueSplitWithoutThirdParty,
-          ethers.constants.AddressZero,
+          aavegotchiOwnerAddress,
           ethers.constants.AddressZero,
           whitelistId,
           []
         )
-      ).to.be.revertedWith("GotchiLending: Not owner of aavegotchi");
+      ).to.be.revertedWith(
+        "LibAppStorage: Only aavegotchi owner can call this function"
+      );
     });
     it("Should revert if period is zero", async function () {
       await expect(
@@ -311,7 +316,7 @@ describe("Testing Aavegotchi Lending", async function () {
           initialCost,
           0,
           revenueSplitWithoutThirdParty,
-          ethers.constants.AddressZero,
+          aavegotchiOwnerAddress,
           ethers.constants.AddressZero,
           whitelistId,
           []
@@ -328,7 +333,7 @@ describe("Testing Aavegotchi Lending", async function () {
           initialCost,
           period,
           invalidRevenueSplit,
-          ethers.constants.AddressZero,
+          aavegotchiOwnerAddress,
           ethers.constants.AddressZero,
           whitelistId,
           []
@@ -342,7 +347,7 @@ describe("Testing Aavegotchi Lending", async function () {
           initialCost,
           period,
           revenueSplitForThirdParty,
-          ethers.constants.AddressZero,
+          aavegotchiOwnerAddress,
           ethers.constants.AddressZero,
           whitelistId,
           []
@@ -358,7 +363,7 @@ describe("Testing Aavegotchi Lending", async function () {
           initialCost,
           period,
           revenueSplitWithoutThirdParty,
-          ethers.constants.AddressZero,
+          aavegotchiOwnerAddress,
           ethers.constants.AddressZero,
           whitelistId + 10,
           []
@@ -379,7 +384,7 @@ describe("Testing Aavegotchi Lending", async function () {
           initialCost,
           period,
           revenueSplitWithoutThirdParty,
-          ethers.constants.AddressZero,
+          aavegotchiOwnerAddress,
           ethers.constants.AddressZero,
           secondWhitelistId,
           []
@@ -394,7 +399,7 @@ describe("Testing Aavegotchi Lending", async function () {
             initialCost,
             period,
             revenueSplitWithoutThirdParty,
-            ethers.constants.AddressZero,
+            aavegotchiOwnerAddress,
             ethers.constants.AddressZero,
             whitelistId,
             []
@@ -410,7 +415,7 @@ describe("Testing Aavegotchi Lending", async function () {
             initialCost,
             period,
             revenueSplitWithoutThirdParty,
-            ethers.constants.AddressZero,
+            aavegotchiOwnerAddress,
             ethers.constants.AddressZero,
             0,
             []
@@ -434,7 +439,7 @@ describe("Testing Aavegotchi Lending", async function () {
             initialCost,
             period,
             revenueSplitWithoutThirdParty,
-            ethers.constants.AddressZero,
+            aavegotchiOwnerAddress,
             ethers.constants.AddressZero,
             whitelistId,
             []
@@ -604,7 +609,7 @@ describe("Testing Aavegotchi Lending", async function () {
           initialCost,
           period,
           revenueSplitWithoutThirdParty,
-          ethers.constants.AddressZero,
+          aavegotchiOwnerAddress,
           ethers.constants.AddressZero,
           whitelistId,
           []
@@ -651,7 +656,7 @@ describe("Testing Aavegotchi Lending", async function () {
           initialCost,
           period,
           revenueSplitForThirdParty,
-          ethers.constants.AddressZero,
+          aavegotchiOwnerAddress,
           thirdParty,
           whitelistId,
           revenueTokens
@@ -901,28 +906,19 @@ describe("Testing Aavegotchi Lending", async function () {
   describe("Testing claimGotchiLending and claimAndEndGotchiLending", async function () {
     it("Should revert when try to claim lending with non lender during agreement", async function () {
       await expect(
-        lendingFacetWithClaimer.claimGotchiLending(
-          unlockedAavegotchiId,
-          revenueTokens
-        )
+        lendingFacetWithClaimer.claimGotchiLending(unlockedAavegotchiId)
       ).to.be.revertedWith("GotchiLending: Only lender or borrower can claim");
     });
     it("Should revert when try to end lending with non lender or non borrower", async function () {
       await expect(
-        lendingFacetWithClaimer.claimAndEndGotchiLending(
-          unlockedAavegotchiId,
-          revenueTokens
-        )
+        lendingFacetWithClaimer.claimAndEndGotchiLending(unlockedAavegotchiId)
       ).to.be.revertedWith(
         "GotchiLending: Only lender or borrower can claim and end agreement"
       );
     });
     it("Should revert when try to end lending with lender or borrower during agreement", async function () {
       await expect(
-        lendingFacetWithOwner.claimAndEndGotchiLending(
-          unlockedAavegotchiId,
-          revenueTokens
-        )
+        lendingFacetWithOwner.claimAndEndGotchiLending(unlockedAavegotchiId)
       ).to.be.revertedWith("GotchiLending: Not allowed during agreement");
     });
     it("Should succeed when claim lending with lender during agreement", async function () {
@@ -941,10 +937,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
-        await lendingFacetWithOwner.claimGotchiLending(
-          unlockedAavegotchiId,
-          revenueTokens
-        )
+        await lendingFacetWithOwner.claimGotchiLending(unlockedAavegotchiId)
       ).wait();
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
       const borrowerNewBalance = await ghstERC20.balanceOf(borrowerAddress);
@@ -986,10 +979,7 @@ describe("Testing Aavegotchi Lending", async function () {
       await ethers.provider.send("evm_mine", []);
 
       await expect(
-        lendingFacetWithClaimer.claimGotchiLending(
-          unlockedAavegotchiId,
-          revenueTokens
-        )
+        lendingFacetWithClaimer.claimGotchiLending(unlockedAavegotchiId)
       ).to.be.revertedWith("GotchiLending: Only lender or borrower can claim");
     });
     it("isAavegotchiLent function should return true if aavegotchi lending is not completed", async function () {
@@ -1015,8 +1005,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
         await lendingFacetWithOwner.claimAndEndGotchiLending(
-          unlockedAavegotchiId,
-          revenueTokens
+          unlockedAavegotchiId
         )
       ).wait();
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
@@ -1106,7 +1095,7 @@ describe("Testing Aavegotchi Lending", async function () {
           initialCost,
           period,
           revenueSplitForThirdParty,
-          ethers.constants.AddressZero,
+          aavegotchiOwnerAddress,
           thirdParty,
           whitelistId,
           []
@@ -1153,8 +1142,7 @@ describe("Testing Aavegotchi Lending", async function () {
       const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
         await lendingFacetWithOwner.claimAndEndGotchiLending(
-          unlockedAavegotchiId,
-          revenueTokens
+          unlockedAavegotchiId
         )
       ).wait();
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
@@ -1228,10 +1216,7 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       const thirdPartyOldBalance = await ghstERC20.balanceOf(thirdParty);
       await (
-        await lendingFacetWithOwner.claimGotchiLending(
-          unlockedAavegotchiId,
-          revenueTokens
-        )
+        await lendingFacetWithOwner.claimGotchiLending(unlockedAavegotchiId)
       ).wait();
       const escrowNewBalance = await ghstERC20.balanceOf(escrowAddress);
       const borrowerNewBalance = await ghstERC20.balanceOf(borrowerAddress);
