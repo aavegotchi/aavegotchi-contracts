@@ -46,7 +46,7 @@ contract WhitelistFacet is Modifiers {
         require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
 
         _removeAddressesFromWhitelist(_whitelistId, _whitelistAddresses);
-        emit WhitelistUpdated(uint32 indexed whitelistId);
+        emit WhitelistUpdated(_whitelistId);
     }
 
     function getWhitelist(uint32 _whitelistId) external view returns (Whitelist memory) {
