@@ -52,7 +52,7 @@ export default {
       timeout: 16000000,
     },
     matic: {
-      url: process.env.MORALIS_URL,
+      url: process.env.MATIC_URL,
       // url: 'https://rpc-mainnet.maticvigil.com/',
       accounts: [process.env.ITEM_MANAGER],
       // blockGasLimit: 20000000,
