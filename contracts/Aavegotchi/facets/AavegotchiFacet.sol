@@ -5,6 +5,7 @@ import {LibAavegotchi, AavegotchiInfo} from "../libraries/LibAavegotchi.sol";
 
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {AppStorage} from "../libraries/LibAppStorage.sol";
+import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 // import "hardhat/console.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
@@ -117,7 +118,7 @@ contract AavegotchiFacet {
     }
 
     ///@notice Check if an address `_operator` is an authorized pet operator for another address `_owner`
-    ///@param _owner address of the original owner of the NFTs
+    ///@param _owner address of the lender of the NFTs
     ///@param _operator address that acts pets the gotchis on behalf of the owner
     ///@return approved_ true if `operator` is an approved pet operator, False if otherwise
     function isPetOperatorForAll(address _owner, address _operator) external view returns (bool approved_) {
@@ -215,6 +216,8 @@ contract AavegotchiFacet {
         address _to,
         uint256 _tokenId
     ) internal {
+        LibGotchiLending.enforceAavegotchiNotInLending(uint32(_tokenId), _sender);
+
         require(_to != address(0), "AavegotchiFacet: Can't transfer to 0 address");
         require(_from != address(0), "AavegotchiFacet: _from can't be 0 address");
         require(_from == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: _from is not owner, transfer failed");
