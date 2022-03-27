@@ -9,6 +9,7 @@ import {CollateralEscrow} from "../CollateralEscrow.sol";
 
 library LibGotchiLending {
     event GotchiLendingCancel(uint32 indexed listingId, uint256 time);
+    event GotchiLendingClaim(uint32 indexed listingId, address[] tokenAddresses, uint256[] amounts);
 
     function cancelGotchiLending(uint32 _listingId, address _lender) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
@@ -51,50 +52,44 @@ library LibGotchiLending {
         delete s.lentTokenIdIndexes[_lender][_tokenId];
     }
 
-    function claimGotchiLending(uint32 listingId, address[] calldata _revenueTokens) internal returns (uint256[] memory) {
+    function claimGotchiLending(uint32 listingId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         GotchiLending storage lending = s.gotchiLendings[listingId];
 
-        uint256[] memory amounts = new uint256[](_revenueTokens.length);
-        uint32 tokenId = lending.erc721TokenId;
-        address escrow = s.aavegotchis[tokenId].escrow;
-        if (escrow == address(0)) return amounts;
-        address collateralType = s.aavegotchis[tokenId].collateralType;
-        for (uint256 i; i < _revenueTokens.length; i++) {
-            address revenueToken = _revenueTokens[i];
-            if (collateralType == revenueToken) continue;
+        uint256[] memory amounts = new uint256[](lending.revenueTokens.length);
+        address escrow = s.aavegotchis[lending.erc721TokenId].escrow;
 
-            bool isIncluded;
-            for (uint256 j; j < lending.includeList.length; j++) {
-                if (lending.includeList[j] == revenueToken) {
-                    isIncluded = true;
-                    break;
-                }
-            }
-            if (!isIncluded) continue;
+        require(escrow != address(0), "LibGotchiLending: Escrow is zero address");
 
+        address collateralType = s.aavegotchis[lending.erc721TokenId].collateralType;
+        for (uint256 i; i < lending.revenueTokens.length; i++) {
+            address revenueToken = lending.revenueTokens[i];
             uint256 balance = IERC20(revenueToken).balanceOf(escrow);
-            if (balance == 0) continue;
-            amounts[i] = balance;
 
-            if (IERC20(revenueToken).allowance(escrow, address(this)) < balance) {
-                CollateralEscrow(escrow).approveAavegotchiDiamond(revenueToken);
-            }
+            if (collateralType == revenueToken || balance == 0) {
+                amounts[i] = 0; //gotchi collateral can never be a revenue token
+            } else {
+                amounts[i] = balance;
 
-            uint256 ownerAmount = (balance * lending.revenueSplit[0]) / 100;
-            uint256 borrowerAmount = (balance * lending.revenueSplit[1]) / 100;
-            address owner = lending.originalOwner == address(0) ? lending.lender : lending.originalOwner;
-            LibERC20.transferFrom(revenueToken, escrow, owner, ownerAmount);
-            LibERC20.transferFrom(revenueToken, escrow, lending.borrower, borrowerAmount);
-            if (lending.thirdParty != address(0)) {
-                uint256 thirdPartyAmount = (balance * lending.revenueSplit[2]) / 100;
-                LibERC20.transferFrom(revenueToken, escrow, lending.thirdParty, thirdPartyAmount);
+                if (IERC20(revenueToken).allowance(escrow, address(this)) < balance) {
+                    CollateralEscrow(escrow).approveAavegotchiDiamond(revenueToken);
+                }
+
+                uint256 ownerAmount = (balance * lending.revenueSplit[0]) / 100;
+                uint256 borrowerAmount = (balance * lending.revenueSplit[1]) / 100;
+                address owner = lending.originalOwner == address(0) ? lending.lender : lending.originalOwner;
+                LibERC20.transferFrom(revenueToken, escrow, owner, ownerAmount);
+                LibERC20.transferFrom(revenueToken, escrow, lending.borrower, borrowerAmount);
+                if (lending.thirdParty != address(0)) {
+                    uint256 thirdPartyAmount = (balance * lending.revenueSplit[2]) / 100;
+                    LibERC20.transferFrom(revenueToken, escrow, lending.thirdParty, thirdPartyAmount);
+                }
             }
         }
 
-        lending.lastClaimed = uint32(block.timestamp);
+        lending.lastClaimed = uint40(block.timestamp);
 
-        return amounts;
+        emit GotchiLendingClaim(listingId, lending.revenueTokens, amounts);
     }
 
     function enforceAavegotchiNotInLending(uint32 _tokenId, address _sender) internal {

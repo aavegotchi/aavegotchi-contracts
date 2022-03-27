@@ -173,7 +173,7 @@ struct GotchiLending {
     uint40 lastClaimed; //timestamp
     uint32 period; //in seconds
     // storage slot 5
-    address[] includeList;
+    address[] revenueTokens;
 }
 
 struct LendingListItem {
