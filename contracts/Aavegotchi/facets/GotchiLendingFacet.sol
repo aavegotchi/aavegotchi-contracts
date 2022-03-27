@@ -206,7 +206,7 @@ contract GotchiLendingFacet is Modifiers {
         address lender = lending.lender;
         require(lender != borrower, "GotchiLending: Borrower can't be lender");
         if (lending.whitelistId > 0) {
-            require(s.isWhitelisted[lending.whitelistId][borrower], "GotchiLending: Not whitelisted address");
+            require(s.isWhitelisted[lending.whitelistId][borrower] > 0, "GotchiLending: Not whitelisted address");
         }
 
         if (lending.initialCost > 0) {
