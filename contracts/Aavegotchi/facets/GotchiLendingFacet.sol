@@ -119,6 +119,7 @@ contract GotchiLendingFacet is Modifiers {
         address sender = LibMeta.msgSender();
         require(IERC721(address(this)).ownerOf(_erc721TokenId) == sender, "GotchiLending: Not owner of aavegotchi");
         require(_period > 0, "GotchiLending: Period should be larger than 0");
+        require(_period <= 31536000, "GotchiLending: Period too long"); //No reason to have a period longer than a year
         require(_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] == 100, "GotchiLending: Sum of revenue split should be 100");
         if (_thirdParty == address(0)) {
             require(_revenueSplit[2] == 0, "GotchiLending: Revenue split for invalid thirdParty should be zero");
