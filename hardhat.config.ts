@@ -27,6 +27,7 @@ require("./tasks/grantXP_aavegotchis");
 require("./tasks/addItemTypes");
 require("./tasks/addWearableSets");
 require("./tasks/grantXP_customValues");
+require("./tasks/generateDiamondABI");
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
