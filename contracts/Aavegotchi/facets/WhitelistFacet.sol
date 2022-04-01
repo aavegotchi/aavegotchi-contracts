@@ -58,8 +58,14 @@ contract WhitelistFacet is Modifiers {
         require(s.whitelists[_whitelistId - 1].owner == sender, "WhitelistFacet: Not whitelist owner");
 
         s.whitelists[_whitelistId - 1].owner = _whitelistOwner;
-        
+
         emit WhitelistOwnershipTransferred(_whitelistId, _whitelistOwner);
+    }
+
+    function whitelistOwner(uint32 _whitelistId) external view returns (address) {
+        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
+
+        return s.whitelists[_whitelistId - 1].owner;
     }
 
     function isWhitelisted(uint32 _whitelistId, address _whitelistAddress) external view returns (uint256) {
