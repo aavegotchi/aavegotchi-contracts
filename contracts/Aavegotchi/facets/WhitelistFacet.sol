@@ -64,7 +64,7 @@ contract WhitelistFacet is Modifiers {
     }
 
     function getWhitelistsLength() external view returns (uint256) {
-        return uint256(s.whitelists.length);
+        return s.whitelists.length;
     }
 
     function _addAddressesToWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) internal {
