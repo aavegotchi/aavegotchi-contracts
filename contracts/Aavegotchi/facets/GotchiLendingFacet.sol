@@ -209,7 +209,7 @@ contract GotchiLendingFacet is Modifiers {
             require(s.isWhitelisted[lending.whitelistId][borrower] > 0, "GotchiLending: Not whitelisted address");
         }
         for(uint256 i = 0; i < s.ownerTokenIds[borrower].length; ) {
-            require(!LibGotchiLending.isAavegotchiBorrowed(s.ownerTokenIds[borrower][i]), "GotchiLending: Already borrowing");
+            require(!LibGotchiLending.isAavegotchiLent(s.ownerTokenIds[borrower][i]), "GotchiLending: Already borrowing");
             unchecked {
                 ++i;
             }
