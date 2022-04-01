@@ -4,7 +4,7 @@
 //@ts-ignore
 import { ethers, network } from "hardhat";
 import chai from "chai";
-import { upgrade } from "../scripts/upgrades/upgrade-gotchiLendingBorrowLimit";
+import { upgrade } from "../scripts/upgrades/upgrade-gotchiLendingOptimize";
 import { impersonate } from "../scripts/helperFunctions";
 import {
   AavegotchiFacet,
@@ -98,7 +98,7 @@ describe("Testing Aavegotchi Lending", async function () {
 
   });
 
-  describe("Testing whitelist", async () => {
+  describe("Testing lending and whitelist", async () => {
     it("Should be able to transfer ownership of a whitelist", async() => {
       await whitelistFacetWithOwner.createWhitelist("yore mum", [thirdParty]);
       whitelistId = await whitelistFacetWithOwner.getWhitelistsLength();
