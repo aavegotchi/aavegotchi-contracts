@@ -7,6 +7,7 @@ import {Modifiers, Whitelist} from "../libraries/LibAppStorage.sol";
 contract WhitelistFacet is Modifiers {
     event WhitelistCreated(uint32 indexed whitelistId);
     event WhitelistUpdated(uint32 indexed whitelistId);
+    event WhitelistOwnershipTransferred(uint32 indexed whitelistId, address indexed newOwner);
 
     function createWhitelist(string calldata _name, address[] calldata _whitelistAddresses) external {
         uint256 whitelistLength = _whitelistAddresses.length;
@@ -48,6 +49,17 @@ contract WhitelistFacet is Modifiers {
         _removeAddressesFromWhitelist(_whitelistId, _whitelistAddresses);
 
         emit WhitelistUpdated(_whitelistId);
+    }
+
+    function transferOwnershipOfWhitelist(uint32 _whitelistId, address _whitelistOwner) external {
+        address sender = LibMeta.msgSender();
+
+        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
+        require(s.whitelists[_whitelistId - 1].owner == sender, "WhitelistFacet: Not whitelist owner");
+
+        s.whitelists[_whitelistId - 1].owner = _whitelistOwner;
+        
+        emit WhitelistOwnershipTransferred(_whitelistId, _whitelistOwner);
     }
 
     function isWhitelisted(uint32 _whitelistId, address _whitelistAddress) external view returns (uint256) {
