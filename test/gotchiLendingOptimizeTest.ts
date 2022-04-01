@@ -19,8 +19,6 @@ const { expect } = chai;
 describe("Testing Aavegotchi Lending", async function () {
   this.timeout(300000);
 
-
-
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   const borrowerAddress = "0xb4473cfEeDC9a0E94612c6ce883677b63f830DB8"; // borrower should be GHST holder
   const thirdParty = "0x382038b034fa8Ea64C74C81d680669bDaC4D0636";
