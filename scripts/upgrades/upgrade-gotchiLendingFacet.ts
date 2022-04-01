@@ -39,6 +39,7 @@ export async function upgrade() {
         "function isWhitelisted(uint32 _whitelistId, address _whitelistAddress) external view",
         "function getWhitelistsLength() external view",
         "function removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external",
+        "function transferOwnershipOfWhitelist(uint32 _whitelistId, address _whitelistOwner) external",
       ],
       removeSelectors: [],
     },
