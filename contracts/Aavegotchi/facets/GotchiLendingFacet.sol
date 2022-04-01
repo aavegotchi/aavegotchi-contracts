@@ -260,7 +260,7 @@ contract GotchiLendingFacet is Modifiers {
         address lender = lending.lender;
         address borrower = lending.borrower;
         require((lender == sender) || (borrower == sender), "GotchiLending: Only lender or borrower can claim and end agreement");
-        require(lending.timeAgreed + lending.period <= block.timestamp, "GotchiLending: Not allowed during agreement");
+        require(borrower == sender || lending.timeAgreed + lending.period <= block.timestamp, "GotchiLending: Not allowed during agreement");
 
         LibGotchiLending.claimGotchiLending(listingId);
 
