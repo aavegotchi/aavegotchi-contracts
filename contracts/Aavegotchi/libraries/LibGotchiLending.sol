@@ -117,6 +117,14 @@ library LibGotchiLending {
         return listing_.completed == false;
     }
 
+    function isAavegotchiBorrowed(uint32 _tokenId) internal view returns (bool) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        uint32 listingId = s.aavegotchiToListingId[_tokenId];
+        if (listingId == 0) return false;
+        GotchiLending storage listing_ = s.gotchiLendings[listingId];
+        return listing_.timeAgreed != 0 && !listing_.completed; // Agreed to rental and the rental is not complete
+    }
+
     function addLendingListItem(
         address _lender,
         uint32 _listingId,
