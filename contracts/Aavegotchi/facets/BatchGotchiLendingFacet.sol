@@ -22,16 +22,15 @@ contract BatchGotchiLendingFacet is Modifiers {
 
     function batchAddGotchiLending(LendingParams[] calldata _params) external {
         for(uint256 i = 0; i < _params.length; ) {
-            LendingParams memory params = _params[i];
             addGotchiLendingInternal(
-                params._erc721TokenId,
-                params._initialCost,
-                params._period,
-                params._revenueSplit,
-                params._originalOwner,
-                params._thirdParty,
-                params.whitelistId,
-                params._revenueTokens
+                _params[i]._erc721TokenId,
+                _params[i]._initialCost,
+                _params[i]._period,
+                _params[i]._revenueSplit,
+                _params[i]._originalOwner,
+                _params[i]._thirdParty,
+                _params[i].whitelistId,
+                _params[i]._revenueTokens
             );
             unchecked {
                 ++i;
@@ -53,11 +52,11 @@ contract BatchGotchiLendingFacet is Modifiers {
         uint32 _erc721TokenId,
         uint96 _initialCost,
         uint32 _period,
-        uint8[3] memory _revenueSplit,
+        uint8[3] calldata _revenueSplit,
         address _originalOwner,
         address _thirdParty,
         uint32 _whitelistId,
-        address[] memory _revenueTokens
+        address[] calldata _revenueTokens
     ) internal onlyAavegotchiOwner(_erc721TokenId) {
         address sender = LibMeta.msgSender();
         require(_originalOwner != address(0), "GotchiLending: Original owner cannot be zero address");
