@@ -13,6 +13,9 @@ export async function upgrade() {
     {
       facetName: "GotchiLendingFacet",
       addSelectors: [
+        "function allowRevenueTokens(address[] tokens) external",
+        "function disallowRevenueTokens(address[] tokens) external",
+        "function revenueTokenAllowed(address token) external view",
         "function getGotchiLendingListingInfo(uint32 _listingId) external view",
         "function getLendingListingInfo(uint32 _listingId) external view",
         "function getGotchiLendingFromToken(uint32 _erc721TokenId) external view",

@@ -25,10 +25,19 @@ describe("Testing Aavegotchi Lending", async function () {
   const originalPetOperator = "0x4E59235b35d504D1372ABf67a835031F98114d64"; // original pet operator should be MATIC holder
   const gotchiHolder = "0x8FEebfA4aC7AF314d90a0c17C3F91C800cFdE44B";
   const linkiest = "0xaCC227235cCAb6C058B76600D4EC2e86072d0813";
+  const diamondOwner = "0x35FE3dF776474a7B24B3B1EC6e745a830FdAd351";
+  const tokens = [
+    "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f", 
+    "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8", 
+    "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
+    "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
+    "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
+  ]
   const lockedAavegotchiId = 16911;
   let lendingFacetWithBorrower: GotchiLendingFacet;
   let lendingFacetWithGotchiOwner: GotchiLendingFacet;
   let lendingFacetWithSirLinkiest: GotchiLendingFacet;
+  let lendingFacetWithDiamondOwner: GotchiLendingFacet;
   let whitelistFacetWithOwner: WhitelistFacet;
   let aavegotchiFacet: AavegotchiFacet;
   let aavegotchiGameFacet: AavegotchiGameFacet;
@@ -56,7 +65,13 @@ describe("Testing Aavegotchi Lending", async function () {
     )) as AavegotchiGameFacet;
 
     aavegotchiOwnerAddress = await aavegotchiFacet.ownerOf(lockedAavegotchiId);
-
+    
+    lendingFacetWithDiamondOwner = await impersonate(
+      diamondOwner,
+      gotchiLendingFacet,
+      ethers,
+      network
+    )
     lendingFacetWithBorrower = await impersonate(
       borrowerAddress,
       gotchiLendingFacet,
@@ -97,6 +112,55 @@ describe("Testing Aavegotchi Lending", async function () {
   });
 
   describe("Testing lending and whitelist", async () => {
+    it("Should be able to add revenue tokens to a revenue token whitelist", async() => {
+      await lendingFacetWithDiamondOwner.allowRevenueTokens(tokens);
+      for(let i = 0; i < tokens.length; i++) {
+        expect(await lendingFacetWithDiamondOwner.revenueTokenAllowed(tokens[i])).to.be.true;
+      }
+    });
+    it("Should not be able to add revenue tokens to a revenue token whitelist if not owner", async() => {
+      await expect(
+        lendingFacetWithBorrower.allowRevenueTokens([diamondOwner])
+      ).to.be.revertedWith("LibDiamond: Must be contract owner");
+    });
+    it("Should be able to remove revenue tokens from a revenue token whitelist", async() => {
+      await lendingFacetWithDiamondOwner.disallowRevenueTokens(tokens);
+      for(let i = 0; i < tokens.length; i++) {
+        expect(await lendingFacetWithDiamondOwner.revenueTokenAllowed(tokens[i])).to.be.false;
+      }
+    });
+    it("Should not be able to remove revenue tokens from a revenue token whitelist if not owner", async() => {
+      await expect(
+        lendingFacetWithBorrower.disallowRevenueTokens([diamondOwner])
+      ).to.be.revertedWith("LibDiamond: Must be contract owner");
+    });
+    it("Should be able to list a gotchi if a revenue token is whitelisted", async() => {
+      await lendingFacetWithDiamondOwner.allowRevenueTokens(tokens);
+      await lendingFacetWithGotchiOwner.addGotchiLending(
+        11939,
+        0,
+        2591000,
+        [50, 50, 0],
+        gotchiHolder,
+        ethers.constants.AddressZero,
+        0,
+        tokens,
+      );
+      expect(await lendingFacetWithGotchiOwner.getGotchiLendingIdByToken(11939)).to.be.gt(0);
+    });
+    it("Should not be able to list a gotchi if a revenue token is not whitelisted", async() => {
+      await lendingFacetWithDiamondOwner.disallowRevenueTokens(tokens);
+      await expect(lendingFacetWithGotchiOwner.addGotchiLending(
+        22003,
+        0,
+        1,
+        [50, 50, 0],
+        gotchiHolder,
+        ethers.constants.AddressZero,
+        0,
+        tokens,
+      )).to.be.revertedWith("GotchiLending: Invalid revenue token address");
+    });
     it("Should be able to transfer ownership of a whitelist", async() => {
       await whitelistFacetWithOwner.createWhitelist("yore mum", [thirdParty]);
       whitelistId = await whitelistFacetWithOwner.getWhitelistsLength();
@@ -112,7 +176,7 @@ describe("Testing Aavegotchi Lending", async function () {
     });
     it("Shouldn't be able to list with a period of more than 30 days", async() => {
       await expect(lendingFacetWithGotchiOwner.addGotchiLending(
-        11939,
+        22003,
         0,
         2_600_000,
         [50, 50, 0],
@@ -124,17 +188,7 @@ describe("Testing Aavegotchi Lending", async function () {
       
     });
     it("Should only allow one borrowed gotchi", async() => {
-      // Create two listings
-      await lendingFacetWithGotchiOwner.addGotchiLending(
-        11939,
-        0,
-        2591000,
-        [50, 50, 0],
-        gotchiHolder,
-        ethers.constants.AddressZero,
-        0,
-        [],
-      );      
+      // Create two listings     
       await lendingFacetWithGotchiOwner.addGotchiLending(
         22003,
         0,

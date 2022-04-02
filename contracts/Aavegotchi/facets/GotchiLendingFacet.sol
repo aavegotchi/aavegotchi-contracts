@@ -14,6 +14,28 @@ contract GotchiLendingFacet is Modifiers {
     event GotchiLendingExecute(uint32 indexed listingId);
     event GotchiLendingEnd(uint32 indexed listingId);
 
+    function allowRevenueTokens(address[] calldata tokens) external onlyOwner {
+        for(uint256 i = 0; i < tokens.length; ) {
+            s.revenueTokenAllowed[tokens[i]] = true;
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function disallowRevenueTokens(address[] calldata tokens) external onlyOwner {
+        for(uint256 i = 0; i < tokens.length; ) {
+            s.revenueTokenAllowed[tokens[i]] = false;
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function revenueTokenAllowed(address token) external view returns (bool) {
+        return s.revenueTokenAllowed[token];
+    }
+
     ///@notice Get an aavegotchi lending details through an identifier
     ///@dev Will throw if the lending does not exist
     ///@param _listingId The identifier of the lending to query
@@ -128,6 +150,12 @@ contract GotchiLendingFacet is Modifiers {
         require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "GotchiLending: Can only lend Aavegotchi");
 
         require(_revenueTokens.length <= 10, "GotchiLending: Too many revenue tokens"); //Prevent claimAndEnd from reverting due to Out of Gas
+        for(uint256 i = 0; i < _revenueTokens.length; ) {
+            require(s.revenueTokenAllowed[_revenueTokens[i]], "GotchiLending: Invalid revenue token address");
+            unchecked {
+                ++i;
+            }
+        }
 
         uint32 oldListingId = s.aavegotchiToListingId[_erc721TokenId];
         if (oldListingId != 0) {
