@@ -11,7 +11,7 @@ import {
 import { Signer } from "@ethersproject/abstract-signer";
 
 import { OwnershipFacet } from "../typechain/OwnershipFacet";
-import { IDiamondCut } from "../typechain/IDiamondCut";
+import { IDiamondCut, IDiamondLoupe } from "../typechain";
 import {
   gasPrice,
   getSelectors,
@@ -162,24 +162,24 @@ task(
         );
         deployedFacets.push(deployedFacet);
 
-        const newSelectors = getSighashes(facet.addSelectors, hre.ethers);
-        const removeSelectors = getSighashes(facet.removeSelectors, hre.ethers);
+        const diamondLoupe = (await hre.ethers.getContractAt(
+          "IDiamondLoupe",
+          diamondAddress,
+          signer
+        )) as IDiamondLoupe;
 
-        let existingFuncs = getSelectors(deployedFacet);
-        for (const selector of newSelectors) {
-          if (!existingFuncs.includes(selector)) {
-            const index = newSelectors.findIndex((val) => val == selector);
-
-            throw Error(
-              `Selector ${selector} (${facet.addSelectors[index]}) not found`
-            );
+        let facetOutput = await diamondLoupe.facets();
+        let existingFunctionSelectors: string[] = [];
+        for(let i = 0; i < facetOutput.length; i++) {
+          for(let j = 0; j < facetOutput[i].functionSelectors.length; j++) {
+            existingFunctionSelectors.push(facetOutput[i].functionSelectors[j]); 
           }
         }
 
-        let existingSelectors = getSelectors(deployedFacet);
-        existingSelectors = existingSelectors.filter(
-          (selector) => !newSelectors.includes(selector)
-        );
+
+        const newSelectors = getSighashes(facet.addSelectors, hre.ethers).filter((selector) => !existingFunctionSelectors.includes(selector));
+        const removeSelectors = getSighashes(facet.removeSelectors, hre.ethers);
+        const existingSelectors = getSelectors(deployedFacet).filter((selector) => existingFunctionSelectors.includes(selector));
 
         if (newSelectors.length > 0) {
           cut.push({
