@@ -36,6 +36,17 @@ contract GotchiLendingFacet is Modifiers {
         return s.revenueTokenAllowed[token];
     }
 
+    function emergencyChangeRevenueTokens(uint32[] calldata _listingIds, address[] calldata _revenueTokens) external onlyOwner {
+        for(uint256 i = 0; i < _listingIds.length; ) {
+            GotchiLending storage listing_ = s.gotchiLendings[_listingIds[i]];
+            require(listing_.timeCreated != 0, "GotchiLending: Listing does not exist");
+            listing_.revenueTokens = _revenueTokens;
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     ///@notice Get an aavegotchi lending details through an identifier
     ///@dev Will throw if the lending does not exist
     ///@param _listingId The identifier of the lending to query

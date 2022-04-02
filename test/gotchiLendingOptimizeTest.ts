@@ -161,6 +161,16 @@ describe("Testing Aavegotchi Lending", async function () {
         tokens,
       )).to.be.revertedWith("GotchiLending: Invalid revenue token address");
     });
+    it("Diamond owner should be able to change revenue tokens of a listing", async() => {
+      await lendingFacetWithDiamondOwner.emergencyChangeRevenueTokens([11939], [diamondOwner]);
+      const lendingInfo = await lendingFacetWithGotchiOwner.getLendingListingInfo(11939);
+      expect(lendingInfo.revenueTokens).to.be.deep.equal([diamondOwner]);
+    });
+    it("Nobody but the diamond owner should be able to change revenue tokens of a listing", async() => {
+      await expect(
+        lendingFacetWithBorrower.emergencyChangeRevenueTokens([11939], [diamondOwner])
+      ).to.be.revertedWith("LibDiamond: Must be contract owner");
+    });
     it("Should be able to transfer ownership of a whitelist", async() => {
       await whitelistFacetWithOwner.createWhitelist("yore mum", [thirdParty]);
       whitelistId = await whitelistFacetWithOwner.getWhitelistsLength();

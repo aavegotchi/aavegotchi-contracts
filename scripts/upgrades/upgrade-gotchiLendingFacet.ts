@@ -13,6 +13,7 @@ export async function upgrade() {
     {
       facetName: "GotchiLendingFacet",
       addSelectors: [
+        "function emergencyChangeRevenueTokens(uint32[] calldata _listingIds, address[] calldata _revenueTokens) external",
         "function allowRevenueTokens(address[] tokens) external",
         "function disallowRevenueTokens(address[] tokens) external",
         "function revenueTokenAllowed(address token) external view",
