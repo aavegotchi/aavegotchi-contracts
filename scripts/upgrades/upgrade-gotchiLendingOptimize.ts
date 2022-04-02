@@ -48,6 +48,7 @@ export async function upgrade() {
       "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2", // ALPHA
       "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C", // KEK
       "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7", // GHST
+      "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270", // WMATIC
     ]]);
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
