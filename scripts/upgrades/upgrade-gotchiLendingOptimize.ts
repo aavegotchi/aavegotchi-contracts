@@ -5,6 +5,8 @@ import {
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
 import { maticDiamondAddress } from "../helperFunctions";
+import { GotchiLendingFacet__factory } from "../../typechain";
+import { GotchiLendingFacetInterface } from "../../typechain/GotchiLendingFacet";
 
 export async function upgrade() {
   const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
@@ -35,12 +37,26 @@ export async function upgrade() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
+  const iface = new ethers.utils.Interface(
+    GotchiLendingFacet__factory.abi
+  ) as GotchiLendingFacetInterface;
+  const payload = iface.encodeFunctionData(
+    "allowRevenueTokens",
+    [[
+      "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f", // FUD
+      "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8", // FOMO
+      "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2", // ALPHA
+      "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C", // KEK
+      "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7", // GHST
+    ]]);
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: true,
+    initAddress: maticDiamondAddress,
+    initCalldata: payload,
   };
 
   await run("deployUpgrade", args);

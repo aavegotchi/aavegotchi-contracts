@@ -113,7 +113,7 @@ describe("Testing Aavegotchi Lending", async function () {
 
   describe("Testing lending and whitelist", async () => {
     it("Should be able to add revenue tokens to a revenue token whitelist", async() => {
-      await lendingFacetWithDiamondOwner.allowRevenueTokens(tokens);
+      // Already allowed in upgrade script
       for(let i = 0; i < tokens.length; i++) {
         expect(await lendingFacetWithDiamondOwner.revenueTokenAllowed(tokens[i])).to.be.true;
       }
