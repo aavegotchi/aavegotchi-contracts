@@ -19,8 +19,6 @@ export async function upgrade() {
         "function allowRevenueTokens(address[] tokens) external",
         "function disallowRevenueTokens(address[] tokens) external",
         "function revenueTokenAllowed(address token) external view",
-        "function addGotchiLending(uint32 _erc721TokenId, uint96 _initialCost, uint32 _period, uint8[3] calldata _revenueSplit, address _originalOwner, address _thirdParty, uint32 _whitelistId, address[] calldata _revenueTokens) external",
-        "function claimAndEndGotchiLending(uint32 _tokenId) external",
       ],
       removeSelectors: [],
     },

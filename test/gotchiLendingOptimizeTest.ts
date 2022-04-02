@@ -24,6 +24,7 @@ describe("Testing Aavegotchi Lending", async function () {
   const thirdParty = "0x382038b034fa8Ea64C74C81d680669bDaC4D0636";
   const originalPetOperator = "0x4E59235b35d504D1372ABf67a835031F98114d64"; // original pet operator should be MATIC holder
   const gotchiHolder = "0x8FEebfA4aC7AF314d90a0c17C3F91C800cFdE44B";
+  const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
   const linkiest = "0xaCC227235cCAb6C058B76600D4EC2e86072d0813";
   const diamondOwner = "0x35FE3dF776474a7B24B3B1EC6e745a830FdAd351";
   const tokens = [
@@ -37,6 +38,7 @@ describe("Testing Aavegotchi Lending", async function () {
   const lockedAavegotchiId = 16911;
   let lendingFacetWithBorrower: GotchiLendingFacet;
   let lendingFacetWithGotchiOwner: GotchiLendingFacet;
+  let lendingFacetWithGameManager: GotchiLendingFacet;
   let lendingFacetWithSirLinkiest: GotchiLendingFacet;
   let lendingFacetWithDiamondOwner: GotchiLendingFacet;
   let whitelistFacetWithOwner: WhitelistFacet;
@@ -84,7 +86,13 @@ describe("Testing Aavegotchi Lending", async function () {
       gotchiLendingFacet,
       ethers,
       network
-    )
+    );
+    lendingFacetWithGameManager = await impersonate(
+      gameManager,
+      gotchiLendingFacet,
+      ethers,
+      network
+    );
     lendingFacetWithSirLinkiest = await impersonate(
       linkiest,
       gotchiLendingFacet,
@@ -163,14 +171,14 @@ describe("Testing Aavegotchi Lending", async function () {
       )).to.be.revertedWith("GotchiLending: Invalid revenue token address");
     });
     it("Diamond owner should be able to change revenue tokens of a listing", async() => {
-      await lendingFacetWithDiamondOwner.emergencyChangeRevenueTokens([11939], [diamondOwner]);
+      await lendingFacetWithGameManager.emergencyChangeRevenueTokens([11939], [diamondOwner]);
       const lendingInfo = await lendingFacetWithGotchiOwner.getLendingListingInfo(11939);
       expect(lendingInfo.revenueTokens).to.be.deep.equal([diamondOwner]);
     });
     it("Nobody but the diamond owner should be able to change revenue tokens of a listing", async() => {
       await expect(
         lendingFacetWithBorrower.emergencyChangeRevenueTokens([11939], [diamondOwner])
-      ).to.be.revertedWith("LibDiamond: Must be contract owner");
+      ).to.be.revertedWith("LibAppStorage: Do not have access");
     });
     it("Should be able to transfer ownership of a whitelist", async() => {
       await whitelistFacetWithOwner.createWhitelist("yore mum", [thirdParty]);
