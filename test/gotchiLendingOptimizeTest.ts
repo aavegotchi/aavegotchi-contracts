@@ -197,19 +197,7 @@ describe("Testing Aavegotchi Lending", async function () {
       )).to.be.revertedWith("GotchiLending: Period too long");
       
     });
-    it("Should only allow one borrowed gotchi", async() => {
-      // Create two listings     
-      await lendingFacetWithGotchiOwner.addGotchiLending(
-        22003,
-        0,
-        2591000,
-        [50, 50, 0],
-        gotchiHolder,
-        ethers.constants.AddressZero,
-        0,
-        [],
-      );
-      // Borrow first listing
+    it("Setup for next tests", async() => {
       let lendingIds: [BigNumberish, BigNumberish] = [
         await lendingFacetWithGotchiOwner.getGotchiLendingIdByToken(11939),
         await lendingFacetWithGotchiOwner.getGotchiLendingIdByToken(22003)
@@ -221,16 +209,6 @@ describe("Testing Aavegotchi Lending", async function () {
         2591000,
         [50, 50, 0],
       );
-      // Borrow second listing should fail
-      await expect(
-        lendingFacetWithBorrower.agreeGotchiLending(
-          lendingIds[1],
-          22003,
-          0,
-          2591000,
-          [50, 50, 0],
-        )
-      ).to.be.revertedWith("GotchiLending: Already borrowing");
 
     });
     it("Lender cannot end the term early", async() => {

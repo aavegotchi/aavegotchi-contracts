@@ -247,13 +247,6 @@ contract GotchiLendingFacet is Modifiers {
         if (lending.whitelistId > 0) {
             require(s.isWhitelisted[lending.whitelistId][borrower] > 0, "GotchiLending: Not whitelisted address");
         }
-        for(uint256 i = 0; i < s.ownerTokenIds[borrower].length; ) {
-            require(!LibGotchiLending.isAavegotchiLent(s.ownerTokenIds[borrower][i]), "GotchiLending: Already borrowing");
-            unchecked {
-                ++i;
-            }
-        }
-
         if (lending.initialCost > 0) {
             require(IERC20(s.ghstContract).balanceOf(borrower) >= lending.initialCost, "GotchiLending: Not enough GHST");
             LibERC20.transferFrom(s.ghstContract, borrower, lender, lending.initialCost);
