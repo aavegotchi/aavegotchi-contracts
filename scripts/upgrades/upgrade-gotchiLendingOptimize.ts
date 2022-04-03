@@ -37,16 +37,16 @@ export async function upgrade() {
   const iface = new ethers.utils.Interface(
     GotchiLendingFacet__factory.abi
   ) as GotchiLendingFacetInterface;
-  const payload = iface.encodeFunctionData(
-    "allowRevenueTokens",
-    [[
+  const payload = iface.encodeFunctionData("allowRevenueTokens", [
+    [
       "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f", // FUD
       "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8", // FOMO
       "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2", // ALPHA
       "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C", // KEK
       "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7", // GHST
       "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270", // WMATIC
-    ]]);
+    ],
+  ]);
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: maticDiamondAddress,
