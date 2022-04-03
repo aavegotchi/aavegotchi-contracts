@@ -27,7 +27,6 @@ export async function upgrade() {
       addSelectors: [
         "function transferOwnershipOfWhitelist(uint32 _whitelistId, address _whitelistOwner) external",
         "function whitelistOwner(uint32 _whitelistId) external view",
-        "function getWhitelistsLength() external view",
       ],
       removeSelectors: [],
     },
