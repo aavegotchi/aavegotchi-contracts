@@ -15,11 +15,11 @@ describe("Testing ERC721 Buy Order", async function () {
 
   const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
-  const maticHolderAddress = "0x3507e4978e0eb83315d20df86ca0b976c0e40ccb";
-  const ghstHolderAddress = "0xBC67F26c2b87e16e304218459D2BB60Dac5C80bC";
+  const maticHolderAddress = "0xd70250731A72C33BFB93016E3D1F0CA160dF7e42";
+  const ghstHolderAddress = "0xb4473cfEeDC9a0E94612c6ce883677b63f830DB8";
   const pixelcraftAddress = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
   const daoAddress = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
-  const lockedAavegotchiId = 13996;
+  const lockedAavegotchiId = 24708;
   const unlockedAavegotchiId = 10000;
   const price = ethers.utils.parseUnits('100', 'ether');
   const mediumPrice = ethers.utils.parseUnits('105', 'ether');
@@ -114,6 +114,7 @@ describe("Testing ERC721 Buy Order", async function () {
     describe("If there's no buy order", async function () {
       it("Should succeed", async function () {
         const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+        await (await ghstERC20.connect(ghstHolder)).approve(diamondAddress, price);
         const receipt = await (await erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, price)).wait();
         const event = receipt!.events!.find(event => event.event === 'ERC721BuyOrderAdd');
         firstBuyOrderId = event!.args!.buyOrderId;
@@ -129,6 +130,7 @@ describe("Testing ERC721 Buy Order", async function () {
       });
       it("Should succeed if price is greater than price of exist buy order", async function () {
         const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+        await (await ghstERC20.connect(ghstHolder)).approve(diamondAddress, mediumPrice);
         const receipt = await (await erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, mediumPrice)).wait();
         const event = receipt!.events!.find(event => event.event === 'ERC721BuyOrderAdd');
         secondBuyOrderId = event!.args!.buyOrderId;
@@ -186,6 +188,7 @@ describe("Testing ERC721 Buy Order", async function () {
 
   describe("Testing cancelERC721BuyOrderByToken", async function () {
     before(async function () {
+      await (await ghstERC20.connect(ghstHolder)).approve(diamondAddress, highPrice);
       await (await erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, highPrice)).wait();
     });
     it("Should revert when try to cancel buy order with wrong aavegotchi id", async function () {
@@ -211,6 +214,7 @@ describe("Testing ERC721 Buy Order", async function () {
       ethers.provider.send('evm_mine', []);
 
       const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+      await (await ghstERC20.connect(ghstHolder)).approve(diamondAddress, highestPrice);
       const receipt = await (await erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, highestPrice)).wait();
       const event = receipt!.events!.find(event => event.event === 'ERC721BuyOrderAdd');
       fourthBuyOrderId = event!.args!.buyOrderId;
@@ -276,6 +280,7 @@ describe("Testing ERC721 Buy Order", async function () {
       let event = receipt!.events!.find(event => event.event === 'ERC721ListingAdd');
       const listingId = event!.args!.listingId;
 
+      await (await ghstERC20.connect(ghstHolder)).approve(diamondAddress, highestPrice);
       receipt = await (await erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, highestPrice)).wait();
       event = receipt!.events!.find(event => event.event === 'ERC721BuyOrderAdd');
       const buyOrderId = event!.args!.buyOrderId;
@@ -291,6 +296,7 @@ describe("Testing ERC721 Buy Order", async function () {
       let event = receipt!.events!.find(event => event.event === 'ERC721ListingAdd');
       const listingId = event!.args!.listingId;
 
+      await (await ghstERC20.connect(ghstHolder)).approve(diamondAddress, highestPrice);
       receipt = await (await erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, highestPrice)).wait();
       event = receipt!.events!.find(event => event.event === 'ERC721BuyOrderAdd');
       const buyOrderId = event!.args!.buyOrderId;
@@ -306,10 +312,12 @@ describe("Testing ERC721 Buy Order", async function () {
       let event = receipt!.events!.find(event => event.event === 'ERC721ListingAdd');
       const listingId = event!.args!.listingId;
 
+      await (await ghstERC20.connect(ghstHolder)).approve(diamondAddress, highestPrice);
       receipt = await (await erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, highestPrice)).wait();
       event = receipt!.events!.find(event => event.event === 'ERC721BuyOrderAdd');
       const buyOrderId = event!.args!.buyOrderId;
 
+      await (await ghstERC20.connect(ghstHolder)).approve(diamondAddress, highestPrice);
       await (await (await erc721MarketplaceFacet.connect(ghstHolder)).executeERC721Listing(listingId)).wait();
 
       const buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(buyOrderId);
