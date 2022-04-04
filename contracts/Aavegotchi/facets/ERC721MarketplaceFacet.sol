@@ -221,7 +221,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         address _erc721TokenAddress,
         uint256 _erc721TokenId,
         uint256 _priceInWei
-    ) external onlyUnlocked(_erc721TokenId) {
+    ) external {
         IERC721 erc721Token = IERC721(_erc721TokenAddress);
         address owner = LibMeta.msgSender();
         require(erc721Token.ownerOf(_erc721TokenId) == owner, "ERC721Marketplace: Not owner of ERC721 token");
@@ -231,6 +231,11 @@ contract ERC721MarketplaceFacet is Modifiers {
                 erc721Token.getApproved(_erc721TokenId) == address(this),
             "ERC721Marketplace: Not approved for transfer"
         );
+
+        //Only unlocked Aavegotchis can be listed
+        if (_erc721TokenAddress == address(this)) {
+            require(s.aavegotchis[_erc721TokenId].locked == false, "ERC721Marketplace: Only callable on unlocked Aavegotchis");
+        }
 
         require(_priceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
 

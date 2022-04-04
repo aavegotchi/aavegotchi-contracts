@@ -289,6 +289,7 @@ struct AppStorage {
     Whitelist[] whitelists;
     // If zero, then the user is not whitelisted for the given whitelist ID. Otherwise, this represents the position of the user in the whitelist + 1
     mapping(uint32 => mapping(address => uint256)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
+    mapping(address => bool) revenueTokenAllowed;
 }
 
 library LibAppStorage {

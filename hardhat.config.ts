@@ -38,12 +38,11 @@ export default {
     apiKey: process.env.POLYGON_API_KEY,
   },
   networks: {
-    hardhat: {
+    hardhat: {  
       forking: {
         url: process.env.MATIC_URL,
         timeout: 12000000,
-        // blockNumber: 12552123
-        blockNumber: 26256003,
+        //blockNumber: 26642399,
       },
       blockGasLimit: 20000000,
       timeout: 120000,

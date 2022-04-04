@@ -14,6 +14,39 @@ contract GotchiLendingFacet is Modifiers {
     event GotchiLendingExecute(uint32 indexed listingId);
     event GotchiLendingEnd(uint32 indexed listingId);
 
+    function allowRevenueTokens(address[] calldata tokens) external onlyOwner {
+        for (uint256 i = 0; i < tokens.length; ) {
+            s.revenueTokenAllowed[tokens[i]] = true;
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function disallowRevenueTokens(address[] calldata tokens) external onlyOwner {
+        for (uint256 i = 0; i < tokens.length; ) {
+            s.revenueTokenAllowed[tokens[i]] = false;
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function revenueTokenAllowed(address token) external view returns (bool) {
+        return s.revenueTokenAllowed[token];
+    }
+
+    function emergencyChangeRevenueTokens(uint32[] calldata _listingIds, address[] calldata _revenueTokens) external onlyOwnerOrDaoOrGameManager {
+        for (uint256 i = 0; i < _listingIds.length; ) {
+            GotchiLending storage listing_ = s.gotchiLendings[_listingIds[i]];
+            require(listing_.timeCreated != 0, "GotchiLending: Listing does not exist");
+            listing_.revenueTokens = _revenueTokens;
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     ///@notice Get an aavegotchi lending details through an identifier
     ///@dev Will throw if the lending does not exist
     ///@param _listingId The identifier of the lending to query
@@ -118,7 +151,7 @@ contract GotchiLendingFacet is Modifiers {
         address sender = LibMeta.msgSender();
         require(_originalOwner != address(0), "GotchiLending: Original owner cannot be zero address");
         require(_period > 0, "GotchiLending: Period should be larger than 0");
-        require(_period <= 31536000, "GotchiLending: Period too long"); //No reason to have a period longer than a year
+        require(_period <= 2_592_000, "GotchiLending: Period too long"); //No reason to have a period longer than 30 days
         require(_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] == 100, "GotchiLending: Sum of revenue split should be 100");
         if (_thirdParty == address(0)) {
             require(_revenueSplit[2] == 0, "GotchiLending: Revenue split for invalid thirdParty should be zero");
@@ -128,6 +161,12 @@ contract GotchiLendingFacet is Modifiers {
         require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "GotchiLending: Can only lend Aavegotchi");
 
         require(_revenueTokens.length <= 10, "GotchiLending: Too many revenue tokens"); //Prevent claimAndEnd from reverting due to Out of Gas
+        for (uint256 i = 0; i < _revenueTokens.length; ) {
+            require(s.revenueTokenAllowed[_revenueTokens[i]], "GotchiLending: Invalid revenue token address");
+            unchecked {
+                ++i;
+            }
+        }
 
         uint32 oldListingId = s.aavegotchiToListingId[_erc721TokenId];
         if (oldListingId != 0) {
@@ -259,8 +298,9 @@ contract GotchiLendingFacet is Modifiers {
         address sender = LibMeta.msgSender();
         address lender = lending.lender;
         address borrower = lending.borrower;
+        uint32 lendingPeriod = lending.period < 2_592_000 ? lending.period : 2_592_000;
         require((lender == sender) || (borrower == sender), "GotchiLending: Only lender or borrower can claim and end agreement");
-        require(lending.timeAgreed + lending.period <= block.timestamp, "GotchiLending: Not allowed during agreement");
+        require(borrower == sender || lending.timeAgreed + lendingPeriod <= block.timestamp, "GotchiLending: Not allowed during agreement");
 
         LibGotchiLending.claimGotchiLending(listingId);
 

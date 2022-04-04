@@ -13,6 +13,10 @@ export async function upgrade() {
     {
       facetName: "GotchiLendingFacet",
       addSelectors: [
+        "function emergencyChangeRevenueTokens(uint32[] calldata _listingIds, address[] calldata _revenueTokens) external",
+        "function allowRevenueTokens(address[] tokens) external",
+        "function disallowRevenueTokens(address[] tokens) external",
+        "function revenueTokenAllowed(address token) external view",
         "function getGotchiLendingListingInfo(uint32 _listingId) external view",
         "function getLendingListingInfo(uint32 _listingId) external view",
         "function getGotchiLendingFromToken(uint32 _erc721TokenId) external view",
@@ -39,6 +43,8 @@ export async function upgrade() {
         "function isWhitelisted(uint32 _whitelistId, address _whitelistAddress) external view",
         "function getWhitelistsLength() external view",
         "function removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external",
+        "function transferOwnershipOfWhitelist(uint32 _whitelistId, address _whitelistOwner) external",
+        "function whitelistOwner(uint32 _whitelistId) external view",
       ],
       removeSelectors: [],
     },
