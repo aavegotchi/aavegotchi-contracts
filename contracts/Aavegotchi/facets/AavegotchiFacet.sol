@@ -31,7 +31,7 @@ contract AavegotchiFacet {
     /// @param _owner An address for whom to query the balance
     /// @return balance_ The number of NFTs owned by `_owner`, possibly zero
     function balanceOf(address _owner) external view returns (uint256 balance_) {
-        require(_owner != address(0), "AavegotchiFacet: _owner can't be address(0");
+        require(_owner != address(0), "AavegotchiFacet: _owner can't be address(0)");
         balance_ = s.ownerTokenIds[_owner].length;
     }
 
