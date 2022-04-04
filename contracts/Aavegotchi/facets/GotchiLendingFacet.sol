@@ -15,7 +15,7 @@ contract GotchiLendingFacet is Modifiers {
     event GotchiLendingEnd(uint32 indexed listingId);
 
     function allowRevenueTokens(address[] calldata tokens) external onlyOwner {
-        for(uint256 i = 0; i < tokens.length; ) {
+        for (uint256 i = 0; i < tokens.length; ) {
             s.revenueTokenAllowed[tokens[i]] = true;
             unchecked {
                 ++i;
@@ -24,7 +24,7 @@ contract GotchiLendingFacet is Modifiers {
     }
 
     function disallowRevenueTokens(address[] calldata tokens) external onlyOwner {
-        for(uint256 i = 0; i < tokens.length; ) {
+        for (uint256 i = 0; i < tokens.length; ) {
             s.revenueTokenAllowed[tokens[i]] = false;
             unchecked {
                 ++i;
@@ -37,7 +37,7 @@ contract GotchiLendingFacet is Modifiers {
     }
 
     function emergencyChangeRevenueTokens(uint32[] calldata _listingIds, address[] calldata _revenueTokens) external onlyOwnerOrDaoOrGameManager {
-        for(uint256 i = 0; i < _listingIds.length; ) {
+        for (uint256 i = 0; i < _listingIds.length; ) {
             GotchiLending storage listing_ = s.gotchiLendings[_listingIds[i]];
             require(listing_.timeCreated != 0, "GotchiLending: Listing does not exist");
             listing_.revenueTokens = _revenueTokens;
@@ -161,7 +161,7 @@ contract GotchiLendingFacet is Modifiers {
         require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "GotchiLending: Can only lend Aavegotchi");
 
         require(_revenueTokens.length <= 10, "GotchiLending: Too many revenue tokens"); //Prevent claimAndEnd from reverting due to Out of Gas
-        for(uint256 i = 0; i < _revenueTokens.length; ) {
+        for (uint256 i = 0; i < _revenueTokens.length; ) {
             require(s.revenueTokenAllowed[_revenueTokens[i]], "GotchiLending: Invalid revenue token address");
             unchecked {
                 ++i;
