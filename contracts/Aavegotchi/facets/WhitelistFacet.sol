@@ -11,13 +11,11 @@ contract WhitelistFacet is Modifiers {
     event WhitelistOwnershipTransferred(uint32 indexed whitelistId, address indexed newOwner);
 
     function createWhitelist(string calldata _name, address[] calldata _whitelistAddresses) external {
-        uint256 whitelistLength = _whitelistAddresses.length;
-        require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
+        require(_whitelistAddresses.length > 0, "WhitelistFacet: Whitelist length should be larger than zero");
 
-        address sender = LibMeta.msgSender();
         uint32 whitelistId = LibWhitelist.getNewWhitelistId();
         address[] memory addresses;
-        Whitelist memory whitelist = Whitelist({owner: sender, name: _name, addresses: addresses});
+        Whitelist memory whitelist = Whitelist({owner: LibMeta.msgSender(), name: _name, addresses: addresses});
 
         s.whitelists.push(whitelist);
 
@@ -27,13 +25,9 @@ contract WhitelistFacet is Modifiers {
     }
 
     function updateWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external {
-        address sender = LibMeta.msgSender();
-
+        require(_whitelistAddresses.length > 0, "WhitelistFacet: Whitelist length should be larger than zero");
         require(LibWhitelist.whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
-        require(LibWhitelist.getWhitelistFromWhitelistId(_whitelistId).owner == sender, "WhitelistFacet: Not whitelist owner");
-
-        uint32 whitelistLength = uint32(_whitelistAddresses.length);
-        require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
+        require(LibWhitelist.checkWhitelistOwner(_whitelistId), "WhitelistFacet: Not whitelist owner");
 
         _addAddressesToWhitelist(_whitelistId, _whitelistAddresses);
 
@@ -41,13 +35,9 @@ contract WhitelistFacet is Modifiers {
     }
 
     function removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external {
-        address sender = LibMeta.msgSender();
-
+        require(_whitelistAddresses.length > 0, "WhitelistFacet: Whitelist length should be larger than zero");
         require(LibWhitelist.whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
-        require(LibWhitelist.getWhitelistFromWhitelistId(_whitelistId).owner == sender, "WhitelistFacet: Not whitelist owner");
-
-        uint32 whitelistLength = uint32(_whitelistAddresses.length);
-        require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
+        require(LibWhitelist.checkWhitelistOwner(_whitelistId), "WhitelistFacet: Not whitelist owner");
 
         _removeAddressesFromWhitelist(_whitelistId, _whitelistAddresses);
 
@@ -56,11 +46,9 @@ contract WhitelistFacet is Modifiers {
 
     function transferOwnershipOfWhitelist(uint32 _whitelistId, address _whitelistOwner) external {
         require(LibWhitelist.whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
+        require(LibWhitelist.checkWhitelistOwner(_whitelistId), "WhitelistFacet: Not whitelist owner");
 
         Whitelist storage whitelist = LibWhitelist.getWhitelistFromWhitelistId(_whitelistId);
-        address sender = LibMeta.msgSender();
-
-        require(whitelist.owner == sender, "WhitelistFacet: Not whitelist owner");
 
         whitelist.owner = _whitelistOwner;
 

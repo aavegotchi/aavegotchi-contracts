@@ -20,4 +20,9 @@ library LibWhitelist {
         require(whitelistExists(whitelistId), "WhitelistFacet: Whitelist not found");
         whitelist = s.whitelists[whitelistId - 1];
     }
+
+    function checkWhitelistOwner(uint32 whitelistId) internal view returns (bool isOwner) {
+        Whitelist storage whitelist = getWhitelistFromWhitelistId(whitelistId);
+        isOwner = whitelist.owner == LibMeta.msgSender();
+    }
 }
