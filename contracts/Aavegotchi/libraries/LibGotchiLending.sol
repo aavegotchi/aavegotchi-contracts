@@ -32,51 +32,6 @@ library LibGotchiLending {
         require(listingId != 0, "GotchiLending: Listing not found");
     }
 
-    function verifyGotchiLendingParams(
-        uint32 _erc721TokenId,
-        uint32 _period,
-        uint8[3] calldata _revenueSplit,
-        address _originalOwner,
-        address _thirdParty,
-        uint32 _whitelistId,
-        address[] calldata _revenueTokens
-    ) internal view {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        require(_originalOwner != address(0), "GotchiLending: Original owner cannot be zero address");
-        require(checkPeriod(_period), "GotchiLending: Period is not valid");
-        require(checkRevenueParams(_revenueSplit, _revenueTokens, _thirdParty), "GotchiLending: Revenue parameters are not valid");
-        require(whitelistExists(_whitelistId) || (_whitelistId == 0), "GotchiLending: Whitelist not found");
-        require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "GotchiLending: Can only lend Aavegotchi");
-        require(!s.aavegotchis[_erc721TokenId].locked, "GotchiLending: Only callable on unlocked Aavegotchis");
-    }
-
-    function verifyGotchiLendingAgreeParams(
-        address _borrower,
-        uint32 _listingId,
-        uint32 _erc721TokenId,
-        uint96 _initialCost,
-        uint32 _period,
-        uint8[3] calldata _revenueSplit
-    ) internal view {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        GotchiLending storage lending = s.gotchiLendings[_listingId];
-        require(lending.timeCreated != 0, "GotchiLending: Listing not found");
-        require(lending.timeAgreed == 0, "GotchiLending: Listing already agreed");
-        require(lending.canceled == false, "GotchiLending: Listing canceled");
-        require(lending.erc721TokenId == _erc721TokenId, "GotchiLending: Invalid token id");
-        require(lending.initialCost == _initialCost, "GotchiLending: Invalid initial cost");
-        require(lending.period == _period, "GotchiLending: Invalid lending period");
-        for (uint256 i; i < 3; i++) {
-            require(lending.revenueSplit[i] == _revenueSplit[i], "GotchiLending: Invalid revenue split");
-        }
-        require(lending.lender != _borrower, "GotchiLending: Borrower can't be lender");
-        if (lending.whitelistId > 0) {
-            require(s.isWhitelisted[lending.whitelistId][_borrower] > 0, "GotchiLending: Not whitelisted address");
-        }
-        // Removed balance check for GHST since this will revert anyway if transferFrom is called
-        //require(IERC20(s.ghstContract).balanceOf(_borrower) >= lending.initialCost, "GotchiLending: Not enough GHST");
-    }
-
     function _addGotchiLending(
         address _lender,
         uint32 _erc721TokenId,
@@ -89,11 +44,11 @@ library LibGotchiLending {
         address[] calldata _revenueTokens
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        verifyGotchiLendingParams(_erc721TokenId, _period, _revenueSplit, _originalOwner, _thirdParty, _whitelistId, _revenueTokens);
         uint32 oldListingId = s.aavegotchiToListingId[_erc721TokenId];
         if (oldListingId != 0) {
             cancelGotchiLending(oldListingId, _lender);
         }
+        verifyAddGotchiLendingParams(_erc721TokenId, _period, _revenueSplit, _originalOwner, _thirdParty, _whitelistId, _revenueTokens);
         uint32 listingId = ++s.nextGotchiListingId; //assigned value after incrementing
 
         s.aavegotchiToListingId[_erc721TokenId] = listingId;
@@ -131,8 +86,7 @@ library LibGotchiLending {
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         GotchiLending storage lending = s.gotchiLendings[_listingId];
-        verifyGotchiLendingAgreeParams(_borrower, _listingId, _erc721TokenId, _initialCost, _period, _revenueSplit);
-
+        verifyAgreeGotchiLendingParams(_borrower, _listingId, _erc721TokenId, _initialCost, _period, _revenueSplit);
         // gas savings
         address lender = lending.lender;
 
@@ -226,12 +180,13 @@ library LibGotchiLending {
     function endGotchiLending(GotchiLending storage lending) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
+        // gas savings
         uint32 tokenId = lending.erc721TokenId;
         address lender = lending.lender;
-        address borrower = lending.borrower;
 
+        // STATE CHANGES
         s.aavegotchis[tokenId].locked = false;
-        LibAavegotchi.transfer(borrower, lender, tokenId);
+        LibAavegotchi.transfer(lending.borrower, lender, tokenId);
         lending.completed = true;
         s.aavegotchiToListingId[tokenId] = 0;
 
@@ -239,6 +194,51 @@ library LibGotchiLending {
         removeLendingListItem(lender, lending.listingId, "agreed");
 
         emit GotchiLendingEnd(tokenId);
+    }
+
+    function verifyAddGotchiLendingParams(
+        uint32 _erc721TokenId,
+        uint32 _period,
+        uint8[3] calldata _revenueSplit,
+        address _originalOwner,
+        address _thirdParty,
+        uint32 _whitelistId,
+        address[] calldata _revenueTokens
+    ) internal view {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        require(_originalOwner != address(0), "GotchiLending: Original owner cannot be zero address");
+        require(checkPeriod(_period), "GotchiLending: Period is not valid");
+        require(checkRevenueParams(_revenueSplit, _revenueTokens, _thirdParty), "GotchiLending: Revenue parameters are not valid");
+        require(whitelistExists(_whitelistId) || (_whitelistId == 0), "GotchiLending: Whitelist not found");
+        require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "GotchiLending: Can only lend Aavegotchi");
+        require(!s.aavegotchis[_erc721TokenId].locked, "GotchiLending: Only callable on unlocked Aavegotchis");
+    }
+
+    function verifyAgreeGotchiLendingParams(
+        address _borrower,
+        uint32 _listingId,
+        uint32 _erc721TokenId,
+        uint96 _initialCost,
+        uint32 _period,
+        uint8[3] calldata _revenueSplit
+    ) internal view {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        GotchiLending storage lending = s.gotchiLendings[_listingId];
+        require(lending.timeCreated != 0, "GotchiLending: Listing not found");
+        require(lending.timeAgreed == 0, "GotchiLending: Listing already agreed");
+        require(lending.canceled == false, "GotchiLending: Listing canceled");
+        require(lending.erc721TokenId == _erc721TokenId, "GotchiLending: Invalid token id");
+        require(lending.initialCost == _initialCost, "GotchiLending: Invalid initial cost");
+        require(lending.period == _period, "GotchiLending: Invalid lending period");
+        for (uint256 i; i < 3; i++) {
+            require(lending.revenueSplit[i] == _revenueSplit[i], "GotchiLending: Invalid revenue split");
+        }
+        require(lending.lender != _borrower, "GotchiLending: Borrower can't be lender");
+        if (lending.whitelistId > 0) {
+            require(s.isWhitelisted[lending.whitelistId][_borrower] > 0, "GotchiLending: Not whitelisted address");
+        }
+        // Removed balance check for GHST since this will revert anyway if transferFrom is called
+        //require(IERC20(s.ghstContract).balanceOf(_borrower) >= lending.initialCost, "GotchiLending: Not enough GHST");
     }
 
     function removeLentAavegotchi(uint32 _tokenId, address _lender) internal {
