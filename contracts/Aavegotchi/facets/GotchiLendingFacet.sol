@@ -80,6 +80,16 @@ contract GotchiLendingFacet is Modifiers {
         LibGotchiLending.cancelGotchiLendingFromToken(_erc721TokenId, LibMeta.msgSender());
     }
 
+    function batchCancelGotchiLendingByToken(uint32[] calldata _erc721TokenIds) external {
+        address sender = LibMeta.msgSender();
+        for (uint256 i = 0; i < _erc721TokenIds.length; ) {
+            LibGotchiLending.cancelGotchiLendingFromToken(_erc721TokenIds[i], sender);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     ///@notice Allow an aavegotchi lender to cancel his NFT lending through the listingId
     ///@param _listingId The identifier of the lending to be cancelled
     function cancelGotchiLending(uint32 _listingId) external {
@@ -108,31 +118,6 @@ contract GotchiLendingFacet is Modifiers {
         LibGotchiLending._agreeGotchiLending(LibMeta.msgSender(), _listingId, _erc721TokenId, _initialCost, _period, _revenueSplit);
     }
 
-    struct AgreeGotchiLendingStruct {
-        uint32 listingId;
-        uint32 tokenId;
-        uint96 initialCost;
-        uint32 period;
-        uint8[3] revenueSplit;
-    }
-
-    function batchAgreeGotchiLending(AgreeGotchiLendingStruct[] calldata inputs) external {
-        address sender = LibMeta.msgSender();
-        for (uint256 i = 0; i < inputs.length; ) {
-            LibGotchiLending._agreeGotchiLending(
-                sender,
-                inputs[i].listingId,
-                inputs[i].tokenId,
-                inputs[i].initialCost,
-                inputs[i].period,
-                inputs[i].revenueSplit
-            );
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
     ///@notice Allow to claim revenue from the lending
     ///@dev Will throw if the NFT has not been lent or if the lending has been canceled already
     ///@param _tokenId The identifier of the lent aavegotchi to claim
@@ -143,6 +128,19 @@ contract GotchiLendingFacet is Modifiers {
         address sender = LibMeta.msgSender();
         require((lending.lender == sender) || (lending.borrower == sender), "GotchiLending: Only lender or borrower can claim");
         LibGotchiLending.claimGotchiLending(listingId);
+    }
+
+    function batchClaimGotchiLending(uint32[] calldata _tokenIds) external {
+        address sender = LibMeta.msgSender();
+        for (uint256 i = 0; i < _tokenIds.length; ) {
+            uint32 listingId = LibGotchiLending.tokenIdToListingId(_tokenIds[i]);
+            GotchiLending storage lending = s.gotchiLendings[listingId];
+            require((lending.lender == sender) || (lending.borrower == sender), "GotchiLending: Only lender or borrower can claim");
+            LibGotchiLending.claimGotchiLending(listingId);
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     ///@notice Allow a lender or borrower to claim revenue from the lending and end the listing
@@ -164,13 +162,42 @@ contract GotchiLendingFacet is Modifiers {
         LibGotchiLending.endGotchiLending(lending);
     }
 
+    function batchClaimAndEndGotchiLending(uint32[] calldata _tokenIds) external {
+        address sender = LibMeta.msgSender();
+        for (uint256 i = 0; i < _tokenIds.length; ) {
+            uint32 listingId = LibGotchiLending.tokenIdToListingId(_tokenIds[i]);
+            GotchiLending storage lending = s.gotchiLendings[listingId];
+
+            address lender = lending.lender;
+            address borrower = lending.borrower;
+            uint32 period = lending.period < 2_592_000 ? lending.period : 2_592_000;
+
+            require((lender == sender) || (borrower == sender), "GotchiLending: Only lender or borrower can claim and end agreement");
+            require(borrower == sender || lending.timeAgreed + period <= block.timestamp, "GotchiLending: Not allowed during agreement");
+
+            LibGotchiLending.claimGotchiLending(listingId);
+            LibGotchiLending.endGotchiLending(lending);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     ///@notice Allows a lender to end the listing and relist with the same parameters
     function claimAndRelistGotchiLending(uint32 _tokenId) external {
         //TODO
     }
 
+    function batchClaimAndRelistGotchiLending(uint32[] calldata _tokenIds) external {
+        //TODO
+    }
+
     ///@notice Allows a lender to renew the listing
     function claimAndRenewGotchiLending(uint32 _tokenId) external {
+        //TODO
+    }
+
+    function batchClaimAndRenewGotchiLending(uint32[] calldata _tokenIds) external {
         //TODO
     }
 }
