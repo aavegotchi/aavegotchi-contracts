@@ -3,6 +3,7 @@ pragma solidity 0.8.1;
 
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {Modifiers, Whitelist} from "../libraries/LibAppStorage.sol";
+import {LibWhitelist} from "../libraries/LibWhitelist.sol";
 
 contract WhitelistFacet is Modifiers {
     event WhitelistCreated(uint32 indexed whitelistId);
@@ -14,10 +15,12 @@ contract WhitelistFacet is Modifiers {
         require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
 
         address sender = LibMeta.msgSender();
-        uint32 whitelistId = uint32(s.whitelists.length + 1); //whitelistId 0 is reserved for "none" in GotchiLending struct
+        uint32 whitelistId = LibWhitelist.getNewWhitelistId();
         address[] memory addresses;
         Whitelist memory whitelist = Whitelist({owner: sender, name: _name, addresses: addresses});
+
         s.whitelists.push(whitelist);
+
         _addAddressesToWhitelist(whitelistId, _whitelistAddresses);
 
         emit WhitelistCreated(whitelistId);
@@ -26,8 +29,8 @@ contract WhitelistFacet is Modifiers {
     function updateWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external {
         address sender = LibMeta.msgSender();
 
-        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
-        require(wl(_whitelistId).owner == sender, "WhitelistFacet: Not whitelist owner");
+        require(LibWhitelist.whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
+        require(LibWhitelist.getWhitelistFromWhitelistId(_whitelistId).owner == sender, "WhitelistFacet: Not whitelist owner");
 
         uint32 whitelistLength = uint32(_whitelistAddresses.length);
         require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
@@ -40,8 +43,8 @@ contract WhitelistFacet is Modifiers {
     function removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external {
         address sender = LibMeta.msgSender();
 
-        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
-        require(wl(_whitelistId).owner == sender, "WhitelistFacet: Not whitelist owner");
+        require(LibWhitelist.whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
+        require(LibWhitelist.getWhitelistFromWhitelistId(_whitelistId).owner == sender, "WhitelistFacet: Not whitelist owner");
 
         uint32 whitelistLength = uint32(_whitelistAddresses.length);
         require(whitelistLength > 0, "WhitelistFacet: Whitelist length should be larger than zero");
@@ -52,37 +55,16 @@ contract WhitelistFacet is Modifiers {
     }
 
     function transferOwnershipOfWhitelist(uint32 _whitelistId, address _whitelistOwner) external {
+        require(LibWhitelist.whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
+
+        Whitelist storage whitelist = LibWhitelist.getWhitelistFromWhitelistId(_whitelistId);
         address sender = LibMeta.msgSender();
 
-        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
-        require(wl(_whitelistId).owner == sender, "WhitelistFacet: Not whitelist owner");
+        require(whitelist.owner == sender, "WhitelistFacet: Not whitelist owner");
 
-        wl(_whitelistId).owner = _whitelistOwner;
+        whitelist.owner = _whitelistOwner;
 
         emit WhitelistOwnershipTransferred(_whitelistId, _whitelistOwner);
-    }
-
-    function whitelistOwner(uint32 _whitelistId) external view returns (address) {
-        require((s.whitelists.length >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
-
-        return wl(_whitelistId).owner;
-    }
-
-    function isWhitelisted(uint32 _whitelistId, address _whitelistAddress) external view returns (uint256) {
-        return s.isWhitelisted[_whitelistId][_whitelistAddress];
-    }
-
-    function getWhitelist(uint32 _whitelistId) external view returns (Whitelist memory) {
-        require((uint32(s.whitelists.length) >= _whitelistId) && (_whitelistId > 0), "WhitelistFacet: Whitelist not found");
-        return wl(_whitelistId);
-    }
-
-    function getWhitelists() external view returns (Whitelist[] memory) {
-        return s.whitelists;
-    }
-
-    function getWhitelistsLength() external view returns (uint256) {
-        return s.whitelists.length;
     }
 
     function _addAddressesToWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) internal {
@@ -93,8 +75,9 @@ contract WhitelistFacet is Modifiers {
 
     function _addAddressToWhitelist(uint32 _whitelistId, address _whitelistAddress) internal {
         if (s.isWhitelisted[_whitelistId][_whitelistAddress] == 0) {
-            wl(_whitelistId).addresses.push(_whitelistAddress);
-            s.isWhitelisted[_whitelistId][_whitelistAddress] = wl(_whitelistId).addresses.length; // Index of the whitelist entry + 1
+            Whitelist storage whitelist = LibWhitelist.getWhitelistFromWhitelistId(_whitelistId);
+            whitelist.addresses.push(_whitelistAddress);
+            s.isWhitelisted[_whitelistId][_whitelistAddress] = whitelist.addresses.length; // Index of the whitelist entry + 1
         }
     }
 
@@ -106,14 +89,15 @@ contract WhitelistFacet is Modifiers {
 
     function _removeAddressFromWhitelist(uint32 _whitelistId, address _whitelistAddress) internal {
         if (s.isWhitelisted[_whitelistId][_whitelistAddress] > 0) {
+            Whitelist storage whitelist = LibWhitelist.getWhitelistFromWhitelistId(_whitelistId);
             uint256 index = s.isWhitelisted[_whitelistId][_whitelistAddress] - 1;
-            uint256 lastIndex = wl(_whitelistId).addresses.length - 1;
+            uint256 lastIndex = whitelist.addresses.length - 1;
             // Replaces the element to be removed with the last element
-            wl(_whitelistId).addresses[index] = wl(_whitelistId).addresses[lastIndex];
+            whitelist.addresses[index] = whitelist.addresses[lastIndex];
             // Store the last element in memory
-            address lastElement = wl(_whitelistId).addresses[lastIndex];
+            address lastElement = whitelist.addresses[lastIndex];
             // Remove the last element from storage
-            wl(_whitelistId).addresses.pop();
+            whitelist.addresses.pop();
             // Update the index of the last element that was swapped. If this is the only element, updates to zero on the next line
             s.isWhitelisted[_whitelistId][lastElement] = index + 1;
             // Update the index of the removed element
@@ -121,7 +105,25 @@ contract WhitelistFacet is Modifiers {
         }
     }
 
-    function wl(uint32 _whitelistId) internal view returns (Whitelist storage) {
-        return s.whitelists[_whitelistId - 1];
+    function isWhitelisted(uint32 _whitelistId, address _whitelistAddress) external view returns (uint256) {
+        return s.isWhitelisted[_whitelistId][_whitelistAddress];
+    }
+
+    function getWhitelists() external view returns (Whitelist[] memory) {
+        return s.whitelists;
+    }
+
+    function getWhitelistsLength() external view returns (uint256) {
+        return s.whitelists.length;
+    }
+
+    function getWhitelist(uint32 _whitelistId) external view returns (Whitelist memory) {
+        require(LibWhitelist.whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
+        return LibWhitelist.getWhitelistFromWhitelistId(_whitelistId);
+    }
+
+    function whitelistOwner(uint32 _whitelistId) external view returns (address) {
+        require(LibWhitelist.whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
+        return LibWhitelist.getWhitelistFromWhitelistId(_whitelistId).owner;
     }
 }
