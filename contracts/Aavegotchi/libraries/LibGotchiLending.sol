@@ -32,20 +32,22 @@ library LibGotchiLending {
         require(listingId != 0, "GotchiLending: Listing not found");
     }
 
+    /// @dev Will not return true for already existing borrows before the upgrade to include borrow gotchi limits
     function isBorrowing(address _borrower) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         return s.borrowerTokenId[_borrower] != 0;
     }
 
+    /// @dev Call this function when a borrower borrows a gotchi to limit a borrower to one borrow.
     function addBorrowerTokenId(address _borrower, uint32 _tokenId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        if (!isBorrowing(_borrower)) {
-            s.borrowerTokenId[_borrower] = _tokenId + 1;
-        }
+        require(!isBorrowing(_borrower), "GotchiLending: Borrower already has a token");
+        s.borrowerTokenId[_borrower] = _tokenId + 1;
     }
 
+    /// @dev Call this function when a borrow is ended so that the borrower can borrow another gotchi.
     /// @dev Since this is an upgrade, the borrower may already have borrowed gotchis.
-    /// To get around this, we only return the status to not borrowing if the token Id matches
+    /// To get around this, we only change the status to not borrowing if the token Id matches
     /// a borrow that was agreed to after the upgrade.
     function removeBorrowerTokenId(address _borrower, uint32 _tokenId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
@@ -141,9 +143,6 @@ library LibGotchiLending {
         s.lentTokenIds[lender].push(_erc721TokenId);
 
         LibAavegotchi.transfer(lender, _borrower, _erc721TokenId);
-
-        require(!isBorrowing(_borrower), "GotchiLending: Already borrowing");
-        addBorrowerTokenId(_borrower, _erc721TokenId);
 
         // set lender as pet operator
         s.petOperators[_borrower][lender] = true;

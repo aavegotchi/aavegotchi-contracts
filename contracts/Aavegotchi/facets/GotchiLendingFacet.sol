@@ -10,9 +10,6 @@ import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 import {Modifiers, GotchiLending} from "../libraries/LibAppStorage.sol";
 
 contract GotchiLendingFacet is Modifiers {
-    ///@notice Allow an aavegotchi lender (msg sender) or their lending operator to add request for lending
-    ///@dev If the lending request exist, cancel it and replaces it with the new one
-    ///@dev If the lending is active, unable to cancel
     ///@param _erc721TokenId The identifier of the NFT to lend
     ///@param _initialCost The lending fee of the aavegotchi in $GHST
     ///@param _period The lending period of the aavegotchi, unit: second
@@ -20,30 +17,35 @@ contract GotchiLendingFacet is Modifiers {
     ///@param _originalOwner The account for original owner, can be set to another address if the owner wishes to have profit split there.
     ///@param _thirdParty The 3rd account for receive revenue split, can be address(0)
     ///@param _whitelistId The identifier of whitelist for agree lending, if 0, allow everyone
-    function addGotchiLending(
-        uint32 _erc721TokenId,
-        uint96 _initialCost,
-        uint32 _period,
-        uint8[3] memory _revenueSplit,
-        address _originalOwner,
-        address _thirdParty,
-        uint32 _whitelistId,
-        address[] memory _revenueTokens
-    ) public {
+    struct AddGotchiListing {
+        uint32 tokenId;
+        uint96 initialCost;
+        uint32 period;
+        uint8[3] revenueSplit;
+        address originalOwner;
+        address thirdParty;
+        uint32 whitelistId;
+        address[] revenueTokens;
+    }
+
+    ///@notice Allow an aavegotchi lender (msg sender) or their lending operator to add request for lending
+    ///@dev If the lending request exist, cancel it and replaces it with the new one
+    ///@dev If the lending is active, unable to cancel
+    function addGotchiListing(AddGotchiListing memory p) public {
         address sender = LibMeta.msgSender();
-        address tokenOwner = s.aavegotchis[_erc721TokenId].owner;
-        bool senderIsLendingOperator = s.isLendingOperator[tokenOwner][sender][_erc721TokenId];
+        address tokenOwner = s.aavegotchis[p.tokenId].owner;
+        bool senderIsLendingOperator = s.isLendingOperator[tokenOwner][sender][p.tokenId];
         require(tokenOwner == sender || senderIsLendingOperator, "Only the owner or a lending operator can add a lending request");
         LibGotchiLending.LibAddGotchiLending memory addLendingStruct = LibGotchiLending.LibAddGotchiLending({
             lender: tokenOwner,
-            tokenId: _erc721TokenId,
-            initialCost: _initialCost,
-            period: _period,
-            revenueSplit: _revenueSplit,
-            originalOwner: _originalOwner,
-            thirdParty: _thirdParty,
-            whitelistId: _whitelistId,
-            revenueTokens: _revenueTokens
+            tokenId: p.tokenId,
+            initialCost: p.initialCost,
+            period: p.period,
+            revenueSplit: p.revenueSplit,
+            originalOwner: p.originalOwner,
+            thirdParty: p.thirdParty,
+            whitelistId: p.whitelistId,
+            revenueTokens: p.revenueTokens
         });
         LibGotchiLending._addGotchiLending(addLendingStruct);
     }
@@ -71,6 +73,7 @@ contract GotchiLendingFacet is Modifiers {
         uint32 _period,
         uint8[3] calldata _revenueSplit
     ) external {
+        LibGotchiLending.addBorrowerTokenId(sender, _erc721TokenId); // This functions as a check for whether the sender already has a borrow after the upgrade
         LibGotchiLending._agreeGotchiLending(LibMeta.msgSender(), _listingId, _erc721TokenId, _initialCost, _period, _revenueSplit);
     }
 
@@ -98,15 +101,15 @@ contract GotchiLendingFacet is Modifiers {
 
         address lender = lending.lender;
         address borrower = lending.borrower;
-        uint32 period = lending.period < 2_592_000 ? lending.period : 2_592_000;
-
         address sender = LibMeta.msgSender();
+        uint32 period = lending.period < 2_592_000 ? lending.period : 2_592_000;
         require(
             (lender == sender) || (borrower == sender) || s.isLendingOperator[lender][sender][_tokenId],
             "GotchiLending: Only lender or borrower or lending operator can claim and end agreement"
         );
         require(borrower == sender || lending.timeAgreed + period <= block.timestamp, "GotchiLending: Agreement not over and not borrower");
 
+        LibGotchiLending.removeBorrowerTokenId(borrower, _tokenId); // Free up the borrower to borrow another gotchi
         LibGotchiLending.claimGotchiLending(listingId);
         LibGotchiLending.endGotchiLending(lending);
     }
@@ -126,6 +129,32 @@ contract GotchiLendingFacet is Modifiers {
     /// From here on, functions require no checks as the functions they call take care of the checks
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    ///@notice Exists to keep the same function signature as previous
+    function addGotchiLending(
+        uint32 _erc721TokenId,
+        uint96 _initialCost,
+        uint32 _period,
+        uint8[3] calldata _revenueSplit,
+        address _originalOwner,
+        address _thirdParty,
+        uint32 _whitelistId,
+        address[] calldata _revenueTokens
+    ) external {
+        uint8[3] memory revenueSplit = _revenueSplit;
+        address[] memory revenueTokens = _revenueTokens;
+        AddGotchiListing memory listing = AddGotchiListing({
+            tokenId: _erc721TokenId,
+            initialCost: _initialCost,
+            period: _period,
+            revenueSplit: revenueSplit,
+            originalOwner: _originalOwner,
+            thirdParty: _thirdParty,
+            whitelistId: _whitelistId,
+            revenueTokens: revenueTokens
+        });
+        addGotchiListing(listing);
+    }
+
     ///@notice Allow an aavegotchi lender to cancel his NFT lending by providing the NFT contract address and identifier
     ///@param _erc721TokenId The identifier of the NFT to be delisted from lending
     function cancelGotchiLendingByToken(uint32 _erc721TokenId) public {
@@ -136,41 +165,23 @@ contract GotchiLendingFacet is Modifiers {
     function claimAndEndAndRelistGotchiLending(uint32 _tokenId) public {
         GotchiLending memory lending = s.gotchiLendings[LibGotchiLending.tokenIdToListingId(_tokenId)];
         claimAndEndGotchiLending(_tokenId);
-        addGotchiLending(
-            lending.erc721TokenId,
-            lending.initialCost,
-            lending.period,
-            lending.revenueSplit,
-            lending.originalOwner,
-            lending.thirdParty,
-            lending.whitelistId,
-            lending.revenueTokens
+        addGotchiListing(
+            AddGotchiListing({
+                tokenId: lending.erc721TokenId,
+                initialCost: lending.initialCost,
+                period: lending.period,
+                revenueSplit: lending.revenueSplit,
+                originalOwner: lending.originalOwner,
+                thirdParty: lending.thirdParty,
+                whitelistId: lending.whitelistId,
+                revenueTokens: lending.revenueTokens
+            })
         );
     }
 
-    struct AddGotchiLending {
-        uint32 tokenId;
-        uint96 initialCost;
-        uint32 period;
-        uint8[3] revenueSplit;
-        address originalOwner;
-        address thirdParty;
-        uint32 whitelistId;
-        address[] revenueTokens;
-    }
-
-    function batchAddGotchiLending(AddGotchiLending[] calldata listings) external {
+    function batchAddGotchiListing(AddGotchiListing[] memory listings) external {
         for (uint256 i = 0; i < listings.length; ) {
-            addGotchiLending(
-                listings[i].tokenId,
-                listings[i].initialCost,
-                listings[i].period,
-                listings[i].revenueSplit,
-                listings[i].originalOwner,
-                listings[i].thirdParty,
-                listings[i].whitelistId,
-                listings[i].revenueTokens
-            );
+            addGotchiListing(listings[i]);
             unchecked {
                 ++i;
             }
