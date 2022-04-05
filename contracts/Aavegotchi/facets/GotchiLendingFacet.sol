@@ -142,10 +142,9 @@ contract GotchiLendingFacet is Modifiers {
         LibGotchiLending.claimGotchiLending(listingId);
     }
 
-    ///@notice Allow a lender to claim revenue from the lending
+    ///@notice Allow a lender or borrower to claim revenue from the lending and end the listing
     ///@dev Will throw if the NFT has not been lent or if the lending has been canceled already
     ///@param _tokenId The identifier of the lent aavegotchi to claim
-
     function claimAndEndGotchiLending(uint32 _tokenId) external {
         uint32 listingId = LibGotchiLending.tokenIdToListingId(_tokenId);
         GotchiLending storage lending = s.gotchiLendings[listingId];
@@ -160,5 +159,15 @@ contract GotchiLendingFacet is Modifiers {
 
         LibGotchiLending.claimGotchiLending(listingId);
         LibGotchiLending.endGotchiLending(lending);
+    }
+
+    ///@notice Allows a lender to end the listing and relist with the same parameters
+    function claimAndRelistGotchiLending(uint32 _tokenId) external {
+        //TODO
+    }
+
+    ///@notice Allows a lender to renew the listing
+    function claimAndRenewGotchiLending(uint32 _tokenId) external {
+        //TODO
     }
 }
