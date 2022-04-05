@@ -30,14 +30,5 @@ library LibBuyOrder {
 
         // refund GHST to buyer
         LibERC20.transfer(s.ghstContract, erc721BuyOrder.buyer, erc721BuyOrder.priceInWei);
-
-        updateFrens(_buyOrderId);
-    }
-
-    function updateFrens(uint256 _buyOrderId) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-
-        ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
-        IStakingFacet(s.ghstStaking).increaseFrens(erc721BuyOrder.buyer, erc721BuyOrder.priceInWei, erc721BuyOrder.timeCreated);
     }
 }

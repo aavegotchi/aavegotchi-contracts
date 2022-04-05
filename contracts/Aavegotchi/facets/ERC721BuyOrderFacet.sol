@@ -149,8 +149,6 @@ contract ERC721BuyOrderFacet is Modifiers {
         s.erc721BuyOrderHead[erc721BuyOrder.erc721TokenId] = 0;
         s.erc721BuyOrders[_buyOrderId].timePurchased = block.timestamp;
 
-        LibBuyOrder.updateFrens(_buyOrderId);
-
         emit ERC721BuyOrderExecuted(_buyOrderId, erc721BuyOrder.buyer, sender, erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId, erc721BuyOrder.category, erc721BuyOrder.priceInWei, block.timestamp);
     }
 }
