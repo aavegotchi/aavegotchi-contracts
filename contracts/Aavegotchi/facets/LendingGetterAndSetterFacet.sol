@@ -4,9 +4,12 @@ pragma solidity 0.8.1;
 import {LibAavegotchi, AavegotchiInfo} from "../libraries/LibAavegotchi.sol";
 import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 import {Modifiers, GotchiLending} from "../libraries/LibAppStorage.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 
 contract LendingGetterAndSetterFacet is Modifiers {
+    event LendingOperatorSet(address indexed lender, address indexed lendingOperator, uint32 indexed tokenId, bool isLendingOperator);
+
     function allowRevenueTokens(address[] calldata tokens) external onlyOwner {
         for (uint256 i = 0; i < tokens.length; ) {
             s.revenueTokenAllowed[tokens[i]] = true;
@@ -41,16 +44,10 @@ contract LendingGetterAndSetterFacet is Modifiers {
         }
     }
 
-    function getRevenueTokenBalancesInEscrow(uint32 _tokenId)
-        external
-        view
-        returns (address[] memory revenueTokens, uint256[] memory revenueBalances)
-    {
-        GotchiLending memory lending = s.gotchiLendings[LibGotchiLending.tokenIdToListingId(_tokenId)];
+    function getTokenBalancesInEscrow(uint32 _tokenId, address[] calldata _revenueTokens) external view returns (uint256[] memory revenueBalances) {
         address escrow = LibAavegotchi.getAavegotchi(_tokenId).escrow;
-        for (uint256 i = 0; i < lending.revenueTokens.length; ) {
-            revenueTokens[i] = lending.revenueTokens[i];
-            revenueBalances[i] = IERC20(revenueTokens[i]).balanceOf(escrow);
+        for (uint256 i = 0; i < _revenueTokens.length; ) {
+            revenueBalances[i] = IERC20(_revenueTokens[i]).balanceOf(escrow);
             unchecked {
                 ++i;
             }
@@ -59,6 +56,41 @@ contract LendingGetterAndSetterFacet is Modifiers {
 
     function getBorrowerTokenId(address borrower) external view returns (uint32) {
         return LibGotchiLending.borrowerTokenId(borrower);
+    }
+
+    function isLendingOperator(
+        address _lender,
+        address _lendingOperator,
+        uint32 _tokenId
+    ) external view returns (bool) {
+        return s.isLendingOperator[_lender][_lendingOperator][_tokenId];
+    }
+
+    ///@notice Set the lending operator for a given token
+    ///@dev Only the aavegotchi owner can set a lending operator
+    ///@dev Can only be called when the token is unlocked to prevent borrowers from setting operators
+    function setLendingOperator(
+        address _lendingOperator,
+        uint32 _tokenId,
+        bool _isLendingOperator
+    ) public onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
+        address sender = LibMeta.msgSender();
+        s.isLendingOperator[sender][_lendingOperator][_tokenId] = _isLendingOperator;
+        emit LendingOperatorSet(sender, _lendingOperator, _tokenId, _isLendingOperator);
+    }
+
+    struct LendingOperatorInputs {
+        uint32 _tokenId;
+        bool _isLendingOperator;
+    }
+
+    function batchSetLendingOperator(address _lendingOperator, LendingOperatorInputs[] calldata _inputs) external {
+        for (uint256 i = 0; i < _inputs.length; ) {
+            setLendingOperator(_lendingOperator, _inputs[i]._tokenId, _inputs[i]._isLendingOperator);
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     ///@notice Get an aavegotchi lending details through an identifier
@@ -118,6 +150,20 @@ contract LendingGetterAndSetterFacet is Modifiers {
         assembly {
             mstore(listings_, listIndex)
         }
+    }
+
+    ///@notice Query a certain amount of aavegotchi lending listings created by an address
+    ///@dev We don't care that this can loop forever since it's just an external view function
+    function getOwnerGotchiLendingsLength(address _lender, bytes32 _status) external view returns (uint256) {
+        uint32 listingId = s.aavegotchiLenderLendingHead[_lender][_status];
+        uint256 length = 0;
+        for (; listingId != 0; ) {
+            listingId = s.aavegotchiLenderLendingListItem[_status][listingId].childListingId;
+            unchecked {
+                ++length;
+            }
+        }
+        return length;
     }
 
     ///@notice Query a certain amount of aavegotchi lending listings

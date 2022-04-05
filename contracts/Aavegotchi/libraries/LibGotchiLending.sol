@@ -60,46 +60,56 @@ library LibGotchiLending {
         return s.borrowerTokenId[_borrower] - 1;
     }
 
-    function _addGotchiLending(
-        address _lender,
-        uint32 _erc721TokenId,
-        uint96 _initialCost,
-        uint32 _period,
-        uint8[3] calldata _revenueSplit,
-        address _originalOwner,
-        address _thirdParty,
-        uint32 _whitelistId,
-        address[] calldata _revenueTokens
-    ) internal {
+    struct AddGotchiLendingStruct {
+        address lender;
+        uint32 tokenId;
+        uint96 initialCost;
+        uint32 period;
+        uint8[3] revenueSplit;
+        address originalOwner;
+        address thirdParty;
+        uint32 whitelistId;
+        address[] revenueTokens;
+    }
+
+    function _addGotchiLending(AddGotchiLendingStruct memory _listing) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        uint32 oldListingId = s.aavegotchiToListingId[_erc721TokenId];
+        uint32 oldListingId = s.aavegotchiToListingId[_listing.tokenId];
         if (oldListingId != 0) {
-            cancelGotchiLending(oldListingId, _lender);
+            cancelGotchiLending(oldListingId, _listing.lender);
         }
-        verifyAddGotchiLendingParams(_erc721TokenId, _period, _revenueSplit, _originalOwner, _thirdParty, _whitelistId, _revenueTokens);
+        verifyAddGotchiLendingParams(
+            _listing.tokenId,
+            _listing.period,
+            _listing.revenueSplit,
+            _listing.originalOwner,
+            _listing.thirdParty,
+            _listing.whitelistId,
+            _listing.revenueTokens
+        );
         uint32 listingId = ++s.nextGotchiListingId; //assigned value after incrementing
 
-        s.aavegotchiToListingId[_erc721TokenId] = listingId;
+        s.aavegotchiToListingId[_listing.tokenId] = listingId;
         s.gotchiLendings[listingId] = GotchiLending({
             listingId: listingId,
-            initialCost: _initialCost,
-            period: _period,
-            revenueSplit: _revenueSplit,
-            lender: _lender,
+            initialCost: _listing.initialCost,
+            period: _listing.period,
+            revenueSplit: _listing.revenueSplit,
+            lender: _listing.lender,
             borrower: address(0),
-            originalOwner: _originalOwner,
-            thirdParty: _thirdParty,
-            erc721TokenId: _erc721TokenId,
-            whitelistId: _whitelistId,
-            revenueTokens: _revenueTokens,
+            originalOwner: _listing.originalOwner,
+            thirdParty: _listing.thirdParty,
+            erc721TokenId: _listing.tokenId,
+            whitelistId: _listing.whitelistId,
+            revenueTokens: _listing.revenueTokens,
             timeCreated: uint40(block.timestamp),
             timeAgreed: 0,
             lastClaimed: 0,
             canceled: false,
             completed: false
         });
-        addLendingListItem(_lender, listingId, "listed");
-        s.aavegotchis[_erc721TokenId].locked = true;
+        addLendingListItem(_listing.lender, listingId, "listed");
+        s.aavegotchis[_listing.tokenId].locked = true;
 
         emit GotchiLendingAdd(listingId);
     }
@@ -150,7 +160,6 @@ library LibGotchiLending {
             return;
         }
         require(lending.timeAgreed == 0, "GotchiLending: Listing already agreed");
-        require(lending.lender == _lender, "GotchiLending: Not lender");
         lending.canceled = true;
 
         removeLendingListItem(_lender, _listingId, "listed");
@@ -237,11 +246,11 @@ library LibGotchiLending {
     function verifyAddGotchiLendingParams(
         uint32 _erc721TokenId,
         uint32 _period,
-        uint8[3] calldata _revenueSplit,
+        uint8[3] memory _revenueSplit,
         address _originalOwner,
         address _thirdParty,
         uint32 _whitelistId,
-        address[] calldata _revenueTokens
+        address[] memory _revenueTokens
     ) internal view {
         AppStorage storage s = LibAppStorage.diamondStorage();
         require(_originalOwner != address(0), "GotchiLending: Original owner cannot be zero address");
@@ -327,8 +336,8 @@ library LibGotchiLending {
     }
 
     function checkRevenueParams(
-        uint8[3] calldata _revenueSplit,
-        address[] calldata _revenueTokens,
+        uint8[3] memory _revenueSplit,
+        address[] memory _revenueTokens,
         address _thirdParty
     ) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
