@@ -32,6 +32,34 @@ library LibGotchiLending {
         require(listingId != 0, "GotchiLending: Listing not found");
     }
 
+    function isBorrowing(address _borrower) internal view returns (bool) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        return s.borrowerTokenId[_borrower] != 0;
+    }
+
+    function addBorrowerTokenId(address _borrower, uint32 _tokenId) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        if (!isBorrowing(_borrower)) {
+            s.borrowerTokenId[_borrower] = _tokenId + 1;
+        }
+    }
+
+    /// @dev Since this is an upgrade, the borrower may already have borrowed gotchis.
+    /// To get around this, we only return the status to not borrowing if the token Id matches
+    /// a borrow that was agreed to after the upgrade.
+    function removeBorrowerTokenId(address _borrower, uint32 _tokenId) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        if (s.borrowerTokenId[_borrower] == _tokenId + 1) {
+            s.borrowerTokenId[_borrower] = 0;
+        }
+    }
+
+    function borrowerTokenId(address _borrower) internal view returns (uint32) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        require(isBorrowing(_borrower), "Borrower does not have any token");
+        return s.borrowerTokenId[_borrower] - 1;
+    }
+
     function _addGotchiLending(
         address _lender,
         uint32 _erc721TokenId,
@@ -104,6 +132,9 @@ library LibGotchiLending {
 
         LibAavegotchi.transfer(lender, _borrower, _erc721TokenId);
 
+        require(!isBorrowing(_borrower), "GotchiLending: Already borrowing");
+        addBorrowerTokenId(_borrower, _erc721TokenId);
+
         // set lender as pet operator
         s.petOperators[_borrower][lender] = true;
 
@@ -146,7 +177,7 @@ library LibGotchiLending {
         require(escrow != address(0), "LibGotchiLending: Escrow is zero address");
 
         address collateralType = s.aavegotchis[lending.erc721TokenId].collateralType;
-        for (uint256 i; i < lending.revenueTokens.length; i++) {
+        for (uint256 i; i < lending.revenueTokens.length; ) {
             address revenueToken = lending.revenueTokens[i];
             uint256 balance = IERC20(revenueToken).balanceOf(escrow);
 
@@ -162,12 +193,19 @@ library LibGotchiLending {
                 uint256 ownerAmount = (balance * lending.revenueSplit[0]) / 100;
                 uint256 borrowerAmount = (balance * lending.revenueSplit[1]) / 100;
                 address owner = lending.originalOwner == address(0) ? lending.lender : lending.originalOwner;
-                LibERC20.transferFrom(revenueToken, escrow, owner, ownerAmount);
-                LibERC20.transferFrom(revenueToken, escrow, lending.borrower, borrowerAmount);
+                if (ownerAmount > 0) {
+                    LibERC20.transferFrom(revenueToken, escrow, owner, ownerAmount);
+                }
+                if (borrowerAmount > 0) {
+                    LibERC20.transferFrom(revenueToken, escrow, lending.borrower, borrowerAmount);
+                }
                 if (lending.thirdParty != address(0)) {
                     uint256 thirdPartyAmount = (balance * lending.revenueSplit[2]) / 100;
                     LibERC20.transferFrom(revenueToken, escrow, lending.thirdParty, thirdPartyAmount);
                 }
+            }
+            unchecked {
+                ++i;
             }
         }
 
@@ -230,8 +268,11 @@ library LibGotchiLending {
         require(lending.erc721TokenId == _erc721TokenId, "GotchiLending: Invalid token id");
         require(lending.initialCost == _initialCost, "GotchiLending: Invalid initial cost");
         require(lending.period == _period, "GotchiLending: Invalid lending period");
-        for (uint256 i; i < 3; i++) {
+        for (uint256 i; i < 3; ) {
             require(lending.revenueSplit[i] == _revenueSplit[i], "GotchiLending: Invalid revenue split");
+            unchecked {
+                ++i;
+            }
         }
         require(lending.lender != _borrower, "GotchiLending: Borrower can't be lender");
         if (lending.whitelistId > 0) {

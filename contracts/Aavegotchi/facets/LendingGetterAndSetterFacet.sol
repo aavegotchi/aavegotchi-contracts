@@ -4,6 +4,7 @@ pragma solidity 0.8.1;
 import {LibAavegotchi, AavegotchiInfo} from "../libraries/LibAavegotchi.sol";
 import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 import {Modifiers, GotchiLending} from "../libraries/LibAppStorage.sol";
+import {IERC20} from "../../shared/interfaces/IERC20.sol";
 
 contract LendingGetterAndSetterFacet is Modifiers {
     function allowRevenueTokens(address[] calldata tokens) external onlyOwner {
@@ -38,6 +39,26 @@ contract LendingGetterAndSetterFacet is Modifiers {
                 ++i;
             }
         }
+    }
+
+    function getRevenueTokenBalancesInEscrow(uint32 _tokenId)
+        external
+        view
+        returns (address[] memory revenueTokens, uint256[] memory revenueBalances)
+    {
+        GotchiLending memory lending = s.gotchiLendings[LibGotchiLending.tokenIdToListingId(_tokenId)];
+        address escrow = LibAavegotchi.getAavegotchi(_tokenId).escrow;
+        for (uint256 i = 0; i < lending.revenueTokens.length; ) {
+            revenueTokens[i] = lending.revenueTokens[i];
+            revenueBalances[i] = IERC20(revenueTokens[i]).balanceOf(escrow);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function getBorrowerTokenId(address borrower) external view returns (uint32) {
+        return LibGotchiLending.borrowerTokenId(borrower);
     }
 
     ///@notice Get an aavegotchi lending details through an identifier
@@ -87,9 +108,12 @@ contract LendingGetterAndSetterFacet is Modifiers {
         uint32 listingId = s.aavegotchiLenderLendingHead[_lender][_status];
         listings_ = new GotchiLending[](_length);
         uint256 listIndex;
-        for (; listingId != 0 && listIndex < _length; listIndex++) {
+        for (; listingId != 0 && listIndex < _length; ) {
             listings_[listIndex] = LibGotchiLending.getListing(listingId);
             listingId = s.aavegotchiLenderLendingListItem[_status][listingId].childListingId;
+            unchecked {
+                ++listIndex;
+            }
         }
         assembly {
             mstore(listings_, listIndex)
@@ -104,9 +128,12 @@ contract LendingGetterAndSetterFacet is Modifiers {
         uint32 listingId = s.gotchiLendingHead[_status];
         listings_ = new GotchiLending[](_length);
         uint256 listIndex;
-        for (; listingId != 0 && listIndex < _length; listIndex++) {
+        for (; listingId != 0 && listIndex < _length; ) {
             listings_[listIndex] = LibGotchiLending.getListing(listingId);
             listingId = s.gotchiLendingListItem[_status][listingId].childListingId;
+            unchecked {
+                ++listIndex;
+            }
         }
         assembly {
             mstore(listings_, listIndex)

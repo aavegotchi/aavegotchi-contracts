@@ -87,8 +87,11 @@ contract GotchiLendingFacet is Modifiers {
     }
 
     function batchCancelGotchiLending(uint32[] calldata _listingIds) external {
-        for (uint256 i = 0; i < _listingIds.length; i++) {
+        for (uint256 i = 0; i < _listingIds.length; ) {
             LibGotchiLending.cancelGotchiLending(_listingIds[i], LibMeta.msgSender());
+            unchecked {
+                ++i;
+            }
         }
     }
 
