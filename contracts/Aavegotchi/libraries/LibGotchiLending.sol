@@ -60,7 +60,7 @@ library LibGotchiLending {
         return s.borrowerTokenId[_borrower] - 1;
     }
 
-    struct AddGotchiLendingStruct {
+    struct LibAddGotchiLending {
         address lender;
         uint32 tokenId;
         uint96 initialCost;
@@ -72,7 +72,7 @@ library LibGotchiLending {
         address[] revenueTokens;
     }
 
-    function _addGotchiLending(AddGotchiLendingStruct memory _listing) internal {
+    function _addGotchiLending(LibAddGotchiLending memory _listing) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint32 oldListingId = s.aavegotchiToListingId[_listing.tokenId];
         if (oldListingId != 0) {

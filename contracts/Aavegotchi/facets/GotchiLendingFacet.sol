@@ -34,7 +34,7 @@ contract GotchiLendingFacet is Modifiers {
         address tokenOwner = s.aavegotchis[_erc721TokenId].owner;
         bool senderIsLendingOperator = s.isLendingOperator[tokenOwner][sender][_erc721TokenId];
         require(tokenOwner == sender || senderIsLendingOperator, "Only the owner or a lending operator can add a lending request");
-        LibGotchiLending.AddGotchiLendingStruct memory addLendingStruct = LibGotchiLending.AddGotchiLendingStruct({
+        LibGotchiLending.LibAddGotchiLending memory addLendingStruct = LibGotchiLending.LibAddGotchiLending({
             lender: tokenOwner,
             tokenId: _erc721TokenId,
             initialCost: _initialCost,
@@ -111,14 +111,41 @@ contract GotchiLendingFacet is Modifiers {
         LibGotchiLending.endGotchiLending(lending);
     }
 
-    ///@notice Allows a lender to extend a current listing
+    ///@notice Allows a lender or lending operator to extend a current listing
     function extendGotchiLending(uint32 _tokenId, uint32 extension) public {
         GotchiLending storage lending = s.gotchiLendings[LibGotchiLending.tokenIdToListingId(_tokenId)];
         address lender = lending.lender;
         address sender = LibMeta.msgSender();
         require(lender == sender || s.isLendingOperator[lender][sender][_tokenId], "GotchiLending: Only lender or lending operator can extend");
         require(lending.timeAgreed != 0 && !lending.completed, "GotchiLending: Cannot extend a listing that has not been borrowed");
+        require(lending.period + extension < 2_592_000, "GotchiLending: Cannot extend a listing beyond the maximum period");
         lending.period += extension;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// From here on, functions require no checks as the functions they call take care of the checks
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ///@notice Allow an aavegotchi lender to cancel his NFT lending by providing the NFT contract address and identifier
+    ///@param _erc721TokenId The identifier of the NFT to be delisted from lending
+    function cancelGotchiLendingByToken(uint32 _erc721TokenId) public {
+        cancelGotchiLending(s.aavegotchiToListingId[_erc721TokenId]);
+    }
+
+    ///@notice Allows a lender or pet operator to end the listing and relist with the same parameters
+    function claimAndEndAndRelistGotchiLending(uint32 _tokenId) public {
+        GotchiLending memory lending = s.gotchiLendings[LibGotchiLending.tokenIdToListingId(_tokenId)];
+        claimAndEndGotchiLending(_tokenId);
+        addGotchiLending(
+            lending.erc721TokenId,
+            lending.initialCost,
+            lending.period,
+            lending.revenueSplit,
+            lending.originalOwner,
+            lending.thirdParty,
+            lending.whitelistId,
+            lending.revenueTokens
+        );
     }
 
     struct AddGotchiLending {
@@ -159,12 +186,6 @@ contract GotchiLendingFacet is Modifiers {
         }
     }
 
-    ///@notice Allow an aavegotchi lender to cancel his NFT lending by providing the NFT contract address and identifier
-    ///@param _erc721TokenId The identifier of the NFT to be delisted from lending
-    function cancelGotchiLendingByToken(uint32 _erc721TokenId) public {
-        cancelGotchiLending(s.aavegotchiToListingId[_erc721TokenId]);
-    }
-
     function batchCancelGotchiLendingByToken(uint32[] calldata _erc721TokenIds) external {
         for (uint256 i = 0; i < _erc721TokenIds.length; ) {
             cancelGotchiLendingByToken(_erc721TokenIds[i]);
@@ -190,22 +211,6 @@ contract GotchiLendingFacet is Modifiers {
                 ++i;
             }
         }
-    }
-
-    ///@notice Allows a lender or pet operator to end the listing and relist with the same parameters
-    function claimAndEndAndRelistGotchiLending(uint32 _tokenId) public {
-        GotchiLending memory lending = s.gotchiLendings[LibGotchiLending.tokenIdToListingId(_tokenId)];
-        claimAndEndGotchiLending(_tokenId);
-        addGotchiLending(
-            lending.erc721TokenId,
-            lending.initialCost,
-            lending.period,
-            lending.revenueSplit,
-            lending.originalOwner,
-            lending.thirdParty,
-            lending.whitelistId,
-            lending.revenueTokens
-        );
     }
 
     function batchClaimAndEndAndRelistGotchiLending(uint32[] calldata _tokenIds) external {
