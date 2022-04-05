@@ -8,10 +8,9 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 import {Modifiers, GotchiLending} from "../libraries/LibAppStorage.sol";
-import {LibUtils} from "../../shared/libraries/LibUtils.sol";
 
 contract GotchiLendingFacet is Modifiers {
-    ///@notice Allow an aavegotchi lender (msg sender) to add request for lending
+    ///@notice Allow an aavegotchi lender (msg sender) or their lending operator to add request for lending
     ///@dev If the lending request exist, cancel it and replaces it with the new one
     ///@dev If the lending is active, unable to cancel
     ///@param _erc721TokenId The identifier of the NFT to lend
@@ -25,11 +24,11 @@ contract GotchiLendingFacet is Modifiers {
         uint32 _erc721TokenId,
         uint96 _initialCost,
         uint32 _period,
-        uint8[3] calldata _revenueSplit,
+        uint8[3] memory _revenueSplit,
         address _originalOwner,
         address _thirdParty,
         uint32 _whitelistId,
-        address[] calldata _revenueTokens
+        address[] memory _revenueTokens
     ) public {
         address sender = LibMeta.msgSender();
         address tokenOwner = s.aavegotchis[_erc721TokenId].owner;
@@ -40,11 +39,11 @@ contract GotchiLendingFacet is Modifiers {
             tokenId: _erc721TokenId,
             initialCost: _initialCost,
             period: _period,
-            revenueSplit: LibUtils.uint8sCalldataToMemory(_revenueSplit),
+            revenueSplit: _revenueSplit,
             originalOwner: _originalOwner,
             thirdParty: _thirdParty,
             whitelistId: _whitelistId,
-            revenueTokens: LibUtils.addressesCalldataToMemory(_revenueTokens)
+            revenueTokens: _revenueTokens
         });
         LibGotchiLending._addGotchiLending(addLendingStruct);
     }
@@ -90,7 +89,7 @@ contract GotchiLendingFacet is Modifiers {
         LibGotchiLending.claimGotchiLending(listingId);
     }
 
-    ///@notice Allow a lender or borrower to claim revenue from the lending and end the listing
+    ///@notice Allow a lender or borrower or lending operator to claim revenue from the lending and end the listing
     ///@dev Will throw if the NFT has not been lent or if the lending has been canceled already
     ///@param _tokenId The identifier of the lent aavegotchi to claim
     function claimAndEndGotchiLending(uint32 _tokenId) public {
@@ -112,10 +111,14 @@ contract GotchiLendingFacet is Modifiers {
         LibGotchiLending.endGotchiLending(lending);
     }
 
-    ///@notice Allow an aavegotchi lender to cancel his NFT lending by providing the NFT contract address and identifier
-    ///@param _erc721TokenId The identifier of the NFT to be delisted from lending
-    function cancelGotchiLendingByToken(uint32 _erc721TokenId) public {
-        cancelGotchiLending(s.aavegotchiToListingId[_erc721TokenId]);
+    ///@notice Allows a lender to extend a current listing
+    function extendGotchiLending(uint32 _tokenId, uint32 extension) public {
+        GotchiLending storage lending = s.gotchiLendings[LibGotchiLending.tokenIdToListingId(_tokenId)];
+        address lender = lending.lender;
+        address sender = LibMeta.msgSender();
+        require(lender == sender || s.isLendingOperator[lender][sender][_tokenId], "GotchiLending: Only lender or lending operator can extend");
+        require(lending.timeAgreed != 0 && !lending.completed, "GotchiLending: Cannot extend a listing that has not been borrowed");
+        lending.period += extension;
     }
 
     struct AddGotchiLending {
@@ -156,6 +159,12 @@ contract GotchiLendingFacet is Modifiers {
         }
     }
 
+    ///@notice Allow an aavegotchi lender to cancel his NFT lending by providing the NFT contract address and identifier
+    ///@param _erc721TokenId The identifier of the NFT to be delisted from lending
+    function cancelGotchiLendingByToken(uint32 _erc721TokenId) public {
+        cancelGotchiLending(s.aavegotchiToListingId[_erc721TokenId]);
+    }
+
     function batchCancelGotchiLendingByToken(uint32[] calldata _erc721TokenIds) external {
         for (uint256 i = 0; i < _erc721TokenIds.length; ) {
             cancelGotchiLendingByToken(_erc721TokenIds[i]);
@@ -183,21 +192,42 @@ contract GotchiLendingFacet is Modifiers {
         }
     }
 
-    ///@notice Allows a lender to end the listing and relist with the same parameters
-    function claimAndRelistGotchiLending(uint32 _tokenId) external {
-        //TODO
+    ///@notice Allows a lender or pet operator to end the listing and relist with the same parameters
+    function claimAndEndAndRelistGotchiLending(uint32 _tokenId) public {
+        GotchiLending memory lending = s.gotchiLendings[LibGotchiLending.tokenIdToListingId(_tokenId)];
+        claimAndEndGotchiLending(_tokenId);
+        addGotchiLending(
+            lending.erc721TokenId,
+            lending.initialCost,
+            lending.period,
+            lending.revenueSplit,
+            lending.originalOwner,
+            lending.thirdParty,
+            lending.whitelistId,
+            lending.revenueTokens
+        );
     }
 
-    function batchClaimAndRelistGotchiLending(uint32[] calldata _tokenIds) external {
-        //TODO
+    function batchClaimAndEndAndRelistGotchiLending(uint32[] calldata _tokenIds) external {
+        for (uint256 i = 0; i < _tokenIds.length; ) {
+            claimAndEndAndRelistGotchiLending(_tokenIds[i]);
+            unchecked {
+                ++i;
+            }
+        }
     }
 
-    ///@notice Allows a lender to renew the listing
-    function claimAndRenewGotchiLending(uint32 _tokenId) external {
-        //TODO
+    struct BatchRenew {
+        uint32 tokenId;
+        uint32 extension;
     }
 
-    function batchClaimAndRenewGotchiLending(uint32[] calldata _tokenIds) external {
-        //TODO
+    function batchRenewGotchiLending(BatchRenew[] calldata _batchRenewParams) external {
+        for (uint256 i = 0; i < _batchRenewParams.length; ) {
+            extendGotchiLending(_batchRenewParams[i].tokenId, _batchRenewParams[i].extension);
+            unchecked {
+                ++i;
+            }
+        }
     }
 }
