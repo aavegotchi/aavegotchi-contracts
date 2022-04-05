@@ -10,8 +10,10 @@ import {LibAavegotchi} from "./LibAavegotchi.sol";
 
 library LibGotchiLending {
     event GotchiLendingAdd(uint32 indexed listingId);
+    event GotchiLendingExecute(uint32 indexed listingId);
     event GotchiLendingCancel(uint32 indexed listingId, uint256 time);
     event GotchiLendingClaim(uint32 indexed listingId, address[] tokenAddresses, uint256[] amounts);
+    event GotchiLendingEnd(uint32 indexed listingId);
 
     function getListing(uint32 _listingId) internal view returns (GotchiLending memory listing_) {
         AppStorage storage s = LibAppStorage.diamondStorage();
@@ -19,25 +21,15 @@ library LibGotchiLending {
         require(listing_.timeCreated != 0, "GotchiLending: Listing does not exist");
     }
 
-    function cancelGotchiLending(uint32 _listingId, address _lender) internal {
+    function whitelistExists(uint32 _whitelistId) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
+        return s.whitelists.length >= _whitelistId;
+    }
 
-        GotchiLending storage lending = s.gotchiLendings[_listingId];
-        require(lending.timeCreated != 0, "GotchiLending: Listing not found");
-        if (lending.canceled) {
-            return;
-        }
-        require(lending.timeAgreed == 0, "GotchiLending: Listing already agreed");
-        require(lending.lender == _lender, "GotchiLending: Not lender");
-        lending.canceled = true;
-
-        removeLendingListItem(_lender, _listingId, "listed");
-
-        //Unlock Aavegotchis when lending is created
-        s.aavegotchis[lending.erc721TokenId].locked = false;
-        s.aavegotchiToListingId[lending.erc721TokenId] = 0;
-
-        emit GotchiLendingCancel(_listingId, block.number);
+    function tokenIdToListingId(uint32 _tokenId) internal view returns (uint32 listingId) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        listingId = s.aavegotchiToListingId[_tokenId];
+        require(listingId != 0, "GotchiLending: Listing not found");
     }
 
     function verifyGotchiLendingParams(
@@ -143,11 +135,9 @@ library LibGotchiLending {
 
         // gas savings
         address lender = lending.lender;
-        address initialCost = lending.initialCost;
-        uint32 tokenId = lending.erc721TokenId;
 
         if (lending.initialCost > 0) {
-            LibERC20.transferFrom(s.ghstContract, _borrower, lender, initialCost);
+            LibERC20.transferFrom(s.ghstContract, _borrower, lender, _initialCost);
         }
         lending.borrower = _borrower;
         lending.timeAgreed = uint40(block.timestamp);
@@ -155,65 +145,41 @@ library LibGotchiLending {
         removeLendingListItem(lender, _listingId, "listed");
         addLendingListItem(lender, _listingId, "agreed");
 
-        s.lentTokenIdIndexes[lender][tokenId] = uint32(s.lentTokenIds[lender].length);
-        s.lentTokenIds[lender].push(tokenId);
+        s.lentTokenIdIndexes[lender][_erc721TokenId] = uint32(s.lentTokenIds[lender].length);
+        s.lentTokenIds[lender].push(_erc721TokenId);
 
-        LibAavegotchi.transfer(lender, _borrower, tokenId);
+        LibAavegotchi.transfer(lender, _borrower, _erc721TokenId);
 
         // set lender as pet operator
         s.petOperators[_borrower][lender] = true;
 
-        emit GotchiLendingAgree(_listingId, block.number);
+        emit GotchiLendingExecute(_listingId);
     }
 
-    function checkPeriod(uint32 _period) internal pure returns (bool) {
-        return _period > 0 && _period <= 2_592_000; //No reason to have a period longer than 30 days
-    }
-
-    function checkRevenueParams(
-        uint8[3] calldata _revenueSplit,
-        address[] calldata _revenueTokens,
-        address _thirdParty
-    ) internal view returns (bool) {
+    function cancelGotchiLending(uint32 _listingId, address _lender) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        if (_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] != 100) return false;
-        for (uint256 i = 0; i < _revenueTokens.length; ) {
-            if (!s.revenueTokenAllowed[_revenueTokens[i]]) return false;
-            unchecked {
-                ++i;
-            }
-        }
-        if (_thirdParty == address(0)) {
-            if (_revenueSplit[2] != 0) return false;
-        }
-        if (_revenueTokens.length > 10) return false; //Prevent claimAndEnd from reverting due to Out of Gas
 
-        return true;
-    }
+        GotchiLending storage lending = s.gotchiLendings[_listingId];
+        require(lending.timeCreated != 0, "GotchiLending: Listing not found");
+        if (lending.canceled) {
+            return;
+        }
+        require(lending.timeAgreed == 0, "GotchiLending: Listing already agreed");
+        require(lending.lender == _lender, "GotchiLending: Not lender");
+        lending.canceled = true;
 
-    function whitelistExists(uint32 _whitelistId) internal view returns (bool) {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        return s.whitelists.length >= _whitelistId;
+        removeLendingListItem(_lender, _listingId, "listed");
+
+        //Unlock Aavegotchis when lending is created
+        s.aavegotchis[lending.erc721TokenId].locked = false;
+        s.aavegotchiToListingId[lending.erc721TokenId] = 0;
+
+        emit GotchiLendingCancel(_listingId, block.number);
     }
 
     function cancelGotchiLendingFromToken(uint32 _erc721TokenId, address _lender) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         cancelGotchiLending(s.aavegotchiToListingId[_erc721TokenId], _lender);
-    }
-
-    function removeLentAavegotchi(uint32 _tokenId, address _lender) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-
-        // Remove indexed data for lender
-        uint32 index = s.lentTokenIdIndexes[_lender][_tokenId];
-        uint32 lastIndex = uint32(s.lentTokenIds[_lender].length - 1);
-        if (index != lastIndex) {
-            uint32 lastTokenId = s.lentTokenIds[_lender][lastIndex];
-            s.lentTokenIds[_lender][index] = lastTokenId;
-            s.lentTokenIdIndexes[_lender][lastTokenId] = index;
-        }
-        s.lentTokenIds[_lender].pop();
-        delete s.lentTokenIdIndexes[_lender][_tokenId];
     }
 
     function claimGotchiLending(uint32 listingId) internal {
@@ -256,6 +222,40 @@ library LibGotchiLending {
         emit GotchiLendingClaim(listingId, lending.revenueTokens, amounts);
     }
 
+    /// @dev Checks should be done before calling this function
+    function endGotchiLending(GotchiLending storage lending) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+
+        uint32 tokenId = lending.erc721TokenId;
+        address lender = lending.lender;
+        address borrower = lending.borrower;
+
+        s.aavegotchis[tokenId].locked = false;
+        LibAavegotchi.transfer(borrower, lender, tokenId);
+        lending.completed = true;
+        s.aavegotchiToListingId[tokenId] = 0;
+
+        removeLentAavegotchi(tokenId, lender);
+        removeLendingListItem(lender, lending.listingId, "agreed");
+
+        emit GotchiLendingEnd(tokenId);
+    }
+
+    function removeLentAavegotchi(uint32 _tokenId, address _lender) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+
+        // Remove indexed data for lender
+        uint32 index = s.lentTokenIdIndexes[_lender][_tokenId];
+        uint32 lastIndex = uint32(s.lentTokenIds[_lender].length - 1);
+        if (index != lastIndex) {
+            uint32 lastTokenId = s.lentTokenIds[_lender][lastIndex];
+            s.lentTokenIds[_lender][index] = lastTokenId;
+            s.lentTokenIdIndexes[_lender][lastTokenId] = index;
+        }
+        s.lentTokenIds[_lender].pop();
+        delete s.lentTokenIdIndexes[_lender][_tokenId];
+    }
+
     function enforceAavegotchiNotInLending(uint32 _tokenId, address _sender) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint32 _listingId = s.aavegotchiToListingId[_tokenId];
@@ -279,6 +279,31 @@ library LibGotchiLending {
         GotchiLending storage listing_ = s.gotchiLendings[listingId];
         if (listing_.timeCreated == 0 || listing_.timeAgreed == 0) return false;
         return listing_.completed == false;
+    }
+
+    function checkPeriod(uint32 _period) internal pure returns (bool) {
+        return _period > 0 && _period <= 2_592_000; //No reason to have a period longer than 30 days
+    }
+
+    function checkRevenueParams(
+        uint8[3] calldata _revenueSplit,
+        address[] calldata _revenueTokens,
+        address _thirdParty
+    ) internal view returns (bool) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        if (_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] != 100) return false;
+        for (uint256 i = 0; i < _revenueTokens.length; ) {
+            if (!s.revenueTokenAllowed[_revenueTokens[i]]) return false;
+            unchecked {
+                ++i;
+            }
+        }
+        if (_thirdParty == address(0)) {
+            if (_revenueSplit[2] != 0) return false;
+        }
+        if (_revenueTokens.length > 10) return false; //Prevent claimAndEnd from reverting due to Out of Gas
+
+        return true;
     }
 
     function addLendingListItem(
