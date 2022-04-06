@@ -9,45 +9,19 @@ import { maticDiamondAddress } from "../helperFunctions";
 
 async function main() {
   const listingIds = [
-    {
-      id: "2483",
-    },
-    {
-      id: "253",
-    },
-    {
-      id: "254",
-    },
-    {
-      id: "313",
-    },
-    {
-      id: "343",
-    },
-    {
-      id: "374",
-    },
-    {
-      id: "470",
-    },
-    {
-      id: "487",
-    },
-    {
-      id: "506",
-    },
-    {
-      id: "511",
-    },
-    {
-      id: "518",
-    },
-    {
-      id: "75",
-    },
-    {
-      id: "838",
-    },
+    "2483",
+    "253",
+    "254",
+    "313",
+    "343",
+    "374",
+    "470",
+    "487",
+    "506",
+    "511",
+    "518",
+    "75",
+    "838",
   ];
 
   const newRevenueTokens = [
@@ -59,16 +33,18 @@ async function main() {
 
   let signer: Signer;
 
-  let owner = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+  const gameManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
+
+  //let owner = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
   const testing = ["hardhat", "localhost"].includes(network.name);
   if (testing) {
     await network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [owner],
+      params: [gameManager],
     });
-    signer = await ethers.provider.getSigner(owner);
+    signer = await ethers.provider.getSigner(gameManager);
   } else if (network.name === "matic") {
-    signer = new LedgerSigner(ethers.provider, "hid", "m/44'/60'/2'/0/0");
+    signer = await (await ethers.getSigners())[0]; //new LedgerSigner(ethers.provider, "hid", "m/44'/60'/2'/0/0");
   } else {
     throw Error("Incorrect network selected");
   }
@@ -84,7 +60,7 @@ async function main() {
   console.log("before listing:", listing);
 
   const tx = await lendingFacet.emergencyChangeRevenueTokens(
-    listingIds.map((val) => val.id),
+    listingIds,
     newRevenueTokens
   );
   await tx.wait();
