@@ -90,6 +90,14 @@ contract AavegotchiFacet {
         }
     }
 
+    function batchOwnerOf(uint256[] calldata _tokenIds) external view returns (address[] memory owners_) {
+        owners_ = new address[](_tokenIds.length);
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            owners_[i] = s.aavegotchis[_tokenIds[i]].owner;
+            require(owners_[i] != address(0), "AavegotchiFacet: invalid _tokenId");
+        }
+    }
+
     /// @notice Find the owner of an NFT
     /// @dev NFTs assigned to zero address are considered invalid, and queries
     ///  about them do throw.
