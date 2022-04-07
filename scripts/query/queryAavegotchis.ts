@@ -171,7 +171,7 @@ export async function getBorrowedGotchis(addresses: string[]) {
     }
   });
 
-  console.log("owner to gotchi:", ownerToGotchi);
+  // console.log("owner to gotchi:", ownerToGotchi);
 
   Object.keys(ownerToGotchi).forEach((val: string) => {
     const gotchisOwned = ownerToGotchi[val].map((gotchi) => {
@@ -189,7 +189,7 @@ export async function getBorrowedGotchis(addresses: string[]) {
     });
   });
 
-  console.log("user gotchis owned:", userGotchisOwned);
+  // console.log("user gotchis owned:", userGotchisOwned);
 
   return removeEmpty(userGotchisOwned);
 }
@@ -310,6 +310,8 @@ export async function getPolygonAndMainnetGotchis(
   //Polygon
   for (let index = 0; index < batches; index++) {
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
+
+    console.log("batch:", batch);
     //Get Polygon
     const users: UserGotchisOwned[] = await getSubgraphGotchis(batch);
 
@@ -319,9 +321,9 @@ export async function getPolygonAndMainnetGotchis(
         .reduce((prev, current) => prev + current)} Gotchis in Matic subgraph`
     );
 
-    users.forEach((user) => {
-      console.log(`${user.id} has ${user.gotchisOwned.length} gotchis`);
-    });
+    // users.forEach((user) => {
+    //   console.log(`${user.id} has ${user.gotchisOwned.length} gotchis`);
+    // });
 
     polygonUsers = polygonUsers.concat(users);
   }
