@@ -101,23 +101,170 @@ describe("Third Party Distribution Test", async () => {
       ])
     ).to.be.revertedWith("SumOfDistributionsNot100(101)");
   });
-  it("Should not be able to update distributions with sum < 100", async () => {});
+  it("Should not be able to update distributions with sum < 100", async () => {
+    await expect(
+      distributor.connect(owner).updateDistribution([
+        {
+          beneficiary: await beneficiaries[0].getAddress(),
+          proportion: 80,
+        },
+        {
+          beneficiary: await beneficiaries[1].getAddress(),
+          proportion: 19,
+        },
+      ])
+    ).to.be.revertedWith("SumOfDistributionsNot100(99)");
+  });
   describe("Public Release", async () => {
-    it("Should be able to batch partial release", async () => {});
-    it("Should be able to batch release", async () => {});
-    it("Should revert if amount is too high", async () => {});
+    it("Should be able to batch partial release", async () => {
+      await token1.mint(distributor.address, 100);
+      await token2.mint(distributor.address, 1000);
+      expect(await token1.balanceOf(distributor.address)).to.equal(100);
+      expect(await token2.balanceOf(distributor.address)).to.equal(1000);
+      await distributor.partialReleaseTokens([
+        {
+          token: token1.address,
+          amount: 50,
+        },
+        {
+          token: token2.address,
+          amount: 500,
+        },
+      ]);
+      expect(await token1.balanceOf(distributor.address)).to.equal(50);
+      expect(await token2.balanceOf(distributor.address)).to.equal(500);
+      expect(
+        await token1.balanceOf(await beneficiaries[0].getAddress())
+      ).to.equal(5);
+      expect(
+        await token1.balanceOf(await beneficiaries[1].getAddress())
+      ).to.equal(45);
+      expect(
+        await token2.balanceOf(await beneficiaries[0].getAddress())
+      ).to.equal(50);
+      expect(
+        await token2.balanceOf(await beneficiaries[1].getAddress())
+      ).to.equal(450);
+    });
+    it("Should revert if amount is too high", async () => {
+      await expect(
+        distributor.partialReleaseToken(token1.address, 101)
+      ).to.be.revertedWith('NotEnoughBalance("' + token1.address + '", 101)');
+    });
+    it("Should be able to batch release", async () => {
+      await distributor.releaseTokens([token1.address, token2.address]);
+      expect(await token1.balanceOf(distributor.address)).to.equal(0);
+      expect(await token2.balanceOf(distributor.address)).to.equal(0);
+      expect(
+        await token1.balanceOf(await beneficiaries[0].getAddress())
+      ).to.equal(10);
+      expect(
+        await token1.balanceOf(await beneficiaries[1].getAddress())
+      ).to.equal(90);
+      expect(
+        await token2.balanceOf(await beneficiaries[0].getAddress())
+      ).to.equal(100);
+      expect(
+        await token2.balanceOf(await beneficiaries[1].getAddress())
+      ).to.equal(900);
+    });
   });
   describe("Owner Release", async () => {
-    it("Should be able to release as owner");
-    it("Should not be able to release as not owner");
+    it("Owner sets release call to onlyOwner and burn all tokens", async () => {
+      await distributor.connect(owner).updateReleaseAccess(1);
+      expect(await distributor.releaseAccess()).to.equal(1);
+      await token1.burn(
+        distributor.address,
+        await token1.balanceOf(distributor.address)
+      );
+      await token2.burn(
+        distributor.address,
+        await token2.balanceOf(distributor.address)
+      );
+      await token1.burn(
+        await beneficiaries[0].getAddress(),
+        await token1.balanceOf(await beneficiaries[0].getAddress())
+      );
+      await token1.burn(
+        await beneficiaries[1].getAddress(),
+        await token1.balanceOf(await beneficiaries[1].getAddress())
+      );
+      await token2.burn(
+        await beneficiaries[0].getAddress(),
+        await token2.balanceOf(await beneficiaries[0].getAddress())
+      );
+      await token2.burn(
+        await beneficiaries[1].getAddress(),
+        await token2.balanceOf(await beneficiaries[1].getAddress())
+      );
+      expect(await token1.balanceOf(distributor.address)).to.equal(0);
+      expect(await token2.balanceOf(distributor.address)).to.equal(0);
+      expect(
+        await token1.balanceOf(await beneficiaries[0].getAddress())
+      ).to.equal(0);
+      expect(
+        await token1.balanceOf(await beneficiaries[1].getAddress())
+      ).to.equal(0);
+      expect(
+        await token2.balanceOf(await beneficiaries[0].getAddress())
+      ).to.equal(0);
+      expect(
+        await token2.balanceOf(await beneficiaries[1].getAddress())
+      ).to.equal(0);
+    });
+    it("Should be able to release as owner", async () => {
+      await token1.mint(distributor.address, 1000);
+      expect(await token1.balanceOf(distributor.address)).to.equal(1000);
+      await distributor.connect(owner).partialReleaseToken(token1.address, 50);
+      expect(await token1.balanceOf(distributor.address)).to.equal(950);
+    });
+    it("Should not be able to release as not owner", async () => {
+      await expect(
+        distributor
+          .connect(beneficiaries[0])
+          .partialReleaseToken(token1.address, 50)
+      ).to.be.revertedWith(
+        'ImproperAccess("' + (await beneficiaries[0].getAddress()) + '", 1)'
+      );
+    });
   });
   describe("Beneficiary Release", async () => {
-    it("Should be able to release as beneficiary");
-    it("Should not be able to release as not beneficiary");
+    it("Should be able to release as beneficiary", async () => {
+      await distributor.connect(owner).updateReleaseAccess(2);
+      await distributor
+        .connect(beneficiaries[0])
+        .partialReleaseToken(token1.address, 50);
+      expect(await token1.balanceOf(distributor.address)).to.equal(900);
+    });
+    it("Should not be able to release as not beneficiary", async () => {
+      await expect(
+        distributor.connect(owner).partialReleaseToken(token1.address, 50)
+      ).to.be.revertedWith(
+        'ImproperAccess("' + (await owner.getAddress()) + '", 2)'
+      );
+    });
   });
   describe("Owner or Beneficiary Release", async () => {
-    it("Should be able to release as owner");
-    it("Should be able to release as beneficiary");
-    it("Should not be able to release as not owner or beneficiary");
+    it("Should be able to release as owner", async () => {
+      await distributor.connect(owner).updateReleaseAccess(3);
+      await distributor.connect(owner).partialReleaseToken(token1.address, 50);
+      expect(await token1.balanceOf(distributor.address)).to.equal(850);
+    });
+    it("Should be able to release as beneficiary", async () => {
+      await distributor.connect(owner).updateReleaseAccess(3);
+      await distributor
+        .connect(beneficiaries[0])
+        .partialReleaseToken(token1.address, 50);
+      expect(await token1.balanceOf(distributor.address)).to.equal(800);
+    });
+    it("Should not be able to release as not owner or beneficiary", async () => {
+      await expect(
+        distributor
+          .connect(otherSigners[0])
+          .partialReleaseToken(token1.address, 50)
+      ).to.be.revertedWith(
+        'ImproperAccess("' + (await otherSigners[0].getAddress()) + '", 3)'
+      );
+    });
   });
 });
