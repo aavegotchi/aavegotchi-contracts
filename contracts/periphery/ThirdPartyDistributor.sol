@@ -115,6 +115,10 @@ contract ThirdPartyDistributor is Ownable {
         revert BeneficiaryDoesNotExist(_beneficiary);
     }
 
+    function numBeneficiaries() external view returns (uint256) {
+        return distributions.length;
+    }
+
     /*********************************************************************************************
      ************************************ OWNER FUNCTIONS ****************************************
      *********************************************************************************************/
@@ -152,7 +156,8 @@ contract ThirdPartyDistributor is Ownable {
     }
 
     function _deleteDistributions() internal {
-        for (uint256 i = 0; i < distributions.length; ) {
+        uint256 length = distributions.length;
+        for (uint256 i = 0; i < length; ) {
             distributions.pop();
             unchecked {
                 ++i;

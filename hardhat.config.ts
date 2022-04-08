@@ -39,11 +39,12 @@ export default {
   },
   networks: {
     hardhat: {
+      /*
       forking: {
         url: process.env.MATIC_URL,
         timeout: 12000000,
         //blockNumber: 26642399,
-      },
+      },*/
       blockGasLimit: 20000000,
       timeout: 120000,
       gas: "auto",
@@ -92,6 +93,9 @@ export default {
     alphaSort: false,
     runOnCompile: false,
     disambiguatePaths: true,
+  },
+  mocha: {
+    timeout: 2000000,
   },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
