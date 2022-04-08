@@ -34,15 +34,18 @@ contract ThirdPartyDistributor is Ownable {
     error Unknown();
 
     modifier checkReleaseAccess() {
+        bool senderIsBeneficiary = isBeneficiary(msg.sender);
+        bool senderIsOwner = msg.sender == owner();
         if (releaseAccess == ReleaseAccess.Public) {
             _;
         } else if (releaseAccess == ReleaseAccess.Owner) {
-            if (msg.sender != owner) revert ImproperAccess(msg.sender, releaseAccess);
+            if (!senderIsOwner) revert ImproperAccess(msg.sender, releaseAccess);
+            _;
         } else if (releaseAccess == ReleaseAccess.Beneficiaries) {
-            if (!isBeneficiary(msg.sender)) revert ImproperAccess(msg.sender, releaseAccess);
+            if (!senderIsBeneficiary) revert ImproperAccess(msg.sender, releaseAccess);
             _;
         } else if (releaseAccess == ReleaseAccess.OwnerAndBeneficiaries) {
-            if (msg.sender != owner && !isBeneficiary(msg.sender)) revert ImproperAccess(msg.sender, releaseAccess);
+            if (!senderIsOwner && !senderIsBeneficiary) revert ImproperAccess(msg.sender, releaseAccess);
             _;
         } else {
             revert Unknown();
@@ -59,35 +62,38 @@ contract ThirdPartyDistributor is Ownable {
         releaseAccess = _releaseAccess;
     }
 
-    function partialReleaseToken(address _token, uint256 _amount) public checkReleaseAccess {
-        IERC20 token = IERC20(_token);
+    function partialReleaseToken(address _token, uint256 _amount) external checkReleaseAccess {
+        _partialReleaseToken(_token, _amount);
+    }
 
-        if (_amount > token.balanceOf(address(this))) revert NotEnoughBalance(_token, _amount);
+    function releaseToken(address _token) external checkReleaseAccess {
+        _releaseToken(_token);
+    }
 
-        for (uint256 i = 0; i < distributions.length; ) {
-            uint256 amount = (distributions[i].proportion * _amount) / 100;
-            token.safeTransfer(distributions[i].beneficiary, amount);
+    struct ReleaseParams {
+        address token;
+        uint256 amount;
+    }
+
+    function partialReleaseTokens(ReleaseParams[] memory _params) external checkReleaseAccess {
+        for (uint256 i = 0; i < _params.length; ) {
+            _partialReleaseToken(_params[i].token, _params[i].amount);
             unchecked {
                 ++i;
             }
         }
-        emit TokensReleased(_token, _amount);
     }
 
-    function releaseToken(address _token) public {
-        partialReleaseToken(_token, IERC20(_token).balanceOf(address(this)));
-    }
-
-    function releaseTokens(address[] calldata _tokens) external {
+    function releaseTokens(address[] calldata _tokens) external checkReleaseAccess {
         for (uint256 i = 0; i < _tokens.length; ) {
-            releaseToken(_tokens[i]);
+            _releaseToken(_tokens[i]);
             unchecked {
                 ++i;
             }
         }
     }
 
-    function isBeneficiary(address _beneficiary) public view returns (bool isBeneficiary) {
+    function isBeneficiary(address _beneficiary) public view returns (bool) {
         for (uint256 i = 0; i < distributions.length; ) {
             if (distributions[i].beneficiary == _beneficiary) return true;
             unchecked {
@@ -97,7 +103,7 @@ contract ThirdPartyDistributor is Ownable {
         return false;
     }
 
-    function beneficiaryDistribution(address _beneficiary) public view returns (Distribution distribution) {
+    function beneficiaryDistribution(address _beneficiary) external view returns (Distribution memory distribution) {
         for (uint256 i = 0; i < distributions.length; ) {
             if (distributions[i].beneficiary == _beneficiary) {
                 return distributions[i];
@@ -106,7 +112,7 @@ contract ThirdPartyDistributor is Ownable {
                 ++i;
             }
         }
-        revert BeneficiaryDoesNotExist();
+        revert BeneficiaryDoesNotExist(_beneficiary);
     }
 
     /*********************************************************************************************
@@ -126,6 +132,24 @@ contract ThirdPartyDistributor is Ownable {
     /********************************************************************************************
      ********************************** INTERNAL FUNCTIONS **************************************
      ********************************************************************************************/
+    function _partialReleaseToken(address _token, uint256 _amount) internal {
+        IERC20 token = IERC20(_token);
+
+        if (_amount > token.balanceOf(address(this))) revert NotEnoughBalance(_token, _amount);
+
+        for (uint256 i = 0; i < distributions.length; ) {
+            uint256 amount = (distributions[i].proportion * _amount) / 100;
+            token.safeTransfer(distributions[i].beneficiary, amount);
+            unchecked {
+                ++i;
+            }
+        }
+        emit TokensReleased(_token, _amount);
+    }
+
+    function _releaseToken(address _token) internal {
+        _partialReleaseToken(_token, IERC20(_token).balanceOf(address(this)));
+    }
 
     function _deleteDistributions() internal {
         for (uint256 i = 0; i < distributions.length; ) {
