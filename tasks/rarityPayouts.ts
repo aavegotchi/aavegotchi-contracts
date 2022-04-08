@@ -261,12 +261,22 @@ task("rarityPayout")
       for (const [i, txGroup] of txData.entries()) {
         console.log("current index:", i);
 
+        if (i < 18) continue;
+
         let tokenIds: string[] = [];
         let amounts: string[] = [];
 
+        const removeList = ["18659"];
+
         txGroup.forEach((sendData) => {
-          tokenIds.push(sendData.tokenID);
-          amounts.push(sendData.parsedAmount);
+          if (removeList.includes(sendData.tokenID)) {
+            console.log(
+              `Removing ${sendData.tokenID} because it's on the bad list`
+            );
+          } else {
+            tokenIds.push(sendData.tokenID);
+            amounts.push(sendData.parsedAmount);
+          }
         });
 
         let totalAmount = amounts.reduce((prev, curr) => {
