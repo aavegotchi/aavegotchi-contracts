@@ -38,7 +38,7 @@ export default {
     apiKey: process.env.POLYGON_API_KEY,
   },
   networks: {
-    hardhat: {  
+    hardhat: {
       forking: {
         url: process.env.MATIC_URL,
         timeout: 12000000,
@@ -96,6 +96,15 @@ export default {
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
     compilers: [
+      {
+        version: "0.8.13",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
       {
         version: "0.8.1",
         settings: {

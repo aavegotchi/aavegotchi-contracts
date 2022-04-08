@@ -15,6 +15,23 @@ export async function upgrade() {
     {
       facetName: "GotchiLendingFacet",
       addSelectors: [
+        "function addGotchiListing(AddGotchiListing memory p) external",
+        "function extendGotchiLending(uint32 _tokenId, uint32 extension) external",
+        "function claimAndEndAndRelistGotchiLending(uint32 _tokenId) external",
+        "function batchAddGotchiListing(AddGotchiListing[] memory listings) external",
+        "function batchCancelGotchiLending(uint32[] calldata _listingIds) external",
+        "function batchCancelGotchiLendingByToken(uint32[] calldata _erc721TokenIds) external",
+      ],
+      removeSelectors: [
+        "function emergencyChangeRevenueTokens(uint32[] calldata _listingIds, address[] calldata _revenueTokens) external",
+        "function allowRevenueTokens(address[] tokens) external",
+        "function disallowRevenueTokens(address[] tokens) external",
+        "function revenueTokenAllowed(address token) external view",
+      ],
+    },
+    {
+      facetName: "LendingGetterAndSetterFacet",
+      addSelectors: [
         "function emergencyChangeRevenueTokens(uint32[] calldata _listingIds, address[] calldata _revenueTokens) external",
         "function allowRevenueTokens(address[] tokens) external",
         "function disallowRevenueTokens(address[] tokens) external",

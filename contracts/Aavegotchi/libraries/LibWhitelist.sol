@@ -25,4 +25,44 @@ library LibWhitelist {
         Whitelist storage whitelist = getWhitelistFromWhitelistId(whitelistId);
         isOwner = whitelist.owner == LibMeta.msgSender();
     }
+
+    function _addAddressToWhitelist(uint32 _whitelistId, address _whitelistAddress) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        if (s.isWhitelisted[_whitelistId][_whitelistAddress] == 0) {
+            Whitelist storage whitelist = LibWhitelist.getWhitelistFromWhitelistId(_whitelistId);
+            whitelist.addresses.push(_whitelistAddress);
+            s.isWhitelisted[_whitelistId][_whitelistAddress] = whitelist.addresses.length; // Index of the whitelist entry + 1
+        }
+    }
+
+    function _removeAddressFromWhitelist(uint32 _whitelistId, address _whitelistAddress) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        if (s.isWhitelisted[_whitelistId][_whitelistAddress] > 0) {
+            Whitelist storage whitelist = LibWhitelist.getWhitelistFromWhitelistId(_whitelistId);
+            uint256 index = s.isWhitelisted[_whitelistId][_whitelistAddress] - 1;
+            uint256 lastIndex = whitelist.addresses.length - 1;
+            // Replaces the element to be removed with the last element
+            whitelist.addresses[index] = whitelist.addresses[lastIndex];
+            // Store the last element in memory
+            address lastElement = whitelist.addresses[lastIndex];
+            // Remove the last element from storage
+            whitelist.addresses.pop();
+            // Update the index of the last element that was swapped. If this is the only element, updates to zero on the next line
+            s.isWhitelisted[_whitelistId][lastElement] = index + 1;
+            // Update the index of the removed element
+            s.isWhitelisted[_whitelistId][_whitelistAddress] = 0;
+        }
+    }
+
+    function _addAddressesToWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) internal {
+        for (uint256 i; i < _whitelistAddresses.length; i++) {
+            _addAddressToWhitelist(_whitelistId, _whitelistAddresses[i]);
+        }
+    }
+
+    function _removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) internal {
+        for (uint256 i; i < _whitelistAddresses.length; i++) {
+            _removeAddressFromWhitelist(_whitelistId, _whitelistAddresses[i]);
+        }
+    }
 }

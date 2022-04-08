@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {Modifiers} from "../libraries/LibAppStorage.sol";
+import {Modifiers, GotchiLending} from "../libraries/LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
+import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
 
 contract EscrowFacet is Modifiers {
@@ -99,13 +100,28 @@ contract EscrowFacet is Modifiers {
         address _erc20Contract,
         address _recipient,
         uint256 _transferAmount
-    ) external onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
+    ) external {
+        // Borrow check
+        if (LibGotchiLending.isAavegotchiLent(uint32(_tokenId))) {
+            GotchiLending memory listing = LibGotchiLending.getListing(s.aavegotchiToListingId[uint32(_tokenId)]);
+            require(listing.originalOwner == LibMeta.msgSender(), "EscrowFacet: Only the original gotchi owner can transfer out the escrow");
+            require(_recipient == listing.originalOwner, "EscrowFacet: Recipient must be original owner");
+            for (uint256 i = 0; i < listing.revenueTokens.length; i++) {
+                if (listing.revenueTokens[i] == _erc20Contract) revert("EscrowFacet: Cannot transferred revenue tokens");
+            }
+        } else {
+            require(s.aavegotchis[_tokenId].owner == LibMeta.msgSender(), "EscrowFacet: Only aavegotchi owner can transfer");
+            require(!s.aavegotchis[_tokenId].locked, "EscrowFacet: Cannot transfer while locked");
+        }
+
+        // Escrow checks
         address escrow = s.aavegotchis[_tokenId].escrow;
         address collateralType = s.aavegotchis[_tokenId].collateralType;
+        uint256 balance = IERC20(_erc20Contract).balanceOf(escrow);
+
         require(escrow != address(0), "EscrowFacet: Does not have an escrow");
         require(collateralType != _erc20Contract, "EscrowFacet: Transferring ERC20 token CANNOT be same as collateral ERC20 token");
 
-        uint256 balance = IERC20(_erc20Contract).balanceOf(escrow);
         require(balance >= _transferAmount, "EscrowFacet: Cannot transfer more than current ERC20 escrow balance");
 
         emit TransferEscrow(_tokenId, _erc20Contract, escrow, _recipient, _transferAmount);
