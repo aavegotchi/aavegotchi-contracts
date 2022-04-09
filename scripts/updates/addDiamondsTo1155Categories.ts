@@ -4,10 +4,11 @@ import { sendToMultisig } from "../libraries/multisig/multisig";
 const { LedgerSigner } = require("@ethersproject/hardware-wallets");
 
 /* TODO: replace follwowing values */
-const installationDiamond = "0x2953399124F0cBB46d2CbACD8A89cF0599974963";
-const installationTypes = [0, 1];
-const tileDiamond = "0x631998e91476DA5B870D741192fc5Cbc55F5a52E";
-const tileTypes = [0, 1, 2, 3];
+const installationDiamond = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
+const installationTypes = [1]; //golden aaltar lvl1
+
+// const tileDiamond = "0x631998e91476DA5B870D741192fc5Cbc55F5a52E";
+// const tileTypes = [0, 1, 2, 3];
 /* TODO: end */
 
 async function main() {
@@ -46,14 +47,14 @@ async function main() {
       category: 4,
     });
   }
-  // adding tile type categories
-  for (let i = 0; i < tileTypes.length; i++) {
-    categories.push({
-      erc1155TokenAddress: tileDiamond,
-      erc1155TypeId: tileTypes[i],
-      category: 5,
-    });
-  }
+  // // adding tile type categories
+  // for (let i = 0; i < tileTypes.length; i++) {
+  //   categories.push({
+  //     erc1155TokenAddress: tileDiamond,
+  //     erc1155TypeId: tileTypes[i],
+  //     category: 5,
+  //   });
+  // }
 
   if (testing) {
     tx = await erc1155MarketplaceFacet.setERC1155Categories(categories);
@@ -76,13 +77,13 @@ async function main() {
       console.log(category.eq(4) ? "correct" : "incorrect");
     }
     console.log("Checking installation diamond categories...");
-    for (let i = 0; i < tileTypes.length; i++) {
-      const category = await erc1155MarketplaceFacet.getERC1155Category(
-        tileDiamond,
-        tileTypes[i]
-      );
-      console.log(category.eq(5) ? "correct" : "incorrect");
-    }
+    // for (let i = 0; i < tileTypes.length; i++) {
+    //   const category = await erc1155MarketplaceFacet.getERC1155Category(
+    //     tileDiamond,
+    //     tileTypes[i]
+    //   );
+    //   console.log(category.eq(5) ? "correct" : "incorrect");
+    // }
   } else {
     try {
       tx =
