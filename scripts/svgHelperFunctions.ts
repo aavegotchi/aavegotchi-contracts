@@ -418,7 +418,6 @@ export async function updateSvgTaskForSvgType(
 //side must be left, right or back only
 export async function updateSleevesTaskForSvgType(
   _itemIds: number[],
-  _sleeveId: number[],
   _side: string
 ) {
   let taskArgs: UpdateSvgsTaskArgs;
@@ -430,9 +429,8 @@ export async function updateSleevesTaskForSvgType(
 
   if ("front" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
-      console.log("Front Sleeve Svg: ", frontSleeve[_sleeveId[i]]);
-      frontSvg.push(`***${frontSleeve[_sleeveId[i]]}`);
-      sleeveId.push(_sleeveId[i]);
+      frontSvg.push(`***${frontSleeve[_itemIds[i]]}`);
+      sleeveId.push(_itemIds[i]);
     }
 
     taskArgs = {
@@ -445,7 +443,7 @@ export async function updateSleevesTaskForSvgType(
   } else if ("left" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
       leftSvg.push(`***${leftSleeve[_itemIds[i]]}`);
-      sleeveId.push(_sleeveId[i]);
+      sleeveId.push(_itemIds[i]);
     }
 
     taskArgs = {
@@ -458,7 +456,7 @@ export async function updateSleevesTaskForSvgType(
   } else if ("right" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
       rightSvg.push(`***${rightSleeve[_itemIds[i]]}`);
-      sleeveId.push(_sleeveId[i]);
+      sleeveId.push(_itemIds[i]);
     }
 
     taskArgs = {
@@ -471,7 +469,7 @@ export async function updateSleevesTaskForSvgType(
   } else if ("back" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
       backSvg.push(`***${backSleeve[_itemIds[i]]}`);
-      sleeveId.push(_sleeveId[i]);
+      sleeveId.push(_itemIds[i]);
     }
 
     taskArgs = {

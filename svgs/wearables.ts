@@ -328,7 +328,7 @@ export const sleeveSvgs = [
   // "5_SnowCamoPantsRight", // body but no sleeves
   // '6_M67GrenadeRight',
   // '7_MarineCapRight',
-  sleeves("8_MarineJacket"), // sleeves("8_MarineJacket"),
+  // sleeves("8_MarineJacket"), // sleeves("8_MarineJacket"),
   // '9_WalkieTalkie',
   // '10_LinkWhiteHatRight',
   sleeves("11_MessDress"), // sleeves("11_MessDress"),
