@@ -43,7 +43,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         buyOrder_ = s.erc721BuyOrders[buyOrderId];
     }
 
-    function placeERC721BuyOrder(address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei) external onlyLocked(_erc721TokenId) {
+    function placeERC721BuyOrder(address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei) external {
         require(_priceInWei >= 1e18, "ERC721BuyOrder: price should be 1 GHST or larger");
 
         address sender = LibMeta.msgSender();

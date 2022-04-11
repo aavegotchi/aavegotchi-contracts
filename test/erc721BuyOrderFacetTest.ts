@@ -93,10 +93,10 @@ describe("Testing ERC721 Buy Order", async function () {
   });
 
   describe("Testing placeERC721BuyOrder", async function () {
-    it("Should revert if place buy order to unlocked Aavegotchi", async function () {
-      await expect(erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, unlockedAavegotchiId, 1))
-        .to.be.revertedWith("LibAppStorage: Only callable on locked Aavegotchis");
-    });
+    // it("Should revert if place buy order to unlocked Aavegotchi", async function () {
+    //   await expect(erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, unlockedAavegotchiId, 1))
+    //     .to.be.revertedWith("LibAppStorage: Only callable on locked Aavegotchis");
+    // });
     it("Should revert if price is lower than 1 GHST", async function () {
       await expect(erc721BuyOrderFacet.placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, 0))
         .to.be.revertedWith("ERC721BuyOrder: price should be 1 GHST or larger");
