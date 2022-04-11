@@ -307,7 +307,10 @@ contract ERC721MarketplaceFacet is Modifiers {
             IERC721(listing.erc721TokenAddress).safeTransferFrom(seller, buyer, listing.erc721TokenId);
         }
 
-        LibBuyOrder.cancelERC721BuyOrderByToken(listing.erc721TokenId);
+        uint256 buyerBuyOrderId = s.buyerToBuyOrderId[listing.erc721TokenId][buyer];
+        if (buyerBuyOrderId != 0) {
+            LibBuyOrder.cancelERC721BuyOrder(buyerBuyOrderId);
+        }
 
         emit ERC721ExecutedListing(
             _listingId,
@@ -344,8 +347,6 @@ contract ERC721MarketplaceFacet is Modifiers {
             listing.cancelled = true;
             emit LibERC721Marketplace.ERC721ListingCancelled(listingId, listing.category, block.number);
             LibERC721Marketplace.removeERC721ListingItem(listingId, listing.seller);
-
-            LibBuyOrder.cancelERC721BuyOrderByToken(listing.erc721TokenId);
         }
     }
 }

@@ -2,7 +2,6 @@
 pragma solidity 0.8.1;
 
 import {LibAppStorage, AppStorage, ListingListItem, ERC721Listing} from "./LibAppStorage.sol";
-import {LibBuyOrder} from "./LibBuyOrder.sol";
 
 import "../../shared/interfaces/IERC721.sol";
 
@@ -32,8 +31,6 @@ library LibERC721Marketplace {
 
         emit ERC721ListingCancelled(_listingId, listing.category, block.number);
         removeERC721ListingItem(_listingId, _owner);
-
-        LibBuyOrder.cancelERC721BuyOrderByToken(listing.erc721TokenId);
     }
 
     function cancelERC721Listing(
@@ -143,5 +140,4 @@ library LibERC721Marketplace {
             LibERC721Marketplace.cancelERC721Listing(listingId, listing.seller);
         }
     }
-
 }

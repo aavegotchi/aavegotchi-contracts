@@ -253,7 +253,9 @@ struct AppStorage {
     // states for buy orders
     uint256 nextERC721BuyOrderId;
     mapping(uint256 => ERC721BuyOrder) erc721BuyOrders; // buyOrderId => data
-    mapping(uint256 => uint256) erc721BuyOrderHead; // erc721TokenId => buyOrderId
+    mapping(uint256 => uint256[]) erc721TokenToBuyOrderIds; // erc721TokenId => buyOrderIds
+    mapping(uint256 => mapping(uint256 => uint256)) erc721TokenToBuyOrderIdIndexes; // erc721TokenId => buyOrderId => index
+    mapping(uint256 => mapping(address => uint256)) buyerToBuyOrderId; // erc721TokenId => sender => buyOrderId
     mapping(uint256 => uint256) erc721BuyOrderLocked; // erc721TokenId => timestamp
 }
 
