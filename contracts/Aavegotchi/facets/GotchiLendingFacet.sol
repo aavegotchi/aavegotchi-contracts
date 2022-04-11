@@ -35,7 +35,7 @@ contract GotchiLendingFacet is Modifiers {
         address sender = LibMeta.msgSender();
         address tokenOwner = s.aavegotchis[p.tokenId].owner;
         bool senderIsLendingOperator = s.isLendingOperator[tokenOwner][sender][p.tokenId];
-        require(tokenOwner == sender || senderIsLendingOperator, "Only the owner or a lending operator can add a lending request");
+        require(tokenOwner == sender || senderIsLendingOperator, "GotchiLending: Only the owner or a lending operator can add a lending request");
         LibGotchiLending.LibAddGotchiLending memory addLendingStruct = LibGotchiLending.LibAddGotchiLending({
             lender: tokenOwner,
             tokenId: p.tokenId,
@@ -54,11 +54,12 @@ contract GotchiLendingFacet is Modifiers {
     ///@param _listingId The identifier of the lending to be cancelled
     function cancelGotchiLending(uint32 _listingId) public {
         GotchiLending storage lending = s.gotchiLendings[_listingId];
+        require(lending.timeCreated != 0, "GotchiLending: Listing not found");
         address sender = LibMeta.msgSender();
         address lender = lending.lender;
         require(
             lender == sender || s.isLendingOperator[lender][sender][lending.erc721TokenId],
-            "Only the lender or lending operator can cancel the lending"
+            "GotchiLending: Only the lender or lending operator can cancel the lending"
         );
         LibGotchiLending.cancelGotchiLending(_listingId, lender);
     }

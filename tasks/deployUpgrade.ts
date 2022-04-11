@@ -11,7 +11,7 @@ import {
 import { Signer } from "@ethersproject/abstract-signer";
 
 import { OwnershipFacet } from "../typechain/OwnershipFacet";
-import { IDiamondCut } from "../typechain/IDiamondCut";
+import { IDiamondLoupe, IDiamondCut } from "../typechain";
 import {
   gasPrice,
   getSelectors,
@@ -181,6 +181,14 @@ task(
           (selector) => !newSelectors.includes(selector)
         );
 
+        if (removeSelectors.length > 0) {
+          console.log("Removing selectors:", removeSelectors);
+          cut.push({
+            facetAddress: hre.ethers.constants.AddressZero,
+            action: FacetCutAction.Remove,
+            functionSelectors: removeSelectors,
+          });
+        }
         if (newSelectors.length > 0) {
           cut.push({
             facetAddress: deployedFacet.address,
@@ -197,17 +205,7 @@ task(
             functionSelectors: existingSelectors,
           });
         }
-        if (removeSelectors.length > 0) {
-          console.log("Removing selectors:", removeSelectors);
-          cut.push({
-            facetAddress: hre.ethers.constants.AddressZero,
-            action: FacetCutAction.Remove,
-            functionSelectors: removeSelectors,
-          });
-        }
       }
-
-      console.log(cut);
 
       //Execute the Cut
       const diamondCut = (await hre.ethers.getContractAt(
@@ -215,6 +213,13 @@ task(
         diamondAddress,
         signer
       )) as IDiamondCut;
+
+      //Helpful for debugging
+      const diamondLoupe = (await hre.ethers.getContractAt(
+        "IDiamondLoupe",
+        diamondAddress,
+        signer
+      )) as IDiamondLoupe;
 
       if (testing) {
         console.log("Diamond cut");

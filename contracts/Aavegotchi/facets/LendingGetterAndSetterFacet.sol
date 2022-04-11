@@ -186,6 +186,10 @@ contract LendingGetterAndSetterFacet is Modifiers {
         }
     }
 
+    function getGotchiLendingsLength() external view returns (uint256) {
+        return s.nextGotchiListingId;
+    }
+
     function isAavegotchiLent(uint32 _erc721TokenId) external view returns (bool) {
         return LibGotchiLending.isAavegotchiLent(_erc721TokenId);
     }

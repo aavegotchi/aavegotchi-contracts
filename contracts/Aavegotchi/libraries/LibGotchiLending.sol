@@ -18,7 +18,7 @@ library LibGotchiLending {
     function getListing(uint32 _listingId) internal view returns (GotchiLending memory listing_) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         listing_ = s.gotchiLendings[_listingId];
-        require(listing_.timeCreated != 0, "GotchiLending: Listing does not exist");
+        require(listing_.timeCreated != 0, "LibGotchiLending: Listing does not exist");
     }
 
     function whitelistExists(uint32 _whitelistId) internal view returns (bool) {
@@ -29,7 +29,7 @@ library LibGotchiLending {
     function tokenIdToListingId(uint32 _tokenId) internal view returns (uint32 listingId) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         listingId = s.aavegotchiToListingId[_tokenId];
-        require(listingId != 0, "GotchiLending: Listing not found");
+        require(listingId != 0, "LibGotchiLending: Listing not found");
     }
 
     /// @dev Will not return true for already existing borrows before the upgrade to include borrow gotchi limits
@@ -41,7 +41,7 @@ library LibGotchiLending {
     /// @dev Call this function when a borrower borrows a gotchi to limit a borrower to one borrow.
     function addBorrowerTokenId(address _borrower, uint32 _tokenId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        require(!isBorrowing(_borrower), "GotchiLending: Borrower already has a token");
+        require(!isBorrowing(_borrower), "LibGotchiLending: Borrower already has a token");
         s.borrowerTokenId[_borrower] = _tokenId + 1;
     }
 
@@ -58,7 +58,7 @@ library LibGotchiLending {
 
     function borrowerTokenId(address _borrower) internal view returns (uint32) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        require(isBorrowing(_borrower), "Borrower does not have any token");
+        require(isBorrowing(_borrower), "LibGotchiLending: Borrower does not have any token");
         return s.borrowerTokenId[_borrower] - 1;
     }
 
@@ -154,11 +154,10 @@ library LibGotchiLending {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
         GotchiLending storage lending = s.gotchiLendings[_listingId];
-        require(lending.timeCreated != 0, "GotchiLending: Listing not found");
         if (lending.canceled) {
             return;
         }
-        require(lending.timeAgreed == 0, "GotchiLending: Listing already agreed");
+        require(lending.timeAgreed == 0, "LibGotchiLending: Listing already agreed");
         lending.canceled = true;
 
         removeLendingListItem(_lender, _listingId, "listed");
@@ -252,12 +251,12 @@ library LibGotchiLending {
         address[] memory _revenueTokens
     ) internal view {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        require(_originalOwner != address(0), "GotchiLending: Original owner cannot be zero address");
-        require(checkPeriod(_period), "GotchiLending: Period is not valid");
-        require(checkRevenueParams(_revenueSplit, _revenueTokens, _thirdParty), "GotchiLending: Revenue parameters are not valid");
-        require(whitelistExists(_whitelistId) || (_whitelistId == 0), "GotchiLending: Whitelist not found");
-        require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "GotchiLending: Can only lend Aavegotchi");
-        require(!s.aavegotchis[_erc721TokenId].locked, "GotchiLending: Only callable on unlocked Aavegotchis");
+        require(_originalOwner != address(0), "LibGotchiLending: Original owner cannot be zero address");
+        require(checkPeriod(_period), "LibGotchiLending: Period is not valid");
+        require(checkRevenueParams(_revenueSplit, _revenueTokens, _thirdParty), "LibGotchiLending: Revenue parameters are not valid");
+        require(whitelistExists(_whitelistId) || (_whitelistId == 0), "LibGotchiLending: Whitelist not found");
+        require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibGotchiLending: Can only lend Aavegotchi");
+        require(!s.aavegotchis[_erc721TokenId].locked, "LibGotchiLending: Only callable on unlocked Aavegotchis");
     }
 
     function verifyAgreeGotchiLendingParams(
@@ -270,21 +269,21 @@ library LibGotchiLending {
     ) internal view {
         AppStorage storage s = LibAppStorage.diamondStorage();
         GotchiLending storage lending = s.gotchiLendings[_listingId];
-        require(lending.timeCreated != 0, "GotchiLending: Listing not found");
-        require(lending.timeAgreed == 0, "GotchiLending: Listing already agreed");
-        require(lending.canceled == false, "GotchiLending: Listing canceled");
-        require(lending.erc721TokenId == _erc721TokenId, "GotchiLending: Invalid token id");
-        require(lending.initialCost == _initialCost, "GotchiLending: Invalid initial cost");
-        require(lending.period == _period, "GotchiLending: Invalid lending period");
+        require(lending.timeCreated != 0, "LibGotchiLending: Listing not found");
+        require(lending.timeAgreed == 0, "LibGotchiLending: Listing already agreed");
+        require(lending.canceled == false, "LibGotchiLending: Listing canceled");
+        require(lending.erc721TokenId == _erc721TokenId, "LibGotchiLending: Invalid token id");
+        require(lending.initialCost == _initialCost, "LibGotchiLending: Invalid initial cost");
+        require(lending.period == _period, "LibGotchiLending: Invalid lending period");
         for (uint256 i; i < 3; ) {
-            require(lending.revenueSplit[i] == _revenueSplit[i], "GotchiLending: Invalid revenue split");
+            require(lending.revenueSplit[i] == _revenueSplit[i], "LibGotchiLending: Invalid revenue split");
             unchecked {
                 ++i;
             }
         }
-        require(lending.lender != _borrower, "GotchiLending: Borrower can't be lender");
+        require(lending.lender != _borrower, "LibGotchiLending: Borrower can't be lender");
         if (lending.whitelistId > 0) {
-            require(s.isWhitelisted[lending.whitelistId][_borrower] > 0, "GotchiLending: Not whitelisted address");
+            require(s.isWhitelisted[lending.whitelistId][_borrower] > 0, "LibGotchiLending: Not whitelisted address");
         }
         // Removed balance check for GHST since this will revert anyway if transferFrom is called
         //require(IERC20(s.ghstContract).balanceOf(_borrower) >= lending.initialCost, "GotchiLending: Not enough GHST");
@@ -310,10 +309,10 @@ library LibGotchiLending {
         uint32 _listingId = s.aavegotchiToListingId[_tokenId];
         if (_listingId > 0) {
             GotchiLending storage _lending = s.gotchiLendings[_listingId];
-            require(_lending.lender == _sender, "GotchiLending: Aavegotchi is in lending");
+            require(_lending.lender == _sender, "LibGotchiLending: Aavegotchi is in lending");
             if (_lending.timeAgreed > 0) {
                 // revert if agreed lending
-                revert("GotchiLending: Aavegotchi is in lending");
+                revert("LibGotchiLending: Aavegotchi is in lending");
             } else {
                 // cancel if not agreed lending
                 cancelGotchiLending(_listingId, _sender);
@@ -340,17 +339,17 @@ library LibGotchiLending {
         address _thirdParty
     ) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        if (_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] != 100) return false;
+        require(_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] == 100, "LibGotchiLending: Sum of revenue splits not 100");
         for (uint256 i = 0; i < _revenueTokens.length; ) {
-            if (!s.revenueTokenAllowed[_revenueTokens[i]]) return false;
+            require(s.revenueTokenAllowed[_revenueTokens[i]], "LibGotchiLending: Revenue token not allowed");
             unchecked {
                 ++i;
             }
         }
         if (_thirdParty == address(0)) {
-            if (_revenueSplit[2] != 0) return false;
+            require(_revenueSplit[2] == 0, "LibGotchiLending: Third party revenue split must be 0 without a third party");
         }
-        if (_revenueTokens.length > 10) return false; //Prevent claimAndEnd from reverting due to Out of Gas
+        require(_revenueTokens.length <= 10, "LibGotchiLending: Too many revenue tokens"); //Prevent claimAndEnd from reverting due to Out of Gas
 
         return true;
     }

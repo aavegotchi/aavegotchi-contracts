@@ -8,6 +8,7 @@ import "solidity-coverage";
 //import './tasks/generateDiamondABI.js';
 import * as dotenv from "dotenv";
 import "@typechain/hardhat";
+import { BigNumber } from "ethers";
 
 dotenv.config({ path: __dirname + "/.env" });
 
@@ -39,12 +40,11 @@ export default {
   },
   networks: {
     hardhat: {
-      /*
       forking: {
         url: process.env.MATIC_URL,
         timeout: 12000000,
-        //blockNumber: 26642399,
-      },*/
+        blockNumber: 27033230,
+      },
       blockGasLimit: 20000000,
       timeout: 120000,
       gas: "auto",
@@ -54,10 +54,12 @@ export default {
     },
     matic: {
       url: process.env.MATIC_URL,
-      // url: 'https://rpc-mainnet.maticvigil.com/',
       accounts: [process.env.ITEM_MANAGER],
       // blockGasLimit: 20000000,
       // gasPrice: 1000000000,
+      maxFeePerGas: BigNumber.from("80").mul(1e9),
+      maxPriorityFeePerGas: BigNumber.from("50").mul(1e9),
+      gasLimit: 2000000,
       timeout: 90000,
     },
     // mumbai: {
