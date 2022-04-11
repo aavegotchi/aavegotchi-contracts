@@ -403,8 +403,4 @@ contract DAOFacet is Modifiers {
             emit UpdateItemPrice(itemId, _newPrices[i]);
         }
     }
-
-    function setGhstStakingContract(address _newGhstStaking) external onlyOwner {
-        s.ghstStaking = _newGhstStaking;
-    }
 }
