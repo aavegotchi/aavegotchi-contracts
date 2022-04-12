@@ -265,11 +265,58 @@ export const wearablesSvgs = [
   wearable("261_AantenaBot"),
   262,
   wearable("263_SignalHeadset"),
-
-  //duplicate added for missing sleeves
-  bodyWearable("264_MarineJacket"), //duplicate of id 8
-  bodyWearable("265_ThaaveSuit"), //duplicate of id 26
-  bodyWearable("125_TrackSuit"), //duplicate of id 125
+  264,
+  265,
+  266,
+  267,
+  268,
+  269,
+  270,
+  271,
+  272,
+  273,
+  274,
+  275,
+  276,
+  277,
+  278,
+  279,
+  280,
+  281,
+  282,
+  283,
+  284,
+  285,
+  286,
+  287,
+  288,
+  289,
+  290,
+  291,
+  wearable("292_BrunettePonytail"),
+  bodyWearable("293_LeatherTunic"),
+  wearable("294_BowandArrow"),
+  wearable("295_ForkedBeard"),
+  wearable("296_DoublesidedAxe"),
+  bodyWearable("297_AnimalSkins"),
+  wearable("298_HornedHelmet"),
+  wearable("299_Longbow"),
+  wearable("300_FeatheredCap"),
+  wearable("301_AlluringEyes"),
+  wearable("302_GeishaHeadpiece"),
+  bodyWearable("303_Kimono"),
+  wearable("304_PaperFan"),
+  wearable("305_SusButterfly"),
+  wearable("306_FlowerStuds"),
+  bodyWearable("307_FairyWings"),
+  wearable("308_RedHair"),
+  wearable("309_CitaadelHelm"),
+  bodyWearable("310_PlateArmor"),
+  wearable("311_SpiritSword"),
+  wearable("312_PlateShield"),
+  wearable("313_KabutoHelmet"),
+  bodyWearable("314_YoroiArmor"),
+  wearable("315_HaanzoKatana"),
 ];
 
 function stripSvg(svg: string) {
@@ -282,7 +329,7 @@ function stripSvg(svg: string) {
 }
 
 function readSvg(name: string) {
-  return stripSvg(fs.readFileSync(`./svgs/svgitems/${name}.svg`, "utf8"));
+  return stripSvg(fs.readFileSync(`./svgs/svgItems/${name}.svg`, "utf8"));
 }
 
 function wearable(name: string) {

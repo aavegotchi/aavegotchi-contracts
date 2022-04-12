@@ -1,6 +1,6 @@
 # Welcome to the Aavegotchi Contracts!
 
-Aavegotchis are fully onchain NFTs, powered by the ERC721, ERC1155, and ERC998 standards. The contracts also implement the EIP2525 Diamonds standard, which allows for modular upgradeability. 
+Aavegotchis are fully onchain NFTs, powered by the ERC721, ERC1155, and ERC998 standards. The contracts also implement the EIP-2535 Diamonds standard, which allows for modular upgradeability. 
 
 Aavegotchis are one of the world's first playable NFTs, with onchain attributes that can be increased by interacting with the NFT and the community. 
 
@@ -15,7 +15,7 @@ Aavegotchis were born on the Polygon sidechain, and have since been bridged back
 
 * Polygon Diamond Address: 0x86935F11C86623deC8a25696E1C19a8659CbF95d <a href="https://polygonscan.com/address/0x86935F11C86623deC8a25696E1C19a8659CbF95d">View on Polygonscan </a>
 
-* Ethereum Diamond Address: 0x1906fd9c4AC440561F7197Da0A4BD2E88DF5fA70 <a href="https://polygonscan.com/address/0x1906fd9c4AC440561F7197Da0A4BD2E88DF5fA70">View on Etherscan </a>
+* Ethereum Diamond Address: 0x1906fd9c4AC440561F7197Da0A4BD2E88DF5fA70 <a href="https://etherscan.io/address/0x1906fd9c4AC440561F7197Da0A4BD2E88DF5fA70">View on Etherscan </a>
 
 ## Resources
 

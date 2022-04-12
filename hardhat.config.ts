@@ -1,39 +1,48 @@
+/* global task ethers */
+
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-etherscan";
 import "hardhat-contract-sizer";
 import "solidity-coverage";
+//import './tasks/generateDiamondABI.js';
 import * as dotenv from "dotenv";
 import "@typechain/hardhat";
 
 dotenv.config({ path: __dirname + "/.env" });
 
-require("./tasks/verifyFacet.ts");
 require("./tasks/deployUpgrade.ts");
-require("./tasks/addWearableSets.ts");
-require("./tasks/grantXP.ts");
-require("./tasks/generateDiamondABI.ts");
-require("./tasks/generateDiamondABI_eth.ts");
-require("./tasks/removeXP.ts");
+require("./tasks/addBaadgeSvgs.ts");
+require("./tasks/mintBaadgeSvgs.ts");
+require("./tasks/baadgeAirdrop.ts");
 require("./tasks/updateItemDimensions.ts");
 require("./tasks/updateSvgs.ts");
 require("./tasks/updateItemSideDimensions.ts");
 require("./tasks/batchDeposit.ts");
 require("./tasks/rarityPayouts");
+require("./tasks/grantXP");
 require("./tasks/grantXP_snapshot");
-// require("./tasks/addItemTypes.ts");
+require("./tasks/grantXP_minigame");
+require("./tasks/grantXP_aavegotchis");
+require("./tasks/addItemTypes");
+require("./tasks/addWearableSets");
+require("./tasks/grantXP_customValues");
+require("./tasks/generateDiamondABI");
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
 // defaultNetwork, networks, solc, and paths.
 // Go to https://buidler.dev/config/ to learn more
 export default {
+  etherscan: {
+    apiKey: process.env.POLYGON_API_KEY,
+  },
   networks: {
-    hardhat: {
+    hardhat: {  
       forking: {
         url: process.env.MATIC_URL,
-        timeout: 120000000,
-        // blockNumber: 12552123
-        // blockNumber: 13024371
+        timeout: 12000000,
+        //blockNumber: 26642399,
       },
       blockGasLimit: 20000000,
       timeout: 120000,
@@ -47,9 +56,8 @@ export default {
       // url: 'https://rpc-mainnet.maticvigil.com/',
       accounts: [process.env.ITEM_MANAGER],
       // blockGasLimit: 20000000,
-      // blockGasLimit: 20000000,
       // gasPrice: 1000000000,
-      // timeout: 90000,
+      timeout: 90000,
     },
     // mumbai: {
     //   url: 'https://rpc-mumbai.matic.today',
@@ -68,12 +76,12 @@ export default {
     //   accounts: [process.env.SECRET],
     //   gasPrice: 5000000000
     // },
-    ethereum: {
-      url: process.env.MAINNET_URL,
-      accounts: [process.env.SECRET],
-      blockGasLimit: 20000000,
-      gasPrice: 2100000000,
-    },
+    // ethereum: {
+    //   url: process.env.MAINNET_URL,
+    //   accounts: [process.env.SECRET],
+    //   blockGasLimit: 20000000,
+    //   gasPrice: 2100000000
+    // }
   },
   gasReporter: {
     currency: "USD",

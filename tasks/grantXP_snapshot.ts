@@ -1,13 +1,13 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { gasPrice, maticDiamondAddress } from "../scripts/helperFunctions";
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
-import { UserGotchisOwned } from "../types";
-import { getSubgraphGotchis } from "../scripts/query/queryAavegotchis";
+
+import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import request from "graphql-request";
+import { NonceManager } from "@ethersproject/experimental";
 
 export interface GrantXPSnapshotTaskArgs {
   proposalId: string;
@@ -76,7 +76,7 @@ async function getVotingAddresses(proposalId: string) {
       votingAddresses.push(voter.voter);
   });
 
-  console.log("final voting addresses:", votingAddresses);
+  console.log("Found voting addresses:", votingAddresses.length);
   return votingAddresses;
 }
 
@@ -140,67 +140,11 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
         throw Error("Incorrect network selected");
       }
 
-      //Get Polygon
-      const polygonUsers: UserGotchisOwned[] = await getSubgraphGotchis(
+      const managedSigner = new NonceManager(signer);
+
+      const { tokenIds, finalUsers } = await getPolygonAndMainnetGotchis(
         addresses,
-        "matic"
-      );
-      const polygonGotchis = polygonUsers
-        .map((item) => item.gotchisOwned.length)
-        .reduce((agg, cur) => agg + cur);
-      console.log(
-        `Found ${polygonUsers.length} Polygon Users with ${polygonGotchis} Gotchis`
-      );
-
-      //Get mainnet
-      const mainnetUsers: UserGotchisOwned[] = await getSubgraphGotchis(
-        addresses,
-        "eth"
-      );
-      const mainnetGotchis = mainnetUsers
-        .map((item) => item.gotchisOwned.length)
-        .reduce((agg, cur) => agg + cur);
-      console.log(
-        `Found ${mainnetUsers.length} Ethereum Users with ${mainnetGotchis} Gotchis`
-      );
-
-      const finalUsers = polygonUsers.concat(mainnetUsers);
-
-      const tokenIds: string[] = [];
-
-      //Extract token ids
-      polygonUsers.forEach((user) => {
-        user.gotchisOwned.forEach((gotchi) => {
-          if (gotchi.status === "3") {
-            if (tokenIds.includes(gotchi.id))
-              throw new Error(`Duplicate token ID: ${gotchi.id}`);
-            else tokenIds.push(gotchi.id);
-          }
-        });
-      });
-
-      mainnetUsers.forEach((user) => {
-        user.gotchisOwned.forEach((gotchi) => {
-          if (gotchi.status === "3") {
-            if (tokenIds.includes(gotchi.id))
-              throw new Error(`Duplicate token ID: ${gotchi.id}`);
-            else tokenIds.push(gotchi.id);
-          }
-        });
-      });
-
-      //Check how many unused addresses there are (addresses that voted, but do not have Aavegotchis)
-      const unusedAddresses: string[] = [];
-      const lowerCaseAddresses = addresses.map((address: string) =>
-        address.toLowerCase()
-      );
-      lowerCaseAddresses.forEach((address: string) => {
-        const found = finalUsers.find((val) => val.id === address);
-        if (!found) unusedAddresses.push(address);
-      });
-
-      console.log(
-        `There were ${unusedAddresses.length} voting addresses without Gotchis.`
+        hre
       );
 
       const batches = Math.ceil(tokenIds.length / batchSize);
@@ -213,15 +157,15 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
 
       const dao = (
         await hre.ethers.getContractAt("DAOFacet", diamondAddress)
-      ).connect(signer) as DAOFacet;
+      ).connect(managedSigner) as DAOFacet;
 
       for (let index = 0; index < batches; index++) {
         console.log("Current batch id:", index);
 
+        // if (index < 10) continue;
+
         const offset = batchSize * index;
         const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
-
-        console.log("send token ids:", sendTokenIds);
 
         console.log(
           `Sending ${xpAmount} XP to ${sendTokenIds.length} Aavegotchis `
@@ -233,7 +177,7 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
           { gasPrice: gasPrice }
         );
         console.log("tx:", tx.hash);
-        let receipt: ContractReceipt = await tx.wait();
+        const receipt: ContractReceipt = await tx.wait();
         // console.log("Gas used:", strDisplay(receipt.gasUsed.toString()));
         if (!receipt.status) {
           throw Error(`Error:: ${tx.hash}`);

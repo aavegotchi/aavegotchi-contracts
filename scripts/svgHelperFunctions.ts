@@ -1,9 +1,7 @@
-import { Signer } from "@ethersproject/abstract-signer";
 import { BigNumberish } from "@ethersproject/bignumber";
 import { BytesLike } from "@ethersproject/bytes";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { SvgFacet } from "../typechain";
-import { gasPrice } from "./helperFunctions";
+import { gasPrice, itemManager, itemManagerAlt } from "./helperFunctions";
 
 import { wearablesSvgs as front } from "../svgs/wearables";
 import {
@@ -14,10 +12,13 @@ import {
   wearablesRightSleeveSvgs as rightSleeve,
   wearablesBackSleeveSvgs as backSleeve,
 } from "../svgs/wearables-sides";
-import { UpdateSvgsTaskArgs } from "../tasks/updateSvgs";
 
+import { UpdateSvgsTaskArgs } from "../tasks/updateSvgs";
+import { AddBaadgeTaskArgs } from "../tasks/addBaadgeSvgs";
+import { AirdropBaadgeTaskArgs } from "../tasks/baadgeAirdrop";
+import { MintBaadgeTaskArgs } from "../tasks/mintBaadgeSvgs";
 const fs = require("fs");
-import { SleeveObject } from "./itemTypeHelpers";
+import { SleeveObject, ItemTypeInputNew } from "./itemTypeHelpers";
 
 export interface SvgTypesAndSizes {
   svgType: BytesLike;
@@ -120,6 +121,75 @@ export function bodyWearable(name: string, folder: string): BodyWearableOutput {
     "</g>";
 
   return { wearable: baseSvg, sleeves: { id: id, svg: sleevesSvg } };
+}
+
+export function bodyWearableBack(name: string, folder: string) {
+  let svg;
+
+  const back = readSvg(`${name}Back`, folder);
+  const backLeftSleevesUp =
+    '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-up">' +
+    readSvg(`${name}BackLeftUp`, folder) +
+    "</g>";
+  const backLeft = readSvg(`${name}BackLeft`, folder);
+  const backRightSleevesUp =
+    '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-up">' +
+    readSvg(`${name}BackRightUp`, folder) +
+    "</g>";
+  const backRight = readSvg(`${name}BackRight`, folder);
+
+  svg =
+    "<g>" +
+    back +
+    backLeftSleevesUp +
+    backLeft +
+    backRightSleevesUp +
+    backRight +
+    "</g>";
+
+  return svg;
+}
+
+export function bodyWearableLeft(name: string, folder: string) {
+  let svg;
+  const left = readSvg(`${name}SideLeft`, folder);
+  svg = "<g>" + left + "</g>";
+  return svg;
+}
+
+export function bodyWearableRight(name: string, folder: string) {
+  let svg;
+  const right = readSvg(`${name}SideRight`, folder);
+  svg = "<g>" + right + "</g>";
+  return svg;
+}
+
+export function sleeveWearableLeft(name: string, folder: string) {
+  let svg;
+  const leftSleevesUp =
+    '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-up">' +
+    readSvg(`${name}SideLeftUp`, folder) +
+    "</g>";
+  const leftSleevesDown =
+    '<g class="gotchi-sleeves gotchi-sleeves-left gotchi-sleeves-down">' +
+    readSvg(`${name}SideLeftDown`, folder) +
+    "</g>";
+  svg = "<g>" + leftSleevesUp + leftSleevesDown + "</g>";
+  return svg;
+}
+
+export function sleeveWearableRight(name: string, folder: string) {
+  let svg;
+  const rightSleevesUp =
+    '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-up">' +
+    readSvg(`${name}SideRightUp`, folder) +
+    "</g>";
+  const rightSleevesDown =
+    '<g class="gotchi-sleeves gotchi-sleeves-right gotchi-sleeves-down">' +
+    readSvg(`${name}SideRightDown`, folder) +
+    "</g>";
+  svg = "<g>" + rightSleevesUp + rightSleevesDown + "</g>";
+  return svg;
 }
 
 export interface UpdateSvgPayload {
@@ -312,4 +382,53 @@ export async function updateSvgTaskForSideSleeves(_itemIds: number[]) {
     }
   }
   return taskArray;
+}
+
+export async function uploadSvgTaskForBaadges(
+  itemTypeInput: ItemTypeInputNew[],
+  svgFileName: string
+) {
+  let taskArray = [];
+
+  for (let index = 0; index < itemTypeInput.length; index++) {
+    if (!itemTypeInput[index].canBeTransferred) {
+      let taskArgs: AddBaadgeTaskArgs = {
+        itemManager: itemManager,
+        svgFile: svgFileName,
+        svgIds: [itemTypeInput[index].svgId].join(","),
+        svgArrayIndex: index.toString(),
+      };
+      taskArray.push(taskArgs);
+    } else {
+      console.log(
+        itemTypeInput[index].name + " canBeTransferred must be set to FALSE"
+      );
+    }
+  }
+  return taskArray;
+}
+
+export async function mintSvgTaskForBaadges(fileName: string) {
+  let taskArgs: MintBaadgeTaskArgs = {
+    itemManager: itemManagerAlt,
+    itemFile: fileName,
+    uploadItemTypes: true,
+    sendToItemManager: true,
+  };
+
+  return taskArgs;
+}
+
+export async function airdropTaskForBaadges(
+  itemTypeInput: ItemTypeInputNew[],
+  awardsArray: number[]
+) {
+  const itemInfo = itemTypeInput[0];
+
+  let taskArgs: AirdropBaadgeTaskArgs = {
+    maxProcess: [itemInfo.maxQuantity].join(","),
+    badgeIds: [itemInfo.svgId].join(","),
+    awardsArray: [awardsArray].join("***"),
+  };
+  return taskArgs;
 }

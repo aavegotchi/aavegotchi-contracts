@@ -3,7 +3,6 @@
 import { network, ethers } from "hardhat";
 import { gasPrice, itemManager } from "../../helperFunctions";
 
-const { LedgerSigner } = require("@ethersproject/hardware-wallets");
 import { results } from "../../../data/airdrops/minigames/astegotchi";
 import { MinigameGroup, MinigameResult } from "../../../types";
 

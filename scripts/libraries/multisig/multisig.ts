@@ -6,7 +6,14 @@ import {
   ContractTransaction,
   PopulatedTransaction,
 } from "@ethersproject/contracts";
+import { BigNumber } from "ethers";
 import { gasPrice } from "../../helperFunctions";
+
+interface FeeData {
+  maxPriorityFeePerGas: BigNumber;
+  maxFeePerGas: BigNumber;
+  gasPrice: BigNumber;
+}
 
 export async function sendToMultisig(
   multisigAddress: string,
@@ -23,12 +30,25 @@ export async function sendToMultisig(
     signer
   );
   console.log("Sending transaction to multisig:", multisigAddress);
+
+  console.log("signer:", await signer.getAddress());
+
+  console.log("data:", transaction.data);
+
+  //@ts-ignore
+  const feeData: FeeData = await signer.provider?.getFeeData();
+
+  console.log("feedata:", feeData);
+
   let tx: ContractTransaction = await multisigContract.submitTransaction(
     transaction.to,
     0,
     transaction.data,
-    { gasPrice: gasPrice }
+    { gasPrice: feeData.gasPrice.mul(5).div(2) }
   );
+
+  console.log("tx:", tx.data);
+
   let receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Failed to send transaction to multisig: ${tx.hash}`);

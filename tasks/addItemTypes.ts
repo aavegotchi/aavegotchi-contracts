@@ -76,7 +76,10 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       const { getWearables } = require(`../svgs/${svgFile}.ts`);
       const { sleeves, wearables } = getWearables();
 
-      const itemTypesArray: ItemTypeOutput[] = getItemTypes(currentItemTypes);
+      const itemTypesArray: ItemTypeOutput[] = getItemTypes(
+        currentItemTypes,
+        hre.ethers
+      );
 
       const svgsArray: string[] = wearables;
       const sleeveSvgsArray: SleeveObject[] = sleeves;
@@ -131,16 +134,8 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       }
 
       if (uploadWearableSvgs) {
-        console.log("svgs array:", svgsArray);
-
         console.log("Upload SVGs");
-        await uploadSvgs(
-          signer,
-          diamondAddress,
-          svgsArray,
-          "wearables",
-          hre.ethers
-        );
+        await uploadSvgs(svgFacet, svgsArray, "wearables", hre.ethers);
       }
 
       if (replaceWearableSvgs) {
@@ -157,8 +152,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
         console.log("Uploading Sleeves");
 
         await uploadSvgs(
-          signer,
-          diamondAddress,
+          svgFacet,
           sleeveSvgsArray.map((value) => value.svg),
           "sleeves",
           hre.ethers
@@ -190,6 +184,8 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
           });
           sleevesSvgId++;
         }
+
+        console.log("sleeves input:", sleevesInput);
 
         console.log("Associating sleeves svgs with body wearable svgs.");
         tx = await svgFacet.setSleeves(sleevesInput, { gasPrice: gasPrice });

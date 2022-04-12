@@ -3,8 +3,7 @@ import request from "graphql-request";
 
 import { wearableSetArrays } from "./wearableSets";
 import { maticGraphUrl } from "./query/queryAavegotchis";
-const tiebreakerIndex = 2;
-const totalResults: number = 6000;
+// const totalResults: number = 6000;
 
 export function findSets(equipped: number[]) {
   const setData = wearableSetArrays;
@@ -56,49 +55,6 @@ export function calculateRarityScore(traitArray: number[]) {
   return energy + aggressiveness + spookiness + brainSize + eyeShape + eyeColor;
 }
 
-export function _sortByBRS(a: LeaderboardAavegotchi, b: LeaderboardAavegotchi) {
-  if (a.withSetsRarityScore == b.withSetsRarityScore) {
-    return Number(b.kinship) - Number(a.kinship);
-  }
-  return Number(b.withSetsRarityScore) - Number(a.withSetsRarityScore);
-}
-
-export function _sortByKinship(
-  a: LeaderboardAavegotchi,
-  b: LeaderboardAavegotchi
-) {
-  if (a.kinship === b.kinship) {
-    //Kinship and XP are the same
-    if (a.experience === b.experience) {
-      return (
-        _distanceFrom50(Number(_aavegotchiNumericTraits(b)[tiebreakerIndex])) -
-        _distanceFrom50(Number(_aavegotchiNumericTraits(a)[tiebreakerIndex]))
-      );
-    } else return Number(b.experience) - Number(a.experience);
-  }
-  return Number(b.kinship) - Number(a.kinship);
-}
-
-export function _sortByExperience(
-  a: LeaderboardAavegotchi,
-  b: LeaderboardAavegotchi
-) {
-  if (a.experience === b.experience) {
-    if (
-      _distanceFrom50(_aavegotchiNumericTraits(a)[tiebreakerIndex]) ===
-      _distanceFrom50(_aavegotchiNumericTraits(b)[tiebreakerIndex])
-    ) {
-      return Number(b.kinship) - Number(a.kinship);
-    } else {
-      //Kinship and XP are the same
-      return (
-        _distanceFrom50(Number(_aavegotchiNumericTraits(b)[tiebreakerIndex])) -
-        _distanceFrom50(Number(_aavegotchiNumericTraits(a)[tiebreakerIndex]))
-      );
-    }
-  } else return Number(b.experience) - Number(a.experience);
-}
-
 function returnRarity(number: number) {
   if (number < 50) return 100 - number;
   else return number + 1;
@@ -108,9 +64,11 @@ function _distanceFrom50(trait: number) {
 }
 
 export function _aavegotchiNumericTraits(aavegotchi: LeaderboardAavegotchi) {
-  const val = aavegotchi.withSetsNumericTraits?.reduce((total, val) => {
-    return total + val;
-  });
+  const val = aavegotchi.withSetsNumericTraits?.reduce(
+    (total: number, val: number) => {
+      return total + val;
+    }
+  );
 
   if (val === 0) return aavegotchi.modifiedNumericTraits;
   if (aavegotchi.withSetsNumericTraits) return aavegotchi.withSetsNumericTraits;
@@ -121,13 +79,19 @@ export function stripGotchis(ids: LeaderboardAavegotchi[]) {
   return ids.map((gotchi: LeaderboardAavegotchi) => gotchi.id);
 }
 
-export function confirmCorrectness(table1: string[], table2: string[]) {
+export function confirmCorrectness(
+  subgraphData: string[],
+  localData: string[]
+) {
   let j = 0;
-  if (table1.length !== table2.length) {
+
+  if (subgraphData.length !== localData.length) {
     console.log("length mismatch, exiting");
   }
-  for (let i = 0; i < table1.length; i++) {
-    if (table1[i] === table2[i]) {
+  for (let i = 0; i < subgraphData.length; i++) {
+    // console.log("subgraph vs local:", subgraphData[i], localData[i]);
+
+    if (subgraphData[i] === localData[i]) {
       j++;
     }
   }
@@ -136,6 +100,55 @@ export function confirmCorrectness(table1: string[], table2: string[]) {
 }
 
 export function leaderboardQuery(
+  orderBy: string,
+  orderDirection: string,
+  blockNumber: string,
+  extraFilters?: string
+): string {
+  // const extraWhere = extraFilters ? "," + extraFilters : "";
+  // const where = `where:{baseRarityScore_gt:0, owner_not:"0x0000000000000000000000000000000000000000" ${extraWhere}}`;
+  const aavegotchi = `
+    id
+    name
+    baseRarityScore
+    modifiedRarityScore
+    withSetsRarityScore
+    numericTraits
+    modifiedNumericTraits
+    withSetsNumericTraits
+    stakedAmount
+    equippedWearables
+    kinship
+    equippedSetID
+    equippedSetName
+    experience
+    level
+    collateral
+    hauntId
+    lastInteracted
+    owner {
+        id
+    }`;
+  const reqs: string[] = [];
+  const max_runs = 25_000 / 1000; // 25_000 gotchis atm
+  for (let i = 0; i < max_runs; i++) {
+    reqs.push(`first${
+      i * 1000
+    }:aavegotchis(block:{number: ${blockNumber}} first:1000, orderBy: gotchiId, where: {
+        gotchiId_gte: ${i * 1000}, gotchiId_lt: ${
+      (i + 1) * 1000
+    } , baseRarityScore_gt: 0
+      }) {
+        ${aavegotchi}
+      }`);
+  }
+
+  return `{
+    ${reqs.join("")}
+  }`;
+}
+
+export function leaderboardQueryOld(
   orderBy: string,
   orderDirection: string,
   blockNumber: string,
@@ -192,24 +205,19 @@ export function leaderboardQuery(
 export async function fetchAndSortLeaderboard(
   category: "withSetsRarityScore" | "kinship" | "experience",
   blockNumber: string,
-  filter?: string
+  tieBreakerIndex: number
 ) {
   let eachFinalResult: LeaderboardAavegotchi[] = [];
-  const query = leaderboardQuery(
-    `${category}`,
-    "desc",
-    blockNumber,
-    `${filter}`
-  );
+  const query = leaderboardQuery(`${category}`, "desc", blockNumber);
 
   const queryresponse = await request(maticGraphUrl, query);
 
-  for (let i = 1; i <= totalResults / 1000; i++) {
-    eachFinalResult = eachFinalResult.concat(queryresponse[`top${i}000`]);
-  }
+  const leaderboardResults: LeaderboardAavegotchi[] = Object.values(
+    queryresponse
+  ).flat(1) as LeaderboardAavegotchi[];
 
   //Add in set bonuses
-  eachFinalResult.map((leaderboardGotchi) => {
+  leaderboardResults.map((leaderboardGotchi) => {
     //  if (leaderboardGotchi.withSetsRarityScore === null) {
     const foundSets = findSets(leaderboardGotchi.equippedWearables);
 
@@ -255,9 +263,55 @@ export async function fetchAndSortLeaderboard(
       leaderboardGotchi.withSetsNumericTraits =
         leaderboardGotchi.modifiedNumericTraits;
     }
+
+    eachFinalResult.push(leaderboardGotchi);
     // }
     return leaderboardGotchi;
   });
+
+  function _sortByBRS(a: LeaderboardAavegotchi, b: LeaderboardAavegotchi) {
+    if (a.withSetsRarityScore == b.withSetsRarityScore) {
+      return Number(b.kinship) - Number(a.kinship);
+    }
+    return Number(b.withSetsRarityScore) - Number(a.withSetsRarityScore);
+  }
+
+  function _sortByKinship(a: LeaderboardAavegotchi, b: LeaderboardAavegotchi) {
+    if (a.kinship === b.kinship) {
+      //Kinship and XP are the same
+      if (a.experience === b.experience) {
+        return (
+          _distanceFrom50(
+            Number(_aavegotchiNumericTraits(b)[tieBreakerIndex])
+          ) -
+          _distanceFrom50(Number(_aavegotchiNumericTraits(a)[tieBreakerIndex]))
+        );
+      } else return Number(b.experience) - Number(a.experience);
+    }
+    return Number(b.kinship) - Number(a.kinship);
+  }
+
+  function _sortByExperience(
+    a: LeaderboardAavegotchi,
+    b: LeaderboardAavegotchi
+  ) {
+    if (a.experience === b.experience) {
+      if (
+        _distanceFrom50(_aavegotchiNumericTraits(a)[tieBreakerIndex]) ===
+        _distanceFrom50(_aavegotchiNumericTraits(b)[tieBreakerIndex])
+      ) {
+        return Number(b.kinship) - Number(a.kinship);
+      } else {
+        //Kinship and XP are the same
+        return (
+          _distanceFrom50(
+            Number(_aavegotchiNumericTraits(b)[tieBreakerIndex])
+          ) -
+          _distanceFrom50(Number(_aavegotchiNumericTraits(a)[tieBreakerIndex]))
+        );
+      }
+    } else return Number(b.experience) - Number(a.experience);
+  }
 
   const sortingOptions: {
     [k in LeaderboardType]: (
@@ -270,9 +324,12 @@ export async function fetchAndSortLeaderboard(
     experience: _sortByExperience,
   };
 
-  const sortedData = eachFinalResult.sort(sortingOptions[`${category}`]);
+  console.log("category:", category);
+  let sortedData = eachFinalResult.sort(sortingOptions[`${category}`]);
 
-  eachFinalResult = sortedData.slice(0, 5000);
+  sortedData = [...new Set(sortedData)];
 
-  return eachFinalResult;
+  // eachFinalResult = sortedData.slice(0, 7500);
+
+  return sortedData.slice(0, 7500);
 }
