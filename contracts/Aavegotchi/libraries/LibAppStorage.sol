@@ -256,7 +256,6 @@ struct AppStorage {
     mapping(uint256 => uint256[]) erc721TokenToBuyOrderIds; // erc721TokenId => buyOrderIds
     mapping(uint256 => mapping(uint256 => uint256)) erc721TokenToBuyOrderIdIndexes; // erc721TokenId => buyOrderId => index
     mapping(uint256 => mapping(address => uint256)) buyerToBuyOrderId; // erc721TokenId => sender => buyOrderId
-    mapping(uint256 => uint256) erc721BuyOrderLocked; // erc721TokenId => timestamp
 }
 
 library LibAppStorage {

@@ -65,8 +65,6 @@ contract ERC721BuyOrderFacet is Modifiers {
         require(category != LibAavegotchi.STATUS_VRF_PENDING, "ERC721BuyOrder: Cannot buy a portal that is pending VRF");
         require(sender != s.aavegotchis[_erc721TokenId].owner, "ERC721BuyOrder: Owner can't be buyer");
 
-        require(block.timestamp > s.erc721BuyOrderLocked[_erc721TokenId] + 10 minutes, "ERC721BuyOrder: Buy order locked for this Aavegotchi");
-
         uint256 oldBuyOrderId = s.buyerToBuyOrderId[_erc721TokenId][sender];
         if (oldBuyOrderId != 0) {
             ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[oldBuyOrderId];
