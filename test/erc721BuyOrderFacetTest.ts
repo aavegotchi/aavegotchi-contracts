@@ -28,9 +28,10 @@ describe("Testing ERC721 Buy Order", async function () {
   const daoAddress = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
   const lockedAavegotchiId = 12867; // listed in Baazaar, used for buy orders
   const unlockedAavegotchiId = 10000; // not listed in Baazaar, no buy orders also
+  const lockedOpenPortalId = 18268; // listed in Baazaar
+  const lockedClosedPortalId = 11000; // listed in Baazaar
   const price = ethers.utils.parseUnits("100", "ether");
   const mediumPrice = ethers.utils.parseUnits("105", "ether");
-  const highPrice = ethers.utils.parseUnits("110", "ether");
   const highestPrice = ethers.utils.parseUnits("115", "ether");
   const listPrice = ethers.utils.parseUnits("1", "ether");
   let erc721BuyOrderFacet: ERC721BuyOrderFacet;
@@ -474,6 +475,47 @@ describe("Testing ERC721 Buy Order", async function () {
       buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(thirdBuyOrderId);
       expect(buyOrder.buyOrderId).to.equal(thirdBuyOrderId);
       expect(buyOrder.cancelled).to.equal(true);
+    });
+  });
+
+  describe("Testing buy order for portal", async function () {
+    it("Should succeed for open portal", async function () {
+      const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+      await (
+        await ghstERC20.connect(ghstHolder)
+      ).approve(diamondAddress, price);
+      const receipt = await (
+        await erc721BuyOrderFacet.placeERC721BuyOrder(
+          diamondAddress,
+          lockedOpenPortalId,
+          price
+        )
+      ).wait();
+      const event = receipt!.events!.find(
+        (e: any) => e.event === "ERC721BuyOrderAdd"
+      );
+      expect(event!.args!.buyer).to.equal(ghstHolderAddress);
+      const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+      expect(newBalance.add(price)).to.equal(oldBalance);
+    });
+    it("Should succeed for closed portal", async function () {
+      const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+      await (
+        await ghstERC20.connect(ghstHolder)
+      ).approve(diamondAddress, price);
+      const receipt = await (
+        await erc721BuyOrderFacet.placeERC721BuyOrder(
+          diamondAddress,
+          lockedClosedPortalId,
+          price
+        )
+      ).wait();
+      const event = receipt!.events!.find(
+        (e: any) => e.event === "ERC721BuyOrderAdd"
+      );
+      expect(event!.args!.buyer).to.equal(ghstHolderAddress);
+      const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+      expect(newBalance.add(price)).to.equal(oldBalance);
     });
   });
 });
