@@ -26,8 +26,8 @@ describe("Testing ERC721 Buy Order", async function () {
   const ghstHolder2Address = "0x45fdb9d9Ff3105392bf5F1A3828F9523314117A7";
   const pixelcraftAddress = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
   const daoAddress = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
-  const testGotchiId1 = 12867; // listed in Baazaar, used for buy orders
-  const testGotchiId2 = 10000; // not listed in Baazaar, no buy orders also
+  const lockedAavegotchiId = 12867; // listed in Baazaar, used for buy orders
+  const unlockedAavegotchiId = 10000; // not listed in Baazaar, no buy orders also
   const price = ethers.utils.parseUnits("100", "ether");
   const mediumPrice = ethers.utils.parseUnits("105", "ether");
   const highPrice = ethers.utils.parseUnits("110", "ether");
@@ -85,7 +85,7 @@ describe("Testing ERC721 Buy Order", async function () {
     ghstHolder = await ethers.getSigner(ghstHolderAddress);
 
     // This is needed for impersonating owner of test aavegotchi
-    aavegotchiOwnerAddress = await aavegotchiFacet.ownerOf(testGotchiId1);
+    aavegotchiOwnerAddress = await aavegotchiFacet.ownerOf(lockedAavegotchiId);
     await network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [aavegotchiOwnerAddress],
@@ -114,11 +114,22 @@ describe("Testing ERC721 Buy Order", async function () {
   });
 
   describe("Testing placeERC721BuyOrder", async function () {
+    it("Should revert if place buy order to unlocked Aavegotchi", async function () {
+      await expect(
+        erc721BuyOrderFacet.placeERC721BuyOrder(
+          diamondAddress,
+          unlockedAavegotchiId,
+          1
+        )
+      ).to.be.revertedWith(
+        "LibAppStorage: Only callable on locked Aavegotchis"
+      );
+    });
     it("Should revert if price is lower than 1 GHST", async function () {
       await expect(
         erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
-          testGotchiId1,
+          lockedAavegotchiId,
           0
         )
       ).to.be.revertedWith("ERC721BuyOrder: price should be 1 GHST or larger");
@@ -127,7 +138,7 @@ describe("Testing ERC721 Buy Order", async function () {
       await expect(
         erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
-          testGotchiId1,
+          lockedAavegotchiId,
           ethers.utils.parseUnits("1000000000", "ether")
         )
       ).to.be.revertedWith("ERC721BuyOrder: Not enough GHST!");
@@ -140,7 +151,7 @@ describe("Testing ERC721 Buy Order", async function () {
       await expect(
         (
           await erc721BuyOrderFacet.connect(aavegotchiOwner)
-        ).placeERC721BuyOrder(diamondAddress, testGotchiId1, minPrice)
+        ).placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, minPrice)
       ).to.be.revertedWith("ERC721BuyOrder: Owner can't be buyer");
     });
     describe("If there's no buy order", async function () {
@@ -152,7 +163,7 @@ describe("Testing ERC721 Buy Order", async function () {
         const receipt = await (
           await erc721BuyOrderFacet.placeERC721BuyOrder(
             diamondAddress,
-            testGotchiId1,
+            lockedAavegotchiId,
             price
           )
         ).wait();
@@ -174,7 +185,7 @@ describe("Testing ERC721 Buy Order", async function () {
         const receipt = await (
           await erc721BuyOrderFacet.placeERC721BuyOrder(
             diamondAddress,
-            testGotchiId1,
+            lockedAavegotchiId,
             mediumPrice
           )
         ).wait();
@@ -208,7 +219,7 @@ describe("Testing ERC721 Buy Order", async function () {
         const receipt = await (
           await erc721BuyOrderFacetWithHolder2.placeERC721BuyOrder(
             diamondAddress,
-            testGotchiId1,
+            lockedAavegotchiId,
             mediumPrice
           )
         ).wait();
@@ -234,15 +245,15 @@ describe("Testing ERC721 Buy Order", async function () {
         firstBuyOrderId
       );
       expect(buyOrder.buyOrderId).to.equal(firstBuyOrderId);
-      expect(buyOrder.erc721TokenId).to.equal(testGotchiId1);
+      expect(buyOrder.erc721TokenId).to.equal(lockedAavegotchiId);
       expect(buyOrder.cancelled).to.equal(true);
       buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(secondBuyOrderId);
       expect(buyOrder.buyOrderId).to.equal(secondBuyOrderId);
-      expect(buyOrder.erc721TokenId).to.equal(testGotchiId1);
+      expect(buyOrder.erc721TokenId).to.equal(lockedAavegotchiId);
       expect(buyOrder.cancelled).to.equal(false);
       buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(thirdBuyOrderId);
       expect(buyOrder.buyOrderId).to.equal(thirdBuyOrderId);
-      expect(buyOrder.erc721TokenId).to.equal(testGotchiId1);
+      expect(buyOrder.erc721TokenId).to.equal(lockedAavegotchiId);
       expect(buyOrder.cancelled).to.equal(false);
     });
   });
@@ -250,12 +261,16 @@ describe("Testing ERC721 Buy Order", async function () {
   describe("Testing getERC721BuyOrderIdsByTokenId", async function () {
     it("Should return empty array with wrong aavegotchi id", async function () {
       const buyOrderIds =
-        await erc721BuyOrderFacet.getERC721BuyOrderIdsByTokenId(testGotchiId2);
+        await erc721BuyOrderFacet.getERC721BuyOrderIdsByTokenId(
+          unlockedAavegotchiId
+        );
       expect(buyOrderIds.length).to.equal(0);
     });
     it("Should fetch active(not cancelled) buy order ids with correct aavegotchi id", async function () {
       const buyOrderIds =
-        await erc721BuyOrderFacet.getERC721BuyOrderIdsByTokenId(testGotchiId1);
+        await erc721BuyOrderFacet.getERC721BuyOrderIdsByTokenId(
+          lockedAavegotchiId
+        );
       expect(buyOrderIds.length).to.equal(2);
       expect(buyOrderIds[0]).to.equal(secondBuyOrderId);
       expect(buyOrderIds[1]).to.equal(thirdBuyOrderId);
@@ -265,20 +280,20 @@ describe("Testing ERC721 Buy Order", async function () {
   describe("Testing getERC721BuyOrdersByTokenId", async function () {
     it("Should return empty array with wrong aavegotchi id", async function () {
       const buyOrders = await erc721BuyOrderFacet.getERC721BuyOrdersByTokenId(
-        testGotchiId2
+        unlockedAavegotchiId
       );
       expect(buyOrders.length).to.equal(0);
     });
     it("Should fetch active(not cancelled) buy orders data with correct aavegotchi id", async function () {
       const buyOrders = await erc721BuyOrderFacet.getERC721BuyOrdersByTokenId(
-        testGotchiId1
+        lockedAavegotchiId
       );
       expect(buyOrders.length).to.equal(2);
       expect(buyOrders[0].buyOrderId).to.equal(secondBuyOrderId);
-      expect(buyOrders[0].erc721TokenId).to.equal(testGotchiId1);
+      expect(buyOrders[0].erc721TokenId).to.equal(lockedAavegotchiId);
       expect(buyOrders[0].cancelled).to.equal(false);
       expect(buyOrders[1].buyOrderId).to.equal(thirdBuyOrderId);
-      expect(buyOrders[1].erc721TokenId).to.equal(testGotchiId1);
+      expect(buyOrders[1].erc721TokenId).to.equal(lockedAavegotchiId);
       expect(buyOrders[1].cancelled).to.equal(false);
     });
   });
@@ -322,7 +337,7 @@ describe("Testing ERC721 Buy Order", async function () {
       const receipt = await (
         await erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
-          testGotchiId1,
+          lockedAavegotchiId,
           highestPrice
         )
       ).wait();
@@ -333,7 +348,7 @@ describe("Testing ERC721 Buy Order", async function () {
 
       const listing = await erc721MarketplaceFacet.getERC721ListingFromToken(
         diamondAddress,
-        testGotchiId1,
+        lockedAavegotchiId,
         aavegotchiOwnerAddress
       );
       listingId = listing.listingId;
@@ -398,7 +413,7 @@ describe("Testing ERC721 Buy Order", async function () {
 
       // Check aavegotchi owner
       const newAavegotchiOwnerAddress = await aavegotchiFacet.ownerOf(
-        testGotchiId1
+        lockedAavegotchiId
       );
       expect(newAavegotchiOwnerAddress).to.equal(ghstHolderAddress);
 
@@ -409,11 +424,10 @@ describe("Testing ERC721 Buy Order", async function () {
       expect(buyOrder.buyOrderId).to.equal(fourthBuyOrderId);
       expect(buyOrder.timePurchased.gt(0)).to.equal(true);
     });
-    // it("Listing should be cancelled after buy order executed", async function () {
-    //   const listing = await erc721MarketplaceFacet.getERC721Listing(listingId);
-    //   // expect(listing.cancelled).to.equal(true);
-    //   console.log(listing)
-    // });
+    it("Listing should be cancelled after buy order executed", async function () {
+      const listing = await erc721MarketplaceFacet.getERC721Listing(listingId);
+      expect(listing.cancelled).to.equal(true);
+    });
   });
 
   describe("Testing ERC721MarketplaceFacet", async function () {
@@ -424,7 +438,7 @@ describe("Testing ERC721 Buy Order", async function () {
       let receipt = await (
         await erc721MarketplaceFacet.addERC721Listing(
           erc721MarketplaceFacet.address,
-          testGotchiId1,
+          lockedAavegotchiId,
           listPrice
         )
       ).wait();
@@ -462,19 +476,4 @@ describe("Testing ERC721 Buy Order", async function () {
       expect(buyOrder.cancelled).to.equal(true);
     });
   });
-
-  // describe("Testing transfer of ERC721", async function () {
-  //   it("Buy order of buyer should be canceled when ERC721 is transferred to buyer", async function () {
-  //     let buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(thirdBuyOrderId);
-  //     expect(buyOrder.buyOrderId).to.equal(thirdBuyOrderId);
-  //     expect(buyOrder.cancelled).to.equal(false);
-  //
-  //     await (await (await aavegotchiFacet.connect(ghstHolder))["safeTransferFrom(address,address,uint256)"](ghstHolderAddress, ghstHolder2Address, testGotchiId1)).wait();
-  //
-  //     buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(thirdBuyOrderId);
-  //     expect(buyOrder.buyOrderId).to.equal(thirdBuyOrderId);
-  //     expect(buyOrder.cancelled).to.equal(true);
-  //
-  //   });
-  // });
 });

@@ -332,6 +332,10 @@ contract Modifiers {
         require(s.aavegotchis[_tokenId].locked == false, "LibAppStorage: Only callable on unlocked Aavegotchis");
         _;
     }
+    modifier onlyLocked(uint256 _tokenId) {
+        require(s.aavegotchis[_tokenId].locked == true, "LibAppStorage: Only callable on locked Aavegotchis");
+        _;
+    }
 
     modifier onlyOwner() {
         LibDiamond.enforceIsContractOwner();

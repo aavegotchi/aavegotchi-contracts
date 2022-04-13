@@ -54,7 +54,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         address _erc721TokenAddress,
         uint256 _erc721TokenId,
         uint256 _priceInWei
-    ) external {
+    ) external onlyLocked(_erc721TokenId) {
         require(_priceInWei >= 1e18, "ERC721BuyOrder: price should be 1 GHST or larger");
 
         address sender = LibMeta.msgSender();
@@ -123,9 +123,7 @@ contract ERC721BuyOrderFacet is Modifiers {
 
         erc721BuyOrder.timePurchased = block.timestamp;
 
-        uint256 _listingId = s.erc721TokenToListingId[erc721BuyOrder.erc721TokenAddress][erc721BuyOrder.erc721TokenId][sender];
-        LibERC721Marketplace.removeERC721ListingItem(_listingId, sender);
-        LibERC721Marketplace.addERC721ListingItem(sender, erc721BuyOrder.category, "purchased", _listingId);
+        LibERC721Marketplace.cancelERC721Listing(erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId, sender);
 
         uint256 daoShare = erc721BuyOrder.priceInWei / 100;
         uint256 pixelCraftShare = (erc721BuyOrder.priceInWei * 2) / 100;
