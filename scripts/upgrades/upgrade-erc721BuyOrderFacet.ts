@@ -23,26 +23,11 @@ export async function upgrade() {
       removeSelectors: [],
     },
     {
-      facetName: "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
       facetName: "ERC721MarketplaceFacet",
       addSelectors: [],
       removeSelectors: [
         "function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view",
       ],
-    },
-    {
-      facetName: "AavegotchiGameFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "VrfFacet",
-      addSelectors: [],
-      removeSelectors: [],
     },
   ];
 
@@ -54,8 +39,6 @@ export async function upgrade() {
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: true,
-    initAddress: ethers.constants.AddressZero,
-    initCalldata: '0x'
   };
 
   await run("deployUpgrade", args);
