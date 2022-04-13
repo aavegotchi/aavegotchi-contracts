@@ -240,7 +240,7 @@ contract GotchiLendingFacet is Modifiers {
         uint32 extension;
     }
 
-    function batchRenewGotchiLending(BatchRenew[] calldata _batchRenewParams) external {
+    function batchExtendGotchiLending(BatchRenew[] calldata _batchRenewParams) external {
         for (uint256 i = 0; i < _batchRenewParams.length; ) {
             extendGotchiLending(_batchRenewParams[i].tokenId, _batchRenewParams[i].extension);
             unchecked {

@@ -10,252 +10,170 @@ import {
   AavegotchiFacet,
   AavegotchiGameFacet,
   GotchiLendingFacet,
+  LendingGetterAndSetterFacet,
+  ERC20Token,
+  ERC721MarketplaceFacet,
   WhitelistFacet,
 } from "../typechain";
+import {
+  fudAddress,
+  fomoAddress,
+  alphaAddress,
+  kekAddress,
+  ghstAddress,
+  aavegotchiDiamondAddressMatic,
+} from "../helpers/constants";
 import { BigNumberish } from "ethers";
 
 const { expect } = chai;
 
-describe("Testing Aavegotchi Lending", async function () {
+describe("Testing Aavegotchi Lending Refactor", async function () {
   this.timeout(300000);
 
-  const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+  const listedFilter = ethers.utils.formatBytes32String("listed");
+  const agreedFilter = ethers.utils.formatBytes32String("agreed");
+  const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
+
+  const collateral = "0x8df3aad3a84da6b69a4da8aec3ea40d9091b2ac4";
+
+  const revenueTokens: string[] = [ghstAddress, kekAddress];
+  const claimerAddress = "0x3507e4978e0eb83315d20df86ca0b976c0e40ccb";
   const borrowerAddress = "0xb4473cfEeDC9a0E94612c6ce883677b63f830DB8"; // borrower should be GHST holder
+  const nonGhstHolderAddress = "0x725Fe4790fC6435B5161f88636C2A50e43247A4b"; // GHST holder balance should be 0
+  const nonWhitelistedAddress = "0xaA3B1fDC3Aa57Bf24418E397f8c80e7385aAa594"; // non-whitelisted address should be GHST holder
+  const ghstHolderAddress = "0x3721546e51258065bfdb9746b2e442c7671b0298";
   const thirdParty = "0x382038b034fa8Ea64C74C81d680669bDaC4D0636";
   const originalPetOperator = "0x4E59235b35d504D1372ABf67a835031F98114d64"; // original pet operator should be MATIC holder
-  const gotchiHolder = "0x8FEebfA4aC7AF314d90a0c17C3F91C800cFdE44B";
-  const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
-  const linkiest = "0xaCC227235cCAb6C058B76600D4EC2e86072d0813";
-  const diamondOwner = "0x35FE3dF776474a7B24B3B1EC6e745a830FdAd351";
-  const tokens = [
-    "0x403E967b044d4Be25170310157cB1A4Bf10bdD0f",
-    "0x44A6e0BE76e1D9620A7F76588e4509fE4fa8E8C8",
-    "0x6a3E7C3c6EF65Ee26975b12293cA1AAD7e1dAeD2",
-    "0x42E5E06EF5b90Fe15F853F59299Fc96259209c5C",
-    "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
-    "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
-  ];
-  const lockedAavegotchiId = 16911;
-  let lendingFacetWithBorrower: GotchiLendingFacet;
-  let lendingFacetWithGotchiOwner: GotchiLendingFacet;
-  let lendingFacetWithGameManager: GotchiLendingFacet;
-  let lendingFacetWithSirLinkiest: GotchiLendingFacet;
-  let lendingFacetWithDiamondOwner: GotchiLendingFacet;
-  let whitelistFacetWithOwner: WhitelistFacet;
+  const lockedAavegotchiId = 22003;
+  const unlockedAavegotchiId = 11939;
+  let lendingFacet: GotchiLendingFacet;
+  let lendingGetterAndSetterFacet: LendingGetterAndSetterFacet;
+  let whitelistFacet: WhitelistFacet;
   let aavegotchiFacet: AavegotchiFacet;
+  let erc721MarketplaceFacet: ERC721MarketplaceFacet;
   let aavegotchiGameFacet: AavegotchiGameFacet;
-  let aavegotchiOwnerAddress: any;
-  let whitelistId: any;
+  let ghstToken: ERC20Token;
+  let aavegotchiOwnerAddress: string;
 
   before(async function () {
     await upgrade();
 
-    const gotchiLendingFacet = (await ethers.getContractAt(
+    lendingFacet = (await ethers.getContractAt(
       "GotchiLendingFacet",
-      diamondAddress
+      aavegotchiDiamondAddressMatic
     )) as GotchiLendingFacet;
-    const whitelistFacet = (await ethers.getContractAt(
+    whitelistFacet = (await ethers.getContractAt(
       "WhitelistFacet",
-      diamondAddress
+      aavegotchiDiamondAddressMatic
     )) as WhitelistFacet;
+    lendingGetterAndSetterFacet = (await ethers.getContractAt(
+      "LendingGetterAndSetterFacet",
+      aavegotchiDiamondAddressMatic
+    )) as LendingGetterAndSetterFacet;
     aavegotchiFacet = (await ethers.getContractAt(
       "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-      diamondAddress
+      aavegotchiDiamondAddressMatic
     )) as AavegotchiFacet;
+    erc721MarketplaceFacet = (await ethers.getContractAt(
+      "ERC721MarketplaceFacet",
+      aavegotchiDiamondAddressMatic
+    )) as ERC721MarketplaceFacet;
     aavegotchiGameFacet = (await ethers.getContractAt(
       "AavegotchiGameFacet",
-      diamondAddress
+      aavegotchiDiamondAddressMatic
     )) as AavegotchiGameFacet;
 
+    ghstToken = (await ethers.getContractAt(
+      "ERC20Token",
+      ghstAddress
+    )) as ERC20Token;
+
+    // This is needed for impersonating owner of test aavegotchi
     aavegotchiOwnerAddress = await aavegotchiFacet.ownerOf(lockedAavegotchiId);
 
-    lendingFacetWithDiamondOwner = await impersonate(
-      diamondOwner,
-      gotchiLendingFacet,
-      ethers,
-      network
-    );
-    lendingFacetWithBorrower = await impersonate(
-      borrowerAddress,
-      gotchiLendingFacet,
-      ethers,
-      network
-    );
-    lendingFacetWithGotchiOwner = await impersonate(
-      gotchiHolder,
-      gotchiLendingFacet,
-      ethers,
-      network
-    );
-    lendingFacetWithGameManager = await impersonate(
-      gameManager,
-      gotchiLendingFacet,
-      ethers,
-      network
-    );
-    lendingFacetWithSirLinkiest = await impersonate(
-      linkiest,
-      gotchiLendingFacet,
-      ethers,
-      network
-    );
-    whitelistFacetWithOwner = await impersonate(
-      aavegotchiOwnerAddress,
-      whitelistFacet,
-      ethers,
-      network
-    );
+    // set pet operator
     aavegotchiFacet = await impersonate(
-      borrowerAddress,
+      aavegotchiOwnerAddress,
       aavegotchiFacet,
       ethers,
       network
     );
-    aavegotchiGameFacet = await impersonate(
-      originalPetOperator,
-      aavegotchiGameFacet,
-      ethers,
-      network
-    );
-  });
 
-  describe("Testing lending and whitelist", async () => {
-    it("Should be able to add revenue tokens to a revenue token whitelist", async () => {
-      // Already allowed in upgrade script
-      for (let i = 0; i < tokens.length; i++) {
-        expect(
-          await lendingFacetWithDiamondOwner.revenueTokenAllowed(tokens[i])
-        ).to.be.true;
-      }
-    });
-    it("Should not be able to add revenue tokens to a revenue token whitelist if not owner", async () => {
-      await expect(
-        lendingFacetWithBorrower.allowRevenueTokens([diamondOwner])
-      ).to.be.revertedWith("LibDiamond: Must be contract owner");
-    });
-    it("Should be able to remove revenue tokens from a revenue token whitelist", async () => {
-      await lendingFacetWithDiamondOwner.disallowRevenueTokens(tokens);
-      for (let i = 0; i < tokens.length; i++) {
-        expect(
-          await lendingFacetWithDiamondOwner.revenueTokenAllowed(tokens[i])
-        ).to.be.false;
-      }
-    });
-    it("Should not be able to remove revenue tokens from a revenue token whitelist if not owner", async () => {
-      await expect(
-        lendingFacetWithBorrower.disallowRevenueTokens([diamondOwner])
-      ).to.be.revertedWith("LibDiamond: Must be contract owner");
-    });
-    it("Should be able to list a gotchi if a revenue token is whitelisted", async () => {
-      await lendingFacetWithDiamondOwner.allowRevenueTokens(tokens);
-      await lendingFacetWithGotchiOwner.addGotchiLending(
-        11939,
-        0,
-        2591000,
-        [50, 50, 0],
-        gotchiHolder,
-        ethers.constants.AddressZero,
-        0,
-        tokens
-      );
-      expect(
-        await lendingFacetWithGotchiOwner.getGotchiLendingIdByToken(11939)
-      ).to.be.gt(0);
-    });
-    it("Should not be able to list a gotchi if a revenue token is not whitelisted", async () => {
-      await lendingFacetWithDiamondOwner.disallowRevenueTokens(tokens);
-      await expect(
-        lendingFacetWithGotchiOwner.addGotchiLending(
-          22003,
-          0,
-          1,
-          [50, 50, 0],
-          gotchiHolder,
-          ethers.constants.AddressZero,
-          0,
-          tokens
-        )
-      ).to.be.revertedWith("GotchiLending: Invalid revenue token address");
-    });
-    it("Diamond owner should be able to change revenue tokens of a listing", async () => {
-      await lendingFacetWithGameManager.emergencyChangeRevenueTokens(
-        [11939],
-        [diamondOwner]
-      );
-      const lendingInfo =
-        await lendingFacetWithGotchiOwner.getLendingListingInfo(11939);
-      expect(lendingInfo.revenueTokens).to.be.deep.equal([diamondOwner]);
-    });
-    it("Nobody but the diamond owner should be able to change revenue tokens of a listing", async () => {
-      await expect(
-        lendingFacetWithBorrower.emergencyChangeRevenueTokens(
-          [11939],
-          [diamondOwner]
-        )
-      ).to.be.revertedWith("LibAppStorage: Do not have access");
-    });
-    it("Should be able to transfer ownership of a whitelist", async () => {
-      await whitelistFacetWithOwner.createWhitelist("yore mum", [thirdParty]);
-      whitelistId = await whitelistFacetWithOwner.getWhitelistsLength();
-      await whitelistFacetWithOwner.transferOwnershipOfWhitelist(
-        whitelistId,
-        ethers.constants.AddressZero
-      );
-      expect(
-        await whitelistFacetWithOwner.whitelistOwner(whitelistId)
-      ).to.equal(ethers.constants.AddressZero);
-    });
-    it("Should not be able to transfer ownership of a whitelist if not the owner", async () => {
-      await expect(
-        whitelistFacetWithOwner.transferOwnershipOfWhitelist(
-          1,
-          ethers.constants.AddressZero
-        )
-      ).to.be.revertedWith("WhitelistFacet: Not whitelist owner");
-    });
-    it("Shouldn't be able to list with a period of more than 30 days", async () => {
-      await expect(
-        lendingFacetWithGotchiOwner.addGotchiLending(
-          22003,
-          0,
-          2_600_000,
-          [50, 50, 0],
-          gotchiHolder,
-          ethers.constants.AddressZero,
-          0,
-          []
-        )
-      ).to.be.revertedWith("GotchiLending: Period too long");
-    });
-    it("Setup for next tests", async () => {
-      let lendingIds: [BigNumberish, BigNumberish] = [
-        await lendingFacetWithGotchiOwner.getGotchiLendingIdByToken(11939),
-        await lendingFacetWithGotchiOwner.getGotchiLendingIdByToken(22003),
-      ];
-      await lendingFacetWithBorrower.agreeGotchiLending(
-        lendingIds[0],
-        11939,
-        0,
-        2591000,
-        [50, 50, 0]
-      );
-    });
-    it("Lender cannot end the term early", async () => {
-      await expect(
-        lendingFacetWithGotchiOwner.claimAndEndGotchiLending(11939)
-      ).to.be.revertedWith("GotchiLending: Not allowed during agreement");
-    });
-    it("Borrower should be able to end lending early", async () => {
-      await lendingFacetWithBorrower.claimAndEndGotchiLending(11939);
-      expect(await lendingFacetWithBorrower.isAavegotchiLent(22003)).to.be
-        .false;
-    });
-    it("Lender should be able to end a long existing borrow early", async () => {
-      await network.provider.send("evm_increaseTime", [2592000]);
-      await network.provider.send("evm_mine");
-      await lendingFacetWithSirLinkiest.claimAndEndGotchiLending(13835);
-      expect(await lendingFacetWithSirLinkiest.isAavegotchiLent(13835)).to.be
-        .false;
-    });
+    // set approval
+    await (
+      await aavegotchiFacet.setApprovalForAll(
+        aavegotchiDiamondAddressMatic,
+        true
+      )
+    ).wait();
   });
 });
+
+describe("Lending Facet Test", async () => {
+  describe("Add Gotchi Listing", async () => {
+    it("Should not allow anyone but lender or operator add listing");
+    it("Should add listing");
+    it("Should add batch listing");
+    it("Should allow lending operator to add listing");
+  });
+  describe("Agree Gotchi Listing", async () => {
+    it("Should borrow a gotchi");
+    it("Should not be able to borrow a second gotchi");
+    it("Should be able to borrow another gotchi after returning a gotchi");
+    it("Should not allow non-whitelisted addresses to agree");
+  });
+  describe("Cancel Gotchi Listing", async () => {
+    it("Should not allow anyone but lender or operator cancel listing");
+    it("Should cancel listing");
+    it("Should cancel batch listing");
+    it("Should allow lending operator to cancel listing");
+  });
+  describe("Claim Gotchi Listing", async () => {
+    it("Should not allow claiming if a listing is not borrowed");
+    it(
+      "Should not allow anyone but lender,borrower, or operator claim listing"
+    );
+    it("Should allow lender to claim listing");
+    it("Should allow borrower to claim listing");
+    it("Should allow lending operator to claim listing");
+    it("Should allow batch claiming");
+  });
+  describe("Claim and End Gotchi Listing", async () => {
+    it(
+      "Should not allow anyone but lender, borrower, or operator claim and end listing"
+    );
+    it("Should allow lender to claim and end listing");
+    it("Should allow borrower to claim and end listing");
+    it("Should allow borrower to claim and end early");
+    it("Should allow lending operator to claim and end listing");
+    it("Should allow batch claim and end");
+  });
+  describe("Extend Gotchi Listing", async () => {
+    it("Should not allow anyone but lender or operator extend listing");
+    it("Should allow lender to extend listing");
+    it("Should allow borrower to extend listing");
+    it("Should allow lending operator to extend listing");
+    it("Should allow batch extensions");
+  });
+});
+describe("Lending Getter and Setter Test", async () => {
+  describe("Revenue Tokens", async () => {
+    it("Should allow diamond owner to set revenue tokens");
+    it("Should not allow anyone but the diamond owner to set revenue tokens");
+    it("Should allow diamond owner to remove revenue tokens");
+    it(
+      "Should not allow anyone but the diamond owner to remove revenue tokens"
+    );
+    it("Should get token balances in escrow");
+  });
+  describe("Setters and Getters", async () => {
+    it("Should get the token id of a borrower");
+    it("Should set lending operator for a token");
+    it("Should be able to batch set lending operator");
+    it("Should not be able to set lending operator if not owner");
+    it("Should not be able to set lending operator if aavegotchi is locked");
+    it("Should get lending operator for a token");
+  });
+});
+describe("Whitelist Facet Test", async () => {});
+describe("Escrow Facet Test", async () => {});

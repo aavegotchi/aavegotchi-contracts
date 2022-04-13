@@ -59,10 +59,6 @@ contract WhitelistFacet is Modifiers {
         return s.isWhitelisted[_whitelistId][_whitelistAddress];
     }
 
-    function getWhitelists() external view returns (Whitelist[] memory) {
-        return s.whitelists;
-    }
-
     function getWhitelistsLength() external view returns (uint256) {
         return s.whitelists.length;
     }

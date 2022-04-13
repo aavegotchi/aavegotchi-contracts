@@ -32,17 +32,17 @@ contract LendingGetterAndSetterFacet is Modifiers {
         return s.revenueTokenAllowed[token];
     }
 
-    /// @dev Should be removed after all old listings are fixed
-    function emergencyChangeRevenueTokens(uint32[] calldata _listingIds, address[] calldata _revenueTokens) external onlyOwnerOrDaoOrGameManager {
-        for (uint256 i = 0; i < _listingIds.length; ) {
-            GotchiLending storage listing_ = s.gotchiLendings[_listingIds[i]];
-            require(listing_.timeCreated != 0, "GotchiLending: Listing does not exist");
-            listing_.revenueTokens = _revenueTokens;
-            unchecked {
-                ++i;
-            }
-        }
-    }
+    // /// @dev Should be removed after all old listings are fixed
+    // function emergencyChangeRevenueTokens(uint32[] calldata _listingIds, address[] calldata _revenueTokens) external onlyOwnerOrDaoOrGameManager {
+    //     for (uint256 i = 0; i < _listingIds.length; ) {
+    //         GotchiLending storage listing_ = s.gotchiLendings[_listingIds[i]];
+    //         require(listing_.timeCreated != 0, "GotchiLending: Listing does not exist");
+    //         listing_.revenueTokens = _revenueTokens;
+    //         unchecked {
+    //             ++i;
+    //         }
+    //     }
+    // }
 
     function getTokenBalancesInEscrow(uint32 _tokenId, address[] calldata _revenueTokens) external view returns (uint256[] memory revenueBalances) {
         address escrow = LibAavegotchi.getAavegotchi(_tokenId).escrow;

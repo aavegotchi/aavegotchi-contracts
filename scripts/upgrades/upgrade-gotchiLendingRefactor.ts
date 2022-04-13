@@ -22,7 +22,7 @@ export async function upgrade() {
         "function batchClaimGotchiLending(uint32[] calldata _tokenIds) external",
         "function batchClaimAndEndGotchiLending(uint32[] calldata _tokenIds) external",
         "function batchClaimAndEndAndRelistGotchiLending(uint32[] calldata _tokenIds) external",
-        "function batchRenewGotchiLending((uint32 tokenId, uint32 extension)[] calldata _batchRenewParams) external",
+        "function batchExtendGotchiLending((uint32 tokenId, uint32 extension)[] calldata _batchRenewParams) external",
       ],
       removeSelectors: [
         "function emergencyChangeRevenueTokens(uint32[] calldata _listingIds, address[] calldata _revenueTokens) external",
@@ -41,7 +41,6 @@ export async function upgrade() {
     {
       facetName: "LendingGetterAndSetterFacet",
       addSelectors: [
-        "function emergencyChangeRevenueTokens(uint32[] calldata _listingIds, address[] calldata _revenueTokens) external",
         "function allowRevenueTokens(address[] tokens) external",
         "function disallowRevenueTokens(address[] tokens) external",
         "function setLendingOperator(address _lendingOperator,uint32 _tokenId,bool _isLendingOperator) external",
@@ -65,7 +64,7 @@ export async function upgrade() {
     {
       facetName: "WhitelistFacet",
       addSelectors: [],
-      removeSelectors: [],
+      removeSelectors: ["function getWhitelists() external view"],
     },
     {
       facetName: "EscrowFacet",
