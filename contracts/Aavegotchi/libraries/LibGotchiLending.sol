@@ -320,13 +320,19 @@ library LibGotchiLending {
         }
     }
 
-    function isAavegotchiLent(uint32 _tokenId) internal view returns (bool) {
+    function isAavegotchiListed(uint32 _tokenId) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint32 listingId = s.aavegotchiToListingId[_tokenId];
-        if (listingId == 0) return false;
+        GotchiLending memory lending = s.gotchiLendings[listingId];
+        return listingId > 0 && lending.timeCreated > 0;
+    }
+
+    function isAavegotchiLent(uint32 _tokenId) internal view returns (bool) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        if (!isAavegotchiListed(_tokenId)) return false;
+        uint32 listingId = s.aavegotchiToListingId[_tokenId];
         GotchiLending storage listing_ = s.gotchiLendings[listingId];
-        if (listing_.timeCreated == 0 || listing_.timeAgreed == 0) return false;
-        return listing_.completed == false;
+        return (listing_.timeAgreed != 0 && !listing_.completed);
     }
 
     function checkPeriod(uint32 _period) internal pure returns (bool) {

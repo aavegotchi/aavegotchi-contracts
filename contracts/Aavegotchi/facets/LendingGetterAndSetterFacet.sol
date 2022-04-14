@@ -28,10 +28,6 @@ contract LendingGetterAndSetterFacet is Modifiers {
         }
     }
 
-    function revenueTokenAllowed(address token) external view returns (bool) {
-        return s.revenueTokenAllowed[token];
-    }
-
     // /// @dev Should be removed after all old listings are fixed
     // function emergencyChangeRevenueTokens(uint32[] calldata _listingIds, address[] calldata _revenueTokens) external onlyOwnerOrDaoOrGameManager {
     //     for (uint256 i = 0; i < _listingIds.length; ) {
@@ -43,28 +39,6 @@ contract LendingGetterAndSetterFacet is Modifiers {
     //         }
     //     }
     // }
-
-    function getTokenBalancesInEscrow(uint32 _tokenId, address[] calldata _revenueTokens) external view returns (uint256[] memory revenueBalances) {
-        address escrow = LibAavegotchi.getAavegotchi(_tokenId).escrow;
-        for (uint256 i = 0; i < _revenueTokens.length; ) {
-            revenueBalances[i] = IERC20(_revenueTokens[i]).balanceOf(escrow);
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    function getBorrowerTokenId(address borrower) external view returns (uint32) {
-        return LibGotchiLending.borrowerTokenId(borrower);
-    }
-
-    function isLendingOperator(
-        address _lender,
-        address _lendingOperator,
-        uint32 _tokenId
-    ) external view returns (bool) {
-        return s.isLendingOperator[_lender][_lendingOperator][_tokenId];
-    }
 
     ///@notice Set the lending operator for a given token
     ///@dev Only the aavegotchi owner can set a lending operator
@@ -91,6 +65,40 @@ contract LendingGetterAndSetterFacet is Modifiers {
                 ++i;
             }
         }
+    }
+
+    /*/////////////////////////////////////////////////////////////////////////////////
+    ///                                    GETTERS                                  ///
+    /////////////////////////////////////////////////////////////////////////////////*/
+
+    function revenueTokenAllowed(address token) external view returns (bool) {
+        return s.revenueTokenAllowed[token];
+    }
+
+    function getTokenBalancesInEscrow(uint32 _tokenId, address[] calldata _revenueTokens) external view returns (uint256[] memory revenueBalances) {
+        address escrow = LibAavegotchi.getAavegotchi(_tokenId).escrow;
+        for (uint256 i = 0; i < _revenueTokens.length; ) {
+            revenueBalances[i] = IERC20(_revenueTokens[i]).balanceOf(escrow);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function isLendingOperator(
+        address _lender,
+        address _lendingOperator,
+        uint32 _tokenId
+    ) external view returns (bool) {
+        return s.isLendingOperator[_lender][_lendingOperator][_tokenId];
+    }
+
+    function getBorrowerTokenId(address _borrower) external view returns (uint32) {
+        return LibGotchiLending.borrowerTokenId(_borrower);
+    }
+
+    function isBorrowing(address _borrower) external view returns (bool) {
+        return LibGotchiLending.isBorrowing(_borrower);
     }
 
     ///@notice Get an aavegotchi lending details through an identifier
@@ -192,5 +200,9 @@ contract LendingGetterAndSetterFacet is Modifiers {
 
     function isAavegotchiLent(uint32 _erc721TokenId) external view returns (bool) {
         return LibGotchiLending.isAavegotchiLent(_erc721TokenId);
+    }
+
+    function isAavegotchiListed(uint32 _erc721TokenId) external view returns (bool) {
+        return LibGotchiLending.isAavegotchiListed(_erc721TokenId);
     }
 }
