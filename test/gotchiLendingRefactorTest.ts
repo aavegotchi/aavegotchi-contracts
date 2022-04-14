@@ -58,6 +58,7 @@ describe("Testing Aavegotchi Lending Refactor", async function () {
   let borrower: Signer;
   let lendingOperator: Signer;
   let thirdParty: Signer;
+  let listingId: BigNumberish;
 
   before(async function () {
     await upgrade();
@@ -86,6 +87,10 @@ describe("Testing Aavegotchi Lending Refactor", async function () {
       "AavegotchiGameFacet",
       aavegotchiDiamondAddressMatic
     )) as AavegotchiGameFacet;
+    escrowFacet = (await ethers.getContractAt(
+      "EscrowFacet",
+      aavegotchiDiamondAddressMatic
+    )) as EscrowFacet;
 
     ghstToken = (await ethers.getContractAt(
       "ERC20Token",
@@ -401,7 +406,7 @@ describe("Testing Aavegotchi Lending Refactor", async function () {
         await lendingFacet.connect(lender).addGotchiListing({
           tokenId: unlockedAavegotchiId[0],
           initialCost: 0,
-          period: 10000,
+          period: 1,
           revenueSplit: [50, 50, 0],
           originalOwner: await lender.getAddress(),
           thirdParty: await thirdParty.getAddress(),
@@ -415,7 +420,7 @@ describe("Testing Aavegotchi Lending Refactor", async function () {
               await lendingGetterAndSetterFacet.getGotchiLendingsLength(),
               unlockedAavegotchiId[0],
               0,
-              10000,
+              1,
               [50, 50, 0]
             )
         ).to.be.revertedWith("LibGotchiLending: Not whitelisted address");
@@ -432,7 +437,7 @@ describe("Testing Aavegotchi Lending Refactor", async function () {
             await lendingGetterAndSetterFacet.getGotchiLendingsLength(),
             unlockedAavegotchiId[0],
             0,
-            10000,
+            1,
             [50, 50, 0]
           );
         expect(
@@ -446,25 +451,19 @@ describe("Testing Aavegotchi Lending Refactor", async function () {
       it("Should allow lending operator to claim listing", async () => {
         await lendingFacet
           .connect(lendingOperator)
-          .claimGotchiLending(
-            await lendingGetterAndSetterFacet.getGotchiLendingsLength()
-          );
+          .claimGotchiLending(unlockedAavegotchiId[0]);
       });
       it("Should allow batch claiming", async () => {
         await lendingFacet
           .connect(lendingOperator)
-          .batchClaimGotchiLending([
-            await lendingGetterAndSetterFacet.getGotchiLendingsLength(),
-          ]);
+          .batchClaimGotchiLending([unlockedAavegotchiId[0]]);
       });
     });
     describe("Claim and End Gotchi Listing", async () => {
       it("Should allow batch claim and end", async () => {
         await lendingFacet
           .connect(lendingOperator)
-          .batchClaimAndEndGotchiLending([
-            await lendingGetterAndSetterFacet.getGotchiLendingsLength(),
-          ]);
+          .batchClaimAndEndGotchiLending([unlockedAavegotchiId[0]]);
       });
     });
     describe("Extend Gotchi Listing", async () => {
@@ -568,7 +567,7 @@ describe("Testing Aavegotchi Lending Refactor", async function () {
               1
             )
         ).to.be.revertedWith(
-          "EscrowFacet: Only the original gotchi owner can transfer out the escrow"
+          "EscrowFacet: Only the lender can transfer out the escrow"
         );
       });
       it("Should not allow transfer of collateral tokens", async () => {
@@ -585,10 +584,39 @@ describe("Testing Aavegotchi Lending Refactor", async function () {
           "EscrowFacet: Transferring ERC20 token CANNOT be same as collateral ERC20 token"
         );
       });
-      it("Should allow transfers if listing is not borrowed");
-      it("Only owner can transfer when borrowed");
-      it("Only owner can transfer when listed");
-      it("Only owner can transfer if not locked");
+      it("Only owner can transfer when borrowed", async () => {
+        await escrowFacet
+          .connect(lender)
+          .transferEscrow(
+            unlockedAavegotchiId[0],
+            ghstAddress,
+            await lender.getAddress(),
+            1
+          );
+      });
+      it("Only owner can transfer when listed", async () => {
+        await escrowFacet
+          .connect(lender)
+          .transferEscrow(
+            unlockedAavegotchiId[0],
+            ghstAddress,
+            await lender.getAddress(),
+            1
+          );
+      });
+      it("Should allow transfers if not listed", async () => {
+        await lendingFacet
+          .connect(borrower)
+          .claimAndEndGotchiLending(unlockedAavegotchiId[0]);
+        await escrowFacet
+          .connect(lender)
+          .transferEscrow(
+            unlockedAavegotchiId[0],
+            ghstAddress,
+            await lender.getAddress(),
+            1
+          );
+      });
     });
   });
 });

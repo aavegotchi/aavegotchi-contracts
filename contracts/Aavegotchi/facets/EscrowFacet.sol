@@ -102,10 +102,10 @@ contract EscrowFacet is Modifiers {
         uint256 _transferAmount
     ) external {
         // Borrow check
-        if (LibGotchiLending.isAavegotchiLent(uint32(_tokenId))) {
+        if (LibGotchiLending.isAavegotchiListed(uint32(_tokenId))) {
             // If the gotchi is borrowed, we will allow the lender to claim escrow tokens if they aren't revenue tokens
             GotchiLending memory listing = LibGotchiLending.getListing(s.aavegotchiToListingId[uint32(_tokenId)]);
-            require(listing.originalOwner == LibMeta.msgSender(), "EscrowFacet: Only the original gotchi owner can transfer out the escrow");
+            require(listing.lender == LibMeta.msgSender(), "EscrowFacet: Only the lender can transfer out the escrow");
             for (uint256 i = 0; i < listing.revenueTokens.length; i++) {
                 if (listing.revenueTokens[i] == _erc20Contract) revert("EscrowFacet: Cannot transferred revenue tokens");
             }
