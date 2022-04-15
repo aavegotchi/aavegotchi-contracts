@@ -181,6 +181,7 @@ contract GotchiLendingFacet is Modifiers {
         );
     }
 
+    ///@notice Add gotchi listings in batch
     function batchAddGotchiListing(AddGotchiListing[] memory listings) external {
         for (uint256 i = 0; i < listings.length; ) {
             addGotchiListing(listings[i]);
@@ -190,6 +191,7 @@ contract GotchiLendingFacet is Modifiers {
         }
     }
 
+    ///@notice Cancel gotchi listings in batch by listing ID
     function batchCancelGotchiLending(uint32[] calldata _listingIds) external {
         for (uint256 i = 0; i < _listingIds.length; ) {
             cancelGotchiLending(_listingIds[i]);
@@ -199,6 +201,7 @@ contract GotchiLendingFacet is Modifiers {
         }
     }
 
+    ///@notice Cancel gotchi listings in batch by token ID
     function batchCancelGotchiLendingByToken(uint32[] calldata _erc721TokenIds) external {
         for (uint256 i = 0; i < _erc721TokenIds.length; ) {
             cancelGotchiLendingByToken(_erc721TokenIds[i]);
@@ -208,6 +211,7 @@ contract GotchiLendingFacet is Modifiers {
         }
     }
 
+    ///@notice Claim gotchi lendings in batch by token ID
     function batchClaimGotchiLending(uint32[] calldata _tokenIds) external {
         for (uint256 i = 0; i < _tokenIds.length; ) {
             claimGotchiLending(_tokenIds[i]);
@@ -217,6 +221,7 @@ contract GotchiLendingFacet is Modifiers {
         }
     }
 
+    ///@notice Claim and end gotchi lendings in batch by token ID
     function batchClaimAndEndGotchiLending(uint32[] calldata _tokenIds) external {
         for (uint256 i = 0; i < _tokenIds.length; ) {
             claimAndEndGotchiLending(_tokenIds[i]);
@@ -226,6 +231,7 @@ contract GotchiLendingFacet is Modifiers {
         }
     }
 
+    ///@notice Claim and end and relist gotchi lendings in batch by token ID
     function batchClaimAndEndAndRelistGotchiLending(uint32[] calldata _tokenIds) external {
         for (uint256 i = 0; i < _tokenIds.length; ) {
             claimAndEndAndRelistGotchiLending(_tokenIds[i]);
@@ -240,6 +246,7 @@ contract GotchiLendingFacet is Modifiers {
         uint32 extension;
     }
 
+    ///@notice Extend gotchi listings in batch by token ID
     function batchExtendGotchiLending(BatchRenew[] calldata _batchRenewParams) external {
         for (uint256 i = 0; i < _batchRenewParams.length; ) {
             extendGotchiLending(_batchRenewParams[i].tokenId, _batchRenewParams[i].extension);
