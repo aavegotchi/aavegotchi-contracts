@@ -123,7 +123,7 @@ describe("Testing ERC721 Buy Order", async function () {
           1
         )
       ).to.be.revertedWith(
-        "LibAppStorage: Only callable on locked Aavegotchis"
+        "ERC721BuyOrder: Only callable on locked Aavegotchis"
       );
     });
     it("Should revert if price is lower than 1 GHST", async function () {
