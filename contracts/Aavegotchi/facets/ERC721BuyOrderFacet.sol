@@ -54,7 +54,12 @@ contract ERC721BuyOrderFacet is Modifiers {
         address _erc721TokenAddress,
         uint256 _erc721TokenId,
         uint256 _priceInWei
-    ) external onlyLocked(_erc721TokenId) {
+    ) {
+        //Only unlocked Aavegotchis can be listed
+        if (_erc721TokenAddress == address(this)) {
+            require(s.aavegotchis[_erc721TokenId].locked == false, "ERC721Marketplace: Only callable on unlocked Aavegotchis");
+        }
+
         require(_priceInWei >= 1e18, "ERC721BuyOrder: price should be 1 GHST or larger");
 
         address sender = LibMeta.msgSender();
