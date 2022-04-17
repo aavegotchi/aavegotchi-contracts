@@ -10,14 +10,14 @@ library LibWhitelist {
         whitelistId = uint32(s.whitelists.length + 1); //whitelistId 0 is reserved for "none" in GotchiLending struct
     }
 
-    function whitelistExists(uint32 whitelistId) internal view returns (bool exists) {
+    function _whitelistExists(uint32 whitelistId) internal view returns (bool exists) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         exists = (s.whitelists.length >= whitelistId) && (whitelistId > 0);
     }
 
     function getWhitelistFromWhitelistId(uint32 whitelistId) internal view returns (Whitelist storage whitelist) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        require(whitelistExists(whitelistId), "WhitelistFacet: Whitelist not found");
+        require(_whitelistExists(whitelistId), "WhitelistFacet: Whitelist not found");
         whitelist = s.whitelists[whitelistId - 1];
     }
 

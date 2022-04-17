@@ -26,7 +26,7 @@ contract WhitelistFacet is Modifiers {
 
     function updateWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external {
         require(_whitelistAddresses.length > 0, "WhitelistFacet: Whitelist length should be larger than zero");
-        require(LibWhitelist.whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
+        require(LibWhitelist._whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
         require(LibWhitelist.checkWhitelistOwner(_whitelistId), "WhitelistFacet: Not whitelist owner");
 
         LibWhitelist._addAddressesToWhitelist(_whitelistId, _whitelistAddresses);
@@ -36,7 +36,7 @@ contract WhitelistFacet is Modifiers {
 
     function removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external {
         require(_whitelistAddresses.length > 0, "WhitelistFacet: Whitelist length should be larger than zero");
-        require(LibWhitelist.whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
+        require(LibWhitelist._whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
         require(LibWhitelist.checkWhitelistOwner(_whitelistId), "WhitelistFacet: Not whitelist owner");
 
         LibWhitelist._removeAddressesFromWhitelist(_whitelistId, _whitelistAddresses);
@@ -45,7 +45,7 @@ contract WhitelistFacet is Modifiers {
     }
 
     function transferOwnershipOfWhitelist(uint32 _whitelistId, address _whitelistOwner) external {
-        require(LibWhitelist.whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
+        require(LibWhitelist._whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
         require(LibWhitelist.checkWhitelistOwner(_whitelistId), "WhitelistFacet: Not whitelist owner");
 
         Whitelist storage whitelist = LibWhitelist.getWhitelistFromWhitelistId(_whitelistId);
@@ -53,6 +53,14 @@ contract WhitelistFacet is Modifiers {
         whitelist.owner = _whitelistOwner;
 
         emit WhitelistOwnershipTransferred(_whitelistId, _whitelistOwner);
+    }
+
+    function getWhitelists() external view returns (Whitelist[] memory) {
+        return s.whitelists;
+    }
+
+    function whitelistExists(uint32 whitelistId) external view returns (bool exists) {
+        exists = LibWhitelist._whitelistExists(whitelistId);
     }
 
     function isWhitelisted(uint32 _whitelistId, address _whitelistAddress) external view returns (uint256) {
@@ -64,12 +72,12 @@ contract WhitelistFacet is Modifiers {
     }
 
     function getWhitelist(uint32 _whitelistId) external view returns (Whitelist memory) {
-        require(LibWhitelist.whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
+        require(LibWhitelist._whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
         return LibWhitelist.getWhitelistFromWhitelistId(_whitelistId);
     }
 
     function whitelistOwner(uint32 _whitelistId) external view returns (address) {
-        require(LibWhitelist.whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
+        require(LibWhitelist._whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
         return LibWhitelist.getWhitelistFromWhitelistId(_whitelistId).owner;
     }
 }

@@ -12,8 +12,10 @@ export async function upgrade() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "WhitelistFacet",
-      addSelectors: [],
-      removeSelectors: ["function getWhitelists() external view"],
+      addSelectors: [
+        "function whitelistExists(uint32 whitelistId) public view",
+      ],
+      removeSelectors: [],
     },
   ];
 
