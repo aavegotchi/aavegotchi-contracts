@@ -556,67 +556,6 @@ describe("Testing Aavegotchi Lending Refactor", async function () {
           );
         expect(lending.period).to.be.equal(40000);
       });
-      it("Should revert on transfer escrow if borrower initiates", async () => {
-        await expect(
-          escrowFacet
-            .connect(borrower)
-            .transferEscrow(
-              unlockedAavegotchiId[0],
-              ghstAddress,
-              await lender.getAddress(),
-              1
-            )
-        ).to.be.revertedWith(
-          "EscrowFacet: Only the lender can transfer out the escrow"
-        );
-      });
-      it("Should not allow transfer of collateral tokens", async () => {
-        await expect(
-          escrowFacet
-            .connect(lender)
-            .transferEscrow(
-              unlockedAavegotchiId[0],
-              "0x1d2a0e5ec8e5bbdca5cb219e649b565d8e5c3360",
-              await lender.getAddress(),
-              1
-            )
-        ).to.be.revertedWith(
-          "EscrowFacet: Transferring ERC20 token CANNOT be same as collateral ERC20 token"
-        );
-      });
-      it("Only owner can transfer when borrowed", async () => {
-        await escrowFacet
-          .connect(lender)
-          .transferEscrow(
-            unlockedAavegotchiId[0],
-            ghstAddress,
-            await lender.getAddress(),
-            1
-          );
-      });
-      it("Only owner can transfer when listed", async () => {
-        await escrowFacet
-          .connect(lender)
-          .transferEscrow(
-            unlockedAavegotchiId[0],
-            ghstAddress,
-            await lender.getAddress(),
-            1
-          );
-      });
-      it("Should allow transfers if not listed", async () => {
-        await lendingFacet
-          .connect(borrower)
-          .claimAndEndGotchiLending(unlockedAavegotchiId[0]);
-        await escrowFacet
-          .connect(lender)
-          .transferEscrow(
-            unlockedAavegotchiId[0],
-            ghstAddress,
-            await lender.getAddress(),
-            1
-          );
-      });
     });
   });
 });
