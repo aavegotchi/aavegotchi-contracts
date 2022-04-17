@@ -7,8 +7,8 @@ const { LedgerSigner } = require("@ethersproject/hardware-wallets");
 const installationDiamond = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
 const installationTypes = [1]; //golden aaltar lvl1
 
-// const tileDiamond = "0x631998e91476DA5B870D741192fc5Cbc55F5a52E";
-// const tileTypes = [0, 1, 2, 3];
+const tileDiamond = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
+const tileTypes = [1, 2, 3];
 /* TODO: end */
 
 async function main() {
@@ -40,21 +40,21 @@ async function main() {
 
   const categories = [];
   // adding installation type categories
-  for (let i = 0; i < installationTypes.length; i++) {
-    categories.push({
-      erc1155TokenAddress: installationDiamond,
-      erc1155TypeId: installationTypes[i],
-      category: 4,
-    });
-  }
-  // // adding tile type categories
-  // for (let i = 0; i < tileTypes.length; i++) {
+  // for (let i = 0; i < installationTypes.length; i++) {
   //   categories.push({
-  //     erc1155TokenAddress: tileDiamond,
-  //     erc1155TypeId: tileTypes[i],
-  //     category: 5,
+  //     erc1155TokenAddress: installationDiamond,
+  //     erc1155TypeId: installationTypes[i],
+  //     category: 4,
   //   });
   // }
+  // adding tile type categories
+  for (let i = 0; i < tileTypes.length; i++) {
+    categories.push({
+      erc1155TokenAddress: tileDiamond,
+      erc1155TypeId: tileTypes[i],
+      category: 5,
+    });
+  }
 
   if (testing) {
     tx = await erc1155MarketplaceFacet.setERC1155Categories(categories);
