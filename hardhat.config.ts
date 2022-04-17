@@ -8,6 +8,7 @@ import "solidity-coverage";
 //import './tasks/generateDiamondABI.js';
 import * as dotenv from "dotenv";
 import "@typechain/hardhat";
+import { BigNumber } from "ethers";
 
 dotenv.config({ path: __dirname + "/.env" });
 
@@ -38,11 +39,11 @@ export default {
     apiKey: process.env.POLYGON_API_KEY,
   },
   networks: {
-    hardhat: {  
+    hardhat: {
       forking: {
         url: process.env.MATIC_URL,
         timeout: 12000000,
-        //blockNumber: 26642399,
+        blockNumber: 27108687,
       },
       blockGasLimit: 20000000,
       timeout: 120000,
@@ -53,10 +54,12 @@ export default {
     },
     matic: {
       url: process.env.MATIC_URL,
-      // url: 'https://rpc-mainnet.maticvigil.com/',
       accounts: [process.env.ITEM_MANAGER],
       // blockGasLimit: 20000000,
       // gasPrice: 1000000000,
+      maxFeePerGas: BigNumber.from("80").mul(1e9),
+      maxPriorityFeePerGas: BigNumber.from("50").mul(1e9),
+      gasLimit: 2000000,
       timeout: 90000,
     },
     // mumbai: {
@@ -93,9 +96,21 @@ export default {
     runOnCompile: false,
     disambiguatePaths: true,
   },
+  mocha: {
+    timeout: 2000000,
+  },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
     compilers: [
+      {
+        version: "0.8.13",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
       {
         version: "0.8.1",
         settings: {
