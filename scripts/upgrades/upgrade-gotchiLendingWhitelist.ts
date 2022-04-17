@@ -15,7 +15,7 @@ export async function upgrade() {
       addSelectors: [
         "function whitelistExists(uint32 whitelistId) public view",
       ],
-      removeSelectors: [],
+      removeSelectors: ["function getWhitelists() external view"],
     },
   ];
 

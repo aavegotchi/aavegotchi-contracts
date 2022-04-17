@@ -55,10 +55,6 @@ contract WhitelistFacet is Modifiers {
         emit WhitelistOwnershipTransferred(_whitelistId, _whitelistOwner);
     }
 
-    function getWhitelists() external view returns (Whitelist[] memory) {
-        return s.whitelists;
-    }
-
     function whitelistExists(uint32 whitelistId) external view returns (bool exists) {
         exists = LibWhitelist._whitelistExists(whitelistId);
     }
