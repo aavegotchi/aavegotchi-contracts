@@ -11,7 +11,7 @@ export const maticGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic";
 
 export const maticLendingUrl: string =
-  "https://static.138.182.90.157.clients.your-server.de/subgraphs/name/aavegotchi/aavegotchi-core-matic-lending-four";
+  "https://api.thegraph.com/subgraphs/name/froid1911/aavegotchi-lending";
 export const ethGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-ethereum";
 
@@ -117,6 +117,8 @@ export async function getSubgraphGotchis(
 }
 
 export async function getBorrowedGotchis(addresses: string[]) {
+  addresses = addresses.map((val) => val.toLowerCase());
+
   const batchSize = 150;
 
   const batches = Math.ceil(addresses.length / batchSize);
@@ -129,16 +131,14 @@ export async function getBorrowedGotchis(addresses: string[]) {
     queryData = queryData.concat(`
       batch${batchId}: gotchiLendings(first:${batchSize}, where:{completed:false, timeAgreed_gt:0, lender_in:[${addresses
       .slice(offset, offset + batchSize)
-      .map(
-        (add: string) => '"' + add.toLowerCase() + '"'
-      )}]},first:${batchSize}) {
+      .map((add: string) => '"' + add + '"')}]},first:${batchSize}) {
         gotchiTokenId
         lender
         }
   `);
   }
 
-  console.log("querydata:", queryData);
+  // console.log("querydata:", queryData);
 
   queryData = queryData.concat(`}`);
 
@@ -161,6 +161,12 @@ export async function getBorrowedGotchis(addresses: string[]) {
   const ownerToGotchi: OwnerToGotchi = {};
 
   finalResponse.map((val) => {
+    if (!addresses.includes(val.lender)) {
+      throw new Error(
+        `${val.gotchiTokenId} not owned by voting lender ${val.lender}`
+      );
+    }
+
     if (!ownerToGotchi[val.lender]) {
       ownerToGotchi[val.lender] = [val.gotchiTokenId];
     } else {
@@ -329,9 +335,12 @@ export async function getPolygonAndMainnetGotchis(
   }
 
   //Borrowed Gotchis
+  console.log("Fetch borrowed gotchis");
   for (let index = 0; index < batches; index++) {
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
     const borrowedGotchis: UserGotchisOwned[] = await getBorrowedGotchis(batch);
+
+    // console.log("borrowed gotchis:", borrowedGotchis);
 
     if (borrowedGotchis.length > 0) {
       console.log(
