@@ -16,6 +16,11 @@ export interface VaultGotchisOwned {
   gotchis: VaultGotchis[];
 }
 
+export interface LendedGotchis {
+  gotchiTokenId: string;
+  lender: string;
+}
+
 export interface RarityFarmingRewardArgs {
   rarity: string[];
   kinship: string[];
