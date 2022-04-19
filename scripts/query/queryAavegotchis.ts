@@ -8,7 +8,7 @@ export const ethGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-ethereum";
 
 export const vaultGraphUrl: string =
-  "https://api.thegraph.com/subgraphs/name/froid1911/aavegotchi-vault";
+  "https://api.thegraph.com/subgraphs/name/aavegotchi/gotchi-vault";
 
 function removeEmpty(userGotchisOwned: UserGotchisOwned[]): UserGotchisOwned[] {
   let removeEmpty: UserGotchisOwned[] = [];
