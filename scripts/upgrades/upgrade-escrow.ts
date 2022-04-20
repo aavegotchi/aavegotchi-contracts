@@ -63,6 +63,16 @@ export async function upgrade() {
       ],
       removeSelectors: [],
     },
+    {
+      facetName: "WhitelistFacet",
+      addSelectors: [],
+      removeSelectors: ["function getWhitelists() external view"],
+    },
+    {
+      facetName: "EscrowFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
