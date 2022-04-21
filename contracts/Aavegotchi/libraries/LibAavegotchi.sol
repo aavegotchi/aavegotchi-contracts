@@ -390,4 +390,16 @@ library LibAavegotchi {
             category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
         }
     }
+
+    function generateValidationHash(address _erc721TokenAddress, uint256 _erc721TokenId) internal view returns (bytes32) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+
+        uint256 category = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
+        if (category == 3) {
+            // Aavegotchi
+            return keccak256(abi.encodePacked(_erc721TokenId, category, s.aavegotchis[_erc721TokenId].equippedWearables));
+        } else {
+            return keccak256(abi.encodePacked(_erc721TokenId, category));
+        }
+    }
 }

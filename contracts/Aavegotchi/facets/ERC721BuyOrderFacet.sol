@@ -55,11 +55,6 @@ contract ERC721BuyOrderFacet is Modifiers {
         uint256 _erc721TokenId,
         uint256 _priceInWei
     ) external {
-        //Only unlocked Aavegotchis can be listed
-        if (_erc721TokenAddress == address(this)) {
-            require(s.aavegotchis[_erc721TokenId].locked == true, "ERC721BuyOrder: Only callable on locked Aavegotchis");
-        }
-
         require(_priceInWei >= 1e18, "ERC721BuyOrder: price should be 1 GHST or larger");
 
         address sender = LibMeta.msgSender();
@@ -97,6 +92,7 @@ contract ERC721BuyOrderFacet is Modifiers {
             erc721TokenId: _erc721TokenId,
             category: category,
             priceInWei: _priceInWei,
+            validationHash: LibAavegotchi.generateValidationHash(_erc721TokenAddress, _erc721TokenId),
             timeCreated: block.timestamp,
             timePurchased: 0,
             cancelled: false
@@ -125,6 +121,10 @@ contract ERC721BuyOrderFacet is Modifiers {
         require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
         require(sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner, "ERC721BuyOrder: Only aavegotchi owner can call this function");
         require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
+        require(
+            erc721BuyOrder.validationHash == LibAavegotchi.generateValidationHash(erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId),
+            "ERC721BuyOrder: Invalid buy order"
+        );
 
         erc721BuyOrder.timePurchased = block.timestamp;
 

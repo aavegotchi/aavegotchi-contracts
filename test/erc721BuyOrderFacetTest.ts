@@ -11,6 +11,7 @@ import {
   ERC20Token,
   ERC721BuyOrderFacet,
   ERC721MarketplaceFacet,
+  ItemsFacet,
   OwnershipFacet,
 } from "../typechain";
 
@@ -26,10 +27,11 @@ describe("Testing ERC721 Buy Order", async function () {
   const ghstHolder2Address = "0x45fdb9d9Ff3105392bf5F1A3828F9523314117A7";
   const pixelcraftAddress = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
   const daoAddress = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
-  const lockedAavegotchiId = 12867; // listed in Baazaar, used for buy orders
-  const unlockedAavegotchiId = 10000; // not listed in Baazaar, no buy orders also
-  const lockedOpenPortalId = 18268; // listed in Baazaar
-  const lockedClosedPortalId = 11000; // listed in Baazaar
+  const testGotchiId1 = 12867;
+  const testGotchiId2 = 10000; // no buy orders
+  const testGotchiId3 = 12852; // should equip wearable and unlocked, used for checking validation
+  const testOpenPortalId = 18268; // listed in Baazaar
+  const testClosedPortalId = 11000; // listed in Baazaar
   const price = ethers.utils.parseUnits("100", "ether");
   const mediumPrice = ethers.utils.parseUnits("105", "ether");
   const highestPrice = ethers.utils.parseUnits("115", "ether");
@@ -39,8 +41,8 @@ describe("Testing ERC721 Buy Order", async function () {
   let erc721MarketplaceFacet: ERC721MarketplaceFacet;
   let ghstERC20: ERC20Token;
   let contractOwner: any;
-  let aavegotchiOwnerAddress: any;
-  let aavegotchiOwner: any;
+  let gotchiOwnerAddress: any;
+  let gotchiOwner: any;
   let maticHolder: any;
   let ghstHolder: any;
   let firstBuyOrderId: any;
@@ -86,12 +88,12 @@ describe("Testing ERC721 Buy Order", async function () {
     ghstHolder = await ethers.getSigner(ghstHolderAddress);
 
     // This is needed for impersonating owner of test aavegotchi
-    aavegotchiOwnerAddress = await aavegotchiFacet.ownerOf(lockedAavegotchiId);
+    gotchiOwnerAddress = await aavegotchiFacet.ownerOf(testGotchiId1);
     await network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [aavegotchiOwnerAddress],
+      params: [gotchiOwnerAddress],
     });
-    aavegotchiOwner = await ethers.getSigner(aavegotchiOwnerAddress);
+    gotchiOwner = await ethers.getSigner(gotchiOwnerAddress);
 
     const contractOwnerAddress = await ownerFacet.owner();
     await network.provider.request({
@@ -115,22 +117,11 @@ describe("Testing ERC721 Buy Order", async function () {
   });
 
   describe("Testing placeERC721BuyOrder", async function () {
-    it("Should revert if place buy order to unlocked Aavegotchi", async function () {
-      await expect(
-        erc721BuyOrderFacet.placeERC721BuyOrder(
-          diamondAddress,
-          unlockedAavegotchiId,
-          1
-        )
-      ).to.be.revertedWith(
-        "ERC721BuyOrder: Only callable on locked Aavegotchis"
-      );
-    });
     it("Should revert if price is lower than 1 GHST", async function () {
       await expect(
         erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
-          lockedAavegotchiId,
+          testGotchiId1,
           0
         )
       ).to.be.revertedWith("ERC721BuyOrder: price should be 1 GHST or larger");
@@ -139,7 +130,7 @@ describe("Testing ERC721 Buy Order", async function () {
       await expect(
         erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
-          lockedAavegotchiId,
+          testGotchiId1,
           ethers.utils.parseUnits("1000000000", "ether")
         )
       ).to.be.revertedWith("ERC721BuyOrder: Not enough GHST!");
@@ -148,11 +139,11 @@ describe("Testing ERC721 Buy Order", async function () {
       const minPrice = ethers.utils.parseUnits("1", "ether");
       await (
         await ghstERC20.connect(ghstHolder)
-      ).transfer(aavegotchiOwnerAddress, minPrice);
+      ).transfer(gotchiOwnerAddress, minPrice);
       await expect(
         (
-          await erc721BuyOrderFacet.connect(aavegotchiOwner)
-        ).placeERC721BuyOrder(diamondAddress, lockedAavegotchiId, minPrice)
+          await erc721BuyOrderFacet.connect(gotchiOwner)
+        ).placeERC721BuyOrder(diamondAddress, testGotchiId1, minPrice)
       ).to.be.revertedWith("ERC721BuyOrder: Owner can't be buyer");
     });
     describe("If there's no buy order", async function () {
@@ -164,7 +155,7 @@ describe("Testing ERC721 Buy Order", async function () {
         const receipt = await (
           await erc721BuyOrderFacet.placeERC721BuyOrder(
             diamondAddress,
-            lockedAavegotchiId,
+            testGotchiId1,
             price
           )
         ).wait();
@@ -186,7 +177,7 @@ describe("Testing ERC721 Buy Order", async function () {
         const receipt = await (
           await erc721BuyOrderFacet.placeERC721BuyOrder(
             diamondAddress,
-            lockedAavegotchiId,
+            testGotchiId1,
             mediumPrice
           )
         ).wait();
@@ -220,7 +211,7 @@ describe("Testing ERC721 Buy Order", async function () {
         const receipt = await (
           await erc721BuyOrderFacetWithHolder2.placeERC721BuyOrder(
             diamondAddress,
-            lockedAavegotchiId,
+            testGotchiId1,
             mediumPrice
           )
         ).wait();
@@ -246,15 +237,15 @@ describe("Testing ERC721 Buy Order", async function () {
         firstBuyOrderId
       );
       expect(buyOrder.buyOrderId).to.equal(firstBuyOrderId);
-      expect(buyOrder.erc721TokenId).to.equal(lockedAavegotchiId);
+      expect(buyOrder.erc721TokenId).to.equal(testGotchiId1);
       expect(buyOrder.cancelled).to.equal(true);
       buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(secondBuyOrderId);
       expect(buyOrder.buyOrderId).to.equal(secondBuyOrderId);
-      expect(buyOrder.erc721TokenId).to.equal(lockedAavegotchiId);
+      expect(buyOrder.erc721TokenId).to.equal(testGotchiId1);
       expect(buyOrder.cancelled).to.equal(false);
       buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(thirdBuyOrderId);
       expect(buyOrder.buyOrderId).to.equal(thirdBuyOrderId);
-      expect(buyOrder.erc721TokenId).to.equal(lockedAavegotchiId);
+      expect(buyOrder.erc721TokenId).to.equal(testGotchiId1);
       expect(buyOrder.cancelled).to.equal(false);
     });
   });
@@ -262,16 +253,12 @@ describe("Testing ERC721 Buy Order", async function () {
   describe("Testing getERC721BuyOrderIdsByTokenId", async function () {
     it("Should return empty array with wrong aavegotchi id", async function () {
       const buyOrderIds =
-        await erc721BuyOrderFacet.getERC721BuyOrderIdsByTokenId(
-          unlockedAavegotchiId
-        );
+        await erc721BuyOrderFacet.getERC721BuyOrderIdsByTokenId(testGotchiId2);
       expect(buyOrderIds.length).to.equal(0);
     });
     it("Should fetch active(not cancelled) buy order ids with correct aavegotchi id", async function () {
       const buyOrderIds =
-        await erc721BuyOrderFacet.getERC721BuyOrderIdsByTokenId(
-          lockedAavegotchiId
-        );
+        await erc721BuyOrderFacet.getERC721BuyOrderIdsByTokenId(testGotchiId1);
       expect(buyOrderIds.length).to.equal(2);
       expect(buyOrderIds[0]).to.equal(secondBuyOrderId);
       expect(buyOrderIds[1]).to.equal(thirdBuyOrderId);
@@ -281,20 +268,20 @@ describe("Testing ERC721 Buy Order", async function () {
   describe("Testing getERC721BuyOrdersByTokenId", async function () {
     it("Should return empty array with wrong aavegotchi id", async function () {
       const buyOrders = await erc721BuyOrderFacet.getERC721BuyOrdersByTokenId(
-        unlockedAavegotchiId
+        testGotchiId2
       );
       expect(buyOrders.length).to.equal(0);
     });
     it("Should fetch active(not cancelled) buy orders data with correct aavegotchi id", async function () {
       const buyOrders = await erc721BuyOrderFacet.getERC721BuyOrdersByTokenId(
-        lockedAavegotchiId
+        testGotchiId1
       );
       expect(buyOrders.length).to.equal(2);
       expect(buyOrders[0].buyOrderId).to.equal(secondBuyOrderId);
-      expect(buyOrders[0].erc721TokenId).to.equal(lockedAavegotchiId);
+      expect(buyOrders[0].erc721TokenId).to.equal(testGotchiId1);
       expect(buyOrders[0].cancelled).to.equal(false);
       expect(buyOrders[1].buyOrderId).to.equal(thirdBuyOrderId);
-      expect(buyOrders[1].erc721TokenId).to.equal(lockedAavegotchiId);
+      expect(buyOrders[1].erc721TokenId).to.equal(testGotchiId1);
       expect(buyOrders[1].cancelled).to.equal(false);
     });
   });
@@ -338,7 +325,7 @@ describe("Testing ERC721 Buy Order", async function () {
       const receipt = await (
         await erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
-          lockedAavegotchiId,
+          testGotchiId1,
           highestPrice
         )
       ).wait();
@@ -349,8 +336,8 @@ describe("Testing ERC721 Buy Order", async function () {
 
       const listing = await erc721MarketplaceFacet.getERC721ListingFromToken(
         diamondAddress,
-        lockedAavegotchiId,
-        aavegotchiOwnerAddress
+        testGotchiId1,
+        gotchiOwnerAddress
       );
       listingId = listing.listingId;
     });
@@ -371,22 +358,20 @@ describe("Testing ERC721 Buy Order", async function () {
     it("Should revert when try to execute canceled buy order", async function () {
       await expect(
         (
-          await erc721BuyOrderFacet.connect(aavegotchiOwner)
+          await erc721BuyOrderFacet.connect(gotchiOwner)
         ).executeERC721BuyOrder(firstBuyOrderId)
       ).to.be.revertedWith("ERC721BuyOrder: Already processed");
     });
     it("Should succeed when execute buy order with valid data", async function () {
       const buyerOldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
-      const sellerOldBalance = await ghstERC20.balanceOf(
-        aavegotchiOwnerAddress
-      );
+      const sellerOldBalance = await ghstERC20.balanceOf(gotchiOwnerAddress);
       const daoOldBalance = await ghstERC20.balanceOf(daoAddress);
       const pixelcraftOldBalance = await ghstERC20.balanceOf(pixelcraftAddress);
       const diamondOldBalance = await ghstERC20.balanceOf(diamondAddress);
 
       const receipt = await (
         await (
-          await erc721BuyOrderFacet.connect(aavegotchiOwner)
+          await erc721BuyOrderFacet.connect(gotchiOwner)
         ).executeERC721BuyOrder(fourthBuyOrderId)
       ).wait();
       const event = receipt!.events!.find(
@@ -395,9 +380,7 @@ describe("Testing ERC721 Buy Order", async function () {
       expect(event!.args!.buyer).to.equal(ghstHolderAddress);
 
       const buyerNewBalance = await ghstERC20.balanceOf(ghstHolderAddress);
-      const sellerNewBalance = await ghstERC20.balanceOf(
-        aavegotchiOwnerAddress
-      );
+      const sellerNewBalance = await ghstERC20.balanceOf(gotchiOwnerAddress);
       const daoNewBalance = await ghstERC20.balanceOf(daoAddress);
       const pixelcraftNewBalance = await ghstERC20.balanceOf(pixelcraftAddress);
       const diamondNewBalance = await ghstERC20.balanceOf(diamondAddress);
@@ -413,10 +396,10 @@ describe("Testing ERC721 Buy Order", async function () {
       expect(diamondOldBalance.sub(diamondNewBalance)).to.equal(highestPrice);
 
       // Check aavegotchi owner
-      const newAavegotchiOwnerAddress = await aavegotchiFacet.ownerOf(
-        lockedAavegotchiId
+      const newGotchiOwnerAddress = await aavegotchiFacet.ownerOf(
+        testGotchiId1
       );
-      expect(newAavegotchiOwnerAddress).to.equal(ghstHolderAddress);
+      expect(newGotchiOwnerAddress).to.equal(ghstHolderAddress);
 
       // Check buy order status
       const buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(
@@ -439,7 +422,7 @@ describe("Testing ERC721 Buy Order", async function () {
       let receipt = await (
         await erc721MarketplaceFacet.addERC721Listing(
           erc721MarketplaceFacet.address,
-          lockedAavegotchiId,
+          testGotchiId1,
           listPrice
         )
       ).wait();
@@ -478,6 +461,49 @@ describe("Testing ERC721 Buy Order", async function () {
     });
   });
 
+  describe("Testing validation when buy order is executed", async function () {
+    it("Should fail if wearable changed for an gotchi", async function () {
+      await (
+        await ghstERC20.connect(ghstHolder)
+      ).approve(diamondAddress, price);
+      const receipt = await (
+        await erc721BuyOrderFacet.placeERC721BuyOrder(
+          diamondAddress,
+          testGotchiId3,
+          price
+        )
+      ).wait();
+      const event = receipt!.events!.find(
+        (e: any) => e.event === "ERC721BuyOrderAdd"
+      );
+      const buyOrderId = event!.args!.buyOrderId;
+
+      // uneqip all wearables for test
+      const gotchiOwnerAddress3 = await aavegotchiFacet.ownerOf(testGotchiId3);
+      await network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [gotchiOwnerAddress3],
+      });
+      const gotchiOwner3 = await ethers.getSigner(gotchiOwnerAddress3);
+      const itemsFacet = (await ethers.getContractAt(
+        "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
+        diamondAddress
+      )) as ItemsFacet;
+      await (
+        await itemsFacet.connect(gotchiOwner3)
+      ).equipWearables(
+        testGotchiId3,
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      );
+
+      await expect(
+        (
+          await erc721BuyOrderFacet.connect(gotchiOwner3)
+        ).executeERC721BuyOrder(buyOrderId)
+      ).to.be.revertedWith("ERC721BuyOrder: Invalid buy order");
+    });
+  });
+
   describe("Testing buy order for portal", async function () {
     it("Should succeed for open portal", async function () {
       const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
@@ -487,7 +513,7 @@ describe("Testing ERC721 Buy Order", async function () {
       const receipt = await (
         await erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
-          lockedOpenPortalId,
+          testOpenPortalId,
           price
         )
       ).wait();
@@ -506,7 +532,7 @@ describe("Testing ERC721 Buy Order", async function () {
       const receipt = await (
         await erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
-          lockedClosedPortalId,
+          testClosedPortalId,
           price
         )
       ).wait();
