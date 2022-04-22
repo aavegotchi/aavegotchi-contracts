@@ -1,11 +1,9 @@
 import { run } from "hardhat";
 
 async function grantXP() {
-  await run("grantXP", {
-    filename: "calls/rarityFarmingSzn3_rnd2",
-    xpAmount: "10",
+  await run("grantXP_customValues", {
+    filename: "missingXP2",
     batchSize: "500",
-    excludedAddresses: "0xDd564df884Fd4e217c9ee6F65B4BA6e5641eAC63",
   });
 }
 

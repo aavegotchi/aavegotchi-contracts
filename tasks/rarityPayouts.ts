@@ -67,6 +67,8 @@ task("rarityPayout")
       const filename: string = taskArgs.rarityDataFile;
       const diamondAddress = maticDiamondAddress;
       const deployerAddress = taskArgs.deployerAddress;
+
+      console.log("deployer:", deployerAddress);
       const accounts = await hre.ethers.getSigners();
       tiebreakerIndex = taskArgs.tieBreakerIndex;
 
@@ -261,12 +263,12 @@ task("rarityPayout")
       for (const [i, txGroup] of txData.entries()) {
         console.log("current index:", i);
 
-        if (i < 18) continue;
+        if (i < 10) continue;
 
         let tokenIds: string[] = [];
         let amounts: string[] = [];
 
-        const removeList = ["18659"];
+        const removeList = ["17231", "21129", "21944", "16681"];
 
         txGroup.forEach((sendData) => {
           if (removeList.includes(sendData.tokenID)) {

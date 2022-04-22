@@ -2,7 +2,7 @@ import { run } from "hardhat";
 
 async function grantXP() {
   await run("grantXP", {
-    filename: "calls/rarityFarmingSzn3_rnd2",
+    filename: "calls/rarityFarmingSzn3_rnd3",
     xpAmount: "10",
     batchSize: "500",
     excludedAddresses: "0xDd564df884Fd4e217c9ee6F65B4BA6e5641eAC63",
