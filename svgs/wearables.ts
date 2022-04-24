@@ -317,6 +317,22 @@ export const wearablesSvgs = [
   wearable("313_KabutoHelmet"),
   bodyWearable("314_YoroiArmor"),
   wearable("315_HaanzoKatana"),
+  316,
+  317,
+  318,
+  319,
+  320,
+  321,
+  322,
+  323,
+  324,
+  325,
+  326,
+  327,
+  328,
+  329,
+  330,
+  331,
 ];
 
 export const sleeveSvgs = [
@@ -511,6 +527,10 @@ export const sleeveSvgs = [
   sleeves("307_FairyWings"),
   sleeves("310_PlateArmor"),
   sleeves("314_YoroiArmor"),
+  "sleeves gap from marine jacket",
+  sleeves("316_MarineJacket"),
+  sleeves("317_ThaaveSuit"),
+  sleeves("318_TrackSuit"),
 ];
 
 function stripSvg(svg: string) {

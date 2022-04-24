@@ -2,97 +2,52 @@
 
 import { run, network, ethers } from "hardhat";
 
-import { Signer } from "@ethersproject/abstract-signer";
-import { SvgFacet } from "../../typechain";
-import { wearablesSvgs as front } from "../../svgs/wearables";
+import {
+  wearablesSvgs as front,
+  sleeveSvgs as frontSleeve,
+} from "../../svgs/wearables";
 import {
   convertSleevesToTaskFormat,
   UpdateSleevesTaskArgs,
-} from "../../tasks/updateSleeveItemId";
-import { UpdateSvgsTaskArgs } from "../../tasks/updateSvgs";
+} from "../../tasks/updateSleeves";
 import { Sleeves } from "../itemTypeHelpers";
 import {
-  updateSvgTaskForSideSleeves,
-  updateSvgTaskFront,
-  updateSvgTaskForSideViews,
+  updateSvgTaskForSvgType,
+  updateSleevesTaskForSvgType,
 } from "../svgHelperFunctions";
-import {
-  wearablesLeftSvgs as left,
-  wearablesRightSvgs as right,
-  wearablesBackSvgs as back,
-  wearablesLeftSleeveSvgs as leftSleeve,
-  wearablesRightSleeveSvgs as rightSleeve,
-  wearablesBackSleeveSvgs as backSleeve,
-} from "../../svgs/wearables-sides";
 
 async function main() {
-  console.log("Sleeves Left Length: ", leftSleeve.length);
-  console.log("Sleeves Right Length: ", rightSleeve.length);
-  console.log("Sleeves Back Length: ", backSleeve.length);
-  const itemIds = [264, 265, 266];
+  const viewSleeves = [49, 50, 51];
+  const backViewSleeves = [49, 51];
 
-  let frontViewTaskArray = await updateSvgTaskFront(itemIds);
-  for (let index = 0; index < frontViewTaskArray.length; index++) {
-    await run("updateSvgs", frontViewTaskArray[index]);
-  }
+  const sleevesFront = await updateSleevesTaskForSvgType(viewSleeves, "front");
+  const sleevesLeft = await updateSleevesTaskForSvgType(viewSleeves, "left");
+  const sleevesRight = await updateSleevesTaskForSvgType(viewSleeves, "right");
+  const sleevesBack = await updateSleevesTaskForSvgType(
+    backViewSleeves,
+    "back"
+  );
 
-  const sideViewSleeves = [43, 44, 45];
+  console.log("Marine Jacket Sleeves: ", frontSleeve[49]);
 
-  const sides = ["left", "right", "back"];
+  console.log("Sleeves Data: ", sleevesFront);
 
-  for (let index = 0; index < sideViewSleeves.length; index++) {
-    const itemId = sideViewSleeves[index];
-
-    const sideArrays = [
-      leftSleeve[itemId],
-      rightSleeve[itemId],
-      backSleeve[itemId],
-    ];
-
-    for (let index = 0; index < sides.length; index++) {
-      const side = sides[index];
-      const sideArray = sideArrays[index];
-
-      let taskArgsLeft: UpdateSvgsTaskArgs = {
-        svgIds: [itemId].join(","),
-        svgType: `sleeves-${side}`,
-        svgs: [sideArray].join("***"),
-      };
-
-      await run("updateSvgs", taskArgsLeft);
-    }
-  }
-
-  for (let index = 0; index < itemIds.length; index++) {
-    const itemId = itemIds[index];
-
-    const sideArrays = [left[itemId], right[itemId], back[itemId]];
-
-    for (let index = 0; index < sides.length; index++) {
-      const side = sides[index];
-      const sideArray = sideArrays[index];
-
-      let taskArgsLeft: UpdateSvgsTaskArgs = {
-        svgIds: [itemId].join(","),
-        svgType: `wearables-${side}`,
-        svgs: [sideArray].join("***"),
-      };
-
-      await run("updateSvgs", taskArgsLeft);
-    }
-  }
+  await run("updateSvgs", sleevesFront);
+  await run("updateSvgs", sleevesLeft);
+  await run("updateSvgs", sleevesRight);
+  await run("updateSvgs", sleevesBack);
 
   let sleeves: Sleeves[] = [
     {
-      sleeveId: 43,
+      sleeveId: 49,
       wearableId: 8,
     },
     {
-      sleeveId: 44,
+      sleeveId: 50,
       wearableId: 25,
     },
     {
-      sleeveId: 45,
+      sleeveId: 51,
       wearableId: 125,
     },
   ];

@@ -227,12 +227,16 @@ export async function uploadSvgs(
   svgType: string,
   ethers: any
 ) {
+  console.log("starting Upload");
+
   let svgItemsStart = 0;
   let svgItemsEnd = 0;
   while (true) {
     let itemsSize = 0;
     while (true) {
+      console.log("continuing Upload");
       if (svgItemsEnd === svgs.length) {
+        console.log("continuing Upload");
         break;
       }
       itemsSize += svgs[svgItemsEnd].length;
@@ -432,7 +436,6 @@ export async function updateSleevesTaskForSvgType(
       frontSvg.push(`***${frontSleeve[_itemIds[i]]}`);
       sleeveId.push(_itemIds[i]);
     }
-
     taskArgs = {
       svgIds: sleeveId.join(","),
       svgType: `sleeves`,
@@ -445,7 +448,6 @@ export async function updateSleevesTaskForSvgType(
       leftSvg.push(`***${leftSleeve[_itemIds[i]]}`);
       sleeveId.push(_itemIds[i]);
     }
-
     taskArgs = {
       svgIds: sleeveId.join(","),
       svgType: `sleeves-left`,
@@ -458,7 +460,6 @@ export async function updateSleevesTaskForSvgType(
       rightSvg.push(`***${rightSleeve[_itemIds[i]]}`);
       sleeveId.push(_itemIds[i]);
     }
-
     taskArgs = {
       svgIds: sleeveId.join(","),
       svgType: `sleeves-right`,
@@ -471,7 +472,6 @@ export async function updateSleevesTaskForSvgType(
       backSvg.push(`***${backSleeve[_itemIds[i]]}`);
       sleeveId.push(_itemIds[i]);
     }
-
     taskArgs = {
       svgIds: sleeveId.join(","),
       svgType: `sleeves-back`,
