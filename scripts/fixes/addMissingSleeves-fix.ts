@@ -18,15 +18,11 @@ import {
 
 async function main() {
   const viewSleeves = [49, 50, 51];
-  const backViewSleeves = [49, 51];
 
   const sleevesFront = await updateSleevesTaskForSvgType(viewSleeves, "front");
   const sleevesLeft = await updateSleevesTaskForSvgType(viewSleeves, "left");
   const sleevesRight = await updateSleevesTaskForSvgType(viewSleeves, "right");
-  const sleevesBack = await updateSleevesTaskForSvgType(
-    backViewSleeves,
-    "back"
-  );
+  const sleevesBack = await updateSleevesTaskForSvgType(viewSleeves, "back");
 
   console.log("Marine Jacket Sleeves: ", frontSleeve[49]);
 
