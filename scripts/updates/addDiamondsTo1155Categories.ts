@@ -1,11 +1,11 @@
 import { ethers, network } from "hardhat";
 import { gasPrice } from "../helperFunctions";
 import { sendToMultisig } from "../libraries/multisig/multisig";
-const { LedgerSigner } = require("@ethersproject/hardware-wallets");
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 /* TODO: replace follwowing values */
-const installationDiamond = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
-const installationTypes = [1]; //golden aaltar lvl1
+// const installationDiamond = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
+// const installationTypes = [1]; //golden aaltar lvl1
 
 const tileDiamond = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
 const tileTypes = [1, 2, 3];
@@ -24,8 +24,7 @@ async function main() {
     });
     signer = await ethers.provider.getSigner(itemManager);
   } else if (network.name === "matic") {
-    signer = new LedgerSigner(ethers.provider, "hid", "m/44'/60'/2'/0/0");
-    console.log("signer:", signer);
+    signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
   } else {
     throw Error("Incorrect network selected");
   }
@@ -69,31 +68,39 @@ async function main() {
     console.log("Adding categories succeeded:", tx.hash);
 
     console.log("Checking installation diamond categories...");
-    for (let i = 0; i < installationTypes.length; i++) {
-      const category = await erc1155MarketplaceFacet.getERC1155Category(
-        installationDiamond,
-        installationTypes[i]
-      );
-      console.log(category.eq(4) ? "correct" : "incorrect");
-    }
-    console.log("Checking installation diamond categories...");
-    // for (let i = 0; i < tileTypes.length; i++) {
+    // for (let i = 0; i < installationTypes.length; i++) {
     //   const category = await erc1155MarketplaceFacet.getERC1155Category(
-    //     tileDiamond,
-    //     tileTypes[i]
+    //     installationDiamond,
+    //     installationTypes[i]
     //   );
-    //   console.log(category.eq(5) ? "correct" : "incorrect");
+    //   console.log(category.eq(4) ? "correct" : "incorrect");
     // }
+    console.log("Checking installation diamond categories...");
+    for (let i = 0; i < tileTypes.length; i++) {
+      const category = await erc1155MarketplaceFacet.getERC1155Category(
+        tileDiamond,
+        tileTypes[i]
+      );
+      console.log(category.eq(5) ? "correct" : "incorrect");
+    }
   } else {
     try {
-      tx =
-        await erc1155MarketplaceFacet.populateTransaction.setERC1155Categories(
-          categories,
-          { gasPrice: gasPrice }
-        );
+      tx = await erc1155MarketplaceFacet.setERC1155Categories(categories, {
+        gasPrice: gasPrice,
+      });
+      await tx.wait();
       console.log("tx:", tx);
+
+      for (let i = 0; i < tileTypes.length; i++) {
+        const category = await erc1155MarketplaceFacet.getERC1155Category(
+          tileDiamond,
+          tileTypes[i]
+        );
+        console.log(category.eq(5) ? "correct" : "incorrect");
+      }
+
       //@ts-ignore
-      await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, ethers);
+      //   await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, ethers);
     } catch (error) {
       console.log("error:", error);
     }
