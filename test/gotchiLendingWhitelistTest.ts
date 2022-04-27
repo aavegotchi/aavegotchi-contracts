@@ -194,10 +194,16 @@ describe("Testing Aavegotchi Lending", async function () {
   describe("Testing createWhitelist", async function () {
     it("Should revert if whitelist is empty", async function () {
       await expect(
-        whitelistFacetWithOwner.createWhitelist("", [])
+        whitelistFacetWithOwner.createWhitelist("Empty", [])
       ).to.be.revertedWith(
         "WhitelistFacet: Whitelist length should be larger than zero"
       );
+    });
+
+    it("Should revert if whitelist name is empty", async function () {
+      await expect(
+        whitelistFacetWithOwner.createWhitelist("", [borrowerAddress])
+      ).to.be.revertedWith("WhitelistFacet: Whitelist name cannot be blank");
     });
     // it("Should revert if whitelist length exceeds limit", async function () {
     //   const whitelistLargerThanLimit = Array(101).fill(borrowerAddress);
@@ -207,26 +213,32 @@ describe("Testing Aavegotchi Lending", async function () {
     //   await expect(whitelistFacetWithOwner.createWhitelist([borrowerAddress, ethers.constants.AddressZero])).to.be.revertedWith("WhitelistFacet: There's invalid address in the list");
     // });
     it("Should succeed if whitelist is valid", async function () {
+      const whitelistsLength =
+        await whitelistFacetWithOwner.getWhitelistsLength();
       const receipt = await (
-        await whitelistFacetWithOwner.createWhitelist("", [borrowerAddress])
+        await whitelistFacetWithOwner.createWhitelist("Empty", [
+          borrowerAddress,
+        ])
       ).wait();
       const event = receipt!.events!.find(
         (event) => event.event === "WhitelistCreated"
       );
       whitelistId = event!.args!.whitelistId;
-      expect(whitelistId).to.equal(1);
+      expect(whitelistId).to.equal(whitelistsLength.add(1));
     });
   });
 
   describe("Testing updateWhitelist", async function () {
     it("Should revert if invalid whitelist id", async function () {
       await expect(
-        whitelistFacetWithOwner.updateWhitelist(whitelistId + 1, [])
+        whitelistFacetWithOwner.updateWhitelist(whitelistId + 1, [
+          nonWhitelistedAddress,
+        ])
       ).to.be.revertedWith("WhitelistFacet: Whitelist not found");
     });
-    it("Should revert if invalid whitelist id", async function () {
+    it("Should revert if not whitelist owner", async function () {
       const receipt = await (
-        await whitelistFacetWithPortalOwner.createWhitelist("", [
+        await whitelistFacetWithPortalOwner.createWhitelist("Empty", [
           nonWhitelistedAddress,
         ])
       ).wait();
@@ -235,7 +247,9 @@ describe("Testing Aavegotchi Lending", async function () {
       );
       secondWhitelistId = event!.args!.whitelistId;
       await expect(
-        whitelistFacetWithOwner.updateWhitelist(secondWhitelistId, [])
+        whitelistFacetWithOwner.updateWhitelist(secondWhitelistId, [
+          nonWhitelistedAddress,
+        ])
       ).to.be.revertedWith("WhitelistFacet: Not whitelist owner");
     });
     it("Should revert if whitelist is empty", async function () {
@@ -280,18 +294,6 @@ describe("Testing Aavegotchi Lending", async function () {
     });
   });
 
-  describe("Testing getWhitelists", async function () {
-    it("Should return array", async function () {
-      const whitelists = await whitelistFacetWithOwner.getWhitelists();
-      expect(whitelists.length).to.equal(2);
-      expect(whitelists[0].owner).to.equal(aavegotchiOwnerAddress);
-      expect(whitelists[0].addresses.length).to.equal(2);
-      expect(whitelists[0].addresses[0]).to.equal(borrowerAddress);
-      expect(whitelists[1].addresses.length).to.equal(1);
-      expect(whitelists[1].addresses[0]).to.equal(nonWhitelistedAddress);
-    });
-  });
-
   describe("Testing remove from whitelist", async () => {
     it("Should remove elements from whitelist", async () => {
       let addresses: string[] = [];
@@ -303,24 +305,26 @@ describe("Testing Aavegotchi Lending", async function () {
         );
       }
       await whitelistFacetWithOwner.createWhitelist("OMEGALUL", addresses);
-      let whitelists = await whitelistFacetWithOwner.getWhitelists();
-      expect(whitelists.length).to.equal(3);
-      expect(whitelists[2].addresses.length).to.equal(10);
+      let whitelistsLength =
+        await whitelistFacetWithOwner.getWhitelistsLength();
+      let whitelist = await whitelistFacetWithOwner.getWhitelist(
+        whitelistsLength
+      );
+      expect(whitelist.addresses.length).to.equal(10);
 
       await whitelistFacetWithOwner.removeAddressesFromWhitelist(
-        whitelists.length,
+        whitelistsLength,
         [addresses[0], addresses[5], addresses[9]]
       );
 
-      whitelists = await whitelistFacetWithOwner.getWhitelists();
-      expect(whitelists.length).to.equal(3);
-      expect(whitelists[2].addresses.length).to.equal(7);
+      whitelist = await whitelistFacetWithOwner.getWhitelist(whitelistsLength);
+      expect(whitelist.addresses.length).to.equal(7);
 
       for (let i = 1; i < 9; i++) {
-        expect(whitelists[2].addresses).to.include(addresses[i]);
+        expect(whitelist.addresses).to.include(addresses[i]);
         expect(
           await whitelistFacetWithOwner.isWhitelisted(
-            whitelists.length,
+            whitelistsLength,
             addresses[i]
           )
         ).to.be.gt(0);
@@ -328,35 +332,34 @@ describe("Testing Aavegotchi Lending", async function () {
       }
       expect(
         await whitelistFacetWithOwner.isWhitelisted(
-          whitelists.length,
+          whitelistsLength,
           addresses[0]
         )
       ).to.be.eq(0);
       expect(
         await whitelistFacetWithOwner.isWhitelisted(
-          whitelists.length,
+          whitelistsLength,
           addresses[5]
         )
       ).to.be.eq(0);
       expect(
         await whitelistFacetWithOwner.isWhitelisted(
-          whitelists.length,
+          whitelistsLength,
           addresses[9]
         )
       ).to.be.eq(0);
 
       // REMOVE THEM ALLLLLL
       await whitelistFacetWithOwner.removeAddressesFromWhitelist(
-        whitelists.length,
+        whitelistsLength,
         addresses
       );
-      whitelists = await whitelistFacetWithOwner.getWhitelists();
-      expect(whitelists.length).to.equal(3);
-      expect(whitelists[2].addresses.length).to.equal(0);
+      whitelist = await whitelistFacetWithOwner.getWhitelist(whitelistsLength);
+      expect(whitelist.addresses.length).to.equal(0);
       for (let i = 0; i < 10; i++) {
         expect(
           await whitelistFacetWithOwner.isWhitelisted(
-            whitelists.length,
+            whitelistsLength,
             addresses[i]
           )
         ).to.be.eq(0);
