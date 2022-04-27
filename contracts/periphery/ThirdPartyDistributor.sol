@@ -5,6 +5,37 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+/**********************************************************************************************************************************************
+The Third Party Distributor contract is a simple escrow contract that releases tokens proportionally to distribution targets. 
+
+To start out, follow these steps:
+
+1. Deploy the Third Party Distributor contract with constructor arguments in the format:
+(address _owner, [(address beneficiary1, uint32 proportion1), (address beneficiary2, uint32 proportion2)], uint256 _releaseAccess)
+
+	a. address _owner - address of the owner of the contract
+	b. Distributions[] _distributions - an array of structs of the format (address beneficiary, uint32 proportion)
+		i. beneficiary - address of distribution receiver
+		ii. proportion - uint32 between 0 and 100. The percent the beneficiary is entitled to of any balance in the escrow contract. Needs to add up to 100.
+	c. ReleaseAccess (uint256) _releaseAccess - This variable decides who can call the release functions. Does not affect the amount beneficiaries receive.
+		i. 0 - Public, no restriction
+		ii. 1 - Contract owner only
+		iii. 2 - Beneficiaries only
+		iv. 3 - Contract owner or beneficiaries
+        Other values are invalid and will revert.
+
+2. Set the third party distributor contract address as the third party in lending
+
+3. Call release in one of four flavors:
+	a. partialReleaseToken(address token, address amount) - releases "amount" of "token"
+	b. releaseToken(address token) - releases all of "token"
+	c. partialReleaseTokens([(address token1, uint256 amount1), (address token2, uint256 amount2)]) - releases "amount" of each "token"
+	d. releaseTokens(address[] tokens) - releases all of each "token"
+
+
+The owner has access to update the distributions and release access with updateDistributions and updateReleaseAccess.
+***********************************************************************************************************************************************/
+
 contract ThirdPartyDistributor is Ownable {
     using SafeERC20 for IERC20;
 
