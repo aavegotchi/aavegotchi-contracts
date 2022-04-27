@@ -44,6 +44,7 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
+    "@anders-t/ethers-ledger": "^1.0.4",
     "@ethersproject/experimental": "^5.4.0",
     "@ethersproject/hardware-wallets": "github:mudgen/ethers-ledger",
     "@nomiclabs/hardhat-etherscan": "^3.0.0",
