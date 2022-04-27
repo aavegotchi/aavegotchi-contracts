@@ -12,6 +12,7 @@ contract WhitelistFacet is Modifiers {
 
     function createWhitelist(string calldata _name, address[] calldata _whitelistAddresses) external {
         require(_whitelistAddresses.length > 0, "WhitelistFacet: Whitelist length should be larger than zero");
+        require(bytes(_name).length > 0, "WhitelistFacet: Whitelist name cannot be blank");
 
         uint32 whitelistId = LibWhitelist.getNewWhitelistId();
         address[] memory addresses;

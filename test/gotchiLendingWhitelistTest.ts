@@ -194,10 +194,16 @@ describe("Testing Aavegotchi Lending", async function () {
   describe("Testing createWhitelist", async function () {
     it("Should revert if whitelist is empty", async function () {
       await expect(
-        whitelistFacetWithOwner.createWhitelist("", [])
+        whitelistFacetWithOwner.createWhitelist("Empty", [])
       ).to.be.revertedWith(
         "WhitelistFacet: Whitelist length should be larger than zero"
       );
+    });
+
+    it("Should revert if whitelist name is empty", async function () {
+      await expect(
+        whitelistFacetWithOwner.createWhitelist("", [borrowerAddress])
+      ).to.be.revertedWith("WhitelistFacet: Whitelist name cannot be blank");
     });
     // it("Should revert if whitelist length exceeds limit", async function () {
     //   const whitelistLargerThanLimit = Array(101).fill(borrowerAddress);
@@ -210,7 +216,9 @@ describe("Testing Aavegotchi Lending", async function () {
       const whitelistsLength =
         await whitelistFacetWithOwner.getWhitelistsLength();
       const receipt = await (
-        await whitelistFacetWithOwner.createWhitelist("", [borrowerAddress])
+        await whitelistFacetWithOwner.createWhitelist("Empty", [
+          borrowerAddress,
+        ])
       ).wait();
       const event = receipt!.events!.find(
         (event) => event.event === "WhitelistCreated"
@@ -230,7 +238,7 @@ describe("Testing Aavegotchi Lending", async function () {
     });
     it("Should revert if not whitelist owner", async function () {
       const receipt = await (
-        await whitelistFacetWithPortalOwner.createWhitelist("", [
+        await whitelistFacetWithPortalOwner.createWhitelist("Empty", [
           nonWhitelistedAddress,
         ])
       ).wait();
