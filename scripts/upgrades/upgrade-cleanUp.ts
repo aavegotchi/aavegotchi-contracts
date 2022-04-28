@@ -4,7 +4,7 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
-import { DiamondLoupeFacet } from "../../typechain";
+import { DiamondLoupeFacet, AavegotchiFacet } from "../../typechain";
 import { maticDiamondAddress } from "../helperFunctions";
 
 export async function upgrade() {
@@ -43,6 +43,17 @@ export async function upgrade() {
   allFacets = await loupe.facetAddresses();
 
   console.log(`length after`, allFacets.length);
+
+  //do some function calls
+  const afacet = await ethers.getContractAt(
+    "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
+    maticDiamondAddress
+  );
+  console.log(await afacet.name());
+  console.log(await afacet.totalSupply());
+  console.log(
+    await afacet.balanceOf("0x1087597337ddeb75c5d7aaddeb871036fde4b28c")
+  );
 }
 
 if (require.main === module) {
