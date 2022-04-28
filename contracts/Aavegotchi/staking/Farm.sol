@@ -218,7 +218,7 @@ contract Farm is Ownable, ReentrancyGuard {
         emit Withdraw(msg.sender, _pid, _amount);
     }
 
-    // Deposit LP tokens to Farm for ERC20 allocation.
+    // Harvest rewards
     function harvest(uint256 _pid) public nonReentrant {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
