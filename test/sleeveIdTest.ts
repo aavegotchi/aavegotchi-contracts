@@ -22,14 +22,15 @@ describe("Testing getNextSleeveId", async function () {
     // await upgrade;
   });
 
-  ///would need to change sleeve id to 49 addRaffle6Wearables.ts and run script
   it.only("Should return next available id index for new sleeves set", async function () {
-    const nextId: BigNumberish = await svgFacet.getNextSleeveId();
+    let nextId: BigNumberish = await svgFacet.getNextSleeveId();
     console.log("Next Id: ", nextId.toString());
 
-    const newStartId: number = parseInt(nextId.toString());
+    let newStartId: number = parseInt(nextId.toString());
 
-    expect(newStartId).to.equal(55);
+    expect(newStartId).to.equal(49);
+
+    svgFacet = await impersonate(itemManager, svgFacet, ethers, network);
   });
 
   it.only("Should NOT set a new next available sleeve id", async function () {
@@ -47,6 +48,6 @@ describe("Testing getNextSleeveId", async function () {
     const nextId: BigNumberish = await svgFacet.getNextSleeveId();
     const newStartId: number = parseInt(nextId.toString());
 
-    expect(newStartId).to.equal(55);
+    expect(newStartId).to.equal(49);
   });
 });

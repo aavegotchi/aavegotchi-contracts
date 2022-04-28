@@ -238,8 +238,6 @@ struct AppStorage {
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
     mapping(uint256 => address) categoryToTokenAddress;
-    //get next sleeve Id to start newest sleeve set upload
-    mapping(bytes32 => uint256) nextSleeveId;
 }
 
 library LibAppStorage {
