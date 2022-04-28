@@ -38,7 +38,7 @@ export interface DeployUpgradeTaskArgs {
   useLedger: boolean;
   initAddress?: string;
   initCalldata?: string;
-  // verifyFacets: boolean;
+  rawSigs?: boolean;
   // updateDiamondABI: boolean;
 }
 
@@ -107,8 +107,9 @@ task(
   .setAction(
     async (taskArgs: DeployUpgradeTaskArgs, hre: HardhatRuntimeEnvironment) => {
       const facets: string = taskArgs.facetsAndAddSelectors;
-      const facetsAndAddSelectors: FacetsAndAddSelectors[] =
-        convertStringToFacetAndSelectors(facets);
+      const facetsAndAddSelectors: FacetsAndAddSelectors[] = convertStringToFacetAndSelectors(
+        facets
+      );
       const diamondUpgrader: string = taskArgs.diamondUpgrader;
       const diamondAddress: string = taskArgs.diamondAddress;
       const useMultisig = taskArgs.useMultisig;
@@ -118,12 +119,10 @@ task(
 
       //Instantiate the Signer
       let signer: Signer;
-      const owner = await (
-        (await hre.ethers.getContractAt(
-          "OwnershipFacet",
-          diamondAddress
-        )) as OwnershipFacet
-      ).owner();
+      const owner = await ((await hre.ethers.getContractAt(
+        "OwnershipFacet",
+        diamondAddress
+      )) as OwnershipFacet).owner();
       const testing = ["hardhat", "localhost"].includes(hre.network.name);
 
       if (testing) {
@@ -149,60 +148,66 @@ task(
         const facet = facetsAndAddSelectors[index];
 
         console.log("facet:", facet);
-        const factory = (await hre.ethers.getContractFactory(
-          facet.facetName
-        )) as ContractFactory;
-        const deployedFacet: Contract = await factory.deploy({
-          gasPrice: gasPrice,
-        });
-        await deployedFacet.deployed();
-        console.log(
-          `Deployed Facet Address for ${facet.facetName}:`,
-          deployedFacet.address
-        );
-        deployedFacets.push(deployedFacet);
+        if (facet.facetName.length > 0) {
+          const factory = (await hre.ethers.getContractFactory(
+            facet.facetName
+          )) as ContractFactory;
+          const deployedFacet: Contract = await factory.deploy({
+            gasPrice: gasPrice,
+          });
+          await deployedFacet.deployed();
+          console.log(
+            `Deployed Facet Address for ${facet.facetName}:`,
+            deployedFacet.address
+          );
+          deployedFacets.push(deployedFacet);
 
-        const newSelectors = getSighashes(facet.addSelectors, hre.ethers);
-        const removeSelectors = getSighashes(facet.removeSelectors, hre.ethers);
+          const newSelectors = getSighashes(facet.addSelectors, hre.ethers);
 
-        let existingFuncs = getSelectors(deployedFacet);
-        for (const selector of newSelectors) {
-          if (!existingFuncs.includes(selector)) {
-            const index = newSelectors.findIndex((val) => val == selector);
+          let existingFuncs = getSelectors(deployedFacet);
+          for (const selector of newSelectors) {
+            if (!existingFuncs.includes(selector)) {
+              const index = newSelectors.findIndex((val) => val == selector);
 
-            throw Error(
-              `Selector ${selector} (${facet.addSelectors[index]}) not found`
-            );
+              throw Error(
+                `Selector ${selector} (${facet.addSelectors[index]}) not found`
+              );
+            }
+          }
+
+          let existingSelectors = getSelectors(deployedFacet);
+          existingSelectors = existingSelectors.filter(
+            (selector) => !newSelectors.includes(selector)
+          );
+          if (newSelectors.length > 0) {
+            cut.push({
+              facetAddress: deployedFacet.address,
+              action: FacetCutAction.Add,
+              functionSelectors: newSelectors,
+            });
+          }
+
+          //Always replace the existing selectors to prevent duplications
+          if (existingSelectors.length > 0) {
+            cut.push({
+              facetAddress: deployedFacet.address,
+              action: FacetCutAction.Replace,
+              functionSelectors: existingSelectors,
+            });
           }
         }
-
-        let existingSelectors = getSelectors(deployedFacet);
-        existingSelectors = existingSelectors.filter(
-          (selector) => !newSelectors.includes(selector)
-        );
-
+        let removeSelectors: string[];
+        if (taskArgs.rawSigs == true) {
+          removeSelectors = facet.removeSelectors;
+        } else {
+          removeSelectors = getSighashes(facet.removeSelectors, hre.ethers);
+        }
         if (removeSelectors.length > 0) {
           console.log("Removing selectors:", removeSelectors);
           cut.push({
             facetAddress: hre.ethers.constants.AddressZero,
             action: FacetCutAction.Remove,
             functionSelectors: removeSelectors,
-          });
-        }
-        if (newSelectors.length > 0) {
-          cut.push({
-            facetAddress: deployedFacet.address,
-            action: FacetCutAction.Add,
-            functionSelectors: newSelectors,
-          });
-        }
-
-        //Always replace the existing selectors to prevent duplications
-        if (existingSelectors.length > 0) {
-          cut.push({
-            facetAddress: deployedFacet.address,
-            action: FacetCutAction.Replace,
-            functionSelectors: existingSelectors,
           });
         }
       }
@@ -239,13 +244,12 @@ task(
         //Choose to use a multisig or a simple deploy address
         if (useMultisig) {
           console.log("Diamond cut");
-          const tx: PopulatedTransaction =
-            await diamondCut.populateTransaction.diamondCut(
-              cut,
-              initAddress ? initAddress : hre.ethers.constants.AddressZero,
-              initCalldata ? initCalldata : "0x",
-              { gasLimit: 800000 }
-            );
+          const tx: PopulatedTransaction = await diamondCut.populateTransaction.diamondCut(
+            cut,
+            initAddress ? initAddress : hre.ethers.constants.AddressZero,
+            initCalldata ? initCalldata : "0x",
+            { gasLimit: 800000 }
+          );
           await sendToMultisig(diamondUpgrader, signer, tx, hre.ethers);
         } else {
           const tx: ContractTransaction = await diamondCut.diamondCut(
