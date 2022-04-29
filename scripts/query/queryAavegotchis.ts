@@ -128,7 +128,7 @@ export async function getBorrowedGotchis(addresses: string[]) {
     const batchId = index;
     const offset = batchId * batchSize;
     queryData = queryData.concat(`
-      batch${batchId}: gotchiLendings(first:1000 where:{completed:false, timeAgreed_gt:0, lender_in:[${addresses
+      batch${batchId}: gotchiLendings(block: {number: 27404025} first:1000 where:{completed:false, timeAgreed_gt:0, lender_in:[${addresses
       .slice(offset, offset + batchSize)
       .map((add: string) => '"' + add + '"')}]},first:1000) {
         gotchiTokenId
@@ -150,6 +150,7 @@ export async function getBorrowedGotchis(addresses: string[]) {
     const batch: LendedGotchis[] = res[`batch${index}`];
 
     if (batch.length >= 1000) {
+      console.log(`batch ${index} length: ${batch.length}`);
       throw new Error("Slow down bub, you're probably missing some gotchis!");
     }
 
