@@ -119,6 +119,7 @@ export async function getBorrowedGotchis(addresses: string[]) {
   addresses = addresses.map((val) => val.toLowerCase());
 
   const batchSize = 50;
+  const rounds = 5;
 
   const batches = Math.ceil(addresses.length / batchSize);
 
@@ -127,14 +128,19 @@ export async function getBorrowedGotchis(addresses: string[]) {
   for (let index = 0; index < batches; index++) {
     const batchId = index;
     const offset = batchId * batchSize;
-    queryData = queryData.concat(`
-      batch${batchId}: gotchiLendings(block: {number: 27404025} first:1000 where:{completed:false, timeAgreed_gt:0, lender_in:[${addresses
-      .slice(offset, offset + batchSize)
-      .map((add: string) => '"' + add + '"')}]},first:1000) {
+
+    for (let r = 0; r < rounds; r++) {
+      const skip = r * 1000;
+
+      queryData = queryData.concat(`
+      batch${batchId}_${r}: gotchiLendings(block: {number: 27404025} skip:${skip} first:1000 where:{completed:false, timeAgreed_gt:0, lender_in:[${addresses
+        .slice(offset, offset + batchSize)
+        .map((add: string) => '"' + add + '"')}]},first:1000) {
         gotchiTokenId
         lender
         }
   `);
+    }
   }
 
   // console.log("querydata:", queryData);
@@ -193,525 +199,6 @@ export async function getBorrowedGotchis(addresses: string[]) {
         status: "3",
       };
     });
-
-    // console.log(`Gotchis borrowed by ${val}: ${gotchisOwned.toString()}`);
-
-    const alreadyAirdropped = [
-      "21044",
-      "5296",
-      "20849",
-      "16227",
-      "10879",
-      "8835",
-      "17623",
-      "24413",
-      "24790",
-      "14524",
-      "10952",
-      "22345",
-      "13461",
-      "12327",
-      "16449",
-      "4978",
-      "21018",
-      "12966",
-      "5705",
-      "4348",
-      "2364",
-      "23351",
-      "19381",
-      "19401",
-      "19356",
-      "13222",
-      "20691",
-      "16488",
-      "15661",
-      "6538",
-      "6030",
-      "19327",
-      "10273",
-      "24401",
-      "3717",
-      "9778",
-      "13117",
-      "16641",
-      "9937",
-      "15008",
-      "17739",
-      "17234",
-      "16405",
-      "17921",
-      "14377",
-      "11818",
-      "14202",
-      "12990",
-      "17967",
-      "14996",
-      "14342",
-      "23246",
-      "870",
-      "3044",
-      "5562",
-      "6390",
-      "21624",
-      "11243",
-      "19886",
-      "6352",
-      "6355",
-      "20236",
-      "21739",
-      "11523",
-      "13424",
-      "17296",
-      "21302",
-      "21243",
-      "13369",
-      "20782",
-      "1703",
-      "17926",
-      "12042",
-      "11916",
-      "13831",
-      "9819",
-      "3659",
-      "14702",
-      "5084",
-      "20852",
-      "9818",
-      "9815",
-      "16695",
-      "21255",
-      "5152",
-      "12096",
-      "22412",
-      "18752",
-      "20934",
-      "17267",
-      "12549",
-      "17113",
-      "17433",
-      "16160",
-      "16388",
-      "18415",
-      "19345",
-      "22585",
-      "19663",
-      "14825",
-      "13261",
-      "20970",
-      "14964",
-      "12758",
-      "1802",
-      "18338",
-      "21524",
-      "12560",
-      "17425",
-      "19294",
-      "24471",
-      "20196",
-      "17208",
-      "16594",
-      "15635",
-      "10090",
-      "17447",
-      "753",
-      "15918",
-      "4640",
-      "19892",
-      "12770",
-      "10095",
-      "15117",
-      "19055",
-      "21362",
-      "16290",
-      "18051",
-      "17482",
-      "5446",
-      "15163",
-      "18487",
-      "18734",
-      "13839",
-      "24473",
-      "5980",
-      "2261",
-      "5079",
-      "44",
-      "3665",
-      "573",
-      "3160",
-      "5488",
-      "5798",
-      "4489",
-      "567",
-      "5551",
-      "9850",
-      "3852",
-      "3431",
-      "6274",
-      "575",
-      "7082",
-      "7425",
-      "24913",
-      "6475",
-      "169",
-      "7569",
-      "9795",
-      "6047",
-      "14568",
-      "23449",
-      "7608",
-      "8502",
-      "24838",
-      "12879",
-      "1543",
-      "1191",
-      "8485",
-      "16822",
-      "18984",
-      "22444",
-      "21309",
-      "8930",
-      "21154",
-      "15293",
-      "23975",
-      "15262",
-      "15694",
-      "22958",
-      "21337",
-      "17239",
-      "20489",
-      "14858",
-      "18247",
-      "8442",
-      "16887",
-      "15930",
-      "22017",
-      "24640",
-      "7936",
-      "7424",
-      "4685",
-      "3727",
-      "3783",
-      "14088",
-      "1989",
-      "9443",
-      "1388",
-      "18163",
-      "18319",
-      "3784",
-      "24035",
-      "4807",
-      "22415",
-      "21747",
-      "15146",
-      "13126",
-      "7965",
-      "14984",
-      "3752",
-      "2667",
-      "1336",
-      "21232",
-      "1063",
-      "8567",
-      "607",
-      "1345",
-      "9554",
-      "14482",
-      "9622",
-      "24109",
-      "1055",
-      "17509",
-      "19920",
-      "5704",
-      "21371",
-      "16379",
-      "3452",
-      "6633",
-      "5524",
-      "8158",
-      "17352",
-      "2976",
-      "24115",
-      "1954",
-      "24545",
-      "511",
-      "4064",
-      "18742",
-      "4444",
-      "7232",
-      "7545",
-      "7958",
-      "1952",
-      "17035",
-      "8633",
-      "7113",
-      "19922",
-      "9958",
-      "5328",
-      "10880",
-      "21789",
-      "20951",
-      "1586",
-      "1256",
-      "8655",
-      "19984",
-      "19795",
-      "106",
-      "3835",
-      "7864",
-      "660",
-      "2558",
-      "23957",
-      "8059",
-      "5783",
-      "5280",
-      "18134",
-      "17625",
-      "24767",
-      "3128",
-      "15510",
-      "973",
-      "19174",
-      "6752",
-      "22470",
-      "10963",
-      "8453",
-      "17231",
-      "23830",
-      "24508",
-      "21129",
-      "19754",
-      "24985",
-      "12031",
-      "18670",
-      "16035",
-      "16681",
-      "14066",
-      "12343",
-      "21701",
-      "17201",
-      "24613",
-      "21944",
-      "19029",
-      "16309",
-      "11731",
-      "24055",
-      "20627",
-      "15241",
-      "10212",
-      "16659",
-      "14028",
-      "24067",
-      "23930",
-      "10060",
-      "22819",
-      "10388",
-      "24964",
-      "23899",
-      "19247",
-      "22931",
-      "10043",
-      "24566",
-      "1249",
-      "23313",
-      "23666",
-      "9360",
-      "10629",
-      "13807",
-      "21199",
-      "19410",
-      "1050",
-      "6222",
-      "21505",
-      "7708",
-      "14993",
-      "21631",
-      "21933",
-      "9289",
-      "21584",
-      "13464",
-      "4607",
-      "13534",
-      "4858",
-      "21075",
-      "1808",
-      "21402",
-      "15320",
-      "18701",
-      "8885",
-      "4797",
-      "5796",
-      "11884",
-      "17895",
-      "9673",
-      "17466",
-      "15840",
-      "15995",
-      "13235",
-      "15034",
-      "16421",
-      "21721",
-      "18419",
-      "10763",
-      "20678",
-      "23753",
-      "13260",
-      "15778",
-      "20737",
-      "12397",
-      "15403",
-      "19405",
-      "21872",
-      "19802",
-      "21407",
-      "1241",
-      "18116",
-      "13046",
-      "632",
-      "24832",
-      "24063",
-      "18217",
-      "17911",
-      "15581",
-      "14559",
-      "22197",
-      "15691",
-      "12930",
-      "15260",
-      "17325",
-      "17831",
-      "20014",
-      "4536",
-      "20305",
-      "21599",
-      "15593",
-      "19536",
-      "3149",
-      "17427",
-      "23812",
-      "12237",
-      "17018",
-      "19383",
-      "11041",
-      "18363",
-      "1065",
-      "12891",
-      "7716",
-      "15863",
-      "22660",
-      "14690",
-      "13054",
-      "24774",
-      "15875",
-      "19858",
-      "17822",
-      "19186",
-      "17576",
-      "16805",
-      "23842",
-      "18691",
-      "19372",
-      "14290",
-      "8581",
-      "13674",
-      "17490",
-      "18610",
-      "24831",
-      "18107",
-      "14554",
-      "16424",
-      "18296",
-      "10549",
-      "20060",
-      "17037",
-      "11566",
-      "23535",
-      "16898",
-      "15697",
-      "10979",
-      "16770",
-      "4302",
-      "18853",
-      "11289",
-      "22122",
-      "4301",
-      "19163",
-      "17979",
-      "5423",
-      "19589",
-      "9337",
-      "4616",
-      "18545",
-      "5155",
-      "17045",
-      "1633",
-      "1779",
-      "9996",
-      "2260",
-      "16749",
-      "7571",
-      "10281",
-      "8927",
-      "15830",
-      "8631",
-      "1752",
-      "4820",
-      "11894",
-      "1668",
-      "16728",
-      "14110",
-      "18836",
-      "12559",
-      "10319",
-      "1838",
-      "11428",
-      "22673",
-      "12231",
-      "2393",
-      "8823",
-      "21400",
-      "10292",
-      "13212",
-      "16280",
-      "22323",
-      "15219",
-      "10708",
-      "18109",
-      "21690",
-      "14024",
-      "19143",
-      "22320",
-      "208",
-      "5293",
-      "6131",
-      "6132",
-      "1195",
-      "19156",
-      "9936",
-      "2750",
-      "15197",
-      "19956",
-      "13551",
-      "10861",
-      "14387",
-      "10690",
-      "2613",
-      "2798",
-      "7601",
-      "3026",
-      "15147",
-      "12882",
-      "15331",
-      "4263",
-      "11527",
-      "12494",
-      "22082",
-      "22361",
-      "13238",
-      "22495",
-      "16349",
-      "6665",
-    ];
 
     gotchisOwned.forEach((gotchi) => {
       userGotchisOwned.push({
@@ -825,14 +312,51 @@ async function resolveAddresses(
   return finalAddresses;
 }
 
+interface GotchiLending {
+  lender: string;
+  borrower: string;
+  gotchiTokenId: string;
+}
+
+interface LendingRes {
+  gotchiLendings: GotchiLending[];
+}
+
+export async function fetchGotchiLending(total: GotchiLending[], skip: number) {
+  console.log("Batch:", skip);
+
+  let skipCount = skip * 1000;
+  //First get all open Gotchi Lendings
+  const query = `{
+  gotchiLendings(block: {number: 27404025} first:1000 where:{timeAgreed_gt:0, gotchiTokenId_gt:${skipCount}, gotchiTokenId_lt:${
+    (skip + 1) * 1000
+  } completed:false}) {
+    lender
+    borrower
+    gotchiTokenId
+  }
+}`;
+
+  const result: LendingRes = await request(maticLendingUrl, query);
+
+  total = total.concat(result.gotchiLendings);
+
+  if (skip < 25) total = await fetchGotchiLending(total, skip + 1);
+
+  return total;
+}
+
 export async function getPolygonAndMainnetGotchis(
   addresses: string[],
   hre: HardhatRuntimeEnvironment
 ) {
-  //resolve ENS names
   let finalAddresses: string[] = await resolveAddresses(addresses, hre);
   //Remove duplicate addresses
-  addresses = [...new Set(finalAddresses)];
+  addresses = [...new Set(finalAddresses)].map((val) => val.toLowerCase());
+
+  let totalLendings: GotchiLending[] = [];
+  totalLendings = await fetchGotchiLending(totalLendings, 0);
+  console.log("Total open lendings found:", totalLendings.length);
 
   const batchSize = 1000;
   const batches = Math.ceil(addresses.length / batchSize);
@@ -858,26 +382,62 @@ export async function getPolygonAndMainnetGotchis(
   }
 
   //Borrowed Gotchis
+  const borrowedGotchis: UserGotchisOwned[] = [];
 
-  for (let index = 0; index < batches; index++) {
-    const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
-
-    console.log(
-      `Fetching batch of ${batch.length} gotchis from LENDING SUBGRAPH`
-    );
-    const borrowedGotchis: UserGotchisOwned[] = await getBorrowedGotchis(batch);
-
-    if (borrowedGotchis.length > 0) {
-      console.log(
-        `-Found ${borrowedGotchis.length} users with ${borrowedGotchis
-          .map((val) => val.gotchisOwned.length)
-          .reduce(
-            (prev, current) => prev + current
-          )} Gotchis in Borrowed subgraph`
-      );
-      polygonUsers = polygonUsers.concat(borrowedGotchis);
-    }
+  interface AddressToGotchi {
+    [address: string]: string[];
   }
+
+  const addressToGotchis: AddressToGotchi = {};
+
+  totalLendings.forEach((lending) => {
+    if (addresses.includes(lending.lender.toLowerCase())) {
+      if (addressToGotchis[lending.lender]) {
+        addressToGotchis[lending.lender] = [
+          ...addressToGotchis[lending.lender],
+          lending.gotchiTokenId,
+        ];
+      } else {
+        addressToGotchis[lending.lender] = [lending.gotchiTokenId];
+      }
+    } //else console.log("Not a lender");
+  });
+
+  Object.entries(addressToGotchis).forEach((address) => {
+    const gotchisOwned: GotchisOwned[] = address[1].map((val) => {
+      return {
+        id: val,
+        status: "3",
+      };
+    });
+
+    borrowedGotchis.push({
+      id: address[0],
+      gotchisOwned: gotchisOwned,
+    });
+  });
+
+  // console.log("borrowed:", borrowedGotchis);
+
+  // for (let index = 0; index < batches; index++) {
+  //   const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
+
+  //   console.log(
+  //     `Fetching batch of ${batch.length} gotchis from LENDING SUBGRAPH`
+  //   );
+  //   const borrowedGotchis: UserGotchisOwned[] = await getBorrowedGotchis(batch);
+
+  if (borrowedGotchis.length > 0) {
+    console.log(
+      `-Found ${borrowedGotchis.length} users with ${borrowedGotchis
+        .map((val) => val.gotchisOwned.length)
+        .reduce(
+          (prev, current) => prev + current
+        )} Gotchis in Borrowed subgraph`
+    );
+    polygonUsers = polygonUsers.concat(borrowedGotchis);
+  }
+  // }
 
   // //Polygon (Vault)
   for (let index = 0; index < batches; index++) {
