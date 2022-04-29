@@ -328,7 +328,7 @@ export async function fetchGotchiLending(total: GotchiLending[], skip: number) {
   let skipCount = skip * 1000;
   //First get all open Gotchi Lendings
   const query = `{
-  gotchiLendings(block: {number: 27404025} first:1000 where:{timeAgreed_gt:0, gotchiTokenId_gt:${skipCount}, gotchiTokenId_lt:${
+  gotchiLendings(first:1000 where:{timeAgreed_gt:0, gotchiTokenId_gt:${skipCount}, gotchiTokenId_lt:${
     (skip + 1) * 1000
   } completed:false}) {
     lender
