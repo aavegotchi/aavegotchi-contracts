@@ -133,7 +133,7 @@ export async function getBorrowedGotchis(addresses: string[]) {
       const skip = r * 1000;
 
       queryData = queryData.concat(`
-      batch${batchId}_${r}: gotchiLendings(block: {number: 27404025} skip:${skip} first:1000 where:{completed:false, timeAgreed_gt:0, lender_in:[${addresses
+      batch${batchId}_${r}: gotchiLendings(skip:${skip} first:1000 where:{completed:false, timeAgreed_gt:0, lender_in:[${addresses
         .slice(offset, offset + batchSize)
         .map((add: string) => '"' + add + '"')}]},first:1000) {
         gotchiTokenId
