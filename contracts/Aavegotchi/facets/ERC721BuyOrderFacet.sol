@@ -53,7 +53,8 @@ contract ERC721BuyOrderFacet is Modifiers {
     function placeERC721BuyOrder(
         address _erc721TokenAddress,
         uint256 _erc721TokenId,
-        uint256 _priceInWei
+        uint256 _priceInWei,
+        bool[] calldata _validationOptions // 0: spirit force, 1: GHST, 2: skill points
     ) external {
         require(_priceInWei >= 1e18, "ERC721BuyOrder: price should be 1 GHST or larger");
 
@@ -64,6 +65,9 @@ contract ERC721BuyOrderFacet is Modifiers {
         uint256 category = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
         require(category != LibAavegotchi.STATUS_VRF_PENDING, "ERC721BuyOrder: Cannot buy a portal that is pending VRF");
         require(sender != s.aavegotchis[_erc721TokenId].owner, "ERC721BuyOrder: Owner can't be buyer");
+        if (category == LibAavegotchi.STATUS_AAVEGOTCHI) {
+            require(_validationOptions.length == 3, "ERC721BuyOrder: Not enough validation options for aavegotchi");
+        }
 
         uint256 oldBuyOrderId = s.buyerToBuyOrderId[_erc721TokenId][sender];
         if (oldBuyOrderId != 0) {
@@ -92,10 +96,11 @@ contract ERC721BuyOrderFacet is Modifiers {
             erc721TokenId: _erc721TokenId,
             category: category,
             priceInWei: _priceInWei,
-            validationHash: LibAavegotchi.generateValidationHash(_erc721TokenAddress, _erc721TokenId),
+            validationHash: LibAavegotchi.generateValidationHash(_erc721TokenAddress, _erc721TokenId, _validationOptions),
             timeCreated: block.timestamp,
             timePurchased: 0,
-            cancelled: false
+            cancelled: false,
+            validationOptions: _validationOptions
         });
         emit ERC721BuyOrderAdd(buyOrderId, sender, _erc721TokenAddress, _erc721TokenId, category, _priceInWei, block.timestamp);
     }
@@ -122,7 +127,12 @@ contract ERC721BuyOrderFacet is Modifiers {
         require(sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner, "ERC721BuyOrder: Only aavegotchi owner can call this function");
         require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
         require(
-            erc721BuyOrder.validationHash == LibAavegotchi.generateValidationHash(erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId),
+            erc721BuyOrder.validationHash ==
+                LibAavegotchi.generateValidationHash(
+                    erc721BuyOrder.erc721TokenAddress,
+                    erc721BuyOrder.erc721TokenId,
+                    erc721BuyOrder.validationOptions
+                ),
             "ERC721BuyOrder: Invalid buy order"
         );
 

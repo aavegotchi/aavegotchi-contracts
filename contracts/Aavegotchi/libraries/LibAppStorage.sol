@@ -199,6 +199,7 @@ struct ERC721BuyOrder {
     uint256 timePurchased;
     bool cancelled;
     bytes32 validationHash;
+    bool[] validationOptions;
 }
 
 struct AppStorage {
