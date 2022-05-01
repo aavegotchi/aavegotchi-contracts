@@ -36,6 +36,7 @@ describe("Testing ERC721 Buy Order", async function () {
   const mediumPrice = ethers.utils.parseUnits("105", "ether");
   const highestPrice = ethers.utils.parseUnits("115", "ether");
   const listPrice = ethers.utils.parseUnits("1", "ether");
+  const testValidationOptions = [false, true, false];
   let erc721BuyOrderFacet: ERC721BuyOrderFacet;
   let aavegotchiFacet: AavegotchiFacet;
   let erc721MarketplaceFacet: ERC721MarketplaceFacet;
@@ -122,7 +123,8 @@ describe("Testing ERC721 Buy Order", async function () {
         erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
           testGotchiId1,
-          0
+          0,
+          testValidationOptions
         )
       ).to.be.revertedWith("ERC721BuyOrder: price should be 1 GHST or larger");
     });
@@ -131,7 +133,8 @@ describe("Testing ERC721 Buy Order", async function () {
         erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
           testGotchiId1,
-          ethers.utils.parseUnits("1000000000", "ether")
+          ethers.utils.parseUnits("1000000000", "ether"),
+          testValidationOptions
         )
       ).to.be.revertedWith("ERC721BuyOrder: Not enough GHST!");
     });
@@ -143,8 +146,26 @@ describe("Testing ERC721 Buy Order", async function () {
       await expect(
         (
           await erc721BuyOrderFacet.connect(gotchiOwner)
-        ).placeERC721BuyOrder(diamondAddress, testGotchiId1, minPrice)
+        ).placeERC721BuyOrder(
+          diamondAddress,
+          testGotchiId1,
+          minPrice,
+          testValidationOptions
+        )
       ).to.be.revertedWith("ERC721BuyOrder: Owner can't be buyer");
+    });
+    it("Should revert if validation options are invalid", async function () {
+      const minPrice = ethers.utils.parseUnits("1", "ether");
+      await expect(
+        erc721BuyOrderFacet.placeERC721BuyOrder(
+          diamondAddress,
+          testGotchiId1,
+          minPrice,
+          [true]
+        )
+      ).to.be.revertedWith(
+        "ERC721BuyOrder: Not enough validation options for aavegotchi"
+      );
     });
     describe("If there's no buy order", async function () {
       it("Should succeed", async function () {
@@ -156,7 +177,8 @@ describe("Testing ERC721 Buy Order", async function () {
           await erc721BuyOrderFacet.placeERC721BuyOrder(
             diamondAddress,
             testGotchiId1,
-            price
+            price,
+            testValidationOptions
           )
         ).wait();
         const event = receipt!.events!.find(
@@ -178,7 +200,8 @@ describe("Testing ERC721 Buy Order", async function () {
           await erc721BuyOrderFacet.placeERC721BuyOrder(
             diamondAddress,
             testGotchiId1,
-            mediumPrice
+            mediumPrice,
+            testValidationOptions
           )
         ).wait();
         const event = receipt!.events!.find(
@@ -212,7 +235,8 @@ describe("Testing ERC721 Buy Order", async function () {
           await erc721BuyOrderFacetWithHolder2.placeERC721BuyOrder(
             diamondAddress,
             testGotchiId1,
-            mediumPrice
+            mediumPrice,
+            testValidationOptions
           )
         ).wait();
         const event = receipt!.events!.find(
@@ -326,7 +350,8 @@ describe("Testing ERC721 Buy Order", async function () {
         await erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
           testGotchiId1,
-          highestPrice
+          highestPrice,
+          testValidationOptions
         )
       ).wait();
       const event = receipt!.events!.find(
@@ -462,6 +487,16 @@ describe("Testing ERC721 Buy Order", async function () {
   });
 
   describe("Testing validation when buy order is executed", async function () {
+    let gotchiOwner3: any;
+    before(async function () {
+      const gotchiOwnerAddress3 = await aavegotchiFacet.ownerOf(testGotchiId3);
+      await network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [gotchiOwnerAddress3],
+      });
+      gotchiOwner3 = await ethers.getSigner(gotchiOwnerAddress3);
+    });
+
     it("Should fail if wearable changed for an gotchi", async function () {
       await (
         await ghstERC20.connect(ghstHolder)
@@ -470,7 +505,8 @@ describe("Testing ERC721 Buy Order", async function () {
         await erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
           testGotchiId3,
-          price
+          price,
+          testValidationOptions
         )
       ).wait();
       const event = receipt!.events!.find(
@@ -479,12 +515,6 @@ describe("Testing ERC721 Buy Order", async function () {
       const buyOrderId = event!.args!.buyOrderId;
 
       // uneqip all wearables for test
-      const gotchiOwnerAddress3 = await aavegotchiFacet.ownerOf(testGotchiId3);
-      await network.provider.request({
-        method: "hardhat_impersonateAccount",
-        params: [gotchiOwnerAddress3],
-      });
-      const gotchiOwner3 = await ethers.getSigner(gotchiOwnerAddress3);
       const itemsFacet = (await ethers.getContractAt(
         "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
         diamondAddress
@@ -496,6 +526,40 @@ describe("Testing ERC721 Buy Order", async function () {
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
       );
 
+      await expect(
+        (
+          await erc721BuyOrderFacet.connect(gotchiOwner3)
+        ).executeERC721BuyOrder(buyOrderId)
+      ).to.be.revertedWith("ERC721BuyOrder: Invalid buy order");
+    });
+    it("Should fail if GHST balance changed for an gotchi", async function () {
+      await (
+        await ghstERC20.connect(ghstHolder)
+      ).approve(diamondAddress, price);
+      const receipt = await (
+        await erc721BuyOrderFacet.placeERC721BuyOrder(
+          diamondAddress,
+          testGotchiId3,
+          price,
+          testValidationOptions
+        )
+      ).wait();
+      const event = receipt!.events!.find(
+        (e: any) => e.event === "ERC721BuyOrderAdd"
+      );
+      const buyOrderId = event!.args!.buyOrderId;
+
+      // change GHST balance of escrow
+      const gotchiInfo = await aavegotchiFacet.getAavegotchi(testGotchiId3);
+      const escrowAddress = gotchiInfo.escrow;
+
+      const amount = ethers.utils.parseUnits("1", "ether");
+      const oldBalance = await ghstERC20.balanceOf(escrowAddress);
+      await (
+        await ghstERC20.connect(ghstHolder)
+      ).transfer(escrowAddress, amount);
+      const newBalance = await ghstERC20.balanceOf(escrowAddress);
+      expect(newBalance.sub(amount)).to.equal(oldBalance);
       await expect(
         (
           await erc721BuyOrderFacet.connect(gotchiOwner3)
@@ -514,7 +578,8 @@ describe("Testing ERC721 Buy Order", async function () {
         await erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
           testOpenPortalId,
-          price
+          price,
+          testValidationOptions
         )
       ).wait();
       const event = receipt!.events!.find(
@@ -533,7 +598,8 @@ describe("Testing ERC721 Buy Order", async function () {
         await erc721BuyOrderFacet.placeERC721BuyOrder(
           diamondAddress,
           testClosedPortalId,
-          price
+          price,
+          testValidationOptions
         )
       ).wait();
       const event = receipt!.events!.find(
