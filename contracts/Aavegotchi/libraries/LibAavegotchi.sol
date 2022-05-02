@@ -401,25 +401,22 @@ library LibAavegotchi {
         uint256 category = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
         if (category == STATUS_AAVEGOTCHI) {
             // Aavegotchi
-            bytes memory _params = abi.encodePacked(_erc721TokenId, category, s.aavegotchis[_erc721TokenId].equippedWearables);
+            bytes memory _params = abi.encode(_erc721TokenId, category, s.aavegotchis[_erc721TokenId].equippedWearables);
             if (_validationOptions[0]) {
                 // spirit force
-                _params = abi.encodePacked(
-                    _params,
-                    IERC20(s.aavegotchis[_erc721TokenId].collateralType).balanceOf(s.aavegotchis[_erc721TokenId].escrow)
-                );
+                _params = abi.encode(_params, IERC20(s.aavegotchis[_erc721TokenId].collateralType).balanceOf(s.aavegotchis[_erc721TokenId].escrow));
             }
             if (_validationOptions[1]) {
                 // GHST
-                _params = abi.encodePacked(_params, IERC20(s.ghstContract).balanceOf(s.aavegotchis[_erc721TokenId].escrow));
+                _params = abi.encode(_params, IERC20(s.ghstContract).balanceOf(s.aavegotchis[_erc721TokenId].escrow));
             }
             if (_validationOptions[2]) {
                 // skill points
-                _params = abi.encodePacked(_params, s.aavegotchis[_erc721TokenId].usedSkillPoints);
+                _params = abi.encode(_params, s.aavegotchis[_erc721TokenId].usedSkillPoints);
             }
             return keccak256(_params);
         } else {
-            return keccak256(abi.encodePacked(_erc721TokenId, category));
+            return keccak256(abi.encode(_erc721TokenId, category));
         }
     }
 }
