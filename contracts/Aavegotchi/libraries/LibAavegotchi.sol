@@ -390,33 +390,4 @@ library LibAavegotchi {
             category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
         }
     }
-
-    function generateValidationHash(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        bool[] memory _validationOptions
-    ) internal view returns (bytes32) {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-
-        uint256 category = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
-        if (category == STATUS_AAVEGOTCHI) {
-            // Aavegotchi
-            bytes memory _params = abi.encode(_erc721TokenId, category, s.aavegotchis[_erc721TokenId].equippedWearables);
-            if (_validationOptions[0]) {
-                // spirit force
-                _params = abi.encode(_params, IERC20(s.aavegotchis[_erc721TokenId].collateralType).balanceOf(s.aavegotchis[_erc721TokenId].escrow));
-            }
-            if (_validationOptions[1]) {
-                // GHST
-                _params = abi.encode(_params, IERC20(s.ghstContract).balanceOf(s.aavegotchis[_erc721TokenId].escrow));
-            }
-            if (_validationOptions[2]) {
-                // skill points
-                _params = abi.encode(_params, s.aavegotchis[_erc721TokenId].usedSkillPoints);
-            }
-            return keccak256(_params);
-        } else {
-            return keccak256(abi.encode(_erc721TokenId, category));
-        }
-    }
 }

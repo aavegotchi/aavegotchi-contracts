@@ -3,6 +3,8 @@ pragma solidity 0.8.1;
 
 import {LibAppStorage, AppStorage, ERC721BuyOrder} from "./LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
+import {LibAavegotchi} from "./LibAavegotchi.sol";
+import {IERC20} from "../../shared/interfaces/IERC20.sol";
 
 import "../../shared/interfaces/IERC721.sol";
 
@@ -42,5 +44,33 @@ library LibBuyOrder {
         delete s.erc721TokenToBuyOrderIdIndexes[_tokenId][_buyOrderId];
 
         delete s.buyerToBuyOrderId[_tokenId][erc721BuyOrder.buyer];
+    }
+
+    function generateValidationHash(
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId,
+        bool[] memory _validationOptions
+    ) internal view returns (bytes32) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+
+        uint256 category = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
+        bytes memory _params = abi.encode(_erc721TokenId, category);
+        if (category == LibAavegotchi.STATUS_AAVEGOTCHI) {
+            // Aavegotchi
+            _params = abi.encode(_params, s.aavegotchis[_erc721TokenId].equippedWearables);
+            if (_validationOptions[0]) {
+                // spirit force
+                _params = abi.encode(_params, IERC20(s.aavegotchis[_erc721TokenId].collateralType).balanceOf(s.aavegotchis[_erc721TokenId].escrow));
+            }
+            if (_validationOptions[1]) {
+                // GHST
+                _params = abi.encode(_params, IERC20(s.ghstContract).balanceOf(s.aavegotchis[_erc721TokenId].escrow));
+            }
+            if (_validationOptions[2]) {
+                // skill points
+                _params = abi.encode(_params, s.aavegotchis[_erc721TokenId].usedSkillPoints);
+            }
+        }
+        return keccak256(_params);
     }
 }

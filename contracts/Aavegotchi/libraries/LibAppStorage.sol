@@ -193,7 +193,6 @@ struct ERC721BuyOrder {
     address buyer;
     address erc721TokenAddress;
     uint256 erc721TokenId;
-    uint256 category; // 0 is closed portal, 1 is vrf pending, 2 is open portal, 3 is Aavegotchi
     uint256 priceInWei;
     uint256 timeCreated;
     uint256 timePurchased;

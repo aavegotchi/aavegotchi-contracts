@@ -27,7 +27,6 @@ contract ERC721BuyOrderFacet is Modifiers {
         address seller,
         address erc721TokenAddress,
         uint256 erc721TokenId,
-        uint256 indexed category,
         uint256 priceInWei,
         uint256 time
     );
@@ -94,9 +93,8 @@ contract ERC721BuyOrderFacet is Modifiers {
             buyer: sender,
             erc721TokenAddress: _erc721TokenAddress,
             erc721TokenId: _erc721TokenId,
-            category: category,
             priceInWei: _priceInWei,
-            validationHash: LibAavegotchi.generateValidationHash(_erc721TokenAddress, _erc721TokenId, _validationOptions),
+            validationHash: LibBuyOrder.generateValidationHash(_erc721TokenAddress, _erc721TokenId, _validationOptions),
             timeCreated: block.timestamp,
             timePurchased: 0,
             cancelled: false,
@@ -128,11 +126,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
         require(
             erc721BuyOrder.validationHash ==
-                LibAavegotchi.generateValidationHash(
-                    erc721BuyOrder.erc721TokenAddress,
-                    erc721BuyOrder.erc721TokenId,
-                    erc721BuyOrder.validationOptions
-                ),
+                LibBuyOrder.generateValidationHash(erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId, erc721BuyOrder.validationOptions),
             "ERC721BuyOrder: Invalid buy order"
         );
 
@@ -171,7 +165,6 @@ contract ERC721BuyOrderFacet is Modifiers {
             sender,
             erc721BuyOrder.erc721TokenAddress,
             erc721BuyOrder.erc721TokenId,
-            erc721BuyOrder.category,
             erc721BuyOrder.priceInWei,
             block.timestamp
         );
