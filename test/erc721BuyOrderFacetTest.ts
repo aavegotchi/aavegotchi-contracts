@@ -277,12 +277,18 @@ describe("Testing ERC721 Buy Order", async function () {
   describe("Testing getERC721BuyOrderIdsByTokenId", async function () {
     it("Should return empty array with wrong aavegotchi id", async function () {
       const buyOrderIds =
-        await erc721BuyOrderFacet.getERC721BuyOrderIdsByTokenId(testGotchiId2);
+        await erc721BuyOrderFacet.getERC721BuyOrderIdsByTokenId(
+          diamondAddress,
+          testGotchiId2
+        );
       expect(buyOrderIds.length).to.equal(0);
     });
     it("Should fetch active(not cancelled) buy order ids with correct aavegotchi id", async function () {
       const buyOrderIds =
-        await erc721BuyOrderFacet.getERC721BuyOrderIdsByTokenId(testGotchiId1);
+        await erc721BuyOrderFacet.getERC721BuyOrderIdsByTokenId(
+          diamondAddress,
+          testGotchiId1
+        );
       expect(buyOrderIds.length).to.equal(2);
       expect(buyOrderIds[0]).to.equal(secondBuyOrderId);
       expect(buyOrderIds[1]).to.equal(thirdBuyOrderId);
@@ -292,12 +298,14 @@ describe("Testing ERC721 Buy Order", async function () {
   describe("Testing getERC721BuyOrdersByTokenId", async function () {
     it("Should return empty array with wrong aavegotchi id", async function () {
       const buyOrders = await erc721BuyOrderFacet.getERC721BuyOrdersByTokenId(
+        diamondAddress,
         testGotchiId2
       );
       expect(buyOrders.length).to.equal(0);
     });
     it("Should fetch active(not cancelled) buy orders data with correct aavegotchi id", async function () {
       const buyOrders = await erc721BuyOrderFacet.getERC721BuyOrdersByTokenId(
+        diamondAddress,
         testGotchiId1
       );
       expect(buyOrders.length).to.equal(2);

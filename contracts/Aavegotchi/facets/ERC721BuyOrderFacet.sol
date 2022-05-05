@@ -36,12 +36,20 @@ contract ERC721BuyOrderFacet is Modifiers {
         require(buyOrder_.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
     }
 
-    function getERC721BuyOrderIdsByTokenId(uint256 _erc721TokenId) external view returns (uint256[] memory buyOrderIds_) {
-        buyOrderIds_ = s.erc721TokenToBuyOrderIds[_erc721TokenId];
+    function getERC721BuyOrderIdsByTokenId(address _erc721TokenAddress, uint256 _erc721TokenId)
+        external
+        view
+        returns (uint256[] memory buyOrderIds_)
+    {
+        buyOrderIds_ = s.erc721TokenToBuyOrderIds[_erc721TokenAddress][_erc721TokenId];
     }
 
-    function getERC721BuyOrdersByTokenId(uint256 _erc721TokenId) external view returns (ERC721BuyOrder[] memory buyOrders_) {
-        uint256[] memory buyOrderIds = s.erc721TokenToBuyOrderIds[_erc721TokenId];
+    function getERC721BuyOrdersByTokenId(address _erc721TokenAddress, uint256 _erc721TokenId)
+        external
+        view
+        returns (ERC721BuyOrder[] memory buyOrders_)
+    {
+        uint256[] memory buyOrderIds = s.erc721TokenToBuyOrderIds[_erc721TokenAddress][_erc721TokenId];
         uint256 length = buyOrderIds.length;
         buyOrders_ = new ERC721BuyOrder[](length);
         for (uint256 i; i < length; i++) {
@@ -68,7 +76,7 @@ contract ERC721BuyOrderFacet is Modifiers {
             require(_validationOptions.length == 3, "ERC721BuyOrder: Not enough validation options for aavegotchi");
         }
 
-        uint256 oldBuyOrderId = s.buyerToBuyOrderId[_erc721TokenId][sender];
+        uint256 oldBuyOrderId = s.buyerToBuyOrderId[_erc721TokenAddress][_erc721TokenId][sender];
         if (oldBuyOrderId != 0) {
             ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[oldBuyOrderId];
             require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
@@ -84,9 +92,10 @@ contract ERC721BuyOrderFacet is Modifiers {
         s.nextERC721BuyOrderId++;
         uint256 buyOrderId = s.nextERC721BuyOrderId;
 
-        s.erc721TokenToBuyOrderIdIndexes[_erc721TokenId][buyOrderId] = s.erc721TokenToBuyOrderIds[_erc721TokenId].length;
-        s.erc721TokenToBuyOrderIds[_erc721TokenId].push(buyOrderId);
-        s.buyerToBuyOrderId[_erc721TokenId][sender] = buyOrderId;
+        s.erc721TokenToBuyOrderIdIndexes[_erc721TokenAddress][_erc721TokenId][buyOrderId] = s
+        .erc721TokenToBuyOrderIds[_erc721TokenAddress][_erc721TokenId].length;
+        s.erc721TokenToBuyOrderIds[_erc721TokenAddress][_erc721TokenId].push(buyOrderId);
+        s.buyerToBuyOrderId[_erc721TokenAddress][_erc721TokenId][sender] = buyOrderId;
 
         s.erc721BuyOrders[buyOrderId] = ERC721BuyOrder({
             buyOrderId: buyOrderId,

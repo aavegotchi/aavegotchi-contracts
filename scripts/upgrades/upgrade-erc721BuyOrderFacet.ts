@@ -14,8 +14,8 @@ export async function upgrade() {
       facetName: "ERC721BuyOrderFacet",
       addSelectors: [
         "function getERC721BuyOrder(uint256 _buyOrderId) external view",
-        "function getERC721BuyOrderIdsByTokenId(uint256 _erc721TokenId) external view",
-        "function getERC721BuyOrdersByTokenId(uint256 _erc721TokenId) external view",
+        "function getERC721BuyOrderIdsByTokenId(address _erc721TokenAddress, uint256 _erc721TokenId) external view",
+        "function getERC721BuyOrdersByTokenId(address _erc721TokenAddress, uint256 _erc721TokenId) external view",
         "function placeERC721BuyOrder(address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei, bool[] calldata _validationOptions) external",
         "function executeERC721BuyOrder(uint256 _buyOrderId) external",
         "function cancelERC721BuyOrder(uint256 _buyOrderId) external",

@@ -32,18 +32,19 @@ library LibBuyOrder {
 
         ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
         uint256 _tokenId = erc721BuyOrder.erc721TokenId;
+        address _tokenAddress = erc721BuyOrder.erc721TokenAddress;
 
-        uint256 index = s.erc721TokenToBuyOrderIdIndexes[_tokenId][_buyOrderId];
-        uint256 lastIndex = s.erc721TokenToBuyOrderIds[_tokenId].length - 1;
+        uint256 index = s.erc721TokenToBuyOrderIdIndexes[_tokenAddress][_tokenId][_buyOrderId];
+        uint256 lastIndex = s.erc721TokenToBuyOrderIds[_tokenAddress][_tokenId].length - 1;
         if (index != lastIndex) {
-            uint256 lastBuyOrderId = s.erc721TokenToBuyOrderIds[_tokenId][lastIndex];
-            s.erc721TokenToBuyOrderIds[_tokenId][index] = lastBuyOrderId;
-            s.erc721TokenToBuyOrderIdIndexes[_tokenId][lastBuyOrderId] = index;
+            uint256 lastBuyOrderId = s.erc721TokenToBuyOrderIds[_tokenAddress][_tokenId][lastIndex];
+            s.erc721TokenToBuyOrderIds[_tokenAddress][_tokenId][index] = lastBuyOrderId;
+            s.erc721TokenToBuyOrderIdIndexes[_tokenAddress][_tokenId][lastBuyOrderId] = index;
         }
-        s.erc721TokenToBuyOrderIds[_tokenId].pop();
-        delete s.erc721TokenToBuyOrderIdIndexes[_tokenId][_buyOrderId];
+        s.erc721TokenToBuyOrderIds[_tokenAddress][_tokenId].pop();
+        delete s.erc721TokenToBuyOrderIdIndexes[_tokenAddress][_tokenId][_buyOrderId];
 
-        delete s.buyerToBuyOrderId[_tokenId][erc721BuyOrder.buyer];
+        delete s.buyerToBuyOrderId[_tokenAddress][_tokenId][erc721BuyOrder.buyer];
     }
 
     function generateValidationHash(
