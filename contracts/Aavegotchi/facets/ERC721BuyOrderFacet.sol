@@ -133,6 +133,15 @@ contract ERC721BuyOrderFacet is Modifiers {
         require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
         require(sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner, "ERC721BuyOrder: Only aavegotchi owner can call this function");
         require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
+
+        // disable for gotchi in lending
+        uint256 category = LibAavegotchi.getERC721Category(erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId);
+        if (category == LibAavegotchi.STATUS_AAVEGOTCHI) {
+            uint32 listingId = s.aavegotchiToListingId[uint32(erc721BuyOrder.erc721TokenId)];
+            require((listingId == 0) || (s.gotchiLendings[listingId].timeAgreed == 0), "ERC721BuyOrder: Not supported for aavegotchi in lending");
+        }
+
+        // hash validation
         require(
             erc721BuyOrder.validationHash ==
                 LibBuyOrder.generateValidationHash(erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId, erc721BuyOrder.validationOptions),

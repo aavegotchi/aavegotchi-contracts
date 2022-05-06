@@ -30,6 +30,7 @@ describe("Testing ERC721 Buy Order", async function () {
   const testGotchiId1 = 12867;
   const testGotchiId2 = 10000; // no buy orders
   const testGotchiId3 = 12852; // should equip wearable and unlocked, used for checking validation
+  const testGotchiId4 = 16911; // should be in lending
   const testOpenPortalId = 18268; // listed in Baazaar
   const testClosedPortalId = 11000; // listed in Baazaar
   const price = ethers.utils.parseUnits("100", "ether");
@@ -444,6 +445,38 @@ describe("Testing ERC721 Buy Order", async function () {
     it("Listing should be cancelled after buy order executed", async function () {
       const listing = await erc721MarketplaceFacet.getERC721Listing(listingId);
       expect(listing.cancelled).to.equal(true);
+    });
+    it("Should fail if gotchi is in lending", async function () {
+      await (
+        await ghstERC20.connect(ghstHolder)
+      ).approve(diamondAddress, price);
+      const receipt = await (
+        await erc721BuyOrderFacet.placeERC721BuyOrder(
+          diamondAddress,
+          testGotchiId4,
+          price,
+          testValidationOptions
+        )
+      ).wait();
+      const event = receipt!.events!.find(
+        (e: any) => e.event === "ERC721BuyOrderAdd"
+      );
+      const buyOrderId = event!.args!.buyOrderId;
+
+      const gotchiBorrowerAddress = await aavegotchiFacet.ownerOf(
+        testGotchiId4
+      );
+      const erc721BuyOrderFacetWithBorrower = await impersonate(
+        gotchiBorrowerAddress,
+        erc721BuyOrderFacet,
+        ethers,
+        network
+      );
+      await expect(
+        erc721BuyOrderFacetWithBorrower.executeERC721BuyOrder(buyOrderId)
+      ).to.be.revertedWith(
+        "ERC721BuyOrder: Not supported for aavegotchi in lending"
+      );
     });
   });
 
