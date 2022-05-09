@@ -1,5 +1,5 @@
 /* global task ethers */
-import { task } from "hardhat/config";
+
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-contract-sizer";
@@ -7,6 +7,7 @@ import "solidity-coverage";
 //import './tasks/generateDiamondABI.js';
 import * as dotenv from "dotenv";
 import "@typechain/hardhat";
+import { BigNumber } from "ethers";
 
 dotenv.config({ path: __dirname + "/.env" });
 
@@ -23,6 +24,9 @@ require("./tasks/rarityPayouts");
 require("./tasks/grantXP_snapshot");
 require("./tasks/grantXP_minigame");
 require("./tasks/addItemTypes");
+require("./tasks/addWearableSets");
+require("./tasks/grantXP_customValues");
+require("./tasks/generateDiamondABI");
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
@@ -34,8 +38,7 @@ export default {
       forking: {
         url: process.env.MATIC_URL,
         timeout: 12000000,
-        // blockNumber: 12552123
-        // blockNumber: 20024371,
+        // blockNumber: 27108687,
       },
       blockGasLimit: 20000000,
       timeout: 120000,
@@ -87,9 +90,21 @@ export default {
     runOnCompile: false,
     disambiguatePaths: true,
   },
+  mocha: {
+    timeout: 2000000,
+  },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
     compilers: [
+      {
+        version: "0.8.13",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
       {
         version: "0.8.1",
         settings: {

@@ -1,6 +1,7 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { gasPrice, itemManager } from "../scripts/helperFunctions";
+import { NonceManager } from "@ethersproject/experimental";
 
 export interface GrantXPMinigameTaskArgs {
   filename: string;
@@ -36,9 +37,11 @@ task("grantXP_aavegotchis", "Grants XP to Aavegotchis by ID")
         throw Error("Incorrect network selected");
       }
 
+      const managedSigner = new NonceManager(signer);
+
       const dao = (
         await hre.ethers.getContractAt("DAOFacet", diamondAddress)
-      ).connect(signer);
+      ).connect(managedSigner);
 
       const { tokenIds } = require(`../data/airdrops/${taskArgs.filename}`);
 
@@ -52,6 +55,8 @@ task("grantXP_aavegotchis", "Grants XP to Aavegotchis by ID")
           index * maxProcess,
           (index + 1) * maxProcess
         );
+
+        if (index < 9) continue;
 
         console.log("batch:", batch);
 

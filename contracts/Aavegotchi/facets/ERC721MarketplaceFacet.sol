@@ -8,6 +8,7 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketplace.sol";
 import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
+import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 
 contract ERC721MarketplaceFacet is Modifiers {
     event ERC721ListingAdd(
@@ -231,7 +232,13 @@ contract ERC721MarketplaceFacet is Modifiers {
             "ERC721Marketplace: Not approved for transfer"
         );
 
+        //Only unlocked Aavegotchis can be listed
+        if (_erc721TokenAddress == address(this)) {
+            require(s.aavegotchis[_erc721TokenId].locked == false, "ERC721Marketplace: Only callable on unlocked Aavegotchis");
+        }
+
         require(_priceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
+
         s.nextERC721ListingId++;
         uint256 listingId = s.nextERC721ListingId;
 

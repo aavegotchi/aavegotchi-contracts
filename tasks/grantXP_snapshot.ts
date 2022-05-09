@@ -1,13 +1,13 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { gasPrice, maticDiamondAddress } from "../scripts/helperFunctions";
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 
 import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import request from "graphql-request";
+import { NonceManager } from "@ethersproject/experimental";
 
 export interface GrantXPSnapshotTaskArgs {
   proposalId: string;
@@ -140,6 +140,8 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
         throw Error("Incorrect network selected");
       }
 
+      const managedSigner = new NonceManager(signer);
+
       const { tokenIds, finalUsers } = await getPolygonAndMainnetGotchis(
         addresses,
         hre
@@ -155,10 +157,12 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
 
       const dao = (
         await hre.ethers.getContractAt("DAOFacet", diamondAddress)
-      ).connect(signer) as DAOFacet;
+      ).connect(managedSigner) as DAOFacet;
 
       for (let index = 0; index < batches; index++) {
         console.log("Current batch id:", index);
+
+        // if (index < 13) continue;
 
         const offset = batchSize * index;
         const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
@@ -173,7 +177,7 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
           { gasPrice: gasPrice }
         );
         console.log("tx:", tx.hash);
-        let receipt: ContractReceipt = await tx.wait();
+        const receipt: ContractReceipt = await tx.wait();
         // console.log("Gas used:", strDisplay(receipt.gasUsed.toString()));
         if (!receipt.status) {
           throw Error(`Error:: ${tx.hash}`);
