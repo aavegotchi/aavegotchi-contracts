@@ -10,23 +10,23 @@ import {
 
 export async function main() {
   const baadges: string[] = [
-    "Aavegotchi-RF-SZN3-Trophy-RARITY-CHAMP",
-    "Aavegotchi-RF-SZN3-Trophy-KINSHIP-CHAMP",
-    "Aavegotchi-RF-SZN3-Trophy-XP-CHAMP",
-    "Aavegotchi-RF-SZN3-Trophy-RARITY-2ND",
-    "Aavegotchi-RF-SZN3-Trophy-KINSHIP-2ND",
-    "Aavegotchi-RF-SZN3-Trophy-XP-2ND",
-    "Aavegotchi-RF-SZN3-Trophy-RARITY-3RD",
-    "Aavegotchi-RF-SZN3-Trophy-KINSHIP-3RD",
-    "Aavegotchi-RF-SZN3-Trophy-XP-3RD",
+    "Aavegotchi-RF-SZN3-Trophy-RARITY-CHAMP", //316
+    "Aavegotchi-RF-SZN3-Trophy-KINSHIP-CHAMP", //317
+    "Aavegotchi-RF-SZN3-Trophy-XP-CHAMP", //318
+    "Aavegotchi-RF-SZN3-Trophy-RARITY-2ND", //319
+    "Aavegotchi-RF-SZN3-Trophy-KINSHIP-2ND", //320
+    "Aavegotchi-RF-SZN3-Trophy-XP-2ND", //321
+    "Aavegotchi-RF-SZN3-Trophy-RARITY-3RD", //322
+    "Aavegotchi-RF-SZN3-Trophy-KINSHIP-3RD", //323
+    "Aavegotchi-RF-SZN3-Trophy-XP-3RD", //324
 
-    "Aavegotchi-RF-SZN3-Baadges-PLAAYER-RAANKED",
-    "Aavegotchi-RF-SZN3-Baadges-RARITY-T10",
-    "Aavegotchi-RF-SZN3-Baadges-KINSHIP-T10",
-    "Aavegotchi-RF-SZN3-Baadges-XP-T10",
-    "Aavegotchi-RF-SZN3-Baadges-RARITY-T100",
-    "Aavegotchi-RF-SZN3-Baadges-KINSHIP-T100",
-    "Aavegotchi-RF-SZN3-Baadges-XP-T100",
+    "Aavegotchi-RF-SZN3-Baadges-PLAAYER-RAANKED", //325
+    "Aavegotchi-RF-SZN3-Baadges-RARITY-T10", //326
+    "Aavegotchi-RF-SZN3-Baadges-KINSHIP-T10", //327
+    "Aavegotchi-RF-SZN3-Baadges-XP-T10", //328
+    "Aavegotchi-RF-SZN3-Baadges-RARITY-T100", //329
+    "Aavegotchi-RF-SZN3-Baadges-KINSHIP-T100", //330
+    "Aavegotchi-RF-SZN3-Baadges-XP-T100", //331
   ];
 
   //Upload SVGs
