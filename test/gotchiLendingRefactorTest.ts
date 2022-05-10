@@ -314,90 +314,90 @@ describe("Testing Aavegotchi Lending Refactor", async function () {
       });
     });
     describe("Agree Gotchi Listing", async () => {
-      it("Should not be able to borrow a second gotchi", async () => {
-        await lendingFacet.connect(lender).batchAddGotchiListing([
-          {
-            tokenId: unlockedAavegotchiId[0],
-            initialCost: 0,
-            period: 10000,
-            revenueSplit: [50, 50, 0],
-            originalOwner: await lender.getAddress(),
-            thirdParty: await thirdParty.getAddress(),
-            whitelistId: 0,
-            revenueTokens: [],
-          },
-          {
-            tokenId: unlockedAavegotchiId[1],
-            initialCost: 0,
-            period: 10000,
-            revenueSplit: [50, 50, 0],
-            originalOwner: await lender.getAddress(),
-            thirdParty: await thirdParty.getAddress(),
-            whitelistId: 0,
-            revenueTokens: [],
-          },
-        ]);
-        let lendingLength =
-          await lendingGetterAndSetterFacet.getGotchiLendingsLength();
-        const listingIds = [lendingLength.sub(1), lendingLength];
-        await lendingFacet
-          .connect(borrower)
-          .agreeGotchiLending(
-            listingIds[0],
-            unlockedAavegotchiId[0],
-            0,
-            10000,
-            [50, 50, 0]
-          );
-        expect(
-          await lendingGetterAndSetterFacet.isBorrowing(
-            await borrower.getAddress()
-          )
-        ).to.be.true;
-        await expect(
-          lendingFacet
-            .connect(borrower)
-            .agreeGotchiLending(
-              listingIds[1],
-              unlockedAavegotchiId[1],
-              0,
-              10000,
-              [50, 50, 0]
-            )
-        ).to.be.revertedWith("LibGotchiLending: Borrower already has a token");
-      });
-      it("Should be able to borrow another gotchi after returning a gotchi early", async () => {
-        await lendingFacet
-          .connect(borrower)
-          .claimAndEndGotchiLending(unlockedAavegotchiId[0]);
-        expect(
-          await lendingGetterAndSetterFacet.isBorrowing(
-            await borrower.getAddress()
-          )
-        ).to.be.false;
-        await lendingFacet
-          .connect(borrower)
-          .agreeGotchiLending(
-            await lendingGetterAndSetterFacet.getGotchiLendingsLength(),
-            unlockedAavegotchiId[1],
-            0,
-            10000,
-            [50, 50, 0]
-          );
-        expect(
-          await lendingGetterAndSetterFacet.isBorrowing(
-            await borrower.getAddress()
-          )
-        ).to.be.true;
-        await lendingFacet
-          .connect(borrower)
-          .claimAndEndGotchiLending(unlockedAavegotchiId[1]);
-        expect(
-          await lendingGetterAndSetterFacet.isBorrowing(
-            await borrower.getAddress()
-          )
-        ).to.be.false;
-      });
+      // it("Should not be able to borrow a second gotchi", async () => {
+      //   await lendingFacet.connect(lender).batchAddGotchiListing([
+      //     {
+      //       tokenId: unlockedAavegotchiId[0],
+      //       initialCost: 0,
+      //       period: 10000,
+      //       revenueSplit: [50, 50, 0],
+      //       originalOwner: await lender.getAddress(),
+      //       thirdParty: await thirdParty.getAddress(),
+      //       whitelistId: 0,
+      //       revenueTokens: [],
+      //     },
+      //     {
+      //       tokenId: unlockedAavegotchiId[1],
+      //       initialCost: 0,
+      //       period: 10000,
+      //       revenueSplit: [50, 50, 0],
+      //       originalOwner: await lender.getAddress(),
+      //       thirdParty: await thirdParty.getAddress(),
+      //       whitelistId: 0,
+      //       revenueTokens: [],
+      //     },
+      //   ]);
+      //   let lendingLength =
+      //     await lendingGetterAndSetterFacet.getGotchiLendingsLength();
+      //   const listingIds = [lendingLength.sub(1), lendingLength];
+      //   await lendingFacet
+      //     .connect(borrower)
+      //     .agreeGotchiLending(
+      //       listingIds[0],
+      //       unlockedAavegotchiId[0],
+      //       0,
+      //       10000,
+      //       [50, 50, 0]
+      //     );
+      //   expect(
+      //     await lendingGetterAndSetterFacet.isBorrowing(
+      //       await borrower.getAddress()
+      //     )
+      //   ).to.be.true;
+      //   await expect(
+      //     lendingFacet
+      //       .connect(borrower)
+      //       .agreeGotchiLending(
+      //         listingIds[1],
+      //         unlockedAavegotchiId[1],
+      //         0,
+      //         10000,
+      //         [50, 50, 0]
+      //       )
+      //   ).to.be.revertedWith("LibGotchiLending: Borrower already has a token");
+      // });
+      // it("Should be able to borrow another gotchi after returning a gotchi early", async () => {
+      //   await lendingFacet
+      //     .connect(borrower)
+      //     .claimAndEndGotchiLending(unlockedAavegotchiId[0]);
+      //   expect(
+      //     await lendingGetterAndSetterFacet.isBorrowing(
+      //       await borrower.getAddress()
+      //     )
+      //   ).to.be.false;
+      //   await lendingFacet
+      //     .connect(borrower)
+      //     .agreeGotchiLending(
+      //       await lendingGetterAndSetterFacet.getGotchiLendingsLength(),
+      //       unlockedAavegotchiId[1],
+      //       0,
+      //       10000,
+      //       [50, 50, 0]
+      //     );
+      //   expect(
+      //     await lendingGetterAndSetterFacet.isBorrowing(
+      //       await borrower.getAddress()
+      //     )
+      //   ).to.be.true;
+      //   await lendingFacet
+      //     .connect(borrower)
+      //     .claimAndEndGotchiLending(unlockedAavegotchiId[1]);
+      //   expect(
+      //     await lendingGetterAndSetterFacet.isBorrowing(
+      //       await borrower.getAddress()
+      //     )
+      //   ).to.be.false;
+      // });
       it("Should not allow non-whitelisted addresses to agree", async () => {
         await whitelistFacet
           .connect(lender)
@@ -440,11 +440,6 @@ describe("Testing Aavegotchi Lending Refactor", async function () {
             1,
             [50, 50, 0]
           );
-        expect(
-          await lendingGetterAndSetterFacet.isBorrowing(
-            await borrower.getAddress()
-          )
-        ).to.be.true;
       });
     });
     describe("Claim Gotchi Listing", async () => {

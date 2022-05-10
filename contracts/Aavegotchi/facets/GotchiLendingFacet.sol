@@ -75,7 +75,7 @@ contract GotchiLendingFacet is Modifiers {
         uint8[3] calldata _revenueSplit
     ) external {
         address sender = LibMeta.msgSender();
-        LibGotchiLending.addBorrowerTokenId(sender, _erc721TokenId); // This functions as a check for whether the sender already has a borrow after the upgrade
+        //LibGotchiLending.addBorrowerTokenId(sender, _erc721TokenId); // This functions as a check for whether the sender already has a borrow after the upgrade
         LibGotchiLending._agreeGotchiLending(sender, _listingId, _erc721TokenId, _initialCost, _period, _revenueSplit);
     }
 
@@ -111,7 +111,7 @@ contract GotchiLendingFacet is Modifiers {
         );
         require(borrower == sender || lending.timeAgreed + period <= block.timestamp, "GotchiLending: Agreement not over and not borrower");
 
-        LibGotchiLending.removeBorrowerTokenId(borrower, _tokenId); // Free up the borrower to borrow another gotchi
+        //LibGotchiLending.removeBorrowerTokenId(borrower, _tokenId); // Free up the borrower to borrow another gotchi
         LibGotchiLending.claimGotchiLending(listingId);
         LibGotchiLending.endGotchiLending(lending);
     }
