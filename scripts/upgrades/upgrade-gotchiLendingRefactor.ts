@@ -59,7 +59,7 @@ export async function upgrade() {
         "function isLendingOperator(address _lender, address _lendingOperator, uint32 _tokenId) external view",
         "function getGotchiLendingsLength() external view",
         "function isAavegotchiListed(uint32 _tokenId) external view",
-        "function isBorrowing(address _borrower) external view",
+        // "function isBorrowing(address _borrower) external view",
       ],
       removeSelectors: [],
     },

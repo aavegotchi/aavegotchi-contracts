@@ -97,9 +97,9 @@ contract LendingGetterAndSetterFacet is Modifiers {
         return LibGotchiLending.borrowerTokenId(_borrower);
     }
 
-    function isBorrowing(address _borrower) external view returns (bool) {
-        return LibGotchiLending.isBorrowing(_borrower);
-    }
+    // function isBorrowing(address _borrower) external view returns (bool) {
+    //     return LibGotchiLending.isBorrowing(_borrower);
+    // }
 
     ///@notice Get an aavegotchi lending details through an identifier
     ///@dev Will throw if the lending does not exist

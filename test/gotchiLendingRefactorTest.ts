@@ -118,10 +118,10 @@ describe("Testing Aavegotchi Lending Refactor", async function () {
 
   describe("Lending Facet Test (To compliment gotchiLendingFacetTest)", async () => {
     describe("Setters and Getters", async () => {
-      it("Borrower should not be borrowing", async () => {
-        expect(await lendingGetterAndSetterFacet.isBorrowing(borrowerAddress))
-          .to.be.false;
-      });
+      // it("Borrower should not be borrowing", async () => {
+      //   expect(await lendingGetterAndSetterFacet.isBorrowing(borrowerAddress))
+      //     .to.be.false;
+      // });
       it("Should set lending operator for a token", async () => {
         await lendingGetterAndSetterFacet
           .connect(lender)
