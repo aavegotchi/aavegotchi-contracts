@@ -7,7 +7,6 @@ import {
   PopulatedTransaction,
 } from "@ethersproject/contracts";
 import { BigNumber } from "ethers";
-import { gasPrice } from "../../helperFunctions";
 
 interface FeeData {
   maxPriorityFeePerGas: BigNumber;
