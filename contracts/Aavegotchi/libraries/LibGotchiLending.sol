@@ -32,35 +32,35 @@ library LibGotchiLending {
         require(listingId != 0, "LibGotchiLending: Listing not found");
     }
 
-    /// @dev Will not return true for already existing borrows before the upgrade to include borrow gotchi limits
-    function isBorrowing(address _borrower) internal view returns (bool) {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        return s.borrowerTokenId[_borrower] != 0;
-    }
+    // /// @dev Will not return true for already existing borrows before the upgrade to include borrow gotchi limits
+    // function isBorrowing(address _borrower) internal view returns (bool) {
+    //     AppStorage storage s = LibAppStorage.diamondStorage();
+    //     return s.borrowerTokenId[_borrower] != 0;
+    // }
 
-    /// @dev Call this function when a borrower borrows a gotchi to limit a borrower to one borrow.
-    function addBorrowerTokenId(address _borrower, uint32 _tokenId) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        require(!isBorrowing(_borrower), "LibGotchiLending: Borrower already has a token");
-        s.borrowerTokenId[_borrower] = _tokenId + 1;
-    }
+    // /// @dev Call this function when a borrower borrows a gotchi to limit a borrower to one borrow.
+    // function addBorrowerTokenId(address _borrower, uint32 _tokenId) internal {
+    //     AppStorage storage s = LibAppStorage.diamondStorage();
+    //     require(!isBorrowing(_borrower), "LibGotchiLending: Borrower already has a token");
+    //     s.borrowerTokenId[_borrower] = _tokenId + 1;
+    // }
 
     /// @dev Call this function when a borrow is ended so that the borrower can borrow another gotchi.
     /// @dev Since this is an upgrade, the borrower may already have borrowed gotchis.
     /// To get around this, we only change the status to not borrowing if the token Id matches
     /// a borrow that was agreed to after the upgrade.
-    function removeBorrowerTokenId(address _borrower, uint32 _tokenId) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        if (s.borrowerTokenId[_borrower] == _tokenId + 1) {
-            s.borrowerTokenId[_borrower] = 0;
-        }
-    }
+    // function removeBorrowerTokenId(address _borrower, uint32 _tokenId) internal {
+    //     AppStorage storage s = LibAppStorage.diamondStorage();
+    //     if (s.borrowerTokenId[_borrower] == _tokenId + 1) {
+    //         s.borrowerTokenId[_borrower] = 0;
+    //     }
+    // }
 
-    function borrowerTokenId(address _borrower) internal view returns (uint32) {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        require(isBorrowing(_borrower), "LibGotchiLending: Borrower does not have any token");
-        return s.borrowerTokenId[_borrower] - 1;
-    }
+    // function borrowerTokenId(address _borrower) internal view returns (uint32) {
+    //     AppStorage storage s = LibAppStorage.diamondStorage();
+    //     require(isBorrowing(_borrower), "LibGotchiLending: Borrower does not have any token");
+    //     return s.borrowerTokenId[_borrower] - 1;
+    // }
 
     struct LibAddGotchiLending {
         address lender;
