@@ -49,7 +49,7 @@ contract LendingGetterAndSetterFacet is Modifiers {
         bool _isLendingOperator
     ) public onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
         address sender = LibMeta.msgSender();
-        s.isLendingOperator[sender][_lendingOperator][_tokenId] = _isLendingOperator;
+        s.lendingOperators[sender][_lendingOperator][_tokenId] = _isLendingOperator;
         emit LendingOperatorSet(sender, _lendingOperator, _tokenId, _isLendingOperator);
     }
 
@@ -90,7 +90,7 @@ contract LendingGetterAndSetterFacet is Modifiers {
         address _lendingOperator,
         uint32 _tokenId
     ) external view returns (bool) {
-        return s.isLendingOperator[_lender][_lendingOperator][_tokenId];
+        return s.lendingOperators[_lender][_lendingOperator][_tokenId];
     }
 
     // function getBorrowerTokenId(address _borrower) external view returns (uint32) {

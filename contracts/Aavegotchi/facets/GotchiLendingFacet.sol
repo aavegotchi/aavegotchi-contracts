@@ -34,8 +34,8 @@ contract GotchiLendingFacet is Modifiers {
     function addGotchiListing(AddGotchiListing memory p) public {
         address sender = LibMeta.msgSender();
         address tokenOwner = s.aavegotchis[p.tokenId].owner;
-        bool senderIsLendingOperator = s.isLendingOperator[tokenOwner][sender][p.tokenId];
-        require(tokenOwner == sender || senderIsLendingOperator, "GotchiLending: Only the owner or a lending operator can add a lending request");
+        bool isLendingOperator = s.lendingOperators[tokenOwner][sender][p.tokenId];
+        require(tokenOwner == sender || isLendingOperator, "GotchiLending: Only the owner or a lending operator can add a lending request");
         LibGotchiLending.LibAddGotchiLending memory addLendingStruct = LibGotchiLending.LibAddGotchiLending({
             lender: tokenOwner,
             tokenId: p.tokenId,
@@ -58,7 +58,7 @@ contract GotchiLendingFacet is Modifiers {
         address sender = LibMeta.msgSender();
         address lender = lending.lender;
         require(
-            lender == sender || s.isLendingOperator[lender][sender][lending.erc721TokenId],
+            lender == sender || s.lendingOperators[lender][sender][lending.erc721TokenId],
             "GotchiLending: Only the lender or lending operator can cancel the lending"
         );
         LibGotchiLending.cancelGotchiLending(_listingId, lender);
@@ -88,7 +88,7 @@ contract GotchiLendingFacet is Modifiers {
         address lender = lending.lender;
         address sender = LibMeta.msgSender();
         require(
-            (lender == sender) || (lending.borrower == sender) || s.isLendingOperator[lender][sender][_tokenId],
+            (lender == sender) || (lending.borrower == sender) || s.lendingOperators[lender][sender][_tokenId],
             "GotchiLending: Only lender or borrower or lending operator can claim"
         );
         LibGotchiLending.claimGotchiLending(listingId);
@@ -106,7 +106,7 @@ contract GotchiLendingFacet is Modifiers {
         address sender = LibMeta.msgSender();
         uint32 period = lending.period < 2_592_000 ? lending.period : 2_592_000;
         require(
-            (lender == sender) || (borrower == sender) || s.isLendingOperator[lender][sender][_tokenId],
+            (lender == sender) || (borrower == sender) || s.lendingOperators[lender][sender][_tokenId],
             "GotchiLending: Only lender or borrower or lending operator can claim and end agreement"
         );
         require(borrower == sender || lending.timeAgreed + period <= block.timestamp, "GotchiLending: Agreement not over and not borrower");
@@ -121,7 +121,7 @@ contract GotchiLendingFacet is Modifiers {
         GotchiLending storage lending = s.gotchiLendings[LibGotchiLending.tokenIdToListingId(_tokenId)];
         address lender = lending.lender;
         address sender = LibMeta.msgSender();
-        require(lender == sender || s.isLendingOperator[lender][sender][_tokenId], "GotchiLending: Only lender or lending operator can extend");
+        require(lender == sender || s.lendingOperators[lender][sender][_tokenId], "GotchiLending: Only lender or lending operator can extend");
         require(lending.timeAgreed != 0 && !lending.completed, "GotchiLending: Cannot extend a listing that has not been borrowed");
         require(lending.period + extension < 2_592_000, "GotchiLending: Cannot extend a listing beyond the maximum period");
         lending.period += extension;
