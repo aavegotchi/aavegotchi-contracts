@@ -93,9 +93,9 @@ contract LendingGetterAndSetterFacet is Modifiers {
         return s.isLendingOperator[_lender][_lendingOperator][_tokenId];
     }
 
-    function getBorrowerTokenId(address _borrower) external view returns (uint32) {
-        return LibGotchiLending.borrowerTokenId(_borrower);
-    }
+    // function getBorrowerTokenId(address _borrower) external view returns (uint32) {
+    //     return LibGotchiLending.borrowerTokenId(_borrower);
+    // }
 
     // function isBorrowing(address _borrower) external view returns (bool) {
     //     return LibGotchiLending.isBorrowing(_borrower);
