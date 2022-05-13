@@ -1,3 +1,5 @@
+import { ethers } from "hardhat";
+
 /* global ethers */
 // 0, DAI Collateral
 // 1, ETH Collateral
@@ -134,7 +136,7 @@ const collaterals = [
   },
 ];
 
-function eightBitArrayToUint(array) {
+function eightBitArrayToUint(array: any) {
   const uint = [];
   for (const num of array) {
     const value = ethers.BigNumber.from(num).toTwos(8);
@@ -143,7 +145,7 @@ function eightBitArrayToUint(array) {
   return ethers.BigNumber.from("0x" + uint.join(""));
 }
 
-function getCollaterals(network, ghstAddress) {
+export function getCollaterals(network: string, ghstAddress?: string) {
   const collateralTypes = [];
   for (const collateralType of collaterals) {
     const collateralTypeInfo = {
@@ -156,7 +158,7 @@ function getCollaterals(network, ghstAddress) {
       conversionRate: collateralType.conversionRate,
       delisted: false,
     };
-    const item = {};
+    const item: any = {};
     if (network === "kovan") {
       item.collateralType = collateralType.kovanAddress;
     } else if (network === "hardhat") {
@@ -175,5 +177,3 @@ function getCollaterals(network, ghstAddress) {
 
   return collateralTypes;
 }
-
-exports.getCollaterals = getCollaterals;

@@ -24,17 +24,28 @@ contract InitDiamond {
         address vrfCoordinator;
         address linkAddress;
         address childChainManager;
-        string name;
-        string symbol;
+        //  string name;
+        //  string symbol;
     }
 
-    function init(Args memory _args) external {
-        s.dao = _args.dao;
-        s.daoTreasury = _args.daoTreasury;
-        s.rarityFarming = _args.rarityFarming;
-        s.pixelCraft = _args.pixelCraft;
+    function init(
+        address dao,
+        address daoTreasury,
+        address pixelCraft,
+        address rarityFarming,
+        address ghstContract,
+        bytes32 chainlinkKeyHash,
+        uint256 chainlinkFee,
+        address vrfCoordinator,
+        address linkAddress,
+        address childChainManager
+    ) external {
+        s.dao = dao;
+        s.daoTreasury = daoTreasury;
+        s.rarityFarming = rarityFarming;
+        s.pixelCraft = pixelCraft;
         s.itemsBaseUri = "https://aavegotchi.com/metadata/items/";
-        s.childChainManager = _args.childChainManager;
+        s.childChainManager = childChainManager;
 
         s.domainSeparator = LibMeta.domainSeparator("AavegotchiDiamond", "V1");
 
@@ -46,15 +57,15 @@ contract InitDiamond {
         ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
         ds.supportedInterfaces[type(IERC173).interfaceId] = true;
 
-        s.ghstContract = _args.ghstContract;
-        s.keyHash = _args.chainlinkKeyHash;
-        s.fee = uint144(_args.chainlinkFee);
-        s.vrfCoordinator = _args.vrfCoordinator;
-        s.link = ILink(_args.linkAddress);
+        s.ghstContract = ghstContract;
+        s.keyHash = chainlinkKeyHash;
+        s.fee = uint144(chainlinkFee);
+        s.vrfCoordinator = vrfCoordinator;
+        s.link = ILink(linkAddress);
 
         s.listingFeeInWei = 1e17;
 
-        s.name = _args.name;
-        s.symbol = _args.symbol;
+        s.name = "Aavegotchi";
+        s.symbol = "GOTCHI";
     }
 }

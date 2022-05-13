@@ -9,6 +9,8 @@ import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {GameManager} from "../libraries/LibAppStorage.sol";
 
+import "hardhat/console.sol";
+
 contract DAOFacet is Modifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
     event DaoTreasuryTransferred(address indexed previousDaoTreasury, address indexed newDaoTreasury);
@@ -72,7 +74,7 @@ contract DAOFacet is Modifiers {
     ///@dev If a certain collateral exists already, it will be overwritten
     ///@param _hauntId Identifier for haunt to add the collaterals to
     ///@param _collateralTypes An array of structs where each struct contains details about a particular collateral
-    function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) public onlyItemManager {
+    function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) public onlyOwnerOrItemManager {
         for (uint256 i; i < _collateralTypes.length; i++) {
             address newCollateralType = _collateralTypes[i].collateralType;
 
@@ -81,8 +83,11 @@ contract DAOFacet is Modifiers {
 
             //First handle global collateralTypes array
             uint256 index = s.collateralTypeIndexes[newCollateralType];
-            bool collateralExists = index > 0 || s.collateralTypes[0] == newCollateralType;
 
+            bool collateralExists;
+            if (s.collateralTypes.length != 0) {
+                collateralExists = index > 0 || s.collateralTypes[0] == newCollateralType;
+            }
             if (!collateralExists) {
                 s.collateralTypes.push(newCollateralType);
                 s.collateralTypeIndexes[newCollateralType] = s.collateralTypes.length;
@@ -290,7 +295,7 @@ contract DAOFacet is Modifiers {
 
     ///@notice Allow an item manager to add item types
     ///@param _itemTypes An array of structs where each struct contains details about each item to be added
-    function addItemTypes(ItemType[] memory _itemTypes) external onlyItemManager {
+    function addItemTypes(ItemType[] memory _itemTypes) external onlyOwnerOrItemManager {
         insertItemTypes(_itemTypes);
     }
 
@@ -302,7 +307,7 @@ contract DAOFacet is Modifiers {
         ItemType[] memory _itemTypes,
         string calldata _svg,
         LibSvg.SvgTypeAndSizes[] calldata _typesAndSizes
-    ) external onlyItemManager {
+    ) external onlyOwnerOrItemManager {
         insertItemTypes(_itemTypes);
         LibSvg.storeSvg(_svg, _typesAndSizes);
     }

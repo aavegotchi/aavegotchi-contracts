@@ -38,35 +38,35 @@ contract ShopFacet is Modifiers {
     ///@notice Allow an address to purchase a portal
     ///@dev Only portals from haunt 1 can be purchased via the contract
     ///@param _to Address to send the portal once purchased
-    ///@param _ghst The amount of GHST the buyer is willing to pay //calculation will be done to know how much portal he recieves based on the haunt's portal price
-    function buyPortals(address _to, uint256 _ghst) external {
+    ///@param _count The # of portals to buy
+    function buyPortals(address _to, uint256 _count) external {
         uint256 currentHauntId = s.currentHauntId;
         require(currentHauntId == 1, "ShopFacet: Can only purchase from Haunt 1");
         Haunt storage haunt = s.haunts[currentHauntId];
         uint256 price = haunt.portalPrice;
-        require(_ghst >= price, "Not enough GHST to buy portals");
+        //  require(_ghst >= price, "Not enough GHST to buy portals");
         uint256[3] memory tiers;
         tiers[0] = price * 5;
         tiers[1] = tiers[0] + (price * 2 * 10);
         tiers[2] = tiers[1] + (price * 3 * 10);
-        require(_ghst <= tiers[2], "Can't buy more than 25");
+        // require(_ghst <= tiers[2], "Can't buy more than 25");
         address sender = LibMeta.msgSender();
-        uint256 numToPurchase;
-        uint256 totalPrice;
-        if (_ghst <= tiers[0]) {
-            numToPurchase = _ghst / price;
-            totalPrice = numToPurchase * price;
-        } else {
-            if (_ghst <= tiers[1]) {
-                numToPurchase = (_ghst - tiers[0]) / (price * 2);
-                totalPrice = tiers[0] + (numToPurchase * (price * 2));
-                numToPurchase += 5;
-            } else {
-                numToPurchase = (_ghst - tiers[1]) / (price * 3);
-                totalPrice = tiers[1] + (numToPurchase * (price * 3));
-                numToPurchase += 15;
-            }
-        }
+        uint256 numToPurchase = _count;
+        uint256 totalPrice = _count * price;
+        // if (_ghst <= tiers[0]) {
+        //     numToPurchase = _ghst / price;
+        //     totalPrice = numToPurchase * price;
+        // } else {
+        //     if (_ghst <= tiers[1]) {
+        //         numToPurchase = (_ghst - tiers[0]) / (price * 2);
+        //         totalPrice = tiers[0] + (numToPurchase * (price * 2));
+        //         numToPurchase += 5;
+        //     } else {
+        //         numToPurchase = (_ghst - tiers[1]) / (price * 3);
+        //         totalPrice = tiers[1] + (numToPurchase * (price * 3));
+        //         numToPurchase += 15;
+        //     }
+        // }
         uint256 hauntCount = haunt.totalCount + numToPurchase;
         require(hauntCount <= haunt.hauntMaxSize, "ShopFacet: Exceeded max number of aavegotchis for this haunt");
         s.haunts[currentHauntId].totalCount = uint24(hauntCount);

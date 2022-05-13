@@ -1,5 +1,9 @@
 /* global ethers */
 
+import { Contract } from "ethers";
+import { ethers } from "hardhat";
+import { InitDiamond__factory } from "../../../typechain";
+
 const FacetCutAction = {
   Add: 0,
   Replace: 1,
@@ -7,13 +11,13 @@ const FacetCutAction = {
 };
 
 // eslint-disable-next-line no-unused-vars
-function getSignatures(contract) {
+export function getSignatures(contract: Contract) {
   return Object.keys(contract.interface.functions);
 }
 
-function getSelectors(contract) {
+export function getSelectors(contract: Contract) {
   const signatures = Object.keys(contract.interface.functions);
-  const selectors = signatures.reduce((acc, val) => {
+  const selectors: string[] = signatures.reduce((acc: string[], val) => {
     if (val !== "init(bytes)") {
       acc.push(contract.interface.getSighash(val));
     }
@@ -22,7 +26,7 @@ function getSelectors(contract) {
   return selectors;
 }
 
-async function deployFacets(facets) {
+export async function deployFacets(facets: Facet[]) {
   console.log("--");
   const deployed = [];
   for (const facet of facets) {
@@ -48,6 +52,8 @@ async function deployFacets(facets) {
       }
       const facetFactory = await ethers.getContractFactory(facet);
       console.log(`Deploying ${facet}`);
+
+      //@ts-ignore
       const deployedFactory = await facetFactory.deploy();
       await deployedFactory.deployed();
       console.log(`${facet} deployed: ${deployedFactory.address}`);
@@ -58,14 +64,18 @@ async function deployFacets(facets) {
   return deployed;
 }
 
-async function deploy({
-  diamondName,
-  initDiamond,
-  facets,
-  owner,
-  args = [],
-  txArgs = {},
-}) {
+interface DeployArgs {
+  diamondName: string;
+  initDiamond: any;
+  facets: any;
+  owner: string;
+  args: any[];
+  txArgs: any;
+}
+
+export async function deploy(deployArgs: DeployArgs) {
+  let { diamondName, initDiamond, facets, owner, args, txArgs } = deployArgs;
+
   if (arguments.length !== 1) {
     throw Error(
       `Requires only 1 map argument. ${arguments.length} arguments used.`
@@ -73,7 +83,7 @@ async function deploy({
   }
   facets = await deployFacets(facets);
   const diamondFactory = await ethers.getContractFactory("Diamond");
-  const diamondCut = [];
+  const diamondCut: any = [];
   console.log("--");
   console.log("Setting up diamondCut args");
   console.log("--");
@@ -104,12 +114,7 @@ async function deploy({
     }
   }
 
-  console.log("args:", args);
-
   console.log("Encoding diamondCut init function call");
-
-  console.log("init args:", initDiamond.interface);
-
   const functionCall = initDiamond.interface.encodeFunctionData("init", args);
   // let functionCall
   // if (args.length > 0) {
@@ -164,7 +169,7 @@ async function deploy({
   return deployedDiamond;
 }
 
-function inFacets(selector, facets) {
+export function inFacets(selector: string, facets: Facet[]) {
   for (const facet of facets) {
     if (facet.functionSelectors.includes(selector)) {
       return true;
@@ -173,13 +178,28 @@ function inFacets(selector, facets) {
   return false;
 }
 
-async function upgrade({
-  diamondAddress,
-  diamondCut,
-  txArgs = {},
-  initFacetName = undefined,
-  initArgs,
-}) {
+interface UpgradeArgs {
+  diamondAddress: string;
+  diamondCut: any;
+  txArgs: any;
+  initFacetName: any;
+  initArgs: any;
+}
+
+interface Facet {
+  facetAddress: string;
+  functionSelectors: string[];
+}
+
+export async function upgrade(upgradeArgs: UpgradeArgs) {
+  let {
+    diamondAddress,
+    diamondCut,
+    txArgs = {},
+    initFacetName = undefined,
+    initArgs,
+  } = upgradeArgs;
+
   if (arguments.length !== 1) {
     throw Error(
       `Requires only 1 map argument. ${arguments.length} arguments used.`
@@ -193,7 +213,7 @@ async function upgrade({
     "DiamondLoupeFacet",
     diamondAddress
   );
-  const existingFacets = await diamondLoupeFacet.facets();
+  const existingFacets: Facet[] = await diamondLoupeFacet.facets();
   const facetFactories = new Map();
 
   console.log("Facet Signatures and Selectors: ");
@@ -346,7 +366,9 @@ async function upgrade({
   if (initFacetName !== undefined) {
     let initFacet = facetFactories.get(initFacetName);
     if (!initFacet) {
-      const InitFacet = await ethers.getContractFactory(initFacetName);
+      const InitFacet = (await ethers.getContractFactory(
+        initFacetName
+      )) as InitDiamond__factory;
       initFacet = await InitFacet.deploy();
       await initFacet.deployed();
       console.log("Deployed init facet: " + initFacet.address);
@@ -377,13 +399,23 @@ async function upgrade({
   return result;
 }
 
-async function upgradeWithNewFacets({
-  diamondAddress,
-  facetNames,
-  selectorsToRemove = [],
-  initFacetName = undefined,
-  initArgs = [],
-}) {
+interface UpgradeArgs {
+  diamondAddress: string;
+  facetNames: string[];
+  selectorsToRemove: string[];
+  initFacetName: any;
+  initArgs: any;
+}
+
+export async function upgradeWithNewFacets(upgradeArgs: UpgradeArgs) {
+  let {
+    diamondAddress,
+    facetNames,
+    selectorsToRemove = [],
+    initFacetName = undefined,
+    initArgs = [],
+  } = upgradeArgs;
+
   if (arguments.length === 1) {
     throw Error(
       `Requires only 1 map argument. ${arguments.length} arguments used.`
@@ -398,7 +430,7 @@ async function upgradeWithNewFacets({
     diamondAddress
   );
 
-  const diamondCut = [];
+  const diamondCut: any = [];
   const existingFacets = await diamondLoupeFacet.facets();
   const undeployed = [];
   const deployed = [];
@@ -416,7 +448,7 @@ async function upgradeWithNewFacets({
       }
     }
     diamondCut.push([
-      ethers.constants.AddressZeo,
+      ethers.constants.AddressZero,
       FacetCutAction.Remove,
       selectorsToRemove,
     ]);
@@ -424,6 +456,8 @@ async function upgradeWithNewFacets({
 
   for (const [name, facetFactory] of undeployed) {
     console.log(`Deploying ${name}`);
+
+    //@ts-ignore
     deployed.push([name, await facetFactory.deploy()]);
   }
 
@@ -466,7 +500,9 @@ async function upgradeWithNewFacets({
       }
     }
     if (!initFacet) {
-      const InitFacet = await ethers.getContractFactory(initFacetName);
+      const InitFacet = (await ethers.getContractFactory(
+        initFacetName
+      )) as InitDiamond__factory;
       initFacet = await InitFacet.deploy();
       await initFacet.deployed();
       console.log("Deployed init facet: " + initFacet.address);
@@ -489,11 +525,11 @@ async function upgradeWithNewFacets({
   return result;
 }
 
-exports.FacetCutAction = FacetCutAction;
-exports.upgrade = upgrade;
-exports.upgradeWithNewFacets = upgradeWithNewFacets;
-exports.getSelectors = getSelectors;
-exports.deployFacets = deployFacets;
-exports.deploy = deploy;
-exports.inFacets = inFacets;
-exports.upgrade = upgrade;
+// exports.FacetCutAction = FacetCutAction
+// exports.upgrade = upgrade
+// exports.upgradeWithNewFacets = upgradeWithNewFacets
+// exports.getSelectors = getSelectors
+// exports.deployFacets = deployFacets
+// exports.deploy = deploy
+// exports.inFacets = inFacets
+// exports.upgrade = upgrade

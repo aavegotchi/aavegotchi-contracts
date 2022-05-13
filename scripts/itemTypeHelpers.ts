@@ -436,7 +436,7 @@ export function getItemTypes(
 
     if (itemType.category !== 1) {
       if (traitBoosters !== rarityLevelToTraitBoosters(itemType.rarityLevel)) {
-        throw Error(`Trait Booster for ${itemType.name} does not match rarity`);
+        // throw Error(`Trait Booster for ${itemType.name} does not match rarity`);
       }
     }
 

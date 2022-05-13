@@ -1,0 +1,123 @@
+import { ethers } from "hardhat";
+import { ItemTypeInput, ItemTypeInputNew } from "./itemTypeHelpers";
+
+const { isThrowStatement } = require("typescript");
+
+/* global ethers */
+const WEARABLE_SLOT_BODY = 0;
+const WEARABLE_SLOT_FACE = 1;
+const WEARABLE_SLOT_EYES = 2;
+const WEARABLE_SLOT_HEAD = 3;
+const WEARABLE_SLOT_HAND_LEFT = 4;
+const WEARABLE_SLOT_HAND_RIGHT = 5;
+const WEARABLE_SLOT_PET_FRONT = 6;
+const WEARABLE_SLOT_PET_BACK = 7;
+const WEARABLE_SLOT_BG = 8;
+
+export const itemTypes: ItemTypeInputNew[] = [
+  {
+    svgId: 0,
+    name: "The Void",
+    setId: [],
+    author: "Xibot",
+    description: "The Void",
+    dimensions: { x: 0, y: 0, width: 0, height: 0 },
+    rarityLevel: "common",
+    allowedCollaterals: [],
+    minLevel: 1,
+    ghstPrice: 0,
+    maxQuantity: 0,
+    traitModifiers: [0, 0, 0, 0, 0, 0],
+    canPurchaseWithGhst: false,
+    slotPositions: "none",
+    category: 0,
+    canBeTransferred: false,
+    totalQuantity: 0,
+    experienceBonus: 0,
+    kinshipBonus: 0,
+  },
+  {
+    svgId: 1,
+    name: "Camo Hat",
+    setId: [1],
+    author: "Xibot",
+    description: "",
+    dimensions: { x: 15, y: 2, width: 34, height: 20 },
+    rarityLevel: "common",
+    allowedCollaterals: [],
+    minLevel: 1,
+    ghstPrice: 5,
+    maxQuantity: 1000,
+    traitModifiers: [0, 1, 0, 0, 0, 0],
+    canPurchaseWithGhst: false,
+    slotPositions: "head",
+    category: 0,
+    canBeTransferred: true,
+    totalQuantity: 0,
+    experienceBonus: 0,
+    kinshipBonus: 0,
+  },
+  {
+    svgId: 2,
+    name: "Camo Pants",
+    setId: [1],
+    author: "Xibot",
+    description: "",
+    dimensions: { x: 15, y: 41, width: 34, height: 14 },
+    rarityLevel: "common",
+    allowedCollaterals: [],
+    minLevel: 1,
+    ghstPrice: 5,
+    maxQuantity: 1000,
+    traitModifiers: [0, 1, 0, 0, 0, 0],
+    canPurchaseWithGhst: false,
+    slotPositions: "body",
+    category: 0,
+    canBeTransferred: true,
+    totalQuantity: 0,
+    experienceBonus: 0,
+    kinshipBonus: 0,
+  },
+  {
+    svgId: 3,
+    name: "MK2 Grenade",
+    setId: [1],
+    author: "Xibot",
+    description: "",
+    dimensions: { x: 5, y: 31, width: 8, height: 11 },
+    rarityLevel: "uncommon",
+    allowedCollaterals: [],
+    minLevel: 1,
+    ghstPrice: 5,
+    maxQuantity: 1000,
+    traitModifiers: [0, 1, 0, 0, 0, 0],
+    canPurchaseWithGhst: false,
+    slotPositions: "hands",
+    category: 0,
+    canBeTransferred: true,
+    totalQuantity: 0,
+    experienceBonus: 0,
+    kinshipBonus: 0,
+  },
+  {
+    svgId: 4,
+    name: "Greater XP Potion",
+    setId: [],
+    author: "Xibot",
+    description: "+50 to XP",
+    dimensions: { x: 0, y: 0, width: 0, height: 0 },
+    rarityLevel: "rare",
+    allowedCollaterals: [],
+    minLevel: 1,
+    ghstPrice: 50,
+    maxQuantity: 250,
+    traitModifiers: [0, 0, 0, 0, 0, 0],
+    canPurchaseWithGhst: true,
+    slotPositions: "none",
+    category: 2,
+    canBeTransferred: true,
+    totalQuantity: 0,
+    experienceBonus: 50,
+    kinshipBonus: 0,
+  },
+];

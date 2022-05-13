@@ -123,7 +123,7 @@ const testCollaterals = [
   },
 ];
 
-function getCollaterals(network, ghstAddress) {
+export function getCollaterals(network: string, ghstAddress: string) {
   const testing = ["hardhat", "localhost"].includes(network);
   const collateralArr = testing ? testCollaterals : collaterals;
   const collateralTypes = [];
@@ -138,7 +138,7 @@ function getCollaterals(network, ghstAddress) {
       conversionRate: collateralType.conversionRate,
       delisted: false,
     };
-    const item = {};
+    const item: any = {};
     if (network === "kovan") {
       item.collateralType = collateralType.kovanAddress;
     } else if (network === "hardhat") {
@@ -154,5 +154,3 @@ function getCollaterals(network, ghstAddress) {
 
   return collateralTypes;
 }
-
-exports.getCollaterals = getCollaterals;
