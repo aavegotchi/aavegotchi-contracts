@@ -12,6 +12,7 @@ import { Signer } from "@ethersproject/abstract-signer";
 
 import { OwnershipFacet } from "../typechain/OwnershipFacet";
 import { IDiamondLoupe, IDiamondCut } from "../typechain";
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 import {
   gasPrice,
   getSelectors,
@@ -134,7 +135,6 @@ task(
         signer = await hre.ethers.getSigner(owner);
       } else if (hre.network.name === "matic") {
         if (useLedger) {
-          const { LedgerSigner } = require("@ethersproject/hardware-wallets");
           signer = new LedgerSigner(hre.ethers.provider);
         } else signer = (await hre.ethers.getSigners())[0];
       } else {
