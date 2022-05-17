@@ -228,6 +228,7 @@ library LibGotchiLending {
         // gas savings
         uint32 tokenId = lending.erc721TokenId;
         address lender = lending.lender;
+        uint32 listingId = s.aavegotchiToListingId[tokenId];
 
         // STATE CHANGES
         s.aavegotchis[tokenId].locked = false;
@@ -238,7 +239,7 @@ library LibGotchiLending {
         removeLentAavegotchi(tokenId, lender);
         removeLendingListItem(lender, lending.listingId, "agreed");
 
-        emit GotchiLendingEnd(tokenId);
+        emit GotchiLendingEnd(listingId);
     }
 
     function verifyAddGotchiLendingParams(
