@@ -121,6 +121,9 @@ export interface rfRankingScore {
 }
 
 export async function getRfSznTypeRanking(rounds: string[][], _rfType: string) {
+  console.log("*** " + _rfType + " ***");
+  const idsArray: number[] = [];
+
   let ranking = await setRfTypeObject(rounds[0], _rfType);
 
   for (let i = 1; i < rounds.length; i++) {
@@ -136,7 +139,11 @@ export async function getRfSznTypeRanking(rounds: string[][], _rfType: string) {
       return 0;
     }
   });
-  return finalRanking;
+  // console.log(_rfType + " : " + finalRanking);
+  for (let x = 0; x < finalRanking.length; x++) {
+    idsArray.push(Number(finalRanking[x].gotchiId));
+  }
+  return idsArray;
 }
 
 export async function setRfTypeObject(rnd: string[], _rfType: string) {
@@ -167,7 +174,11 @@ export async function compareScoreArrays(
 }
 
 export async function getPlaayersIds(round: string[][]) {
+  console.log("*** RAANKED ***");
+
+  const arrayInNumbers: number[] = [];
   const array: string[] = round[0];
+
   for (let i = 0; i < round.length; i++) {
     for (let x = 0; x < round[i].length; x++) {
       if (!array.includes(round[i][x])) {
@@ -179,9 +190,9 @@ export async function getPlaayersIds(round: string[][]) {
 }
 
 export async function hasDuplicateGotchiIds(_array: string[]) {
-  var valuesSoFar = Object.create(null);
-  for (var i = 0; i < _array.length; ++i) {
-    var value = _array[i];
+  let valuesSoFar = Object.create(null);
+  for (let i = 0; i < _array.length; ++i) {
+    let value = _array[i];
     if (value in valuesSoFar) {
       return true;
     }
