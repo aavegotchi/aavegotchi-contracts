@@ -76,6 +76,7 @@ contract LendingGetterAndSetterFacet is Modifiers {
     }
 
     function getTokenBalancesInEscrow(uint32 _tokenId, address[] calldata _revenueTokens) external view returns (uint256[] memory revenueBalances) {
+        revenueBalances = new uint256[](_revenueTokens.length);
         address escrow = LibAavegotchi.getAavegotchi(_tokenId).escrow;
         for (uint256 i = 0; i < _revenueTokens.length; ) {
             revenueBalances[i] = IERC20(_revenueTokens[i]).balanceOf(escrow);
