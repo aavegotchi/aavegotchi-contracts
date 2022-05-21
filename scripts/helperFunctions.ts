@@ -175,8 +175,6 @@ export async function compareScoreArrays(
 
 export async function getPlaayersIds(round: string[][]) {
   console.log("*** RAANKED ***");
-
-  const arrayInNumbers: number[] = [];
   const array: string[] = round[0];
 
   for (let i = 0; i < round.length; i++) {
