@@ -1,11 +1,9 @@
 import { run } from "hardhat";
 import { itemTypes } from "../../scripts/addItemTypes/itemTypes/rfSzn3Bdgs";
-// import { baadges } from "../../svgs/rfSzn3BdgsSvgs";
 import {
   updateBaadgeTaskForSvgType,
   mintSvgTaskForBaadges,
   airdropTaskForBaadges,
-  updateSvgTaskForSvgType,
 } from "../../scripts/svgHelperFunctions";
 
 import {
