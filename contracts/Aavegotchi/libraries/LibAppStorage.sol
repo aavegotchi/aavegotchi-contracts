@@ -291,6 +291,7 @@ struct AppStorage {
     mapping(uint32 => mapping(address => uint256)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
     mapping(address => bool) revenueTokenAllowed;
     mapping(address => mapping(address => mapping(uint32 => bool))) lendingOperators; // owner => operator => tokenId => isLendingOperator
+    mapping(uint32 => bool) blockSoloChannelingOnLending;
 
     // mapping(address => uint32) borrowerTokenId; // We need 0 to mean none borrowed, but 0 is a token Id so we offset by 1 when storing into this mapping
 }

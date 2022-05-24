@@ -67,6 +67,19 @@ contract LendingGetterAndSetterFacet is Modifiers {
         }
     }
 
+    function setBlockSoloChannelingOnLending(uint32 _tokenId, bool _block) public onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
+        s.blockSoloChannelingOnLending[_tokenId] = _block;
+    }
+
+    function batchSetBlockSoloChannelingOnLending(uint32[] memory _tokenIds, bool _block) external {
+        for (uint256 i = 0; i < _tokenIds.length; ) {
+            setBlockSoloChannelingOnLending(_tokenIds[i], _block);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     /*/////////////////////////////////////////////////////////////////////////////////
     ///                                    GETTERS                                  ///
     /////////////////////////////////////////////////////////////////////////////////*/
@@ -205,5 +218,9 @@ contract LendingGetterAndSetterFacet is Modifiers {
 
     function isAavegotchiListed(uint32 _erc721TokenId) external view returns (bool) {
         return LibGotchiLending.isAavegotchiListed(_erc721TokenId);
+    }
+
+    function isAavegotchiBlockedFromSoloChanneling(uint32 _tokenId) external view returns (bool) {
+        return s.blockSoloChannelingOnLending[_tokenId];
     }
 }
