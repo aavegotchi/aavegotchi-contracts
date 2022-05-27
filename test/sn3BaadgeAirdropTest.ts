@@ -15,7 +15,7 @@ import {
   getPlaayersIds,
 } from "../scripts/helperFunctions";
 
-describe("Airdrop SZN2 Baadges", async function () {
+describe("Airdrop SZN3 Baadges", async function () {
   this.timeout(200000000);
 
   let aavegotchiFacet: AavegotchiFacet,
