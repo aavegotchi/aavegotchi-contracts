@@ -3,8 +3,6 @@ pragma solidity 0.8.1;
 import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {ILink} from "../interfaces/ILink.sol";
-//import "../interfaces/IERC20.sol";
-// import "hardhat/console.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
@@ -291,9 +289,8 @@ struct AppStorage {
     mapping(uint32 => mapping(address => uint256)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
     mapping(address => bool) revenueTokenAllowed;
     mapping(address => mapping(address => mapping(uint32 => bool))) lendingOperators; // owner => operator => tokenId => isLendingOperator
-    mapping(uint32 => mapping(uint256 => uint256)) gotchiAccessRights; // tokenId => action => access
-
-    // mapping(address => uint32) borrowerTokenId; // We need 0 to mean none borrowed, but 0 is a token Id so we offset by 1 when storing into this mapping
+    address realmAddress;
+    mapping(uint32 => mapping(uint256 => uint256)) gotchiAccessRights;
 }
 
 library LibAppStorage {
