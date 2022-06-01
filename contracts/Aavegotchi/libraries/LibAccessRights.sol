@@ -11,4 +11,12 @@ library LibAccessRights {
         if (_action == 0) return _access <= 1;
         else return false;
     }
+
+    function resetAccessRights(uint256 _tokenId) internal {
+        uint32 _tokenId32 = uint32(_tokenId);
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        if (s.gotchiAccessRights[_tokenId32][0] != 0) {
+            s.gotchiAccessRights[_tokenId32][0] = 0;
+        }
+    }
 }

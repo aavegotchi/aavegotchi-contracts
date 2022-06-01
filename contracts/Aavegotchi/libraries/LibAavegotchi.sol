@@ -5,6 +5,7 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibAppStorage, AavegotchiCollateralTypeInfo, AppStorage, Aavegotchi, ItemType, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM} from "./LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibAccessRights} from "./LibAccessRights.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
@@ -351,6 +352,8 @@ library LibAavegotchi {
         uint256 _tokenId
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
+
+        LibAccessRights.resetAccessRights(_tokenId);
 
         // remove
         uint256 index = s.ownerTokenIdIndexes[_from][_tokenId];
