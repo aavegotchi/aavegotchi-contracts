@@ -4,7 +4,7 @@ pragma solidity 0.8.1;
 import {AppStorage, Modifiers} from "../libraries/LibAppStorage.sol";
 import {LibAccessRights} from "../libraries/LibAccessRights.sol";
 
-contract AavegotchiAccessRightsFacet is Modifiers {
+contract AccessRightsFacet is Modifiers {
     event AccessRightSet(uint32 _tokenId, uint256 _action, uint256 _access);
 
     function setAccessRight(
@@ -12,7 +12,7 @@ contract AavegotchiAccessRightsFacet is Modifiers {
         uint256 _action,
         uint256 _access
     ) public onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
-        require(LibAccessRights.verifyAccessRight(_action, _access), "Invalid access right");
+        require(LibAccessRights.verifyAccessRight(_action, _access), "AccessRightsFacet: Invalid access right");
         s.gotchiAccessRights[_tokenId][_action] = _access;
         emit AccessRightSet(_tokenId, _action, _access);
     }
