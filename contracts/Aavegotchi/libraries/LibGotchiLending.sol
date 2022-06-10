@@ -7,8 +7,12 @@ import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibAavegotchi} from "./LibAavegotchi.sol";
+import {LibWhitelist} from "./LibWhitelist.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 library LibGotchiLending {
+    using EnumerableSet for EnumerableSet.UintSet;
+
     event GotchiLendingAdd(uint32 indexed listingId);
     event GotchiLendingExecute(uint32 indexed listingId);
     event GotchiLendingCancel(uint32 indexed listingId, uint256 time);
@@ -100,36 +104,6 @@ library LibGotchiLending {
         listingId = s.aavegotchiToListingId[_tokenId];
         require(listingId != 0, "LibGotchiLending: Listing not found");
     }
-
-    // /// @dev Will not return true for already existing borrows before the upgrade to include borrow gotchi limits
-    // function isBorrowing(address _borrower) internal view returns (bool) {
-    //     AppStorage storage s = LibAppStorage.diamondStorage();
-    //     return s.borrowerTokenId[_borrower] != 0;
-    // }
-
-    // /// @dev Call this function when a borrower borrows a gotchi to limit a borrower to one borrow.
-    // function addBorrowerTokenId(address _borrower, uint32 _tokenId) internal {
-    //     AppStorage storage s = LibAppStorage.diamondStorage();
-    //     require(!isBorrowing(_borrower), "LibGotchiLending: Borrower already has a token");
-    //     s.borrowerTokenId[_borrower] = _tokenId + 1;
-    // }
-
-    /// @dev Call this function when a borrow is ended so that the borrower can borrow another gotchi.
-    /// @dev Since this is an upgrade, the borrower may already have borrowed gotchis.
-    /// To get around this, we only change the status to not borrowing if the token Id matches
-    /// a borrow that was agreed to after the upgrade.
-    // function removeBorrowerTokenId(address _borrower, uint32 _tokenId) internal {
-    //     AppStorage storage s = LibAppStorage.diamondStorage();
-    //     if (s.borrowerTokenId[_borrower] == _tokenId + 1) {
-    //         s.borrowerTokenId[_borrower] = 0;
-    //     }
-    // }
-
-    // function borrowerTokenId(address _borrower) internal view returns (uint32) {
-    //     AppStorage storage s = LibAppStorage.diamondStorage();
-    //     require(isBorrowing(_borrower), "LibGotchiLending: Borrower does not have any token");
-    //     return s.borrowerTokenId[_borrower] - 1;
-    // }
 
     struct LibAddGotchiLending {
         address lender;
@@ -228,6 +202,19 @@ library LibGotchiLending {
 
         // set lender as pet operator
         s.petOperators[_borrower][lender] = true;
+
+        EnumerableSet.UintSet storage whitelistBorrowerGotchiSet = s.whitelistGotchiBorrows[lending.whitelistId][_borrower];
+        uint256 borrowLimit = LibWhitelist.borrowLimit(lending.whitelistId);
+
+        // Check if the whitelist allows multiple borrows
+        // If not, register the gotchi id to the whitelist to prevent more borrows
+        // We do not need to check for whitelistId = 0 since this whitelistId's borrow limit will always be 0, thus passing this check
+        // There is a possibility of setting this borrow limit in an init function in the future for whitelist id 0 if desired
+        require(
+            borrowLimit == 0 || borrowLimit > whitelistBorrowerGotchiSet.length(),
+            "LibGotchiLending: Borrower is over borrow limit for the limit set by whitelist owner"
+        );
+        whitelistBorrowerGotchiSet.add(_erc721TokenId);
 
         emit GotchiLendingExecute(_listingId);
         emit GotchiLendingExecuted(
@@ -362,6 +349,10 @@ library LibGotchiLending {
 
         removeLentAavegotchi(tokenId, lender);
         removeLendingListItem(lender, lending.listingId, "agreed");
+
+        EnumerableSet.UintSet storage whitelistBorrowerGotchiSet = s.whitelistGotchiBorrows[lending.whitelistId][lending.borrower];
+        // Remove token id from borrower's list of borrowed gotchis. Does not revert if it the element does not exist
+        whitelistBorrowerGotchiSet.remove(lending.erc721TokenId);
 
         emit GotchiLendingEnd(listingId);
         emit GotchiLendingEnded(

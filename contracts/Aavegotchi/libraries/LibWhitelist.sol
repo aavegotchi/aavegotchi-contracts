@@ -5,6 +5,8 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibAppStorage, AppStorage, Whitelist} from "../libraries/LibAppStorage.sol";
 
 library LibWhitelist {
+    event WhitelistAccessRightSet(uint32 indexed whitelistId, uint256 indexed actionRight, uint256 indexed accessRight);
+
     function getNewWhitelistId() internal view returns (uint32 whitelistId) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         whitelistId = uint32(s.whitelists.length + 1); //whitelistId 0 is reserved for "none" in GotchiLending struct
@@ -64,5 +66,29 @@ library LibWhitelist {
         for (uint256 i; i < _whitelistAddresses.length; i++) {
             _removeAddressFromWhitelist(_whitelistId, _whitelistAddresses[i]);
         }
+    }
+
+    function setWhitelistAccessRight(
+        uint32 _whitelistId,
+        uint256 _actionRight,
+        uint256 _accessRight
+    ) internal {
+        require(_isAccessRightValid(_actionRight, _accessRight), "LibWhitelist: Invalid Rights");
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        s.whitelistAccessRights[_whitelistId][_actionRight] = _accessRight;
+    }
+
+    function _isAccessRightValid(uint256 _actionRight, uint256 _accessRight) internal pure returns (bool) {
+        // This action right limits borrowers in a whitelist to a number of borrowed gotchis. 0 is unlimited
+        if (_actionRight == 0) {
+            return _accessRight <= 1;
+        } else {
+            return false;
+        }
+    }
+
+    function borrowLimit(uint32 _whitelistId) internal view returns (uint256) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        return s.whitelistAccessRights[_whitelistId][0];
     }
 }

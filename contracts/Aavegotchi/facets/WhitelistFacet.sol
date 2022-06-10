@@ -56,6 +56,17 @@ contract WhitelistFacet is Modifiers {
         emit WhitelistOwnershipTransferred(_whitelistId, _whitelistOwner);
     }
 
+    function setWhitelistAccessRight(
+        uint32 _whitelistId,
+        uint256 _actionRight,
+        uint256 _accessRight
+    ) external {
+        require(LibWhitelist._whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
+        require(LibWhitelist.checkWhitelistOwner(_whitelistId), "WhitelistFacet: Not whitelist owner");
+
+        LibWhitelist.setWhitelistAccessRight(_whitelistId, _actionRight, _accessRight);
+    }
+
     function whitelistExists(uint32 whitelistId) external view returns (bool exists) {
         exists = LibWhitelist._whitelistExists(whitelistId);
     }

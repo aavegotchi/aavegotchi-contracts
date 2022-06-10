@@ -3,6 +3,7 @@ pragma solidity 0.8.1;
 import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {ILink} from "../interfaces/ILink.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
@@ -292,6 +293,8 @@ struct AppStorage {
     address realmAddress;
     // side => (itemTypeId => (slotPosition => exception Bool)) SVG exceptions
     mapping(bytes32 => mapping(uint256 => mapping(uint256 => bool))) wearableExceptions;
+    mapping(uint32 => mapping(uint256 => uint256)) whitelistAccessRights; // whitelistId => action right => access right
+    mapping(uint32 => mapping(address => EnumerableSet.UintSet)) whitelistGotchiBorrows; // whitelistId => borrower => gotchiId set
 }
 
 library LibAppStorage {
