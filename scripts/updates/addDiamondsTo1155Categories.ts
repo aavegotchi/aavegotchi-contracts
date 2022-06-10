@@ -4,11 +4,10 @@ import { sendToMultisig } from "../libraries/multisig/multisig";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 /* TODO: replace follwowing values */
-// const installationDiamond = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
-// const installationTypes = [1]; //golden aaltar lvl1
-
-const tileDiamond = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
-const tileTypes = [1, 2, 3];
+const installationDiamond = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
+const typeStartId = 19;
+const typeEndId = 54;
+const category = 4;
 /* TODO: end */
 
 async function main() {
@@ -39,19 +38,11 @@ async function main() {
 
   const categories = [];
   // adding installation type categories
-  // for (let i = 0; i < installationTypes.length; i++) {
-  //   categories.push({
-  //     erc1155TokenAddress: installationDiamond,
-  //     erc1155TypeId: installationTypes[i],
-  //     category: 4,
-  //   });
-  // }
-  // adding tile type categories
-  for (let i = 0; i < tileTypes.length; i++) {
+  for (let i = typeStartId; i <= typeEndId; i++) {
     categories.push({
-      erc1155TokenAddress: tileDiamond,
-      erc1155TypeId: tileTypes[i],
-      category: 5,
+      erc1155TokenAddress: installationDiamond,
+      erc1155TypeId: i,
+      category: category,
     });
   }
 
@@ -67,22 +58,6 @@ async function main() {
     }
     console.log("Adding categories succeeded:", tx.hash);
 
-    console.log("Checking installation diamond categories...");
-    // for (let i = 0; i < installationTypes.length; i++) {
-    //   const category = await erc1155MarketplaceFacet.getERC1155Category(
-    //     installationDiamond,
-    //     installationTypes[i]
-    //   );
-    //   console.log(category.eq(4) ? "correct" : "incorrect");
-    // }
-    console.log("Checking installation diamond categories...");
-    for (let i = 0; i < tileTypes.length; i++) {
-      const category = await erc1155MarketplaceFacet.getERC1155Category(
-        tileDiamond,
-        tileTypes[i]
-      );
-      console.log(category.eq(5) ? "correct" : "incorrect");
-    }
   } else {
     try {
       tx = await erc1155MarketplaceFacet.setERC1155Categories(categories, {
@@ -91,19 +66,20 @@ async function main() {
       await tx.wait();
       console.log("tx:", tx);
 
-      for (let i = 0; i < tileTypes.length; i++) {
-        const category = await erc1155MarketplaceFacet.getERC1155Category(
-          tileDiamond,
-          tileTypes[i]
-        );
-        console.log(category.eq(5) ? "correct" : "incorrect");
-      }
-
       //@ts-ignore
-      //   await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, ethers);
+      // await sendToMultisig(process.env.DIAMOND_UPGRADER, signer, tx, ethers);
     } catch (error) {
       console.log("error:", error);
     }
+  }
+
+  console.log("Checking installation diamond categories...");
+  for (let i = typeStartId; i <= typeEndId; i++) {
+    const categorySaved = await erc1155MarketplaceFacet.getERC1155Category(
+      installationDiamond,
+      i
+    );
+    console.log(categorySaved.eq(category) ? `correct: ${i}` : `incorrect: ${i}`);
   }
 }
 
