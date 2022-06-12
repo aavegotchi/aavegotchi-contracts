@@ -10,8 +10,8 @@ import {
 export const maticGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic";
 
-export const maticLendingUrl: string =
-  "https://api.thegraph.com/subgraphs/name/froid1911/aavegotchi-lending";
+// export const maticLendingUrl: string =
+// "https://api.thegraph.com/subgraphs/name/froid1911/aavegotchi-lending";
 export const ethGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-ethereum";
 
@@ -149,7 +149,7 @@ export async function getBorrowedGotchis(addresses: string[]) {
 
   if (queryData == "{}") return [];
 
-  const res = await request(maticLendingUrl, queryData);
+  const res = await request(maticGraphUrl, queryData);
 
   let finalResponse: LendedGotchis[] = [];
   for (let index = 0; index < batches; index++) {
@@ -337,7 +337,7 @@ export async function fetchGotchiLending(total: GotchiLending[], skip: number) {
   }
 }`;
 
-  const result: LendingRes = await request(maticLendingUrl, query);
+  const result: LendingRes = await request(maticGraphUrl, query);
 
   total = total.concat(result.gotchiLendings);
 
