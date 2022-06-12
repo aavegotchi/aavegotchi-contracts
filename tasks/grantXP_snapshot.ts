@@ -165,11 +165,15 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
         // if (index < 13) continue;
 
         const offset = batchSize * index;
-        const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
+        const sendTokenIds = tokenIds
+          .slice(offset, offset + batchSize)
+          .filter((val) => val !== undefined);
 
         console.log(
           `Sending ${xpAmount} XP to ${sendTokenIds.length} Aavegotchis `
         );
+
+        console.log("send token ids:", sendTokenIds);
 
         const tx: ContractTransaction = await dao.grantExperience(
           sendTokenIds,

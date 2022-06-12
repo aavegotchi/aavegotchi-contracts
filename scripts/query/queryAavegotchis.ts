@@ -4,6 +4,7 @@ import {
   GotchisOwned,
   LendedGotchis,
   UserGotchisOwned,
+  VaultGotchis,
   VaultGotchisOwned,
 } from "../../types";
 
@@ -48,11 +49,15 @@ interface QuerySubgraphResponse {
   batch3: UserGotchisOwned[];
   batch4: UserGotchisOwned[];
   id: string;
+  gotchisLentOut?: {
+    id: string;
+  }[];
 }
 
 async function querySubgraph(
   addresses: string[],
   url: string,
+  includeLentGotchis: boolean,
   includeStatus = true
 ) {
   const batchSize = 100;
@@ -71,6 +76,13 @@ async function querySubgraph(
         (add: string) => '"' + add.toLowerCase() + '"'
       )}]},first:${batchSize}) {
         id
+        ${
+          includeLentGotchis
+            ? `gotchisLentOut(first:1000) {
+          id
+        }`
+            : ""
+        }
         ${addGotchisOwned(includeStatus)}
       }
   `);
@@ -91,6 +103,32 @@ async function querySubgraph(
     userBatches.forEach((userResponse) => {
       let userGotchisOwned: GotchisOwned[] = [];
 
+      //Add lent out gotchis
+
+      if (
+        userResponse.gotchisLentOut &&
+        userResponse.gotchisLentOut.length >= 1000
+      ) {
+        console.log(
+          `batch ${index} length: ${userResponse.gotchisLentOut.length}`
+        );
+        throw new Error("Slow down bub, you're probably missing some gotchis!");
+      }
+
+      if (
+        userResponse.gotchisLentOut &&
+        userResponse.gotchisLentOut.length > 0
+      ) {
+        userGotchisOwned = userGotchisOwned.concat(
+          userResponse.gotchisLentOut.map((val) => {
+            return {
+              id: val.id,
+              status: "3",
+            };
+          })
+        );
+      }
+
       for (let index = 0; index < 5; index++) {
         //@ts-ignore
         const gotchis: GotchisOwned[] = userResponse[`batch${index}`];
@@ -99,6 +137,7 @@ async function querySubgraph(
 
       batchGotchis.push({
         gotchisOwned: userGotchisOwned,
+        // gotchisLentOut: gotchisLentOut,
         id: userResponse.id,
       });
     });
@@ -112,9 +151,9 @@ async function querySubgraph(
 export async function getSubgraphGotchis(
   addresses: string[]
 ): Promise<UserGotchisOwned[]> {
-  return await querySubgraph(addresses, maticGraphUrl);
+  return await querySubgraph(addresses, maticGraphUrl, true, true);
 }
-
+/* 
 export async function getBorrowedGotchis(addresses: string[]) {
   addresses = addresses.map((val) => val.toLowerCase());
 
@@ -211,7 +250,7 @@ export async function getBorrowedGotchis(addresses: string[]) {
   // console.log("user gotchis owned:", userGotchisOwned);
 
   return removeEmpty(userGotchisOwned);
-}
+} */
 
 export async function getVaultGotchis(
   addresses: string[]
@@ -258,6 +297,7 @@ export async function getVaultGotchis(
         return { id: gotchi.id, status: "3" };
       }),
       id: val.id,
+      gotchisLentOut: [],
     };
   });
 
@@ -269,7 +309,7 @@ export async function getEthSubgraphGotchis(
 ): Promise<UserGotchisOwned[]> {
   console.log("Fetching ETH subgraph gotchis");
 
-  return await querySubgraph(addresses, ethGraphUrl, false);
+  return await querySubgraph(addresses, ethGraphUrl, false, false);
 }
 
 export async function queryAavegotchis(ids: string[]) {
@@ -354,11 +394,11 @@ export async function getPolygonAndMainnetGotchis(
   //Remove duplicate addresses
   addresses = [...new Set(finalAddresses)].map((val) => val.toLowerCase());
 
-  let totalLendings: GotchiLending[] = [];
-  totalLendings = await fetchGotchiLending(totalLendings, 0);
-  console.log("Total open lendings found:", totalLendings.length);
+  // let totalLendings: GotchiLending[] = [];
+  // totalLendings = await fetchGotchiLending(totalLendings, 0);
+  // console.log("Total open lendings found:", totalLendings.length);
 
-  const batchSize = 1000;
+  const batchSize = 100;
   const batches = Math.ceil(addresses.length / batchSize);
   let polygonUsers: UserGotchisOwned[] = [];
   let mainnetUsers: UserGotchisOwned[] = [];
@@ -390,7 +430,7 @@ export async function getPolygonAndMainnetGotchis(
 
   const addressToGotchis: AddressToGotchi = {};
 
-  totalLendings.forEach((lending) => {
+  /*  totalLendings.forEach((lending) => {
     if (addresses.includes(lending.lender.toLowerCase())) {
       if (addressToGotchis[lending.lender]) {
         addressToGotchis[lending.lender] = [
@@ -401,7 +441,7 @@ export async function getPolygonAndMainnetGotchis(
         addressToGotchis[lending.lender] = [lending.gotchiTokenId];
       }
     } //else console.log("Not a lender");
-  });
+  }); */
 
   Object.entries(addressToGotchis).forEach((address) => {
     const gotchisOwned: GotchisOwned[] = address[1].map((val) => {
