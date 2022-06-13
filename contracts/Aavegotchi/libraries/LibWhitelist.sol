@@ -81,7 +81,7 @@ library LibWhitelist {
     function _isAccessRightValid(uint256 _actionRight, uint256 _accessRight) internal pure returns (bool) {
         // This action right limits borrowers in a whitelist to a number of borrowed gotchis. 0 is unlimited
         if (_actionRight == 0) {
-            return _accessRight <= 1;
+            return true;
         } else {
             return false;
         }
