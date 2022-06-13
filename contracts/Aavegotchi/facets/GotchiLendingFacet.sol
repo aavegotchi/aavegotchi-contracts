@@ -32,6 +32,7 @@ contract GotchiLendingFacet is Modifiers {
     ///@dev If the lending request exist, cancel it and replaces it with the new one
     ///@dev If the lending is active, unable to cancel
     function addGotchiListing(AddGotchiListing memory p) public {
+        require(p.whitelistId != 0, "GotchiLending: Must set whitelist");
         address sender = LibMeta.msgSender();
         address tokenOwner = s.aavegotchis[p.tokenId].owner;
         bool isLendingOperator = s.lendingOperators[tokenOwner][sender][p.tokenId];
@@ -47,6 +48,7 @@ contract GotchiLendingFacet is Modifiers {
             whitelistId: p.whitelistId,
             revenueTokens: p.revenueTokens
         });
+
         LibGotchiLending._addGotchiLending(addLendingStruct);
     }
 
@@ -142,6 +144,7 @@ contract GotchiLendingFacet is Modifiers {
         uint32 _whitelistId,
         address[] calldata _revenueTokens
     ) external {
+        require(_whitelistId != 0, "GotchiLending: Must set whitelist");
         uint8[3] memory revenueSplit = _revenueSplit;
         address[] memory revenueTokens = _revenueTokens;
         AddGotchiListing memory listing = AddGotchiListing({
