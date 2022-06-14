@@ -217,17 +217,17 @@ contract SvgViewsFacet is Modifiers {
 
         //Left
         bytes memory svg_ = getAavegotchiSideSvgLayers("left", _collateralType, _numericTraits, type(uint256).max - 1, _hauntId, equippedWearables);
-        svg_ = abi.encodePacked(addBodyAndWearableSideSvgLayers("left", svg_, equippedWearables));
+        svg_ = abi.encodePacked(svg_);
         ag_[1] = string(abi.encodePacked(viewBox, svg_, "</svg>"));
 
         //Right
         svg_ = getAavegotchiSideSvgLayers("right", _collateralType, _numericTraits, type(uint256).max - 1, _hauntId, equippedWearables);
-        svg_ = abi.encodePacked(addBodyAndWearableSideSvgLayers("right", svg_, equippedWearables));
+        svg_ = abi.encodePacked(svg_);
         ag_[2] = string(abi.encodePacked(viewBox, svg_, "</svg>"));
 
         //Back
         svg_ = getAavegotchiSideSvgLayers("back", _collateralType, _numericTraits, type(uint256).max - 1, _hauntId, equippedWearables);
-        svg_ = abi.encodePacked(addBodyAndWearableSideSvgLayers("back", svg_, equippedWearables));
+        svg_ = abi.encodePacked(svg_);
         ag_[3] = string(abi.encodePacked(viewBox, svg_, "</svg>"));
     }
 
