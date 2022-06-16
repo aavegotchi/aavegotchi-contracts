@@ -17,6 +17,7 @@ export async function upgrade() {
         "function setAccessRights(uint32[] memory _tokenId, uint256[] memory _action, uint256[] memory _access) external",
         "function getAccessRight(uint32 _tokenId, uint256 _action) external view returns (uint256)",
         "function getAccessRights(uint32[] memory _tokenIds, uint256[] memory _actions) external view returns (uint256[] memory)",
+        "function canChannelOnLending(uint32 _tokenId) external view returns (bool)",
       ],
       removeSelectors: [],
     },

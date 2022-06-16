@@ -46,4 +46,8 @@ contract AccessRightsFacet is Modifiers {
         }
         return _accesses;
     }
+
+    function canChannelOnLending(uint32 _tokenId) external view returns (bool) {
+        return s.gotchiAccessRights[_tokenId][0] == 0;
+    }
 }
