@@ -28,6 +28,8 @@ describe("Testing Baazaar Recipient", async function () {
     )) as ERC1155MarketplaceFacet;
   });
 
-  it("Profit Share is executed according to proper proportions", async function () {});
-  it("Recipient receives proper # of NFTs", async function () {});
+  it("ERC721 Profit Share is executed according to proper proportions", async function () {});
+  it("ERC721 Recipient receives proper # of NFTs", async function () {});
+  it("ERC1155 Profit Share is executed according to proper proportions", async function () {});
+  it("ERC1155 Recipient receives proper # of NFTs", async function () {});
 });

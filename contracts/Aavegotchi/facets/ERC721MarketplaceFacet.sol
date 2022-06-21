@@ -294,6 +294,22 @@ contract ERC721MarketplaceFacet is Modifiers {
         LibERC721Marketplace.cancelERC721Listing(_listingId, LibMeta.msgSender());
     }
 
+    struct BaazaarSplit {
+        uint256 daoShare;
+        uint256 pixelcraftShare;
+        uint256 playerRewardsShare;
+        uint256 sellerShare;
+    }
+
+    function getBaazaarSplit(uint256 _cost) internal pure returns (BaazaarSplit memory) {
+        uint256 daoShare = _cost / 100; //1%
+        uint256 pixelcraftShare = (_cost * 2) / 100; //2%
+        uint256 playerRewardsShare = _cost / 200; //0.5%
+        uint256 sellerAmount = _cost - (daoShare + pixelcraftShare + playerRewardsShare); //96.5%
+        return
+            BaazaarSplit({daoShare: daoShare, pixelcraftShare: pixelcraftShare, playerRewardsShare: playerRewardsShare, sellerShare: sellerAmount});
+    }
+
     ///@notice Allow a buyer to execute an open listing i.e buy the NFT
     ///@dev Will throw if the NFT has been sold or if the listing has been cancelled already
     ///@dev Will be deprecated soon.
@@ -313,17 +329,11 @@ contract ERC721MarketplaceFacet is Modifiers {
         LibERC721Marketplace.removeERC721ListingItem(_listingId, seller);
         LibERC721Marketplace.addERC721ListingItem(seller, listing.category, "purchased", _listingId);
 
-        uint256 daoShare = priceInWei / 100;
-        uint256 pixelCraftShare = (priceInWei * 2) / 100;
-        //AGIP6 adds on 0.5%
-        uint256 playerRewardsShare = priceInWei / 200;
-
-        uint256 transferAmount = priceInWei - (daoShare + pixelCraftShare + playerRewardsShare);
-        LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, pixelCraftShare);
-        LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, daoShare);
-        LibERC20.transferFrom(s.ghstContract, buyer, seller, transferAmount);
-        //AGIP6 adds on 0.5%
-        LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, playerRewardsShare);
+        BaazaarSplit memory split = getBaazaarSplit(listing.priceInWei);
+        LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, split.pixelcraftShare);
+        LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, split.daoShare);
+        LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, split.playerRewardsShare);
+        LibERC20.transferFrom(s.ghstContract, buyer, seller, split.sellerShare);
 
         if (listing.erc721TokenAddress == address(this)) {
             s.aavegotchis[listing.erc721TokenId].locked = false;
@@ -376,17 +386,11 @@ contract ERC721MarketplaceFacet is Modifiers {
         LibERC721Marketplace.removeERC721ListingItem(_listingId, seller);
         LibERC721Marketplace.addERC721ListingItem(seller, listing.category, "purchased", _listingId);
 
-        uint256 daoShare = priceInWei / 100;
-        uint256 pixelCraftShare = (priceInWei * 2) / 100;
-        //AGIP6 adds on 0.5%
-        uint256 playerRewardsShare = priceInWei / 200;
-
-        uint256 transferAmount = priceInWei - (daoShare + pixelCraftShare + playerRewardsShare);
-        LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, pixelCraftShare);
-        LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, daoShare);
-        LibERC20.transferFrom(s.ghstContract, buyer, seller, transferAmount);
-        //AGIP6 adds on 0.5%
-        LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, playerRewardsShare);
+        BaazaarSplit memory split = getBaazaarSplit(listing.priceInWei);
+        LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, split.pixelcraftShare);
+        LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, split.daoShare);
+        LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, split.playerRewardsShare);
+        LibERC20.transferFrom(s.ghstContract, buyer, seller, split.sellerShare);
 
         if (listing.erc721TokenAddress == address(this)) {
             s.aavegotchis[listing.erc721TokenId].locked = false;
