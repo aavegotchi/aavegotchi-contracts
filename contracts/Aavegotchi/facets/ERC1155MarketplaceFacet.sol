@@ -217,8 +217,25 @@ contract ERC1155MarketplaceFacet is Modifiers {
         LibERC1155Marketplace.cancelERC1155Listing(_listingId, LibMeta.msgSender());
     }
 
+    struct BaazaarSplit {
+        uint256 daoShare;
+        uint256 pixelcraftShare;
+        uint256 playerRewardsShare;
+        uint256 sellerShare;
+    }
+
+    function getBaazaarSplit(uint256 _cost) internal pure returns (BaazaarSplit memory) {
+        uint256 daoShare = _cost / 100;
+        uint256 pixelcraftShare = (_cost * 2) / 100;
+        uint256 playerRewardsShare = _cost / 200;
+        uint256 sellerAmount = _cost - (daoShare + pixelcraftShare + playerRewardsShare);
+        return
+            BaazaarSplit({daoShare: daoShare, pixelcraftShare: pixelcraftShare, playerRewardsShare: playerRewardsShare, sellerShare: sellerAmount});
+    }
+
     ///@notice Allow a buyer to execcute an open listing i.e buy the NFT
     ///@dev Will throw if the NFT has been sold or if the listing has been cancelled already
+    ///@dev Will be deprecated soon.
     ///@param _listingId The identifier of the listing to execute
     ///@param _quantity The amount of ERC1155 NFTs execute/buy
     ///@param _priceInWei the cost price of the ERC1155 NFTs individually
@@ -241,18 +258,11 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 cost = _quantity * _priceInWei;
         require(IERC20(s.ghstContract).balanceOf(buyer) >= cost, "ERC1155Marketplace: not enough GHST");
         {
-            // handles stack too deep error
-            uint256 daoShare = cost / 100;
-            uint256 pixelCraftShare = (cost * 2) / 100;
-            //AGIP6 adds on 0.5%
-            uint256 playerRewardsShare = cost / 200;
-
-            uint256 transferAmount = cost - (daoShare + pixelCraftShare + playerRewardsShare);
-            LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, pixelCraftShare);
-            LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, daoShare);
-            LibERC20.transferFrom(s.ghstContract, buyer, seller, transferAmount);
-            //AGIP6 adds on 0.5%
-            LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, playerRewardsShare);
+            BaazaarSplit memory split = getBaazaarSplit(cost);
+            LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, split.pixelcraftShare);
+            LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, split.daoShare);
+            LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, split.playerRewardsShare);
+            LibERC20.transferFrom(s.ghstContract, buyer, seller, split.sellerShare);
 
             listing.timeLastPurchased = block.timestamp;
             s.nextERC1155ListingId++;
@@ -291,6 +301,90 @@ contract ERC1155MarketplaceFacet is Modifiers {
             _listingId,
             seller,
             buyer,
+            listing.erc1155TokenAddress,
+            listing.erc1155TypeId,
+            listing.category,
+            _quantity,
+            listing.priceInWei,
+            block.timestamp
+        );
+    }
+
+    ///@notice Allow a buyer to execcute an open listing i.e buy the NFT on behalf of the recipient. Also checks to ensure the item details match the listing.
+    ///@dev Will throw if the NFT has been sold or if the listing has been cancelled already
+    ///@param _listingId The identifier of the listing to execute
+    ///@param _contractAddress The token contract address
+    ///@param _itemId the erc1155 token id
+    ///@param _quantity The amount of ERC1155 NFTs execute/buy
+    ///@param _priceInWei the cost price of the ERC1155 NFTs individually
+    ///@param _recipient the recipient of the item
+    function executeERC1155ListingToRecipient(
+        uint256 _listingId,
+        address _contractAddress,
+        uint256 _itemId,
+        uint256 _quantity,
+        uint256 _priceInWei,
+        address _recipient
+    ) external {
+        ERC1155Listing storage listing = s.erc1155Listings[_listingId];
+        require(_priceInWei == listing.priceInWei, "ERC1155Marketplace: wrong price or price changed");
+        require(listing.timeCreated != 0, "ERC1155Marketplace: listing not found");
+        require(listing.sold == false, "ERC1155Marketplace: listing is sold out");
+        require(listing.cancelled == false, "ERC1155Marketplace: listing is cancelled");
+        require(listing.erc1155TokenAddress == _contractAddress, "ERC1155Marketplace: Incorrect token address");
+        require(listing.erc1155TypeId == _itemId, "ERC1155Marketplace: Incorrect token id");
+        address buyer = LibMeta.msgSender();
+        address seller = listing.seller;
+        require(seller != buyer, "ERC1155Marketplace: buyer can't be seller");
+        require(_quantity > 0, "ERC1155Marketplace: _quantity can't be zero");
+        require(_quantity <= listing.quantity, "ERC1155Marketplace: quantity is greater than listing");
+        listing.quantity -= _quantity;
+        uint256 cost = _quantity * _priceInWei;
+        require(IERC20(s.ghstContract).balanceOf(buyer) >= cost, "ERC1155Marketplace: not enough GHST");
+        {
+            BaazaarSplit memory split = getBaazaarSplit(cost);
+            LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, split.pixelcraftShare);
+            LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, split.daoShare);
+            LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, split.playerRewardsShare);
+            LibERC20.transferFrom(s.ghstContract, buyer, seller, split.sellerShare);
+
+            listing.timeLastPurchased = block.timestamp;
+            s.nextERC1155ListingId++;
+            uint256 purchaseListingId = s.nextERC1155ListingId;
+            s.erc1155Listings[purchaseListingId] = ERC1155Listing({
+                listingId: purchaseListingId,
+                seller: seller,
+                erc1155TokenAddress: listing.erc1155TokenAddress,
+                erc1155TypeId: listing.erc1155TypeId,
+                category: listing.category,
+                quantity: _quantity,
+                priceInWei: _priceInWei,
+                timeCreated: block.timestamp,
+                timeLastPurchased: block.timestamp,
+                sourceListingId: _listingId,
+                sold: true,
+                cancelled: false
+            });
+            LibERC1155Marketplace.addERC1155ListingItem(seller, listing.category, "purchased", purchaseListingId);
+            if (listing.quantity == 0) {
+                listing.sold = true;
+                LibERC1155Marketplace.removeERC1155ListingItem(_listingId, seller);
+            }
+        }
+        // Have to call it like this because LibMeta.msgSender() gets in the way
+        if (listing.erc1155TokenAddress == address(this)) {
+            LibItems.removeFromOwner(seller, listing.erc1155TypeId, _quantity);
+            LibItems.addToOwner(_recipient, listing.erc1155TypeId, _quantity);
+            emit LibERC1155.TransferSingle(address(this), seller, _recipient, listing.erc1155TypeId, _quantity);
+            LibERC1155.onERC1155Received(address(this), seller, _recipient, listing.erc1155TypeId, _quantity, "");
+        } else {
+            // GHSTStakingDiamond
+            IERC1155(listing.erc1155TokenAddress).safeTransferFrom(seller, _recipient, listing.erc1155TypeId, _quantity, new bytes(0));
+        }
+        emit ERC1155ExecutedListing(
+            _listingId,
+            seller,
+            _recipient,
             listing.erc1155TokenAddress,
             listing.erc1155TypeId,
             listing.category,

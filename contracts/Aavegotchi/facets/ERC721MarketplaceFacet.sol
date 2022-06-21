@@ -293,6 +293,7 @@ contract ERC721MarketplaceFacet is Modifiers {
 
     ///@notice Allow a buyer to execute an open listing i.e buy the NFT
     ///@dev Will throw if the NFT has been sold or if the listing has been cancelled already
+    ///@dev Will be deprecated soon.
     ///@param _listingId The identifier of the listing to execute
     function executeERC721Listing(uint256 _listingId) external {
         ERC721Listing storage listing = s.erc721Listings[_listingId];
@@ -333,6 +334,69 @@ contract ERC721MarketplaceFacet is Modifiers {
             _listingId,
             seller,
             buyer,
+            listing.erc721TokenAddress,
+            listing.erc721TokenId,
+            listing.category,
+            listing.priceInWei,
+            block.timestamp
+        );
+    }
+
+    ///@notice Allow a buyer to execute an open listing i.e buy the NFT on behalf of another address (the recipient). Also checks to ensure the item details match the listing.
+    ///@dev Will throw if the NFT has been sold or if the listing has been cancelled already
+    ///@param _listingId The identifier of the listing to execute
+    ///@param _contractAddress The token contract address
+    ///@param _priceInWei The price of the item
+    ///@param _tokenId the tokenID of the item
+    ///@param _recipient The address to receive the NFT
+    function executeERC721ListingToRecipient(
+        uint256 _listingId,
+        address _contractAddress,
+        uint256 _priceInWei,
+        uint256 _tokenId,
+        address _recipient
+    ) external {
+        ERC721Listing storage listing = s.erc721Listings[_listingId];
+        require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
+        require(listing.cancelled == false, "ERC721Marketplace: listing cancelled");
+        require(listing.timeCreated != 0, "ERC721Marketplace: listing not found");
+        require(listing.erc721TokenId == _tokenId, "ERC721Marketplace: Incorrect tokenID");
+        require(listing.erc721TokenAddress == _contractAddress, "ERC721Marketplace: Incorrect token address");
+        require(listing.priceInWei == _priceInWei, "ERC721Marketplace: Incorrect price");
+        uint256 priceInWei = listing.priceInWei;
+        address buyer = LibMeta.msgSender();
+        address seller = listing.seller;
+        require(seller != buyer, "ERC721Marketplace: Buyer can't be seller");
+        require(IERC20(s.ghstContract).balanceOf(buyer) >= priceInWei, "ERC721Marketplace: Not enough GHST");
+
+        listing.timePurchased = block.timestamp;
+        LibERC721Marketplace.removeERC721ListingItem(_listingId, seller);
+        LibERC721Marketplace.addERC721ListingItem(seller, listing.category, "purchased", _listingId);
+
+        uint256 daoShare = priceInWei / 100;
+        uint256 pixelCraftShare = (priceInWei * 2) / 100;
+        //AGIP6 adds on 0.5%
+        uint256 playerRewardsShare = priceInWei / 200;
+
+        uint256 transferAmount = priceInWei - (daoShare + pixelCraftShare + playerRewardsShare);
+        LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, pixelCraftShare);
+        LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, daoShare);
+        LibERC20.transferFrom(s.ghstContract, buyer, seller, transferAmount);
+        //AGIP6 adds on 0.5%
+        LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, playerRewardsShare);
+
+        if (listing.erc721TokenAddress == address(this)) {
+            s.aavegotchis[listing.erc721TokenId].locked = false;
+            LibAavegotchi.transfer(seller, _recipient, listing.erc721TokenId);
+        } else {
+            // External contracts
+            IERC721(listing.erc721TokenAddress).safeTransferFrom(seller, _recipient, listing.erc721TokenId);
+        }
+
+        emit ERC721ExecutedListing(
+            _listingId,
+            seller,
+            _recipient,
             listing.erc721TokenAddress,
             listing.erc721TokenId,
             listing.category,
