@@ -31,6 +31,9 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 time
     );
 
+    ///@dev Is sent in tandem with ERC721ExecutedListing
+    event ERC721ExecutedToRecipient(uint256 indexed listingId, address indexed buyer, address indexed recipient);
+
     ///@notice Get an aavegotchi listing details through an identifier
     ///@dev Will throw if the listing does not exist
     ///@param _listingId The identifier of the listing to query
@@ -403,6 +406,7 @@ contract ERC721MarketplaceFacet is Modifiers {
             listing.priceInWei,
             block.timestamp
         );
+        emit ERC721ExecutedToRecipient(_listingId, buyer, _recipient);
     }
 
     ///@notice Update the ERC721 listing of an address

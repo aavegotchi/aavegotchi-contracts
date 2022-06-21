@@ -36,6 +36,9 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 time
     );
 
+    ///@dev Is sent in tandem with ERC1155ExecutedListing
+    event ERC1155ExecutedToRecipient(uint256 indexed listingId, address indexed buyer, address indexed recipient);
+
     event ERC1155ListingCancelled(uint256 indexed listingId);
 
     event ChangedListingFee(uint256 listingFeeInWei);
@@ -392,6 +395,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
             listing.priceInWei,
             block.timestamp
         );
+        emit ERC1155ExecutedToRecipient(_listingId, buyer, _recipient);
     }
 
     ///@notice Update the ERC1155 listing of an address
