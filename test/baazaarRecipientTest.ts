@@ -4,7 +4,11 @@
 //@ts-ignore
 import { ethers, network } from "hardhat";
 import { upgrade } from "../scripts/upgrades/upgrade-baazaarRecipient";
-import { ERC1155MarketplaceFacet, ERC721MarketplaceFacet } from "../typechain";
+import {
+  ERC1155MarketplaceFacet,
+  ERC721MarketplaceFacet,
+  IERC20,
+} from "../typechain";
 import {
   aavegotchiDAOAddress,
   aavegotchiDiamondAddressMatic,
@@ -14,13 +18,16 @@ import {
 } from "../helpers/constants";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
-import { impersonate } from "../scripts/helperFunctions";
+import { impersonate, maticDiamondAddress } from "../scripts/helperFunctions";
+
+let ghst: IERC20;
 
 async function getGHSTBalance(target: string) {
-  const ghst = await ethers.getContractAt(
+  ghst = (await ethers.getContractAt(
     "contracts/shared/interfaces/IERC20.sol:IERC20",
     ghstAddress
-  );
+  )) as IERC20;
+
   return ghst.balanceOf(target);
 }
 
@@ -28,6 +35,7 @@ describe("Testing Baazaar Recipient", async function () {
   //this.timeout(300000);
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   const recipient = "0x875425AF9bEA816F87cec7622b49F434Fb6A8166";
+  const ghstOwner = "0xbd3183e633CA6C5065a8A4693923B3CDE9E5175f";
   let erc721Facet: ERC721MarketplaceFacet;
   let erc1155Facet: ERC1155MarketplaceFacet;
   const ERC721ListingId = 232336;
@@ -35,8 +43,8 @@ describe("Testing Baazaar Recipient", async function () {
 
   // this.timeout(300000)
   before(async function () {
-    await upgrade();
-    const signer = await ethers.getSigner(recipient);
+    // await upgrade();
+    const signer = await ethers.getSigner(ghstOwner);
     erc721Facet = (await ethers.getContractAt(
       "ERC721MarketplaceFacet",
       diamondAddress,
@@ -49,10 +57,23 @@ describe("Testing Baazaar Recipient", async function () {
       signer
     )) as ERC1155MarketplaceFacet;
 
+    ghst = (await ethers.getContractAt(
+      "contracts/shared/interfaces/IERC20.sol:IERC20",
+      ghstAddress,
+      signer
+    )) as IERC20;
+
     await network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [recipient],
+      params: [ghstOwner],
     });
+
+    await network.provider.request({
+      method: "hardhat_setBalance",
+      params: [ghstOwner, "0x1000000000000000000000000000000000000000"],
+    });
+    //aprprove
+    await ghst.approve(maticDiamondAddress, ethers.utils.parseEther("1000"));
   });
 
   it("ERC721 Profit Share is executed according to proper proportions and receives correct # of NFTs", async function () {
