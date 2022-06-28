@@ -2,7 +2,7 @@ import { ItemTypeInputNew } from "../../../scripts/itemTypeHelpers";
 
 export const itemTypes: ItemTypeInputNew[] = [
   {
-    name: "CHAAMPION of Rarity Farming SZN3 (Rarity)", //0
+    name: "CHAAMPION of Rarity Farming SZN3 (Rarity)",
     description:
       "Scored across all four rounds, this Aavegotchi is the ultimate chaampion of RARITY for Rarity Farming SZN 3. Aamazing! From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 316,
@@ -24,7 +24,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "CHAAMPION of Rarity Farming SZN3 (Kinship)", //1
+    name: "CHAAMPION of Rarity Farming SZN3 (Kinship)",
     description:
       "Scored across all four rounds, this Aavegotchi is the ultimate chaampion of KINSHIP for Rarity Farming SZN 3. Aamazing! From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 317,
@@ -46,7 +46,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "CHAAMPION of Rarity Farming SZN3 (XP)", //2
+    name: "CHAAMPION of Rarity Farming SZN3 (XP)",
     description:
       "Scored across all four rounds, this Aavegotchi is the ultimate chaampion of XP for Rarity Farming SZN 3. Aamazing! From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 318,
@@ -68,7 +68,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN3 RARITY 2nd Place", //3
+    name: "Rarity Farming SZN3 RARITY 2nd Place",
     description:
       "Scored across all four rounds, this Aavegotchi is the 2nd highest ranked of all RARITY for Rarity Farming SZN 3. Incredible! From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 319,
@@ -90,7 +90,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN3 KINSHIP 2nd Place", //4
+    name: "Rarity Farming SZN3 KINSHIP 2nd Place",
     description:
       "Scored across all four rounds, this Aavegotchi is the 2nd highest ranked of all KINSHIP for Rarity Farming SZN 3. Incredible! From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 320,
@@ -112,7 +112,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN3 XP 2nd Place", //5
+    name: "Rarity Farming SZN3 XP 2nd Place",
     description:
       "Scored across all four rounds, this Aavegotchi is the 2nd highest ranked of all XP for Rarity Farming SZN 3. Incredible! From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 321,
@@ -134,7 +134,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN3 RARITY 3rd Place", //6
+    name: "Rarity Farming SZN3 RARITY 3rd Place",
     description:
       "Scored across all four rounds, this Aavegotchi is the 3rd highest ranked of all RARITY for Rarity Farming SZN 3. Impressive! From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 322,
@@ -156,7 +156,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN3 KINSHIP 3rd Place", //7
+    name: "Rarity Farming SZN3 KINSHIP 3rd Place",
     description:
       "Scored across all four rounds, this Aavegotchi is the 3rd highest ranked of all KINSHIP for Rarity Farming SZN 3. Impressive! From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 323,
@@ -178,7 +178,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN3 XP 3rd Place", //8
+    name: "Rarity Farming SZN3 XP 3rd Place",
     description:
       "Scored across all four rounds, this Aavegotchi is the 3rd highest ranked of all XP for Rarity Farming SZN 3. Impressive! From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 324,
@@ -200,7 +200,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN3 Raanked", //9
+    name: "Rarity Farming SZN3 Raanked",
     description:
       "This Aavegotchi achieved leaderboard ranking in at least one category during the third season of Rarity Farming. From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 325,
@@ -222,7 +222,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN3 RARITY Top 10", //10
+    name: "Rarity Farming SZN3 RARITY Top 10",
     description:
       "This Aavegotchi achieved a rank in the top 10 of RARITY for Rarity Farming SZN 3. From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 326,
@@ -244,7 +244,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN3 KINSHIP Top 10", //11
+    name: "Rarity Farming SZN3 KINSHIP Top 10",
     description:
       "This Aavegotchi achieved a rank in the top 10 of KINSHIP for Rarity Farming SZN 3. From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 327,
@@ -266,7 +266,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN3 XP Top 10", //12
+    name: "Rarity Farming SZN3 XP Top 10",
     description:
       "This Aavegotchi achieved a rank in the top 10 of XP for Rarity Farming SZN 3. From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 328,
@@ -288,7 +288,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN3 RARITY Top 100", //13
+    name: "Rarity Farming SZN3 RARITY Top 100",
     description:
       "This Aavegotchi achieved a rank in the top 100 of RARITY for Rarity Farming SZN 3. From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 329,
@@ -310,7 +310,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN3 KINSHIP Top 100", //14
+    name: "Rarity Farming SZN3 KINSHIP Top 100",
     description:
       "This Aavegotchi achieved a rank in the top 100 of KINSHIP for Rarity Farming SZN 3. From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 330,
@@ -332,7 +332,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     canPurchaseWithGhst: false,
   },
   {
-    name: "Rarity Farming SZN3 XP Top 100", //15
+    name: "Rarity Farming SZN3 XP Top 100",
     description:
       "This Aavegotchi achieved a rank in the top 100 of XP for Rarity Farming SZN 3. From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
     svgId: 331,
