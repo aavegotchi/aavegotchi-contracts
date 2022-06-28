@@ -376,10 +376,20 @@ contract SvgFacet is Modifiers {
         bytes32 front = LibSvg.bytesToBytes32("wearables-", "front");
 
         svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable, layers.hands);
-        if (s.wearableExceptions[front][equippedWearables[2]][2] && !s.wearableExceptions[front][equippedWearables[1]][1]) {
-            svg_ = abi.encodePacked(svg_, layers.eyes, layers.face, layers.head);
+        //eyes and head exceptions
+        if (
+            s.wearableExceptions[front][equippedWearables[2]][2] &&
+            s.wearableExceptions[front][equippedWearables[3]][3] &&
+            equippedWearables[2] != 301 /*alluring eyes*/
+        ) {
+            svg_ = abi.encodePacked(svg_, layers.face, layers.head, layers.eyes);
+            //face exceptions
         } else if (s.wearableExceptions[front][equippedWearables[1]][1]) {
             svg_ = abi.encodePacked(svg_, layers.eyes, layers.head, layers.face);
+        } else if (
+            equippedWearables[2] == 301 /*aave mask*/
+        ) {
+            svg_ = abi.encodePacked(svg_, layers.eyes, layers.face, layers.head);
         } else {
             svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head);
         }
