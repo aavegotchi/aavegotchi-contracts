@@ -57,7 +57,6 @@ async function main() {
       throw Error(`Adding categories failed: ${tx.hash}`);
     }
     console.log("Adding categories succeeded:", tx.hash);
-
   } else {
     try {
       tx = await erc1155MarketplaceFacet.setERC1155Categories(categories, {
@@ -79,7 +78,9 @@ async function main() {
       installationDiamond,
       i
     );
-    console.log(categorySaved.eq(category) ? `correct: ${i}` : `incorrect: ${i}`);
+    console.log(
+      categorySaved.eq(category) ? `correct: ${i}` : `incorrect: ${i}`
+    );
   }
 }
 
