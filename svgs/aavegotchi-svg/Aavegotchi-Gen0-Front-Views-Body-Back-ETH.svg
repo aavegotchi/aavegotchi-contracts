@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 25.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns:v="https://vecta.io/nano"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64"
+	 style="enable-background:new 0 0 64 64;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#64438E;}
+	.st1{fill:#EDD3FD;}
+	.st2{fill:#FFFFFF;}
+</style>
+<g>
+	<polygon class="st0" points="47,14 47,12 45,12 45,10 41,10 41,8 37,8 37,6 27,6 27,8 23,8 23,10 19,10 19,12 17,12 17,14 15,14 
+		15,55 19,55 19,53 24,53 24,55 29,55 29,53 35,53 35,55 40,55 40,53 45,53 45,55 49,55 49,14 	"/>
+	<polygon class="st1" points="45,14 45,12 41,12 41,10 37,10 37,8 27,8 27,10 23,10 23,12 19,12 19,14 17,14 17,53 19,53 19,51 
+		24,51 24,53 29,53 29,51 35,51 35,53 40,53 40,51 45,51 45,53 47,53 47,14 	"/>
+	<path class="st2" d="M18,49h2v-1h2v1h2v2h5v-2h2v-1h2v1h2v2h5v-2h2v-1h2v1h1V14h-4v-2h-4v-2h-5V9h-5v2h-4v2h-4v2h-1V49z"/>
+</g>
+</svg>

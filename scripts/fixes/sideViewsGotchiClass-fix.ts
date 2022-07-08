@@ -2,6 +2,7 @@
 /* eslint prefer-const: "off" */
 import { ethers, network } from "hardhat";
 import { aavegotchiSvgs } from "../../svgs/aavegotchi-side-typeScript";
+import { aavegotchiSvgs as frontGotchiSvgs } from "../../svgs/aavegotchi-typescript";
 import { Signer } from "@ethersproject/abstract-signer";
 
 async function main() {
@@ -73,6 +74,10 @@ async function main() {
       itemIds[i],
       signer
     );
+  }
+
+  for (var i = 0; i < itemIds.length; i++) {
+    await updateSvgs(frontGotchiSvgs, "aavegotchi", itemIds[i], signer);
   }
 }
 
