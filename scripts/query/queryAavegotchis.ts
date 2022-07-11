@@ -18,6 +18,35 @@ export const ethGraphUrl: string =
 export const vaultGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/gotchi-vault";
 
+function getUsersWithGotchisOfAddresses(
+  addresses: string[],
+  index: Number = 0
+) {
+  let addressesString = addresses.map((e) => `"${e}"`).join(",");
+  let query = `
+    {users(skip: ${index} first: 1000 where: {id_in: [${addressesString}]}) {
+      id
+      gotchisLentOut
+      batch1: gotchisOwned(first: 1000) {
+        id
+      }
+      batch2: gotchisOwned(first: 1000 skip: 1000) {
+        id
+      }
+      batch3: gotchisOwned(first: 1000 skip: 2000) {
+        id
+      }
+      batch4: gotchisOwned(first: 1000 skip: 3000) {
+        id
+      }
+      batch5: gotchisOwned(first: 1000 skip: 4000) {
+        id
+      }
+    }}
+    `;
+  return request(maticGraphUrl, query);
+}
+
 function removeEmpty(userGotchisOwned: UserGotchisOwned[]): UserGotchisOwned[] {
   let removeEmpty: UserGotchisOwned[] = [];
   userGotchisOwned.forEach((element) => {
@@ -362,28 +391,27 @@ export async function getPolygonAndMainnetGotchis(
   //Remove duplicate addresses
   addresses = [...new Set(finalAddresses)].map((val) => val.toLowerCase());
   console.log("Addresses: ", addresses.length);
-  let addressesString = addresses.map((e) => `"${e}"`).join(",");
-  // get gotchis and lentout
-  // @todo: add batching
-  let query = `
-    {users(first: 1000 where: {id_in: [${addressesString}]}) {
-      id
-      gotchisLentOut
-      gotchisOwned {
-        id
-      }
-    }}
-    `;
 
+  // get gotchis and lentout
   let gotchiIds: any[] = [];
   let fetchedAddresses: string[] = [];
-  const result: any = await request(maticGraphUrl, query);
-  result.users.forEach((e: any) => {
-    gotchiIds = gotchiIds.concat(e.gotchisLentOut);
-    let gotchisOwned = e.gotchisOwned.map((f: any) => f.id);
-    gotchiIds = gotchiIds.concat(gotchisOwned);
-    fetchedAddresses.push(e.id);
-  });
+  let prevLength = 0;
+  let index = 0;
+  do {
+    const result = await getUsersWithGotchisOfAddresses(addresses, index);
+    index += 1000;
+    prevLength = gotchiIds.length;
+    result.users.forEach((e: any) => {
+      gotchiIds = gotchiIds.concat(e.gotchisLentOut);
+      let gotchisOwned = e.batch1.map((f: any) => f.id);
+      gotchisOwned = gotchisOwned.concat(e.batch2.map((f: any) => f.id));
+      gotchisOwned = gotchisOwned.concat(e.batch3.map((f: any) => f.id));
+      gotchisOwned = gotchisOwned.concat(e.batch4.map((f: any) => f.id));
+      gotchisOwned = gotchisOwned.concat(e.batch5.map((f: any) => f.id));
+      gotchiIds = gotchiIds.concat(gotchisOwned);
+      fetchedAddresses.push(e.id);
+    });
+  } while (gotchiIds.length != prevLength);
 
   const batchSize = 1000;
   const batches = Math.ceil(addresses.length / batchSize);
