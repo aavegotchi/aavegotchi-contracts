@@ -327,6 +327,7 @@ export async function fetchGotchiLending(total: GotchiLending[], skip: number) {
 
   let skipCount = skip * 1000;
   //First get all open Gotchi Lendings
+
   const query = `{
   gotchiLendings(first:1000 where:{timeAgreed_gt:0, gotchiTokenId_gt:${skipCount}, gotchiTokenId_lt:${
     (skip + 1) * 1000
@@ -350,10 +351,18 @@ export async function getPolygonAndMainnetGotchis(
   addresses: string[],
   hre: HardhatRuntimeEnvironment
 ) {
+  //Queries
+  //Aavegotchis in ATTENDEE's wallet
+  //Aavegotchis owned by ATTENDEE but are borrowed out
+  //Aavegotchis in the VAULT that are owned by ATTENDEE
+  //Aavegotchis in the VAULT that are owned by ATTENDEE but borrowed out
+  //Aavegotchis owned by ATTENDEE on Ethereum
+
   let finalAddresses: string[] = await resolveAddresses(addresses, hre);
   //Remove duplicate addresses
   addresses = [...new Set(finalAddresses)].map((val) => val.toLowerCase());
 
+  //Fetch all open Gotchi Lendings
   let totalLendings: GotchiLending[] = [];
   totalLendings = await fetchGotchiLending(totalLendings, 0);
   console.log("Total open lendings found:", totalLendings.length);
@@ -363,14 +372,12 @@ export async function getPolygonAndMainnetGotchis(
   let polygonUsers: UserGotchisOwned[] = [];
   let mainnetUsers: UserGotchisOwned[] = [];
 
-  //Polygon
+  //Fetch gotchis in wallet on Polygon
   for (let index = 0; index < batches; index++) {
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
     console.log(
-      `Fetching batch of ${batch.length} gotchis from MATIC SUBGRAPH`
+      `Fetching batch of ${batch.length} addresses from MATIC SUBGRAPH`
     );
-
-    //Get Polygon
     const users: UserGotchisOwned[] = await getSubgraphGotchis(batch);
 
     console.log(
@@ -381,7 +388,7 @@ export async function getPolygonAndMainnetGotchis(
     polygonUsers = polygonUsers.concat(users);
   }
 
-  //Borrowed Gotchis
+  //Fetch borrowed gotchis
   const borrowedGotchis: UserGotchisOwned[] = [];
 
   interface AddressToGotchi {
@@ -439,7 +446,7 @@ export async function getPolygonAndMainnetGotchis(
   }
   // }
 
-  // //Polygon (Vault)
+  // Fetch Gotchis in Vault
   for (let index = 0; index < batches; index++) {
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
     const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(batch);
@@ -453,6 +460,8 @@ export async function getPolygonAndMainnetGotchis(
       polygonUsers = polygonUsers.concat(vaultUsers);
     }
   }
+
+  //Aavegotchis in the VAULT that are owned by ATTENDEE but borrowed out
 
   //Ethereum
   for (let index = 0; index < batches; index++) {

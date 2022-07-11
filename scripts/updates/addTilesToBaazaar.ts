@@ -4,7 +4,7 @@ import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 /* TODO: replace follwowing values */
 const tileDiamond = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
-const tileIds = [5]; //mythical rug
+const tileIds = [7]; //godlike rug
 const category = 5;
 /* TODO: end */
 
