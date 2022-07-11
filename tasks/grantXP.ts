@@ -6,6 +6,8 @@ import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import { NonceManager } from "@ethersproject/experimental";
+import { ethers } from "hardhat";
+import { getAddress } from "ethers/lib/utils";
 
 interface TaskArgs {
   filename: string;
@@ -45,7 +47,6 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     const diamondAddress = maticDiamondAddress;
     const gameManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
-    console.log(gameManager);
     let signer: Signer;
     const testing = ["hardhat", "localhost"].includes(hre.network.name);
     if (testing) {
@@ -74,12 +75,8 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     ).connect(managedSigner) as DAOFacet;
 
     for (let index = 0; index < batches; index++) {
-      console.log("Current batch id:", index);
-
       const offset = batchSize * index;
       const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
-
-      console.log("send token ids:", sendTokenIds);
 
       // sendTokenIds.forEach((id: string) => {
       //   console.log(id);

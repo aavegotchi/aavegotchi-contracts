@@ -361,107 +361,43 @@ export async function getPolygonAndMainnetGotchis(
   let finalAddresses: string[] = await resolveAddresses(addresses, hre);
   //Remove duplicate addresses
   addresses = [...new Set(finalAddresses)].map((val) => val.toLowerCase());
+  console.log("Addresses: ", addresses.length);
+  let addressesString = addresses.map((e) => `"${e}"`).join(",");
+  // get gotchis and lentout
+  // @todo: add batching
+  let query = `
+    {users(first: 1000 where: {id_in: [${addressesString}]}) {
+      id
+      gotchisLentOut
+      gotchisOwned {
+        id
+      }
+    }}
+    `;
 
-  //Fetch all open Gotchi Lendings
-  let totalLendings: GotchiLending[] = [];
-  totalLendings = await fetchGotchiLending(totalLendings, 0);
-  console.log("Total open lendings found:", totalLendings.length);
+  let gotchiIds: any[] = [];
+  let fetchedAddresses: string[] = [];
+  const result: any = await request(maticGraphUrl, query);
+  result.users.forEach((e: any) => {
+    gotchiIds = gotchiIds.concat(e.gotchisLentOut);
+    let gotchisOwned = e.gotchisOwned.map((f: any) => f.id);
+    gotchiIds = gotchiIds.concat(gotchisOwned);
+    fetchedAddresses.push(e.id);
+  });
 
   const batchSize = 1000;
   const batches = Math.ceil(addresses.length / batchSize);
-  let polygonUsers: UserGotchisOwned[] = [];
   let mainnetUsers: UserGotchisOwned[] = [];
-
-  //Fetch gotchis in wallet on Polygon
-  for (let index = 0; index < batches; index++) {
-    const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
-    console.log(
-      `Fetching batch of ${batch.length} addresses from MATIC SUBGRAPH`
-    );
-    const users: UserGotchisOwned[] = await getSubgraphGotchis(batch);
-
-    console.log(
-      `-Found ${users.length} users with ${users
-        .map((val) => val.gotchisOwned.length)
-        .reduce((prev, current) => prev + current)} Gotchis in Matic subgraph`
-    );
-    polygonUsers = polygonUsers.concat(users);
-  }
-
-  //Fetch borrowed gotchis
-  const borrowedGotchis: UserGotchisOwned[] = [];
-
-  interface AddressToGotchi {
-    [address: string]: string[];
-  }
-
-  const addressToGotchis: AddressToGotchi = {};
-
-  totalLendings.forEach((lending) => {
-    if (addresses.includes(lending.lender.toLowerCase())) {
-      if (addressToGotchis[lending.lender]) {
-        addressToGotchis[lending.lender] = [
-          ...addressToGotchis[lending.lender],
-          lending.gotchiTokenId,
-        ];
-      } else {
-        addressToGotchis[lending.lender] = [lending.gotchiTokenId];
-      }
-    } //else console.log("Not a lender");
-  });
-
-  Object.entries(addressToGotchis).forEach((address) => {
-    const gotchisOwned: GotchisOwned[] = address[1].map((val) => {
-      return {
-        id: val,
-        status: "3",
-      };
-    });
-
-    borrowedGotchis.push({
-      id: address[0],
-      gotchisOwned: gotchisOwned,
-    });
-  });
-
-  // console.log("borrowed:", borrowedGotchis);
-
-  // for (let index = 0; index < batches; index++) {
-  //   const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
-
-  //   console.log(
-  //     `Fetching batch of ${batch.length} gotchis from LENDING SUBGRAPH`
-  //   );
-  //   const borrowedGotchis: UserGotchisOwned[] = await getBorrowedGotchis(batch);
-
-  if (borrowedGotchis.length > 0) {
-    console.log(
-      `-Found ${borrowedGotchis.length} users with ${borrowedGotchis
-        .map((val) => val.gotchisOwned.length)
-        .reduce(
-          (prev, current) => prev + current
-        )} Gotchis in Borrowed subgraph`
-    );
-    polygonUsers = polygonUsers.concat(borrowedGotchis);
-  }
-  // }
 
   // Fetch Gotchis in Vault
   for (let index = 0; index < batches; index++) {
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
     const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(batch);
-
-    if (vaultUsers.length > 0) {
-      console.log(
-        `-Found ${vaultUsers.length} users with ${vaultUsers
-          .map((val) => val.gotchisOwned.length)
-          .reduce((prev, current) => prev + current)} Gotchis in Vault subgraph`
-      );
-      polygonUsers = polygonUsers.concat(vaultUsers);
-    }
+    vaultUsers.forEach((e) => {
+      gotchiIds = gotchiIds.concat(e.gotchisOwned.map((f) => f.id));
+      fetchedAddresses.push(e.id);
+    });
   }
-
-  //Aavegotchis in the VAULT that are owned by ATTENDEE but borrowed out
 
   //Ethereum
   for (let index = 0; index < batches; index++) {
@@ -473,17 +409,6 @@ export async function getPolygonAndMainnetGotchis(
     }
   }
 
-  let tokenIds: string[] = [];
-  let notGotchis = 0;
-
-  //Handle Polygon gotchis
-  polygonUsers.forEach((user) => {
-    user.gotchisOwned.forEach((gotchi) => {
-      if (gotchi.status === "3") tokenIds.push(gotchi.id);
-      else notGotchis++;
-    });
-  });
-
   //Handle mainnet Gotchis
   const mainnetTokenIds: string[] = [];
   mainnetUsers.forEach((user) => {
@@ -494,37 +419,19 @@ export async function getPolygonAndMainnetGotchis(
   //then get gotchi object on polygon for those gotchi ids to ensure they are gotchis (not portals)
   const finalMainnetIds = await queryAavegotchis(mainnetTokenIds);
   finalMainnetIds.aavegotchis.forEach((gotchi: GotchisOwned) => {
-    if (gotchi.status === "3") tokenIds.push(gotchi.id);
-    else notGotchis++;
+    if (gotchi.status === "3") gotchiIds.push(gotchi.id);
   });
 
   //Remove duplicates
-  tokenIds = [...new Set(tokenIds)];
-  //Double check
-  let checked: string[] = [];
-  tokenIds.forEach((id) => {
-    if (checked.includes(id)) throw new Error(`Duplicate ${id}`);
-    checked.push(id);
-  });
+  let tokenIds = [...new Set(gotchiIds)];
+  console.log("Final token Ids: " + tokenIds.length);
+  fetchedAddresses = fetchedAddresses.concat(mainnetUsers.map((e) => e.id));
+  let finalUsers = [...new Set(fetchedAddresses)];
+  console.log("Final users: " + finalUsers.length);
 
-  const finalUsers = polygonUsers.concat(mainnetUsers);
-
-  //Console logs
-  const polygonGotchis = polygonUsers
-    .map((item) => item.gotchisOwned.length)
-    .reduce((agg, cur) => agg + cur);
   console.log(
-    `Found ${polygonUsers.length} Polygon Users with ${polygonGotchis} Gotchis`
+    "not found: " + addresses.filter((e) => !finalUsers.includes(e)).length
   );
-
-  if (mainnetUsers.length > 0) {
-    const mainnetGotchis = mainnetUsers
-      .map((item) => item.gotchisOwned.length)
-      .reduce((agg, cur) => agg + cur);
-    console.log(
-      `Found ${mainnetUsers.length} Ethereum Users with ${mainnetGotchis} Gotchis`
-    );
-  }
 
   return { finalUsers: finalUsers, tokenIds: tokenIds };
 }
