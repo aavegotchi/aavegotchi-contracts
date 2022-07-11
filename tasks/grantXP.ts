@@ -6,8 +6,6 @@ import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import { NonceManager } from "@ethersproject/experimental";
-import { ethers } from "hardhat";
-import { getAddress } from "ethers/lib/utils";
 
 interface TaskArgs {
   filename: string;
