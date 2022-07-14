@@ -76,7 +76,12 @@ interface QuerySubgraphResponse {
   batch2: UserGotchisOwned[];
   batch3: UserGotchisOwned[];
   batch4: UserGotchisOwned[];
+  batch5: UserGotchisOwned[];
   id: string;
+}
+
+interface UserWithGotchisAndLentOut extends QuerySubgraphResponse {
+  gotchisLentOut: string[];
 }
 
 async function querySubgraph(
@@ -347,6 +352,10 @@ interface GotchiLending {
   gotchiTokenId: string;
 }
 
+interface GotchiId {
+  id: string;
+}
+
 interface LendingRes {
   gotchiLendings: GotchiLending[];
 }
@@ -393,7 +402,7 @@ export async function getPolygonAndMainnetGotchis(
   console.log("Addresses: ", addresses.length);
 
   // get gotchis and lentout
-  let gotchiIds: any[] = [];
+  let gotchiIds: string[] = [];
   let fetchedAddresses: string[] = [];
   let prevLength = 0;
   let index = 0;
@@ -401,13 +410,13 @@ export async function getPolygonAndMainnetGotchis(
     const result = await getUsersWithGotchisOfAddresses(addresses, index);
     index += 1000;
     prevLength = gotchiIds.length;
-    result.users.forEach((e: any) => {
+    result.users.forEach((e: UserWithGotchisAndLentOut) => {
       gotchiIds = gotchiIds.concat(e.gotchisLentOut);
-      let gotchisOwned = e.batch1.map((f: any) => f.id);
-      gotchisOwned = gotchisOwned.concat(e.batch2.map((f: any) => f.id));
-      gotchisOwned = gotchisOwned.concat(e.batch3.map((f: any) => f.id));
-      gotchisOwned = gotchisOwned.concat(e.batch4.map((f: any) => f.id));
-      gotchisOwned = gotchisOwned.concat(e.batch5.map((f: any) => f.id));
+      let gotchisOwned = e.batch1.map((f: GotchiId) => f.id);
+      gotchisOwned = gotchisOwned.concat(e.batch2.map((f: GotchiId) => f.id));
+      gotchisOwned = gotchisOwned.concat(e.batch3.map((f: GotchiId) => f.id));
+      gotchisOwned = gotchisOwned.concat(e.batch4.map((f: GotchiId) => f.id));
+      gotchisOwned = gotchisOwned.concat(e.batch5.map((f: GotchiId) => f.id));
       gotchiIds = gotchiIds.concat(gotchisOwned);
       fetchedAddresses.push(e.id);
     });
