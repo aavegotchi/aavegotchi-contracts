@@ -39,6 +39,12 @@ export async function upgrade() {
   const payload: Exceptions[] = [
     //body
     {
+      itemId: 40,
+      slotPosition: 0,
+      side: back,
+      exceptionBool: true,
+    },
+    {
       itemId: 132,
       slotPosition: 0,
       side: back,
@@ -76,12 +82,30 @@ export async function upgrade() {
     // },
 
     //face
-    // {
-    //   itemId: 18,
-    //   slotPosition: 1,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
+    {
+      itemId: 18,
+      slotPosition: 1,
+      side: front,
+      exceptionBool: true,
+    },
+    {
+      itemId: 18,
+      slotPosition: 1,
+      side: left,
+      exceptionBool: true,
+    },
+    {
+      itemId: 18,
+      slotPosition: 1,
+      side: right,
+      exceptionBool: true,
+    },
+    {
+      itemId: 18,
+      slotPosition: 1,
+      side: back,
+      exceptionBool: true,
+    },
     {
       itemId: 55,
       slotPosition: 1,

@@ -121,21 +121,21 @@ export async function getPolygonAndMainnetGotchis(
 
   //first batch into 1000 addresses each
 
-  for (let index = 0; index < addresses.length; index++) {
-    let address = addresses[index];
-    if (address.includes(".eth")) {
-      let ethSigner = new hre.ethers.providers.JsonRpcProvider(
-        process.env.MAINNET_URL
-      );
+  // for (let index = 0; index < addresses.length; index++) {
+  //   let address = addresses[index];
+  //   if (address.includes(".eth")) {
+  //     let ethSigner = new hre.ethers.providers.JsonRpcProvider(
+  //       process.env.MAINNET_URL
+  //     );
 
-      const resolved = await ethSigner.resolveName(address);
-      address = resolved;
-    }
+  //     const resolved = await ethSigner.resolveName(address);
+  //     address = resolved.toString();
+  //   }
 
-    if (await hre.ethers.utils.isAddress(address)) {
-      finalAddresses.push(address);
-    }
-  }
+  //   if (await hre.ethers.utils.isAddress(address)) {
+  //     finalAddresses.push(address);
+  //   }
+  // }
 
   //Set new addresses after replacing .eth addresses with resolved names
   addresses = finalAddresses;

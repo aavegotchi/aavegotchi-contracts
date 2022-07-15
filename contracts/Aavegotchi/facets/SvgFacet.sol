@@ -383,12 +383,13 @@ contract SvgFacet is Modifiers {
             equippedWearables[2] != 301 /*alluring eyes*/
         ) {
             svg_ = abi.encodePacked(svg_, layers.face, layers.head, layers.eyes);
-            //face exceptions
-        } else if (s.wearableExceptions[front][equippedWearables[1]][1]) {
-            svg_ = abi.encodePacked(svg_, layers.eyes, layers.head, layers.face);
+            //face or eye and head exceptions
         } else if (
-            equippedWearables[2] == 301 /*aave mask*/
+            (s.wearableExceptions[front][equippedWearables[1]][1] || equippedWearables[2] == 301) &&
+            s.wearableExceptions[front][equippedWearables[3]][3]
         ) {
+            svg_ = abi.encodePacked(svg_, layers.eyes, layers.head, layers.face);
+        } else if ((s.wearableExceptions[front][equippedWearables[1]][1] || equippedWearables[2] == 301) && equippedWearables[2] == 301) {
             svg_ = abi.encodePacked(svg_, layers.eyes, layers.face, layers.head);
         } else {
             svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head);
