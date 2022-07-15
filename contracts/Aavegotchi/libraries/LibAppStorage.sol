@@ -292,6 +292,8 @@ struct AppStorage {
     address realmAddress;
     // side => (itemTypeId => (slotPosition => exception Bool)) SVG exceptions
     mapping(bytes32 => mapping(uint256 => mapping(uint256 => bool))) wearableExceptions;
+    // fake gotchi diamond
+    address fakeGotchiDiamond;
 }
 
 library LibAppStorage {

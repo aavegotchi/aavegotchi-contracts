@@ -28,6 +28,7 @@ contract DAOFacet is Modifiers {
     event ItemModifiersSet(uint256 _wearableId, int8[6] _traitModifiers, uint8 _rarityScoreModifier);
     event RemoveExperience(uint256[] _tokenIds, uint256[] _xpValues);
     event UpdateItemPrice(uint256 _itemId, uint256 _priceInWei);
+    event FakeGotchiDiamondSet(address indexed previousFakeGotchi, address indexed newFakeGotchi);
 
     /***********************************|
    |             Read Functions         |
@@ -402,5 +403,12 @@ contract DAOFacet is Modifiers {
             item.ghstPrice = _newPrices[i];
             emit UpdateItemPrice(itemId, _newPrices[i]);
         }
+    }
+
+    ///@notice Allow the Diamond owner or DAO to set a new Fake Gotchi Diamond address
+    ///@param _newFakeGotchiDiamond New Fake Gotchi Diamond address
+    function setFakeGotchiDiamond(address _newFakeGotchiDiamond) external onlyDaoOrOwner {
+        emit FakeGotchiDiamondSet(s.fakeGotchiDiamond, _newFakeGotchiDiamond);
+        s.fakeGotchiDiamond = _newFakeGotchiDiamond;
     }
 }

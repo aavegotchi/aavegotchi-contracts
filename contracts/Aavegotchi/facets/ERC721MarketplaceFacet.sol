@@ -9,6 +9,7 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketplace.sol";
 import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
 import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
+import "../interfaces/IFakeGotchiDiamond.sol";
 
 contract ERC721MarketplaceFacet is Modifiers {
     event ERC721ListingAdd(
@@ -333,7 +334,23 @@ contract ERC721MarketplaceFacet is Modifiers {
         LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, split.pixelcraftShare);
         LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, split.daoShare);
         LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, split.playerRewardsShare);
-        LibERC20.transferFrom(s.ghstContract, buyer, seller, split.sellerShare);
+        if (listing.erc721TokenAddress == s.fakeGotchiDiamond) {
+            // Fake gotchi royalty
+            address[2] memory _sellers;
+            uint256[2] memory _royalty;
+            (_sellers, _royalty) = IFakeGotchiDiamond(listing.erc721TokenAddress).getRoyaltyInfo(listing.erc721TokenId); // royalty[0]: publisher, royalty[1]: artist
+            if (_sellers[1] == address(0)) {
+                // If no artist (publisher only)
+                LibERC20.transferFrom(s.ghstContract, buyer, _sellers[0], split.sellerShare);
+            } else {
+                for (uint256 i = 0; i < _sellers.length; i++) {
+                    LibERC20.transferFrom(s.ghstContract, buyer, _sellers[i], (split.sellerShare * _royalty[i]) / 100);
+                }
+            }
+        } else {
+            // Normal seller payment
+            LibERC20.transferFrom(s.ghstContract, buyer, seller, split.sellerShare);
+        }
 
         if (listing.erc721TokenAddress == address(this)) {
             s.aavegotchis[listing.erc721TokenId].locked = false;
