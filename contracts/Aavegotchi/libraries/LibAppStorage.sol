@@ -290,6 +290,8 @@ struct AppStorage {
     mapping(address => bool) revenueTokenAllowed;
     mapping(address => mapping(address => mapping(uint32 => bool))) lendingOperators; // owner => operator => tokenId => isLendingOperator
     address realmAddress;
+    // fake gotchi diamond
+    address fakeGotchiDiamond;
 }
 
 library LibAppStorage {
