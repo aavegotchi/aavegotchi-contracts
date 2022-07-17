@@ -4,7 +4,7 @@ import { GrantXPSnapshotTaskArgs } from "../../../tasks/grantXP_snapshot";
 async function grantXP() {
   const taskArgs: GrantXPSnapshotTaskArgs = {
     proposalId:
-      "0xd610a038fb70717cefa788332d6cfbfd4504723fa2b33dc5689b542752da3cde",
+      "0xf9dafc88fce3ceff0e6c0c04936862c9e4cc5889850749631632af2e5b903452",
     propType: "sigprop",
     batchSize: "500",
   };

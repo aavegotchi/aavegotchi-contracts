@@ -425,16 +425,19 @@ export async function getPolygonAndMainnetGotchis(
   do {
     const result = await getUsersWithGotchisOfAddresses(addresses, index);
 
-    console.log("result:", result);
+    // console.log("result:", result);
 
     if (result.users.length > 0) {
-      console.log("gotchis lent:", result.users[0].gotchisLentOut);
-      console.log("batch 1:", result.users[0].batch1);
+      result.users.forEach((element) => {
+        console.log("gotchis lent:", element.gotchisLentOut.length);
+      });
+
+      // console.log("batch 1:", result.users[0].batch1);
     }
 
     index += 1000;
     prevLength = gotchiIds.length;
-    result.users.forEach((e: UserWithGotchisAndLentOut) => {
+    result.users.forEach((e) => {
       gotchiIds = gotchiIds.concat(e.gotchisLentOut);
       let gotchisOwned = e.batch1.map((f: GotchiId) => f.id);
       gotchisOwned = gotchisOwned.concat(e.batch2.map((f: GotchiId) => f.id));
