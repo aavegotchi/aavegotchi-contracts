@@ -18,10 +18,26 @@ export const ethGraphUrl: string =
 export const vaultGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/gotchi-vault";
 
+interface Gotchi {
+  id: string;
+}
+
+interface UsersWithGotchisRes {
+  users: {
+    id: string;
+    gotchisLentOut: string[];
+    batch1: Gotchi[];
+    batch2: Gotchi[];
+    batch3: Gotchi[];
+    batch4: Gotchi[];
+    batch5: Gotchi[];
+  }[];
+}
+
 function getUsersWithGotchisOfAddresses(
   addresses: string[],
   index: Number = 0
-) {
+): Promise<UsersWithGotchisRes> {
   let addressesString = addresses.map((e) => `"${e}"`).join(",");
   let query = `
     {users(skip: ${index} first: 1000 where: {id_in: [${addressesString}]}) {
@@ -408,6 +424,14 @@ export async function getPolygonAndMainnetGotchis(
   let index = 0;
   do {
     const result = await getUsersWithGotchisOfAddresses(addresses, index);
+
+    console.log("result:", result);
+
+    if (result.users.length > 0) {
+      console.log("gotchis lent:", result.users[0].gotchisLentOut);
+      console.log("batch 1:", result.users[0].batch1);
+    }
+
     index += 1000;
     prevLength = gotchiIds.length;
     result.users.forEach((e: UserWithGotchisAndLentOut) => {
