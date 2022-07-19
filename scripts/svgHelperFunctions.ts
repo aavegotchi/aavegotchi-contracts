@@ -314,10 +314,8 @@ export async function uploadOrUpdateSvg(
   const svgUpdate = [];
 
   for (let i = 0; i < svgId.length; i++) {
-    // let exists = false;
     try {
       await svgFacet.getSvg(svgTypeToBytes(svgType, ethers), svgId[i]);
-      // exists = true;
       idUpdate.push(svgId[i]);
       svgUpdate.push(svg[i]);
     } catch (error) {
@@ -327,8 +325,8 @@ export async function uploadOrUpdateSvg(
   }
 
   if (idUpdate.length > 0) {
-    await updateSvgs(svgUpdate, svgType, idUpdate, svgFacet, ethers);
     console.log(`Svg ${svgType} #${idUpdate} exists, updating`);
+    await updateSvgs(svgUpdate, svgType, idUpdate, svgFacet, ethers);
   }
   if (idUpload.length > 0) {
     console.log(`Svg ${svgType} #${idUpload} does not exist, uploading`);
@@ -516,56 +514,6 @@ export async function updateBaadgeTaskForSvgType(
   }
 }
 
-/* export async function updateSvgTaskForSideViews(_itemIds: number[]) {
-  const sideViews = ["left", "right", "back"];
-  let taskArray = [];
-
-  for (let index = 0; index < _itemIds.length; index++) {
-    const itemId = _itemIds[index];
-    const sideArrays = [left[itemId], right[itemId], back[itemId]];
-
-    for (let index = 0; index < sideViews.length; index++) {
-      const side = sideViews[index];
-      const sideArray = sideArrays[index];
-
-      let taskArgsSides: UpdateSvgsTaskArgs = {
-        svgIds: [itemId].join(","),
-        svgType: `wearables-${side}`,
-        svgs: [sideArray].join("***"),
-      };
-      taskArray.push(taskArgsSides);
-    }
-  }
-  return taskArray;
-}
-
-export async function updateSvgTaskForSideSleeves(_itemIds: number[]) {
-  const sideViews = ["left", "right", "back"];
-  let taskArray = [];
-
-  for (let index = 0; index < _itemIds.length; index++) {
-    const itemId = _itemIds[index];
-    const sideArrays = [
-      leftSleeve[itemId],
-      rightSleeve[itemId],
-      backSleeve[itemId],
-    ];
-
-    for (let index = 0; index < sideViews.length; index++) {
-      const side = sideViews[index];
-      const sideArray = sideArrays[index];
-
-      let taskArgsSides: UpdateSvgsTaskArgs = {
-        svgIds: [itemId].join(","),
-        svgType: `sleeves-${side}`,
-        svgs: [sideArray].join("***"),
-      };
-      taskArray.push(taskArgsSides);
-    }
-  }
-  return taskArray;
-} */
-
 export async function uploadSvgTaskForBaadges(
   itemTypeInput: ItemTypeInputNew[],
   svgFileName: string
@@ -613,4 +561,69 @@ export async function airdropTaskForBaadges(
     awardsArray: [awardsArray].join("***"),
   };
   return taskArgs;
+}
+
+export async function collateralsUpdateForSvgTask(
+  _itemIds: number[],
+  _side: string
+) {
+  let taskArgs: UpdateSvgsTaskArgs;
+  const frontSvg = [];
+  const leftSvg = [];
+  const rightSvg = [];
+  const backSvg = [];
+
+  if ("front" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      frontSvg.push(`***${front[_itemIds[i]]}`);
+    }
+
+    taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `collaterals`,
+      svgs: [frontSvg].join("***"),
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
+  } else if ("left" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      leftSvg.push(`***${left[_itemIds[i]]}`);
+    }
+
+    taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `collaterals-left`,
+      svgs: [leftSvg].join("***"),
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
+  } else if ("right" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      rightSvg.push(`***${right[_itemIds[i]]}`);
+    }
+
+    taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `collaterals-right`,
+      svgs: [rightSvg].join("***"),
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
+  } else if ("back" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      backSvg.push(`***${back[_itemIds[i]]}`);
+    }
+
+    taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `collaterals-back`,
+      svgs: [backSvg].join("***"),
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
+  } else {
+    console.log(
+      "Not a proper collaterals side, must be string of front, left, right or back ONLY"
+    );
+  }
 }
