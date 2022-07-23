@@ -1,5 +1,8 @@
 import { run } from "hardhat";
-import { GrantXPSnapshotTaskArgs } from "../../../tasks/grantXP_snapshot";
+import {
+  currentOverrides,
+  GrantXPSnapshotTaskArgs,
+} from "../../../tasks/grantXP_snapshot";
 
 async function grantXP() {
   const taskArgs: GrantXPSnapshotTaskArgs = {
