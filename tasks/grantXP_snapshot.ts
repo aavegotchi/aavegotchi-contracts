@@ -1,13 +1,20 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { gasPrice, maticDiamondAddress } from "../scripts/helperFunctions";
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 
 import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import request from "graphql-request";
+import { NonceManager } from "@ethersproject/experimental";
+
+export const currentOverrides: string[] = [
+  "0xC0Ab521Fa3FF034029C206eEBbb481E06c8d8BB5",
+  "0xA2faa3405a734c04aE713AAa837E6cEcC2cAee9F",
+  "0x77F4e1c69EfB78625244DD1c7d9e05B7411a7768",
+  "0xb9ff017c875f5c39d0018d1df86fbd92943d5b82",
+];
 
 export interface GrantXPSnapshotTaskArgs {
   proposalId: string;
@@ -109,12 +116,20 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
     ) => {
       const proposalId: string = taskArgs.proposalId;
       const xpAmount: number = taskArgs.propType === "sigprop" ? 10 : 20;
+      const exceptions = currentOverrides;
       const batchSize: number = Number(taskArgs.batchSize);
 
-      const addresses = await getVotingAddresses(proposalId);
+      const addresses = await (
+        await getVotingAddresses(proposalId)
+      ).concat(exceptions);
+
+      if (addresses.includes(exceptions[0])) {
+        console.log("exception added!");
+      }
+
       const propDetails: ProposalDetails = await getProposalDetails(proposalId);
 
-      if (propDetails.votes !== addresses.length) {
+      if (propDetails.votes + exceptions.length !== addresses.length) {
         throw new Error("Proposal voter count doesn't match");
       }
 
@@ -140,26 +155,11 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
         throw Error("Incorrect network selected");
       }
 
+      const managedSigner = new NonceManager(signer);
+
       const { tokenIds, finalUsers } = await getPolygonAndMainnetGotchis(
         addresses,
         hre
-      );
-
-      //Check how many unused addresses there are (addresses that voted, but do not have Aavegotchis)
-      const unusedAddresses: string[] = [];
-      const lowerCaseAddresses = addresses.map((address: string) =>
-        address.toLowerCase()
-      );
-      lowerCaseAddresses.forEach((address: string) => {
-        const found = finalUsers.find((val) => val.id === address);
-        if (!found) {
-          console.log("unused address:", address);
-          unusedAddresses.push(address);
-        }
-      });
-
-      console.log(
-        `There were ${unusedAddresses.length} voting addresses without Gotchis.`
       );
 
       const batches = Math.ceil(tokenIds.length / batchSize);
@@ -172,7 +172,7 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
 
       const dao = (
         await hre.ethers.getContractAt("DAOFacet", diamondAddress)
-      ).connect(signer) as DAOFacet;
+      ).connect(managedSigner) as DAOFacet;
 
       for (let index = 0; index < batches; index++) {
         console.log("Current batch id:", index);
@@ -190,7 +190,7 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
           { gasPrice: gasPrice }
         );
         console.log("tx:", tx.hash);
-        let receipt: ContractReceipt = await tx.wait();
+        const receipt: ContractReceipt = await tx.wait();
         // console.log("Gas used:", strDisplay(receipt.gasUsed.toString()));
         if (!receipt.status) {
           throw Error(`Error:: ${tx.hash}`);

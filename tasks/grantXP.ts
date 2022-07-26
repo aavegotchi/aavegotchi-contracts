@@ -1,22 +1,17 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { gasPrice, maticDiamondAddress } from "../scripts/helperFunctions";
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
-import { GotchisOwned, UserGotchisOwned } from "../types";
-import {
-  getEthSubgraphGotchis,
-  getPolygonAndMainnetGotchis,
-  getSubgraphGotchis,
-  queryAavegotchis,
-} from "../scripts/query/queryAavegotchis";
+import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
+import { NonceManager } from "@ethersproject/experimental";
 
 interface TaskArgs {
   filename: string;
   xpAmount: string;
   batchSize: string;
+  excludedAddresses: string;
 }
 
 task("grantXP", "Grants XP to Gotchis by addresses")
@@ -26,13 +21,22 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     "batchSize",
     "How many Aavegotchis to send at a time. Default is 500"
   )
+  .addParam("excludedAddresses", "Any addresses excluded")
 
   .setAction(async (taskArgs: TaskArgs, hre: HardhatRuntimeEnvironment) => {
     const filename: string = taskArgs.filename;
     const xpAmount: number = Number(taskArgs.xpAmount);
     const batchSize: number = Number(taskArgs.batchSize);
+    const excludedAddresses: string[] = taskArgs.excludedAddresses
+      .split(",")
+      .map((val) => val.toLowerCase());
 
     let { addresses } = require(`../data/airdrops/${filename}.ts`);
+
+    //Filter out addresses
+    addresses = addresses.filter((address: string) => {
+      return !excludedAddresses.includes(address.toLowerCase());
+    });
 
     const { finalUsers, tokenIds } = await getPolygonAndMainnetGotchis(
       addresses,
@@ -41,7 +45,6 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     const diamondAddress = maticDiamondAddress;
     const gameManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
-    console.log(gameManager);
     let signer: Signer;
     const testing = ["hardhat", "localhost"].includes(hre.network.name);
     if (testing) {
@@ -52,14 +55,12 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       signer = await hre.ethers.provider.getSigner(gameManager);
     } else if (hre.network.name === "matic") {
       const accounts = await hre.ethers.getSigners();
-      signer = accounts[0]; /* new LedgerSigner(
-        hre.ethers.provider,
-        "hid",
-        "m/44'/60'/2'/0/0"
-      ); */
-    } else {
-      throw Error("Incorrect network selected");
-    }
+      signer = accounts[0];
+
+      // signer = new LedgerSigner(hre.ethers.provider, "hid", "m/44'/60'/2'/0/0");
+    } else throw Error("Incorrect network selected");
+
+    const managedSigner = new NonceManager(signer);
 
     const batches = Math.ceil(tokenIds.length / batchSize);
 
@@ -69,15 +70,15 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     const dao = (
       await hre.ethers.getContractAt("DAOFacet", diamondAddress)
-    ).connect(signer) as DAOFacet;
+    ).connect(managedSigner) as DAOFacet;
 
     for (let index = 0; index < batches; index++) {
-      console.log("Current batch id:", index);
-
       const offset = batchSize * index;
       const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
 
-      console.log("send token ids:", sendTokenIds);
+      // sendTokenIds.forEach((id: string) => {
+      //   console.log(id);
+      // });
 
       console.log(
         `Sending ${xpAmount} XP to ${sendTokenIds.length} Aavegotchis `
@@ -90,7 +91,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       );
       console.log("tx:", tx.hash);
       let receipt: ContractReceipt = await tx.wait();
-      // console.log("Gas used:", strDisplay(receipt.gasUsed.toString()));
+
       if (!receipt.status) {
         throw Error(`Error:: ${tx.hash}`);
       }

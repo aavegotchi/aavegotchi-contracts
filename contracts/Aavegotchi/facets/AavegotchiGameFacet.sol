@@ -283,8 +283,19 @@ contract AavegotchiGameFacet is Modifiers {
 
             //If the owner is the bridge, anyone can pet the gotchis inside
             if (owner != address(this)) {
+                // Check lending status of aavegotchi and allow original pet operators
+                bool isOriginalPetOperator;
+                uint32 listingId = s.aavegotchiToListingId[uint32(tokenId)];
+                if ((listingId != 0) && (s.gotchiLendings[listingId].timeAgreed > 0)) {
+                    address lender = s.gotchiLendings[listingId].lender;
+                    isOriginalPetOperator = s.operators[lender][sender] || s.petOperators[lender][sender];
+                }
                 require(
-                    sender == owner || s.operators[owner][sender] || s.approved[tokenId] == sender || s.petOperators[owner][sender],
+                    sender == owner ||
+                        s.operators[owner][sender] ||
+                        s.approved[tokenId] == sender ||
+                        s.petOperators[owner][sender] ||
+                        isOriginalPetOperator,
                     "AavegotchiGameFacet: Not owner of token or approved"
                 );
             }
@@ -292,6 +303,15 @@ contract AavegotchiGameFacet is Modifiers {
             require(s.aavegotchis[tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for Aavegotchi");
             LibAavegotchi.interact(tokenId);
         }
+    }
+
+    function setRealmAddress(address _realm) public onlyOwner {
+        s.realmAddress = _realm;
+    }
+
+    function realmInteract(uint256 _tokenId) external {
+        require(msg.sender == s.realmAddress, "AavegotchiGamefacet: Not RealmAddress");
+        LibAavegotchi.interact(_tokenId);
     }
 
     ///@notice Allow the owner of an NFT to spend skill points for it(basically to boost the numeric traits of that NFT)

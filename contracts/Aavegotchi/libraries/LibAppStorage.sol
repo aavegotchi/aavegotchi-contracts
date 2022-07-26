@@ -3,8 +3,6 @@ pragma solidity 0.8.1;
 import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {ILink} from "../interfaces/ILink.sol";
-//import "../interfaces/IERC20.sol";
-// import "hardhat/console.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
@@ -152,6 +150,42 @@ struct GameManager {
     uint256 refreshTime;
 }
 
+struct GotchiLending {
+    // storage slot 1
+    address lender;
+    uint96 initialCost; // GHST in wei, can be zero
+    // storage slot 2
+    address borrower;
+    uint32 listingId;
+    uint32 erc721TokenId;
+    uint32 whitelistId; // can be zero
+    // storage slot 3
+    address originalOwner; // if original owner is lender, same as lender
+    uint40 timeCreated;
+    uint40 timeAgreed;
+    bool canceled;
+    bool completed;
+    // storage slot 4
+    address thirdParty; // can be address(0)
+    uint8[3] revenueSplit; // lender/original owner, borrower, thirdParty
+    uint40 lastClaimed; //timestamp
+    uint32 period; //in seconds
+    // storage slot 5
+    address[] revenueTokens;
+}
+
+struct LendingListItem {
+    uint32 parentListingId;
+    uint256 listingId;
+    uint32 childListingId;
+}
+
+struct Whitelist {
+    address owner;
+    string name;
+    address[] addresses;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -238,7 +272,25 @@ struct AppStorage {
     mapping(uint256 => mapping(bytes => Dimensions)) sideViewDimensions;
     mapping(address => mapping(address => bool)) petOperators; //Pet operators for a token
     mapping(uint256 => address) categoryToTokenAddress;
-    // side => (itemTypeId => (slotPosition => exception Bool))
+    //***
+    //Gotchi Lending
+    //***
+    uint32 nextGotchiListingId;
+    mapping(uint32 => GotchiLending) gotchiLendings;
+    mapping(uint32 => uint32) aavegotchiToListingId;
+    mapping(address => uint32[]) lentTokenIds;
+    mapping(address => mapping(uint32 => uint32)) lentTokenIdIndexes; // address => lent token id => index
+    mapping(bytes32 => mapping(uint32 => LendingListItem)) gotchiLendingListItem; // ("listed" or "agreed") => listingId => LendingListItem
+    mapping(bytes32 => uint32) gotchiLendingHead; // ("listed" or "agreed") => listingId
+    mapping(bytes32 => mapping(uint32 => LendingListItem)) aavegotchiLenderLendingListItem; // ("listed" or "agreed") => listingId => LendingListItem
+    mapping(address => mapping(bytes32 => uint32)) aavegotchiLenderLendingHead; // user address => ("listed" or "agreed") => listingId => LendingListItem
+    Whitelist[] whitelists;
+    // If zero, then the user is not whitelisted for the given whitelist ID. Otherwise, this represents the position of the user in the whitelist + 1
+    mapping(uint32 => mapping(address => uint256)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
+    mapping(address => bool) revenueTokenAllowed;
+    mapping(address => mapping(address => mapping(uint32 => bool))) lendingOperators; // owner => operator => tokenId => isLendingOperator
+    address realmAddress;
+    // side => (itemTypeId => (slotPosition => exception Bool)) SVG exceptions
     mapping(bytes32 => mapping(uint256 => mapping(uint256 => bool))) wearableExceptions;
 }
 

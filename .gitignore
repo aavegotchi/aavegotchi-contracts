@@ -12,3 +12,5 @@ scripts/portals.js
 hardhat.config.js
 typechain/
 flat
+botDaddies.ts
+botDaddies2.ts

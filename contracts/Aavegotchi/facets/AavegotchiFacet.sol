@@ -5,11 +5,14 @@ import {LibAavegotchi, AavegotchiInfo} from "../libraries/LibAavegotchi.sol";
 
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {AppStorage} from "../libraries/LibAppStorage.sol";
+import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 // import "hardhat/console.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {IERC721TokenReceiver} from "../../shared/interfaces/IERC721TokenReceiver.sol";
+
+import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 
 contract AavegotchiFacet {
     AppStorage internal s;
@@ -28,7 +31,7 @@ contract AavegotchiFacet {
     /// @param _owner An address for whom to query the balance
     /// @return balance_ The number of NFTs owned by `_owner`, possibly zero
     function balanceOf(address _owner) external view returns (uint256 balance_) {
-        require(_owner != address(0), "AavegotchiFacet: _owner can't be address(0");
+        require(_owner != address(0), "AavegotchiFacet: _owner can't be address(0)");
         balance_ = s.ownerTokenIds[_owner].length;
     }
 
@@ -87,6 +90,14 @@ contract AavegotchiFacet {
         }
     }
 
+    function batchOwnerOf(uint256[] calldata _tokenIds) external view returns (address[] memory owners_) {
+        owners_ = new address[](_tokenIds.length);
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            owners_[i] = s.aavegotchis[_tokenIds[i]].owner;
+            require(owners_[i] != address(0), "AavegotchiFacet: invalid _tokenId");
+        }
+    }
+
     /// @notice Find the owner of an NFT
     /// @dev NFTs assigned to zero address are considered invalid, and queries
     ///  about them do throw.
@@ -115,7 +126,7 @@ contract AavegotchiFacet {
     }
 
     ///@notice Check if an address `_operator` is an authorized pet operator for another address `_owner`
-    ///@param _owner address of the original owner of the NFTs
+    ///@param _owner address of the lender of the NFTs
     ///@param _operator address that acts pets the gotchis on behalf of the owner
     ///@return approved_ true if `operator` is an approved pet operator, False if otherwise
     function isPetOperatorForAll(address _owner, address _operator) external view returns (bool approved_) {
@@ -213,6 +224,8 @@ contract AavegotchiFacet {
         address _to,
         uint256 _tokenId
     ) internal {
+        LibGotchiLending.enforceAavegotchiNotInLending(uint32(_tokenId), _sender);
+
         require(_to != address(0), "AavegotchiFacet: Can't transfer to 0 address");
         require(_from != address(0), "AavegotchiFacet: _from can't be 0 address");
         require(_from == s.aavegotchis[_tokenId].owner, "AavegotchiFacet: _from is not owner, transfer failed");
@@ -277,6 +290,12 @@ contract AavegotchiFacet {
     ///  3986. The URI may point to a JSON file that conforms to the "ERC721
     ///  Metadata JSON Schema".
     function tokenURI(uint256 _tokenId) external pure returns (string memory) {
-        return LibStrings.strWithUint("https://aavegotchi.com/metadata/aavegotchis/", _tokenId); //Here is your URL!
+        return LibStrings.strWithUint("https://app.aavegotchi.com/metadata/aavegotchis/", _tokenId); //Here is your URL!
+    }
+
+    function addInterfaces() external {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        ds.supportedInterfaces[0xd9b67a26] = true; //erc1155
+        ds.supportedInterfaces[0x80ac58cd] = true; //erc721
     }
 }

@@ -239,14 +239,16 @@ contract ItemsFacet is Modifiers {
     ///@dev A wearable cannot be equipped in the wrong slot
     ///@param _tokenId The identifier of the aavegotchi to make changes to
     ///@param _wearablesToEquip An array containing the identifiers of the wearables to equip
-    function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip) external onlyAavegotchiOwner(_tokenId) {
+    function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip)
+        external
+        onlyAavegotchiOwner(_tokenId)
+        onlyUnlocked(_tokenId)
+    {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
         emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _wearablesToEquip);
 
         address sender = LibMeta.msgSender();
-
-        uint256 aavegotchiLevel = LibAavegotchi.aavegotchiLevel(aavegotchi.experience);
 
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             uint256 toEquipId = _wearablesToEquip[slot];
@@ -274,7 +276,7 @@ contract ItemsFacet is Modifiers {
             //If a wearable is being equipped
             if (toEquipId != 0) {
                 ItemType storage itemType = s.itemTypes[toEquipId];
-                require(aavegotchiLevel >= itemType.minLevel, "ItemsFacet: AG level lower than minLevel");
+                require(LibAavegotchi.aavegotchiLevel(aavegotchi.experience) >= itemType.minLevel, "ItemsFacet: AG level lower than minLevel");
                 require(itemType.category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
                 require(itemType.slotPositions[slot] == true, "ItemsFacet: Wearable can't be equipped in slot");
                 {
@@ -309,8 +311,7 @@ contract ItemsFacet is Modifiers {
                 }
 
                 if (nftBalance < neededBalance) {
-                    uint256 ownerBalance = s.ownerItemBalances[sender][toEquipId];
-                    require(nftBalance + ownerBalance >= neededBalance, "ItemsFacet: Wearable isn't in inventory");
+                    require(nftBalance + s.ownerItemBalances[sender][toEquipId] >= neededBalance, "ItemsFacet: Wearable isn't in inventory");
                     uint256 balToTransfer = neededBalance - nftBalance;
 
                     //Transfer to Aavegotchi

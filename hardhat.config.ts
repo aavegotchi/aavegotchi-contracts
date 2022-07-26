@@ -1,16 +1,17 @@
 /* global task ethers */
-import { task } from "hardhat/config";
+
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-etherscan";
 import "hardhat-contract-sizer";
 import "solidity-coverage";
 //import './tasks/generateDiamondABI.js';
 import * as dotenv from "dotenv";
 import "@typechain/hardhat";
+import { BigNumber } from "ethers";
 
 dotenv.config({ path: __dirname + "/.env" });
 
-//  require("./tasks/verifyFacet.js");
 require("./tasks/deployUpgrade.ts");
 require("./tasks/addBaadgeSvgs.ts");
 require("./tasks/mintBaadgeSvgs.ts");
@@ -20,9 +21,14 @@ require("./tasks/updateSvgs.ts");
 require("./tasks/updateItemSideDimensions.ts");
 require("./tasks/batchDeposit.ts");
 require("./tasks/rarityPayouts");
+require("./tasks/grantXP");
 require("./tasks/grantXP_snapshot");
 require("./tasks/grantXP_minigame");
+require("./tasks/grantXP_aavegotchis");
 require("./tasks/addItemTypes");
+require("./tasks/addWearableSets");
+require("./tasks/grantXP_customValues");
+require("./tasks/generateDiamondABI");
 require("./tasks/updateWearableExceptions");
 
 // You have to export an object to set up your config
@@ -30,13 +36,15 @@ require("./tasks/updateWearableExceptions");
 // defaultNetwork, networks, solc, and paths.
 // Go to https://buidler.dev/config/ to learn more
 export default {
+  etherscan: {
+    apiKey: process.env.POLYGON_API_KEY,
+  },
   networks: {
     hardhat: {
       forking: {
         url: process.env.MATIC_URL,
         timeout: 12000000,
-        // blockNumber: 12552123
-        // blockNumber: 20024371,
+        // blockNumber: 27108687,
       },
       blockGasLimit: 20000000,
       timeout: 120000,
@@ -45,15 +53,16 @@ export default {
     localhost: {
       timeout: 16000000,
     },
-    // matic: {
-    //   url: process.env.MATIC_URL,
-    //   // url: 'https://rpc-mainnet.maticvigil.com/',
-    //   accounts: [process.env.ITEM_MANAGER],
-    //   // blockGasLimit: 20000000,
-    //   blockGasLimit: 20000000,
-    //   gasPrice: 1000000000,
-    //   timeout: 90000,
-    // },
+    matic: {
+      url: process.env.MATIC_URL,
+      accounts: [process.env.ITEM_MANAGER],
+      // blockGasLimit: 20000000,
+      // gasPrice: 1000000000,
+      maxFeePerGas: BigNumber.from("80").mul(1e9),
+      maxPriorityFeePerGas: BigNumber.from("50").mul(1e9),
+      gasLimit: 2000000,
+      timeout: 90000,
+    },
     // mumbai: {
     //   url: 'https://rpc-mumbai.matic.today',
     //   accounts: [process.env.SECRET],
@@ -88,9 +97,21 @@ export default {
     runOnCompile: false,
     disambiguatePaths: true,
   },
+  mocha: {
+    timeout: 2000000,
+  },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
     compilers: [
+      {
+        version: "0.8.13",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
       {
         version: "0.8.1",
         settings: {

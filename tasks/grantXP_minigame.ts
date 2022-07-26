@@ -102,6 +102,11 @@ task("grantXP_minigame", "Grants XP to Gotchis by addresses")
         let tokenIdsNum = 0;
         for (const obj of group.aavegotchis) {
           const gotchiID = obj.tokenId;
+
+          if (isNaN(Number(gotchiID))) {
+            throw new Error(`Not a number: ${gotchiID}`);
+          }
+
           if (maxProcess < tokenIdsNum + 1) {
             txData.push(txGroup);
             txGroup = [];
