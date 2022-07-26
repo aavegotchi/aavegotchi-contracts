@@ -9,6 +9,11 @@ import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibAavegotchi} from "./LibAavegotchi.sol";
 
 library LibGotchiLending {
+    event GotchiLendingAdd(uint32 indexed listingId);
+    event GotchiLendingExecute(uint32 indexed listingId);
+    event GotchiLendingCancel(uint32 indexed listingId, uint256 time);
+    event GotchiLendingClaim(uint32 indexed listingId, address[] tokenAddresses, uint256[] amounts);
+    event GotchiLendingEnd(uint32 indexed listingId);
     event GotchiLendingAdded(
         uint32 indexed listingId,
         address indexed lender,
@@ -177,6 +182,7 @@ library LibGotchiLending {
         addLendingListItem(_listing.lender, listingId, "listed");
         s.aavegotchis[_listing.tokenId].locked = true;
 
+        emit GotchiLendingAdd(listingId);
         emit GotchiLendingAdded(
             listingId,
             _listing.lender,
@@ -223,6 +229,7 @@ library LibGotchiLending {
         // set lender as pet operator
         s.petOperators[_borrower][lender] = true;
 
+        emit GotchiLendingExecute(_listingId);
         emit GotchiLendingExecuted(
             _listingId,
             lending.lender,
@@ -255,6 +262,7 @@ library LibGotchiLending {
         s.aavegotchis[lending.erc721TokenId].locked = false;
         s.aavegotchiToListingId[lending.erc721TokenId] = 0;
 
+        emit GotchiLendingCancel(_listingId, block.timestamp);
         emit GotchiLendingCanceled(
             _listingId,
             lending.lender,
@@ -319,6 +327,7 @@ library LibGotchiLending {
 
         lending.lastClaimed = uint40(block.timestamp);
 
+        emit GotchiLendingClaim(listingId, lending.revenueTokens, amounts);
         emit GotchiLendingClaimed(
             listingId,
             lending.lender,
@@ -354,6 +363,7 @@ library LibGotchiLending {
         removeLentAavegotchi(tokenId, lender);
         removeLendingListItem(lender, lending.listingId, "agreed");
 
+        emit GotchiLendingEnd(listingId);
         emit GotchiLendingEnded(
             listingId,
             lending.lender,
