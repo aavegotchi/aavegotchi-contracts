@@ -3,6 +3,8 @@ import { BytesLike } from "@ethersproject/bytes";
 import { SvgFacet } from "../typechain";
 import { gasPrice, itemManager, itemManagerAlt } from "./helperFunctions";
 
+import { aavegotchiSvgs } from "../svgs/aavegotchi-side-typeScript";
+import { aavegotchiSvgs as frontGotchiSvgs } from "../svgs/aavegotchi-typescript";
 import {
   wearablesSvgs as front,
   sleeveSvgs as frontSleeve,
@@ -15,6 +17,21 @@ import {
   wearablesRightSleeveSvgs as rightSleeve,
   wearablesBackSleeveSvgs as backSleeve,
 } from "../svgs/wearables-sides";
+import { collateralsSvgs as collateralFront } from "../svgs/collateralsOptimizerFront";
+import {
+  collateralsLeftSvgs,
+  collateralsRightSvgs,
+} from "../svgs/collaterals-sides";
+import { eyeShapeSvgs as frontEyesH1 } from "../svgs/eyeShapesOptimized";
+import {
+  eyeShapesLeftSvgs as leftEyesH1,
+  eyeShapesRightSvgs as rightEyesH1,
+} from "../svgs/eyeShapes-sidesOpt";
+import { eyeShapeSvgs as frontEyesH2 } from "../svgs/eyeShapesH2Opt";
+import {
+  eyeShapesLeftSvgs as leftEyesH2,
+  eyeShapesRightSvgs as rightEyesH2,
+} from "../svgs/eyeShapesH2-sidesOpt";
 
 import { UpdateSvgsTaskArgs } from "../tasks/updateSvgs";
 import { AddBaadgeTaskArgs } from "../tasks/addBaadgeSvgs";
@@ -571,11 +588,10 @@ export async function collateralsUpdateForSvgTask(
   const frontSvg = [];
   const leftSvg = [];
   const rightSvg = [];
-  const backSvg = [];
 
   if ("front" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
-      frontSvg.push(`***${front[_itemIds[i]]}`);
+      frontSvg.push(`***${collateralFront[_itemIds[i]]}`);
     }
 
     taskArgs = {
@@ -587,7 +603,7 @@ export async function collateralsUpdateForSvgTask(
     return taskArgs;
   } else if ("left" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
-      leftSvg.push(`***${left[_itemIds[i]]}`);
+      leftSvg.push(`***${collateralsLeftSvgs[_itemIds[i]]}`);
     }
 
     taskArgs = {
@@ -599,7 +615,7 @@ export async function collateralsUpdateForSvgTask(
     return taskArgs;
   } else if ("right" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
-      rightSvg.push(`***${right[_itemIds[i]]}`);
+      rightSvg.push(`***${collateralsRightSvgs[_itemIds[i]]}`);
     }
 
     taskArgs = {
@@ -609,21 +625,175 @@ export async function collateralsUpdateForSvgTask(
     };
     console.log("Task Arg IDs: ", taskArgs.svgIds);
     return taskArgs;
-  } else if ("back" === _side) {
+  } else {
+    console.log(
+      "Not a proper collaterals side, must be string of front, left, right or back ONLY"
+    );
+  }
+}
+
+export async function eyeShapeUpdateForSvgTask(
+  _itemIds: number[],
+  _side: string,
+  _haunt: number
+) {
+  let taskArgs: UpdateSvgsTaskArgs;
+  const frontSvg = [];
+  const leftSvg = [];
+  const rightSvg = [];
+
+  if (1 === _haunt) {
+    if ("front" === _side) {
+      for (let i = 0; i < _itemIds.length; i++) {
+        frontSvg.push(`***${frontEyesH1[_itemIds[i]]}`);
+      }
+
+      taskArgs = {
+        svgIds: [_itemIds].join(","),
+        svgType: `eyeShapes`,
+        svgs: [frontSvg].join("***"),
+      };
+      console.log("Task Arg IDs: ", taskArgs.svgIds);
+      return taskArgs;
+    } else if ("left" === _side) {
+      for (let i = 0; i < _itemIds.length; i++) {
+        leftSvg.push(`***${leftEyesH1[_itemIds[i]]}`);
+      }
+
+      taskArgs = {
+        svgIds: [_itemIds].join(","),
+        svgType: `eyeShapes-left`,
+        svgs: [leftSvg].join("***"),
+      };
+      console.log("Task Arg IDs: ", taskArgs.svgIds);
+      return taskArgs;
+    } else if ("right" === _side) {
+      for (let i = 0; i < _itemIds.length; i++) {
+        rightSvg.push(`***${rightEyesH1[_itemIds[i]]}`);
+      }
+
+      taskArgs = {
+        svgIds: [_itemIds].join(","),
+        svgType: `eyeShapes-right`,
+        svgs: [rightSvg].join("***"),
+      };
+      console.log("Task Arg IDs: ", taskArgs.svgIds);
+      return taskArgs;
+    } else {
+      console.log(
+        "Not a proper eyeShape side, must be string of front, left, right or back ONLY"
+      );
+    }
+  } else if (2 === _haunt) {
+    if ("front" === _side) {
+      for (let i = 0; i < _itemIds.length; i++) {
+        frontSvg.push(`***${frontEyesH2[_itemIds[i]]}`);
+      }
+
+      taskArgs = {
+        svgIds: [_itemIds].join(","),
+        svgType: `eyeShapesH2`,
+        svgs: [frontSvg].join("***"),
+      };
+      console.log("Task Arg IDs: ", taskArgs.svgIds);
+      return taskArgs;
+    } else if ("left" === _side) {
+      for (let i = 0; i < _itemIds.length; i++) {
+        leftSvg.push(`***${leftEyesH2[_itemIds[i]]}`);
+      }
+
+      taskArgs = {
+        svgIds: [_itemIds].join(","),
+        svgType: `eyeShapesH2-left`,
+        svgs: [leftSvg].join("***"),
+      };
+      console.log("Task Arg IDs: ", taskArgs.svgIds);
+      return taskArgs;
+    } else if ("right" === _side) {
+      for (let i = 0; i < _itemIds.length; i++) {
+        rightSvg.push(`***${rightEyesH2[_itemIds[i]]}`);
+      }
+
+      taskArgs = {
+        svgIds: [_itemIds].join(","),
+        svgType: `eyeShapesH2-right`,
+        svgs: [rightSvg].join("***"),
+      };
+      console.log("Task Arg IDs: ", taskArgs.svgIds);
+      return taskArgs;
+    } else {
+      console.log(
+        "Not a proper eyeShape side, must be string of front, left, right or back ONLY"
+      );
+    }
+  } else {
+    console.log(
+      "Not a proper haunt, must be 1 or 2... unless a new haunt has been deployed"
+    );
+  }
+}
+
+export async function aavegotchiUpdateForSvgTask(
+  _itemIds: number[],
+  _side: string
+) {
+  let taskArgs: UpdateSvgsTaskArgs;
+  const frontSvg = [];
+  const leftSvg = [];
+  const rightSvg = [];
+  const backSvg = [];
+
+  if ("front" === _side) {
     for (let i = 0; i < _itemIds.length; i++) {
-      backSvg.push(`***${back[_itemIds[i]]}`);
+      frontSvg.push(`***${frontGotchiSvgs[_itemIds[i]]}`);
     }
 
     taskArgs = {
       svgIds: [_itemIds].join(","),
-      svgType: `collaterals-back`,
+      svgType: `aavegotchi`,
+      svgs: [frontSvg].join("***"),
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
+  } else if ("left" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      leftSvg.push(`***${aavegotchiSvgs.left[_itemIds[i]]}`);
+    }
+
+    taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `aavegotchi-left`,
+      svgs: [leftSvg].join("***"),
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
+  } else if ("right" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      rightSvg.push(`***${aavegotchiSvgs.right[_itemIds[i]]}`);
+    }
+
+    taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `aavegotchi-right`,
+      svgs: [rightSvg].join("***"),
+    };
+    console.log("Task Arg IDs: ", taskArgs.svgIds);
+    return taskArgs;
+  } else if ("back" === _side) {
+    for (let i = 0; i < _itemIds.length; i++) {
+      backSvg.push(`***${aavegotchiSvgs.back[_itemIds[i]]}`);
+    }
+
+    taskArgs = {
+      svgIds: [_itemIds].join(","),
+      svgType: `aavegotchi-back`,
       svgs: [backSvg].join("***"),
     };
     console.log("Task Arg IDs: ", taskArgs.svgIds);
     return taskArgs;
   } else {
     console.log(
-      "Not a proper collaterals side, must be string of front, left, right or back ONLY"
+      "Not a proper aavegotchi side, must be string of front, left, right or back ONLY"
     );
   }
 }

@@ -3,7 +3,7 @@ console.log(process.cwd());
 
 // Make sure that the entire enclosing <g> has a class="collateral"
 
-function stripSvg(svg) {
+function stripSvg(svg: string) {
   // removes svg tag
   if (svg.includes("viewBox")) {
     svg = svg.slice(svg.indexOf(">") + 1);
@@ -12,19 +12,19 @@ function stripSvg(svg) {
   return svg;
 }
 
-function readSvg(name) {
+function readSvg(name: string) {
   return stripSvg(
     fs.readFileSync(`./svgs/eyeShapes-sides/${name}.svg`, "utf8")
   );
 }
 
-function eyeShape(name) {
+function eyeShape(name: string) {
   let svg = readSvg(name);
   svg = `<g class="gotchi-eyeColor">${svg}</g>`;
   return svg;
 }
 
-const eyeShapesLeftSvgs = [
+export const eyeShapesLeftSvgs = [
   eyeShape("mythical_low_1_left"),
   eyeShape("mythical_low_2_left"),
   eyeShape("rare_low_1_left"),
@@ -53,7 +53,7 @@ const eyeShapesLeftSvgs = [
   eyeShape("usdt_collateral_left_eyeShapes"),
 ];
 
-const eyeShapesRightSvgs = [
+export const eyeShapesRightSvgs = [
   eyeShape("mythical_low_1_right"),
   eyeShape("mythical_low_2_right"),
   eyeShape("rare_low_1_right"),
@@ -81,6 +81,3 @@ const eyeShapesRightSvgs = [
   eyeShape("tusd_collateral_right_eyeShapes"),
   eyeShape("usdt_collateral_right_eyeShapes"),
 ];
-
-exports.eyeShapesLeftSvgs = eyeShapesLeftSvgs;
-exports.eyeShapesRightSvgs = eyeShapesRightSvgs;
