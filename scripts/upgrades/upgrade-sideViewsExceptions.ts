@@ -68,18 +68,6 @@ export async function upgrade() {
       side: back,
       exceptionBool: true,
     },
-    // {
-    //   itemId: 307,
-    //   slotPosition: 0,
-    //   side: left,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 307,
-    //   slotPosition: 0,
-    //   side: right,
-    //   exceptionBool: true,
-    // },
 
     //face
     {
@@ -210,24 +198,7 @@ export async function upgrade() {
       side: right,
       exceptionBool: true,
     },
-    // {
-    //   itemId: 36,
-    //   slotPosition: 2,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 49,
-    //   slotPosition: 2,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 57,
-    //   slotPosition: 2,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
+
     {
       itemId: 66,
       slotPosition: 2,
@@ -278,54 +249,7 @@ export async function upgrade() {
     },
 
     //head
-    // {
-    //   itemId: 21,
-    //   slotPosition: 3,
-    //   side: front,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 21,
-    //   slotPosition: 3,
-    //   side: right,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 21,
-    //   slotPosition: 3,
-    //   side: left,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 21,
-    //   slotPosition: 3,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 24,
-    //   slotPosition: 3,
-    //   side: front,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 24,
-    //   slotPosition: 3,
-    //   side: right,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 24,
-    //   slotPosition: 3,
-    //   side: left,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 24,
-    //   slotPosition: 3,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
+
     {
       itemId: 27,
       slotPosition: 3,
@@ -398,78 +322,7 @@ export async function upgrade() {
       side: back,
       exceptionBool: true,
     },
-    // {
-    //   itemId: 39,
-    //   slotPosition: 3,
-    //   side: front,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 39,
-    //   slotPosition: 3,
-    //   side: right,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 39,
-    //   slotPosition: 3,
-    //   side: left,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 39,
-    //   slotPosition: 3,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 42,
-    //   slotPosition: 3,
-    //   side: front,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 42,
-    //   slotPosition: 3,
-    //   side: right,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 42,
-    //   slotPosition: 3,
-    //   side: left,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 42,
-    //   slotPosition: 3,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 45,
-    //   slotPosition: 3,
-    //   side: front,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 45,
-    //   slotPosition: 3,
-    //   side: right,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 45,
-    //   slotPosition: 3,
-    //   side: left,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 45,
-    //   slotPosition: 3,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
+
     {
       itemId: 72,
       slotPosition: 3,
@@ -494,54 +347,7 @@ export async function upgrade() {
       side: back,
       exceptionBool: true,
     },
-    // {
-    //   itemId: 104,
-    //   slotPosition: 3,
-    //   side: front,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 104,
-    //   slotPosition: 3,
-    //   side: right,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 104,
-    //   slotPosition: 3,
-    //   side: left,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 104,
-    //   slotPosition: 3,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 111,
-    //   slotPosition: 3,
-    //   side: front,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 111,
-    //   slotPosition: 3,
-    //   side: right,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 111,
-    //   slotPosition: 3,
-    //   side: left,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 111,
-    //   slotPosition: 3,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
+
     {
       itemId: 144,
       slotPosition: 3,
@@ -614,30 +420,7 @@ export async function upgrade() {
       side: back,
       exceptionBool: true,
     },
-    // {
-    //   itemId: 211,
-    //   slotPosition: 3,
-    //   side: front,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 211,
-    //   slotPosition: 3,
-    //   side: right,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 211,
-    //   slotPosition: 3,
-    //   side: left,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 211,
-    //   slotPosition: 3,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
+
     {
       itemId: 242,
       slotPosition: 3,
@@ -656,54 +439,7 @@ export async function upgrade() {
       side: back,
       exceptionBool: true,
     },
-    // {
-    //   itemId: 252,
-    //   slotPosition: 3,
-    //   side: front,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 252,
-    //   slotPosition: 3,
-    //   side: right,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 252,
-    //   slotPosition: 3,
-    //   side: left,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 252,
-    //   slotPosition: 3,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 255,
-    //   slotPosition: 3,
-    //   side: front,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 255,
-    //   slotPosition: 3,
-    //   side: right,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 255,
-    //   slotPosition: 3,
-    //   side: left,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 255,
-    //   slotPosition: 3,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
+
     {
       itemId: 292,
       slotPosition: 3,
@@ -776,54 +512,6 @@ export async function upgrade() {
       side: back,
       exceptionBool: true,
     },
-    // {
-    //   itemId: 309,
-    //   slotPosition: 3,
-    //   side: front,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 309,
-    //   slotPosition: 3,
-    //   side: right,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 309,
-    //   slotPosition: 3,
-    //   side: left,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 309,
-    //   slotPosition: 3,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 313,
-    //   slotPosition: 3,
-    //   side: front,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 313,
-    //   slotPosition: 3,
-    //   side: right,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 313,
-    //   slotPosition: 3,
-    //   side: left,
-    //   exceptionBool: true,
-    // },
-    // {
-    //   itemId: 313,
-    //   slotPosition: 3,
-    //   side: back,
-    //   exceptionBool: true,
-    // },
 
     //right hand
     {
