@@ -20,7 +20,9 @@ export async function upgrade() {
     },
     {
       facetName: "SvgFacet",
-      addSelectors: [],
+      addSelectors: [
+        `function getNextSleeveId() external view returns (uint256)`,
+      ],
       removeSelectors: [],
     },
   ];
