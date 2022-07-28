@@ -37,8 +37,8 @@ export function convertStringToSleevesArray(
 
   sleevesIdsOutput.forEach((_, index) => {
     output.push({
-      sleeveId: sleevesIdsOutput[index],
-      wearableId: wearableIdsOutput[index],
+      sleeveId: Number(sleevesIdsOutput[index]),
+      wearableId: Number(wearableIdsOutput[index]),
     });
   });
   return output;
@@ -61,6 +61,8 @@ task("updateSleeves", "Updates SVGs, given sleevesIds and a list of svgIds")
         maticDiamondAddress,
         signer
       )) as SvgFacet;
+
+      console.log("Sleeves being set: ", sleeves);
 
       let tx = await svgFacet.setSleeves(sleeves);
       console.log("tx hash:", tx.hash);

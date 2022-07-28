@@ -62,23 +62,24 @@ task("addBaadgeSvgs", "Adds itemTypes and SVGs")
         signer
       )) as SvgFacet;
 
+      const svgId: number[] = [];
+
       for (let index = 0; index < svgIds.length; index++) {
-        const svgId = svgIds[index];
+        svgId.push(Number(svgIds[index]));
 
         console.log("array id:", svgArrayIndex);
         console.log("svg length:", svgsArray[svgArrayIndex].length);
-
-        try {
-          await uploadOrUpdateSvg(
-            svgsArray[svgArrayIndex],
-            "wearables",
-            Number(svgId),
-            svgFacet,
-            hre.ethers
-          );
-        } catch (error) {
-          console.log("error uploading", svgId, error);
-        }
+      }
+      try {
+        await uploadOrUpdateSvg(
+          svgsArray,
+          "wearables",
+          svgId,
+          svgFacet,
+          hre.ethers
+        );
+      } catch (error) {
+        console.log("error uploading", svgId, error);
       }
     }
   );

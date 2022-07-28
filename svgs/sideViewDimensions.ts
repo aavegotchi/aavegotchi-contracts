@@ -2354,7 +2354,7 @@ export const sideViewDimensions2 = [
     itemId: 85,
     name: "Gentleman Suit",
     side: "left",
-    dimensions: { x: 20, y: 33, width: 4, height: 9 },
+    dimensions: { x: 20, y: 32, width: 4, height: 9 },
   },
   {
     itemId: 85,
@@ -2378,7 +2378,7 @@ export const sideViewDimensions2 = [
     itemId: 85,
     name: "Gentleman Suit",
     side: "right",
-    dimensions: { x: 20, y: 33, width: 4, height: 9 },
+    dimensions: { x: 20, y: 32, width: 4, height: 9 },
   },
   {
     itemId: 86,
