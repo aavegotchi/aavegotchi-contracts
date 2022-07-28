@@ -499,10 +499,4 @@ contract SvgFacet is Modifiers {
             s.itemTypes[_itemIds[i]].dimensions = _dimensions[i];
         }
     }
-
-    ///@notice used for setting starting id for new sleeve set uploads
-    ///@return next available sleeve id to start new set upload
-    function getNextSleeveId() external view returns (uint256) {
-        return s.svgLayers[LibSvg.bytesToBytes32("sleeves", "")].length;
-    }
 }
