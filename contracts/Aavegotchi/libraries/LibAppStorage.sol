@@ -290,6 +290,8 @@ struct AppStorage {
     mapping(address => bool) revenueTokenAllowed;
     mapping(address => mapping(address => mapping(uint32 => bool))) lendingOperators; // owner => operator => tokenId => isLendingOperator
     address realmAddress;
+    // side => (itemTypeId => (slotPosition => exception Bool)) SVG exceptions
+    mapping(bytes32 => mapping(uint256 => mapping(uint256 => bool))) wearableExceptions;
 }
 
 library LibAppStorage {
