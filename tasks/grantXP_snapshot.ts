@@ -14,6 +14,7 @@ export const currentOverrides: string[] = [
   "0xA2faa3405a734c04aE713AAa837E6cEcC2cAee9F",
   "0x77F4e1c69EfB78625244DD1c7d9e05B7411a7768",
   "0xb9ff017c875f5c39d0018d1df86fbd92943d5b82",
+  "0x1EA25519e4829Bf579a58F133C4bF31e7e6F7565",
 ];
 
 export interface GrantXPSnapshotTaskArgs {

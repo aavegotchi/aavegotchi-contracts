@@ -73,6 +73,7 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     ).connect(managedSigner) as DAOFacet;
 
     for (let index = 0; index < batches; index++) {
+      console.log("batch:", index);
       const offset = batchSize * index;
       const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
 
