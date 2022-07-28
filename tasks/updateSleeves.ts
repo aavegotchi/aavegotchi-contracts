@@ -1,6 +1,7 @@
 import { task } from "hardhat/config";
 import { Signer } from "@ethersproject/abstract-signer";
 import {
+  gasPrice,
   getDiamondSigner,
   itemManager,
   maticDiamondAddress,
@@ -64,7 +65,7 @@ task("updateSleeves", "Updates SVGs, given sleevesIds and a list of svgIds")
 
       console.log("Sleeves being set: ", sleeves);
 
-      let tx = await svgFacet.setSleeves(sleeves);
+      let tx = await svgFacet.setSleeves(sleeves, { gasPrice: gasPrice });
       console.log("tx hash:", tx.hash);
       let receipt = await tx.wait();
       console.log("Sleeve set!");
