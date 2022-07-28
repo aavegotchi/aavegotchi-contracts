@@ -3,6 +3,7 @@
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-contract-sizer";
+import "@nomiclabs/hardhat-etherscan";
 import "solidity-coverage";
 //import './tasks/generateDiamondABI.js';
 import * as dotenv from "dotenv";
@@ -34,6 +35,9 @@ require("./tasks/updateWearableExceptions");
 // defaultNetwork, networks, solc, and paths.
 // Go to https://buidler.dev/config/ to learn more
 export default {
+  etherscan: {
+    apiKey: process.env.POLYGON_API_KEY,
+  },
   networks: {
     hardhat: {
       forking: {
