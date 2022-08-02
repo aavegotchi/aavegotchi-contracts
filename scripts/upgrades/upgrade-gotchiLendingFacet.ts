@@ -9,6 +9,11 @@ import { maticDiamondAddress } from "../helperFunctions";
 export async function upgrade() {
   const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 
+  const InitBorrowLimit = await ethers.getContractFactory("InitBorrowLimit");
+  const initBorrowLimit = await InitBorrowLimit.deploy();
+  await initBorrowLimit.deployed();
+  const payload = initBorrowLimit.interface.encodeFunctionData("init");
+
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "GotchiLendingFacet",
@@ -24,6 +29,7 @@ export async function upgrade() {
       facetName: "WhitelistFacet",
       addSelectors: [
         "function setWhitelistAccessRight(uint32 _whitelistId,uint256 _actionRight,uint256 _accessRight) external",
+        "function setBorrowLimit(uint32 _whitelistId, uint256 _borrowlimit) external",
       ],
       removeSelectors: [],
     },
@@ -37,6 +43,8 @@ export async function upgrade() {
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: true,
+    initAddress: initBorrowLimit.address,
+    initCalldata: payload,
   };
 
   await run("deployUpgrade", args);

@@ -349,11 +349,12 @@ library LibGotchiLending {
 
         removeLentAavegotchi(tokenId, lender);
         removeLendingListItem(lender, lending.listingId, "agreed");
-
-        EnumerableSet.UintSet storage whitelistBorrowerGotchiSet = s.whitelistGotchiBorrows[lending.whitelistId][lending.borrower];
-        // Remove token id from borrower's list of borrowed gotchis. Does not revert if it the element does not exist
-        whitelistBorrowerGotchiSet.remove(lending.erc721TokenId);
-
+        // scope to avoid stack too deep
+        {
+            EnumerableSet.UintSet storage whitelistBorrowerGotchiSet = s.whitelistGotchiBorrows[lending.whitelistId][lending.borrower];
+            // Remove token id from borrower's list of borrowed gotchis. Does not revert if it the element does not exist
+            whitelistBorrowerGotchiSet.remove(lending.erc721TokenId);
+        }
         emit GotchiLendingEnd(listingId);
         emit GotchiLendingEnded(
             listingId,
