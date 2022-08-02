@@ -67,6 +67,13 @@ contract WhitelistFacet is Modifiers {
         LibWhitelist.setWhitelistAccessRight(_whitelistId, _actionRight, _accessRight);
     }
 
+    function setBorrowLimit(uint32 _whitelistId, uint256 _borrowlimit) external {
+        require(LibWhitelist._whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
+        require(LibWhitelist.checkWhitelistOwner(_whitelistId), "WhitelistFacet: Not whitelist owner");
+
+        LibWhitelist.setWhitelistAccessRight(_whitelistId, 0, _borrowlimit);
+    }
+
     function whitelistExists(uint32 whitelistId) external view returns (bool exists) {
         exists = LibWhitelist._whitelistExists(whitelistId);
     }
