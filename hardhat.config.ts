@@ -2,8 +2,8 @@
 
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
-import "@nomiclabs/hardhat-etherscan";
 import "hardhat-contract-sizer";
+import "@nomiclabs/hardhat-etherscan";
 import "solidity-coverage";
 //import './tasks/generateDiamondABI.js';
 import * as dotenv from "dotenv";
@@ -12,6 +12,7 @@ import { BigNumber } from "ethers";
 
 dotenv.config({ path: __dirname + "/.env" });
 
+//  require("./tasks/verifyFacet.js");
 require("./tasks/deployUpgrade.ts");
 require("./tasks/addBaadgeSvgs.ts");
 require("./tasks/mintBaadgeSvgs.ts");
@@ -21,14 +22,13 @@ require("./tasks/updateSvgs.ts");
 require("./tasks/updateItemSideDimensions.ts");
 require("./tasks/batchDeposit.ts");
 require("./tasks/rarityPayouts");
-require("./tasks/grantXP");
 require("./tasks/grantXP_snapshot");
 require("./tasks/grantXP_minigame");
-require("./tasks/grantXP_aavegotchis");
 require("./tasks/addItemTypes");
 require("./tasks/addWearableSets");
 require("./tasks/grantXP_customValues");
 require("./tasks/generateDiamondABI");
+require("./tasks/updateWearableExceptions");
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
@@ -54,12 +54,11 @@ export default {
     },
     matic: {
       url: process.env.MATIC_URL,
+      // url: 'https://rpc-mainnet.maticvigil.com/',
       accounts: [process.env.ITEM_MANAGER],
       // blockGasLimit: 20000000,
-      // gasPrice: 1000000000,
-      maxFeePerGas: BigNumber.from("80").mul(1e9),
-      maxPriorityFeePerGas: BigNumber.from("50").mul(1e9),
-      gasLimit: 2000000,
+      blockGasLimit: 20000000,
+      gasPrice: 1000000000,
       timeout: 90000,
     },
     // mumbai: {

@@ -5,8 +5,8 @@ import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 /* TODO: replace follwowing values */
 const installationDiamond = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
-const typeStartId = 19;
-const typeEndId = 54;
+const typeStartId = 55;
+const typeEndId = 55;
 const category = 4;
 /* TODO: end */
 

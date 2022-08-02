@@ -365,18 +365,36 @@ contract SvgFacet is Modifiers {
         //10. Right hand wearable
         //11. Pet wearable
 
-        svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable);
-        svg_ = abi.encodePacked(
-            svg_,
-            layers.hands,
-            layers.face,
-            layers.eyes,
-            layers.head,
-            layers.sleeves,
-            layers.handLeft,
-            layers.handRight,
-            layers.pet
-        );
+        svg_ = applyFrontLayerExceptions(equippedWearables, layers, _body);
+    }
+
+    function applyFrontLayerExceptions(
+        uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables,
+        AavegotchiLayers memory layers,
+        bytes memory _body
+    ) internal view returns (bytes memory svg_) {
+        bytes32 front = LibSvg.bytesToBytes32("wearables-", "front");
+
+        svg_ = abi.encodePacked(layers.background, _body, layers.bodyWearable, layers.hands);
+        //eyes and head exceptions
+        if (
+            s.wearableExceptions[front][equippedWearables[2]][2] &&
+            s.wearableExceptions[front][equippedWearables[3]][3] &&
+            equippedWearables[2] != 301 /*alluring eyes*/
+        ) {
+            svg_ = abi.encodePacked(svg_, layers.face, layers.head, layers.eyes);
+            //face or eye and head exceptions
+        } else if (
+            (s.wearableExceptions[front][equippedWearables[1]][1] || equippedWearables[2] == 301) &&
+            s.wearableExceptions[front][equippedWearables[3]][3]
+        ) {
+            svg_ = abi.encodePacked(svg_, layers.eyes, layers.head, layers.face);
+        } else if ((s.wearableExceptions[front][equippedWearables[1]][1] || equippedWearables[2] == 301) && equippedWearables[2] == 301) {
+            svg_ = abi.encodePacked(svg_, layers.eyes, layers.face, layers.head);
+        } else {
+            svg_ = abi.encodePacked(svg_, layers.face, layers.eyes, layers.head);
+        }
+        svg_ = abi.encodePacked(svg_, layers.sleeves, layers.handLeft, layers.handRight, layers.pet);
     }
 
     ///@notice Query the svg data for all aavegotchis with the portals as bg (10 in total)
@@ -498,5 +516,11 @@ contract SvgFacet is Modifiers {
         for (uint256 i; i < _itemIds.length; i++) {
             s.itemTypes[_itemIds[i]].dimensions = _dimensions[i];
         }
+    }
+
+    ///@notice used for setting starting id for new sleeve set uploads
+    ///@return next available sleeve id to start new set upload
+    function getNextSleeveId() external view returns (uint256) {
+        return s.svgLayers[LibSvg.bytesToBytes32("sleeves", "")].length;
     }
 }

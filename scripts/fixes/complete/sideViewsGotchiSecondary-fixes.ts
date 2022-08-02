@@ -1,7 +1,7 @@
 /* global ethers hre */
 /* eslint prefer-const: "off" */
 import { ethers, network } from "hardhat";
-import { aavegotchiSvgs } from "../../svgs/aavegotchi-side-typeScript";
+import { aavegotchiSvgs } from "../../../svgs/aavegotchi-side-typeScript";
 import { Signer } from "@ethersproject/abstract-signer";
 
 async function main() {
