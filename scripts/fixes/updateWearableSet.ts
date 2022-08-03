@@ -3,16 +3,32 @@ import { network, ethers } from "hardhat";
 import { WearableSetOutput } from "../../tasks/addWearableSets";
 
 import { DAOFacet } from "../../typechain";
-import { itemManagerAlt, maticDiamondAddress } from "../helperFunctions";
+import {
+  gasPrice,
+  itemManagerAlt,
+  maticDiamondAddress,
+} from "../helperFunctions";
 
 export async function updateWearableSets() {
-  const setIds = [3, 56, 93];
+  const setIds = [3, 46, 48, 56, 93];
 
   const setInfo: WearableSetOutput[] = [
     {
       name: "Link Marine",
       wearableIds: [10, 11, 12],
-      traitsBonuses: [4, 0, 2, 0, 2], //add 2 BRN to compensate for Link Bubbly -2 BRN that contradicts +2 BRN
+      traitsBonuses: [4, 0, 2, 0, 4], //add 4 BRN to compensate for Link Bubbly -2 BRN
+      allowedCollaterals: [],
+    },
+    {
+      name: "Runner",
+      wearableIds: [94, 95, 118], //change 121 to 118, Water Jug
+      traitsBonuses: [2, 1, 0, 0, 0],
+      allowedCollaterals: [],
+    },
+    {
+      name: "Long Distance Runner",
+      wearableIds: [94, 125, 118], //change 121 to 118, Water Jug
+      traitsBonuses: [4, 2, 0, 0, 0],
       allowedCollaterals: [],
     },
     {
@@ -50,7 +66,9 @@ export async function updateWearableSets() {
     signer
   )) as DAOFacet;
 
-  const tx = await daoFacet.updateWearableSets(setIds, setInfo);
+  const tx = await daoFacet.updateWearableSets(setIds, setInfo, {
+    gasPrice: gasPrice,
+  });
   console.log("tx hash:", tx.hash);
   await tx.wait();
   console.log("Updated wearable sets");

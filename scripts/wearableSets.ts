@@ -46,9 +46,9 @@ export const wearableSetArrays: WearableSet[] = [
   },
   {
     setId: 3,
-    name: "General",
+    name: "Link Marine",
     wearableIds: [10, 11, 12],
-    traitsBonuses: [4, 0, 2, 0, 0],
+    traitsBonuses: [4, 0, 2, 0, 4], //add 4 BRN to compensate for Link Bubbly -2 BRN
     allowedCollaterals: [],
   },
   {
@@ -419,7 +419,7 @@ export const wearableSetArrays: WearableSet[] = [
     setId: 56,
     name: "Off Duty Hazmat",
     wearableIds: [111, 112, 123],
-    traitsBonuses: [4, 2, 0, 0, 0],
+    traitsBonuses: [4, 2, 0, 2, 0], //add +2 SPK to compensate for -2 SPK of Apple Juice
     allowedCollaterals: [],
   },
   {
@@ -679,10 +679,9 @@ export const wearableSetArrays: WearableSet[] = [
   },
 
   {
-    setId: 93,
     name: "Venly Biker",
     wearableIds: [206, 207, 208, 209],
-    traitsBonuses: [4, 1, 1, 0, 0],
+    traitsBonuses: [4, -1, 1, 0, 0], //change NRG to -1 to be in line with others
     allowedCollaterals: [],
   },
   {
