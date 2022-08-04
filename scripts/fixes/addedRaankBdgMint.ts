@@ -18,19 +18,6 @@ import { dataArgs as dataArgs3 } from "../../data/airdrops/rarityfarming/szn3/rn
 import { dataArgs as dataArgs4 } from "../../data/airdrops/rarityfarming/szn3/rnd4";
 
 export async function main() {
-  const baadges: string[] = ["Aavegotchi-RF-SZN3-Baadges-PLAAYER-RAANKED"];
-
-  //Upload SVGs
-  let ids: number[] = [332];
-
-  let upload = await updateBaadgeTaskForSvgType(
-    baadges,
-    "sZN3AddedRankingBdg",
-    ids
-  );
-
-  await run("updateSvgs", upload);
-
   //Mint baadge item types
   let mint = await mintSvgTaskForBaadges("rankRf3AddedMint");
   console.log("mint:", mint);

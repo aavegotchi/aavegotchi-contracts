@@ -5,7 +5,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN3 Raanked",
     description:
       "This Aavegotchi achieved leaderboard ranking in at least one category during the third season of Rarity Farming. From February 24 to April 22, 2022, the third season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards increased from 5k to 7500 winning gotchis each round!",
-    svgId: 332,
+    svgId: 325,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "common",

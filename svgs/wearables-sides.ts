@@ -333,7 +333,6 @@ export const wearablesRightSvgs = [
   329,
   330,
   331,
-  332,
 ];
 
 export const wearablesBackSvgs = [
@@ -669,7 +668,6 @@ export const wearablesBackSvgs = [
   329,
   330,
   331,
-  332,
 ];
 
 export const wearablesLeftSvgs = [
@@ -1005,7 +1003,6 @@ export const wearablesLeftSvgs = [
   329,
   330,
   331,
-  332,
 ];
 
 export const wearablesLeftSleeveSvgs = [
