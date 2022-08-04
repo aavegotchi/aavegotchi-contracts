@@ -76,6 +76,7 @@ library LibWhitelist {
         require(_isAccessRightValid(_actionRight, _accessRight), "LibWhitelist: Invalid Rights");
         AppStorage storage s = LibAppStorage.diamondStorage();
         s.whitelistAccessRights[_whitelistId][_actionRight] = _accessRight;
+        emit WhitelistAccessRightSet(_whitelistId, _actionRight, _accessRight);
     }
 
     function _isAccessRightValid(uint256 _actionRight, uint256 _accessRight) internal pure returns (bool) {
