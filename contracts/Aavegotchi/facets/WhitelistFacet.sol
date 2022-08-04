@@ -9,7 +9,6 @@ contract WhitelistFacet is Modifiers {
     event WhitelistCreated(uint32 indexed whitelistId);
     event WhitelistUpdated(uint32 indexed whitelistId);
     event WhitelistOwnershipTransferred(uint32 indexed whitelistId, address indexed newOwner);
-    event WhitelistAccessRightSet(uint32 indexed whitelistId, uint256 indexed actionRight, uint256 indexed accessRight);
 
     function createWhitelist(string calldata _name, address[] calldata _whitelistAddresses) external {
         require(_whitelistAddresses.length > 0, "WhitelistFacet: Whitelist length should be larger than zero");
