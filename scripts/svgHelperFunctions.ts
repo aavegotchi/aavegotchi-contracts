@@ -658,6 +658,9 @@ export async function eyeShapeUpdateForSvgTask(
     } else if ("left" === _side) {
       for (let i = 0; i < _itemIds.length; i++) {
         leftSvg.push(`***${leftEyesH1[_itemIds[i]]}`);
+        console.log("ID: ", _itemIds[i]);
+        console.log("Eyes array lenths: ", leftEyesH1.length);
+        console.log("Left Eyes SVG: ", leftEyesH1[_itemIds[i]]);
       }
 
       taskArgs = {
@@ -670,6 +673,7 @@ export async function eyeShapeUpdateForSvgTask(
     } else if ("right" === _side) {
       for (let i = 0; i < _itemIds.length; i++) {
         rightSvg.push(`***${rightEyesH1[_itemIds[i]]}`);
+        console.log("Right Eyes SVG: ", rightEyesH1[_itemIds[i]]);
       }
 
       taskArgs = {
