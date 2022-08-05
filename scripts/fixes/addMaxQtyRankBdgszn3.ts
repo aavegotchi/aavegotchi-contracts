@@ -4,6 +4,7 @@ import { itemTypes } from "../../scripts/addItemTypes/itemTypes/rfSzn3Bdgs";
 import { airdropTaskForBaadges } from "../svgHelperFunctions";
 
 import {
+  gasPrice,
   getPlaayersIds,
   hasDuplicateGotchiIds,
   itemManagerAlt,
@@ -50,7 +51,9 @@ export async function main() {
   let tx;
   let receipt;
   console.log("Update ItemTypeMaxQuantities");
-  tx = await daoFacet.updateItemTypeMaxQuantity(ids, maxQty);
+  tx = await daoFacet.updateItemTypeMaxQuantity(ids, maxQty, {
+    gasPrice: gasPrice,
+  });
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Not Sent: ${tx.hash}`);
@@ -58,7 +61,9 @@ export async function main() {
   console.log("Updated ItemTypeMaxQuantities successfully");
 
   //Mint
-  tx = await daoFacet.mintItems(itemManagerAlt, ids, addedQty);
+  tx = await daoFacet.mintItems(itemManagerAlt, ids, addedQty, {
+    gasPrice: gasPrice,
+  });
   const mintReceipt = await tx.wait();
   if (!mintReceipt.status) {
     throw Error(`Not Sent: ${tx.hash}`);
