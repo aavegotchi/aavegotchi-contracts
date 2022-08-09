@@ -4,7 +4,7 @@ pragma solidity 0.8.1;
 import {LibAavegotchi, AavegotchiInfo} from "../libraries/LibAavegotchi.sol";
 
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
-import {AppStorage} from "../libraries/LibAppStorage.sol";
+import {AppStorage, Modifiers} from "../libraries/LibAppStorage.sol";
 import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 // import "hardhat/console.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -14,9 +14,7 @@ import {IERC721TokenReceiver} from "../../shared/interfaces/IERC721TokenReceiver
 
 import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 
-contract AavegotchiFacet {
-    AppStorage internal s;
-
+contract AavegotchiFacet is Modifiers {
     event PetOperatorApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
     ///@notice Query the universal totalSupply of all NFTs ever minted
@@ -297,5 +295,59 @@ contract AavegotchiFacet {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
         ds.supportedInterfaces[0xd9b67a26] = true; //erc1155
         ds.supportedInterfaces[0x80ac58cd] = true; //erc721
+    }
+
+    function authorizePeriphery(address _periphery, bool _authorized) external onlyOwner {
+        s.authorizedPeriphery[_periphery] = _authorized;
+    }
+
+    function peripheryApprove(
+        address _sender,
+        address _approved,
+        uint256 _tokenId
+    ) external onlyPeriphery {
+        address owner = s.aavegotchis[_tokenId].owner;
+        require(owner == _sender || s.operators[owner][_sender], "ERC721: Not owner or operator of token.");
+        s.approved[_tokenId] = _approved;
+        emit LibERC721.Approval(owner, _approved, _tokenId);
+    }
+
+    function peripherySetApprovalForAll(
+        address _sender,
+        address _operator,
+        bool _approved
+    ) external onlyPeriphery {
+        s.operators[_sender][_operator] = _approved;
+        emit LibERC721.ApprovalForAll(_sender, _operator, _approved);
+    }
+
+    function peripheryTransferFrom(
+        address _sender,
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) external onlyPeriphery {
+        internalTransferFrom(_sender, _from, _to, _tokenId);
+    }
+
+    function peripherySafeTransferFrom(
+        address _sender,
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) external onlyPeriphery {
+        internalTransferFrom(_sender, _from, _to, _tokenId);
+        LibERC721.checkOnERC721Received(_sender, _from, _to, _tokenId, "");
+    }
+
+    function peripherySafeTransferFrom(
+        address _sender,
+        address _from,
+        address _to,
+        uint256 _tokenId,
+        bytes calldata _data
+    ) external onlyPeriphery {
+        internalTransferFrom(_sender, _from, _to, _tokenId);
+        LibERC721.checkOnERC721Received(_sender, _from, _to, _tokenId, _data);
     }
 }
