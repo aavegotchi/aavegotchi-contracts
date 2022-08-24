@@ -10,7 +10,7 @@ export async function upgrade() {
   const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 
   const InitBorrowLimit = await ethers.getContractFactory("InitBorrowLimit");
-  const initBorrowLimit = await InitBorrowLimit.deploy();
+  const initBorrowLimit = await InitBorrowLimit.deploy({ gasPrice: gasPrice });
   await initBorrowLimit.deployed();
   const payload = initBorrowLimit.interface.encodeFunctionData("init");
 
