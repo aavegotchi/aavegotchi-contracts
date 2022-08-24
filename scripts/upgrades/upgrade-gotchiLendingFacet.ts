@@ -4,7 +4,7 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
-import { maticDiamondAddress } from "../helperFunctions";
+import { gasPrice, maticDiamondAddress } from "../helperFunctions";
 
 export async function upgrade() {
   const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
