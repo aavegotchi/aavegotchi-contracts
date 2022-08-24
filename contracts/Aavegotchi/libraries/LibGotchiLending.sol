@@ -9,6 +9,8 @@ import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibAavegotchi} from "./LibAavegotchi.sol";
 import {LibWhitelist} from "./LibWhitelist.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {IRealmDiamond} from "../../shared/interfaces/IRealmDiamond.sol";
+import {Math} from "../../shared/libraries/Math.sol";
 
 library LibGotchiLending {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -204,14 +206,16 @@ library LibGotchiLending {
         s.petOperators[_borrower][lender] = true;
 
         EnumerableSet.UintSet storage whitelistBorrowerGotchiSet = s.whitelistGotchiBorrows[lending.whitelistId][_borrower];
-        uint256 borrowLimit = LibWhitelist.borrowLimit(lending.whitelistId);
+        uint256 borrowLimit = lending.whitelistId == 0
+            ? Math.min(IRealmDiamond(s.realmAddress).balanceOf(_borrower), 1)
+            : LibWhitelist.borrowLimit(lending.whitelistId);
 
         // Check if the whitelist allows multiple borrows
         // If not, register the gotchi id to the whitelist to prevent more borrows
         // We do not need to check for whitelistId = 0 since this whitelistId's borrow limit will always be 0, thus passing this check
         // There is a possibility of setting this borrow limit in an init function in the future for whitelist id 0 if desired
         require(
-            borrowLimit == 0 || borrowLimit > whitelistBorrowerGotchiSet.length(),
+            (borrowLimit == 0 && lending.whitelistId != 0) || borrowLimit > whitelistBorrowerGotchiSet.length(),
             "LibGotchiLending: Borrower is over borrow limit for the limit set by whitelist owner"
         );
         whitelistBorrowerGotchiSet.add(_erc721TokenId);
