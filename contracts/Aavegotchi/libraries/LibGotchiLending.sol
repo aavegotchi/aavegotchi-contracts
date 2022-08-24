@@ -207,7 +207,7 @@ library LibGotchiLending {
 
         EnumerableSet.UintSet storage whitelistBorrowerGotchiSet = s.whitelistGotchiBorrows[lending.whitelistId][_borrower];
         uint256 borrowLimit = lending.whitelistId == 0
-            ? Math.min(IRealmDiamond(s.realmAddress).balanceOf(_borrower), 1)
+            ? Math.max(IRealmDiamond(s.realmAddress).balanceOf(_borrower), 1)
             : LibWhitelist.borrowLimit(lending.whitelistId);
 
         // Check if the whitelist allows multiple borrows
