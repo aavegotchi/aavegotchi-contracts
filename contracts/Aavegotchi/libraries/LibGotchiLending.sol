@@ -215,7 +215,7 @@ library LibGotchiLending {
         // We do not need to check for whitelistId = 0 since this whitelistId's borrow limit will always be 0, thus passing this check
         // There is a possibility of setting this borrow limit in an init function in the future for whitelist id 0 if desired
         require(
-            (borrowLimit == 0 && lending.whitelistId != 0) || borrowLimit > whitelistBorrowerGotchiSet.length(),
+            borrowLimit == 0 || borrowLimit > whitelistBorrowerGotchiSet.length(),
             "LibGotchiLending: Borrower is over borrow limit for the limit set by whitelist owner"
         );
         whitelistBorrowerGotchiSet.add(_erc721TokenId);
