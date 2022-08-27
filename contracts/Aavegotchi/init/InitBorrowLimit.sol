@@ -6,6 +6,6 @@ import {LibWhitelist} from "../libraries/LibWhitelist.sol";
 contract InitBorrowLimit {
     // Set borrow limit for whitelist id 0 to 1 gotchi
     function init() external {
-        LibWhitelist.setWhitelistAccessRight(0, 0, 1);
+        LibWhitelist.setWhitelistAccessRight(0, 0, 0);
     }
 }

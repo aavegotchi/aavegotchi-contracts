@@ -27,12 +27,7 @@ export async function upgrade() {
     },
     {
       facetName: "WhitelistFacet",
-      addSelectors: [
-        "function setWhitelistAccessRight(uint32 _whitelistId,uint256 _actionRight,uint256 _accessRight) external",
-        "function setBorrowLimit(uint32 _whitelistId, uint256 _borrowlimit) external",
-        "function getBorrowLimit(uint32 _whitelistId) external view returns (uint256)",
-        "function getWhitelistAccessRight(uint32 _whitelistId, uint256 _actionRight) external view returns (uint256)",
-      ],
+      addSelectors: [],
       removeSelectors: [],
     },
   ];
