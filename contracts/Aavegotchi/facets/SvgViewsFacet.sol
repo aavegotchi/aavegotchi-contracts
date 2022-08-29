@@ -8,6 +8,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
+import "hardhat/console.sol";
 
 contract SvgViewsFacet is Modifiers {
     ///@notice Get the sideview svgs of an aavegotchi
@@ -246,7 +247,7 @@ contract SvgViewsFacet is Modifiers {
 
             if (i == LibItems.WEARABLE_SLOT_BG && wearableId != 0) {
                 layers.background = sideview;
-            } else {
+            } else if (i == LibItems.WEARABLE_SLOT_BG) {
                 layers.background = LibSvg.getSvg("aavegotchi", 4);
             }
 

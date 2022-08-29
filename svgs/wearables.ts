@@ -211,7 +211,7 @@ export const wearablesSvgs = [
   wearable("207_BikerJacket"),
   wearable("208_Aviators"),
   "209_HorsehoeMustache",
-  210,
+  wearable("210_H1background"),
   wearable("211_GuyFauwkesMask"),
   wearable("212_1337Laptop"),
   bodyWearable("213_H4xx0rShirt"),

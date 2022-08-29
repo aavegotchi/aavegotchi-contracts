@@ -7,6 +7,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
+import "hardhat/console.sol";
 
 contract SvgFacet is Modifiers {
     /***********************************|
@@ -294,6 +295,8 @@ contract SvgFacet is Modifiers {
         bytes memory svg_ = getAavegotchiSvgLayers(_collateralType, _numericTraits, type(uint256).max - 1, _hauntId);
 
         //Add on body wearables
+        console.log("***Background Id***");
+        console.log(equippedWearables[LibItems.WEARABLE_SLOT_BG]);
         svg_ = abi.encodePacked(addBodyAndWearableSvgLayers(svg_, equippedWearables));
 
         //Encode
@@ -310,8 +313,12 @@ contract SvgFacet is Modifiers {
         // If background is equipped
         uint256 wearableId = equippedWearables[LibItems.WEARABLE_SLOT_BG];
         if (wearableId != 0) {
+            console.log("BACKGROUND H1");
+            console.log(wearableId);
             layers.background = getWearable(wearableId, LibItems.WEARABLE_SLOT_BG);
         } else {
+            console.log("BACKGROUND Default");
+            console.log(wearableId);
             layers.background = LibSvg.getSvg("aavegotchi", 4);
         }
 
