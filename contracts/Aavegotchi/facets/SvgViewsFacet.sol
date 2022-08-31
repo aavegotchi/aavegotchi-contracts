@@ -246,7 +246,7 @@ contract SvgViewsFacet is Modifiers {
 
             if (i == LibItems.WEARABLE_SLOT_BG && wearableId != 0) {
                 layers.background = sideview;
-            } else {
+            } else if (i == LibItems.WEARABLE_SLOT_BG) {
                 layers.background = LibSvg.getSvg("aavegotchi", 4);
             }
 
