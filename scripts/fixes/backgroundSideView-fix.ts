@@ -27,12 +27,10 @@ async function main() {
 
   const ids: number[] = [210];
 
-  const frontBG = await updateSvgTaskForSvgType(ids, "front");
   const leftBG = await updateSvgTaskForSvgType(ids, "left");
   const rightBG = await updateSvgTaskForSvgType(ids, "right");
   const backBG = await updateSvgTaskForSvgType(ids, "back");
 
-  await run("updateSvgs", frontBG);
   await run("updateSvgs", leftBG);
   await run("updateSvgs", rightBG);
   await run("updateSvgs", backBG);

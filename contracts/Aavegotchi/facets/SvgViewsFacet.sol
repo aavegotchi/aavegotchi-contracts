@@ -8,7 +8,6 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
-import "hardhat/console.sol";
 
 contract SvgViewsFacet is Modifiers {
     ///@notice Get the sideview svgs of an aavegotchi
