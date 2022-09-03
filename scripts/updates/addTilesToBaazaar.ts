@@ -4,7 +4,7 @@ import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 /* TODO: replace follwowing values */
 const tileDiamond = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
-const tileIds = [6]; //le cyan grass
+const tileIds = [8, 9, 10, 11]; //le cyan grass
 const category = 5;
 /* TODO: end */
 
