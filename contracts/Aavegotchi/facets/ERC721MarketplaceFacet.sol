@@ -20,6 +20,17 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 time
     );
 
+    event ERC721ListingAddWithSplit(
+        uint256 indexed listingId,
+        address indexed seller,
+        address erc721TokenAddress,
+        uint256 erc721TokenId,
+        uint256 indexed category,
+        uint256 time,
+        uint16[2] principalSplit,
+        address affiliate
+    );
+
     event ERC721ExecutedListing(
         uint256 indexed listingId,
         address indexed seller,
@@ -225,6 +236,26 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 _erc721TokenId,
         uint256 _priceInWei
     ) external {
+        createERC721Listing(_erc721TokenAddress, _erc721TokenId, _priceInWei, [10000, 0], address(0));
+    }
+
+    function addERC721ListingWithSplit(
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId,
+        uint256 _priceInWei,
+        uint16[2] memory _principalSplit,
+        address _affiliate
+    ) external {
+        createERC721Listing(_erc721TokenAddress, _erc721TokenId, _priceInWei, _principalSplit, _affiliate);
+    }
+
+    function createERC721Listing(
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId,
+        uint256 _priceInWei,
+        uint16[2] memory _principalSplit,
+        address _affiliate
+    ) internal {
         IERC721 erc721Token = IERC721(_erc721TokenAddress);
         address owner = LibMeta.msgSender();
         require(erc721Token.ownerOf(_erc721TokenId) == owner, "ERC721Marketplace: Not owner of ERC721 token");
@@ -262,11 +293,13 @@ contract ERC721MarketplaceFacet is Modifiers {
             priceInWei: _priceInWei,
             timeCreated: block.timestamp,
             timePurchased: 0,
-            cancelled: false
+            cancelled: false,
+            principalSplit: _principalSplit,
+            affiliate: _affiliate
         });
 
         LibERC721Marketplace.addERC721ListingItem(owner, category, "listed", listingId);
-        emit ERC721ListingAdd(listingId, owner, _erc721TokenAddress, _erc721TokenId, category, _priceInWei);
+        emit ERC721ListingAddWithSplit(listingId, owner, _erc721TokenAddress, _erc721TokenId, category, _priceInWei, _principalSplit, _affiliate);
 
         //Lock Aavegotchis when listing is created
         if (_erc721TokenAddress == address(this)) {
@@ -334,6 +367,8 @@ contract ERC721MarketplaceFacet is Modifiers {
         LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, split.daoShare);
         LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, split.playerRewardsShare);
         LibERC20.transferFrom(s.ghstContract, buyer, seller, split.sellerShare);
+
+        //todo: Add affiliate split
 
         if (listing.erc721TokenAddress == address(this)) {
             s.aavegotchis[listing.erc721TokenId].locked = false;
