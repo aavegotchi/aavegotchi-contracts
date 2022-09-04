@@ -23,18 +23,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 time
     );
 
-    event ERC1155ListingAddWithSplit(
-        uint256 indexed listingId,
-        address indexed seller,
-        address erc1155TokenAddress,
-        uint256 erc1155TypeId,
-        uint256 indexed category,
-        uint256 quantity,
-        uint256 priceInWei,
-        uint256 time,
-        uint16[2] principalSplit,
-        address affiliate
-    );
+    event ERC1155ListingSplit(uint256 indexed listingId, uint16[2] principalSplit, address affiliate);
 
     event ERC1155ExecutedListing(
         uint256 indexed listingId,
@@ -235,18 +224,11 @@ contract ERC1155MarketplaceFacet is Modifiers {
             });
             LibERC1155Marketplace.addERC1155ListingItem(seller, category, "listed", listingId);
 
-            emit ERC1155ListingAddWithSplit(
-                listingId,
-                seller,
-                _erc1155TokenAddress,
-                _erc1155TypeId,
-                category,
-                _quantity,
-                _priceInWei,
-                block.timestamp,
-                _principalSplit,
-                _affiliate
-            );
+            emit ERC1155ListingAdd(listingId, seller, _erc1155TokenAddress, _erc1155TypeId, category, _quantity, _priceInWei, block.timestamp);
+
+            if (_affiliate != address(0)) {
+                emit ERC1155ListingSplit(listingId, _principalSplit, _affiliate);
+            }
         } else {
             ERC1155Listing storage listing = s.erc1155Listings[listingId];
             listing.quantity = _quantity;

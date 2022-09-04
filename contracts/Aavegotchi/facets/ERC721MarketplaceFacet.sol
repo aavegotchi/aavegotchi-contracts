@@ -11,7 +11,6 @@ import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 import {BaazaarSplit, LibSharedMarketplace, SplitAddresses} from "../libraries/LibSharedMarketplace.sol";
 
 contract ERC721MarketplaceFacet is Modifiers {
-    ///@dev deprecated, but leaving in for ABI compatibility
     event ERC721ListingAdd(
         uint256 indexed listingId,
         address indexed seller,
@@ -21,16 +20,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 time
     );
 
-    event ERC721ListingAddWithSplit(
-        uint256 indexed listingId,
-        address indexed seller,
-        address erc721TokenAddress,
-        uint256 erc721TokenId,
-        uint256 indexed category,
-        uint256 time,
-        uint16[2] principalSplit,
-        address affiliate
-    );
+    event ERC721ListingSplit(uint256 indexed listingId, uint16[2] principalSplit, address affiliate);
 
     event ERC721ExecutedListing(
         uint256 indexed listingId,
@@ -301,7 +291,11 @@ contract ERC721MarketplaceFacet is Modifiers {
         });
 
         LibERC721Marketplace.addERC721ListingItem(msgSender, category, "listed", listingId);
-        emit ERC721ListingAddWithSplit(listingId, msgSender, _erc721TokenAddress, _erc721TokenId, category, _priceInWei, _principalSplit, _affiliate);
+        emit ERC721ListingAdd(listingId, msgSender, _erc721TokenAddress, _erc721TokenId, category, _priceInWei);
+
+        if (_affiliate != address(0)) {
+            emit ERC721ListingSplit(listingId, _principalSplit, _affiliate);
+        }
 
         //Lock Aavegotchis when listing is created
         if (_erc721TokenAddress == address(this)) {

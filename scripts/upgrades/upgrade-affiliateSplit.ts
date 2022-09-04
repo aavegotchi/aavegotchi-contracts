@@ -12,12 +12,16 @@ export async function upgrade() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "ERC721MarketplaceFacet",
-      addSelectors: [],
+      addSelectors: [
+        `function addERC721ListingWithSplit(address _erc721TokenAddress,uint256 _erc721TokenId,uint256 _priceInWei,uint16[2] memory _principalSplit,address _affiliate) external`,
+      ],
       removeSelectors: [],
     },
     {
       facetName: "ERC1155MarketplaceFacet",
-      addSelectors: [],
+      addSelectors: [
+        `function setERC1155ListingWithSplit(address _erc1155TokenAddress, uint256 _erc1155TypeId,uint256 _quantity,uint256 _priceInWei,uint16[2] memory _principalSplit,address _affiliate) external`,
+      ],
       removeSelectors: [],
     },
   ];
