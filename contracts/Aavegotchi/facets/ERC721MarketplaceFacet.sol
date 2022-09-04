@@ -332,15 +332,27 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 pixelcraftShare;
         uint256 playerRewardsShare;
         uint256 sellerShare;
+        uint256 affiliateShare;
     }
 
-    function getBaazaarSplit(uint256 _cost) internal pure returns (BaazaarSplit memory) {
-        uint256 daoShare = _cost / 100; //1%
-        uint256 pixelcraftShare = (_cost * 2) / 100; //2%
-        uint256 playerRewardsShare = _cost / 200; //0.5%
-        uint256 sellerAmount = _cost - (daoShare + pixelcraftShare + playerRewardsShare); //96.5%
+    function getBaazaarSplit(uint256 _amount, uint16[2] memory _principalSplit) internal pure returns (BaazaarSplit memory) {
+        uint256 daoShare = _amount / 100; //1%
+        uint256 pixelcraftShare = (_amount * 2) / 100; //2%
+        uint256 playerRewardsShare = _amount / 200; //0.5%
+        uint256 principal = _amount - (daoShare + pixelcraftShare + playerRewardsShare); //96.5%
+
+        //@todo: check this math
+        uint256 sellerShare = (principal * _principalSplit[0]) / 10000;
+        uint256 affiliateShare = (principal * _principalSplit[1]) / 10000;
+
         return
-            BaazaarSplit({daoShare: daoShare, pixelcraftShare: pixelcraftShare, playerRewardsShare: playerRewardsShare, sellerShare: sellerAmount});
+            BaazaarSplit({
+                daoShare: daoShare,
+                pixelcraftShare: pixelcraftShare,
+                playerRewardsShare: playerRewardsShare,
+                sellerShare: sellerShare,
+                affiliateShare: affiliateShare
+            });
     }
 
     ///@notice Allow a buyer to execute an open listing i.e buy the NFT
@@ -348,46 +360,9 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@dev Will be deprecated soon.
     ///@param _listingId The identifier of the listing to execute
     function executeERC721Listing(uint256 _listingId) external {
+        //buyer is the recipient
         ERC721Listing storage listing = s.erc721Listings[_listingId];
-        require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
-        require(listing.cancelled == false, "ERC721Marketplace: listing cancelled");
-        require(listing.timeCreated != 0, "ERC721Marketplace: listing not found");
-        uint256 priceInWei = listing.priceInWei;
-        address buyer = LibMeta.msgSender();
-        address seller = listing.seller;
-        require(seller != buyer, "ERC721Marketplace: buyer can't be seller");
-        require(IERC20(s.ghstContract).balanceOf(buyer) >= priceInWei, "ERC721Marketplace: not enough GHST");
-
-        listing.timePurchased = block.timestamp;
-        LibERC721Marketplace.removeERC721ListingItem(_listingId, seller);
-        LibERC721Marketplace.addERC721ListingItem(seller, listing.category, "purchased", _listingId);
-
-        BaazaarSplit memory split = getBaazaarSplit(listing.priceInWei);
-        LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, split.pixelcraftShare);
-        LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, split.daoShare);
-        LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, split.playerRewardsShare);
-        LibERC20.transferFrom(s.ghstContract, buyer, seller, split.sellerShare);
-
-        //todo: Add affiliate split
-
-        if (listing.erc721TokenAddress == address(this)) {
-            s.aavegotchis[listing.erc721TokenId].locked = false;
-            LibAavegotchi.transfer(seller, buyer, listing.erc721TokenId);
-        } else {
-            // External contracts
-            IERC721(listing.erc721TokenAddress).safeTransferFrom(seller, buyer, listing.erc721TokenId);
-        }
-
-        emit ERC721ExecutedListing(
-            _listingId,
-            seller,
-            buyer,
-            listing.erc721TokenAddress,
-            listing.erc721TokenId,
-            listing.category,
-            listing.priceInWei,
-            block.timestamp
-        );
+        handleExecuteERC721Listing(_listingId, listing.erc721TokenAddress, listing.priceInWei, listing.erc721TokenId, LibMeta.msgSender());
     }
 
     ///@notice Allow a buyer to execute an open listing i.e buy the NFT on behalf of another address (the recipient). Also checks to ensure the item details match the listing.
@@ -404,6 +379,16 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 _tokenId,
         address _recipient
     ) external {
+        handleExecuteERC721Listing(_listingId, _contractAddress, _priceInWei, _tokenId, _recipient);
+    }
+
+    function handleExecuteERC721Listing(
+        uint256 _listingId,
+        address _contractAddress,
+        uint256 _priceInWei,
+        uint256 _tokenId,
+        address _recipient
+    ) internal {
         ERC721Listing storage listing = s.erc721Listings[_listingId];
         require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
         require(listing.cancelled == false, "ERC721Marketplace: listing cancelled");
@@ -421,11 +406,20 @@ contract ERC721MarketplaceFacet is Modifiers {
         LibERC721Marketplace.removeERC721ListingItem(_listingId, seller);
         LibERC721Marketplace.addERC721ListingItem(seller, listing.category, "purchased", _listingId);
 
-        BaazaarSplit memory split = getBaazaarSplit(listing.priceInWei);
+        //Handle legacy listings -- if affiliate is not set, use 100-0 split
+        BaazaarSplit memory split = getBaazaarSplit(listing.priceInWei, listing.affiliate == address(0) ? [10000, 0] : listing.principalSplit);
         LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, split.pixelcraftShare);
         LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, split.daoShare);
+
         LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, split.playerRewardsShare);
+
+        //@todo: check that this is 100% for legacy listings
         LibERC20.transferFrom(s.ghstContract, buyer, seller, split.sellerShare);
+
+        //handle affiliate split if necessary
+        if (split.affiliateShare > 0) {
+            LibERC20.transferFrom(s.ghstContract, buyer, listing.affiliate, split.affiliateShare);
+        }
 
         if (listing.erc721TokenAddress == address(this)) {
             s.aavegotchis[listing.erc721TokenId].locked = false;
@@ -445,7 +439,11 @@ contract ERC721MarketplaceFacet is Modifiers {
             listing.priceInWei,
             block.timestamp
         );
-        emit ERC721ExecutedToRecipient(_listingId, buyer, _recipient);
+
+        //Don't emit the event if the buyer is the same as recipient
+        if (buyer != _recipient) {
+            emit ERC721ExecutedToRecipient(_listingId, buyer, _recipient);
+        }
     }
 
     ///@notice Update the ERC721 listing of an address
