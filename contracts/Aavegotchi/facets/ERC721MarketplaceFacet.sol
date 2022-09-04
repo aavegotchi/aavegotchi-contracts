@@ -9,6 +9,7 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketplace.sol";
 import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
 import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
+import {BaazaarSplit, LibSharedMarketplace, SplitAddresses} from "../libraries/LibSharedMarketplace.sol";
 
 contract ERC721MarketplaceFacet is Modifiers {
     event ERC721ListingAdd(
@@ -227,6 +228,7 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@notice Allow an ERC721 owner to list his NFT for sale
     ///@dev If the NFT has been listed before,it cancels it and replaces it with the new one
     ///@dev NFTs that are listed are immediately locked
+    ///@dev Will be deprecated soon, use addERC721ListingWithSplit
     ///@param _erc721TokenAddress The contract address of the NFT to be listed
     ///@param _erc721TokenId The identifier of the NFT to be listed
     ///@param _priceInWei The cost price of the NFT in $GHST
@@ -327,34 +329,6 @@ contract ERC721MarketplaceFacet is Modifiers {
         LibERC721Marketplace.cancelERC721Listing(_listingId, LibMeta.msgSender());
     }
 
-    struct BaazaarSplit {
-        uint256 daoShare;
-        uint256 pixelcraftShare;
-        uint256 playerRewardsShare;
-        uint256 sellerShare;
-        uint256 affiliateShare;
-    }
-
-    function getBaazaarSplit(uint256 _amount, uint16[2] memory _principalSplit) internal pure returns (BaazaarSplit memory) {
-        uint256 daoShare = _amount / 100; //1%
-        uint256 pixelcraftShare = (_amount * 2) / 100; //2%
-        uint256 playerRewardsShare = _amount / 200; //0.5%
-        uint256 principal = _amount - (daoShare + pixelcraftShare + playerRewardsShare); //96.5%
-
-        //@todo: check this math
-        uint256 sellerShare = (principal * _principalSplit[0]) / 10000;
-        uint256 affiliateShare = (principal * _principalSplit[1]) / 10000;
-
-        return
-            BaazaarSplit({
-                daoShare: daoShare,
-                pixelcraftShare: pixelcraftShare,
-                playerRewardsShare: playerRewardsShare,
-                sellerShare: sellerShare,
-                affiliateShare: affiliateShare
-            });
-    }
-
     ///@notice Allow a buyer to execute an open listing i.e buy the NFT
     ///@dev Will throw if the NFT has been sold or if the listing has been cancelled already
     ///@dev Will be deprecated soon.
@@ -407,19 +381,36 @@ contract ERC721MarketplaceFacet is Modifiers {
         LibERC721Marketplace.addERC721ListingItem(seller, listing.category, "purchased", _listingId);
 
         //Handle legacy listings -- if affiliate is not set, use 100-0 split
-        BaazaarSplit memory split = getBaazaarSplit(listing.priceInWei, listing.affiliate == address(0) ? [10000, 0] : listing.principalSplit);
-        LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, split.pixelcraftShare);
-        LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, split.daoShare);
+        BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(
+            listing.priceInWei,
+            listing.affiliate == address(0) ? [10000, 0] : listing.principalSplit
+        );
 
-        LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, split.playerRewardsShare);
+        LibSharedMarketplace.transferSales(
+            SplitAddresses({
+                ghstContract: s.ghstContract,
+                buyer: buyer,
+                seller: seller,
+                affiliate: listing.affiliate,
+                daoTreasury: s.daoTreasury,
+                pixelCraft: s.pixelCraft,
+                rarityFarming: s.rarityFarming
+            }),
+            split
+        );
 
-        //@todo: check that this is 100% for legacy listings
-        LibERC20.transferFrom(s.ghstContract, buyer, seller, split.sellerShare);
+        // LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, split.pixelcraftShare);
+        // LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, split.daoShare);
 
-        //handle affiliate split if necessary
-        if (split.affiliateShare > 0) {
-            LibERC20.transferFrom(s.ghstContract, buyer, listing.affiliate, split.affiliateShare);
-        }
+        // LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, split.playerRewardsShare);
+
+        // //@todo: check that this is 100% for legacy listings
+        // LibERC20.transferFrom(s.ghstContract, buyer, seller, split.sellerShare);
+
+        // //handle affiliate split if necessary
+        // if (split.affiliateShare > 0) {
+        //     LibERC20.transferFrom(s.ghstContract, buyer, listing.affiliate, split.affiliateShare);
+        // }
 
         if (listing.erc721TokenAddress == address(this)) {
             s.aavegotchis[listing.erc721TokenId].locked = false;
