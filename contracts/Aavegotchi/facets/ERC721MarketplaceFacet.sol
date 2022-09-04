@@ -11,6 +11,7 @@ import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 import {BaazaarSplit, LibSharedMarketplace, SplitAddresses} from "../libraries/LibSharedMarketplace.sol";
 
 contract ERC721MarketplaceFacet is Modifiers {
+    ///@dev deprecated, but leaving in for ABI compatibility
     event ERC721ListingAdd(
         uint256 indexed listingId,
         address indexed seller,
@@ -258,11 +259,11 @@ contract ERC721MarketplaceFacet is Modifiers {
         address _affiliate
     ) internal {
         IERC721 erc721Token = IERC721(_erc721TokenAddress);
-        address owner = LibMeta.msgSender();
-        require(erc721Token.ownerOf(_erc721TokenId) == owner, "ERC721Marketplace: Not owner of ERC721 token");
+        address msgSender = LibMeta.msgSender();
+        require(erc721Token.ownerOf(_erc721TokenId) == msgSender, "ERC721Marketplace: Not owner of ERC721 token");
         require(
             _erc721TokenAddress == address(this) ||
-                erc721Token.isApprovedForAll(owner, address(this)) ||
+                erc721Token.isApprovedForAll(msgSender, address(this)) ||
                 erc721Token.getApproved(_erc721TokenId) == address(this),
             "ERC721Marketplace: Not approved for transfer"
         );
@@ -280,14 +281,14 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 category = getERC721Category(_erc721TokenAddress, _erc721TokenId);
         require(category != LibAavegotchi.STATUS_VRF_PENDING, "ERC721Marketplace: Cannot list a portal that is pending VRF");
 
-        uint256 oldListingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][owner];
+        uint256 oldListingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][msgSender];
         if (oldListingId != 0) {
-            LibERC721Marketplace.cancelERC721Listing(oldListingId, owner);
+            LibERC721Marketplace.cancelERC721Listing(oldListingId, msgSender);
         }
-        s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][owner] = listingId;
+        s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][msgSender] = listingId;
         s.erc721Listings[listingId] = ERC721Listing({
             listingId: listingId,
-            seller: owner,
+            seller: msgSender,
             erc721TokenAddress: _erc721TokenAddress,
             erc721TokenId: _erc721TokenId,
             category: category,
@@ -299,8 +300,8 @@ contract ERC721MarketplaceFacet is Modifiers {
             affiliate: _affiliate
         });
 
-        LibERC721Marketplace.addERC721ListingItem(owner, category, "listed", listingId);
-        emit ERC721ListingAddWithSplit(listingId, owner, _erc721TokenAddress, _erc721TokenId, category, _priceInWei, _principalSplit, _affiliate);
+        LibERC721Marketplace.addERC721ListingItem(msgSender, category, "listed", listingId);
+        emit ERC721ListingAddWithSplit(listingId, msgSender, _erc721TokenAddress, _erc721TokenId, category, _priceInWei, _principalSplit, _affiliate);
 
         //Lock Aavegotchis when listing is created
         if (_erc721TokenAddress == address(this)) {
@@ -309,7 +310,7 @@ contract ERC721MarketplaceFacet is Modifiers {
 
         //Burn listing fee
         if (s.listingFeeInWei > 0) {
-            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, owner, s.ghstContract);
+            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, msgSender, s.ghstContract);
         }
     }
 

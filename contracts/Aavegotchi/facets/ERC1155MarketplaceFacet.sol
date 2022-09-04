@@ -10,9 +10,8 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {BaazaarSplit, LibSharedMarketplace, SplitAddresses} from "../libraries/LibSharedMarketplace.sol";
 
-// import "hardhat/console.sol";
-
 contract ERC1155MarketplaceFacet is Modifiers {
+    ///@dev deprecated, but leaving in for ABI compatibility
     event ERC1155ListingAdd(
         uint256 indexed listingId,
         address indexed seller,
@@ -22,6 +21,19 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 quantity,
         uint256 priceInWei,
         uint256 time
+    );
+
+    event ERC1155ListingAddWithSplit(
+        uint256 indexed listingId,
+        address indexed seller,
+        address erc1155TokenAddress,
+        uint256 erc1155TypeId,
+        uint256 indexed category,
+        uint256 quantity,
+        uint256 priceInWei,
+        uint256 time,
+        uint16[2] principalSplit,
+        address affiliate
     );
 
     event ERC1155ExecutedListing(
@@ -222,7 +234,19 @@ contract ERC1155MarketplaceFacet is Modifiers {
                 affiliate: _affiliate
             });
             LibERC1155Marketplace.addERC1155ListingItem(seller, category, "listed", listingId);
-            emit ERC1155ListingAdd(listingId, seller, _erc1155TokenAddress, _erc1155TypeId, category, _quantity, _priceInWei, block.timestamp);
+
+            emit ERC1155ListingAddWithSplit(
+                listingId,
+                seller,
+                _erc1155TokenAddress,
+                _erc1155TypeId,
+                category,
+                _quantity,
+                _priceInWei,
+                block.timestamp,
+                _principalSplit,
+                _affiliate
+            );
         } else {
             ERC1155Listing storage listing = s.erc1155Listings[listingId];
             listing.quantity = _quantity;
