@@ -365,6 +365,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
             block.timestamp
         );
 
+        //Only emit if buyer is not recipient
         if (buyer != _recipient) {
             emit ERC1155ExecutedToRecipient(_listingId, buyer, _recipient);
         }
