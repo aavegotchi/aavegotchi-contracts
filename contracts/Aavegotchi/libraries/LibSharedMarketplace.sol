@@ -55,4 +55,14 @@ library LibSharedMarketplace {
             LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.affiliate, split.affiliateShare);
         }
     }
+
+    function burnListingFee(
+        uint256 listingFee,
+        address owner,
+        address ghstContract
+    ) internal {
+        if (listingFee > 0) {
+            LibERC20.transferFrom(ghstContract, owner, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), listingFee);
+        }
+    }
 }

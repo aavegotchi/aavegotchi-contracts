@@ -4,7 +4,6 @@ pragma solidity 0.8.1;
 import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
 import {LibERC1155Marketplace, ERC1155Listing} from "../libraries/LibERC1155Marketplace.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
-import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibItems} from "../libraries/LibItems.sol";
@@ -230,11 +229,9 @@ contract ERC1155MarketplaceFacet is Modifiers {
             emit LibERC1155Marketplace.UpdateERC1155Listing(listingId, _quantity, listing.priceInWei, block.timestamp);
         }
 
-        // Check if there's a publication fee and
-        // transfer the amount to burn address
+        //Burn listing fee
         if (s.listingFeeInWei > 0) {
-            // burn address: address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)
-            LibERC20.transferFrom(s.ghstContract, LibMeta.msgSender(), address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), s.listingFeeInWei);
+            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, LibMeta.msgSender(), s.ghstContract);
         }
     }
 
@@ -320,19 +317,6 @@ contract ERC1155MarketplaceFacet is Modifiers {
                 }),
                 split
             );
-
-            // LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, split.pixelcraftShare);
-            // LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, split.daoShare);
-
-            // LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, split.playerRewardsShare);
-
-            // //@todo: check that this is 100% for legacy listings
-            // LibERC20.transferFrom(s.ghstContract, buyer, seller, split.sellerShare);
-
-            // //handle affiliate split if necessary
-            // if (split.affiliateShare > 0) {
-            //     LibERC20.transferFrom(s.ghstContract, buyer, listing.affiliate, split.affiliateShare);
-            // }
 
             listing.timeLastPurchased = block.timestamp;
             s.nextERC1155ListingId++;

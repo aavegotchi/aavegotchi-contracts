@@ -3,7 +3,6 @@ pragma solidity 0.8.1;
 
 import {LibAavegotchi, AavegotchiInfo} from "../libraries/LibAavegotchi.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
-import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketplace.sol";
@@ -308,10 +307,9 @@ contract ERC721MarketplaceFacet is Modifiers {
             s.aavegotchis[_erc721TokenId].locked = true;
         }
 
-        // Check if there's a publication fee and
-        // transfer the amount to burn address
+        //Burn listing fee
         if (s.listingFeeInWei > 0) {
-            LibERC20.transferFrom(s.ghstContract, owner, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), s.listingFeeInWei);
+            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, owner, s.ghstContract);
         }
     }
 
@@ -398,19 +396,6 @@ contract ERC721MarketplaceFacet is Modifiers {
             }),
             split
         );
-
-        // LibERC20.transferFrom(s.ghstContract, buyer, s.pixelCraft, split.pixelcraftShare);
-        // LibERC20.transferFrom(s.ghstContract, buyer, s.daoTreasury, split.daoShare);
-
-        // LibERC20.transferFrom((s.ghstContract), buyer, s.rarityFarming, split.playerRewardsShare);
-
-        // //@todo: check that this is 100% for legacy listings
-        // LibERC20.transferFrom(s.ghstContract, buyer, seller, split.sellerShare);
-
-        // //handle affiliate split if necessary
-        // if (split.affiliateShare > 0) {
-        //     LibERC20.transferFrom(s.ghstContract, buyer, listing.affiliate, split.affiliateShare);
-        // }
 
         if (listing.erc721TokenAddress == address(this)) {
             s.aavegotchis[listing.erc721TokenId].locked = false;
