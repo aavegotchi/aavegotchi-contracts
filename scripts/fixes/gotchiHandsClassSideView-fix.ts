@@ -40,7 +40,6 @@ async function main() {
   await run("updateSvgs", aavegotchiLeftFix);
   await run("updateSvgs", aavegotchiRightFix);
 
-  //dimensions
   const svgViewsFacet = await ethers.getContractAt(
     "SvgViewsFacet",
     diamondAddress,
