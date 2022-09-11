@@ -200,6 +200,10 @@ contract ERC1155MarketplaceFacet is Modifiers {
 
         uint256 cost = _quantity * _priceInWei;
         require(cost >= 1e18, "ERC1155Marketplace: cost should be 1 GHST or larger");
+        require(_principalSplit[0] + _principalSplit[1] == 10000, "ERC1155Marketplace: Sum of principal splits not 10000");
+        if (_affiliate == address(0)) {
+            require(_principalSplit[1] == 0, "ERC1155Marketplace: Affiliate split must be 0 for address(0)");
+        }
 
         uint256 listingId = s.erc1155TokenToListingId[_erc1155TokenAddress][_erc1155TypeId][seller];
         if (listingId == 0) {
@@ -291,10 +295,10 @@ contract ERC1155MarketplaceFacet is Modifiers {
         address _recipient
     ) internal {
         ERC1155Listing storage listing = s.erc1155Listings[_listingId];
-        require(_priceInWei == listing.priceInWei, "ERC1155Marketplace: wrong price or price changed");
         require(listing.timeCreated != 0, "ERC1155Marketplace: listing not found");
         require(listing.sold == false, "ERC1155Marketplace: listing is sold out");
         require(listing.cancelled == false, "ERC1155Marketplace: listing is cancelled");
+        require(_priceInWei == listing.priceInWei, "ERC1155Marketplace: wrong price or price changed");
         require(listing.erc1155TokenAddress == _contractAddress, "ERC1155Marketplace: Incorrect token address");
         require(listing.erc1155TypeId == _itemId, "ERC1155Marketplace: Incorrect token id");
         address buyer = LibMeta.msgSender();
@@ -307,7 +311,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         require(IERC20(s.ghstContract).balanceOf(buyer) >= cost, "ERC1155Marketplace: not enough GHST");
         {
             BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(
-                listing.priceInWei,
+                cost,
                 listing.affiliate == address(0) ? [10000, 0] : listing.principalSplit
             );
 

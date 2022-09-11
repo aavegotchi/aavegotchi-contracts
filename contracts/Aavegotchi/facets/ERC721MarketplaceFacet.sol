@@ -265,6 +265,11 @@ contract ERC721MarketplaceFacet is Modifiers {
 
         require(_priceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
 
+        require(_principalSplit[0] + _principalSplit[1] == 10000, "ERC721Marketplace: Sum of principal splits not 10000");
+        if (_affiliate == address(0)) {
+            require(_principalSplit[1] == 0, "ERC721Marketplace: Affiliate split must be 0 for address(0)");
+        }
+
         s.nextERC721ListingId++;
         uint256 listingId = s.nextERC721ListingId;
 
