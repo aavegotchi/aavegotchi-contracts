@@ -9,6 +9,8 @@ import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 
+import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
+
 contract BridgeFacet is Modifiers {
     event WithdrawnBatch(address indexed owner, uint256[] tokenIds);
     event AddedAavegotchiBatch(address indexed owner, uint256[] tokenIds);
@@ -17,22 +19,22 @@ contract BridgeFacet is Modifiers {
     uint256 internal constant ERC721_TOKEN_TYPE = 721;
     uint256 internal constant ERC1155_TOKEN_TYPE = 1155;
 
-///@notice Allow the Aavegotchi Diamond owner or Dao to change the childChain manager address
-///@param _newChildChainManager Address of the new childChain manager
+    ///@notice Allow the Aavegotchi Diamond owner or Dao to change the childChain manager address
+    ///@param _newChildChainManager Address of the new childChain manager
     function setChildChainManager(address _newChildChainManager) external onlyDaoOrOwner {
         s.childChainManager = _newChildChainManager;
     }
 
-///@notice Query the current address of the childChain Manager
-///@return The current address of the childChain Manager
+    ///@notice Query the current address of the childChain Manager
+    ///@return The current address of the childChain Manager
     function childChainManager() external view returns (address) {
         return s.childChainManager;
     }
 
-///@notice Allows abatch withdrawal of ERC1155 NFTs/items by the owner
-///@dev Only 20 items can be withdrawn in a single transaction, will throw if more than that
-///@param _ids An array containing the identifiers of the items to withdraw
-///@param _values An array containing the value/number of each item to withdraw
+    ///@notice Allows abatch withdrawal of ERC1155 NFTs/items by the owner
+    ///@dev Only 20 items can be withdrawn in a single transaction, will throw if more than that
+    ///@param _ids An array containing the identifiers of the items to withdraw
+    ///@param _values An array containing the value/number of each item to withdraw
     function withdrawItemsBatch(uint256[] calldata _ids, uint256[] calldata _values) external {
         require(_ids.length == _values.length, "Bridge: ids not same length as values");
         require(_ids.length <= 20, "Items: exceeded max number of ids for single transaction");
@@ -43,14 +45,13 @@ contract BridgeFacet is Modifiers {
             LibItems.removeFromOwner(owner, id, value);
             LibERC1155Marketplace.updateERC1155Listing(address(this), id, owner);
         }
-        emit LibERC1155.TransferBatch(owner, owner, address(0), _ids, _values);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(owner, owner, address(0), _ids, _values);
         emit WithdrawnItems(owner, _ids, _values);
     }
 
-
-///@notice Allows abatch withdrawal of ERC721 NFTs by the owner
-///@dev Only 20 NFTs can be withdrawn in a single transaction, will throw if more than that
-///@param _tokenIds An array containing the identifiers of the NFTs to withdraw
+    ///@notice Allows abatch withdrawal of ERC721 NFTs by the owner
+    ///@dev Only 20 NFTs can be withdrawn in a single transaction, will throw if more than that
+    ///@param _tokenIds An array containing the identifiers of the NFTs to withdraw
     function withdrawAavegotchiBatch(uint256[] calldata _tokenIds) external {
         address owner = LibMeta.msgSender();
         require(_tokenIds.length <= 20, "Bridge: exceeds withdraw limit for single transaction");
@@ -82,7 +83,7 @@ contract BridgeFacet is Modifiers {
                 uint256 value = values[i];
                 LibItems.addToOwner(_user, id, value);
             }
-            emit LibERC1155.TransferBatch(msg.sender, address(0), _user, ids, values);
+            IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(msg.sender, address(0), _user, ids, values);
             emit AddedItemsBatch(_user, ids, values);
         } else if (tokenType == ERC721_TOKEN_TYPE) {
             uint256[] memory tokenIds = abi.decode(tokenDepositData, (uint256[]));

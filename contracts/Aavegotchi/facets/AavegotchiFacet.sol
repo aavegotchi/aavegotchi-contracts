@@ -297,57 +297,7 @@ contract AavegotchiFacet is Modifiers {
         ds.supportedInterfaces[0x80ac58cd] = true; //erc721
     }
 
-    function authorizePeriphery(address _periphery, bool _authorized) external onlyOwner {
-        s.authorizedPeriphery[_periphery] = _authorized;
-    }
-
-    function peripheryApprove(
-        address _sender,
-        address _approved,
-        uint256 _tokenId
-    ) external onlyPeriphery {
-        address owner = s.aavegotchis[_tokenId].owner;
-        require(owner == _sender || s.operators[owner][_sender], "ERC721: Not owner or operator of token.");
-        s.approved[_tokenId] = _approved;
-        emit LibERC721.Approval(owner, _approved, _tokenId);
-    }
-
-    function peripherySetApprovalForAll(
-        address _sender,
-        address _operator,
-        bool _approved
-    ) external onlyPeriphery {
-        s.operators[_sender][_operator] = _approved;
-        emit LibERC721.ApprovalForAll(_sender, _operator, _approved);
-    }
-
-    function peripheryTransferFrom(
-        address _sender,
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external onlyPeriphery {
-        internalTransferFrom(_sender, _from, _to, _tokenId);
-    }
-
-    function peripherySafeTransferFrom(
-        address _sender,
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external onlyPeriphery {
-        internalTransferFrom(_sender, _from, _to, _tokenId);
-        LibERC721.checkOnERC721Received(_sender, _from, _to, _tokenId, "");
-    }
-
-    function peripherySafeTransferFrom(
-        address _sender,
-        address _from,
-        address _to,
-        uint256 _tokenId,
-        bytes calldata _data
-    ) external onlyPeriphery {
-        internalTransferFrom(_sender, _from, _to, _tokenId);
-        LibERC721.checkOnERC721Received(_sender, _from, _to, _tokenId, _data);
+    function setPeriphery(address _periphery) external onlyOwner {
+        s.wearableDiamond = _periphery;
     }
 }

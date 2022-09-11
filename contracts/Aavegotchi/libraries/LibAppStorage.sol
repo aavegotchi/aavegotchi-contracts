@@ -295,7 +295,7 @@ struct AppStorage {
     mapping(bytes32 => mapping(uint256 => mapping(uint256 => bool))) wearableExceptions;
     mapping(uint32 => mapping(uint256 => uint256)) whitelistAccessRights; // whitelistId => action right => access right
     mapping(uint32 => mapping(address => EnumerableSet.UintSet)) whitelistGotchiBorrows; // whitelistId => borrower => gotchiId set
-    mapping(address => bool) authorizedPeriphery;
+    address wearableDiamond;
 }
 
 library LibAppStorage {
@@ -360,7 +360,7 @@ contract Modifiers {
 
     modifier onlyPeriphery() {
         address sender = LibMeta.msgSender();
-        require(s.authorizedPeriphery[sender], "LibAppStorage: only an authorized Periphery can call this function");
+        require(sender == s.wearableDiamond, "LibAppStorage: Not wearable diamond");
         _;
     }
 }

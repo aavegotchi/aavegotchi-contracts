@@ -9,6 +9,8 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 
+import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
+
 contract ItemsFacet is Modifiers {
     //using LibAppStorage for AppStorage;
 
@@ -225,7 +227,8 @@ contract ItemsFacet is Modifiers {
         // require(LibMeta.msgSender() == s.contractOwner, "ItemsFacet: Must be contract owner");
         s.itemsBaseUri = _value;
         for (uint256 i; i < s.itemTypes.length; i++) {
-            emit LibERC1155.URI(LibStrings.strWithUint(_value, i), i);
+            //delegate event to wearableDiamond
+            IEventHandlerFacet(s.wearableDiamond).emitUriEvent(LibStrings.strWithUint(_value, i), i);
         }
     }
 
@@ -269,7 +272,7 @@ contract ItemsFacet is Modifiers {
                 // remove wearable from Aavegotchi and transfer item to owner
                 LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
                 LibItems.addToOwner(sender, existingEquippedWearableId, 1);
-                emit LibERC1155.TransferSingle(sender, address(this), sender, existingEquippedWearableId, 1);
+                IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, address(this), sender, existingEquippedWearableId, 1);
                 emit LibERC1155.TransferFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
             }
 
@@ -318,7 +321,7 @@ contract ItemsFacet is Modifiers {
                     LibItems.removeFromOwner(sender, toEquipId, balToTransfer);
                     LibItems.addToParent(address(this), _tokenId, toEquipId, balToTransfer);
                     emit TransferToParent(address(this), _tokenId, toEquipId, balToTransfer);
-                    emit LibERC1155.TransferSingle(sender, sender, address(this), toEquipId, balToTransfer);
+                    IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, sender, address(this), toEquipId, balToTransfer);
                     LibERC1155Marketplace.updateERC1155Listing(address(this), toEquipId, sender);
                 }
             }
@@ -389,6 +392,6 @@ contract ItemsFacet is Modifiers {
             LibERC1155Marketplace.updateERC1155Listing(address(this), itemId, sender);
         }
         emit UseConsumables(_tokenId, _itemIds, _quantities);
-        emit LibERC1155.TransferBatch(sender, sender, address(0), _itemIds, _quantities);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, sender, address(0), _itemIds, _quantities);
     }
 }
