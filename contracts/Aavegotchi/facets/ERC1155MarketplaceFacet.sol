@@ -11,7 +11,6 @@ import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {BaazaarSplit, LibSharedMarketplace, SplitAddresses} from "../libraries/LibSharedMarketplace.sol";
 
 contract ERC1155MarketplaceFacet is Modifiers {
-    ///@dev deprecated, but leaving in for ABI compatibility
     event ERC1155ListingAdd(
         uint256 indexed listingId,
         address indexed seller,

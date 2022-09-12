@@ -27,7 +27,6 @@ library LibSharedMarketplace {
         uint256 playerRewardsShare = _amount / 200; //0.5%
         uint256 principal = _amount - (daoShare + pixelcraftShare + playerRewardsShare); //96.5%
 
-        //@todo: check this math
         uint256 sellerShare = (principal * _principalSplit[0]) / 10000;
         uint256 affiliateShare = (principal * _principalSplit[1]) / 10000;
 
@@ -47,7 +46,6 @@ library LibSharedMarketplace {
 
         LibERC20.transferFrom((_a.ghstContract), _a.buyer, _a.rarityFarming, split.playerRewardsShare);
 
-        //@todo: check that this is 100% for legacy listings
         LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.seller, split.sellerShare);
 
         //handle affiliate split if necessary
