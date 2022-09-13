@@ -297,6 +297,11 @@ contract AavegotchiFacet is Modifiers {
         ds.supportedInterfaces[0x80ac58cd] = true; //erc721
     }
 
+    function removeInterface() external onlyOwner {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        ds.supportedInterfaces[0xd9b67a26] = false; //erc1155
+    }
+
     function setPeriphery(address _periphery) external onlyOwner {
         s.wearableDiamond = _periphery;
     }

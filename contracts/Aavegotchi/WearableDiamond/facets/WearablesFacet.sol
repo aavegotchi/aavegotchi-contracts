@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 import "../../facets/PeripheryFacet.sol";
 import "../libraries/LibEventHandler.sol";
@@ -6,7 +7,7 @@ import "../../../shared/libraries/LibStrings.sol";
 
 contract WearablesFacet {
     //READ
-    function periphery() internal view returns (PeripheryFacet pFacet) {
+    function periphery() internal pure returns (PeripheryFacet pFacet) {
         pFacet = PeripheryFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND);
     }
 
