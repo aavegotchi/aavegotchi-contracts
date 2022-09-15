@@ -38,10 +38,10 @@ contract WearablesFacet {
     //WRITE
 
     function setApprovalForAll(address _operator, bool _approved) external {
-        periphery().peripherySetApprovalForAll(_operator, _approved, tx.origin);
+        periphery().peripherySetApprovalForAll(_operator, _approved, msg.sender);
         //emit event
-        //tx.origin should be the owner
-        LibEventHandler._receiveAndEmitApprovalEvent(tx.origin, _operator, _approved);
+        //previoua address in frame should be the owner
+        LibEventHandler._receiveAndEmitApprovalEvent(msg.sender, _operator, _approved);
     }
 
     function setBaseURI(string memory _value) external {
