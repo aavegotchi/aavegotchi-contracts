@@ -39,7 +39,7 @@ contract PeripheryFacet is Modifiers {
         bool _approved,
         address _onBehalfOf
     ) external onlyPeriphery {
-        require(tx.origin == _onBehalfOf, "PeripherFacet: Approval Failed");
+        require(tx.origin == _onBehalfOf, "PeripheryFacet: Approval Failed");
         address sender = tx.origin;
         s.operators[sender][_operator] = _approved;
     }
