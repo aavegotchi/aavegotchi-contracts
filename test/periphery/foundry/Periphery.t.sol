@@ -223,11 +223,23 @@ contract PeripheryTest is Test, IDiamondCut, PeripheryConstants {
         //check URI
         WearablesFacet(wearableDiamond).uri(202);
 
-        //approve via periphery
+        //approve potionOwner via periphery
         vm.expectEmit(true, true, true, false, address(wDiamond));
-        emit ApprovalForAll(wearableOwner, wearableDiamond, true);
-        WearablesFacet(wearableDiamond).setApprovalForAll(wearableDiamond, true);
+        emit ApprovalForAll(wearableOwner, potionOwner, true);
+        WearablesFacet(wearableDiamond).setApprovalForAll(potionOwner, true);
 
+        //assert approval
+        assertEq(WearablesFacet(wearableDiamond).isApprovedForAll(wearableOwner, potionOwner), true);
+
+        //make sure no other address was approved
+        assertEq(WearablesFacet(wearableDiamond).isApprovedForAll(wearableOwner, wearableDiamond), false);
+        vm.stopPrank();
+        //peripheryApproval can only be called by peripheryDiamond
+        vm.prank(wearableOwner);
+        vm.expectRevert("LibAppStorage: Not wearable diamond");
+        PeripheryFacet(aavegotchiDiamond).peripherySetApprovalForAll(potionOwner, true, wearableOwner);
+
+        vm.startPrank(address(this), wearableOwner);
         //single transfer via periphery
         vm.expectEmit(true, true, true, true, address(wDiamond));
         emit TransferSingle(wearableOwner, wearableOwner, potionOwner, sampleWearableId, 1);
