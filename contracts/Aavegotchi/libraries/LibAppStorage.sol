@@ -125,6 +125,9 @@ struct ERC1155Listing {
     uint256 sourceListingId;
     bool sold;
     bool cancelled;
+    //new:
+    uint16[2] principalSplit;
+    address affiliate;
 }
 
 struct ERC721Listing {
@@ -137,6 +140,9 @@ struct ERC721Listing {
     uint256 timeCreated;
     uint256 timePurchased;
     bool cancelled;
+    //new:
+    uint16[2] principalSplit;
+    address affiliate;
 }
 
 struct ListingListItem {
