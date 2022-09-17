@@ -40,7 +40,7 @@ contract WearablesFacet {
     function setApprovalForAll(address _operator, bool _approved) external {
         periphery().peripherySetApprovalForAll(_operator, _approved, msg.sender);
         //emit event
-        //previoua address in frame should be the owner
+        //previous address in frame should be the owner
         LibEventHandler._receiveAndEmitApprovalEvent(msg.sender, _operator, _approved);
     }
 
