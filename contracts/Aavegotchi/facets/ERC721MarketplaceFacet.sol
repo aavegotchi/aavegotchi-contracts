@@ -4,6 +4,8 @@ pragma solidity 0.8.1;
 import {LibAavegotchi, AavegotchiInfo} from "../libraries/LibAavegotchi.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
+import {IERC165} from "../../shared/interfaces/IERC165.sol";
+import {IERC2981} from "../../shared/interfaces/IERC2981.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketplace.sol";
 import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
@@ -368,19 +370,25 @@ contract ERC721MarketplaceFacet is Modifiers {
         require(listing.erc721TokenId == _tokenId, "ERC721Marketplace: Incorrect tokenID");
         require(listing.erc721TokenAddress == _contractAddress, "ERC721Marketplace: Incorrect token address");
         require(listing.priceInWei == _priceInWei, "ERC721Marketplace: Incorrect price");
-        uint256 priceInWei = listing.priceInWei;
         address buyer = LibMeta.msgSender();
         address seller = listing.seller;
         require(seller != buyer, "ERC721Marketplace: Buyer can't be seller");
-        require(IERC20(s.ghstContract).balanceOf(buyer) >= priceInWei, "ERC721Marketplace: Not enough GHST");
+        require(IERC20(s.ghstContract).balanceOf(buyer) >= _priceInWei, "ERC721Marketplace: Not enough GHST");
 
         listing.timePurchased = block.timestamp;
         LibERC721Marketplace.removeERC721ListingItem(_listingId, seller);
         LibERC721Marketplace.addERC721ListingItem(seller, listing.category, "purchased", _listingId);
 
+        address royalty;
+        uint256 royaltyShare;
+        if (IERC165(_contractAddress).supportsInterface(0x2a55205a)) { // EIP-2981 supported
+            (royalty, royaltyShare) = IERC2981(_contractAddress).royaltyInfo(_tokenId, _priceInWei);
+        }
+
         //Handle legacy listings -- if affiliate is not set, use 100-0 split
         BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(
-            listing.priceInWei,
+            _priceInWei,
+            royaltyShare,
             listing.affiliate == address(0) ? [10000, 0] : listing.principalSplit
         );
 
@@ -390,6 +398,7 @@ contract ERC721MarketplaceFacet is Modifiers {
                 buyer: buyer,
                 seller: seller,
                 affiliate: listing.affiliate,
+                royalty: royalty,
                 daoTreasury: s.daoTreasury,
                 pixelCraft: s.pixelCraft,
                 rarityFarming: s.rarityFarming

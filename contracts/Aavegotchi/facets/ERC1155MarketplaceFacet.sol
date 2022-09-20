@@ -311,6 +311,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         {
             BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(
                 cost,
+                0,
                 listing.affiliate == address(0) ? [10000, 0] : listing.principalSplit
             );
 
@@ -320,6 +321,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
                     buyer: buyer,
                     seller: seller,
                     affiliate: listing.affiliate,
+                    royalty: address(0),
                     daoTreasury: s.daoTreasury,
                     pixelCraft: s.pixelCraft,
                     rarityFarming: s.rarityFarming
