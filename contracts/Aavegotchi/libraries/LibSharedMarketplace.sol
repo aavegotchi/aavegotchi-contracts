@@ -8,6 +8,7 @@ struct BaazaarSplit {
     uint256 playerRewardsShare;
     uint256 sellerShare;
     uint256 affiliateShare;
+    uint256 royaltyShare;
 }
 
 struct SplitAddresses {
@@ -15,17 +16,18 @@ struct SplitAddresses {
     address buyer;
     address seller;
     address affiliate;
+    address royalty;
     address daoTreasury;
     address pixelCraft;
     address rarityFarming;
 }
 
 library LibSharedMarketplace {
-    function getBaazaarSplit(uint256 _amount, uint16[2] memory _principalSplit) internal pure returns (BaazaarSplit memory) {
+    function getBaazaarSplit(uint256 _amount, uint256 _royaltyShare, uint16[2] memory _principalSplit) internal pure returns (BaazaarSplit memory) {
         uint256 daoShare = _amount / 100; //1%
         uint256 pixelcraftShare = (_amount * 2) / 100; //2%
         uint256 playerRewardsShare = _amount / 200; //0.5%
-        uint256 principal = _amount - (daoShare + pixelcraftShare + playerRewardsShare); //96.5%
+        uint256 principal = _amount - _royaltyShare - (daoShare + pixelcraftShare + playerRewardsShare); //96.5%-royalty
 
         uint256 sellerShare = (principal * _principalSplit[0]) / 10000;
         uint256 affiliateShare = (principal * _principalSplit[1]) / 10000;
@@ -36,7 +38,8 @@ library LibSharedMarketplace {
                 pixelcraftShare: pixelcraftShare,
                 playerRewardsShare: playerRewardsShare,
                 sellerShare: sellerShare,
-                affiliateShare: affiliateShare
+                affiliateShare: affiliateShare,
+                royaltyShare: _royaltyShare
             });
     }
 
@@ -51,6 +54,10 @@ library LibSharedMarketplace {
         //handle affiliate split if necessary
         if (split.affiliateShare > 0) {
             LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.affiliate, split.affiliateShare);
+        }
+        //handle royalty if necessary
+        if (split.royaltyShare > 0) {
+            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.royalty, split.royaltyShare);
         }
     }
 
