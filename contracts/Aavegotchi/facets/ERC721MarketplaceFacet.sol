@@ -6,6 +6,7 @@ import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {IERC165} from "../../shared/interfaces/IERC165.sol";
 import {IERC2981} from "../../shared/interfaces/IERC2981.sol";
+import {IMultiRoyalty} from "../../shared/interfaces/IMultiRoyalty.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketplace.sol";
 import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
@@ -379,16 +380,22 @@ contract ERC721MarketplaceFacet is Modifiers {
         LibERC721Marketplace.removeERC721ListingItem(_listingId, seller);
         LibERC721Marketplace.addERC721ListingItem(seller, listing.category, "purchased", _listingId);
 
-        address royalty;
-        uint256 royaltyShare;
-        if (IERC165(_contractAddress).supportsInterface(0x2a55205a)) { // EIP-2981 supported
-            (royalty, royaltyShare) = IERC2981(_contractAddress).royaltyInfo(_tokenId, _priceInWei);
+        address[] memory royalties;
+        uint256[] memory royaltyShares;
+        if (IERC165(_contractAddress).supportsInterface(0x2a55205a)) {
+            // EIP-2981 supported
+            (royalties[0], royaltyShares[0]) = IERC2981(_contractAddress).royaltyInfo(_tokenId, _priceInWei);
+        }
+        //@todo: update with multi royalty info hash
+        else if (IERC165(_contractAddress).supportsInterface(0x2a55205a)) {
+            // Multi Royalty Standard supported
+            (royalties, royaltyShares) = IMultiRoyalty(_contractAddress).multiRoyaltyInfo(_tokenId, _priceInWei);
         }
 
         //Handle legacy listings -- if affiliate is not set, use 100-0 split
         BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(
             _priceInWei,
-            royaltyShare,
+            royaltyShares,
             listing.affiliate == address(0) ? [10000, 0] : listing.principalSplit
         );
 
@@ -398,7 +405,7 @@ contract ERC721MarketplaceFacet is Modifiers {
                 buyer: buyer,
                 seller: seller,
                 affiliate: listing.affiliate,
-                royalty: royalty,
+                royalties: royalties,
                 daoTreasury: s.daoTreasury,
                 pixelCraft: s.pixelCraft,
                 rarityFarming: s.rarityFarming
