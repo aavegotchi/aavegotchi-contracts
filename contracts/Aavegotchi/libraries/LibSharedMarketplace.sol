@@ -68,7 +68,9 @@ library LibSharedMarketplace {
         //handle royalty if necessary
         if (_a.royalties.length > 0) {
             for (uint256 i = 0; i < _a.royalties.length; i++) {
-                LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.royalties[i], split.royaltyShares[i]);
+                if (split.royaltyShares[i] > 0) {
+                    LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.royalties[i], split.royaltyShares[i]);
+                }
             }
         }
     }

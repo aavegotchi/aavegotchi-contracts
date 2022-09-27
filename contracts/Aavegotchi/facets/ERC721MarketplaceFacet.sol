@@ -384,10 +384,10 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256[] memory royaltyShares;
         if (IERC165(_contractAddress).supportsInterface(0x2a55205a)) {
             // EIP-2981 supported
+            royalties = new address[](1);
+            royaltyShares = new uint256[](1);
             (royalties[0], royaltyShares[0]) = IERC2981(_contractAddress).royaltyInfo(_tokenId, _priceInWei);
-        }
-        //@todo: update with multi royalty info hash
-        else if (IERC165(_contractAddress).supportsInterface(0x2a55205a)) {
+        } else if (IERC165(_contractAddress).supportsInterface(0x24d34933)) {
             // Multi Royalty Standard supported
             (royalties, royaltyShares) = IMultiRoyalty(_contractAddress).multiRoyaltyInfo(_tokenId, _priceInWei);
         }
