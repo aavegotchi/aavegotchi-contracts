@@ -223,11 +223,16 @@ contract PeripheryTest is Test, IDiamondCut, PeripheryConstants {
         //check URI
         WearablesFacet(wearableDiamond).uri(202);
 
-        //approve potionOwner via periphery
+        //approving when tx.origin is not nft owner wshould revert
+        vm.expectRevert("PeripheryFacet: Approval Failed");
+        WearablesFacet(wearableDiamond).setApprovalForAll(potionOwner, true);
+
+        vm.stopPrank();
+        //approve potionOwner via periphery when tx.origin is correct
+        vm.startPrank(wearableOwner, wearableOwner);
         vm.expectEmit(true, true, true, false, address(wDiamond));
         emit ApprovalForAll(wearableOwner, potionOwner, true);
         WearablesFacet(wearableDiamond).setApprovalForAll(potionOwner, true);
-
         //assert approval
         assertEq(WearablesFacet(wearableDiamond).isApprovedForAll(wearableOwner, potionOwner), true);
 
