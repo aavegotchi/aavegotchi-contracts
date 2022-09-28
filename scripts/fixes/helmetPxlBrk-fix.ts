@@ -4,10 +4,9 @@ import { run } from "hardhat";
 import { updateSvgTaskForSvgType } from "../../scripts/svgHelperFunctions";
 
 async function main() {
-  const frontIds = [111, 252, 255];
   const ids = [111, 252, 255];
 
-  const fixFront = await updateSvgTaskForSvgType(frontIds, "front");
+  const fixFront = await updateSvgTaskForSvgType(ids, "front");
   const fixLeft = await updateSvgTaskForSvgType(ids, "left");
   const fixRight = await updateSvgTaskForSvgType(ids, "right");
 
