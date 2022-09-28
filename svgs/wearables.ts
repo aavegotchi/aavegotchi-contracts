@@ -317,6 +317,7 @@ export const wearablesSvgs = [
   wearable("313_KabutoHelmet"),
   bodyWearable("314_YoroiArmor"),
   wearable("315_HaanzoKatana"),
+  //szn 3 baadges
   316,
   317,
   318,
@@ -333,6 +334,23 @@ export const wearablesSvgs = [
   329,
   330,
   331,
+  //szn 4 baadges
+  332,
+  333,
+  334,
+  335,
+  336,
+  337,
+  338,
+  339,
+  340,
+  341,
+  342,
+  343,
+  344,
+  345,
+  346,
+  347,
 ];
 
 export const sleeveSvgs = [
