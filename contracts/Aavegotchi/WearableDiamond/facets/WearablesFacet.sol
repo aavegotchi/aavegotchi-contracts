@@ -2,37 +2,49 @@
 pragma solidity 0.8.1;
 import "../../facets/PeripheryFacet.sol";
 import "../libraries/LibEventHandler.sol";
-import "../libraries/LibDiamond.sol";
+import "../libraries/WearableLibDiamond.sol";
 import "../../../shared/libraries/LibStrings.sol";
 
+import "../../facets/ItemsFacet.sol";
+import "../../facets/AavegotchiFacet.sol";
+
 contract WearablesFacet {
-    //READ
     function periphery() internal pure returns (PeripheryFacet pFacet) {
         pFacet = PeripheryFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND);
     }
 
+    function itemsFacet() internal pure returns (ItemsFacet iFacet) {
+        iFacet = ItemsFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND);
+    }
+
+    function aavegotchiFacet() internal pure returns (AavegotchiFacet aFacet) {
+        aFacet = AavegotchiFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND);
+    }
+
+    //READ
+
     function balanceOf(address _owner, uint256 _id) external view returns (uint256 balance_) {
-        balance_ = periphery().peripheryBalanceOf(_owner, _id);
+        balance_ = itemsFacet().balanceOf(_owner, _id);
     }
 
     function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory bals) {
-        bals = periphery().peripheryBalanceOfBatch(_owners, _ids);
+        bals = itemsFacet().balanceOfBatch(_owners, _ids);
     }
 
     function uri(uint256 _id) external view returns (string memory) {
-        return periphery().peripheryUri(_id);
+        return itemsFacet().uri(_id);
     }
 
     function isApprovedForAll(address _owner, address _operator) external view returns (bool approved_) {
-        approved_ = periphery().peripheryIsApprovedForAll(_owner, _operator);
+        approved_ = aavegotchiFacet().isApprovedForAll(_owner, _operator);
     }
 
-    function symbol() external pure returns (string memory) {
-        return "GOTCHI";
+    function symbol() external view returns (string memory) {
+        return aavegotchiFacet().symbol();
     }
 
-    function name() external pure returns (string memory) {
-        return "AAVEGOTCHI";
+    function name() external view returns (string memory) {
+        return aavegotchiFacet().name();
     }
 
     //WRITE
@@ -60,9 +72,9 @@ contract WearablesFacet {
         uint256 _value,
         bytes calldata _data
     ) external {
-        periphery().peripherySafeTransferFrom(_from, _to, _id, _value, _data);
+        periphery().peripherySafeTransferFrom(msg.sender, _from, _to, _id, _value, _data);
         //emit event
-        LibEventHandler._receiveAndEmitTransferSingleEvent(tx.origin, _from, _to, _id, _value);
+        LibEventHandler._receiveAndEmitTransferSingleEvent(msg.sender, _from, _to, _id, _value);
     }
 
     function safeBatchTransferFrom(
@@ -72,8 +84,8 @@ contract WearablesFacet {
         uint256[] calldata _values,
         bytes calldata _data
     ) external {
-        periphery().peripherySafeBatchTransferFrom(_from, _to, _ids, _values, _data);
+        periphery().peripherySafeBatchTransferFrom(msg.sender, _from, _to, _ids, _values, _data);
         //emit event
-        LibEventHandler._receiveAndEmitTransferBatchEvent(tx.origin, _from, _to, _ids, _values);
+        LibEventHandler._receiveAndEmitTransferBatchEvent(msg.sender, _from, _to, _ids, _values);
     }
 }

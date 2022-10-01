@@ -223,9 +223,9 @@ contract PeripheryTest is Test, IDiamondCut, PeripheryConstants {
         //check URI
         WearablesFacet(wearableDiamond).uri(202);
 
-        //approving when tx.origin is not nft owner wshould revert
-        vm.expectRevert("PeripheryFacet: Approval Failed");
-        WearablesFacet(wearableDiamond).setApprovalForAll(potionOwner, true);
+        // //approving when tx.origin is not nft owner wshould revert
+        // vm.expectRevert("PeripheryFacet: Approval Failed");
+        // WearablesFacet(wearableDiamond).setApprovalForAll(potionOwner, true);
 
         vm.stopPrank();
         //approve potionOwner via periphery when tx.origin is correct
@@ -244,15 +244,19 @@ contract PeripheryTest is Test, IDiamondCut, PeripheryConstants {
         vm.expectRevert("LibAppStorage: Not wearable diamond");
         PeripheryFacet(aavegotchiDiamond).peripherySetApprovalForAll(potionOwner, true, wearableOwner);
 
-        vm.startPrank(address(this), wearableOwner);
+        vm.prank(wearableOwner, wearableOwner);
+        //approve this contract
+        //address(this) is now the operator
+        WearablesFacet(wearableDiamond).setApprovalForAll(address(this), true);
+        vm.startPrank(address(this));
         //single transfer via periphery
         vm.expectEmit(true, true, true, true, address(wDiamond));
-        emit TransferSingle(wearableOwner, wearableOwner, potionOwner, sampleWearableId, 1);
+        emit TransferSingle(address(this), wearableOwner, potionOwner, sampleWearableId, 1);
         WearablesFacet(wearableDiamond).safeTransferFrom(wearableOwner, potionOwner, sampleWearableId, 1, "");
 
         //batch transfer via periphery
         vm.expectEmit(true, true, true, true, address(wDiamond));
-        emit TransferBatch(wearableOwner, wearableOwner, potionOwner, populateUint(301, 303), populateUint(1, 1));
+        emit TransferBatch(address(this), wearableOwner, potionOwner, populateUint(301, 303), populateUint(1, 1));
         WearablesFacet(wearableDiamond).safeBatchTransferFrom(wearableOwner, potionOwner, populateUint(301, 303), populateUint(1, 1), "");
 
         vm.stopPrank();

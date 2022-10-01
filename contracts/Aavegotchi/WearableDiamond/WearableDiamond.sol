@@ -7,7 +7,7 @@ pragma solidity 0.8.1;
 * Implementation of a diamond.
 /******************************************************************************/
 
-import {WearableLibDiamond} from "./libraries/LibDiamond.sol";
+import {WearableLibDiamond} from "./libraries/WearableLibDiamond.sol";
 import {DiamondCutFacet} from "../../shared/facets/DiamondCutFacet.sol";
 import {DiamondLoupeFacet} from "../../shared/facets/DiamondLoupeFacet.sol";
 import {OwnershipFacet} from "../../shared/facets/OwnershipFacet.sol";

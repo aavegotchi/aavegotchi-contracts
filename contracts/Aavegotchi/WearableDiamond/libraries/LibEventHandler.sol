@@ -1,6 +1,6 @@
 pragma solidity 0.8.1;
 
-import "./LibDiamond.sol";
+import "./WearableLibDiamond.sol";
 import "../../interfaces/IAavegotchiDiamondERC1155.sol";
 
 library LibEventHandler {

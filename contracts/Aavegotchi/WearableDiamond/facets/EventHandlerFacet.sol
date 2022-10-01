@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 import "../libraries/LibEventHandler.sol";
-import "../libraries/LibDiamond.sol";
+import "../libraries/WearableLibDiamond.sol";
 
 contract EventHandlerFacet {
     function emitApprovalEvent(
