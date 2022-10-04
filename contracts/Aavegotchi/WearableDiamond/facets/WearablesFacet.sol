@@ -39,13 +39,13 @@ contract WearablesFacet {
         approved_ = aavegotchiFacet().isApprovedForAll(_owner, _operator);
     }
 
-    function symbol() external view returns (string memory) {
-        return aavegotchiFacet().symbol();
+      function tokenURI(uint256 _tokenId) external pure returns (string memory) {
+        return aavegotchiFacet().tokenURI(_tokenId);
     }
 
-    function name() external view returns (string memory) {
-        return aavegotchiFacet().name();
-    }
+    //  function contractURI() public view returns (string memory) {
+    //     return "https://app.aavegotchi.com/metadata/items/[id]";
+    // }
 
     //WRITE
 
