@@ -272,12 +272,5 @@ task(
           console.log("Completed diamond cut: ", tx.hash);
         }
       }
-
-      for (let z = 0; z < cut.length; z++) {
-        await hre.run("verify:verify", {
-          address: cut[z].facetAddress,
-          constructorArguments: [],
-        });
-      }
     }
   );
