@@ -9,6 +9,7 @@ import "solidity-coverage";
 import * as dotenv from "dotenv";
 import "@typechain/hardhat";
 import { BigNumber } from "ethers";
+import "@nomiclabs/hardhat-etherscan";
 
 dotenv.config({ path: __dirname + "/.env" });
 
