@@ -104,11 +104,132 @@ export async function main() {
   const plaayers = [rarityPlaayers, kinshipPlaayers, xpPlaayers];
   const totalPlaayers = await getPlaayersIds(plaayers);
   console.log("Total amount of players: ", totalPlaayers.length);
+  console.log("Max Rank Baadge amount: ", itemTypes[9].maxQuantity);
 
   console.log(
     "Does totalPlaayers Array Have Duplicates: ",
     await hasDuplicateGotchiIds(totalPlaayers)
   );
+
+  console.log(itemTypes[0].name);
+  console.log("Rarity Chaamp: ", rarityRFSzn4[0]);
+  const rarityChaampion = await airdropTaskForBaadges(
+    [itemTypes[0]],
+    [rarityRFSzn4[0]]
+  );
+  await run("airdropBaadges", rarityChaampion);
+
+  console.log(itemTypes[1].name);
+  const kinshipChaampion = await airdropTaskForBaadges(
+    [itemTypes[1]],
+    [kinshipRFSzn4[0]]
+  );
+  await run("airdropBaadges", kinshipChaampion);
+
+  //xp tie breakers go to gotchi id: 6952 for higher rf 4 average xp score
+  console.log(itemTypes[2].name);
+  console.log("XP Chaampion: ", xpRFSzn4[1]);
+  const xpChaampion = await airdropTaskForBaadges(
+    [itemTypes[2]],
+    [xpRFSzn4[0]]
+  );
+  await run("airdropBaadges", xpChaampion);
+
+  console.log(itemTypes[3].name);
+  const rarity2nd = await airdropTaskForBaadges(
+    [itemTypes[3]],
+    [rarityRFSzn4[1]]
+  );
+  await run("airdropBaadges", rarity2nd);
+
+  console.log(itemTypes[4].name);
+  const kinship2nd = await airdropTaskForBaadges(
+    [itemTypes[4]],
+    [kinshipRFSzn4[1]]
+  );
+  await run("airdropBaadges", kinship2nd);
+
+  console.log(itemTypes[5].name);
+  const xp2nd = await airdropTaskForBaadges([itemTypes[5]], [xpRFSzn4[0]]);
+  await run("airdropBaadges", xp2nd);
+
+  console.log(itemTypes[6].name);
+  const rarity3rd = await airdropTaskForBaadges(
+    [itemTypes[6]],
+    [rarityRFSzn4[2]]
+  );
+  await run("airdropBaadges", rarity3rd);
+
+  console.log(itemTypes[7].name);
+  const kinship3rd = await airdropTaskForBaadges(
+    [itemTypes[7]],
+    [kinshipRFSzn4[2]]
+  );
+  await run("airdropBaadges", kinship3rd);
+
+  console.log(itemTypes[8].name);
+  const xp3rd = await airdropTaskForBaadges([itemTypes[8]], [xpRFSzn4[2]]);
+  await run("airdropBaadges", xp3rd);
+
+  console.log(itemTypes[9].name);
+  const raankingNumbersArray: number[] = [];
+  for (let x = 0; x < totalPlaayers.length; x++) {
+    raankingNumbersArray.push(Number(totalPlaayers[x]));
+  }
+
+  // const perBatch = 200;
+  // const batches = Math.ceil(raankingNumbersArray.length / perBatch);
+
+  // console.log("Begin airdrops!");
+
+  // for (let index = 0; index < batches; index++) {
+  //   console.log("Airdropping batch:", index);
+  //   let gotchiBatch = raankingNumbersArray.slice(
+  //     index * perBatch,
+  //     (index + 1) * perBatch
+  //   );
+
+  //   let plaayerAirdrop = await airdropTaskForBaadges(
+  //     [itemTypes[9]],
+  //     gotchiBatch
+  //   );
+
+  //   await run("airdropBaadges", plaayerAirdrop);
+  //   console.log("Complete Airdropping batch:", index);
+  // }
+
+  console.log(itemTypes[10].name);
+  const rarityTop10 = await airdropTaskForBaadges([itemTypes[10]], top10rarity);
+  await run("airdropBaadges", rarityTop10);
+
+  console.log(itemTypes[11].name);
+  const kinshipTop10 = await airdropTaskForBaadges(
+    [itemTypes[11]],
+    top10kinship
+  );
+  await run("airdropBaadges", kinshipTop10);
+
+  console.log(itemTypes[12].name);
+  const xpTop10 = await airdropTaskForBaadges([itemTypes[12]], top10xp);
+  await run("airdropBaadges", xpTop10);
+
+  console.log(itemTypes[13].name);
+  const rarityTop100 = await airdropTaskForBaadges(
+    [itemTypes[13]],
+    top100rarity
+  );
+  await run("airdropBaadges", rarityTop100);
+
+  console.log(itemTypes[14].name);
+  const kinshipTop100 = await airdropTaskForBaadges(
+    [itemTypes[14]],
+    top100kinship
+  );
+  await run("airdropBaadges", kinshipTop100);
+
+  console.log(itemTypes[15].name);
+  const xpTop100 = await airdropTaskForBaadges([itemTypes[15]], top100xp);
+  await run("airdropBaadges", xpTop100);
 }
 
 main()
