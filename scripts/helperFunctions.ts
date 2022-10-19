@@ -73,6 +73,10 @@ export const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 export const maticRealmDiamondAddress =
   "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
 
+export const maticFakeGotchiCards = "0x9f6BcC63e86D44c46e85564E9383E650dc0b56D7";
+
+export const maticFakeGotchiArt = "0xA4E3513c98b30d4D7cc578d2C328Bd550725D1D0";
+
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();
 }
