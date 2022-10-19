@@ -128,7 +128,7 @@ export async function main() {
 
   //xp tie breakers go to gotchi id: 6952 for higher rf 4 average xp score
   console.log(itemTypes[2].name);
-  console.log("XP Chaampion: ", xpRFSzn4[1]);
+  console.log("XP Chaampion: ", xpRFSzn4[0]);
   const xpChaampion = await airdropTaskForBaadges(
     [itemTypes[2]],
     [xpRFSzn4[0]]
@@ -150,7 +150,7 @@ export async function main() {
   await run("airdropBaadges", kinship2nd);
 
   console.log(itemTypes[5].name);
-  const xp2nd = await airdropTaskForBaadges([itemTypes[5]], [xpRFSzn4[0]]);
+  const xp2nd = await airdropTaskForBaadges([itemTypes[5]], [xpRFSzn4[1]]);
   await run("airdropBaadges", xp2nd);
 
   console.log(itemTypes[6].name);
