@@ -12,6 +12,7 @@ import {
   getRfSznTypeRanking,
   hasDuplicateGotchiIds,
 } from "../../scripts/helperFunctions";
+import { IFakeGotchi } from "../../typechain";
 import { dataArgs as dataArgs1 } from "../../data/airdrops/rarityfarming/szn4/rnd1";
 import { dataArgs as dataArgs2 } from "../../data/airdrops/rarityfarming/szn4/rnd2";
 import { dataArgs as dataArgs3 } from "../../data/airdrops/rarityfarming/szn4/rnd3";
@@ -37,6 +38,18 @@ export async function main() {
     throw Error("Incorrect network selected");
   }
 
+  const fakeGotchis = (await ethers.getContractAt(
+    "IFakeGotchi",
+    maticFakeGotchiCards
+  )) as IFakeGotchi;
+
+  const itemsTransferFacet = await ethers.getContractAt(
+    "ItemsTransferFacet",
+    maticDiamondAddress,
+    signer
+  );
+
+  //Gotchi IDs
   const rarityArray = [
     dataArgs1.rarityGotchis,
     dataArgs2.rarityGotchis,
@@ -74,11 +87,8 @@ export async function main() {
   console.log("Top 333 XP Length: ", top333XP.length);
   console.log("Top 333 XP: ", top333XP);
 
-  const itemsTransferFacet = await ethers.getContractAt(
-    "ItemsTransferFacet",
-    maticDiamondAddress,
-    signer
-  );
+  //Airdrop
+  await fakeGotchis.safeBatchTransferFrom(maticFakeGotchiCards, maticDiamondAddress, [#], [1000], []);
 
   let tokenIds: number[] = [];
   let _ids: Number[] = [];
@@ -91,12 +101,12 @@ export async function main() {
   for (let x = 0; x < top334Rarity.length; x++){
     tokenIds.push(top334Rarity[x]);
     batchIds.push(
-      batchValues.push(_values);
+    batchValues.push(_values);
   }
   for (let y = 0; y < top333Kinship.length; y++){
     tokenIds.push(top333Kinship[y]);
     batchIds.push(
-      batchValues.push(_values);
+    batchValues.push(_values);
   }
   for (let z = 0; z < top333XP.length; z++){
     tokenIds.push(top333XP[z]);
