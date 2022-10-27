@@ -178,13 +178,7 @@ export async function main() {
   let count: number = 0;
 
   for (let b = 0; b < addressArray.length; b++) {
-    await fakeGotchis.safeBatchTransferFrom(
-      cardOwner,
-      addressArray[b],
-      [0],
-      [1],
-      []
-    );
+    await fakeGotchis.safeTransferFrom(cardOwner, addressArray[b], 0, 1, []);
     count++;
     await delay(1500);
   }

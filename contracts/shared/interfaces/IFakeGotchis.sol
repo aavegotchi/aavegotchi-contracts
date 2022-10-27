@@ -21,6 +21,24 @@ interface IFakeGotchi {
     ) external;
 
     /**
+     * @notice Transfers `_amount` of an `_id` from the `_from` address to the `_to` address specified (with safety call).
+     * @dev Caller must be approved to manage the tokens being transferred out of the `_from` account (see "Approval" section of the standard).
+     * Must contain scenario of internal _safeTransferFrom() function
+     * @param _from    Source address
+     * @param _to      Target address
+     * @param _id      ID of the token type
+     * @param _amount  Transfer amount
+     * @param _data    Additional data with no specified format, MUST be sent unaltered in call to `onERC1155Received` on `_to`
+     */
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _id,
+        uint256 _amount,
+        bytes calldata _data
+    ) external;
+
+    /**
      * @notice Start new card series with minting ERC1155 Cards to this
      * @param _amount Amount to mint in this series
      */
