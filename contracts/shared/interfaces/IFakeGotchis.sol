@@ -21,8 +21,22 @@ interface IFakeGotchi {
     ) external;
 
     /**
+     * @notice Start new card series with minting ERC1155 Cards to this
+     * @param _amount Amount to mint in this series
+     */
+    function startNewSeries(uint256 _amount) external;
+
+    /**
      * @notice Get the URI for a card type
      * @return URI for token type
      */
     function uri(uint256 _id) external view returns (string memory);
+
+    /**
+     * @notice Get the balance of an account's tokens.
+     * @param _owner  The address of the token holder
+     * @param _id     ID of the token
+     * @return bal_   The _owner's balance of the token type requested
+     */
+    function balanceOf(address _owner, uint256 _id) external view returns (uint256 bal_);
 }
