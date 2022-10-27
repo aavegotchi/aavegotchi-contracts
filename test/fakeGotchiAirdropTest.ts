@@ -1,30 +1,18 @@
 import { ethers } from "hardhat";
 import { request } from "graphql-request";
-import {
-  AavegotchiFacet,
-  IFakeGotchi,
-  LendingGetterAndSetterFacet,
-} from "../typechain";
+import { IFakeGotchi, LendingGetterAndSetterFacet } from "../typechain";
 import {
   maticDiamondAddress,
-  getDiamondSigner,
   maticFakeGotchiCards,
-  itemManagerAlt,
-  gasPrice,
 } from "../scripts/helperFunctions";
 import { Signer } from "@ethersproject/abstract-signer";
 import { expect } from "chai";
-import { main } from "../scripts/airdrops/rfSzn3BdgsAirdrop";
-import { itemTypes } from "../scripts/addItemTypes/itemTypes/rfSzn3Bdgs";
 import { dataArgs as dataArgs1 } from "../data/airdrops/rarityfarming/szn4/rnd1";
 import { dataArgs as dataArgs2 } from "../data/airdrops/rarityfarming/szn4/rnd2";
 import { dataArgs as dataArgs3 } from "../data/airdrops/rarityfarming/szn4/rnd3";
 import { dataArgs as dataArgs4 } from "../data/airdrops/rarityfarming/szn4/rnd4";
 
-import {
-  getRfSznTypeRanking,
-  getPlaayersIds,
-} from "../scripts/helperFunctions";
+import { getRfSznTypeRanking } from "../scripts/helperFunctions";
 
 describe("Fake Gotchi Airdrop", async function () {
   this.timeout(200000000);
@@ -35,9 +23,6 @@ describe("Fake Gotchi Airdrop", async function () {
   let fakeGotchis: IFakeGotchi,
     lendingGetter: LendingGetterAndSetterFacet,
     signer: Signer,
-    rarityRFSzn3: number[],
-    kinshipRFSzn3: number[],
-    gotchiIdsArray: number[],
     batchAddressArray1: string[],
     batchAddressArray2: string[],
     batchAddressArray3: string[];
@@ -114,18 +99,7 @@ describe("Fake Gotchi Airdrop", async function () {
     const xp = await getRfSznTypeRanking(xpArray, "xp");
     const topXP = xp.slice(0, 4);
 
-    // for (let x = 0; x < topRarity.length; x++) {
-    //   gotchiIdsArray.push(topRarity[x]);
-    // }
-    // for (let y = 0; y < topKinship.length; y++) {
-    //   gotchiIdsArray.push(topKinship[y]);
-    // }
-    // for (let z = 0; z < topXP.length; z++) {
-    //   gotchiIdsArray.push(topXP[z]);
-    // }
-
     for (let i = 0; i < topRarity.length; i++) {
-      // let ownerAddress: string;
       let isLent = await lendingGetter.isAavegotchiLent(topRarity[i]);
       let data = await getOriginalOwnerAddress(topRarity[i]);
       let curOwner = data.aavegotchis[0].owner.id;
@@ -140,7 +114,6 @@ describe("Fake Gotchi Airdrop", async function () {
     }
 
     for (let i = 0; i < topKinship.length; i++) {
-      // let ownerAddress: string;
       let isLent = await lendingGetter.isAavegotchiLent(topKinship[i]);
       let data = await getOriginalOwnerAddress(topKinship[i]);
       let curOwner = data.aavegotchis[0].owner.id;
@@ -155,7 +128,6 @@ describe("Fake Gotchi Airdrop", async function () {
     }
 
     for (let i = 0; i < topXP.length; i++) {
-      // let ownerAddress: string;
       let isLent = await lendingGetter.isAavegotchiLent(topXP[i]);
       let data = await getOriginalOwnerAddress(topXP[i]);
       let curOwner = data.aavegotchis[0].owner.id;

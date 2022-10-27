@@ -1,23 +1,12 @@
-import { run, network, ethers } from "hardhat";
+import { network, ethers } from "hardhat";
 import { request } from "graphql-request";
 import { Signer } from "@ethersproject/abstract-signer";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 import {
   maticDiamondAddress,
-  getDiamondSigner,
   maticFakeGotchiCards,
-  itemManagerAlt,
-  gasPrice,
 } from "../../scripts/helperFunctions";
-import {
-  getRfSznTypeRanking,
-  hasDuplicateGotchiIds,
-} from "../../scripts/helperFunctions";
-import {
-  IFakeGotchi,
-  LendingGetterAndSetterFacet,
-  AavegotchiFacet,
-} from "../../typechain";
+import { getRfSznTypeRanking } from "../../scripts/helperFunctions";
+import { IFakeGotchi, LendingGetterAndSetterFacet } from "../../typechain";
 import { dataArgs as dataArgs1 } from "../../data/airdrops/rarityfarming/szn4/rnd1";
 import { dataArgs as dataArgs2 } from "../../data/airdrops/rarityfarming/szn4/rnd2";
 import { dataArgs as dataArgs3 } from "../../data/airdrops/rarityfarming/szn4/rnd3";
@@ -64,18 +53,6 @@ export async function main() {
     signer
   )) as LendingGetterAndSetterFacet;
 
-  const aavegotchiFacet = (await ethers.getContractAt(
-    "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-    maticDiamondAddress,
-    signer
-  )) as AavegotchiFacet;
-
-  const itemsTransferFacet = await ethers.getContractAt(
-    "ItemsTransferFacet",
-    maticDiamondAddress,
-    signer
-  );
-
   let ownerBalance = await fakeGotchis.balanceOf(cardOwner, 0);
   console.log("Owner balance: ", ownerBalance.toString());
 
@@ -92,11 +69,6 @@ export async function main() {
   }
 
   function getOriginalOwnerAddress(_id: number): Promise<OriginalAddress> {
-    // let addresses: string[] = [];
-    // let gotchiInfo = await aavegotchiFacet.getAavegotchi(_id);
-    // let address: string = gotchiInfo.owner.toString();
-    // console.log("Owner Address: ", address);
-    // console.log("Gotchi Info: ", gotchiInfo.toString());
     let query = `
     {aavegotchis(where: {gotchiId_in: [${_id}]}) {
       gotchiId
@@ -108,12 +80,7 @@ export async function main() {
       }
     }}
     `;
-
-    // let graphRequest = await request(maticGraphUrl, query);
-    // console.log("TheGraph: ", graphRequest);
-
     return request(maticGraphUrl, query);
-    // let addressesString = addresses.map((e) => `"${e}"`).join(",");
   }
 
   //Gotchi IDs
