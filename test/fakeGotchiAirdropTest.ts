@@ -92,16 +92,33 @@ describe("Fake Gotchi Airdrop", async function () {
 
     const rarity = await getRfSznTypeRanking(rarityArray, "rarity");
     const topRarity = rarity.slice(0, 10);
+    const bottomRarity = rarity.slice(300, 320);
 
     const kinship = await getRfSznTypeRanking(kinshipArray, "kinship");
     const topKinship = kinship.slice(0, 10);
+    const bottomKinship = rarity.slice(300, 320);
 
     const xp = await getRfSznTypeRanking(xpArray, "xp");
     const topXP = xp.slice(0, 4);
+    const bottomXP = rarity.slice(300, 320);
 
     for (let i = 0; i < topRarity.length; i++) {
       let isLent = await lendingGetter.isAavegotchiLent(topRarity[i]);
       let data = await getOriginalOwnerAddress(topRarity[i]);
+      let curOwner = data.aavegotchis[0].owner.id;
+
+      if (isLent) {
+        let ogOwner = data.aavegotchis[0].originalOwner.id;
+
+        batchAddressArray1.push(ogOwner);
+      } else {
+        batchAddressArray1.push(curOwner);
+      }
+    }
+
+    for (let i = 0; i < bottomRarity.length; i++) {
+      let isLent = await lendingGetter.isAavegotchiLent(bottomRarity[i]);
+      let data = await getOriginalOwnerAddress(bottomRarity[i]);
       let curOwner = data.aavegotchis[0].owner.id;
 
       if (isLent) {
@@ -127,9 +144,37 @@ describe("Fake Gotchi Airdrop", async function () {
       }
     }
 
+    for (let i = 0; i < bottomKinship.length; i++) {
+      let isLent = await lendingGetter.isAavegotchiLent(bottomKinship[i]);
+      let data = await getOriginalOwnerAddress(bottomKinship[i]);
+      let curOwner = data.aavegotchis[0].owner.id;
+
+      if (isLent) {
+        let ogOwner = data.aavegotchis[0].originalOwner.id;
+
+        batchAddressArray2.push(ogOwner);
+      } else {
+        batchAddressArray2.push(curOwner);
+      }
+    }
+
     for (let i = 0; i < topXP.length; i++) {
       let isLent = await lendingGetter.isAavegotchiLent(topXP[i]);
       let data = await getOriginalOwnerAddress(topXP[i]);
+      let curOwner = data.aavegotchis[0].owner.id;
+
+      if (isLent) {
+        let ogOwner = data.aavegotchis[0].originalOwner.id;
+
+        batchAddressArray3.push(ogOwner);
+      } else {
+        batchAddressArray3.push(curOwner);
+      }
+    }
+
+    for (let i = 0; i < bottomXP.length; i++) {
+      let isLent = await lendingGetter.isAavegotchiLent(bottomXP[i]);
+      let data = await getOriginalOwnerAddress(bottomXP[i]);
       let curOwner = data.aavegotchis[0].owner.id;
 
       if (isLent) {
