@@ -6,6 +6,12 @@ import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
 
 export const gasPrice = 70000000000;
 
+export function delay(milliseconds: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
+}
+
 export async function impersonate(
   address: string,
   contract: any,
@@ -73,7 +79,8 @@ export const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 export const maticRealmDiamondAddress =
   "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
 
-export const maticFakeGotchiCards = "0x9f6BcC63e86D44c46e85564E9383E650dc0b56D7";
+export const maticFakeGotchiCards =
+  "0x9f6BcC63e86D44c46e85564E9383E650dc0b56D7";
 
 export const maticFakeGotchiArt = "0xA4E3513c98b30d4D7cc578d2C328Bd550725D1D0";
 

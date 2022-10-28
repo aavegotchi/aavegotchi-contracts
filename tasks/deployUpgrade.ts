@@ -15,6 +15,7 @@ import {
   gasPrice,
   getSelectors,
   getSighashes,
+  delay,
 } from "../scripts/helperFunctions";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -276,6 +277,17 @@ task(
           }
           console.log("Completed diamond cut: ", tx.hash);
         }
+      }
+
+      console.log("Verifying Addresses");
+      await delay(60000);
+
+      for (let x = 0; x < cut.length; x++) {
+        console.log("Addresses to be verified: ", cut[x].facetAddress);
+        await hre.run("verify:verify", {
+          address: cut[x].facetAddress,
+          constructorArguments: [],
+        });
       }
     }
   );
