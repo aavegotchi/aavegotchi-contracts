@@ -333,6 +333,23 @@ export const wearablesRightSvgs = [
   329,
   330,
   331,
+  //szn 4 baadges
+  332,
+  333,
+  334,
+  335,
+  336,
+  337,
+  338,
+  339,
+  340,
+  341,
+  342,
+  343,
+  344,
+  345,
+  346,
+  347,
 ];
 
 export const wearablesBackSvgs = [
@@ -668,6 +685,23 @@ export const wearablesBackSvgs = [
   329,
   330,
   331,
+  //szn 4 baadges
+  332,
+  333,
+  334,
+  335,
+  336,
+  337,
+  338,
+  339,
+  340,
+  341,
+  342,
+  343,
+  344,
+  345,
+  346,
+  347,
 ];
 
 export const wearablesLeftSvgs = [
@@ -1003,6 +1037,23 @@ export const wearablesLeftSvgs = [
   329,
   330,
   331,
+  //szn 4 baadges
+  332,
+  333,
+  334,
+  335,
+  336,
+  337,
+  338,
+  339,
+  340,
+  341,
+  342,
+  343,
+  344,
+  345,
+  346,
+  347,
 ];
 
 export const wearablesLeftSleeveSvgs = [
