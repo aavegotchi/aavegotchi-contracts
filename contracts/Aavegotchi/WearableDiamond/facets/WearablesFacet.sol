@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
-import "../../facets/PeripheryFacet.sol";
-import "../libraries/LibEventHandler.sol";
-import "../libraries/WearableLibDiamond.sol";
-import "../../../shared/libraries/LibStrings.sol";
+import {PeripheryFacet} from "../../facets/PeripheryFacet.sol";
+import {LibEventHandler} from "../libraries/LibEventHandler.sol";
+import {WearableLibDiamond} from "../libraries/WearableLibDiamond.sol";
+import {LibStrings} from "../../../shared/libraries/LibStrings.sol";
 
-import "../../facets/ItemsFacet.sol";
-import "../../facets/AavegotchiFacet.sol";
+import {ItemsFacet} from "../../facets/ItemsFacet.sol";
+import {AavegotchiFacet} from "../../facets/AavegotchiFacet.sol";
 
 contract WearablesFacet {
     function periphery() internal pure returns (PeripheryFacet pFacet) {
@@ -39,7 +39,7 @@ contract WearablesFacet {
         approved_ = aavegotchiFacet().isApprovedForAll(_owner, _operator);
     }
 
-      function tokenURI(uint256 _tokenId) external pure returns (string memory) {
+    function tokenURI(uint256 _tokenId) external pure returns (string memory) {
         return aavegotchiFacet().tokenURI(_tokenId);
     }
 

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import "../libraries/LibItems.sol";
-import "../libraries/LibAppStorage.sol";
-import "../libraries/LibERC1155Marketplace.sol";
-import "../../shared/libraries/LibStrings.sol";
+import {LibItems} from "../libraries/LibItems.sol";
+import {Modifiers} from "../libraries/LibAppStorage.sol";
+import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
+import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 
 contract PeripheryFacet is Modifiers {
     //WRITE
