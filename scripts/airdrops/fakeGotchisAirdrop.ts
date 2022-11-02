@@ -13,12 +13,6 @@ import { dataArgs as dataArgs3 } from "../../data/airdrops/rarityfarming/szn4/rn
 import { dataArgs as dataArgs4 } from "../../data/airdrops/rarityfarming/szn4/rnd4";
 
 export async function main() {
-  function delay(milliseconds: number) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, milliseconds);
-    });
-  }
-
   const maticGraphUrl: string =
     "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic";
   const testing = ["hardhat", "localhost"].includes(network.name);
@@ -178,9 +172,16 @@ export async function main() {
   let count: number = 0;
 
   for (let b = 0; b < addressArray.length; b++) {
-    await fakeGotchis.safeTransferFrom(cardOwner, addressArray[b], 0, 1, []);
+    const tx = await fakeGotchis.safeTransferFrom(
+      cardOwner,
+      addressArray[b],
+      0,
+      1,
+      []
+    );
+
+    await tx.wait();
     count++;
-    await delay(1500);
   }
 
   console.log("Airdrop count: ", count);
