@@ -131,7 +131,6 @@ export async function main() {
   let zeroAddresses: any[] = [];
 
   for (let i = 0; i < gotchiIdsArray.length; i++) {
-    // let ownerAddress: string;
     let isLent = await lendingGetter.isAavegotchiLent(gotchiIdsArray[i]);
     let data = await getOriginalOwnerAddress(gotchiIdsArray[i]);
     let curOwner = data.aavegotchis[0].owner.id;
