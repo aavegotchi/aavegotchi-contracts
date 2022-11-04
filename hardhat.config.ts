@@ -24,6 +24,7 @@ require("./tasks/batchDeposit.ts");
 require("./tasks/rarityPayouts");
 require("./tasks/grantXP_snapshot");
 require("./tasks/grantXP_minigame");
+require("./tasks/grantXP");
 require("./tasks/addItemTypes");
 require("./tasks/addWearableSets");
 require("./tasks/grantXP_customValues");
@@ -43,7 +44,7 @@ export default {
       forking: {
         url: process.env.MATIC_URL,
         timeout: 12000000,
-        blockNumber: 31480850,
+        // blockNumber: 31480850,
       },
       blockGasLimit: 20000000,
       timeout: 120000,

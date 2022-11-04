@@ -178,6 +178,8 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
       for (let index = 0; index < batches; index++) {
         console.log("Current batch id:", index);
 
+        // if (index < 1) continue;
+
         const offset = batchSize * index;
         const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
 

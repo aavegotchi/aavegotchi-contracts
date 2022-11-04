@@ -15,6 +15,7 @@ import {
   gasPrice,
   getSelectors,
   getSighashes,
+  delay,
 } from "../scripts/helperFunctions";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -106,9 +107,8 @@ task(
   .setAction(
     async (taskArgs: DeployUpgradeTaskArgs, hre: HardhatRuntimeEnvironment) => {
       const facets: string = taskArgs.facetsAndAddSelectors;
-      const facetsAndAddSelectors: FacetsAndAddSelectors[] = convertStringToFacetAndSelectors(
-        facets
-      );
+      const facetsAndAddSelectors: FacetsAndAddSelectors[] =
+        convertStringToFacetAndSelectors(facets);
       const diamondUpgrader: string = taskArgs.diamondUpgrader;
       const diamondAddress: string = taskArgs.diamondAddress;
       const useMultisig = taskArgs.useMultisig;
@@ -116,12 +116,19 @@ task(
       const initAddress = taskArgs.initAddress;
       const initCalldata = taskArgs.initCalldata;
 
+      const branch = require("git-branch");
+      if (hre.network.name === "matic" && branch.sync() !== "master") {
+        throw new Error("Not master branch!");
+      }
+
       //Instantiate the Signer
       let signer: Signer;
-      const owner = await ((await hre.ethers.getContractAt(
-        "OwnershipFacet",
-        diamondAddress
-      )) as OwnershipFacet).owner();
+      const owner = await (
+        (await hre.ethers.getContractAt(
+          "OwnershipFacet",
+          diamondAddress
+        )) as OwnershipFacet
+      ).owner();
       const testing = ["hardhat", "localhost"].includes(hre.network.name);
 
       if (testing) {
@@ -248,19 +255,20 @@ task(
         //Choose to use a multisig or a simple deploy address
         if (useMultisig) {
           console.log("Diamond cut");
-          const tx: PopulatedTransaction = await diamondCut.populateTransaction.diamondCut(
-            cut,
-            initAddress ? initAddress : hre.ethers.constants.AddressZero,
-            initCalldata ? initCalldata : "0x",
-            { gasLimit: 800000 }
-          );
+          const tx: PopulatedTransaction =
+            await diamondCut.populateTransaction.diamondCut(
+              cut,
+              initAddress ? initAddress : hre.ethers.constants.AddressZero,
+              initCalldata ? initCalldata : "0x",
+              { gasLimit: 800000 }
+            );
           await sendToMultisig(diamondUpgrader, signer, tx, hre.ethers);
         } else {
           const tx: ContractTransaction = await diamondCut.diamondCut(
             cut,
             initAddress ? initAddress : hre.ethers.constants.AddressZero,
             initCalldata ? initCalldata : "0x",
-            { gasLimit: 800000 }
+            { gasPrice: gasPrice }
           );
 
           const receipt: ContractReceipt = await tx.wait();
@@ -269,6 +277,17 @@ task(
           }
           console.log("Completed diamond cut: ", tx.hash);
         }
+      }
+
+      console.log("Verifying Addresses");
+      await delay(60000);
+
+      for (let x = 0; x < cut.length; x++) {
+        console.log("Addresses to be verified: ", cut[x].facetAddress);
+        await hre.run("verify:verify", {
+          address: cut[x].facetAddress,
+          constructorArguments: [],
+        });
       }
     }
   );

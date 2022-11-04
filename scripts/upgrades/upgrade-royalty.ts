@@ -4,29 +4,19 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
-import { gasPrice, maticDiamondAddress } from "../helperFunctions";
+import { maticDiamondAddress } from "../helperFunctions";
 
 export async function upgrade() {
   const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 
-  const InitBorrowLimit = await ethers.getContractFactory("InitBorrowLimit");
-  const initBorrowLimit = await InitBorrowLimit.deploy({ gasPrice: gasPrice });
-  await initBorrowLimit.deployed();
-  const payload = initBorrowLimit.interface.encodeFunctionData("init");
-
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "GotchiLendingFacet",
+      facetName: "ERC721MarketplaceFacet",
       addSelectors: [],
       removeSelectors: [],
     },
     {
-      facetName: "LendingGetterAndSetterFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "WhitelistFacet",
+      facetName: "ERC1155MarketplaceFacet",
       addSelectors: [],
       removeSelectors: [],
     },
@@ -40,8 +30,6 @@ export async function upgrade() {
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: true,
-    initAddress: initBorrowLimit.address,
-    initCalldata: payload,
   };
 
   await run("deployUpgrade", args);

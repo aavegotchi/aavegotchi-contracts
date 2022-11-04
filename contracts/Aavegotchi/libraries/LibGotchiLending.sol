@@ -9,6 +9,7 @@ import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibAavegotchi} from "./LibAavegotchi.sol";
 import {LibWhitelist} from "./LibWhitelist.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {IRealmDiamond} from "../../shared/interfaces/IRealmDiamond.sol";
 
 library LibGotchiLending {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -204,7 +205,9 @@ library LibGotchiLending {
         s.petOperators[_borrower][lender] = true;
 
         EnumerableSet.UintSet storage whitelistBorrowerGotchiSet = s.whitelistGotchiBorrows[lending.whitelistId][_borrower];
-        uint256 borrowLimit = LibWhitelist.borrowLimit(lending.whitelistId);
+        uint256 borrowLimit = lending.whitelistId == 0
+            ? IRealmDiamond(s.realmAddress).balanceOf(_borrower) + 1
+            : LibWhitelist.borrowLimit(lending.whitelistId);
 
         // Check if the whitelist allows multiple borrows
         // If not, register the gotchi id to the whitelist to prevent more borrows

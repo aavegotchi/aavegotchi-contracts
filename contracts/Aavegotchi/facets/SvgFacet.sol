@@ -126,13 +126,7 @@ contract SvgFacet is Modifiers {
         //Token ID is uint256 max - 1: used for Gotchi previews to open hands
         else if (_tokenId == type(uint256).max - 1) {
             equippedWearables[0] = 1;
-            svg_ = abi.encodePacked(
-                applyStyles(details, _tokenId, equippedWearables),
-                LibSvg.getSvg("aavegotchi", LibSvg.BACKGROUND_SVG_ID),
-                svg_,
-                details.collateral,
-                details.eyeShape
-            );
+            svg_ = abi.encodePacked(applyStyles(details, _tokenId, equippedWearables), svg_, details.collateral, details.eyeShape);
 
             //Normal token ID
         } else {

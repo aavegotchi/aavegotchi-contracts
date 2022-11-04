@@ -14,6 +14,11 @@ interface TaskArgs {
   excludedAddresses: string;
 }
 
+export const currentOverrides: string[] = [
+  "0x0B71a4ee5FDFc67946aD6AF0f6D46b7f67B5d14e",
+  "0xC33ddC98c4e090c887D7Faa54D560B2CfE106b68",
+];
+
 task("grantXP", "Grants XP to Gotchis by addresses")
   .addParam("filename", "File that contains the airdrop")
   .addParam("xpAmount", "Amount of XP that each Aavegotchi should receive")
@@ -32,6 +37,8 @@ task("grantXP", "Grants XP to Gotchis by addresses")
       .map((val) => val.toLowerCase());
 
     let { addresses } = require(`../data/airdrops/${filename}.ts`);
+
+    addresses = addresses.concat(currentOverrides);
 
     //Filter out addresses
     addresses = addresses.filter((address: string) => {
