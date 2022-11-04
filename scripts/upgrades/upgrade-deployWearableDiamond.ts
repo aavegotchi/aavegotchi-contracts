@@ -44,8 +44,6 @@ async function deployAndUpgradeWearableDiamond() {
         "function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory bals)",
         "function uri(uint256 _id) external view returns (string memory)",
         "function isApprovedForAll(address _owner, address _operator) external view returns (bool approved_)",
-        "function symbol() external pure returns (string memory)",
-        "function name() external pure returns (string memory)",
         "function setApprovalForAll(address _operator, bool _approved) external",
         "function setBaseURI(string memory _value) external",
         "function safeTransferFrom(address _from,address _to,uint256 _id,uint256 _value,bytes calldata _data) external",
@@ -74,6 +72,7 @@ async function deployAndUpgradeWearableDiamond() {
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
+    freshDeployment: true,
   };
 
   await run("deployUpgrade", args);

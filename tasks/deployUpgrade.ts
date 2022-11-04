@@ -40,6 +40,7 @@ export interface DeployUpgradeTaskArgs {
   initCalldata?: string;
   rawSigs?: boolean;
   // updateDiamondABI: boolean;
+  freshDeployment?: boolean;
 }
 
 interface Cut {
@@ -102,6 +103,7 @@ task(
     "Set to true if multisig should be used for deploying"
   )
   .addFlag("useLedger", "Set to true if Ledger should be used for signing")
+  .addFlag("freshDeployment", "This is for Diamonds that are freshly deployed ")
   // .addFlag("verifyFacets","Set to true if facets should be verified after deployment")
 
   .setAction(
@@ -198,13 +200,16 @@ task(
             });
           }
 
-          //Always replace the existing selectors to prevent duplications
-          if (existingSelectors.length > 0) {
-            cut.push({
-              facetAddress: deployedFacet.address,
-              action: FacetCutAction.Replace,
-              functionSelectors: existingSelectors,
-            });
+          //replace only when not using on newly deplyed diamonds
+          if (!taskArgs.freshDeployment) {
+            //Always replace the existing selectors to prevent duplications
+            if (existingSelectors.length > 0) {
+              cut.push({
+                facetAddress: deployedFacet.address,
+                action: FacetCutAction.Replace,
+                functionSelectors: existingSelectors,
+              });
+            }
           }
         }
         let removeSelectors: string[];

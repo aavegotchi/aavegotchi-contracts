@@ -13,7 +13,7 @@ import { maticDiamondAddress } from "../helperFunctions";
 const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 
 //deployed address of the periphery diamond
-let periphery: string = "";
+let periphery: string = "0xb8C25FD8450a6a53539fF8E502fC5Db0D9907417";
 
 //includes upgrades for AavegotchiFacet,BridgeFacet and DAOFacet
 export async function upgrade1() {
@@ -184,6 +184,7 @@ export async function upgrade4() {
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
+    freshDeployment: false,
   };
 
   await run("deployUpgrade", args);
