@@ -7,19 +7,10 @@ import { main } from "../scripts/airdrops/pumpkinBdgAirdrop";
 import { itemTypes } from "../scripts/addItemTypes/itemTypes/pumpkinBdg";
 import { pumpkinSmashData } from "../data/airdrops/badges/pumpkinSmashing";
 
-import {
-  getRfSznTypeRanking,
-  getPlaayersIds,
-} from "../scripts/helperFunctions";
-
-describe("Airdrop SZN3 Baadges", async function () {
+describe("Airdrop Pumpkin Smash Baadges", async function () {
   this.timeout(200000000);
 
   let aavegotchiFacet: AavegotchiFacet, signer: Signer;
-
-  // before(async function () {
-
-  // });
 
   it("Should airdrop pumpkin badge", async function () {
     let players: number[] = [];

@@ -5,7 +5,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "GOTCHI SMAASH 2022 Haalloween Party",
     description:
       "This Aavegotchi ranked in GOTCHI SMAASH 2022, the first ever mass PvE event in the Gotchiverse. Mad Paampkins invaded Metaguild's Paartner Parcel during the third annual Aavegotchi Haalloween Party in four waves. 392 Aavegotchis banded together to claim victory and Alchemica candy! The final Paampkin nearly got away but was eventually smited by the heroic band of gotchis!",
-    svgId: 348,
+    svgId: 332,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "common",

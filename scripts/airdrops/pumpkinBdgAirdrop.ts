@@ -5,22 +5,16 @@ import {
   mintSvgTaskForBaadges,
   airdropTaskForBaadges,
 } from "../../scripts/svgHelperFunctions";
-
-import {
-  getRfSznTypeRanking,
-  getPlaayersIds,
-  hasDuplicateGotchiIds,
-} from "../../scripts/helperFunctions";
-
+import { hasDuplicateGotchiIds } from "../../scripts/helperFunctions";
 import { pumpkinSmashData } from "../../data/airdrops/badges/pumpkinSmashing";
 
 export async function main() {
   const baadge: string[] = [
-    "GotchiSmaash2022-Baadge-Final-Pixelart", //348
+    "GotchiSmaash2022-Baadge-Final-Pixelart", //332
   ];
 
   //Upload SVGs
-  let upload = await updateBaadgeTaskForSvgType(baadge, "pumpkinBadge", [348]);
+  let upload = await updateBaadgeTaskForSvgType(baadge, "pumpkinBadge", [332]);
 
   await run("updateSvgs", upload);
 
