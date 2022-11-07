@@ -171,11 +171,11 @@ export async function main() {
   const xp3rd = await airdropTaskForBaadges([itemTypes[8]], [xpRFSzn4[2]]);
   await run("airdropBaadges", xp3rd);
 
-  console.log(itemTypes[9].name);
-  const raankingNumbersArray: number[] = [];
-  for (let x = 0; x < totalPlaayers.length; x++) {
-    raankingNumbersArray.push(Number(totalPlaayers[x]));
-  }
+  // console.log(itemTypes[9].name);
+  // const raankingNumbersArray: number[] = [];
+  // for (let x = 0; x < totalPlaayers.length; x++) {
+  //   raankingNumbersArray.push(Number(totalPlaayers[x]));
+  // }
 
   // const perBatch = 200;
   // const batches = Math.ceil(raankingNumbersArray.length / perBatch);
