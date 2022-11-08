@@ -1,14 +1,13 @@
 import { run } from "hardhat";
 
 async function verify() {
-  const address = "0x6C7CE64BB23dB2981A3769020F67d1d718167705"; // deployed address
-  const facet = "DAOFacet"; // name of facet
-  await run("verifyFacet", {
+  await run("verify:verify", {
     apikey: process.env.POLYGON_API_KEY,
-    contract: address,
-    facet: facet,
-    directory: "Aavegotchi",
-    apiURL: "https://api.polygonscan.com/api",
+    contract: 'contracts/Aavegotchi/facets/WhitelistFacet.sol:WhitelistFacet',
+    address: "0x20A04363E78017126350BB220dEF309A7f93bB99", // deployed address,
+    // constructorArguments: [
+    //   "",
+    // ]
   });
 }
 
