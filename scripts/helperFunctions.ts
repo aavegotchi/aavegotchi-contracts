@@ -1,10 +1,9 @@
 import { Signer } from "@ethersproject/abstract-signer";
 import { Contract } from "@ethersproject/contracts";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { indexOf } from "underscore";
 import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
 
-export const gasPrice = 70000000000;
+export const gasPrice = 270000000000;
 
 export function delay(milliseconds: number) {
   return new Promise((resolve) => {
