@@ -19,28 +19,28 @@ import { dataArgs as dataArgs4 } from "../../data/airdrops/rarityfarming/szn4/rn
 
 export async function main() {
   const baadges: string[] = [
-    "Aavegotchi-RF-SZN4-Trophy-CHAMP-RARITY", //332
-    "Aavegotchi-RF-SZN4-Trophy-CHAMP-KINSHIP", //333
-    "Aavegotchi-RF-SZN4-Trophy-CHAMP-XP", //334
-    "Aavegotchi-RF-SZN4-Trophy-2ND-RARITY", //335
-    "Aavegotchi-RF-SZN4-Trophy-2ND-KINSHIP", //336
-    "Aavegotchi-RF-SZN4-Trophy-2ND-XP", //337
-    "Aavegotchi-RF-SZN4-Trophy-3RD-RARITY", //338
-    "Aavegotchi-RF-SZN4-Trophy-3RD-KINSHIP", //339
-    "Aavegotchi-RF-SZN4-Trophy-3RD-XP", //340
+    "Aavegotchi-RF-SZN4-Trophy-CHAMP-RARITY", //333
+    "Aavegotchi-RF-SZN4-Trophy-CHAMP-KINSHIP", //334
+    "Aavegotchi-RF-SZN4-Trophy-CHAMP-XP", //335
+    "Aavegotchi-RF-SZN4-Trophy-2ND-RARITY", //336
+    "Aavegotchi-RF-SZN4-Trophy-2ND-KINSHIP", //337
+    "Aavegotchi-RF-SZN4-Trophy-2ND-XP", //338
+    "Aavegotchi-RF-SZN4-Trophy-3RD-RARITY", //339
+    "Aavegotchi-RF-SZN4-Trophy-3RD-KINSHIP", //340
+    "Aavegotchi-RF-SZN4-Trophy-3RD-XP", //341
 
-    "Aavegotchi-RF-SZN4-Baadge-RAANKED", //341
-    "Aavegotchi-RF-SZN4-Baadge-TOP10-RARITY", //342
-    "Aavegotchi-RF-SZN4-Baadge-TOP10-KINSHIP", //343
-    "Aavegotchi-RF-SZN4-Baadge-TOP10-XP", //344
-    "Aavegotchi-RF-SZN4-Baadge-TOP100-RARITY", //345
-    "Aavegotchi-RF-SZN4-Baadge-TOP100-KINSHIP", //346
-    "Aavegotchi-RF-SZN4-Baadge-TOP100-XP", //347
+    "Aavegotchi-RF-SZN4-Baadge-RAANKED", //342
+    "Aavegotchi-RF-SZN4-Baadge-TOP10-RARITY", //343
+    "Aavegotchi-RF-SZN4-Baadge-TOP10-KINSHIP", //344
+    "Aavegotchi-RF-SZN4-Baadge-TOP10-XP", //345
+    "Aavegotchi-RF-SZN4-Baadge-TOP100-RARITY", //346
+    "Aavegotchi-RF-SZN4-Baadge-TOP100-KINSHIP", //347
+    "Aavegotchi-RF-SZN4-Baadge-TOP100-XP", //348
   ];
 
   //Upload SVGs
   let ids: number[] = [];
-  for (let i = 332; i <= 347; i++) {
+  for (let i = 333; i <= 348; i++) {
     ids.push(i);
   }
   let upload = await updateBaadgeTaskForSvgType(baadges, "sZN4Baadges", ids);
