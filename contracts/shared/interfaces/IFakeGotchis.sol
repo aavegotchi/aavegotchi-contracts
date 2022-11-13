@@ -20,6 +20,14 @@ interface IFakeGotchi {
         bytes calldata _data
     ) external;
 
+    function safeBatchTransferTo(
+        address _from,
+        address[] calldata _to,
+        uint256[] calldata _ids,
+        uint256[] calldata _amounts,
+        bytes calldata _data
+    ) external;
+
     /**
      * @notice Transfers `_amount` of an `_id` from the `_from` address to the `_to` address specified (with safety call).
      * @dev Caller must be approved to manage the tokens being transferred out of the `_from` account (see "Approval" section of the standard).

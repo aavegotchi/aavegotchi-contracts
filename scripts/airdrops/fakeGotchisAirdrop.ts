@@ -1,15 +1,9 @@
 import { network, ethers } from "hardhat";
 import { request } from "graphql-request";
 import { Signer } from "@ethersproject/abstract-signer";
-import {
-  maticDiamondAddress,
-  maticFakeGotchiCards,
-} from "../../scripts/helperFunctions";
+import { gasPrice, maticFakeGotchiCards } from "../../scripts/helperFunctions";
 import { getRfSznTypeRanking } from "../../scripts/helperFunctions";
-import { IFakeGotchi, LendingGetterAndSetterFacet } from "../../typechain";
-import { dataArgs as dataArgs1 } from "../../data/airdrops/rarityfarming/szn4/rnd1";
-import { dataArgs as dataArgs2 } from "../../data/airdrops/rarityfarming/szn4/rnd2";
-import { dataArgs as dataArgs3 } from "../../data/airdrops/rarityfarming/szn4/rnd3";
+import { IFakeGotchi } from "../../typechain";
 import { dataArgs as dataArgs4 } from "../../data/airdrops/rarityfarming/szn4/rnd4";
 
 export async function main() {
@@ -41,12 +35,6 @@ export async function main() {
     signer
   )) as IFakeGotchi;
 
-  const lendingGetter = (await ethers.getContractAt(
-    "LendingGetterAndSetterFacet",
-    maticDiamondAddress,
-    signer
-  )) as LendingGetterAndSetterFacet;
-
   let ownerBalance = await fakeGotchis.balanceOf(cardOwner, 0);
   console.log("Owner balance: ", ownerBalance.toString());
 
@@ -62,9 +50,11 @@ export async function main() {
     }[];
   }
 
-  function getOriginalOwnerAddress(_id: number): Promise<OriginalAddress> {
+  function getOriginalOwnerAddress(_ids: number[]): Promise<OriginalAddress> {
+    const ids = _ids.map((val) => `"${val}"`);
+
     let query = `
-    {aavegotchis(where: {gotchiId_in: [${_id}]}) {
+    {aavegotchis(first:1000 where: {gotchiId_in: [${ids}]}) {
       gotchiId
       owner{
         id
@@ -78,24 +68,9 @@ export async function main() {
   }
 
   //Gotchi IDs
-  const rarityArray = [
-    dataArgs1.rarityGotchis,
-    dataArgs2.rarityGotchis,
-    dataArgs3.rarityGotchis,
-    dataArgs4.rarityGotchis,
-  ];
-  const kinshipArray = [
-    dataArgs1.kinshipGotchis,
-    dataArgs2.kinshipGotchis,
-    dataArgs3.kinshipGotchis,
-    dataArgs4.kinshipGotchis,
-  ];
-  const xpArray = [
-    dataArgs1.xpGotchis,
-    dataArgs2.xpGotchis,
-    dataArgs3.xpGotchis,
-    dataArgs4.xpGotchis,
-  ];
+  const rarityArray = [dataArgs4.rarityGotchis];
+  const kinshipArray = [dataArgs4.kinshipGotchis];
+  const xpArray = [dataArgs4.xpGotchis];
 
   const rarity = await getRfSznTypeRanking(rarityArray, "rarity");
   console.log("Rarity: ", rarity);
@@ -130,36 +105,39 @@ export async function main() {
   let addressArray: string[] = [];
   let zeroAddresses: any[] = [];
 
+  const data = await getOriginalOwnerAddress(gotchiIdsArray);
+
   for (let i = 0; i < gotchiIdsArray.length; i++) {
-    let isLent = await lendingGetter.isAavegotchiLent(gotchiIdsArray[i]);
-    let data = await getOriginalOwnerAddress(gotchiIdsArray[i]);
-    let curOwner = data.aavegotchis[0].owner.id;
+    const gotchiId = gotchiIdsArray[i];
+    const ownerData = data.aavegotchis.find(
+      (val) => val.gotchiId.toString() === gotchiId.toString()
+    );
+
+    const isLent = ownerData?.originalOwner.id !== ownerData?.owner.id;
+
+    let curOwner = ownerData?.owner.id;
 
     if (isLent) {
-      let ogOwner = data.aavegotchis[0].originalOwner.id;
+      let ogOwner = ownerData?.originalOwner.id;
       if (ogOwner === "0x0000000000000000000000000000000000000000") {
-        zeroAddresses.push(data.aavegotchis[0]);
-      } else {
-        console.log("Lent Gotchi Id: ", gotchiIdsArray[i]);
-        console.log("### New Owner Address ###: ", curOwner);
-        console.log("### Original Owner Address ###: ", ogOwner);
+        console.log(`${gotchiId} is owned by zero address! be careful`);
 
-        addressArray.push(ogOwner);
+        zeroAddresses.push(ownerData);
+      } else {
+        addressArray.push(ogOwner ? ogOwner : "not found");
       }
     } else {
       if (curOwner === "0x0000000000000000000000000000000000000000") {
-        zeroAddresses.push(data.aavegotchis[0]);
+        zeroAddresses.push(ownerData);
       } else {
-        console.log("***NOT Lent Gotchi Id*** ", gotchiIdsArray[i]);
-        console.log("### Owner Address ###: ", curOwner);
-
-        addressArray.push(curOwner);
+        addressArray.push(curOwner ? curOwner : "not found");
       }
     }
   }
 
   console.log("!!! All Airdrop Addresses !!!", addressArray);
   console.log("Airdrop Addresses array length: ", addressArray.length);
+  console.log("Unique airdrop Addresses: ", [...new Set(addressArray)].length);
   console.log("Gotchi Ids w/ owner zero address: ", zeroAddresses);
   console.log(
     "Gotchi Ids w/ owner zero address array length: ",
@@ -168,22 +146,35 @@ export async function main() {
 
   //Airdrop
   console.log("Begin airdrops!");
-  let count: number = 0;
 
-  for (let b = 0; b < addressArray.length; b++) {
-    const tx = await fakeGotchis.safeTransferFrom(
-      cardOwner,
-      addressArray[b],
-      0,
-      1,
-      []
-    );
+  const perBatch = 1000;
 
-    await tx.wait();
-    count++;
+  const skip = ["0xe52405604bf644349f57b36ca6e85cf095fab8da"];
+
+  for (let index = 0; index < addressArray.length / perBatch; index++) {
+    const addresses = addressArray
+      .slice(index * perBatch, (index + 1) * perBatch)
+      .filter((val) => !skip.includes(val));
+
+    console.log("batch:", index);
+    const ids = new Array(addresses.length).fill(0);
+    const amounts = new Array(addresses.length).fill(1);
+
+    if (addresses.length > 0) {
+      console.log("addresses:", addresses);
+
+      const tx = await fakeGotchis.safeBatchTransferTo(
+        cardOwner,
+        addresses,
+        ids,
+        amounts,
+        [],
+        { gasPrice: gasPrice }
+      );
+
+      await tx.wait();
+    }
   }
-
-  console.log("Airdrop count: ", count);
 
   console.log("Owner old balance: ", ownerBalance.toString());
   ownerBalance = await fakeGotchis.balanceOf(cardOwner, 0);
