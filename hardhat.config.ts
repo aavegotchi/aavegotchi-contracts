@@ -2,15 +2,17 @@
 
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
-import "@nomiclabs/hardhat-etherscan";
 import "hardhat-contract-sizer";
+import "@nomiclabs/hardhat-etherscan";
 import "solidity-coverage";
 //import './tasks/generateDiamondABI.js';
 import * as dotenv from "dotenv";
 import "@typechain/hardhat";
+import { BigNumber } from "ethers";
 
 dotenv.config({ path: __dirname + "/.env" });
 
+//  require("./tasks/verifyFacet.js");
 require("./tasks/deployUpgrade.ts");
 require("./tasks/addBaadgeSvgs.ts");
 require("./tasks/mintBaadgeSvgs.ts");
@@ -20,14 +22,14 @@ require("./tasks/updateSvgs.ts");
 require("./tasks/updateItemSideDimensions.ts");
 require("./tasks/batchDeposit.ts");
 require("./tasks/rarityPayouts");
-require("./tasks/grantXP");
 require("./tasks/grantXP_snapshot");
 require("./tasks/grantXP_minigame");
-require("./tasks/grantXP_aavegotchis");
+require("./tasks/grantXP");
 require("./tasks/addItemTypes");
 require("./tasks/addWearableSets");
 require("./tasks/grantXP_customValues");
 require("./tasks/generateDiamondABI");
+require("./tasks/updateWearableExceptions");
 
 // You have to export an object to set up your config
 // This object can have the following optional entries:
@@ -38,11 +40,11 @@ export default {
     apiKey: process.env.POLYGON_API_KEY,
   },
   networks: {
-    hardhat: {  
+    hardhat: {
       forking: {
         url: process.env.MATIC_URL,
         timeout: 12000000,
-        //blockNumber: 26642399,
+        // blockNumber: 31480850,
       },
       blockGasLimit: 20000000,
       timeout: 120000,
@@ -56,7 +58,8 @@ export default {
       // url: 'https://rpc-mainnet.maticvigil.com/',
       accounts: [process.env.ITEM_MANAGER],
       // blockGasLimit: 20000000,
-      // gasPrice: 1000000000,
+      blockGasLimit: 20000000,
+      gasPrice: 1000000000,
       timeout: 90000,
     },
     // mumbai: {
@@ -93,9 +96,21 @@ export default {
     runOnCompile: false,
     disambiguatePaths: true,
   },
+  mocha: {
+    timeout: 2000000,
+  },
   // This is a sample solc configuration that specifies which version of solc to use
   solidity: {
     compilers: [
+      {
+        version: "0.8.13",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
       {
         version: "0.8.1",
         settings: {

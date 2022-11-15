@@ -1,5 +1,3 @@
-// import { sendToMultisig } from "../scripts/libraries/multisig/multisig";
-// import { AddressZero } from "@ethersproject/constants";
 import { task } from "hardhat/config";
 import {
   Contract,
@@ -11,11 +9,13 @@ import {
 import { Signer } from "@ethersproject/abstract-signer";
 
 import { OwnershipFacet } from "../typechain/OwnershipFacet";
-import { IDiamondCut } from "../typechain/IDiamondCut";
+import { IDiamondLoupe, IDiamondCut } from "../typechain";
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 import {
   gasPrice,
   getSelectors,
   getSighashes,
+  delay,
 } from "../scripts/helperFunctions";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -38,7 +38,7 @@ export interface DeployUpgradeTaskArgs {
   useLedger: boolean;
   initAddress?: string;
   initCalldata?: string;
-  // verifyFacets: boolean;
+  rawSigs?: boolean;
   // updateDiamondABI: boolean;
 }
 
@@ -116,6 +116,11 @@ task(
       const initAddress = taskArgs.initAddress;
       const initCalldata = taskArgs.initCalldata;
 
+      const branch = require("git-branch");
+      if (hre.network.name === "matic" && branch.sync() !== "master") {
+        throw new Error("Not master branch!");
+      }
+
       //Instantiate the Signer
       let signer: Signer;
       const owner = await (
@@ -131,10 +136,15 @@ task(
           method: "hardhat_impersonateAccount",
           params: [owner],
         });
+
+        await hre.network.provider.request({
+          method: "hardhat_setBalance",
+          params: [owner, "0x100000000000000000000000"],
+        });
+
         signer = await hre.ethers.getSigner(owner);
       } else if (hre.network.name === "matic") {
         if (useLedger) {
-          const { LedgerSigner } = require("@ethersproject/hardware-wallets");
           signer = new LedgerSigner(hre.ethers.provider);
         } else signer = (await hre.ethers.getSigners())[0];
       } else {
@@ -149,53 +159,59 @@ task(
         const facet = facetsAndAddSelectors[index];
 
         console.log("facet:", facet);
-        const factory = (await hre.ethers.getContractFactory(
-          facet.facetName
-        )) as ContractFactory;
-        const deployedFacet: Contract = await factory.deploy({
-          gasPrice: gasPrice,
-        });
-        await deployedFacet.deployed();
-        console.log(
-          `Deployed Facet Address for ${facet.facetName}:`,
-          deployedFacet.address
-        );
-        deployedFacets.push(deployedFacet);
+        if (facet.facetName.length > 0) {
+          const factory = (await hre.ethers.getContractFactory(
+            facet.facetName
+          )) as ContractFactory;
+          const deployedFacet: Contract = await factory.deploy({
+            gasPrice: gasPrice,
+          });
+          await deployedFacet.deployed();
+          console.log(
+            `Deployed Facet Address for ${facet.facetName}:`,
+            deployedFacet.address
+          );
+          deployedFacets.push(deployedFacet);
 
-        const newSelectors = getSighashes(facet.addSelectors, hre.ethers);
-        const removeSelectors = getSighashes(facet.removeSelectors, hre.ethers);
+          const newSelectors = getSighashes(facet.addSelectors, hre.ethers);
 
-        let existingFuncs = getSelectors(deployedFacet);
-        for (const selector of newSelectors) {
-          if (!existingFuncs.includes(selector)) {
-            const index = newSelectors.findIndex((val) => val == selector);
+          let existingFuncs = getSelectors(deployedFacet);
+          for (const selector of newSelectors) {
+            if (!existingFuncs.includes(selector)) {
+              const index = newSelectors.findIndex((val) => val == selector);
 
-            throw Error(
-              `Selector ${selector} (${facet.addSelectors[index]}) not found`
-            );
+              throw Error(
+                `Selector ${selector} (${facet.addSelectors[index]}) not found`
+              );
+            }
+          }
+
+          let existingSelectors = getSelectors(deployedFacet);
+          existingSelectors = existingSelectors.filter(
+            (selector) => !newSelectors.includes(selector)
+          );
+          if (newSelectors.length > 0) {
+            cut.push({
+              facetAddress: deployedFacet.address,
+              action: FacetCutAction.Add,
+              functionSelectors: newSelectors,
+            });
+          }
+
+          //Always replace the existing selectors to prevent duplications
+          if (existingSelectors.length > 0) {
+            cut.push({
+              facetAddress: deployedFacet.address,
+              action: FacetCutAction.Replace,
+              functionSelectors: existingSelectors,
+            });
           }
         }
-
-        let existingSelectors = getSelectors(deployedFacet);
-        existingSelectors = existingSelectors.filter(
-          (selector) => !newSelectors.includes(selector)
-        );
-
-        if (newSelectors.length > 0) {
-          cut.push({
-            facetAddress: deployedFacet.address,
-            action: FacetCutAction.Add,
-            functionSelectors: newSelectors,
-          });
-        }
-
-        //Always replace the existing selectors to prevent duplications
-        if (existingSelectors.length > 0) {
-          cut.push({
-            facetAddress: deployedFacet.address,
-            action: FacetCutAction.Replace,
-            functionSelectors: existingSelectors,
-          });
+        let removeSelectors: string[];
+        if (taskArgs.rawSigs == true) {
+          removeSelectors = facet.removeSelectors;
+        } else {
+          removeSelectors = getSighashes(facet.removeSelectors, hre.ethers);
         }
         if (removeSelectors.length > 0) {
           console.log("Removing selectors:", removeSelectors);
@@ -207,14 +223,19 @@ task(
         }
       }
 
-      console.log(cut);
-
       //Execute the Cut
       const diamondCut = (await hre.ethers.getContractAt(
         "IDiamondCut",
         diamondAddress,
         signer
       )) as IDiamondCut;
+
+      //Helpful for debugging
+      const diamondLoupe = (await hre.ethers.getContractAt(
+        "IDiamondLoupe",
+        diamondAddress,
+        signer
+      )) as IDiamondLoupe;
 
       if (testing) {
         console.log("Diamond cut");
@@ -247,7 +268,7 @@ task(
             cut,
             initAddress ? initAddress : hre.ethers.constants.AddressZero,
             initCalldata ? initCalldata : "0x",
-            { gasLimit: 800000 }
+            { gasPrice: gasPrice }
           );
 
           const receipt: ContractReceipt = await tx.wait();
@@ -256,6 +277,17 @@ task(
           }
           console.log("Completed diamond cut: ", tx.hash);
         }
+      }
+
+      console.log("Verifying Addresses");
+      await delay(60000);
+
+      for (let x = 0; x < cut.length; x++) {
+        console.log("Addresses to be verified: ", cut[x].facetAddress);
+        await hre.run("verify:verify", {
+          address: cut[x].facetAddress,
+          constructorArguments: [],
+        });
       }
     }
   );

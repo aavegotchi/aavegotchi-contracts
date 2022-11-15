@@ -1,14 +1,67 @@
 import { request } from "graphql-request";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { GotchisOwned, UserGotchisOwned, VaultGotchisOwned } from "../../types";
+import {
+  GotchisOwned,
+  LendedGotchis,
+  UserGotchisOwned,
+  VaultGotchisOwned,
+} from "../../types";
 
 export const maticGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic";
+
+// export const maticLendingUrl: string =
+// "https://api.thegraph.com/subgraphs/name/froid1911/aavegotchi-lending";
 export const ethGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-ethereum";
 
 export const vaultGraphUrl: string =
-  "https://api.thegraph.com/subgraphs/name/froid1911/aavegotchi-vault";
+  "https://api.thegraph.com/subgraphs/name/aavegotchi/gotchi-vault";
+
+interface Gotchi {
+  id: string;
+}
+
+interface UsersWithGotchisRes {
+  users: {
+    id: string;
+    gotchisLentOut: string[];
+    batch1: Gotchi[];
+    batch2: Gotchi[];
+    batch3: Gotchi[];
+    batch4: Gotchi[];
+    batch5: Gotchi[];
+  }[];
+}
+
+function getUsersWithGotchisOfAddresses(
+  addresses: string[],
+  index: Number = 0
+): Promise<UsersWithGotchisRes> {
+  let addressesString = addresses.map((e) => `"${e}"`).join(",");
+  let query = `
+    {users(skip: ${index} first: 1000 where: {id_in: [${addressesString}]}) {
+      id
+      gotchisLentOut
+      batch1: gotchisOwned(first: 1000) {
+        id
+      }
+      batch2: gotchisOwned(first: 1000 skip: 1000) {
+        id
+      }
+      batch3: gotchisOwned(first: 1000 skip: 2000) {
+        id
+      }
+      batch4: gotchisOwned(first: 1000 skip: 3000) {
+        id
+      }
+      batch5: gotchisOwned(first: 1000 skip: 4000) {
+        id
+      }
+    }}
+    `;
+  return request(maticGraphUrl, query);
+}
 
 function removeEmpty(userGotchisOwned: UserGotchisOwned[]): UserGotchisOwned[] {
   let removeEmpty: UserGotchisOwned[] = [];
@@ -39,7 +92,12 @@ interface QuerySubgraphResponse {
   batch2: UserGotchisOwned[];
   batch3: UserGotchisOwned[];
   batch4: UserGotchisOwned[];
+  batch5: UserGotchisOwned[];
   id: string;
+}
+
+interface UserWithGotchisAndLentOut extends QuerySubgraphResponse {
+  gotchisLentOut: string[];
 }
 
 async function querySubgraph(
@@ -104,8 +162,105 @@ async function querySubgraph(
 export async function getSubgraphGotchis(
   addresses: string[]
 ): Promise<UserGotchisOwned[]> {
-  console.log("Fetching Matic subgraph gotchis");
   return await querySubgraph(addresses, maticGraphUrl);
+}
+
+export async function getBorrowedGotchis(addresses: string[]) {
+  addresses = addresses.map((val) => val.toLowerCase());
+
+  const batchSize = 50;
+  const rounds = 5;
+
+  const batches = Math.ceil(addresses.length / batchSize);
+
+  let queryData = `{`;
+
+  for (let index = 0; index < batches; index++) {
+    const batchId = index;
+    const offset = batchId * batchSize;
+
+    for (let r = 0; r < rounds; r++) {
+      const skip = r * 1000;
+
+      queryData = queryData.concat(`
+      batch${batchId}_${r}: gotchiLendings(skip:${skip} first:1000 where:{completed:false, timeAgreed_gt:0, lender_in:[${addresses
+        .slice(offset, offset + batchSize)
+        .map((add: string) => '"' + add + '"')}]},first:1000) {
+        gotchiTokenId
+        lender
+        }
+  `);
+    }
+  }
+
+  // console.log("querydata:", queryData);
+
+  queryData = queryData.concat(`}`);
+
+  if (queryData == "{}") return [];
+
+  const res = await request(maticGraphUrl, queryData);
+
+  let finalResponse: LendedGotchis[] = [];
+  for (let index = 0; index < batches; index++) {
+    const batch: LendedGotchis[] = res[`batch${index}`];
+
+    if (batch.length >= 1000) {
+      console.log(`batch ${index} length: ${batch.length}`);
+      throw new Error("Slow down bub, you're probably missing some gotchis!");
+    }
+
+    console.log(`batch ${index} length: ${batch.length}`);
+    finalResponse = finalResponse.concat(batch);
+  }
+
+  const userGotchisOwned: UserGotchisOwned[] = [];
+
+  interface OwnerToGotchi {
+    [id: string]: string[];
+  }
+
+  const ownerToGotchi: OwnerToGotchi = {};
+
+  finalResponse.map((val) => {
+    if (!addresses.includes(val.lender)) {
+      throw new Error(
+        `${val.gotchiTokenId} not owned by voting lender ${val.lender}`
+      );
+    }
+
+    if (!ownerToGotchi[val.lender]) {
+      ownerToGotchi[val.lender] = [val.gotchiTokenId];
+    } else {
+      ownerToGotchi[val.lender] = [
+        ...ownerToGotchi[val.lender],
+        val.gotchiTokenId,
+      ];
+    }
+  });
+
+  // console.log("owner to gotchi:", ownerToGotchi);
+
+  Object.keys(ownerToGotchi).forEach((val: string) => {
+    const gotchisOwned = ownerToGotchi[val].map((gotchi) => {
+      // console.log(gotchi);
+      return {
+        id: gotchi,
+        status: "3",
+      };
+    });
+
+    gotchisOwned.forEach((gotchi) => {
+      userGotchisOwned.push({
+        id: val,
+        gotchisOwned: gotchisOwned,
+      });
+    });
+  });
+
+  // console.log("user gotchis owned:", userGotchisOwned);
+
+  return removeEmpty(userGotchisOwned);
 }
 
 export async function getVaultGotchis(
@@ -207,52 +362,95 @@ async function resolveAddresses(
   return finalAddresses;
 }
 
+interface GotchiLending {
+  lender: string;
+  borrower: string;
+  gotchiTokenId: string;
+}
+
+interface GotchiId {
+  id: string;
+}
+
+interface LendingRes {
+  gotchiLendings: GotchiLending[];
+}
+
+export async function fetchGotchiLending(total: GotchiLending[], skip: number) {
+  console.log("Batch:", skip);
+
+  let skipCount = skip * 1000;
+  //First get all open Gotchi Lendings
+
+  const query = `{
+  gotchiLendings(first:1000 where:{timeAgreed_gt:0, gotchiTokenId_gt:${skipCount}, gotchiTokenId_lt:${
+    (skip + 1) * 1000
+  } completed:false}) {
+    lender
+    borrower
+    gotchiTokenId
+  }
+}`;
+
+  const result: LendingRes = await request(maticGraphUrl, query);
+
+  total = total.concat(result.gotchiLendings);
+
+  if (skip < 25) total = await fetchGotchiLending(total, skip + 1);
+
+  return total;
+}
+
 export async function getPolygonAndMainnetGotchis(
   addresses: string[],
   hre: HardhatRuntimeEnvironment
 ) {
-  //resolve ENS names
+  //Queries
+  //Aavegotchis in ATTENDEE's wallet
+  //Aavegotchis owned by ATTENDEE but are borrowed out
+  //Aavegotchis in the VAULT that are owned by ATTENDEE
+  //Aavegotchis in the VAULT that are owned by ATTENDEE but borrowed out
+  //Aavegotchis owned by ATTENDEE on Ethereum
+
   let finalAddresses: string[] = await resolveAddresses(addresses, hre);
   //Remove duplicate addresses
-  addresses = [...new Set(finalAddresses)];
+  addresses = [...new Set(finalAddresses)].map((val) => val.toLowerCase());
+  console.log("Addresses: ", addresses.length);
+
+  // get gotchis and lentout
+  let gotchiIds: string[] = [];
+  let fetchedAddresses: string[] = [];
+  let prevLength = 0;
+  let index = 0;
+  do {
+    const result = await getUsersWithGotchisOfAddresses(addresses, index);
+
+    index += 1000;
+    prevLength = gotchiIds.length;
+    result.users.forEach((e) => {
+      gotchiIds = gotchiIds.concat(e.gotchisLentOut);
+      let gotchisOwned = e.batch1.map((f: GotchiId) => f.id);
+      gotchisOwned = gotchisOwned.concat(e.batch2.map((f: GotchiId) => f.id));
+      gotchisOwned = gotchisOwned.concat(e.batch3.map((f: GotchiId) => f.id));
+      gotchisOwned = gotchisOwned.concat(e.batch4.map((f: GotchiId) => f.id));
+      gotchisOwned = gotchisOwned.concat(e.batch5.map((f: GotchiId) => f.id));
+      gotchiIds = gotchiIds.concat(gotchisOwned);
+      fetchedAddresses.push(e.id);
+    });
+  } while (gotchiIds.length != prevLength);
 
   const batchSize = 1000;
   const batches = Math.ceil(addresses.length / batchSize);
-  let polygonUsers: UserGotchisOwned[] = [];
   let mainnetUsers: UserGotchisOwned[] = [];
 
-  //Polygon
-  for (let index = 0; index < batches; index++) {
-    const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
-    //Get Polygon
-    const users: UserGotchisOwned[] = await getSubgraphGotchis(batch);
-
-    console.log(
-      `Found ${users.length} users with ${users
-        .map((val) => val.gotchisOwned.length)
-        .reduce((prev, current) => prev + current)} Gotchis in Matic subgraph`
-    );
-
-    users.forEach((user) => {
-      console.log(`${user.id} has ${user.gotchisOwned.length} gotchis`);
-    });
-
-    polygonUsers = polygonUsers.concat(users);
-  }
-
-  //Polygon (Vault)
+  // Fetch Gotchis in Vault
   for (let index = 0; index < batches; index++) {
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
     const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(batch);
-
-    if (vaultUsers.length > 0) {
-      console.log(
-        `Found ${vaultUsers.length} users with ${vaultUsers
-          .map((val) => val.gotchisOwned.length)
-          .reduce((prev, current) => prev + current)} Gotchis in Vault subgraph`
-      );
-      polygonUsers = polygonUsers.concat(vaultUsers);
-    }
+    vaultUsers.forEach((e) => {
+      gotchiIds = gotchiIds.concat(e.gotchisOwned.map((f) => f.id));
+      fetchedAddresses.push(e.id);
+    });
   }
 
   //Ethereum
@@ -265,17 +463,6 @@ export async function getPolygonAndMainnetGotchis(
     }
   }
 
-  let tokenIds: string[] = [];
-  let notGotchis = 0;
-
-  //Handle Polygon gotchis
-  polygonUsers.forEach((user) => {
-    user.gotchisOwned.forEach((gotchi) => {
-      if (gotchi.status === "3") tokenIds.push(gotchi.id);
-      else notGotchis++;
-    });
-  });
-
   //Handle mainnet Gotchis
   const mainnetTokenIds: string[] = [];
   mainnetUsers.forEach((user) => {
@@ -286,37 +473,19 @@ export async function getPolygonAndMainnetGotchis(
   //then get gotchi object on polygon for those gotchi ids to ensure they are gotchis (not portals)
   const finalMainnetIds = await queryAavegotchis(mainnetTokenIds);
   finalMainnetIds.aavegotchis.forEach((gotchi: GotchisOwned) => {
-    if (gotchi.status === "3") tokenIds.push(gotchi.id);
-    else notGotchis++;
+    if (gotchi.status === "3") gotchiIds.push(gotchi.id);
   });
 
   //Remove duplicates
-  tokenIds = [...new Set(tokenIds)];
-  //Double check
-  let checked: string[] = [];
-  tokenIds.forEach((id) => {
-    if (checked.includes(id)) throw new Error(`Duplicate ${id}`);
-    checked.push(id);
-  });
+  let tokenIds = [...new Set(gotchiIds)];
+  console.log("Final token Ids: " + tokenIds.length);
+  fetchedAddresses = fetchedAddresses.concat(mainnetUsers.map((e) => e.id));
+  let finalUsers = [...new Set(fetchedAddresses)];
+  console.log("Final users: " + finalUsers.length);
 
-  const finalUsers = polygonUsers.concat(mainnetUsers);
-
-  //Console logs
-  const polygonGotchis = polygonUsers
-    .map((item) => item.gotchisOwned.length)
-    .reduce((agg, cur) => agg + cur);
   console.log(
-    `Found ${polygonUsers.length} Polygon Users with ${polygonGotchis} Gotchis`
+    "not found: " + addresses.filter((e) => !finalUsers.includes(e)).length
   );
-
-  if (mainnetUsers.length > 0) {
-    const mainnetGotchis = mainnetUsers
-      .map((item) => item.gotchisOwned.length)
-      .reduce((agg, cur) => agg + cur);
-    console.log(
-      `Found ${mainnetUsers.length} Ethereum Users with ${mainnetGotchis} Gotchis`
-    );
-  }
 
   return { finalUsers: finalUsers, tokenIds: tokenIds };
 }

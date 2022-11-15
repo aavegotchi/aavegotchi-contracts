@@ -14,6 +14,11 @@ interface TaskArgs {
   excludedAddresses: string;
 }
 
+export const currentOverrides: string[] = [
+  "0x0B71a4ee5FDFc67946aD6AF0f6D46b7f67B5d14e",
+  "0xC33ddC98c4e090c887D7Faa54D560B2CfE106b68",
+];
+
 task("grantXP", "Grants XP to Gotchis by addresses")
   .addParam("filename", "File that contains the airdrop")
   .addParam("xpAmount", "Amount of XP that each Aavegotchi should receive")
@@ -33,6 +38,8 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     let { addresses } = require(`../data/airdrops/${filename}.ts`);
 
+    addresses = addresses.concat(currentOverrides);
+
     //Filter out addresses
     addresses = addresses.filter((address: string) => {
       return !excludedAddresses.includes(address.toLowerCase());
@@ -45,7 +52,6 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     const diamondAddress = maticDiamondAddress;
     const gameManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
-    console.log(gameManager);
     let signer: Signer;
     const testing = ["hardhat", "localhost"].includes(hre.network.name);
     if (testing) {
@@ -74,12 +80,9 @@ task("grantXP", "Grants XP to Gotchis by addresses")
     ).connect(managedSigner) as DAOFacet;
 
     for (let index = 0; index < batches; index++) {
-      console.log("Current batch id:", index);
-
+      console.log("batch:", index);
       const offset = batchSize * index;
       const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
-
-      console.log("send token ids:", sendTokenIds);
 
       // sendTokenIds.forEach((id: string) => {
       //   console.log(id);

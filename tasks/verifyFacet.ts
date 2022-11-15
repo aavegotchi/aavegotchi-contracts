@@ -48,7 +48,7 @@ task(
 )
   .addOptionalParam("noflatten", "Flatten the file or not")
   .addParam("apikey", "Polygon scan api key")
-  .addParam("contract", "Faucet contract address")
+  .addParam("contract", "Facet contract address")
   .addParam("directory", "The directory of the facet")
   .addParam("facet", "Facet File name without extension")
   .addParam("apiURL", "The API url")

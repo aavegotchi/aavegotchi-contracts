@@ -3,8 +3,7 @@ pragma solidity 0.8.1;
 import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {ILink} from "../interfaces/ILink.sol";
-//import "../interfaces/IERC20.sol";
-// import "hardhat/console.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
@@ -126,6 +125,9 @@ struct ERC1155Listing {
     uint256 sourceListingId;
     bool sold;
     bool cancelled;
+    //new:
+    uint16[2] principalSplit;
+    address affiliate;
 }
 
 struct ERC721Listing {
@@ -138,6 +140,9 @@ struct ERC721Listing {
     uint256 timeCreated;
     uint256 timePurchased;
     bool cancelled;
+    //new:
+    uint16[2] principalSplit;
+    address affiliate;
 }
 
 struct ListingListItem {
@@ -303,6 +308,12 @@ struct AppStorage {
     // If zero, then the user is not whitelisted for the given whitelist ID. Otherwise, this represents the position of the user in the whitelist + 1
     mapping(uint32 => mapping(address => uint256)) isWhitelisted; // whitelistId => whitelistAddress => isWhitelisted
     mapping(address => bool) revenueTokenAllowed;
+    mapping(address => mapping(address => mapping(uint32 => bool))) lendingOperators; // owner => operator => tokenId => isLendingOperator
+    address realmAddress;
+    // side => (itemTypeId => (slotPosition => exception Bool)) SVG exceptions
+    mapping(bytes32 => mapping(uint256 => mapping(uint256 => bool))) wearableExceptions;
+    mapping(uint32 => mapping(uint256 => uint256)) whitelistAccessRights; // whitelistId => action right => access right
+    mapping(uint32 => mapping(address => EnumerableSet.UintSet)) whitelistGotchiBorrows; // whitelistId => borrower => gotchiId set
     // states for buy orders
     uint256 nextERC721BuyOrderId;
     mapping(uint256 => ERC721BuyOrder) erc721BuyOrders; // buyOrderId => data

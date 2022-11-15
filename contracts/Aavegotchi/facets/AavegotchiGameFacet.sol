@@ -305,6 +305,15 @@ contract AavegotchiGameFacet is Modifiers {
         }
     }
 
+    function setRealmAddress(address _realm) public onlyOwner {
+        s.realmAddress = _realm;
+    }
+
+    function realmInteract(uint256 _tokenId) external {
+        require(msg.sender == s.realmAddress, "AavegotchiGamefacet: Not RealmAddress");
+        LibAavegotchi.interact(_tokenId);
+    }
+
     ///@notice Allow the owner of an NFT to spend skill points for it(basically to boost the numeric traits of that NFT)
     ///@dev only valid for claimed aavegotchis
     ///@param _tokenId The identifier of the NFT to spend the skill points on
