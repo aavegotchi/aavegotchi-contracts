@@ -27,7 +27,27 @@ export async function upgrade() {
       addSelectors: [],
       removeSelectors: [
         "function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view",
+        "function getAavegotchiListing(uint256 _listingId) external view",
+        "function getERC721Listing(uint256 _listingId) external view",
+        "function getERC721ListingFromToken(address _erc721TokenAddress, uint256 _erc721TokenId, address _owner) external view",
+        "function getOwnerERC721Listings(address _owner, uint256 _category, string memory _sort, uint256 _length) external view",
+        "function getOwnerAavegotchiListings(address _owner, uint256 _category, string memory _sort, uint256 _length) external view",
+        "function getERC721Listings(uint256 _category, string memory _sort, uint256 _length) external view",
+        "function getAavegotchiListings(uint256 _category, string memory _sort, uint256 _length) external view",
       ],
+    },
+    {
+      facetName: "ERC721MarketplaceGetterFacet",
+      addSelectors: [
+        "function getAavegotchiListing(uint256 _listingId) external view",
+        "function getERC721Listing(uint256 _listingId) external view",
+        "function getERC721ListingFromToken(address _erc721TokenAddress, uint256 _erc721TokenId, address _owner) external view",
+        "function getOwnerERC721Listings(address _owner, uint256 _category, string memory _sort, uint256 _length) external view",
+        "function getOwnerAavegotchiListings(address _owner, uint256 _category, string memory _sort, uint256 _length) external view",
+        "function getERC721Listings(uint256 _category, string memory _sort, uint256 _length) external view",
+        "function getAavegotchiListings(uint256 _category, string memory _sort, uint256 _length) external view",
+      ],
+      removeSelectors: [],
     },
   ];
 
