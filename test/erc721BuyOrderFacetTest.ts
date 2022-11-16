@@ -11,6 +11,7 @@ import {
   ERC20Token,
   ERC721BuyOrderFacet,
   ERC721MarketplaceFacet,
+  ERC721MarketplaceGetterFacet,
   ItemsFacet,
   OwnershipFacet,
 } from "../typechain";
@@ -29,8 +30,8 @@ describe("Testing ERC721 Buy Order", async function () {
   const daoAddress = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
   const testGotchiId1 = 12867;
   const testGotchiId2 = 10000; // no buy orders
-  const testGotchiId3 = 12852; // should equip wearable and unlocked, used for checking validation
-  const testGotchiId4 = 16911; // should be in lending
+  const testGotchiId3 = 12854; // should equip wearable and unlocked, used for checking validation
+  const testGotchiId4 = 11600; // should be in lending
   const testOpenPortalId = 18268; // listed in Baazaar
   const testClosedPortalId = 11000; // listed in Baazaar
   const price = ethers.utils.parseUnits("100", "ether");
@@ -41,6 +42,7 @@ describe("Testing ERC721 Buy Order", async function () {
   let erc721BuyOrderFacet: ERC721BuyOrderFacet;
   let aavegotchiFacet: AavegotchiFacet;
   let erc721MarketplaceFacet: ERC721MarketplaceFacet;
+  let erc721MarketplaceGetterFacet: ERC721MarketplaceGetterFacet;
   let ghstERC20: ERC20Token;
   let contractOwner: any;
   let gotchiOwnerAddress: any;
@@ -67,6 +69,10 @@ describe("Testing ERC721 Buy Order", async function () {
       "ERC721MarketplaceFacet",
       diamondAddress
     )) as ERC721MarketplaceFacet;
+    erc721MarketplaceGetterFacet = (await ethers.getContractAt(
+      "ERC721MarketplaceGetterFacet",
+      diamondAddress
+    )) as ERC721MarketplaceGetterFacet;
     const ownerFacet = (await ethers.getContractAt(
       "OwnershipFacet",
       diamondAddress
@@ -368,11 +374,12 @@ describe("Testing ERC721 Buy Order", async function () {
       );
       fourthBuyOrderId = event!.args!.buyOrderId;
 
-      const listing = await erc721MarketplaceFacet.getERC721ListingFromToken(
-        diamondAddress,
-        testGotchiId1,
-        gotchiOwnerAddress
-      );
+      const listing =
+        await erc721MarketplaceGetterFacet.getERC721ListingFromToken(
+          diamondAddress,
+          testGotchiId1,
+          gotchiOwnerAddress
+        );
       listingId = listing.listingId;
     });
     it("Should revert when try to execute buy order with wrong buy order id", async function () {
@@ -443,7 +450,9 @@ describe("Testing ERC721 Buy Order", async function () {
       expect(buyOrder.timePurchased.gt(0)).to.equal(true);
     });
     it("Listing should be cancelled after buy order executed", async function () {
-      const listing = await erc721MarketplaceFacet.getERC721Listing(listingId);
+      const listing = await erc721MarketplaceGetterFacet.getERC721Listing(
+        listingId
+      );
       expect(listing.cancelled).to.equal(true);
     });
     it("Should fail if gotchi is in lending", async function () {
