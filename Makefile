@@ -1,7 +1,7 @@
 -include .env
 
 export FOUNDRY_ETH_RPC_URL=${MATIC_URL}
-export FOUNDRY_FORK_BLOCK_NUMBER?=32983782
+export FOUNDRY_FORK_BLOCK_NUMBER?=35721238
 
 
 update-submodules: 
