@@ -7,7 +7,7 @@ import {
 import { WearableDiamond__factory } from "../../typechain/factories/WearableDiamond__factory";
 
 import { gasPrice } from "../helperFunctions";
-const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
+// const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 
 //these already deployed facets(in the aavegotchi diamond) are added to the wearableDiamond directly
 const aavegotchiCutFacet = "0x4f908Fa47F10bc2254dae7c74d8B797C1749A8a6";
@@ -21,8 +21,10 @@ async function deployAndUpgradeWearableDiamond() {
     "WearableDiamond"
   )) as WearableDiamond__factory;
 
+  const signerAddress = await (await ethers.getSigners())[0].getAddress();
+
   const diamond = await Diamond.deploy(
-    diamondUpgrader,
+    signerAddress,
     aavegotchiCutFacet,
     aavegotchiLoupeFacet,
     aavegotchiOwnerShipFacet,
@@ -67,10 +69,10 @@ async function deployAndUpgradeWearableDiamond() {
   const joined = convertFacetAndSelectorsToString(facets);
 
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: diamondUpgrader,
+    diamondUpgrader: signerAddress,
     diamondAddress: diamond.address,
     facetsAndAddSelectors: joined,
-    useLedger: true,
+    useLedger: false,
     useMultisig: false,
     freshDeployment: true,
   };

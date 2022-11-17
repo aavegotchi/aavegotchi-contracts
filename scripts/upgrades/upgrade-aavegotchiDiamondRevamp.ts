@@ -4,8 +4,12 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
-import { AavegotchiFacet__factory } from "../../typechain";
+import {
+  AavegotchiFacet__factory,
+  PeripheryFacet__factory,
+} from "../../typechain";
 import { AavegotchiFacetInterface } from "../../typechain/AavegotchiFacet";
+import { PeripheryFacetInterface } from "../../typechain/PeripheryFacet";
 
 //import { ItemsFacetInterface } from "../../typechain/ItemsFacet";
 import { maticDiamondAddress } from "../helperFunctions";
@@ -13,7 +17,7 @@ import { maticDiamondAddress } from "../helperFunctions";
 const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 
 //deployed address of the periphery diamond
-let periphery: string = "0xb8C25FD8450a6a53539fF8E502fC5Db0D9907417";
+let periphery: string = "0xd7cf3281431F4f2Ee8acc4b174d4290cb7B280C3";
 
 //includes upgrades for AavegotchiFacet,BridgeFacet and DAOFacet
 export async function upgrade1() {
@@ -23,12 +27,10 @@ export async function upgrade1() {
     {
       facetName:
         "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-      addSelectors: [
-        "function setPeriphery(address _periphery) external",
-        "function removeInterface() external",
-      ],
-      removeSelectors: [],
+      addSelectors: [],
+      removeSelectors: [`function addInterfaces() external`],
     },
+
     {
       facetName: "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
       addSelectors: [],
@@ -43,26 +45,18 @@ export async function upgrade1() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
-  let iface: AavegotchiFacetInterface = new ethers.utils.Interface(
-    AavegotchiFacet__factory.abi
-  ) as AavegotchiFacetInterface;
-  //@ts-ignore
-  const calldata = iface.encodeFunctionData("addInterfaces", []);
-
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
-    initAddress: maticDiamondAddress,
-    initCalldata: calldata,
   };
 
   await run("deployUpgrade", args);
 }
 
-//includes upgrades for ERC1155MarketplaceFacet,ItemsFacet and ItemsTransferFacet
+//includes upgrades for ERC1155MarketplaceFacet,ItemsFacet, PeripheryFacet and ItemsTransferFacet
 //also sets the address periphery address in the aavegotchi diamond
 export async function upgrade2() {
   console.log("-------------------------");
@@ -85,6 +79,27 @@ export async function upgrade2() {
       ],
     },
     {
+      facetName: "PeripheryFacet",
+      addSelectors: [
+        // "function peripheryBalanceOf(address _owner, uint256 _id) external view returns (uint256 balance_)",
+        // "function peripheryBalanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory bals_) ",
+        // "function peripheryUri(uint256 _id) external view returns (string memory)",
+        // "function peripheryIsApprovedForAll(address _owner, address _operator) external view returns (bool approved_)",
+        // "function peripherySetApprovalForAll(address _operator, bool _approved) external",
+        " function peripherySetApprovalForAll(address _operator,bool _approved,address _onBehalfOf) external",
+        "function peripherySetBaseURI(string memory _value) external returns (uint256 _itemsLength)",
+
+        "function peripherySafeTransferFrom(address _operator,address _from,address _to,uint256 _id,uint256 _value,bytes calldata _data) external",
+
+        "function peripherySafeBatchTransferFrom(address _operator,address _from,address _to,uint256[] calldata _ids,uint256[] calldata _values,bytes calldata _data) external",
+
+        // "function peripherySafeBatchTransferFrom(address _from,address _to,uint256[] calldata _ids,uint256[] calldata _values,bytes calldata _data) external",
+        "function removeInterface() external",
+        "function setPeriphery(address _periphery) external",
+      ],
+      removeSelectors: [],
+    },
+    {
       facetName: "ItemsTransferFacet",
       addSelectors: [],
       removeSelectors: [],
@@ -94,9 +109,9 @@ export async function upgrade2() {
   const joined = convertFacetAndSelectorsToString(facets);
 
   //set the wearable diamond address
-  let iface: AavegotchiFacetInterface = new ethers.utils.Interface(
-    AavegotchiFacet__factory.abi
-  ) as AavegotchiFacetInterface;
+  let iface: PeripheryFacetInterface = new ethers.utils.Interface(
+    PeripheryFacet__factory.abi
+  ) as PeripheryFacetInterface;
   //@ts-ignore
   const calldata = iface.encodeFunctionData("setPeriphery", [periphery]);
 
@@ -113,7 +128,7 @@ export async function upgrade2() {
   await run("deployUpgrade", args);
 }
 
-//includes upgrades for the ShopFacet, VoucherMigrationFacet and PeripheryFacet
+//includes upgrades for the ShopFacet and VoucherMigrationFacet. Also Removes the unused interfaces.
 export async function upgrade3() {
   console.log("-------------------------");
   console.log("executing upgrade 3");
@@ -130,41 +145,6 @@ export async function upgrade3() {
       removeSelectors: [],
     },
     {
-      facetName: "PeripheryFacet",
-      addSelectors: [
-        "function peripheryBalanceOf(address _owner, uint256 _id) external view returns (uint256 balance_)",
-        "function peripheryBalanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory bals_) ",
-        "function peripheryUri(uint256 _id) external view returns (string memory)",
-        "function peripheryIsApprovedForAll(address _owner, address _operator) external view returns (bool approved_)",
-        "function peripherySetApprovalForAll(address _operator, bool _approved) external",
-        "function peripherySetBaseURI(string memory _value) external returns (uint256 _itemsLength)",
-        "function peripherySafeTransferFrom(address _from,address _to,uint256 _id,uint256 _value,bytes calldata _data) external",
-        "function peripherySafeBatchTransferFrom(address _from,address _to,uint256[] calldata _ids,uint256[] calldata _values,bytes calldata _data) external",
-      ],
-      removeSelectors: [],
-    },
-  ];
-
-  const joined = convertFacetAndSelectorsToString(facets);
-
-  const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: diamondUpgrader,
-    diamondAddress: maticDiamondAddress,
-    facetsAndAddSelectors: joined,
-    useLedger: true,
-    useMultisig: false,
-  };
-
-  await run("deployUpgrade", args);
-}
-
-//This adds a new facet called WearableSetsFacet to the aavegotchi diamond
-export async function upgrade4() {
-  console.log("-------------------------");
-  console.log("executing upgrade 4");
-
-  const facets: FacetsAndAddSelectors[] = [
-    {
       facetName: "WearableSetsFacet",
       addSelectors: [
         "function findWearableSets(uint256[] calldata _wearableIds) external view returns (uint256[] memory wearableSetIds_)",
@@ -176,6 +156,12 @@ export async function upgrade4() {
     },
   ];
 
+  let iface: PeripheryFacetInterface = new ethers.utils.Interface(
+    PeripheryFacet__factory.abi
+  ) as PeripheryFacetInterface;
+
+  const calldata = iface.encodeFunctionData("removeInterface");
+
   const joined = convertFacetAndSelectorsToString(facets);
 
   const args: DeployUpgradeTaskArgs = {
@@ -183,18 +169,20 @@ export async function upgrade4() {
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
+    initAddress: maticDiamondAddress,
+    initCalldata: calldata,
     useMultisig: false,
-    freshDeployment: false,
   };
 
   await run("deployUpgrade", args);
 }
 
+//This adds a new facet called WearableSetsFacet to the aavegotchi diamond
+
 async function upgradeAll() {
   await upgrade1();
   await upgrade2();
   await upgrade3();
-  await upgrade4();
 }
 
 if (require.main === module) {

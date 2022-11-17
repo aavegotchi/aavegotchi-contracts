@@ -5,6 +5,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers} from "../libraries/LibAppStorage.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
+import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 
 contract PeripheryFacet is Modifiers {
     //WRITE
@@ -62,5 +63,14 @@ contract PeripheryFacet is Modifiers {
         //delegate to periphery
         //   IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, _from, _to, _ids, _values);
         LibERC1155.onERC1155BatchReceived(_operator, _from, _to, _ids, _values, _data);
+    }
+
+    function removeInterface() external onlyOwner {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        ds.supportedInterfaces[0xd9b67a26] = false; //erc1155
+    }
+
+    function setPeriphery(address _periphery) external onlyOwner {
+        s.wearableDiamond = _periphery;
     }
 }
