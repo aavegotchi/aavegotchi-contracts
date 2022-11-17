@@ -15,12 +15,13 @@ abstract contract PeripheryConstants {
     uint256 gotchiId = 3342;
     uint256 sampleWearableId = 302;
 
-    address constant ghstOwner = 0x74BF5B9972Da24406C2c046494a5cCBE2fBa28Dc;
-    address constant listingOwner = 0xD41213C320d05c0B6882EdF1021328939AA18be6;
-    uint256 constant listingId = 329063;
-    uint256 itemTypeId = 225;
-    uint256 price = 49e18;
+    address constant ghstOwner = 0x32037cabd6e86e7E9E83ab1f997E4420b8503710;
+    address constant listingOwner = 0xA60CA8a1400333468a736c7247BAad6350C6496d;
+    uint256 constant listingId = 329683;
+    uint256 itemTypeId = 129;
+    uint256 price = 1000e18;
 
     address diamondOwner;
     address wearableDiamond;
 }
+

@@ -79,28 +79,22 @@ contract PeripheryTest is Test, IDiamondCut, PeripheryConstants {
     function cutDiamonds() internal {
         //prepare cut args for aavegotchi diamond
 
-        IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](9);
+        IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](8);
 
         vm.startPrank(diamondOwner);
         cut[0] = IDiamondCut.FacetCut({
-            facetAddress: address(aFacet),
-            action: IDiamondCut.FacetCutAction.Add,
-            functionSelectors: populateBytes4(AavegotchiFacet.setPeriphery.selector)
-        });
-
-        cut[1] = IDiamondCut.FacetCut({
             facetAddress: address(bFacet),
             action: IDiamondCut.FacetCutAction.Replace,
             functionSelectors: populateBytes4(BridgeFacet.withdrawItemsBatch.selector, BridgeFacet.deposit.selector)
         });
 
-        cut[2] = IDiamondCut.FacetCut({
+        cut[1] = IDiamondCut.FacetCut({
             facetAddress: address(dFacet),
             action: IDiamondCut.FacetCutAction.Replace,
             functionSelectors: populateBytes4(DAOFacet.addItemTypes.selector, DAOFacet.addItemTypesAndSvgs.selector, DAOFacet.mintItems.selector)
         });
 
-        cut[3] = IDiamondCut.FacetCut({
+        cut[2] = IDiamondCut.FacetCut({
             facetAddress: address(marketplaceFacet),
             action: IDiamondCut.FacetCutAction.Replace,
             functionSelectors: populateBytes4(
@@ -109,38 +103,38 @@ contract PeripheryTest is Test, IDiamondCut, PeripheryConstants {
             )
         });
 
-        cut[4] = IDiamondCut.FacetCut({
+        cut[3] = IDiamondCut.FacetCut({
             facetAddress: address(iFacet),
             action: IDiamondCut.FacetCutAction.Replace,
             functionSelectors: populateBytes4(ItemsFacet.setBaseURI.selector, ItemsFacet.equipWearables.selector, ItemsFacet.useConsumables.selector)
         });
 
-        cut[5] = IDiamondCut.FacetCut({
+        cut[4] = IDiamondCut.FacetCut({
             facetAddress: address(iTransferFacet),
             action: IDiamondCut.FacetCutAction.Replace,
             functionSelectors: generateSelectors("ItemsTransferFacet")
         });
 
-        cut[6] = IDiamondCut.FacetCut({
+        cut[5] = IDiamondCut.FacetCut({
             facetAddress: address(sFacet),
             action: IDiamondCut.FacetCutAction.Replace,
             functionSelectors: populateBytes4(ShopFacet.purchaseTransferItemsWithGhst.selector, ShopFacet.purchaseItemsWithGhst.selector)
         });
 
-        cut[7] = IDiamondCut.FacetCut({
+        cut[6] = IDiamondCut.FacetCut({
             facetAddress: address(vFacet),
             action: IDiamondCut.FacetCutAction.Replace,
             functionSelectors: populateBytes4(VoucherMigrationFacet.migrateVouchers.selector)
         });
 
-        cut[8] = IDiamondCut.FacetCut({
+        cut[7] = IDiamondCut.FacetCut({
             facetAddress: address(pFacet),
             action: IDiamondCut.FacetCutAction.Add,
             functionSelectors: generateSelectors("PeripheryFacet")
         });
 
         //set the periphery diamond address in the aavegotchi diamond
-        bytes memory payload = abi.encodeWithSelector(AavegotchiFacet.setPeriphery.selector, address(wDiamond));
+        bytes memory payload = abi.encodeWithSelector(PeripheryFacet.setPeriphery.selector, address(wDiamond));
 
         /////UPGRADE AAVEGOTCHI DIAMOND
         IDiamondCut(aavegotchiDiamond).diamondCut(cut, aavegotchiDiamond, payload);
