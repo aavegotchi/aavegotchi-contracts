@@ -39,6 +39,12 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@dev Is sent in tandem with ERC721ExecutedListing
     event ERC721ExecutedToRecipient(uint256 indexed listingId, address indexed buyer, address indexed recipient);
 
+    event ERC721ListingPriceUpdate(
+        uint256 indexed listingId,
+        uint256 priceInWei,
+        uint256 time
+    );
+
     ///@notice Get an aavegotchi listing details through an identifier
     ///@dev Will throw if the listing does not exist
     ///@param _listingId The identifier of the listing to query
@@ -225,14 +231,8 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@param _erc721TokenAddress The contract address of the NFT to be listed
     ///@param _erc721TokenId The identifier of the NFT to be listed
     ///@param _priceInWei The cost price of the NFT in $GHST
-
-    function addERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        uint256 _priceInWei
-    ) external {
-        createERC721Listing(_erc721TokenAddress, _erc721TokenId, _priceInWei, [10000, 0], address(0));
-    }
+    ///@param _principalSplit principal split
+    ///@param _affiliate The address of affiliate
 
     function addERC721ListingWithSplit(
         address _erc721TokenAddress,
@@ -314,6 +314,43 @@ contract ERC721MarketplaceFacet is Modifiers {
         if (s.listingFeeInWei > 0) {
             LibSharedMarketplace.burnListingFee(s.listingFeeInWei, msgSender, s.ghstContract);
         }
+    }
+
+    ///@notice Allow an ERC721 owner to update list price of his NFT for sale
+    ///@dev If the NFT has not been listed before, it will be rejected
+    ///@param _listingId The identifier of the listing to execute
+    ///@param _priceInWei The price of the item
+    function updateERC721ListingPrice(
+        uint256 _listingId,
+        uint256 _priceInWei
+    ) external {
+        _updateERC721ListingPrice(_listingId, _priceInWei);
+    }
+
+    function batchUpdateERC721ListingPrice(
+        uint256[] calldata _listingIds,
+        uint256[] calldata _priceInWeis
+    ) external {
+        require(_listingIds.length == _priceInWeis.length, "ERC721Marketplace: listing ids not same length as prices");
+        for (uint256 i; i < _listingIds.length; i++) {
+            _updateERC721ListingPrice(_listingIds[i], _priceInWeis[i]);
+        }
+    }
+
+    function _updateERC721ListingPrice(
+        uint256 _listingId,
+        uint256 _priceInWei
+    ) internal {
+        ERC721Listing storage listing = s.erc721Listings[_listingId];
+        require(listing.timeCreated != 0, "ERC721Marketplace: listing not found");
+        require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
+        require(listing.cancelled == false, "ERC721Marketplace: listing already cancelled");
+        require(_priceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
+        require(listing.seller == LibMeta.msgSender(), "ERC721Marketplace: Not seller of ERC721 listing");
+
+        s.erc721Listings[_listingId].priceInWei = _priceInWei;
+
+        emit ERC721ListingPriceUpdate(_listingId, _priceInWei, block.timestamp);
     }
 
     ///@notice Allow an ERC721 owner to cancel his NFT listing by providing the NFT contract address and identifier
