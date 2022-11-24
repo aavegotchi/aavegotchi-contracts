@@ -60,8 +60,7 @@ contract PeripheryFacet is Modifiers {
             LibItems.addToOwner(_to, id, value);
             LibERC1155Marketplace.updateERC1155Listing(address(this), id, _from);
         }
-        //delegate to periphery
-        //   IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, _from, _to, _ids, _values);
+
         LibERC1155.onERC1155BatchReceived(_operator, _from, _to, _ids, _values, _data);
     }
 
