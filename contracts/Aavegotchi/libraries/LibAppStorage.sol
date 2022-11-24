@@ -301,6 +301,7 @@ struct AppStorage {
     mapping(bytes32 => mapping(uint256 => mapping(uint256 => bool))) wearableExceptions;
     mapping(uint32 => mapping(uint256 => uint256)) whitelistAccessRights; // whitelistId => action right => access right
     mapping(uint32 => mapping(address => EnumerableSet.UintSet)) whitelistGotchiBorrows; // whitelistId => borrower => gotchiId set
+    address wearableDiamond;
 }
 
 library LibAppStorage {
@@ -360,6 +361,12 @@ contract Modifiers {
             sender == LibDiamond.contractOwner() || s.itemManagers[sender] == true,
             "LibAppStorage: only an Owner or ItemManager can call this function"
         );
+        _;
+    }
+
+    modifier onlyPeriphery() {
+        address sender = LibMeta.msgSender();
+        require(sender == s.wearableDiamond, "LibAppStorage: Not wearable diamond");
         _;
     }
 }

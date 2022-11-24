@@ -8,6 +8,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {GameManager} from "../libraries/LibAppStorage.sol";
+import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 
 contract DAOFacet is Modifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
@@ -238,7 +239,7 @@ contract DAOFacet is Modifiers {
             LibItems.addToOwner(_to, itemId, quantity);
             s.itemTypes[itemId].totalQuantity = totalQuantity;
         }
-        emit LibERC1155.TransferBatch(sender, address(0), _to, _itemIds, _quantities);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, address(0), _to, _itemIds, _quantities);
         LibERC1155.onERC1155BatchReceived(sender, address(0), _to, _itemIds, _quantities, "");
     }
 
@@ -314,7 +315,7 @@ contract DAOFacet is Modifiers {
             s.erc1155Categories[address(this)][itemId] = _itemTypes[i].category;
             s.itemTypes.push(_itemTypes[i]);
             emit AddItemType(_itemTypes[i]);
-            emit LibERC1155.TransferSingle(LibMeta.msgSender(), address(0), address(0), itemId, 0);
+            IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(LibMeta.msgSender(), address(0), address(0), itemId, 0);
         }
     }
 

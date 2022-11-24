@@ -8,6 +8,7 @@ import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
+import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 import {BaazaarSplit, LibSharedMarketplace, SplitAddresses} from "../libraries/LibSharedMarketplace.sol";
 
 contract ERC1155MarketplaceFacet is Modifiers {
@@ -358,7 +359,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         if (listing.erc1155TokenAddress == address(this)) {
             LibItems.removeFromOwner(seller, listing.erc1155TypeId, _quantity);
             LibItems.addToOwner(_recipient, listing.erc1155TypeId, _quantity);
-            emit LibERC1155.TransferSingle(address(this), seller, _recipient, listing.erc1155TypeId, _quantity);
+            IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(address(this), seller, _recipient, listing.erc1155TypeId, _quantity);
             LibERC1155.onERC1155Received(address(this), seller, _recipient, listing.erc1155TypeId, _quantity, "");
         } else {
             // GHSTStakingDiamond
