@@ -12,7 +12,7 @@ import { maticDiamondAddress } from "../helperFunctions";
 const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 
 //deployed address of the periphery diamond
-let periphery: string = "0xd7cf3281431F4f2Ee8acc4b174d4290cb7B280C3";
+let periphery: string = "0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f";
 
 //includes upgrades for AavegotchiFacet,BridgeFacet and DAOFacet
 export async function upgrade1() {
@@ -168,8 +168,8 @@ export async function upgrade3() {
 //This adds a new facet called WearableSetsFacet to the aavegotchi diamond
 
 async function upgradeAll() {
-  await upgrade1();
-  await upgrade2();
+  // await upgrade1();
+  // await upgrade2();
   await upgrade3();
 }
 
