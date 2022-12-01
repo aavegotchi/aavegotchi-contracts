@@ -19,27 +19,40 @@ import { Dimensions } from "../itemTypeHelpers";
 async function main() {
   const ids = [
     8, 11, 15, 16, 19, 22, 28, 31, 37, 43, 50, 56, 74, 85, 91, 102, 109, 112,
-    114, 115, 125, 135, 138, 150, 160, 222, 231, 234, 244,
+    114, 115, 125, 135, 138, 160, 222, 231, 234, 244, 310,
   ];
 
   const sleeveIds = [
-    1, 2, 3, 4, 5, 7, 8, 9, 10, 12, 14, 15, 16, 17, 18, 20, 21, 23, 24, 25, 26,
-    27, 28, 29, 34, 35, 36, 38, 49, 51,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+    23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 36, 49, 51,
+  ];
+
+  const sideSleeveIds = [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+    23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 36, 49, 51,
   ];
 
   console.log("Body length: ", ids.length);
   console.log("Sleeves length: ", sleeveIds.length);
+  console.log("Side Sleeves length: ", sideSleeveIds.length);
 
   //update svg
   const frontBody = await updateSvgTaskForSvgType(ids, "front");
   const frontSleeves = await updateSleevesTaskForSvgType(sleeveIds, "front");
   const backBody = await updateSvgTaskForSvgType(ids, "back");
   const backSleeves = await updateSleevesTaskForSvgType(sleeveIds, "back");
+  const rightSleeves = await updateSleevesTaskForSvgType(
+    sideSleeveIds,
+    "right"
+  );
+  const leftSleeves = await updateSleevesTaskForSvgType(sideSleeveIds, "left");
 
   await run("updateSvgs", frontBody);
   await run("updateSvgs", frontSleeves);
   await run("updateSvgs", backBody);
   await run("updateSvgs", backSleeves);
+  await run("updateSvgs", rightSleeves);
+  await run("updateSvgs", leftSleeves);
 
   //update dimensions
   let dimFixIds: number[] = [135, 138, 160];
