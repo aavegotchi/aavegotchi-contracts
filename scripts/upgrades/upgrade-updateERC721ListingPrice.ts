@@ -17,7 +17,7 @@ export async function upgrade() {
         `function batchUpdateERC721ListingPrice(uint256[] calldata _listingIds, uint256[] calldata _priceInWeis) external`,
       ],
       removeSelectors: [
-        `function addERC721Listing(address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei) external`,
+        `function executeERC721Listing(uint256 _listingId) external`,
       ],
     },
   ];

@@ -39,11 +39,7 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@dev Is sent in tandem with ERC721ExecutedListing
     event ERC721ExecutedToRecipient(uint256 indexed listingId, address indexed buyer, address indexed recipient);
 
-    event ERC721ListingPriceUpdate(
-        uint256 indexed listingId,
-        uint256 priceInWei,
-        uint256 time
-    );
+    event ERC721ListingPriceUpdate(uint256 indexed listingId, uint256 priceInWei, uint256 time);
 
     ///@notice Get an aavegotchi listing details through an identifier
     ///@dev Will throw if the listing does not exist
@@ -231,6 +227,21 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@param _erc721TokenAddress The contract address of the NFT to be listed
     ///@param _erc721TokenId The identifier of the NFT to be listed
     ///@param _priceInWei The cost price of the NFT in $GHST
+
+    function addERC721Listing(
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId,
+        uint256 _priceInWei
+    ) external {
+        createERC721Listing(_erc721TokenAddress, _erc721TokenId, _priceInWei, [10000, 0], address(0));
+    }
+
+    ///@notice Allow an ERC721 owner to list his NFT for sale
+    ///@dev If the NFT has been listed before,it cancels it and replaces it with the new one
+    ///@dev NFTs that are listed are immediately locked
+    ///@param _erc721TokenAddress The contract address of the NFT to be listed
+    ///@param _erc721TokenId The identifier of the NFT to be listed
+    ///@param _priceInWei The cost price of the NFT in $GHST
     ///@param _principalSplit principal split
     ///@param _affiliate The address of affiliate
 
@@ -320,27 +331,18 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@dev If the NFT has not been listed before, it will be rejected
     ///@param _listingId The identifier of the listing to execute
     ///@param _priceInWei The price of the item
-    function updateERC721ListingPrice(
-        uint256 _listingId,
-        uint256 _priceInWei
-    ) external {
+    function updateERC721ListingPrice(uint256 _listingId, uint256 _priceInWei) external {
         _updateERC721ListingPrice(_listingId, _priceInWei);
     }
 
-    function batchUpdateERC721ListingPrice(
-        uint256[] calldata _listingIds,
-        uint256[] calldata _priceInWeis
-    ) external {
+    function batchUpdateERC721ListingPrice(uint256[] calldata _listingIds, uint256[] calldata _priceInWeis) external {
         require(_listingIds.length == _priceInWeis.length, "ERC721Marketplace: listing ids not same length as prices");
         for (uint256 i; i < _listingIds.length; i++) {
             _updateERC721ListingPrice(_listingIds[i], _priceInWeis[i]);
         }
     }
 
-    function _updateERC721ListingPrice(
-        uint256 _listingId,
-        uint256 _priceInWei
-    ) internal {
+    function _updateERC721ListingPrice(uint256 _listingId, uint256 _priceInWei) internal {
         ERC721Listing storage listing = s.erc721Listings[_listingId];
         require(listing.timeCreated != 0, "ERC721Marketplace: listing not found");
         require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
@@ -365,16 +367,6 @@ contract ERC721MarketplaceFacet is Modifiers {
 
     function cancelERC721Listing(uint256 _listingId) external {
         LibERC721Marketplace.cancelERC721Listing(_listingId, LibMeta.msgSender());
-    }
-
-    ///@notice Allow a buyer to execute an open listing i.e buy the NFT
-    ///@dev Will throw if the NFT has been sold or if the listing has been cancelled already
-    ///@dev Will be deprecated soon.
-    ///@param _listingId The identifier of the listing to execute
-    function executeERC721Listing(uint256 _listingId) external {
-        //buyer is the recipient
-        ERC721Listing storage listing = s.erc721Listings[_listingId];
-        handleExecuteERC721Listing(_listingId, listing.erc721TokenAddress, listing.priceInWei, listing.erc721TokenId, LibMeta.msgSender());
     }
 
     ///@notice Allow a buyer to execute an open listing i.e buy the NFT on behalf of another address (the recipient). Also checks to ensure the item details match the listing.
