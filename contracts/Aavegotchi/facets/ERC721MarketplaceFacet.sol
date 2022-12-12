@@ -226,11 +226,7 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@param _erc721TokenId The identifier of the NFT to be listed
     ///@param _priceInWei The cost price of the NFT in $GHST
 
-    function addERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        uint256 _priceInWei
-    ) external {
+    function addERC721Listing(address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei) external payable {
         createERC721Listing(_erc721TokenAddress, _erc721TokenId, _priceInWei, [10000, 0], address(0));
     }
 
@@ -240,7 +236,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 _priceInWei,
         uint16[2] memory _principalSplit,
         address _affiliate
-    ) external {
+    ) external payable {
         createERC721Listing(_erc721TokenAddress, _erc721TokenId, _priceInWei, _principalSplit, _affiliate);
     }
 
@@ -312,7 +308,7 @@ contract ERC721MarketplaceFacet is Modifiers {
 
         //Burn listing fee
         if (s.listingFeeInWei > 0) {
-            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, msgSender, s.ghstContract);
+            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, msgSender);
         }
     }
 
@@ -442,11 +438,7 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@param _erc721TokenAddress Contract address of the ERC721 token
     ///@param _erc721TokenId Identifier of the ERC721 token
     ///@param _owner Owner of the ERC721 token
-    function updateERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        address _owner
-    ) external {
+    function updateERC721Listing(address _erc721TokenAddress, uint256 _erc721TokenId, address _owner) external {
         LibERC721Marketplace.updateERC721Listing(_erc721TokenAddress, _erc721TokenId, _owner);
     }
 

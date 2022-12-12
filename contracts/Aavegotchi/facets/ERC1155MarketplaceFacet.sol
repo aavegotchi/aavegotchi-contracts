@@ -160,12 +160,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _erc1155TypeId The identifier of the NFT to be listed
     ///@param _quantity The amount of NFTs to be listed
     ///@param _priceInWei The cost price of the NFT individually in $GHST
-    function setERC1155Listing(
-        address _erc1155TokenAddress,
-        uint256 _erc1155TypeId,
-        uint256 _quantity,
-        uint256 _priceInWei
-    ) external {
+    function setERC1155Listing(address _erc1155TokenAddress, uint256 _erc1155TypeId, uint256 _quantity, uint256 _priceInWei) external payable {
         createERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _quantity, _priceInWei, [10000, 0], address(0));
     }
 
@@ -176,7 +171,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 _priceInWei,
         uint16[2] memory _principalSplit,
         address _affiliate
-    ) external {
+    ) external payable {
         createERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _quantity, _priceInWei, _principalSplit, _affiliate);
     }
 
@@ -241,7 +236,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
 
         //Burn listing fee
         if (s.listingFeeInWei > 0) {
-            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, LibMeta.msgSender(), s.ghstContract);
+            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, LibMeta.msgSender());
         }
     }
 
@@ -258,11 +253,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _listingId The identifier of the listing to execute
     ///@param _quantity The amount of ERC1155 NFTs execute/buy
     ///@param _priceInWei the cost price of the ERC1155 NFTs individually
-    function executeERC1155Listing(
-        uint256 _listingId,
-        uint256 _quantity,
-        uint256 _priceInWei
-    ) external {
+    function executeERC1155Listing(uint256 _listingId, uint256 _quantity, uint256 _priceInWei) external {
         ERC1155Listing storage listing = s.erc1155Listings[_listingId];
         handleExecuteERC1155Listing(_listingId, listing.erc1155TokenAddress, listing.erc1155TypeId, _quantity, _priceInWei, LibMeta.msgSender());
     }
@@ -387,11 +378,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _erc1155TokenAddress Contract address of the ERC1155 token
     ///@param _erc1155TypeId Identifier of the ERC1155 token
     ///@param _owner Owner of the ERC1155 token
-    function updateERC1155Listing(
-        address _erc1155TokenAddress,
-        uint256 _erc1155TypeId,
-        address _owner
-    ) external {
+    function updateERC1155Listing(address _erc1155TokenAddress, uint256 _erc1155TypeId, address _owner) external {
         LibERC1155Marketplace.updateERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _owner);
     }
 
@@ -399,11 +386,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _erc1155TokenAddress Contract address of the ERC1155 token
     ///@param _erc1155TypeIds An array containing the identifiers of the ERC1155 tokens to update
     ///@param _owner Owner of the ERC1155 tokens
-    function updateBatchERC1155Listing(
-        address _erc1155TokenAddress,
-        uint256[] calldata _erc1155TypeIds,
-        address _owner
-    ) external {
+    function updateBatchERC1155Listing(address _erc1155TokenAddress, uint256[] calldata _erc1155TypeIds, address _owner) external {
         for (uint256 i; i < _erc1155TypeIds.length; i++) {
             LibERC1155Marketplace.updateERC1155Listing(_erc1155TokenAddress, _erc1155TypeIds[i], _owner);
         }

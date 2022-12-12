@@ -12,3 +12,7 @@ update-submodules:
 test-events:
 	@echo Running tests for wearable events 
 	@forge test --mc PeripheryTest -vvvvv 
+
+test-listingFee:
+	@echo Testing listingFee changes
+	@forge t --mc ListingFeeTest -vvvvv  
