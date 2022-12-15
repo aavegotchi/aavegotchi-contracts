@@ -176,10 +176,6 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, Ownable, Pau
     onlyAavegotchiUnlocked(gotchiId)
     onlyAavegotchiOwner(gotchiId)
     {
-        // retrieve item metadata
-        // require balances of alloy, core, schematic, and essence if required are > 0
-        // gltr cost
-
         require(!s.gotchiForging[gotchiId].isForging, "ForgeFacet: Aavegotchi already forging");
 
         address sender = msg.sender;
