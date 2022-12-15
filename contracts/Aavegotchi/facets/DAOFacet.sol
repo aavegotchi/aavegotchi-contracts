@@ -13,6 +13,7 @@ import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 contract DAOFacet is Modifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
     event DaoTreasuryTransferred(address indexed previousDaoTreasury, address indexed newDaoTreasury);
+    event ForgeTransferred(address indexed previousForge, address indexed newForge);
     event UpdateCollateralModifiers(int16[NUMERIC_TRAITS_NUM] _oldModifiers, int16[NUMERIC_TRAITS_NUM] _newModifiers);
     event AddCollateralType(AavegotchiCollateralTypeIO _collateralType);
     event AddItemType(ItemType _itemType);
@@ -67,6 +68,13 @@ contract DAOFacet is Modifiers {
         emit DaoTreasuryTransferred(s.daoTreasury, _newDaoTreasury);
         s.dao = _newDao;
         s.daoTreasury = _newDaoTreasury;
+    }
+
+    ///@notice Allow the Diamond owner or DAO to set a new Forge address
+    ///@param _newForge New DAO address
+    function setForge(address _newForge) external onlyDaoOrOwner {
+        emit ForgeTransferred(s.forgeDiamond, _newForge);
+        s.forgeDiamond = _newForge;
     }
 
     ///@notice Allow an item manager to add new collateral types to a haunt
