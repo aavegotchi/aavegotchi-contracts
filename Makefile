@@ -15,4 +15,4 @@ test-events:
 
 test-listingFee:
 	@echo Testing listingFee changes
-	@forge t --mc ListingFeeTest -vvvvv  
+	@forge t --mc ListingFeeTest -vvvv
