@@ -5,6 +5,7 @@ import { ERC1155 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ERC1155URIStorage } from "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
+import { ERC1155Supply } from "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import { Counters } from "@openzeppelin/contracts/utils/Counters.sol";
 import { Pausable } from "@openzeppelin/contracts/security/Pausable.sol";
 import { ERC1155Holder } from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
@@ -29,7 +30,7 @@ import {AavegotchiGameFacet} from "../../facets/AavegotchiGameFacet.sol";
 // TODO: max supply
 // TODO: make GotchiForging support more than one per gotchi, maybe later release
 
-contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, Ownable, Pausable {
+contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, ERC1155Supply, Pausable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     Counters.Counter private _forgeQueueId;
@@ -346,6 +347,18 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, Ownable, Pau
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, ERC1155Receiver) returns (bool) {
         return super.supportsInterface(interfaceId);
+    }
+    function _beforeTokenTransfer(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data) internal virtual override(ERC1155, ERC1155Supply) {
+        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+    }
+    function uri(uint256 tokenId) public view virtual override(ERC1155, ERC1155URIStorage) returns (string memory) {
+        return ERC1155URIStorage.uri(tokenId);
     }
 
 }
