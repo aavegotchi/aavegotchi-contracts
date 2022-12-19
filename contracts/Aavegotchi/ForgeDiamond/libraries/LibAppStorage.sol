@@ -1,5 +1,7 @@
 pragma solidity 0.8.1;
 
+import {ForgeLibDiamond} from "./ForgeLibDiamond.sol";
+import {LibMeta} from "../../../shared/libraries/LibMeta.sol";
 
 ////////
 //////// DO NOT CHANGE THIS OFFSET OR BELOW IDS
@@ -92,10 +94,17 @@ struct AppStorage {
     //gotchi token ID to points map
     mapping(uint256 => uint256) gotchiSmithingSkillPoints;
 
+    mapping(uint256 => uint256) maxSupplyByToken;
+
 
 }
 
 contract Modifiers {
     AppStorage internal s;
 
+    modifier onlyDaoOrOwner() {
+        address sender = LibMeta.msgSender();
+        require(sender == s.AAVEGOTCHI_DAO || sender == ForgeLibDiamond.contractOwner(), "LibAppStorage: Do not have access");
+        _;
+    }
 }

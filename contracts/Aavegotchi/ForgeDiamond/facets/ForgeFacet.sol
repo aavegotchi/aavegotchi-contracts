@@ -57,7 +57,7 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, Ownable, Pau
         _;
     }
     modifier onlyAavegotchiOwner(uint256 gotchiId) {
-        require(msg.sender == aavegotchiFacet.ownerOf(gotchiId), "ForgeFacet: Not Aavegotchi owner");
+        require(LibMeta.msgSender() == aavegotchiFacet.ownerOf(gotchiId), "ForgeFacet: Not Aavegotchi owner");
         _;
     }
 
@@ -123,7 +123,11 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, Ownable, Pau
         alloy = s.forgeAlloyCost[rarityScoreModifier] * (1 - ((s.alloyBurnFeeInBips + s.alloyDaoFeeInBips) / 10000));
     }
 
-    function _smelt(uint256 itemId, uint256 gotchiId) internal onlyAavegotchiUnlocked(gotchiId) onlyAavegotchiOwner(gotchiId) {
+    function _smelt(uint256 itemId, uint256 gotchiId)
+    internal
+    onlyAavegotchiUnlocked(gotchiId)
+    onlyAavegotchiOwner(gotchiId)
+    {
         address sender = LibMeta.msgSender();
 
         require(wearablesFacet.balanceOf(sender, itemId) > 0, "ForgeFacet: smelt item not owned");
@@ -133,7 +137,7 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, Ownable, Pau
 
         // remove smelted item
         // TODO: needs approval
-        wearablesFacet.safeTransferFrom(msg.sender, s.FORGE_DIAMOND, itemId, 1, "");
+        wearablesFacet.safeTransferFrom(sender, s.FORGE_DIAMOND, itemId, 1, "");
 
         uint256 totalAlloy = s.forgeAlloyCost[itemType.rarityScoreModifier];
         uint256 daoAlloyAmt = totalAlloy * (s.alloyDaoFeeInBips / 10000);
@@ -178,7 +182,7 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, Ownable, Pau
     {
         require(!s.gotchiForging[gotchiId].isForging, "ForgeFacet: Aavegotchi already forging");
 
-        address sender = msg.sender;
+        address sender = LibMeta.msgSender();
         // get item metadata
         ItemType memory itemType = itemsFacet.getItemType(itemId);
         uint8 rsm = itemType.rarityScoreModifier;
@@ -213,9 +217,8 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, Ownable, Pau
 
         if (forgeTime - _gltr == 0){
             // Immediately forge the item.
-            emit ForgeTimeReduced(0, gotchiId, itemId, _gltr);
-
             wearablesFacet.safeTransferFrom(s.FORGE_DIAMOND, sender, itemId, 1, "");
+            emit ForgeTimeReduced(0, gotchiId, itemId, _gltr);
         } else {
 
                 // increment first to start at one.
@@ -236,17 +239,19 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, Ownable, Pau
     }
 
 
-    function claimForgeQueueItems(uint256[] calldata gotchiIds) external {
+    function claimForgeQueueItems(uint256[] calldata gotchiIds) external whenNotPaused {
+        address sender = LibMeta.msgSender();
+
         for (uint256 i; i < gotchiIds.length; i++){
             require(!aavegotchiGameFacet.aavegotchiLocked(gotchiIds[i]), "Aavegotchi not unlocked");
 
             ForgeQueueItem storage queueItem = _getQueueItem(gotchiIds[i]);
             require(!queueItem.claimed, "ForgeFacet: already claimed");
-            require(msg.sender == aavegotchiFacet.ownerOf(queueItem.gotchiId), "ForgeFacet: Not Aavegotchi owner");
+            require(sender == aavegotchiFacet.ownerOf(queueItem.gotchiId), "ForgeFacet: Not Aavegotchi owner");
             require(block.number >= queueItem.readyBlock, "ForgeFacet: Forge item not ready");
 
             // ready to be claimed, transfer.
-            wearablesFacet.safeTransferFrom(s.FORGE_DIAMOND, msg.sender, queueItem.itemId, 1, "");
+            wearablesFacet.safeTransferFrom(s.FORGE_DIAMOND, sender, queueItem.itemId, 1, "");
             s.forgeQueue[queueItem.id].claimed = true;
             s.itemForging[queueItem.itemId] -= 1;
             delete s.gotchiForging[gotchiIds[i]];
@@ -297,12 +302,16 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, Ownable, Pau
     }
 
     function availableToForge(uint256 itemId) public view returns(bool available) {
+        require(itemId < WEARABLE_GAP_OFFSET, "ForgeFacet: only valid for schematics");
         available = wearablesFacet.balanceOf(s.FORGE_DIAMOND, itemId) - s.itemForging[itemId] > 0;
     }
 
 
+    // @notice Allow Aavegotchi diamond to mint essence.
+    // @dev Only called from CollateralFacet's decreaseAndDestroy function. Not including a whenNotPaused modifier
+    //      here to avoid impacts to aavegotchi sacrifice functionality.
     function mintEssence(address owner, uint256 gotchiId) external {
-        require(msg.sender == ForgeLibDiamond.AAVEGOTCHI_DIAMOND, "ForgeFacet: Can only be called by Aavegotchi Diamond");
+        require(LibMeta.msgSender() == ForgeLibDiamond.AAVEGOTCHI_DIAMOND, "ForgeFacet: Can only be called by Aavegotchi Diamond");
 //        require(aavegotchiFacet.ownerOf(gotchiId) == address(0), "ForgeFacet: Aavegotchi not sacrificed");
 
         _mintItem(owner, ESSENCE, 1000);
@@ -320,10 +329,10 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, Ownable, Pau
         _burn(account, id, amount);
     }
 
-    function pause() public onlyOwner {
+    function pause() public onlyDaoOrOwner {
         _pause();
     }
-    function unpause() public onlyOwner {
+    function unpause() public onlyDaoOrOwner {
         _unpause();
     }
 

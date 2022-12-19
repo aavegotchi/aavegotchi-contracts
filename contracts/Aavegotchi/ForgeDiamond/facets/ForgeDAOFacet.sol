@@ -4,6 +4,7 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import "../libraries/LibAppStorage.sol";
 
 // TODO: add core, alloy, schematic minting funcs and setters for max supply.
+// TODO: add events for all setters.
 
 contract ForgeDAOFacet is Modifiers, Ownable {
 
@@ -17,26 +18,26 @@ contract ForgeDAOFacet is Modifiers, Ownable {
     event ChangedAlloyBurnFee(uint256 alloyBurnFeeInWei);
 
 
-    function setAavegotchiDaoAddress (address daoAddress) external onlyOwner {
+    function setAavegotchiDaoAddress (address daoAddress) external onlyDaoOrOwner {
         s.AAVEGOTCHI_DAO = daoAddress;
     }
     function setGltrAddress (address gltr) external onlyOwner {
         s.GLTR = gltr;
     }
-    function setForgeDiamondAddress (address diamond) external onlyOwner {
+    function setForgeDiamondAddress (address diamond) external onlyDaoOrOwner {
         s.FORGE_DIAMOND = diamond;
     }
 
     function getAlloyDaoFeeInBips() external view returns (uint256) {
         return s.alloyDaoFeeInBips;
     }
-    function setAlloyDaoFeeInBips(uint256 alloyDaoFeeInBips) external onlyOwner {
+    function setAlloyDaoFeeInBips(uint256 alloyDaoFeeInBips) external onlyDaoOrOwner {
         s.alloyDaoFeeInBips = alloyDaoFeeInBips;
     }
     function getAlloyBurnFeeInBips() external view returns (uint256) {
         return s.alloyBurnFeeInBips;
     }
-    function setAlloyBurnFeeInBips(uint256 alloyBurnFeeInBips) external onlyOwner {
+    function setAlloyBurnFeeInBips(uint256 alloyBurnFeeInBips) external onlyDaoOrOwner {
         s.alloyBurnFeeInBips = alloyBurnFeeInBips;
     }
 
@@ -45,7 +46,7 @@ contract ForgeDAOFacet is Modifiers, Ownable {
     // @param costs RarityValueIO struct of costs.
     // @dev We convert RarityValueIO keys into a mapping that is referencable by equivalent rarity score modifier,
     //      since this is what ForgeFacet functions have from itemTypes.
-    function setForgeAlloyCost (RarityValueIO calldata costs) external onlyOwner {
+    function setForgeAlloyCost (RarityValueIO calldata costs) external onlyDaoOrOwner {
         s.forgeAlloyCost[COMMON_RSM] = costs.common;
         s.forgeAlloyCost[UNCOMMON_RSM] = costs.uncommon;
         s.forgeAlloyCost[RARE_RSM] = costs.rare;
@@ -60,7 +61,7 @@ contract ForgeDAOFacet is Modifiers, Ownable {
     // @param costs RarityValueIO struct of costs
     // @dev We convert RarityValueIO keys into a mapping that is referencable by equivalent rarity score modifier,
     //      since this is what ForgeFacet functions have from itemTypes.
-    function setForgeEssenceCost (RarityValueIO calldata costs) external onlyOwner {
+    function setForgeEssenceCost (RarityValueIO calldata costs) external onlyDaoOrOwner {
         s.forgeEssenceCost[COMMON_RSM] = costs.common;
         s.forgeEssenceCost[UNCOMMON_RSM] = costs.uncommon;
         s.forgeEssenceCost[RARE_RSM] = costs.rare;
@@ -75,7 +76,7 @@ contract ForgeDAOFacet is Modifiers, Ownable {
     // @param costs RarityValueIO struct of block amounts
     // @dev We convert RarityValueIO keys into a mapping that is referencable by equivalent rarity score modifier,
     //      since this is what ForgeFacet functions have from itemTypes.
-    function setForgeTimeCostInBlocks (RarityValueIO calldata costs) external onlyOwner {
+    function setForgeTimeCostInBlocks (RarityValueIO calldata costs) external onlyDaoOrOwner {
         s.forgeTimeCostInBlocks[COMMON_RSM] = costs.common;
         s.forgeTimeCostInBlocks[UNCOMMON_RSM] = costs.uncommon;
         s.forgeTimeCostInBlocks[RARE_RSM] = costs.rare;
@@ -88,7 +89,7 @@ contract ForgeDAOFacet is Modifiers, Ownable {
 
     // @notice Allow DAO to update skill points gained from forging
     // @param points RarityValueIO struct of points
-    function setSkillPointsEarnedFromForge (RarityValueIO calldata points) external onlyOwner {
+    function setSkillPointsEarnedFromForge (RarityValueIO calldata points) external onlyDaoOrOwner {
         s.skillPointsEarnedFromForge[COMMON_RSM] = points.common;
         s.skillPointsEarnedFromForge[UNCOMMON_RSM] = points.uncommon;
         s.skillPointsEarnedFromForge[RARE_RSM] = points.rare;
@@ -102,11 +103,20 @@ contract ForgeDAOFacet is Modifiers, Ownable {
     // @notice Allow DAO to update skill points gained from smelting.
     // @param bips Factor to reduce skillPointsEarnedFromForge by, denoted in bips.
     //              For ex, if half of forging points is earned from smelting, bips = 5000.
-    function setSmeltingSkillPointReductionFactorBips (uint256 bips) external onlyOwner {
+    function setSmeltingSkillPointReductionFactorBips (uint256 bips) external onlyDaoOrOwner {
         uint256 oldBips  = s.smeltingSkillPointReductionFactorBips;
         s.smeltingSkillPointReductionFactorBips = bips;
 
         emit SetSmeltingSkillPointReductionFactorBips(oldBips, s.smeltingSkillPointReductionFactorBips);
+    }
+
+    // @notice Allow DAO to set max supply per Forge asset token.
+    function setMaxSupplyPerToken(uint256[] calldata tokenIDs, uint256[] calldata supplyAmts) external onlyDaoOrOwner {
+        require(tokenIDs.length == supplyAmts.length, "ForgeDaoFacet: Mismatched arrays.");
+
+        for (uint256 i; i < tokenIDs.length; i++){
+            s.maxSupplyByToken[tokenIDs[i]] = supplyAmts[i];
+        }
     }
 
 
