@@ -8,24 +8,32 @@ import "../libraries/LibAppStorage.sol";
 
 contract ForgeDAOFacet is Modifiers, Ownable {
 
+    event SetAavegotchiDaoAddress(address newAddress);
+    event SetGltrAddress(address newAddress);
+    event SetForgeDiamondAddress(address newAddress);
+
     event SetForgeAlloyCost(RarityValueIO newCosts);
     event SetForgeEssenceCost(RarityValueIO newCosts);
     event SetForgeTimeCostInBlocks(RarityValueIO newCosts);
     event SetSkillPointsEarnedFromForge(RarityValueIO newPoints);
     event SetSmeltingSkillPointReductionFactorBips(uint256 oldBips, uint256 newBips);
+    event SetMaxSupplyPerToken(uint256[] tokenIds, uint256[] supplyPerTokenId);
 
-    event ChangedAlloyDaoFee(uint256 alloyDaoFeeInWei);
-    event ChangedAlloyBurnFee(uint256 alloyBurnFeeInWei);
+    event SetAlloyDaoFee(uint256 bips);
+    event SetAlloyBurnFee(uint256 bips);
 
 
-    function setAavegotchiDaoAddress (address daoAddress) external onlyDaoOrOwner {
+    function setAavegotchiDaoAddress(address daoAddress) external onlyDaoOrOwner {
         s.AAVEGOTCHI_DAO = daoAddress;
+        emit SetAavegotchiDaoAddress(daoAddress);
     }
-    function setGltrAddress (address gltr) external onlyOwner {
+    function setGltrAddress(address gltr) external onlyDaoOrOwner {
         s.GLTR = gltr;
+        emit SetGltrAddress(gltr);
     }
-    function setForgeDiamondAddress (address diamond) external onlyDaoOrOwner {
+    function setForgeDiamondAddress(address diamond) external onlyDaoOrOwner {
         s.FORGE_DIAMOND = diamond;
+        emit SetForgeDiamondAddress(diamond);
     }
 
     function getAlloyDaoFeeInBips() external view returns (uint256) {
@@ -33,12 +41,14 @@ contract ForgeDAOFacet is Modifiers, Ownable {
     }
     function setAlloyDaoFeeInBips(uint256 alloyDaoFeeInBips) external onlyDaoOrOwner {
         s.alloyDaoFeeInBips = alloyDaoFeeInBips;
+        emit SetAlloyDaoFee(alloyDaoFeeInBips);
     }
     function getAlloyBurnFeeInBips() external view returns (uint256) {
         return s.alloyBurnFeeInBips;
     }
     function setAlloyBurnFeeInBips(uint256 alloyBurnFeeInBips) external onlyDaoOrOwner {
         s.alloyBurnFeeInBips = alloyBurnFeeInBips;
+        emit SetAlloyBurnFee(alloyBurnFeeInBips);
     }
 
 
@@ -103,7 +113,7 @@ contract ForgeDAOFacet is Modifiers, Ownable {
     // @notice Allow DAO to update skill points gained from smelting.
     // @param bips Factor to reduce skillPointsEarnedFromForge by, denoted in bips.
     //              For ex, if half of forging points is earned from smelting, bips = 5000.
-    function setSmeltingSkillPointReductionFactorBips (uint256 bips) external onlyDaoOrOwner {
+    function setSmeltingSkillPointReductionFactorBips(uint256 bips) external onlyDaoOrOwner {
         uint256 oldBips  = s.smeltingSkillPointReductionFactorBips;
         s.smeltingSkillPointReductionFactorBips = bips;
 
@@ -117,6 +127,7 @@ contract ForgeDAOFacet is Modifiers, Ownable {
         for (uint256 i; i < tokenIDs.length; i++){
             s.maxSupplyByToken[tokenIDs[i]] = supplyAmts[i];
         }
+        emit SetMaxSupplyPerToken(tokenIDs, supplyAmts);
     }
 
 

@@ -320,12 +320,12 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, ERC1155Suppl
 
     function _mintItem(address account, uint256 id, uint256 amount) internal {
         // mint doesnt exceed max supply
-//        require();
+        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
         _mint(account, id, amount, "");
     }
-    function _mintBatchItems(address to, uint256[] memory ids, uint256[] memory amounts) internal {
-        _mintBatch(to, ids, amounts, "");
-    }
+//    function _mintBatchItems(address to, uint256[] memory ids, uint256[] memory amounts) internal {
+//        _mintBatch(to, ids, amounts, "");
+//    }
     function _burnItem(address account, uint256 id, uint256 amount) internal {
         _burn(account, id, amount);
     }
