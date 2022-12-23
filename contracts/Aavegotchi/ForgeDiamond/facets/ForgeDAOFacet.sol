@@ -1,17 +1,16 @@
 pragma solidity 0.8.1;
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import "../libraries/LibAppStorage.sol";
 
-// TODO: add core, alloy, schematic minting funcs and setters for max supply.
-// TODO: add events for all setters.
 
-contract ForgeDAOFacet is Modifiers, Ownable {
+contract ForgeDAOFacet is Modifiers {
 
     event SetAavegotchiDaoAddress(address newAddress);
     event SetGltrAddress(address newAddress);
     event SetForgeDiamondAddress(address newAddress);
 
+    event SetAlloyDaoFee(uint256 bips);
+    event SetAlloyBurnFee(uint256 bips);
     event SetForgeAlloyCost(RarityValueIO newCosts);
     event SetForgeEssenceCost(RarityValueIO newCosts);
     event SetForgeTimeCostInBlocks(RarityValueIO newCosts);
@@ -19,8 +18,6 @@ contract ForgeDAOFacet is Modifiers, Ownable {
     event SetSmeltingSkillPointReductionFactorBips(uint256 oldBips, uint256 newBips);
     event SetMaxSupplyPerToken(uint256[] tokenIds, uint256[] supplyPerTokenId);
 
-    event SetAlloyDaoFee(uint256 bips);
-    event SetAlloyBurnFee(uint256 bips);
 
 
     function setAavegotchiDaoAddress(address daoAddress) external onlyDaoOrOwner {
@@ -112,7 +109,7 @@ contract ForgeDAOFacet is Modifiers, Ownable {
 
     // @notice Allow DAO to update skill points gained from smelting.
     // @param bips Factor to reduce skillPointsEarnedFromForge by, denoted in bips.
-    //              For ex, if half of forging points is earned from smelting, bips = 5000.
+    //             For ex, if half of forging points is earned from smelting, bips = 5000.
     function setSmeltingSkillPointReductionFactorBips(uint256 bips) external onlyDaoOrOwner {
         uint256 oldBips  = s.smeltingSkillPointReductionFactorBips;
         s.smeltingSkillPointReductionFactorBips = bips;

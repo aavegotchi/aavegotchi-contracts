@@ -39,10 +39,8 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, ERC1155Suppl
     event ItemForged(uint256 itemId, uint256 gotchiId);
     event ForgeQueueClaimed(uint256 itemId, uint256 gotchiId);
 
-
     event ForgeTimeReduced(uint256 indexed queueId, uint256 indexed gotchiId, uint256 indexed itemId, uint40 _blocksReduced);
     event AddedToQueue(address indexed owner, uint256 indexed itemId, uint256 indexed gotchiId, uint40 readyBlock, uint256 queueId);
-
 
     WearablesFacet wearablesFacet = WearablesFacet(ForgeLibDiamond.WEARABLE_DIAMOND);
     ItemsFacet itemsFacet = ItemsFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
@@ -319,6 +317,12 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, ERC1155Suppl
     }
 
     function _mintItem(address account, uint256 id, uint256 amount) internal {
+        // mint doesnt exceed max supply
+        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
+        _mint(account, id, amount, "");
+    }
+
+    function adminMint(address account, uint256 id, uint256 amount) external onlyDaoOrOwner {
         // mint doesnt exceed max supply
         require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
         _mint(account, id, amount, "");
