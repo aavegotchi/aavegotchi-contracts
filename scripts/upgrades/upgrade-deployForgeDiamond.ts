@@ -56,8 +56,8 @@ async function deployAndUpgradeWearableDiamond() {
                 "function unpause() public",
                 "function name() external view returns (string memory)",
                 "function symbol() external view returns (string memory)",
-                "function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, ERC1155Receiver) returns (bool)",
-                "function uri(uint256 tokenId) public view virtual override(ERC1155, ERC1155URIStorage) returns (string memory)"
+                "function supportsInterface(bytes4 interfaceId) public view returns (bool)",
+                "function uri(uint256 tokenId) public view returns (string memory)"
             ],
             removeSelectors: [],
         },
