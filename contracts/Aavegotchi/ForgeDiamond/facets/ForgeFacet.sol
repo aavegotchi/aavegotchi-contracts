@@ -259,11 +259,11 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, ERC1155Suppl
         }
     }
 
-    function getAavegotchiQueueItem(uint256 gotchiId) public returns (ForgeQueueItem memory output) {
-        output = _getQueueItem(gotchiId);
+    function getAavegotchiQueueItem(uint256 gotchiId) external view returns (ForgeQueueItem memory) {
+        return _getQueueItem(gotchiId);
     }
 
-    function _getQueueItem(uint256 gotchiId) internal returns (ForgeQueueItem storage output) {
+    function _getQueueItem(uint256 gotchiId) internal view returns (ForgeQueueItem storage output) {
         require(s.gotchiForging[gotchiId].isForging, "ForgeFacet: Aavegotchi not currently forging.");
         output = s.forgeQueue[s.gotchiForging[gotchiId].forgeQueueId];
     }
