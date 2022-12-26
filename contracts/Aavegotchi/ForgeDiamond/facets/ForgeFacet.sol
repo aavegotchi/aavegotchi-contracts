@@ -8,7 +8,7 @@ import { ERC1155URIStorage } from "@openzeppelin/contracts/token/ERC1155/extensi
 import { ERC1155Supply } from "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import { Counters } from "@openzeppelin/contracts/utils/Counters.sol";
 import { Pausable } from "@openzeppelin/contracts/security/Pausable.sol";
-import { ERC1155Holder } from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
+//import { ERC1155Holder } from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import { ERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol";
 
 //import {LibItems} from "../../libraries/LibItems.sol";
@@ -26,11 +26,8 @@ import {AavegotchiFacet} from "../../facets/AavegotchiFacet.sol";
 import {AavegotchiGameFacet} from "../../facets/AavegotchiGameFacet.sol";
 
 
-// TODO: add ability to withdraw erc20.
-// TODO: max supply
-// TODO: make GotchiForging support more than one per gotchi, maybe later release
 
-contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, ERC1155Supply, Pausable {
+contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     Counters.Counter private _forgeQueueId;
@@ -63,7 +60,7 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, ERC1155Suppl
 
     // @notice Get an Aavegotchi's current smithing skill level
     // @dev due to complex formula (approx P = 8 * 1.4^L for each next level), thresholds hardcoded here.
-    function getAavegotchiSmithingLevel(uint256 gotchiId) public returns (uint256) {
+    function getAavegotchiSmithingLevel(uint256 gotchiId) public view returns (uint256) {
         uint256[30] memory sequence =
         [uint256(0), 16, 38, 69, 113, 174, 259, 378, 544, 776, 1100, 1554, 2189, 3078, 4323,
         6066, 8506, 11922, 16704, 23398, 32769, 45889, 64256, 89970, 125970, 176369, 246928,
@@ -100,7 +97,7 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, ERC1155Suppl
 
 
     // @notice Get the specific Core token ID given an Aavegotchi rarity score modifier.
-    function coreTokenIdFromRsm(uint8 rarityScoreModifier) public returns (uint256 tokenId){
+    function coreTokenIdFromRsm(uint8 rarityScoreModifier) public pure returns (uint256 tokenId){
         if (rarityScoreModifier == COMMON_RSM){
             tokenId = CORE_COMMON;
         } else if (rarityScoreModifier == UNCOMMON_RSM){
@@ -273,7 +270,7 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, ERC1155Suppl
     // @dev Note that filtering is done only on the _owner current owned gotchis.
     //      Forge item cannot be claimed without owning the gotchi.
     // TODO: check if gas issue with large owners
-    function getForgeQueueOfOwner(address _owner) external returns (ForgeQueueItem[] memory output) {
+    function getForgeQueueOfOwner(address _owner) external view returns (ForgeQueueItem[] memory output) {
         uint32[] memory tokenIds = aavegotchiFacet.tokenIdsOfOwner(_owner);
         output = new ForgeQueueItem[](tokenIds.length);
         uint256 counter;
@@ -341,16 +338,16 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, ERC1155Suppl
         _unpause();
     }
 
-    function name() external view returns (string memory) {
+    function name() external pure returns (string memory) {
         return "Aavegotchi Forge";
     }
 
-    function symbol() external view returns (string memory) {
+    function symbol() external pure returns (string memory) {
         return "FORGE";
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, ERC1155Receiver) returns (bool) {
-        return super.supportsInterface(interfaceId);
+    function uri(uint256 tokenId) public view virtual override(ERC1155, ERC1155URIStorage) returns (string memory) {
+        return ERC1155URIStorage.uri(tokenId);
     }
     function _beforeTokenTransfer(
         address operator,
@@ -361,8 +358,23 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Holder, ERC1155Suppl
         bytes memory data) internal virtual override(ERC1155, ERC1155Supply) {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
-    function uri(uint256 tokenId) public view virtual override(ERC1155, ERC1155URIStorage) returns (string memory) {
-        return ERC1155URIStorage.uri(tokenId);
+    function onERC1155Received(
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes memory
+    ) external returns (bytes4) {
+        return this.onERC1155Received.selector;
+    }
+    function onERC1155BatchReceived(
+        address,
+        address,
+        uint256[] memory,
+        uint256[] memory,
+        bytes memory
+    ) external returns (bytes4) {
+        return this.onERC1155BatchReceived.selector;
     }
 
 }

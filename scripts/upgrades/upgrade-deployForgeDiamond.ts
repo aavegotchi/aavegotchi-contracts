@@ -13,7 +13,7 @@ const aavegotchiCutFacet = "0x4f908Fa47F10bc2254dae7c74d8B797C1749A8a6";
 const aavegotchiLoupeFacet = "0x58f64b56B1e15D8C932c51287d814EDaa8d6feb9";
 const aavegotchiOwnerShipFacet = "0xAE7DF9f59FEc446903c64f21a76d039Bc81712ef";
 
-async function deployAndUpgradeWearableDiamond() {
+async function deployAndUpgradeForgeDiamond() {
     console.log("Deploying forge diamond");
 
     const Diamond = (await ethers.getContractFactory(
@@ -40,25 +40,27 @@ async function deployAndUpgradeWearableDiamond() {
         {
             facetName: "ForgeFacet",
             addSelectors: [
-                "function getAavegotchiSmithingLevel(uint256 gotchiId) public returns (uint256)",
+                "function getAavegotchiSmithingLevel(uint256 gotchiId) public view returns (uint256)",
                 "function getSmithingLevelMultiplierBips(uint256 gotchiId) public returns (uint256)",
-                "function coreTokenIdFromRsm(uint8 rarityScoreModifier) public returns (uint256 tokenId)",
+                "function coreTokenIdFromRsm(uint8 rarityScoreModifier) public pure returns (uint256 tokenId)",
                 "function smeltAlloyMintAmount (uint8 rarityScoreModifier) public view returns (uint256 alloy)",
                 "function smeltWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds) external",
                 "function claimForgeQueueItems(uint256[] calldata gotchiIds) external",
                 "function getAavegotchiQueueItem(uint256 gotchiId) external view returns (tuple(uint256 itemId,uint256 gotchiId,bool claimed,uint40 readyBlock,uint256 id) memory)",
                 // "function getForgeQueueOfOwner(address _owner) external returns (ForgeQueueItem[] memory output)",
-                "function getForgeQueueOfOwner(address _owner) external returns (tuple(uint256 itemId,uint256 gotchiId,bool claimed,uint40 readyBlock,uint256 id)[] memory output)",
+                "function getForgeQueueOfOwner(address _owner) external view returns (tuple(uint256 itemId,uint256 gotchiId,bool claimed,uint40 readyBlock,uint256 id)[] memory output)",
                 "function forgeWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds, uint40[] calldata _gltr) external",
                 "function availableToForge(uint256 itemId) public view returns(bool available)",
                 "function mintEssence(address owner, uint256 gotchiId) external",
                 "function adminMint(address account, uint256 id, uint256 amount) external",
                 "function pause() public",
                 "function unpause() public",
-                "function name() external view returns (string memory)",
-                "function symbol() external view returns (string memory)",
+                "function name() external pure returns (string memory)",
+                "function symbol() external pure returns (string memory)",
                 // "function supportsInterface(bytes4 interfaceId) public view returns (bool)",
-                "function uri(uint256 tokenId) public view returns (string memory)"
+                "function uri(uint256 tokenId) public view returns (string memory)",
+                "function onERC1155Received(address,address,uint256,uint256,bytes memory) external returns (bytes4)",
+                "function onERC1155BatchReceived(address,address,uint256[] memory,uint256[] memory,bytes memory) external returns (bytes4)"
             ],
             removeSelectors: [],
         },
@@ -99,7 +101,7 @@ async function deployAndUpgradeWearableDiamond() {
 }
 
 if (require.main === module) {
-    deployAndUpgradeWearableDiamond()
+    deployAndUpgradeForgeDiamond()
         .then(() => process.exit(0))
         // .then(() => console.log('upgrade completed') /* process.exit(0) */)
         .catch((error) => {
