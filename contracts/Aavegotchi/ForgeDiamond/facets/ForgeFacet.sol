@@ -40,7 +40,6 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
     event ForgeTimeReduced(uint256 indexed queueId, uint256 indexed gotchiId, uint256 indexed itemId, uint40 _blocksReduced);
     event AddedToQueue(address indexed owner, uint256 indexed itemId, uint256 indexed gotchiId, uint40 readyBlock, uint256 queueId);
 
-    IERC20 gltrContract = IERC20(s.GLTR);
 
     constructor() ERC1155("") { }
 
@@ -70,6 +69,9 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
     }
     function lendingGetterAndSetterFacet() internal pure returns (LendingGetterAndSetterFacet facet){
         facet = LendingGetterAndSetterFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
+    }
+    function gltrContract() internal returns (IERC20 token){
+        token = IERC20(s.GLTR);
     }
     ////////
 
@@ -137,9 +139,9 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         }
     }
 
-    function smeltAlloyMintAmount (uint8 rarityScoreModifier) public view returns (uint256 alloy){
-        alloy = s.forgeAlloyCost[rarityScoreModifier] * (1 - ((s.alloyBurnFeeInBips + s.alloyDaoFeeInBips) / 10000));
-    }
+//    function smeltAlloyMintAmount (uint8 rarityScoreModifier) public view returns (uint256 alloy){
+//        alloy = s.forgeAlloyCost[rarityScoreModifier] * (1 - ((s.alloyBurnFeeInBips + s.alloyDaoFeeInBips) / 10000));
+//    }
 
     function _smelt(uint256 itemId, uint256 gotchiId)
     internal
@@ -203,16 +205,16 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         ItemType memory itemType = itemsFacet().getItemType(itemId);
         uint8 rsm = itemType.rarityScoreModifier;
 
+        require(balanceOf(sender, ALLOY) >= s.forgeAlloyCost[rsm], "ForgeFacet: not enough Alloy");
+        require(balanceOf(sender, coreTokenIdFromRsm(rsm)) >= 1, "ForgeFacet: missing required Core");
         require(availableToForge(itemId), "ForgeFacet: forge item not in stock");
-        require(balanceOf(sender, ALLOY) >= s.forgeAlloyCost[rsm], "ForgeFacet: not enough Alloy.");
-        require(balanceOf(sender, coreTokenIdFromRsm(rsm)) >= 1, "ForgeFacet: missing required Core.");
 
         // Schematic (item ids identical to Wearable ids)
         require(balanceOf(sender, itemId) >= 1, "ForgeFacet: missing required Schematic.");
 
         // Essence required if forging a pet or godlike item.
         if (itemType.slotPositions[PET_SLOT_INDEX] || rsm == GODLIKE_RSM){
-            require(balanceOf(sender, ESSENCE) >= s.forgeEssenceCost[rsm], "ForgeFacet: not enough Essence.");
+            require(balanceOf(sender, ESSENCE) >= s.forgeEssenceCost[rsm], "ForgeFacet: not enough Essence");
 
             _burnItem(sender, ESSENCE, s.forgeEssenceCost[rsm]);
         }
@@ -222,12 +224,12 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         _burnItem(sender, coreTokenIdFromRsm(rsm), 1);
         _burnItem(sender, itemId, 1);
 
-        uint256 forgeTime = s.forgeTimeCostInBlocks[rsm] * (getSmithingLevelMultiplierBips(gotchiId) / 10000);
+        uint256 forgeTime = s.forgeTimeCostInBlocks[rsm] * getSmithingLevelMultiplierBips(gotchiId) / 10000;
 
         require(_gltr <= forgeTime, "ForgeFacet: too much GLTR");
 
         require(
-            gltrContract.transferFrom(sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, (uint256(_gltr) * 1e18)),
+            gltrContract().transferFrom(sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, (uint256(_gltr) * 1e18)),
             "ForgeFacet: Failed GLTR transfer"
         );
 

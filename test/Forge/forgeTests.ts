@@ -1,10 +1,12 @@
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
-import {ForgeDAOFacet, ForgeFacet, WearablesFacet} from "../../typechain";
+import {ForgeDAOFacet, ForgeFacet, WearablesFacet, CollateralFacet, DAOFacet, ItemsFacet, IERC20} from "../../typechain";
 import { deployAndUpgradeForgeDiamond } from "../../scripts/upgrades/upgrade-deployAndUpgradeForgeDiamond";
 import { impersonate, maticDiamondAddress } from "../../scripts/helperFunctions";
 import {JsonRpcSigner} from "@ethersproject/providers";
 import {upgradeAavegotchiForForge} from "../../scripts/upgrades/upgrade-aavegotchiForForge";
+
+
 
 // See contracts/Aavegotchi/ForgeDiamond/libraries/LibAppStorage.sol
 // All non-schematic items (cores, alloy, essence, etc) IDs start at this offset number.
@@ -26,11 +28,16 @@ describe("Testing Forge", async function () {
     let testUser = "0x60c4ae0EE854a20eA7796a9678090767679B30FC";
     let daoAddr = "0x6fb7e0AAFBa16396Ad6c1046027717bcA25F821f"; // DTF multisig
     let WEARABLE_DIAMOND = "0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f"
+    let GLTR = "0x3801C3B3B5c98F88a9c9005966AA96aa440B9Afc"
 
     let forgeDiamondAddress: string;
     let forgeFacet: ForgeFacet;
     let forgeDaoFacet: ForgeDAOFacet;
     let wearablesFacet: WearablesFacet;
+    let collateralFacet: CollateralFacet;
+    let itemsFacet: ItemsFacet;
+    let aavegotchiDaoFacet: DAOFacet;
+    let gltrContract: IERC20;
 
 
 
@@ -53,8 +60,29 @@ describe("Testing Forge", async function () {
             "contracts/Aavegotchi/WearableDiamond/facets/WearablesFacet.sol:WearablesFacet",
             WEARABLE_DIAMOND
         )) as WearablesFacet;
+        collateralFacet = (await ethers.getContractAt(
+            "contracts/Aavegotchi/facets/CollateralFacet.sol:CollateralFacet",
+            maticDiamondAddress
+        )) as CollateralFacet;
+        itemsFacet = (await ethers.getContractAt(
+            "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
+            maticDiamondAddress
+        )) as ItemsFacet;
+        aavegotchiDaoFacet = (await ethers.getContractAt(
+            "contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet",
+            maticDiamondAddress
+        )) as DAOFacet;
+        gltrContract = (await ethers.getContractAt(
+            "contracts/shared/interfaces/IERC20.sol:IERC20",
+            GLTR
+        )) as IERC20;
 
         // prep storage - TODO: put into script
+        let aavegotchiOwner = "0x585E06CA576D0565a035301819FD2cfD7104c1E8"
+        let impOwner: DAOFacet = await impersonate(aavegotchiOwner, aavegotchiDaoFacet, ethers, network)
+        await impOwner.setForge(forgeDiamondAddress);
+
+        await forgeDaoFacet.setGltrAddress(GLTR);
         await forgeDaoFacet.setForgeDiamondAddress(forgeDiamondAddress);
         await forgeDaoFacet.setAavegotchiDaoAddress(daoAddr);
         await forgeDaoFacet.setAlloyDaoFeeInBips(500);
@@ -68,6 +96,22 @@ describe("Testing Forge", async function () {
             mythical: 25000,
             godlike: 130000,
         }
+        let essenceCost = {
+            common: 1,
+            uncommon: 5,
+            rare: 10,
+            legendary: 50,
+            mythical: 250,
+            godlike: 1000,
+        }
+        let timeCost = {
+            common: 32922,
+            uncommon: 98765,
+            rare: 296296,
+            legendary: 888889,
+            mythical: 2666667,
+            godlike: 8000000,
+        }
         let skillPts = {
             common: 4,
             uncommon: 12,
@@ -76,7 +120,10 @@ describe("Testing Forge", async function () {
             mythical: 1000,
             godlike: 5200,
         }
+
         await forgeDaoFacet.setForgeAlloyCost(alloyCosts);
+        await forgeDaoFacet.setForgeEssenceCost(essenceCost);
+        await forgeDaoFacet.setForgeTimeCostInBlocks(timeCost);
         await forgeDaoFacet.setSkillPointsEarnedFromForge(skillPts);
         await forgeDaoFacet.setSmeltingSkillPointReductionFactorBips(5000);
 
@@ -103,6 +150,7 @@ describe("Testing Forge", async function () {
         await expect(imp.adminMint(forgeDiamondAddress, 0, 10)).to.be.revertedWith("LibAppStorage: No access");
     });
 
+
     it('should revert smelt correctly', async function () {
         let imp = await impersonate(testUser, forgeFacet, ethers, network)
 
@@ -113,66 +161,140 @@ describe("Testing Forge", async function () {
     });
 
 
+    describe("smelt forge flow", async function (){
+        it('should smelt an item, mint correct forge items, and provide smithing skill', async function () {
+            // let items = [10, 119, 146] // leg Link White Hat, leg Baby Bottle, common Imp mustache
+            let items = [157, 244, 205] // uncommon Goatee, rare V-Neck, common Mug
+            let gotchis = [7735, 7735, 7735]
 
-    it('should smelt an item, mint correct forge items, and provide smithing skill', async function () {
-        // let items = [10, 119, 146] // leg Link White Hat, leg Baby Bottle, common Imp mustache
-        let items = [157, 244, 205] // uncommon Goatee, rare V-Neck, common Mug
-        let gotchis = [7735, 7735, 7735]
-
-        console.log("initial balances")
-        console.log(await wearablesFacet.balanceOf(testUser, items[0]))
-        console.log(await wearablesFacet.balanceOf(testUser, items[1]))
-        console.log(await wearablesFacet.balanceOf(testUser, items[2]))
-
-
-        let imp = await impersonate(testUser, forgeFacet, ethers, network)
-
-        await expect(imp.smeltWearables(items, gotchis))
-            .to.emit(forgeFacet, "ItemSmelted").withArgs(items[0], gotchis[0])
-            .to.emit(forgeFacet, "ItemSmelted").withArgs(items[1], gotchis[1])
-            .to.emit(forgeFacet, "ItemSmelted").withArgs(items[2], gotchis[2]);
+            // console.log("initial balances")
+            // console.log(await wearablesFacet.balanceOf(testUser, items[0]))
+            // console.log(await wearablesFacet.balanceOf(testUser, items[1]))
+            // console.log(await wearablesFacet.balanceOf(testUser, items[2]))
 
 
-        // Check correct new balances of all items
-        expect(await forgeFacet.balanceOf(testUser, ALLOY)).to.be.equal(1530) // 90 + 270 + 1170
-        expect(await forgeFacet.balanceOf(daoAddr, ALLOY)).to.be.equal(85) // 5 + 15 + 65
+            let imp = await impersonate(testUser, forgeFacet, ethers, network)
 
-        // schematics
-        expect(await forgeFacet.balanceOf(testUser, items[0])).to.be.equal(1)
-        expect(await forgeFacet.balanceOf(testUser, items[1])).to.be.equal(1)
-        expect(await forgeFacet.balanceOf(testUser, items[2])).to.be.equal(1)
+            await expect(imp.smeltWearables(items, gotchis))
+                .to.emit(forgeFacet, "ItemSmelted").withArgs(items[0], gotchis[0])
+                .to.emit(forgeFacet, "ItemSmelted").withArgs(items[1], gotchis[1])
+                .to.emit(forgeFacet, "ItemSmelted").withArgs(items[2], gotchis[2]);
 
-        // Check correct balances deducted and sent to Forge Diamond
-        expect(await wearablesFacet.balanceOf(testUser, items[0])).to.be.equal(16)
-        expect(await wearablesFacet.balanceOf(testUser, items[1])).to.be.equal(1)
-        expect(await wearablesFacet.balanceOf(testUser, items[2])).to.be.equal(10)
+            // Check correct balances deducted and sent to Forge Diamond
+            expect(await wearablesFacet.balanceOf(testUser, items[0])).to.be.equal(16)
+            expect(await wearablesFacet.balanceOf(testUser, items[1])).to.be.equal(1)
+            expect(await wearablesFacet.balanceOf(testUser, items[2])).to.be.equal(10)
 
-        expect(await wearablesFacet.balanceOf(forgeDiamondAddress, items[0])).to.be.equal(1)
-        expect(await wearablesFacet.balanceOf(forgeDiamondAddress, items[1])).to.be.equal(1)
-        expect(await wearablesFacet.balanceOf(forgeDiamondAddress, items[2])).to.be.equal(1)
+            expect(await wearablesFacet.balanceOf(forgeDiamondAddress, items[0])).to.be.equal(1)
+            expect(await wearablesFacet.balanceOf(forgeDiamondAddress, items[1])).to.be.equal(1)
+            expect(await wearablesFacet.balanceOf(forgeDiamondAddress, items[2])).to.be.equal(1)
 
-        // cores
-        expect(await forgeFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(1)
-        expect(await forgeFacet.balanceOf(testUser, CORE_RARE)).to.be.equal(1)
-        expect(await forgeFacet.balanceOf(testUser, CORE_COMMON)).to.be.equal(1)
+            // Check correct new balances of all items
+            expect(await forgeFacet.balanceOf(testUser, ALLOY)).to.be.equal(1530) // 90 + 270 + 1170
+            expect(await forgeFacet.balanceOf(daoAddr, ALLOY)).to.be.equal(85) // 5 + 15 + 65
 
-        // smithing skill + level
-        expect(await forgeFacet.getAavegotchiSmithingSkillPts(gotchis[0])).to.be.equal(34)
-        // expect(await forgeFacet.getAavegotchiSmithingSkillPts(gotchis[1])).to.be.equal(106)
-        expect(await forgeFacet.getAavegotchiSmithingLevel(gotchis[0])).to.be.equal(2)
-        expect(await forgeFacet.getSmithingLevelMultiplierBips(gotchis[0])).to.be.equal(9700);
+            // schematics
+            expect(await forgeFacet.balanceOf(testUser, items[0])).to.be.equal(1)
+            expect(await forgeFacet.balanceOf(testUser, items[1])).to.be.equal(1)
+            expect(await forgeFacet.balanceOf(testUser, items[2])).to.be.equal(1)
 
-        // smelt again for next level and recheck balances
-        await imp.smeltWearables([157], [7735])
+            // cores
+            expect(await forgeFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(1)
+            expect(await forgeFacet.balanceOf(testUser, CORE_RARE)).to.be.equal(1)
+            expect(await forgeFacet.balanceOf(testUser, CORE_COMMON)).to.be.equal(1)
 
-        expect(await forgeFacet.getAavegotchiSmithingSkillPts(gotchis[0])).to.be.equal(40)
-        expect(await forgeFacet.getAavegotchiSmithingLevel(gotchis[0])).to.be.equal(3)
-        expect(await forgeFacet.getSmithingLevelMultiplierBips(gotchis[0])).to.be.equal(9410);
+            // smithing skill + level
+            expect(await forgeFacet.getAavegotchiSmithingSkillPts(gotchis[0])).to.be.equal(34)
+            // expect(await forgeFacet.getAavegotchiSmithingSkillPts(gotchis[1])).to.be.equal(106)
+            expect(await forgeFacet.getAavegotchiSmithingLevel(gotchis[0])).to.be.equal(2)
+            expect(await forgeFacet.getSmithingLevelMultiplierBips(gotchis[0])).to.be.equal(9700);
 
-        expect(await forgeFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(2)
-        expect(await forgeFacet.balanceOf(testUser, 157)).to.be.equal(2)
-        expect(await wearablesFacet.balanceOf(testUser, items[0])).to.be.equal(15)
-    });
+            // smelt again for next level and recheck balances
+            await imp.smeltWearables([157], [7735])
 
+            expect(await forgeFacet.getAavegotchiSmithingSkillPts(gotchis[0])).to.be.equal(40)
+            expect(await forgeFacet.getAavegotchiSmithingLevel(gotchis[0])).to.be.equal(3)
+            expect(await forgeFacet.getSmithingLevelMultiplierBips(gotchis[0])).to.be.equal(9410);
+
+            expect(await forgeFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(2)
+            expect(await forgeFacet.balanceOf(testUser, 157)).to.be.equal(2)
+            expect(await wearablesFacet.balanceOf(testUser, items[0])).to.be.equal(15)
+        });
+
+        it('should revert forge', async function () {
+            let imp: ForgeFacet = await impersonate(testUser, forgeFacet, ethers, network)
+
+            // forge godlike
+            await expect(imp.forgeWearables([113], [7735], [0])).to.be.revertedWith("ForgeFacet: not enough Alloy")
+
+            await forgeFacet.adminMint(testUser, ALLOY, 130000);
+            await expect(imp.forgeWearables([113], [7735], [0])).to.be.revertedWith("ForgeFacet: missing required Core")
+
+            await forgeFacet.adminMint(testUser, CORE_GODLIKE, 1);
+            await expect(imp.forgeWearables([113], [7735], [0])).to.be.revertedWith("ForgeFacet: forge item not in stock")
+
+        })
+
+        it('should test essence and forge queue', async function () {
+            // impersonate Felon owner, smelt a godlike (Link Cube) so the contract is holding one to forge
+            let felonOwner = "0x60eD33735C9C29ec2c26B8eC734e36D5B6fa1EAB"
+
+            // get nekkid
+            let impItems = await impersonate(felonOwner, itemsFacet, ethers, network)
+            await impItems.equipWearables(19095, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+            console.log(await wearablesFacet.balanceOf(felonOwner, 17))
+            expect(await wearablesFacet.balanceOf(felonOwner, 17)).to.be.equal(1)
+
+            let impWearzFelon = await impersonate(felonOwner, wearablesFacet, ethers, network)
+            await impWearzFelon.setApprovalForAll(forgeDiamondAddress, true);
+
+            let impForgeFelon = await impersonate(felonOwner, forgeFacet, ethers, network)
+
+            await impForgeFelon.smeltWearables([17], [19095])
+
+            // top off the missing alloy
+            await forgeFacet.adminMint(felonOwner, ALLOY, 13000);
+
+            await expect(impForgeFelon.forgeWearables([17], [19095], [0])).to.be.revertedWith("ForgeFacet: not enough Essence")
+
+            // obtain essence to test essence burn (sac DIFFERENT gotchi)
+            let impCollFelon: CollateralFacet = await impersonate(felonOwner, collateralFacet, ethers, network)
+            await impCollFelon.decreaseAndDestroy(7001, 2270)
+            expect(await forgeFacet.balanceOf(felonOwner, ESSENCE)).to.be.equal(1000)
+
+            await impForgeFelon.forgeWearables([17], [19095], [0])
+            expect(await forgeFacet.balanceOf(felonOwner, ESSENCE)).to.be.equal(0)
+            expect(await wearablesFacet.balanceOf(felonOwner, 17)).to.be.equal(0)
+
+            await expect(impForgeFelon.forgeWearables([17], [19095], [0])).to.be.revertedWith("ForgeFacet: Aavegotchi already forging")
+
+            // check queue
+            console.log(ethers.utils.formatEther((await gltrContract.balanceOf(felonOwner)).toString()));
+            await expect(impForgeFelon.claimForgeQueueItems([19095])).to.be.revertedWith("ForgeFacet: Forge item not ready")
+
+            // skip 8,000,000 (0x7A1200) required blocks for godlike queue
+            await network.provider.send("hardhat_mine", ["0x7A1200"])
+
+            await expect(impForgeFelon.claimForgeQueueItems([19095]))
+                .to.emit(impForgeFelon, "ForgeQueueClaimed").withArgs("17", "19095")
+
+            expect(await wearablesFacet.balanceOf(felonOwner, 17)).to.be.equal(1)
+            expect(await wearablesFacet.balanceOf(forgeDiamondAddress, 17)).to.be.equal(0)
+        });
+
+        it('should forge correctly', async function () {
+            let imp: ForgeFacet = await impersonate(testUser, forgeFacet, ethers, network)
+
+            console.log(ethers.utils.formatEther((await gltrContract.balanceOf(testUser)).toString()));
+
+            await imp.forgeWearables([157], [7735], [0]);
+
+            // gotchi can only be forging one thing at a time
+            await expect(imp.forgeWearables([157], [7735], [0])).to.be.revertedWith("ForgeFacet: Aavegotchi already forging")
+
+
+        });
+    })
 
 });

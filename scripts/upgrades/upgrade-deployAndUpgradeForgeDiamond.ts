@@ -44,7 +44,7 @@ export async function deployAndUpgradeForgeDiamond() {
                 "function getSmithingLevelMultiplierBips(uint256 gotchiId) public view returns (uint256)",
                 "function getAavegotchiSmithingSkillPts(uint256 gotchiId) public view returns (uint256)",
                 "function coreTokenIdFromRsm(uint8 rarityScoreModifier) public pure returns (uint256 tokenId)",
-                "function smeltAlloyMintAmount (uint8 rarityScoreModifier) public view returns (uint256 alloy)",
+                // "function smeltAlloyMintAmount (uint8 rarityScoreModifier) public view returns (uint256 alloy)",
                 "function smeltWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds) external",
                 "function claimForgeQueueItems(uint256[] calldata gotchiIds) external",
                 "function getAavegotchiQueueItem(uint256 gotchiId) external view returns (tuple(uint256 itemId,uint256 gotchiId,bool claimed,uint40 readyBlock,uint256 id) memory)",
@@ -64,7 +64,8 @@ export async function deployAndUpgradeForgeDiamond() {
                 "function onERC1155BatchReceived(address,address,uint256[] memory,uint256[] memory,bytes memory) external returns (bytes4)",
 
                 // Inherited
-                "function totalSupply(uint256 id) public view virtual returns (uint256)",
+                // TODO: transferFrom et al
+                "function totalSupply(uint256 id) public view returns (uint256)",
                 "function balanceOf(address account, uint256 id) public view returns (uint256)",
 
             ],
