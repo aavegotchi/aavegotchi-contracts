@@ -104,7 +104,7 @@ contract Modifiers {
 
     modifier onlyDaoOrOwner() {
         address sender = LibMeta.msgSender();
-        require(sender == s.AAVEGOTCHI_DAO || sender == ForgeLibDiamond.contractOwner(), "LibAppStorage: Do not have access");
+        require(sender == s.AAVEGOTCHI_DAO || sender == ForgeLibDiamond.contractOwner(), "LibAppStorage: No access");
         _;
     }
 }
