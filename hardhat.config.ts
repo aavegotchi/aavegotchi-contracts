@@ -1,6 +1,7 @@
 /* global task ethers */
 
-import "@nomiclabs/hardhat-waffle";
+// import "@nomiclabs/hardhat-waffle";
+import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-contract-sizer";
 import "@nomiclabs/hardhat-etherscan";
@@ -9,6 +10,8 @@ import "solidity-coverage";
 import * as dotenv from "dotenv";
 import "@typechain/hardhat";
 import { BigNumber } from "ethers";
+
+require("hardhat-tracer");
 
 dotenv.config({ path: __dirname + "/.env" });
 
