@@ -13,7 +13,7 @@ const aavegotchiCutFacet = "0x4f908Fa47F10bc2254dae7c74d8B797C1749A8a6";
 const aavegotchiLoupeFacet = "0x58f64b56B1e15D8C932c51287d814EDaa8d6feb9";
 const aavegotchiOwnerShipFacet = "0xAE7DF9f59FEc446903c64f21a76d039Bc81712ef";
 
-async function deployAndUpgradeForgeDiamond() {
+export async function deployAndUpgradeForgeDiamond() {
     console.log("Deploying forge diamond");
 
     const Diamond = (await ethers.getContractFactory(
@@ -41,7 +41,8 @@ async function deployAndUpgradeForgeDiamond() {
             facetName: "ForgeFacet",
             addSelectors: [
                 "function getAavegotchiSmithingLevel(uint256 gotchiId) public view returns (uint256)",
-                "function getSmithingLevelMultiplierBips(uint256 gotchiId) public returns (uint256)",
+                "function getSmithingLevelMultiplierBips(uint256 gotchiId) public view returns (uint256)",
+                "function getAavegotchiSmithingSkillPts(uint256 gotchiId) public view returns (uint256)",
                 "function coreTokenIdFromRsm(uint8 rarityScoreModifier) public pure returns (uint256 tokenId)",
                 "function smeltAlloyMintAmount (uint8 rarityScoreModifier) public view returns (uint256 alloy)",
                 "function smeltWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds) external",
@@ -60,7 +61,12 @@ async function deployAndUpgradeForgeDiamond() {
                 // "function supportsInterface(bytes4 interfaceId) public view returns (bool)",
                 "function uri(uint256 tokenId) public view returns (string memory)",
                 "function onERC1155Received(address,address,uint256,uint256,bytes memory) external returns (bytes4)",
-                "function onERC1155BatchReceived(address,address,uint256[] memory,uint256[] memory,bytes memory) external returns (bytes4)"
+                "function onERC1155BatchReceived(address,address,uint256[] memory,uint256[] memory,bytes memory) external returns (bytes4)",
+
+                // Inherited
+                "function totalSupply(uint256 id) public view virtual returns (uint256)",
+                "function balanceOf(address account, uint256 id) public view returns (uint256)",
+
             ],
             removeSelectors: [],
         },
@@ -80,7 +86,7 @@ async function deployAndUpgradeForgeDiamond() {
                 "function setForgeTimeCostInBlocks (tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) calldata costs) external",
                 "function setSkillPointsEarnedFromForge (tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) calldata points) external",
                 "function setSmeltingSkillPointReductionFactorBips(uint256 bips) external",
-                "function setMaxSupplyPerToken(uint256[] calldata tokenIDs, uint256[] calldata supplyAmts) external"
+                // "function setMaxSupplyPerToken(uint256[] calldata tokenIDs, uint256[] calldata supplyAmts) external"
             ],
             removeSelectors: [],
         },
@@ -98,12 +104,13 @@ async function deployAndUpgradeForgeDiamond() {
     };
 
     await run("deployUpgrade", args);
+
+    return diamond.address;
 }
 
 if (require.main === module) {
     deployAndUpgradeForgeDiamond()
         .then(() => process.exit(0))
-        // .then(() => console.log('upgrade completed') /* process.exit(0) */)
         .catch((error) => {
             console.error(error);
             process.exit(1);

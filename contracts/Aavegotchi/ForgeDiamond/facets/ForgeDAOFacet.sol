@@ -117,15 +117,16 @@ contract ForgeDAOFacet is Modifiers {
         emit SetSmeltingSkillPointReductionFactorBips(oldBips, s.smeltingSkillPointReductionFactorBips);
     }
 
+    // @dev Max supply is not practical to keep track of for each forge token. The contract logic should take care of this.
     // @notice Allow DAO to set max supply per Forge asset token.
-    function setMaxSupplyPerToken(uint256[] calldata tokenIDs, uint256[] calldata supplyAmts) external onlyDaoOrOwner {
-        require(tokenIDs.length == supplyAmts.length, "ForgeDaoFacet: Mismatched arrays.");
-
-        for (uint256 i; i < tokenIDs.length; i++){
-            s.maxSupplyByToken[tokenIDs[i]] = supplyAmts[i];
-        }
-        emit SetMaxSupplyPerToken(tokenIDs, supplyAmts);
-    }
+//    function setMaxSupplyPerToken(uint256[] calldata tokenIDs, uint256[] calldata supplyAmts) external onlyDaoOrOwner {
+//        require(tokenIDs.length == supplyAmts.length, "ForgeDaoFacet: Mismatched arrays.");
+//
+//        for (uint256 i; i < tokenIDs.length; i++){
+//            s.maxSupplyByToken[tokenIDs[i]] = supplyAmts[i];
+//        }
+//        emit SetMaxSupplyPerToken(tokenIDs, supplyAmts);
+//    }
 
 
 

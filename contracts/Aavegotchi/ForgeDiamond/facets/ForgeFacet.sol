@@ -24,6 +24,7 @@ import {ItemsFacet} from "../../facets/ItemsFacet.sol";
 import {ItemType} from "../../libraries/LibAppStorage.sol";
 import {AavegotchiFacet} from "../../facets/AavegotchiFacet.sol";
 import {AavegotchiGameFacet} from "../../facets/AavegotchiGameFacet.sol";
+import {LendingGetterAndSetterFacet} from "../../facets/LendingGetterAndSetterFacet.sol";
 
 
 
@@ -39,23 +40,38 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
     event ForgeTimeReduced(uint256 indexed queueId, uint256 indexed gotchiId, uint256 indexed itemId, uint40 _blocksReduced);
     event AddedToQueue(address indexed owner, uint256 indexed itemId, uint256 indexed gotchiId, uint40 readyBlock, uint256 queueId);
 
-    WearablesFacet wearablesFacet = WearablesFacet(ForgeLibDiamond.WEARABLE_DIAMOND);
-    ItemsFacet itemsFacet = ItemsFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
-    AavegotchiFacet aavegotchiFacet = AavegotchiFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
-    AavegotchiGameFacet aavegotchiGameFacet = AavegotchiGameFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
     IERC20 gltrContract = IERC20(s.GLTR);
 
     constructor() ERC1155("") { }
 
-
     modifier onlyAavegotchiUnlocked(uint256 gotchiId) {
-        require(!aavegotchiGameFacet.aavegotchiLocked(gotchiId), "Aavegotchi not unlocked");
+        require(!aavegotchiGameFacet().aavegotchiLocked(gotchiId), "ForgeFacet: Aavegotchi is locked");
         _;
     }
+    // @notice Will revert if aavegotchi is in active rental as well.
     modifier onlyAavegotchiOwner(uint256 gotchiId) {
-        require(LibMeta.msgSender() == aavegotchiFacet.ownerOf(gotchiId), "ForgeFacet: Not Aavegotchi owner");
+//        require(lendingGetterAndSetterFacet().isAavegotchiLent, "ForgeFacet: Aavegotchi is lent out");
+        require(LibMeta.msgSender() == aavegotchiFacet().ownerOf(gotchiId), "ForgeFacet: Not Aavegotchi owner");
         _;
     }
+
+    // External contracts
+    function aavegotchiGameFacet() internal pure returns (AavegotchiGameFacet facet){
+        facet = AavegotchiGameFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
+    }
+    function aavegotchiFacet() internal pure returns (AavegotchiFacet facet){
+        facet = AavegotchiFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
+    }
+    function itemsFacet() internal pure returns (ItemsFacet facet){
+        facet = ItemsFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
+    }
+    function wearablesFacet() internal pure returns (WearablesFacet facet){
+        facet = WearablesFacet(ForgeLibDiamond.WEARABLE_DIAMOND);
+    }
+    function lendingGetterAndSetterFacet() internal pure returns (LendingGetterAndSetterFacet facet){
+        facet = LendingGetterAndSetterFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
+    }
+    ////////
 
 
     // @notice Get an Aavegotchi's current smithing skill level
@@ -84,15 +100,21 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         return level;
     }
 
+    function getAavegotchiSmithingSkillPts(uint256 gotchiId) public view returns (uint256) {
+        return s.gotchiSmithingSkillPoints[gotchiId];
+    }
+
+
     // @notice Return the forge time multiplier gained from smithing level, represented in bips.
-    function getSmithingLevelMultiplierBips(uint256 gotchiId) public returns (uint256) {
-        uint256[30] memory percentTimeSaved = [
-            uint256(1000), 970, 953, 935, 916, 896, 875, 854, 833, 811,
-             789, 768, 746, 725, 704, 684, 664, 644, 625, 607,
-             589, 571, 554, 538, 522, 506, 491, 476, 462, 448
+    function getSmithingLevelMultiplierBips(uint256 gotchiId) public view returns (uint256) {
+        uint256[30] memory percentTimeDiscountBips = [
+            uint256(1000), 970, 941, 913, 885, 859, 833, 808, 784, 760,
+            737, 715, 694, 673, 653, 633, 614, 596, 578, 561, 544, 527,
+            512, 496, 481, 467, 453, 439, 426, 413
         ];
         uint256 level = getAavegotchiSmithingLevel(gotchiId);
-        return percentTimeSaved[level - 1] * 10;
+
+        return percentTimeDiscountBips[level - 1] * 10;
     }
 
 
@@ -121,23 +143,21 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
 
     function _smelt(uint256 itemId, uint256 gotchiId)
     internal
-    onlyAavegotchiUnlocked(gotchiId)
     onlyAavegotchiOwner(gotchiId)
+    onlyAavegotchiUnlocked(gotchiId)
     {
         address sender = LibMeta.msgSender();
-
-        require(wearablesFacet.balanceOf(sender, itemId) > 0, "ForgeFacet: smelt item not owned");
+        require(wearablesFacet().balanceOf(sender, itemId) > 0, "ForgeFacet: smelt item not owned");
 
         // get smeltedItem metadata
-        ItemType memory itemType = itemsFacet.getItemType(itemId);
+        ItemType memory itemType = itemsFacet().getItemType(itemId);
 
         // remove smelted item
-        // TODO: needs approval
-        wearablesFacet.safeTransferFrom(sender, s.FORGE_DIAMOND, itemId, 1, "");
+        wearablesFacet().safeTransferFrom(sender, s.FORGE_DIAMOND, itemId, 1, "");
 
         uint256 totalAlloy = s.forgeAlloyCost[itemType.rarityScoreModifier];
-        uint256 daoAlloyAmt = totalAlloy * (s.alloyDaoFeeInBips / 10000);
-        uint256 burnAlloyAmt = totalAlloy * (s.alloyBurnFeeInBips / 10000); // "burn" by not minting this amount
+        uint256 daoAlloyAmt = totalAlloy * s.alloyDaoFeeInBips / 10000;
+        uint256 burnAlloyAmt = totalAlloy * s.alloyBurnFeeInBips / 10000; // "burn" by not minting this amount
         uint256 userAlloyAmt = totalAlloy - daoAlloyAmt - burnAlloyAmt;
 
         // mint alloy
@@ -152,7 +172,7 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
 
         // add smithing skill
         s.gotchiSmithingSkillPoints[gotchiId] +=
-            (s.skillPointsEarnedFromForge[itemType.rarityScoreModifier] * (s.smeltingSkillPointReductionFactorBips / 10000));
+            (s.skillPointsEarnedFromForge[itemType.rarityScoreModifier] * s.smeltingSkillPointReductionFactorBips / 10000);
 
         emit ItemSmelted(itemId, gotchiId);
 
@@ -173,14 +193,14 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
 
     function _forge(uint256 itemId, uint256 gotchiId, uint40 _gltr)
     internal
-    onlyAavegotchiUnlocked(gotchiId)
     onlyAavegotchiOwner(gotchiId)
+    onlyAavegotchiUnlocked(gotchiId)
     {
         require(!s.gotchiForging[gotchiId].isForging, "ForgeFacet: Aavegotchi already forging");
 
         address sender = LibMeta.msgSender();
         // get item metadata
-        ItemType memory itemType = itemsFacet.getItemType(itemId);
+        ItemType memory itemType = itemsFacet().getItemType(itemId);
         uint8 rsm = itemType.rarityScoreModifier;
 
         require(availableToForge(itemId), "ForgeFacet: forge item not in stock");
@@ -213,7 +233,7 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
 
         if (forgeTime - _gltr == 0){
             // Immediately forge the item.
-            wearablesFacet.safeTransferFrom(s.FORGE_DIAMOND, sender, itemId, 1, "");
+            wearablesFacet().safeTransferFrom(s.FORGE_DIAMOND, sender, itemId, 1, "");
             emit ForgeTimeReduced(0, gotchiId, itemId, _gltr);
         } else {
 
@@ -239,15 +259,15 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         address sender = LibMeta.msgSender();
 
         for (uint256 i; i < gotchiIds.length; i++){
-            require(!aavegotchiGameFacet.aavegotchiLocked(gotchiIds[i]), "Aavegotchi not unlocked");
+            require(!aavegotchiGameFacet().aavegotchiLocked(gotchiIds[i]), "Aavegotchi not unlocked");
 
             ForgeQueueItem storage queueItem = _getQueueItem(gotchiIds[i]);
             require(!queueItem.claimed, "ForgeFacet: already claimed");
-            require(sender == aavegotchiFacet.ownerOf(queueItem.gotchiId), "ForgeFacet: Not Aavegotchi owner");
+            require(sender == aavegotchiFacet().ownerOf(queueItem.gotchiId), "ForgeFacet: Not Aavegotchi owner");
             require(block.number >= queueItem.readyBlock, "ForgeFacet: Forge item not ready");
 
             // ready to be claimed, transfer.
-            wearablesFacet.safeTransferFrom(s.FORGE_DIAMOND, sender, queueItem.itemId, 1, "");
+            wearablesFacet().safeTransferFrom(s.FORGE_DIAMOND, sender, queueItem.itemId, 1, "");
             s.forgeQueue[queueItem.id].claimed = true;
             s.itemForging[queueItem.itemId] -= 1;
             delete s.gotchiForging[gotchiIds[i]];
@@ -271,7 +291,7 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
     //      Forge item cannot be claimed without owning the gotchi.
     // TODO: check if gas issue with large owners
     function getForgeQueueOfOwner(address _owner) external view returns (ForgeQueueItem[] memory output) {
-        uint32[] memory tokenIds = aavegotchiFacet.tokenIdsOfOwner(_owner);
+        uint32[] memory tokenIds = aavegotchiFacet().tokenIdsOfOwner(_owner);
         output = new ForgeQueueItem[](tokenIds.length);
         uint256 counter;
 
@@ -299,7 +319,7 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
 
     function availableToForge(uint256 itemId) public view returns(bool available) {
         require(itemId < WEARABLE_GAP_OFFSET, "ForgeFacet: only valid for schematics");
-        available = wearablesFacet.balanceOf(s.FORGE_DIAMOND, itemId) - s.itemForging[itemId] > 0;
+        available = wearablesFacet().balanceOf(s.FORGE_DIAMOND, itemId) - s.itemForging[itemId] > 0;
     }
 
 
@@ -315,13 +335,13 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
 
     function _mintItem(address account, uint256 id, uint256 amount) internal {
         // mint doesnt exceed max supply
-        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
+//        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
         _mint(account, id, amount, "");
     }
 
     function adminMint(address account, uint256 id, uint256 amount) external onlyDaoOrOwner {
         // mint doesnt exceed max supply
-        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
+//        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
         _mint(account, id, amount, "");
     }
 //    function _mintBatchItems(address to, uint256[] memory ids, uint256[] memory amounts) internal {
