@@ -285,17 +285,17 @@ task(
         }
       }
 
-      if (hre.network.name !== "hardhat") {
-        console.log("Verifying Addresses");
-        await delay(60000);
+      // if (hre.network.name !== "hardhat") {
+      //   console.log("Verifying Addresses");
+      //   await delay(60000);
 
-        for (let x = 0; x < cut.length; x++) {
-          console.log("Addresses to be verified: ", cut[x].facetAddress);
-          await hre.run("verify:verify", {
-            address: cut[x].facetAddress,
-            constructorArguments: [],
-          });
-        }
-      }
+      //   for (let x = 0; x < cut.length; x++) {
+      //     console.log("Addresses to be verified: ", cut[x].facetAddress);
+      //     await hre.run("verify:verify", {
+      //       address: cut[x].facetAddress,
+      //       constructorArguments: [],
+      //     });
+      //   }
+      // }
     }
   );
