@@ -12,7 +12,10 @@ export async function upgrade() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "LendingGetterAndSetterFacet",
-      addSelectors: [],
+      addSelectors: [
+        `function getLentTokenIdsOfLender(address _lender) external view returns (uint32[] memory tokenIds_)`,
+        `function balanceOfLentGotchis(address _lender) external view returns (uint256 balance_)`,
+      ],
       removeSelectors: [],
     },
   ];
