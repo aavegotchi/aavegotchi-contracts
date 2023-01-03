@@ -1,5 +1,15 @@
 import { ethers } from "hardhat";
 import { BigNumber, BigNumberish } from "ethers";
+import { request } from "graphql-request";
+import { snapshotGraphUrl } from "./constants";
+
+interface ProposalTitle {
+  proposals: [
+    {
+      title: string;
+    }
+  ];
+}
 
 export async function impersonateSigner(network: any, address: string) {
   await network.provider.request({
@@ -27,4 +37,22 @@ export async function impersonateAndFundSigner(
 ) {
   await fundSigner(network, address, amount);
   return await impersonateSigner(network, address);
+}
+
+export async function propType(id: string): Promise<"coreprop" | "sigprop"> {
+  const query = `query {
+    proposals( where:{
+      id_in:["${id}"],
+    },
+    ){
+  title}
+  }`;
+  const res: ProposalTitle = await request(snapshotGraphUrl, query);
+  console.log(res.proposals[0]);
+
+  if (res.proposals[0].title.includes("AGIP")) {
+    return "coreprop";
+  } else {
+    return "sigprop";
+  }
 }
