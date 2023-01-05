@@ -27,6 +27,7 @@
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.9.6",
     "chai": "^4.3.4",
+    "defender-relay-client": "^1.37.0",
     "diamond-util": "^1.1.1",
     "dotenv": "^8.2.0",
     "ethereum-waffle": "^3.3.0",

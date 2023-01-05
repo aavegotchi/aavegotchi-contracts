@@ -1,8 +1,13 @@
 import { ethers } from "hardhat";
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumberish } from "ethers";
 import { request } from "graphql-request";
 import { snapshotGraphUrl } from "./constants";
-
+const {
+  DefenderRelayProvider,
+  DefenderRelaySigner,
+} = require("defender-relay-client/lib/ethers");
+import * as dotenv from "dotenv";
+dotenv.config();
 interface ProposalTitle {
   proposals: [
     {
@@ -55,4 +60,19 @@ export async function propType(id: string): Promise<"coreprop" | "sigprop"> {
   } else {
     return "sigprop";
   }
+}
+
+export interface RelayerInfo {
+  apiKey: string;
+  apiSecret: string;
+}
+
+export function getRelayerSigner() {
+  const credentials: RelayerInfo = {
+    apiKey: process.env.DEFENDER_APIKEY!,
+    apiSecret: process.env.DEFENDER_APIKEY!,
+  };
+
+  const provider = new DefenderRelayProvider(credentials);
+  return new DefenderRelaySigner(credentials, provider);
 }

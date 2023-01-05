@@ -8,6 +8,7 @@ import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import request from "graphql-request";
 import { NonceManager } from "@ethersproject/experimental";
+import { getRelayerSigner } from "../helpers/helpers";
 
 export const currentOverrides: string[] = [
   "0xC0Ab521Fa3FF034029C206eEBbb481E06c8d8BB5",
@@ -147,7 +148,7 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
         signer = await hre.ethers.provider.getSigner(gameManager);
       } else if (hre.network.name === "matic") {
         const accounts = await hre.ethers.getSigners();
-        signer = accounts[0]; /* new LedgerSigner(
+        signer = getRelayerSigner(); /* new LedgerSigner(
           hre.ethers.provider,
           "hid",
           "m/44'/60'/2'/0/0"
