@@ -1,7 +1,13 @@
 import { Signer } from "@ethersproject/abstract-signer";
 import { Contract } from "@ethersproject/contracts";
+import request from "graphql-request";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { snapshotGraphUrl } from "../helpers/constants";
 import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
+const {
+  DefenderRelayProvider,
+  DefenderRelaySigner,
+} = require("defender-relay-client/lib/ethers");
 
 export const gasPrice = 270000000000;
 
@@ -207,4 +213,44 @@ export async function hasDuplicateGotchiIds(_array: string[]) {
     valuesSoFar[value] = true;
   }
   return false;
+}
+
+interface ProposalTitle {
+  proposals: [
+    {
+      title: string;
+    }
+  ];
+}
+export async function propType(id: string): Promise<"coreprop" | "sigprop"> {
+  const query = `query {
+    proposals( where:{
+      id_in:["${id}"],
+    },
+    ){
+  title}
+  }`;
+  const res: ProposalTitle = await request(snapshotGraphUrl, query);
+  console.log(res.proposals[0]);
+
+  if (res.proposals[0].title.includes("AGIP")) {
+    return "coreprop";
+  } else {
+    return "sigprop";
+  }
+}
+
+export interface RelayerInfo {
+  apiKey: string;
+  apiSecret: string;
+}
+
+export function getRelayerSigner() {
+  const credentials: RelayerInfo = {
+    apiKey: process.env.DEFENDER_APIKEY!,
+    apiSecret: process.env.DEFENDER_APIKEY!,
+  };
+
+  const provider = new DefenderRelayProvider(credentials);
+  return new DefenderRelaySigner(credentials, provider);
 }

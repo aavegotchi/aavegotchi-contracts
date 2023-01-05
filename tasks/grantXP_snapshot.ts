@@ -8,7 +8,7 @@ import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import request from "graphql-request";
 import { NonceManager } from "@ethersproject/experimental";
-import { getRelayerSigner } from "../helpers/helpers";
+import { getRelayerSigner } from "../scripts/helperFunctions";
 
 export const currentOverrides: string[] = [
   "0xC0Ab521Fa3FF034029C206eEBbb481E06c8d8BB5",
