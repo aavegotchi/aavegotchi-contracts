@@ -222,18 +222,8 @@ interface ProposalTitle {
     }
   ];
 }
-export async function propType(id: string): Promise<"coreprop" | "sigprop"> {
-  const query = `query {
-    proposals( where:{
-      id_in:["${id}"],
-    },
-    ){
-  title}
-  }`;
-  const res: ProposalTitle = await request(snapshotGraphUrl, query);
-  console.log(res.proposals[0]);
-
-  if (res.proposals[0].title.includes("AGIP")) {
+export function propType(title: string): "coreprop" | "sigprop" {
+  if (title.includes("AGIP")) {
     return "coreprop";
   } else {
     return "sigprop";

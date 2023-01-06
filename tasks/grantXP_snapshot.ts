@@ -9,6 +9,7 @@ import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import request from "graphql-request";
 import { NonceManager } from "@ethersproject/experimental";
 import { getRelayerSigner } from "../scripts/helperFunctions";
+import { snapshotGraphUrl } from "../helpers/constants";
 
 export const currentOverrides: string[] = [
   "0xC0Ab521Fa3FF034029C206eEBbb481E06c8d8BB5",
@@ -33,7 +34,6 @@ interface Voter {
   voter: string;
 }
 
-const snapshotHub = "https://hub.snapshot.org/graphql";
 
 const graphqlRequest = (proposalId: string) => {
   return `
@@ -58,7 +58,7 @@ const graphqlRequest = (proposalId: string) => {
 
 async function getVotingAddresses(proposalId: string) {
   let votingAddresses: string[] = [];
-  const addresses = await request(snapshotHub, graphqlRequest(proposalId));
+  const addresses = await request(snapshotGraphUrl, graphqlRequest(proposalId));
 
   addresses.first1000.forEach((voter: Voter) => {
     votingAddresses.push(voter.voter);
@@ -97,7 +97,7 @@ async function getProposalDetails(proposalId: string) {
   }}
   `;
 
-  const res = await request(snapshotHub, query);
+  const res = await request(snapshotGraphUrl, query);
 
   return res.proposal;
 }
@@ -115,8 +115,6 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
       hre: HardhatRuntimeEnvironment
     ) => {
       const proposalId: string = taskArgs.proposalId;
-      const proposalType = await propType(proposalId);
-      const xpAmount: number = proposalType === "sigprop" ? 10 : 20;
       const exceptions = currentOverrides;
       const batchSize: number = Number(taskArgs.batchSize);
 
@@ -129,6 +127,8 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
       }
 
       const propDetails: ProposalDetails = await getProposalDetails(proposalId);
+      const proposalType = await propType(propDetails.title);
+      const xpAmount: number = proposalType === "sigprop" ? 10 : 20;
 
       if (propDetails.votes + exceptions.length !== addresses.length) {
         throw new Error("Proposal voter count doesn't match");
