@@ -1,5 +1,5 @@
 import { run } from "hardhat";
-import { propType } from "../../../helpers/helpers";
+import { propType } from "../../helperFunctions";
 import { GrantXPSnapshotTaskArgs } from "../../../tasks/grantXP_snapshot";
 
 async function grantXP() {
@@ -7,7 +7,6 @@ async function grantXP() {
     "0x3f162f96d0bf396cb2cc3f9f39818cbaee7747441e0c50785b84aa243797b940";
   const taskArgs: GrantXPSnapshotTaskArgs = {
     proposalId: id,
-    propType: await propType(id),
     batchSize: "500",
   };
   await run("grantXP_snapshot", taskArgs);

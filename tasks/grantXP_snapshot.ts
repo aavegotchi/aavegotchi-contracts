@@ -1,6 +1,6 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { gasPrice, maticDiamondAddress } from "../scripts/helperFunctions";
+import { gasPrice, maticDiamondAddress,propType } from "../scripts/helperFunctions";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
@@ -20,7 +20,6 @@ export const currentOverrides: string[] = [
 
 export interface GrantXPSnapshotTaskArgs {
   proposalId: string;
-  propType: "coreprop" | "sigprop";
   batchSize: string;
 }
 
@@ -105,7 +104,6 @@ async function getProposalDetails(proposalId: string) {
 
 task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
   .addParam("proposalId", "ID of the Snapshot proposal")
-  .addParam("propType", "sigprop or coreprop")
   .addParam(
     "batchSize",
     "How many Aavegotchis to send at a time. Default is 500"
@@ -117,7 +115,8 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
       hre: HardhatRuntimeEnvironment
     ) => {
       const proposalId: string = taskArgs.proposalId;
-      const xpAmount: number = taskArgs.propType === "sigprop" ? 10 : 20;
+      const proposalType = await propType(proposalId);
+      const xpAmount: number = proposalType === "sigprop" ? 10 : 20;
       const exceptions = currentOverrides;
       const batchSize: number = Number(taskArgs.batchSize);
 
@@ -147,7 +146,7 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
         });
         signer = await hre.ethers.provider.getSigner(gameManager);
       } else if (hre.network.name === "matic") {
-        const accounts = await hre.ethers.getSigners();
+        //  const accounts = await hre.ethers.getSigners();
         signer = getRelayerSigner(); /* new LedgerSigner(
           hre.ethers.provider,
           "hid",
@@ -166,7 +165,7 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
 
       const batches = Math.ceil(tokenIds.length / batchSize);
 
-      console.log(`Deploying ${taskArgs.propType}: ${propDetails.title}!!!`);
+      console.log(`Deploying ${proposalType}: ${propDetails.title}!!!`);
 
       console.log(
         `Sending ${xpAmount} XP to ${tokenIds.length} Aavegotchis in ${finalUsers.length} addresses!`
