@@ -44,6 +44,7 @@ export async function deployAndUpgradeForgeDiamond() {
                 "function getSmithingLevelMultiplierBips(uint256 gotchiId) public view returns (uint256)",
                 "function getAavegotchiSmithingSkillPts(uint256 gotchiId) public view returns (uint256)",
                 "function coreTokenIdFromRsm(uint8 rarityScoreModifier) public pure returns (uint256 tokenId)",
+                "function geodeTokenIdFromRsm(uint8 rarityScoreModifier) public pure returns (uint256 tokenId)",
                 // "function smeltAlloyMintAmount (uint8 rarityScoreModifier) public view returns (uint256 alloy)",
                 "function smeltWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds) external",
                 "function claimForgeQueueItems(uint256[] calldata gotchiIds) external",
@@ -86,6 +87,7 @@ export async function deployAndUpgradeForgeDiamond() {
                 "function setForgeEssenceCost (tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) calldata costs) external",
                 "function setForgeTimeCostInBlocks (tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) calldata costs) external",
                 "function setSkillPointsEarnedFromForge (tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) calldata points) external",
+                "function setGeodeWinChance (tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) calldata chances) external",
                 "function setSmeltingSkillPointReductionFactorBips(uint256 bips) external",
                 // "function setMaxSupplyPerToken(uint256[] calldata tokenIDs, uint256[] calldata supplyAmts) external"
             ],

@@ -15,6 +15,7 @@ contract ForgeDAOFacet is Modifiers {
     event SetForgeEssenceCost(RarityValueIO newCosts);
     event SetForgeTimeCostInBlocks(RarityValueIO newCosts);
     event SetSkillPointsEarnedFromForge(RarityValueIO newPoints);
+    event SetGeodeWinChance(RarityValueIO newChances);
     event SetSmeltingSkillPointReductionFactorBips(uint256 oldBips, uint256 newBips);
     event SetMaxSupplyPerToken(uint256[] tokenIds, uint256[] supplyPerTokenId);
 
@@ -105,6 +106,19 @@ contract ForgeDAOFacet is Modifiers {
         s.skillPointsEarnedFromForge[GODLIKE_RSM] = points.godlike;
 
         emit SetSkillPointsEarnedFromForge(points);
+    }
+
+    // @notice Allow DAO to update percent chance to win from a Geode.
+    // @param points RarityValueIO struct of points
+    function setGeodeWinChance (RarityValueIO calldata chances) external onlyDaoOrOwner {
+        s.geodeWinChance[COMMON_RSM] = chances.common;
+        s.geodeWinChance[UNCOMMON_RSM] = chances.uncommon;
+        s.geodeWinChance[RARE_RSM] = chances.rare;
+        s.geodeWinChance[LEGENDARY_RSM] = chances.legendary;
+        s.geodeWinChance[MYTHICAL_RSM] = chances.mythical;
+        s.geodeWinChance[GODLIKE_RSM] = chances.godlike;
+
+        emit SetGeodeWinChance(chances);
     }
 
     // @notice Allow DAO to update skill points gained from smelting.

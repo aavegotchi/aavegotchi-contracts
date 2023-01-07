@@ -139,6 +139,25 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         }
     }
 
+    // @notice Get the specific Geode token ID given an Aavegotchi rarity score modifier.
+    function geodeTokenIdFromRsm(uint8 rarityScoreModifier) public pure returns (uint256 tokenId){
+        if (rarityScoreModifier == COMMON_RSM){
+            tokenId = GEODE_COMMON;
+        } else if (rarityScoreModifier == UNCOMMON_RSM){
+            tokenId = GEODE_UNCOMMON;
+        } else if (rarityScoreModifier == RARE_RSM){
+            tokenId = GEODE_RARE;
+        } else if (rarityScoreModifier == LEGENDARY_RSM){
+            tokenId = GEODE_LEGENDARY;
+        } else if (rarityScoreModifier == MYTHICAL_RSM){
+            tokenId = GEODE_MYTHICAL;
+        } else if (rarityScoreModifier == GODLIKE_RSM){
+            tokenId = GEODE_GODLIKE;
+        } else {
+            revert("Invalid rarity score modifier");
+        }
+    }
+
 //    function smeltAlloyMintAmount (uint8 rarityScoreModifier) public view returns (uint256 alloy){
 //        alloy = s.forgeAlloyCost[rarityScoreModifier] * (1 - ((s.alloyBurnFeeInBips + s.alloyDaoFeeInBips) / 10000));
 //    }
@@ -171,6 +190,9 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
 
         //mint core
         _mintItem(sender, coreTokenIdFromRsm(itemType.rarityScoreModifier), 1);
+
+        //mint geode
+        _mintItem(sender, geodeTokenIdFromRsm(itemType.rarityScoreModifier), 1);
 
         // add smithing skill
         s.gotchiSmithingSkillPoints[gotchiId] +=

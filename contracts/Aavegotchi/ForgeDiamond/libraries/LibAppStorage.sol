@@ -21,6 +21,14 @@ uint256 constant CORE_LEGENDARY = WEARABLE_GAP_OFFSET + 5;
 uint256 constant CORE_MYTHICAL = WEARABLE_GAP_OFFSET + 6;
 uint256 constant CORE_GODLIKE = WEARABLE_GAP_OFFSET + 7;
 
+uint256 constant GEODE_COMMON = WEARABLE_GAP_OFFSET + 8;
+uint256 constant GEODE_UNCOMMON = WEARABLE_GAP_OFFSET + 9;
+uint256 constant GEODE_RARE = WEARABLE_GAP_OFFSET + 10;
+uint256 constant GEODE_LEGENDARY = WEARABLE_GAP_OFFSET + 11;
+uint256 constant GEODE_MYTHICAL = WEARABLE_GAP_OFFSET + 12;
+uint256 constant GEODE_GODLIKE = WEARABLE_GAP_OFFSET + 13;
+
+
 //////////
 //////////
 //////////
@@ -88,6 +96,8 @@ struct AppStorage {
     mapping(uint8 => uint256) forgeTimeCostInBlocks;
     // Map rarity score modifier (which denotes item rarity) to number of skill points earned for successful forging.
     mapping(uint8 => uint256) skillPointsEarnedFromForge;
+    // Map rarity score modifier (which denotes item rarity) to percent chance (in bips) to win a prize.
+    mapping(uint8 => uint256) geodeWinChance;
     // Reduction factor for skillPointsEarnedFromForge for smelting.
     uint256 smeltingSkillPointReductionFactorBips;
 
