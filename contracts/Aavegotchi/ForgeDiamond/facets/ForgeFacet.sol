@@ -249,10 +249,12 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
             GotchiForging memory gf = GotchiForging(true, s.forgeQueueId);
             s.gotchiForging[gotchiId] = gf;
 
+            s.forgeQueueId += 1;
+
             // keep track of which items are in queue.
             s.itemForging[itemId] += 1;
 
-            emit AddedToQueue(sender, itemId, gotchiId, readyBlock, s.forgeQueueId);
+            emit AddedToQueue(sender, itemId, gotchiId, readyBlock, newQueueItem.id);
         }
     }
 
