@@ -130,7 +130,7 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
 
       console.log("Proposal type:", proposalType);
 
-      const xpAmount: number = 0; //proposalType === "sigprop" ? 10 : 20;
+      const xpAmount: number = proposalType === "sigprop" ? 10 : 20;
 
       if (propDetails.votes + exceptions.length !== addresses.length) {
         throw new Error("Proposal voter count doesn't match");
