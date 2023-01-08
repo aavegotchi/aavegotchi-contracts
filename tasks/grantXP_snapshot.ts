@@ -1,22 +1,22 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { gasPrice, maticDiamondAddress,propType } from "../scripts/helperFunctions";
+import {
+  gasPrice,
+  maticDiamondAddress,
+  propType,
+  xpRelayerAddress,
+} from "../scripts/helperFunctions";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 
 import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import request from "graphql-request";
-import { NonceManager } from "@ethersproject/experimental";
 import { getRelayerSigner } from "../scripts/helperFunctions";
 import { snapshotGraphUrl } from "../helpers/constants";
 
 export const currentOverrides: string[] = [
-  "0xC0Ab521Fa3FF034029C206eEBbb481E06c8d8BB5",
-  "0xA2faa3405a734c04aE713AAa837E6cEcC2cAee9F",
-  "0x77F4e1c69EfB78625244DD1c7d9e05B7411a7768",
-  "0xb9ff017c875f5c39d0018d1df86fbd92943d5b82",
-  "0x1EA25519e4829Bf579a58F133C4bF31e7e6F7565",
+  "0x4d6e3Ff00F77F6e746eBF7f6827800eB99e36910",
 ];
 
 export interface GrantXPSnapshotTaskArgs {
@@ -33,7 +33,6 @@ export interface ProposalDetails {
 interface Voter {
   voter: string;
 }
-
 
 const graphqlRequest = (proposalId: string) => {
   return `
@@ -128,14 +127,17 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
 
       const propDetails: ProposalDetails = await getProposalDetails(proposalId);
       const proposalType = await propType(propDetails.title);
-      const xpAmount: number = proposalType === "sigprop" ? 10 : 20;
+
+      console.log("Proposal type:", proposalType);
+
+      const xpAmount: number = 0; //proposalType === "sigprop" ? 10 : 20;
 
       if (propDetails.votes + exceptions.length !== addresses.length) {
         throw new Error("Proposal voter count doesn't match");
       }
 
       const diamondAddress = maticDiamondAddress;
-      const gameManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
+      const gameManager = xpRelayerAddress;
       console.log(gameManager);
       let signer: Signer;
       const testing = ["hardhat", "localhost"].includes(hre.network.name);
@@ -156,8 +158,6 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
         throw Error("Incorrect network selected");
       }
 
-      const managedSigner = new NonceManager(signer);
-
       const { tokenIds, finalUsers } = await getPolygonAndMainnetGotchis(
         addresses,
         hre
@@ -173,12 +173,10 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
 
       const dao = (
         await hre.ethers.getContractAt("DAOFacet", diamondAddress)
-      ).connect(managedSigner) as DAOFacet;
+      ).connect(signer) as DAOFacet;
 
       for (let index = 0; index < batches; index++) {
         console.log("Current batch id:", index);
-
-        // if (index < 1) continue;
 
         const offset = batchSize * index;
         const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
@@ -189,15 +187,14 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
 
         const tx: ContractTransaction = await dao.grantExperience(
           sendTokenIds,
-          Array(sendTokenIds.length).fill(xpAmount),
-          { gasPrice: gasPrice }
+          Array(sendTokenIds.length).fill(xpAmount)
         );
         console.log("tx:", tx.hash);
-        const receipt: ContractReceipt = await tx.wait();
+        // const receipt: ContractReceipt = await tx.wait();
         // console.log("Gas used:", strDisplay(receipt.gasUsed.toString()));
-        if (!receipt.status) {
-          throw Error(`Error:: ${tx.hash}`);
-        }
+        // if (!receipt.status) {
+        //   throw Error(`Error:: ${tx.hash}`);
+        // }
         console.log(
           "Airdropped XP to Aaavegotchis. Last tokenID:",
           sendTokenIds[sendTokenIds.length - 1]

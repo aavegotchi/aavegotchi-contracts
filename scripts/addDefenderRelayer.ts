@@ -2,7 +2,12 @@ import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { BigNumber, Signer } from "ethers";
 import { ethers, network } from "hardhat";
 import { DAOFacet, OwnershipFacet } from "../typechain";
-import { impersonate, maticDiamondAddress } from "./helperFunctions";
+import {
+  gasPrice,
+  impersonate,
+  maticDiamondAddress,
+  xpRelayerAddress,
+} from "./helperFunctions";
 
 async function main() {
   let signer: Signer = new LedgerSigner(ethers.provider);
@@ -19,12 +24,9 @@ async function main() {
     signer = await ethers.provider.getSigner(owner);
   }
 
-  if (network.name === "matic") {
-    signer = (await ethers.getSigners())[0];
-  }
-
-  const defenderRelayer = "0xb6384935d68e9858f8385ebeed7db84fc93b1420";
-  const limit = BigNumber.from("100");
+  // if (network.name === "matic") {
+  //   signer =
+  // }
 
   console.log("Making the relayer a gameManager " + maticDiamondAddress);
 
@@ -33,6 +35,9 @@ async function main() {
     maticDiamondAddress,
     signer
   )) as DAOFacet;
+
+  const owner = await diamond.owner();
+  console.log("owner:", owner);
 
   if (network.name === "hardhat") {
     diamond = await impersonate(
@@ -43,7 +48,9 @@ async function main() {
     );
   }
 
-  const tx = await daoFacet.addGameManagers([defenderRelayer], [limit]);
+  const tx = await daoFacet.addGameManagers([xpRelayerAddress], [1000000], {
+    gasPrice: gasPrice,
+  });
   const tx2 = await tx.wait();
   console.log("Transaction hash: " + tx2.transactionHash);
   console.log("Relayer added as game manager");

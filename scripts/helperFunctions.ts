@@ -4,10 +4,11 @@ import request from "graphql-request";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { snapshotGraphUrl } from "../helpers/constants";
 import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
-const {
+
+import {
   DefenderRelayProvider,
   DefenderRelaySigner,
-} = require("defender-relay-client/lib/ethers");
+} from "defender-relay-client/lib/ethers";
 
 export const gasPrice = 270000000000;
 
@@ -223,7 +224,7 @@ interface ProposalTitle {
   ];
 }
 export function propType(title: string): "coreprop" | "sigprop" {
-  if (title.includes("AGIP")) {
+  if (title.includes("[AGIP]")) {
     return "coreprop";
   } else {
     return "sigprop";
@@ -235,12 +236,17 @@ export interface RelayerInfo {
   apiSecret: string;
 }
 
+export const xpRelayerAddress = "0xb6384935d68e9858f8385ebeed7db84fc93b1420";
+
 export function getRelayerSigner() {
   const credentials: RelayerInfo = {
     apiKey: process.env.DEFENDER_APIKEY!,
-    apiSecret: process.env.DEFENDER_APIKEY!,
+    apiSecret: process.env.DEFENDER_SECRET!,
   };
 
   const provider = new DefenderRelayProvider(credentials);
-  return new DefenderRelaySigner(credentials, provider);
+  return new DefenderRelaySigner(credentials, provider, {
+    speed: "fast",
+    validForSeconds: 3600,
+  });
 }
