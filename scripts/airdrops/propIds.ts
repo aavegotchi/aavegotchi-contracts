@@ -34,6 +34,14 @@ const sigProps = [
     title:
       "SigProp: Create AavegotchiDAO Foundation with 9 Directors/multisig signers",
   },
+  {
+    id: "0x9ea87c07638280312a87f9e59f795710bd982e44214b5d796e9502bc3362e4e8",
+    title: "Rarity Farm Season 5",
+  },
+  {
+    id: "0x894039351d89063285281b2d941c7b5ffc2dcde5899b981785843fe7bc3eb37c",
+    title: "implement original KINSHIP mechanics  (economical change)",
+  },
 ];
 
 const coreProps = [
@@ -70,5 +78,17 @@ const coreProps = [
   {
     id: "0x345ddec87f19d29b438ac88d0f947798af6edadbe1116cb64f96edc931f06fb3",
     title: "[AGIP 50] Create AavegotchiDAO Foundation",
+  },
+  {
+    id: "0x8285f38e7d49580b73b0040d96984c6284c0f453d6e2abfc7f64e7c51a6ec774",
+    title: "KEEP AGIP51 RESULTS OR REVOTE WITHOUT RECUSED APPLICANTS",
+  },
+  {
+    id: "0x84119ecd3be2cd0fd2382ffaf2db0490967b3456ff19695e6629fdeeb9058dbb",
+    title: "[AGIP52] Rarity Farming Season 5",
+  },
+  {
+    id: "0xfb3766f05a6990514c618db06c2a74d8fd36298694740799e2dd23424a297115",
+    title: "[AGIP 53] Channel Alchemica by Burning Kinship",
   },
 ];
