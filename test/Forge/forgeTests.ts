@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
-import {ForgeDAOFacet, ForgeFacet, WearablesFacet, CollateralFacet, DAOFacet, ItemsFacet, IERC20} from "../../typechain";
+import {ForgeDAOFacet, ForgeFacet, ForgeTokenFacet, WearablesFacet, CollateralFacet, DAOFacet, ItemsFacet, IERC20} from "../../typechain";
 import { deployAndUpgradeForgeDiamond } from "../../scripts/upgrades/upgrade-deployAndUpgradeForgeDiamond";
 import { impersonate, maticDiamondAddress } from "../../scripts/helperFunctions";
 import {JsonRpcSigner} from "@ethersproject/providers";
@@ -22,10 +22,18 @@ const CORE_LEGENDARY = WEARABLE_GAP_OFFSET + 5;
 const CORE_MYTHICAL = WEARABLE_GAP_OFFSET + 6;
 const CORE_GODLIKE = WEARABLE_GAP_OFFSET + 7;
 
+const GEODE_COMMON = WEARABLE_GAP_OFFSET + 8;
+const GEODE_UNCOMMON = WEARABLE_GAP_OFFSET + 9;
+const GEODE_RARE = WEARABLE_GAP_OFFSET + 10;
+const GEODE_LEGENDARY = WEARABLE_GAP_OFFSET + 11;
+const GEODE_MYTHICAL = WEARABLE_GAP_OFFSET + 12;
+const GEODE_GODLIKE = WEARABLE_GAP_OFFSET + 13;
+
 
 describe("Testing Forge", async function () {
     let signer: JsonRpcSigner, signer2: JsonRpcSigner;
     let testUser = "0x60c4ae0EE854a20eA7796a9678090767679B30FC";
+    let felonOwner = "0x60eD33735C9C29ec2c26B8eC734e36D5B6fa1EAB"
     let daoAddr = "0x6fb7e0AAFBa16396Ad6c1046027717bcA25F821f"; // DTF multisig
     let WEARABLE_DIAMOND = "0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f"
     let GLTR = "0x3801C3B3B5c98F88a9c9005966AA96aa440B9Afc"
@@ -33,6 +41,8 @@ describe("Testing Forge", async function () {
     let forgeDiamondAddress: string;
     let forgeFacet: ForgeFacet;
     let forgeDaoFacet: ForgeDAOFacet;
+    let forgeTokenFacet: ForgeTokenFacet;
+    // let forgeVrfFacet: ForgeVRFFacet;
     let wearablesFacet: WearablesFacet;
     let collateralFacet: CollateralFacet;
     let itemsFacet: ItemsFacet;
@@ -56,6 +66,14 @@ describe("Testing Forge", async function () {
             "contracts/Aavegotchi/ForgeDiamond/facets/ForgeDAOFacet.sol:ForgeDAOFacet",
             forgeDiamondAddress
         )) as ForgeDAOFacet;
+        forgeTokenFacet = (await ethers.getContractAt(
+            "contracts/Aavegotchi/ForgeDiamond/facets/ForgeTokenFacet.sol:ForgeTokenFacet",
+            forgeDiamondAddress
+        )) as ForgeTokenFacet;
+        // forgeVrfFacet = (await ethers.getContractAt(
+        //     "contracts/Aavegotchi/ForgeDiamond/facets/ForgeVRFFacet.sol:ForgeVRFFacet",
+        //     forgeDiamondAddress
+        // )) as ForgeVRFFacet;
         wearablesFacet = (await ethers.getContractAt(
             "contracts/Aavegotchi/WearableDiamond/facets/WearablesFacet.sol:WearablesFacet",
             WEARABLE_DIAMOND
@@ -83,7 +101,6 @@ describe("Testing Forge", async function () {
         await impOwner.setForge(forgeDiamondAddress);
 
         await forgeDaoFacet.setGltrAddress(GLTR);
-        await forgeDaoFacet.setForgeDiamondAddress(forgeDiamondAddress);
         await forgeDaoFacet.setAavegotchiDaoAddress(daoAddr);
         await forgeDaoFacet.setAlloyDaoFeeInBips(500);
         await forgeDaoFacet.setAlloyBurnFeeInBips(500);
@@ -120,18 +137,30 @@ describe("Testing Forge", async function () {
             mythical: 1000,
             godlike: 5200,
         }
+        // let geodeChances = {
+        //     common: 79,
+        //     uncommon: 235,
+        //     rare: 982,
+        //     legendary: 3439,
+        //     mythical: 8630,
+        //     godlike: 10000
+        // }
 
         await forgeDaoFacet.setForgeAlloyCost(alloyCosts);
         await forgeDaoFacet.setForgeEssenceCost(essenceCost);
         await forgeDaoFacet.setForgeTimeCostInBlocks(timeCost);
         await forgeDaoFacet.setSkillPointsEarnedFromForge(skillPts);
         await forgeDaoFacet.setSmeltingSkillPointReductionFactorBips(5000);
+        // await forgeDaoFacet.setGeodeWinChance(geodeChances);
+        // await forgeDaoFacet.setGeodePrizes([1], [1]);.
 
 
         // approve for test user
         let imp: WearablesFacet = await impersonate(testUser, wearablesFacet, ethers, network)
         await imp.setApprovalForAll(forgeDiamondAddress, true);
 
+        let impTestGltr: IERC20 = await impersonate(testUser, gltrContract, ethers, network)
+        await impTestGltr.approve(forgeDiamondAddress, "9999999999999999999999999999");
     })
 
     it('should adminMint and return total supply', async function () {
@@ -141,7 +170,7 @@ describe("Testing Forge", async function () {
 
         for (let i = 0; i < ids.length; i++) {
             await forgeFacet.adminMint(forgeDiamondAddress, ids[i], amts[i]);
-            expect(await forgeFacet.totalSupply(ids[i])).to.be.equal(supplies[i]);
+            expect(await forgeTokenFacet.totalSupply(ids[i])).to.be.equal(supplies[i]);
         }
     });
 
@@ -190,18 +219,23 @@ describe("Testing Forge", async function () {
             expect(await wearablesFacet.balanceOf(forgeDiamondAddress, items[2])).to.be.equal(1)
 
             // Check correct new balances of all items
-            expect(await forgeFacet.balanceOf(testUser, ALLOY)).to.be.equal(1530) // 90 + 270 + 1170
-            expect(await forgeFacet.balanceOf(daoAddr, ALLOY)).to.be.equal(85) // 5 + 15 + 65
+            expect(await forgeTokenFacet.balanceOf(testUser, ALLOY)).to.be.equal(1530) // 90 + 270 + 1170
+            expect(await forgeTokenFacet.balanceOf(daoAddr, ALLOY)).to.be.equal(85) // 5 + 15 + 65
 
             // schematics
-            expect(await forgeFacet.balanceOf(testUser, items[0])).to.be.equal(1)
-            expect(await forgeFacet.balanceOf(testUser, items[1])).to.be.equal(1)
-            expect(await forgeFacet.balanceOf(testUser, items[2])).to.be.equal(1)
+            expect(await forgeTokenFacet.balanceOf(testUser, items[0])).to.be.equal(1)
+            expect(await forgeTokenFacet.balanceOf(testUser, items[1])).to.be.equal(1)
+            expect(await forgeTokenFacet.balanceOf(testUser, items[2])).to.be.equal(1)
 
             // cores
-            expect(await forgeFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(1)
-            expect(await forgeFacet.balanceOf(testUser, CORE_RARE)).to.be.equal(1)
-            expect(await forgeFacet.balanceOf(testUser, CORE_COMMON)).to.be.equal(1)
+            expect(await forgeTokenFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(1)
+            expect(await forgeTokenFacet.balanceOf(testUser, CORE_RARE)).to.be.equal(1)
+            expect(await forgeTokenFacet.balanceOf(testUser, CORE_COMMON)).to.be.equal(1)
+
+            // geodes
+            expect(await forgeTokenFacet.balanceOf(testUser, GEODE_UNCOMMON)).to.be.equal(1)
+            expect(await forgeTokenFacet.balanceOf(testUser, GEODE_RARE)).to.be.equal(1)
+            expect(await forgeTokenFacet.balanceOf(testUser, GEODE_COMMON)).to.be.equal(1)
 
             // smithing skill + level
             expect(await forgeFacet.getAavegotchiSmithingSkillPts(gotchis[0])).to.be.equal(34)
@@ -209,16 +243,24 @@ describe("Testing Forge", async function () {
             expect(await forgeFacet.getAavegotchiSmithingLevel(gotchis[0])).to.be.equal(2)
             expect(await forgeFacet.getSmithingLevelMultiplierBips(gotchis[0])).to.be.equal(9700);
 
-            // smelt again for next level and recheck balances
-            await imp.smeltWearables([157], [7735])
+            // smelt again for next level, forge to get items back, and recheck balances
+            await imp.smeltWearables([157], [gotchis[0]])
 
+            expect(await forgeTokenFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(2)
+            expect(await forgeTokenFacet.balanceOf(testUser, 157)).to.be.equal(2)
+            expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(15)
+
+            await imp.forgeWearables([157], [gotchis[0]], [await forgeFacet.forgeTime(gotchis[0], 2)]);
+            await imp.forgeWearables([157], [gotchis[0]], [await forgeFacet.forgeTime(gotchis[0], 2)])
+
+            // TODO: double check this section, skill pts seems to be off
             expect(await forgeFacet.getAavegotchiSmithingSkillPts(gotchis[0])).to.be.equal(40)
             expect(await forgeFacet.getAavegotchiSmithingLevel(gotchis[0])).to.be.equal(3)
             expect(await forgeFacet.getSmithingLevelMultiplierBips(gotchis[0])).to.be.equal(9410);
 
-            expect(await forgeFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(2)
-            expect(await forgeFacet.balanceOf(testUser, 157)).to.be.equal(2)
-            expect(await wearablesFacet.balanceOf(testUser, items[0])).to.be.equal(15)
+            expect(await forgeTokenFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(0)
+            expect(await forgeTokenFacet.balanceOf(testUser, 157)).to.be.equal(0)
+            expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(17)
         });
 
         it('should revert forge', async function () {
@@ -237,13 +279,12 @@ describe("Testing Forge", async function () {
 
         it('should test essence and forge queue', async function () {
             // impersonate Felon owner, smelt a godlike (Link Cube) so the contract is holding one to forge
-            let felonOwner = "0x60eD33735C9C29ec2c26B8eC734e36D5B6fa1EAB"
 
             // get nekkid
             let impItems = await impersonate(felonOwner, itemsFacet, ethers, network)
             await impItems.equipWearables(19095, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
-            console.log(await wearablesFacet.balanceOf(felonOwner, 17))
+            // console.log(await wearablesFacet.balanceOf(felonOwner, 17))
             expect(await wearablesFacet.balanceOf(felonOwner, 17)).to.be.equal(1)
 
             let impWearzFelon = await impersonate(felonOwner, wearablesFacet, ethers, network)
@@ -261,16 +302,16 @@ describe("Testing Forge", async function () {
             // obtain essence to test essence burn (sac DIFFERENT gotchi)
             let impCollFelon: CollateralFacet = await impersonate(felonOwner, collateralFacet, ethers, network)
             await impCollFelon.decreaseAndDestroy(7001, 2270)
-            expect(await forgeFacet.balanceOf(felonOwner, ESSENCE)).to.be.equal(1000)
+            expect(await forgeTokenFacet.balanceOf(felonOwner, ESSENCE)).to.be.equal(1000)
 
             await impForgeFelon.forgeWearables([17], [19095], [0])
-            expect(await forgeFacet.balanceOf(felonOwner, ESSENCE)).to.be.equal(0)
+            expect(await forgeTokenFacet.balanceOf(felonOwner, ESSENCE)).to.be.equal(0)
             expect(await wearablesFacet.balanceOf(felonOwner, 17)).to.be.equal(0)
 
             await expect(impForgeFelon.forgeWearables([17], [19095], [0])).to.be.revertedWith("ForgeFacet: Aavegotchi already forging")
 
             // check queue
-            console.log(ethers.utils.formatEther((await gltrContract.balanceOf(felonOwner)).toString()));
+            // console.log(ethers.utils.formatEther((await gltrContract.balanceOf(felonOwner)).toString()));
             await expect(impForgeFelon.claimForgeQueueItems([19095])).to.be.revertedWith("ForgeFacet: Forge item not ready")
 
             // skip 8,000,000 (0x7A1200) required blocks for godlike queue
@@ -283,18 +324,112 @@ describe("Testing Forge", async function () {
             expect(await wearablesFacet.balanceOf(forgeDiamondAddress, 17)).to.be.equal(0)
         });
 
-        it('should forge correctly', async function () {
-            let imp: ForgeFacet = await impersonate(testUser, forgeFacet, ethers, network)
+        it('should use gltr to speed up actions', async function () {
+            let impForgeFelon: ForgeFacet = await impersonate(felonOwner, forgeFacet, ethers, network)
 
-            console.log(ethers.utils.formatEther((await gltrContract.balanceOf(testUser)).toString()));
+            // console.log(ethers.utils.formatEther((await gltrContract.balanceOf(testUser)).toString()));
+            // console.log(ethers.utils.formatEther((await gltrContract.balanceOf(felonOwner)).toString()));
 
-            await imp.forgeWearables([157], [7735], [0]);
+            let impFelonWears: WearablesFacet = await impersonate(felonOwner, wearablesFacet, ethers, network)
+            await impFelonWears.setApprovalForAll(forgeDiamondAddress, true);
+
+            // get materials and skill
+            await impForgeFelon.smeltWearables([78], [11866])
+            await forgeFacet.adminMint(felonOwner, ALLOY, 30);
+
+            // test gltr
+            let impTestGltr: IERC20 = await impersonate(testUser, gltrContract, ethers, network)
+            await impTestGltr.transfer(felonOwner, ethers.utils.parseEther("200000"))
+
+            // console.log(ethers.utils.formatEther((await gltrContract.balanceOf(felonOwner)).toString()));
+
+            let impFelonGltr: IERC20 = await impersonate(felonOwner, gltrContract, ethers, network)
+            await impFelonGltr.approve(forgeDiamondAddress, "9999999999999999999999999999");
+
+            // full amount gltr needed = 98765, test with slightly less and move forward blocks to claim
+            await impForgeFelon.forgeWearables([78], [11866], [98760]);
+
+            // let queue = await impForgeFelon.getAavegotchiQueueItem(11866)
+            // console.log(queue)
 
             // gotchi can only be forging one thing at a time
-            await expect(imp.forgeWearables([157], [7735], [0])).to.be.revertedWith("ForgeFacet: Aavegotchi already forging")
+            await expect(impForgeFelon.forgeWearables([78], [11866], [0]))
+                .to.be.revertedWith("ForgeFacet: Aavegotchi already forging")
 
+            // skip remaining blocks to claim
+            await network.provider.send("hardhat_mine", ["0x4"])
+
+            expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(1)
+            expect(await wearablesFacet.balanceOf(forgeDiamondAddress, 78)).to.be.equal(1)
+
+            await expect(impForgeFelon.claimForgeQueueItems([11866]))
+                .to.emit(impForgeFelon, "ForgeQueueClaimed").withArgs("78", "11866")
+
+            expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(2)
+            expect(await wearablesFacet.balanceOf(forgeDiamondAddress, 78)).to.be.equal(0)
+
+
+            // get materials and skill again
+            await impForgeFelon.smeltWearables([78], [11866])
+            await forgeFacet.adminMint(felonOwner, ALLOY, 30);
+
+            expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(1)
+            // test with full amount gltr needed (98765)
+            await impForgeFelon.forgeWearables([78], [11866], [98765]);
+            expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(2)
+
+        });
+
+        it('should manage queue', async function () {
+            let impFelonWears: WearablesFacet = await impersonate(felonOwner, wearablesFacet, ethers, network)
+            await impFelonWears.setApprovalForAll(forgeDiamondAddress, true);
+
+            let impForgeFelon: ForgeFacet = await impersonate(felonOwner, forgeFacet, ethers, network)
+            let impForgeTest: ForgeFacet = await impersonate(testUser, forgeFacet, ethers, network)
+
+            // get materials for two users
+            expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(2)
+            await impForgeFelon.smeltWearables([78, 78], [11866, 11866])
+            await forgeFacet.adminMint(felonOwner, ALLOY, 60);
+
+            expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(17)
+            await impForgeTest.smeltWearables([157, 157], [7735, 7735])
+            await forgeFacet.adminMint(testUser, ALLOY, 60);
+
+            expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(0)
+            expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(15)
+
+            await impForgeFelon.forgeWearables([78, 78], [11866, 826], [0, 0]);
+            await impForgeTest.forgeWearables([157], [7735], [0]);
+
+            let forgeQueue = await impForgeFelon.getForgeQueue();
+            console.log(forgeQueue);
+            expect(forgeQueue.length).to.be.equal(5)
+            expect(forgeQueue.includes(f => f.claimed)).to.be.false
+
+            // skip remaining blocks to claim
+            await network.provider.send("hardhat_mine", ["0x181CC"])
+
+            await impForgeFelon.claimForgeQueueItems([11866])
+            expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(1)
+
+            console.log("-----------")
+            forgeQueue = await impForgeFelon.getForgeQueue();
+            console.log(forgeQueue);
+
+            expect(forgeQueue.filter(f => f.gotchiId == "11866")[0].claimed).to.be.true
+
+            // expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(2)
 
         });
     })
+    // describe("geodes", async function () {
+    //     it('should open a geode', async function () {
+    //         expect(await forgeVrfFacet.areGeodePrizesAvailable()).to.be.equal(true)
+    //     });
+    // })
 
+    describe("standard erc1155", async function () {
+
+    })
 });
