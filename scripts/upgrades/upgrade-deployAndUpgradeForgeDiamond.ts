@@ -51,24 +51,12 @@ export async function deployAndUpgradeForgeDiamond() {
                 "function getAavegotchiQueueItem(uint256 gotchiId) external view returns (tuple(uint256 itemId,uint256 gotchiId,bool claimed,uint40 readyBlock,uint256 id) memory)",
                 // "function getForgeQueueOfOwner(address _owner) external returns (ForgeQueueItem[] memory output)",
                 "function getForgeQueueOfOwner(address _owner) external view returns (tuple(uint256 itemId,uint256 gotchiId,bool claimed,uint40 readyBlock,uint256 id)[] memory output)",
+                "function getForgeQueue() external view returns (tuple(uint256 itemId,uint256 gotchiId,bool claimed,uint40 readyBlock,uint256 id)[] memory queue)",
                 "function forgeWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds, uint40[] calldata _gltr) external",
+                "function forgeTime(uint256 gotchiId, uint8 rsm) public view returns (uint256 forgeTime)",
                 "function availableToForge(uint256 itemId) public view returns(bool available)",
                 "function mintEssence(address owner, uint256 gotchiId) external",
                 "function adminMint(address account, uint256 id, uint256 amount) external",
-                "function pause() public",
-                "function unpause() public",
-                "function name() external pure returns (string memory)",
-                "function symbol() external pure returns (string memory)",
-                // "function supportsInterface(bytes4 interfaceId) public view returns (bool)",
-                "function uri(uint256 tokenId) public view returns (string memory)",
-                "function onERC1155Received(address,address,uint256,uint256,bytes memory) external returns (bytes4)",
-                "function onERC1155BatchReceived(address,address,uint256[] memory,uint256[] memory,bytes memory) external returns (bytes4)",
-
-                // Inherited
-                // TODO: transferFrom et al
-                "function totalSupply(uint256 id) public view returns (uint256)",
-                "function balanceOf(address account, uint256 id) public view returns (uint256)",
-
             ],
             removeSelectors: [],
         },
@@ -78,7 +66,6 @@ export async function deployAndUpgradeForgeDiamond() {
             addSelectors: [
                 "function setAavegotchiDaoAddress(address daoAddress) external",
                 "function setGltrAddress(address gltr) external",
-                "function setForgeDiamondAddress(address diamond) external",
                 "function getAlloyDaoFeeInBips() external view returns (uint256)",
                 "function setAlloyDaoFeeInBips(uint256 alloyDaoFeeInBips) external",
                 "function getAlloyBurnFeeInBips() external view returns (uint256)",
@@ -87,12 +74,43 @@ export async function deployAndUpgradeForgeDiamond() {
                 "function setForgeEssenceCost (tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) calldata costs) external",
                 "function setForgeTimeCostInBlocks (tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) calldata costs) external",
                 "function setSkillPointsEarnedFromForge (tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) calldata points) external",
-                "function setGeodeWinChance (tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) calldata chances) external",
+                // "function setGeodeWinChance (tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) calldata chances) external",
+                // "function setGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities) external",
                 "function setSmeltingSkillPointReductionFactorBips(uint256 bips) external",
+                "function pauseContract() external",
+                "function unpauseContract() external",
                 // "function setMaxSupplyPerToken(uint256[] calldata tokenIDs, uint256[] calldata supplyAmts) external"
             ],
             removeSelectors: [],
         },
+        {
+            facetName: "ForgeTokenFacet",
+            addSelectors: [
+                "function name() external pure returns (string memory)",
+                "function symbol() external pure returns (string memory)",
+                "function uri(uint256 _id) external view returns (string memory)",
+                "function setBaseURI(string memory _value) external",
+                "function totalSupply(uint256 id) public view virtual returns (uint256)",
+                "function balanceOf(address account, uint256 id) public view returns (uint256)",
+                "function balanceOfBatch(address[] memory accounts, uint256[] memory ids) public view returns (uint256[] memory)",
+                "function setApprovalForAll(address operator, bool approved) public",
+                "function isApprovedForAll(address account, address operator) public view returns (bool)",
+                "function safeTransferFrom(address from,address to,uint256 id,uint256 amount,bytes memory data) public",
+                "function safeBatchTransferFrom(address from,address to,uint256[] memory ids,uint256[] memory amounts,bytes memory data) public",
+                "function onERC1155Received(address,address,uint256,uint256,bytes memory) external",
+                "function onERC1155BatchReceived(address,address,uint256[] memory,uint256[] memory,bytes memory) external returns (bytes4)",
+            ],
+            removeSelectors: [],
+        },
+        // {
+        //     facetName: "ForgeVRFFacet",
+        //     addSelectors: [
+        //         "function areGeodePrizesAvailable() public view returns (bool)",
+        //         "function openGeodes(uint256[] calldata _geodeTokenIds) external",
+        //         "function changeVrf(uint256 _newFee,bytes32 _keyHash,address _vrfCoordinator,address _link) external"
+        //     ],
+        //     removeSelectors: [],
+        // },
     ];
 
     const joined = convertFacetAndSelectorsToString(facets);

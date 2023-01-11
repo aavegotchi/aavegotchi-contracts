@@ -1,24 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import { ERC1155 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { ERC1155URIStorage } from "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
-import { ERC1155Supply } from "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
-import { Counters } from "@openzeppelin/contracts/utils/Counters.sol";
-import { Pausable } from "@openzeppelin/contracts/security/Pausable.sol";
-//import { ERC1155Holder } from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
-import { ERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol";
 
-//import {LibItems} from "../../libraries/LibItems.sol";
-//import { Modifiers } from "../libraries/LibAppStorage.sol";
 import "../libraries/LibAppStorage.sol";
 import {WearablesFacet} from "../../WearableDiamond/facets/WearablesFacet.sol";
 import {ForgeLibDiamond} from "../libraries/ForgeLibDiamond.sol";
 import {ForgeDiamond} from "../ForgeDiamond.sol";
+import {ForgeTokenFacet} from "./ForgeTokenFacet.sol";
 
 // Аavegotchi
+import {IERC20} from "../../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../../shared/libraries/LibMeta.sol";
 import {ItemsFacet} from "../../facets/ItemsFacet.sol";
 import {ItemType} from "../../libraries/LibAppStorage.sol";
@@ -28,10 +19,10 @@ import {LendingGetterAndSetterFacet} from "../../facets/LendingGetterAndSetterFa
 
 
 
-contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
-    Counters.Counter private _forgeQueueId;
+
+contract ForgeFacet is Modifiers {
+    event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);
+    event TransferBatch(address indexed operator, address indexed from, address indexed to, uint256[] ids, uint256[] values);
 
     event ItemSmelted(uint256 itemId, uint256 gotchiId);
     event ItemForged(uint256 itemId, uint256 gotchiId);
@@ -41,7 +32,6 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
     event AddedToQueue(address indexed owner, uint256 indexed itemId, uint256 indexed gotchiId, uint40 readyBlock, uint256 queueId);
 
 
-    constructor() ERC1155("") { }
 
     modifier onlyAavegotchiUnlocked(uint256 gotchiId) {
         require(!aavegotchiGameFacet().aavegotchiLocked(gotchiId), "ForgeFacet: Aavegotchi is locked");
@@ -54,6 +44,9 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         _;
     }
 
+    function forgeTokenFacet() internal view returns (ForgeTokenFacet facet){
+        facet = ForgeTokenFacet(address(this));
+    }
     // External contracts
     function aavegotchiGameFacet() internal pure returns (AavegotchiGameFacet facet){
         facet = AavegotchiGameFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
@@ -170,11 +163,11 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         address sender = LibMeta.msgSender();
         require(wearablesFacet().balanceOf(sender, itemId) > 0, "ForgeFacet: smelt item not owned");
 
-        // get smeltedItem metadata
+        // get smelted item metadata
         ItemType memory itemType = itemsFacet().getItemType(itemId);
 
         // remove smelted item
-        wearablesFacet().safeTransferFrom(sender, s.FORGE_DIAMOND, itemId, 1, "");
+        wearablesFacet().safeTransferFrom(sender, address(this), itemId, 1, "");
 
         uint256 totalAlloy = s.forgeAlloyCost[itemType.rarityScoreModifier];
         uint256 daoAlloyAmt = totalAlloy * s.alloyDaoFeeInBips / 10000;
@@ -199,8 +192,6 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
             (s.skillPointsEarnedFromForge[itemType.rarityScoreModifier] * s.smeltingSkillPointReductionFactorBips / 10000);
 
         emit ItemSmelted(itemId, gotchiId);
-
-        // TODO: chainlink
     }
 
     function smeltWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds)
@@ -227,16 +218,16 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         ItemType memory itemType = itemsFacet().getItemType(itemId);
         uint8 rsm = itemType.rarityScoreModifier;
 
-        require(balanceOf(sender, ALLOY) >= s.forgeAlloyCost[rsm], "ForgeFacet: not enough Alloy");
-        require(balanceOf(sender, coreTokenIdFromRsm(rsm)) >= 1, "ForgeFacet: missing required Core");
+        require(forgeTokenFacet().balanceOf(sender, ALLOY) >= s.forgeAlloyCost[rsm], "ForgeFacet: not enough Alloy");
+        require(forgeTokenFacet().balanceOf(sender, coreTokenIdFromRsm(rsm)) >= 1, "ForgeFacet: missing required Core");
         require(availableToForge(itemId), "ForgeFacet: forge item not in stock");
 
         // Schematic (item ids identical to Wearable ids)
-        require(balanceOf(sender, itemId) >= 1, "ForgeFacet: missing required Schematic.");
+        require(forgeTokenFacet().balanceOf(sender, itemId) >= 1, "ForgeFacet: missing required Schematic.");
 
         // Essence required if forging a pet or godlike item.
         if (itemType.slotPositions[PET_SLOT_INDEX] || rsm == GODLIKE_RSM){
-            require(balanceOf(sender, ESSENCE) >= s.forgeEssenceCost[rsm], "ForgeFacet: not enough Essence");
+            require(forgeTokenFacet().balanceOf(sender, ESSENCE) >= s.forgeEssenceCost[rsm], "ForgeFacet: not enough Essence");
 
             _burnItem(sender, ESSENCE, s.forgeEssenceCost[rsm]);
         }
@@ -246,7 +237,7 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         _burnItem(sender, coreTokenIdFromRsm(rsm), 1);
         _burnItem(sender, itemId, 1);
 
-        uint256 forgeTime = s.forgeTimeCostInBlocks[rsm] * getSmithingLevelMultiplierBips(gotchiId) / 10000;
+        uint256 forgeTime = forgeTime(gotchiId, rsm);
 
         require(_gltr <= forgeTime, "ForgeFacet: too much GLTR");
 
@@ -257,13 +248,9 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
 
         if (forgeTime - _gltr == 0){
             // Immediately forge the item.
-            wearablesFacet().safeTransferFrom(s.FORGE_DIAMOND, sender, itemId, 1, "");
+            wearablesFacet().safeTransferFrom(address(this), sender, itemId, 1, "");
             emit ForgeTimeReduced(0, gotchiId, itemId, _gltr);
         } else {
-
-                // increment first to start at one.
-//            s.forgeQueueId += 1;
-
             uint40 readyBlock = uint40(block.number) + uint40(s.forgeTimeCostInBlocks[rsm]) - _gltr;
             ForgeQueueItem memory newQueueItem = ForgeQueueItem(itemId, gotchiId, false, readyBlock, s.forgeQueueId);
             s.forgeQueue.push(newQueueItem);
@@ -280,6 +267,11 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         }
     }
 
+    // @dev returns the time (in blocks) cost for forging for an aavegotchi
+    function forgeTime(uint256 gotchiId, uint8 rsm) public view returns (uint256 forgeTime) {
+        forgeTime = s.forgeTimeCostInBlocks[rsm] * getSmithingLevelMultiplierBips(gotchiId) / 10000;
+    }
+
 
     function claimForgeQueueItems(uint256[] calldata gotchiIds) external whenNotPaused {
         address sender = LibMeta.msgSender();
@@ -288,12 +280,13 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
             require(!aavegotchiGameFacet().aavegotchiLocked(gotchiIds[i]), "Aavegotchi not unlocked");
 
             ForgeQueueItem storage queueItem = _getQueueItem(gotchiIds[i]);
+
             require(!queueItem.claimed, "ForgeFacet: already claimed");
             require(sender == aavegotchiFacet().ownerOf(queueItem.gotchiId), "ForgeFacet: Not Aavegotchi owner");
             require(block.number >= queueItem.readyBlock, "ForgeFacet: Forge item not ready");
 
             // ready to be claimed, transfer.
-            wearablesFacet().safeTransferFrom(s.FORGE_DIAMOND, sender, queueItem.itemId, 1, "");
+            wearablesFacet().safeTransferFrom(address(this), sender, queueItem.itemId, 1, "");
             s.forgeQueue[queueItem.id].claimed = true;
             s.itemForging[queueItem.itemId] -= 1;
             delete s.gotchiForging[gotchiIds[i]];
@@ -311,20 +304,27 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         output = s.forgeQueue[s.gotchiForging[gotchiId].forgeQueueId];
     }
 
+    function getForgeQueue() external view returns (ForgeQueueItem[] memory queue){
+        queue = s.forgeQueue;
+    }
+
 
     // @notice Get items in the forge queue that can be claimed by _owner.
     // @dev Note that filtering is done only on the _owner current owned gotchis.
     //      Forge item cannot be claimed without owning the gotchi.
-    // TODO: check if gas issue with large owners
     function getForgeQueueOfOwner(address _owner) external view returns (ForgeQueueItem[] memory output) {
         uint32[] memory tokenIds = aavegotchiFacet().tokenIdsOfOwner(_owner);
         output = new ForgeQueueItem[](tokenIds.length);
         uint256 counter;
 
         for (uint256 i; i < tokenIds.length; i++){
-            ForgeQueueItem memory queueItem = _getQueueItem(uint256(tokenIds[i]));
-            output[counter] = queueItem;
-            counter++;
+            if (s.gotchiForging[tokenIds[i]].isForging){
+                ForgeQueueItem memory queueItem;
+                queueItem = _getQueueItem(uint256(tokenIds[i]));
+
+                output[counter] = queueItem;
+                counter++;
+            }
         }
         // add final length to output.
         assembly {
@@ -343,9 +343,10 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         }
     }
 
+
     function availableToForge(uint256 itemId) public view returns(bool available) {
         require(itemId < WEARABLE_GAP_OFFSET, "ForgeFacet: only valid for schematics");
-        available = wearablesFacet().balanceOf(s.FORGE_DIAMOND, itemId) - s.itemForging[itemId] > 0;
+        available = wearablesFacet().balanceOf(address(this), itemId) - s.itemForging[itemId] > 0;
     }
 
 
@@ -370,6 +371,11 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
 //        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
         _mint(account, id, amount, "");
     }
+    function adminMintBatch(address to, uint256[] memory ids, uint256[] memory amounts) external onlyDaoOrOwner {
+        // mint doesnt exceed max supply
+//        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
+        _mintBatch(to, ids, amounts, "");
+    }
 //    function _mintBatchItems(address to, uint256[] memory ids, uint256[] memory amounts) internal {
 //        _mintBatch(to, ids, amounts, "");
 //    }
@@ -377,50 +383,75 @@ contract ForgeFacet is Modifiers, ERC1155URIStorage, ERC1155Supply, Pausable {
         _burn(account, id, amount);
     }
 
-    function pause() public onlyDaoOrOwner {
-        _pause();
-    }
-    function unpause() public onlyDaoOrOwner {
-        _unpause();
+
+    function _mint(
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) internal {
+        require(to != address(0), "ForgeFacet: mint to the zero address");
+
+        s._balances[id][to] += amount;
+        s._totalSupply[id] += amount;
+        emit TransferSingle(msg.sender, address(0), to, id, amount);
+
+//        forgeTokenFacet()._doSafeTransferAcceptanceCheck(msg.sender, address(0), to, id, amount, data);
     }
 
-    function name() external pure returns (string memory) {
-        return "Aavegotchi Forge";
-    }
-
-    function symbol() external pure returns (string memory) {
-        return "FORGE";
-    }
-
-    function uri(uint256 tokenId) public view virtual override(ERC1155, ERC1155URIStorage) returns (string memory) {
-        return ERC1155URIStorage.uri(tokenId);
-    }
-    function _beforeTokenTransfer(
-        address operator,
-        address from,
+    function _mintBatch(
         address to,
         uint256[] memory ids,
         uint256[] memory amounts,
-        bytes memory data) internal virtual override(ERC1155, ERC1155Supply) {
-        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+        bytes memory data
+    ) internal {
+        require(to != address(0), "ForgeTokenFacet: mint to the zero address");
+        require(ids.length == amounts.length, "ForgeTokenFacet: ids and amounts length mismatch");
+
+        for (uint256 i = 0; i < ids.length; i++) {
+            s._balances[ids[i]][to] += amounts[i];
+            s._totalSupply[ids[i]] += amounts[i];
+        }
+        emit TransferBatch(msg.sender, address(0), to, ids, amounts);
+
+//        forgeTokenFacet()._doSafeBatchTransferAcceptanceCheck(msg.sender, address(0), to, ids, amounts, data);
     }
-    function onERC1155Received(
-        address,
-        address,
-        uint256,
-        uint256,
-        bytes memory
-    ) external returns (bytes4) {
-        return this.onERC1155Received.selector;
+
+    function _burn(
+        address from,
+        uint256 id,
+        uint256 amount
+    ) internal virtual {
+        require(from != address(0), "ForgeTokenFacet: burn from the zero address");
+
+        uint256 fromBalance = s._balances[id][from];
+        require(fromBalance >= amount, "ForgeTokenFacet: burn amount exceeds balance");
+        unchecked {
+            s._balances[id][from] = fromBalance - amount;
+            s._totalSupply[id] += amount;
+        }
+        emit TransferSingle(msg.sender, from, address(0), id, amount);
     }
-    function onERC1155BatchReceived(
-        address,
-        address,
-        uint256[] memory,
-        uint256[] memory,
-        bytes memory
-    ) external returns (bytes4) {
-        return this.onERC1155BatchReceived.selector;
+    function _burnBatch(
+        address from,
+        uint256[] memory ids,
+        uint256[] memory amounts
+    ) internal virtual {
+        require(from != address(0), "ForgeTokenFacet: burn from the zero address");
+        require(ids.length == amounts.length, "ForgeTokenFacet: ids and amounts length mismatch");
+
+        for (uint256 i = 0; i < ids.length; i++) {
+            uint256 id = ids[i];
+            uint256 amount = amounts[i];
+
+            uint256 fromBalance = s._balances[id][from];
+            require(fromBalance >= amount, "ForgeTokenFacet: burn amount exceeds balance");
+            unchecked {
+                s._balances[id][from] = fromBalance - amount;
+                s._totalSupply[id] += amount;
+            }
+        }
+        emit TransferBatch(msg.sender, from, address(0), ids, amounts);
     }
 
 }

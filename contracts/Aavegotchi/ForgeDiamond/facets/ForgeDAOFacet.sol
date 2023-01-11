@@ -19,6 +19,9 @@ contract ForgeDAOFacet is Modifiers {
     event SetSmeltingSkillPointReductionFactorBips(uint256 oldBips, uint256 newBips);
     event SetMaxSupplyPerToken(uint256[] tokenIds, uint256[] supplyPerTokenId);
 
+    event ContractPaused();
+    event ContractUnpaused();
+
 
 
     function setAavegotchiDaoAddress(address daoAddress) external onlyDaoOrOwner {
@@ -29,10 +32,10 @@ contract ForgeDAOFacet is Modifiers {
         s.GLTR = gltr;
         emit SetGltrAddress(gltr);
     }
-    function setForgeDiamondAddress(address diamond) external onlyDaoOrOwner {
-        s.FORGE_DIAMOND = diamond;
-        emit SetForgeDiamondAddress(diamond);
-    }
+//    function setForgeDiamondAddress(address diamond) external onlyDaoOrOwner {
+//        s.FORGE_DIAMOND = diamond;
+//        emit SetForgeDiamondAddress(diamond);
+//    }
 
     function getAlloyDaoFeeInBips() external view returns (uint256) {
         return s.alloyDaoFeeInBips;
@@ -54,7 +57,7 @@ contract ForgeDAOFacet is Modifiers {
     // @param costs RarityValueIO struct of costs.
     // @dev We convert RarityValueIO keys into a mapping that is referencable by equivalent rarity score modifier,
     //      since this is what ForgeFacet functions have from itemTypes.
-    function setForgeAlloyCost (RarityValueIO calldata costs) external onlyDaoOrOwner {
+    function setForgeAlloyCost(RarityValueIO calldata costs) external onlyDaoOrOwner {
         s.forgeAlloyCost[COMMON_RSM] = costs.common;
         s.forgeAlloyCost[UNCOMMON_RSM] = costs.uncommon;
         s.forgeAlloyCost[RARE_RSM] = costs.rare;
@@ -69,7 +72,7 @@ contract ForgeDAOFacet is Modifiers {
     // @param costs RarityValueIO struct of costs
     // @dev We convert RarityValueIO keys into a mapping that is referencable by equivalent rarity score modifier,
     //      since this is what ForgeFacet functions have from itemTypes.
-    function setForgeEssenceCost (RarityValueIO calldata costs) external onlyDaoOrOwner {
+    function setForgeEssenceCost(RarityValueIO calldata costs) external onlyDaoOrOwner {
         s.forgeEssenceCost[COMMON_RSM] = costs.common;
         s.forgeEssenceCost[UNCOMMON_RSM] = costs.uncommon;
         s.forgeEssenceCost[RARE_RSM] = costs.rare;
@@ -84,7 +87,7 @@ contract ForgeDAOFacet is Modifiers {
     // @param costs RarityValueIO struct of block amounts
     // @dev We convert RarityValueIO keys into a mapping that is referencable by equivalent rarity score modifier,
     //      since this is what ForgeFacet functions have from itemTypes.
-    function setForgeTimeCostInBlocks (RarityValueIO calldata costs) external onlyDaoOrOwner {
+    function setForgeTimeCostInBlocks(RarityValueIO calldata costs) external onlyDaoOrOwner {
         s.forgeTimeCostInBlocks[COMMON_RSM] = costs.common;
         s.forgeTimeCostInBlocks[UNCOMMON_RSM] = costs.uncommon;
         s.forgeTimeCostInBlocks[RARE_RSM] = costs.rare;
@@ -97,7 +100,7 @@ contract ForgeDAOFacet is Modifiers {
 
     // @notice Allow DAO to update skill points gained from forging
     // @param points RarityValueIO struct of points
-    function setSkillPointsEarnedFromForge (RarityValueIO calldata points) external onlyDaoOrOwner {
+    function setSkillPointsEarnedFromForge(RarityValueIO calldata points) external onlyDaoOrOwner {
         s.skillPointsEarnedFromForge[COMMON_RSM] = points.common;
         s.skillPointsEarnedFromForge[UNCOMMON_RSM] = points.uncommon;
         s.skillPointsEarnedFromForge[RARE_RSM] = points.rare;
@@ -108,18 +111,6 @@ contract ForgeDAOFacet is Modifiers {
         emit SetSkillPointsEarnedFromForge(points);
     }
 
-    // @notice Allow DAO to update percent chance to win from a Geode.
-    // @param points RarityValueIO struct of points
-    function setGeodeWinChance (RarityValueIO calldata chances) external onlyDaoOrOwner {
-        s.geodeWinChance[COMMON_RSM] = chances.common;
-        s.geodeWinChance[UNCOMMON_RSM] = chances.uncommon;
-        s.geodeWinChance[RARE_RSM] = chances.rare;
-        s.geodeWinChance[LEGENDARY_RSM] = chances.legendary;
-        s.geodeWinChance[MYTHICAL_RSM] = chances.mythical;
-        s.geodeWinChance[GODLIKE_RSM] = chances.godlike;
-
-        emit SetGeodeWinChance(chances);
-    }
 
     // @notice Allow DAO to update skill points gained from smelting.
     // @param bips Factor to reduce skillPointsEarnedFromForge by, denoted in bips.
@@ -130,6 +121,37 @@ contract ForgeDAOFacet is Modifiers {
 
         emit SetSmeltingSkillPointReductionFactorBips(oldBips, s.smeltingSkillPointReductionFactorBips);
     }
+
+//    // @notice Allow DAO to update percent chance to win from a Geode.
+//    // @param points RarityValueIO struct of points
+//    function setGeodeWinChance(RarityValueIO calldata chances) external onlyDaoOrOwner {
+//        s.geodeWinChance[COMMON_RSM] = chances.common;
+//        s.geodeWinChance[UNCOMMON_RSM] = chances.uncommon;
+//        s.geodeWinChance[RARE_RSM] = chances.rare;
+//        s.geodeWinChance[LEGENDARY_RSM] = chances.legendary;
+//        s.geodeWinChance[MYTHICAL_RSM] = chances.mythical;
+//        s.geodeWinChance[GODLIKE_RSM] = chances.godlike;
+//
+//        emit SetGeodeWinChance(chances);
+//    }
+//
+//    // @notice Allow DAO to set which prizes can be won from a Geode.
+//    // @param ids Token IDs of the available prizes
+//    // @param quantities Initial amounts of each prize available
+//    function setGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities) external onlyDaoOrOwner {
+//        require(ids.length == quantities.length, "ForgeDAOFacet: mismatched arrays");
+//
+//        for (uint256 i; i < ids.length; i++){
+//            if (s.geodePrizeQuantities[ids[i]] == 0){
+//                // this ID is deleted from the array in the geode opening function when last item is won.
+//                s.geodePrizeTokenIds.push(ids[i]);
+//            }
+//            s.geodePrizeQuantities[ids[i]] += quantities[i];
+//        }
+//
+//        emit SetGeodePrizes(ids, quantities);
+//    }
+
 
     // @dev Max supply is not practical to keep track of for each forge token. The contract logic should take care of this.
     // @notice Allow DAO to set max supply per Forge asset token.
@@ -142,6 +164,14 @@ contract ForgeDAOFacet is Modifiers {
 //        emit SetMaxSupplyPerToken(tokenIDs, supplyAmts);
 //    }
 
+    function pauseContract() external onlyDaoOrOwner {
+        s.contractPaused = true;
+        emit ContractPaused();
+    }
+    function unpauseContract() external onlyDaoOrOwner {
+        s.contractPaused = false;
+        emit ContractUnpaused();
+    }
 
 
 }

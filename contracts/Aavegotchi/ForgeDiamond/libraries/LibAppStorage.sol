@@ -71,9 +71,18 @@ struct GotchiForging {
 
 
 struct AppStorage {
+    ////// ERC1155
+    // Mapping from token ID to account balances
+    mapping(uint256 => mapping(address => uint256)) _balances;
+    // Mapping from account to operator approvals
+    mapping(address => mapping(address => bool)) _operatorApprovals;
+    mapping(uint256 => uint256) _totalSupply;
+    string _baseUri;
+    //////
+
+    bool contractPaused;
     address AAVEGOTCHI_DAO;
     address GLTR;
-    address FORGE_DIAMOND;
 
     uint256 alloyDaoFeeInBips;
     uint256 alloyBurnFeeInBips;
@@ -115,6 +124,11 @@ contract Modifiers {
     modifier onlyDaoOrOwner() {
         address sender = LibMeta.msgSender();
         require(sender == s.AAVEGOTCHI_DAO || sender == ForgeLibDiamond.contractOwner(), "LibAppStorage: No access");
+        _;
+    }
+
+    modifier whenNotPaused() {
+        require(!s.contractPaused, "LibAppStorage: Contract paused");
         _;
     }
 }
