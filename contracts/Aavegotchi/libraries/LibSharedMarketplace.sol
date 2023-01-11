@@ -75,13 +75,19 @@ library LibSharedMarketplace {
         }
     }
 
-    function burnListingFee(
-        uint256 listingFee,
-        address owner,
-        address ghstContract
-    ) internal {
+    //will only habdle fee asserts and refunds(in case of >s.listingFee values)
+    function burnListingFee(uint256 listingFee, address owner) internal {
         if (listingFee > 0) {
-            LibERC20.transferFrom(ghstContract, owner, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), listingFee);
+            assert(msg.value >= listingFee);
+            //send out fee to feeCollector
+            address to;
+            (bool success, ) = to.call{value: listingFee}("");
+            assert(success);
+            if (msg.value > listingFee) {
+                //refund extra matic sent in
+                (bool success2, ) = owner.call{value: msg.value - listingFee}("");
+                assert(success2);
+            }
         }
     }
 }
