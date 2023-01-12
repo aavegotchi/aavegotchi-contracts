@@ -286,10 +286,10 @@ contract ForgeFacet is Modifiers {
             require(block.number >= queueItem.readyBlock, "ForgeFacet: Forge item not ready");
 
             // ready to be claimed, transfer.
-            wearablesFacet().safeTransferFrom(address(this), sender, queueItem.itemId, 1, "");
             s.forgeQueue[queueItem.id].claimed = true;
             s.itemForging[queueItem.itemId] -= 1;
             delete s.gotchiForging[gotchiIds[i]];
+            wearablesFacet().safeTransferFrom(address(this), sender, queueItem.itemId, 1, "");
 
             emit ForgeQueueClaimed(queueItem.itemId, gotchiIds[i]);
         }
