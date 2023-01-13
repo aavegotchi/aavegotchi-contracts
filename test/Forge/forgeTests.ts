@@ -210,7 +210,7 @@ describe("Testing Forge", async function () {
                 .to.emit(forgeFacet, "ItemSmelted").withArgs(items[2], gotchis[2]);
 
             // Check correct balances deducted and sent to Forge Diamond
-            expect(await wearablesFacet.balanceOf(testUser, items[0])).to.be.equal(16)
+            expect(await wearablesFacet.balanceOf(testUser, items[0])).to.be.equal(15)
             expect(await wearablesFacet.balanceOf(testUser, items[1])).to.be.equal(1)
             expect(await wearablesFacet.balanceOf(testUser, items[2])).to.be.equal(10)
 
@@ -248,7 +248,7 @@ describe("Testing Forge", async function () {
 
             expect(await forgeTokenFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(2)
             expect(await forgeTokenFacet.balanceOf(testUser, 157)).to.be.equal(2)
-            expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(15)
+            expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(14)
 
             await imp.forgeWearables([157], [gotchis[0]], [await forgeFacet.forgeTime(gotchis[0], 2)]);
             await imp.forgeWearables([157], [gotchis[0]], [await forgeFacet.forgeTime(gotchis[0], 2)])
@@ -260,7 +260,7 @@ describe("Testing Forge", async function () {
 
             expect(await forgeTokenFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(0)
             expect(await forgeTokenFacet.balanceOf(testUser, 157)).to.be.equal(0)
-            expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(17)
+            expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(16)
         });
 
         it('should revert forge', async function () {
@@ -392,12 +392,12 @@ describe("Testing Forge", async function () {
             await impForgeFelon.smeltWearables([78, 78], [11866, 11866])
             await forgeFacet.adminMint(felonOwner, ALLOY, 60);
 
-            expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(17)
+            expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(16)
             await impForgeTest.smeltWearables([157, 157], [7735, 7735])
             await forgeFacet.adminMint(testUser, ALLOY, 60);
 
             expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(0)
-            expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(15)
+            expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(14)
 
             await impForgeFelon.forgeWearables([78, 78], [11866, 826], [0, 0]);
             await impForgeTest.forgeWearables([157], [7735], [0]);
@@ -421,6 +421,10 @@ describe("Testing Forge", async function () {
 
             // expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(2)
 
+        });
+
+        it('should revert for rental gotchi', function () {
+            
         });
     })
     // describe("geodes", async function () {

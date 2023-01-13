@@ -39,7 +39,8 @@ contract ForgeFacet is Modifiers {
     }
     // @notice Will revert if aavegotchi is in active rental as well.
     modifier onlyAavegotchiOwner(uint256 gotchiId) {
-//        require(lendingGetterAndSetterFacet().isAavegotchiLent, "ForgeFacet: Aavegotchi is lent out");
+        require(!lendingGetterAndSetterFacet().isAavegotchiLent(uint32(gotchiId)), "ForgeFacet: Aavegotchi is lent out");
+//        require(!lendingGetterAndSetterFacet().isAavegotchiListed(uint32(gotchiId)), "ForgeFacet: Aavegotchi is listed for rental");
         require(LibMeta.msgSender() == aavegotchiFacet().ownerOf(gotchiId), "ForgeFacet: Not Aavegotchi owner");
         _;
     }
