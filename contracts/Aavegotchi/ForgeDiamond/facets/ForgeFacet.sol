@@ -275,25 +275,31 @@ contract ForgeFacet is Modifiers {
 
 
     function claimForgeQueueItems(uint256[] calldata gotchiIds) external whenNotPaused {
-        address sender = LibMeta.msgSender();
-
         for (uint256 i; i < gotchiIds.length; i++){
-            require(!aavegotchiGameFacet().aavegotchiLocked(gotchiIds[i]), "Aavegotchi not unlocked");
-
-            ForgeQueueItem storage queueItem = _getQueueItem(gotchiIds[i]);
-
-            require(!queueItem.claimed, "ForgeFacet: already claimed");
-            require(sender == aavegotchiFacet().ownerOf(queueItem.gotchiId), "ForgeFacet: Not Aavegotchi owner");
-            require(block.number >= queueItem.readyBlock, "ForgeFacet: Forge item not ready");
-
-            // ready to be claimed, transfer.
-            s.forgeQueue[queueItem.id].claimed = true;
-            s.itemForging[queueItem.itemId] -= 1;
-            delete s.gotchiForging[gotchiIds[i]];
-            wearablesFacet().safeTransferFrom(address(this), sender, queueItem.itemId, 1, "");
-
-            emit ForgeQueueClaimed(queueItem.itemId, gotchiIds[i]);
+            _claimQueueItem(gotchiIds[i]);
         }
+    }
+
+    function _claimQueueItem(uint256 gotchiId)
+    internal
+    onlyAavegotchiOwner(gotchiId)
+    onlyAavegotchiUnlocked(gotchiId) {
+        require(!aavegotchiGameFacet().aavegotchiLocked(gotchiId), "Aavegotchi not unlocked");
+
+        address sender = LibMeta.msgSender();
+        ForgeQueueItem storage queueItem = _getQueueItem(gotchiId);
+
+        require(!queueItem.claimed, "ForgeFacet: already claimed");
+        require(sender == aavegotchiFacet().ownerOf(queueItem.gotchiId), "ForgeFacet: Not Aavegotchi owner");
+        require(block.number >= queueItem.readyBlock, "ForgeFacet: Forge item not ready");
+
+        // ready to be claimed, transfer.
+        s.forgeQueue[queueItem.id].claimed = true;
+        s.itemForging[queueItem.itemId] -= 1;
+        delete s.gotchiForging[gotchiId];
+        wearablesFacet().safeTransferFrom(address(this), sender, queueItem.itemId, 1, "");
+
+        emit ForgeQueueClaimed(queueItem.itemId, gotchiId);
     }
 
     function getAavegotchiQueueItem(uint256 gotchiId) external view returns (ForgeQueueItem memory) {
