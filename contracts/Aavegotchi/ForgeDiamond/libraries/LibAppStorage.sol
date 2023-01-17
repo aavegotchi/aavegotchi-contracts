@@ -50,9 +50,9 @@ struct ForgeQueueItem {
 //    address owner;
     uint256 itemId;
     uint256 gotchiId;
-    bool claimed;
-    uint40 readyBlock;
     uint256 id;
+    uint40 readyBlock;
+    bool claimed;
 }
 
 struct RarityValueIO {
@@ -65,8 +65,8 @@ struct RarityValueIO {
 }
 
 struct GotchiForging {
-    bool isForging;
     uint256 forgeQueueId;
+    bool isForging;
 }
 
 
