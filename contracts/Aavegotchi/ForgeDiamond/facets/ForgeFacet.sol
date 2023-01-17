@@ -284,13 +284,10 @@ contract ForgeFacet is Modifiers {
     internal
     onlyAavegotchiOwner(gotchiId)
     onlyAavegotchiUnlocked(gotchiId) {
-        require(!aavegotchiGameFacet().aavegotchiLocked(gotchiId), "Aavegotchi not unlocked");
-
         address sender = LibMeta.msgSender();
         ForgeQueueItem storage queueItem = _getQueueItem(gotchiId);
 
         require(!queueItem.claimed, "ForgeFacet: already claimed");
-        require(sender == aavegotchiFacet().ownerOf(queueItem.gotchiId), "ForgeFacet: Not Aavegotchi owner");
         require(block.number >= queueItem.readyBlock, "ForgeFacet: Forge item not ready");
 
         // ready to be claimed, transfer.
