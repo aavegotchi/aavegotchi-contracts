@@ -101,7 +101,8 @@ contract ForgeFacet is Modifiers {
     }
 
 
-    // @notice Return the forge time multiplier gained from smithing level, represented in bips.
+    // @notice Return the forge time multiplier gained from smithing level, represented in bips
+    //         approximating M=0.97^(L-1).
     function getSmithingLevelMultiplierBips(uint256 gotchiId) public view returns (uint256) {
         uint256[30] memory percentTimeDiscountBips = [
             uint256(1000), 970, 941, 913, 885, 859, 833, 808, 784, 760,
@@ -221,7 +222,7 @@ contract ForgeFacet is Modifiers {
 
         require(forgeTokenFacet().balanceOf(sender, ALLOY) >= s.forgeAlloyCost[rsm], "ForgeFacet: not enough Alloy");
         require(forgeTokenFacet().balanceOf(sender, coreTokenIdFromRsm(rsm)) >= 1, "ForgeFacet: missing required Core");
-        require(availableToForge(itemId), "ForgeFacet: forge item not in stock");
+        require(isForgeable(itemId), "ForgeFacet: forge item not in stock");
 
         // Schematic (item ids identical to Wearable ids)
         require(forgeTokenFacet().balanceOf(sender, itemId) >= 1, "ForgeFacet: missing required Schematic.");
@@ -269,6 +270,8 @@ contract ForgeFacet is Modifiers {
     }
 
     // @dev returns the time (in blocks) cost for forging for an aavegotchi
+    // @param gotchId
+    // @param rsm Rarity score modifier of an item (1, 2, 5, 10, 20, 50).
     function forgeTime(uint256 gotchiId, uint8 rsm) public view returns (uint256 forgeTime) {
         forgeTime = s.forgeTimeCostInBlocks[rsm] * getSmithingLevelMultiplierBips(gotchiId) / 10000;
     }
@@ -285,7 +288,7 @@ contract ForgeFacet is Modifiers {
     onlyAavegotchiOwner(gotchiId)
     onlyAavegotchiUnlocked(gotchiId) {
         address sender = LibMeta.msgSender();
-        ForgeQueueItem storage queueItem = _getQueueItem(gotchiId);
+        ForgeQueueItem storage queueItem = _getForgeQueueItem(gotchiId);
 
         require(!queueItem.claimed, "ForgeFacet: already claimed");
         require(block.number >= queueItem.readyBlock, "ForgeFacet: Forge item not ready");
@@ -299,11 +302,11 @@ contract ForgeFacet is Modifiers {
         emit ForgeQueueClaimed(queueItem.itemId, gotchiId);
     }
 
-    function getAavegotchiQueueItem(uint256 gotchiId) external view returns (ForgeQueueItem memory) {
-        return _getQueueItem(gotchiId);
+    function getForgeQueueItem(uint256 gotchiId) external view returns (ForgeQueueItem memory) {
+        return _getForgeQueueItem(gotchiId);
     }
 
-    function _getQueueItem(uint256 gotchiId) internal view returns (ForgeQueueItem storage output) {
+    function _getForgeQueueItem(uint256 gotchiId) internal view returns (ForgeQueueItem storage output) {
         require(s.gotchiForging[gotchiId].isForging, "ForgeFacet: Aavegotchi not currently forging.");
         output = s.forgeQueue[s.gotchiForging[gotchiId].forgeQueueId];
     }
@@ -316,7 +319,7 @@ contract ForgeFacet is Modifiers {
     // @notice Get items in the forge queue that can be claimed by _owner.
     // @dev Note that filtering is done only on the _owner current owned gotchis.
     //      Forge item cannot be claimed without owning the gotchi.
-    function getForgeQueueOfOwner(address _owner) external view returns (ForgeQueueItem[] memory output) {
+    function getForgeQueueItemsByOwner(address _owner) external view returns (ForgeQueueItem[] memory output) {
         uint32[] memory tokenIds = aavegotchiFacet().tokenIdsOfOwner(_owner);
         output = new ForgeQueueItem[](tokenIds.length);
         uint256 counter;
@@ -324,7 +327,7 @@ contract ForgeFacet is Modifiers {
         for (uint256 i; i < tokenIds.length; i++){
             if (s.gotchiForging[tokenIds[i]].isForging){
                 ForgeQueueItem memory queueItem;
-                queueItem = _getQueueItem(uint256(tokenIds[i]));
+                queueItem = _getForgeQueueItem(uint256(tokenIds[i]));
 
                 output[counter] = queueItem;
                 counter++;
@@ -348,7 +351,7 @@ contract ForgeFacet is Modifiers {
     }
 
 
-    function availableToForge(uint256 itemId) public view returns(bool available) {
+    function isForgeable(uint256 itemId) public view returns(bool available) {
         require(itemId < WEARABLE_GAP_OFFSET, "ForgeFacet: only valid for schematics");
         available = wearablesFacet().balanceOf(address(this), itemId) - s.itemForging[itemId] > 0;
     }
