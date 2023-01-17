@@ -254,10 +254,10 @@ contract ForgeFacet is Modifiers {
             emit ForgeTimeReduced(0, gotchiId, itemId, _gltr);
         } else {
             uint40 readyBlock = uint40(block.number) + uint40(s.forgeTimeCostInBlocks[rsm]) - _gltr;
-            ForgeQueueItem memory newQueueItem = ForgeQueueItem(itemId, gotchiId, false, readyBlock, s.forgeQueueId);
+            ForgeQueueItem memory newQueueItem = ForgeQueueItem(itemId, gotchiId, s.forgeQueueId, readyBlock, false);
             s.forgeQueue.push(newQueueItem);
 
-            GotchiForging memory gf = GotchiForging(true, s.forgeQueueId);
+            GotchiForging memory gf = GotchiForging(s.forgeQueueId, true);
             s.gotchiForging[gotchiId] = gf;
 
             s.forgeQueueId += 1;
