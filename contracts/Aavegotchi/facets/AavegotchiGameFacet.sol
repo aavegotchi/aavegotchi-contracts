@@ -333,7 +333,7 @@ contract AavegotchiGameFacet is Modifiers {
         emit SpendSkillpoints(_tokenId, _values);
     }
 
-    function aavegotchiLocked(uint256 _tokenId) external view returns (bool isLocked) {
+    function isAavegotchiLocked(uint256 _tokenId) external view returns (bool isLocked) {
         isLocked = s.aavegotchis[_tokenId].locked;
     }
 }

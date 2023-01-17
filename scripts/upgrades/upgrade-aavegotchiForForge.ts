@@ -17,7 +17,7 @@ export async function upgradeAavegotchiForForge() {
             facetName:
                 "contracts/Aavegotchi/facets/AavegotchiGameFacet.sol:AavegotchiGameFacet",
             addSelectors: [
-                "function aavegotchiLocked(uint256 _tokenId) external view returns (bool isLocked)",
+                "function isAavegotchiLocked(uint256 _tokenId) external view returns (bool isLocked)",
             ],
             removeSelectors: [],
         },

@@ -34,7 +34,7 @@ contract ForgeFacet is Modifiers {
 
 
     modifier onlyAavegotchiUnlocked(uint256 gotchiId) {
-        require(!aavegotchiGameFacet().aavegotchiLocked(gotchiId), "ForgeFacet: Aavegotchi is locked");
+        require(!aavegotchiGameFacet().isAavegotchiLocked(gotchiId), "ForgeFacet: Aavegotchi is locked");
         _;
     }
     // @notice Will revert if aavegotchi is in active rental as well.
