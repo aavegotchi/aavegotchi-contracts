@@ -7,7 +7,6 @@ contract ForgeDAOFacet is Modifiers {
 
     event SetAavegotchiDaoAddress(address newAddress);
     event SetGltrAddress(address newAddress);
-    event SetForgeDiamondAddress(address newAddress);
 
     event SetAlloyDaoFee(uint256 bips);
     event SetAlloyBurnFee(uint256 bips);
@@ -32,10 +31,6 @@ contract ForgeDAOFacet is Modifiers {
         s.GLTR = gltr;
         emit SetGltrAddress(gltr);
     }
-//    function setForgeDiamondAddress(address diamond) external onlyDaoOrOwner {
-//        s.FORGE_DIAMOND = diamond;
-//        emit SetForgeDiamondAddress(diamond);
-//    }
 
     function getAlloyDaoFeeInBips() external view returns (uint256) {
         return s.alloyDaoFeeInBips;
