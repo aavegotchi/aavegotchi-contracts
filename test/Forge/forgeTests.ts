@@ -419,6 +419,35 @@ describe("Testing Forge", async function () {
         });
     })
 
+    describe("transfer tests", async function (){
+        it('should revert transfer when forging', async function () {
+            let impTestForge = await impersonate(testUser, forgeFacet, ethers, network)
+            let impTestAavegotchi: AavegotchiFacet = await impersonate(testUser, aavegotchiFacet, ethers, network)
+
+            await impTestForge.smeltWearables([157], [7735])
+            await forgeFacet.adminMint(testUser, ALLOY, 30);
+            await impTestForge.forgeWearables([157], [7735], [0]);
+
+            // attemp transfer to random address, expect revert
+            await expect(impTestAavegotchi["safeTransferFrom(address,address,uint256)"](testUser, rentalTestUser, 7735))
+                .to.be.revertedWith("I'M BUSY FORGING DON'T BOTHER ME")
+
+            await network.provider.send("hardhat_mine", ["0x181CD"])
+            await impTestForge.claimForgeQueueItems([7735])
+        });
+
+        it('should transfer correctly as before when not in rental', async function () {
+            let impTestAavegotchi: AavegotchiFacet = await impersonate(testUser, aavegotchiFacet, ethers, network)
+            let impRenterAavegotchi: AavegotchiFacet = await impersonate(rentalTestUser, aavegotchiFacet, ethers, network)
+
+            expect(await impTestAavegotchi["safeTransferFrom(address,address,uint256)"](testUser, rentalTestUser, 7735)).to.be.ok
+            expect(await impTestAavegotchi.ownerOf(7735)).to.be.equal(rentalTestUser)
+
+            expect(await impRenterAavegotchi["safeTransferFrom(address,address,uint256)"](rentalTestUser, testUser, 7735)).to.be.ok
+            expect(await impTestAavegotchi.ownerOf(7735)).to.be.equal(testUser)
+        });
+    })
+
     describe("revert tests", async function (){
         it('should adminMint and return total supply', async function () {
             let ids = [ALLOY, ESSENCE, CORE_COMMON, ALLOY]
@@ -449,21 +478,7 @@ describe("Testing Forge", async function () {
             await expect(imp.smeltWearables([145], [7735])).to.be.revertedWith("ForgeFacet: smelt item not owned")
         })
 
-        it('should revert transfer when forging', async function () {
-            let impTestForge = await impersonate(testUser, forgeFacet, ethers, network)
-            let impTestAavegotchi: AavegotchiFacet = await impersonate(testUser, aavegotchiFacet, ethers, network)
 
-            await impTestForge.smeltWearables([157], [7735])
-            await forgeFacet.adminMint(testUser, ALLOY, 30);
-            await impTestForge.forgeWearables([157], [7735], [0]);
-
-            // attemp transfer to random address, expect revert
-            await expect(impTestAavegotchi["safeTransferFrom(address,address,uint256)"](testUser, rentalTestUser, 7735))
-                .to.be.revertedWith("I'M BUSY FORGING DON'T BOTHER ME")
-
-            await network.provider.send("hardhat_mine", ["0x181CD"])
-            await impTestForge.claimForgeQueueItems([7735])
-        });
         it('should revert for rental gotchi', async function () {
             let lending = {
                 tokenId: 7735,
