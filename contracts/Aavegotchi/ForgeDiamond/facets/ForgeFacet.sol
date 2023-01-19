@@ -154,9 +154,6 @@ contract ForgeFacet is Modifiers {
         }
     }
 
-//    function smeltAlloyMintAmount (uint8 rarityScoreModifier) public view returns (uint256 alloy){
-//        alloy = s.forgeAlloyCost[rarityScoreModifier] * (1 - ((s.alloyBurnFeeInBips + s.alloyDaoFeeInBips) / 10000));
-//    }
 
     function _smelt(uint256 itemId, uint256 gotchiId)
     internal
@@ -328,7 +325,6 @@ contract ForgeFacet is Modifiers {
             uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
             uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
             uint256 burnAmount = uint256(removeBlocks) * 10**18;
-//            gltr.burnFrom(msg.sender, burnAmount);
 
             require(
                 gltrContract().transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, burnAmount),
