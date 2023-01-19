@@ -48,6 +48,7 @@ export async function deployAndUpgradeForgeDiamond() {
                 // "function smeltAlloyMintAmount (uint8 rarityScoreModifier) public view returns (uint256 alloy)",
                 "function smeltWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds) external",
                 "function claimForgeQueueItems(uint256[] calldata gotchiIds) external",
+                "function reduceQueueTime(uint256[] calldata _gotchiIds, uint40[] calldata _amounts) external",
                 "function getForgeQueueItem(uint256 gotchiId) external view returns (tuple(uint256 itemId,uint256 gotchiId,bool claimed,uint40 readyBlock,uint256 id) memory)",
                 "function getForgeQueueItemsByOwner(address _owner) external view returns (tuple(uint256 itemId,uint256 gotchiId,bool claimed,uint40 readyBlock,uint256 id)[] memory output)",
                 "function getForgeQueue() external view returns (tuple(uint256 itemId,uint256 gotchiId,bool claimed,uint40 readyBlock,uint256 id)[] memory queue)",

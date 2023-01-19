@@ -34,7 +34,7 @@ const GEODE_GODLIKE = WEARABLE_GAP_OFFSET + 13;
 describe("Testing Forge", async function () {
     let signer: JsonRpcSigner, signer2: JsonRpcSigner;
     let testUser = "0x60c4ae0EE854a20eA7796a9678090767679B30FC";
-    let rentalTestUser = "0x3e9c2ee838072b370567efc2df27602d776b341c";
+    let rentalTestUser = "0x3E9c2Ee838072b370567efC2DF27602d776B341c";
     let felonOwner = "0x60eD33735C9C29ec2c26B8eC734e36D5B6fa1EAB"
     let daoAddr = "0x6fb7e0AAFBa16396Ad6c1046027717bcA25F821f"; // DTF multisig
     let WEARABLE_DIAMOND = "0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f"
@@ -254,20 +254,6 @@ describe("Testing Forge", async function () {
             expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(16)
         });
 
-        it('should revert forge', async function () {
-            let imp: ForgeFacet = await impersonate(testUser, forgeFacet, ethers, network)
-
-            // forge godlike
-            await expect(imp.forgeWearables([113], [7735], [0])).to.be.revertedWith("ForgeFacet: not enough Alloy")
-
-            await forgeFacet.adminMint(testUser, ALLOY, 130000);
-            await expect(imp.forgeWearables([113], [7735], [0])).to.be.revertedWith("ForgeFacet: missing required Core")
-
-            await forgeFacet.adminMint(testUser, CORE_GODLIKE, 1);
-            await expect(imp.forgeWearables([113], [7735], [0])).to.be.revertedWith("ForgeFacet: forge item not in stock")
-
-        })
-
         it('should test essence and forge queue', async function () {
             // impersonate Felon owner, smelt a godlike (Link Cube) so the contract is holding one to forge
 
@@ -414,8 +400,23 @@ describe("Testing Forge", async function () {
             console.log(forgeQueue);
 
             expect(forgeQueue.filter(f => f.gotchiId == "11866")[0].claimed).to.be.true
+        });
 
+        it('should speed up queue', async function () {
+            let impForgeTest: ForgeFacet = await impersonate(testUser, forgeFacet, ethers, network)
 
+            // get materials
+            await impForgeTest.smeltWearables([157, 157], [7735, 7735])
+            await forgeFacet.adminMint(testUser, ALLOY, 60);
+            // add to queue
+            await impForgeTest.forgeWearables([157], [7735], [0]);
+
+            await expect(impForgeTest.claimForgeQueueItems([7735])).to.be.revertedWith("ForgeFacet: Forge item not ready")
+
+            await expect(impForgeTest.reduceQueueTime([7735], [98765]))
+                .to.emit(forgeFacet, "QueueTimeReduced").withArgs(7735, 98764)
+            await expect(impForgeTest.claimForgeQueueItems([7735]))
+                .to.emit(forgeFacet, "ForgeQueueClaimed").withArgs(157, 7735)
         });
     })
 
@@ -450,6 +451,19 @@ describe("Testing Forge", async function () {
 
     describe("revert tests", async function (){
 
+        it('should revert forge', async function () {
+            let imp: ForgeFacet = await impersonate(testUser, forgeFacet, ethers, network)
+
+            // forge godlike
+            await expect(imp.forgeWearables([113], [7735], [0])).to.be.revertedWith("ForgeFacet: not enough Alloy")
+
+            await forgeFacet.adminMint(testUser, ALLOY, 130000);
+            await expect(imp.forgeWearables([113], [7735], [0])).to.be.revertedWith("ForgeFacet: missing required Core")
+
+            await forgeFacet.adminMint(testUser, CORE_GODLIKE, 1);
+            await expect(imp.forgeWearables([113], [7735], [0])).to.be.revertedWith("ForgeFacet: forge item not in stock")
+
+        })
 
         it('should reject adminMint', async function () {
             let imp: ForgeFacet = await impersonate(testUser, forgeFacet, ethers, network)

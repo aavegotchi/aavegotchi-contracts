@@ -30,6 +30,7 @@ contract ForgeFacet is Modifiers {
 
     event ForgeTimeReduced(uint256 indexed queueId, uint256 indexed gotchiId, uint256 indexed itemId, uint40 _blocksReduced);
     event AddedToQueue(address indexed owner, uint256 indexed itemId, uint256 indexed gotchiId, uint40 readyBlock, uint256 queueId);
+    event QueueTimeReduced(uint256 indexed gotchiId, uint40 reducedBlocks);
 
 
 
@@ -304,6 +305,41 @@ contract ForgeFacet is Modifiers {
 
         emit ForgeQueueClaimed(queueItem.itemId, gotchiId);
     }
+
+
+    /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLTR tokens
+    /// @dev Will throw if the caller is not the queue owner
+    /// @dev $GLTR tokens are burnt upon usage
+    /// @dev amount expressed in block numbers
+    /// @param _gotchiIds An array containing the gotchi ID queues to speed up
+    /// @param _amounts An array containing the corresponding amounts of $GLTR tokens to pay for each queue speedup
+    function reduceQueueTime(uint256[] calldata _gotchiIds, uint40[] calldata _amounts) external {
+        require(_gotchiIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
+        for (uint256 i; i < _gotchiIds.length; i++) {
+            uint256 gotchiId = _gotchiIds[i];
+            ForgeQueueItem storage queueItem = _getForgeQueueItem(gotchiId);
+
+            require(msg.sender == aavegotchiFacet().ownerOf(gotchiId), "ForgeFacet: Not gotchi owner");
+
+            require(block.number <= queueItem.readyBlock, "InstallationFacet: installation already done");
+
+            IERC20 gltr = IERC20(s.GLTR);
+
+            uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
+            uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
+            uint256 burnAmount = uint256(removeBlocks) * 10**18;
+//            gltr.burnFrom(msg.sender, burnAmount);
+
+            require(
+                gltrContract().transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, burnAmount),
+                "ForgeFacet: Failed GLTR transfer"
+            );
+
+            queueItem.readyBlock -= removeBlocks;
+            emit QueueTimeReduced(gotchiId, removeBlocks);
+        }
+    }
+
 
     function getForgeQueueItem(uint256 gotchiId) external view returns (ForgeQueueItem memory) {
         return _getForgeQueueItem(gotchiId);
