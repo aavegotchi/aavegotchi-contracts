@@ -35,6 +35,12 @@ export async function upgradeAavegotchiForForge() {
             ],
             removeSelectors: [],
         },
+        {
+            facetName:
+                "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
+            addSelectors: [],
+            removeSelectors: [],
+        }
     ];
 
     const joined = convertFacetAndSelectorsToString(facets);

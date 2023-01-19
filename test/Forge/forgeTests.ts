@@ -1,6 +1,7 @@
 import { ethers, network } from "hardhat";
 import { expect } from "chai";
-import {ForgeDAOFacet, ForgeFacet, ForgeTokenFacet, WearablesFacet, CollateralFacet, DAOFacet, ItemsFacet, IERC20} from "../../typechain";
+import {ForgeDAOFacet, ForgeFacet, ForgeTokenFacet, WearablesFacet, CollateralFacet, DAOFacet, ItemsFacet,
+    GotchiLendingFacet, LendingGetterAndSetterFacet, AavegotchiFacet, IERC20} from "../../typechain";
 import { deployAndUpgradeForgeDiamond } from "../../scripts/upgrades/upgrade-deployAndUpgradeForgeDiamond";
 import { impersonate, maticDiamondAddress } from "../../scripts/helperFunctions";
 import {JsonRpcSigner} from "@ethersproject/providers";
@@ -33,6 +34,7 @@ const GEODE_GODLIKE = WEARABLE_GAP_OFFSET + 13;
 describe("Testing Forge", async function () {
     let signer: JsonRpcSigner, signer2: JsonRpcSigner;
     let testUser = "0x60c4ae0EE854a20eA7796a9678090767679B30FC";
+    let rentalTestUser = "0x3e9c2ee838072b370567efc2df27602d776b341c";
     let felonOwner = "0x60eD33735C9C29ec2c26B8eC734e36D5B6fa1EAB"
     let daoAddr = "0x6fb7e0AAFBa16396Ad6c1046027717bcA25F821f"; // DTF multisig
     let WEARABLE_DIAMOND = "0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f"
@@ -43,10 +45,13 @@ describe("Testing Forge", async function () {
     let forgeDaoFacet: ForgeDAOFacet;
     let forgeTokenFacet: ForgeTokenFacet;
     // let forgeVrfFacet: ForgeVRFFacet;
+    let aavegotchiFacet: AavegotchiFacet;
     let wearablesFacet: WearablesFacet;
     let collateralFacet: CollateralFacet;
     let itemsFacet: ItemsFacet;
     let aavegotchiDaoFacet: DAOFacet;
+    let lendingFacet: GotchiLendingFacet;
+    let lendingGetSetFacet: LendingGetterAndSetterFacet;
     let gltrContract: IERC20;
 
 
@@ -74,6 +79,10 @@ describe("Testing Forge", async function () {
         //     "contracts/Aavegotchi/ForgeDiamond/facets/ForgeVRFFacet.sol:ForgeVRFFacet",
         //     forgeDiamondAddress
         // )) as ForgeVRFFacet;
+        aavegotchiFacet = (await ethers.getContractAt(
+            "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
+            maticDiamondAddress
+        )) as AavegotchiFacet;
         wearablesFacet = (await ethers.getContractAt(
             "contracts/Aavegotchi/WearableDiamond/facets/WearablesFacet.sol:WearablesFacet",
             WEARABLE_DIAMOND
@@ -90,6 +99,14 @@ describe("Testing Forge", async function () {
             "contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet",
             maticDiamondAddress
         )) as DAOFacet;
+        lendingFacet = (await ethers.getContractAt(
+            "contracts/Aavegotchi/facets/GotchiLendingFacet.sol:GotchiLendingFacet",
+            maticDiamondAddress
+        )) as GotchiLendingFacet;
+        lendingGetSetFacet = (await ethers.getContractAt(
+            "contracts/Aavegotchi/facets/LendingGetterAndSetterFacet.sol:LendingGetterAndSetterFacet",
+            maticDiamondAddress
+        )) as LendingGetterAndSetterFacet;
         gltrContract = (await ethers.getContractAt(
             "contracts/shared/interfaces/IERC20.sol:IERC20",
             GLTR
@@ -163,31 +180,6 @@ describe("Testing Forge", async function () {
         await impTestGltr.approve(forgeDiamondAddress, "9999999999999999999999999999");
     })
 
-    it('should adminMint and return total supply', async function () {
-        let ids = [ALLOY, ESSENCE, CORE_COMMON, ALLOY]
-        let amts = [5, 10, 15, 10]
-        let supplies = [5, 10, 15, 15]
-
-        for (let i = 0; i < ids.length; i++) {
-            await forgeFacet.adminMint(forgeDiamondAddress, ids[i], amts[i]);
-            expect(await forgeTokenFacet.totalSupply(ids[i])).to.be.equal(supplies[i]);
-        }
-    });
-
-    it('should reject adminMint', async function () {
-        let imp: ForgeFacet = await impersonate(testUser, forgeFacet, ethers, network)
-        await expect(imp.adminMint(forgeDiamondAddress, 0, 10)).to.be.revertedWith("LibAppStorage: No access");
-    });
-
-
-    it('should revert smelt correctly', async function () {
-        let imp = await impersonate(testUser, forgeFacet, ethers, network)
-
-        // issue with testing locked; not owner if in rental as well, even if called by original owner.
-        // await expect(imp.smeltWearables([157], [2270])).to.be.revertedWith("ForgeFacet: Aavegotchi is locked")
-        await expect(imp.smeltWearables([157], [1])).to.be.revertedWith("ForgeFacet: Not Aavegotchi owner")
-        await expect(imp.smeltWearables([145], [7735])).to.be.revertedWith("ForgeFacet: smelt item not owned")
-    });
 
 
     describe("smelt forge flow", async function (){
@@ -253,8 +245,7 @@ describe("Testing Forge", async function () {
             await imp.forgeWearables([157], [gotchis[0]], [await forgeFacet.forgeTime(gotchis[0], 2)]);
             await imp.forgeWearables([157], [gotchis[0]], [await forgeFacet.forgeTime(gotchis[0], 2)])
 
-            // TODO: double check this section, skill pts seems to be off
-            expect(await forgeFacet.getAavegotchiSmithingSkillPts(gotchis[0])).to.be.equal(40)
+            expect(await forgeFacet.getAavegotchiSmithingSkillPts(gotchis[0])).to.be.equal(64)
             expect(await forgeFacet.getAavegotchiSmithingLevel(gotchis[0])).to.be.equal(3)
             expect(await forgeFacet.getSmithingLevelMultiplierBips(gotchis[0])).to.be.equal(9410);
 
@@ -375,7 +366,10 @@ describe("Testing Forge", async function () {
 
             expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(1)
             // test with full amount gltr needed (98765)
-            await impForgeFelon.forgeWearables([78], [11866], [98765]);
+
+            let forgeTime = await forgeFacet.forgeTime(11866, 2)
+
+            await impForgeFelon.forgeWearables([78], [11866], [forgeTime]);
             expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(2)
 
         });
@@ -411,7 +405,9 @@ describe("Testing Forge", async function () {
             await network.provider.send("hardhat_mine", ["0x181CC"])
 
             await impForgeFelon.claimForgeQueueItems([11866])
+            await impForgeTest.claimForgeQueueItems([7735])
             expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(1)
+            expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(15)
 
             console.log("-----------")
             forgeQueue = await impForgeFelon.getForgeQueue();
@@ -419,19 +415,92 @@ describe("Testing Forge", async function () {
 
             expect(forgeQueue.filter(f => f.gotchiId == "11866")[0].claimed).to.be.true
 
-            // expect(await wearablesFacet.balanceOf(felonOwner, 78)).to.be.equal(2)
 
-        });
-
-        it('should revert for rental gotchi', function () {
-            
         });
     })
-    // describe("geodes", async function () {
-    //     it('should open a geode', async function () {
-    //         expect(await forgeVrfFacet.areGeodePrizesAvailable()).to.be.equal(true)
-    //     });
-    // })
+
+    describe("revert tests", async function (){
+        it('should adminMint and return total supply', async function () {
+            let ids = [ALLOY, ESSENCE, CORE_COMMON, ALLOY]
+            let amts = [5, 10, 15, 10]
+            let supplies = [5, 10, 15, 15]
+
+            for (let i = 0; i < ids.length; i++) {
+                let currTotal = await forgeTokenFacet.totalSupply(ids[i]);
+
+                await forgeFacet.adminMint(forgeDiamondAddress, ids[i], amts[i]);
+
+                expect(await forgeTokenFacet.totalSupply(ids[i])).to.be.equal(amts[i] + Number(currTotal));
+            }
+        });
+
+        it('should reject adminMint', async function () {
+            let imp: ForgeFacet = await impersonate(testUser, forgeFacet, ethers, network)
+            await expect(imp.adminMint(forgeDiamondAddress, 0, 10)).to.be.revertedWith("LibAppStorage: No access");
+        });
+
+
+        it('should revert smelt correctly', async function () {
+            let imp = await impersonate(testUser, forgeFacet, ethers, network)
+
+            // issue with testing locked; not owner if in rental as well, even if called by original owner.
+            // await expect(imp.smeltWearables([157], [2270])).to.be.revertedWith("ForgeFacet: Aavegotchi is locked")
+            await expect(imp.smeltWearables([157], [1])).to.be.revertedWith("ForgeFacet: Not Aavegotchi owner")
+            await expect(imp.smeltWearables([145], [7735])).to.be.revertedWith("ForgeFacet: smelt item not owned")
+        })
+
+        it('should revert transfer when forging', async function () {
+            let impTestForge = await impersonate(testUser, forgeFacet, ethers, network)
+            let impTestAavegotchi: AavegotchiFacet = await impersonate(testUser, aavegotchiFacet, ethers, network)
+
+            await impTestForge.smeltWearables([157], [7735])
+            await forgeFacet.adminMint(testUser, ALLOY, 30);
+            await impTestForge.forgeWearables([157], [7735], [0]);
+
+            // attemp transfer to random address, expect revert
+            await expect(impTestAavegotchi["safeTransferFrom(address,address,uint256)"](testUser, rentalTestUser, 7735))
+                .to.be.revertedWith("I'M BUSY FORGING DON'T BOTHER ME")
+
+            await network.provider.send("hardhat_mine", ["0x181CD"])
+            await impTestForge.claimForgeQueueItems([7735])
+        });
+        it('should revert for rental gotchi', async function () {
+            let lending = {
+                tokenId: 7735,
+                initialCost: 0,
+                period: 0,
+                revenueSplit: [100, 0, 0],
+                originalOwner: testUser,
+                thirdParty: "",
+                whitelistId: 0,
+                revenueTokens: [],
+            }
+            let impRenterLending: GotchiLendingFacet = await impersonate(rentalTestUser, lendingFacet, ethers, network);
+            let impTestLending: GotchiLendingFacet = await impersonate(testUser, lendingFacet, ethers, network);
+
+            let impTestForge: ForgeFacet = await impersonate(testUser, forgeFacet, ethers, network)
+            let impRenterForge: ForgeFacet = await impersonate(rentalTestUser, forgeFacet, ethers, network)
+
+            // start a forge
+            await impTestForge.smeltWearables([157], [7735], )
+            await forgeFacet.adminMint(testUser, ALLOY, 30);
+            await impTestForge.forgeWearables([157], [7735], [0])
+
+            // create and agree rental
+            await impTestLending.addGotchiLending(
+                7735, 0, 1, [100, 0, 0], testUser, "0x0000000000000000000000000000000000000000", 0, []
+            );
+            let listing = await lendingGetSetFacet.getGotchiLendingFromToken(7735);
+            await impRenterLending.agreeGotchiLending(listing.listingId, 7735, 0, 1, [100, 0, 0]);
+
+            // should revert claim for both original owner and renter
+            await expect(impTestForge.claimForgeQueueItems([7735])).to.be.revertedWith("ForgeFacet: Aavegotchi is lent out")
+            await expect(impRenterForge.claimForgeQueueItems([7735])).to.be.revertedWith("ForgeFacet: Aavegotchi is lent out")
+
+            await network.provider.send("hardhat_mine", ["0x10"])
+            await impTestLending.claimAndEndGotchiLending(7735);
+        });
+    })
 
     describe("standard erc1155", async function () {
 

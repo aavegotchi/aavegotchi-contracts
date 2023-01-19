@@ -359,6 +359,9 @@ contract ForgeFacet is Modifiers {
         available = wearablesFacet().balanceOf(address(this), itemId) - s.itemForging[itemId] > 0;
     }
 
+    function isGotchiForging(uint256 gotchiId) public view returns(bool) {
+        return s.gotchiForging[gotchiId].isForging;
+    }
 
     // @notice Allow Aavegotchi diamond to mint essence.
     // @dev Only called from CollateralFacet's decreaseAndDestroy function. Not including a whenNotPaused modifier

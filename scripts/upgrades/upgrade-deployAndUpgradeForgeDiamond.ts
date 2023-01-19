@@ -54,6 +54,7 @@ export async function deployAndUpgradeForgeDiamond() {
                 "function forgeWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds, uint40[] calldata _gltr) external",
                 "function forgeTime(uint256 gotchiId, uint8 rsm) public view returns (uint256 forgeTime)",
                 "function isForgeable(uint256 itemId) public view returns(bool available)",
+                "function isGotchiForging(uint256 gotchiId) public view returns(bool)",
                 "function mintEssence(address owner, uint256 gotchiId) external",
                 "function adminMint(address account, uint256 id, uint256 amount) external",
             ],

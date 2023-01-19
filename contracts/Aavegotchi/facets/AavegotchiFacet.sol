@@ -12,6 +12,8 @@ import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {IERC721TokenReceiver} from "../../shared/interfaces/IERC721TokenReceiver.sol";
 
+import { ForgeFacet } from "../ForgeDiamond/facets/ForgeFacet.sol";
+
 contract AavegotchiFacet is Modifiers {
     event PetOperatorApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
@@ -129,6 +131,11 @@ contract AavegotchiFacet is Modifiers {
         approved_ = s.petOperators[_owner][_operator];
     }
 
+    function _enforceAavegotchiNotForging(uint256 _tokenId) internal {
+        ForgeFacet forgeFacet = ForgeFacet(s.forgeDiamond);
+        require(!forgeFacet.isGotchiForging(_tokenId), "I'M BUSY FORGING DON'T BOTHER ME");
+    }
+
     /// @notice Transfers the ownership of an NFT from one address to another address
     /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
     ///  operator, or the approved address for this NFT. Throws if `_from` is
@@ -221,6 +228,7 @@ contract AavegotchiFacet is Modifiers {
         uint256 _tokenId
     ) internal {
         LibGotchiLending.enforceAavegotchiNotInLending(uint32(_tokenId), _sender);
+        _enforceAavegotchiNotForging(_tokenId);
 
         require(_to != address(0), "AavegotchiFacet: Can't transfer to 0 address");
         require(_from != address(0), "AavegotchiFacet: _from can't be 0 address");
