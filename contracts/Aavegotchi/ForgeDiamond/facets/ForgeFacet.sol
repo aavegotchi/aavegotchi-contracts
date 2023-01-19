@@ -267,6 +267,9 @@ contract ForgeFacet is Modifiers {
 
             emit AddedToQueue(sender, itemId, gotchiId, readyBlock, newQueueItem.id);
         }
+
+        // add smithing skill
+        s.gotchiSmithingSkillPoints[gotchiId] += s.skillPointsEarnedFromForge[itemType.rarityScoreModifier];
     }
 
     // @dev returns the time (in blocks) cost for forging for an aavegotchi
