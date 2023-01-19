@@ -449,19 +449,7 @@ describe("Testing Forge", async function () {
     })
 
     describe("revert tests", async function (){
-        it('should adminMint and return total supply', async function () {
-            let ids = [ALLOY, ESSENCE, CORE_COMMON, ALLOY]
-            let amts = [5, 10, 15, 10]
-            let supplies = [5, 10, 15, 15]
 
-            for (let i = 0; i < ids.length; i++) {
-                let currTotal = await forgeTokenFacet.totalSupply(ids[i]);
-
-                await forgeFacet.adminMint(forgeDiamondAddress, ids[i], amts[i]);
-
-                expect(await forgeTokenFacet.totalSupply(ids[i])).to.be.equal(amts[i] + Number(currTotal));
-            }
-        });
 
         it('should reject adminMint', async function () {
             let imp: ForgeFacet = await impersonate(testUser, forgeFacet, ethers, network)
@@ -517,7 +505,19 @@ describe("Testing Forge", async function () {
         });
     })
 
-    describe("standard erc1155", async function () {
+    describe("token tests", async function () {
+        it('should adminMint and return total supply', async function () {
+            let ids = [ALLOY, ESSENCE, CORE_COMMON, ALLOY]
+            let amts = [5, 10, 15, 10]
+            let supplies = [5, 10, 15, 15]
 
+            for (let i = 0; i < ids.length; i++) {
+                let currTotal = await forgeTokenFacet.totalSupply(ids[i]);
+
+                await forgeFacet.adminMint(forgeDiamondAddress, ids[i], amts[i]);
+
+                expect(await forgeTokenFacet.totalSupply(ids[i])).to.be.equal(amts[i] + Number(currTotal));
+            }
+        });
     })
 });
