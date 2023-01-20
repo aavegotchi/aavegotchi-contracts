@@ -3,11 +3,13 @@ import {
     convertFacetAndSelectorsToString,
     DeployUpgradeTaskArgs,
     FacetsAndAddSelectors,
-} from "../../tasks/deployUpgrade";
+} from "../../../tasks/deployUpgrade";
 
-import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
+import { maticDiamondAddress, maticDiamondUpgrader } from "../../helperFunctions";
+import {DAOFacetInterface} from "../../../typechain/DAOFacet";
+import {DAOFacet__factory} from "../../../typechain";
 
-export async function upgradeAavegotchiForForge() {
+export async function upgradeAavegotchiForForge(forgeAddress: string) {
     console.log("Upgrading Aavegotchi facets for Forge.");
 
     const signerAddress = await (await ethers.getSigners())[0].getAddress();
@@ -45,13 +47,23 @@ export async function upgradeAavegotchiForForge() {
 
     const joined = convertFacetAndSelectorsToString(facets);
 
+    let iface: DAOFacetInterface = new ethers.utils.Interface(
+        DAOFacet__factory.abi
+    ) as DAOFacetInterface;
+
+    const calldata = iface.encodeFunctionData("setForge", [
+        forgeAddress,
+    ]);
+
     const args: DeployUpgradeTaskArgs = {
         diamondUpgrader: signerAddress,
         diamondAddress: maticDiamondAddress,
         facetsAndAddSelectors: joined,
         useLedger: false,
         useMultisig: false,
-        freshDeployment: false
+        freshDeployment: false,
+        initAddress: maticDiamondAddress,
+        initCalldata: calldata
     };
 
     await run("deployUpgrade", args);
@@ -59,11 +71,11 @@ export async function upgradeAavegotchiForForge() {
     console.log("Finished upgrading Aavegotchi facets for Forge.");
 }
 
-if (require.main === module) {
-    upgradeAavegotchiForForge()
-        .then(() => process.exit(0))
-        .catch((error) => {
-            console.error(error);
-            process.exit(1);
-        });
-}
+// if (require.main === module) {
+//     upgradeAavegotchiForForge()
+//         .then(() => process.exit(0))
+//         .catch((error) => {
+//             console.error(error);
+//             process.exit(1);
+//         });
+// }

@@ -2,11 +2,9 @@ import { ethers, network } from "hardhat";
 import { expect } from "chai";
 import {ForgeDAOFacet, ForgeFacet, ForgeTokenFacet, WearablesFacet, CollateralFacet, DAOFacet, ItemsFacet,
     GotchiLendingFacet, LendingGetterAndSetterFacet, AavegotchiFacet, IERC20} from "../../typechain";
-import { deployAndUpgradeForgeDiamond } from "../../scripts/upgrades/upgrade-deployAndUpgradeForgeDiamond";
 import { impersonate, maticDiamondAddress } from "../../scripts/helperFunctions";
 import {JsonRpcSigner} from "@ethersproject/providers";
-import {upgradeAavegotchiForForge} from "../../scripts/upgrades/upgrade-aavegotchiForForge";
-
+import {releaseForge} from "../../scripts/upgrades/forge/upgrade-forgeFinal";
 
 
 // See contracts/Aavegotchi/ForgeDiamond/libraries/LibAppStorage.sol
@@ -57,11 +55,7 @@ describe("Testing Forge", async function () {
 
 
     before(async function (){
-        forgeDiamondAddress = await deployAndUpgradeForgeDiamond();
-        await upgradeAavegotchiForForge();
-
-        // signer = await ethers.provider.getSigner(forgeDiamondAddress);
-        // signer2 = await ethers.provider.getSigner(testAdd);
+        forgeDiamondAddress = await releaseForge();
 
         forgeFacet = (await ethers.getContractAt(
             "contracts/Aavegotchi/ForgeDiamond/facets/ForgeFacet.sol:ForgeFacet",
@@ -112,64 +106,9 @@ describe("Testing Forge", async function () {
             GLTR
         )) as IERC20;
 
-        // prep storage - TODO: put into script
-        let aavegotchiOwner = "0x585E06CA576D0565a035301819FD2cfD7104c1E8"
-        let impOwner: DAOFacet = await impersonate(aavegotchiOwner, aavegotchiDaoFacet, ethers, network)
-        await impOwner.setForge(forgeDiamondAddress);
-
-        await forgeDaoFacet.setGltrAddress(GLTR);
-        await forgeDaoFacet.setAavegotchiDaoAddress(daoAddr);
-        await forgeDaoFacet.setAlloyDaoFeeInBips(500);
-        await forgeDaoFacet.setAlloyBurnFeeInBips(500);
-
-        let alloyCosts = {
-            common: 100,
-            uncommon: 300,
-            rare: 1300,
-            legendary: 5300,
-            mythical: 25000,
-            godlike: 130000,
-        }
-        let essenceCost = {
-            common: 1,
-            uncommon: 5,
-            rare: 10,
-            legendary: 50,
-            mythical: 250,
-            godlike: 1000,
-        }
-        let timeCost = {
-            common: 32922,
-            uncommon: 98765,
-            rare: 296296,
-            legendary: 888889,
-            mythical: 2666667,
-            godlike: 8000000,
-        }
-        let skillPts = {
-            common: 4,
-            uncommon: 12,
-            rare: 52,
-            legendary: 212,
-            mythical: 1000,
-            godlike: 5200,
-        }
-        // let geodeChances = {
-        //     common: 79,
-        //     uncommon: 235,
-        //     rare: 982,
-        //     legendary: 3439,
-        //     mythical: 8630,
-        //     godlike: 10000
-        // }
-
-        await forgeDaoFacet.setForgeAlloyCost(alloyCosts);
-        await forgeDaoFacet.setForgeEssenceCost(essenceCost);
-        await forgeDaoFacet.setForgeTimeCostInBlocks(timeCost);
-        await forgeDaoFacet.setSkillPointsEarnedFromForge(skillPts);
-        await forgeDaoFacet.setSmeltingSkillPointReductionFactorBips(5000);
-        // await forgeDaoFacet.setGeodeWinChance(geodeChances);
-        // await forgeDaoFacet.setGeodePrizes([1], [1]);.
+        // let aavegotchiOwner = "0x585E06CA576D0565a035301819FD2cfD7104c1E8"
+        // let impOwner: DAOFacet = await impersonate(aavegotchiOwner, aavegotchiDaoFacet, ethers, network)
+        // await impOwner.setForge(forgeDiamondAddress);
 
 
         // approve for test user

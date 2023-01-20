@@ -3,10 +3,10 @@ import {
     convertFacetAndSelectorsToString,
     DeployUpgradeTaskArgs,
     FacetsAndAddSelectors,
-} from "../../tasks/deployUpgrade";
-import { ForgeDiamond__factory } from "../../typechain/factories/ForgeDiamond__factory";
+} from "../../../tasks/deployUpgrade";
+import { ForgeDiamond__factory } from "../../../typechain/factories/ForgeDiamond__factory";
 
-import { gasPrice } from "../helperFunctions";
+import { gasPrice } from "../../helperFunctions";
 
 //these already deployed facets(in the aavegotchi diamond) are added to the forgeDiamond directly
 const aavegotchiCutFacet = "0x4f908Fa47F10bc2254dae7c74d8B797C1749A8a6";
