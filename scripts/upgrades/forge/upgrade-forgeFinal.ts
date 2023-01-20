@@ -14,3 +14,12 @@ export async function releaseForge(){
 
     return forgeDiamondAddress
 }
+
+if (require.main === module) {
+    releaseForge()
+        .then(() => process.exit(0))
+        .catch((error) => {
+            console.error(error);
+            process.exit(1);
+        });
+}
