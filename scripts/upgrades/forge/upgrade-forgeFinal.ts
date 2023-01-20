@@ -7,8 +7,8 @@ export async function releaseForge(){
     console.log("Starting forge release...")
 
     let forgeDiamondAddress = await deployAndUpgradeForgeDiamond();
-    await upgradeAavegotchiForForge(forgeDiamondAddress);
     await setForgeProperties(forgeDiamondAddress)
+    await upgradeAavegotchiForForge(forgeDiamondAddress);
 
     console.log("Finished forge release.")
 
