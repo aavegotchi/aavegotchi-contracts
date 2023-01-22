@@ -4,7 +4,7 @@ import request from "graphql-request";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { snapshotGraphUrl } from "../helpers/constants";
 import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
-
+import * as fs from "fs";
 import {
   DefenderRelayProvider,
   DefenderRelaySigner,
@@ -224,7 +224,10 @@ interface ProposalTitle {
   ];
 }
 export function propType(title: string): "coreprop" | "sigprop" {
-  if (title.includes("[AGIP]")) {
+  const searchString = "\\[AGIP.*]";
+  const regex = new RegExp(searchString);
+  const match = title.match(regex);
+  if (match) {
     return "coreprop";
   } else {
     return "sigprop";
@@ -249,4 +252,26 @@ export function getRelayerSigner() {
     speed: "fast",
     validForSeconds: 3600,
   });
+}
+
+export function logXPRecipients(
+  propType: "sigprop" | "coreprop",
+  title: string,
+  tokenIds: string[],
+  addresses: string[]
+) {
+  const parentDir = `data/XPRecipients/${propType}`;
+  const parentFile = `${parentDir}/${title}.json`;
+  if (!fs.existsSync(parentDir)) {
+    fs.mkdirSync(parentDir, { recursive: true });
+  }
+  if (!fs.existsSync(parentFile)) {
+    const data = {
+      tokenIds,
+      addresses,
+    };
+
+    fs.writeFileSync(parentFile, JSON.stringify(data));
+    console.log("finished writing to file");
+  }
 }
