@@ -166,6 +166,8 @@ contract ForgeFacet is Modifiers {
         // get smelted item metadata
         ItemType memory itemType = itemsFacet().getItemType(itemId);
 
+        require(itemType.category == 0, "ForgeFacet: Only wearables can be smelted");
+
         // remove smelted item
         wearablesFacet().safeTransferFrom(sender, address(this), itemId, 1, "");
 

@@ -417,6 +417,7 @@ describe("Testing Forge", async function () {
             // await expect(imp.smeltWearables([157], [2270])).to.be.revertedWith("ForgeFacet: Aavegotchi is locked")
             await expect(imp.smeltWearables([157], [1])).to.be.revertedWith("ForgeFacet: Not Aavegotchi owner")
             await expect(imp.smeltWearables([145], [7735])).to.be.revertedWith("ForgeFacet: smelt item not owned")
+            await expect(imp.smeltWearables([127], [7735])).to.be.revertedWith("ForgeFacet: Only wearables can be smelted")
         })
 
 
