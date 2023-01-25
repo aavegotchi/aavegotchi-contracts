@@ -1,14 +1,11 @@
 import { task } from "hardhat/config";
 import { Signer } from "@ethersproject/abstract-signer";
-import {
-  getDiamondSigner,
-  itemManager,
-  maticDiamondAddress,
-} from "../scripts/helperFunctions";
+import { maticDiamondAddress } from "../scripts/helperFunctions";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { uploadOrUpdateSvg } from "../scripts/svgHelperFunctions";
 import { SvgFacet } from "../typechain";
+import { getRelayerSigner } from "../scripts/helperFunctions";
 
 export interface UpdateSvgsTaskArgs {
   svgIds: string;
@@ -31,7 +28,7 @@ task("updateSvgs", "Updates SVGs, given svgType and a list of IDs")
         .filter((str) => str.length > 0);
       const svgType: string = taskArgs.svgType;
 
-      const signer: Signer = await getDiamondSigner(hre, itemManager, false);
+      const signer: Signer = await getRelayerSigner();
 
       const svgFacet = (await hre.ethers.getContractAt(
         "SvgFacet",

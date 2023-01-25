@@ -109,7 +109,6 @@ export async function getDiamondSigner(
   useLedger?: boolean
 ) {
   //Instantiate the Signer
-  let signer: Signer;
   const owner = await (
     (await hre.ethers.getContractAt(
       "OwnershipFacet",
