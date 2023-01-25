@@ -11,6 +11,8 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
+import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
+
 contract ShopFacet is Modifiers {
     event MintPortals(
         address indexed _from,
@@ -140,7 +142,7 @@ contract ShopFacet is Modifiers {
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
         require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
         emit PurchaseItemsWithGhst(sender, _to, _itemIds, _quantities, totalPrice);
-        emit LibERC1155.TransferBatch(sender, address(0), _to, _itemIds, _quantities);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, address(0), _to, _itemIds, _quantities);
         LibAavegotchi.purchase(sender, totalPrice);
         LibERC1155.onERC1155BatchReceived(sender, address(0), _to, _itemIds, _quantities, "");
     }
@@ -174,7 +176,7 @@ contract ShopFacet is Modifiers {
         }
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
         require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
-        emit LibERC1155.TransferBatch(sender, from, _to, _itemIds, _quantities);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, from, _to, _itemIds, _quantities);
         emit PurchaseTransferItemsWithGhst(sender, _to, _itemIds, _quantities, totalPrice);
         LibAavegotchi.purchase(sender, totalPrice);
         LibERC1155.onERC1155BatchReceived(sender, from, _to, _itemIds, _quantities, "");

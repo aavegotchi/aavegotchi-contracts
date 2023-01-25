@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import './IERC165.sol';
+import "./IERC165.sol";
 
 /// @title IERC2981
 /// @dev Interface for the ERC2981 - Token Royalty standard
@@ -19,13 +19,7 @@ interface IERC2981 is IERC165 {
     /// @param _salePrice - the sale price of the NFT asset specified by _tokenId
     /// @return receiver - address of who should be sent the royalty payment
     /// @return royaltyAmount - the royalty payment amount for _salePrice
-    function royaltyInfo(
-        uint256 _tokenId,
-        uint256 _salePrice
-    ) external view returns (
-        address receiver,
-        uint256 royaltyAmount
-    );
+    function royaltyInfo(uint256 _tokenId, uint256 _salePrice) external view returns (address receiver, uint256 royaltyAmount);
 
     /// @notice Informs callers that this contract supports ERC2981
     /// @dev If `_registerInterface(_INTERFACE_ID_ERC2981)` is called
@@ -33,5 +27,5 @@ interface IERC2981 is IERC165 {
     /// @param interfaceID The interface identifier, as specified in ERC-165
     /// @return `true` if the contract implements
     ///         `_INTERFACE_ID_ERC2981` and `false` otherwise
-    function supportsInterface(bytes4 interfaceID) override external view returns (bool);
+    function supportsInterface(bytes4 interfaceID) external view override returns (bool);
 }

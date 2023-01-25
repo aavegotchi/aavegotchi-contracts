@@ -1,7 +1,7 @@
 import { BigNumberish } from "@ethersproject/bignumber";
 import { BytesLike } from "@ethersproject/bytes";
 import { SvgFacet } from "../typechain";
-import { gasPrice, itemManager, itemManagerAlt } from "./helperFunctions";
+import { itemManager, itemManagerAlt } from "./helperFunctions";
 
 import { aavegotchiSvgs } from "../svgs/aavegotchi-side-typeScript";
 import { aavegotchiSvgs as frontGotchiSvgs } from "../svgs/aavegotchi-typescript";
@@ -271,9 +271,7 @@ export async function uploadSvgs(
     //this might be incorrect
     // printSizeInfo(svgType, svgTypesAndSizes[0].sizes);
 
-    let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes, {
-      gasPrice: gasPrice,
-    });
+    let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes);
     let receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
@@ -306,9 +304,7 @@ export async function updateSvgs(
       },
     ];
 
-    let tx = await svgFacet.updateSvg(svg, array, {
-      gasPrice: gasPrice,
-    });
+    let tx = await svgFacet.updateSvg(svg, array);
     // console.log("tx hash:", tx.hash);
     let receipt = await tx.wait();
     if (!receipt.status) {

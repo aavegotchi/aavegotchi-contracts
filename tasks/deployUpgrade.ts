@@ -15,10 +15,12 @@ import {
   gasPrice,
   getSelectors,
   getSighashes,
+  delay,
 } from "../scripts/helperFunctions";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { sendToMultisig } from "../scripts/libraries/multisig/multisig";
+import { network } from "hardhat";
 
 export interface FacetsAndAddSelectors {
   facetName: string;
@@ -39,6 +41,7 @@ export interface DeployUpgradeTaskArgs {
   initCalldata?: string;
   rawSigs?: boolean;
   // updateDiamondABI: boolean;
+  freshDeployment?: boolean;
 }
 
 interface Cut {
@@ -101,6 +104,7 @@ task(
     "Set to true if multisig should be used for deploying"
   )
   .addFlag("useLedger", "Set to true if Ledger should be used for signing")
+  .addFlag("freshDeployment", "This is for Diamonds that are freshly deployed ")
   // .addFlag("verifyFacets","Set to true if facets should be verified after deployment")
 
   .setAction(
@@ -114,6 +118,11 @@ task(
       const useLedger = taskArgs.useLedger;
       const initAddress = taskArgs.initAddress;
       const initCalldata = taskArgs.initCalldata;
+
+      const branch = require("git-branch");
+      if (hre.network.name === "matic" && branch.sync() !== "master") {
+        throw new Error("Not master branch!");
+      }
 
       //Instantiate the Signer
       let signer: Signer;
@@ -192,13 +201,16 @@ task(
             });
           }
 
-          //Always replace the existing selectors to prevent duplications
-          if (existingSelectors.length > 0) {
-            cut.push({
-              facetAddress: deployedFacet.address,
-              action: FacetCutAction.Replace,
-              functionSelectors: existingSelectors,
-            });
+          //replace only when not using on newly deplyed diamonds
+          if (!taskArgs.freshDeployment) {
+            //Always replace the existing selectors to prevent duplications
+            if (existingSelectors.length > 0) {
+              cut.push({
+                facetAddress: deployedFacet.address,
+                action: FacetCutAction.Replace,
+                functionSelectors: existingSelectors,
+              });
+            }
           }
         }
         let removeSelectors: string[];
@@ -272,5 +284,18 @@ task(
           console.log("Completed diamond cut: ", tx.hash);
         }
       }
+
+      // if (hre.network.name !== "hardhat") {
+      //   console.log("Verifying Addresses");
+      //   await delay(60000);
+
+      //   for (let x = 0; x < cut.length; x++) {
+      //     console.log("Addresses to be verified: ", cut[x].facetAddress);
+      //     await hre.run("verify:verify", {
+      //       address: cut[x].facetAddress,
+      //       constructorArguments: [],
+      //     });
+      //   }
+      // }
     }
   );

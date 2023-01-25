@@ -8,6 +8,7 @@ import {
   AavegotchiFacet,
   ERC1155MarketplaceFacet,
   ERC721MarketplaceFacet,
+  ERC721WithMultiRoyalties,
   ERC721WithRoyalties,
   IERC20,
   ItemsFacet,
@@ -32,6 +33,7 @@ describe("Testing Baazaar Recipient", async function () {
   const gotchiOwnerAddress = "0xb7601193f559de56D67FB8e6a2AF219b05BD36c7"; // Should be Gotchi owner
   const itemOwnerAddress = "0xb7601193f559de56D67FB8e6a2AF219b05BD36c7"; // Should be Item owner
   const royaltyAddress = "0x4E8ffddB1403CF5306C6c7B31dC72EF5f44BC4F5"; // Random address
+  const royaltyAddress2 = "0x46a3A41bd932244Dd08186e4c19F1a7E48cbcDf4"; // Random address 2
   const erc721Id = 11600; // Should be unlocked erc721/gotchi
   const testPrice = "1";
   const principalSplit: [number, number] = [6000, 4000]; // 60% and 40%
@@ -40,6 +42,7 @@ describe("Testing Baazaar Recipient", async function () {
   const erc1155Id = 138; // Should be erc1155/item
   const test1155Quantity = "1";
 
+  let snapshot: any;
   let erc721MarketWithBuyer: ERC721MarketplaceFacet;
   let erc721MarketWithGotchiSeller: ERC721MarketplaceFacet;
   let erc1155MarketWithBuyer: ERC1155MarketplaceFacet;
@@ -48,11 +51,13 @@ describe("Testing Baazaar Recipient", async function () {
   let erc1155: ItemsFacet;
   let erc721Royalty: ERC721WithRoyalties;
   let erc721WithRoyaltiesAddress: any;
-  let snapshot: any;
+  let erc721MultiRoyalty: ERC721WithMultiRoyalties;
+  let erc721WithMultiRoyaltiesAddress: any;
 
   let erc721ListingId: BigNumber;
   let erc1155ListingId: BigNumber;
   let erc721RoyaltyTokenId: any;
+  let erc721MultiRoyaltyTokenId: any;
 
   before(async function () {
     await upgrade();
@@ -136,11 +141,11 @@ describe("Testing Baazaar Recipient", async function () {
       ])
     ).wait();
 
-    // mint mock EIP2981 ERC721 tokens
-    const receipt = await (
+    // mint mock EIP2981 supported ERC721 tokens
+    let receipt = await (
       await erc721Royalty.mint(gotchiOwnerAddress, royaltyAddress, 400)
     ).wait(); // royalty: 4%
-    const event = receipt!.events!.find((event) => event.event === "Transfer");
+    let event = receipt!.events!.find((event) => event.event === "Transfer");
     erc721RoyaltyTokenId = event!.args!.tokenId;
 
     // approve diamond to move erc721 with royalty
@@ -152,6 +157,46 @@ describe("Testing Baazaar Recipient", async function () {
     );
     await (
       await erc721RoyaltyWithTokenOwner.setApprovalForAll(diamondAddress, true)
+    ).wait();
+
+    // deploy mock multi royalty ERC721 and add category for it
+    erc721MultiRoyalty = (await (
+      await ethers.getContractFactory("ERC721WithMultiRoyalties")
+    ).deploy("FM Gotchi", "FMGOTCHI")) as ERC721WithMultiRoyalties;
+    erc721WithMultiRoyaltiesAddress = erc721MultiRoyalty.address;
+
+    await (
+      await erc721MarketWithItemManager.setERC721Categories([
+        {
+          erc721TokenAddress: erc721WithMultiRoyaltiesAddress,
+          category: 6,
+        },
+      ])
+    ).wait();
+
+    // mint mock multi royalty supported ERC721 tokens
+    receipt = await (
+      await erc721MultiRoyalty.mint(
+        gotchiOwnerAddress,
+        [royaltyAddress, royaltyAddress2],
+        [100, 300]
+      )
+    ).wait(); // royalty: 4%
+    event = receipt!.events!.find((event) => event.event === "Transfer");
+    erc721MultiRoyaltyTokenId = event!.args!.tokenId;
+
+    // approve diamond to move erc721 with royalty
+    const erc721MultiRoyaltyWithTokenOwner = await impersonate(
+      gotchiOwnerAddress,
+      erc721MultiRoyalty,
+      ethers,
+      network
+    );
+    await (
+      await erc721MultiRoyaltyWithTokenOwner.setApprovalForAll(
+        diamondAddress,
+        true
+      )
     ).wait();
 
     snapshot = await ethers.provider.send("evm_snapshot", []);
@@ -1325,6 +1370,260 @@ describe("Testing Baazaar Recipient", async function () {
           ).to.equal(principalShare.mul(principalSplit[1]).div(10000));
 
           const ownerAfter = await erc721Royalty.ownerOf(erc721RoyaltyTokenId);
+          expect(ownerAfter).to.equal(recipient);
+        });
+      });
+    });
+  });
+
+  describe("ERC721MarketplaceFacet with multi royalty", async function () {
+    // note: adding and executing cases (success only) are added.
+    before(async function () {
+      snapshot = await ethers.provider.send("evm_snapshot", []);
+    });
+    describe("ERC721 listing without split", async function () {
+      describe("addERC721Listing", async function () {
+        it("Should success if all parameters are valid", async function () {
+          const receipt = await (
+            await erc721MarketWithGotchiSeller.addERC721Listing(
+              erc721WithMultiRoyaltiesAddress,
+              erc721MultiRoyaltyTokenId,
+              ethers.utils.parseEther(testPrice)
+            )
+          ).wait();
+          const event = receipt!.events!.find(
+            (event) => event.event === "ERC721ListingAdd"
+          );
+          erc721ListingId = event!.args!.listingId;
+          expect(event!.args!.seller).to.equal(gotchiOwnerAddress);
+          expect(event!.args!.erc721TokenAddress).to.equal(
+            erc721WithMultiRoyaltiesAddress
+          );
+          expect(event!.args!.erc721TokenId).to.equal(
+            erc721MultiRoyaltyTokenId
+          );
+        });
+      });
+      describe("executeERC721Listing", async function () {
+        it("Should success if all parameters are valid", async function () {
+          const ghstBalanceBuyerBefore = await ghst.balanceOf(
+            ghstHolderAddress
+          );
+          const ghstBalanceSellerBefore = await ghst.balanceOf(
+            gotchiOwnerAddress
+          );
+          const ghstBalancePixelCraftBefore = await ghst.balanceOf(
+            pixelcraftAddress
+          );
+          const ghstBalanceDaoBefore = await ghst.balanceOf(
+            aavegotchiDAOAddress
+          );
+          const ghstBalancePlayerBefore = await ghst.balanceOf(
+            playerRewardsAddress
+          );
+          const ghstBalanceRoyaltyBefore = await ghst.balanceOf(royaltyAddress);
+          const ghstBalanceRoyalty2Before = await ghst.balanceOf(
+            royaltyAddress2
+          );
+
+          const receipt = await (
+            await erc721MarketWithBuyer.executeERC721Listing(erc721ListingId)
+          ).wait();
+          const event = receipt!.events!.find(
+            (event) => event.event === "ERC721ExecutedListing"
+          );
+          expect(event!.args!.seller).to.equal(gotchiOwnerAddress);
+          expect(event!.args!.buyer).to.equal(ghstHolderAddress);
+          expect(event!.args!.erc721TokenAddress).to.equal(
+            erc721WithMultiRoyaltiesAddress
+          );
+          expect(event!.args!.erc721TokenId).to.equal(
+            erc721MultiRoyaltyTokenId
+          );
+
+          const ghstBalanceBuyerAfter = await ghst.balanceOf(ghstHolderAddress);
+          const ghstBalanceSellerAfter = await ghst.balanceOf(
+            gotchiOwnerAddress
+          );
+          const ghstBalancePixelCraftAfter = await ghst.balanceOf(
+            pixelcraftAddress
+          );
+          const ghstBalanceDaoAfter = await ghst.balanceOf(
+            aavegotchiDAOAddress
+          );
+          const ghstBalancePlayerAfter = await ghst.balanceOf(
+            playerRewardsAddress
+          );
+          const ghstBalanceRoyaltyAfter = await ghst.balanceOf(royaltyAddress);
+          const ghstBalanceRoyalty2After = await ghst.balanceOf(
+            royaltyAddress2
+          );
+
+          expect(
+            ghstBalancePixelCraftAfter.sub(ghstBalancePixelCraftBefore)
+          ).to.equal(ethers.utils.parseEther(testPrice).div(50)); // 2%
+          expect(ghstBalanceDaoAfter.sub(ghstBalanceDaoBefore)).to.equal(
+            ethers.utils.parseEther(testPrice).div(100)
+          ); // 1%
+          expect(ghstBalancePlayerAfter.sub(ghstBalancePlayerBefore)).to.equal(
+            ethers.utils.parseEther(testPrice).div(200)
+          ); // 0.5%
+          expect(ghstBalanceBuyerBefore.sub(ghstBalanceBuyerAfter)).to.equal(
+            ethers.utils.parseEther(testPrice)
+          );
+          expect(
+            ghstBalanceRoyaltyAfter.sub(ghstBalanceRoyaltyBefore)
+          ).to.equal(ethers.utils.parseEther(testPrice).mul(1).div(100)); // 1%
+          expect(
+            ghstBalanceRoyalty2After.sub(ghstBalanceRoyalty2Before)
+          ).to.equal(ethers.utils.parseEther(testPrice).mul(3).div(100)); // 3%
+          expect(ghstBalanceSellerAfter.sub(ghstBalanceSellerBefore)).to.equal(
+            ethers.utils.parseEther(testPrice).mul(925).div(1000)
+          ); // 92.5% (96.5% - royalty)
+
+          const ownerAfter = await erc721MultiRoyalty.ownerOf(
+            erc721MultiRoyaltyTokenId
+          );
+          expect(ownerAfter).to.equal(ghstHolderAddress);
+        });
+      });
+    });
+    describe("ERC721 listing with split", async function () {
+      before(async function () {
+        // rollback
+        await ethers.provider.send("evm_revert", [snapshot]);
+      });
+      describe("addERC721ListingWithSplit", async function () {
+        it("Should success if all parameters are valid", async function () {
+          const receipt = await (
+            await erc721MarketWithGotchiSeller.addERC721ListingWithSplit(
+              erc721WithMultiRoyaltiesAddress,
+              erc721MultiRoyaltyTokenId,
+              ethers.utils.parseEther(testPrice),
+              principalSplit,
+              affiliate
+            )
+          ).wait();
+          let event = receipt!.events!.find(
+            (event) => event.event === "ERC721ListingAdd"
+          );
+          erc721ListingId = event!.args!.listingId;
+          expect(event!.args!.seller).to.equal(gotchiOwnerAddress);
+          expect(event!.args!.erc721TokenAddress).to.equal(
+            erc721WithMultiRoyaltiesAddress
+          );
+          expect(event!.args!.erc721TokenId).to.equal(
+            erc721MultiRoyaltyTokenId
+          );
+
+          event = receipt!.events!.find(
+            (event) => event.event === "ERC721ListingSplit"
+          );
+          expect(event!.args!.principalSplit).to.deep.equal(principalSplit);
+          expect(event!.args!.affiliate).to.equal(affiliate);
+        });
+      });
+      describe("executeERC721ListingToRecipient", async function () {
+        it("Should success if all parameters are valid", async function () {
+          const ghstBalanceBuyerBefore = await ghst.balanceOf(
+            ghstHolderAddress
+          );
+          const ghstBalanceSellerBefore = await ghst.balanceOf(
+            gotchiOwnerAddress
+          );
+          const ghstBalanceAffiliateBefore = await ghst.balanceOf(affiliate);
+          const ghstBalancePixelCraftBefore = await ghst.balanceOf(
+            pixelcraftAddress
+          );
+          const ghstBalanceDaoBefore = await ghst.balanceOf(
+            aavegotchiDAOAddress
+          );
+          const ghstBalancePlayerBefore = await ghst.balanceOf(
+            playerRewardsAddress
+          );
+          const ghstBalanceRoyaltyBefore = await ghst.balanceOf(royaltyAddress);
+          const ghstBalanceRoyalty2Before = await ghst.balanceOf(
+            royaltyAddress2
+          );
+
+          const receipt = await (
+            await erc721MarketWithBuyer.executeERC721ListingToRecipient(
+              erc721ListingId,
+              erc721WithMultiRoyaltiesAddress,
+              ethers.utils.parseEther(testPrice),
+              erc721MultiRoyaltyTokenId,
+              recipient
+            )
+          ).wait();
+          let event = receipt!.events!.find(
+            (event) => event.event === "ERC721ExecutedListing"
+          );
+          expect(event!.args!.seller).to.equal(gotchiOwnerAddress);
+          expect(event!.args!.buyer).to.equal(recipient);
+          expect(event!.args!.erc721TokenAddress).to.equal(
+            erc721WithMultiRoyaltiesAddress
+          );
+          expect(event!.args!.erc721TokenId).to.equal(
+            erc721MultiRoyaltyTokenId
+          );
+
+          event = receipt!.events!.find(
+            (event) => event.event === "ERC721ExecutedToRecipient"
+          );
+          expect(event!.args!.buyer).to.equal(ghstHolderAddress);
+          expect(event!.args!.recipient).to.equal(recipient);
+
+          const ghstBalanceBuyerAfter = await ghst.balanceOf(ghstHolderAddress);
+          const ghstBalanceSellerAfter = await ghst.balanceOf(
+            gotchiOwnerAddress
+          );
+          const ghstBalanceAffiliateAfter = await ghst.balanceOf(affiliate);
+          const ghstBalancePixelCraftAfter = await ghst.balanceOf(
+            pixelcraftAddress
+          );
+          const ghstBalanceDaoAfter = await ghst.balanceOf(
+            aavegotchiDAOAddress
+          );
+          const ghstBalancePlayerAfter = await ghst.balanceOf(
+            playerRewardsAddress
+          );
+          const ghstBalanceRoyaltyAfter = await ghst.balanceOf(royaltyAddress);
+          const ghstBalanceRoyalty2After = await ghst.balanceOf(
+            royaltyAddress2
+          );
+
+          expect(
+            ghstBalancePixelCraftAfter.sub(ghstBalancePixelCraftBefore)
+          ).to.equal(ethers.utils.parseEther(testPrice).div(50)); // 2%
+          expect(ghstBalanceDaoAfter.sub(ghstBalanceDaoBefore)).to.equal(
+            ethers.utils.parseEther(testPrice).div(100)
+          ); // 1%
+          expect(ghstBalancePlayerAfter.sub(ghstBalancePlayerBefore)).to.equal(
+            ethers.utils.parseEther(testPrice).div(200)
+          ); // 0.5%
+          expect(ghstBalanceBuyerBefore.sub(ghstBalanceBuyerAfter)).to.equal(
+            ethers.utils.parseEther(testPrice)
+          );
+          expect(
+            ghstBalanceRoyaltyAfter.sub(ghstBalanceRoyaltyBefore)
+          ).to.equal(ethers.utils.parseEther(testPrice).mul(1).div(100)); // 1%
+          expect(
+            ghstBalanceRoyalty2After.sub(ghstBalanceRoyalty2Before)
+          ).to.equal(ethers.utils.parseEther(testPrice).mul(3).div(100)); // 3%
+          const principalShare = ethers.utils
+            .parseEther(testPrice)
+            .mul(925)
+            .div(1000); // 92.5% (96.5% - royalty)
+          expect(ghstBalanceSellerAfter.sub(ghstBalanceSellerBefore)).to.equal(
+            principalShare.mul(principalSplit[0]).div(10000)
+          );
+          expect(
+            ghstBalanceAffiliateAfter.sub(ghstBalanceAffiliateBefore)
+          ).to.equal(principalShare.mul(principalSplit[1]).div(10000));
+
+          const ownerAfter = await erc721MultiRoyalty.ownerOf(
+            erc721MultiRoyaltyTokenId
+          );
           expect(ownerAfter).to.equal(recipient);
         });
       });

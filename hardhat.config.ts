@@ -62,6 +62,14 @@ export default {
       gasPrice: 1000000000,
       timeout: 90000,
     },
+    tenderly: {
+      url: process.env.TENDERLY_FORK,
+      accounts: [process.env.ITEM_MANAGER],
+      // blockGasLimit: 20000000,
+      blockGasLimit: 20000000,
+      gasPrice: 1000000000,
+      timeout: 90000,
+    },
     // mumbai: {
     //   url: 'https://rpc-mumbai.matic.today',
     //   accounts: [process.env.SECRET],
