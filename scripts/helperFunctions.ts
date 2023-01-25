@@ -126,6 +126,8 @@ export async function getDiamondSigner(
     return await hre.ethers.getSigner(override ? override : owner);
   } else if (hre.network.name === "matic") {
     return (await hre.ethers.getSigners())[0];
+  } else if (hre.network.name === "tenderly") {
+    return (await hre.ethers.getSigners())[0];
   } else {
     throw Error("Incorrect network selected");
   }
