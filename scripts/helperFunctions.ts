@@ -1,10 +1,22 @@
 import { Signer } from "@ethersproject/abstract-signer";
 import { Contract } from "@ethersproject/contracts";
+import request from "graphql-request";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { indexOf } from "underscore";
+import { snapshotGraphUrl } from "../helpers/constants";
 import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
 
-export const gasPrice = 70000000000;
+import {
+  DefenderRelayProvider,
+  DefenderRelaySigner,
+} from "defender-relay-client/lib/ethers";
+
+export const gasPrice = 270000000000;
+
+export function delay(milliseconds: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
+}
 
 export async function impersonate(
   address: string,
@@ -72,6 +84,11 @@ export const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 
 export const maticRealmDiamondAddress =
   "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
+
+export const maticFakeGotchiCards =
+  "0x9f6BcC63e86D44c46e85564E9383E650dc0b56D7";
+
+export const maticFakeGotchiArt = "0xA4E3513c98b30d4D7cc578d2C328Bd550725D1D0";
 
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();
@@ -197,4 +214,39 @@ export async function hasDuplicateGotchiIds(_array: string[]) {
     valuesSoFar[value] = true;
   }
   return false;
+}
+
+interface ProposalTitle {
+  proposals: [
+    {
+      title: string;
+    }
+  ];
+}
+export function propType(title: string): "coreprop" | "sigprop" {
+  if (title.includes("[AGIP]")) {
+    return "coreprop";
+  } else {
+    return "sigprop";
+  }
+}
+
+export interface RelayerInfo {
+  apiKey: string;
+  apiSecret: string;
+}
+
+export const xpRelayerAddress = "0xb6384935d68e9858f8385ebeed7db84fc93b1420";
+
+export function getRelayerSigner() {
+  const credentials: RelayerInfo = {
+    apiKey: process.env.DEFENDER_APIKEY!,
+    apiSecret: process.env.DEFENDER_SECRET!,
+  };
+
+  const provider = new DefenderRelayProvider(credentials);
+  return new DefenderRelaySigner(credentials, provider, {
+    speed: "fast",
+    validForSeconds: 3600,
+  });
 }

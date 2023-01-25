@@ -9,6 +9,8 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 
+import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
+
 contract ItemsFacet is Modifiers {
     //using LibAppStorage for AppStorage;
 
@@ -128,64 +130,6 @@ contract ItemsFacet is Modifiers {
         wearableIds_ = s.aavegotchis[_tokenId].equippedWearables;
     }
 
-    ///@notice Query all available wearable sets
-    ///@dev Called by off chain software so not too concerned about gas costs
-    ///@return wearableSets_ Am array of structs, each struct containing details about a wearable set
-    function getWearableSets() external view returns (WearableSet[] memory wearableSets_) {
-        wearableSets_ = s.wearableSets;
-    }
-
-    ///@notice Query a particular wearable set
-    ///@param _index Index of the set to query
-    ///@return wearableSet_ A struct containing details about a wearable set with index `_index`
-    function getWearableSet(uint256 _index) public view returns (WearableSet memory wearableSet_) {
-        uint256 length = s.wearableSets.length;
-        require(_index < length, "ItemsFacet: Wearable set does not exist");
-        wearableSet_ = s.wearableSets[_index];
-    }
-
-    ///@notice Query how many wearable sets are available
-    ///@return The total number of wearable sets available
-    function totalWearableSets() external view returns (uint256) {
-        return s.wearableSets.length;
-    }
-
-    ///@notice Query the wearable set identiiers that a wearable belongs to
-    ///@param _wearableIds An array containing the wearable identifiers to query
-    ///@return wearableSetIds_ An array containing the wearable set identifiers for each `_wearableIds`
-    function findWearableSets(uint256[] calldata _wearableIds) external view returns (uint256[] memory wearableSetIds_) {
-        unchecked {
-            uint256 length = s.wearableSets.length;
-            wearableSetIds_ = new uint256[](length);
-            uint256 count;
-            for (uint256 i; i < length; i++) {
-                uint16[] memory setWearableIds = s.wearableSets[i].wearableIds;
-                bool foundSet = true;
-                for (uint256 j; j < setWearableIds.length; j++) {
-                    uint256 setWearableId = setWearableIds[j];
-                    bool foundWearableId = false;
-                    for (uint256 k; k < _wearableIds.length; k++) {
-                        if (_wearableIds[k] == setWearableId) {
-                            foundWearableId = true;
-                            break;
-                        }
-                    }
-                    if (foundWearableId == false) {
-                        foundSet = false;
-                        break;
-                    }
-                }
-                if (foundSet) {
-                    wearableSetIds_[count] = i;
-                    count++;
-                }
-            }
-            assembly {
-                mstore(wearableSetIds_, count)
-            }
-        }
-    }
-
     ///@notice Query the item type of a particular item
     ///@param _itemId Item to query
     ///@return itemType_ A struct containing details about the item type of an item with identifier `_itemId`
@@ -225,7 +169,8 @@ contract ItemsFacet is Modifiers {
         // require(LibMeta.msgSender() == s.contractOwner, "ItemsFacet: Must be contract owner");
         s.itemsBaseUri = _value;
         for (uint256 i; i < s.itemTypes.length; i++) {
-            emit LibERC1155.URI(LibStrings.strWithUint(_value, i), i);
+            //delegate event to wearableDiamond
+            IEventHandlerFacet(s.wearableDiamond).emitUriEvent(LibStrings.strWithUint(_value, i), i);
         }
     }
 
@@ -269,7 +214,7 @@ contract ItemsFacet is Modifiers {
                 // remove wearable from Aavegotchi and transfer item to owner
                 LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
                 LibItems.addToOwner(sender, existingEquippedWearableId, 1);
-                emit LibERC1155.TransferSingle(sender, address(this), sender, existingEquippedWearableId, 1);
+                IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, address(this), sender, existingEquippedWearableId, 1);
                 emit LibERC1155.TransferFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
             }
 
@@ -318,7 +263,7 @@ contract ItemsFacet is Modifiers {
                     LibItems.removeFromOwner(sender, toEquipId, balToTransfer);
                     LibItems.addToParent(address(this), _tokenId, toEquipId, balToTransfer);
                     emit TransferToParent(address(this), _tokenId, toEquipId, balToTransfer);
-                    emit LibERC1155.TransferSingle(sender, sender, address(this), toEquipId, balToTransfer);
+                    IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, sender, address(this), toEquipId, balToTransfer);
                     LibERC1155Marketplace.updateERC1155Listing(address(this), toEquipId, sender);
                 }
             }
@@ -389,6 +334,6 @@ contract ItemsFacet is Modifiers {
             LibERC1155Marketplace.updateERC1155Listing(address(this), itemId, sender);
         }
         emit UseConsumables(_tokenId, _itemIds, _quantities);
-        emit LibERC1155.TransferBatch(sender, sender, address(0), _itemIds, _quantities);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, sender, address(0), _itemIds, _quantities);
     }
 }

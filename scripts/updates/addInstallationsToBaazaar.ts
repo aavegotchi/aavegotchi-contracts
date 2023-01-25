@@ -1,12 +1,11 @@
 import { ethers, network } from "hardhat";
 import { gasPrice } from "../helperFunctions";
-import { sendToMultisig } from "../libraries/multisig/multisig";
-import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 /* TODO: replace follwowing values */
 const installationDiamond = "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
-const typeStartId = 55;
-const typeEndId = 55;
+const ids: number[] = [
+  141, 142, 143, 144, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156,
+];
 const category = 4;
 /* TODO: end */
 
@@ -23,7 +22,7 @@ async function main() {
     });
     signer = await ethers.provider.getSigner(itemManager);
   } else if (network.name === "matic") {
-    signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+    signer = await (await ethers.getSigners())[0];
   } else {
     throw Error("Incorrect network selected");
   }
@@ -36,15 +35,21 @@ async function main() {
   let tx;
   let receipt;
 
-  const categories = [];
+  interface Category {
+    erc1155TokenAddress: string;
+    erc1155TypeId: number;
+    category: number;
+  }
+
+  const categories: Category[] = [];
   // adding installation type categories
-  for (let i = typeStartId; i <= typeEndId; i++) {
+  ids.forEach((id) => {
     categories.push({
       erc1155TokenAddress: installationDiamond,
-      erc1155TypeId: i,
+      erc1155TypeId: id,
       category: category,
     });
-  }
+  });
 
   if (testing) {
     tx = await erc1155MarketplaceFacet.setERC1155Categories(categories);
@@ -73,13 +78,14 @@ async function main() {
   }
 
   console.log("Checking installation diamond categories...");
-  for (let i = typeStartId; i <= typeEndId; i++) {
+  for (let i = 0; i < ids.length; i++) {
+    const id = ids[i];
     const categorySaved = await erc1155MarketplaceFacet.getERC1155Category(
       installationDiamond,
-      i
+      id
     );
     console.log(
-      categorySaved.eq(category) ? `correct: ${i}` : `incorrect: ${i}`
+      categorySaved.eq(category) ? `correct: ${id}` : `incorrect: ${id}`
     );
   }
 }
