@@ -6,6 +6,7 @@ import {
   getDiamondSigner,
   itemManagerAlt,
   gasPrice,
+  getRelayerSigner,
 } from "../scripts/helperFunctions";
 
 export interface AirdropBaadgeTaskArgs {
@@ -56,7 +57,7 @@ task(
       console.log("Batch Ids for airdrop: ", batchIds);
       console.log("tokenids:", tokenIds);
 
-      const signer: Signer = await getDiamondSigner(hre, itemManagerAlt, false);
+      const signer: Signer = await getRelayerSigner();
 
       const itemsTransferFacet = await hre.ethers.getContractAt(
         "ItemsTransferFacet",
@@ -69,8 +70,7 @@ task(
         maticDiamondAddress,
         tokenIds,
         batchIds,
-        batchValues,
-        { gasPrice: gasPrice }
+        batchValues
       );
       console.log("Tx hash:", tx.hash);
       let receipt = await tx.wait();

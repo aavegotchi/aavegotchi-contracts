@@ -5,7 +5,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "CHAAMPION of Rarity Farming SZN4 (Rarity)",
     description:
       "Scored across all four rounds, this Aavegotchi is the ultimate chaampion of RARITY for Rarity Farming SZN 4. FANTASTIC! From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 333,
+    svgId: 334,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "godlike",
@@ -27,7 +27,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "CHAAMPION of Rarity Farming SZN4 (Kinship)",
     description:
       "Scored across all four rounds, this Aavegotchi is the ultimate chaampion of KINSHIP for Rarity Farming SZN 4. FANTASTIC! From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 334,
+    svgId: 335,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "godlike",
@@ -49,7 +49,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "CHAAMPION of Rarity Farming SZN4 (XP)",
     description:
       "Scored across all four rounds, this Aavegotchi is the ultimate chaampion of XP for Rarity Farming SZN 4. FANTASTIC! From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 335,
+    svgId: 336,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "godlike",
@@ -71,7 +71,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN4 RARITY 2nd Place",
     description:
       "Scored across all four rounds, this Aavegotchi is the 2nd highest ranked of all RARITY for Rarity Farming SZN 4. Incredible! From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 336,
+    svgId: 337,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "godlike",
@@ -93,7 +93,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN4 KINSHIP 2nd Place",
     description:
       "Scored across all four rounds, this Aavegotchi is the 2nd highest ranked of all KINSHIP for Rarity Farming SZN 4. Incredible! From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 337,
+    svgId: 338,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "godlike",
@@ -115,7 +115,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN4 XP 2nd Place",
     description:
       "Scored across all four rounds, this Aavegotchi is the 2nd highest ranked of all XP for Rarity Farming SZN 4. Incredible! From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 5k to 7500 winning gotchis each round!",
-    svgId: 338,
+    svgId: 339,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "godlike",
@@ -137,7 +137,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN4 RARITY 3rd Place",
     description:
       "Scored across all four rounds, this Aavegotchi is the 3rd highest ranked of all RARITY for Rarity Farming SZN 4. Impressive! From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 339,
+    svgId: 340,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "godlike",
@@ -159,7 +159,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN4 KINSHIP 3rd Place",
     description:
       "Scored across all four rounds, this Aavegotchi is the 3rd highest ranked of all KINSHIP for Rarity Farming SZN 4. Impressive! From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 340,
+    svgId: 341,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "godlike",
@@ -181,7 +181,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN4 XP 3rd Place",
     description:
       "Scored across all four rounds, this Aavegotchi is the 3rd highest ranked of all XP for Rarity Farming SZN 4. Impressive! From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 341,
+    svgId: 342,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "godlike",
@@ -203,7 +203,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN4 Raanked",
     description:
       "This Aavegotchi achieved leaderboard ranking in at least one category during the fourth season of Rarity Farming. From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 342,
+    svgId: 343,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "common",
@@ -225,7 +225,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN4 RARITY Top 10",
     description:
       "This Aavegotchi achieved a rank in the top 10 of RARITY for Rarity Farming SZN 4. From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 343,
+    svgId: 344,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "mythical",
@@ -247,7 +247,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN4 KINSHIP Top 10",
     description:
       "This Aavegotchi achieved a rank in the top 10 of KINSHIP for Rarity Farming SZN 4. From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 344,
+    svgId: 345,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "mythical",
@@ -269,7 +269,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN4 XP Top 10",
     description:
       "This Aavegotchi achieved a rank in the top 10 of XP for Rarity Farming SZN 4. From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 345,
+    svgId: 346,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "mythical",
@@ -291,7 +291,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN4 RARITY Top 100",
     description:
       "This Aavegotchi achieved a rank in the top 100 of RARITY for Rarity Farming SZN 4. From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 346,
+    svgId: 347,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "legendary",
@@ -313,7 +313,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN4 KINSHIP Top 100",
     description:
       "This Aavegotchi achieved a rank in the top 100 of KINSHIP for Rarity Farming SZN 4. From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 347,
+    svgId: 348,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "legendary",
@@ -335,7 +335,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     name: "Rarity Farming SZN4 XP Top 100",
     description:
       "This Aavegotchi achieved a rank in the top 100 of XP for Rarity Farming SZN 4. From July 28th to September 22nd, 2022, the fourth season of Rarity Farming distributed 1.5 million GHST over 8 weeks. Each of the 3 leaderboards has 7500 winning gotchis each round!",
-    svgId: 348,
+    svgId: 349,
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "legendary",

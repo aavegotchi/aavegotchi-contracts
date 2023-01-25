@@ -40,7 +40,7 @@ export async function main() {
 
   //Upload SVGs
   let ids: number[] = [];
-  for (let i = 333; i <= 348; i++) {
+  for (let i = 334; i <= 349; i++) {
     ids.push(i);
   }
   let upload = await updateBaadgeTaskForSvgType(baadges, "sZN4Baadges", ids);

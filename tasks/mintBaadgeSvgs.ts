@@ -1,10 +1,9 @@
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
-
 import { task } from "hardhat/config";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
 import { getBaadgeItemTypes, ItemTypeOutput } from "../scripts/itemTypeHelpers";
 import {
+  getRelayerSigner,
   itemManagerAlt,
   maticDiamondAddress,
 } from "../scripts/helperFunctions";
@@ -46,33 +45,14 @@ task("mintBaadgeSvgs", "Adds itemTypes and SVGs")
       const itemTypesArray: ItemTypeOutput[] =
         getBaadgeItemTypes(currentItemTypes);
 
-      let signer: Signer;
-
-      let owner = itemManager;
-      const testing = ["hardhat", "localhost"].includes(hre.network.name);
-      if (testing) {
-        await hre.network.provider.request({
-          method: "hardhat_impersonateAccount",
-          params: [owner],
-        });
-        signer = await hre.ethers.provider.getSigner(owner);
-      } else if (hre.network.name === "matic") {
-        signer = await (await hre.ethers.getSigners())[0];
-        // signer = new LedgerSigner(
-        //   hre.ethers.provider,
-        //   "hid",
-        //   "m/44'/60'/2'/0/0"
-        // );
-      } else {
-        throw Error("Incorrect network selected");
-      }
+      const signer: Signer = await getRelayerSigner();
 
       console.log("signer:", await signer.getAddress());
 
       let tx: ContractTransaction;
       let receipt: ContractReceipt;
 
-      let daoFacet = (await hre.ethers.getContractAt(
+      const daoFacet = (await hre.ethers.getContractAt(
         "DAOFacet",
         maticDiamondAddress,
         signer
@@ -81,9 +61,7 @@ task("mintBaadgeSvgs", "Adds itemTypes and SVGs")
       if (uploadItemTypes) {
         console.log("Adding items", 0, "to", currentItemTypes.length);
 
-        tx = await daoFacet.addItemTypes(itemTypesArray, {
-          gasPrice: gasPrice,
-        });
+        tx = await daoFacet.addItemTypes(itemTypesArray);
 
         console.log("tx hash:", tx.hash);
 
