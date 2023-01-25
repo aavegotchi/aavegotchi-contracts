@@ -14,19 +14,54 @@ const WEARABLE_GAP_OFFSET = 1000000000;
 // Forge asset token IDs
 const ALLOY = WEARABLE_GAP_OFFSET + 0;
 const ESSENCE = WEARABLE_GAP_OFFSET + 1;
-const CORE_COMMON = WEARABLE_GAP_OFFSET + 2;
-const CORE_UNCOMMON = WEARABLE_GAP_OFFSET + 3;
-const CORE_RARE = WEARABLE_GAP_OFFSET + 4;
-const CORE_LEGENDARY = WEARABLE_GAP_OFFSET + 5;
-const CORE_MYTHICAL = WEARABLE_GAP_OFFSET + 6;
-const CORE_GODLIKE = WEARABLE_GAP_OFFSET + 7;
+const GEODE_COMMON = WEARABLE_GAP_OFFSET + 2;
+const GEODE_UNCOMMON = WEARABLE_GAP_OFFSET + 3;
+const GEODE_RARE = WEARABLE_GAP_OFFSET + 4;
+const GEODE_LEGENDARY = WEARABLE_GAP_OFFSET + 5;
+const GEODE_MYTHICAL = WEARABLE_GAP_OFFSET + 6;
+const GEODE_GODLIKE = WEARABLE_GAP_OFFSET + 7;
 
-const GEODE_COMMON = WEARABLE_GAP_OFFSET + 8;
-const GEODE_UNCOMMON = WEARABLE_GAP_OFFSET + 9;
-const GEODE_RARE = WEARABLE_GAP_OFFSET + 10;
-const GEODE_LEGENDARY = WEARABLE_GAP_OFFSET + 11;
-const GEODE_MYTHICAL = WEARABLE_GAP_OFFSET + 12;
-const GEODE_GODLIKE = WEARABLE_GAP_OFFSET + 13;
+const CORE_BODY_COMMON = WEARABLE_GAP_OFFSET + 8;
+const CORE_BODY_UNCOMMON = WEARABLE_GAP_OFFSET + 9;
+const CORE_BODY_RARE = WEARABLE_GAP_OFFSET + 10;
+const CORE_BODY_LEGENDARY = WEARABLE_GAP_OFFSET + 11;
+const CORE_BODY_MYTHICAL = WEARABLE_GAP_OFFSET + 12;
+const CORE_BODY_GODLIKE = WEARABLE_GAP_OFFSET + 13;
+
+const CORE_FACE_COMMON = WEARABLE_GAP_OFFSET + 14;
+const CORE_FACE_UNCOMMON = WEARABLE_GAP_OFFSET + 15;
+const CORE_FACE_RARE = WEARABLE_GAP_OFFSET + 16;
+const CORE_FACE_LEGENDARY = WEARABLE_GAP_OFFSET + 17;
+const CORE_FACE_MYTHICAL = WEARABLE_GAP_OFFSET + 18;
+const CORE_FACE_GODLIKE = WEARABLE_GAP_OFFSET + 19;
+
+const CORE_EYES_COMMON = WEARABLE_GAP_OFFSET + 20;
+const CORE_EYES_UNCOMMON = WEARABLE_GAP_OFFSET + 21;
+const CORE_EYES_RARE = WEARABLE_GAP_OFFSET + 22;
+const CORE_EYES_LEGENDARY = WEARABLE_GAP_OFFSET + 23;
+const CORE_EYES_MYTHICAL = WEARABLE_GAP_OFFSET + 24;
+const CORE_EYES_GODLIKE = WEARABLE_GAP_OFFSET + 25;
+
+const CORE_HEAD_COMMON = WEARABLE_GAP_OFFSET + 26;
+const CORE_HEAD_UNCOMMON = WEARABLE_GAP_OFFSET + 27;
+const CORE_HEAD_RARE = WEARABLE_GAP_OFFSET + 28;
+const CORE_HEAD_LEGENDARY = WEARABLE_GAP_OFFSET + 29;
+const CORE_HEAD_MYTHICAL = WEARABLE_GAP_OFFSET + 30;
+const CORE_HEAD_GODLIKE = WEARABLE_GAP_OFFSET + 31;
+
+const CORE_HANDS_COMMON = WEARABLE_GAP_OFFSET + 32;
+const CORE_HANDS_UNCOMMON = WEARABLE_GAP_OFFSET + 33;
+const CORE_HANDS_RARE = WEARABLE_GAP_OFFSET + 34;
+const CORE_HANDS_LEGENDARY = WEARABLE_GAP_OFFSET + 35;
+const CORE_HANDS_MYTHICAL = WEARABLE_GAP_OFFSET + 36;
+const CORE_HANDS_GODLIKE = WEARABLE_GAP_OFFSET + 37;
+
+const CORE_PET_COMMON = WEARABLE_GAP_OFFSET + 38;
+const CORE_PET_UNCOMMON = WEARABLE_GAP_OFFSET + 39;
+const CORE_PET_RARE = WEARABLE_GAP_OFFSET + 40;
+const CORE_PET_LEGENDARY = WEARABLE_GAP_OFFSET + 41;
+const CORE_PET_MYTHICAL = WEARABLE_GAP_OFFSET + 42;
+const CORE_PET_GODLIKE = WEARABLE_GAP_OFFSET + 43;
 
 
 describe("Testing Forge", async function () {
@@ -159,9 +194,9 @@ describe("Testing Forge", async function () {
             expect(await forgeTokenFacet.balanceOf(testUser, items[2])).to.be.equal(1)
 
             // cores
-            expect(await forgeTokenFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(1)
-            expect(await forgeTokenFacet.balanceOf(testUser, CORE_RARE)).to.be.equal(1)
-            expect(await forgeTokenFacet.balanceOf(testUser, CORE_COMMON)).to.be.equal(1)
+            expect(await forgeTokenFacet.balanceOf(testUser, CORE_FACE_UNCOMMON)).to.be.equal(1)
+            expect(await forgeTokenFacet.balanceOf(testUser, CORE_BODY_RARE)).to.be.equal(1)
+            expect(await forgeTokenFacet.balanceOf(testUser, CORE_HANDS_COMMON)).to.be.equal(1)
 
             // geodes
             expect(await forgeTokenFacet.balanceOf(testUser, GEODE_UNCOMMON)).to.be.equal(1)
@@ -177,7 +212,7 @@ describe("Testing Forge", async function () {
             // smelt again for next level, forge to get items back, and recheck balances
             await imp.smeltWearables([157], [gotchis[0]])
 
-            expect(await forgeTokenFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(2)
+            expect(await forgeTokenFacet.balanceOf(testUser, CORE_FACE_UNCOMMON)).to.be.equal(2)
             expect(await forgeTokenFacet.balanceOf(testUser, 157)).to.be.equal(2)
             expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(14)
 
@@ -188,7 +223,7 @@ describe("Testing Forge", async function () {
             expect(await forgeFacet.getAavegotchiSmithingLevel(gotchis[0])).to.be.equal(3)
             expect(await forgeFacet.getSmithingLevelMultiplierBips(gotchis[0])).to.be.equal(9410);
 
-            expect(await forgeTokenFacet.balanceOf(testUser, CORE_UNCOMMON)).to.be.equal(0)
+            expect(await forgeTokenFacet.balanceOf(testUser, CORE_FACE_UNCOMMON)).to.be.equal(0)
             expect(await forgeTokenFacet.balanceOf(testUser, 157)).to.be.equal(0)
             expect(await wearablesFacet.balanceOf(testUser, 157)).to.be.equal(16)
         });
@@ -399,7 +434,7 @@ describe("Testing Forge", async function () {
             await forgeFacet.adminMint(testUser, ALLOY, 130000);
             await expect(imp.forgeWearables([113], [7735], [0])).to.be.revertedWith("ForgeFacet: missing required Core")
 
-            await forgeFacet.adminMint(testUser, CORE_GODLIKE, 1);
+            await forgeFacet.adminMint(testUser, CORE_HANDS_GODLIKE, 1);
             await expect(imp.forgeWearables([113], [7735], [0])).to.be.revertedWith("ForgeFacet: forge item not in stock")
 
         })
@@ -461,7 +496,7 @@ describe("Testing Forge", async function () {
 
     describe("token tests", async function () {
         it('should adminMint and return total supply', async function () {
-            let ids = [ALLOY, ESSENCE, CORE_COMMON, ALLOY]
+            let ids = [ALLOY, ESSENCE, CORE_BODY_COMMON, ALLOY]
             let amts = [5, 10, 15, 10]
             let supplies = [5, 10, 15, 15]
 

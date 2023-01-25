@@ -116,20 +116,50 @@ contract ForgeFacet is Modifiers {
     }
 
 
-    // @notice Get the specific Core token ID given an Aavegotchi rarity score modifier.
-    function coreTokenIdFromRsm(uint8 rarityScoreModifier) public pure returns (uint256 tokenId){
+    // @notice Get the specific Core token ID given an item rarity score modifier and slot positions.
+    function getCoreTokenId(uint8 rarityScoreModifier, bool[16] memory slotPositions) public pure returns (uint256 tokenId){
         if (rarityScoreModifier == COMMON_RSM){
-            tokenId = CORE_COMMON;
+            if (slotPositions[0]){tokenId = CORE_BODY_COMMON;}
+            if (slotPositions[1]){tokenId = CORE_FACE_COMMON;}
+            if (slotPositions[2]){tokenId = CORE_EYES_COMMON;}
+            if (slotPositions[3]){tokenId = CORE_HEAD_COMMON;}
+            if (slotPositions[4] || slotPositions[5]){tokenId = CORE_HANDS_COMMON;}
+            if (slotPositions[6]){tokenId = CORE_PET_COMMON;}
         } else if (rarityScoreModifier == UNCOMMON_RSM){
-            tokenId = CORE_UNCOMMON;
+            if (slotPositions[0]){tokenId = CORE_BODY_UNCOMMON;}
+            if (slotPositions[1]){tokenId = CORE_FACE_UNCOMMON;}
+            if (slotPositions[2]){tokenId = CORE_EYES_UNCOMMON;}
+            if (slotPositions[3]){tokenId = CORE_HEAD_UNCOMMON;}
+            if (slotPositions[4] || slotPositions[5]){tokenId = CORE_HANDS_UNCOMMON;}
+            if (slotPositions[6]){tokenId = CORE_PET_UNCOMMON;}
         } else if (rarityScoreModifier == RARE_RSM){
-            tokenId = CORE_RARE;
+            if (slotPositions[0]){tokenId = CORE_BODY_RARE;}
+            if (slotPositions[1]){tokenId = CORE_FACE_RARE;}
+            if (slotPositions[2]){tokenId = CORE_EYES_RARE;}
+            if (slotPositions[3]){tokenId = CORE_HEAD_RARE;}
+            if (slotPositions[4] || slotPositions[5]){tokenId = CORE_HANDS_RARE;}
+            if (slotPositions[6]){tokenId = CORE_PET_RARE;}
         } else if (rarityScoreModifier == LEGENDARY_RSM){
-            tokenId = CORE_LEGENDARY;
+            if (slotPositions[0]){tokenId = CORE_BODY_LEGENDARY;}
+            if (slotPositions[1]){tokenId = CORE_FACE_LEGENDARY;}
+            if (slotPositions[2]){tokenId = CORE_EYES_LEGENDARY;}
+            if (slotPositions[3]){tokenId = CORE_HEAD_LEGENDARY;}
+            if (slotPositions[4] || slotPositions[5]){tokenId = CORE_HANDS_LEGENDARY;}
+            if (slotPositions[6]){tokenId = CORE_PET_LEGENDARY;}
         } else if (rarityScoreModifier == MYTHICAL_RSM){
-            tokenId = CORE_MYTHICAL;
+            if (slotPositions[0]){tokenId = CORE_BODY_MYTHICAL;}
+            if (slotPositions[1]){tokenId = CORE_FACE_MYTHICAL;}
+            if (slotPositions[2]){tokenId = CORE_EYES_MYTHICAL;}
+            if (slotPositions[3]){tokenId = CORE_HEAD_MYTHICAL;}
+            if (slotPositions[4] || slotPositions[5]){tokenId = CORE_HANDS_MYTHICAL;}
+            if (slotPositions[6]){tokenId = CORE_PET_MYTHICAL;}
         } else if (rarityScoreModifier == GODLIKE_RSM){
-            tokenId = CORE_GODLIKE;
+            if (slotPositions[0]){tokenId = CORE_BODY_GODLIKE;}
+            if (slotPositions[1]){tokenId = CORE_FACE_GODLIKE;}
+            if (slotPositions[2]){tokenId = CORE_EYES_GODLIKE;}
+            if (slotPositions[3]){tokenId = CORE_HEAD_GODLIKE;}
+            if (slotPositions[4] || slotPositions[5]){tokenId = CORE_HANDS_GODLIKE;}
+            if (slotPositions[6]){tokenId = CORE_PET_GODLIKE;}
         } else {
             revert("Invalid rarity score modifier");
         }
@@ -184,7 +214,7 @@ contract ForgeFacet is Modifiers {
         _mintItem(sender, itemId, 1);
 
         //mint core
-        _mintItem(sender, coreTokenIdFromRsm(itemType.rarityScoreModifier), 1);
+        _mintItem(sender, getCoreTokenId(itemType.rarityScoreModifier, itemType.slotPositions), 1);
 
         //mint geode
         _mintItem(sender, geodeTokenIdFromRsm(itemType.rarityScoreModifier), 1);
@@ -219,9 +249,10 @@ contract ForgeFacet is Modifiers {
         // get item metadata
         ItemType memory itemType = itemsFacet().getItemType(itemId);
         uint8 rsm = itemType.rarityScoreModifier;
+        bool[16] memory slots = itemType.slotPositions;
 
         require(forgeTokenFacet().balanceOf(sender, ALLOY) >= s.forgeAlloyCost[rsm], "ForgeFacet: not enough Alloy");
-        require(forgeTokenFacet().balanceOf(sender, coreTokenIdFromRsm(rsm)) >= 1, "ForgeFacet: missing required Core");
+        require(forgeTokenFacet().balanceOf(sender, getCoreTokenId(rsm, slots)) >= 1, "ForgeFacet: missing required Core");
         require(isForgeable(itemId), "ForgeFacet: forge item not in stock");
 
         // Schematic (item ids identical to Wearable ids)
@@ -236,7 +267,7 @@ contract ForgeFacet is Modifiers {
 
         // burn forge materials
         _burnItem(sender, ALLOY, s.forgeAlloyCost[rsm]);
-        _burnItem(sender, coreTokenIdFromRsm(rsm), 1);
+        _burnItem(sender, getCoreTokenId(rsm, slots), 1);
         _burnItem(sender, itemId, 1);
 
         uint256 forgeTime = forgeTime(gotchiId, rsm);

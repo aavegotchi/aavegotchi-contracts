@@ -43,7 +43,7 @@ export async function deployAndUpgradeForgeDiamond() {
                 "function getAavegotchiSmithingLevel(uint256 gotchiId) public view returns (uint256)",
                 "function getSmithingLevelMultiplierBips(uint256 gotchiId) public view returns (uint256)",
                 "function getAavegotchiSmithingSkillPts(uint256 gotchiId) public view returns (uint256)",
-                "function coreTokenIdFromRsm(uint8 rarityScoreModifier) public pure returns (uint256 tokenId)",
+                "function getCoreTokenId(uint8 rarityScoreModifier, bool[16] memory slotPositions) public pure returns (uint256 tokenId)",
                 "function geodeTokenIdFromRsm(uint8 rarityScoreModifier) public pure returns (uint256 tokenId)",
                 // "function smeltAlloyMintAmount (uint8 rarityScoreModifier) public view returns (uint256 alloy)",
                 "function smeltWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds) external",

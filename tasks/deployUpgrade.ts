@@ -285,7 +285,7 @@ task(
         }
       }
 
-      if (hre.network.name !== "hardhat") {
+      if (hre.network.name !== "hardhat" && hre.network.name !== "localhost") {
         console.log("Verifying Addresses");
         await delay(60000);
 
