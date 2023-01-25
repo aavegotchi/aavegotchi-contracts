@@ -38,20 +38,20 @@ export async function main() {
     "Aavegotchi-RF-SZN4-Baadge-TOP100-XP", //349
   ];
 
-  //Upload SVGs
-  let ids: number[] = [];
-  for (let i = 334; i <= 349; i++) {
-    ids.push(i);
-  }
-  let upload = await updateBaadgeTaskForSvgType(baadges, "sZN4Baadges", ids);
+  // //Upload SVGs
+  // let ids: number[] = [];
+  // for (let i = 334; i <= 349; i++) {
+  //   ids.push(i);
+  // }
+  // let upload = await updateBaadgeTaskForSvgType(baadges, "sZN4Baadges", ids);
 
-  await run("updateSvgs", upload);
+  // await run("updateSvgs", upload);
 
-  //Mint baadge item types
-  let mint = await mintSvgTaskForBaadges("rfSzn4Bdgs");
+  // //Mint baadge item types
+  // let mint = await mintSvgTaskForBaadges("rfSzn4Bdgs");
 
-  console.log("mint:", mint);
-  await run("mintBaadgeSvgs", mint);
+  // console.log("mint:", mint);
+  // await run("mintBaadgeSvgs", mint);
 
   //Airdrop
   const rarityArray = [
@@ -171,33 +171,6 @@ export async function main() {
   const xp3rd = await airdropTaskForBaadges([itemTypes[8]], [xpRFSzn4[2]]);
   await run("airdropBaadges", xp3rd);
 
-  // console.log(itemTypes[9].name);
-  // const raankingNumbersArray: number[] = [];
-  // for (let x = 0; x < totalPlaayers.length; x++) {
-  //   raankingNumbersArray.push(Number(totalPlaayers[x]));
-  // }
-
-  // const perBatch = 200;
-  // const batches = Math.ceil(raankingNumbersArray.length / perBatch);
-
-  // console.log("Begin airdrops!");
-
-  // for (let index = 0; index < batches; index++) {
-  //   console.log("Airdropping batch:", index);
-  //   let gotchiBatch = raankingNumbersArray.slice(
-  //     index * perBatch,
-  //     (index + 1) * perBatch
-  //   );
-
-  //   let plaayerAirdrop = await airdropTaskForBaadges(
-  //     [itemTypes[9]],
-  //     gotchiBatch
-  //   );
-
-  //   await run("airdropBaadges", plaayerAirdrop);
-  //   console.log("Complete Airdropping batch:", index);
-  // }
-
   console.log(itemTypes[10].name);
   const rarityTop10 = await airdropTaskForBaadges([itemTypes[10]], top10rarity);
   await run("airdropBaadges", rarityTop10);
@@ -230,6 +203,34 @@ export async function main() {
   console.log(itemTypes[15].name);
   const xpTop100 = await airdropTaskForBaadges([itemTypes[15]], top100xp);
   await run("airdropBaadges", xpTop100);
+
+  console.log(itemTypes[9].name);
+
+  const raankingNumbersArray: number[] = [];
+  for (let x = 0; x < totalPlaayers.length; x++) {
+    raankingNumbersArray.push(Number(totalPlaayers[x]));
+  }
+
+  const perBatch = 200;
+  const batches = Math.ceil(raankingNumbersArray.length / perBatch);
+
+  console.log("Begin airdrops!");
+
+  for (let index = 0; index < batches; index++) {
+    console.log("Airdropping batch:", index);
+    let gotchiBatch = raankingNumbersArray.slice(
+      index * perBatch,
+      (index + 1) * perBatch
+    );
+
+    let plaayerAirdrop = await airdropTaskForBaadges(
+      [itemTypes[9]],
+      gotchiBatch
+    );
+
+    await run("airdropBaadges", plaayerAirdrop);
+    console.log("Complete Airdropping batch:", index);
+  }
 }
 
 main()

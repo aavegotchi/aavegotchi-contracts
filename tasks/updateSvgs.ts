@@ -28,7 +28,7 @@ task("updateSvgs", "Updates SVGs, given svgType and a list of IDs")
         .filter((str) => str.length > 0);
       const svgType: string = taskArgs.svgType;
 
-      const signer: Signer = await getRelayerSigner();
+      const signer: Signer = await getRelayerSigner(hre);
 
       const svgFacet = (await hre.ethers.getContractAt(
         "SvgFacet",

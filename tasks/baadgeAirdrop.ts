@@ -6,8 +6,8 @@ import {
   getDiamondSigner,
   itemManagerAlt,
   gasPrice,
-  getRelayerSigner,
 } from "../scripts/helperFunctions";
+import { ItemsTransferFacet } from "../typechain";
 
 export interface AirdropBaadgeTaskArgs {
   maxProcess: string;
@@ -57,20 +57,21 @@ task(
       console.log("Batch Ids for airdrop: ", batchIds);
       console.log("tokenids:", tokenIds);
 
-      const signer: Signer = await getRelayerSigner();
+      const signer: Signer = await getDiamondSigner(hre, itemManagerAlt, false);
 
-      const itemsTransferFacet = await hre.ethers.getContractAt(
+      const itemsTransferFacet = (await hre.ethers.getContractAt(
         "ItemsTransferFacet",
         maticDiamondAddress,
         signer
-      );
+      )) as ItemsTransferFacet;
 
       const tx = await itemsTransferFacet.batchBatchTransferToParent(
         itemManagerAlt,
         maticDiamondAddress,
         tokenIds,
         batchIds,
-        batchValues
+        batchValues,
+        { gasPrice: gasPrice }
       );
       console.log("Tx hash:", tx.hash);
       let receipt = await tx.wait();

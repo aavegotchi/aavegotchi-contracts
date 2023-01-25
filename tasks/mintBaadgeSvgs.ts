@@ -45,7 +45,7 @@ task("mintBaadgeSvgs", "Adds itemTypes and SVGs")
       const itemTypesArray: ItemTypeOutput[] =
         getBaadgeItemTypes(currentItemTypes);
 
-      const signer: Signer = await getRelayerSigner();
+      const signer: Signer = await getRelayerSigner(hre);
 
       console.log("signer:", await signer.getAddress());
 

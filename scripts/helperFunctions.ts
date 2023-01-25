@@ -124,6 +124,8 @@ export async function getDiamondSigner(
     });
     return await hre.ethers.getSigner(override ? override : owner);
   } else if (hre.network.name === "matic") {
+    console.log("Diamond signer - Matic");
+
     return (await hre.ethers.getSigners())[0];
   } else if (hre.network.name === "tenderly") {
     return (await hre.ethers.getSigners())[0];
@@ -239,15 +241,33 @@ export interface RelayerInfo {
 
 export const xpRelayerAddress = "0xb6384935d68e9858f8385ebeed7db84fc93b1420";
 
-export function getRelayerSigner() {
-  const credentials: RelayerInfo = {
-    apiKey: process.env.DEFENDER_APIKEY!,
-    apiSecret: process.env.DEFENDER_SECRET!,
-  };
+export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
+  const testing = ["hardhat", "localhost"].includes(hre.network.name);
+  if (testing) {
+    console.log("Using Hardhat");
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [xpRelayerAddress],
+    });
+    return await hre.ethers.provider.getSigner(xpRelayerAddress);
+  } else if (hre.network.name === "matic") {
+    console.log("USING MATIC");
 
-  const provider = new DefenderRelayProvider(credentials);
-  return new DefenderRelaySigner(credentials, provider, {
-    speed: "fast",
-    validForSeconds: 3600,
-  });
+    const credentials: RelayerInfo = {
+      apiKey: process.env.DEFENDER_APIKEY!,
+      apiSecret: process.env.DEFENDER_SECRET!,
+    };
+
+    const provider = new DefenderRelayProvider(credentials);
+    return new DefenderRelaySigner(credentials, provider, {
+      speed: "fast",
+      validForSeconds: 3600,
+    });
+  } else if (hre.network.name === "tenderly") {
+    //impersonate
+    console.log("Using tenderly");
+    return (await hre.ethers.getSigners())[0];
+  } else {
+    throw Error("Incorrect network selected");
+  }
 }

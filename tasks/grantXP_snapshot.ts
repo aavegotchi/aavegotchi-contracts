@@ -148,7 +148,7 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
         signer = await hre.ethers.provider.getSigner(gameManager);
       } else if (hre.network.name === "matic") {
         //  const accounts = await hre.ethers.getSigners();
-        signer = getRelayerSigner(); /* new LedgerSigner(
+        signer = await getRelayerSigner(hre); /* new LedgerSigner(
           hre.ethers.provider,
           "hid",
           "m/44'/60'/2'/0/0"
