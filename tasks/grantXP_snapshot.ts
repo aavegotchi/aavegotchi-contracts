@@ -1,14 +1,13 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import {
-  gasPrice,
   maticDiamondAddress,
   propType,
   xpRelayerAddress,
 } from "../scripts/helperFunctions";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
-import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
+import { ContractTransaction } from "@ethersproject/contracts";
 
 import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import request from "graphql-request";
@@ -154,6 +153,10 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
           "hid",
           "m/44'/60'/2'/0/0"
         ); */
+      } else if (hre.network.name === "tenderly") {
+        //impersonate
+        console.log("Using tenderly");
+        signer = (await hre.ethers.getSigners())[0];
       } else {
         throw Error("Incorrect network selected");
       }
