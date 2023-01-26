@@ -41,7 +41,6 @@ contract ForgeFacet is Modifiers {
     // @notice Will revert if aavegotchi is in active rental as well.
     modifier onlyAavegotchiOwner(uint256 gotchiId) {
         require(!lendingGetterAndSetterFacet().isAavegotchiLent(uint32(gotchiId)), "ForgeFacet: Aavegotchi is lent out");
-//        require(!lendingGetterAndSetterFacet().isAavegotchiListed(uint32(gotchiId)), "ForgeFacet: Aavegotchi is listed for rental");
         require(LibMeta.msgSender() == aavegotchiFacet().ownerOf(gotchiId), "ForgeFacet: Not Aavegotchi owner");
         _;
     }
@@ -53,18 +52,23 @@ contract ForgeFacet is Modifiers {
     function aavegotchiGameFacet() internal pure returns (AavegotchiGameFacet facet){
         facet = AavegotchiGameFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
     }
+
     function aavegotchiFacet() internal pure returns (AavegotchiFacet facet){
         facet = AavegotchiFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
     }
+
     function itemsFacet() internal pure returns (ItemsFacet facet){
         facet = ItemsFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
     }
+
     function wearablesFacet() internal pure returns (WearablesFacet facet){
         facet = WearablesFacet(ForgeLibDiamond.WEARABLE_DIAMOND);
     }
+
     function lendingGetterAndSetterFacet() internal pure returns (LendingGetterAndSetterFacet facet){
         facet = LendingGetterAndSetterFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
     }
+
     function gltrContract() internal returns (IERC20 token){
         token = IERC20(s.GLTR);
     }
@@ -81,7 +85,7 @@ contract ForgeFacet is Modifiers {
 
         uint256 points = s.gotchiSmithingSkillPoints[gotchiId];
 
-        if (points > sequence[sequence.length - 1]){
+        if (points > sequence[sequence.length - 1]) {
             return sequence.length;
         }
 
@@ -118,48 +122,48 @@ contract ForgeFacet is Modifiers {
 
     // @notice Get the specific Core token ID given an item rarity score modifier and slot positions.
     function getCoreTokenId(uint8 rarityScoreModifier, bool[16] memory slotPositions) public pure returns (uint256 tokenId){
-        if (rarityScoreModifier == COMMON_RSM){
-            if (slotPositions[0]){tokenId = CORE_BODY_COMMON;}
-            if (slotPositions[1]){tokenId = CORE_FACE_COMMON;}
-            if (slotPositions[2]){tokenId = CORE_EYES_COMMON;}
-            if (slotPositions[3]){tokenId = CORE_HEAD_COMMON;}
-            if (slotPositions[4] || slotPositions[5]){tokenId = CORE_HANDS_COMMON;}
-            if (slotPositions[6]){tokenId = CORE_PET_COMMON;}
-        } else if (rarityScoreModifier == UNCOMMON_RSM){
-            if (slotPositions[0]){tokenId = CORE_BODY_UNCOMMON;}
-            if (slotPositions[1]){tokenId = CORE_FACE_UNCOMMON;}
-            if (slotPositions[2]){tokenId = CORE_EYES_UNCOMMON;}
-            if (slotPositions[3]){tokenId = CORE_HEAD_UNCOMMON;}
-            if (slotPositions[4] || slotPositions[5]){tokenId = CORE_HANDS_UNCOMMON;}
-            if (slotPositions[6]){tokenId = CORE_PET_UNCOMMON;}
-        } else if (rarityScoreModifier == RARE_RSM){
-            if (slotPositions[0]){tokenId = CORE_BODY_RARE;}
-            if (slotPositions[1]){tokenId = CORE_FACE_RARE;}
-            if (slotPositions[2]){tokenId = CORE_EYES_RARE;}
-            if (slotPositions[3]){tokenId = CORE_HEAD_RARE;}
-            if (slotPositions[4] || slotPositions[5]){tokenId = CORE_HANDS_RARE;}
-            if (slotPositions[6]){tokenId = CORE_PET_RARE;}
-        } else if (rarityScoreModifier == LEGENDARY_RSM){
-            if (slotPositions[0]){tokenId = CORE_BODY_LEGENDARY;}
-            if (slotPositions[1]){tokenId = CORE_FACE_LEGENDARY;}
-            if (slotPositions[2]){tokenId = CORE_EYES_LEGENDARY;}
-            if (slotPositions[3]){tokenId = CORE_HEAD_LEGENDARY;}
-            if (slotPositions[4] || slotPositions[5]){tokenId = CORE_HANDS_LEGENDARY;}
-            if (slotPositions[6]){tokenId = CORE_PET_LEGENDARY;}
-        } else if (rarityScoreModifier == MYTHICAL_RSM){
-            if (slotPositions[0]){tokenId = CORE_BODY_MYTHICAL;}
-            if (slotPositions[1]){tokenId = CORE_FACE_MYTHICAL;}
-            if (slotPositions[2]){tokenId = CORE_EYES_MYTHICAL;}
-            if (slotPositions[3]){tokenId = CORE_HEAD_MYTHICAL;}
-            if (slotPositions[4] || slotPositions[5]){tokenId = CORE_HANDS_MYTHICAL;}
-            if (slotPositions[6]){tokenId = CORE_PET_MYTHICAL;}
-        } else if (rarityScoreModifier == GODLIKE_RSM){
-            if (slotPositions[0]){tokenId = CORE_BODY_GODLIKE;}
-            if (slotPositions[1]){tokenId = CORE_FACE_GODLIKE;}
-            if (slotPositions[2]){tokenId = CORE_EYES_GODLIKE;}
-            if (slotPositions[3]){tokenId = CORE_HEAD_GODLIKE;}
-            if (slotPositions[4] || slotPositions[5]){tokenId = CORE_HANDS_GODLIKE;}
-            if (slotPositions[6]){tokenId = CORE_PET_GODLIKE;}
+        if (rarityScoreModifier == COMMON_RSM) {
+            if (slotPositions[0]) {tokenId = CORE_BODY_COMMON;}
+            if (slotPositions[1]) {tokenId = CORE_FACE_COMMON;}
+            if (slotPositions[2]) {tokenId = CORE_EYES_COMMON;}
+            if (slotPositions[3]) {tokenId = CORE_HEAD_COMMON;}
+            if (slotPositions[4] || slotPositions[5]) {tokenId = CORE_HANDS_COMMON;}
+            if (slotPositions[6]) {tokenId = CORE_PET_COMMON;}
+        } else if (rarityScoreModifier == UNCOMMON_RSM) {
+            if (slotPositions[0]) {tokenId = CORE_BODY_UNCOMMON;}
+            if (slotPositions[1]) {tokenId = CORE_FACE_UNCOMMON;}
+            if (slotPositions[2]) {tokenId = CORE_EYES_UNCOMMON;}
+            if (slotPositions[3]) {tokenId = CORE_HEAD_UNCOMMON;}
+            if (slotPositions[4] || slotPositions[5]) {tokenId = CORE_HANDS_UNCOMMON;}
+            if (slotPositions[6]) {tokenId = CORE_PET_UNCOMMON;}
+        } else if (rarityScoreModifier == RARE_RSM) {
+            if (slotPositions[0]) {tokenId = CORE_BODY_RARE;}
+            if (slotPositions[1]) {tokenId = CORE_FACE_RARE;}
+            if (slotPositions[2]) {tokenId = CORE_EYES_RARE;}
+            if (slotPositions[3]) {tokenId = CORE_HEAD_RARE;}
+            if (slotPositions[4] || slotPositions[5]) {tokenId = CORE_HANDS_RARE;}
+            if (slotPositions[6]) {tokenId = CORE_PET_RARE;}
+        } else if (rarityScoreModifier == LEGENDARY_RSM) {
+            if (slotPositions[0]) {tokenId = CORE_BODY_LEGENDARY;}
+            if (slotPositions[1]) {tokenId = CORE_FACE_LEGENDARY;}
+            if (slotPositions[2]) {tokenId = CORE_EYES_LEGENDARY;}
+            if (slotPositions[3]) {tokenId = CORE_HEAD_LEGENDARY;}
+            if (slotPositions[4] || slotPositions[5]) {tokenId = CORE_HANDS_LEGENDARY;}
+            if (slotPositions[6]) {tokenId = CORE_PET_LEGENDARY;}
+        } else if (rarityScoreModifier == MYTHICAL_RSM) {
+            if (slotPositions[0]) {tokenId = CORE_BODY_MYTHICAL;}
+            if (slotPositions[1]) {tokenId = CORE_FACE_MYTHICAL;}
+            if (slotPositions[2]) {tokenId = CORE_EYES_MYTHICAL;}
+            if (slotPositions[3]) {tokenId = CORE_HEAD_MYTHICAL;}
+            if (slotPositions[4] || slotPositions[5]) {tokenId = CORE_HANDS_MYTHICAL;}
+            if (slotPositions[6]) {tokenId = CORE_PET_MYTHICAL;}
+        } else if (rarityScoreModifier == GODLIKE_RSM) {
+            if (slotPositions[0]) {tokenId = CORE_BODY_GODLIKE;}
+            if (slotPositions[1]) {tokenId = CORE_FACE_GODLIKE;}
+            if (slotPositions[2]) {tokenId = CORE_EYES_GODLIKE;}
+            if (slotPositions[3]) {tokenId = CORE_HEAD_GODLIKE;}
+            if (slotPositions[4] || slotPositions[5]) {tokenId = CORE_HANDS_GODLIKE;}
+            if (slotPositions[6]) {tokenId = CORE_PET_GODLIKE;}
         } else {
             revert("Invalid rarity score modifier");
         }
@@ -167,17 +171,17 @@ contract ForgeFacet is Modifiers {
 
     // @notice Get the specific Geode token ID given an Aavegotchi rarity score modifier.
     function geodeTokenIdFromRsm(uint8 rarityScoreModifier) public pure returns (uint256 tokenId){
-        if (rarityScoreModifier == COMMON_RSM){
+        if (rarityScoreModifier == COMMON_RSM) {
             tokenId = GEODE_COMMON;
-        } else if (rarityScoreModifier == UNCOMMON_RSM){
+        } else if (rarityScoreModifier == UNCOMMON_RSM) {
             tokenId = GEODE_UNCOMMON;
-        } else if (rarityScoreModifier == RARE_RSM){
+        } else if (rarityScoreModifier == RARE_RSM) {
             tokenId = GEODE_RARE;
-        } else if (rarityScoreModifier == LEGENDARY_RSM){
+        } else if (rarityScoreModifier == LEGENDARY_RSM) {
             tokenId = GEODE_LEGENDARY;
-        } else if (rarityScoreModifier == MYTHICAL_RSM){
+        } else if (rarityScoreModifier == MYTHICAL_RSM) {
             tokenId = GEODE_MYTHICAL;
-        } else if (rarityScoreModifier == GODLIKE_RSM){
+        } else if (rarityScoreModifier == GODLIKE_RSM) {
             tokenId = GEODE_GODLIKE;
         } else {
             revert("Invalid rarity score modifier");
@@ -232,7 +236,7 @@ contract ForgeFacet is Modifiers {
     {
         require(_itemIds.length == _gotchiIds.length, "ForgeFacet: mismatched array lengths");
 
-        for(uint256 i; i < _itemIds.length; i++){
+        for (uint256 i; i < _itemIds.length; i++) {
             _smelt(_itemIds[i], _gotchiIds[i]);
         }
     }
@@ -259,7 +263,7 @@ contract ForgeFacet is Modifiers {
         require(forgeTokenFacet().balanceOf(sender, itemId) >= 1, "ForgeFacet: missing required Schematic.");
 
         // Essence required if forging a pet or godlike item.
-        if (itemType.slotPositions[PET_SLOT_INDEX] || rsm == GODLIKE_RSM){
+        if (itemType.slotPositions[PET_SLOT_INDEX] || rsm == GODLIKE_RSM) {
             require(forgeTokenFacet().balanceOf(sender, ESSENCE) >= s.forgeEssenceCost[rsm], "ForgeFacet: not enough Essence");
 
             _burnItem(sender, ESSENCE, s.forgeEssenceCost[rsm]);
@@ -279,7 +283,7 @@ contract ForgeFacet is Modifiers {
             "ForgeFacet: Failed GLTR transfer"
         );
 
-        if (forgeTime - _gltr == 0){
+        if (forgeTime - _gltr == 0) {
             // Immediately forge the item.
             wearablesFacet().safeTransferFrom(address(this), sender, itemId, 1, "");
             emit ForgeTimeReduced(0, gotchiId, itemId, _gltr);
@@ -312,7 +316,7 @@ contract ForgeFacet is Modifiers {
 
 
     function claimForgeQueueItems(uint256[] calldata gotchiIds) external whenNotPaused {
-        for (uint256 i; i < gotchiIds.length; i++){
+        for (uint256 i; i < gotchiIds.length; i++) {
             _claimQueueItem(gotchiIds[i]);
         }
     }
@@ -357,7 +361,7 @@ contract ForgeFacet is Modifiers {
 
             uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
             uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
-            uint256 burnAmount = uint256(removeBlocks) * 10**18;
+            uint256 burnAmount = uint256(removeBlocks) * 10 ** 18;
 
             require(
                 gltrContract().transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, burnAmount),
@@ -392,8 +396,8 @@ contract ForgeFacet is Modifiers {
         output = new ForgeQueueItem[](tokenIds.length);
         uint256 counter;
 
-        for (uint256 i; i < tokenIds.length; i++){
-            if (s.gotchiForging[tokenIds[i]].isForging){
+        for (uint256 i; i < tokenIds.length; i++) {
+            if (s.gotchiForging[tokenIds[i]].isForging) {
                 ForgeQueueItem memory queueItem;
                 queueItem = _getForgeQueueItem(uint256(tokenIds[i]));
 
@@ -413,13 +417,13 @@ contract ForgeFacet is Modifiers {
     {
         require(_itemIds.length == _gotchiIds.length && _gotchiIds.length == _gltr.length, "ForgeFacet: mismatched array lengths");
 
-        for(uint256 i; i < _itemIds.length; i++){
+        for (uint256 i; i < _itemIds.length; i++) {
             _forge(_itemIds[i], _gotchiIds[i], _gltr[i]);
         }
     }
 
 
-    function isForgeable(uint256 itemId) public view returns(bool available) {
+    function isForgeable(uint256 itemId) public view returns (bool available) {
         require(itemId < WEARABLE_GAP_OFFSET, "ForgeFacet: only valid for schematics");
         available = wearablesFacet().balanceOf(address(this), itemId) - s.itemForging[itemId] > 0;
     }
@@ -473,8 +477,6 @@ contract ForgeFacet is Modifiers {
         s._balances[id][to] += amount;
         s._totalSupply[id] += amount;
         emit TransferSingle(msg.sender, address(0), to, id, amount);
-
-//        forgeTokenFacet()._doSafeTransferAcceptanceCheck(msg.sender, address(0), to, id, amount, data);
     }
 
     function _mintBatch(
@@ -491,8 +493,6 @@ contract ForgeFacet is Modifiers {
             s._totalSupply[ids[i]] += amounts[i];
         }
         emit TransferBatch(msg.sender, address(0), to, ids, amounts);
-
-//        forgeTokenFacet()._doSafeBatchTransferAcceptanceCheck(msg.sender, address(0), to, ids, amounts, data);
     }
 
     function _burn(
