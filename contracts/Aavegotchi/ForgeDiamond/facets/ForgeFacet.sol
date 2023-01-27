@@ -506,7 +506,7 @@ contract ForgeFacet is Modifiers {
         require(fromBalance >= amount, "ForgeTokenFacet: burn amount exceeds balance");
         unchecked {
             s._balances[id][from] = fromBalance - amount;
-            s._totalSupply[id] += amount;
+            s._totalSupply[id] -= amount;
         }
         emit TransferSingle(msg.sender, from, address(0), id, amount);
     }
