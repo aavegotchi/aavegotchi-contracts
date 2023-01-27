@@ -35,6 +35,7 @@ export interface AddItemTypesTaskArgs {
   uploadWearableSvgs: boolean;
   associateSleeves: boolean;
   sendToItemManager: boolean;
+  replaceItemTypes: boolean;
   replaceWearableSvgs: boolean;
   replaceSleeveSvgs: boolean;
   uploadSleeveSvgs: boolean;
@@ -51,6 +52,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
   .addFlag("uploadSleeveSvgs", "Upload sleeve svgs")
   .addFlag("associateSleeves", "Associate the sleeves")
   .addFlag("sendToItemManager", "Mint and send the items to itemManager")
+  .addFlag("replaceItemTypes", "Replace itemTypes instead of uploading")
   .addFlag("replaceWearableSvgs", "Replace wearable SVGs instead of uploading")
   .addFlag("replaceSleeveSvgs", "Replace sleeve SVGs instead of uploading")
 
@@ -66,6 +68,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       const uploadWearableSvgs = taskArgs.uploadWearableSvgs;
       const associateSleeves = taskArgs.associateSleeves;
       const uploadSleeveSvgs = taskArgs.uploadSleeveSvgs;
+      const replaceItemTypes = taskArgs.replaceItemTypes;
       const replaceWearableSvgs = taskArgs.replaceWearableSvgs;
       const replaceSleeveSvgs = taskArgs.replaceSleeveSvgs;
 
@@ -133,6 +136,27 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
         console.log("Items were added:", tx.hash);
       }
 
+      const itemIds: number[] = itemTypesArray.map((value) =>
+        Number(value.svgId)
+      );
+      const quantities: BigNumberish[] = itemTypesArray.map((value) =>
+        Number(value.maxQuantity)
+      );
+
+      if (replaceItemTypes) {
+        console.log("Updating items", 0, "to", currentItemTypes.length);
+
+        tx = await daoFacet.updateItemTypes(itemIds, itemTypesArray, {
+          gasPrice: gasPrice,
+        });
+
+        receipt = await tx.wait();
+        if (!receipt.status) {
+          throw Error(`Error:: ${tx.hash}`);
+        }
+        console.log("Items were updated:", tx.hash);
+      }
+
       if (uploadWearableSvgs) {
         console.log("Upload SVGs");
         await uploadSvgs(svgFacet, svgsArray, "wearables", hre.ethers);
@@ -140,13 +164,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       }
 
       if (replaceWearableSvgs) {
-        await updateSvgs(
-          svgsArray,
-          "wearables",
-          itemTypesArray.map((value) => Number(value.svgId)),
-          svgFacet,
-          hre
-        );
+        await updateSvgs(svgsArray, "wearables", itemIds, svgFacet, hre.ethers);
       }
 
       if (uploadSleeveSvgs) {
@@ -166,7 +184,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
           "sleeves",
           sleeveSvgsArray.map((_, index) => Number(sleeveStartId) + index),
           svgFacet,
-          hre
+          hre.ethers
         );
       }
 
@@ -198,13 +216,6 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       }
 
       if (sendToItemManager) {
-        const itemIds: BigNumberish[] = [];
-        const quantities: BigNumberish[] = [];
-        itemTypesArray.forEach((itemType: ItemTypeOutput) => {
-          itemIds.push(itemType.svgId);
-          quantities.push(itemType.maxQuantity);
-        });
-
         console.log("final quantities:", itemIds, quantities);
 
         console.log(`Mint prize items to Item Manager ${itemManager}`);

@@ -333,9 +333,11 @@ export const wearablesRightSvgs = [
   329,
   330,
   331,
-  //szn 4 baadges
+  // Haalloween Party Badge
   332,
+  // TOOORKEY CHAASE Badge
   333,
+  //szn 4 baadges
   334,
   335,
   336,
@@ -350,6 +352,29 @@ export const wearablesRightSvgs = [
   345,
   346,
   347,
+  348,
+  349,
+  // forge wearables
+  bodyWearableRight("350_PixelcraftTee"),
+  wearable("351_3DGlasses"),
+  wearable("352_PixelcraftSquare"),
+  wearable("353_Nimbus"),
+  wearable("354_AlchemicaApron"),
+  wearable("355_SafetyGlasses"),
+  wearable("356_Bandage"),
+  wearable("357_NailGun"),
+  wearable("358_FlamingApron"),
+  wearable("359_ForgeGoggles"),
+  wearable("360_GeodeSmasher"),
+  wearable("361_Geo"),
+  bodyWearableRight("362_FAKEShirt"),
+  wearable("363_FAKEBeret"),
+  wearable("364_PaintBrush"),
+  wearable("365_PaintPalette"),
+  bodyWearableRight("366_HeavenlyRobes"),
+  wearable("367_EyesofDevotion"),
+  wearable("368_BeardofDivinity"),
+  wearable("369_StaffofCreation"),
 ];
 
 export const wearablesBackSvgs = [
@@ -685,9 +710,11 @@ export const wearablesBackSvgs = [
   329,
   330,
   331,
-  //szn 4 baadges
+  // Haalloween Party Badge
   332,
+  // TOOORKEY CHAASE Badge
   333,
+  //szn 4 baadges
   334,
   335,
   336,
@@ -702,6 +729,29 @@ export const wearablesBackSvgs = [
   345,
   346,
   347,
+  348,
+  349,
+  // forge wearables
+  bodyWearable("350_PixelcraftTee"),
+  wearable("351_3DGlasses"),
+  wearable("352_PixelcraftSquare"),
+  wearable("353_Nimbus"),
+  wearable("354_AlchemicaApron"),
+  wearable("355_SafetyGlasses"),
+  wearable("356_Bandage"),
+  wearable("357_NailGun"),
+  wearable("358_FlamingApron"),
+  wearable("359_ForgeGoggles"),
+  wearable("360_GeodeSmasher"),
+  wearable("361_Geo"),
+  bodyWearable("362_FAKEShirt"),
+  wearable("363_FAKEBeret"),
+  wearable("364_PaintBrush"),
+  wearable("365_PaintPalette"),
+  bodyWearable("366_HeavenlyRobes"),
+  wearable("367_EyesofDevotion"),
+  wearable("368_BeardofDivinity"),
+  wearable("369_StaffofCreation"),
 ];
 
 export const wearablesLeftSvgs = [
@@ -1037,9 +1087,11 @@ export const wearablesLeftSvgs = [
   329,
   330,
   331,
-  //szn 4 baadges
+  // Haalloween Party Badge
   332,
+  // TOOORKEY CHAASE Badge
   333,
+  //szn 4 baadges
   334,
   335,
   336,
@@ -1054,6 +1106,29 @@ export const wearablesLeftSvgs = [
   345,
   346,
   347,
+  348,
+  349,
+  // forge wearables
+  bodyWearableLeft("350_PixelcraftTee"),
+  wearable("351_3DGlasses"),
+  wearable("352_PixelcraftSquare"),
+  wearable("353_Nimbus"),
+  wearable("354_AlchemicaApron"),
+  wearable("355_SafetyGlasses"),
+  wearable("356_Bandage"),
+  wearable("357_NailGun"),
+  wearable("358_FlamingApron"),
+  wearable("359_ForgeGoggles"),
+  wearable("360_GeodeSmasher"),
+  wearable("361_Geo"),
+  bodyWearableLeft("362_FAKEShirt"),
+  wearable("363_FAKEBeret"),
+  wearable("364_PaintBrush"),
+  wearable("365_PaintPalette"),
+  bodyWearableLeft("366_HeavenlyRobes"),
+  wearable("367_EyesofDevotion"),
+  wearable("368_BeardofDivinity"),
+  wearable("369_StaffofCreation"),
 ];
 
 export const wearablesLeftSleeveSvgs = [
@@ -1252,6 +1327,10 @@ export const wearablesLeftSleeveSvgs = [
   sleeveWearableLeft("316_MarineJacket"),
   sleeveWearableLeft("317_ThaaveSuit"),
   sleeveWearableLeft("318_TrackSuit"),
+  // forge wearables
+  sleeveWearableLeft("350_PixelcraftTee"),
+  sleeveWearableLeft("362_FAKEShirt"),
+  sleeveWearableLeft("366_HeavenlyRobes"),
 ];
 
 export const wearablesRightSleeveSvgs = [
@@ -1450,6 +1529,10 @@ export const wearablesRightSleeveSvgs = [
   sleeveWearableRight("316_MarineJacket"),
   sleeveWearableRight("317_ThaaveSuit"),
   sleeveWearableRight("318_TrackSuit"),
+  // forge wearables
+  sleeveWearableRight("350_PixelcraftTee"),
+  sleeveWearableRight("362_FAKEShirt"),
+  sleeveWearableRight("366_HeavenlyRobes"),
 ];
 
 export const wearablesBackSleeveSvgs = [
@@ -1648,6 +1731,10 @@ export const wearablesBackSleeveSvgs = [
   sleeveWearableRight("316_MarineJacket"),
   sleeveWearableRight("317_ThaaveSuit"),
   sleeveWearableRight("318_TrackSuit"),
+  // forge wearables
+  sleeveWearableRight("350_PixelcraftTee"),
+  sleeveWearableRight("362_FAKEShirt"),
+  sleeveWearableRight("366_HeavenlyRobes"),
 ];
 
 function stripSvg(svg: string) {
