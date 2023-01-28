@@ -120,54 +120,36 @@ contract ForgeFacet is Modifiers {
         return percentTimeDiscountBips[level - 1] * 10;
     }
 
+    function getRsmIndex(uint8 rsm) internal pure returns (uint8){
+        uint8[6] memory rsmIndexRef = [uint8(COMMON_RSM), UNCOMMON_RSM, RARE_RSM, LEGENDARY_RSM, MYTHICAL_RSM, GODLIKE_RSM];
+        for (uint8 i; i < rsmIndexRef.length; i++){
+            if (rsmIndexRef[i] == rsm) {
+                return i;
+            }
+        }
+        revert("Invalid rarity score modifier");
+    }
 
     // @notice Get the specific Core token ID given an item rarity score modifier and slot positions.
-    function getCoreTokenId(uint8 rarityScoreModifier, bool[16] memory slotPositions) public pure returns (uint256 tokenId){
-        if (rarityScoreModifier == COMMON_RSM) {
-            if (slotPositions[0]) {tokenId = CORE_BODY_COMMON;}
-            if (slotPositions[1]) {tokenId = CORE_FACE_COMMON;}
-            if (slotPositions[2]) {tokenId = CORE_EYES_COMMON;}
-            if (slotPositions[3]) {tokenId = CORE_HEAD_COMMON;}
-            if (slotPositions[4] || slotPositions[5]) {tokenId = CORE_HANDS_COMMON;}
-            if (slotPositions[6]) {tokenId = CORE_PET_COMMON;}
-        } else if (rarityScoreModifier == UNCOMMON_RSM) {
-            if (slotPositions[0]) {tokenId = CORE_BODY_UNCOMMON;}
-            if (slotPositions[1]) {tokenId = CORE_FACE_UNCOMMON;}
-            if (slotPositions[2]) {tokenId = CORE_EYES_UNCOMMON;}
-            if (slotPositions[3]) {tokenId = CORE_HEAD_UNCOMMON;}
-            if (slotPositions[4] || slotPositions[5]) {tokenId = CORE_HANDS_UNCOMMON;}
-            if (slotPositions[6]) {tokenId = CORE_PET_UNCOMMON;}
-        } else if (rarityScoreModifier == RARE_RSM) {
-            if (slotPositions[0]) {tokenId = CORE_BODY_RARE;}
-            if (slotPositions[1]) {tokenId = CORE_FACE_RARE;}
-            if (slotPositions[2]) {tokenId = CORE_EYES_RARE;}
-            if (slotPositions[3]) {tokenId = CORE_HEAD_RARE;}
-            if (slotPositions[4] || slotPositions[5]) {tokenId = CORE_HANDS_RARE;}
-            if (slotPositions[6]) {tokenId = CORE_PET_RARE;}
-        } else if (rarityScoreModifier == LEGENDARY_RSM) {
-            if (slotPositions[0]) {tokenId = CORE_BODY_LEGENDARY;}
-            if (slotPositions[1]) {tokenId = CORE_FACE_LEGENDARY;}
-            if (slotPositions[2]) {tokenId = CORE_EYES_LEGENDARY;}
-            if (slotPositions[3]) {tokenId = CORE_HEAD_LEGENDARY;}
-            if (slotPositions[4] || slotPositions[5]) {tokenId = CORE_HANDS_LEGENDARY;}
-            if (slotPositions[6]) {tokenId = CORE_PET_LEGENDARY;}
-        } else if (rarityScoreModifier == MYTHICAL_RSM) {
-            if (slotPositions[0]) {tokenId = CORE_BODY_MYTHICAL;}
-            if (slotPositions[1]) {tokenId = CORE_FACE_MYTHICAL;}
-            if (slotPositions[2]) {tokenId = CORE_EYES_MYTHICAL;}
-            if (slotPositions[3]) {tokenId = CORE_HEAD_MYTHICAL;}
-            if (slotPositions[4] || slotPositions[5]) {tokenId = CORE_HANDS_MYTHICAL;}
-            if (slotPositions[6]) {tokenId = CORE_PET_MYTHICAL;}
-        } else if (rarityScoreModifier == GODLIKE_RSM) {
-            if (slotPositions[0]) {tokenId = CORE_BODY_GODLIKE;}
-            if (slotPositions[1]) {tokenId = CORE_FACE_GODLIKE;}
-            if (slotPositions[2]) {tokenId = CORE_EYES_GODLIKE;}
-            if (slotPositions[3]) {tokenId = CORE_HEAD_GODLIKE;}
-            if (slotPositions[4] || slotPositions[5]) {tokenId = CORE_HANDS_GODLIKE;}
-            if (slotPositions[6]) {tokenId = CORE_PET_GODLIKE;}
-        } else {
-            revert("Invalid rarity score modifier");
+    function getCoreTokenId(uint8 rarityScoreModifier, bool[16] memory slotPositions) public pure returns (uint256 tokenId) {
+        uint256 offsetMultiplier = 6;
+        uint256 startingOffsetId = CORE_BODY_COMMON;
+
+        uint8 slotNumber;
+        for (uint8 i; i < slotPositions.length; i++){
+            if (slotPositions[i]){
+                slotNumber = i;
+            }
         }
+        // Hand items are two slots (4 and 5). Treat any hand wearable as slot 4 for token ID offset.
+        if (slotNumber == 5) {
+            slotNumber = 4;
+        }
+
+        uint256 offsetWithSlot = startingOffsetId + (offsetMultiplier * slotNumber);
+        uint256 offsetWithRarity = offsetWithSlot + getRsmIndex(rarityScoreModifier);
+
+        return offsetWithRarity;
     }
 
     // @notice Get the specific Geode token ID given an Aavegotchi rarity score modifier.
