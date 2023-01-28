@@ -3,6 +3,7 @@ pragma solidity 0.8.1;
 
 
 import "../libraries/LibAppStorage.sol";
+import {LibToken} from "../libraries/LibToken.sol";
 import {WearablesFacet} from "../../WearableDiamond/facets/WearablesFacet.sol";
 import {ForgeLibDiamond} from "../libraries/ForgeLibDiamond.sol";
 import {ForgeDiamond} from "../ForgeDiamond.sol";
@@ -474,7 +475,8 @@ contract ForgeFacet is Modifiers {
     ) internal {
         require(to != address(0), "ForgeFacet: mint to the zero address");
 
-        s._balances[id][to] += amount;
+        LibToken.addToOwner(to, id, amount);
+
         s._totalSupply[id] += amount;
         emit TransferSingle(msg.sender, address(0), to, id, amount);
     }
@@ -489,7 +491,7 @@ contract ForgeFacet is Modifiers {
         require(ids.length == amounts.length, "ForgeTokenFacet: ids and amounts length mismatch");
 
         for (uint256 i = 0; i < ids.length; i++) {
-            s._balances[ids[i]][to] += amounts[i];
+            LibToken.addToOwner(to, ids[i], amounts[i]);
             s._totalSupply[ids[i]] += amounts[i];
         }
         emit TransferBatch(msg.sender, address(0), to, ids, amounts);
@@ -504,10 +506,10 @@ contract ForgeFacet is Modifiers {
 
         uint256 fromBalance = s._balances[id][from];
         require(fromBalance >= amount, "ForgeTokenFacet: burn amount exceeds balance");
-        unchecked {
-            s._balances[id][from] = fromBalance - amount;
-            s._totalSupply[id] -= amount;
-        }
+
+        LibToken.removeFromOwner(from, id, amount);
+        s._totalSupply[id] -= amount;
+
         emit TransferSingle(msg.sender, from, address(0), id, amount);
     }
     function _burnBatch(
@@ -524,10 +526,10 @@ contract ForgeFacet is Modifiers {
 
             uint256 fromBalance = s._balances[id][from];
             require(fromBalance >= amount, "ForgeTokenFacet: burn amount exceeds balance");
-            unchecked {
-                s._balances[id][from] = fromBalance - amount;
-                s._totalSupply[id] -= amount;
-            }
+
+            LibToken.removeFromOwner(from, id, amount);
+            s._totalSupply[id] -= amount;
+
         }
         emit TransferBatch(msg.sender, from, address(0), ids, amounts);
     }

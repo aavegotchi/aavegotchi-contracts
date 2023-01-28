@@ -101,6 +101,11 @@ struct RarityValueIO {
     uint256 godlike;
 }
 
+struct ItemBalancesIO {
+    uint256 tokenId;
+    uint256 balance;
+}
+
 struct GotchiForging {
     uint256 forgeQueueId;
     bool isForging;
@@ -111,6 +116,11 @@ struct AppStorage {
     ////// ERC1155
     // Mapping from token ID to account balances
     mapping(uint256 => mapping(address => uint256)) _balances;
+    mapping(address => uint256[]) ownerItems;
+    mapping(address => mapping(uint256 => uint256)) ownerItemBalances;
+    // indexes are stored 1 higher so that 0 means no items in items array
+    mapping(address => mapping(uint256 => uint256)) ownerItemIndexes;
+
     // Mapping from account to operator approvals
     mapping(address => mapping(address => bool)) _operatorApprovals;
     mapping(uint256 => uint256) _totalSupply;
@@ -153,6 +163,14 @@ struct AppStorage {
     mapping(uint256 => uint256) maxSupplyByToken;
 
 
+}
+
+library LibAppStorage {
+    function diamondStorage() internal pure returns (AppStorage storage ds) {
+        assembly {
+            ds.slot := 0
+        }
+    }
 }
 
 contract Modifiers {

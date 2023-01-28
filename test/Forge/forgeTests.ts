@@ -508,5 +508,13 @@ describe("Testing Forge", async function () {
                 expect(await forgeTokenFacet.totalSupply(ids[i])).to.be.equal(amts[i] + Number(currTotal));
             }
         });
+
+        it('should return all user balances', async function () {
+            let impTestForge: ForgeFacet = await impersonate(testUser, forgeFacet, ethers, network)
+            await impTestForge.smeltWearables([157], [7735])
+            let bals = await forgeTokenFacet.balanceOfOwner(testUser)
+
+            console.log(bals)
+        });
     })
 });

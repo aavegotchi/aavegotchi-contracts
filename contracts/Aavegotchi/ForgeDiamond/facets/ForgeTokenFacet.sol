@@ -1,4 +1,6 @@
-import {Modifiers} from "../libraries/LibAppStorage.sol";
+import "../libraries/LibAppStorage.sol";
+import {LibToken} from "../libraries/LibToken.sol";
+
 import { ERC1155 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import { IERC1155 } from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
@@ -79,6 +81,17 @@ contract ForgeTokenFacet is Modifiers {
         }
 
         return batchBalances;
+    }
+
+    // @notice return users balance of all tokens
+    function balanceOfOwner(address account) public view returns (ItemBalancesIO[] memory output_) {
+        uint256 count = s.ownerItems[account].length;
+        output_ = new ItemBalancesIO[](count);
+        for (uint256 i; i < count; i++) {
+            uint256 tokenId = s.ownerItems[account][i];
+            output_[i].balance = s.ownerItemBalances[account][tokenId];
+            output_[i].tokenId = tokenId;
+        }
     }
 
     /**
@@ -186,12 +199,8 @@ contract ForgeTokenFacet is Modifiers {
             uint256 id = ids[i];
             uint256 amount = amounts[i];
 
-            uint256 fromBalance = s._balances[id][from];
-            require(fromBalance >= amount, "ForgeTokenFacet: insufficient balance for transfer");
-            unchecked {
-                s._balances[id][from] = fromBalance - amount;
-            }
-            s._balances[id][to] += amount;
+            LibToken.removeFromOwner(from, id, amount);
+            LibToken.addToOwner(to, id, amount);
         }
 
         emit TransferBatch(msg.sender, from, to, ids, amounts);

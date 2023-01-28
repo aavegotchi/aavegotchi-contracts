@@ -94,6 +94,7 @@ export async function deployAndUpgradeForgeDiamond() {
                 "function totalSupply(uint256 id) public view virtual returns (uint256)",
                 "function balanceOf(address account, uint256 id) public view returns (uint256)",
                 "function balanceOfBatch(address[] memory accounts, uint256[] memory ids) public view returns (uint256[] memory)",
+                "function balanceOfOwner(address account) public view returns (tuple(uint256 tokenId, uint256 balance)[] memory output_)",
                 "function setApprovalForAll(address operator, bool approved) public",
                 "function isApprovedForAll(address account, address operator) public view returns (bool)",
                 "function safeTransferFrom(address from,address to,uint256 id,uint256 amount,bytes memory data) public",
