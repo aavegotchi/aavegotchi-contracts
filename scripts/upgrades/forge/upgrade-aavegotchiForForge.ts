@@ -1,74 +1,70 @@
 import { ethers, run } from "hardhat";
 import {
-    convertFacetAndSelectorsToString,
-    DeployUpgradeTaskArgs,
-    FacetsAndAddSelectors,
+  convertFacetAndSelectorsToString,
+  DeployUpgradeTaskArgs,
+  FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
 
-import { maticDiamondAddress, maticDiamondUpgrader } from "../../helperFunctions";
-import {DAOFacetInterface} from "../../../typechain/DAOFacet";
-import {DAOFacet__factory} from "../../../typechain";
+import {
+  maticDiamondAddress,
+  maticDiamondUpgrader,
+} from "../../helperFunctions";
+import { DAOFacetInterface } from "../../../typechain/DAOFacet";
+import { DAOFacet__factory } from "../../../typechain";
 
 export async function upgradeAavegotchiForForge(forgeAddress: string) {
-    console.log("Upgrading Aavegotchi facets for Forge.");
+  console.log("Upgrading Aavegotchi facets for Forge.");
 
-    const signerAddress = await (await ethers.getSigners())[0].getAddress();
+  const facets: FacetsAndAddSelectors[] = [
+    {
+      facetName:
+        "contracts/Aavegotchi/facets/AavegotchiGameFacet.sol:AavegotchiGameFacet",
+      addSelectors: [
+        "function isAavegotchiLocked(uint256 _tokenId) external view returns (bool isLocked)",
+      ],
+      removeSelectors: [],
+    },
+    {
+      facetName:
+        "contracts/Aavegotchi/facets/CollateralFacet.sol:CollateralFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+    {
+      facetName: "contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet",
+      addSelectors: ["function setForge(address _newForge) external"],
+      removeSelectors: [],
+    },
+    {
+      facetName:
+        "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+  ];
 
-    const facets: FacetsAndAddSelectors[] = [
-        {
-            facetName:
-                "contracts/Aavegotchi/facets/AavegotchiGameFacet.sol:AavegotchiGameFacet",
-            addSelectors: [
-                "function isAavegotchiLocked(uint256 _tokenId) external view returns (bool isLocked)",
-            ],
-            removeSelectors: [],
-        },
-        {
-            facetName:
-                "contracts/Aavegotchi/facets/CollateralFacet.sol:CollateralFacet",
-            addSelectors: [],
-            removeSelectors: [],
-        },
-        {
-            facetName:
-                "contracts/Aavegotchi/facets/DAOFacet.sol:DAOFacet",
-            addSelectors: [
-                "function setForge(address _newForge) external",
-            ],
-            removeSelectors: [],
-        },
-        {
-            facetName:
-                "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-            addSelectors: [],
-            removeSelectors: [],
-        }
-    ];
+  const joined = convertFacetAndSelectorsToString(facets);
 
-    const joined = convertFacetAndSelectorsToString(facets);
+  let iface: DAOFacetInterface = new ethers.utils.Interface(
+    DAOFacet__factory.abi
+  ) as DAOFacetInterface;
 
-    let iface: DAOFacetInterface = new ethers.utils.Interface(
-        DAOFacet__factory.abi
-    ) as DAOFacetInterface;
+  const calldata = iface.encodeFunctionData("setForge", [forgeAddress]);
 
-    const calldata = iface.encodeFunctionData("setForge", [
-        forgeAddress,
-    ]);
+  const args: DeployUpgradeTaskArgs = {
+    diamondUpgrader: maticDiamondUpgrader,
+    diamondAddress: maticDiamondAddress,
+    facetsAndAddSelectors: joined,
+    useLedger: false,
+    useMultisig: false,
+    freshDeployment: false,
+    initAddress: maticDiamondAddress,
+    initCalldata: calldata,
+  };
 
-    const args: DeployUpgradeTaskArgs = {
-        diamondUpgrader: signerAddress,
-        diamondAddress: maticDiamondAddress,
-        facetsAndAddSelectors: joined,
-        useLedger: false,
-        useMultisig: false,
-        freshDeployment: false,
-        initAddress: maticDiamondAddress,
-        initCalldata: calldata
-    };
+  await run("deployUpgrade", args);
 
-    await run("deployUpgrade", args);
-
-    console.log("Finished upgrading Aavegotchi facets for Forge.");
+  console.log("Finished upgrading Aavegotchi facets for Forge.");
 }
 
 // if (require.main === module) {

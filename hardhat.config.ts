@@ -67,6 +67,7 @@ export default {
     },
     tenderly: {
       url: process.env.TENDERLY_FORK,
+      chainId: Number(process.env.TENDERLY_NETWORK_ID),
       accounts: [process.env.ITEM_MANAGER],
       // blockGasLimit: 20000000,
       blockGasLimit: 20000000,

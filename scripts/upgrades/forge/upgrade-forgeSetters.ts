@@ -1,5 +1,7 @@
-import { ForgeDAOFacet } from "../../../typechain";
+import { ForgeDAOFacet, OwnershipFacet } from "../../../typechain";
 import { ethers, network } from "hardhat";
+import { sendToTenderly } from "../../libraries/tenderly";
+import { impersonate } from "../../helperFunctions";
 
 const daoAddr = "0x6fb7e0AAFBa16396Ad6c1046027717bcA25F821f"; // DTF multisig
 const GLTR = "0x3801C3B3B5c98F88a9c9005966AA96aa440B9Afc";
@@ -46,12 +48,73 @@ export async function setForgeProperties(forgeDiamondAddress: string) {
   )) as ForgeDAOFacet;
 
   if (network.name === "tenderly") {
-    const tenderlyProvider = await new ethers.providers.JsonRpcProvider(
-      process.env.TENDERLY_FORK
+    const owner = await (
+      (await ethers.getContractAt(
+        "OwnershipFacet",
+        forgeDiamondAddress
+      )) as OwnershipFacet
+    ).owner();
+
+    await sendToTenderly(
+      forgeDiamondAddress,
+      owner,
+      await forgeDaoFacet.populateTransaction.setGltrAddress(GLTR)
+    );
+    await sendToTenderly(
+      forgeDiamondAddress,
+      owner,
+      await forgeDaoFacet.populateTransaction.setAavegotchiDaoAddress(daoAddr)
+    );
+    await sendToTenderly(
+      forgeDiamondAddress,
+      owner,
+      await forgeDaoFacet.populateTransaction.setAlloyDaoFeeInBips(500)
+    );
+    await sendToTenderly(
+      forgeDiamondAddress,
+      owner,
+      await forgeDaoFacet.populateTransaction.setAlloyBurnFeeInBips(500)
     );
 
-    //handle tenderly impersonations
+    await sendToTenderly(
+      forgeDiamondAddress,
+      owner,
+      await forgeDaoFacet.populateTransaction.setForgeAlloyCost(alloyCosts)
+    );
+    await sendToTenderly(
+      forgeDiamondAddress,
+      owner,
+      await forgeDaoFacet.populateTransaction.setForgeEssenceCost(essenceCost)
+    );
+    await sendToTenderly(
+      forgeDiamondAddress,
+      owner,
+      await forgeDaoFacet.populateTransaction.setForgeTimeCostInBlocks(timeCost)
+    );
+    await sendToTenderly(
+      forgeDiamondAddress,
+      owner,
+      await forgeDaoFacet.populateTransaction.setSkillPointsEarnedFromForge(
+        skillPts
+      )
+    );
+    await sendToTenderly(
+      forgeDiamondAddress,
+      owner,
+      await forgeDaoFacet.populateTransaction.setSmeltingSkillPointReductionFactorBips(
+        5000
+      )
+    );
   } else {
+    if (network.name === "hardhat") {
+      const owner = await (
+        (await ethers.getContractAt(
+          "OwnershipFacet",
+          forgeDiamondAddress
+        )) as OwnershipFacet
+      ).owner();
+      forgeDaoFacet = await impersonate(owner, forgeDaoFacet, ethers, network);
+    }
     await forgeDaoFacet.setGltrAddress(GLTR);
     await forgeDaoFacet.setAavegotchiDaoAddress(daoAddr);
     await forgeDaoFacet.setAlloyDaoFeeInBips(500);

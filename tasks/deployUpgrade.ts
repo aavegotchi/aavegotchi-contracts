@@ -20,6 +20,7 @@ import {
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { sendToMultisig } from "../scripts/libraries/multisig/multisig";
+import { sendToTenderly } from "../scripts/libraries/tenderly";
 
 export interface FacetsAndAddSelectors {
   facetName: string;
@@ -151,6 +152,12 @@ task(
         } else signer = (await hre.ethers.getSigners())[0];
       } else if (hre.network.name === "tenderly") {
         signer = (await hre.ethers.getSigners())[0];
+        await hre.ethers.provider.send("tenderly_setBalance", [
+          [await signer.getAddress(), owner],
+          hre.ethers.utils.hexValue(
+            hre.ethers.utils.parseUnits("10000", "ether").toHexString()
+          ),
+        ]);
       } else {
         throw Error("Incorrect network selected");
       }
@@ -168,7 +175,7 @@ task(
             facet.facetName
           )) as ContractFactory;
           const deployedFacet: Contract = await factory.deploy({
-            gasPrice: gasPrice,
+            // gasPrice: gasPrice,
           });
           await deployedFacet.deployed();
           console.log(
@@ -245,39 +252,17 @@ task(
       // )) as IDiamondLoupe;
 
       if (hre.network.name === "tenderly") {
+        console.log("Diamond cut");
         console.log("Using Tenderly");
 
-        const tenderlyProvider = await new hre.ethers.providers.JsonRpcProvider(
-          process.env.TENDERLY_FORK
-        );
-
-        //Execute the Cut
-        const unsignedDiamondCut = (await hre.ethers.getContractAt(
-          "IDiamondCut",
-          diamondAddress
-        )) as IDiamondCut;
-
-        console.log("unsigned:", unsignedDiamondCut);
-
-        const unsignedTx =
-          await unsignedDiamondCut.populateTransaction.diamondCut(
+        const tx: PopulatedTransaction =
+          await diamondCut.populateTransaction.diamondCut(
             cut,
             initAddress ? initAddress : hre.ethers.constants.AddressZero,
-            initCalldata ? initCalldata : "0x"
+            initCalldata ? initCalldata : "0x",
+            { gasLimit: 800000 }
           );
-
-        const txParams = [
-          {
-            gas: hre.ethers.utils.hexValue(8000000),
-            to: diamondAddress,
-            from: "0x0000000000000000000000000000000000000000",
-            data: unsignedTx.data,
-            value: hre.ethers.utils.hexValue(0),
-            gasPrice: hre.ethers.utils.hexValue(30),
-          },
-        ];
-
-        await tenderlyProvider.send("eth_sendTransaction", txParams);
+        await sendToTenderly(diamondUpgrader, owner, tx);
       } else if (testing) {
         console.log("Diamond cut");
         const tx: ContractTransaction = await diamondCut.diamondCut(
