@@ -276,7 +276,7 @@ export async function uploadSvgs(
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
     }
-    // console.log("tx:", tx.hash);
+    console.log("tx:", tx.hash);
     // console.log(svgItemsEnd, svg.length);
     if (svgItemsEnd === svgs.length) {
       break;
