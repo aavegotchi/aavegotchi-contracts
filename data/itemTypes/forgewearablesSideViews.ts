@@ -1,4 +1,5 @@
-import { SideDimensions } from "../../scripts/itemTypeHelpers";
+import { Exceptions, SideDimensions } from "../../scripts/itemTypeHelpers";
+import { ethers } from "hardhat";
 
 export const sideViewDimensions: SideDimensions[] = [
   {
@@ -107,7 +108,7 @@ export const sideViewDimensions: SideDimensions[] = [
     itemId: 353,
     name: "Nimbus",
     side: "back",
-    dimensions: { x: 38, y: 3, width: 26, height: 14 },
+    dimensions: { x: 0, y: 3, width: 26, height: 14 },
   },
   {
     itemId: 353,
@@ -377,13 +378,13 @@ export const sideViewDimensions: SideDimensions[] = [
     itemId: 366,
     name: "Heavenly Robes",
     side: "left",
-    dimensions: { x: 18, y: 33, width: 33, height: 24 },
+    dimensions: { x: 18, y: 27, width: 33, height: 24 },
   },
   {
     itemId: 366,
     name: "Heavenly Robes",
     side: "right",
-    dimensions: { x: 13, y: 33, width: 33, height: 24 },
+    dimensions: { x: 13, y: 27, width: 33, height: 24 },
   },
   {
     itemId: 366,
@@ -413,7 +414,7 @@ export const sideViewDimensions: SideDimensions[] = [
     itemId: 366,
     name: "Heavenly Robes",
     side: "back",
-    dimensions: { x: 11, y: 33, width: 42, height: 24 },
+    dimensions: { x: 8, y: 29, width: 42, height: 24 },
   },
   {
     itemId: 366,
@@ -480,5 +481,20 @@ export const sideViewDimensions: SideDimensions[] = [
     name: "Staff of Creation",
     side: "right",
     dimensions: { x: 32, y: 18, width: 14, height: 38 },
+  },
+];
+
+export const forgeSideExceptions: Exceptions[] = [
+  {
+    itemId: 353,
+    slotPosition: 6,
+    side: "wearables-back",
+    exceptionBool: true,
+  },
+  {
+    itemId: 361,
+    slotPosition: 6,
+    side: "wearables-back",
+    exceptionBool: true,
   },
 ];

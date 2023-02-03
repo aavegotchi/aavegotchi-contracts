@@ -1,12 +1,16 @@
 import { run } from "hardhat";
 import { itemTypes as itemTypes1 } from "../../data/itemTypes/forgewearables1";
 import { itemTypes as itemTypes2 } from "../../data/itemTypes/forgewearables2";
-import { sideViewDimensions } from "../../data/itemTypes/forgewearablesSideViews";
+import {
+  forgeSideExceptions,
+  sideViewDimensions,
+} from "../../data/itemTypes/forgewearablesSideViews";
 import {
   updateSvgTaskForSideSleeves,
   updateSvgTaskForSideViews,
 } from "../svgHelperFunctions";
 import { convertSideDimensionsToTaskFormat } from "../../tasks/updateItemSideDimensions";
+import { convertExceptionsToTaskFormat } from "../../tasks/updateWearableExceptions";
 
 export async function addSideViews() {
   const itemIds: number[] = [];
@@ -35,6 +39,12 @@ export async function addSideViews() {
   await run(
     "updateItemSideDimensions",
     convertSideDimensionsToTaskFormat(sideViewDimensions)
+  );
+
+  // uploading svg excpetions
+  await run(
+    "updateWearableExceptions",
+    convertExceptionsToTaskFormat(forgeSideExceptions)
   );
 }
 
