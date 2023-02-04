@@ -163,12 +163,8 @@ contract ForgeTokenFacet is Modifiers {
     ) internal {
         require(to != address(0), "ForgeTokenFacet: transfer to the zero address");
 
-        uint256 fromBalance = s._balances[id][from];
-        require(fromBalance >= amount, "ForgeTokenFacet: insufficient balance for transfer");
-        unchecked {
-            s._balances[id][from] = fromBalance - amount;
-        }
-        s._balances[id][to] += amount;
+        LibToken.removeFromOwner(from, id, amount);
+        LibToken.addToOwner(to, id, amount);
 
         emit TransferSingle(msg.sender, from, to, id, amount);
 
