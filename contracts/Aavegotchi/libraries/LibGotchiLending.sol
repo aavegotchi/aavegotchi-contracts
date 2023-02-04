@@ -10,6 +10,7 @@ import {LibAavegotchi} from "./LibAavegotchi.sol";
 import {LibWhitelist} from "./LibWhitelist.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IRealmDiamond} from "../../shared/interfaces/IRealmDiamond.sol";
+import {LibEvents} from "../../shared/libraries/LibEvents.sol";
 
 library LibGotchiLending {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -157,6 +158,8 @@ library LibGotchiLending {
         addLendingListItem(_listing.lender, listingId, "listed");
         s.aavegotchis[_listing.tokenId].locked = true;
 
+        LibEvents.emitLockNFT(_listing.tokenId);
+
         emit GotchiLendingAdd(listingId);
         emit GotchiLendingAdded(
             listingId,
@@ -252,6 +255,7 @@ library LibGotchiLending {
         s.aavegotchis[lending.erc721TokenId].locked = false;
         s.aavegotchiToListingId[lending.erc721TokenId] = 0;
 
+        LibEvents.emitUnlockNFT(lending.erc721TokenId);
         emit GotchiLendingCancel(_listingId, block.timestamp);
         emit GotchiLendingCanceled(
             _listingId,
@@ -358,6 +362,8 @@ library LibGotchiLending {
             // Remove token id from borrower's list of borrowed gotchis. Does not revert if it the element does not exist
             whitelistBorrowerGotchiSet.remove(lending.erc721TokenId);
         }
+
+        LibEvents.emitUnlockNFT(lending.erc721TokenId);
         emit GotchiLendingEnd(listingId);
         emit GotchiLendingEnded(
             listingId,

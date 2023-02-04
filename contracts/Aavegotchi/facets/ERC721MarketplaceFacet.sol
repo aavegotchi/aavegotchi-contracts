@@ -12,6 +12,7 @@ import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketp
 import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
 import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 import {BaazaarSplit, LibSharedMarketplace, SplitAddresses} from "../libraries/LibSharedMarketplace.sol";
+import {LibEvents} from "../../shared/libraries/LibEvents.sol";
 
 contract ERC721MarketplaceFacet is Modifiers {
     event ERC721ListingAdd(
@@ -308,6 +309,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         //Lock Aavegotchis when listing is created
         if (_erc721TokenAddress == address(this)) {
             s.aavegotchis[_erc721TokenId].locked = true;
+            LibEvents.emitLockNFT(_erc721TokenId);
         }
 
         //Burn listing fee
@@ -416,6 +418,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         if (listing.erc721TokenAddress == address(this)) {
             s.aavegotchis[listing.erc721TokenId].locked = false;
             LibAavegotchi.transfer(seller, _recipient, listing.erc721TokenId);
+            LibEvents.emitUnlockNFT(listing.erc721TokenId);
         } else {
             // External contracts
             IERC721(listing.erc721TokenAddress).safeTransferFrom(seller, _recipient, listing.erc721TokenId);
