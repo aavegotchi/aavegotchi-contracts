@@ -166,9 +166,9 @@ contract ForgeTokenFacet is Modifiers {
         LibToken.removeFromOwner(from, id, amount);
         LibToken.addToOwner(to, id, amount);
 
-        emit TransferSingle(msg.sender, from, to, id, amount);
+        emit TransferSingle(LibMeta.msgSender(), from, to, id, amount);
 
-        _doSafeTransferAcceptanceCheck(msg.sender, from, to, id, amount, data);
+        _doSafeTransferAcceptanceCheck(LibMeta.msgSender(), from, to, id, amount, data);
     }
 
     /**
@@ -199,9 +199,9 @@ contract ForgeTokenFacet is Modifiers {
             LibToken.addToOwner(to, id, amount);
         }
 
-        emit TransferBatch(msg.sender, from, to, ids, amounts);
+        emit TransferBatch(LibMeta.msgSender(), from, to, ids, amounts);
 
-        _doSafeBatchTransferAcceptanceCheck(msg.sender, from, to, ids, amounts, data);
+        _doSafeBatchTransferAcceptanceCheck(LibMeta.msgSender(), from, to, ids, amounts, data);
     }
 
 
