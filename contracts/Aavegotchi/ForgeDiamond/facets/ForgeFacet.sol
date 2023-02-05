@@ -334,8 +334,8 @@ contract ForgeFacet is Modifiers {
     // @dev returns the time (in blocks) cost for forging for an aavegotchi
     // @param gotchId
     // @param rsm Rarity score modifier of an item (1, 2, 5, 10, 20, 50).
-    function forgeTime(uint256 gotchiId, uint8 rsm) public view returns (uint256 forgeTime) {
-        forgeTime = (s.forgeTimeCostInBlocks[rsm] * getSmithingLevelMultiplierBips(gotchiId)) / 10000;
+    function forgeTime(uint256 gotchiId, uint8 rsm) public view returns (uint256) {
+        return (s.forgeTimeCostInBlocks[rsm] * getSmithingLevelMultiplierBips(gotchiId)) / 10000;
     }
 
     function claimForgeQueueItems(uint256[] calldata gotchiIds) external whenNotPaused {
@@ -376,7 +376,7 @@ contract ForgeFacet is Modifiers {
 
             require(block.number <= queueItem.readyBlock, "InstallationFacet: installation already done");
 
-            IERC20 gltr = IERC20(s.gltr);
+            // IERC20 gltr = IERC20(s.gltr);
 
             uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
             uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
@@ -452,7 +452,9 @@ contract ForgeFacet is Modifiers {
     // @notice Allow Aavegotchi diamond to mint essence.
     // @dev Only called from CollateralFacet's decreaseAndDestroy function. Not including a whenNotPaused modifier
     //      here to avoid impacts to aavegotchi sacrifice functionality.
-    function mintEssence(address owner, uint256 gotchiId) external {
+    function mintEssence(
+        address owner /*uint256 gotchiId*/
+    ) external {
         require(LibMeta.msgSender() == ForgeLibDiamond.AAVEGOTCHI_DIAMOND, "ForgeFacet: Can only be called by Aavegotchi Diamond");
         //        require(aavegotchiFacet.ownerOf(gotchiId) == address(0), "ForgeFacet: Aavegotchi not sacrificed");
 
@@ -466,7 +468,7 @@ contract ForgeFacet is Modifiers {
     ) internal {
         // mint doesnt exceed max supply
         //        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
-        _mint(account, id, amount, "");
+        _mint(account, id, amount);
     }
 
     function adminMint(
@@ -476,7 +478,7 @@ contract ForgeFacet is Modifiers {
     ) external onlyDaoOrOwner {
         // mint doesnt exceed max supply
         //        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
-        _mint(account, id, amount, "");
+        _mint(account, id, amount);
     }
 
     function adminMintBatch(
@@ -486,7 +488,7 @@ contract ForgeFacet is Modifiers {
     ) external onlyDaoOrOwner {
         // mint doesnt exceed max supply
         //        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
-        _mintBatch(to, ids, amounts, "");
+        _mintBatch(to, ids, amounts);
     }
 
     //    function _mintBatchItems(address to, uint256[] memory ids, uint256[] memory amounts) internal {
@@ -503,9 +505,9 @@ contract ForgeFacet is Modifiers {
     function _mint(
         address to,
         uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) internal {
+        uint256 amount
+    ) internal // bytes memory data
+    {
         require(to != address(0), "ForgeFacet: mint to the zero address");
 
         LibToken.addToOwner(to, id, amount);
@@ -517,9 +519,9 @@ contract ForgeFacet is Modifiers {
     function _mintBatch(
         address to,
         uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) internal {
+        uint256[] memory amounts
+    ) internal // bytes memory data
+    {
         require(to != address(0), "ForgeTokenFacet: mint to the zero address");
         require(ids.length == amounts.length, "ForgeTokenFacet: ids and amounts length mismatch");
 
