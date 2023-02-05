@@ -13,10 +13,6 @@ import {IERC173} from "../../../shared/interfaces/IERC173.sol";
 import {LibMeta} from "../../../shared/libraries/LibMeta.sol";
 
 library ForgeLibDiamond {
-    bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
-    address constant AAVEGOTCHI_DIAMOND = 0x86935F11C86623deC8a25696E1C19a8659CbF95d;
-    address constant WEARABLE_DIAMOND = 0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f;
-
     struct FacetAddressAndPosition {
         address facetAddress;
         uint16 functionSelectorPosition; // position in facetFunctionSelectors.functionSelectors array
@@ -44,14 +40,18 @@ library ForgeLibDiamond {
         address aavegotchiDiamond;
     }
 
+    bytes32 public constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
+    address public constant AAVEGOTCHI_DIAMOND = 0x86935F11C86623deC8a25696E1C19a8659CbF95d;
+    address public constant WEARABLE_DIAMOND = 0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
     function diamondStorage() internal pure returns (DiamondStorage storage ds) {
         bytes32 position = DIAMOND_STORAGE_POSITION;
         assembly {
             ds.slot := position
         }
     }
-
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     function setContractOwner(address _newOwner) internal {
         DiamondStorage storage ds = diamondStorage();

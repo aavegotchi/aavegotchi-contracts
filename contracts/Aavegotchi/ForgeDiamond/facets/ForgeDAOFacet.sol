@@ -5,7 +5,6 @@ import "../libraries/LibAppStorage.sol";
 contract ForgeDAOFacet is Modifiers {
     event SetAavegotchiDaoAddress(address newAddress);
     event SetGltrAddress(address newAddress);
-
     event SetAlloyDaoFee(uint256 bips);
     event SetAlloyBurnFee(uint256 bips);
     event SetForgeAlloyCost(RarityValueIO newCosts);

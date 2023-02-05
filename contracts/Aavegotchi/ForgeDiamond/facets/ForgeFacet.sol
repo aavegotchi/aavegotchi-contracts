@@ -65,7 +65,7 @@ contract ForgeFacet is Modifiers {
         facet = LendingGetterAndSetterFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
     }
 
-    function gltrContract() internal returns (IERC20 token) {
+    function gltrContract() internal view returns (IERC20 token) {
         token = IERC20(s.GLTR);
     }
 
