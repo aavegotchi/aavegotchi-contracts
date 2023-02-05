@@ -9,7 +9,7 @@ import {LibMeta} from "../../../shared/libraries/LibMeta.sol";
 
 // @dev this offset exists so that schematic IDs can exactly mirror Aavegotchi wearable IDs.
 // All non-schematic items (cores, alloy, essence, etc) IDs start at this offset number.
-uint256 constant WEARABLE_GAP_OFFSET = 1000000000;
+uint256 constant WEARABLE_GAP_OFFSET = 1_000_000_000;
 
 // Forge asset token IDs
 uint256 constant ALLOY = WEARABLE_GAP_OFFSET + 0;

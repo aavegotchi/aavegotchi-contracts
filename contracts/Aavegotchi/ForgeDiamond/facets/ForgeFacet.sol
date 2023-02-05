@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-
 import "../libraries/LibAppStorage.sol";
 import {LibToken} from "../libraries/LibToken.sol";
 import {WearablesFacet} from "../../WearableDiamond/facets/WearablesFacet.sol";
@@ -33,8 +32,6 @@ contract ForgeFacet is Modifiers {
     event AddedToQueue(address indexed owner, uint256 indexed itemId, uint256 indexed gotchiId, uint40 readyBlock, uint256 queueId);
     event QueueTimeReduced(uint256 indexed gotchiId, uint40 reducedBlocks);
 
-
-
     modifier onlyAavegotchiUnlocked(uint256 gotchiId) {
         require(!aavegotchiGameFacet().isAavegotchiLocked(gotchiId), "ForgeFacet: Aavegotchi is locked");
         _;
@@ -46,43 +43,72 @@ contract ForgeFacet is Modifiers {
         _;
     }
 
-    function forgeTokenFacet() internal view returns (ForgeTokenFacet facet){
+    function forgeTokenFacet() internal view returns (ForgeTokenFacet facet) {
         facet = ForgeTokenFacet(address(this));
     }
+
     // External contracts
-    function aavegotchiGameFacet() internal pure returns (AavegotchiGameFacet facet){
+    function aavegotchiGameFacet() internal pure returns (AavegotchiGameFacet facet) {
         facet = AavegotchiGameFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
     }
 
-    function aavegotchiFacet() internal pure returns (AavegotchiFacet facet){
+    function aavegotchiFacet() internal pure returns (AavegotchiFacet facet) {
         facet = AavegotchiFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
     }
 
-    function itemsFacet() internal pure returns (ItemsFacet facet){
+    function itemsFacet() internal pure returns (ItemsFacet facet) {
         facet = ItemsFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
     }
 
-    function wearablesFacet() internal pure returns (WearablesFacet facet){
+    function wearablesFacet() internal pure returns (WearablesFacet facet) {
         facet = WearablesFacet(ForgeLibDiamond.WEARABLE_DIAMOND);
     }
 
-    function lendingGetterAndSetterFacet() internal pure returns (LendingGetterAndSetterFacet facet){
+    function lendingGetterAndSetterFacet() internal pure returns (LendingGetterAndSetterFacet facet) {
         facet = LendingGetterAndSetterFacet(ForgeLibDiamond.AAVEGOTCHI_DIAMOND);
     }
 
-    function gltrContract() internal returns (IERC20 token){
+    function gltrContract() internal returns (IERC20 token) {
         token = IERC20(s.GLTR);
     }
-    ////////
 
+    ////////
 
     // @notice Get an Aavegotchi's current smithing skill level
     // @dev due to complex formula (approx P = 8 * 1.4^L for each next level), thresholds hardcoded here.
     function getAavegotchiSmithingLevel(uint256 gotchiId) public view returns (uint256) {
-        uint256[30] memory sequence =
-        [uint256(0), 16, 38, 69, 113, 174, 259, 378, 544, 776, 1100, 1554, 2189, 3078, 4323,
-        6066, 8506, 11922, 16704, 23398, 32769, 45889, 64256, 89970, 125970, 176369, 246928,
-        345710, 484004, 677616];
+        uint256[30] memory sequence = [
+            uint256(0),
+            16,
+            38,
+            69,
+            113,
+            174,
+            259,
+            378,
+            544,
+            776,
+            1100,
+            1554,
+            2189,
+            3078,
+            4323,
+            6066,
+            8506,
+            11922,
+            16704,
+            23398,
+            32769,
+            45889,
+            64256,
+            89970,
+            125970,
+            176369,
+            246928,
+            345710,
+            484004,
+            677616
+        ];
 
         uint256 points = s.gotchiSmithingSkillPoints[gotchiId];
 
@@ -106,23 +132,49 @@ contract ForgeFacet is Modifiers {
         return s.gotchiSmithingSkillPoints[gotchiId];
     }
 
-
     // @notice Return the forge time multiplier gained from smithing level, represented in bips
     //         approximating M=0.97^(L-1).
     function getSmithingLevelMultiplierBips(uint256 gotchiId) public view returns (uint256) {
         uint256[30] memory percentTimeDiscountBips = [
-            uint256(1000), 970, 941, 913, 885, 859, 833, 808, 784, 760,
-            737, 715, 694, 673, 653, 633, 614, 596, 578, 561, 544, 527,
-            512, 496, 481, 467, 453, 439, 426, 413
+            uint256(1000),
+            970,
+            941,
+            913,
+            885,
+            859,
+            833,
+            808,
+            784,
+            760,
+            737,
+            715,
+            694,
+            673,
+            653,
+            633,
+            614,
+            596,
+            578,
+            561,
+            544,
+            527,
+            512,
+            496,
+            481,
+            467,
+            453,
+            439,
+            426,
+            413
         ];
         uint256 level = getAavegotchiSmithingLevel(gotchiId);
 
         return percentTimeDiscountBips[level - 1] * 10;
     }
 
-    function getRsmIndex(uint8 rsm) internal pure returns (uint8){
+    function getRsmIndex(uint8 rsm) internal pure returns (uint8) {
         uint8[6] memory rsmIndexRef = [uint8(COMMON_RSM), UNCOMMON_RSM, RARE_RSM, LEGENDARY_RSM, MYTHICAL_RSM, GODLIKE_RSM];
-        for (uint8 i; i < rsmIndexRef.length; i++){
+        for (uint8 i; i < rsmIndexRef.length; i++) {
             if (rsmIndexRef[i] == rsm) {
                 return i;
             }
@@ -136,8 +188,8 @@ contract ForgeFacet is Modifiers {
         uint256 startingOffsetId = CORE_BODY_COMMON;
 
         uint8 slotNumber;
-        for (uint8 i; i < slotPositions.length; i++){
-            if (slotPositions[i]){
+        for (uint8 i; i < slotPositions.length; i++) {
+            if (slotPositions[i]) {
                 slotNumber = i;
             }
         }
@@ -153,7 +205,7 @@ contract ForgeFacet is Modifiers {
     }
 
     // @notice Get the specific Geode token ID given an Aavegotchi rarity score modifier.
-    function geodeTokenIdFromRsm(uint8 rarityScoreModifier) public pure returns (uint256 tokenId){
+    function geodeTokenIdFromRsm(uint8 rarityScoreModifier) public pure returns (uint256 tokenId) {
         if (rarityScoreModifier == COMMON_RSM) {
             tokenId = GEODE_COMMON;
         } else if (rarityScoreModifier == UNCOMMON_RSM) {
@@ -171,12 +223,7 @@ contract ForgeFacet is Modifiers {
         }
     }
 
-
-    function _smelt(uint256 itemId, uint256 gotchiId)
-    internal
-    onlyAavegotchiOwner(gotchiId)
-    onlyAavegotchiUnlocked(gotchiId)
-    {
+    function _smelt(uint256 itemId, uint256 gotchiId) internal onlyAavegotchiOwner(gotchiId) onlyAavegotchiUnlocked(gotchiId) {
         address sender = LibMeta.msgSender();
         require(wearablesFacet().balanceOf(sender, itemId) > 0, "ForgeFacet: smelt item not owned");
 
@@ -189,8 +236,9 @@ contract ForgeFacet is Modifiers {
         wearablesFacet().safeTransferFrom(sender, address(this), itemId, 1, "");
 
         uint256 totalAlloy = s.forgeAlloyCost[itemType.rarityScoreModifier];
-        uint256 daoAlloyAmt = totalAlloy * s.alloyDaoFeeInBips / 10000;
-        uint256 burnAlloyAmt = totalAlloy * s.alloyBurnFeeInBips / 10000; // "burn" by not minting this amount
+        uint256 daoAlloyAmt = (totalAlloy * s.alloyDaoFeeInBips) / 10000;
+        // "burn" by not minting this amount
+        uint256 burnAlloyAmt = (totalAlloy * s.alloyBurnFeeInBips) / 10000;
         uint256 userAlloyAmt = totalAlloy - daoAlloyAmt - burnAlloyAmt;
 
         // mint alloy
@@ -207,16 +255,13 @@ contract ForgeFacet is Modifiers {
         _mintItem(sender, geodeTokenIdFromRsm(itemType.rarityScoreModifier), 1);
 
         // add smithing skill
-        s.gotchiSmithingSkillPoints[gotchiId] +=
-            (s.skillPointsEarnedFromForge[itemType.rarityScoreModifier] * s.smeltingSkillPointReductionFactorBips / 10000);
+        s.gotchiSmithingSkillPoints[gotchiId] += ((s.skillPointsEarnedFromForge[itemType.rarityScoreModifier] *
+            s.smeltingSkillPointReductionFactorBips) / 10000);
 
         emit ItemSmelted(itemId, gotchiId);
     }
 
-    function smeltWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds)
-    external
-    whenNotPaused
-    {
+    function smeltWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds) external whenNotPaused {
         require(_itemIds.length == _gotchiIds.length, "ForgeFacet: mismatched array lengths");
 
         for (uint256 i; i < _itemIds.length; i++) {
@@ -224,12 +269,11 @@ contract ForgeFacet is Modifiers {
         }
     }
 
-
-    function _forge(uint256 itemId, uint256 gotchiId, uint40 _gltr)
-    internal
-    onlyAavegotchiOwner(gotchiId)
-    onlyAavegotchiUnlocked(gotchiId)
-    {
+    function _forge(
+        uint256 itemId,
+        uint256 gotchiId,
+        uint40 _gltr
+    ) internal onlyAavegotchiOwner(gotchiId) onlyAavegotchiUnlocked(gotchiId) {
         require(!s.gotchiForging[gotchiId].isForging, "ForgeFacet: Aavegotchi already forging");
 
         address sender = LibMeta.msgSender();
@@ -294,9 +338,8 @@ contract ForgeFacet is Modifiers {
     // @param gotchId
     // @param rsm Rarity score modifier of an item (1, 2, 5, 10, 20, 50).
     function forgeTime(uint256 gotchiId, uint8 rsm) public view returns (uint256 forgeTime) {
-        forgeTime = s.forgeTimeCostInBlocks[rsm] * getSmithingLevelMultiplierBips(gotchiId) / 10000;
+        forgeTime = (s.forgeTimeCostInBlocks[rsm] * getSmithingLevelMultiplierBips(gotchiId)) / 10000;
     }
-
 
     function claimForgeQueueItems(uint256[] calldata gotchiIds) external whenNotPaused {
         for (uint256 i; i < gotchiIds.length; i++) {
@@ -304,10 +347,7 @@ contract ForgeFacet is Modifiers {
         }
     }
 
-    function _claimQueueItem(uint256 gotchiId)
-    internal
-    onlyAavegotchiOwner(gotchiId)
-    onlyAavegotchiUnlocked(gotchiId) {
+    function _claimQueueItem(uint256 gotchiId) internal onlyAavegotchiOwner(gotchiId) onlyAavegotchiUnlocked(gotchiId) {
         address sender = LibMeta.msgSender();
         ForgeQueueItem storage queueItem = _getForgeQueueItem(gotchiId);
 
@@ -322,7 +362,6 @@ contract ForgeFacet is Modifiers {
 
         emit ForgeQueueClaimed(queueItem.itemId, gotchiId);
     }
-
 
     /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLTR tokens
     /// @dev Will throw if the caller is not the queue owner
@@ -344,7 +383,7 @@ contract ForgeFacet is Modifiers {
 
             uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
             uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
-            uint256 burnAmount = uint256(removeBlocks) * 10 ** 18;
+            uint256 burnAmount = uint256(removeBlocks) * 10**18;
 
             require(
                 gltrContract().transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, burnAmount),
@@ -356,7 +395,6 @@ contract ForgeFacet is Modifiers {
         }
     }
 
-
     function getForgeQueueItem(uint256 gotchiId) external view returns (ForgeQueueItem memory) {
         return _getForgeQueueItem(gotchiId);
     }
@@ -366,10 +404,9 @@ contract ForgeFacet is Modifiers {
         output = s.forgeQueue[s.gotchiForging[gotchiId].forgeQueueId];
     }
 
-    function getForgeQueue() external view returns (ForgeQueueItem[] memory queue){
+    function getForgeQueue() external view returns (ForgeQueueItem[] memory queue) {
         queue = s.forgeQueue;
     }
-
 
     // @notice Get items in the forge queue that can be claimed by _owner.
     // @dev Note that filtering is done only on the _owner current owned gotchis.
@@ -394,10 +431,11 @@ contract ForgeFacet is Modifiers {
         }
     }
 
-    function forgeWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds, uint40[] calldata _gltr)
-    external
-    whenNotPaused
-    {
+    function forgeWearables(
+        uint256[] calldata _itemIds,
+        uint256[] calldata _gotchiIds,
+        uint40[] calldata _gltr
+    ) external whenNotPaused {
         require(_itemIds.length == _gotchiIds.length && _gotchiIds.length == _gltr.length, "ForgeFacet: mismatched array lengths");
 
         for (uint256 i; i < _itemIds.length; i++) {
@@ -405,13 +443,12 @@ contract ForgeFacet is Modifiers {
         }
     }
 
-
     function isForgeable(uint256 itemId) public view returns (bool available) {
         require(itemId < WEARABLE_GAP_OFFSET, "ForgeFacet: only valid for schematics");
         available = wearablesFacet().balanceOf(address(this), itemId) - s.itemForging[itemId] > 0;
     }
 
-    function isGotchiForging(uint256 gotchiId) public view returns(bool) {
+    function isGotchiForging(uint256 gotchiId) public view returns (bool) {
         return s.gotchiForging[gotchiId].isForging;
     }
 
@@ -420,34 +457,51 @@ contract ForgeFacet is Modifiers {
     //      here to avoid impacts to aavegotchi sacrifice functionality.
     function mintEssence(address owner, uint256 gotchiId) external {
         require(LibMeta.msgSender() == ForgeLibDiamond.AAVEGOTCHI_DIAMOND, "ForgeFacet: Can only be called by Aavegotchi Diamond");
-//        require(aavegotchiFacet.ownerOf(gotchiId) == address(0), "ForgeFacet: Aavegotchi not sacrificed");
+        //        require(aavegotchiFacet.ownerOf(gotchiId) == address(0), "ForgeFacet: Aavegotchi not sacrificed");
 
         _mintItem(owner, ESSENCE, 1000);
     }
 
-    function _mintItem(address account, uint256 id, uint256 amount) internal {
+    function _mintItem(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) internal {
         // mint doesnt exceed max supply
-//        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
+        //        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
         _mint(account, id, amount, "");
     }
 
-    function adminMint(address account, uint256 id, uint256 amount) external onlyDaoOrOwner {
+    function adminMint(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) external onlyDaoOrOwner {
         // mint doesnt exceed max supply
-//        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
+        //        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
         _mint(account, id, amount, "");
     }
-    function adminMintBatch(address to, uint256[] memory ids, uint256[] memory amounts) external onlyDaoOrOwner {
+
+    function adminMintBatch(
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts
+    ) external onlyDaoOrOwner {
         // mint doesnt exceed max supply
-//        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
+        //        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
         _mintBatch(to, ids, amounts, "");
     }
-//    function _mintBatchItems(address to, uint256[] memory ids, uint256[] memory amounts) internal {
-//        _mintBatch(to, ids, amounts, "");
-//    }
-    function _burnItem(address account, uint256 id, uint256 amount) internal {
+
+    //    function _mintBatchItems(address to, uint256[] memory ids, uint256[] memory amounts) internal {
+    //        _mintBatch(to, ids, amounts, "");
+    //    }
+    function _burnItem(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) internal {
         _burn(account, id, amount);
     }
-
 
     function _mint(
         address to,
@@ -494,6 +548,7 @@ contract ForgeFacet is Modifiers {
 
         emit TransferSingle(msg.sender, from, address(0), id, amount);
     }
+
     function _burnBatch(
         address from,
         uint256[] memory ids,
@@ -511,9 +566,7 @@ contract ForgeFacet is Modifiers {
 
             LibToken.removeFromOwner(from, id, amount);
             s._totalSupply[id] -= amount;
-
         }
         emit TransferBatch(msg.sender, from, address(0), ids, amounts);
     }
-
 }

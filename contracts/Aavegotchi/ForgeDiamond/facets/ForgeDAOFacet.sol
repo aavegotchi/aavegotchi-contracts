@@ -2,9 +2,7 @@ pragma solidity 0.8.1;
 
 import "../libraries/LibAppStorage.sol";
 
-
 contract ForgeDAOFacet is Modifiers {
-
     event SetAavegotchiDaoAddress(address newAddress);
     event SetGltrAddress(address newAddress);
 
@@ -21,12 +19,11 @@ contract ForgeDAOFacet is Modifiers {
     event ContractPaused();
     event ContractUnpaused();
 
-
-
     function setAavegotchiDaoAddress(address daoAddress) external onlyDaoOrOwner {
         s.AAVEGOTCHI_DAO = daoAddress;
         emit SetAavegotchiDaoAddress(daoAddress);
     }
+
     function setGltrAddress(address gltr) external onlyDaoOrOwner {
         s.GLTR = gltr;
         emit SetGltrAddress(gltr);
@@ -35,18 +32,20 @@ contract ForgeDAOFacet is Modifiers {
     function getAlloyDaoFeeInBips() external view returns (uint256) {
         return s.alloyDaoFeeInBips;
     }
+
     function setAlloyDaoFeeInBips(uint256 alloyDaoFeeInBips) external onlyDaoOrOwner {
         s.alloyDaoFeeInBips = alloyDaoFeeInBips;
         emit SetAlloyDaoFee(alloyDaoFeeInBips);
     }
+
     function getAlloyBurnFeeInBips() external view returns (uint256) {
         return s.alloyBurnFeeInBips;
     }
+
     function setAlloyBurnFeeInBips(uint256 alloyBurnFeeInBips) external onlyDaoOrOwner {
         s.alloyBurnFeeInBips = alloyBurnFeeInBips;
         emit SetAlloyBurnFee(alloyBurnFeeInBips);
     }
-
 
     // @notice Allow DAO to update forging Alloy cost
     // @param costs RarityValueIO struct of costs.
@@ -106,67 +105,64 @@ contract ForgeDAOFacet is Modifiers {
         emit SetSkillPointsEarnedFromForge(points);
     }
 
-
     // @notice Allow DAO to update skill points gained from smelting.
     // @param bips Factor to reduce skillPointsEarnedFromForge by, denoted in bips.
     //             For ex, if half of forging points is earned from smelting, bips = 5000.
     function setSmeltingSkillPointReductionFactorBips(uint256 bips) external onlyDaoOrOwner {
-        uint256 oldBips  = s.smeltingSkillPointReductionFactorBips;
+        uint256 oldBips = s.smeltingSkillPointReductionFactorBips;
         s.smeltingSkillPointReductionFactorBips = bips;
 
         emit SetSmeltingSkillPointReductionFactorBips(oldBips, s.smeltingSkillPointReductionFactorBips);
     }
 
-//    // @notice Allow DAO to update percent chance to win from a Geode.
-//    // @param points RarityValueIO struct of points
-//    function setGeodeWinChance(RarityValueIO calldata chances) external onlyDaoOrOwner {
-//        s.geodeWinChance[COMMON_RSM] = chances.common;
-//        s.geodeWinChance[UNCOMMON_RSM] = chances.uncommon;
-//        s.geodeWinChance[RARE_RSM] = chances.rare;
-//        s.geodeWinChance[LEGENDARY_RSM] = chances.legendary;
-//        s.geodeWinChance[MYTHICAL_RSM] = chances.mythical;
-//        s.geodeWinChance[GODLIKE_RSM] = chances.godlike;
-//
-//        emit SetGeodeWinChance(chances);
-//    }
-//
-//    // @notice Allow DAO to set which prizes can be won from a Geode.
-//    // @param ids Token IDs of the available prizes
-//    // @param quantities Initial amounts of each prize available
-//    function setGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities) external onlyDaoOrOwner {
-//        require(ids.length == quantities.length, "ForgeDAOFacet: mismatched arrays");
-//
-//        for (uint256 i; i < ids.length; i++){
-//            if (s.geodePrizeQuantities[ids[i]] == 0){
-//                // this ID is deleted from the array in the geode opening function when last item is won.
-//                s.geodePrizeTokenIds.push(ids[i]);
-//            }
-//            s.geodePrizeQuantities[ids[i]] += quantities[i];
-//        }
-//
-//        emit SetGeodePrizes(ids, quantities);
-//    }
-
+    //    // @notice Allow DAO to update percent chance to win from a Geode.
+    //    // @param points RarityValueIO struct of points
+    //    function setGeodeWinChance(RarityValueIO calldata chances) external onlyDaoOrOwner {
+    //        s.geodeWinChance[COMMON_RSM] = chances.common;
+    //        s.geodeWinChance[UNCOMMON_RSM] = chances.uncommon;
+    //        s.geodeWinChance[RARE_RSM] = chances.rare;
+    //        s.geodeWinChance[LEGENDARY_RSM] = chances.legendary;
+    //        s.geodeWinChance[MYTHICAL_RSM] = chances.mythical;
+    //        s.geodeWinChance[GODLIKE_RSM] = chances.godlike;
+    //
+    //        emit SetGeodeWinChance(chances);
+    //    }
+    //
+    //    // @notice Allow DAO to set which prizes can be won from a Geode.
+    //    // @param ids Token IDs of the available prizes
+    //    // @param quantities Initial amounts of each prize available
+    //    function setGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities) external onlyDaoOrOwner {
+    //        require(ids.length == quantities.length, "ForgeDAOFacet: mismatched arrays");
+    //
+    //        for (uint256 i; i < ids.length; i++){
+    //            if (s.geodePrizeQuantities[ids[i]] == 0){
+    //                // this ID is deleted from the array in the geode opening function when last item is won.
+    //                s.geodePrizeTokenIds.push(ids[i]);
+    //            }
+    //            s.geodePrizeQuantities[ids[i]] += quantities[i];
+    //        }
+    //
+    //        emit SetGeodePrizes(ids, quantities);
+    //    }
 
     // @dev Max supply is not practical to keep track of for each forge token. The contract logic should take care of this.
     // @notice Allow DAO to set max supply per Forge asset token.
-//    function setMaxSupplyPerToken(uint256[] calldata tokenIDs, uint256[] calldata supplyAmts) external onlyDaoOrOwner {
-//        require(tokenIDs.length == supplyAmts.length, "ForgeDaoFacet: Mismatched arrays.");
-//
-//        for (uint256 i; i < tokenIDs.length; i++){
-//            s.maxSupplyByToken[tokenIDs[i]] = supplyAmts[i];
-//        }
-//        emit SetMaxSupplyPerToken(tokenIDs, supplyAmts);
-//    }
+    //    function setMaxSupplyPerToken(uint256[] calldata tokenIDs, uint256[] calldata supplyAmts) external onlyDaoOrOwner {
+    //        require(tokenIDs.length == supplyAmts.length, "ForgeDaoFacet: Mismatched arrays.");
+    //
+    //        for (uint256 i; i < tokenIDs.length; i++){
+    //            s.maxSupplyByToken[tokenIDs[i]] = supplyAmts[i];
+    //        }
+    //        emit SetMaxSupplyPerToken(tokenIDs, supplyAmts);
+    //    }
 
     function pauseContract() external onlyDaoOrOwner {
         s.contractPaused = true;
         emit ContractPaused();
     }
+
     function unpauseContract() external onlyDaoOrOwner {
         s.contractPaused = false;
         emit ContractUnpaused();
     }
-
-
 }
