@@ -170,7 +170,7 @@ contract CollateralFacet is Modifiers {
         delete s.aavegotchis[_tokenId];
 
         ForgeFacet forgeFacet = ForgeFacet(s.forgeDiamond);
-        forgeFacet.mintEssence(owner, _tokenId);
+        forgeFacet.mintEssence(owner);
     }
     
 ///@notice Set the SVG id for a supported/existing collateral
