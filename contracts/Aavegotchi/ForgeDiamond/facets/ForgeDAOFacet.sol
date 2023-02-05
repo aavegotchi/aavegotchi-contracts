@@ -19,6 +19,8 @@ contract ForgeDAOFacet is Modifiers {
     event ContractPaused();
     event ContractUnpaused();
 
+    //SETTERS
+
     function setAavegotchiDaoAddress(address daoAddress) external onlyDaoOrOwner {
         s.AAVEGOTCHI_DAO = daoAddress;
         emit SetAavegotchiDaoAddress(daoAddress);
@@ -29,17 +31,9 @@ contract ForgeDAOFacet is Modifiers {
         emit SetGltrAddress(gltr);
     }
 
-    function getAlloyDaoFeeInBips() external view returns (uint256) {
-        return s.alloyDaoFeeInBips;
-    }
-
     function setAlloyDaoFeeInBips(uint256 alloyDaoFeeInBips) external onlyDaoOrOwner {
         s.alloyDaoFeeInBips = alloyDaoFeeInBips;
         emit SetAlloyDaoFee(alloyDaoFeeInBips);
-    }
-
-    function getAlloyBurnFeeInBips() external view returns (uint256) {
-        return s.alloyBurnFeeInBips;
     }
 
     function setAlloyBurnFeeInBips(uint256 alloyBurnFeeInBips) external onlyDaoOrOwner {
@@ -115,6 +109,26 @@ contract ForgeDAOFacet is Modifiers {
         emit SetSmeltingSkillPointReductionFactorBips(oldBips, s.smeltingSkillPointReductionFactorBips);
     }
 
+    function pauseContract() external onlyDaoOrOwner {
+        s.contractPaused = true;
+        emit ContractPaused();
+    }
+
+    function unpauseContract() external onlyDaoOrOwner {
+        s.contractPaused = false;
+        emit ContractUnpaused();
+    }
+
+    //GETTERS
+
+    function getAlloyDaoFeeInBips() external view returns (uint256) {
+        return s.alloyDaoFeeInBips;
+    }
+
+    function getAlloyBurnFeeInBips() external view returns (uint256) {
+        return s.alloyBurnFeeInBips;
+    }
+
     //    // @notice Allow DAO to update percent chance to win from a Geode.
     //    // @param points RarityValueIO struct of points
     //    function setGeodeWinChance(RarityValueIO calldata chances) external onlyDaoOrOwner {
@@ -155,14 +169,4 @@ contract ForgeDAOFacet is Modifiers {
     //        }
     //        emit SetMaxSupplyPerToken(tokenIDs, supplyAmts);
     //    }
-
-    function pauseContract() external onlyDaoOrOwner {
-        s.contractPaused = true;
-        emit ContractPaused();
-    }
-
-    function unpauseContract() external onlyDaoOrOwner {
-        s.contractPaused = false;
-        emit ContractUnpaused();
-    }
 }
