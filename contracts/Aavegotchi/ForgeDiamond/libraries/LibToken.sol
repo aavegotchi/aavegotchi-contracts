@@ -1,7 +1,6 @@
 import {ForgeLibDiamond} from "./ForgeLibDiamond.sol";
 import {LibAppStorage, AppStorage} from "./LibAppStorage.sol";
 
-
 library LibToken {
     function addToOwner(
         address _to,

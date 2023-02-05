@@ -82,7 +82,7 @@ library ForgeLibDiamond {
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](3);
         bytes4[] memory functionSelectors = new bytes4[](1);
         functionSelectors[0] = IDiamondCut.diamondCut.selector;
-        cut[0] = IDiamondCut.FacetCut({facetAddress : _diamondCutFacet, action : IDiamondCut.FacetCutAction.Add, functionSelectors : functionSelectors});
+        cut[0] = IDiamondCut.FacetCut({facetAddress: _diamondCutFacet, action: IDiamondCut.FacetCutAction.Add, functionSelectors: functionSelectors});
         functionSelectors = new bytes4[](5);
         functionSelectors[0] = IDiamondLoupe.facets.selector;
         functionSelectors[1] = IDiamondLoupe.facetFunctionSelectors.selector;
@@ -90,14 +90,14 @@ library ForgeLibDiamond {
         functionSelectors[3] = IDiamondLoupe.facetAddress.selector;
         functionSelectors[4] = IERC165.supportsInterface.selector;
         cut[1] = IDiamondCut.FacetCut({
-        facetAddress : _diamondLoupeFacet,
-        action : IDiamondCut.FacetCutAction.Add,
-        functionSelectors : functionSelectors
+            facetAddress: _diamondLoupeFacet,
+            action: IDiamondCut.FacetCutAction.Add,
+            functionSelectors: functionSelectors
         });
         functionSelectors = new bytes4[](2);
         functionSelectors[0] = IERC173.transferOwnership.selector;
         functionSelectors[1] = IERC173.owner.selector;
-        cut[2] = IDiamondCut.FacetCut({facetAddress : _ownershipFacet, action : IDiamondCut.FacetCutAction.Add, functionSelectors : functionSelectors});
+        cut[2] = IDiamondCut.FacetCut({facetAddress: _ownershipFacet, action: IDiamondCut.FacetCutAction.Add, functionSelectors: functionSelectors});
         diamondCut(cut, address(0), "");
     }
 

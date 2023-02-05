@@ -64,12 +64,9 @@ uint256 constant CORE_PET_LEGENDARY = WEARABLE_GAP_OFFSET + 41;
 uint256 constant CORE_PET_MYTHICAL = WEARABLE_GAP_OFFSET + 42;
 uint256 constant CORE_PET_GODLIKE = WEARABLE_GAP_OFFSET + 43;
 
-
-
 //////////
 //////////
 //////////
-
 
 // Rarity Score Modifiers
 uint8 constant COMMON_RSM = 1;
@@ -84,7 +81,7 @@ uint256 constant PET_SLOT_INDEX = 6;
 struct ForgeQueueItem {
     // removed so that no filtering is ever done using this (else issue on gotchi transfer if it has a queue item.
     // Forge item can only be claimed using an owned gotchi.
-//    address owner;
+    //    address owner;
     uint256 itemId;
     uint256 gotchiId;
     uint256 id;
@@ -111,7 +108,6 @@ struct GotchiForging {
     bool isForging;
 }
 
-
 struct AppStorage {
     ////// ERC1155
     // Mapping from token ID to account balances
@@ -120,7 +116,6 @@ struct AppStorage {
     mapping(address => mapping(uint256 => uint256)) ownerItemBalances;
     // indexes are stored 1 higher so that 0 means no items in items array
     mapping(address => mapping(uint256 => uint256)) ownerItemIndexes;
-
     // Mapping from account to operator approvals
     mapping(address => mapping(address => bool)) _operatorApprovals;
     mapping(uint256 => uint256) _totalSupply;
@@ -130,20 +125,16 @@ struct AppStorage {
     bool contractPaused;
     address AAVEGOTCHI_DAO;
     address GLTR;
-
     uint256 alloyDaoFeeInBips;
     uint256 alloyBurnFeeInBips;
-
     uint256 forgeQueueId;
     ForgeQueueItem[] forgeQueue;
     // Since a gotchi can only forge one item at a time, a mapping can be used for the "queue"
-//    mapping(uint256 => ForgeQueueItem) forgeQueue;
+    //    mapping(uint256 => ForgeQueueItem) forgeQueue;
     mapping(address => uint256[]) userForgeQueue;
     mapping(uint256 => GotchiForging) gotchiForging;
-
     // keep track of which items are in forging queue to avoid supply issues before items are claimed.
     mapping(uint256 => uint256) itemForging;
-
     // Map rarity score modifier (which denotes item rarity) to Alloy cost for forging.
     mapping(uint8 => uint256) forgeAlloyCost;
     // Map rarity score modifier (which denotes item rarity) to Essence cost for forging.
@@ -156,13 +147,9 @@ struct AppStorage {
     mapping(uint8 => uint256) geodeWinChance;
     // Reduction factor for skillPointsEarnedFromForge for smelting.
     uint256 smeltingSkillPointReductionFactorBips;
-
     //gotchi token ID to points map
     mapping(uint256 => uint256) gotchiSmithingSkillPoints;
-
     mapping(uint256 => uint256) maxSupplyByToken;
-
-
 }
 
 library LibAppStorage {
