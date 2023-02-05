@@ -123,8 +123,8 @@ struct AppStorage {
     //////
 
     bool contractPaused;
-    address AAVEGOTCHI_DAO;
-    address GLTR;
+    address aavegotchiDAO;
+    address gltr;
     uint256 alloyDaoFeeInBips;
     uint256 alloyBurnFeeInBips;
     uint256 forgeQueueId;
@@ -165,7 +165,7 @@ contract Modifiers {
 
     modifier onlyDaoOrOwner() {
         address sender = LibMeta.msgSender();
-        require(sender == s.AAVEGOTCHI_DAO || sender == ForgeLibDiamond.contractOwner(), "LibAppStorage: No access");
+        require(sender == s.aavegotchiDAO || sender == ForgeLibDiamond.contractOwner(), "LibAppStorage: No access");
         _;
     }
 

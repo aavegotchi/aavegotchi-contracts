@@ -66,7 +66,7 @@ contract ForgeFacet is Modifiers {
     }
 
     function gltrContract() internal view returns (IERC20 token) {
-        token = IERC20(s.GLTR);
+        token = IERC20(s.gltr);
     }
 
     ////////
@@ -240,7 +240,7 @@ contract ForgeFacet is Modifiers {
 
         // mint alloy
         _mintItem(sender, ALLOY, userAlloyAmt);
-        _mintItem(s.AAVEGOTCHI_DAO, ALLOY, daoAlloyAmt);
+        _mintItem(s.aavegotchiDAO, ALLOY, daoAlloyAmt);
 
         //mint schematic. ID is identical to the wearable ID.
         _mintItem(sender, itemId, 1);
@@ -376,7 +376,7 @@ contract ForgeFacet is Modifiers {
 
             require(block.number <= queueItem.readyBlock, "InstallationFacet: installation already done");
 
-            IERC20 gltr = IERC20(s.GLTR);
+            IERC20 gltr = IERC20(s.gltr);
 
             uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
             uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;

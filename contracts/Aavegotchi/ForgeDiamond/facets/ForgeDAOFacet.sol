@@ -21,12 +21,12 @@ contract ForgeDAOFacet is Modifiers {
     //SETTERS
 
     function setAavegotchiDaoAddress(address daoAddress) external onlyDaoOrOwner {
-        s.AAVEGOTCHI_DAO = daoAddress;
+        s.aavegotchiDAO = daoAddress;
         emit SetAavegotchiDaoAddress(daoAddress);
     }
 
     function setGltrAddress(address gltr) external onlyDaoOrOwner {
-        s.GLTR = gltr;
+        s.gltr = gltr;
         emit SetGltrAddress(gltr);
     }
 
