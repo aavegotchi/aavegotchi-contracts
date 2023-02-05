@@ -11,7 +11,6 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {LibMeta} from "../../../shared/libraries/LibMeta.sol";
 import {LibStrings} from "../../../shared/libraries/LibStrings.sol";
 
-
 contract ForgeTokenFacet is Modifiers {
     event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);
     event TransferBatch(address indexed operator, address indexed from, address indexed to, uint256[] ids, uint256[] values);
@@ -67,11 +66,7 @@ contract ForgeTokenFacet is Modifiers {
      *
      * - `accounts` and `ids` must have the same length.
      */
-    function balanceOfBatch(address[] memory accounts, uint256[] memory ids)
-    public
-    view
-    returns (uint256[] memory)
-    {
+    function balanceOfBatch(address[] memory accounts, uint256[] memory ids) public view returns (uint256[] memory) {
         require(accounts.length == ids.length, "ForgeTokenFacet: accounts and ids length mismatch");
 
         uint256[] memory batchBalances = new uint256[](accounts.length);
@@ -118,10 +113,7 @@ contract ForgeTokenFacet is Modifiers {
         uint256 amount,
         bytes memory data
     ) public {
-        require(
-            from == LibMeta.msgSender() || isApprovedForAll(from, LibMeta.msgSender()),
-            "ForgeTokenFacet: caller is not token owner or approved"
-        );
+        require(from == LibMeta.msgSender() || isApprovedForAll(from, LibMeta.msgSender()), "ForgeTokenFacet: caller is not token owner or approved");
         _safeTransferFrom(from, to, id, amount, data);
     }
 
@@ -135,10 +127,7 @@ contract ForgeTokenFacet is Modifiers {
         uint256[] memory amounts,
         bytes memory data
     ) public {
-        require(
-            from == LibMeta.msgSender() || isApprovedForAll(from, LibMeta.msgSender()),
-            "ForgeTokenFacet: caller is not token owner or approved"
-        );
+        require(from == LibMeta.msgSender() || isApprovedForAll(from, LibMeta.msgSender()), "ForgeTokenFacet: caller is not token owner or approved");
         _safeBatchTransferFrom(from, to, ids, amounts, data);
     }
 
@@ -204,7 +193,6 @@ contract ForgeTokenFacet is Modifiers {
         _doSafeBatchTransferAcceptanceCheck(LibMeta.msgSender(), from, to, ids, amounts, data);
     }
 
-
     /**
      * @dev Approve `operator` to operate on all of `owner` tokens
      *
@@ -219,7 +207,6 @@ contract ForgeTokenFacet is Modifiers {
         s._operatorApprovals[owner][operator] = approved;
         emit ApprovalForAll(owner, operator, approved);
     }
-
 
     function _doSafeTransferAcceptanceCheck(
         address operator,
@@ -251,9 +238,7 @@ contract ForgeTokenFacet is Modifiers {
         bytes memory data
     ) private {
         if (isContract(to)) {
-            try IERC1155Receiver(to).onERC1155BatchReceived(operator, from, ids, amounts, data) returns (
-                bytes4 response
-            ) {
+            try IERC1155Receiver(to).onERC1155BatchReceived(operator, from, ids, amounts, data) returns (bytes4 response) {
                 if (response != IERC1155Receiver.onERC1155BatchReceived.selector) {
                     revert("ForgeTokenFacet: ERC1155Receiver rejected tokens");
                 }
@@ -273,8 +258,6 @@ contract ForgeTokenFacet is Modifiers {
 
         return account.code.length > 0;
     }
-
-
 
     // @dev Add support for receiving ERC1155 tokens.
     function onERC1155Received(
