@@ -1,7 +1,7 @@
 import { ForgeDAOFacet, OwnershipFacet } from "../../../typechain";
 import { ethers, network } from "hardhat";
 import { sendToTenderly } from "../../libraries/tenderly";
-import { impersonate } from "../../helperFunctions";
+import { diamondOwner, impersonate } from "../../helperFunctions";
 
 const daoAddr = "0x6fb7e0AAFBa16396Ad6c1046027717bcA25F821f"; // DTF multisig
 const GLTR = "0x3801C3B3B5c98F88a9c9005966AA96aa440B9Afc";
@@ -40,12 +40,25 @@ const skillPts = {
 };
 
 export async function setForgeProperties(forgeDiamondAddress: string) {
+  const owner = await diamondOwner(forgeDiamondAddress, ethers);
+  console.log("owner:", owner);
+
   console.log("Starting setForgeProperties...");
 
   let forgeDaoFacet = (await ethers.getContractAt(
     "contracts/Aavegotchi/ForgeDiamond/facets/ForgeDAOFacet.sol:ForgeDAOFacet",
     forgeDiamondAddress
   )) as ForgeDAOFacet;
+
+  // if (network.name === "hardhat") {
+  //   forgeDaoFacet = await impersonate(
+  //     await diamondOwner(forgeDiamondAddress, ethers),
+  //     forgeDaoFacet,
+  //     ethers,
+  //     network
+  //   );
+  // }
+
   //
   // if (network.name === "tenderly") {
   //   const owner = await (
@@ -115,16 +128,16 @@ export async function setForgeProperties(forgeDiamondAddress: string) {
   //     ).owner();
   //     forgeDaoFacet = await impersonate(owner, forgeDaoFacet, ethers, network);
   //   }
-    await forgeDaoFacet.setGltrAddress(GLTR);
-    await forgeDaoFacet.setAavegotchiDaoAddress(daoAddr);
-    await forgeDaoFacet.setAlloyDaoFeeInBips(500);
-    await forgeDaoFacet.setAlloyBurnFeeInBips(500);
+  await forgeDaoFacet.setGltrAddress(GLTR);
+  await forgeDaoFacet.setAavegotchiDaoAddress(daoAddr);
+  await forgeDaoFacet.setAlloyDaoFeeInBips(500);
+  await forgeDaoFacet.setAlloyBurnFeeInBips(500);
 
-    await forgeDaoFacet.setForgeAlloyCost(alloyCosts);
-    await forgeDaoFacet.setForgeEssenceCost(essenceCost);
-    await forgeDaoFacet.setForgeTimeCostInBlocks(timeCost);
-    await forgeDaoFacet.setSkillPointsEarnedFromForge(skillPts);
-    await forgeDaoFacet.setSmeltingSkillPointReductionFactorBips(5000);
+  await forgeDaoFacet.setForgeAlloyCost(alloyCosts);
+  await forgeDaoFacet.setForgeEssenceCost(essenceCost);
+  await forgeDaoFacet.setForgeTimeCostInBlocks(timeCost);
+  await forgeDaoFacet.setSkillPointsEarnedFromForge(skillPts);
+  await forgeDaoFacet.setSmeltingSkillPointReductionFactorBips(5000);
   // }
 
   console.log("Finished setForgeProperties.");

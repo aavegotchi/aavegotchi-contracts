@@ -55,7 +55,7 @@ export async function upgradeAavegotchiForForge(forgeAddress: string) {
     diamondUpgrader: maticDiamondUpgrader,
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     freshDeployment: false,
     initAddress: maticDiamondAddress,
