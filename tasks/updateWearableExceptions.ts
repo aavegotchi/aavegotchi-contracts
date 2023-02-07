@@ -60,7 +60,7 @@ export function convertStringToExceptionsArray(
 }
 
 task(
-  "updateWearableExcpetions",
+  "updateWearableExceptions",
   "Updates wearable ids for exceptions of layering order"
 )
   .addParam("itemIds", "Wearable IDs to update exception")
