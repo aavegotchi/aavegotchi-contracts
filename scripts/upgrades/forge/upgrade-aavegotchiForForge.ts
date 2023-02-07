@@ -41,6 +41,11 @@ export async function upgradeAavegotchiForForge(forgeAddress: string) {
       addSelectors: [],
       removeSelectors: [],
     },
+    {
+      facetName: "ERC1155MarketplaceFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);

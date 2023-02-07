@@ -1,6 +1,7 @@
 import { deployAndUpgradeForgeDiamond } from "./upgrade-deployAndUpgradeForgeDiamond";
 import { upgradeAavegotchiForForge } from "./upgrade-aavegotchiForForge";
 import { setForgeProperties } from "./upgrade-forgeSetters";
+import { addForgeAssetsToBaazaar } from "../../updates/addForgeAssetsToBaazaar";
 
 export async function releaseForge() {
   console.log("Starting forge release...");
@@ -8,6 +9,7 @@ export async function releaseForge() {
   let forgeDiamondAddress = await deployAndUpgradeForgeDiamond();
   await setForgeProperties(forgeDiamondAddress);
   await upgradeAavegotchiForForge(forgeDiamondAddress);
+  await addForgeAssetsToBaazaar(forgeDiamondAddress);
 
   console.log("Finished forge release.");
 

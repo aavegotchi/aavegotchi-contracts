@@ -2,9 +2,6 @@ import { ethers, network } from "hardhat";
 import { gasPrice } from "../helperFunctions";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
-/* TODO: replace follwowing values */
-const tileDiamond = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
-
 const offset = 1_000_000_000;
 
 const tileIds = [28, 29, 30, 31]; //le cyan grass
@@ -91,7 +88,7 @@ const finalArray = [
 
 /* TODO: end */
 
-async function main() {
+export async function addForgeAssetsToBaazaar(forgeDiamond: string) {
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   let signer;
 
@@ -127,7 +124,7 @@ async function main() {
 
     for (let index = 0; index < toAdd.length; index++) {
       categories.push({
-        erc1155TokenAddress: tileDiamond,
+        erc1155TokenAddress: forgeDiamond,
         erc1155TypeId: toAdd[index],
         category: category,
       });
@@ -170,7 +167,7 @@ async function main() {
 
     for (let i = 0; i < toAdd.length; i++) {
       const categorySaved = await erc1155MarketplaceFacet.getERC1155Category(
-        tileDiamond,
+        forgeDiamond,
         toAdd[i]
       );
 
@@ -183,9 +180,9 @@ async function main() {
   }
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+// addForgeAssetsToBaazaar(tileDiamond)
+//   .then(() => process.exit(0))
+//   .catch((error) => {
+//     console.error(error);
+//     process.exit(1);
+//   });
