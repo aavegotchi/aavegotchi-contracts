@@ -180,9 +180,11 @@ export async function addForgeAssetsToBaazaar(forgeDiamond: string) {
   }
 }
 
-// addForgeAssetsToBaazaar(tileDiamond)
-//   .then(() => process.exit(0))
-//   .catch((error) => {
-//     console.error(error);
-//     process.exit(1);
-//   });
+if (require.main === module) {
+  addForgeAssetsToBaazaar("")
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}

@@ -12,7 +12,7 @@ import {
 import { convertSideDimensionsToTaskFormat } from "../../tasks/updateItemSideDimensions";
 import { convertExceptionsToTaskFormat } from "../../tasks/updateWearableExceptions";
 
-export async function addSideViews() {
+export async function addForgeWearableSideViews() {
   const itemIds: number[] = [];
   for (let index = 0; index < itemTypes1.length; index++) {
     itemIds.push(Number(itemTypes1[index].svgId));
@@ -49,7 +49,7 @@ export async function addSideViews() {
 }
 
 if (require.main === module) {
-  addSideViews()
+  addForgeWearableSideViews()
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);

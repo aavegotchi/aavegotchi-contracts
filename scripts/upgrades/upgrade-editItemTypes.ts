@@ -6,7 +6,7 @@ import {
 } from "../../tasks/deployUpgrade";
 import { maticDiamondAddress } from "../helperFunctions";
 
-export async function upgrade() {
+export async function upgradeEditItemTypes() {
   const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
   const dimensionTuple = "tuple(uint8 x, uint8 y, uint8 width, uint8 height)";
   const itemTypeTuple = `tuple(string name, string description, string author, int8[6] traitModifiers, bool[16] slotPositions, uint8[] allowedCollaterals, ${dimensionTuple} dimensions, uint256 ghstPrice, uint256 maxQuantity, uint256 totalQuantity, uint32 svgId, uint8 rarityScoreModifier, bool canPurchaseWithGhst, uint16 minLevel, bool canBeTransferred, uint8 category, int16 kinshipBonus, uint32 experienceBonus)`;
@@ -35,7 +35,7 @@ export async function upgrade() {
 }
 
 if (require.main === module) {
-  upgrade()
+  upgradeEditItemTypes()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

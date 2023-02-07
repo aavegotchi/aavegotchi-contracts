@@ -1,11 +1,11 @@
 import { run } from "hardhat";
 import { AddItemTypesTaskArgs } from "../../tasks/addItemTypes";
 import { maticDiamondAddress, itemManagerAlt } from "../helperFunctions";
-import { upgrade } from "../upgrades/upgrade-editItemTypes";
-import { addSideViews } from "./addForgeWearablesSideViews";
+import { upgradeEditItemTypes } from "../upgrades/upgrade-editItemTypes";
+import { addForgeWearableSideViews } from "./addForgeWearablesSideViews";
 
-export async function addItemTypes() {
-  await upgrade();
+export async function addForgeWearables() {
+  // await upgradeEditItemTypes();
 
   // Replace wrongly added baadges with forge wearables
   const itemFile: string = "forgewearables1";
@@ -26,7 +26,7 @@ export async function addItemTypes() {
     replaceWearableSvgs: false,
     replaceSleeveSvgs: false,
     associateSleeves: true,
-    sendToItemManager: true,
+    sendToAddress: maticDiamondAddress,
   };
 
   await run("addItemTypes", args);
@@ -50,7 +50,7 @@ export async function addItemTypes() {
     replaceWearableSvgs: false,
     replaceSleeveSvgs: false,
     associateSleeves: true,
-    sendToItemManager: true,
+    sendToAddress: maticDiamondAddress,
   };
 
   await run("addItemTypes", args2);
@@ -60,7 +60,7 @@ export async function addItemTypes() {
 }
 
 if (require.main === module) {
-  addItemTypes()
+  addForgeWearables()
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);

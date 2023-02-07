@@ -1,12 +1,7 @@
 import { LedgerSigner } from "@ethersproject/hardware-wallets";
 
 import { task } from "hardhat/config";
-import {
-  Contract,
-  ContractReceipt,
-  ContractTransaction,
-} from "@ethersproject/contracts";
-import { Signer } from "@ethersproject/abstract-signer";
+import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import {
   getItemTypes,
   ItemTypeOutput,
@@ -15,13 +10,7 @@ import {
 import { DAOFacet } from "../typechain/DAOFacet";
 import { SvgFacet } from "../typechain/SvgFacet";
 import { BigNumberish } from "@ethersproject/bignumber";
-import {
-  setupSvg,
-  printSizeInfo,
-  svgTypeToBytes,
-  uploadSvgs,
-  updateSvgs,
-} from "../scripts/svgHelperFunctions";
+import { uploadSvgs, updateSvgs } from "../scripts/svgHelperFunctions";
 import { gasPrice } from "../scripts/helperFunctions";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -34,7 +23,7 @@ export interface AddItemTypesTaskArgs {
   uploadItemTypes: boolean;
   uploadWearableSvgs: boolean;
   associateSleeves: boolean;
-  sendToItemManager: boolean;
+  sendToAddress: string;
   replaceItemTypes: boolean;
   replaceWearableSvgs: boolean;
   replaceSleeveSvgs: boolean;
@@ -47,11 +36,11 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
   .addParam("itemFile", "File name of the items to add")
   .addParam("svgFile", "File name of the itemType SVGs")
   .addParam("sleeveStartId", "ID of the sleeve to start at")
+  .addParam("sendToAddress", "Address to mint and send items to.")
   .addFlag("uploadItemTypes", "Upload itemTypes")
   .addFlag("uploadWearableSvgs", "Upload the SVGs")
   .addFlag("uploadSleeveSvgs", "Upload sleeve svgs")
   .addFlag("associateSleeves", "Associate the sleeves")
-  .addFlag("sendToItemManager", "Mint and send the items to itemManager")
   .addFlag("replaceItemTypes", "Replace itemTypes instead of uploading")
   .addFlag("replaceWearableSvgs", "Replace wearable SVGs instead of uploading")
   .addFlag("replaceSleeveSvgs", "Replace sleeve SVGs instead of uploading")
@@ -63,7 +52,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       const svgFile: string = taskArgs.svgFile;
       const sleeveStartId: string = taskArgs.sleeveStartId;
       const itemManager = taskArgs.itemManager;
-      const sendToItemManager = taskArgs.sendToItemManager;
+      const sendToAddress = taskArgs.sendToAddress;
       const uploadItemTypes = taskArgs.uploadItemTypes;
       const uploadWearableSvgs = taskArgs.uploadWearableSvgs;
       const associateSleeves = taskArgs.associateSleeves;
@@ -87,7 +76,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       const svgsArray: string[] = wearables;
       const sleeveSvgsArray: SleeveObject[] = sleeves;
 
-      let signer: Signer;
+      let signer: any;
 
       let owner = itemManager;
       const testing = ["hardhat", "localhost"].includes(hre.network.name);
@@ -215,20 +204,18 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
         console.log("Sleeves associated:", tx.hash);
       }
 
-      if (sendToItemManager) {
-        console.log("final quantities:", itemIds, quantities);
+      console.log("final quantities:", itemIds, quantities);
 
-        console.log(`Mint prize items to Item Manager ${itemManager}`);
+      console.log(`Mint prize items to target address: ${sendToAddress}`);
 
-        tx = await daoFacet.mintItems(itemManager, itemIds, quantities, {
-          gasPrice: gasPrice,
-        });
-        receipt = await tx.wait();
-        if (!receipt.status) {
-          throw Error(`Error:: ${tx.hash}`);
-        }
-
-        console.log("Prize items minted:", tx.hash);
+      tx = await daoFacet.mintItems(sendToAddress, itemIds, quantities, {
+        gasPrice: gasPrice,
+      });
+      receipt = await tx.wait();
+      if (!receipt.status) {
+        throw Error(`Error:: ${tx.hash}`);
       }
+
+      console.log("Prize items minted:", tx.hash);
     }
   );
