@@ -151,7 +151,12 @@ task(
           signer = new LedgerSigner(hre.ethers.provider);
         } else signer = (await hre.ethers.getSigners())[0];
       } else if (hre.network.name === "tenderly") {
-        signer = (await hre.ethers.getSigners())[0];
+        if (useLedger) {
+          signer = new LedgerSigner(hre.ethers.provider);
+        } else {
+          signer = (await hre.ethers.getSigners())[0];
+        }
+
         await hre.ethers.provider.send("tenderly_setBalance", [
           [await signer.getAddress(), owner],
           hre.ethers.utils.hexValue(
@@ -251,19 +256,21 @@ task(
       //   signer
       // )) as IDiamondLoupe;
 
-      if (hre.network.name === "tenderly") {
-        console.log("Diamond cut");
-        console.log("Using Tenderly");
+      // if (hre.network.name === "tenderly") {
+      //   console.log("Diamond cut");
+      //   console.log("Using Tenderly");
 
-        const tx: PopulatedTransaction =
-          await diamondCut.populateTransaction.diamondCut(
-            cut,
-            initAddress ? initAddress : hre.ethers.constants.AddressZero,
-            initCalldata ? initCalldata : "0x",
-            { gasLimit: 800000 }
-          );
-        await sendToTenderly(diamondUpgrader, owner, tx);
-      } else if (testing) {
+      //   const tx: PopulatedTransaction =
+      //     await diamondCut.populateTransaction.diamondCut(
+      //       cut,
+      //       initAddress ? initAddress : hre.ethers.constants.AddressZero,
+      //       initCalldata ? initCalldata : "0x",
+      //       { gasLimit: 800000 }
+      //     );
+      //   await sendToTenderly(diamondUpgrader, owner, tx);
+      // }
+
+      if (testing) {
         console.log("Diamond cut");
         const tx: ContractTransaction = await diamondCut.diamondCut(
           cut,

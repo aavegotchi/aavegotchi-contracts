@@ -29,8 +29,10 @@ export async function deployAndUpgradeForgeDiamond() {
     ]);
   }
 
+  const deployer = await (await ethers.getSigners())[0].address;
+
   const diamond = await Diamond.deploy(
-    maticDiamondUpgrader,
+    deployer,
     aavegotchiCutFacet,
     aavegotchiLoupeFacet,
     aavegotchiOwnerShipFacet,

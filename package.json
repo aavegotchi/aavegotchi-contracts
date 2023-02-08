@@ -52,6 +52,7 @@
     "@openzeppelin/contracts-upgradeable": "^4.5.2",
     "@types/chai": "^4.2.21",
     "@types/mocha": "^9.0.0",
+    "alchemy-sdk": "^2.4.1",
     "axios": "^0.21.1",
     "git-branch": "^2.0.1",
     "graphql": "^16.2.0",
