@@ -387,12 +387,15 @@ describe("Testing Forge", async function () {
 
             await expect(impForgeTest.claimForgeQueueItems([7735])).to.be.revertedWith("ForgeFacet: Forge item not ready")
 
-            await expect(impForgeTest.reduceQueueTime([7735], [98765]))
-                .to.emit(forgeFacet, "QueueTimeReduced").withArgs(7735, 98764)
-            await expect(impForgeTest.claimForgeQueueItems([7735]))
-                .to.emit(forgeFacet, "ForgeQueueClaimed").withArgs(157, 7735)
-        });
-    })
+      // expecting 90171 due to gotchi's smith level
+      await expect(impForgeTest.reduceQueueTime([7735], [98765]))
+        .to.emit(forgeFacet, "QueueTimeReduced")
+        .withArgs(7735, 90171);
+      await expect(impForgeTest.claimForgeQueueItems([7735]))
+        .to.emit(forgeFacet, "ForgeQueueClaimed")
+        .withArgs(157, 7735);
+    });
+  });
 
     describe("transfer tests", async function (){
         it('should revert transfer when forging', async function () {
