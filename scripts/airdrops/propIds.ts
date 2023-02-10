@@ -42,6 +42,36 @@ const sigProps = [
     id: "0x894039351d89063285281b2d941c7b5ffc2dcde5899b981785843fe7bc3eb37c",
     title: "implement original KINSHIP mechanics  (economical change)",
   },
+
+  {
+    id: "0x0e2211f4b37efd7dc38710aa13a1b8e7411998a8f53cd872fc0ddd6ed7996ac0",
+    title: "SigProp: Creating the Aarcade Taask Force (ATF)",
+  },
+  {
+    id: "0x1f84e1141646282c7e09271cd267c15537298b8086f03c97d2cdefb1f7a181e5",
+    title: "Update the template to require the use of 'weighted voting'",
+  },
+  {
+    id: "0x0e51eab4886527f297d8470f0434e502032be7368d69a2f71ac06057e193ebec",
+    title: "Fund Alchemica Spending Competition",
+  },
+  {
+    id: "0xf83adaa50a92a963961d07c3547635dd9dfbcf35183bf4cc61a244f6cd1097eb",
+    title:
+      'Establish the "Core Framework" Guiding Wearable Release - Forge Proposal',
+  },
+  {
+    id: "0x0a5979a05cebab1c87e08bbe8d142657d3442e0987d45d36c2eb41584d86da7b",
+    title: "Launch Round 2 Parcel Rolls ",
+  },
+  {
+    id: "0x1dcc158c82df2e95f977ff5853c6dc9ff9a96ccfb2a5f70c30b7c20d75d0346f",
+    title: "2023 DTF Budget request",
+  },
+  {
+    id: "0xd32d9f40f79c98b69761a9f09f8de0f28a8ec005cc0f01a7f4c9ea3ee8f2e1dc",
+    title: "Gotchi Lodge 2023",
+  },
 ];
 
 const coreProps = [
@@ -90,5 +120,35 @@ const coreProps = [
   {
     id: "0xfb3766f05a6990514c618db06c2a74d8fd36298694740799e2dd23424a297115",
     title: "[AGIP 53] Channel Alchemica by Burning Kinship",
+  },
+  {
+    id: "0x123768584b0e878a6466a293e402702de7427f0657ea24fd60d71589d0b3003e",
+    title: "[AGIP54] Creating the Aarcade Taask Force (ATF)",
+  },
+  {
+    id: "0xcae82273be9b783832d85214303e0f9f52e2220cedd5acc254b81f5b9457bae7",
+    title:
+      "[AGIP55] Update the Template to Require the Use of ‘Weighted Voting’’ ",
+  },
+  {
+    id: "0x8802a8883ff724f80752cdcfde817b4fdae48d7bc8d7ba7c47e9ed7106d67ee9",
+    title: "[AGIP56] Fund Alchemica Spending Competition",
+  },
+  {
+    id: "0x1930189873f7591fa60fc108d632c0f11fc35d8fff3eaccc349d05756c54c321",
+    title:
+      "[AGIP 57] Establish the “Core Framework” Guiding Wearable Release - Forge Proposal",
+  },
+  {
+    id: "0xfb3766f05a6990514c618db06c2a74d8fd36298694740799e2dd23424a297115",
+    title: "[AGIP 58] Launch Round 2 Parcel Rolls",
+  },
+  {
+    id: "0xa749417f53627cc60140332e3c9e37fbb2779b50b96e71aff005244e71367a46",
+    title: "[AGIP 59] 2023 DTF Budget Request",
+  },
+  {
+    id: "0x4c43e12bf5d84d049e907194c48f514e1efacb6ec1f1c5c742d0530a86df021a",
+    title: "[AGIP 60] Gotchi Lodge 2023",
   },
 ];
