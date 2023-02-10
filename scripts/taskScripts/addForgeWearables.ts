@@ -4,7 +4,7 @@ import { maticDiamondAddress, itemManagerAlt } from "../helperFunctions";
 import { upgradeEditItemTypes } from "../upgrades/upgrade-editItemTypes";
 import { addForgeWearableSideViews } from "./addForgeWearablesSideViews";
 
-export async function addForgeWearables() {
+export async function addForgeWearables(sendToAddress: string) {
   // await upgradeEditItemTypes();
 
   // Replace wrongly added baadges with forge wearables
@@ -50,7 +50,7 @@ export async function addForgeWearables() {
     replaceWearableSvgs: false,
     replaceSleeveSvgs: false,
     associateSleeves: true,
-    sendToAddress: maticDiamondAddress,
+    sendToAddress: sendToAddress,
   };
 
   await run("addItemTypes", args2);
@@ -60,7 +60,7 @@ export async function addForgeWearables() {
 }
 
 if (require.main === module) {
-  addForgeWearables()
+  addForgeWearables("0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF")
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);

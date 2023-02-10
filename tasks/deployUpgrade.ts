@@ -180,7 +180,7 @@ task(
             facet.facetName
           )) as ContractFactory;
           const deployedFacet: Contract = await factory.deploy({
-            // gasPrice: gasPrice,
+            gasPrice: gasPrice,
           });
           await deployedFacet.deployed();
           console.log(

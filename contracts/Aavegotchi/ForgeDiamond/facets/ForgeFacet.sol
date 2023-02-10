@@ -298,16 +298,16 @@ contract ForgeFacet is Modifiers {
         _burnItem(sender, getCoreTokenId(rsm, slots), 1);
         _burnItem(sender, itemId, 1);
 
-        uint256 forgeTime = forgeTime(gotchiId, rsm);
+        uint256 forgeReqTime = forgeTime(gotchiId, rsm);
 
-        require(_gltr <= forgeTime, "ForgeFacet: too much GLTR");
+        require(_gltr <= forgeReqTime, "ForgeFacet: too much GLTR");
 
         require(
             gltrContract().transferFrom(sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, (uint256(_gltr) * 1e18)),
             "ForgeFacet: Failed GLTR transfer"
         );
 
-        if (forgeTime - _gltr == 0) {
+        if (forgeReqTime - _gltr == 0) {
             // Immediately forge the item.
             wearablesFacet().safeTransferFrom(address(this), sender, itemId, 1, "");
             emit ForgeTimeReduced(0, gotchiId, itemId, _gltr);
@@ -505,9 +505,8 @@ contract ForgeFacet is Modifiers {
     function _mint(
         address to,
         uint256 id,
-        uint256 amount
-    ) internal // bytes memory data
-    {
+        uint256 amount // bytes memory data
+    ) internal {
         require(to != address(0), "ForgeFacet: mint to the zero address");
 
         LibToken.addToOwner(to, id, amount);
@@ -519,9 +518,8 @@ contract ForgeFacet is Modifiers {
     function _mintBatch(
         address to,
         uint256[] memory ids,
-        uint256[] memory amounts
-    ) internal // bytes memory data
-    {
+        uint256[] memory amounts // bytes memory data
+    ) internal {
         require(to != address(0), "ForgeTokenFacet: mint to the zero address");
         require(ids.length == amounts.length, "ForgeTokenFacet: ids and amounts length mismatch");
 

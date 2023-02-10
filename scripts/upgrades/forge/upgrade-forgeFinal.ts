@@ -12,13 +12,13 @@ export async function releaseForge() {
   let forgeDiamondAddress = await deployAndUpgradeForgeDiamond();
   await setForgeProperties(forgeDiamondAddress);
 
-  await upgradeAavegotchiForForge(forgeDiamondAddress);
+  // await upgradeAavegotchiForForge(forgeDiamondAddress);
 
-  await addForgeAssetsToBaazaar(forgeDiamondAddress);
+  // await addForgeAssetsToBaazaar(forgeDiamondAddress);
 
   //Add wearables onchain
-  await addForgeWearables();
-  await addForgeWearableSideViews;
+  // await addForgeWearables(forgeDiamondAddress);
+  // await addForgeWearableSideViews;
 
   console.log("Finished forge release.");
 
