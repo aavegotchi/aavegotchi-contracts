@@ -1,6 +1,7 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import {
+  logXPRecipients,
   maticDiamondAddress,
   propType,
   xpRelayerAddress,
@@ -166,6 +167,8 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
         hre
       );
 
+      //since txns are all sent to defender, then we assume all recovered tokenIds were airdropped xp
+      logXPRecipients(proposalType, propDetails.title, tokenIds, finalUsers);
       const batches = Math.ceil(tokenIds.length / batchSize);
 
       console.log(`Deploying ${proposalType}: ${propDetails.title}!!!`);
