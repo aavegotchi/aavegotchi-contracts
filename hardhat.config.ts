@@ -62,7 +62,7 @@ export default {
       accounts: [process.env.ITEM_MANAGER],
       // blockGasLimit: 20000000,
       blockGasLimit: 20000000,
-      gasPrice: 1000000000,
+      gasPrice: 400000000000,
       timeout: 90000,
     },
     tenderly: {

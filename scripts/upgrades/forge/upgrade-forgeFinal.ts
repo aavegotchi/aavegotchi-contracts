@@ -9,14 +9,16 @@ import { upgradeEditItemTypes } from "../upgrade-editItemTypes";
 export async function releaseForge() {
   console.log("Starting forge release...");
 
-  let forgeDiamondAddress = await deployAndUpgradeForgeDiamond();
-  await setForgeProperties(forgeDiamondAddress);
+  // let forgeDiamondAddress = await deployAndUpgradeForgeDiamond();
 
-  // await upgradeAavegotchiForForge(forgeDiamondAddress);
+  const forgeDiamondAddress = "0x4fDfc1B53Fd1D80d969C984ba7a8CE4c7bAaD442";
+  // await setForgeProperties(forgeDiamondAddress);
+
+  await upgradeAavegotchiForForge(forgeDiamondAddress);
 
   // await addForgeAssetsToBaazaar(forgeDiamondAddress);
 
-  //Add wearables onchain
+  // //Add wearables onchain
   // await addForgeWearables(forgeDiamondAddress);
   // await addForgeWearableSideViews;
 

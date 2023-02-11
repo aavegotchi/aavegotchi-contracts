@@ -40,14 +40,17 @@ const skillPts = {
 };
 
 export async function setForgeProperties(forgeDiamondAddress: string) {
-  const owner = await diamondOwner(forgeDiamondAddress, ethers);
-  console.log("owner:", owner);
+  // const owner = await diamondOwner(forgeDiamondAddress, ethers);
+  // console.log("owner:", owner);
 
   console.log("Starting setForgeProperties...");
 
   let forgeDaoFacet = (await ethers.getContractAt(
     "contracts/Aavegotchi/ForgeDiamond/facets/ForgeDAOFacet.sol:ForgeDAOFacet",
-    forgeDiamondAddress
+    forgeDiamondAddress,
+    (
+      await ethers.getSigners()
+    )[0]
   )) as ForgeDAOFacet;
 
   // if (network.name === "hardhat") {
