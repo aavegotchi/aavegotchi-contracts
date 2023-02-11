@@ -26,7 +26,7 @@ export async function addForgeWearables(sendToAddress: string) {
     replaceWearableSvgs: false,
     replaceSleeveSvgs: false,
     associateSleeves: true,
-    sendToAddress: maticDiamondAddress,
+    sendToAddress: sendToAddress,
   };
 
   await run("addItemTypes", args);
