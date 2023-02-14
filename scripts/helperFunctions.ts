@@ -18,6 +18,12 @@ export function delay(milliseconds: number) {
   });
 }
 
+export function delay(milliseconds: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
+}
+
 export async function impersonate(
   address: string,
   contract: any,
