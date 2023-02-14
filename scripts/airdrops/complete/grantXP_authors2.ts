@@ -2,7 +2,7 @@ import { run } from "hardhat";
 
 async function grantXP() {
   await run("grantXP_customValues", {
-    filename: "amb/feb_23",
+    filename: "authors/authors2",
     batchSize: "500",
   });
 }
