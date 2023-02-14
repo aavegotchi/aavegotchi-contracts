@@ -85,8 +85,6 @@ export const amounts = [
   //AGIP42
   "75",
   "75",
-  "",
-  "75",
   //AGIP43
   "150",
   //AGIP44
