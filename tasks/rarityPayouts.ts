@@ -2173,9 +2173,9 @@ task("rarityPayout")
 
         console.log("correct:", correct);
 
-        // if (correct !== 7500) {
-        //   throw new Error("Results do not line up with subgraph");
-        // }
+        if (correct !== 7500) {
+          throw new Error("Results do not line up with subgraph");
+        }
 
         leaderboardResults[dataName] = result;
       }
