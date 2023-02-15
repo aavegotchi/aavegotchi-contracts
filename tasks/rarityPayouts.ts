@@ -5,7 +5,11 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { parseEther, formatEther } from "@ethersproject/units";
 import { EscrowFacet } from "../typechain";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { maticDiamondAddress, gasPrice } from "../scripts/helperFunctions";
+import {
+  maticDiamondAddress,
+  gasPrice,
+  getRelayerSigner,
+} from "../scripts/helperFunctions";
 import { LeaderboardDataName, LeaderboardType } from "../types";
 import { NonceManager } from "@ethersproject/experimental";
 import {
@@ -2092,7 +2096,7 @@ task("rarityPayout")
         });
         signer = await hre.ethers.provider.getSigner(deployerAddress);
       } else if (hre.network.name === "matic") {
-        signer = accounts[0];
+        signer = await getRelayerSigner(hre);
       } else {
         throw Error("Incorrect network selected");
       }
