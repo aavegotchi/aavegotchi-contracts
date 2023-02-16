@@ -302,6 +302,7 @@ struct AppStorage {
     mapping(uint32 => mapping(uint256 => uint256)) whitelistAccessRights; // whitelistId => action right => access right
     mapping(uint32 => mapping(address => EnumerableSet.UintSet)) whitelistGotchiBorrows; // whitelistId => borrower => gotchiId set
     address wearableDiamond;
+    address forgeDiamond;
 }
 
 library LibAppStorage {

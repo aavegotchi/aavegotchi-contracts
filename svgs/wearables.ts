@@ -334,9 +334,11 @@ export const wearablesSvgs = [
   329,
   330,
   331,
-  //szn 4 baadges
+  // Haalloween Party Badge
   332,
+  // TOOORKEY CHAASE Badge
   333,
+  //szn 4 baadges
   334,
   335,
   336,
@@ -351,6 +353,29 @@ export const wearablesSvgs = [
   345,
   346,
   347,
+  348,
+  349,
+  // forge wearables
+  bodyWearable("350_PixelcraftTee"),
+  wearable("351_3DGlasses"),
+  wearable("352_PixelcraftSquare"),
+  wearable("353_Nimbus"),
+  wearable("354_AlchemicaApron"),
+  wearable("355_SafetyGlasses"),
+  wearable("356_Bandage"),
+  wearable("357_NailGun"),
+  wearable("358_FlamingApron"),
+  wearable("359_ForgeGoggles"),
+  wearable("360_GeodeSmasher"),
+  wearable("361_Geo"),
+  bodyWearable("362_FAKEShirt"),
+  wearable("363_FAKEBeret"),
+  wearable("364_PaintBrush"),
+  wearable("365_PaintPalette"),
+  bodyWearable("366_HeavenlyRobes"),
+  wearable("367_EyesofDevotion"),
+  wearable("368_BeardofDivinity"),
+  wearable("369_StaffofCreation"),
 ];
 
 export const sleeveSvgs = [
@@ -550,6 +575,10 @@ export const sleeveSvgs = [
   sleeves("316_MarineJacket"),
   sleeves("317_ThaaveSuit"),
   sleeves("318_TrackSuit"),
+  // forge wearables
+  sleeves("350_PixelcraftTee"),
+  sleeves("362_FAKEShirt"),
+  sleeves("366_HeavenlyRobes"),
 ];
 
 function stripSvg(svg: string) {

@@ -272,11 +272,12 @@ export async function uploadSvgs(
     // printSizeInfo(svgType, svgTypesAndSizes[0].sizes);
 
     let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes);
+    console.log("tx:", tx.hash);
     let receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
     }
-    // console.log("tx:", tx.hash);
+
     // console.log(svgItemsEnd, svg.length);
     if (svgItemsEnd === svgs.length) {
       break;
@@ -305,6 +306,7 @@ export async function updateSvgs(
     ];
 
     let tx = await svgFacet.updateSvg(svg, array);
+    console.log("tx:", tx.hash);
     // console.log("tx hash:", tx.hash);
     let receipt = await tx.wait();
     if (!receipt.status) {
@@ -525,6 +527,56 @@ export async function updateBaadgeTaskForSvgType(
   } else {
     console.log("File Names array is not equal to IDs array");
   }
+}
+
+export async function updateSvgTaskForSideViews(_itemIds: number[]) {
+  const sideViews = ["left", "right", "back"];
+  let taskArray = [];
+
+  for (let index = 0; index < _itemIds.length; index++) {
+    const itemId = _itemIds[index];
+    const sideArrays = [left[itemId], right[itemId], back[itemId]];
+
+    for (let index = 0; index < sideViews.length; index++) {
+      const side = sideViews[index];
+      const sideArray = sideArrays[index];
+
+      let taskArgsSides: UpdateSvgsTaskArgs = {
+        svgIds: [itemId].join(","),
+        svgType: `wearables-${side}`,
+        svgs: [sideArray].join("***"),
+      };
+      taskArray.push(taskArgsSides);
+    }
+  }
+  return taskArray;
+}
+
+export async function updateSvgTaskForSideSleeves(_itemIds: number[]) {
+  const sideViews = ["left", "right", "back"];
+  let taskArray = [];
+
+  for (let index = 0; index < _itemIds.length; index++) {
+    const itemId = _itemIds[index];
+    const sideArrays = [
+      leftSleeve[itemId],
+      rightSleeve[itemId],
+      backSleeve[itemId],
+    ];
+
+    for (let index = 0; index < sideViews.length; index++) {
+      const side = sideViews[index];
+      const sideArray = sideArrays[index];
+
+      let taskArgsSides: UpdateSvgsTaskArgs = {
+        svgIds: [itemId].join(","),
+        svgType: `sleeves-${side}`,
+        svgs: [sideArray].join("***"),
+      };
+      taskArray.push(taskArgsSides);
+    }
+  }
+  return taskArray;
 }
 
 export async function uploadSvgTaskForBaadges(

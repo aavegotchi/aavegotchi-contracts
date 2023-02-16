@@ -20,7 +20,7 @@ import {
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { sendToMultisig } from "../scripts/libraries/multisig/multisig";
-import { network } from "hardhat";
+import { sendToTenderly } from "../scripts/libraries/tenderly";
 
 export interface FacetsAndAddSelectors {
   facetName: string;
@@ -150,6 +150,19 @@ task(
         if (useLedger) {
           signer = new LedgerSigner(hre.ethers.provider);
         } else signer = (await hre.ethers.getSigners())[0];
+      } else if (hre.network.name === "tenderly") {
+        if (useLedger) {
+          signer = new LedgerSigner(hre.ethers.provider);
+        } else {
+          signer = (await hre.ethers.getSigners())[0];
+        }
+
+        await hre.ethers.provider.send("tenderly_setBalance", [
+          [await signer.getAddress(), owner],
+          hre.ethers.utils.hexValue(
+            hre.ethers.utils.parseUnits("10000", "ether").toHexString()
+          ),
+        ]);
       } else {
         throw Error("Incorrect network selected");
       }
@@ -236,12 +249,26 @@ task(
         signer
       )) as IDiamondCut;
 
-      //Helpful for debugging
-      const diamondLoupe = (await hre.ethers.getContractAt(
-        "IDiamondLoupe",
-        diamondAddress,
-        signer
-      )) as IDiamondLoupe;
+      // //Helpful for debugging
+      // const diamondLoupe = (await hre.ethers.getContractAt(
+      //   "IDiamondLoupe",
+      //   diamondAddress,
+      //   signer
+      // )) as IDiamondLoupe;
+
+      // if (hre.network.name === "tenderly") {
+      //   console.log("Diamond cut");
+      //   console.log("Using Tenderly");
+
+      //   const tx: PopulatedTransaction =
+      //     await diamondCut.populateTransaction.diamondCut(
+      //       cut,
+      //       initAddress ? initAddress : hre.ethers.constants.AddressZero,
+      //       initCalldata ? initCalldata : "0x",
+      //       { gasLimit: 800000 }
+      //     );
+      //   await sendToTenderly(diamondUpgrader, owner, tx);
+      // }
 
       if (testing) {
         console.log("Diamond cut");
@@ -274,7 +301,9 @@ task(
             cut,
             initAddress ? initAddress : hre.ethers.constants.AddressZero,
             initCalldata ? initCalldata : "0x",
-            { gasPrice: gasPrice }
+            {
+              gasPrice: gasPrice,
+            }
           );
 
           const receipt: ContractReceipt = await tx.wait();
