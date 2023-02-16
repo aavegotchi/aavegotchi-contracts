@@ -19,7 +19,7 @@ export async function releaseForge() {
   // await addForgeAssetsToBaazaar(forgeDiamondAddress);
 
   // //Add wearables onchain
-  await addForgeWearables(forgeDiamondAddress);
+  // await addForgeWearables(forgeDiamondAddress);
   await addForgeWearableSideViews();
 
   console.log("Finished forge release.");

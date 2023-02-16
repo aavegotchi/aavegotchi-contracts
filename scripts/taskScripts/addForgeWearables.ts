@@ -1,8 +1,6 @@
 import { run } from "hardhat";
 import { AddItemTypesTaskArgs } from "../../tasks/addItemTypes";
-import { maticDiamondAddress, itemManagerAlt } from "../helperFunctions";
-import { upgradeEditItemTypes } from "../upgrades/upgrade-editItemTypes";
-import { addForgeWearableSideViews } from "./addForgeWearablesSideViews";
+import { maticDiamondAddress, xpRelayerAddress } from "../helperFunctions";
 
 export async function addForgeWearables(sendToAddress: string) {
   // await upgradeEditItemTypes();
@@ -13,7 +11,6 @@ export async function addForgeWearables(sendToAddress: string) {
   const sleeveStartId: string = "52"; // last sleeve id for this set is 54
 
   const args: AddItemTypesTaskArgs = {
-    itemManager: itemManagerAlt,
     diamondAddress: maticDiamondAddress,
     itemFile: itemFile,
     svgFile: svgFile,
@@ -29,7 +26,7 @@ export async function addForgeWearables(sendToAddress: string) {
     sendToAddress: sendToAddress,
   };
 
-  await run("addItemTypes", args);
+  // await run("addItemTypes", args);
 
   // Add remained forge wearables
   const itemFile2: string = "forgewearables2";
@@ -37,7 +34,6 @@ export async function addForgeWearables(sendToAddress: string) {
   const sleeveStartId2: string = "54"; // last sleeve id for this set is 51
 
   const args2: AddItemTypesTaskArgs = {
-    itemManager: itemManagerAlt,
     diamondAddress: maticDiamondAddress,
     itemFile: itemFile2,
     svgFile: svgFile2,

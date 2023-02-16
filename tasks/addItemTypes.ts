@@ -1,5 +1,3 @@
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
-
 import { task } from "hardhat/config";
 import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
 import {
@@ -11,11 +9,10 @@ import { DAOFacet } from "../typechain/DAOFacet";
 import { SvgFacet } from "../typechain/SvgFacet";
 import { BigNumberish } from "@ethersproject/bignumber";
 import { uploadSvgs, updateSvgs } from "../scripts/svgHelperFunctions";
-import { gasPrice } from "../scripts/helperFunctions";
+import { getRelayerSigner } from "../scripts/helperFunctions";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 export interface AddItemTypesTaskArgs {
-  itemManager: string;
   diamondAddress: string;
   itemFile: string;
   svgFile: string;
@@ -31,7 +28,6 @@ export interface AddItemTypesTaskArgs {
 }
 
 task("addItemTypes", "Adds itemTypes and SVGs ")
-  .addParam("itemManager", "Address of the item manager", "0")
   .addParam("diamondAddress", "Address of the Diamond to upgrade")
   .addParam("itemFile", "File name of the items to add")
   .addParam("svgFile", "File name of the itemType SVGs")
@@ -51,7 +47,6 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       const diamondAddress: string = taskArgs.diamondAddress;
       const svgFile: string = taskArgs.svgFile;
       const sleeveStartId: string = taskArgs.sleeveStartId;
-      const itemManager = taskArgs.itemManager;
       const sendToAddress = taskArgs.sendToAddress;
       const uploadItemTypes = taskArgs.uploadItemTypes;
       const uploadWearableSvgs = taskArgs.uploadWearableSvgs;
@@ -76,25 +71,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       const svgsArray: string[] = wearables;
       const sleeveSvgsArray: SleeveObject[] = sleeves;
 
-      let signer: any;
-
-      let owner = itemManager;
-      const testing = ["hardhat", "localhost"].includes(hre.network.name);
-      if (testing) {
-        await hre.network.provider.request({
-          method: "hardhat_impersonateAccount",
-          params: [owner],
-        });
-        signer = await hre.ethers.provider.getSigner(owner);
-      } else if (hre.network.name === "matic") {
-        signer = new LedgerSigner(
-          hre.ethers.provider,
-          "hid",
-          "m/44'/60'/2'/0/0"
-        );
-      } else {
-        throw Error("Incorrect network selected");
-      }
+      let signer = await getRelayerSigner(hre);
 
       let tx: ContractTransaction;
       let receipt: ContractReceipt;
@@ -114,9 +91,8 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       if (uploadItemTypes) {
         console.log("Adding items", 0, "to", currentItemTypes.length);
 
-        tx = await daoFacet.addItemTypes(itemTypesArray, {
-          gasPrice: gasPrice,
-        });
+        tx = await daoFacet.addItemTypes(itemTypesArray);
+        console.log("tx:", tx.hash);
 
         receipt = await tx.wait();
         if (!receipt.status) {
@@ -135,9 +111,8 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       if (replaceItemTypes) {
         console.log("Updating items", 0, "to", currentItemTypes.length);
 
-        tx = await daoFacet.updateItemTypes(itemIds, itemTypesArray, {
-          gasPrice: gasPrice,
-        });
+        tx = await daoFacet.updateItemTypes(itemIds, itemTypesArray);
+        console.log("tx hash:", tx.hash);
 
         receipt = await tx.wait();
         if (!receipt.status) {
@@ -196,7 +171,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
         console.log("sleeves input:", sleevesInput);
 
         console.log("Associating sleeves svgs with body wearable svgs.");
-        tx = await svgFacet.setSleeves(sleevesInput, { gasPrice: gasPrice });
+        tx = await svgFacet.setSleeves(sleevesInput);
         receipt = await tx.wait();
         if (!receipt.status) {
           throw Error(`Error:: ${tx.hash}`);
@@ -208,9 +183,8 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
 
       console.log(`Mint prize items to target address: ${sendToAddress}`);
 
-      tx = await daoFacet.mintItems(sendToAddress, itemIds, quantities, {
-        gasPrice: gasPrice,
-      });
+      tx = await daoFacet.mintItems(sendToAddress, itemIds, quantities);
+      console.log("tx hash:", tx.hash);
       receipt = await tx.wait();
       if (!receipt.status) {
         throw Error(`Error:: ${tx.hash}`);

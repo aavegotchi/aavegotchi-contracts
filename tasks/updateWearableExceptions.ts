@@ -3,6 +3,7 @@ import { Signer } from "@ethersproject/abstract-signer";
 import {
   gasPrice,
   getDiamondSigner,
+  getRelayerSigner,
   itemManager,
   maticDiamondAddress,
 } from "../scripts/helperFunctions";
@@ -87,16 +88,14 @@ task(
         hre.ethers
       );
 
-      const signer: Signer = await getDiamondSigner(hre, itemManager, false);
+      const signer: Signer = await getRelayerSigner(hre);
       const svgViewsFacet = (await hre.ethers.getContractAt(
         "SvgViewsFacet",
         maticDiamondAddress,
         signer
       )) as SvgViewsFacet;
 
-      let tx = await svgViewsFacet.setSideViewExceptions(exceptions, {
-        gasPrice: gasPrice,
-      });
+      let tx = await svgViewsFacet.setSideViewExceptions(exceptions);
       console.log("tx hash:", tx.hash);
       let receipt = await tx.wait();
       console.log("Exception Set!");

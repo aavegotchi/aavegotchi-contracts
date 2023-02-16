@@ -272,11 +272,12 @@ export async function uploadSvgs(
     // printSizeInfo(svgType, svgTypesAndSizes[0].sizes);
 
     let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes);
+    console.log("tx:", tx.hash);
     let receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
     }
-    console.log("tx:", tx.hash);
+
     // console.log(svgItemsEnd, svg.length);
     if (svgItemsEnd === svgs.length) {
       break;
@@ -305,6 +306,7 @@ export async function updateSvgs(
     ];
 
     let tx = await svgFacet.updateSvg(svg, array);
+    console.log("tx:", tx.hash);
     // console.log("tx hash:", tx.hash);
     let receipt = await tx.wait();
     if (!receipt.status) {
