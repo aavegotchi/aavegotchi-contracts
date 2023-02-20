@@ -5,11 +5,11 @@ import { LedgerSigner } from "@anders-t/ethers-ledger";
 const offset = 1_000_000_000;
 
 const tileIds = [28, 29, 30, 31]; //le cyan grass
-const alloyCategory = 6;
-// const schematicCategory = 7; unused
-const geodesCategory = 8;
-const essenceCategory = 9;
-const coresCategory = 10;
+const alloyCategory = 7;
+// const schematicCategory = 8; unused
+const geodesCategory = 9;
+const essenceCategory = 10;
+const coresCategory = 11;
 
 const alloyIds = [offset];
 const essenceIds = [offset + 1];
@@ -101,7 +101,7 @@ export async function addForgeAssetsToBaazaar(forgeDiamond: string) {
     });
     signer = await ethers.provider.getSigner(itemManager);
   } else if (network.name === "matic") {
-    signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
+    signer = (await ethers.getSigners())[0];
   } else {
     throw Error("Incorrect network selected");
   }
@@ -181,7 +181,7 @@ export async function addForgeAssetsToBaazaar(forgeDiamond: string) {
 }
 
 if (require.main === module) {
-  addForgeAssetsToBaazaar("")
+  addForgeAssetsToBaazaar("0x4fDfc1B53Fd1D80d969C984ba7a8CE4c7bAaD442")
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
