@@ -294,6 +294,29 @@ contract ERC1155MarketplaceFacet is Modifiers {
         handleExecuteERC1155Listing(_listingId, _contractAddress, _itemId, _quantity, _priceInWei, _recipient);
     }
 
+    ///@param listingId The identifier of the listing to execute
+    ///@param contractAddress The token contract address
+    ///@param itemId the erc1155 token id
+    ///@param quantity The amount of ERC1155 NFTs execute/buy
+    ///@param priceInWei The price of the item
+    ///@param recipient The address to receive the NFT
+    struct ExecuteERC1155ListingParams {
+        uint256 listingId;
+        address contractAddress;
+        uint256 itemId;
+        uint256 quantity;
+        uint256 priceInWei;
+        address recipient;
+    }
+
+    ///@notice execute ERC1155 listings in batch
+    function batchExecuteERC1155Listing(ExecuteERC1155ListingParams[] calldata listings) external {
+        require(listings.length <= 10, "ERC1155Marketplace: length should be lower than 10");
+        for (uint256 i = 0; i < listings.length; i++) {
+            handleExecuteERC1155Listing(listings[i].listingId, listings[i].contractAddress, listings[i].itemId, listings[i].quantity, listings[i].priceInWei, listings[i].recipient);
+        }
+    }
+
     function handleExecuteERC1155Listing(
         uint256 _listingId,
         address _contractAddress,
