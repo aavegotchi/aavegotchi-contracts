@@ -150,6 +150,7 @@ struct AppStorage {
     //gotchi token ID to points map
     mapping(uint256 => uint256) gotchiSmithingSkillPoints;
     mapping(uint256 => uint256) maxSupplyByToken;
+    address aavegotchiDiamond;
 }
 
 library LibAppStorage {

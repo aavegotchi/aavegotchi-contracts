@@ -14,6 +14,7 @@ contract ForgeDAOFacet is Modifiers {
     event SetGeodeWinChance(RarityValueIO newChances);
     event SetSmeltingSkillPointReductionFactorBips(uint256 oldBips, uint256 newBips);
     event SetMaxSupplyPerToken(uint256[] tokenIds, uint256[] supplyPerTokenId);
+    event SetAavegotchiDiamondAddress(address _address);
 
     event ContractPaused();
     event ContractUnpaused();
@@ -38,6 +39,10 @@ contract ForgeDAOFacet is Modifiers {
     function setAlloyBurnFeeInBips(uint256 alloyBurnFeeInBips) external onlyDaoOrOwner {
         s.alloyBurnFeeInBips = alloyBurnFeeInBips;
         emit SetAlloyBurnFee(alloyBurnFeeInBips);
+    }
+
+    function setAavegotchiDiamondAddress(address _address) external onlyDaoOrOwner {
+        s.aavegotchiDiamond = _address;
     }
 
     // @notice Allow DAO to update forging Alloy cost
