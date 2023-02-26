@@ -8,7 +8,7 @@ import {
 } from "../../types";
 
 export const maticGraphUrl: string =
-  "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-core-matic";
+  "https://subgraph.satsuma-prod.com/tWYl5n5y04oz/aavegotchi/aavegotchi-core-matic/api";
 
 // export const maticLendingUrl: string =
 // "https://api.thegraph.com/subgraphs/name/froid1911/aavegotchi-lending";
@@ -34,7 +34,7 @@ interface UsersWithGotchisRes {
   }[];
 }
 
-function getUsersWithGotchisOfAddresses(
+export function getUsersWithGotchisOfAddresses(
   addresses: string[],
   index: Number = 0
 ): Promise<UsersWithGotchisRes> {
@@ -368,7 +368,7 @@ interface GotchiLending {
   gotchiTokenId: string;
 }
 
-interface GotchiId {
+export interface GotchiId {
   id: string;
 }
 

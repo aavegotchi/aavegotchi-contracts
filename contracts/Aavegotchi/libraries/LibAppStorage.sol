@@ -193,6 +193,11 @@ struct Whitelist {
     address[] addresses;
 }
 
+struct XPMerkleDrops {
+    bytes32 root;
+    uint8 propType; //1-sigprop, 2-coreprop
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -302,6 +307,9 @@ struct AppStorage {
     mapping(uint32 => mapping(uint256 => uint256)) whitelistAccessRights; // whitelistId => action right => access right
     mapping(uint32 => mapping(address => EnumerableSet.UintSet)) whitelistGotchiBorrows; // whitelistId => borrower => gotchiId set
     address wearableDiamond;
+    //XP Drops
+    mapping(bytes32 => XPMerkleDrops) xpDrops;
+    mapping(address => mapping(bytes32 => bool)) xpClaimed;
 }
 
 library LibAppStorage {

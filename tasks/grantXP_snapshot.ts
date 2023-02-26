@@ -14,6 +14,7 @@ import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import request from "graphql-request";
 import { getRelayerSigner } from "../scripts/helperFunctions";
 import { snapshotGraphUrl } from "../helpers/constants";
+import { getVotingAddresses } from "../scripts/query/queryVotingAddresses";
 
 export const currentOverrides: string[] = [
   "0x4d6e3Ff00F77F6e746eBF7f6827800eB99e36910",
@@ -30,64 +31,7 @@ export interface ProposalDetails {
   votes: number;
 }
 
-interface Voter {
-  voter: string;
-}
-
-const graphqlRequest = (proposalId: string) => {
-  return `
-  {first1000: votes(first:1000, where:{proposal_in:["${proposalId}"]}) {
-    voter
-  }
-    second1000:votes(skip:1000, first:1000, where:{proposal_in:["${proposalId}"]}) {
-      voter
-  }
-     third1000:votes(skip: 2000, first:1000, where:{proposal_in:["${proposalId}"]}) {
-      voter
-  }
-    fourth1000:votes(skip: 3000, first:1000, where:{proposal_in:["${proposalId}"]}) {
-      voter
-  }
-    fifth1000:votes(skip: 4000, first:1000, where:{proposal_in:["${proposalId}"]}) {
-      voter
-    }
-  }
-  `;
-};
-
-async function getVotingAddresses(proposalId: string) {
-  let votingAddresses: string[] = [];
-  const addresses = await request(snapshotGraphUrl, graphqlRequest(proposalId));
-
-  addresses.first1000.forEach((voter: Voter) => {
-    votingAddresses.push(voter.voter);
-  });
-
-  addresses.second1000.forEach((voter: Voter) => {
-    if (!votingAddresses.includes(voter.voter))
-      votingAddresses.push(voter.voter);
-  });
-
-  addresses.third1000.forEach((voter: Voter) => {
-    if (!votingAddresses.includes(voter.voter))
-      votingAddresses.push(voter.voter);
-  });
-
-  addresses.fourth1000.forEach((voter: Voter) => {
-    if (!votingAddresses.includes(voter.voter))
-      votingAddresses.push(voter.voter);
-  });
-
-  addresses.fifth1000.forEach((voter: Voter) => {
-    if (!votingAddresses.includes(voter.voter))
-      votingAddresses.push(voter.voter);
-  });
-
-  console.log("Found voting addresses:", votingAddresses.length);
-  return votingAddresses;
-}
-
-async function getProposalDetails(proposalId: string) {
+export async function getProposalDetails(proposalId: string) {
   const query = `
   {proposal(id:"${proposalId}") {
     id
