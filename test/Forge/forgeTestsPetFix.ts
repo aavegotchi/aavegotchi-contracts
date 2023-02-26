@@ -288,5 +288,52 @@ describe("Testing Forge", async function () {
         // console.log("passing ", i);
       }
     });
+
+    it("should fix invalid IDs", async function () {
+      const user1 = "0x478fa4C971a077038B4Fc5C172c3Af5552224ccc";
+      const user2 = "0x7D9fb540504D8F277099472b89113485F712c546";
+      const user3 = "0x221fb400C8E70472F95ad3dF5456A57a21b54Bf3";
+      const user4 = "0x4177a5c0E2369F6830A4c3825aFc8fB3Dd47790D";
+      // const user5 = "0x7D9fb540504D8F277099472b89113485F712c546"; //duplicate
+
+      const users = [user1, user2, user3, user4];
+
+      for (let i = 0; i < users.length; i++) {
+        const priorBalances = [
+          Number(await forgeTokenFacet.balanceOf(users[i], 1000000044)),
+          Number(await forgeTokenFacet.balanceOf(users[i], 1000000045)),
+          Number(await forgeTokenFacet.balanceOf(users[i], 1000000046)),
+          Number(await forgeTokenFacet.balanceOf(users[i], 1000000047)),
+          Number(await forgeTokenFacet.balanceOf(users[i], 1000000048)),
+          Number(await forgeTokenFacet.balanceOf(users[i], 1000000049)),
+        ];
+
+        await forgeFacet.fixInvalidTokenIds(users[i]);
+
+        expect(
+          await forgeTokenFacet.balanceOf(users[i], CORE_PET_COMMON)
+        ).to.be.equal(priorBalances[0]);
+
+        expect(
+          await forgeTokenFacet.balanceOf(users[i], CORE_PET_UNCOMMON)
+        ).to.be.equal(priorBalances[1]);
+
+        expect(
+          await forgeTokenFacet.balanceOf(users[i], CORE_PET_RARE)
+        ).to.be.equal(priorBalances[2]);
+
+        expect(
+          await forgeTokenFacet.balanceOf(users[i], CORE_PET_LEGENDARY)
+        ).to.be.equal(priorBalances[3]);
+
+        expect(
+          await forgeTokenFacet.balanceOf(users[i], CORE_PET_MYTHICAL)
+        ).to.be.equal(priorBalances[4]);
+
+        expect(
+          await forgeTokenFacet.balanceOf(users[i], CORE_PET_GODLIKE)
+        ).to.be.equal(priorBalances[5]);
+      }
+    });
   });
 });

@@ -17,7 +17,7 @@ export async function upgradeForgeDiamondForPet() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "ForgeFacet",
-      addSelectors: [],
+      addSelectors: ["function fixInvalidTokenIds(address owner) external"],
       removeSelectors: [],
     },
   ];
