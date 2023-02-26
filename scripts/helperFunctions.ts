@@ -10,7 +10,13 @@ import {
   DefenderRelaySigner,
 } from "defender-relay-client/lib/ethers";
 
-export const gasPrice = 270000000000;
+export const gasPrice = 570000000000;
+
+export function delay(milliseconds: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
+}
 
 export function delay(milliseconds: number) {
   return new Promise((resolve) => {
@@ -89,6 +95,8 @@ export const maticFakeGotchiCards =
   "0x9f6BcC63e86D44c46e85564E9383E650dc0b56D7";
 
 export const maticFakeGotchiArt = "0xA4E3513c98b30d4D7cc578d2C328Bd550725D1D0";
+
+export const maticForgeDiamond = "0x4fDfc1B53Fd1D80d969C984ba7a8CE4c7bAaD442";
 
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();

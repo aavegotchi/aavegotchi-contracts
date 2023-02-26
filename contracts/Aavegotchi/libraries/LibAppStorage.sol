@@ -307,7 +307,8 @@ struct AppStorage {
     mapping(uint32 => mapping(uint256 => uint256)) whitelistAccessRights; // whitelistId => action right => access right
     mapping(uint32 => mapping(address => EnumerableSet.UintSet)) whitelistGotchiBorrows; // whitelistId => borrower => gotchiId set
     address wearableDiamond;
-    //XP Drops
+    address forgeDiamond;
+  //XP Drops
     mapping(bytes32 => XPMerkleDrops) xpDrops;
     mapping(address => mapping(bytes32 => bool)) xpClaimed;
 }

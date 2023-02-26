@@ -18,6 +18,9 @@ import { getVotingAddresses } from "../scripts/query/queryVotingAddresses";
 
 export const currentOverrides: string[] = [
   "0x4d6e3Ff00F77F6e746eBF7f6827800eB99e36910",
+  "0xcc65af377188153f157878705ba0623a5646c0ac",
+  "0x3ca2E945a3bc25399c75f49e9e45D34d897c1041",
+  "0x2F204531C9906FbAa4c8A756e226b2678eb07d02",
 ];
 
 export interface GrantXPSnapshotTaskArgs {

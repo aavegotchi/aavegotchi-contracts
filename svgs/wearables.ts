@@ -334,9 +334,11 @@ export const wearablesSvgs = [
   329,
   330,
   331,
-  //szn 4 baadges
+  // Haalloween Party Badge
   332,
+  // TOOORKEY CHAASE Badge
   333,
+  //szn 4 baadges
   334,
   335,
   336,
@@ -351,10 +353,33 @@ export const wearablesSvgs = [
   345,
   346,
   347,
+  348,
+  349,
+  // forge wearables
+  bodyWearable("350_PixelcraftTee"),
+  wearable("351_3DGlasses"),
+  wearable("352_PixelcraftSquare"),
+  wearable("353_Nimbus"),
+  wearable("354_AlchemicaApron"),
+  wearable("355_SafetyGlasses"),
+  wearable("356_Bandage"),
+  wearable("357_NailGun"),
+  wearable("358_FlamingApron"),
+  wearable("359_ForgeGoggles"),
+  wearable("360_GeodeSmasher"),
+  wearable("361_Geo"),
+  bodyWearable("362_FAKEShirt"),
+  wearable("363_FAKEBeret"),
+  wearable("364_PaintBrush"),
+  wearable("365_PaintPalette"),
+  bodyWearable("366_HeavenlyRobes"),
+  wearable("367_EyesofDevotion"),
+  wearable("368_BeardofDivinity"),
+  wearable("369_StaffofCreation"),
 ];
 
 export const sleeveSvgs = [
-  // '0_VoidRight',
+  "0_VoidRight",
   // '1_CamoHatRight',
   // '2_CamoPantsRight', // body but doesn't have sleeves
   // '3_MK2GrenadeRight',
@@ -379,12 +404,12 @@ export const sleeveSvgs = [
   sleeves("22_CaptainAaveSuit"), // sleeves("22_CaptainAaveSuit"),
   // '23_CaptainAaveShieldRight',
   // '24_ThaaveHelmetRight',
-  sleeves("25_ThaaveSuit"),
+  // sleeves("25_ThaaveSuit"),
   // '26_ThaaveHammerRight',
   // '27_MarcHairRight',
   sleeves("28_MarcOutfit"), // sleeves("28_MarcOutfit"),
   // '29_REKTSignRight',
-  // '30_JordanHairRight',
+  // "30_JordanHairRight",
   sleeves("31_JordanSuit"), // sleeves("31_JordanSuit"),
   // '32_AaveFlagRight',
   // '33_StaniHairRight',
@@ -479,7 +504,7 @@ export const sleeveSvgs = [
   // '122_MilkshakeRight',
   // '123_AppleJuiceRight',
   // '124_BeerHelmetRight',
-  sleeves("125_TrackSuit"),
+  // sleeves("125_TrackSuit"),
   // '126_KinshipPotionRight',
   // '127_GreaterKinshipPotionRight',
   // '128_XPPotionRight',
@@ -530,7 +555,7 @@ export const sleeveSvgs = [
   sleeves("220_PunkShirt"),
   sleeves("222_PirateCoat"),
   sleeves("231_ComfyPoncho"),
-  // sleeves('232_PonchoHoodie'),
+  // "232_PonchoHoodie",
   sleeves("234_ShaamanPoncho"),
   sleeves("241_WGMIShirt"),
   sleeves("244_VNeckShirt"),
@@ -545,10 +570,15 @@ export const sleeveSvgs = [
   sleeves("307_FairyWings"),
   sleeves("310_PlateArmor"),
   sleeves("314_YoroiArmor"),
-  "sleeves gap from marine jacket",
+  "sleeves gap",
+  "sleeves gap",
   sleeves("316_MarineJacket"),
   sleeves("317_ThaaveSuit"),
   sleeves("318_TrackSuit"),
+  // forge wearables
+  sleeves("350_PixelcraftTee"),
+  sleeves("362_FAKEShirt"),
+  sleeves("366_HeavenlyRobes"),
 ];
 
 function stripSvg(svg: string) {
