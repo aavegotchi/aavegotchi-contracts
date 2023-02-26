@@ -190,9 +190,11 @@ contract ForgeFacet is Modifiers {
                 slotNumber = i;
             }
         }
-        // Hand items are two slots (4 and 5). Treat any hand wearable as slot 4 for token ID offset.
-        if (slotNumber == 5) {
-            slotNumber = 4;
+        // Hand items are two slots (4 and 5).
+        // Treat any hand wearable as slot 4 for token ID offset.
+        // Further slots must also be decremented to account for this.
+        if (slotNumber >= 5) {
+            slotNumber -= 1;
         }
 
         uint256 offsetWithSlot = startingOffsetId + (offsetMultiplier * slotNumber);
