@@ -297,42 +297,57 @@ describe("Testing Forge", async function () {
       // const user5 = "0x7D9fb540504D8F277099472b89113485F712c546"; //duplicate
 
       const users = [user1, user2, user3, user4];
+      let priorBalances = [];
 
       for (let i = 0; i < users.length; i++) {
-        const priorBalances = [
-          Number(await forgeTokenFacet.balanceOf(users[i], 1000000044)),
-          Number(await forgeTokenFacet.balanceOf(users[i], 1000000045)),
-          Number(await forgeTokenFacet.balanceOf(users[i], 1000000046)),
-          Number(await forgeTokenFacet.balanceOf(users[i], 1000000047)),
-          Number(await forgeTokenFacet.balanceOf(users[i], 1000000048)),
-          Number(await forgeTokenFacet.balanceOf(users[i], 1000000049)),
-        ];
+        priorBalances.push([
+          Number(await forgeTokenFacet.balanceOf(users[i], 1000000044)) +
+            Number(await forgeTokenFacet.balanceOf(users[i], CORE_PET_COMMON)),
+          Number(await forgeTokenFacet.balanceOf(users[i], 1000000045)) +
+            Number(
+              await forgeTokenFacet.balanceOf(users[i], CORE_PET_UNCOMMON)
+            ),
+          Number(await forgeTokenFacet.balanceOf(users[i], 1000000046)) +
+            Number(await forgeTokenFacet.balanceOf(users[i], CORE_PET_RARE)),
+          Number(await forgeTokenFacet.balanceOf(users[i], 1000000047)) +
+            Number(
+              await forgeTokenFacet.balanceOf(users[i], CORE_PET_LEGENDARY)
+            ),
+          Number(await forgeTokenFacet.balanceOf(users[i], 1000000048)) +
+            Number(
+              await forgeTokenFacet.balanceOf(users[i], CORE_PET_MYTHICAL)
+            ),
+          Number(await forgeTokenFacet.balanceOf(users[i], 1000000049)) +
+            Number(await forgeTokenFacet.balanceOf(users[i], CORE_PET_GODLIKE)),
+        ]);
+      }
 
-        await forgeFacet.fixInvalidTokenIds(users[i]);
+      await forgeFacet.fixInvalidTokenIds(users);
 
+      for (let i = 0; i < users.length; i++) {
         expect(
           await forgeTokenFacet.balanceOf(users[i], CORE_PET_COMMON)
-        ).to.be.equal(priorBalances[0]);
+        ).to.be.equal(priorBalances[i][0]);
 
         expect(
           await forgeTokenFacet.balanceOf(users[i], CORE_PET_UNCOMMON)
-        ).to.be.equal(priorBalances[1]);
+        ).to.be.equal(priorBalances[i][1]);
 
         expect(
           await forgeTokenFacet.balanceOf(users[i], CORE_PET_RARE)
-        ).to.be.equal(priorBalances[2]);
+        ).to.be.equal(priorBalances[i][2]);
 
         expect(
           await forgeTokenFacet.balanceOf(users[i], CORE_PET_LEGENDARY)
-        ).to.be.equal(priorBalances[3]);
+        ).to.be.equal(priorBalances[i][3]);
 
         expect(
           await forgeTokenFacet.balanceOf(users[i], CORE_PET_MYTHICAL)
-        ).to.be.equal(priorBalances[4]);
+        ).to.be.equal(priorBalances[i][4]);
 
         expect(
           await forgeTokenFacet.balanceOf(users[i], CORE_PET_GODLIKE)
-        ).to.be.equal(priorBalances[5]);
+        ).to.be.equal(priorBalances[i][5]);
       }
     });
   });
