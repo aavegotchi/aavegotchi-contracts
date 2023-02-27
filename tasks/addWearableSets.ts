@@ -295,7 +295,9 @@ task("addWearableSets", "Uploads Wearable Sets to the Aavegotchi Diamond")
       //Add in trait modifiers
       const finalWearableSets = wearableSets.map((set) => addSetTraits(set));
 
-      console.log("wearable sets:", finalWearableSets);
+      console.log(`Adding ${finalWearableSets.length} new sets:`);
+
+      console.log(finalWearableSets);
 
       let signer: Signer;
 
