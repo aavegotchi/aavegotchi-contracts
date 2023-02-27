@@ -5,12 +5,7 @@ import {
   FacetsAndAddSelectors,
 } from "../../../tasks/deployUpgrade";
 
-import {
-  gasPrice,
-  maticDiamondAddress,
-  maticDiamondUpgrader,
-  maticForgeDiamond,
-} from "../../helperFunctions";
+import { maticDiamondUpgrader, maticForgeDiamond } from "../../helperFunctions";
 import { ForgeFacet__factory } from "../../../typechain";
 import { ForgeFacetInterface } from "../../../typechain/ForgeFacet";
 
@@ -38,7 +33,7 @@ export async function upgradeForgeDiamondForPet() {
   const iface = new ethers.utils.Interface(
     ForgeFacet__factory.abi
   ) as ForgeFacetInterface;
-  const payload = iface.encodeFunctionData("fixInvalidTokenIds", users);
+  const payload = iface.encodeFunctionData("fixInvalidTokenIds", [users]);
 
   const joined = convertFacetAndSelectorsToString(facets);
 
