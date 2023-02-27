@@ -12,7 +12,7 @@ export interface WearableSetInput {
   setId?: number | undefined;
   name: string;
   wearableIds: BigNumberish[];
-  traitsBonuses?: [
+  traitsBonuses: [
     BigNumberish,
     BigNumberish,
     BigNumberish,
@@ -50,6 +50,7 @@ export interface AddWearableSetsTaskArgs {
   itemManager: string;
   diamondAddress: string;
   setsFile: string;
+  overrideTraits: "true" | "false";
 }
 
 function assignBrsAndSetPoints(
@@ -140,7 +141,10 @@ function assignBrsAndSetPoints(
   return { brsBonus: brsBonus, setPoints: setPoints };
 }
 
-function addSetTraits(wearableSet: WearableSetInput): WearableSetOutput {
+function addSetTraits(
+  wearableSet: WearableSetInput,
+  overrideTraits: "true" | "false"
+): WearableSetOutput {
   const totalTraits: number[] = [0, 0, 0, 0, 0, 0];
 
   let rarityLevelQuantities = [0, 0, 0, 0, 0, 0];
@@ -250,24 +254,36 @@ function addSetTraits(wearableSet: WearableSetInput): WearableSetOutput {
     else currentIndex++;
   }
 
-  //First iterate through all the traits to determine
-  const finalSetBonus: [
+  let finalSetBonus: [
     BigNumberish,
     BigNumberish,
     BigNumberish,
     BigNumberish,
     BigNumberish
-  ] = [
-    brsBonus,
-    finalSetPoints[0],
-    finalSetPoints[1],
-    finalSetPoints[2],
-    finalSetPoints[3],
-  ];
+  ] = [0, 0, 0, 0, 0];
+
+  if (overrideTraits === "true") {
+    //First iterate through all the traits to determine
+    finalSetBonus = [
+      brsBonus,
+      finalSetPoints[0],
+      finalSetPoints[1],
+      finalSetPoints[2],
+      finalSetPoints[3],
+    ];
+  } else {
+    finalSetBonus = [
+      wearableSet.traitsBonuses[0],
+      wearableSet.traitsBonuses[1],
+      wearableSet.traitsBonuses[2],
+      wearableSet.traitsBonuses[3],
+      wearableSet.traitsBonuses[4],
+    ];
+  }
 
   return {
     ...wearableSet,
-    setTraits: totalTraits,
+    // setTraits: totalTraits,
     traitsBonuses: finalSetBonus,
     allowedCollaterals: [],
   };
@@ -276,6 +292,7 @@ function addSetTraits(wearableSet: WearableSetInput): WearableSetOutput {
 task("addWearableSets", "Uploads Wearable Sets to the Aavegotchi Diamond")
   .addParam("itemManager", "Address of the item manager")
   .addParam("diamondAddress", "Address of the Diamond to add")
+  .addParam("overrideTraits", "Whether or not to automatically generate traits")
   .addParam("setsFile", "File name of the sets to add")
 
   .setAction(
@@ -293,7 +310,9 @@ task("addWearableSets", "Uploads Wearable Sets to the Aavegotchi Diamond")
       let wearableSets: WearableSetInput[] = trimSetNames(sets);
 
       //Add in trait modifiers
-      const finalWearableSets = wearableSets.map((set) => addSetTraits(set));
+      const finalWearableSets = wearableSets.map((set) =>
+        addSetTraits(set, taskArgs.overrideTraits)
+      );
 
       console.log(`Adding ${finalWearableSets.length} new sets:`);
 

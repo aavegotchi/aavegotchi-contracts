@@ -11,6 +11,7 @@ async function addWearableSets() {
     itemManager: itemManager,
     diamondAddress: diamondAddress,
     setsFile: setsFile,
+    overrideTraits: "false",
   };
   await run("addWearableSets", args);
 }
