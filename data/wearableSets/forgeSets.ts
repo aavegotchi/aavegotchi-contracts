@@ -55,14 +55,14 @@ export const sets: WearableSetInput[] = [
   {
     setId: 152,
     name: "Carpentooor",
-    wearableIds: [354, 255, 356, 357],
+    wearableIds: [354, 355, 356, 357],
     traitsBonuses: [3, 1, 1, 0, 0],
     allowedCollaterals: [],
   },
   {
     setId: 153,
     name: "Carpentor",
-    wearableIds: [354, 255, 357],
+    wearableIds: [354, 355, 357],
     traitsBonuses: [3, 1, 1, 0, 0],
     allowedCollaterals: [],
   },
