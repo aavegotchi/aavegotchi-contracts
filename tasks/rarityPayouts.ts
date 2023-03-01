@@ -2084,7 +2084,7 @@ task("rarityPayout")
       const deployerAddress = taskArgs.deployerAddress;
 
       console.log("deployer:", deployerAddress);
-      const accounts = await hre.ethers.getSigners();
+      // const accounts = await hre.ethers.getSigners();
       tiebreakerIndex = taskArgs.tieBreakerIndex;
 
       const testing = ["hardhat", "localhost"].includes(hre.network.name);
