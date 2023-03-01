@@ -3,7 +3,7 @@ import { ContractReceipt } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
 import { BigNumber } from "@ethersproject/bignumber";
 import { parseEther, formatEther } from "@ethersproject/units";
-import { EscrowFacet } from "../typechain";
+import { ERC20, EscrowFacet } from "../typechain";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import {
   maticDiamondAddress,
@@ -2037,6 +2037,10 @@ import {
   RarityFarmingRewardArgs,
   rarityRewards,
 } from "../types";
+import {
+  aavegotchiDiamondAddressMatic,
+  ghstAddress,
+} from "../helpers/constants";
 
 function addCommas(nStr: string) {
   nStr += "";
@@ -2101,12 +2105,10 @@ task("rarityPayout")
         throw Error("Incorrect network selected");
       }
 
-      const managedSigner = new NonceManager(signer);
-
       const rounds = Number(taskArgs.rounds);
 
       const signerAddress = await signer.getAddress();
-      if (signerAddress !== deployerAddress) {
+      if (signerAddress.toLowerCase() !== deployerAddress.toLowerCase()) {
         throw new Error(
           `Deployer ${deployerAddress} does not match signer ${signerAddress}`
         );
@@ -2150,15 +2152,7 @@ task("rarityPayout")
         kinshipGotchis: [],
       };
 
-      // let extraFilter: string = "";
       for (let index = 0; index < leaderboards.length; index++) {
-        // if (
-        //   index === leaderboards.length - 1 ||
-        //   index === leaderboards.length - 2
-        // ) {
-        //   console.log("getting rookies");
-        //   // extraFilter = rookieFilter;
-        // }
         let element: LeaderboardType = leaderboards[index] as LeaderboardType;
 
         const result = stripGotchis(
@@ -2275,8 +2269,31 @@ task("rarityPayout")
         tokenIdsNum = 0;
       }
 
+      const ghstToken = (await hre.ethers.getContractAt(
+        "ERC20",
+        ghstAddress,
+        signer
+      )) as ERC20;
+      const allowance = await ghstToken.allowance(
+        deployerAddress,
+        aavegotchiDiamondAddressMatic
+      );
+
+      if (allowance.lt(hre.ethers.utils.parseEther("375000"))) {
+        console.log("Setting allowance");
+
+        const tx = await ghstToken.approve(
+          aavegotchiDiamondAddressMatic,
+          hre.ethers.constants.MaxUint256
+        );
+        await tx.wait();
+        console.log("Allowance set!");
+      }
+
       for (const [i, txGroup] of txData.entries()) {
         console.log("current index:", i);
+
+        if (i < 25) continue; //use this line to skip indexes where the tx failed.
 
         let tokenIds: string[] = [];
         let amounts: string[] = [];
@@ -2310,10 +2327,9 @@ task("rarityPayout")
 
         const escrowFacet = (
           await hre.ethers.getContractAt("EscrowFacet", diamondAddress)
-        ).connect(managedSigner) as EscrowFacet;
-        const tx = await escrowFacet.batchDepositGHST(tokenIds, amounts, {
-          gasPrice: gasPrice,
-        });
+        ).connect(signer) as EscrowFacet;
+        const tx = await escrowFacet.batchDepositGHST(tokenIds, amounts);
+        console.log("tx hash:", tx.hash);
 
         let receipt: ContractReceipt = await tx.wait();
         console.log("receipt:", receipt.transactionHash);
