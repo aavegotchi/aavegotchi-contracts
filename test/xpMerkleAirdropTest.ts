@@ -18,7 +18,7 @@ describe("Testing Xp Merkle Airdrops", async function () {
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
 
   const testAddress1 = "0xfef3afcc1de62f8a50eebd5eeffa1623b383db9f";
-  const testAddress2 = "0x01c28a969a7d0ba03419c8c80be59928c4732cd9";
+  const testAddress2 = "0xfd41bef1fd45d7db65fb8f4cd3804e4c8daff6b9";
 
   const sampleCoreProp =
     "0x1930189873f7591fa60fc108d632c0f11fc35d8fff3eaccc349d05756c54c321";

@@ -1,6 +1,5 @@
 import { request } from "graphql-request";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { blockNumber } from "../../data/airdrops/calls/raffle5";
 import {
   GotchisOwned,
   LendedGotchis,
