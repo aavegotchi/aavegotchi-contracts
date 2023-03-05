@@ -195,7 +195,7 @@ struct Whitelist {
 
 struct XPMerkleDrops {
     bytes32 root;
-    uint8 propType; //1-sigprop, 2-coreprop
+    uint256 xpAmount; //1-sigprop, 2-coreprop
 }
 
 struct AppStorage {
@@ -308,7 +308,7 @@ struct AppStorage {
     mapping(uint32 => mapping(address => EnumerableSet.UintSet)) whitelistGotchiBorrows; // whitelistId => borrower => gotchiId set
     address wearableDiamond;
     address forgeDiamond;
-  //XP Drops
+    //XP Drops
     mapping(bytes32 => XPMerkleDrops) xpDrops;
     mapping(address => mapping(bytes32 => bool)) xpClaimed;
 }

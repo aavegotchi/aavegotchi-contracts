@@ -1,5 +1,6 @@
 import { request } from "graphql-request";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { blockNumber } from "../../data/airdrops/calls/raffle5";
 import {
   GotchisOwned,
   LendedGotchis,
@@ -17,6 +18,8 @@ export const ethGraphUrl: string =
 
 export const vaultGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/gotchi-vault";
+
+export const blockllamaUrl: string = "https://coins.llama.fi/block/polygon";
 
 interface Gotchi {
   id: string;
@@ -36,26 +39,27 @@ interface UsersWithGotchisRes {
 
 export function getUsersWithGotchisOfAddresses(
   addresses: string[],
+  blockNumber: number,
   index: Number = 0
 ): Promise<UsersWithGotchisRes> {
   let addressesString = addresses.map((e) => `"${e}"`).join(",");
   let query = `
-    {users(skip: ${index} first: 1000 where: {id_in: [${addressesString}]}) {
+    {users(skip: ${index} first: 1000 block:{number:${blockNumber}} where: {id_in: [${addressesString}]}) {
       id
       gotchisLentOut
-      batch1: gotchisOwned(first: 1000) {
+      batch1: gotchisOwned(first: 1000 block:{number:${blockNumber}} ) {
         id
       }
-      batch2: gotchisOwned(first: 1000 skip: 1000) {
+      batch2: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 1000) {
         id
       }
-      batch3: gotchisOwned(first: 1000 skip: 2000) {
+      batch3: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 2000) {
         id
       }
-      batch4: gotchisOwned(first: 1000 skip: 3000) {
+      batch4: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 3000) {
         id
       }
-      batch5: gotchisOwned(first: 1000 skip: 4000) {
+      batch5: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 4000) {
         id
       }
     }}
@@ -264,7 +268,8 @@ export async function getBorrowedGotchis(addresses: string[]) {
 }
 
 export async function getVaultGotchis(
-  addresses: string[]
+  addresses: string[],
+  blockTag: number
 ): Promise<UserGotchisOwned[]> {
   console.log("Fetching Vault subgraph gotchis");
 
@@ -282,7 +287,7 @@ export async function getVaultGotchis(
       .slice(offset, offset + batchSize)
       .map(
         (add: string) => '"' + add.toLowerCase() + '"'
-      )}]},first:${batchSize}) {
+      )}]},first:${batchSize},block:{number:${blockTag}}) {
         id
         gotchis(first:1000) {
           id
@@ -403,6 +408,7 @@ export async function fetchGotchiLending(total: GotchiLending[], skip: number) {
 
 export async function getPolygonAndMainnetGotchis(
   addresses: string[],
+  blockTag: number,
   hre: HardhatRuntimeEnvironment
 ) {
   //Queries
@@ -423,7 +429,11 @@ export async function getPolygonAndMainnetGotchis(
   let prevLength = 0;
   let index = 0;
   do {
-    const result = await getUsersWithGotchisOfAddresses(addresses, index);
+    const result = await getUsersWithGotchisOfAddresses(
+      addresses,
+      blockTag,
+      index
+    );
 
     index += 1000;
     prevLength = gotchiIds.length;
@@ -446,7 +456,10 @@ export async function getPolygonAndMainnetGotchis(
   // Fetch Gotchis in Vault
   for (let index = 0; index < batches; index++) {
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
-    const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(batch);
+    const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(
+      batch,
+      blockTag
+    );
     vaultUsers.forEach((e) => {
       gotchiIds = gotchiIds.concat(e.gotchisOwned.map((f) => f.id));
       fetchedAddresses.push(e.id);

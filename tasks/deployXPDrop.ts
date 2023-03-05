@@ -36,6 +36,7 @@ task("deployXPDrop", "Deploys an onchain airdrop for a certain proposal")
         params: [gameManager],
       });
       signer = await hre.ethers.provider.getSigner(gameManager);
+      //uses relayer signer since it is a game manager
     } else if (hre.network.name === "matic") {
       signer = await getRelayerSigner(hre);
     } else {
@@ -50,7 +51,7 @@ task("deployXPDrop", "Deploys an onchain airdrop for a certain proposal")
 
     const proposalType = propType(prop.title);
     const e =
-      proposalType === "sigprop" ? 1 : proposalType === "coreprop" ? 2 : 0;
+      proposalType === "sigprop" ? 10 : proposalType === "coreprop" ? 20 : 0;
 
     const tx: ContractTransaction = await xpMerkle.createXPDrop(
       prop.id,

@@ -18,6 +18,7 @@ import * as fs from "fs";
 import { propType } from "../helperFunctions";
 import { ethers } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { getDataForTimestamp } from "./queryBlockNumberMatic";
 
 interface GotchiData {
   address: string;
@@ -32,6 +33,7 @@ interface XPProof {
 export const rootPath = "scripts/airdrops/xpDrops/";
 
 export async function queryAllAavegotchis(
+  blockTag: number,
   addresses: string[],
   hre: HardhatRuntimeEnvironment
 ) {
@@ -52,7 +54,11 @@ export async function queryAllAavegotchis(
   let prevLength = 0;
   let allGotchiIds: string[] = [];
   do {
-    const result = await getUsersWithGotchisOfAddresses(addresses, index);
+    const result = await getUsersWithGotchisOfAddresses(
+      addresses,
+      blockTag,
+      index
+    );
 
     index += 1000;
     prevLength = allGotchiIds.length;
@@ -85,7 +91,10 @@ export async function queryAllAavegotchis(
   //get vault gotchis
   for (let index = 0; index < batches; index++) {
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
-    const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(batch);
+    const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(
+      batch,
+      blockTag
+    );
     vaultUsers.forEach((e) => {
       allGotchiIds = allGotchiIds.concat(e.gotchisOwned.map((f) => f.id));
       addGotchiId(
@@ -184,7 +193,11 @@ export async function generateMerkleTree(
   let leaf: string;
 
   const voters: string[] = await getVotingAddresses(propId);
-  const data: GotchiData[] = await queryAllAavegotchis(voters, hre);
+  const propDetails: ProposalDetails = await getProposalDetails(propId);
+  const blockNo = await getDataForTimestamp(propDetails.end);
+  console.log("Using data at block", blockNo);
+
+  const data: GotchiData[] = await queryAllAavegotchis(blockNo, voters, hre);
   //generate leaves
   for (const user of data) {
     leaf = ethers.utils.solidityKeccak256(
@@ -204,7 +217,7 @@ export async function generateMerkleTree(
   });
 
   //write the tree to a file
-  const propDetails: ProposalDetails = await getProposalDetails(propId);
+
   const parentPath = getParentPath(propDetails.title);
   if (!fs.existsSync(parentPath)) {
     //create folder if it doesn't exist

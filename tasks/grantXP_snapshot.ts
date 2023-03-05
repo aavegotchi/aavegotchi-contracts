@@ -32,6 +32,7 @@ export interface ProposalDetails {
   id: string;
   title: string;
   votes: number;
+  end: number;
 }
 
 export async function getProposalDetails(proposalId: string) {
@@ -40,6 +41,7 @@ export async function getProposalDetails(proposalId: string) {
     id
     votes
     title
+    end
   }}
   `;
 

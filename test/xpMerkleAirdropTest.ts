@@ -53,11 +53,11 @@ describe("Testing Xp Merkle Airdrops", async function () {
     const prop: ProposalDetails = await getProposalDetails(sampleCoreProp);
     const propInt =
       propType(prop.title) === "sigprop"
-        ? 1
+        ? 10
         : propType(prop.title) === "coreprop"
-        ? 2
+        ? 20
         : 0;
-    expect(xpDropDetails.propType).to.equal(propInt);
+    expect(xpDropDetails.xpAmount).to.equal(propInt);
   });
 
   it("Cannot claim a non-existent drop", async function () {
