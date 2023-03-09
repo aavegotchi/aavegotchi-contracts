@@ -338,4 +338,17 @@ describe("Aragon Fundraising Close Test", async function () {
     // );
     expect(balanceAfter).to.equal(0);
   });
+
+  it.only("Test", async function () {
+    let canExecute = await votingContract.canExecute(3)
+    expect(canExecute).to.equal(false);
+
+    const voteTime = (await votingContract.voteTime()).toNumber()
+
+    ethers.provider.send('evm_increaseTime', [voteTime + 100])
+    ethers.provider.send('evm_mine')
+
+    canExecute = await votingContract.canExecute(3)
+    expect(canExecute).to.equal(true);
+  });
 });
