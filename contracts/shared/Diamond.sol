@@ -7,25 +7,22 @@ pragma solidity 0.8.1;
 * Implementation of a diamond.
 /******************************************************************************/
 
-import {WearableLibDiamond} from "./libraries/WearableLibDiamond.sol";
-import {DiamondCutFacet} from "../../shared/facets/DiamondCutFacet.sol";
-import {DiamondLoupeFacet} from "../../shared/facets/DiamondLoupeFacet.sol";
-import {OwnershipFacet} from "../../shared/facets/OwnershipFacet.sol";
+import {LibDiamond} from "./libraries/LibDiamond.sol";
+import {DiamondCutFacet} from "./facets/DiamondCutFacet.sol";
+import {DiamondLoupeFacet} from "./facets/DiamondLoupeFacet.sol";
+import {OwnershipFacet} from "./facets/OwnershipFacet.sol";
 
-contract WearableDiamond {
-    constructor(address _contractOwner, address _diamondCutFacet, address _diaomondLoupeFacet, address _ownershipFacet, address _aavegotchiDiamond) {
-        WearableLibDiamond.setContractOwner(_contractOwner);
-        WearableLibDiamond.addDiamondFunctions(_diamondCutFacet, _diaomondLoupeFacet, _ownershipFacet);
-        WearableLibDiamond.DiamondStorage storage ds = WearableLibDiamond.diamondStorage();
-        ds.supportedInterfaces[0xd9b67a26] = true; //erc1155
-        ds.aavegotchiDiamond = _aavegotchiDiamond;
+contract Diamond {
+    constructor(address _contractOwner) {
+        LibDiamond.setContractOwner(_contractOwner);
+        LibDiamond.addDiamondFunctions(address(new DiamondCutFacet()), address(new DiamondLoupeFacet()), address(new OwnershipFacet()));
     }
 
     // Find facet for function that is called and execute the
     // function if a facet is found and return any value.
     fallback() external payable {
-        WearableLibDiamond.DiamondStorage storage ds;
-        bytes32 position = WearableLibDiamond.DIAMOND_STORAGE_POSITION;
+        LibDiamond.DiamondStorage storage ds;
+        bytes32 position = LibDiamond.DIAMOND_STORAGE_POSITION;
         assembly {
             ds.slot := position
         }

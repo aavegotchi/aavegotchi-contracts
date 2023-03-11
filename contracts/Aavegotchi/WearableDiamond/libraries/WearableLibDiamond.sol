@@ -68,7 +68,7 @@ library WearableLibDiamond {
     }
 
     function enforceIsDiamond() internal view {
-        require(msg.sender == AAVEGOTCHI_DIAMOND, "LibDiamond: Caller must be Aavegotchi Diamond");
+        require(msg.sender == diamondStorage().aavegotchiDiamond, "LibDiamond: Caller must be Aavegotchi Diamond");
     }
 
     event DiamondCut(IDiamondCut.FacetCut[] _diamondCut, address _init, bytes _calldata);
