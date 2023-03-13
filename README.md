@@ -13,7 +13,11 @@ We also have one of the frenliest communities in crypto, so don't hesitate to ho
 
 Aavegotchis were born on the Polygon sidechain, and have since been bridged back to Ethereum. Below are the deployed Diamond addresses:
 
-* Polygon Diamond Address: 0x86935F11C86623deC8a25696E1C19a8659CbF95d <a href="https://polygonscan.com/address/0x86935F11C86623deC8a25696E1C19a8659CbF95d">View on Polygonscan </a>
+**As of 11/24/2022, the ERC1155 NFTs previously located in AavegotchiDiamond (0x869) have been migrated to a separate WearableDiamond.**
+
+* Polygon AavegotchiDiamond Address (ERC721 and storage): 0x86935F11C86623deC8a25696E1C19a8659CbF95d <a href="https://polygonscan.com/address/0x86935F11C86623deC8a25696E1C19a8659CbF95d">View on Polygonscan </a>
+
+* Polygon WearableDiamond Address (ERC1155 Items): 0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f <a href="https://polygonscan.com/address/0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f">View on Polygonscan </a>
 
 * Ethereum Diamond Address: 0x1906fd9c4AC440561F7197Da0A4BD2E88DF5fA70 <a href="https://etherscan.io/address/0x1906fd9c4AC440561F7197Da0A4BD2E88DF5fA70">View on Etherscan </a>
 

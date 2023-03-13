@@ -8,13 +8,16 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {GameManager} from "../libraries/LibAppStorage.sol";
+import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 
 contract DAOFacet is Modifiers {
     event DaoTransferred(address indexed previousDao, address indexed newDao);
     event DaoTreasuryTransferred(address indexed previousDaoTreasury, address indexed newDaoTreasury);
+    event ForgeTransferred(address indexed previousForge, address indexed newForge);
     event UpdateCollateralModifiers(int16[NUMERIC_TRAITS_NUM] _oldModifiers, int16[NUMERIC_TRAITS_NUM] _newModifiers);
     event AddCollateralType(AavegotchiCollateralTypeIO _collateralType);
     event AddItemType(ItemType _itemType);
+    event UpdateItemType(uint256 indexed _itemId, ItemType _itemType);
     event CreateHaunt(uint256 indexed _hauntId, uint256 _hauntMaxSize, uint256 _portalPrice, bytes32 _bodyColor);
     event GrantExperience(uint256[] _tokenIds, uint256[] _xpValues);
     event AddWearableSet(WearableSet _wearableSet);
@@ -66,6 +69,13 @@ contract DAOFacet is Modifiers {
         emit DaoTreasuryTransferred(s.daoTreasury, _newDaoTreasury);
         s.dao = _newDao;
         s.daoTreasury = _newDaoTreasury;
+    }
+
+    ///@notice Allow the Diamond owner or DAO to set a new Forge address
+    ///@param _newForge New DAO address
+    function setForge(address _newForge) external onlyDaoOrOwner {
+        emit ForgeTransferred(s.forgeDiamond, _newForge);
+        s.forgeDiamond = _newForge;
     }
 
     ///@notice Allow an item manager to add new collateral types to a haunt
@@ -156,11 +166,7 @@ contract DAOFacet is Modifiers {
     ///@param _hauntMaxSize The maximum number of portals in the new haunt
     ///@param _portalPrice The base price of portals in the new haunt(in $GHST)
     ///@param _bodyColor The universal body color applied to NFTs in the new haunt
-    function createHaunt(
-        uint24 _hauntMaxSize,
-        uint96 _portalPrice,
-        bytes3 _bodyColor
-    ) external onlyDaoOrOwner returns (uint256 hauntId_) {
+    function createHaunt(uint24 _hauntMaxSize, uint96 _portalPrice, bytes3 _bodyColor) external onlyDaoOrOwner returns (uint256 hauntId_) {
         uint256 currentHauntId = s.currentHauntId;
         require(
             s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
@@ -218,11 +224,7 @@ contract DAOFacet is Modifiers {
     ///@param _to The address to mint the items to
     ///@param _itemIds An array containing the identifiers of the items to mint
     ///@param _quantities An array containing the number of items to mint
-    function mintItems(
-        address _to,
-        uint256[] calldata _itemIds,
-        uint256[] calldata _quantities
-    ) external onlyItemManager {
+    function mintItems(address _to, uint256[] calldata _itemIds, uint256[] calldata _quantities) external onlyItemManager {
         require(_itemIds.length == _quantities.length, "DAOFacet: Ids and quantities length must match");
         address sender = LibMeta.msgSender();
         uint256 itemTypesLength = s.itemTypes.length;
@@ -238,7 +240,7 @@ contract DAOFacet is Modifiers {
             LibItems.addToOwner(_to, itemId, quantity);
             s.itemTypes[itemId].totalQuantity = totalQuantity;
         }
-        emit LibERC1155.TransferBatch(sender, address(0), _to, _itemIds, _quantities);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, address(0), _to, _itemIds, _quantities);
         LibERC1155.onERC1155BatchReceived(sender, address(0), _to, _itemIds, _quantities, "");
     }
 
@@ -314,7 +316,19 @@ contract DAOFacet is Modifiers {
             s.erc1155Categories[address(this)][itemId] = _itemTypes[i].category;
             s.itemTypes.push(_itemTypes[i]);
             emit AddItemType(_itemTypes[i]);
-            emit LibERC1155.TransferSingle(LibMeta.msgSender(), address(0), address(0), itemId, 0);
+            IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(LibMeta.msgSender(), address(0), address(0), itemId, 0);
+        }
+    }
+
+    ///@notice Allow an item manager to update item types
+    ///@param _indices An array of item id to be updated
+    ///@param _itemTypes An array of structs where each struct contains details about each item to be updated
+    function updateItemTypes(uint256[] memory _indices, ItemType[] memory _itemTypes) external onlyItemManager {
+        require(_indices.length == _itemTypes.length, "DAOFacet: Incorrect lengths");
+
+        for (uint256 i; i < _indices.length; i++) {
+            s.itemTypes[_indices[i]] = _itemTypes[i];
+            emit UpdateItemType(_indices[i], _itemTypes[i]);
         }
     }
 

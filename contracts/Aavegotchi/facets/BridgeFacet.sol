@@ -9,6 +9,8 @@ import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 
+import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
+
 contract BridgeFacet is Modifiers {
     event WithdrawnBatch(address indexed owner, uint256[] tokenIds);
     event AddedAavegotchiBatch(address indexed owner, uint256[] tokenIds);
@@ -43,10 +45,9 @@ contract BridgeFacet is Modifiers {
             LibItems.removeFromOwner(owner, id, value);
             LibERC1155Marketplace.updateERC1155Listing(address(this), id, owner);
         }
-        emit LibERC1155.TransferBatch(owner, owner, address(0), _ids, _values);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(owner, owner, address(0), _ids, _values);
         emit WithdrawnItems(owner, _ids, _values);
     }
-
 
 ///@notice Allows abatch withdrawal of ERC721 NFTs by the owner
 ///@dev Only 20 NFTs can be withdrawn in a single transaction, will throw if more than that
@@ -82,7 +83,7 @@ contract BridgeFacet is Modifiers {
                 uint256 value = values[i];
                 LibItems.addToOwner(_user, id, value);
             }
-            emit LibERC1155.TransferBatch(msg.sender, address(0), _user, ids, values);
+            IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(msg.sender, address(0), _user, ids, values);
             emit AddedItemsBatch(_user, ids, values);
         } else if (tokenType == ERC721_TOKEN_TYPE) {
             uint256[] memory tokenIds = abi.decode(tokenDepositData, (uint256[]));

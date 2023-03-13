@@ -6,6 +6,8 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
+import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
+
 contract VoucherMigrationFacet is Modifiers {
     event MigrateVouchers(address indexed _owner, uint256[] _ids, uint256[] _values);
 
@@ -30,7 +32,13 @@ contract VoucherMigrationFacet is Modifiers {
                 itemType.totalQuantity = totalQuantity;
                 LibItems.addToOwner(owner, id, value);
             }
-            emit LibERC1155.TransferBatch(sender, address(0), owner, _vouchersOwners[i].ids, _vouchersOwners[i].values);
+            IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(
+                sender,
+                address(0),
+                owner,
+                _vouchersOwners[i].ids,
+                _vouchersOwners[i].values
+            );
             emit MigrateVouchers(owner, _vouchersOwners[i].ids, _vouchersOwners[i].values);
             LibERC1155.onERC1155BatchReceived(sender, address(0), owner, _vouchersOwners[i].ids, _vouchersOwners[i].values, "");
         }

@@ -1,9 +1,22 @@
 import { Signer } from "@ethersproject/abstract-signer";
 import { Contract } from "@ethersproject/contracts";
+import request from "graphql-request";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { snapshotGraphUrl } from "../helpers/constants";
 import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
+import * as fs from "fs";
+import {
+  DefenderRelayProvider,
+  DefenderRelaySigner,
+} from "defender-relay-client/lib/ethers";
 
-export const gasPrice = 270000000000;
+export const gasPrice = 570000000000;
+
+export function delay(milliseconds: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
+}
 
 export function delay(milliseconds: number) {
   return new Promise((resolve) => {
@@ -83,6 +96,8 @@ export const maticFakeGotchiCards =
 
 export const maticFakeGotchiArt = "0xA4E3513c98b30d4D7cc578d2C328Bd550725D1D0";
 
+export const maticForgeDiamond = "0x4fDfc1B53Fd1D80d969C984ba7a8CE4c7bAaD442";
+
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();
 }
@@ -102,7 +117,6 @@ export async function getDiamondSigner(
   useLedger?: boolean
 ) {
   //Instantiate the Signer
-  let signer: Signer;
   const owner = await (
     (await hre.ethers.getContractAt(
       "OwnershipFacet",
@@ -118,6 +132,10 @@ export async function getDiamondSigner(
     });
     return await hre.ethers.getSigner(override ? override : owner);
   } else if (hre.network.name === "matic") {
+    console.log("Diamond signer - Matic");
+
+    return (await hre.ethers.getSigners())[0];
+  } else if (hre.network.name === "tenderly") {
     return (await hre.ethers.getSigners())[0];
   } else {
     throw Error("Incorrect network selected");
@@ -207,4 +225,79 @@ export async function hasDuplicateGotchiIds(_array: string[]) {
     valuesSoFar[value] = true;
   }
   return false;
+}
+
+interface ProposalTitle {
+  proposals: [
+    {
+      title: string;
+    }
+  ];
+}
+export function propType(title: string): "coreprop" | "sigprop" {
+  if (title.includes("AGIP")) {
+    return "coreprop";
+  } else {
+    return "sigprop";
+  }
+}
+
+export interface RelayerInfo {
+  apiKey: string;
+  apiSecret: string;
+}
+
+export const xpRelayerAddress = "0xb6384935d68e9858f8385ebeed7db84fc93b1420";
+
+export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
+  const testing = ["hardhat", "localhost"].includes(hre.network.name);
+  if (testing) {
+    console.log("Using Hardhat");
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [xpRelayerAddress],
+    });
+    return await hre.ethers.provider.getSigner(xpRelayerAddress);
+  } else if (hre.network.name === "matic") {
+    console.log("USING MATIC");
+
+    const credentials: RelayerInfo = {
+      apiKey: process.env.DEFENDER_APIKEY!,
+      apiSecret: process.env.DEFENDER_SECRET!,
+    };
+
+    const provider = new DefenderRelayProvider(credentials);
+    return new DefenderRelaySigner(credentials, provider, {
+      speed: "fast",
+      validForSeconds: 3600,
+    });
+  } else if (hre.network.name === "tenderly") {
+    //impersonate
+    console.log("Using tenderly");
+    return (await hre.ethers.getSigners())[0];
+  } else {
+    throw Error("Incorrect network selected");
+  }
+}
+
+export function logXPRecipients(
+  propType: "sigprop" | "coreprop",
+  title: string,
+  tokenIds: string[],
+  addresses: string[]
+) {
+  const parentDir = `data/XPRecipients/${propType}`;
+  const parentFile = `${parentDir}/${title}.json`;
+  if (!fs.existsSync(parentDir)) {
+    fs.mkdirSync(parentDir, { recursive: true });
+  }
+  if (!fs.existsSync(parentFile)) {
+    const data = {
+      tokenIds,
+      addresses,
+    };
+
+    fs.writeFileSync(parentFile, JSON.stringify(data));
+    console.log("finished writing to file");
+  }
 }

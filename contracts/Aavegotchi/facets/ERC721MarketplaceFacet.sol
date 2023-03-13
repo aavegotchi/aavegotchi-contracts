@@ -380,6 +380,27 @@ contract ERC721MarketplaceFacet is Modifiers {
         handleExecuteERC721Listing(_listingId, _contractAddress, _priceInWei, _tokenId, _recipient);
     }
 
+    ///@param listingId The identifier of the listing to execute
+    ///@param contractAddress The token contract address
+    ///@param priceInWei The price of the item
+    ///@param tokenId the tokenID of the item
+    ///@param recipient The address to receive the NFT
+    struct ExecuteERC721ListingParams {
+        uint256 listingId;
+        address contractAddress;
+        uint256 priceInWei;
+        uint256 tokenId;
+        address recipient;
+    }
+
+    ///@notice execute gotchi listings in batch
+    function batchExecuteERC721Listing(ExecuteERC721ListingParams[] calldata listings) external {
+        require(listings.length <= 10, "ERC721Marketplace: length should be lower than 10");
+        for (uint256 i = 0; i < listings.length; i++) {
+            handleExecuteERC721Listing(listings[i].listingId, listings[i].contractAddress, listings[i].priceInWei, listings[i].tokenId, listings[i].recipient);
+        }
+    }
+
     function handleExecuteERC721Listing(
         uint256 _listingId,
         address _contractAddress,

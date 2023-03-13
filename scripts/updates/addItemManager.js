@@ -35,6 +35,8 @@ async function main() {
     itemManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
   }
 
+  //Also added 0xb6384935d68e9858f8385ebeed7db84fc93b1420 (defender) as item manager
+
   let itemManagers = [itemManager];
   console.log("Adding item managers");
 
