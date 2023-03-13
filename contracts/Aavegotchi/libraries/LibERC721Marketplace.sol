@@ -2,6 +2,7 @@
 pragma solidity 0.8.1;
 
 import {LibAppStorage, AppStorage, ListingListItem, ERC721Listing} from "./LibAppStorage.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 import "../../shared/interfaces/IERC721.sol";
 
@@ -10,6 +11,7 @@ import "../../shared/interfaces/IERC721.sol";
 library LibERC721Marketplace {
     event ERC721ListingCancelled(uint256 indexed listingId, uint256 category, uint256 time);
     event ERC721ListingRemoved(uint256 indexed listingId, uint256 category, uint256 time);
+    event ERC721ListingPriceUpdate(uint256 indexed listingId, uint256 priceInWei, uint256 time);
 
     function cancelERC721Listing(uint256 _listingId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
@@ -139,5 +141,19 @@ library LibERC721Marketplace {
         if (owner != listing.seller) {
             LibERC721Marketplace.cancelERC721Listing(listingId, listing.seller);
         }
+    }
+
+    function updateERC721ListingPrice(uint256 _listingId, uint256 _priceInWei) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        ERC721Listing storage listing = s.erc721Listings[_listingId];
+        require(listing.timeCreated != 0, "ERC721Marketplace: listing not found");
+        require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
+        require(listing.cancelled == false, "ERC721Marketplace: listing already cancelled");
+        require(_priceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
+        require(listing.seller == LibMeta.msgSender(), "ERC721Marketplace: Not seller of ERC721 listing");
+
+        s.erc721Listings[_listingId].priceInWei = _priceInWei;
+
+        emit ERC721ListingPriceUpdate(_listingId, _priceInWei, block.timestamp);
     }
 }

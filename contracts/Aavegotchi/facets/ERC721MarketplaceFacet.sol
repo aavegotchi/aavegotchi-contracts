@@ -39,8 +39,6 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@dev Is sent in tandem with ERC721ExecutedListing
     event ERC721ExecutedToRecipient(uint256 indexed listingId, address indexed buyer, address indexed recipient);
 
-    event ERC721ListingPriceUpdate(uint256 indexed listingId, uint256 priceInWei, uint256 time);
-
     ///@notice Get an aavegotchi listing details through an identifier
     ///@dev Will throw if the listing does not exist
     ///@param _listingId The identifier of the listing to query
@@ -332,27 +330,14 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@param _listingId The identifier of the listing to execute
     ///@param _priceInWei The price of the item
     function updateERC721ListingPrice(uint256 _listingId, uint256 _priceInWei) external {
-        _updateERC721ListingPrice(_listingId, _priceInWei);
+        LibERC721Marketplace.updateERC721ListingPrice(_listingId, _priceInWei);
     }
 
     function batchUpdateERC721ListingPrice(uint256[] calldata _listingIds, uint256[] calldata _priceInWeis) external {
         require(_listingIds.length == _priceInWeis.length, "ERC721Marketplace: listing ids not same length as prices");
         for (uint256 i; i < _listingIds.length; i++) {
-            _updateERC721ListingPrice(_listingIds[i], _priceInWeis[i]);
+            LibERC721Marketplace.updateERC721ListingPrice(_listingIds[i], _priceInWeis[i]);
         }
-    }
-
-    function _updateERC721ListingPrice(uint256 _listingId, uint256 _priceInWei) internal {
-        ERC721Listing storage listing = s.erc721Listings[_listingId];
-        require(listing.timeCreated != 0, "ERC721Marketplace: listing not found");
-        require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
-        require(listing.cancelled == false, "ERC721Marketplace: listing already cancelled");
-        require(_priceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
-        require(listing.seller == LibMeta.msgSender(), "ERC721Marketplace: Not seller of ERC721 listing");
-
-        s.erc721Listings[_listingId].priceInWei = _priceInWei;
-
-        emit ERC721ListingPriceUpdate(_listingId, _priceInWei, block.timestamp);
     }
 
     ///@notice Allow an ERC721 owner to cancel his NFT listing by providing the NFT contract address and identifier
