@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
+import {Modifiers} from "../libraries/LibAppStorage.sol";
 import {LibERC1155Marketplace, ERC1155Listing} from "../libraries/LibERC1155Marketplace.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
@@ -43,81 +43,6 @@ contract ERC1155MarketplaceFacet is Modifiers {
     event ERC1155ListingCancelled(uint256 indexed listingId);
 
     event ChangedListingFee(uint256 listingFeeInWei);
-
-    ///@notice Get the standard listing fee in wei
-    ///@return The listing fee(Fee for listing NFTs on the baazaar)
-    function getListingFeeInWei() external view returns (uint256) {
-        return s.listingFeeInWei;
-    }
-
-    ///@notice Query the details of an ERC1155 listing
-    ///@param _listingId The identifier of the listing to be queried
-    ///@return listing_ A struct containing details of the ERC1155 listing being queried
-
-    function getERC1155Listing(uint256 _listingId) external view returns (ERC1155Listing memory listing_) {
-        listing_ = s.erc1155Listings[_listingId];
-    }
-
-    ///@notice Get an ERC721 listing details through an NFT
-    ///@dev Will throw if the listing does not exist
-    ///@param _erc1155TokenAddress The address of the NFT associated with the listing
-    ///@param _erc1155TypeId The identifier of the NFT associated with the listing
-    ///@param _owner The owner of the NFT associated with the listing
-    ///@return listing_ A struct containing certain details about the ERC1155 listing associated with an NFT of contract address `_erc721TokenAddress` and identifier `_erc721TokenId`
-    function getERC1155ListingFromToken(
-        address _erc1155TokenAddress,
-        uint256 _erc1155TypeId,
-        address _owner
-    ) external view returns (ERC1155Listing memory listing_) {
-        uint256 listingId = s.erc1155TokenToListingId[_erc1155TokenAddress][_erc1155TypeId][_owner];
-        listing_ = s.erc1155Listings[listingId];
-    }
-
-    ///@notice Query a certain amount of ERC1155 listings created by an address based on their category and sortings
-    ///@param _owner Creator of the listings to query
-    ///@param _category Category of listings to query // 0 is wearable, 1 is badge, 2 is consumable, 3 is tickets
-    ///@param _sort Sortings of listings to query // "listed" or "purchased"
-    ///@param _length How many ERC1155 listings to return
-    ///@return listings_ An array of structs, each struct containing details about each listing being returned
-    function getOwnerERC1155Listings(
-        address _owner,
-        uint256 _category,
-        string memory _sort,
-        uint256 _length // how many items to get back or the rest available
-    ) external view returns (ERC1155Listing[] memory listings_) {
-        uint256 listingId = s.erc1155OwnerListingHead[_owner][_category][_sort];
-        listings_ = new ERC1155Listing[](_length);
-        uint256 listIndex;
-        for (; listingId != 0 && listIndex < _length; listIndex++) {
-            listings_[listIndex] = s.erc1155Listings[listingId];
-            listingId = s.erc1155OwnerListingListItem[_sort][listingId].childListingId;
-        }
-        assembly {
-            mstore(listings_, listIndex)
-        }
-    }
-
-    ///@notice Query a certain amount of ERC1155 listings
-    ///@param _category Category of listings to query // 0 is wearable, 1 is badge, 2 is consumable, 3 is tickets
-    ///@param _sort Sortings of listings to query  // "listed" or "purchased"
-    ///@param _length How many listings to return
-    ///@return listings_ An array of structs, each struct containing details about each listing being returned
-    function getERC1155Listings(
-        uint256 _category, // // 0 is wearable, 1 is badge, 2 is consumable, 3 is tickets
-        string memory _sort, // "listed" or "purchased"
-        uint256 _length // how many items to get back or the rest available
-    ) external view returns (ERC1155Listing[] memory listings_) {
-        uint256 listingId = s.erc1155ListingHead[_category][_sort];
-        listings_ = new ERC1155Listing[](_length);
-        uint256 listIndex;
-        for (; listingId != 0 && listIndex < _length; listIndex++) {
-            listings_[listIndex] = s.erc1155Listings[listingId];
-            listingId = s.erc1155ListingListItem[_sort][listingId].childListingId;
-        }
-        assembly {
-            mstore(listings_, listIndex)
-        }
-    }
 
     ///@notice Allow the aavegotchi diamond owner or DAO to set the default listing fee
     ///@param _listingFeeInWei The new listing fee in wei
@@ -168,12 +93,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _erc1155TypeId The identifier of the NFT to be listed
     ///@param _quantity The amount of NFTs to be listed
     ///@param _priceInWei The cost price of the NFT individually in $GHST
-    function setERC1155Listing(
-        address _erc1155TokenAddress,
-        uint256 _erc1155TypeId,
-        uint256 _quantity,
-        uint256 _priceInWei
-    ) external {
+    function setERC1155Listing(address _erc1155TokenAddress, uint256 _erc1155TypeId, uint256 _quantity, uint256 _priceInWei) external {
         createERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _quantity, _priceInWei, [10000, 0], address(0));
     }
 
@@ -266,11 +186,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _listingId The identifier of the listing to execute
     ///@param _quantity The amount of ERC1155 NFTs execute/buy
     ///@param _priceInWei the cost price of the ERC1155 NFTs individually
-    function executeERC1155Listing(
-        uint256 _listingId,
-        uint256 _quantity,
-        uint256 _priceInWei
-    ) external {
+    function executeERC1155Listing(uint256 _listingId, uint256 _quantity, uint256 _priceInWei) external {
         ERC1155Listing storage listing = s.erc1155Listings[_listingId];
         handleExecuteERC1155Listing(_listingId, listing.erc1155TokenAddress, listing.erc1155TypeId, _quantity, _priceInWei, LibMeta.msgSender());
     }
@@ -313,7 +229,14 @@ contract ERC1155MarketplaceFacet is Modifiers {
     function batchExecuteERC1155Listing(ExecuteERC1155ListingParams[] calldata listings) external {
         require(listings.length <= 10, "ERC1155Marketplace: length should be lower than 10");
         for (uint256 i = 0; i < listings.length; i++) {
-            handleExecuteERC1155Listing(listings[i].listingId, listings[i].contractAddress, listings[i].itemId, listings[i].quantity, listings[i].priceInWei, listings[i].recipient);
+            handleExecuteERC1155Listing(
+                listings[i].listingId,
+                listings[i].contractAddress,
+                listings[i].itemId,
+                listings[i].quantity,
+                listings[i].priceInWei,
+                listings[i].recipient
+            );
         }
     }
 
@@ -418,11 +341,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _erc1155TokenAddress Contract address of the ERC1155 token
     ///@param _erc1155TypeId Identifier of the ERC1155 token
     ///@param _owner Owner of the ERC1155 token
-    function updateERC1155Listing(
-        address _erc1155TokenAddress,
-        uint256 _erc1155TypeId,
-        address _owner
-    ) external {
+    function updateERC1155Listing(address _erc1155TokenAddress, uint256 _erc1155TypeId, address _owner) external {
         LibERC1155Marketplace.updateERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _owner);
     }
 
@@ -430,11 +349,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _erc1155TokenAddress Contract address of the ERC1155 token
     ///@param _erc1155TypeIds An array containing the identifiers of the ERC1155 tokens to update
     ///@param _owner Owner of the ERC1155 tokens
-    function updateBatchERC1155Listing(
-        address _erc1155TokenAddress,
-        uint256[] calldata _erc1155TypeIds,
-        address _owner
-    ) external {
+    function updateBatchERC1155Listing(address _erc1155TokenAddress, uint256[] calldata _erc1155TypeIds, address _owner) external {
         for (uint256 i; i < _erc1155TypeIds.length; i++) {
             LibERC1155Marketplace.updateERC1155Listing(_erc1155TokenAddress, _erc1155TypeIds[i], _owner);
         }
