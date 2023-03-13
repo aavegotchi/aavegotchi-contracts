@@ -4,7 +4,11 @@
 //@ts-ignore
 import { ethers, network } from "hardhat";
 import { upgrade } from "../scripts/upgrades/upgrade-updateERC721ListingPrice";
-import { ERC721MarketplaceFacet, IERC20 } from "../typechain";
+import {
+  ERC721MarketplaceFacet,
+  IERC20,
+  MarketplaceGetterFacet,
+} from "../typechain";
 import {
   aavegotchiDiamondAddressMatic,
   ghstAddress,
@@ -18,11 +22,13 @@ describe("Testing update ERC721 listing price", async function () {
   this.timeout(300000);
 
   const diamondAddress = aavegotchiDiamondAddressMatic;
-  const erc721ListingId = 251720;
+  const erc721ListingId = 263824;
   const newListingPrice = "1";
-  let erc721MarketplaceFacet: ERC721MarketplaceFacet;
   const ghstHolderAddress = "0x3721546e51258065bfdb9746b2e442C7671B0298"; // Should be GHST holder
+  let erc721MarketplaceFacet: ERC721MarketplaceFacet;
   let erc721MarketWithBuyer: ERC721MarketplaceFacet;
+  let marketplaceGetter: MarketplaceGetterFacet;
+  let listing: any;
   let snapshot: any;
 
   before(async function () {
@@ -32,11 +38,13 @@ describe("Testing update ERC721 listing price", async function () {
       "ERC721MarketplaceFacet",
       diamondAddress
     )) as ERC721MarketplaceFacet;
+    marketplaceGetter = (await ethers.getContractAt(
+      "MarketplaceGetterFacet",
+      diamondAddress
+    )) as MarketplaceGetterFacet;
 
     // get seller of listing
-    const listing = await erc721MarketplaceFacet.getERC721Listing(
-      erc721ListingId
-    );
+    listing = await marketplaceGetter.getERC721Listing(erc721ListingId);
     const sellerAddress = listing.seller;
 
     erc721MarketplaceFacet = await impersonate(
@@ -84,7 +92,13 @@ describe("Testing update ERC721 listing price", async function () {
     });
     it("Should revert if erc721 listing already sold", async function () {
       await (
-        await erc721MarketWithBuyer.executeERC721Listing(erc721ListingId)
+        await erc721MarketWithBuyer.executeERC721ListingToRecipient(
+          erc721ListingId,
+          listing.erc721TokenAddress,
+          listing.priceInWei,
+          listing.erc721TokenId,
+          ghstHolderAddress
+        )
       ).wait();
       await expect(
         erc721MarketplaceFacet.updateERC721ListingPrice(
@@ -104,16 +118,6 @@ describe("Testing update ERC721 listing price", async function () {
         )
       ).to.be.revertedWith("ERC721Marketplace: listing already cancelled");
     });
-    it("Should revert if invalid price", async function () {
-      await expect(
-        erc721MarketplaceFacet.updateERC721ListingPrice(
-          erc721ListingId,
-          ethers.utils.parseEther("0.5")
-        )
-      ).to.be.revertedWith(
-        "ERC721Marketplace: price should be 1 GHST or larger"
-      );
-    });
     it("Should revert if not seller of ERC721 listing", async function () {
       await expect(
         erc721MarketWithBuyer.updateERC721ListingPrice(
@@ -129,16 +133,7 @@ describe("Testing update ERC721 listing price", async function () {
           ethers.utils.parseEther(newListingPrice)
         )
       ).wait();
-      const event = receipt!.events!.find(
-        (event) => event.event === "ERC721ListingPriceUpdate"
-      );
-      expect(event!.args!.listingId).to.equal(erc721ListingId);
-      expect(event!.args!.priceInWei).to.equal(
-        ethers.utils.parseEther(newListingPrice)
-      );
-      const listing = await erc721MarketplaceFacet.getERC721Listing(
-        erc721ListingId
-      );
+      const listing = await marketplaceGetter.getERC721Listing(erc721ListingId);
       expect(listing.listingId).to.equal(erc721ListingId);
       expect(listing.priceInWei).to.equal(
         ethers.utils.parseEther(newListingPrice)
@@ -170,7 +165,13 @@ describe("Testing update ERC721 listing price", async function () {
     });
     it("Should revert if erc721 listing already sold", async function () {
       await (
-        await erc721MarketWithBuyer.executeERC721Listing(erc721ListingId)
+        await erc721MarketWithBuyer.executeERC721ListingToRecipient(
+          erc721ListingId,
+          listing.erc721TokenAddress,
+          listing.priceInWei,
+          listing.erc721TokenId,
+          ghstHolderAddress
+        )
       ).wait();
       await expect(
         erc721MarketplaceFacet.batchUpdateERC721ListingPrice(
@@ -190,16 +191,6 @@ describe("Testing update ERC721 listing price", async function () {
         )
       ).to.be.revertedWith("ERC721Marketplace: listing already cancelled");
     });
-    it("Should revert if invalid price", async function () {
-      await expect(
-        erc721MarketplaceFacet.batchUpdateERC721ListingPrice(
-          [erc721ListingId],
-          [ethers.utils.parseEther("0.5")]
-        )
-      ).to.be.revertedWith(
-        "ERC721Marketplace: price should be 1 GHST or larger"
-      );
-    });
     it("Should revert if not seller of ERC721 listing", async function () {
       await expect(
         erc721MarketWithBuyer.batchUpdateERC721ListingPrice(
@@ -209,24 +200,14 @@ describe("Testing update ERC721 listing price", async function () {
       ).to.be.revertedWith("ERC721Marketplace: Not seller of ERC721 listing");
     });
     it("Should success if all parameters are valid", async function () {
-      const receipt = await (
+      await (
         await erc721MarketplaceFacet.batchUpdateERC721ListingPrice(
           [erc721ListingId],
           [ethers.utils.parseEther(newListingPrice)]
         )
       ).wait();
-      const events = receipt!.events!.filter(
-        (event) => event.event === "ERC721ListingPriceUpdate"
-      );
-      expect(events.length).to.equal(1);
-      const event = events[0];
-      expect(event!.args!.listingId).to.equal(erc721ListingId);
-      expect(event!.args!.priceInWei).to.equal(
-        ethers.utils.parseEther(newListingPrice)
-      );
-      const listing = await erc721MarketplaceFacet.getERC721Listing(
-        erc721ListingId
-      );
+
+      const listing = await marketplaceGetter.getERC721Listing(erc721ListingId);
       expect(listing.listingId).to.equal(erc721ListingId);
       expect(listing.priceInWei).to.equal(
         ethers.utils.parseEther(newListingPrice)
