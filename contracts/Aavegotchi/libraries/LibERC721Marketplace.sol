@@ -149,7 +149,6 @@ library LibERC721Marketplace {
         require(listing.timeCreated != 0, "ERC721Marketplace: listing not found");
         require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
         require(listing.cancelled == false, "ERC721Marketplace: listing already cancelled");
-        require(_priceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
         require(listing.seller == LibMeta.msgSender(), "ERC721Marketplace: Not seller of ERC721 listing");
 
         s.erc721Listings[_listingId].priceInWei = _priceInWei;

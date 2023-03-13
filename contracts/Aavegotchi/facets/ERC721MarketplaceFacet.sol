@@ -331,12 +331,21 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@param _priceInWei The price of the item
     function updateERC721ListingPrice(uint256 _listingId, uint256 _priceInWei) external {
         LibERC721Marketplace.updateERC721ListingPrice(_listingId, _priceInWei);
+        if (s.listingFeeInWei > 0) {
+            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, LibMeta.msgSender(), s.ghstContract);
+        }
     }
 
     function batchUpdateERC721ListingPrice(uint256[] calldata _listingIds, uint256[] calldata _priceInWeis) external {
         require(_listingIds.length == _priceInWeis.length, "ERC721Marketplace: listing ids not same length as prices");
+
         for (uint256 i; i < _listingIds.length; i++) {
             LibERC721Marketplace.updateERC721ListingPrice(_listingIds[i], _priceInWeis[i]);
+        }
+
+        if (s.listingFeeInWei > 0) {
+            uint256 totalFee = s.listingFeeInWei * _listingIds.length;
+            LibSharedMarketplace.burnListingFee(totalFee, LibMeta.msgSender(), s.ghstContract);
         }
     }
 
