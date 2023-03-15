@@ -29,6 +29,11 @@ export async function upgrade() {
         "function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view",
       ],
     },
+    {
+      facetName: "ERC1155MarketplaceFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);

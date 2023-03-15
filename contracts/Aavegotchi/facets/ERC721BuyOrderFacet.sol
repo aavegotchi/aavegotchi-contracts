@@ -9,6 +9,7 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {Modifiers, ERC721BuyOrder} from "../libraries/LibAppStorage.sol";
+import {BaazaarSplit, LibSharedMarketplace, SplitAddresses} from "../libraries/LibSharedMarketplace.sol";
 
 contract ERC721BuyOrderFacet is Modifiers {
     event ERC721BuyOrderAdd(
@@ -36,19 +37,17 @@ contract ERC721BuyOrderFacet is Modifiers {
         require(buyOrder_.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
     }
 
-    function getERC721BuyOrderIdsByTokenId(address _erc721TokenAddress, uint256 _erc721TokenId)
-        external
-        view
-        returns (uint256[] memory buyOrderIds_)
-    {
+    function getERC721BuyOrderIdsByTokenId(
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId
+    ) external view returns (uint256[] memory buyOrderIds_) {
         buyOrderIds_ = s.erc721TokenToBuyOrderIds[_erc721TokenAddress][_erc721TokenId];
     }
 
-    function getERC721BuyOrdersByTokenId(address _erc721TokenAddress, uint256 _erc721TokenId)
-        external
-        view
-        returns (ERC721BuyOrder[] memory buyOrders_)
-    {
+    function getERC721BuyOrdersByTokenId(
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId
+    ) external view returns (ERC721BuyOrder[] memory buyOrders_) {
         uint256[] memory buyOrderIds = s.erc721TokenToBuyOrderIds[_erc721TokenAddress][_erc721TokenId];
         uint256 length = buyOrderIds.length;
         buyOrders_ = new ERC721BuyOrder[](length);
@@ -152,25 +151,27 @@ contract ERC721BuyOrderFacet is Modifiers {
 
         LibERC721Marketplace.cancelERC721Listing(erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId, sender);
 
-        uint256 daoShare = erc721BuyOrder.priceInWei / 100;
-        uint256 pixelCraftShare = (erc721BuyOrder.priceInWei * 2) / 100;
-        //AGIP6 adds on 0.5%
-        uint256 playerRewardsShare = erc721BuyOrder.priceInWei / 200;
+        BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(erc721BuyOrder.priceInWei, new uint256[](0), [10000, 0]);
 
-        uint256 transferAmount = erc721BuyOrder.priceInWei - (daoShare + pixelCraftShare + playerRewardsShare);
-        LibERC20.transfer(s.ghstContract, s.pixelCraft, pixelCraftShare);
-        LibERC20.transfer(s.ghstContract, s.daoTreasury, daoShare);
-        LibERC20.transfer(s.ghstContract, sender, transferAmount);
-        //AGIP6 adds on 0.5%
-        LibERC20.transfer((s.ghstContract), s.rarityFarming, playerRewardsShare);
+        LibSharedMarketplace.transferSales(
+            SplitAddresses({
+                ghstContract: s.ghstContract,
+                buyer: address(this),
+                seller: sender,
+                affiliate: address(0),
+                royalties: new address[](0),
+                daoTreasury: s.daoTreasury,
+                pixelCraft: s.pixelCraft,
+                rarityFarming: s.rarityFarming
+            }),
+            split
+        );
 
         s.aavegotchis[erc721BuyOrder.erc721TokenId].locked = false;
 
-        //To do (Nick) -- Explain why this is necessary
         if (erc721BuyOrder.erc721TokenAddress == address(this)) {
             LibAavegotchi.transfer(sender, erc721BuyOrder.buyer, erc721BuyOrder.erc721TokenId);
         } else {
-            // GHSTStakingDiamond
             IERC721(erc721BuyOrder.erc721TokenAddress).safeTransferFrom(sender, erc721BuyOrder.buyer, erc721BuyOrder.erc721TokenId);
         }
 
