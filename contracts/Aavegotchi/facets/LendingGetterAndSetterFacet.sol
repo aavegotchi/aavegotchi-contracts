@@ -195,6 +195,14 @@ contract LendingGetterAndSetterFacet is Modifiers {
         }
     }
 
+    function getLentTokenIdsOfLender(address _lender) external view returns (uint32[] memory tokenIds_) {
+        tokenIds_ = s.lentTokenIds[_lender];
+    }
+
+    function balanceOfLentGotchis(address _lender) external view returns (uint256 balance_) {
+        balance_ = s.lentTokenIds[_lender].length;
+    }
+
     function getGotchiLendingsLength() external view returns (uint256) {
         return s.nextGotchiListingId;
     }

@@ -8,6 +8,8 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
+import "../../Aavegotchi/WearableDiamond/interfaces/IEventHandlerFacet.sol";
+
 contract ItemsTransferFacet is Modifiers {
     /**
         @notice Transfers `_value` amount of an `_id` from the `_from` address to the `_to` address specified (with safety call).
@@ -36,7 +38,7 @@ contract ItemsTransferFacet is Modifiers {
         LibItems.removeFromOwner(_from, _id, _value);
         LibItems.addToOwner(_to, _id, _value);
         LibERC1155Marketplace.updateERC1155Listing(address(this), _id, _from);
-        emit LibERC1155.TransferSingle(sender, _from, _to, _id, _value);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, _from, _to, _id, _value);
         LibERC1155.onERC1155Received(sender, _from, _to, _id, _value, _data);
     }
 
@@ -74,7 +76,7 @@ contract ItemsTransferFacet is Modifiers {
             LibItems.addToOwner(_to, id, value);
             LibERC1155Marketplace.updateERC1155Listing(address(this), id, _from);
         }
-        emit LibERC1155.TransferBatch(sender, _from, _to, _ids, _values);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, _from, _to, _ids, _values);
         LibERC1155.onERC1155BatchReceived(sender, _from, _to, _ids, _values, _data);
     }
 
@@ -97,7 +99,7 @@ contract ItemsTransferFacet is Modifiers {
         LibItems.removeFromOwner(_from, _id, _value);
         LibItems.addToParent(_toContract, _toTokenId, _id, _value);
         LibERC1155Marketplace.updateERC1155Listing(address(this), _id, _from);
-        emit LibERC1155.TransferSingle(sender, _from, _toContract, _id, _value);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, _from, _toContract, _id, _value);
         emit LibERC1155.TransferToParent(_toContract, _toTokenId, _id, _value);
     }
 
@@ -150,7 +152,7 @@ contract ItemsTransferFacet is Modifiers {
             LibERC1155Marketplace.updateERC1155Listing(address(this), id, _from);
             emit LibERC1155.TransferToParent(_toContract, _toTokenId, id, value);
         }
-        emit LibERC1155.TransferBatch(sender, _from, _toContract, _ids, _values);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, _from, _toContract, _ids, _values);
     }
 
     function transferFromTokenApproved(
@@ -198,7 +200,7 @@ contract ItemsTransferFacet is Modifiers {
         transferFromTokenApproved(sender, _fromContract, _fromTokenId);
         LibItems.removeFromParent(_fromContract, _fromTokenId, _id, _value);
         LibItems.addToOwner(_to, _id, _value);
-        emit LibERC1155.TransferSingle(sender, _fromContract, _to, _id, _value);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, _fromContract, _to, _id, _value);
         emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, _id, _value);
     }
 
@@ -230,7 +232,7 @@ contract ItemsTransferFacet is Modifiers {
             LibItems.addToOwner(_to, id, value);
             emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, id, value);
         }
-        emit LibERC1155.TransferBatch(sender, _fromContract, _to, _ids, _values);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, _fromContract, _to, _ids, _values);
     }
 
     /// @notice Transfer item from an ERC721 parent token  to another ERC721 parent token
@@ -257,7 +259,7 @@ contract ItemsTransferFacet is Modifiers {
         transferFromTokenApproved(sender, _fromContract, _fromTokenId);
         LibItems.removeFromParent(_fromContract, _fromTokenId, _id, _value);
         LibItems.addToParent(_toContract, _toTokenId, _id, _value);
-        emit LibERC1155.TransferSingle(sender, _fromContract, _toContract, _id, _value);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, _fromContract, _toContract, _id, _value);
         emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, _id, _value);
         emit LibERC1155.TransferToParent(_toContract, _toTokenId, _id, _value);
     }
@@ -293,7 +295,7 @@ contract ItemsTransferFacet is Modifiers {
             emit LibERC1155.TransferFromParent(_fromContract, _fromTokenId, id, value);
             emit LibERC1155.TransferToParent(_toContract, _toTokenId, id, value);
         }
-        emit LibERC1155.TransferBatch(sender, _fromContract, _toContract, _ids, _values);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, _fromContract, _toContract, _ids, _values);
     }
 
     /**
@@ -351,7 +353,7 @@ contract ItemsTransferFacet is Modifiers {
             LibItems.addToOwner(_to, itemId, value);
 
             emit LibERC1155.TransferFromParent(sender, _tokenId, itemId, value);
-            emit LibERC1155.TransferSingle(sender, address(this), _to, itemId, value);
+            IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, address(this), _to, itemId, value);
         }
     }
 
@@ -371,6 +373,6 @@ contract ItemsTransferFacet is Modifiers {
             LibItems.addToOwner(_to, itemId, value);
         }
 
-        emit LibERC1155.TransferBatch(sender, address(this), sender, _itemIds, _values);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, address(this), sender, _itemIds, _values);
     }
 }

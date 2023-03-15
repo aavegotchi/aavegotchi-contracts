@@ -9,6 +9,8 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 
+import { ForgeFacet } from "../ForgeDiamond/facets/ForgeFacet.sol";
+
 // import "hardhat/console.sol";
 
 contract CollateralFacet is Modifiers {
@@ -166,6 +168,9 @@ contract CollateralFacet is Modifiers {
             delete s.aavegotchiNamesUsed[LibAavegotchi.validateAndLowerName(name)];
         }
         delete s.aavegotchis[_tokenId];
+
+        ForgeFacet forgeFacet = ForgeFacet(s.forgeDiamond);
+        forgeFacet.mintEssence(owner);
     }
     
 ///@notice Set the SVG id for a supported/existing collateral

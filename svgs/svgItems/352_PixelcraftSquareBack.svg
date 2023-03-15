@@ -1,0 +1,1 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path d="M8 0H0v8h8V0z"/><linearGradient id="A" gradientUnits="userSpaceOnUse" x1="-307.551" y1="-62.342" x2="-302.449" y2="-55.658" gradientTransform="matrix(0 -1 -1 0 -55 -301)"><stop offset="0" stop-color="#ff0"/><stop offset=".8" stop-color="#f0f"/></linearGradient><path d="M1 7h6V1H1v6z" fill="url(#A)"/></svg>

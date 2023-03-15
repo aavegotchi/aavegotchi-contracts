@@ -1,25 +1,29 @@
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { gasPrice, maticDiamondAddress } from "../scripts/helperFunctions";
+import {
+  logXPRecipients,
+  maticDiamondAddress,
+  propType,
+  xpRelayerAddress,
+} from "../scripts/helperFunctions";
 import { Signer } from "@ethersproject/abstract-signer";
 import { DAOFacet } from "../typechain";
-import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
+import { ContractTransaction } from "@ethersproject/contracts";
 
 import { getPolygonAndMainnetGotchis } from "../scripts/query/queryAavegotchis";
 import request from "graphql-request";
-import { NonceManager } from "@ethersproject/experimental";
+import { getRelayerSigner } from "../scripts/helperFunctions";
+import { snapshotGraphUrl } from "../helpers/constants";
 
 export const currentOverrides: string[] = [
-  "0xC0Ab521Fa3FF034029C206eEBbb481E06c8d8BB5",
-  "0xA2faa3405a734c04aE713AAa837E6cEcC2cAee9F",
-  "0x77F4e1c69EfB78625244DD1c7d9e05B7411a7768",
-  "0xb9ff017c875f5c39d0018d1df86fbd92943d5b82",
-  "0x1EA25519e4829Bf579a58F133C4bF31e7e6F7565",
+  "0x4d6e3Ff00F77F6e746eBF7f6827800eB99e36910",
+  "0xcc65af377188153f157878705ba0623a5646c0ac",
+  "0x3ca2E945a3bc25399c75f49e9e45D34d897c1041",
+  "0x2F204531C9906FbAa4c8A756e226b2678eb07d02",
 ];
 
 export interface GrantXPSnapshotTaskArgs {
   proposalId: string;
-  propType: "coreprop" | "sigprop";
   batchSize: string;
 }
 
@@ -32,8 +36,6 @@ export interface ProposalDetails {
 interface Voter {
   voter: string;
 }
-
-const snapshotHub = "https://hub.snapshot.org/graphql";
 
 const graphqlRequest = (proposalId: string) => {
   return `
@@ -58,7 +60,7 @@ const graphqlRequest = (proposalId: string) => {
 
 async function getVotingAddresses(proposalId: string) {
   let votingAddresses: string[] = [];
-  const addresses = await request(snapshotHub, graphqlRequest(proposalId));
+  const addresses = await request(snapshotGraphUrl, graphqlRequest(proposalId));
 
   addresses.first1000.forEach((voter: Voter) => {
     votingAddresses.push(voter.voter);
@@ -97,14 +99,13 @@ async function getProposalDetails(proposalId: string) {
   }}
   `;
 
-  const res = await request(snapshotHub, query);
+  const res = await request(snapshotGraphUrl, query);
 
   return res.proposal;
 }
 
 task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
   .addParam("proposalId", "ID of the Snapshot proposal")
-  .addParam("propType", "sigprop or coreprop")
   .addParam(
     "batchSize",
     "How many Aavegotchis to send at a time. Default is 500"
@@ -116,7 +117,6 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
       hre: HardhatRuntimeEnvironment
     ) => {
       const proposalId: string = taskArgs.proposalId;
-      const xpAmount: number = taskArgs.propType === "sigprop" ? 10 : 20;
       const exceptions = currentOverrides;
       const batchSize: number = Number(taskArgs.batchSize);
 
@@ -129,13 +129,18 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
       }
 
       const propDetails: ProposalDetails = await getProposalDetails(proposalId);
+      const proposalType = await propType(propDetails.title);
+
+      console.log("Proposal type:", proposalType);
+
+      const xpAmount: number = proposalType === "sigprop" ? 10 : 20;
 
       if (propDetails.votes + exceptions.length !== addresses.length) {
         throw new Error("Proposal voter count doesn't match");
       }
 
       const diamondAddress = maticDiamondAddress;
-      const gameManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
+      const gameManager = xpRelayerAddress;
       console.log(gameManager);
       let signer: Signer;
       const testing = ["hardhat", "localhost"].includes(hre.network.name);
@@ -146,26 +151,30 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
         });
         signer = await hre.ethers.provider.getSigner(gameManager);
       } else if (hre.network.name === "matic") {
-        const accounts = await hre.ethers.getSigners();
-        signer = accounts[0]; /* new LedgerSigner(
+        //  const accounts = await hre.ethers.getSigners();
+        signer = await getRelayerSigner(hre); /* new LedgerSigner(
           hre.ethers.provider,
           "hid",
           "m/44'/60'/2'/0/0"
         ); */
+      } else if (hre.network.name === "tenderly") {
+        //impersonate
+        console.log("Using tenderly");
+        signer = (await hre.ethers.getSigners())[0];
       } else {
         throw Error("Incorrect network selected");
       }
-
-      const managedSigner = new NonceManager(signer);
 
       const { tokenIds, finalUsers } = await getPolygonAndMainnetGotchis(
         addresses,
         hre
       );
 
+      //since txns are all sent to defender, then we assume all recovered tokenIds were airdropped xp
+      // logXPRecipients(proposalType, propDetails.title, tokenIds, finalUsers);
       const batches = Math.ceil(tokenIds.length / batchSize);
 
-      console.log(`Deploying ${taskArgs.propType}: ${propDetails.title}!!!`);
+      console.log(`Deploying ${proposalType}: ${propDetails.title}!!!`);
 
       console.log(
         `Sending ${xpAmount} XP to ${tokenIds.length} Aavegotchis in ${finalUsers.length} addresses!`
@@ -173,12 +182,10 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
 
       const dao = (
         await hre.ethers.getContractAt("DAOFacet", diamondAddress)
-      ).connect(managedSigner) as DAOFacet;
+      ).connect(signer) as DAOFacet;
 
       for (let index = 0; index < batches; index++) {
         console.log("Current batch id:", index);
-
-        // if (index < 1) continue;
 
         const offset = batchSize * index;
         const sendTokenIds = tokenIds.slice(offset, offset + batchSize);
@@ -189,15 +196,14 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
 
         const tx: ContractTransaction = await dao.grantExperience(
           sendTokenIds,
-          Array(sendTokenIds.length).fill(xpAmount),
-          { gasPrice: gasPrice }
+          Array(sendTokenIds.length).fill(xpAmount)
         );
         console.log("tx:", tx.hash);
-        const receipt: ContractReceipt = await tx.wait();
+        // const receipt: ContractReceipt = await tx.wait();
         // console.log("Gas used:", strDisplay(receipt.gasUsed.toString()));
-        if (!receipt.status) {
-          throw Error(`Error:: ${tx.hash}`);
-        }
+        // if (!receipt.status) {
+        //   throw Error(`Error:: ${tx.hash}`);
+        // }
         console.log(
           "Airdropped XP to Aaavegotchis. Last tokenID:",
           sendTokenIds[sendTokenIds.length - 1]

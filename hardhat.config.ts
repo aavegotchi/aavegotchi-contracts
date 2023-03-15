@@ -1,6 +1,7 @@
 /* global task ethers */
 
-import "@nomiclabs/hardhat-waffle";
+// import "@nomiclabs/hardhat-waffle";
+import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-contract-sizer";
 import "@nomiclabs/hardhat-etherscan";
@@ -9,6 +10,8 @@ import "solidity-coverage";
 import * as dotenv from "dotenv";
 import "@typechain/hardhat";
 import { BigNumber } from "ethers";
+
+require("hardhat-tracer");
 
 dotenv.config({ path: __dirname + "/.env" });
 
@@ -59,15 +62,24 @@ export default {
       accounts: [process.env.ITEM_MANAGER],
       // blockGasLimit: 20000000,
       blockGasLimit: 20000000,
+      gasPrice: 400000000000,
+      timeout: 90000,
+    },
+    tenderly: {
+      url: process.env.TENDERLY_FORK,
+      chainId: Number(process.env.TENDERLY_NETWORK_ID),
+      accounts: [process.env.ITEM_MANAGER],
+      // blockGasLimit: 20000000,
+      blockGasLimit: 20000000,
       gasPrice: 1000000000,
       timeout: 90000,
     },
-    // mumbai: {
-    //   url: 'https://rpc-mumbai.matic.today',
-    //   accounts: [process.env.SECRET],
-    //   blockGasLimit: 20000000,
-    //   gasPrice: 1000000000
-    // },
+    mumbai: {
+      url: process.env.MUMBAI_URL,
+      accounts: [process.env.SECRET],
+      blockGasLimit: 20000000,
+      gasPrice: 1000000000,
+    },
     // gorli: {
     //   url: process.env.GORLI,
     //   accounts: [process.env.SECRET],
@@ -122,6 +134,15 @@ export default {
       },
       {
         version: "0.7.4",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+      {
+        version: "0.4.24",
         settings: {
           optimizer: {
             enabled: true,
