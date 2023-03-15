@@ -1,5 +1,14 @@
 import { ethers } from "hardhat";
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumberish } from "ethers";
+import * as dotenv from "dotenv";
+dotenv.config();
+interface ProposalTitle {
+  proposals: [
+    {
+      title: string;
+    }
+  ];
+}
 
 export async function impersonateSigner(network: any, address: string) {
   await network.provider.request({

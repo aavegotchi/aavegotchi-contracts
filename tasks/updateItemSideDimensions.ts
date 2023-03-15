@@ -3,6 +3,7 @@ import { Signer } from "@ethersproject/abstract-signer";
 import {
   gasPrice,
   getDiamondSigner,
+  getRelayerSigner,
   itemManager,
   maticDiamondAddress,
 } from "../scripts/helperFunctions";
@@ -81,16 +82,14 @@ task(
           taskArgs.dimensions
         );
 
-      const signer: Signer = await getDiamondSigner(hre, itemManager, false);
+      const signer: Signer = await getRelayerSigner(hre);
       const svgViewsFacet = (await hre.ethers.getContractAt(
         "SvgViewsFacet",
         maticDiamondAddress,
         signer
       )) as SvgViewsFacet;
 
-      let tx = await svgViewsFacet.setSideViewDimensions(sideDimensions, {
-        gasPrice: gasPrice,
-      });
+      let tx = await svgViewsFacet.setSideViewDimensions(sideDimensions);
       console.log("tx hash:", tx.hash);
       let receipt = await tx.wait();
       console.log("New Dimensions set!");

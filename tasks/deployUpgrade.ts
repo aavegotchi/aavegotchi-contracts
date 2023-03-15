@@ -20,6 +20,7 @@ import {
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { sendToMultisig } from "../scripts/libraries/multisig/multisig";
+import { sendToTenderly } from "../scripts/libraries/tenderly";
 
 export interface FacetsAndAddSelectors {
   facetName: string;
@@ -40,6 +41,7 @@ export interface DeployUpgradeTaskArgs {
   initCalldata?: string;
   rawSigs?: boolean;
   // updateDiamondABI: boolean;
+  freshDeployment?: boolean;
 }
 
 interface Cut {
@@ -102,6 +104,7 @@ task(
     "Set to true if multisig should be used for deploying"
   )
   .addFlag("useLedger", "Set to true if Ledger should be used for signing")
+  .addFlag("freshDeployment", "This is for Diamonds that are freshly deployed ")
   // .addFlag("verifyFacets","Set to true if facets should be verified after deployment")
 
   .setAction(
@@ -147,6 +150,19 @@ task(
         if (useLedger) {
           signer = new LedgerSigner(hre.ethers.provider);
         } else signer = (await hre.ethers.getSigners())[0];
+      } else if (hre.network.name === "tenderly") {
+        if (useLedger) {
+          signer = new LedgerSigner(hre.ethers.provider);
+        } else {
+          signer = (await hre.ethers.getSigners())[0];
+        }
+
+        await hre.ethers.provider.send("tenderly_setBalance", [
+          [await signer.getAddress(), owner],
+          hre.ethers.utils.hexValue(
+            hre.ethers.utils.parseUnits("10000", "ether").toHexString()
+          ),
+        ]);
       } else {
         throw Error("Incorrect network selected");
       }
@@ -198,13 +214,16 @@ task(
             });
           }
 
-          //Always replace the existing selectors to prevent duplications
-          if (existingSelectors.length > 0) {
-            cut.push({
-              facetAddress: deployedFacet.address,
-              action: FacetCutAction.Replace,
-              functionSelectors: existingSelectors,
-            });
+          //replace only when not using on newly deplyed diamonds
+          if (!taskArgs.freshDeployment) {
+            //Always replace the existing selectors to prevent duplications
+            if (existingSelectors.length > 0) {
+              cut.push({
+                facetAddress: deployedFacet.address,
+                action: FacetCutAction.Replace,
+                functionSelectors: existingSelectors,
+              });
+            }
           }
         }
         let removeSelectors: string[];
@@ -230,12 +249,26 @@ task(
         signer
       )) as IDiamondCut;
 
-      //Helpful for debugging
-      const diamondLoupe = (await hre.ethers.getContractAt(
-        "IDiamondLoupe",
-        diamondAddress,
-        signer
-      )) as IDiamondLoupe;
+      // //Helpful for debugging
+      // const diamondLoupe = (await hre.ethers.getContractAt(
+      //   "IDiamondLoupe",
+      //   diamondAddress,
+      //   signer
+      // )) as IDiamondLoupe;
+
+      // if (hre.network.name === "tenderly") {
+      //   console.log("Diamond cut");
+      //   console.log("Using Tenderly");
+
+      //   const tx: PopulatedTransaction =
+      //     await diamondCut.populateTransaction.diamondCut(
+      //       cut,
+      //       initAddress ? initAddress : hre.ethers.constants.AddressZero,
+      //       initCalldata ? initCalldata : "0x",
+      //       { gasLimit: 800000 }
+      //     );
+      //   await sendToTenderly(diamondUpgrader, owner, tx);
+      // }
 
       if (testing) {
         console.log("Diamond cut");
@@ -268,7 +301,9 @@ task(
             cut,
             initAddress ? initAddress : hre.ethers.constants.AddressZero,
             initCalldata ? initCalldata : "0x",
-            { gasPrice: gasPrice }
+            {
+              gasPrice: gasPrice,
+            }
           );
 
           const receipt: ContractReceipt = await tx.wait();
@@ -277,16 +312,19 @@ task(
           }
           console.log("Completed diamond cut: ", tx.hash);
         }
-        console.log("Verifying Addresses");
-        await delay(60000);
-
-        for (let x = 0; x < cut.length; x++) {
-          console.log("Addresses to be verified: ", cut[x].facetAddress);
-          await hre.run("verify:verify", {
-            address: cut[x].facetAddress,
-            constructorArguments: [],
-          });
-        }
       }
+
+      // if (hre.network.name !== "hardhat") {
+      //   console.log("Verifying Addresses");
+      //   await delay(60000);
+
+      //   for (let x = 0; x < cut.length; x++) {
+      //     console.log("Addresses to be verified: ", cut[x].facetAddress);
+      //     await hre.run("verify:verify", {
+      //       address: cut[x].facetAddress,
+      //       constructorArguments: [],
+      //     });
+      //   }
+      // }
     }
   );

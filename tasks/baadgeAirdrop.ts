@@ -7,6 +7,7 @@ import {
   itemManagerAlt,
   gasPrice,
 } from "../scripts/helperFunctions";
+import { ItemsTransferFacet } from "../typechain";
 
 export interface AirdropBaadgeTaskArgs {
   maxProcess: string;
@@ -58,11 +59,11 @@ task(
 
       const signer: Signer = await getDiamondSigner(hre, itemManagerAlt, false);
 
-      const itemsTransferFacet = await hre.ethers.getContractAt(
+      const itemsTransferFacet = (await hre.ethers.getContractAt(
         "ItemsTransferFacet",
         maticDiamondAddress,
         signer
-      );
+      )) as ItemsTransferFacet;
 
       const tx = await itemsTransferFacet.batchBatchTransferToParent(
         itemManagerAlt,
