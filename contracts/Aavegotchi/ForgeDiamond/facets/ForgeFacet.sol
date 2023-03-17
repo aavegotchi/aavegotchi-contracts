@@ -190,9 +190,11 @@ contract ForgeFacet is Modifiers {
                 slotNumber = i;
             }
         }
-        // Hand items are two slots (4 and 5). Treat any hand wearable as slot 4 for token ID offset.
-        if (slotNumber == 5) {
-            slotNumber = 4;
+        // Hand items are two slots (4 and 5).
+        // Treat any hand wearable as slot 4 for token ID offset.
+        // Further slots must also be decremented to account for this.
+        if (slotNumber >= 5) {
+            slotNumber -= 1;
         }
 
         uint256 offsetWithSlot = startingOffsetId + (offsetMultiplier * slotNumber);
@@ -459,6 +461,44 @@ contract ForgeFacet is Modifiers {
         //        require(aavegotchiFacet.ownerOf(gotchiId) == address(0), "ForgeFacet: Aavegotchi not sacrificed");
 
         _mintItem(owner, ESSENCE, 1000);
+    }
+
+    function fixInvalidTokenIds(address[] calldata owners) external onlyDaoOrOwner {
+        ForgeTokenFacet tokenFacet = ForgeTokenFacet(address(this));
+
+        for (uint256 i; i < owners.length; i++) {
+            uint256 invalidBal1 = tokenFacet.balanceOf(owners[i], 1000000044);
+            uint256 invalidBal2 = tokenFacet.balanceOf(owners[i], 1000000045);
+            uint256 invalidBal3 = tokenFacet.balanceOf(owners[i], 1000000046);
+            uint256 invalidBal4 = tokenFacet.balanceOf(owners[i], 1000000047);
+            uint256 invalidBal5 = tokenFacet.balanceOf(owners[i], 1000000048);
+            uint256 invalidBal6 = tokenFacet.balanceOf(owners[i], 1000000049);
+
+            if (invalidBal1 > 0) {
+                _burnItem(owners[i], 1000000044, invalidBal1);
+                _mintItem(owners[i], 1000000038, invalidBal1);
+            }
+            if (invalidBal2 > 0) {
+                _burnItem(owners[i], 1000000045, invalidBal2);
+                _mintItem(owners[i], 1000000039, invalidBal2);
+            }
+            if (invalidBal3 > 0) {
+                _burnItem(owners[i], 1000000046, invalidBal3);
+                _mintItem(owners[i], 1000000040, invalidBal3);
+            }
+            if (invalidBal4 > 0) {
+                _burnItem(owners[i], 1000000047, invalidBal4);
+                _mintItem(owners[i], 1000000041, invalidBal4);
+            }
+            if (invalidBal5 > 0) {
+                _burnItem(owners[i], 1000000048, invalidBal5);
+                _mintItem(owners[i], 1000000042, invalidBal5);
+            }
+            if (invalidBal6 > 0) {
+                _burnItem(owners[i], 1000000049, invalidBal6);
+                _mintItem(owners[i], 1000000043, invalidBal6);
+            }
+        }
     }
 
     function _mintItem(

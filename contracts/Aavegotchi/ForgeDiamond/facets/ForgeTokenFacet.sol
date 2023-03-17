@@ -10,6 +10,7 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 import {LibMeta} from "../../../shared/libraries/LibMeta.sol";
 import {LibStrings} from "../../../shared/libraries/LibStrings.sol";
+import {LibERC1155Marketplace} from "../../libraries/LibERC1155Marketplace.sol";
 
 contract ForgeTokenFacet is Modifiers {
     event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);
@@ -154,6 +155,7 @@ contract ForgeTokenFacet is Modifiers {
 
         LibToken.removeFromOwner(from, id, amount);
         LibToken.addToOwner(to, id, amount);
+        LibERC1155Marketplace.updateERC1155Listing(s.aavegotchiDiamond, id, from);
 
         emit TransferSingle(LibMeta.msgSender(), from, to, id, amount);
 
@@ -186,6 +188,7 @@ contract ForgeTokenFacet is Modifiers {
 
             LibToken.removeFromOwner(from, id, amount);
             LibToken.addToOwner(to, id, amount);
+            LibERC1155Marketplace.updateERC1155Listing(s.aavegotchiDiamond, id, from);
         }
 
         emit TransferBatch(LibMeta.msgSender(), from, to, ids, amounts);
