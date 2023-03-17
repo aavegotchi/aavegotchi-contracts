@@ -60,8 +60,8 @@ library LibBuyOrder {
             // Aavegotchi
             _params = abi.encode(_params, s.aavegotchis[_erc721TokenId].equippedWearables);
             if (_validationOptions[0]) {
-                // spirit force
-                _params = abi.encode(_params, IERC20(s.aavegotchis[_erc721TokenId].collateralType).balanceOf(s.aavegotchis[_erc721TokenId].escrow));
+                // BRS
+                _params = abi.encode(_params, LibAavegotchi.baseRarityScore(s.aavegotchis[_erc721TokenId].numericTraits));
             }
             if (_validationOptions[1]) {
                 // GHST
