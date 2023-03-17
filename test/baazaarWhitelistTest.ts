@@ -9,6 +9,7 @@ import {
   ERC721MarketplaceFacet,
   IERC20,
   ItemsFacet,
+  MarketplaceGetterFacet,
   WhitelistFacet,
 } from "../typechain";
 import {
@@ -40,6 +41,7 @@ describe("Testing Baazaar Whitelist", async function () {
   const erc1155Id = 138; // Should be erc1155/item
   const test1155Quantity = "1";
 
+  let marketplaceGetter: MarketplaceGetterFacet;
   let erc721MarketWithGotchiSeller: ERC721MarketplaceFacet;
   let erc721MarketWithWhitelistedBuyer: ERC721MarketplaceFacet;
   let erc721MarketWithNonWhitelistedBuyer: ERC721MarketplaceFacet;
@@ -62,7 +64,6 @@ describe("Testing Baazaar Whitelist", async function () {
       "ERC721MarketplaceFacet",
       diamondAddress
     )) as ERC721MarketplaceFacet;
-
     const erc1155MarketplaceFacet = (await ethers.getContractAt(
       "ERC1155MarketplaceFacet",
       diamondAddress
@@ -71,6 +72,10 @@ describe("Testing Baazaar Whitelist", async function () {
       "WhitelistFacet",
       diamondAddress
     )) as WhitelistFacet;
+    marketplaceGetter = (await ethers.getContractAt(
+      "MarketplaceGetterFacet",
+      diamondAddress
+    )) as MarketplaceGetterFacet;
 
     erc721 = (await ethers.getContractAt(
       "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
@@ -189,7 +194,7 @@ describe("Testing Baazaar Whitelist", async function () {
       });
       describe("getERC721Listing", async function () {
         it("Should return correct params if valid listing id", async function () {
-          const listing = await erc721MarketWithGotchiSeller.getERC721Listing(
+          const listing = await marketplaceGetter.getERC721Listing(
             erc721ListingId
           );
           expect(listing.seller).to.equal(gotchiOwnerAddress);
@@ -366,7 +371,7 @@ describe("Testing Baazaar Whitelist", async function () {
       });
       describe("getERC721Listing", async function () {
         it("Should return correct params if valid listing id", async function () {
-          const listing = await erc721MarketWithGotchiSeller.getERC721Listing(
+          const listing = await marketplaceGetter.getERC721Listing(
             erc721ListingId
           );
           expect(listing.seller).to.equal(gotchiOwnerAddress);
@@ -492,7 +497,7 @@ describe("Testing Baazaar Whitelist", async function () {
       });
       describe("getERC1155Listing", async function () {
         it("Should return correct params if valid listing id", async function () {
-          const listing = await erc1155MarketWithItemSeller.getERC1155Listing(
+          const listing = await marketplaceGetter.getERC1155Listing(
             erc1155ListingId
           );
           expect(listing.seller).to.equal(itemOwnerAddress);
@@ -712,7 +717,7 @@ describe("Testing Baazaar Whitelist", async function () {
       });
       describe("getERC1155Listing", async function () {
         it("Should return correct params if valid listing id", async function () {
-          const listing = await erc1155MarketWithItemSeller.getERC1155Listing(
+          const listing = await marketplaceGetter.getERC1155Listing(
             erc1155ListingId
           );
           expect(listing.seller).to.equal(itemOwnerAddress);

@@ -24,6 +24,11 @@ export async function upgradeBaazaarWhitelist() {
       ],
       removeSelectors: [],
     },
+    {
+      facetName: "MarketplaceGetterFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
