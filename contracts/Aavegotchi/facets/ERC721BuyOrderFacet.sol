@@ -8,6 +8,7 @@ import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 import {Modifiers, ERC721BuyOrder} from "../libraries/LibAppStorage.sol";
 import {BaazaarSplit, LibSharedMarketplace, SplitAddresses} from "../libraries/LibSharedMarketplace.sol";
 
@@ -60,7 +61,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         address _erc721TokenAddress,
         uint256 _erc721TokenId,
         uint256 _priceInWei,
-        bool[] calldata _validationOptions // 0: spirit force, 1: GHST, 2: skill points
+        bool[] calldata _validationOptions // 0: BRS, 1: GHST, 2: skill points
     ) external {
         require(_priceInWei >= 1e18, "ERC721BuyOrder: price should be 1 GHST or larger");
 
@@ -136,8 +137,10 @@ contract ERC721BuyOrderFacet is Modifiers {
         // disable for gotchi in lending
         uint256 category = LibAavegotchi.getERC721Category(erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId);
         if (category == LibAavegotchi.STATUS_AAVEGOTCHI) {
-            uint32 listingId = s.aavegotchiToListingId[uint32(erc721BuyOrder.erc721TokenId)];
-            require((listingId == 0) || (s.gotchiLendings[listingId].timeAgreed == 0), "ERC721BuyOrder: Not supported for aavegotchi in lending");
+            require(
+                !LibGotchiLending.isAavegotchiLent(uint32(erc721BuyOrder.erc721TokenId)),
+                "ERC721BuyOrder: Not supported for aavegotchi in lending"
+            );
         }
 
         // hash validation
@@ -148,8 +151,6 @@ contract ERC721BuyOrderFacet is Modifiers {
         );
 
         erc721BuyOrder.timePurchased = block.timestamp;
-
-        LibERC721Marketplace.cancelERC721Listing(erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId, sender);
 
         BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(erc721BuyOrder.priceInWei, new uint256[](0), [10000, 0]);
 
