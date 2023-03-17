@@ -2270,7 +2270,7 @@ task("rarityPayout")
       }
 
       const ghstToken = (await hre.ethers.getContractAt(
-        "ERC20",
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
         ghstAddress,
         signer
       )) as ERC20;
@@ -2293,7 +2293,7 @@ task("rarityPayout")
       for (const [i, txGroup] of txData.entries()) {
         console.log("current index:", i);
 
-        if (i < 25) continue; //use this line to skip indexes where the tx failed.
+        // if (i < 0) continue; //use this line to skip indexes where the tx failed.
 
         let tokenIds: string[] = [];
         let amounts: string[] = [];
