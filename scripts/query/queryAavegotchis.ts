@@ -7,11 +7,8 @@ import {
   VaultGotchisOwned,
 } from "../../types";
 
-export const maticGraphUrl: string =
-  "https://subgraph.satsuma-prod.com/tWYl5n5y04oz/aavegotchi/aavegotchi-core-matic/api";
+export const maticGraphUrl: string = process.env.SUBGRAPH_CORE_MATIC as string;
 
-// export const maticLendingUrl: string =
-// "https://api.thegraph.com/subgraphs/name/froid1911/aavegotchi-lending";
 export const ethGraphUrl: string =
   "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-ethereum";
 

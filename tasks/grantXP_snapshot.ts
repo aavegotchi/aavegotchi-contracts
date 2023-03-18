@@ -117,7 +117,7 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
       );
 
       //since txns are all sent to defender, then we assume all recovered tokenIds were airdropped xp
-      logXPRecipients(proposalType, propDetails.title, tokenIds, finalUsers);
+      // logXPRecipients(proposalType, propDetails.title, tokenIds, finalUsers);
       const batches = Math.ceil(tokenIds.length / batchSize);
 
       console.log(`Deploying ${proposalType}: ${propDetails.title}!!!`);
