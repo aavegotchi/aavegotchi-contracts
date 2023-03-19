@@ -235,10 +235,7 @@ interface ProposalTitle {
   ];
 }
 export function propType(title: string): "coreprop" | "sigprop" {
-  const searchString = "\\[AGIP.*]";
-  const regex = new RegExp(searchString);
-  const match = title.match(regex);
-  if (match) {
+  if (title.includes("AGIP")) {
     return "coreprop";
   } else {
     return "sigprop";
