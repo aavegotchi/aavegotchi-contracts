@@ -194,10 +194,13 @@ export async function generateMerkleTree(
 
   const voters: string[] = await getVotingAddresses(propId);
   const propDetails: ProposalDetails = await getProposalDetails(propId);
-  const blockNo = await getDataForTimestamp(propDetails.end);
-  console.log("Using data at block", blockNo);
+  console.log("Using data at block", propDetails.snapshot);
 
-  const data: GotchiData[] = await queryAllAavegotchis(blockNo, voters, hre);
+  const data: GotchiData[] = await queryAllAavegotchis(
+    propDetails.snapshot,
+    voters,
+    hre
+  );
   //generate leaves
   for (const user of data) {
     leaf = ethers.utils.solidityKeccak256(

@@ -32,7 +32,7 @@ export interface ProposalDetails {
   id: string;
   title: string;
   votes: number;
-  end: number;
+  snapshot: number;
 }
 
 export async function getProposalDetails(proposalId: string) {
@@ -41,7 +41,7 @@ export async function getProposalDetails(proposalId: string) {
     id
     votes
     title
-    end
+    snapshot
   }}
   `;
 
@@ -113,6 +113,7 @@ task("grantXP_snapshot", "Grants XP to Gotchis by addresses")
 
       const { tokenIds, finalUsers } = await getPolygonAndMainnetGotchis(
         addresses,
+        propDetails.snapshot,
         hre
       );
 
