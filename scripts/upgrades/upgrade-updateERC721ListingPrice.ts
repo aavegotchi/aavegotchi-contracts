@@ -18,6 +18,12 @@ export async function upgrade() {
       ],
       removeSelectors: [],
     },
+
+    {
+      facetName: "MarketplaceGetterFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
