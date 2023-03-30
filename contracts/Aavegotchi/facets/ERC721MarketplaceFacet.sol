@@ -23,6 +23,7 @@ contract ERC721MarketplaceFacet is Modifiers {
     );
 
     event ERC721ListingSplit(uint256 indexed listingId, uint16[2] principalSplit, address affiliate);
+    event ERC721ListingWhitelistSet(uint256 indexed listingId, uint32 whitelistId);
 
     event ERC721ExecutedListing(
         uint256 indexed listingId,
@@ -88,7 +89,7 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@param _priceInWei The cost price of the NFT in $GHST
 
     function addERC721Listing(address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei) external {
-        createERC721Listing(_erc721TokenAddress, _erc721TokenId, _priceInWei, [10000, 0], address(0));
+        createERC721Listing(_erc721TokenAddress, _erc721TokenId, _priceInWei, [10000, 0], address(0), 0);
     }
 
     ///@notice Allow an ERC721 owner to list his NFT for sale
@@ -107,7 +108,20 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint16[2] memory _principalSplit,
         address _affiliate
     ) external {
-        createERC721Listing(_erc721TokenAddress, _erc721TokenId, _priceInWei, _principalSplit, _affiliate);
+        createERC721Listing(_erc721TokenAddress, _erc721TokenId, _priceInWei, _principalSplit, _affiliate, 0);
+    }
+
+    //@dev Not implemented in UI yet. Do not use unless you don't want anyone purchasing your NFT.
+
+    function addERC721ListingWithWhitelist(
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId,
+        uint256 _priceInWei,
+        uint16[2] memory _principalSplit,
+        address _affiliate,
+        uint32 _whitelistId
+    ) external {
+        createERC721Listing(_erc721TokenAddress, _erc721TokenId, _priceInWei, _principalSplit, _affiliate, _whitelistId);
     }
 
     function createERC721Listing(
@@ -115,7 +129,8 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 _erc721TokenId,
         uint256 _priceInWei,
         uint16[2] memory _principalSplit,
-        address _affiliate
+        address _affiliate,
+        uint32 _whitelistId
     ) internal {
         IERC721 erc721Token = IERC721(_erc721TokenAddress);
         address msgSender = LibMeta.msgSender();
@@ -161,7 +176,8 @@ contract ERC721MarketplaceFacet is Modifiers {
             timePurchased: 0,
             cancelled: false,
             principalSplit: _principalSplit,
-            affiliate: _affiliate
+            affiliate: _affiliate,
+            whitelistId: _whitelistId
         });
 
         LibERC721Marketplace.addERC721ListingItem(msgSender, category, "listed", listingId);
@@ -169,6 +185,10 @@ contract ERC721MarketplaceFacet is Modifiers {
 
         if (_affiliate != address(0)) {
             emit ERC721ListingSplit(listingId, _principalSplit, _affiliate);
+        }
+
+        if (_whitelistId != 0) {
+            emit ERC721ListingWhitelistSet(listingId, _whitelistId);
         }
 
         //Lock Aavegotchis when listing is created
@@ -281,6 +301,9 @@ contract ERC721MarketplaceFacet is Modifiers {
         address buyer = LibMeta.msgSender();
         address seller = listing.seller;
         require(seller != buyer, "ERC721Marketplace: Buyer can't be seller");
+        if (listing.whitelistId > 0) {
+            require(s.isWhitelisted[listing.whitelistId][buyer] > 0, "ERC721Marketplace: Not whitelisted address");
+        }
         require(IERC20(s.ghstContract).balanceOf(buyer) >= _priceInWei, "ERC721Marketplace: Not enough GHST");
 
         listing.timePurchased = block.timestamp;

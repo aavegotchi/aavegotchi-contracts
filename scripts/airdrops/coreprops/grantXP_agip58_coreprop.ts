@@ -3,7 +3,7 @@ import { GrantXPSnapshotTaskArgs } from "../../../tasks/grantXP_snapshot";
 
 async function grantXP() {
   const id =
-    "0xfb3766f05a6990514c618db06c2a74d8fd36298694740799e2dd23424a297115";
+    "0x378153f1fe22c673bb57d4c421b6ef93f5562f806317950be7c189547c0458c2";
   const taskArgs: GrantXPSnapshotTaskArgs = {
     proposalId: id,
     batchSize: "500",
