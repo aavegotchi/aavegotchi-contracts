@@ -35,11 +35,7 @@ library LibERC721Marketplace {
         removeERC721ListingItem(_listingId, _owner);
     }
 
-    function cancelERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        address _owner
-    ) internal {
+    function cancelERC721Listing(address _erc721TokenAddress, uint256 _erc721TokenId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
         if (listingId == 0) {
@@ -48,12 +44,7 @@ library LibERC721Marketplace {
         cancelERC721Listing(listingId, _owner);
     }
 
-    function addERC721ListingItem(
-        address _owner,
-        uint256 _category,
-        string memory _sort,
-        uint256 _listingId
-    ) internal {
+    function addERC721ListingItem(address _owner, uint256 _category, string memory _sort, uint256 _listingId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 headListingId = s.erc721OwnerListingHead[_owner][_category][_sort];
         if (headListingId != 0) {
@@ -123,11 +114,7 @@ library LibERC721Marketplace {
         emit ERC721ListingRemoved(_listingId, listing.category, block.timestamp);
     }
 
-    function updateERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        address _owner
-    ) internal {
+    function updateERC721Listing(address _erc721TokenAddress, uint256 _erc721TokenId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
         if (listingId == 0) {
@@ -151,7 +138,8 @@ library LibERC721Marketplace {
         require(listing.cancelled == false, "ERC721Marketplace: listing already cancelled");
         require(listing.seller == LibMeta.msgSender(), "ERC721Marketplace: Not seller of ERC721 listing");
 
-        s.erc721Listings[_listingId].priceInWei = _priceInWei;
+        //comment out until graph event is added
+        // s.erc721Listings[_listingId].priceInWei = _priceInWei;
 
         emit ERC721ListingPriceUpdate(_listingId, _priceInWei, block.timestamp);
     }
