@@ -33,7 +33,7 @@ export async function upgrade() {
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
-    useMultisig: true,
+    useMultisig: false,
   };
 
   await run("deployUpgrade", args);
