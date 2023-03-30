@@ -102,6 +102,8 @@ contract ERC721MarketplaceFacet is Modifiers {
         createERC721Listing(_erc721TokenAddress, _erc721TokenId, _priceInWei, _principalSplit, _affiliate, 0);
     }
 
+    //@dev Not implemented in UI yet. Do not use unless you don't want anyone purchasing your NFT.
+
     function addERC721ListingWithWhitelist(
         address _erc721TokenAddress,
         uint256 _erc721TokenId,

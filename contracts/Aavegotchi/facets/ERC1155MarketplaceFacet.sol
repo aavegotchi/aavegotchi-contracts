@@ -109,6 +109,8 @@ contract ERC1155MarketplaceFacet is Modifiers {
         createERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _quantity, _priceInWei, _principalSplit, _affiliate, 0);
     }
 
+    //@dev Not implemented in UI yet. Do not use unless you don't want anyone purchasing your NFT.
+
     function setERC1155ListingWithWhitelist(
         address _erc1155TokenAddress,
         uint256 _erc1155TypeId,
