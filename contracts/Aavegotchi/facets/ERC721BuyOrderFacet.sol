@@ -20,6 +20,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         uint256 erc721TokenId,
         uint256 indexed category,
         uint256 priceInWei,
+        bytes32 validationHash,
         uint256 time
     );
 
@@ -97,19 +98,20 @@ contract ERC721BuyOrderFacet is Modifiers {
         s.erc721TokenToBuyOrderIds[_erc721TokenAddress][_erc721TokenId].push(buyOrderId);
         s.buyerToBuyOrderId[_erc721TokenAddress][_erc721TokenId][sender] = buyOrderId;
 
+        bytes32 _validationHash = LibBuyOrder.generateValidationHash(_erc721TokenAddress, _erc721TokenId, _validationOptions);
         s.erc721BuyOrders[buyOrderId] = ERC721BuyOrder({
             buyOrderId: buyOrderId,
             buyer: sender,
             erc721TokenAddress: _erc721TokenAddress,
             erc721TokenId: _erc721TokenId,
             priceInWei: _priceInWei,
-            validationHash: LibBuyOrder.generateValidationHash(_erc721TokenAddress, _erc721TokenId, _validationOptions),
+            validationHash: _validationHash,
             timeCreated: block.timestamp,
             timePurchased: 0,
             cancelled: false,
             validationOptions: _validationOptions
         });
-        emit ERC721BuyOrderAdd(buyOrderId, sender, _erc721TokenAddress, _erc721TokenId, category, _priceInWei, block.timestamp);
+        emit ERC721BuyOrderAdd(buyOrderId, sender, _erc721TokenAddress, _erc721TokenId, category, _priceInWei, _validationHash, block.timestamp);
     }
 
     function cancelERC721BuyOrder(uint256 _buyOrderId) external {
