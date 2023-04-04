@@ -18,7 +18,6 @@ import * as fs from "fs";
 import { propType } from "../helperFunctions";
 import { ethers } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { getDataForTimestamp } from "./queryBlockNumberMatic";
 
 interface GotchiData {
   address: string;
