@@ -394,4 +394,34 @@ contract ERC1155MarketplaceFacet is Modifiers {
             LibERC1155Marketplace.removeERC1155ListingItem(listingId, listing.seller);
         }
     }
+
+    ///@notice Allow an ERC1155 owner to update list price of his NFT for sale
+    ///@dev If the NFT has not been listed before, it will be rejected
+    ///@param _listingId The identifier of the listing to execute
+    ///@param _quantity The amount of ERC1155 NFTs execute/buy
+    ///@param _priceInWei The price of the item
+    function updateERC1155ListingPriceAndQuantity(uint256 _listingId, uint256 _quantity, uint256 _priceInWei) external {
+        LibERC1155Marketplace.updateERC1155ListingPriceAndQuantity(_listingId, _quantity, _priceInWei);
+        if (s.listingFeeInWei > 0) {
+            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, LibMeta.msgSender(), s.ghstContract);
+        }
+    }
+
+    function batchUpdateERC1155ListingPriceAndQuantity(
+        uint256[] calldata _listingIds,
+        uint256[] calldata _quantities,
+        uint256[] calldata _priceInWeis
+    ) external {
+        require(_listingIds.length == _quantities.length, "ERC1155Marketplace: listing ids not same length as quantities");
+        require(_listingIds.length == _priceInWeis.length, "ERC1155Marketplace: listing ids not same length as prices");
+
+        for (uint256 i; i < _listingIds.length; i++) {
+            LibERC1155Marketplace.updateERC1155ListingPriceAndQuantity(_listingIds[i], _quantities[i], _priceInWeis[i]);
+        }
+
+        if (s.listingFeeInWei > 0) {
+            uint256 totalFee = s.listingFeeInWei * _listingIds.length;
+            LibSharedMarketplace.burnListingFee(totalFee, LibMeta.msgSender(), s.ghstContract);
+        }
+    }
 }
