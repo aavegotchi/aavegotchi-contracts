@@ -5,7 +5,7 @@ async function grantXP() {
   const taskArgs: GrantXPMinigameTaskArgs = {
     filename: "gotchiminer.ts",
     xp15: "100",
-    xp10: "500",
+    xp10: "400",
     xpMin: "10000",
   };
   await run("grantXP_minigame", taskArgs);
