@@ -310,7 +310,7 @@ struct AppStorage {
     address forgeDiamond;
     //XP Drops
     mapping(bytes32 => XPMerkleDrops) xpDrops;
-    mapping(address => mapping(bytes32 => bool)) xpClaimed;
+    mapping(uint256 => mapping(bytes32 => uint8)) xpClaimed;
 }
 
 library LibAppStorage {
