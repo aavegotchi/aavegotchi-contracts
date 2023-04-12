@@ -134,8 +134,9 @@ library LibERC1155Marketplace {
             "ERC1155Marketplace: Not enough ERC1155 token"
         );
 
-        listing.priceInWei = _priceInWei;
-        listing.quantity = _quantity;
+        //comment out until subgraph is synced
+        // listing.priceInWei = _priceInWei;
+        // listing.quantity = _quantity;
 
         emit UpdateERC1155Listing(_listingId, _quantity, _priceInWei, block.timestamp);
     }
