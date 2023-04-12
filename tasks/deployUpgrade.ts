@@ -313,7 +313,6 @@ task(
           console.log("Completed diamond cut: ", tx.hash);
         }
       }
-
       // if (hre.network.name !== "hardhat") {
       //   console.log("Verifying Addresses");
       //   await delay(60000);
