@@ -18,7 +18,6 @@ contract MerkleDropFacet is Modifiers {
         bytes32[] calldata _proof,
         uint256[] calldata _onlyGotchis
     ) external {
-        if (s.xpDrops[_propId].xpAmount == 0) revert("NonExistentDrop");
         LibXPAllocation._claimXPDrop(_propId, _claimer, _gotchiId, _proof, _onlyGotchis);
     }
 
@@ -32,7 +31,6 @@ contract MerkleDropFacet is Modifiers {
         uint256[][] calldata _onlyGotchis
     ) external {
         if (_claimers.length != _gotchiIds.length || _gotchiIds.length != _proofs.length) revert("ArrayLengthMismatch");
-        if (s.xpDrops[_propId].xpAmount == 0) revert("NonExistentDrop");
         for (uint256 i; i < _gotchiIds.length; i++) {
             LibXPAllocation._claimXPDrop(_propId, _claimers[i], _gotchiIds[i], _proofs[i], _onlyGotchis[i]);
         }

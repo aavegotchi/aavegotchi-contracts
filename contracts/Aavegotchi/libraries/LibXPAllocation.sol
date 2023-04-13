@@ -26,12 +26,13 @@ library LibXPAllocation {
     ) internal {
         //short-circuits
         AppStorage storage s = LibAppStorage.diamondStorage();
+        uint256 xpAmount = s.xpDrops[_propId].xpAmount;
+        //short-circuit here
+        if (xpAmount == 0) revert("NonExistentDrop");
         //drops are unique by their roots
         bytes32 node = keccak256(abi.encodePacked(_claimer, _gotchiIds));
         bytes32 root = s.xpDrops[_propId].root;
-        uint256 xpAmount = s.xpDrops[_propId].xpAmount;
 
-        if (xpAmount == 0) revert("NonExistentDrop");
         //short-circuits do not revert entire claim process
         //proof is valid
         if (MerkleProofLib.verify(_proof, root, node)) {
