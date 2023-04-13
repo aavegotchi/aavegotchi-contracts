@@ -31,33 +31,31 @@ library LibXPAllocation {
         bytes32 root = s.xpDrops[_propId].root;
         uint256 xpAmount = s.xpDrops[_propId].xpAmount;
 
+        if (xpAmount == 0) revert("NonExistentDrop");
         //short-circuits do not revert entire claim process
-        //existent drop
-        if (s.xpDrops[_propId].xpAmount > 0) {
-            //proof is valid
-            if (MerkleProofLib.verify(_proof, root, node)) {
-                //claiming for a set of gotchis
-                if (_onlyGotchis.length > 0) {
-                    //make sure gotchi is a subset
-                    for (uint256 i; i < _onlyGotchis.length; i++) {
-                        uint256 gotchiId = _onlyGotchis[i];
-                        if (_inUintArray(_gotchiIds, gotchiId)) {
-                            //check claimed status
-                            if (s.xpClaimed[gotchiId][_propId] == 0) {
-                                //allocate xp
-                                _allocateXPViaDrop(_propId, gotchiId, xpAmount);
-                            }
-                        }
-                    }
-                } else {
-                    //claiming for all gotchis
-                    for (uint256 i; i < _gotchiIds.length; i++) {
-                        uint256 gotchiId = _gotchiIds[i];
+        //proof is valid
+        if (MerkleProofLib.verify(_proof, root, node)) {
+            //claiming for a set of gotchis
+            if (_onlyGotchis.length > 0) {
+                //make sure gotchi is a subset
+                for (uint256 i; i < _onlyGotchis.length; i++) {
+                    uint256 gotchiId = _onlyGotchis[i];
+                    if (_inUintArray(_gotchiIds, gotchiId)) {
                         //check claimed status
                         if (s.xpClaimed[gotchiId][_propId] == 0) {
                             //allocate xp
                             _allocateXPViaDrop(_propId, gotchiId, xpAmount);
                         }
+                    }
+                }
+            } else {
+                //claiming for all gotchis
+                for (uint256 i; i < _gotchiIds.length; i++) {
+                    uint256 gotchiId = _gotchiIds[i];
+                    //check claimed status
+                    if (s.xpClaimed[gotchiId][_propId] == 0) {
+                        //allocate xp
+                        _allocateXPViaDrop(_propId, gotchiId, xpAmount);
                     }
                 }
             }

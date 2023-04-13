@@ -50,7 +50,6 @@ contract MerkleDropFacet is Modifiers {
         if (_propIds.length != _gotchiIds.length || _claimers.length != _gotchiIds.length || _gotchiIds.length != _proofs.length)
             revert("ArrayLengthMismatch");
         for (uint256 i; i < _propIds.length; i++) {
-            if (s.xpDrops[_propIds[i]].xpAmount == 0) continue;
             LibXPAllocation._claimXPDrop(_propIds[i], _claimers[i], _gotchiIds[i], _proofs[i], _onlyGotchis[i]);
         }
     }
