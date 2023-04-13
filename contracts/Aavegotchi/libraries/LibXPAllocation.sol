@@ -7,6 +7,7 @@ import {MerkleProofLib} from "../libraries/LibMerkle.sol";
 library LibXPAllocation {
     event XPDropCreated(bytes32 indexed _propId, bytes32 _merkleRoot, uint256 _xpAmount);
     event XPClaimed(bytes32 indexed _propId, uint256 _gotchiId);
+    event GrantExperience(uint256[] _tokenIds, uint256[] _xpValues);
 
     function _createXPDrop(bytes32 _propId, bytes32 _merkleRoot, uint256 _xpAmount) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
@@ -67,7 +68,14 @@ library LibXPAllocation {
         //we assume that xp allocation via drops are limited by the tree
         AppStorage storage s = LibAppStorage.diamondStorage();
         s.aavegotchis[_tokenId].experience += _xpAmount;
-        s.xpClaimed[_tokenId][_propId] = 1;
+        s.xpClaimed[_tokenId][_propId] = _xpAmount;
+
+        //populate array for event
+        uint256[] memory tokenIds = new uint256[](1);
+        uint256[] memory xpAmounts = new uint256[](1);
+        tokenIds[0] = _tokenId;
+        xpAmounts[0] = _xpAmount;
+        emit GrantExperience(tokenIds, xpAmounts);
         emit XPClaimed(_propId, _tokenId);
     }
 }
