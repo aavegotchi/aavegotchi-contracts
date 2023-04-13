@@ -54,8 +54,6 @@ describe("Testing Xp Merkle Airdrops", async function () {
   });
 
   it("Allows the admin to add new airdrops ", async function () {
-    //  xpDrop = await impersonate(testGotchi1, xpDrop, ethers, network);
-
     const xpDropDetails = await xpDrop.viewXPDrop(sampleCoreProp);
     const prop: ProposalDetails = await getProposalDetails(sampleCoreProp);
     const propInt =
@@ -250,52 +248,6 @@ describe("Testing Xp Merkle Airdrops", async function () {
     for (let i = 0; i < gotchis2x!.length; i++) {
       expect(prevXP2[i].add(10)).to.equal(afterXP2[i]);
     }
-
-    // const
-    // const proofs: string[][] = await getProofs(gotchiIds, sampleSigProp);
-    // //replace first proof with incorrect proof
-    // proofs[0] = [];
-
-    // // const gotchiIds2: string[] | null = await getGotchiIds(
-    // //   testGotchi2,
-    // //   sampleSigProp
-    // // );
-    // let prevXp: BigNumber[] = [];
-    // for (let i = 0; i < gotchiIds.length; i++) {
-    //   //@ts-ignore
-    //   const xp = await aavegotchiFacet.getAavegotchi(gotchiIds[i]);
-
-    //   prevXp.push(xp.experience);
-    // }
-    // console.log("prevXp", prevXp);
-
-    // //claim xp
-    // const tx = await xpDrop.batchGotchiClaimXPDrop(
-    //   sampleSigProp,
-    //   gotchiIds,
-    //   proofs
-    // );
-    // const tx2 = await tx.wait();
-    // //get gas used
-    // console.log(tx2.gasUsed.toString());
-    // //make sure xp increases by 10 each
-    // for (let i = 0; i < gotchiIds.length; i++) {
-    //   //testGotchi2 doesn't receive xp
-    //   //@ts-ignore
-    //   const xp = await aavegotchiFacet.getAavegotchi(gotchiIds[i]);
-    //   console.log("after", xp.experience.toString());
-    //   //first gotchi should not receive xp
-    //   if (i === 0) {
-    //     expect(xp.experience).to.equal(prevXp[i]);
-    //   } else {
-    //     expect(xp.experience).to.equal(prevXp[i].add(10));
-    //   }
-
-    // if ((i = 0)) {
-    //   expect(xp.experience).to.equal(prevXp[i]);
-    // } else {
-    //   expect(xp.experience).to.equal(prevXp[i].add(10));
-    // }
   });
 
   it("Should allow partial xp claiming ", async function () {
