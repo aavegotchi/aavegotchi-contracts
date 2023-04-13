@@ -18,7 +18,7 @@ export async function upgrade() {
         `function claimXPDrop(bytes32 _propId, address _claimer,  uint256[] calldata _gotchiId,  bytes32[] calldata _proof,  uint256[] calldata _onlyGotchis ) external `,
         `function batchGotchiClaimXPDrop( bytes32 _propId,  address[] calldata _claimers, uint256[][] calldata _gotchiIds, bytes32[][] calldata _proofs, uint256[][] calldata _onlyGotchis) external`,
         `function batchDropClaimXPDrop( bytes32[] calldata _propIds, address[] calldata _claimers, uint256[][] calldata _gotchiIds, bytes32[][] calldata _proofs, uint256[][] calldata _onlyGotchis ) external`,
-        `function isClaimed(bytes32 _propId, uint256 _gotchId) public view returns (uint8 claimed_)`,
+        `function isClaimed(bytes32 _propId, uint256 _gotchId) public view returns (uint256 claimed_)`,
         `function viewXPDrop(bytes32 _propId) public view returns (${XPMerkleDrops} memory) `,
       ],
       removeSelectors: [],

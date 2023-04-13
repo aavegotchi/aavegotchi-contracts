@@ -195,7 +195,7 @@ struct Whitelist {
 
 struct XPMerkleDrops {
     bytes32 root;
-    uint256 xpAmount; //1-sigprop, 2-coreprop
+    uint256 xpAmount; //10-sigprop, 20-coreprop
 }
 
 struct AppStorage {
@@ -310,7 +310,7 @@ struct AppStorage {
     address forgeDiamond;
     //XP Drops
     mapping(bytes32 => XPMerkleDrops) xpDrops;
-    mapping(uint256 => mapping(bytes32 => uint8)) xpClaimed;
+    mapping(uint256 => mapping(bytes32 => uint256)) xpClaimed;
 }
 
 library LibAppStorage {

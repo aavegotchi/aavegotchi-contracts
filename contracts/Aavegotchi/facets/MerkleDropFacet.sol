@@ -55,7 +55,7 @@ contract MerkleDropFacet is Modifiers {
         }
     }
 
-    function isClaimed(bytes32 _propId, uint256 _gotchId) public view returns (uint8 claimed_) {
+    function isClaimed(bytes32 _propId, uint256 _gotchId) public view returns (uint256 claimed_) {
         if (s.xpDrops[_propId].xpAmount == 0) revert("NonExistentDrop");
         claimed_ = s.xpClaimed[_gotchId][_propId];
     }
