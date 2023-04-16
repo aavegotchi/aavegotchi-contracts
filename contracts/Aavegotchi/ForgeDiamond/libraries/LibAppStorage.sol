@@ -2,6 +2,7 @@ pragma solidity 0.8.1;
 
 import {ForgeLibDiamond} from "./ForgeLibDiamond.sol";
 import {LibMeta} from "../../../shared/libraries/LibMeta.sol";
+import {ILink} from "../../interfaces/ILink.sol";
 
 ////////
 //////// DO NOT CHANGE THIS OFFSET OR BELOW IDS
@@ -108,6 +109,21 @@ struct GotchiForging {
     bool isForging;
 }
 
+enum VrfStatus {
+    PENDING,
+    READY_TO_CLAIM,
+    CLAIMED
+}
+
+struct VrfRequestInfo {
+    address user;
+    bytes32 requestId;
+    VrfStatus status;
+    uint256 randomNumber;
+    uint256[] geodeTokenIds;
+    uint256[] amountPerToken;
+}
+
 struct AppStorage {
     ////// ERC1155
     // Mapping from token ID to account balances
@@ -144,13 +160,23 @@ struct AppStorage {
     // Map rarity score modifier (which denotes item rarity) to number of skill points earned for successful forging.
     mapping(uint8 => uint256) skillPointsEarnedFromForge;
     // Map rarity score modifier (which denotes item rarity) to percent chance (in bips) to win a prize.
-    mapping(uint8 => uint256) geodeWinChance;
+    mapping(uint8 => uint256) geodeWinChanceBips;
     // Reduction factor for skillPointsEarnedFromForge for smelting.
     uint256 smeltingSkillPointReductionFactorBips;
     //gotchi token ID to points map
     mapping(uint256 => uint256) gotchiSmithingSkillPoints;
     mapping(uint256 => uint256) maxSupplyByToken;
     address aavegotchiDiamond;
+    mapping(uint256 => uint256) geodePrizeQuantities;
+    mapping(bytes32 => uint256) vrfNonces;
+    mapping(bytes32 => VrfRequestInfo) vrfRequestIdToVrfRequestInfo;
+    mapping(address => bytes32[]) vrfUserToRequestIds;
+    mapping(address => bool) userVrfPending;
+    uint256[] geodePrizeTokenIds;
+    ILink link;
+    address vrfCoordinator;
+    bytes32 keyHash;
+    uint144 vrfFee;
 }
 
 library LibAppStorage {
