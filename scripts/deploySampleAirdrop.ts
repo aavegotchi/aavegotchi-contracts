@@ -24,6 +24,35 @@ async function main() {
 
   console.log("Deploying an xp airdrop");
 
+  /*
+
+  {
+  '0x36968D7dBB96346dCA8F5467c7CA2078d6F91366': {
+    address: '0x36968D7dBB96346dCA8F5467c7CA2078d6F91366',
+    gotchiIds: [ '1484' ]
+  },
+  '0x81B405f915D2442e66dC374d34B45b836fe90e94': {
+    address: '0x81B405f915D2442e66dC374d34B45b836fe90e94',
+    gotchiIds: [ '4430', '8' ]
+  }
+}
+
+{
+  "0x36968D7dBB96346dCA8F5467c7CA2078d6F91366": {
+    "leaf": "0x0x7809ff4bfdd4bc774e2e1d611e2fbc2a9860afa6fc3402ac3e50370186f2b3ca",
+    "proof": [
+      "0x435825e5c79292a5762079f980aa576e0f24584995b2c6d9e89210a652c36332"
+    ]
+  },
+  "0x81B405f915D2442e66dC374d34B45b836fe90e94": {
+    "leaf": "0x0x435825e5c79292a5762079f980aa576e0f24584995b2c6d9e89210a652c36332",
+    "proof": [
+      "0x7809ff4bfdd4bc774e2e1d611e2fbc2a9860afa6fc3402ac3e50370186f2b3ca"
+    ]
+  }
+}
+*/
+
   const propId =
     "0x9036ec1b899d16cdf2845a54555129303d133d19d7ad5d790f0aaed1b6d48913";
   const xpAmount = "0";
