@@ -117,6 +117,7 @@ async function main() {
     wearableSetsFacet,
     whitelistFacet,
     peripheryFacet,
+    merkleDropFacet,
   ] = await deployFacets(
     "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
     "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
@@ -138,7 +139,8 @@ async function main() {
     "SvgViewsFacet",
     "WearableSetsFacet",
     "WhitelistFacet",
-    "PeripheryFacet"
+    "PeripheryFacet",
+    "MerkleDropFacet"
   );
 
   // eslint-disable-next-line no-unused-vars
@@ -167,6 +169,7 @@ async function main() {
       ["WearableSetsFacet", wearableSetsFacet],
       ["WhitelistFacet", whitelistFacet],
       ["PeripheryFacet", peripheryFacet],
+      ["MerkleDropFacet", merkleDropFacet],
     ],
     owner: ownerAddress,
     args: [
