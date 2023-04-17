@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import {Modifiers, XPMerkleDrops} from "../libraries/LibAppStorage.sol";
-import {MerkleProofLib} from "../libraries/LibMerkle.sol";
+import {LibMerkle} from "../libraries/LibMerkle.sol";
 import "../libraries/LibXPAllocation.sol";
 
 contract MerkleDropFacet is Modifiers {
