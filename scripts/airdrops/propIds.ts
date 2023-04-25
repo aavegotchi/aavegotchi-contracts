@@ -72,6 +72,42 @@ const sigProps = [
     id: "0xd32d9f40f79c98b69761a9f09f8de0f28a8ec005cc0f01a7f4c9ea3ee8f2e1dc",
     title: "Gotchi Lodge 2023",
   },
+  {
+    id: "0x711c79d517b315b252e90cb6cf7a22e9291c5e052370b2582e4979cf55f055e9",
+    title: "The Forge - Request for Funding and Development",
+  },
+  {
+    id: "0x6fd66b330df28c8ca3fab19da85d632be22a3dc393ae468bee6e9e88fa248b25",
+    title: " Infinity Keys x Aavegotchi Paartnership [Updated Numbers]",
+  },
+  {
+    id: "0x16f6d4043da35ef318a9071e701e905adab8fe3928c2584880aae786c2357eb3",
+    title: "SigProp: Aavegotchi X The Sandbox",
+  },
+  {
+    id: "0x0f8ae0b2eebe1eddf0dc7e2c49b07fcec17338101a4a21f5aa48e9bb3f35ef28",
+    title: "Sigprop: Turn off the GHST Bonding Curve",
+  },
+  {
+    id: "0x2ab8f9ec193623518f69cbdf31c3c945a03af82bcac03300f927ec87149c0782",
+    title: "25/25/25/25 split for curve DAI",
+  },
+  {
+    id: "0x2d9a7ecb7a5e503a3fb1b252bbf66a3bc20f07517de83c8043cf36e0954496a4",
+    title: "Form and Fund the Curve Transition Team",
+  },
+  {
+    id: "0xda5dc0306f37d55d5a1b61d8ddc3dd3af70bf96377476706514f75198dc98950",
+    title: "Curve Transition Plan - Securing funds for liquidity",
+  },
+  {
+    id: "0xfecb010001c499cb65a4b5f0c19f729fb1135fadea497f099f3b612a57decb21",
+    title: "Sigprop: fund fireball.gg team to develop guilds",
+  },
+  {
+    id: "0x9e71af4605d33f57f68ded125ea95da0b766cffa6eb709f2b320b5e095620de2",
+    title: "Securing Protocol Rewards – Operational & funding request",
+  },
 ];
 
 const coreProps = [
@@ -150,5 +186,42 @@ const coreProps = [
   {
     id: "0x4c43e12bf5d84d049e907194c48f514e1efacb6ec1f1c5c742d0530a86df021a",
     title: "[AGIP 60] Gotchi Lodge 2023",
+  },
+  {
+    id: "0x35f331772e625d209848a32cc25e84fef06d56cca7d270ff0031dcdeb38f3b4c",
+    title: "[AGIP 61] Launching the Aavegotchi Forge",
+  },
+  {
+    id: "0x69f0ac4e4dc5c651d56940ba4717fedcf8813743c4f5a27967317a8fb29e69da",
+    title: "[AGIP 62] Infinity Keys X Aavegotchi Paartnership",
+  },
+  {
+    id: "0xfb622fe34ebf295d55d6d9a44d6da55176861f24c8d9393af7838cae393e6f7f",
+    title: "[AGIP 63] Aavegotchi X The Sandbox",
+  },
+  {
+    id: "0x6cabf7712786db0f3a954fe03e84c44a12d4b14aa2fb5243c606607bf6296bf1",
+    title: "[AGIP 64] Close the GHST Bonding Curve",
+  },
+  {
+    id: "0xdae48a92f83f8317dac11e1f28475ce38f6cf9b1986695b6d229e50ca24c03ea",
+    title: "[AGIP 65] 25/25/25/25 Split for Curve DAI",
+  },
+  {
+    id: "0x93f3e0fc14dec5ca662b6ec0df89a8ec3e22502e0171c326d087defd93c5ac2f",
+    title: "[AGIP 66] Form and Fund the Curve Transition Team",
+  },
+  {
+    id: "0x4fcf6ce9107b62231a92c3c3bed6a5806732b37e5da443883d4f8e5a5286177e",
+    title: "[AGIP 67] Curve Transition Plan - Securing funds for liquidity",
+  },
+  {
+    id: "0x59c001336592a05451805f89d66859159a136bfb850aa4263ec962f65134e2de",
+    title: "[AGIP 68] Fund fireball.gg Team to Develop Guilds",
+  },
+  {
+    id: "0xc6622d08b9786e543699695b422c361d2bf6ed1d4395d9e365dd70d8301d440b",
+    title:
+      "[AGIP 69] Securing Protocol Rewards - Operational & Funding Request",
   },
 ];

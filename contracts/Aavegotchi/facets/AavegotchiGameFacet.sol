@@ -66,11 +66,9 @@ contract AavegotchiGameFacet is Modifiers {
     ///@param _tokenId Identifier of the NFT to query
     ///@return portalAavegotchiTraits_ A struct containing all details about the NFT with identifier `_tokenId`
 
-    function portalAavegotchiTraits(uint256 _tokenId)
-        external
-        view
-        returns (PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory portalAavegotchiTraits_)
-    {
+    function portalAavegotchiTraits(
+        uint256 _tokenId
+    ) external view returns (PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory portalAavegotchiTraits_) {
         portalAavegotchiTraits_ = LibAavegotchi.portalAavegotchiTraits(_tokenId);
     }
 
@@ -159,11 +157,9 @@ contract AavegotchiGameFacet is Modifiers {
     ///@return numericTraits_ An array of six integers each representing a numeric trait(modified) of an NFT with identifier `_tokenId`
     ///@return rarityScore_ The modified rarity score of an NFT with identifier `_tokenId`
     //Only valid for claimed Aavegotchis
-    function modifiedTraitsAndRarityScore(uint256 _tokenId)
-        external
-        view
-        returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_, uint256 rarityScore_)
-    {
+    function modifiedTraitsAndRarityScore(
+        uint256 _tokenId
+    ) external view returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_, uint256 rarityScore_) {
         (numericTraits_, rarityScore_) = LibAavegotchi.modifiedTraitsAndRarityScore(_tokenId);
     }
 
@@ -220,11 +216,7 @@ contract AavegotchiGameFacet is Modifiers {
     ///@param _tokenId The identifier of NFT to claim an Aavegotchi from
     ///@param _option The index of the aavegotchi to claim(1-10)
     ///@param _stakeAmount Minimum amount of collateral tokens needed to be sent to the new aavegotchi escrow contract
-    function claimAavegotchi(
-        uint256 _tokenId,
-        uint256 _option,
-        uint256 _stakeAmount
-    ) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function claimAavegotchi(uint256 _tokenId, uint256 _option, uint256 _stakeAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiGameFacet: Portal not open");
         require(_option < PORTAL_AAVEGOTCHIS_NUM, "AavegotchiGameFacet: Only 10 aavegotchi options available");
@@ -281,8 +273,8 @@ contract AavegotchiGameFacet is Modifiers {
             uint256 tokenId = _tokenIds[i];
             address owner = s.aavegotchis[tokenId].owner;
 
-            //If the owner is the bridge, anyone can pet the gotchis inside
-            if (owner != address(this)) {
+            //If the owner is the bridge or GBM Contract, anyone can pet the gotchis inside
+            if (owner != address(this) && owner != 0xD5543237C656f25EEA69f1E247b8Fa59ba353306) {
                 // Check lending status of aavegotchi and allow original pet operators
                 bool isOriginalPetOperator;
                 uint32 listingId = s.aavegotchiToListingId[uint32(tokenId)];

@@ -195,6 +195,11 @@ struct Whitelist {
     address[] addresses;
 }
 
+struct XPMerkleDrops {
+    bytes32 root;
+    uint256 xpAmount; //10-sigprop, 20-coreprop
+}
+
 struct ERC721BuyOrder {
     uint256 buyOrderId;
     address buyer;
@@ -318,6 +323,9 @@ struct AppStorage {
     mapping(uint32 => mapping(address => EnumerableSet.UintSet)) whitelistGotchiBorrows; // whitelistId => borrower => gotchiId set
     address wearableDiamond;
     address forgeDiamond;
+    //XP Drops
+    mapping(bytes32 => XPMerkleDrops) xpDrops;
+    mapping(uint256 => mapping(bytes32 => uint256)) xpClaimed;
     // states for buy orders
     uint256 nextERC721BuyOrderId;
     mapping(uint256 => ERC721BuyOrder) erc721BuyOrders; // buyOrderId => data
