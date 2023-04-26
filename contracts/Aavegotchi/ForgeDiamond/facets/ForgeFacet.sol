@@ -369,6 +369,7 @@ contract ForgeFacet is Modifiers {
         address sender = LibMeta.msgSender();
         ForgeQueueItem storage queueItem = _getForgeQueueItem(gotchiId);
 
+        require(queueItem.id > 0, "ForgeFacet: queue item doesnt exist");
         require(!queueItem.claimed, "ForgeFacet: already claimed");
         require(block.number >= queueItem.readyBlock, "ForgeFacet: Forge item not ready");
 

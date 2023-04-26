@@ -39,6 +39,10 @@ contract ForgeVRFFacet is Modifiers {
         return s.keyHash;
     }
 
+    function getMaxVrf() external view returns (uint256) {
+        return MAX_VRF;
+    }
+
     function areGeodePrizesAvailable() public view returns (bool) {
         for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
             uint256 tokenId = s.geodePrizeTokenIds[i];
@@ -150,6 +154,14 @@ contract ForgeVRFFacet is Modifiers {
         info.status = VrfStatus.READY_TO_CLAIM;
 
         emit VrfResponse(info.user, _randomNumber, _requestId, block.number);
+    }
+
+    function getRequestInfo(address user) external view returns (VrfRequestInfo memory) {
+        //        require(s.vrfUserToRequestIds[user].length > 0, "ForgeVRFFacet: No VRF requests");
+        bytes32 requestId = s.vrfUserToRequestIds[user][s.vrfUserToRequestIds[user].length - 1];
+        VrfRequestInfo storage info = s.vrfRequestIdToVrfRequestInfo[requestId];
+
+        return info;
     }
 
     function claimWinnings() external whenNotPaused {

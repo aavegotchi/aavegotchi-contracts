@@ -169,6 +169,14 @@ contract ForgeDAOFacet is Modifiers {
         emit SetGeodePrizes(ids, quantities);
     }
 
+    function getGeodePrizesRemaining() external view returns (uint256[] memory, uint256[] memory) {
+        uint256[] memory quantities = new uint256[](s.geodePrizeTokenIds.length);
+        for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
+            quantities[i] = s.geodePrizeQuantities[s.geodePrizeTokenIds[i]];
+        }
+        return (s.geodePrizeTokenIds, quantities);
+    }
+
     // @dev Max supply is not practical to keep track of for each forge token. The contract logic should take care of this.
     // @notice Allow DAO to set max supply per Forge asset token.
     //    function setMaxSupplyPerToken(uint256[] calldata tokenIDs, uint256[] calldata supplyAmts) external onlyDaoOrOwner {
