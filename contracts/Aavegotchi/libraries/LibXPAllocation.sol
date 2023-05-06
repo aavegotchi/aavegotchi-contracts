@@ -24,18 +24,37 @@ library LibXPAllocation {
         bytes32[] calldata _proof,
         uint256[] calldata _onlyGotchis
     ) internal {
-        //short-circuits
+        //calculate leaf onchain
+        bytes32 node = keccak256(abi.encodePacked(_claimer, _gotchiIds));
+
+        handleXPDrop(_propId, node, _gotchiIds, _proof, _onlyGotchis);
+    }
+
+    //This claim function assumes that the leaf for the entry has been calculated properly offchain
+    function _claimXPDropWithPrecalculatedLeaf(
+        bytes32 _propId,
+        bytes32 _leaf,
+        uint256[] calldata _gotchiIds,
+        bytes32[] calldata _proof,
+        uint256[] calldata _onlyGotchis
+    ) internal {
+        handleXPDrop(_propId, _leaf, _gotchiIds, _proof, _onlyGotchis);
+    }
+
+    function handleXPDrop(
+        bytes32 _propId,
+        bytes32 _leaf,
+        uint256[] calldata _gotchiIds,
+        bytes32[] calldata _proof,
+        uint256[] calldata _onlyGotchis
+    ) private {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 xpAmount = s.xpDrops[_propId].xpAmount;
         //short-circuit here
         if (xpAmount == 0) revert("NonExistentDrop");
-        //drops are unique by their roots
-        bytes32 node = keccak256(abi.encodePacked(_claimer, _gotchiIds));
         bytes32 root = s.xpDrops[_propId].root;
 
-        //short-circuits do not revert entire claim process
-        //proof is valid
-        if (LibMerkle.verify(_proof, root, node)) {
+        if (LibMerkle.verify(_proof, root, _leaf)) {
             //claiming for a set of gotchis
             if (_onlyGotchis.length > 0) {
                 //make sure gotchi is a subset

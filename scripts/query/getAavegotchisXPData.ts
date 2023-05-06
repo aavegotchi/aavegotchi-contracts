@@ -213,14 +213,14 @@ export async function generateMerkleTree(
   data.forEach((user, index) => {
     const proof = tree.getProof(leaves[index]);
     xpProofs[user.address] = {
-      leaf: "0x" + leaves[index].toString(),
+      leaf: leaves[index].toString(),
       proof: proof.map((p) => "0x" + p.data.toString("hex")),
     };
   });
 
   //write the tree to a file
 
-  const parentPath = getParentPath(propDetails.id);
+  const parentPath = getParentPath(propDetails.title, propId);
   if (!fs.existsSync(parentPath)) {
     //create folder if it doesn't exist
     fs.mkdirSync(parentPath, { recursive: true });
@@ -249,8 +249,8 @@ export async function generateMerkleTree(
   };
 }
 
-export function getParentPath(propTitle: string): string {
-  return rootPath + `${propType(propTitle)}/${propTitle}`;
+export function getParentPath(propTitle: string, propId: string): string {
+  return rootPath + `${propType(propTitle)}/${propId}`;
 }
 
 function removeEmpty(data: GotchiData[]) {
@@ -270,7 +270,7 @@ function removeEmpty(data: GotchiData[]) {
 //gets the proof of a particular address
 export async function getProof(address: string, propId: string) {
   const prop: ProposalDetails = await getProposalDetails(propId);
-  const filePath = getParentPath(prop.title) + "/tree.json";
+  const filePath = getParentPath(prop.title, propId) + "/tree.json";
 
   //retrieve proof
   const jsonString = fs.readFileSync(filePath, "utf-8");
@@ -286,7 +286,7 @@ export async function getProof(address: string, propId: string) {
 
 export async function getGotchiIds(address: string, propId: string) {
   const prop: ProposalDetails = await getProposalDetails(propId);
-  const filePath = getParentPath(prop.title) + "/data.json";
+  const filePath = getParentPath(prop.title, propId) + "/data.json";
 
   //retrieve gotchiIds
   const jsonString = fs.readFileSync(filePath, "utf-8");
@@ -295,6 +295,22 @@ export async function getGotchiIds(address: string, propId: string) {
     const data: GotchiData = jsonObj[address];
 
     return data ? data.gotchiIds : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+export async function getLeaf(address: string, propId: string) {
+  const prop: ProposalDetails = await getProposalDetails(propId);
+  const filePath = getParentPath(prop.title, propId) + "/tree.json";
+
+  //retrieve proof
+  const jsonString = fs.readFileSync(filePath, "utf-8");
+  const jsonObj = JSON.parse(jsonString);
+  try {
+    const proof: XPProof = jsonObj[address];
+
+    return proof ? proof.leaf : null;
   } catch (error) {
     return null;
   }
