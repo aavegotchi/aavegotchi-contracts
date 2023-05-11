@@ -181,6 +181,8 @@ struct GotchiLending {
     uint32 period; //in seconds
     // storage slot 5
     address[] revenueTokens;
+    //storage slot 6
+    uint256 channellingStatus;
 }
 
 struct LendingListItem {

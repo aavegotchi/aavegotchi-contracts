@@ -67,6 +67,10 @@ contract LendingGetterAndSetterFacet is Modifiers {
         }
     }
 
+    function setLendingChannelingStatus(uint32 _listingId, uint256 _newChannelStatus) external {
+        LibGotchiLending.changeChannelingStatus(_listingId, _newChannelStatus);
+    }
+
     /*/////////////////////////////////////////////////////////////////////////////////
     ///                                    GETTERS                                  ///
     /////////////////////////////////////////////////////////////////////////////////*/
@@ -86,11 +90,7 @@ contract LendingGetterAndSetterFacet is Modifiers {
         }
     }
 
-    function isLendingOperator(
-        address _lender,
-        address _lendingOperator,
-        uint32 _tokenId
-    ) external view returns (bool) {
+    function isLendingOperator(address _lender, address _lendingOperator, uint32 _tokenId) external view returns (bool) {
         return s.lendingOperators[_lender][_lendingOperator][_tokenId];
     }
 
@@ -107,11 +107,9 @@ contract LendingGetterAndSetterFacet is Modifiers {
     ///@param _listingId The identifier of the lending to query
     ///@return listing_ A struct containing certain details about the lending like timeCreated etc
     ///@return aavegotchiInfo_ A struct containing details about the aavegotchi
-    function getGotchiLendingListingInfo(uint32 _listingId)
-        external
-        view
-        returns (GotchiLending memory listing_, AavegotchiInfo memory aavegotchiInfo_)
-    {
+    function getGotchiLendingListingInfo(
+        uint32 _listingId
+    ) external view returns (GotchiLending memory listing_, AavegotchiInfo memory aavegotchiInfo_) {
         listing_ = LibGotchiLending.getListing(_listingId);
         aavegotchiInfo_ = LibAavegotchi.getAavegotchi(listing_.erc721TokenId);
     }
@@ -141,11 +139,7 @@ contract LendingGetterAndSetterFacet is Modifiers {
     ///@param _status Status of the listings to query, "listed" or "agreed"
     ///@param _length How many aavegotchi listings to return
     ///@return listings_ An array of lending
-    function getOwnerGotchiLendings(
-        address _lender,
-        bytes32 _status,
-        uint256 _length
-    ) external view returns (GotchiLending[] memory listings_) {
+    function getOwnerGotchiLendings(address _lender, bytes32 _status, uint256 _length) external view returns (GotchiLending[] memory listings_) {
         uint32 listingId = s.aavegotchiLenderLendingHead[_lender][_status];
         listings_ = new GotchiLending[](_length);
         uint256 listIndex;
@@ -213,5 +207,9 @@ contract LendingGetterAndSetterFacet is Modifiers {
 
     function isAavegotchiListed(uint32 _erc721TokenId) external view returns (bool) {
         return LibGotchiLending.isAavegotchiListed(_erc721TokenId);
+    }
+
+    function getListingChannelingStatus(uint32 _listingId) external view returns (uint256) {
+        return LibGotchiLending.getChannelingStatus(_listingId);
     }
 }
