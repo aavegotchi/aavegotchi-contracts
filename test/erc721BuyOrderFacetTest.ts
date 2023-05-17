@@ -28,7 +28,7 @@ describe("Testing ERC721 Buy Order", async function () {
   const ghstHolder2Address = "0x45fdb9d9Ff3105392bf5F1A3828F9523314117A7";
   const pixelcraftAddress = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
   const daoAddress = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
-  const testGotchiId1 = 12867;
+  const testGotchiId1 = 12867; // should be listed
   const testGotchiId2 = 10000; // no buy orders
   const testGotchiId3 = 19009; // should equip wearable and unlocked, used for checking validation
   const testGotchiId4 = 11600; // should be in lending
@@ -38,6 +38,9 @@ describe("Testing ERC721 Buy Order", async function () {
   const mediumPrice = ethers.utils.parseUnits("105", "ether");
   const highestPrice = ethers.utils.parseUnits("115", "ether");
   const listPrice = ethers.utils.parseUnits("1", "ether");
+  const duration0 = 0;
+  const duration1 = 100;
+  const duration2 = 86400;
   const testValidationOptions = [false, true, false];
   let erc721BuyOrderFacet: ERC721BuyOrderFacet;
   let aavegotchiFacet: AavegotchiFacet;
@@ -131,6 +134,7 @@ describe("Testing ERC721 Buy Order", async function () {
           diamondAddress,
           testGotchiId1,
           0,
+          duration0,
           testValidationOptions
         )
       ).to.be.revertedWith("ERC721BuyOrder: price should be 1 GHST or larger");
@@ -141,6 +145,7 @@ describe("Testing ERC721 Buy Order", async function () {
           diamondAddress,
           testGotchiId1,
           ethers.utils.parseUnits("1000000000", "ether"),
+          duration0,
           testValidationOptions
         )
       ).to.be.revertedWith("ERC721BuyOrder: Not enough GHST!");
@@ -157,6 +162,7 @@ describe("Testing ERC721 Buy Order", async function () {
           diamondAddress,
           testGotchiId1,
           minPrice,
+          duration0,
           testValidationOptions
         )
       ).to.be.revertedWith("ERC721BuyOrder: Owner can't be buyer");
@@ -168,6 +174,7 @@ describe("Testing ERC721 Buy Order", async function () {
           diamondAddress,
           testGotchiId1,
           minPrice,
+          duration0,
           [true]
         )
       ).to.be.revertedWith(
@@ -185,14 +192,16 @@ describe("Testing ERC721 Buy Order", async function () {
             diamondAddress,
             testGotchiId1,
             price,
+            duration1,
             testValidationOptions
           )
         ).wait();
         const event = receipt!.events!.find(
-          (e: any) => e.event === "ERC721BuyOrderAdd"
+          (e: any) => e.event === "ERC721BuyOrderAdded"
         );
         firstBuyOrderId = event!.args!.buyOrderId;
         expect(event!.args!.buyer).to.equal(ghstHolderAddress);
+        expect(event!.args!.duration).to.equal(duration1);
         const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
         expect(newBalance.add(price)).to.equal(oldBalance);
       });
@@ -208,14 +217,16 @@ describe("Testing ERC721 Buy Order", async function () {
             diamondAddress,
             testGotchiId1,
             mediumPrice,
+            duration0,
             testValidationOptions
           )
         ).wait();
         const event = receipt!.events!.find(
-          (e: any) => e.event === "ERC721BuyOrderAdd"
+          (e: any) => e.event === "ERC721BuyOrderAdded"
         );
         secondBuyOrderId = event!.args!.buyOrderId;
         expect(event!.args!.buyer).to.equal(ghstHolderAddress);
+        expect(event!.args!.duration).to.equal(duration0);
         const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
         expect(newBalance.add(mediumPrice).sub(price)).to.equal(oldBalance);
       });
@@ -243,14 +254,16 @@ describe("Testing ERC721 Buy Order", async function () {
             diamondAddress,
             testGotchiId1,
             mediumPrice,
+            duration0,
             testValidationOptions
           )
         ).wait();
         const event = receipt!.events!.find(
-          (e: any) => e.event === "ERC721BuyOrderAdd"
+          (e: any) => e.event === "ERC721BuyOrderAdded"
         );
         thirdBuyOrderId = event!.args!.buyOrderId;
         expect(event!.args!.buyer).to.equal(ghstHolder2Address);
+        expect(event!.args!.duration).to.equal(duration0);
         const newBalance = await ghstERC20.balanceOf(ghstHolder2Address);
         expect(newBalance.add(mediumPrice)).to.equal(oldBalance);
       });
@@ -269,14 +282,17 @@ describe("Testing ERC721 Buy Order", async function () {
       );
       expect(buyOrder.buyOrderId).to.equal(firstBuyOrderId);
       expect(buyOrder.erc721TokenId).to.equal(testGotchiId1);
+      expect(buyOrder.duration).to.equal(duration1);
       expect(buyOrder.cancelled).to.equal(true);
       buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(secondBuyOrderId);
       expect(buyOrder.buyOrderId).to.equal(secondBuyOrderId);
       expect(buyOrder.erc721TokenId).to.equal(testGotchiId1);
+      expect(buyOrder.duration).to.equal(duration0);
       expect(buyOrder.cancelled).to.equal(false);
       buyOrder = await erc721BuyOrderFacet.getERC721BuyOrder(thirdBuyOrderId);
       expect(buyOrder.buyOrderId).to.equal(thirdBuyOrderId);
       expect(buyOrder.erc721TokenId).to.equal(testGotchiId1);
+      expect(buyOrder.duration).to.equal(duration0);
       expect(buyOrder.cancelled).to.equal(false);
     });
   });
@@ -318,14 +334,16 @@ describe("Testing ERC721 Buy Order", async function () {
       expect(buyOrders.length).to.equal(2);
       expect(buyOrders[0].buyOrderId).to.equal(secondBuyOrderId);
       expect(buyOrders[0].erc721TokenId).to.equal(testGotchiId1);
+      expect(buyOrders[0].duration).to.equal(duration0);
       expect(buyOrders[0].cancelled).to.equal(false);
       expect(buyOrders[1].buyOrderId).to.equal(thirdBuyOrderId);
       expect(buyOrders[1].erc721TokenId).to.equal(testGotchiId1);
+      expect(buyOrders[1].duration).to.equal(duration0);
       expect(buyOrders[1].cancelled).to.equal(false);
     });
   });
 
-  describe("Testing cancelERC721BuyOrder", async function () {
+  describe("Testing cancelERC721BuyOrder (without duration)", async function () {
     it("Should revert when try to cancel buy order with wrong id", async function () {
       await expect(
         erc721BuyOrderFacet.cancelERC721BuyOrder(thirdBuyOrderId.add(1))
@@ -355,7 +373,7 @@ describe("Testing ERC721 Buy Order", async function () {
     });
   });
 
-  describe("Testing executeERC721BuyOrder", async function () {
+  describe("Testing executeERC721BuyOrder (without duration)", async function () {
     let listingId: any;
     before(async function () {
       await (
@@ -366,11 +384,12 @@ describe("Testing ERC721 Buy Order", async function () {
           diamondAddress,
           testGotchiId1,
           highestPrice,
+          duration0,
           testValidationOptions
         )
       ).wait();
       const event = receipt!.events!.find(
-        (e: any) => e.event === "ERC721BuyOrderAdd"
+        (e: any) => e.event === "ERC721BuyOrderAdded"
       );
       fourthBuyOrderId = event!.args!.buyOrderId;
 
@@ -461,11 +480,12 @@ describe("Testing ERC721 Buy Order", async function () {
           diamondAddress,
           testGotchiId4,
           price,
+          duration0,
           testValidationOptions
         )
       ).wait();
       const event = receipt!.events!.find(
-        (e: any) => e.event === "ERC721BuyOrderAdd"
+        (e: any) => e.event === "ERC721BuyOrderAdded"
       );
       const buyOrderId = event!.args!.buyOrderId;
 
@@ -559,11 +579,12 @@ describe("Testing ERC721 Buy Order", async function () {
           diamondAddress,
           testGotchiId3,
           price,
+          duration0,
           testValidationOptions
         )
       ).wait();
       const event = receipt!.events!.find(
-        (e: any) => e.event === "ERC721BuyOrderAdd"
+        (e: any) => e.event === "ERC721BuyOrderAdded"
       );
       const buyOrderId = event!.args!.buyOrderId;
 
@@ -594,11 +615,12 @@ describe("Testing ERC721 Buy Order", async function () {
           diamondAddress,
           testGotchiId3,
           price,
+          duration0,
           testValidationOptions
         )
       ).wait();
       const event = receipt!.events!.find(
-        (e: any) => e.event === "ERC721BuyOrderAdd"
+        (e: any) => e.event === "ERC721BuyOrderAdded"
       );
       const buyOrderId = event!.args!.buyOrderId;
 
@@ -632,11 +654,12 @@ describe("Testing ERC721 Buy Order", async function () {
           diamondAddress,
           testOpenPortalId,
           price,
+          duration0,
           testValidationOptions
         )
       ).wait();
       const event = receipt!.events!.find(
-        (e: any) => e.event === "ERC721BuyOrderAdd"
+        (e: any) => e.event === "ERC721BuyOrderAdded"
       );
       expect(event!.args!.buyer).to.equal(ghstHolderAddress);
       const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
@@ -652,11 +675,12 @@ describe("Testing ERC721 Buy Order", async function () {
           diamondAddress,
           testClosedPortalId,
           price,
+          duration0,
           testValidationOptions
         )
       ).wait();
       const event = receipt!.events!.find(
-        (e: any) => e.event === "ERC721BuyOrderAdd"
+        (e: any) => e.event === "ERC721BuyOrderAdded"
       );
       expect(event!.args!.buyer).to.equal(ghstHolderAddress);
       const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);

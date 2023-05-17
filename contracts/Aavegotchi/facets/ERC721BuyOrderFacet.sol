@@ -13,13 +13,14 @@ import {Modifiers, ERC721BuyOrder} from "../libraries/LibAppStorage.sol";
 import {BaazaarSplit, LibSharedMarketplace, SplitAddresses} from "../libraries/LibSharedMarketplace.sol";
 
 contract ERC721BuyOrderFacet is Modifiers {
-    event ERC721BuyOrderAdd(
+    event ERC721BuyOrderAdded(
         uint256 indexed buyOrderId,
         address indexed buyer,
         address erc721TokenAddress,
         uint256 erc721TokenId,
         uint256 indexed category,
         uint256 priceInWei,
+        uint256 duration,
         bytes32 validationHash,
         uint256 time
     );
@@ -62,6 +63,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         address _erc721TokenAddress,
         uint256 _erc721TokenId,
         uint256 _priceInWei,
+        uint256 _duration,
         bool[] calldata _validationOptions // 0: BRS, 1: GHST, 2: skill points
     ) external {
         require(_priceInWei >= 1e18, "ERC721BuyOrder: price should be 1 GHST or larger");
@@ -108,10 +110,21 @@ contract ERC721BuyOrderFacet is Modifiers {
             validationHash: _validationHash,
             timeCreated: block.timestamp,
             timePurchased: 0,
+            duration: _duration,
             cancelled: false,
             validationOptions: _validationOptions
         });
-        emit ERC721BuyOrderAdd(buyOrderId, sender, _erc721TokenAddress, _erc721TokenId, category, _priceInWei, _validationHash, block.timestamp);
+        emit ERC721BuyOrderAdded(
+            buyOrderId,
+            sender,
+            _erc721TokenAddress,
+            _erc721TokenId,
+            category,
+            _priceInWei,
+            _duration,
+            _validationHash,
+            block.timestamp
+        );
     }
 
     function cancelERC721BuyOrder(uint256 _buyOrderId) external {
@@ -124,6 +137,9 @@ contract ERC721BuyOrderFacet is Modifiers {
             "ERC721BuyOrder: Only aavegotchi owner or buyer can call this function"
         );
         require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
+        if (erc721BuyOrder.duration > 0) {
+            require(erc721BuyOrder.timeCreated + erc721BuyOrder.duration >= block.timestamp, "ERC721BuyOrder: Already expired");
+        }
 
         LibBuyOrder.cancelERC721BuyOrder(_buyOrderId);
     }
@@ -135,6 +151,9 @@ contract ERC721BuyOrderFacet is Modifiers {
         require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
         require(sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner, "ERC721BuyOrder: Only aavegotchi owner can call this function");
         require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
+        if (erc721BuyOrder.duration > 0) {
+            require(erc721BuyOrder.timeCreated + erc721BuyOrder.duration >= block.timestamp, "ERC721BuyOrder: Already expired");
+        }
 
         // disable for gotchi in lending
         uint256 category = LibAavegotchi.getERC721Category(erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId);
