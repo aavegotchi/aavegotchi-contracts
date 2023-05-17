@@ -174,6 +174,7 @@ contract ERC721BuyOrderFacet is Modifiers {
 
         if (erc721BuyOrder.erc721TokenAddress == address(this)) {
             LibAavegotchi.transfer(sender, erc721BuyOrder.buyer, erc721BuyOrder.erc721TokenId);
+            LibERC721Marketplace.updateERC721Listing(address(this), erc721BuyOrder.erc721TokenId, sender);
         } else {
             IERC721(erc721BuyOrder.erc721TokenAddress).safeTransferFrom(sender, erc721BuyOrder.buyer, erc721BuyOrder.erc721TokenId);
         }
