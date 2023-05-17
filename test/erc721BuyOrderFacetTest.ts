@@ -39,8 +39,7 @@ describe("Testing ERC721 Buy Order", async function () {
   const highestPrice = ethers.utils.parseUnits("115", "ether");
   const listPrice = ethers.utils.parseUnits("1", "ether");
   const duration0 = 0;
-  const duration1 = 100;
-  const duration2 = 86400;
+  const duration1 = 86400; // non-zero
   const testValidationOptions = [false, true, false];
   let erc721BuyOrderFacet: ERC721BuyOrderFacet;
   let aavegotchiFacet: AavegotchiFacet;
@@ -640,6 +639,50 @@ describe("Testing ERC721 Buy Order", async function () {
           await erc721BuyOrderFacet.connect(gotchiOwner3)
         ).executeERC721BuyOrder(buyOrderId)
       ).to.be.revertedWith("ERC721BuyOrder: Invalid buy order");
+    });
+  });
+
+  describe("Testing duration logic", async function () {
+    let gotchiOwner3: any;
+    let buyOrderId: any;
+    before(async function () {
+      const gotchiOwnerAddress3 = await aavegotchiFacet.ownerOf(testGotchiId3);
+      await network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [gotchiOwnerAddress3],
+      });
+      gotchiOwner3 = await ethers.getSigner(gotchiOwnerAddress3);
+      await (
+        await ghstERC20.connect(ghstHolder)
+      ).approve(diamondAddress, price);
+      const receipt = await (
+        await erc721BuyOrderFacet.placeERC721BuyOrder(
+          diamondAddress,
+          testGotchiId3,
+          price,
+          duration1,
+          testValidationOptions
+        )
+      ).wait();
+      const event = receipt!.events!.find(
+        (e: any) => e.event === "ERC721BuyOrderAdded"
+      );
+      buyOrderId = event!.args!.buyOrderId;
+
+      ethers.provider.send("evm_increaseTime", [duration1 + 1]);
+      ethers.provider.send("evm_mine", []);
+    });
+    it("Should fail if cancel expired buy order", async function () {
+      await expect(
+        erc721BuyOrderFacet.cancelERC721BuyOrder(buyOrderId)
+      ).to.be.revertedWith("ERC721BuyOrder: Already expired");
+    });
+    it("Should fail if execute expired buy order", async function () {
+      await expect(
+        (
+          await erc721BuyOrderFacet.connect(gotchiOwner3)
+        ).executeERC721BuyOrder(buyOrderId)
+      ).to.be.revertedWith("ERC721BuyOrder: Already expired");
     });
   });
 

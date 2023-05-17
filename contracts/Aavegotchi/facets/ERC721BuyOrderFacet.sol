@@ -84,8 +84,9 @@ contract ERC721BuyOrderFacet is Modifiers {
             ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[oldBuyOrderId];
             require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
             require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
-
-            LibBuyOrder.cancelERC721BuyOrder(oldBuyOrderId);
+            if ((erc721BuyOrder.duration == 0) || (erc721BuyOrder.timeCreated + erc721BuyOrder.duration >= block.timestamp)) {
+                LibBuyOrder.cancelERC721BuyOrder(oldBuyOrderId);
+            }
         }
 
         // Transfer GHST
