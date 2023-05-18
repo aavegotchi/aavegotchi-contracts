@@ -369,7 +369,7 @@ library LibAavegotchi {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 currentKinship = s.aavegotchis[_tokenId].interactionCount;
         if (_amount > currentKinship) {
-            revert("Kinship too low to channel");
+            revert("Kinship too low to reduce");
         } else {
             s.aavegotchis[_tokenId].interactionCount -= _amount;
         }

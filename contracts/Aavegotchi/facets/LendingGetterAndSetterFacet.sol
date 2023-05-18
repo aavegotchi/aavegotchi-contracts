@@ -7,6 +7,8 @@ import {Modifiers, GotchiLending} from "../libraries/LibAppStorage.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 
+import {LibBitmapHelpers} from "../libraries/LibBitmapHelpers.sol";
+
 contract LendingGetterAndSetterFacet is Modifiers {
     event LendingOperatorSet(address indexed lender, address indexed lendingOperator, uint32 indexed tokenId, bool isLendingOperator);
 
@@ -65,10 +67,6 @@ contract LendingGetterAndSetterFacet is Modifiers {
                 ++i;
             }
         }
-    }
-
-    function setLendingChannelingStatus(uint32 _listingId, uint256 _newChannelStatus) external {
-        LibGotchiLending.changeChannelingStatus(_listingId, _newChannelStatus);
     }
 
     /*/////////////////////////////////////////////////////////////////////////////////
@@ -209,7 +207,20 @@ contract LendingGetterAndSetterFacet is Modifiers {
         return LibGotchiLending.isAavegotchiListed(_erc721TokenId);
     }
 
-    function getListingChannelingStatus(uint32 _listingId) external view returns (uint256) {
-        return LibGotchiLending.getChannelingStatus(_listingId);
+    function getLendingPermissionBitmap(uint32 _listingId) external view returns (uint256) {
+        return s.gotchiLendings[_listingId].permissions;
+    }
+
+    function getAllLendingPermissions(uint32 _listingId) external view returns (uint8[32] memory permissions_) {
+        permissions_ = LibBitmapHelpers.getAllNumbers(s.gotchiLendings[_listingId].permissions);
+    }
+
+    function getLendingPermissionModifier(uint32 _listingId, uint8 _permissionIndex) public view returns (uint8) {
+        return LibBitmapHelpers.getValueInByte(_permissionIndex, s.gotchiLendings[_listingId].permissions);
+    }
+
+    //simple check to see if a lending listing permission is set to none
+    function lendingPermissionSetToNone(uint32 _listingId) public view returns (bool) {
+        return getLendingPermissionModifier(_listingId, 0) == 0;
     }
 }

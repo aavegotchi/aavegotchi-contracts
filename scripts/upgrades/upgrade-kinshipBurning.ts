@@ -10,7 +10,7 @@ export async function upgrade() {
   const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 
   const addGotchiListing =
-    "(uint32 tokenId,uint96 initialCost,uint32 period,uint8[3] revenueSplit,address originalOwner,address thirdParty,uint32 whitelistId,address[] revenueTokens, uint256 channellingStatus)";
+    "(uint32 tokenId,uint96 initialCost,uint32 period,uint8[3] revenueSplit,address originalOwner,address thirdParty,uint32 whitelistId,address[] revenueTokens, uint256 permissions)";
   const addGotchiListingOld =
     "(uint32 tokenId,uint96 initialCost,uint32 period,uint8[3] revenueSplit,address originalOwner,address thirdParty,uint32 whitelistId,address[] revenueTokens)";
   const facets: FacetsAndAddSelectors[] = [
@@ -18,7 +18,7 @@ export async function upgrade() {
       facetName: "GotchiLendingFacet",
       addSelectors: [
         `function addGotchiListing(${addGotchiListing} memory p) external`,
-        `function addGotchiLending(uint32 _erc721TokenId,uint96 _initialCost,uint32 _period,uint8[3] calldata _revenueSplit,address _originalOwner,address _thirdParty,uint32 _whitelistId,address[] calldata _revenueTokens, uint256 channellingStatus) external`,
+        `function addGotchiLending(uint32 _erc721TokenId,uint96 _initialCost,uint32 _period,uint8[3] calldata _revenueSplit,address _originalOwner,address _thirdParty,uint32 _whitelistId,address[] calldata _revenueTokens, uint256 permissions) external`,
         `function batchAddGotchiListing(${addGotchiListing}[] memory listings) external`,
       ],
       removeSelectors: [
@@ -37,8 +37,10 @@ export async function upgrade() {
     {
       facetName: "LendingGetterAndSetterFacet",
       addSelectors: [
-        ` function getListingChannelingStatus(uint32 _listingId) external view returns (uint256)`,
-        `function setLendingChannelingStatus(uint32 _listingId, uint256 _newChannelStatus) external`,
+        `function getLendingPermissionBitmap(uint32 _listingId) external view returns (uint256)`,
+        `function getAllLendingPermissions(uint32 _listingId) external view returns (uint8[32] memory permissions_)`,
+        `function getLendingPermissionModifier(uint32 _listingId, uint8 _permissionIndex) public view returns (uint8)`,
+        `function lendingPermissionSetToNone(uint32 _listingId) public view returns (bool) `,
       ],
       removeSelectors: [],
     },

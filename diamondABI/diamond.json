@@ -3882,11 +3882,7 @@
         "name": "_revenueTokens",
         "type": "address[]"
       },
-      {
-        "internalType": "uint256",
-        "name": "_channellingStatus",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "_permissions", "type": "uint256" }
     ],
     "name": "addGotchiLending",
     "outputs": [],
@@ -3923,7 +3919,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "channellingStatus",
+            "name": "permissions",
             "type": "uint256"
           }
         ],
@@ -3984,7 +3980,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "channellingStatus",
+            "name": "permissions",
             "type": "uint256"
           }
         ],
@@ -4987,6 +4983,21 @@
   },
   {
     "inputs": [
+      { "internalType": "uint32", "name": "_listingId", "type": "uint32" }
+    ],
+    "name": "getAllLendingPermissions",
+    "outputs": [
+      {
+        "internalType": "uint8[32]",
+        "name": "permissions_",
+        "type": "uint8[32]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
       { "internalType": "uint32", "name": "_erc721TokenId", "type": "uint32" }
     ],
     "name": "getGotchiLendingFromToken",
@@ -5031,7 +5042,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "channellingStatus",
+            "name": "permissions",
             "type": "uint256"
           }
         ],
@@ -5098,7 +5109,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "channellingStatus",
+            "name": "permissions",
             "type": "uint256"
           }
         ],
@@ -5366,7 +5377,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "channellingStatus",
+            "name": "permissions",
             "type": "uint256"
           }
         ],
@@ -5431,7 +5442,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "channellingStatus",
+            "name": "permissions",
             "type": "uint256"
           }
         ],
@@ -5445,21 +5456,31 @@
   },
   {
     "inputs": [
+      { "internalType": "uint32", "name": "_listingId", "type": "uint32" }
+    ],
+    "name": "getLendingPermissionBitmap",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint32", "name": "_listingId", "type": "uint32" },
+      { "internalType": "uint8", "name": "_permissionIndex", "type": "uint8" }
+    ],
+    "name": "getLendingPermissionModifier",
+    "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
       { "internalType": "address", "name": "_lender", "type": "address" }
     ],
     "name": "getLentTokenIdsOfLender",
     "outputs": [
       { "internalType": "uint32[]", "name": "tokenIds_", "type": "uint32[]" }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint32", "name": "_listingId", "type": "uint32" }
-    ],
-    "name": "getListingChannelingStatus",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -5511,7 +5532,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "channellingStatus",
+            "name": "permissions",
             "type": "uint256"
           }
         ],
@@ -5588,25 +5609,20 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "token", "type": "address" }
+      { "internalType": "uint32", "name": "_listingId", "type": "uint32" }
     ],
-    "name": "revenueTokenAllowed",
+    "name": "lendingPermissionSetToNone",
     "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint32", "name": "_listingId", "type": "uint32" },
-      {
-        "internalType": "uint256",
-        "name": "_newChannelStatus",
-        "type": "uint256"
-      }
+      { "internalType": "address", "name": "token", "type": "address" }
     ],
-    "name": "setLendingChannelingStatus",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "name": "revenueTokenAllowed",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -8432,7 +8448,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "channellingStatus",
+            "name": "permissions",
             "type": "uint256"
           }
         ],
@@ -8502,7 +8518,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "channellingStatus",
+            "name": "permissions",
             "type": "uint256"
           }
         ],
@@ -8584,7 +8600,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "channellingStatus",
+            "name": "permissions",
             "type": "uint256"
           }
         ],
@@ -8645,7 +8661,7 @@
           { "internalType": "uint256", "name": "timeEnded", "type": "uint256" },
           {
             "internalType": "uint256",
-            "name": "channellingStatus",
+            "name": "permissions",
             "type": "uint256"
           }
         ],
@@ -8710,7 +8726,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "channellingStatus",
+            "name": "permissions",
             "type": "uint256"
           }
         ],
@@ -8721,25 +8737,6 @@
       }
     ],
     "name": "GotchiLendingExecuted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint32",
-        "name": "listingId",
-        "type": "uint32"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "channellingStatus",
-        "type": "uint256"
-      }
-    ],
-    "name": "LendingChannelingStatusChanged",
     "type": "event"
   },
   {

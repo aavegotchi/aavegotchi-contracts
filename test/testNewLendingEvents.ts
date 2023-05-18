@@ -10,23 +10,24 @@ import { expect } from "chai";
 import { upgrade } from "../scripts/upgrades/upgrade-kinshipBurning";
 
 import { BigNumber, ContractReceipt } from "ethers";
+import { constructPermissionsBitMap } from "../scripts/LendingPermissions";
 
 const gCancel = [
-  `event GotchiLendingCancelled((uint32 listingId,address lender,uint32 tokenId,uint96 initialCost,uint32 period,uint8[3] revenueSplit,address originalOwner,address thirdParty,uint32 whitelistId,address[] revenueTokens,uint256 timeCancelled,uint256 channellingStatus))`,
+  `event GotchiLendingCancelled((uint32 listingId,address lender,uint32 tokenId,uint96 initialCost,uint32 period,uint8[3] revenueSplit,address originalOwner,address thirdParty,uint32 whitelistId,address[] revenueTokens,uint256 timeCancelled,uint256 permissions))`,
 ];
 const gAdd = [
-  `event GotchiLendingAdded((uint32 listingId,address lender,uint32 tokenId,uint96 initialCost,uint32 period,uint8[3] revenueSplit,address originalOwner,address thirdParty,uint32 whitelistId,address[] revenueTokens,uint256 timeCreated,uint256 channellingStatus))`,
+  `event GotchiLendingAdded((uint32 listingId,address lender,uint32 tokenId,uint96 initialCost,uint32 period,uint8[3] revenueSplit,address originalOwner,address thirdParty,uint32 whitelistId,address[] revenueTokens,uint256 timeCreated,uint256 permissions))`,
 ];
 const gExecute = [
-  `event GotchiLendingExecuted((uint32 listingId,address lender,address borrower,uint32 tokenId,uint96 initialCost,uint32 period,uint8[3] revenueSplit,address originalOwner,address thirdParty,uint32 whitelistId,address[] revenueTokens,uint256 timeAgreed,uint256 channellingStatus))`,
+  `event GotchiLendingExecuted((uint32 listingId,address lender,address borrower,uint32 tokenId,uint96 initialCost,uint32 period,uint8[3] revenueSplit,address originalOwner,address thirdParty,uint32 whitelistId,address[] revenueTokens,uint256 timeAgreed,uint256 permissions))`,
 ];
 
 const gClaim = [
-  `event GotchiLendingClaimed((uint32 listingId,address lender,address borrower,uint32 tokenId,uint96 initialCost,uint32 period,uint8[3] revenueSplit,address originalOwner,address thirdParty,uint32 whitelistId,address[] revenueTokens,uint256[] amounts,uint256 timeClaimed,uint256 channellingStatus))`,
+  `event GotchiLendingClaimed((uint32 listingId,address lender,address borrower,uint32 tokenId,uint96 initialCost,uint32 period,uint8[3] revenueSplit,address originalOwner,address thirdParty,uint32 whitelistId,address[] revenueTokens,uint256[] amounts,uint256 timeClaimed,uint256 permissions))`,
 ];
 
 const gEnd = [
-  `event GotchiLendingEnded((uint32 listingId,address lender,address borrower,uint32 tokenId,uint96 initialCost,uint32 period,uint8[3] revenueSplit,address originalOwner,address thirdParty,uint32 whitelistId,address[] revenueTokens,uint256 timeEnded,uint256 channellingStatus))`,
+  `event GotchiLendingEnded((uint32 listingId,address lender,address borrower,uint32 tokenId,uint96 initialCost,uint32 period,uint8[3] revenueSplit,address originalOwner,address thirdParty,uint32 whitelistId,address[] revenueTokens,uint256 timeEnded,uint256 permissions))`,
 ];
 
 const user: string = "0x4083FE56Ed8e2784CD720ec6851a01E7e931076b";
@@ -47,7 +48,7 @@ interface IGotchiLending {
   timeAgreed?: BigNumber;
   timeCreated?: BigNumber;
   borrower?: string;
-  channellingStatus: BigNumber;
+  permissions: BigNumber;
 }
 
 let gotchiLendingFacet: GotchiLendingFacet;
@@ -68,7 +69,7 @@ describe("Testing Correct events for lending actions", async function () {
     thirdParty: any;
     whitelistId: any;
     revenueTokens: any;
-    channellingStatus: any;
+    permissions: any;
     listingId?: string;
     lender?: string;
     timeCancelled?: number;
@@ -95,7 +96,7 @@ describe("Testing Correct events for lending actions", async function () {
   });
 
   it("Test event for lending cancellation ", async function () {
-    const listingId = "1730619";
+    const listingId = "1734651";
 
     const info = await getAndSetFacet.getLendingListingInfo(listingId);
 
@@ -120,7 +121,7 @@ describe("Testing Correct events for lending actions", async function () {
       whitelistId: info.whitelistId,
       revenueTokens: info.revenueTokens,
       timeCancelled: getCurrentTimestamp(),
-      channellingStatus: 0,
+      permissions: 0,
     };
 
     //cache details for later
@@ -134,6 +135,10 @@ describe("Testing Correct events for lending actions", async function () {
     modularAssert("cancel", tx2, GotchiLendingCancellation);
   });
 
+  const channellingAllowed = constructPermissionsBitMap({
+    noPermissions: 1,
+    channellingAllowed: 1,
+  });
   it("Test event for lending creation ", async function () {
     //make sure the listingCancelled event is emitted
     //create similar listing
@@ -146,26 +151,12 @@ describe("Testing Correct events for lending actions", async function () {
       cancellationDetails.thirdParty,
       cancellationDetails.whitelistId,
       cancellationDetails.revenueTokens,
-      0
+      channellingAllowed
     );
 
     const tx2 = await tx.wait();
 
     newListingId = await modularAssert("add", tx2, cancellationDetails);
-  });
-
-  it("Test for channeling permission changes", async function () {
-    getAndSetFacet = await impersonate(owner, getAndSetFacet, ethers, network);
-
-    const tx = await getAndSetFacet.setLendingChannelingStatus(newListingId, 1);
-
-    const tx2 = await tx.wait();
-
-    const newChannelingStatus = await getAndSetFacet.getListingChannelingStatus(
-      newListingId
-    );
-
-    expect(newChannelingStatus).to.equal(1);
   });
 
   it("Test event for lending execution ", async function () {
@@ -186,14 +177,6 @@ describe("Testing Correct events for lending actions", async function () {
 
     cancellationDetails.listingId = newListingId;
     newListingId = await modularAssert("execute", tx2, cancellationDetails);
-  });
-
-  it("Cannot change channeling status while listing has been executed", async function () {
-    getAndSetFacet = await impersonate(owner, getAndSetFacet, ethers, network);
-
-    await expect(
-      getAndSetFacet.setLendingChannelingStatus(newListingId, 1)
-    ).to.be.revertedWith("LibGotchiLending: Listing already agreed");
   });
 
   it("Test event for lending claim ", async function () {
@@ -280,8 +263,8 @@ async function modularAssert(
   expect(pItems[0].revenueTokens.length).to.equal(info.revenueTokens.length);
 
   const currentChannelingStatus =
-    await getAndSetFacet.getListingChannelingStatus(pItems[0].listingId);
-  expect(pItems[0].channellingStatus).to.equal(currentChannelingStatus);
+    await getAndSetFacet.getLendingPermissionBitmap(pItems[0].listingId);
+  expect(pItems[0].permissions).to.equal(currentChannelingStatus);
 
   return pItems[0].listingId;
 }

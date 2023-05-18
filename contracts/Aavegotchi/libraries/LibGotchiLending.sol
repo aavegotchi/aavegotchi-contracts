@@ -26,7 +26,7 @@ library LibEventStructContainers {
         uint32 whitelistId;
         address[] revenueTokens;
         uint256 timeCreated;
-        uint256 channellingStatus;
+        uint256 permissions;
     }
 
     struct GotchiLendingExecution {
@@ -42,7 +42,7 @@ library LibEventStructContainers {
         uint32 whitelistId;
         address[] revenueTokens;
         uint256 timeAgreed;
-        uint256 channellingStatus;
+        uint256 permissions;
     }
 
     struct GotchiLendingCancellation {
@@ -57,7 +57,7 @@ library LibEventStructContainers {
         uint32 whitelistId;
         address[] revenueTokens;
         uint256 timeCancelled;
-        uint256 channellingStatus;
+        uint256 permissions;
     }
 
     struct GotchiLendingClaim {
@@ -74,7 +74,7 @@ library LibEventStructContainers {
         address[] revenueTokens;
         uint256[] amounts;
         uint256 timeClaimed;
-        uint256 channellingStatus;
+        uint256 permissions;
     }
 
     struct GotchiLendingEnd {
@@ -90,7 +90,7 @@ library LibEventStructContainers {
         uint32 whitelistId;
         address[] revenueTokens;
         uint256 timeEnded;
-        uint256 channellingStatus;
+        uint256 permissions;
     }
 }
 
@@ -108,8 +108,6 @@ library LibGotchiLending {
     event GotchiLendingCancelled(LibEventStructContainers.GotchiLendingCancellation);
     event GotchiLendingClaimed(LibEventStructContainers.GotchiLendingClaim);
     event GotchiLendingEnded(LibEventStructContainers.GotchiLendingEnd);
-
-    event LendingChannelingStatusChanged(uint32 listingId, uint256 channellingStatus);
 
     function getListing(uint32 _listingId) internal view returns (GotchiLending memory listing_) {
         AppStorage storage s = LibAppStorage.diamondStorage();
@@ -138,7 +136,7 @@ library LibGotchiLending {
         address thirdParty;
         uint32 whitelistId;
         address[] revenueTokens;
-        uint256 channellingStatus;
+        uint256 permissions; //0 = none, 1 = channelling allowed for borrower
     }
 
     function _addGotchiLending(LibAddGotchiLending memory _listing) internal {
@@ -176,14 +174,13 @@ library LibGotchiLending {
             lastClaimed: 0,
             canceled: false,
             completed: false,
-            channellingStatus: _listing.channellingStatus
+            permissions: _listing.permissions
         });
 
         addLendingListItem(_listing.lender, listingId, "listed");
         s.aavegotchis[_listing.tokenId].locked = true;
 
         emit GotchiLendingAdd(listingId);
-        emit LendingChannelingStatusChanged(listingId, _listing.channellingStatus);
         emit GotchiLendingAdded(
             LibEventStructContainers.GotchiLendingAdd(
                 listingId,
@@ -197,7 +194,7 @@ library LibGotchiLending {
                 _listing.whitelistId,
                 _listing.revenueTokens,
                 block.timestamp,
-                _listing.channellingStatus
+                _listing.permissions
             )
         );
     }
@@ -265,7 +262,7 @@ library LibGotchiLending {
                 lending.whitelistId,
                 lending.revenueTokens,
                 currentTime,
-                lending.channellingStatus
+                lending.permissions
             )
         );
     }
@@ -300,7 +297,7 @@ library LibGotchiLending {
                 lending.whitelistId,
                 lending.revenueTokens,
                 block.timestamp,
-                lending.channellingStatus
+                lending.permissions
             )
         );
     }
@@ -370,7 +367,7 @@ library LibGotchiLending {
                 lending.revenueTokens,
                 amounts,
                 block.timestamp,
-                lending.channellingStatus
+                lending.permissions
             )
         );
     }
@@ -413,7 +410,7 @@ library LibGotchiLending {
                 lending.whitelistId,
                 lending.revenueTokens,
                 block.timestamp,
-                lending.channellingStatus
+                lending.permissions
             )
         );
     }
@@ -600,23 +597,5 @@ library LibGotchiLending {
         lendingItem.listingId = 0;
         lendingItem.parentListingId = 0;
         lendingItem.childListingId = 0;
-    }
-
-    function changeChannelingStatus(uint32 _listingId, uint256 _newChannelStatus) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        GotchiLending storage lending = s.gotchiLendings[_listingId];
-        //make sure listing exists
-        require(lending.timeCreated != 0, "GotchiLending: Listing not found");
-        address sender = LibMeta.msgSender();
-        address lender = lending.lender;
-        require(lender == sender, "GotchiLending: Only lender can toggle channeling status");
-        require(lending.timeAgreed == 0, "LibGotchiLending: Listing already agreed");
-        s.gotchiLendings[_listingId].channellingStatus = _newChannelStatus;
-        emit LendingChannelingStatusChanged(_listingId, _newChannelStatus);
-    }
-
-    function getChannelingStatus(uint32 _listingId) internal view returns (uint256) {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        return s.gotchiLendings[_listingId].channellingStatus;
     }
 }

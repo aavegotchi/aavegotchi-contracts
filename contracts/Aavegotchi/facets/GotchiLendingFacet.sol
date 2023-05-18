@@ -26,7 +26,7 @@ contract GotchiLendingFacet is Modifiers {
         address thirdParty;
         uint32 whitelistId;
         address[] revenueTokens;
-        uint256 channellingStatus;
+        uint256 permissions;
     }
 
     ///@notice Allow an aavegotchi lender (msg sender) or their lending operator to add request for lending
@@ -47,7 +47,7 @@ contract GotchiLendingFacet is Modifiers {
             thirdParty: p.thirdParty,
             whitelistId: p.whitelistId,
             revenueTokens: p.revenueTokens,
-            channellingStatus: p.channellingStatus
+            permissions: p.permissions
         });
         LibGotchiLending._addGotchiLending(addLendingStruct);
     }
@@ -143,7 +143,7 @@ contract GotchiLendingFacet is Modifiers {
         address _thirdParty,
         uint32 _whitelistId,
         address[] calldata _revenueTokens,
-        uint256 _channellingStatus
+        uint256 _permissions
     ) external {
         uint8[3] memory revenueSplit = _revenueSplit;
         address[] memory revenueTokens = _revenueTokens;
@@ -156,7 +156,7 @@ contract GotchiLendingFacet is Modifiers {
             thirdParty: _thirdParty,
             whitelistId: _whitelistId,
             revenueTokens: revenueTokens,
-            channellingStatus: _channellingStatus
+            permissions: _permissions
         });
         addGotchiListing(listing);
     }
@@ -181,7 +181,7 @@ contract GotchiLendingFacet is Modifiers {
                 thirdParty: lending.thirdParty,
                 whitelistId: lending.whitelistId,
                 revenueTokens: lending.revenueTokens,
-                channellingStatus: lending.channellingStatus
+                permissions: lending.permissions
             })
         );
     }
