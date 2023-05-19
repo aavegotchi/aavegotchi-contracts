@@ -37,6 +37,24 @@ export function constructPermissionsBitMap(permissions: LendingPermissions) {
   return permissionsBitMap;
 }
 
+export function getPermissionsFromBitmap(bitmap: bigint): LendingPermissions {
+  const permissions: LendingPermissions = {
+    noPermissions: 0,
+    channellingAllowed: 0,
+    // Initialize additional lending permissions here
+  };
+
+  const totalKeys = Object.keys(permissions).length;
+
+  for (let i = 0; i < totalKeys; i++) {
+    const value = Number((bitmap >> BigInt(i * 8)) & BigInt(0xff));
+    permissions[Object.keys(permissions)[i] as keyof LendingPermissions] =
+      value as 0 | 1;
+  }
+
+  return permissions;
+}
+
 function storeValueInBitmap(value: number, position: number, bitmap: any) {
   bitmap &= ~(BigInt(0xff) << (BigInt(position) * BigInt(8)));
 
