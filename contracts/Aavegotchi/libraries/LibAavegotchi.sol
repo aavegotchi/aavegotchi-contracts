@@ -61,7 +61,7 @@ library LibAavegotchi {
     uint8 constant STATUS_AAVEGOTCHI = 3;
 
     event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
-    event RemoveExperience(uint256[] _tokenIds, uint256[] _xpValues);
+    event KinshipBurned(uint256 _tokenId, uint256 _value);
 
     function toNumericTraits(
         uint256 _randomNumber,
@@ -373,11 +373,7 @@ library LibAavegotchi {
             revert("Kinship too low to reduce");
         } else {
             s.aavegotchis[_tokenId].interactionCount -= _amount;
-            uint256[] memory tokenIds = new uint256[](1);
-            uint256[] memory xpAmounts = new uint256[](1);
-            tokenIds[0] = _tokenId;
-            xpAmounts[0] = _amount;
-            emit RemoveExperience(tokenIds, xpAmounts);
+            emit KinshipBurned(_tokenId, _amount);
         }
     }
 }
