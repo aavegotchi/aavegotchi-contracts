@@ -83,7 +83,7 @@ import {ILink} from "../interfaces/ILink.sol";
  * @dev until it calls fulfillRandomness().
  */
 
-contract VRFFacet is Modifiers {
+contract VrfFacet is Modifiers {
     event VrfRandomNumber(uint256 indexed tokenId, uint256 randomNumber, uint256 _vrfTimeSet);
     event OpenPortals(uint256[] _tokenIds);
     event PortalOpened(uint256 indexed tokenId);
@@ -194,7 +194,12 @@ contract VRFFacet is Modifiers {
     //@param _keyHash New keyhash
     //@param _vrfCoordinator The new vrf coordinator address
     //@param _link New LINK token contract address
-    function changeVrf(uint256 _newFee, bytes32 _keyHash, address _vrfCoordinator, address _link) external onlyOwner {
+    function changeVrf(
+        uint256 _newFee,
+        bytes32 _keyHash,
+        address _vrfCoordinator,
+        address _link
+    ) external onlyOwner {
         if (_newFee != 0) {
             s.fee = uint96(_newFee);
         }

@@ -367,14 +367,14 @@ export const wearablesRightSvgs = [
   wearable("359_ForgeGogglesRight"),
   wearable("360_GeodeSmasherRight"),
   wearable("361_GeoRight"),
-  bodyWearableRight("362_FakeShirt"),
-  wearable("363_FakeBeretRight"),
+  bodyWearableRight("362_FAKEShirt"),
+  wearable("363_FAKEBeretRight"),
   wearable("364_PaintBrushRight"),
   wearable("365_PaintPaletteRight"),
   bodyWearableRight("366_HeavenlyRobes"),
-  wearable("367_EyesOfDevotionRight"),
-  wearable("368_BeardOfDivinityRight"),
-  wearable("369_StaffOfCreationRight"),
+  wearable("367_EyesofDevotionRight"),
+  wearable("368_BeardofDivinityRight"),
+  wearable("369_StaffofCreationRight"),
 ];
 
 export const wearablesBackSvgs = [
@@ -744,14 +744,14 @@ export const wearablesBackSvgs = [
   wearable("359_ForgeGogglesBack"),
   wearable("360_GeodeSmasherBack"),
   wearable("361_GeoBack"),
-  bodyWearable("362_FakeShirt"),
-  wearable("363_FakeBeretBack"),
+  bodyWearable("362_FAKEShirt"),
+  wearable("363_FAKEBeretBack"),
   wearable("364_PaintBrushBack"),
   wearable("365_PaintPaletteBack"),
   bodyWearable("366_HeavenlyRobes"),
-  "367_EyesOfDevotionBack",
-  "368_BeardOfDivinityBack",
-  wearable("369_StaffOfCreationBack"),
+  "367_EyesofDevotionBack",
+  "368_BeardofDivinityBack",
+  wearable("369_StaffofCreationBack"),
 ];
 
 export const wearablesLeftSvgs = [
@@ -1121,14 +1121,14 @@ export const wearablesLeftSvgs = [
   wearable("359_ForgeGogglesLeft"),
   wearable("360_GeodeSmasherLeft"),
   wearable("361_GeoLeft"),
-  bodyWearableLeft("362_FakeShirt"),
-  wearable("363_FakeBeretLeft"),
+  bodyWearableLeft("362_FAKEShirt"),
+  wearable("363_FAKEBeretLeft"),
   wearable("364_PaintBrushLeft"),
   wearable("365_PaintPaletteLeft"),
   bodyWearableLeft("366_HeavenlyRobes"),
-  wearable("367_EyesOfDevotionLeft"),
-  wearable("368_BeardOfDivinityLeft"),
-  wearable("369_StaffOfCreationLeft"),
+  wearable("367_EyesofDevotionLeft"),
+  wearable("368_BeardofDivinityLeft"),
+  wearable("369_StaffofCreationLeft"),
 ];
 
 export const wearablesLeftSleeveSvgs = [
@@ -1331,7 +1331,7 @@ export const wearablesLeftSleeveSvgs = [
   sleeveWearableLeft("318_TrackSuit"),
   // forge wearables
   sleeveWearableLeft("350_PixelcraftTee"),
-  sleeveWearableLeft("362_FakeShirt"),
+  sleeveWearableLeft("362_FAKEShirt"),
   sleeveWearableLeft("366_HeavenlyRobes"),
 ];
 
@@ -1535,7 +1535,7 @@ export const wearablesRightSleeveSvgs = [
   sleeveWearableRight("318_TrackSuit"),
   // forge wearables
   sleeveWearableRight("350_PixelcraftTee"),
-  sleeveWearableRight("362_FakeShirt"),
+  sleeveWearableRight("362_FAKEShirt"),
   sleeveWearableRight("366_HeavenlyRobes"),
 ];
 
@@ -1737,7 +1737,7 @@ export const wearablesBackSleeveSvgs = [
   sleeveWearableRight("318_TrackSuit"),
   // forge wearables
   sleeveWearableRight("350_PixelcraftTee"),
-  sleeveWearableRight("362_FakeShirt"),
+  sleeveWearableRight("362_FAKEShirt"),
   sleeveWearableRight("366_HeavenlyRobes"),
 ];
 

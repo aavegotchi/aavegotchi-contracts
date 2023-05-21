@@ -17,17 +17,17 @@ dotenv.config({ path: __dirname + "/.env" });
 
 //  require("./tasks/verifyFacet.js");
 require("./tasks/deployUpgrade.ts");
-// require("./tasks/addBaadgeSvgs.ts");
-// require("./tasks/mintBaadgeSvgs.ts");
-// require("./tasks/baadgeAirdrop.ts");
-// require("./tasks/updateItemDimensions.ts");
-// require("./tasks/updateSvgs.ts");
-// require("./tasks/updateItemSideDimensions.ts");
-// require("./tasks/batchDeposit.ts");
-// require("./tasks/rarityPayouts");
-// require("./tasks/grantXP_snapshot");
-// require("./tasks/grantXP_minigame");
-// require("./tasks/grantXP");
+require("./tasks/addBaadgeSvgs.ts");
+require("./tasks/mintBaadgeSvgs.ts");
+require("./tasks/baadgeAirdrop.ts");
+require("./tasks/updateItemDimensions.ts");
+require("./tasks/updateSvgs.ts");
+require("./tasks/updateItemSideDimensions.ts");
+require("./tasks/batchDeposit.ts");
+require("./tasks/rarityPayouts");
+require("./tasks/grantXP_snapshot");
+require("./tasks/grantXP_minigame");
+require("./tasks/grantXP");
 require("./tasks/addItemTypes");
 require("./tasks/addWearableSets");
 require("./tasks/grantXP_customValues");
@@ -60,27 +60,27 @@ export default {
     matic: {
       url: process.env.MATIC_URL,
       // url: 'https://rpc-mainnet.maticvigil.com/',
-      accounts: [process.env.SECRET],
+      accounts: [process.env.ITEM_MANAGER],
       // blockGasLimit: 20000000,
       blockGasLimit: 20000000,
       gasPrice: 400000000000,
       timeout: 90000,
     },
-    // tenderly: {
-    //   url: process.env.TENDERLY_FORK,
-    //   chainId: Number(process.env.TENDERLY_NETWORK_ID),
-    //   accounts: [process.env.ITEM_MANAGER],
-    //   // blockGasLimit: 20000000,
-    //   blockGasLimit: 20000000,
-    //   gasPrice: 1000000000,
-    //   timeout: 90000,
-    // },
-    // mumbai: {
-    //   url: process.env.MUMBAI_URL,
-    //   accounts: [process.env.SECRET],
-    //   blockGasLimit: 20000000,
-    //   gasPrice: 1000000000,
-    // },
+    tenderly: {
+      url: process.env.TENDERLY_FORK,
+      chainId: Number(process.env.TENDERLY_NETWORK_ID),
+      accounts: [process.env.ITEM_MANAGER],
+      // blockGasLimit: 20000000,
+      blockGasLimit: 20000000,
+      gasPrice: 1000000000,
+      timeout: 90000,
+    },
+    mumbai: {
+      url: process.env.MUMBAI_URL,
+      accounts: [process.env.SECRET],
+      blockGasLimit: 20000000,
+      gasPrice: 1000000000,
+    },
     // gorli: {
     //   url: process.env.GORLI,
     //   accounts: [process.env.SECRET],
