@@ -9,6 +9,8 @@ import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
 
+import {LibXPAllocation} from "./LibXPAllocation.sol";
+
 struct AavegotchiCollateralTypeIO {
     address collateralType;
     AavegotchiCollateralTypeInfo collateralTypeInfo;
@@ -372,6 +374,11 @@ library LibAavegotchi {
             revert("Kinship too low to reduce");
         } else {
             s.aavegotchis[_tokenId].interactionCount -= _amount;
+            uint256[] memory tokenIds = new uint256[](1);
+            uint256[] memory xpAmounts = new uint256[](1);
+            tokenIds[0] = _tokenId;
+            xpAmounts[0] = s.aavegotchis[_tokenId].interactionCount;
+            emit LibXPAllocation.GrantExperience(tokenIds, xpAmounts);
         }
     }
 }
