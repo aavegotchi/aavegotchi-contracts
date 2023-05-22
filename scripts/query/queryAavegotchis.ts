@@ -43,19 +43,19 @@ export function getUsersWithGotchisOfAddresses(
     {users(skip: ${index} first: 1000 block:{number:${blockNumber}} where: {id_in: [${addressesString}]}) {
       id
       gotchisLentOut
-      batch1: gotchisOwned(first: 1000 block:{number:${blockNumber}} ) {
+      batch1: gotchisOriginalOwned(first: 1000 block:{number:${blockNumber}} ) {
         id
       }
-      batch2: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 1000) {
+      batch2: gotchisOriginalOwned(first: 1000 block:{number:${blockNumber}} skip: 1000) {
         id
       }
-      batch3: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 2000) {
+      batch3: gotchisOriginalOwned(first: 1000 block:{number:${blockNumber}} skip: 2000) {
         id
       }
-      batch4: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 3000) {
+      batch4: gotchisOriginalOwned(first: 1000 block:{number:${blockNumber}} skip: 3000) {
         id
       }
-      batch5: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 4000) {
+      batch5: gotchisOriginalOwned(first: 1000 block:{number:${blockNumber}} skip: 4000) {
         id
       }
     }}

@@ -1,8 +1,5 @@
-import { Signer } from "@ethersproject/abstract-signer";
 import { Contract } from "@ethersproject/contracts";
-import request from "graphql-request";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { snapshotGraphUrl } from "../helpers/constants";
 import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
 import * as fs from "fs";
 import {
@@ -11,12 +8,6 @@ import {
 } from "defender-relay-client/lib/ethers";
 
 export const gasPrice = 570000000000;
-
-export function delay(milliseconds: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, milliseconds);
-  });
-}
 
 export function delay(milliseconds: number) {
   return new Promise((resolve) => {

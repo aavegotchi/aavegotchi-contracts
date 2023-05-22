@@ -220,7 +220,7 @@ export async function generateMerkleTree(
 
   //write the tree to a file
 
-  const parentPath = getParentPath(propDetails.title);
+  const parentPath = getParentPath(propDetails.id);
   if (!fs.existsSync(parentPath)) {
     //create folder if it doesn't exist
     fs.mkdirSync(parentPath, { recursive: true });

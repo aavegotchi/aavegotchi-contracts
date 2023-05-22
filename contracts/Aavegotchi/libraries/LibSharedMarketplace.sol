@@ -54,32 +54,46 @@ library LibSharedMarketplace {
     }
 
     function transferSales(SplitAddresses memory _a, BaazaarSplit memory split) internal {
-        LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.pixelCraft, split.pixelcraftShare);
-        LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.daoTreasury, split.daoShare);
+        if (_a.buyer == address(this)) {
+            LibERC20.transfer(_a.ghstContract, _a.pixelCraft, split.pixelcraftShare);
+            LibERC20.transfer(_a.ghstContract, _a.daoTreasury, split.daoShare);
+            LibERC20.transfer(_a.ghstContract, _a.rarityFarming, split.playerRewardsShare);
+            LibERC20.transfer(_a.ghstContract, _a.seller, split.sellerShare);
 
-        LibERC20.transferFrom((_a.ghstContract), _a.buyer, _a.rarityFarming, split.playerRewardsShare);
+            //handle affiliate split if necessary
+            if (split.affiliateShare > 0) {
+                LibERC20.transfer(_a.ghstContract, _a.affiliate, split.affiliateShare);
+            }
+            //handle royalty if necessary
+            if (_a.royalties.length > 0) {
+                for (uint256 i = 0; i < _a.royalties.length; i++) {
+                    if (split.royaltyShares[i] > 0) {
+                        LibERC20.transfer(_a.ghstContract, _a.royalties[i], split.royaltyShares[i]);
+                    }
+                }
+            }
+        } else {
+            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.pixelCraft, split.pixelcraftShare);
+            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.daoTreasury, split.daoShare);
+            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.rarityFarming, split.playerRewardsShare);
+            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.seller, split.sellerShare);
 
-        LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.seller, split.sellerShare);
-
-        //handle affiliate split if necessary
-        if (split.affiliateShare > 0) {
-            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.affiliate, split.affiliateShare);
-        }
-        //handle royalty if necessary
-        if (_a.royalties.length > 0) {
-            for (uint256 i = 0; i < _a.royalties.length; i++) {
-                if (split.royaltyShares[i] > 0) {
-                    LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.royalties[i], split.royaltyShares[i]);
+            //handle affiliate split if necessary
+            if (split.affiliateShare > 0) {
+                LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.affiliate, split.affiliateShare);
+            }
+            //handle royalty if necessary
+            if (_a.royalties.length > 0) {
+                for (uint256 i = 0; i < _a.royalties.length; i++) {
+                    if (split.royaltyShares[i] > 0) {
+                        LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.royalties[i], split.royaltyShares[i]);
+                    }
                 }
             }
         }
     }
 
-    function burnListingFee(
-        uint256 listingFee,
-        address owner,
-        address ghstContract
-    ) internal {
+    function burnListingFee(uint256 listingFee, address owner, address ghstContract) internal {
         if (listingFee > 0) {
             LibERC20.transferFrom(ghstContract, owner, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), listingFee);
         }

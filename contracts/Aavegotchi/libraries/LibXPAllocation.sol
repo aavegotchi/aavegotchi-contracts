@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import {AppStorage, LibAppStorage, XPMerkleDrops} from "./LibAppStorage.sol";
-import {MerkleProofLib} from "../libraries/LibMerkle.sol";
+import {LibMerkle} from "../libraries/LibMerkle.sol";
 
 library LibXPAllocation {
     event XPDropCreated(bytes32 indexed _propId, bytes32 _merkleRoot, uint256 _xpAmount);
@@ -35,7 +35,7 @@ library LibXPAllocation {
 
         //short-circuits do not revert entire claim process
         //proof is valid
-        if (MerkleProofLib.verify(_proof, root, node)) {
+        if (LibMerkle.verify(_proof, root, node)) {
             //claiming for a set of gotchis
             if (_onlyGotchis.length > 0) {
                 //make sure gotchi is a subset
