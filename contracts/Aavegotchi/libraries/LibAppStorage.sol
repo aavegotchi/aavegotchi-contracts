@@ -208,7 +208,7 @@ struct ERC721BuyOrder {
     uint256 priceInWei;
     uint256 timeCreated;
     uint256 timePurchased;
-    uint256 duration;
+    uint256 duration; //0 for unlimited
     bool cancelled;
     bytes32 validationHash;
     bool[] validationOptions;
