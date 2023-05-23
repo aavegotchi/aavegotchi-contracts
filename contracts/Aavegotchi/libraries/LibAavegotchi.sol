@@ -373,7 +373,7 @@ library LibAavegotchi {
             revert("Kinship too low to reduce");
         } else {
             s.aavegotchis[_tokenId].interactionCount -= _amount;
-            emit KinshipBurned(_tokenId, _amount);
+            emit KinshipBurned(_tokenId, s.aavegotchis[_tokenId].interactionCount);
         }
     }
 }
