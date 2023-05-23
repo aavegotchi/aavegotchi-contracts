@@ -5,16 +5,15 @@ import {
   ForgeFacet,
 } from "../../../../typechain";
 import { ethers, network } from "hardhat";
-import { sendToTenderly } from "../../libraries/tenderly";
 import {
   diamondOwner,
   impersonate,
   maticForgeDiamond,
+  mumbaiForgeDiamond,
 } from "../../../helperFunctions";
 
-const daoAddr = "0x6fb7e0AAFBa16396Ad6c1046027717bcA25F821f"; // DTF multisig
-const GLTR = "0x3801C3B3B5c98F88a9c9005966AA96aa440B9Afc";
-const forgeDiamondAddress = maticForgeDiamond;
+const isMumbai = true;
+const forgeDiamondAddress = isMumbai ? mumbaiForgeDiamond : maticForgeDiamond;
 
 const winChance = {
   common: 79,
@@ -78,11 +77,25 @@ export async function setForgeGeodeProperties() {
     );
   }
 
+  // https://docs.chain.link/vrf/v1/supported-networks
+
+  const keyHash = isMumbai
+    ? "0x6e75b569a01ef56d18cab6a8e71e6600d6ce853834d4a5748b720d06f878b3a4"
+    : "0xf86195cf7690c55907b2b611ebb7343a6f649bff128701cc542f0569e2c549da";
+
+  const vrfCoordinator = isMumbai
+    ? "0x8C7382F9D8f56b33781fE506E897a4F1e2d17255"
+    : "0x3d2341ADb2D31f1c5530cDC622016af293177AE0";
+
+  const link = isMumbai
+    ? "0x326C977E6efc84E512bB9C30f76E30c160eD06FB"
+    : "0xb0897686c545045aFc77CF20eC7A532E3120E0F1";
+
   await forgeVrfFacet.changeVrf(
     "100000000000000",
-    "0xf86195cf7690c55907b2b611ebb7343a6f649bff128701cc542f0569e2c549da",
-    "0x3d2341ADb2D31f1c5530cDC622016af293177AE0",
-    "0xb0897686c545045aFc77CF20eC7A532E3120E0F1"
+    keyHash,
+    vrfCoordinator,
+    link
   );
 
   await forgeDaoFacet.setGeodeWinChanceBips(winChance);
@@ -90,7 +103,7 @@ export async function setForgeGeodeProperties() {
 
   // mint schematics
   await forgeFacet.adminMintBatch(
-    maticForgeDiamond,
+    forgeDiamondAddress,
     geodePrizeIds,
     geodePrizeQuantities
   );

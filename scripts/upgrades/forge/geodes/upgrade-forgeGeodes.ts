@@ -9,9 +9,10 @@ import {
   maticDiamondAddress,
   maticDiamondUpgrader,
   maticForgeDiamond,
+  mumbaiForgeDiamond,
 } from "../../../helperFunctions";
-import { ForgeDAOFacetInterface } from "../../../../typechain/ForgeDAOFacet";
-import { ForgeDAOFacet__factory } from "../../../../typechain";
+
+const isMumbai = true;
 
 export async function upgradeForgeGeodes() {
   console.log("Upgrading Forge facets for Geodes.");
@@ -77,7 +78,7 @@ export async function upgradeForgeGeodes() {
   const args: DeployUpgradeTaskArgs = {
     // diamondUpgrader: maticDiamondUpgrader,
     diamondUpgrader: signerAddress,
-    diamondAddress: maticForgeDiamond,
+    diamondAddress: isMumbai ? mumbaiForgeDiamond : maticForgeDiamond,
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,
