@@ -113,7 +113,7 @@ contract ForgeVRFFacet is Modifiers {
         s.vrfUserToRequestIds[sender].push(requestId);
 
         // for testing
-        tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _geodeTokenIds[0]))));
+        //        tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _geodeTokenIds[0]))));
     }
 
     // for testing purpose only
