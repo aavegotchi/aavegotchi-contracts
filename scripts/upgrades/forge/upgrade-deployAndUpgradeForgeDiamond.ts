@@ -78,6 +78,8 @@ export async function deployAndUpgradeForgeDiamond() {
         // "function mintEssence(address owner, uint256 gotchiId) external",
         "function mintEssence(address owner) external",
         "function adminMint(address account, uint256 id, uint256 amount) external",
+        "function fixInvalidTokenIds(address[] calldata owners) external",
+        "function adminMintBatch(address to, uint256[] memory ids, uint256[] memory amounts) external",
       ],
       removeSelectors: [],
     },
@@ -86,6 +88,7 @@ export async function deployAndUpgradeForgeDiamond() {
       facetName: "ForgeDAOFacet",
       addSelectors: [
         "function setAavegotchiDaoAddress(address daoAddress) external",
+        "function setAavegotchiDiamondAddress(address _address) external",
         "function setGltrAddress(address gltr) external",
         "function getAlloyDaoFeeInBips() external view returns (uint256)",
         "function setAlloyDaoFeeInBips(uint256 alloyDaoFeeInBips) external",
