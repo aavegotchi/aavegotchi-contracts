@@ -25,9 +25,7 @@ export async function upgrade() {
     {
       facetName: "ERC721MarketplaceFacet",
       addSelectors: [],
-      removeSelectors: [
-        "function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view",
-      ],
+      removeSelectors: [],
     },
     {
       facetName: "ERC1155MarketplaceFacet",
