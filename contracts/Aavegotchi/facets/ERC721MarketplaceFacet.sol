@@ -65,6 +65,14 @@ contract ERC721MarketplaceFacet is Modifiers {
         }
     }
 
+    ///@notice Query the category of an NFT
+    ///@param _erc721TokenAddress The contract address of the NFT to query
+    ///@param _erc721TokenId The identifier of the NFT to query
+    ///@return category_ Category of the NFT // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi 4 == Realm.
+    function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view returns (uint256 category_) {
+        category_ = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
+    }
+
     ///@notice Allow an ERC721 owner to list his NFT for sale
     ///@dev If the NFT has been listed before,it cancels it and replaces it with the new one
     ///@dev NFTs that are listed are immediately locked
