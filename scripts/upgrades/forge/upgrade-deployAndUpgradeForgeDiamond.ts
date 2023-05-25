@@ -14,23 +14,18 @@ let aavegotchiCutFacet = "0x4f908Fa47F10bc2254dae7c74d8B797C1749A8a6";
 let aavegotchiLoupeFacet = "0x58f64b56B1e15D8C932c51287d814EDaa8d6feb9";
 let aavegotchiOwnerShipFacet = "0xAE7DF9f59FEc446903c64f21a76d039Bc81712ef";
 
-export async function deployAndUpgradeForgeDiamond() {
+export async function deployAndUpgradeForgeDiamond(
+  cutFacet: string,
+  loupeFacet: string,
+  ownerShipFacet: string
+) {
   console.log("Deploying forge diamond");
 
   const Diamond = (await ethers.getContractFactory(
     "ForgeDiamond"
   )) as ForgeDiamond__factory;
 
-  const testing = ["hardhat", "localhost", "mumbai"].includes(network.name);
-  if (testing) {
-    aavegotchiCutFacet = "0x38d67a8cb93ed3795764ec2ecf8ea284da329936";
-    aavegotchiLoupeFacet = "0x613d34492e7f105c74b7923648653a1e57e5a852";
-    aavegotchiOwnerShipFacet = "0x1709d0d0e696d64bce8add21da8f61f7a641dfaa";
-  } else if (network.name === "matic") {
-    aavegotchiCutFacet = "0x4f908Fa47F10bc2254dae7c74d8B797C1749A8a6";
-    aavegotchiLoupeFacet = "0x58f64b56B1e15D8C932c51287d814EDaa8d6feb9";
-    aavegotchiOwnerShipFacet = "0xAE7DF9f59FEc446903c64f21a76d039Bc81712ef";
-  } else if (network.name === "tenderly") {
+  if (network.name === "tenderly") {
     await ethers.provider.send("tenderly_setBalance", [
       [await (await ethers.getSigners())[0].getAddress()],
       ethers.utils.hexValue(
@@ -43,9 +38,9 @@ export async function deployAndUpgradeForgeDiamond() {
 
   const diamond = await Diamond.deploy(
     deployer,
-    aavegotchiCutFacet,
-    aavegotchiLoupeFacet,
-    aavegotchiOwnerShipFacet,
+    cutFacet,
+    loupeFacet,
+    ownerShipFacet,
     { gasPrice: gasPrice }
   );
   await diamond.deployed();
@@ -141,7 +136,7 @@ export async function deployAndUpgradeForgeDiamond() {
   const joined = convertFacetAndSelectorsToString(facets);
 
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: maticDiamondUpgrader,
+    diamondUpgrader: deployer,
     diamondAddress: diamond.address,
     facetsAndAddSelectors: joined,
     useLedger: false,
@@ -155,7 +150,22 @@ export async function deployAndUpgradeForgeDiamond() {
 }
 
 if (require.main === module) {
-  deployAndUpgradeForgeDiamond()
+  const testing = ["hardhat", "localhost", "mumbai"].includes(network.name);
+  if (testing) {
+    aavegotchiCutFacet = "0x38d67a8cb93ed3795764ec2ecf8ea284da329936";
+    aavegotchiLoupeFacet = "0x613d34492e7f105c74b7923648653a1e57e5a852";
+    aavegotchiOwnerShipFacet = "0x1709d0d0e696d64bce8add21da8f61f7a641dfaa";
+  } else if (network.name === "matic") {
+    aavegotchiCutFacet = "0x4f908Fa47F10bc2254dae7c74d8B797C1749A8a6";
+    aavegotchiLoupeFacet = "0x58f64b56B1e15D8C932c51287d814EDaa8d6feb9";
+    aavegotchiOwnerShipFacet = "0xAE7DF9f59FEc446903c64f21a76d039Bc81712ef";
+  }
+
+  deployAndUpgradeForgeDiamond(
+    aavegotchiCutFacet,
+    aavegotchiLoupeFacet,
+    aavegotchiOwnerShipFacet
+  )
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
