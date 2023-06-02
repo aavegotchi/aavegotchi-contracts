@@ -17,12 +17,16 @@ contract ForgeDiamond {
         address _contractOwner,
         address _diamondCutFacet,
         address _diaomondLoupeFacet,
-        address _ownershipFacet
+        address _ownershipFacet,
+        address _aavegotchiDiamond,
+        address _wearableDiamond
     ) {
         ForgeLibDiamond.setContractOwner(_contractOwner);
         ForgeLibDiamond.addDiamondFunctions(_diamondCutFacet, _diaomondLoupeFacet, _ownershipFacet);
         ForgeLibDiamond.DiamondStorage storage ds = ForgeLibDiamond.diamondStorage();
         ds.supportedInterfaces[0xd9b67a26] = true; //erc1155
+        ds.aavegotchiDiamond = _aavegotchiDiamond;
+        ds.wearableDiamond = _wearableDiamond;
     }
 
     // Find facet for function that is called and execute the

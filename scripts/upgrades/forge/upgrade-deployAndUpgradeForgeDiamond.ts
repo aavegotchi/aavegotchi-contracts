@@ -7,6 +7,10 @@ import {
 import { ForgeDiamond__factory } from "../../../typechain/factories/ForgeDiamond__factory";
 
 import { gasPrice, maticDiamondUpgrader } from "../../helperFunctions";
+import {
+  aavegotchiDiamondAddressMatic,
+  wearableDiamondAddressMatic,
+} from "../../../helpers/constants";
 
 //these already deployed facets(in the aavegotchi diamond) are added to the forgeDiamond directly
 // default matic network values
@@ -14,7 +18,10 @@ let aavegotchiCutFacet = "0x4f908Fa47F10bc2254dae7c74d8B797C1749A8a6";
 let aavegotchiLoupeFacet = "0x58f64b56B1e15D8C932c51287d814EDaa8d6feb9";
 let aavegotchiOwnerShipFacet = "0xAE7DF9f59FEc446903c64f21a76d039Bc81712ef";
 
-export async function deployAndUpgradeForgeDiamond() {
+export async function deployAndUpgradeForgeDiamond(
+  aavegotchiDiamond: string,
+  wearableDiamond: string
+) {
   console.log("Deploying forge diamond");
 
   const Diamond = (await ethers.getContractFactory(
@@ -46,6 +53,8 @@ export async function deployAndUpgradeForgeDiamond() {
     aavegotchiCutFacet,
     aavegotchiLoupeFacet,
     aavegotchiOwnerShipFacet,
+    aavegotchiDiamond,
+    wearableDiamond,
     { gasPrice: gasPrice }
   );
   await diamond.deployed();
@@ -155,7 +164,10 @@ export async function deployAndUpgradeForgeDiamond() {
 }
 
 if (require.main === module) {
-  deployAndUpgradeForgeDiamond()
+  deployAndUpgradeForgeDiamond(
+    aavegotchiDiamondAddressMatic,
+    wearableDiamondAddressMatic
+  )
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
