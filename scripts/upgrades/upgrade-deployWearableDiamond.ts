@@ -15,7 +15,12 @@ const aavegotchiCutFacet = "0x4f908Fa47F10bc2254dae7c74d8B797C1749A8a6";
 const aavegotchiLoupeFacet = "0x58f64b56B1e15D8C932c51287d814EDaa8d6feb9";
 const aavegotchiOwnerShipFacet = "0xAE7DF9f59FEc446903c64f21a76d039Bc81712ef";
 
-export async function deployAndUpgradeWearableDiamond(cutFacet: string, loupeFacet: string, ownerShipFacet: string, aavegotchiDiamond: string) {
+export async function deployAndUpgradeWearableDiamond(
+  cutFacet: string,
+  loupeFacet: string,
+  ownerShipFacet: string,
+  aavegotchiDiamond: string
+) {
   console.log("Deploying wearable diamond");
   // deploy Wearable Diamond
   const Diamond = (await ethers.getContractFactory(
@@ -52,6 +57,7 @@ export async function deployAndUpgradeWearableDiamond(cutFacet: string, loupeFac
         "function setBaseURI(string memory _value) external",
         "function safeTransferFrom(address _from,address _to,uint256 _id,uint256 _value,bytes calldata _data) external",
         "function safeBatchTransferFrom(address _from,address _to,uint256[] calldata _ids,uint256[] calldata _values,bytes calldata _data) external",
+        "function tokenURI(uint256 _tokenId) external view returns (string memory)",
       ],
       removeSelectors: [],
     },
@@ -85,7 +91,12 @@ export async function deployAndUpgradeWearableDiamond(cutFacet: string, loupeFac
 }
 
 if (require.main === module) {
-  deployAndUpgradeWearableDiamond(aavegotchiCutFacet, aavegotchiLoupeFacet, aavegotchiOwnerShipFacet, aavegotchiDiamondAddressMatic)
+  deployAndUpgradeWearableDiamond(
+    aavegotchiCutFacet,
+    aavegotchiLoupeFacet,
+    aavegotchiOwnerShipFacet,
+    aavegotchiDiamondAddressMatic
+  )
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

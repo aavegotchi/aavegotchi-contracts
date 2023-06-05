@@ -7,6 +7,10 @@ import {
 import { ForgeDiamond__factory } from "../../../typechain/factories/ForgeDiamond__factory";
 
 import { gasPrice, maticDiamondUpgrader } from "../../helperFunctions";
+import {
+  aavegotchiDiamondAddressMatic,
+  wearableDiamondAddressMatic,
+} from "../../../helpers/constants";
 
 //these already deployed facets(in the aavegotchi diamond) are added to the forgeDiamond directly
 // default matic network values
@@ -17,7 +21,9 @@ let aavegotchiOwnerShipFacet = "0xAE7DF9f59FEc446903c64f21a76d039Bc81712ef";
 export async function deployAndUpgradeForgeDiamond(
   cutFacet: string,
   loupeFacet: string,
-  ownerShipFacet: string
+  ownerShipFacet: string,
+  aavegotchiDiamond: string,
+  wearableDiamond: string
 ) {
   console.log("Deploying forge diamond");
 
@@ -41,6 +47,8 @@ export async function deployAndUpgradeForgeDiamond(
     cutFacet,
     loupeFacet,
     ownerShipFacet,
+    aavegotchiDiamond,
+    wearableDiamond,
     { gasPrice: gasPrice }
   );
   await diamond.deployed();
@@ -164,7 +172,9 @@ if (require.main === module) {
   deployAndUpgradeForgeDiamond(
     aavegotchiCutFacet,
     aavegotchiLoupeFacet,
-    aavegotchiOwnerShipFacet
+    aavegotchiOwnerShipFacet,
+    aavegotchiDiamondAddressMatic,
+    wearableDiamondAddressMatic
   )
     .then(() => process.exit(0))
     .catch((error) => {

@@ -11,6 +11,89 @@ import {LibWhitelist} from "./LibWhitelist.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IRealmDiamond} from "../../shared/interfaces/IRealmDiamond.sol";
 
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+
+library LibEventStructContainers {
+    struct GotchiLendingAdd {
+        uint32 listingId;
+        address lender;
+        uint32 tokenId;
+        uint96 initialCost;
+        uint32 period;
+        uint8[3] revenueSplit;
+        address originalOwner;
+        address thirdParty;
+        uint32 whitelistId;
+        address[] revenueTokens;
+        uint256 timeCreated;
+        uint256 permissions;
+    }
+
+    struct GotchiLendingExecution {
+        uint32 listingId;
+        address lender;
+        address borrower;
+        uint32 tokenId;
+        uint96 initialCost;
+        uint32 period;
+        uint8[3] revenueSplit;
+        address originalOwner;
+        address thirdParty;
+        uint32 whitelistId;
+        address[] revenueTokens;
+        uint256 timeAgreed;
+        uint256 permissions;
+    }
+
+    struct GotchiLendingCancellation {
+        uint32 listingId;
+        address lender;
+        uint32 tokenId;
+        uint96 initialCost;
+        uint32 period;
+        uint8[3] revenueSplit;
+        address originalOwner;
+        address thirdParty;
+        uint32 whitelistId;
+        address[] revenueTokens;
+        uint256 timeCancelled;
+        uint256 permissions;
+    }
+
+    struct GotchiLendingClaim {
+        uint32 listingId;
+        address lender;
+        address borrower;
+        uint32 tokenId;
+        uint96 initialCost;
+        uint32 period;
+        uint8[3] revenueSplit;
+        address originalOwner;
+        address thirdParty;
+        uint32 whitelistId;
+        address[] revenueTokens;
+        uint256[] amounts;
+        uint256 timeClaimed;
+        uint256 permissions;
+    }
+
+    struct GotchiLendingEnd {
+        uint32 listingId;
+        address lender;
+        address borrower;
+        uint32 tokenId;
+        uint96 initialCost;
+        uint32 period;
+        uint8[3] revenueSplit;
+        address originalOwner;
+        address thirdParty;
+        uint32 whitelistId;
+        address[] revenueTokens;
+        uint256 timeEnded;
+        uint256 permissions;
+    }
+}
+
 library LibGotchiLending {
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -19,75 +102,12 @@ library LibGotchiLending {
     event GotchiLendingCancel(uint32 indexed listingId, uint256 time);
     event GotchiLendingClaim(uint32 indexed listingId, address[] tokenAddresses, uint256[] amounts);
     event GotchiLendingEnd(uint32 indexed listingId);
-    event GotchiLendingAdded(
-        uint32 indexed listingId,
-        address indexed lender,
-        uint32 indexed tokenId,
-        uint96 initialCost,
-        uint32 period,
-        uint8[3] revenueSplit,
-        address originalOwner,
-        address thirdParty,
-        uint32 whitelistId,
-        address[] revenueTokens,
-        uint256 timeCreated
-    );
-    event GotchiLendingExecuted(
-        uint32 indexed listingId,
-        address indexed lender,
-        address indexed borrower,
-        uint32 tokenId,
-        uint96 initialCost,
-        uint32 period,
-        uint8[3] revenueSplit,
-        address originalOwner,
-        address thirdParty,
-        uint32 whitelistId,
-        address[] revenueTokens,
-        uint256 timeAgreed
-    );
-    event GotchiLendingCanceled(
-        uint32 indexed listingId,
-        address indexed lender,
-        uint32 indexed tokenId,
-        uint96 initialCost,
-        uint32 period,
-        uint8[3] revenueSplit,
-        address originalOwner,
-        address thirdParty,
-        uint32 whitelistId,
-        address[] revenueTokens,
-        uint256 timeCanceled
-    );
-    event GotchiLendingClaimed(
-        uint32 indexed listingId,
-        address indexed lender,
-        address indexed borrower,
-        uint32 tokenId,
-        uint96 initialCost,
-        uint32 period,
-        uint8[3] revenueSplit,
-        address originalOwner,
-        address thirdParty,
-        uint32 whitelistId,
-        address[] revenueTokens,
-        uint256[] amounts,
-        uint256 timeClaimed
-    );
-    event GotchiLendingEnded(
-        uint32 indexed listingId,
-        address indexed lender,
-        address indexed borrower,
-        uint32 tokenId,
-        uint96 initialCost,
-        uint32 period,
-        uint8[3] revenueSplit,
-        address originalOwner,
-        address thirdParty,
-        uint32 whitelistId,
-        address[] revenueTokens,
-        uint256 timeEnded
-    );
+
+    event GotchiLendingAdded(LibEventStructContainers.GotchiLendingAdd);
+    event GotchiLendingExecuted(LibEventStructContainers.GotchiLendingExecution);
+    event GotchiLendingCancelled(LibEventStructContainers.GotchiLendingCancellation);
+    event GotchiLendingClaimed(LibEventStructContainers.GotchiLendingClaim);
+    event GotchiLendingEnded(LibEventStructContainers.GotchiLendingEnd);
 
     function getListing(uint32 _listingId) internal view returns (GotchiLending memory listing_) {
         AppStorage storage s = LibAppStorage.diamondStorage();
@@ -116,6 +136,7 @@ library LibGotchiLending {
         address thirdParty;
         uint32 whitelistId;
         address[] revenueTokens;
+        uint256 permissions; //0 = none, 1 = channelling allowed for borrower
     }
 
     function _addGotchiLending(LibAddGotchiLending memory _listing) internal {
@@ -152,24 +173,29 @@ library LibGotchiLending {
             timeAgreed: 0,
             lastClaimed: 0,
             canceled: false,
-            completed: false
+            completed: false,
+            permissions: _listing.permissions
         });
+
         addLendingListItem(_listing.lender, listingId, "listed");
         s.aavegotchis[_listing.tokenId].locked = true;
 
         emit GotchiLendingAdd(listingId);
         emit GotchiLendingAdded(
-            listingId,
-            _listing.lender,
-            _listing.tokenId,
-            _listing.initialCost,
-            _listing.period,
-            _listing.revenueSplit,
-            _listing.originalOwner,
-            _listing.thirdParty,
-            _listing.whitelistId,
-            _listing.revenueTokens,
-            block.timestamp
+            LibEventStructContainers.GotchiLendingAdd(
+                listingId,
+                _listing.lender,
+                _listing.tokenId,
+                _listing.initialCost,
+                _listing.period,
+                _listing.revenueSplit,
+                _listing.originalOwner,
+                _listing.thirdParty,
+                _listing.whitelistId,
+                _listing.revenueTokens,
+                block.timestamp,
+                _listing.permissions
+            )
         );
     }
 
@@ -183,6 +209,7 @@ library LibGotchiLending {
     ) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         GotchiLending storage lending = s.gotchiLendings[_listingId];
+
         verifyAgreeGotchiLendingParams(_borrower, _listingId, _erc721TokenId, _initialCost, _period, _revenueSplit);
         // gas savings
         address lender = lending.lender;
@@ -191,7 +218,8 @@ library LibGotchiLending {
             LibERC20.transferFrom(s.ghstContract, _borrower, lender, _initialCost);
         }
         lending.borrower = _borrower;
-        lending.timeAgreed = uint40(block.timestamp);
+        uint40 currentTime = uint40(block.timestamp);
+        lending.timeAgreed = currentTime;
 
         removeLendingListItem(lender, _listingId, "listed");
         addLendingListItem(lender, _listingId, "agreed");
@@ -221,18 +249,21 @@ library LibGotchiLending {
 
         emit GotchiLendingExecute(_listingId);
         emit GotchiLendingExecuted(
-            _listingId,
-            lending.lender,
-            _borrower,
-            _erc721TokenId,
-            lending.initialCost,
-            lending.period,
-            lending.revenueSplit,
-            lending.originalOwner,
-            lending.thirdParty,
-            lending.whitelistId,
-            lending.revenueTokens,
-            block.timestamp
+            LibEventStructContainers.GotchiLendingExecution(
+                _listingId,
+                lending.lender,
+                _borrower,
+                _erc721TokenId,
+                lending.initialCost,
+                lending.period,
+                lending.revenueSplit,
+                lending.originalOwner,
+                lending.thirdParty,
+                lending.whitelistId,
+                lending.revenueTokens,
+                currentTime,
+                lending.permissions
+            )
         );
     }
 
@@ -253,18 +284,21 @@ library LibGotchiLending {
         s.aavegotchiToListingId[lending.erc721TokenId] = 0;
 
         emit GotchiLendingCancel(_listingId, block.timestamp);
-        emit GotchiLendingCanceled(
-            _listingId,
-            lending.lender,
-            lending.erc721TokenId,
-            lending.initialCost,
-            lending.period,
-            lending.revenueSplit,
-            lending.originalOwner,
-            lending.thirdParty,
-            lending.whitelistId,
-            lending.revenueTokens,
-            block.timestamp
+        emit GotchiLendingCancelled(
+            LibEventStructContainers.GotchiLendingCancellation(
+                _listingId,
+                lending.lender,
+                lending.erc721TokenId,
+                lending.initialCost,
+                lending.period,
+                lending.revenueSplit,
+                lending.originalOwner,
+                lending.thirdParty,
+                lending.whitelistId,
+                lending.revenueTokens,
+                block.timestamp,
+                lending.permissions
+            )
         );
     }
 
@@ -319,19 +353,22 @@ library LibGotchiLending {
 
         emit GotchiLendingClaim(listingId, lending.revenueTokens, amounts);
         emit GotchiLendingClaimed(
-            listingId,
-            lending.lender,
-            lending.borrower,
-            lending.erc721TokenId,
-            lending.initialCost,
-            lending.period,
-            lending.revenueSplit,
-            lending.originalOwner,
-            lending.thirdParty,
-            lending.whitelistId,
-            lending.revenueTokens,
-            amounts,
-            block.timestamp
+            LibEventStructContainers.GotchiLendingClaim(
+                listingId,
+                lending.lender,
+                lending.borrower,
+                lending.erc721TokenId,
+                lending.initialCost,
+                lending.period,
+                lending.revenueSplit,
+                lending.originalOwner,
+                lending.thirdParty,
+                lending.whitelistId,
+                lending.revenueTokens,
+                amounts,
+                block.timestamp,
+                lending.permissions
+            )
         );
     }
 
@@ -360,18 +397,21 @@ library LibGotchiLending {
         }
         emit GotchiLendingEnd(listingId);
         emit GotchiLendingEnded(
-            listingId,
-            lending.lender,
-            lending.borrower,
-            lending.erc721TokenId,
-            lending.initialCost,
-            lending.period,
-            lending.revenueSplit,
-            lending.originalOwner,
-            lending.thirdParty,
-            lending.whitelistId,
-            lending.revenueTokens,
-            block.timestamp
+            LibEventStructContainers.GotchiLendingEnd(
+                listingId,
+                lending.lender,
+                lending.borrower,
+                lending.erc721TokenId,
+                lending.initialCost,
+                lending.period,
+                lending.revenueSplit,
+                lending.originalOwner,
+                lending.thirdParty,
+                lending.whitelistId,
+                lending.revenueTokens,
+                block.timestamp,
+                lending.permissions
+            )
         );
     }
 

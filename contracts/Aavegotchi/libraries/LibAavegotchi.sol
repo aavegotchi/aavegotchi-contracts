@@ -61,6 +61,7 @@ library LibAavegotchi {
     uint8 constant STATUS_AAVEGOTCHI = 3;
 
     event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
+    event KinshipBurned(uint256 _tokenId, uint256 _value);
 
     function toNumericTraits(
         uint256 _randomNumber,
@@ -380,6 +381,17 @@ library LibAavegotchi {
             category_ = s.erc721Categories[_erc721TokenAddress][0];
         } else {
             category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
+        }
+    }
+
+    function _reduceAavegotchiKinship(uint256 _tokenId, uint256 _amount) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        uint256 currentKinship = s.aavegotchis[_tokenId].interactionCount;
+        if (_amount > currentKinship) {
+            revert("Kinship too low to reduce");
+        } else {
+            s.aavegotchis[_tokenId].interactionCount -= _amount;
+            emit KinshipBurned(_tokenId, s.aavegotchis[_tokenId].interactionCount);
         }
     }
 }

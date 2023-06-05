@@ -441,7 +441,7 @@ async function main() {
   // console.log("Prize items minted:", tx.hash);
 
   // forge
-  let forgeDiamondAddress = await deployAndUpgradeForgeDiamond();
+  let forgeDiamondAddress = await deployAndUpgradeForgeDiamond(aavegotchiDiamond.address, wearableDiamondAddress);
   await setForgeProperties(forgeDiamondAddress);
   tx = await daoFacet.setForge(forgeDiamondAddress, { gasLimit: gasLimit });
   receipt = await tx.wait();
