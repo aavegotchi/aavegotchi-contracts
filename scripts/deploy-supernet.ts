@@ -463,7 +463,9 @@ async function main() {
   let forgeDiamondAddress = await deployAndUpgradeForgeDiamond(
     diamondCutFacet.address,
     diamondLoupeFacet.address,
-    ownershipFacet.address
+    ownershipFacet.address,
+    aavegotchiDiamond.address,
+    wearableDiamondAddress
   );
   await setForgeProperties(forgeDiamondAddress);
   tx = await daoFacet.setForge(forgeDiamondAddress, { gasLimit: gasLimit });
