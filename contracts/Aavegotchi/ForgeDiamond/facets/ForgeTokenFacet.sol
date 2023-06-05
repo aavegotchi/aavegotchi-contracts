@@ -114,7 +114,7 @@ contract ForgeTokenFacet is Modifiers {
         uint256 amount,
         bytes memory data
     ) public {
-        require(from == LibMeta.msgSender() || isApprovedForAll(from, LibMeta.msgSender()), "ForgeTokenFacet: caller is not token owner or approved");
+        require(from == msg.sender || isApprovedForAll(from, msg.sender), "ForgeTokenFacet: caller is not token owner or approved");
         _safeTransferFrom(from, to, id, amount, data);
     }
 

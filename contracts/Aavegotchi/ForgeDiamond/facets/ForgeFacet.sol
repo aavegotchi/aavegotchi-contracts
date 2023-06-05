@@ -222,6 +222,25 @@ contract ForgeFacet is Modifiers {
         }
     }
 
+    // @notice Get the specific rarity score modifier for a geode token ID.
+    function geodeRsmFromTokenId(uint256 tokenId) public pure returns (uint8 rarityScoreModifier) {
+        if (tokenId == GEODE_COMMON) {
+            rarityScoreModifier = COMMON_RSM;
+        } else if (tokenId == GEODE_UNCOMMON) {
+            rarityScoreModifier = UNCOMMON_RSM;
+        } else if (tokenId == GEODE_RARE) {
+            rarityScoreModifier = RARE_RSM;
+        } else if (tokenId == GEODE_LEGENDARY) {
+            rarityScoreModifier = LEGENDARY_RSM;
+        } else if (tokenId == GEODE_MYTHICAL) {
+            rarityScoreModifier = MYTHICAL_RSM;
+        } else if (tokenId == GEODE_GODLIKE) {
+            rarityScoreModifier == GODLIKE_RSM;
+        } else {
+            revert("Invalid tokenId");
+        }
+    }
+
     function _smelt(uint256 itemId, uint256 gotchiId) internal onlyAavegotchiOwner(gotchiId) onlyAavegotchiUnlocked(gotchiId) {
         address sender = LibMeta.msgSender();
         require(wearablesFacet().balanceOf(sender, itemId) > 0, "ForgeFacet: smelt item not owned");
@@ -346,6 +365,7 @@ contract ForgeFacet is Modifiers {
         address sender = LibMeta.msgSender();
         ForgeQueueItem storage queueItem = _getForgeQueueItem(gotchiId);
 
+        require(queueItem.id > 0, "ForgeFacet: queue item doesnt exist");
         require(!queueItem.claimed, "ForgeFacet: already claimed");
         require(block.number >= queueItem.readyBlock, "ForgeFacet: Forge item not ready");
 
@@ -507,6 +527,19 @@ contract ForgeFacet is Modifiers {
         // mint doesnt exceed max supply
         //        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
         _mintBatch(to, ids, amounts);
+    }
+
+    function burn(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) external {
+        require(
+            account == msg.sender || forgeTokenFacet().isApprovedForAll(account, msg.sender),
+            "ForgeFacet: caller is not token owner or approved"
+        );
+        require(forgeTokenFacet().balanceOf(account, id) >= amount, "ForgeFacet: not enough balance.");
+        _burnItem(account, id, amount);
     }
 
     //    function _mintBatchItems(address to, uint256[] memory ids, uint256[] memory amounts) internal {
