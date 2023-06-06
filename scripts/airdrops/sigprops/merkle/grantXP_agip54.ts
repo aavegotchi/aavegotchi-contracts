@@ -1,5 +1,4 @@
 import { run } from "hardhat";
-import { GrantXPSnapshotTaskArgs } from "../../../../tasks/grantXP_snapshot";
 
 async function addXPDrop() {
   const propId =
