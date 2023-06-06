@@ -235,7 +235,7 @@ contract ForgeFacet is Modifiers {
         } else if (tokenId == GEODE_MYTHICAL) {
             rarityScoreModifier = MYTHICAL_RSM;
         } else if (tokenId == GEODE_GODLIKE) {
-            rarityScoreModifier == GODLIKE_RSM;
+            rarityScoreModifier = GODLIKE_RSM;
         } else {
             revert("Invalid tokenId");
         }
