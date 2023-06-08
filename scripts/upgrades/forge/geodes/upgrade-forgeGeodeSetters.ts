@@ -12,7 +12,7 @@ import {
   mumbaiForgeDiamond,
 } from "../../../helperFunctions";
 
-const isMumbai = true;
+const isMumbai = false;
 const forgeDiamondAddress = isMumbai ? mumbaiForgeDiamond : maticForgeDiamond;
 
 const winChance = {

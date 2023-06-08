@@ -107,6 +107,10 @@ describe("Testing Geodes", async function () {
   });
 
   describe("tests", async function () {
+    it("should get prizes", async function () {
+      let prizes = await forgeDaoFacet.getGeodePrizesRemaining();
+      console.log(prizes);
+    });
     it("should burn and revert invalid", async function () {
       let priorBal = await forgeTokenFacet.balanceOf(testUser, 361);
       await adminForge.adminMint(testUser, 361, 1);
@@ -129,7 +133,8 @@ describe("Testing Geodes", async function () {
 
       await adminDao.setGeodePrizes(geodePrizeIds, geodePrizeQuantities);
 
-      await testVrf.openGeodes([GEODE_LEGENDARY], [15]);
+      // NOTE: this assumes the testing function is enabled for vrf
+      await (await testVrf.openGeodes([GEODE_LEGENDARY], [15])).wait();
       await expect(testVrf.claimWinnings()).to.emit(testVrf, "GeodeRefunded");
       await testForge.burn(testUser, 361, 1);
 

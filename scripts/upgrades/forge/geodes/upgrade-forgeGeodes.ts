@@ -12,7 +12,7 @@ import {
   mumbaiForgeDiamond,
 } from "../../../helperFunctions";
 
-const isMumbai = true;
+const isMumbai = false;
 
 export async function upgradeForgeGeodes() {
   console.log("Upgrading Forge facets for Geodes.");
@@ -57,6 +57,7 @@ export async function upgradeForgeGeodes() {
         "function openGeodes(uint256[] calldata _geodeTokenIds, uint256[] calldata _amountPerToken) external",
         "function rawFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) external",
         "function getRequestInfo(address user) external view returns (tuple(address,bytes32,VrfStatus,uint256,uint256[],uint256[]) memory)",
+        "function getRequestInfoByRequestId(bytes32 requestId) external view returns (tuple(address,bytes32,VrfStatus,uint256,uint256[],uint256[]) memory)",
         "function claimWinnings() external",
         "function changeVrf(uint256 _newFee, bytes32 _keyHash, address _vrfCoordinator, address _link) external",
         "function removeLinkTokens(address _to, uint256 _value) external",

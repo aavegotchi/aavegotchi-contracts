@@ -164,6 +164,10 @@ contract ForgeVRFFacet is Modifiers {
         return info;
     }
 
+    function getRequestInfoByRequestId(bytes32 requestId) external view returns (VrfRequestInfo memory) {
+        return s.vrfRequestIdToVrfRequestInfo[requestId];
+    }
+
     function claimWinnings() external whenNotPaused {
         address sender = LibMeta.msgSender();
 
@@ -224,12 +228,7 @@ contract ForgeVRFFacet is Modifiers {
     //@param _keyHash New keyhash
     //@param _vrfCoordinator The new vrf coordinator address
     //@param _link New LINK token contract address
-    function changeVrf(
-        uint256 _newFee,
-        bytes32 _keyHash,
-        address _vrfCoordinator,
-        address _link
-    ) external onlyDaoOrOwner {
+    function changeVrf(uint256 _newFee, bytes32 _keyHash, address _vrfCoordinator, address _link) external onlyDaoOrOwner {
         if (_newFee != 0) {
             s.vrfFee = uint96(_newFee);
         }
