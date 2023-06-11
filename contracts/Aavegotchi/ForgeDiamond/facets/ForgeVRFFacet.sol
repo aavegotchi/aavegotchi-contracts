@@ -129,7 +129,6 @@ contract ForgeVRFFacet is Modifiers {
         emit VrfResponse(info.user, _randomNumber, _requestId, block.number);
     }
 
-    // Treat them as reserved in claimWinnings until the claim is run.
     /**
      * @notice fulfillRandomness handles the VRF response. Your contract must
      * @notice implement it.
