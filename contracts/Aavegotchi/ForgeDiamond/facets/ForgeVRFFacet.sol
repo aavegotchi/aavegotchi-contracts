@@ -1,10 +1,12 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.1;
+
 import "../libraries/LibAppStorage.sol";
 
 import {LibMeta} from "../../../shared/libraries/LibMeta.sol";
 import {ILink} from "../../interfaces/ILink.sol";
 import {ForgeFacet} from "./ForgeFacet.sol";
 import {ForgeTokenFacet} from "./ForgeTokenFacet.sol";
-import {LibSvg} from "../../libraries/LibSvg.sol";
 
 contract ForgeVRFFacet is Modifiers {
     event VrfResponse(address user, uint256 randomNumber, bytes32 requestId, uint256 blockNumber);
@@ -80,9 +82,7 @@ contract ForgeVRFFacet is Modifiers {
         }
 
         // spend geodes
-        for (uint256 i; i < _geodeTokenIds.length; i++) {
-            forgeTokenFacet().safeTransferFrom(sender, address(this), _geodeTokenIds[i], _amountPerToken[i], "");
-        }
+        forgeTokenFacet().safeBatchTransferFrom(sender, address(this), _geodeTokenIds, _amountPerToken, "");
         drawRandomNumber(_geodeTokenIds, _amountPerToken);
     }
 
@@ -181,14 +181,14 @@ contract ForgeVRFFacet is Modifiers {
         uint256 modNum = 10000;
         uint256 divNum = 1;
 
-        uint256 numTotalPrizesLeft = numTotalPrizesLeft();
+        uint256 prizesLeft = numTotalPrizesLeft();
         uint256 numWins;
 
         for (uint256 i; i < info.geodeTokenIds.length; i++) {
             uint8 rsm = forgeFacet().geodeRsmFromTokenId(info.geodeTokenIds[i]);
 
             for (uint256 j; j < info.amountPerToken[i]; j++) {
-                if (numWins < numTotalPrizesLeft) {
+                if (numWins < prizesLeft) {
                     // geodeRandNum is a 4 digit (0-9999) subsection of the random number
                     uint256 geodeRandNum = (info.randomNumber % modNum) / divNum;
 
@@ -205,8 +205,11 @@ contract ForgeVRFFacet is Modifiers {
                         numWins++;
 
                         forgeTokenFacet().safeTransferFrom(address(this), sender, itemIdWon, 1, "");
+                        forgeFacet().burn(address(this), info.geodeTokenIds[i], 1);
+
                         emit GeodeWin(sender, itemIdWon, info.geodeTokenIds[i], requestId, block.number);
                     } else {
+                        forgeFacet().burn(address(this), info.geodeTokenIds[i], 1);
                         emit GeodeEmpty(sender, info.geodeTokenIds[i], requestId, block.number);
                     }
                 } else {
