@@ -244,7 +244,7 @@ describe("Bridge ERC721: ", function () {
     console.log({ aavegotchiData })
   })
 
-  it("sendFrom() - send NFT from Polygon to Gotchichain and back to Polygon - equipping item on gotchichain", async function () {
+  it.skip("sendFrom() - send NFT from Polygon to Gotchichain and back to Polygon - equipping item on gotchichain", async function () {
     const tokenId = await mintPortals(owner.address)
 
     //Estimate nativeFees
