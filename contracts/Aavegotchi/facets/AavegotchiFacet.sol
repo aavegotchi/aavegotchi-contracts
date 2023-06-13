@@ -199,7 +199,7 @@ contract AavegotchiFacet is Modifiers {
     ) external {
         address sender = LibMeta.msgSender();
         internalTransferFrom(sender, _from, _to, _tokenId);
-        LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
+        // LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
     }
 
     /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
@@ -227,8 +227,8 @@ contract AavegotchiFacet is Modifiers {
         address _to,
         uint256 _tokenId
     ) internal {
-        LibGotchiLending.enforceAavegotchiNotInLending(uint32(_tokenId), _sender);
-        _enforceAavegotchiNotForging(_tokenId);
+        // LibGotchiLending.enforceAavegotchiNotInLending(uint32(_tokenId), _sender);
+        // _enforceAavegotchiNotForging(_tokenId);
 
         require(_to != address(0), "AavegotchiFacet: Can't transfer to 0 address");
         require(_from != address(0), "AavegotchiFacet: _from can't be 0 address");
