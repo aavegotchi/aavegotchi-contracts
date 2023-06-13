@@ -66,12 +66,6 @@ contract ForgeVRFFacet is Modifiers {
         require(areGeodePrizesAvailable(), "ForgeVRFFacet: No prizes currently available");
         require(_geodeTokenIds.length == _amountPerToken.length, "ForgeVRFFacet: mismatched arrays");
 
-        uint256 totalGeodes;
-        for (uint256 i; i < _amountPerToken.length; i++) {
-            totalGeodes += _amountPerToken[i];
-        }
-        require(totalGeodes <= MAX_VRF, "ForgeVRFFacet: Exceeds max total geodes per call");
-
         address sender = LibMeta.msgSender();
         uint256 total;
         for (uint256 i; i < _amountPerToken.length; i++) {
@@ -79,6 +73,7 @@ contract ForgeVRFFacet is Modifiers {
 
             require(_geodeTokenIds[i] >= GEODE_COMMON && _geodeTokenIds[i] <= GEODE_GODLIKE, "ForgeVRFFacet: Invalid geode token ID");
             require(forgeTokenFacet().balanceOf(sender, _geodeTokenIds[i]) >= _amountPerToken[i], "ForgeVRFFacet: not enough geodes owned");
+            require(total <= MAX_VRF, "ForgeVRFFacet: Exceeds max total geodes per call");
         }
 
         // spend geodes
