@@ -71,21 +71,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _erc1155TypeId Identifier of the NFT to query
     ///@return category_ Category of the NFT // 0 is wearable, 1 is badge, 2 is consumable, 3 is tickets
     function getERC1155Category(address _erc1155TokenAddress, uint256 _erc1155TypeId) public view returns (uint256 category_) {
-        if (_erc1155TokenAddress == s.forgeDiamond && _erc1155TypeId < 1_000_000_000) {
-            //Schematics are always supported to trade, so long as the wearable exists
-            //Schematic IDs are under 1_000_000_000 offset.
-            category_ = 7;
-            require(s.itemTypes[_erc1155TypeId].maxQuantity > 0, "ERC1155Marketplace: erc1155 item not supported");
-        } else {
-            category_ = s.erc1155Categories[_erc1155TokenAddress][_erc1155TypeId];
-        }
-
-        if (category_ == 0) {
-            require(
-                _erc1155TokenAddress == address(this) && s.itemTypes[_erc1155TypeId].maxQuantity > 0,
-                "ERC1155Marketplace: erc1155 item not supported"
-            );
-        }
+        category_ = LibERC1155Marketplace.getERC1155Category(_erc1155TokenAddress, _erc1155TypeId);
     }
 
     ///@notice Allow an ERC1155 owner to list his NFTs for sale

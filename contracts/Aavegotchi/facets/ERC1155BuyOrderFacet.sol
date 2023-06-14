@@ -1,0 +1,233 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.1;
+
+import {LibBuyOrder} from "../libraries/LibBuyOrder.sol";
+import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
+import {LibERC20} from "../../shared/libraries/LibERC20.sol";
+import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
+import {LibItems} from "../libraries/LibItems.sol";
+import {IERC20} from "../../shared/interfaces/IERC20.sol";
+import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {Modifiers, ERC1155BuyOrder} from "../libraries/LibAppStorage.sol";
+import {BaazaarSplit, LibSharedMarketplace, SplitAddresses} from "../libraries/LibSharedMarketplace.sol";
+import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
+
+contract ERC1155BuyOrderFacet is Modifiers {
+    event ERC1155BuyOrderAdd(
+        uint256 indexed buyOrderId,
+        address indexed buyer,
+        address erc1155TokenAddress,
+        uint256 erc1155TokenId,
+        uint256 indexed category,
+        uint256 priceInWei,
+        uint256 quantity,
+        uint256 duration,
+        uint256 time
+    );
+
+    event ERC1155BuyOrderExecute(
+        uint256 indexed buyOrderId,
+        address indexed buyer,
+        address seller,
+        address erc1155TokenAddress,
+        uint256 erc1155TokenId,
+        uint256 indexed category,
+        uint256 priceInWei,
+        uint256 quantity,
+        uint256 time
+    );
+
+    function getERC1155BuyOrder(uint256 _buyOrderId) external view returns (ERC1155BuyOrder memory buyOrder_) {
+        buyOrder_ = s.erc1155BuyOrders[_buyOrderId];
+        require(buyOrder_.timeCreated != 0, "ERC1155BuyOrder: ERC1155 buyOrder does not exist");
+    }
+
+    function getERC1155BuyOrderIdsByTokenId(
+        address _erc1155TokenAddress,
+        uint256 _erc1155TokenId
+    ) external view returns (uint256[] memory buyOrderIds_) {
+        buyOrderIds_ = s.erc1155TokenToBuyOrderIds[_erc1155TokenAddress][_erc1155TokenId];
+    }
+
+    function getERC1155BuyOrdersByTokenId(
+        address _erc1155TokenAddress,
+        uint256 _erc1155TokenId
+    ) external view returns (ERC1155BuyOrder[] memory buyOrders_) {
+        uint256[] memory buyOrderIds = s.erc1155TokenToBuyOrderIds[_erc1155TokenAddress][_erc1155TokenId];
+        uint256 length = buyOrderIds.length;
+        buyOrders_ = new ERC1155BuyOrder[](length);
+        for (uint256 i; i < length; i++) {
+            buyOrders_[i] = s.erc1155BuyOrders[buyOrderIds[i]];
+        }
+    }
+
+    function placeERC1155BuyOrder(
+        address _erc1155TokenAddress,
+        uint256 _erc1155TokenId,
+        uint256 _priceInWei,
+        uint256 _quantity,
+        uint256 _duration
+    ) external {
+        require(_priceInWei >= 1e18, "ERC1155BuyOrder: price should be 1 GHST or larger");
+
+        address sender = LibMeta.msgSender();
+        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
+        require(ghstBalance >= _priceInWei * _quantity, "ERC1155BuyOrder: Not enough GHST!");
+
+        uint256 category = LibERC1155Marketplace.getERC1155Category(_erc1155TokenAddress, _erc1155TokenId);
+
+        uint256 oldBuyOrderId = s.buyerToERC1155BuyOrderId[_erc1155TokenAddress][_erc1155TokenId][sender];
+        if (oldBuyOrderId != 0) {
+            ERC1155BuyOrder memory erc1155BuyOrder = s.erc1155BuyOrders[oldBuyOrderId];
+            require(erc1155BuyOrder.timeCreated != 0, "ERC1155BuyOrder: ERC1155 buyOrder does not exist");
+            require((erc1155BuyOrder.cancelled == false) && (erc1155BuyOrder.lastTimePurchased == 0), "ERC1155BuyOrder: Already processed");
+            if ((erc1155BuyOrder.duration == 0) || (erc1155BuyOrder.timeCreated + erc1155BuyOrder.duration >= block.timestamp)) {
+                LibBuyOrder.cancelERC1155BuyOrder(oldBuyOrderId);
+            }
+        }
+
+        // Transfer GHST
+        LibERC20.transferFrom(s.ghstContract, sender, address(this), _priceInWei * _quantity);
+
+        // Place new buy order
+        s.nextERC1155BuyOrderId++;
+        uint256 buyOrderId = s.nextERC1155BuyOrderId;
+
+        s.erc1155TokenToBuyOrderIdIndexes[_erc1155TokenAddress][_erc1155TokenId][buyOrderId] = s
+        .erc1155TokenToBuyOrderIds[_erc1155TokenAddress][_erc1155TokenId].length;
+        s.erc1155TokenToBuyOrderIds[_erc1155TokenAddress][_erc1155TokenId].push(buyOrderId);
+        s.buyerToERC1155BuyOrderId[_erc1155TokenAddress][_erc1155TokenId][sender] = buyOrderId;
+
+        s.erc1155BuyOrders[buyOrderId] = ERC1155BuyOrder({
+            buyOrderId: buyOrderId,
+            buyer: sender,
+            erc1155TokenAddress: _erc1155TokenAddress,
+            erc1155TokenId: _erc1155TokenId,
+            priceInWei: _priceInWei,
+            quantity: _quantity,
+            sourceBuyOrderId: 0,
+            timeCreated: block.timestamp,
+            lastTimePurchased: 0,
+            duration: _duration,
+            completed: false,
+            cancelled: false
+        });
+        emit ERC1155BuyOrderAdd(
+            buyOrderId,
+            sender,
+            _erc1155TokenAddress,
+            _erc1155TokenId,
+            category,
+            _priceInWei,
+            _quantity,
+            _duration,
+            block.timestamp
+        );
+    }
+
+    function cancelERC1155BuyOrder(uint256 _buyOrderId) external {
+        address sender = LibMeta.msgSender();
+        ERC1155BuyOrder memory erc1155BuyOrder = s.erc1155BuyOrders[_buyOrderId];
+        require(erc1155BuyOrder.timeCreated != 0, "ERC1155BuyOrder: ERC1155 buyOrder does not exist");
+        require(sender == erc1155BuyOrder.buyer, "ERC1155BuyOrder: Only buyer can call this function");
+        require((erc1155BuyOrder.cancelled == false) && (erc1155BuyOrder.completed == false), "ERC1155BuyOrder: Already processed");
+        if (erc1155BuyOrder.duration > 0) {
+            require(erc1155BuyOrder.timeCreated + erc1155BuyOrder.duration >= block.timestamp, "ERC1155BuyOrder: Already expired");
+        }
+
+        LibBuyOrder.cancelERC1155BuyOrder(_buyOrderId);
+    }
+
+    function executeERC1155BuyOrder(uint256 _buyOrderId, uint256 _quantity) external {
+        address sender = LibMeta.msgSender();
+        ERC1155BuyOrder memory erc1155BuyOrder = s.erc1155BuyOrders[_buyOrderId];
+
+        require(erc1155BuyOrder.timeCreated != 0, "ERC1155BuyOrder: ERC1155 buyOrder does not exist");
+        require(erc1155BuyOrder.buyer != sender, "ERC1155BuyOrder: Buyer can't be seller");
+        require((erc1155BuyOrder.cancelled == false) && (erc1155BuyOrder.completed == false), "ERC1155BuyOrder: Already processed");
+        if (erc1155BuyOrder.duration > 0) {
+            require(erc1155BuyOrder.timeCreated + erc1155BuyOrder.duration >= block.timestamp, "ERC1155BuyOrder: Already expired");
+        }
+        require(erc1155BuyOrder.quantity >= _quantity, "ERC1155BuyOrder: Sell amount should not be larger than quantity of the buy order");
+
+        IERC1155 erc1155Token = IERC1155(erc1155BuyOrder.erc1155TokenAddress);
+        require(erc1155Token.balanceOf(sender, erc1155BuyOrder.erc1155TokenId) >= _quantity, "ERC1155Marketplace: Not enough ERC1155 token");
+
+        erc1155BuyOrder.quantity -= _quantity;
+        erc1155BuyOrder.lastTimePurchased = block.timestamp;
+
+        uint256 cost = _quantity * erc1155BuyOrder.priceInWei;
+
+        BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(cost, new uint256[](0), [10000, 0]);
+        LibSharedMarketplace.transferSales(
+            SplitAddresses({
+                ghstContract: s.ghstContract,
+                buyer: address(this),
+                seller: sender,
+                affiliate: address(0),
+                royalties: new address[](0),
+                daoTreasury: s.daoTreasury,
+                pixelCraft: s.pixelCraft,
+                rarityFarming: s.rarityFarming
+            }),
+            split
+        );
+
+        // new sub buy order
+        s.nextERC1155BuyOrderId++;
+        uint256 subBuyOrderId = s.nextERC1155BuyOrderId;
+        s.erc1155BuyOrders[subBuyOrderId] = ERC1155BuyOrder({
+            buyOrderId: subBuyOrderId,
+            buyer: erc1155BuyOrder.buyer,
+            erc1155TokenAddress: erc1155BuyOrder.erc1155TokenAddress,
+            erc1155TokenId: erc1155BuyOrder.erc1155TokenId,
+            priceInWei: erc1155BuyOrder.priceInWei,
+            quantity: _quantity,
+            sourceBuyOrderId: _buyOrderId,
+            timeCreated: block.timestamp,
+            lastTimePurchased: block.timestamp,
+            duration: erc1155BuyOrder.duration,
+            completed: true,
+            cancelled: false
+        });
+        if (erc1155BuyOrder.quantity == 0) {
+            erc1155BuyOrder.completed = true;
+            LibBuyOrder.removeERC1155BuyOrder(_buyOrderId);
+        }
+
+        // ERC1155 transfer
+        if (erc1155BuyOrder.erc1155TokenAddress == address(this)) {
+            LibItems.removeFromOwner(sender, erc1155BuyOrder.erc1155TokenId, _quantity);
+            LibItems.addToOwner(erc1155BuyOrder.buyer, erc1155BuyOrder.erc1155TokenId, _quantity);
+            IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(
+                address(this),
+                sender,
+                erc1155BuyOrder.buyer,
+                erc1155BuyOrder.erc1155TokenId,
+                _quantity
+            );
+            LibERC1155.onERC1155Received(address(this), sender, erc1155BuyOrder.buyer, erc1155BuyOrder.erc1155TokenId, _quantity, "");
+        } else {
+            IERC1155(erc1155BuyOrder.erc1155TokenAddress).safeTransferFrom(
+                sender,
+                erc1155BuyOrder.buyer,
+                erc1155BuyOrder.erc1155TokenId,
+                _quantity,
+                new bytes(0)
+            );
+        }
+
+        emit ERC1155BuyOrderExecute(
+            _buyOrderId,
+            erc1155BuyOrder.buyer,
+            sender,
+            erc1155BuyOrder.erc1155TokenAddress,
+            erc1155BuyOrder.erc1155TokenId,
+            LibERC1155Marketplace.getERC1155Category(erc1155BuyOrder.erc1155TokenAddress, erc1155BuyOrder.erc1155TokenId),
+            erc1155BuyOrder.priceInWei,
+            _quantity,
+            block.timestamp
+        );
+    }
+}

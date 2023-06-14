@@ -200,6 +200,21 @@ struct XPMerkleDrops {
     uint256 xpAmount; //10-sigprop, 20-coreprop
 }
 
+struct ERC1155BuyOrder {
+    uint256 buyOrderId;
+    address buyer;
+    address erc1155TokenAddress;
+    uint256 erc1155TokenId;
+    uint256 priceInWei;
+    uint256 quantity;
+    uint256 sourceBuyOrderId;
+    uint256 timeCreated;
+    uint256 lastTimePurchased;
+    uint256 duration; //0 for unlimited
+    bool cancelled;
+    bool completed;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -313,6 +328,12 @@ struct AppStorage {
     //XP Drops
     mapping(bytes32 => XPMerkleDrops) xpDrops;
     mapping(uint256 => mapping(bytes32 => uint256)) xpClaimed;
+    // states for buy orders
+    uint256 nextERC1155BuyOrderId;
+    mapping(uint256 => ERC1155BuyOrder) erc1155BuyOrders; // buyOrderId => data
+    mapping(address => mapping(uint256 => uint256[])) erc1155TokenToBuyOrderIds; // erc1155 token address => erc1155TokenId => buyOrderIds
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) erc1155TokenToBuyOrderIdIndexes; // erc1155 token address => erc1155TokenId => buyOrderId => index
+    mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToERC1155BuyOrderId; // erc1155 token address => erc1155TokenId => sender => buyOrderId
 }
 
 library LibAppStorage {
