@@ -290,8 +290,6 @@ describe("Bridge ERC721: ", function () {
     await itemsFacetPolygonSide.equipWearables(tokenId, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     
     //Checking items balance after unequipping them
-    console.log('Balance with typ')
-    console.log(await itemsFacetPolygonSide.itemBalancesWithTypes(owner.address))
     expect((await itemsFacetPolygonSide.itemBalances(owner.address)).length).to.be.equal(2)
     expect((await itemsFacetPolygonSide.itemBalancesWithTypes(owner.address))[1].itemId).to.be.equal(ethers.BigNumber.from(1))
     expect((await itemsFacetPolygonSide.itemBalancesWithTypes(owner.address))[1].balance).to.be.equal(ethers.BigNumber.from(1))

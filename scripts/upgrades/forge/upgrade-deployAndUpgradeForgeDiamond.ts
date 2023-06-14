@@ -40,18 +40,8 @@ export async function deployAndUpgradeForgeDiamond(
     ]);
   }
 
-  console.log('Heyoo')
   const deployer = await (await ethers.getSigners())[0].address;
 
-  console.log('Heyoo22')
-  console.log({
-    deployer,
-    cutFacet,
-    loupeFacet,
-    ownerShipFacet,
-    aavegotchiDiamond,
-    wearableDiamond,
-  })
   const diamond = await Diamond.deploy(
     deployer,
     cutFacet,
