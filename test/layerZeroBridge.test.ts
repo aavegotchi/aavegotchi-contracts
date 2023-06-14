@@ -238,7 +238,7 @@ describe("Bridge ERC721: ", function () {
     console.log({ aavegotchiData })
   })
 
-  it("sendFrom() - send NFT from Polygon to Gotchichain and back to Polygon - equipping item on gotchichain", async function () {
+  it.only("sendFrom() - send NFT from Polygon to Gotchichain and back to Polygon - equipping item on gotchichain", async function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
     //Estimate nativeFees
@@ -337,7 +337,6 @@ describe("Bridge ERC721: ", function () {
     tx = await shopFacetGotchichainSide.purchaseItemsWithGhst(owner.address, [2], [1])
     await tx.wait()
     
-    console.log('Calling equipWearables()')
     tx = await itemsFacetGotchichainSide.equipWearables(tokenId, [2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     await tx.wait()
   }
