@@ -13,6 +13,8 @@ import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
 import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 
+import "hardhat/console.sol";
+
 contract ShopFacet is Modifiers {
     event MintPortals(
         address indexed _from,
