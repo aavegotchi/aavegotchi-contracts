@@ -300,63 +300,6 @@ describe("Bridge ERC721: ", function () {
     expect(await itemsFacetPolygonSide.equippedWearables(tokenId)).to.eql([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
   })
 
-  it.skip("sendFrom() - send NFT from Polygon to Gotchichain and back to Polygon - with equipped item on polygon and equipping item on gotchichain", async function () {
-    const tokenId = await mintPortalsWithItems(owner.address)
-
-    //Estimate nativeFees
-    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, defaultAdapterParams)).nativeFee
-
-    //Swapping token to gotchichain
-    await aavegotchiFacetPolygonSide.approve(bridgePolygonSide.address, tokenId)
-    let sendFromTx = await bridgePolygonSide.sendFrom(
-      owner.address,
-      chainId_B,
-      owner.address,
-      tokenId,
-      owner.address,
-      ethers.constants.AddressZero,
-      defaultAdapterParams,
-      { value: nativeFee }
-    )
-    await sendFromTx.wait()
-
-    expect(await aavegotchiFacetPolygonSide.ownerOf(tokenId)).to.equal(bridgePolygonSide.address)
-    expect(await aavegotchiFacetGotchichainSide.ownerOf(tokenId)).to.be.equal(owner.address)
-
-    //Equipping item on gotchichain
-    await equipItemOnGotchichain(tokenId)
-
-    //Swapping token back to Polygon
-    await aavegotchiFacetGotchichainSide.approve(bridgeGotchichainSide.address, tokenId)
-    sendFromTx = await bridgeGotchichainSide.sendFrom(
-      owner.address,
-      chainId_A,
-      owner.address,
-      tokenId,
-      owner.address,
-      ethers.constants.AddressZero,
-      defaultAdapterParams,
-      { value: (await bridgeGotchichainSide.estimateSendFee(chainId_A, owner.address, tokenId, false, defaultAdapterParams)).nativeFee }
-    )
-    await sendFromTx.wait()
-
-    //Checking Aavegotchi ownership in both chains
-    expect(await aavegotchiFacetGotchichainSide.ownerOf(tokenId)).to.equal(bridgeGotchichainSide.address)
-    expect(await aavegotchiFacetPolygonSide.ownerOf(tokenId)).to.be.equal(owner.address)
-
-    //Checking equipped items and owner items balance before unequipping item
-    expect(await itemsFacetPolygonSide.equippedWearables(tokenId)).to.eql([2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-    expect((await itemsFacetPolygonSide.itemBalances(owner.address)).length).to.be.equal(0)
-    
-    // //Checking items balance after unequipping them
-    // expect((await itemsFacetPolygonSide.itemBalances(owner.address)).length).to.be.equal(1)
-    // expect((await itemsFacetPolygonSide.itemBalancesWithTypes(owner.address))[0].itemId).to.be.equal(ethers.BigNumber.from(1))
-    // expect((await itemsFacetPolygonSide.itemBalancesWithTypes(owner.address))[0].balance).to.be.equal(ethers.BigNumber.from(1))
-
-    // //Checking equipped items after unequipping them
-    // expect(await itemsFacetPolygonSide.equippedWearables(tokenId)).to.eql([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-  })
-
   async function mintPortals(to: string) {
     let tx = await shopFacetPolygonSide.mintPortals(to, 1)
     let receipt: any = await tx.wait()
