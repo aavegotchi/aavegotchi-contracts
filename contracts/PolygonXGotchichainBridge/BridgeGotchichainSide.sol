@@ -2,7 +2,7 @@
 pragma solidity ^0.8.1;
 
 import {Aavegotchi} from "../Aavegotchi/libraries/LibAppStorage.sol";
-import "@layerzerolabs/solidity-examples/contracts/token/onft/extension/ProxyONFT721.sol";
+import "./ProxyONFT721.sol";
 import "../Aavegotchi/facets/AavegotchiFacet.sol";
 import "../Aavegotchi/facets/PolygonXGotchichainBridgeFacet.sol";
 
