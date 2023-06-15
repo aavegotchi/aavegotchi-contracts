@@ -1,7 +1,6 @@
 import {
   ForgeDAOFacet,
   ForgeVRFFacet,
-  OwnershipFacet,
   ForgeFacet,
 } from "../../../../typechain";
 import { ethers, network } from "hardhat";

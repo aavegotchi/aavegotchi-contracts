@@ -6,8 +6,6 @@ import {
 } from "../../../../tasks/deployUpgrade";
 
 import {
-  maticDiamondAddress,
-  maticDiamondUpgrader,
   maticForgeDiamond,
   mumbaiForgeDiamond,
 } from "../../../helperFunctions";
@@ -68,24 +66,15 @@ export async function upgradeForgeGeodes() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
-  // let iface: ForgeDAOFacetInterface = new ethers.utils.Interface(
-  //   ForgeDAOFacet__factory.abi
-  // ) as ForgeDAOFacetInterface;
-  //
-  // const calldata = iface.encodeFunctionData("setForge", [forgeAddress]);
-
   const signerAddress = await (await ethers.getSigners())[0].getAddress();
 
   const args: DeployUpgradeTaskArgs = {
-    // diamondUpgrader: maticDiamondUpgrader,
     diamondUpgrader: signerAddress,
     diamondAddress: isMumbai ? mumbaiForgeDiamond : maticForgeDiamond,
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,
     freshDeployment: false,
-    // initAddress: maticDiamondAddress,
-    // initCalldata: calldata,
   };
 
   await run("deployUpgrade", args);
