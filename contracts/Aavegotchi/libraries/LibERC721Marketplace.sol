@@ -2,6 +2,7 @@
 pragma solidity 0.8.1;
 
 import {LibAppStorage, AppStorage, ListingListItem, ERC721Listing} from "./LibAppStorage.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 import "../../shared/interfaces/IERC721.sol";
 
@@ -10,6 +11,7 @@ import "../../shared/interfaces/IERC721.sol";
 library LibERC721Marketplace {
     event ERC721ListingCancelled(uint256 indexed listingId, uint256 category, uint256 time);
     event ERC721ListingRemoved(uint256 indexed listingId, uint256 category, uint256 time);
+    event ERC721ListingPriceUpdate(uint256 indexed listingId, uint256 priceInWei, uint256 time);
 
     function cancelERC721Listing(uint256 _listingId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
@@ -33,11 +35,7 @@ library LibERC721Marketplace {
         removeERC721ListingItem(_listingId, _owner);
     }
 
-    function cancelERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        address _owner
-    ) internal {
+    function cancelERC721Listing(address _erc721TokenAddress, uint256 _erc721TokenId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
         if (listingId == 0) {
@@ -46,12 +44,7 @@ library LibERC721Marketplace {
         cancelERC721Listing(listingId, _owner);
     }
 
-    function addERC721ListingItem(
-        address _owner,
-        uint256 _category,
-        string memory _sort,
-        uint256 _listingId
-    ) internal {
+    function addERC721ListingItem(address _owner, uint256 _category, string memory _sort, uint256 _listingId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 headListingId = s.erc721OwnerListingHead[_owner][_category][_sort];
         if (headListingId != 0) {
@@ -121,11 +114,7 @@ library LibERC721Marketplace {
         emit ERC721ListingRemoved(_listingId, listing.category, block.timestamp);
     }
 
-    function updateERC721Listing(
-        address _erc721TokenAddress,
-        uint256 _erc721TokenId,
-        address _owner
-    ) internal {
+    function updateERC721Listing(address _erc721TokenAddress, uint256 _erc721TokenId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 listingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][_owner];
         if (listingId == 0) {
@@ -139,5 +128,19 @@ library LibERC721Marketplace {
         if (owner != listing.seller) {
             LibERC721Marketplace.cancelERC721Listing(listingId, listing.seller);
         }
+    }
+
+    function updateERC721ListingPrice(uint256 _listingId, uint256 _priceInWei) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        ERC721Listing storage listing = s.erc721Listings[_listingId];
+        require(listing.timeCreated != 0, "ERC721Marketplace: listing not found");
+        require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
+        require(listing.cancelled == false, "ERC721Marketplace: listing already cancelled");
+        require(listing.seller == LibMeta.msgSender(), "ERC721Marketplace: Not seller of ERC721 listing");
+
+        //comment out until graph event is added
+        // s.erc721Listings[_listingId].priceInWei = _priceInWei;
+
+        emit ERC721ListingPriceUpdate(_listingId, _priceInWei, block.timestamp);
     }
 }

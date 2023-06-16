@@ -24,6 +24,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     );
 
     event ERC1155ListingSplit(uint256 indexed listingId, uint16[2] principalSplit, address affiliate);
+    event ERC1155ListingWhitelistSet(uint256 indexed listingId, uint32 whitelistId);
 
     event ERC1155ExecutedListing(
         uint256 indexed listingId,
@@ -94,7 +95,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _quantity The amount of NFTs to be listed
     ///@param _priceInWei The cost price of the NFT individually in $GHST
     function setERC1155Listing(address _erc1155TokenAddress, uint256 _erc1155TypeId, uint256 _quantity, uint256 _priceInWei) external {
-        createERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _quantity, _priceInWei, [10000, 0], address(0));
+        createERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _quantity, _priceInWei, [10000, 0], address(0), 0);
     }
 
     function setERC1155ListingWithSplit(
@@ -105,7 +106,21 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint16[2] memory _principalSplit,
         address _affiliate
     ) external {
-        createERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _quantity, _priceInWei, _principalSplit, _affiliate);
+        createERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _quantity, _priceInWei, _principalSplit, _affiliate, 0);
+    }
+
+    //@dev Not implemented in UI yet. Do not use unless you don't want anyone purchasing your NFT.
+
+    function setERC1155ListingWithWhitelist(
+        address _erc1155TokenAddress,
+        uint256 _erc1155TypeId,
+        uint256 _quantity,
+        uint256 _priceInWei,
+        uint16[2] memory _principalSplit,
+        address _affiliate,
+        uint32 _whitelistId
+    ) external {
+        createERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _quantity, _priceInWei, _principalSplit, _affiliate, _whitelistId);
     }
 
     function createERC1155Listing(
@@ -114,7 +129,8 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 _quantity,
         uint256 _priceInWei,
         uint16[2] memory _principalSplit,
-        address _affiliate
+        address _affiliate,
+        uint32 _whitelistId
     ) internal {
         address seller = LibMeta.msgSender();
         uint256 category = getERC1155Category(_erc1155TokenAddress, _erc1155TypeId);
@@ -152,7 +168,8 @@ contract ERC1155MarketplaceFacet is Modifiers {
                 sold: false,
                 cancelled: false,
                 principalSplit: _principalSplit,
-                affiliate: _affiliate
+                affiliate: _affiliate,
+                whitelistId: _whitelistId
             });
             LibERC1155Marketplace.addERC1155ListingItem(seller, category, "listed", listingId);
 
@@ -160,6 +177,9 @@ contract ERC1155MarketplaceFacet is Modifiers {
 
             if (_affiliate != address(0)) {
                 emit ERC1155ListingSplit(listingId, _principalSplit, _affiliate);
+            }
+            if (_whitelistId != 0) {
+                emit ERC1155ListingWhitelistSet(listingId, _whitelistId);
             }
         } else {
             ERC1155Listing storage listing = s.erc1155Listings[listingId];
@@ -258,6 +278,9 @@ contract ERC1155MarketplaceFacet is Modifiers {
         address buyer = LibMeta.msgSender();
         address seller = listing.seller;
         require(seller != buyer, "ERC1155Marketplace: buyer can't be seller");
+        if (listing.whitelistId > 0) {
+            require(s.isWhitelisted[listing.whitelistId][buyer] > 0, "ERC1155Marketplace: Not whitelisted address");
+        }
         require(_quantity > 0, "ERC1155Marketplace: _quantity can't be zero");
         require(_quantity <= listing.quantity, "ERC1155Marketplace: quantity is greater than listing");
         listing.quantity -= _quantity;
@@ -301,7 +324,8 @@ contract ERC1155MarketplaceFacet is Modifiers {
                 sold: true,
                 cancelled: false,
                 principalSplit: listing.principalSplit,
-                affiliate: listing.affiliate
+                affiliate: listing.affiliate,
+                whitelistId: listing.whitelistId
             });
             LibERC1155Marketplace.addERC1155ListingItem(seller, listing.category, "purchased", purchaseListingId);
             if (listing.quantity == 0) {
@@ -368,6 +392,36 @@ contract ERC1155MarketplaceFacet is Modifiers {
             listing.cancelled = true;
             emit LibERC1155Marketplace.ERC1155ListingCancelled(listingId, listing.category, block.number);
             LibERC1155Marketplace.removeERC1155ListingItem(listingId, listing.seller);
+        }
+    }
+
+    ///@notice Allow an ERC1155 owner to update list price of his NFT for sale
+    ///@dev If the NFT has not been listed before, it will be rejected
+    ///@param _listingId The identifier of the listing to execute
+    ///@param _quantity The amount of ERC1155 NFTs execute/buy
+    ///@param _priceInWei The price of the item
+    function updateERC1155ListingPriceAndQuantity(uint256 _listingId, uint256 _quantity, uint256 _priceInWei) external {
+        LibERC1155Marketplace.updateERC1155ListingPriceAndQuantity(_listingId, _quantity, _priceInWei);
+        if (s.listingFeeInWei > 0) {
+            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, LibMeta.msgSender(), s.ghstContract);
+        }
+    }
+
+    function batchUpdateERC1155ListingPriceAndQuantity(
+        uint256[] calldata _listingIds,
+        uint256[] calldata _quantities,
+        uint256[] calldata _priceInWeis
+    ) external {
+        require(_listingIds.length == _quantities.length, "ERC1155Marketplace: listing ids not same length as quantities");
+        require(_listingIds.length == _priceInWeis.length, "ERC1155Marketplace: listing ids not same length as prices");
+
+        for (uint256 i; i < _listingIds.length; i++) {
+            LibERC1155Marketplace.updateERC1155ListingPriceAndQuantity(_listingIds[i], _quantities[i], _priceInWeis[i]);
+        }
+
+        if (s.listingFeeInWei > 0) {
+            uint256 totalFee = s.listingFeeInWei * _listingIds.length;
+            LibSharedMarketplace.burnListingFee(totalFee, LibMeta.msgSender(), s.ghstContract);
         }
     }
 }

@@ -128,6 +128,7 @@ struct ERC1155Listing {
     //new:
     uint16[2] principalSplit;
     address affiliate;
+    uint32 whitelistId;
 }
 
 struct ERC721Listing {
@@ -143,6 +144,7 @@ struct ERC721Listing {
     //new:
     uint16[2] principalSplit;
     address affiliate;
+    uint32 whitelistId;
 }
 
 struct ListingListItem {
