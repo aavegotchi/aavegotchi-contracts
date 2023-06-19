@@ -245,7 +245,7 @@ contract ForgeVRFFacet is Modifiers {
         s.link.transfer(_to, _value);
     }
 
-    function fixZeroGeodes(address user) {
+    function fixZeroGeodes(address user) external {
         bytes32 requestId = s.vrfUserToRequestIds[user][s.vrfUserToRequestIds[user].length - 1];
         VrfRequestInfo storage info = s.vrfRequestIdToVrfRequestInfo[requestId];
 
