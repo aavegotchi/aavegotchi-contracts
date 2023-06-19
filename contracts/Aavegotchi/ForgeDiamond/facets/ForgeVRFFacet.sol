@@ -62,6 +62,7 @@ contract ForgeVRFFacet is Modifiers {
     }
 
     function openGeodes(uint256[] calldata _geodeTokenIds, uint256[] calldata _amountPerToken) external whenNotPaused {
+        require(_geodeTokenIds.length > 0, "ForgeVRFFacet: Cannot open 0 geodes");
         require(areGeodePrizesAvailable(), "ForgeVRFFacet: No prizes currently available");
         require(_geodeTokenIds.length == _amountPerToken.length, "ForgeVRFFacet: mismatched arrays");
 
@@ -242,5 +243,17 @@ contract ForgeVRFFacet is Modifiers {
     // Remove the LINK tokens from this contract that are used to pay for VRF random number fees
     function removeLinkTokens(address _to, uint256 _value) external onlyDaoOrOwner {
         s.link.transfer(_to, _value);
+    }
+
+    function fixZeroGeodes(address user) {
+        bytes32 requestId = s.vrfUserToRequestIds[user][s.vrfUserToRequestIds[user].length - 1];
+        VrfRequestInfo storage info = s.vrfRequestIdToVrfRequestInfo[requestId];
+
+        if (info.geodeTokenIds.length == 0) {
+            info.status = VrfStatus.CLAIMED;
+            s.userVrfPending[info.user] = false;
+        } else {
+            revert("ForgeVRFFacet: not 0 geodes");
+        }
     }
 }
