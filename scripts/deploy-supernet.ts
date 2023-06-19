@@ -248,6 +248,16 @@ async function main() {
     "PeripheryFacet",
     aavegotchiDiamond.address
   );
+  shopFacet = await ethers.getContractAt(
+    "ShopFacet",
+    aavegotchiDiamond.address
+  );
+  aavegotchiFacet = await ethers.getContractAt(
+    "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
+    aavegotchiDiamond.address
+  );
+  aavegotchiGameFacet = await ethers.getContractAt("AavegotchiGameFacet", aavegotchiDiamond.address);
+  vrfFacet = await ethers.getContractAt("VrfFacet", aavegotchiDiamond.address);
   svgFacet = await ethers.getContractAt("SvgFacet", aavegotchiDiamond.address);
 
   // add item managers
@@ -582,6 +592,31 @@ async function main() {
   receipt = await tx.wait();
   console.log("Realm diamond set:" + strDisplay(receipt.gasUsed));
   totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+
+  let numberPerMint = 5;
+  tx = await shopFacet.mintPortals(ownerAddress, numberPerMint);
+  receipt = await tx.wait();
+  console.log("Mint portals:" + strDisplay(receipt.gasUsed));
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+
+  const gotchiIds = []
+  for (let i = 0; i < numberPerMint; i++) {
+    const gotchi = await aavegotchiFacet.getAavegotchi(i);
+    gotchiIds.push(gotchi.tokenId)
+    console.log(`Aavegotchi ID: ${i} owner is ${gotchi.owner} and status is closed portal (${gotchi.status == 0}) `);
+  }
+
+  await vrfFacet.openPortals(gotchiIds);
+  for (let i = 0; i < numberPerMint; i++) {
+    const gotchi = await aavegotchiFacet.getAavegotchi(i);
+    console.log(`Aavegotchi ID: ${i} status is open portal (${gotchi.status == 2}) `);
+  }
+
+  for (let i = 0; i < numberPerMint; i++) {
+    await aavegotchiGameFacet.claimAavegotchi(i, 0, ethers.utils.parseEther("10000"));
+    const gotchi = await aavegotchiFacet.getAavegotchi(i);
+    console.log(`Aavegotchi ID: ${i} status is claimed (${gotchi.status == 3}) `);
+  }
 
   // TODO: allow revenue tokens?
 
