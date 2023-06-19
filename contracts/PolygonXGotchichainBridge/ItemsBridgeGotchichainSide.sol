@@ -69,6 +69,15 @@ contract ItemsBridgeGotchichainSide is ProxyONFT1155 {
         }
     }
 
+    function _debitFrom(address _from, uint16, bytes memory, uint[] memory _tokenIds, uint[] memory _amounts) internal override {
+        require(_from == _msgSender(), "ItemsBridgePolygonSide: owner is not send caller");
+        PolygonXGotchichainBridgeFacet(address(token)).removeItemsFromOwner(_from, _tokenIds, _amounts);
+    }
+
+    function _creditTo(uint16, address _toAddress, uint[] memory _tokenIds, uint[] memory _amounts) internal override {
+        PolygonXGotchichainBridgeFacet(address(token)).addItemsToOwner(_toAddress, _tokenIds, _amounts);
+    }
+
     function _updateAavegotchiMetadata(address newOwner, uint[] memory tokenIds, Aavegotchi[] memory aavegotchis) internal {
         for (uint i = 0; i < tokenIds.length; i++) {
             aavegotchis[i].owner = newOwner;

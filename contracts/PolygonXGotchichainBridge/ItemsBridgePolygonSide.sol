@@ -52,7 +52,7 @@ contract ItemsBridgePolygonSide is ProxyONFT1155 {
         }
     }
 
-    function _nonblockingLzReceive(uint16 _srcChainId, bytes memory _srcAddress, uint64 /*_nonce*/, bytes memory _payload) internal override {
+    function _nonblockingLzReceive(uint16 _srcChainId, bytes memory _srcAddress, uint64, bytes memory _payload) internal override {
         // decode and load the toAddress
         (bytes memory toAddressBytes, uint[] memory tokenIds, uint[] memory amounts) = abi.decode(_payload, (bytes, uint[], uint[]));
         address toAddress;
@@ -69,28 +69,13 @@ contract ItemsBridgePolygonSide is ProxyONFT1155 {
         }
     }
 
-    function _creditTo(uint16, address _toAddress, uint[] memory _tokenIds, uint[] memory _amounts) internal override {
-        /**
-            Two possible approachs:
-            - Verify if there is already tokens locked in the contract and them transfer
-                - We will need to loop through every token and verify if there is enough of that token to be transfered,
-                if so we can transfer. If there is less then we need to mint the missing amount
-                - This approach is more gas expensive
-            - Create new tokens and transfer them
-                - Implies that the _debitFrom will always be burning tokens
-                - This approach is less gass expensive
-         */
-        
-        token.safeBatchTransferFrom(address(this), _toAddress, _tokenIds, _amounts, "");
+    function _debitFrom(address _from, uint16, bytes memory, uint[] memory _tokenIds, uint[] memory _amounts) internal override {
+        require(_from == _msgSender(), "ItemsBridgePolygonSide: owner is not send caller");
+        PolygonXGotchichainBridgeFacet(address(token)).removeItemsFromOwner(_from, _tokenIds, _amounts);
+    }
 
-        try token.ownerOf(_tokenId) {
-            token.safeTransferFrom(address(this), _toAddress, _tokenId);
-        } catch Error(string memory reason) {
-            if (_compare(reason, "AavegotchiFacet: invalid _tokenId")) {
-                PolygonXGotchichainBridgeFacet(address(token)).mintWithId(_toAddress, _tokenId);
-            }
-            // @todo: what to do?
-        }
+    function _creditTo(uint16, address _toAddress, uint[] memory _tokenIds, uint[] memory _amounts) internal override {
+        PolygonXGotchichainBridgeFacet(address(token)).addItemsToOwner(_toAddress, _tokenIds, _amounts);
     }
 
     function _updateAavegotchiMetadata(address newOwner, uint[] memory tokenIds, Aavegotchi[] memory aavegotchis) internal {
