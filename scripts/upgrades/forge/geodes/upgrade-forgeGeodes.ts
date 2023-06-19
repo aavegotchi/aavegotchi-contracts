@@ -49,7 +49,7 @@ export async function upgradeForgeGeodes() {
         "function vrfCoordinator() external view returns (address)",
         "function link() external view returns (address)",
         "function keyHash() external view returns (bytes32)",
-        "function getMaxVrf() external view returns (uint256)",
+        "function getMaxVrf() external pure returns (uint256)",
         "function areGeodePrizesAvailable() public view returns (bool)",
         "function numTotalPrizesLeft() public view returns (uint256)",
         "function openGeodes(uint256[] calldata _geodeTokenIds, uint256[] calldata _amountPerToken) external",

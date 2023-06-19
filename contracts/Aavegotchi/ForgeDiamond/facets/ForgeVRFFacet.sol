@@ -9,6 +9,9 @@ import {ForgeFacet} from "./ForgeFacet.sol";
 import {ForgeTokenFacet} from "./ForgeTokenFacet.sol";
 
 contract ForgeVRFFacet is Modifiers {
+    // Maximum number of geodes that can be opened in one call.
+    uint256 public constant MAX_VRF = 15;
+
     event VrfResponse(address user, uint256 randomNumber, bytes32 requestId, uint256 blockNumber);
     event GeodeWin(address user, uint256 itemId, uint256 geodeTokenId, bytes32 requestId, uint256 blockNumber);
     event GeodeEmpty(address user, uint256 geodeTokenId, bytes32 requestId, uint256 blockNumber);
@@ -21,9 +24,6 @@ contract ForgeVRFFacet is Modifiers {
     function forgeFacet() internal view returns (ForgeFacet facet) {
         facet = ForgeFacet(address(this));
     }
-
-    // Maximum number of geodes that can be opened in one call.
-    uint256 constant MAX_VRF = 15;
 
     function linkBalance() external view returns (uint256 linkBalance_) {
         linkBalance_ = s.link.balanceOf(address(this));
@@ -41,7 +41,7 @@ contract ForgeVRFFacet is Modifiers {
         return s.keyHash;
     }
 
-    function getMaxVrf() external view returns (uint256) {
+    function getMaxVrf() external pure returns (uint256) {
         return MAX_VRF;
     }
 
