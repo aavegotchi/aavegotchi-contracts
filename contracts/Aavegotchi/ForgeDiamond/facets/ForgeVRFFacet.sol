@@ -244,16 +244,4 @@ contract ForgeVRFFacet is Modifiers {
     function removeLinkTokens(address _to, uint256 _value) external onlyDaoOrOwner {
         s.link.transfer(_to, _value);
     }
-
-    function fixZeroGeodes(address user) external {
-        bytes32 requestId = s.vrfUserToRequestIds[user][s.vrfUserToRequestIds[user].length - 1];
-        VrfRequestInfo storage info = s.vrfRequestIdToVrfRequestInfo[requestId];
-
-        if (info.geodeTokenIds.length == 0) {
-            info.status = VrfStatus.CLAIMED;
-            s.userVrfPending[info.user] = false;
-        } else {
-            revert("ForgeVRFFacet: not 0 geodes");
-        }
-    }
 }
