@@ -248,6 +248,10 @@ async function main() {
     "PeripheryFacet",
     aavegotchiDiamond.address
   );
+  shopFacet = await ethers.getContractAt(
+    "ShopFacet",
+    aavegotchiDiamond.address
+  );
   svgFacet = await ethers.getContractAt("SvgFacet", aavegotchiDiamond.address);
 
   // add item managers
@@ -581,6 +585,12 @@ async function main() {
   });
   receipt = await tx.wait();
   console.log("Realm diamond set:" + strDisplay(receipt.gasUsed));
+  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+
+  let numberPerMint = 100;
+  tx = await shopFacet.mintPortals(ownerAddress, numberPerMint);
+  receipt = await tx.wait();
+  console.log("Mint portals:" + strDisplay(receipt.gasUsed));
   totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
   // TODO: allow revenue tokens?
