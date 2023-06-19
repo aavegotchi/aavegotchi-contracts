@@ -10,7 +10,6 @@ import {ForgeTokenFacet} from "./ForgeTokenFacet.sol";
 
 contract ForgeVRFFacet is Modifiers {
     // Maximum number of geodes that can be opened in one call.
-    uint256 public constant MAX_VRF = 15;
 
     event VrfResponse(address user, uint256 randomNumber, bytes32 requestId, uint256 blockNumber);
     event GeodeWin(address user, uint256 itemId, uint256 geodeTokenId, bytes32 requestId, uint256 blockNumber);
@@ -41,8 +40,8 @@ contract ForgeVRFFacet is Modifiers {
         return s.keyHash;
     }
 
-    function getMaxVrf() external pure returns (uint256) {
-        return MAX_VRF;
+    function getMaxVrf() public pure returns (uint256) {
+        return 15;
     }
 
     function areGeodePrizesAvailable() public view returns (bool) {
@@ -73,7 +72,7 @@ contract ForgeVRFFacet is Modifiers {
 
             require(_geodeTokenIds[i] >= GEODE_COMMON && _geodeTokenIds[i] <= GEODE_GODLIKE, "ForgeVRFFacet: Invalid geode token ID");
             require(forgeTokenFacet().balanceOf(sender, _geodeTokenIds[i]) >= _amountPerToken[i], "ForgeVRFFacet: not enough geodes owned");
-            require(total <= MAX_VRF, "ForgeVRFFacet: Exceeds max total geodes per call");
+            require(total <= getMaxVrf(), "ForgeVRFFacet: Exceeds max total geodes per call");
         }
 
         // spend geodes
@@ -112,30 +111,30 @@ contract ForgeVRFFacet is Modifiers {
     }
 
     // for testing purpose only
-    function tempFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) internal {
-        VrfRequestInfo storage info = s.vrfRequestIdToVrfRequestInfo[_requestId];
+    // function tempFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) internal {
+    //     VrfRequestInfo storage info = s.vrfRequestIdToVrfRequestInfo[_requestId];
 
-        require(s.userVrfPending[info.user], "ForgeVRFFacet: VRF is not pending for user");
-        require(info.status == VrfStatus.PENDING, "ForgeVRFFacet: VRF request is not pending");
+    //     require(s.userVrfPending[info.user], "ForgeVRFFacet: VRF is not pending for user");
+    //     require(info.status == VrfStatus.PENDING, "ForgeVRFFacet: VRF request is not pending");
 
-        info.randomNumber = _randomNumber;
-        info.status = VrfStatus.READY_TO_CLAIM;
+    //     info.randomNumber = _randomNumber;
+    //     info.status = VrfStatus.READY_TO_CLAIM;
 
-        emit VrfResponse(info.user, _randomNumber, _requestId, block.number);
-    }
+    //     emit VrfResponse(info.user, _randomNumber, _requestId, block.number);
+    // }
 
     /**
-     * @notice fulfillRandomness handles the VRF response. Your contract must
-     * @notice implement it.
-     *
-     * @dev The VRFCoordinator expects a calling contract to have a method with
-     * @dev this signature, and will trigger it once it has verified the proof
-     * @dev associated with the randomness (It is triggered via a call to
-     * @dev rawFulfillRandomness, below.)
-     *
-     * @param _requestId The Id initially returned by requestRandomness
-     * @param _randomNumber the VRF output
-//     */
+         * @notice fulfillRandomness handles the VRF response. Your contract must
+         * @notice implement it.
+         *
+         * @dev The VRFCoordinator expects a calling contract to have a method with
+         * @dev this signature, and will trigger it once it has verified the proof
+         * @dev associated with the randomness (It is triggered via a call to
+         * @dev rawFulfillRandomness, below.)
+         *
+         * @param _requestId The Id initially returned by requestRandomness
+         * @param _randomNumber the VRF output
+    //     */
     function rawFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) external {
         require(LibMeta.msgSender() == s.vrfCoordinator, "Only VRFCoordinator can fulfill");
 
