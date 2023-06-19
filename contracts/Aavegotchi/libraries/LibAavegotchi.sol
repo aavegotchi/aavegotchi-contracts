@@ -121,17 +121,15 @@ library LibAavegotchi {
         uint256 multiplier = rarityMultiplier(singlePortalAavegotchiTraits_.numericTraits);
 
         //First we get the base price of our collateral in terms of DAI
-        uint256 collateralDAIPrice = ((10**IERC20(collateralType).decimals()) / conversionRate);
+        uint256 collateralDAIPrice = ((10 ** IERC20(collateralType).decimals()) / conversionRate);
 
         //Then multiply by the rarity multiplier
         singlePortalAavegotchiTraits_.minimumStake = collateralDAIPrice * multiplier;
     }
 
-    function portalAavegotchiTraits(uint256 _tokenId)
-        internal
-        view
-        returns (PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory portalAavegotchiTraits_)
-    {
+    function portalAavegotchiTraits(
+        uint256 _tokenId
+    ) internal view returns (PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory portalAavegotchiTraits_) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
 
@@ -177,11 +175,9 @@ library LibAavegotchi {
     }
 
     //Only valid for claimed Aavegotchis
-    function modifiedTraitsAndRarityScore(uint256 _tokenId)
-        internal
-        view
-        returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_, uint256 rarityScore_)
-    {
+    function modifiedTraitsAndRarityScore(
+        uint256 _tokenId
+    ) internal view returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_, uint256 rarityScore_) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         require(s.aavegotchis[_tokenId].status == STATUS_AAVEGOTCHI, "AavegotchiFacet: Must be claimed");
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
@@ -236,7 +232,7 @@ library LibAavegotchi {
 
     function xpUntilNextLevel(uint256 _experience) internal pure returns (uint256 requiredXp_) {
         uint256 currentLevel = aavegotchiLevel(_experience);
-        requiredXp_ = ((currentLevel**2) * 50) - _experience;
+        requiredXp_ = ((currentLevel ** 2) * 50) - _experience;
     }
 
     function aavegotchiLevel(uint256 _experience) internal pure returns (uint256 level_) {
@@ -345,11 +341,7 @@ library LibAavegotchi {
 
     // function removeTokenFromUser(address _from, uint256 _tokenId) internal {}
 
-    function transfer(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) internal {
+    function transfer(address _from, address _to, uint256 _tokenId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
         // remove

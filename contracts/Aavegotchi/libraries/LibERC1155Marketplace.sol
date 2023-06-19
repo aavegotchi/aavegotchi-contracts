@@ -27,12 +27,7 @@ library LibERC1155Marketplace {
         removeERC1155ListingItem(_listingId, _owner);
     }
 
-    function addERC1155ListingItem(
-        address _owner,
-        uint256 _category,
-        string memory _sort,
-        uint256 _listingId
-    ) internal {
+    function addERC1155ListingItem(address _owner, uint256 _category, string memory _sort, uint256 _listingId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 headListingId = s.erc1155OwnerListingHead[_owner][_category][_sort];
         if (headListingId != 0) {
@@ -103,11 +98,7 @@ library LibERC1155Marketplace {
         emit ERC1155ListingRemoved(_listingId, listing.category, block.timestamp);
     }
 
-    function updateERC1155Listing(
-        address _erc1155TokenAddress,
-        uint256 _erc1155TypeId,
-        address _owner
-    ) internal {
+    function updateERC1155Listing(address _erc1155TokenAddress, uint256 _erc1155TypeId, address _owner) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         uint256 listingId = s.erc1155TokenToListingId[_erc1155TokenAddress][_erc1155TypeId][_owner];
         if (listingId == 0) {
@@ -128,5 +119,25 @@ library LibERC1155Marketplace {
         if (quantity == 0) {
             cancelERC1155Listing(listingId, listing.seller);
         }
+    }
+
+    function updateERC1155ListingPriceAndQuantity(uint256 _listingId, uint256 _quantity, uint256 _priceInWei) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        ERC1155Listing storage listing = s.erc1155Listings[_listingId];
+        require(listing.timeCreated != 0, "ERC1155Marketplace: listing not found");
+        require(listing.sold == false, "ERC1155Marketplace: listing is sold out");
+        require(listing.cancelled == false, "ERC1155Marketplace: listing already cancelled");
+        require(_quantity * _priceInWei >= 1e18, "ERC1155Marketplace: cost should be 1 GHST or larger");
+        require(listing.seller == msg.sender, "ERC1155Marketplace: Not seller of ERC1155 listing");
+        require(
+            IERC1155(listing.erc1155TokenAddress).balanceOf(listing.seller, listing.erc1155TypeId) >= _quantity,
+            "ERC1155Marketplace: Not enough ERC1155 token"
+        );
+
+        //comment out until subgraph is synced
+        // listing.priceInWei = _priceInWei;
+        // listing.quantity = _quantity;
+
+        emit UpdateERC1155Listing(_listingId, _quantity, _priceInWei, block.timestamp);
     }
 }

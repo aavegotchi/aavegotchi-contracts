@@ -128,6 +128,7 @@ struct ERC1155Listing {
     //new:
     uint16[2] principalSplit;
     address affiliate;
+    uint32 whitelistId;
 }
 
 struct ERC721Listing {
@@ -143,6 +144,7 @@ struct ERC721Listing {
     //new:
     uint16[2] principalSplit;
     address affiliate;
+    uint32 whitelistId;
 }
 
 struct ListingListItem {
@@ -191,6 +193,11 @@ struct Whitelist {
     address owner;
     string name;
     address[] addresses;
+}
+
+struct XPMerkleDrops {
+    bytes32 root;
+    uint256 xpAmount; //10-sigprop, 20-coreprop
 }
 
 struct AppStorage {
@@ -303,6 +310,9 @@ struct AppStorage {
     mapping(uint32 => mapping(address => EnumerableSet.UintSet)) whitelistGotchiBorrows; // whitelistId => borrower => gotchiId set
     address wearableDiamond;
     address forgeDiamond;
+    //XP Drops
+    mapping(bytes32 => XPMerkleDrops) xpDrops;
+    mapping(uint256 => mapping(bytes32 => uint256)) xpClaimed;
 }
 
 library LibAppStorage {

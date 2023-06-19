@@ -473,11 +473,7 @@ library LibGotchiLending {
         return _period > 0 && _period <= 2_592_000; //No reason to have a period longer than 30 days
     }
 
-    function checkRevenueParams(
-        uint8[3] memory _revenueSplit,
-        address[] memory _revenueTokens,
-        address _thirdParty
-    ) internal view returns (bool) {
+    function checkRevenueParams(uint8[3] memory _revenueSplit, address[] memory _revenueTokens, address _thirdParty) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
         require(_revenueSplit[0] + _revenueSplit[1] + _revenueSplit[2] == 100, "LibGotchiLending: Sum of revenue splits not 100");
         for (uint256 i = 0; i < _revenueTokens.length; ) {
@@ -494,11 +490,7 @@ library LibGotchiLending {
         return true;
     }
 
-    function addLendingListItem(
-        address _lender,
-        uint32 _listingId,
-        bytes32 _status
-    ) internal {
+    function addLendingListItem(address _lender, uint32 _listingId, bytes32 _status) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
         uint32 headListingId = s.aavegotchiLenderLendingHead[_lender][_status];
@@ -522,11 +514,7 @@ library LibGotchiLending {
         lendingItem.listingId = _listingId;
     }
 
-    function removeLendingListItem(
-        address _lender,
-        uint32 _listingId,
-        bytes32 _status
-    ) internal {
+    function removeLendingListItem(address _lender, uint32 _listingId, bytes32 _status) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
         LendingListItem storage lendingItem = s.gotchiLendingListItem[_status][_listingId];
