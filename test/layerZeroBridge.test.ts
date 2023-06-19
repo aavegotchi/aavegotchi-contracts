@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { AavegotchiFacet, BridgeGotchichainSide, BridgePolygonSide, DAOFacet, ERC20MintableBurnable, ItemsFacet, PolygonXGotchichainBridgeFacet, ShopFacet, SvgFacet } from "../typechain";
+import { AavegotchiFacet, BridgeGotchichainSide, BridgePolygonSide, DAOFacet, ERC20MintableBurnable, ItemsFacet, PolygonXGotchichainBridgeFacet, ShopFacet, SvgFacet, AavegotchiGameFacet, VrfFacet } from "../typechain";
 import { getAllItemTypes, SleeveObject } from "../scripts/itemTypeHelpers";
 import { itemTypes as allItemTypes } from "../data/itemTypes/itemTypes";
 import { wearableSets } from "../scripts/wearableSets";
@@ -26,13 +26,15 @@ describe("Bridge ERC721: ", function () {
   let itemsFacetPolygonSide: ItemsFacet, itemsFacetGotchichainSide: ItemsFacet
   let ghstTokenPolygonSide: ERC20MintableBurnable, ghstTokenGotchichainSide: ERC20MintableBurnable
   let bridgeFacetPolygonSide: PolygonXGotchichainBridgeFacet, bridgeFacetGotchichainSide: PolygonXGotchichainBridgeFacet
+  let aavegotchiGameFacetPolygonSide: AavegotchiGameFacet, aavegotchiGameFacetGotchichainSide: AavegotchiGameFacet
+  let vrfFacetPolygonSide: VrfFacet, vrfFacetGotchichainSide: VrfFacet
 
   beforeEach(async function () {
     owner = (await ethers.getSigners())[0];
     alice = (await ethers.getSigners())[1];
 
-    ; ({ shopFacet: shopFacetPolygonSide, aavegotchiFacet: aavegotchiFacetPolygonSide, polygonXGotchichainBridgeFacet: bridgeFacetPolygonSide, itemsFacet: itemsFacetPolygonSide, ghstToken: ghstTokenPolygonSide } = await deployAavegotchiContracts(owner.address))
-    ; ({ shopFacet: shopFacetGotchichainSide, aavegotchiFacet: aavegotchiFacetGotchichainSide, polygonXGotchichainBridgeFacet: bridgeFacetGotchichainSide, itemsFacet: itemsFacetGotchichainSide, ghstToken: ghstTokenGotchichainSide } = await deployAavegotchiContracts(owner.address))
+    ; ({ shopFacet: shopFacetPolygonSide, aavegotchiFacet: aavegotchiFacetPolygonSide, polygonXGotchichainBridgeFacet: bridgeFacetPolygonSide, itemsFacet: itemsFacetPolygonSide, ghstToken: ghstTokenPolygonSide, aavegotchiGameFacet: aavegotchiGameFacetPolygonSide, vrfFacet: vrfFacetPolygonSide } = await deployAavegotchiContracts(owner.address))
+    ; ({ shopFacet: shopFacetGotchichainSide, aavegotchiFacet: aavegotchiFacetGotchichainSide, polygonXGotchichainBridgeFacet: bridgeFacetGotchichainSide, itemsFacet: itemsFacetGotchichainSide, ghstToken: ghstTokenGotchichainSide, aavegotchiGameFacet: aavegotchiGameFacetGotchichainSide, vrfFacet: vrfFacetGotchichainSide } = await deployAavegotchiContracts(owner.address))
 
     LZEndpointMock = await ethers.getContractFactory(LZEndpointMockCompiled.abi, LZEndpointMockCompiled.bytecode)
     const BridgePolygonSide = await ethers.getContractFactory("BridgePolygonSide");
@@ -69,6 +71,7 @@ describe("Bridge ERC721: ", function () {
 
   it("sendFrom() - send NFT from Polygon to Gotchichain - without equipped item", async function () {
     const tokenId = await mintPortals(owner.address)
+    // await claimPortal(tokenId)
 
     //Estimate nativeFees
     let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, defaultAdapterParams)).nativeFee
@@ -238,7 +241,7 @@ describe("Bridge ERC721: ", function () {
     console.log({ aavegotchiData })
   })
 
-  it.only("sendFrom() - send NFT from Polygon to Gotchichain and back to Polygon - equipping item on gotchichain", async function () {
+  it("sendFrom() - send NFT from Polygon to Gotchichain and back to Polygon - equipping item on gotchichain", async function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
     //Estimate nativeFees
@@ -300,6 +303,72 @@ describe("Bridge ERC721: ", function () {
     expect(await itemsFacetPolygonSide.equippedWearables(tokenId)).to.eql([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
   })
 
+  it.only("sendFrom() - send equipped NFT from Polygon to Gotchichain - equipping and unequipping on Gotchichain - send back to Polygon", async function () {
+    const tokenId = await mintPortalsWithItems(owner.address)
+
+    // Estimate nativeFees
+    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, defaultAdapterParams)).nativeFee
+
+    // Swapping token to gotchichain
+    await aavegotchiFacetPolygonSide.approve(bridgePolygonSide.address, tokenId)
+    let sendFromTx = await bridgePolygonSide.sendFrom(
+      owner.address,
+      chainId_B,
+      owner.address,
+      tokenId,
+      owner.address,
+      ethers.constants.AddressZero,
+      defaultAdapterParams,
+      { value: nativeFee }
+    )
+    await sendFromTx.wait()
+
+    // Checking Aavegotchi ownership in both chains
+    expect(await aavegotchiFacetPolygonSide.ownerOf(tokenId)).to.equal(bridgePolygonSide.address)
+    expect(await aavegotchiFacetGotchichainSide.ownerOf(tokenId)).to.be.equal(owner.address)
+
+    // Checking equipped items and balance before purchase items
+    expect(await itemsFacetGotchichainSide.equippedWearables(tokenId)).to.eql([0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    expect((await itemsFacetGotchichainSide.itemBalances(owner.address)).length).to.be.equal(0)
+
+    // Purchasing item 2 on gotchichain
+    await purchaseItems(ghstTokenGotchichainSide, shopFacetGotchichainSide, [2], [1])
+    
+    // Checking equipped items and balance after purchase items but before changing them
+    expect(await itemsFacetGotchichainSide.equippedWearables(tokenId)).to.eql([0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    expect((await itemsFacetGotchichainSide.itemBalances(owner.address)).length).to.be.equal(1)
+
+    // Equipping item 2 on slot 0 and removing item 1 from slot 3 on gotchichain
+    const tx = await itemsFacetGotchichainSide.equipWearables(tokenId, [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    tx.wait()
+
+    // Checking equipped items after changing items
+    expect(await itemsFacetGotchichainSide.equippedWearables(tokenId)).to.eql([2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    expect((await itemsFacetGotchichainSide.itemBalances(owner.address)).length).to.be.equal(1) // item 1 from slot 3 were unequipped and sent to owner
+
+    // Swapping token back to Polygon
+    await aavegotchiFacetGotchichainSide.approve(bridgeGotchichainSide.address, tokenId)
+    sendFromTx = await bridgeGotchichainSide.sendFrom(
+      owner.address,
+      chainId_A,
+      owner.address,
+      tokenId,
+      owner.address,
+      ethers.constants.AddressZero,
+      defaultAdapterParams,
+      { value: (await bridgeGotchichainSide.estimateSendFee(chainId_A, owner.address, tokenId, false, defaultAdapterParams)).nativeFee }
+    )
+    await sendFromTx.wait()
+
+    // Checking Aavegotchi ownership in both chains
+    expect(await aavegotchiFacetGotchichainSide.ownerOf(tokenId)).to.equal(bridgeGotchichainSide.address)
+    expect(await aavegotchiFacetPolygonSide.ownerOf(tokenId)).to.be.equal(owner.address)
+
+    // Checking equipped items
+    expect(await itemsFacetPolygonSide.equippedWearables(tokenId)).to.eql([2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    expect((await itemsFacetPolygonSide.itemBalances(owner.address)).length).to.be.equal(0) // item 1 from slot 3 were unequipped and sent to owner
+  })
+
   async function mintPortals(to: string) {
     let tx = await shopFacetPolygonSide.mintPortals(to, 1)
     let receipt: any = await tx.wait()
@@ -310,38 +379,46 @@ describe("Bridge ERC721: ", function () {
   async function mintPortalsWithItems(to: string) {
     const tokenId = await mintPortals(to)
 
-    let tx = await ghstTokenPolygonSide.mint(owner.address, ethers.utils.parseEther('100000000000000000000000'))
-    await tx.wait()
+    await purchaseItems(ghstTokenPolygonSide, shopFacetPolygonSide, [1], [1])
 
-    tx = await ghstTokenPolygonSide.approve(shopFacetPolygonSide.address, ethers.utils.parseEther('100000000000000000000000'))
-
-    tx = await shopFacetPolygonSide.purchaseItemsWithGhst(owner.address, [1], [1])
-    await tx.wait()
-
-    tx = await itemsFacetPolygonSide.equipWearables(tokenId, [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    const tx = await itemsFacetPolygonSide.equipWearables(tokenId, [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     await tx.wait()
 
     return tokenId
   }
 
-  async function equipItemOnGotchichain(tokenId: string) {
+  async function claimPortal(tokenId: string) {
+    await vrfFacetPolygonSide.openPortals([tokenId])
 
+    const ghosts = await aavegotchiGameFacetPolygonSide.portalAavegotchiTraits(tokenId)
+    const selectedGhost = ghosts[0]
+    const minStake = selectedGhost.minimumStake
+
+    let tx = await aavegotchiGameFacetPolygonSide.claimAavegotchi(tokenId, 0, minStake)
+    await tx.wait()
+  }
+
+  async function equipItemOnGotchichain(tokenId: string) {
     // console.log('Item 2')
     // console.log(await itemsFacetGotchichainSide.getItemType(2))
 
-    let tx = await ghstTokenGotchichainSide.mint(owner.address, ethers.utils.parseEther('100000000000000000000000'))
+    await purchaseItems(ghstTokenGotchichainSide, shopFacetGotchichainSide, [2], [1])
+    
+    const tx = await itemsFacetGotchichainSide.equipWearables(tokenId, [2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    await tx.wait()
+  }
+
+  async function purchaseItems(ghstToken: ERC20MintableBurnable, shopFacet: ShopFacet, itemIds: number[], quantities: number[]) {
+    let tx = await ghstToken.mint(owner.address, ethers.utils.parseEther('100000000000000000000000'))
     await tx.wait()
     
-    tx = await ghstTokenGotchichainSide.approve(shopFacetGotchichainSide.address, ethers.utils.parseEther('100000000000000000000000'))
-    
-    tx = await shopFacetGotchichainSide.purchaseItemsWithGhst(owner.address, [2], [1])
+    tx = await ghstToken.approve(shopFacet.address, ethers.utils.parseEther('100000000000000000000000'))
     await tx.wait()
-    
-    tx = await itemsFacetGotchichainSide.equipWearables(tokenId, [2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+    tx = await shopFacet.purchaseItemsWithGhst(owner.address, itemIds, quantities)
     await tx.wait()
   }
 })
-
 
 async function deployAavegotchiContracts(ownerAddress: string) {
   const name = "Aavegotchi";
@@ -543,6 +620,8 @@ async function deployAavegotchiContracts(ownerAddress: string) {
     aavegotchiDiamond.address
   );
   svgFacet = await ethers.getContractAt("SvgFacet", aavegotchiDiamond.address);
+  aavegotchiGameFacet = await ethers.getContractAt("AavegotchiGameFacet", aavegotchiDiamond.address);
+  vrfFacet = await ethers.getContractAt("VrfFacet", aavegotchiDiamond.address);
 
 
   // add item managers
@@ -723,6 +802,8 @@ async function deployAavegotchiContracts(ownerAddress: string) {
     aavegotchiFacet,
     polygonXGotchichainBridgeFacet,
     itemsFacet,
+    aavegotchiGameFacet,
+    vrfFacet,
     ghstToken: ghstTokenContract,
   }
 }
