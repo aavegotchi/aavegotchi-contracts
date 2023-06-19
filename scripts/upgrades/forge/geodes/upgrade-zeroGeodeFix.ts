@@ -16,7 +16,9 @@ export async function releaseZeroGeodesFix() {
     {
       facetName:
         "contracts/Aavegotchi/ForgeDiamond/facets/ForgeVRFFacet.sol:ForgeVRFFacet",
-      addSelectors: ["function fixZeroGeodes(address user) external"],
+      addSelectors: [
+        // "function fixZeroGeodes(address user) external"
+      ],
       removeSelectors: [],
     },
   ];

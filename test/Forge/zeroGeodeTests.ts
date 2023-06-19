@@ -26,12 +26,9 @@ describe("Testing Geodes", async function () {
 
   describe("tests", async function () {
     it("should test zero geode fix", async function () {
-      await expect(
-        forgeVrfFacet.fixZeroGeodes(
-          "0x2b29518e5ac3eda4CfC138FacD6f023bffc5d65a"
-        )
-      ).to.be.ok;
-      await expect(forgeVrfFacet.fixZeroGeodes(testUser)).to.be.reverted;
+      await expect(forgeVrfFacet.openGeodes([], [])).to.be.revertedWith(
+        "ForgeVRFFacet: Cannot open 0 geodes"
+      );
     });
   });
 });
