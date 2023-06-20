@@ -43,7 +43,7 @@ function strDisplay(str) {
   return addCommas(str.toString());
 }
 
-async function main() {
+export default async function main() {
   let ghstDiamondAddress = ethers.constants.AddressZero;
   const ghstStakingDiamondAddress = ethers.constants.AddressZero; //todo
   const realmDiamondAddress = ethers.constants.AddressZero; //todo
@@ -129,6 +129,7 @@ async function main() {
   }
   let [
     bridgeFacet,
+    polygonXGotchichainBridgeFacet,
     aavegotchiFacet,
     aavegotchiGameFacet,
     svgFacet,
@@ -152,6 +153,7 @@ async function main() {
     merkleDropFacet,
   ] = await deployFacets(
     "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
+    "contracts/Aavegotchi/facets/PolygonXGotchichainBridgeFacet.sol:PolygonXGotchichainBridgeFacet",
     "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
     "AavegotchiGameFacet",
     "SvgFacet",
@@ -181,6 +183,7 @@ async function main() {
     initDiamond: "contracts/Aavegotchi/InitDiamond.sol:InitDiamond",
     facets: [
       ["BridgeFacet", bridgeFacet],
+      ["PolygonXGotchichainBridgeFacet", polygonXGotchichainBridgeFacet],
       ["AavegotchiFacet", aavegotchiFacet],
       ["AavegotchiGameFacet", aavegotchiGameFacet],
       ["SvgFacet", svgFacet],
@@ -256,6 +259,10 @@ async function main() {
     "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
     aavegotchiDiamond.address
   );
+  polygonXGotchichainBridgeFacet = await ethers.getContractAt(
+    "PolygonXGotchichainBridgeFacet",
+    aavegotchiDiamond.address
+  );
   aavegotchiGameFacet = await ethers.getContractAt("AavegotchiGameFacet", aavegotchiDiamond.address);
   vrfFacet = await ethers.getContractAt("VrfFacet", aavegotchiDiamond.address);
   svgFacet = await ethers.getContractAt("SvgFacet", aavegotchiDiamond.address);
@@ -317,6 +324,7 @@ async function main() {
   let step = 20;
   let sliceStep = itemTypes.length / step;
   for (let i = 0; i < step; i++) {
+
     tx = await daoFacet.addItemTypes(
       itemTypes.slice(sliceStep * i, sliceStep * (i + 1)),
       { gasLimit: gasLimit }
@@ -593,7 +601,7 @@ async function main() {
   console.log("Realm diamond set:" + strDisplay(receipt.gasUsed));
   totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
-  let numberPerMint = 5;
+  let numberPerMint = 1;
   tx = await shopFacet.mintPortals(ownerAddress, numberPerMint);
   receipt = await tx.wait();
   console.log("Mint portals:" + strDisplay(receipt.gasUsed));
@@ -615,8 +623,35 @@ async function main() {
   for (let i = 0; i < numberPerMint; i++) {
     await aavegotchiGameFacet.claimAavegotchi(i, 0, ethers.utils.parseEther("10000"));
     const gotchi = await aavegotchiFacet.getAavegotchi(i);
-    console.log(`Aavegotchi ID: ${i} status is claimed (${gotchi.status == 3}) `);
+    console.log(`Aavegotchi ID: ${i} status is claimed (${gotchi.status == 3})`);
+    console.log('aavegotchi owner', gotchi.owner)
   }
+
+  for (let i = 1; i < 200; i++) {
+    try {
+      tx = await ghstTokenContract.mint(ownerAddress, ethers.utils.parseEther('100000000000000000000000'))
+      await tx.wait()
+
+      tx = await ghstTokenContract.approve(shopFacet.address, ethers.utils.parseEther('100000000000000000000000'))
+      await tx.wait()
+
+      tx = await shopFacet.purchaseItemsWithGhst(ownerAddress, [i], [1])
+      await tx.wait()
+      console.log(`purchased item with id ${i}`)
+
+    } catch (e) {
+    }
+  }
+
+  console.log('itemBalancesWithTypes')
+  console.log(await itemsFacet.itemBalancesWithTypes(ownerAddress))
+
+
+  console.log('Equipping wearables')
+  tx = await itemsFacet.equipWearables(0, [0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+  await tx.wait()
+
+
 
   // TODO: allow revenue tokens?
 
@@ -634,6 +669,16 @@ async function main() {
   // // }
 
   console.log("Total gas used: " + strDisplay(totalGasUsed));
+
+  return {
+    shopFacet,
+    aavegotchiFacet,
+    polygonXGotchichainBridgeFacet,
+    itemsFacet,
+    aavegotchiGameFacet,
+    vrfFacet,
+    ghstToken: ghstTokenContract,
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere
