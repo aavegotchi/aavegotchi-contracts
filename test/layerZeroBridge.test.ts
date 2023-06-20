@@ -11,6 +11,8 @@ import { deployAndUpgradeWearableDiamond } from "../scripts/upgrades/upgrade-dep
 import { deployAndUpgradeForgeDiamond } from "../scripts/upgrades/forge/upgrade-deployAndUpgradeForgeDiamond";
 import { setForgeProperties } from "../scripts/upgrades/forge/upgrade-forgeSetters";
 
+import deploySupernets from "../scripts/deploy-supernet";
+
 describe("Bridge ERC721: ", function () {
   const chainId_A = 1
   const chainId_B = 2
@@ -141,13 +143,14 @@ describe("Bridge ERC721: ", function () {
     expect(await aavegotchiFacetPolygonSide.ownerOf(tokenId)).to.be.equal(owner.address)
   })
 
-  it("sendFrom() - send NFT from Polygon to Gotchichain - with equipped item", async function () {
+  it.only("sendFrom() - send NFT from Polygon to Gotchichain - with equipped item", async function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
     //Estimate nativeFees
     let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, defaultAdapterParams)).nativeFee
 
     //Swaping token to Gotchichain
+    console.log('Swaping token to Gotchichain')
     await aavegotchiFacetPolygonSide.approve(bridgePolygonSide.address, tokenId)
     let sendFromTx = await bridgePolygonSide.sendFrom(
       owner.address,
@@ -172,7 +175,7 @@ describe("Bridge ERC721: ", function () {
     await itemsFacetGotchichainSide.equipWearables(tokenId, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
     //Checking items balance after unequipping them
-    expect((await itemsFacetGotchichainSide.itemBalancesWithTypes(owner.address))[0].itemId).to.be.equal(ethers.BigNumber.from(1))
+    expect((await itemsFacetGotchichainSide.itemBalancesWithTypes(owner.address))[0].itemId).to.be.equal(ethers.BigNumber.from(80))
     expect((await itemsFacetGotchichainSide.itemBalancesWithTypes(owner.address))[0].balance).to.be.equal(ethers.BigNumber.from(1))
 
     //Checking equipped items
@@ -303,7 +306,7 @@ describe("Bridge ERC721: ", function () {
     expect(await itemsFacetPolygonSide.equippedWearables(tokenId)).to.eql([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
   })
 
-  it.only("sendFrom() - send equipped NFT from Polygon to Gotchichain - equipping and unequipping on Gotchichain - send back to Polygon", async function () {
+  it("sendFrom() - send equipped NFT from Polygon to Gotchichain - equipping and unequipping on Gotchichain - send back to Polygon", async function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
     // Estimate nativeFees
@@ -373,35 +376,26 @@ describe("Bridge ERC721: ", function () {
     let tx = await shopFacetPolygonSide.mintPortals(to, 1)
     let receipt: any = await tx.wait()
 
-    return receipt.events[0].args._tokenId.toString()
+    const tokenId = receipt.events[0].args._tokenId.toString()
+
+    // await vrfFacetPolygonSide.openPortals([tokenId]);
+    // await aavegotchiGameFacetPolygonSide.claimAavegotchi(tokenId, 0, ethers.utils.parseEther("10000"));
+
+    return tokenId
   }
   
   async function mintPortalsWithItems(to: string) {
     const tokenId = await mintPortals(to)
 
-    await purchaseItems(ghstTokenPolygonSide, shopFacetPolygonSide, [1], [1])
+    await purchaseItems(ghstTokenPolygonSide, shopFacetPolygonSide, [80], [1])
 
-    const tx = await itemsFacetPolygonSide.equipWearables(tokenId, [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    const tx = await itemsFacetPolygonSide.equipWearables(tokenId, [0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     await tx.wait()
 
     return tokenId
   }
 
-  async function claimPortal(tokenId: string) {
-    await vrfFacetPolygonSide.openPortals([tokenId])
-
-    const ghosts = await aavegotchiGameFacetPolygonSide.portalAavegotchiTraits(tokenId)
-    const selectedGhost = ghosts[0]
-    const minStake = selectedGhost.minimumStake
-
-    let tx = await aavegotchiGameFacetPolygonSide.claimAavegotchi(tokenId, 0, minStake)
-    await tx.wait()
-  }
-
   async function equipItemOnGotchichain(tokenId: string) {
-    // console.log('Item 2')
-    // console.log(await itemsFacetGotchichainSide.getItemType(2))
-
     await purchaseItems(ghstTokenGotchichainSide, shopFacetGotchichainSide, [2], [1])
     
     const tx = await itemsFacetGotchichainSide.equipWearables(tokenId, [2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
