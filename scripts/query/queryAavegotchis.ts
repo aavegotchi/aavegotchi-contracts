@@ -24,12 +24,16 @@ interface Gotchi {
 interface UsersWithGotchisRes {
   users: {
     id: string;
-    gotchisLentOut: string[];
     batch1: Gotchi[];
     batch2: Gotchi[];
     batch3: Gotchi[];
     batch4: Gotchi[];
     batch5: Gotchi[];
+    batch1owned: Gotchi[];
+    batch2owned: Gotchi[];
+    batch3owned: Gotchi[];
+    batch4owned: Gotchi[];
+    batch5owned: Gotchi[];
   }[];
 }
 
@@ -42,7 +46,7 @@ export function getUsersWithGotchisOfAddresses(
   let query = `
     {users(skip: ${index} first: 1000 block:{number:${blockNumber}} where: {id_in: [${addressesString}]}) {
       id
-      gotchisLentOut
+      
       batch1: gotchisOriginalOwned(first: 1000 block:{number:${blockNumber}} ) {
         id
       }
@@ -56,6 +60,21 @@ export function getUsersWithGotchisOfAddresses(
         id
       }
       batch5: gotchisOriginalOwned(first: 1000 block:{number:${blockNumber}} skip: 4000) {
+        id
+      }
+      batch1owned: gotchisOwned(first: 1000 block:{number:${blockNumber}}) {
+        id
+      }
+      batch2owned: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 1000) {
+        id
+      }
+      batch3owned: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 2000) {
+        id
+      }
+      batch4owned: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 3000) {
+        id
+      }
+      batch5owned: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 4000) {
         id
       }
     }}
@@ -434,7 +453,6 @@ export async function getPolygonAndMainnetGotchis(
     index += 1000;
     prevLength = gotchiIds.length;
     result.users.forEach((e) => {
-      gotchiIds = gotchiIds.concat(e.gotchisLentOut);
       let gotchisOwned = e.batch1.map((f: GotchiId) => f.id);
       gotchisOwned = gotchisOwned.concat(e.batch2.map((f: GotchiId) => f.id));
       gotchisOwned = gotchisOwned.concat(e.batch3.map((f: GotchiId) => f.id));

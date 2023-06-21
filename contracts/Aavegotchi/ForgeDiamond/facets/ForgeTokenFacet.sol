@@ -114,21 +114,15 @@ contract ForgeTokenFacet is Modifiers {
         uint256 amount,
         bytes memory data
     ) public {
-        require(from == LibMeta.msgSender() || isApprovedForAll(from, LibMeta.msgSender()), "ForgeTokenFacet: caller is not token owner or approved");
+        require(from == msg.sender || isApprovedForAll(from, msg.sender), "ForgeTokenFacet: caller is not token owner or approved");
         _safeTransferFrom(from, to, id, amount, data);
     }
 
     /**
      * @dev See {IERC1155-safeBatchTransferFrom}.
      */
-    function safeBatchTransferFrom(
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) public {
-        require(from == LibMeta.msgSender() || isApprovedForAll(from, LibMeta.msgSender()), "ForgeTokenFacet: caller is not token owner or approved");
+    function safeBatchTransferFrom(address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) public {
+        require(from == msg.sender || isApprovedForAll(from, msg.sender), "ForgeTokenFacet: caller is not token owner or approved");
         _safeBatchTransferFrom(from, to, ids, amounts, data);
     }
 
