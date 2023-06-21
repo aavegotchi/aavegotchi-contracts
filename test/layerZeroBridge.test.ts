@@ -23,7 +23,8 @@ describe("Bridge ERC721: ", function () {
   const chainId_B = 2
   const minGasToStore = 100000
   const batchSizeLimit = 1
-  const defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, "50000000000000000"])
+  let polygonAdapterParams: any
+  let gotchichainAdapterParams: any
 
   let LZEndpointMock: any, bridgePolygonSide: BridgePolygonSide, bridgeGotchichainSide: BridgeGotchichainSide
   let owner: SignerWithAddress, alice: SignerWithAddress
@@ -68,12 +69,19 @@ describe("Bridge ERC721: ", function () {
     await bridgeGotchichainSide.setDstChainIdToBatchLimit(chainId_A, batchSizeLimit)
     
     //Set min dst gas for swap
-    await bridgePolygonSide.setMinDstGas(chainId_B, 1, 350000)
-    await bridgeGotchichainSide.setMinDstGas(chainId_A, 1, 350000)
+    await bridgePolygonSide.setMinDstGas(chainId_B, 1, 150000)
+    await bridgeGotchichainSide.setMinDstGas(chainId_A, 1, 150000)
+
+    await bridgePolygonSide.setDstChainIdToTransferGas(chainId_B, 50000)
+    await bridgeGotchichainSide.setDstChainIdToTransferGas(chainId_A, 50000)
     
     //Set layer zero bridge on facet
     await bridgeFacetPolygonSide.setLayerZeroBridge(bridgePolygonSide.address)
     await bridgeFacetGotchichainSide.setLayerZeroBridge(bridgeGotchichainSide.address)
+
+    let minGasToTransferAndStore = await bridgePolygonSide.minDstGasLookup(chainId_B, 1)
+    let transferGasPerToken = await bridgePolygonSide.dstChainIdToTransferGas(chainId_B)
+    polygonAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, minGasToTransferAndStore.add(transferGasPerToken.mul(1))])
   })
 
   it("sendFrom() - send NFT from Polygon to Gotchichain - without equipped item", async function () {
@@ -151,7 +159,7 @@ describe("Bridge ERC721: ", function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
     //Estimate nativeFees
-    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, defaultAdapterParams)).nativeFee
+    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, polygonAdapterParams)).nativeFee
     console.log('nativeFee', nativeFee.toString())
 
     //Swaping token to Gotchichain
@@ -164,7 +172,7 @@ describe("Bridge ERC721: ", function () {
       tokenId,
       owner.address,
       ethers.constants.AddressZero,
-      defaultAdapterParams,
+      polygonAdapterParams,
       { value: nativeFee }
     )
     await sendFromTx.wait()
