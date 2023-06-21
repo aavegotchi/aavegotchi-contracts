@@ -72,7 +72,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
         require(ghstBalance >= _priceInWei, "ERC721BuyOrder: Not enough GHST!");
 
-        uint256 category = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
+        uint256 category = LibSharedMarketplace.getERC721Category(_erc721TokenAddress, _erc721TokenId);
         require(category != LibAavegotchi.STATUS_VRF_PENDING, "ERC721BuyOrder: Cannot buy a portal that is pending VRF");
         require(sender != s.aavegotchis[_erc721TokenId].owner, "ERC721BuyOrder: Owner can't be buyer");
         if (category == LibAavegotchi.STATUS_AAVEGOTCHI) {
@@ -157,7 +157,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         }
 
         // disable for gotchi in lending
-        uint256 category = LibAavegotchi.getERC721Category(erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId);
+        uint256 category = LibSharedMarketplace.getERC721Category(erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId);
         if (category == LibAavegotchi.STATUS_AAVEGOTCHI) {
             require(
                 !LibGotchiLending.isAavegotchiLent(uint32(erc721BuyOrder.erc721TokenId)),
