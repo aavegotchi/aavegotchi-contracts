@@ -13,6 +13,11 @@ import { setForgeProperties } from "../scripts/upgrades/forge/upgrade-forgeSette
 
 import deploySupernets from "../scripts/deploy-supernet";
 
+//770011019756000000000
+//770000011019756000000000
+
+//87964
+
 describe("Bridge ERC721: ", function () {
   const chainId_A = 1
   const chainId_B = 2
@@ -63,8 +68,8 @@ describe("Bridge ERC721: ", function () {
     await bridgeGotchichainSide.setDstChainIdToBatchLimit(chainId_A, batchSizeLimit)
     
     //Set min dst gas for swap
-    await bridgePolygonSide.setMinDstGas(chainId_B, 1, 550000)
-    await bridgeGotchichainSide.setMinDstGas(chainId_A, 1, 550000)
+    await bridgePolygonSide.setMinDstGas(chainId_B, 1, 350000)
+    await bridgeGotchichainSide.setMinDstGas(chainId_A, 1, 350000)
     
     //Set layer zero bridge on facet
     await bridgeFacetPolygonSide.setLayerZeroBridge(bridgePolygonSide.address)
@@ -163,37 +168,27 @@ describe("Bridge ERC721: ", function () {
       { value: nativeFee }
     )
     await sendFromTx.wait()
-
-    console.log('É dps?')
     
     //Checking Aavegotchi ownership in both chains
     expect(await aavegotchiFacetPolygonSide.ownerOf(tokenId)).to.equal(bridgePolygonSide.address)
-    console.log('Nem tão dps assim?')
     const aavegotchiDatax = await bridgeFacetGotchichainSide.getAavegotchiData(tokenId)
-    console.log('agora sim')
     console.log({ aavegotchiDatax })
     expect(await aavegotchiFacetGotchichainSide.ownerOf(tokenId)).to.be.equal(owner.address)
     
-    console.log('É bem dps?')
     //Checking items balance before unequipping them
     expect((await itemsFacetGotchichainSide.itemBalances(owner.address)).length).to.be.equal(0)
     
-    console.log('É muito dps?')
     //Unequipping items
     await itemsFacetGotchichainSide.equipWearables(tokenId, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     
-    console.log('É extremamente dps?')
     //Checking items balance after unequipping them
     expect((await itemsFacetGotchichainSide.itemBalancesWithTypes(owner.address))[0].itemId).to.be.equal(ethers.BigNumber.from(80))
     expect((await itemsFacetGotchichainSide.itemBalancesWithTypes(owner.address))[0].balance).to.be.equal(ethers.BigNumber.from(1))
-    console.log('tudo isso?')
     
     //Checking equipped items
     expect(await itemsFacetGotchichainSide.equippedWearables(tokenId)).to.eql([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-    console.log('nada ainda?')
     
     const aavegotchiData = await bridgeFacetGotchichainSide.getAavegotchiData(tokenId)
-    console.log('agora sim')
     console.log({ aavegotchiData })
   })
 
