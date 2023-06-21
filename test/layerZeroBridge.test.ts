@@ -18,7 +18,7 @@ describe("Bridge ERC721: ", function () {
   const chainId_B = 2
   const minGasToStore = 100000
   const batchSizeLimit = 1
-  const defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, "350000"])
+  const defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, "50000000000000000"])
 
   let LZEndpointMock: any, bridgePolygonSide: BridgePolygonSide, bridgeGotchichainSide: BridgeGotchichainSide
   let owner: SignerWithAddress, alice: SignerWithAddress
@@ -63,8 +63,8 @@ describe("Bridge ERC721: ", function () {
     await bridgeGotchichainSide.setDstChainIdToBatchLimit(chainId_A, batchSizeLimit)
     
     //Set min dst gas for swap
-    await bridgePolygonSide.setMinDstGas(chainId_B, 1, 150000)
-    await bridgeGotchichainSide.setMinDstGas(chainId_A, 1, 150000)
+    await bridgePolygonSide.setMinDstGas(chainId_B, 1, 550000)
+    await bridgeGotchichainSide.setMinDstGas(chainId_A, 1, 550000)
     
     //Set layer zero bridge on facet
     await bridgeFacetPolygonSide.setLayerZeroBridge(bridgePolygonSide.address)
@@ -73,7 +73,6 @@ describe("Bridge ERC721: ", function () {
 
   it("sendFrom() - send NFT from Polygon to Gotchichain - without equipped item", async function () {
     const tokenId = await mintPortals(owner.address)
-    // await claimPortal(tokenId)
 
     //Estimate nativeFees
     let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, defaultAdapterParams)).nativeFee
@@ -148,6 +147,7 @@ describe("Bridge ERC721: ", function () {
 
     //Estimate nativeFees
     let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, defaultAdapterParams)).nativeFee
+    console.log('nativeFee', nativeFee.toString())
 
     //Swaping token to Gotchichain
     console.log('Swaping token to Gotchichain')
@@ -164,24 +164,36 @@ describe("Bridge ERC721: ", function () {
     )
     await sendFromTx.wait()
 
+    console.log('É dps?')
+    
     //Checking Aavegotchi ownership in both chains
     expect(await aavegotchiFacetPolygonSide.ownerOf(tokenId)).to.equal(bridgePolygonSide.address)
+    console.log('Nem tão dps assim?')
+    const aavegotchiDatax = await bridgeFacetGotchichainSide.getAavegotchiData(tokenId)
+    console.log('agora sim')
+    console.log({ aavegotchiDatax })
     expect(await aavegotchiFacetGotchichainSide.ownerOf(tokenId)).to.be.equal(owner.address)
-
+    
+    console.log('É bem dps?')
     //Checking items balance before unequipping them
     expect((await itemsFacetGotchichainSide.itemBalances(owner.address)).length).to.be.equal(0)
-
+    
+    console.log('É muito dps?')
     //Unequipping items
     await itemsFacetGotchichainSide.equipWearables(tokenId, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-
+    
+    console.log('É extremamente dps?')
     //Checking items balance after unequipping them
     expect((await itemsFacetGotchichainSide.itemBalancesWithTypes(owner.address))[0].itemId).to.be.equal(ethers.BigNumber.from(80))
     expect((await itemsFacetGotchichainSide.itemBalancesWithTypes(owner.address))[0].balance).to.be.equal(ethers.BigNumber.from(1))
-
+    console.log('tudo isso?')
+    
     //Checking equipped items
     expect(await itemsFacetGotchichainSide.equippedWearables(tokenId)).to.eql([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-
+    console.log('nada ainda?')
+    
     const aavegotchiData = await bridgeFacetGotchichainSide.getAavegotchiData(tokenId)
+    console.log('agora sim')
     console.log({ aavegotchiData })
   })
 
