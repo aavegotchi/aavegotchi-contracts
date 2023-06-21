@@ -147,7 +147,7 @@ contract ERC721BuyOrderFacet is Modifiers {
 
     function executeERC721BuyOrder(uint256 _buyOrderId) external {
         address sender = LibMeta.msgSender();
-        ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
+        ERC721BuyOrder storage erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
 
         require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
         require(sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner, "ERC721BuyOrder: Only aavegotchi owner can call this function");
@@ -171,8 +171,6 @@ contract ERC721BuyOrderFacet is Modifiers {
                 LibBuyOrder.generateValidationHash(erc721BuyOrder.erc721TokenAddress, erc721BuyOrder.erc721TokenId, erc721BuyOrder.validationOptions),
             "ERC721BuyOrder: Invalid buy order"
         );
-
-        erc721BuyOrder.timePurchased = block.timestamp;
 
         BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(erc721BuyOrder.priceInWei, new uint256[](0), [10000, 0]);
 
@@ -200,7 +198,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         }
 
         LibBuyOrder.removeERC721BuyOrder(_buyOrderId);
-        s.erc721BuyOrders[_buyOrderId].timePurchased = block.timestamp;
+        erc721BuyOrder.timePurchased = block.timestamp;
 
         emit ERC721BuyOrderExecuted(
             _buyOrderId,
