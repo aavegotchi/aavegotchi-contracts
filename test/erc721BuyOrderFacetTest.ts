@@ -30,7 +30,7 @@ describe("Testing ERC721 Buy Order", async function () {
   const daoAddress = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
   const testGotchiId1 = 12867; // should be listed
   const testGotchiId2 = 10000; // no buy orders
-  const testGotchiId3 = 19009; // should equip wearable and unlocked, used for checking validation
+  const testGotchiId3 = 19109; // should equip wearable and unlocked, used for checking validation
   const testGotchiId4 = 11600; // should be in lending
   const testOpenPortalId = 18268; // listed in Baazaar
   const testClosedPortalId = 11000; // listed in Baazaar
