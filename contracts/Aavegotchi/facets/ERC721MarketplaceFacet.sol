@@ -344,6 +344,7 @@ contract ERC721MarketplaceFacet is Modifiers {
             IERC721(listing.erc721TokenAddress).safeTransferFrom(seller, _recipient, listing.erc721TokenId);
         }
 
+        //Cancel an existing buy order if it exists for the buyer
         uint256 buyerBuyOrderId = s.buyerToBuyOrderId[listing.erc721TokenAddress][listing.erc721TokenId][buyer];
         if (buyerBuyOrderId != 0) {
             LibBuyOrder.cancelERC721BuyOrder(buyerBuyOrderId);
