@@ -154,7 +154,7 @@ describe("Testing ERC1155 Buy Order", async function () {
       });
     });
     describe("If there's already buy order from same buyer", async function () {
-      it("Should succeed", async function () {
+      it("Should succeed and GHST should be transferred if cost is greater than old one", async function () {
         const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
         await (
           await ghstERC20.connect(ghstHolder)
@@ -169,14 +169,39 @@ describe("Testing ERC1155 Buy Order", async function () {
           )
         ).wait();
         const event = receipt!.events!.find(
-          (e: any) => e.event === "ERC1155BuyOrderAdd"
+          (e: any) => e.event === "ERC1155BuyOrderUpdate"
         );
-        secondBuyOrderId = event!.args!.buyOrderId;
-        expect(event!.args!.buyer).to.equal(ghstHolderAddress);
-        expect(event!.args!.duration).to.equal(duration0);
+        expect(event!.args!.buyOrderId).to.equal(firstBuyOrderId);
+        expect(event!.args!.priceInWei).to.equal(mediumPrice);
+        expect(event!.args!.quantity).to.equal(quantity2);
         const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
         expect(
           newBalance.add(mediumPrice.mul(quantity2)).sub(price.mul(quantity1))
+        ).to.equal(oldBalance);
+      });
+      it("Should succeed and GHST should be returned if cost is lower than old one", async function () {
+        const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+        await (
+          await ghstERC20.connect(ghstHolder)
+        ).approve(diamondAddress, mediumPrice.mul(quantity2));
+        const receipt = await (
+          await erc1155BuyOrderFacet.placeERC1155BuyOrder(
+            diamondAddress,
+            testWearableId1,
+            price,
+            quantity1,
+            duration0
+          )
+        ).wait();
+        const event = receipt!.events!.find(
+          (e: any) => e.event === "ERC1155BuyOrderUpdate"
+        );
+        expect(event!.args!.buyOrderId).to.equal(firstBuyOrderId);
+        expect(event!.args!.priceInWei).to.equal(price);
+        expect(event!.args!.quantity).to.equal(quantity1);
+        const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+        expect(
+          newBalance.add(price.mul(quantity1)).sub(mediumPrice.mul(quantity2))
         ).to.equal(oldBalance);
       });
     });
@@ -213,7 +238,7 @@ describe("Testing ERC1155 Buy Order", async function () {
         const event = receipt!.events!.find(
           (e: any) => e.event === "ERC1155BuyOrderAdd"
         );
-        thirdBuyOrderId = event!.args!.buyOrderId;
+        secondBuyOrderId = event!.args!.buyOrderId;
         expect(event!.args!.buyer).to.equal(ghstHolder2Address);
         expect(event!.args!.duration).to.equal(duration0);
         const newBalance = await ghstERC20.balanceOf(ghstHolder2Address);
@@ -222,7 +247,57 @@ describe("Testing ERC1155 Buy Order", async function () {
     });
   });
 
+  describe("Testing cancelERC1155BuyOrder (without duration)", async function () {
+    it("Should revert when try to cancel buy order with wrong id", async function () {
+      await expect(
+        erc1155BuyOrderFacet.cancelERC1155BuyOrder(secondBuyOrderId.add(1))
+      ).to.be.revertedWith("ERC1155BuyOrder: ERC1155 buyOrder does not exist");
+    });
+    it("Should revert when try to cancel buy order with non-buyer", async function () {
+      await expect(
+        (
+          await erc1155BuyOrderFacet.connect(maticHolder)
+        ).cancelERC1155BuyOrder(firstBuyOrderId)
+      ).to.be.revertedWith(
+        "ERC1155BuyOrder: Only buyer can call this function"
+      );
+    });
+    it("Should succeed if cancel valid buy order", async function () {
+      const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+      const receipt = await (
+        await erc1155BuyOrderFacet.cancelERC1155BuyOrder(firstBuyOrderId)
+      ).wait();
+      const topic = ethers.utils.id("ERC1155BuyOrderCanceled(uint256,uint256)");
+      const event = receipt!.events!.find(
+        (event: any) => event.topics && event.topics[0] === topic
+      );
+      expect(event!.address).to.equal(diamondAddress);
+      const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+      expect(newBalance.sub(price.mul(quantity1))).to.equal(oldBalance);
+    });
+    it("Should revert when try to cancel canceled buy order", async function () {
+      await expect(
+        erc1155BuyOrderFacet.cancelERC1155BuyOrder(firstBuyOrderId)
+      ).to.be.revertedWith("ERC1155BuyOrder: Already processed");
+    });
+  });
+
   describe("Testing getERC1155BuyOrder", async function () {
+    before(async function () {
+      const receipt = await (
+        await erc1155BuyOrderFacet.placeERC1155BuyOrder(
+          diamondAddress,
+          testWearableId1,
+          mediumPrice,
+          quantity2,
+          duration0
+        )
+      ).wait();
+      const event = receipt!.events!.find(
+        (e: any) => e.event === "ERC1155BuyOrderAdd"
+      );
+      thirdBuyOrderId = event!.args!.buyOrderId;
+    });
     it("Should revert when try to get buy order with wrong id", async function () {
       await expect(
         erc1155BuyOrderFacet.getERC1155BuyOrder(thirdBuyOrderId.add(1))
@@ -273,6 +348,11 @@ describe("Testing ERC1155 Buy Order", async function () {
   });
 
   describe("Testing getERC1155BuyOrdersByTokenId", async function () {
+    after(async function () {
+      await (
+        await erc1155BuyOrderFacet.cancelERC1155BuyOrder(thirdBuyOrderId)
+      ).wait();
+    });
     it("Should return empty array with wrong wearable id", async function () {
       const buyOrders = await erc1155BuyOrderFacet.getERC1155BuyOrdersByTokenId(
         diamondAddress,
@@ -294,41 +374,6 @@ describe("Testing ERC1155 Buy Order", async function () {
       expect(buyOrders[1].erc1155TokenId).to.equal(testWearableId1);
       expect(buyOrders[1].duration).to.equal(duration0);
       expect(buyOrders[1].cancelled).to.equal(false);
-    });
-  });
-
-  describe("Testing cancelERC1155BuyOrder (without duration)", async function () {
-    it("Should revert when try to cancel buy order with wrong id", async function () {
-      await expect(
-        erc1155BuyOrderFacet.cancelERC1155BuyOrder(thirdBuyOrderId.add(1))
-      ).to.be.revertedWith("ERC1155BuyOrder: ERC1155 buyOrder does not exist");
-    });
-    it("Should revert when try to cancel buy order with non-buyer", async function () {
-      await expect(
-        (
-          await erc1155BuyOrderFacet.connect(maticHolder)
-        ).cancelERC1155BuyOrder(firstBuyOrderId)
-      ).to.be.revertedWith(
-        "ERC1155BuyOrder: Only buyer can call this function"
-      );
-    });
-    it("Should revert when try to cancel canceled buy order", async function () {
-      await expect(
-        erc1155BuyOrderFacet.cancelERC1155BuyOrder(firstBuyOrderId)
-      ).to.be.revertedWith("ERC1155BuyOrder: Already processed");
-    });
-    it("Should succeed if cancel valid buy order", async function () {
-      const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
-      const receipt = await (
-        await erc1155BuyOrderFacet.cancelERC1155BuyOrder(secondBuyOrderId)
-      ).wait();
-      const topic = ethers.utils.id("ERC1155BuyOrderCanceled(uint256,uint256)");
-      const event = receipt!.events!.find(
-        (event: any) => event.topics && event.topics[0] === topic
-      );
-      expect(event!.address).to.equal(diamondAddress);
-      const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
-      expect(newBalance.sub(mediumPrice.mul(quantity2))).to.equal(oldBalance);
     });
   });
 

@@ -25,7 +25,7 @@ contract ERC1155BuyOrderFacet is Modifiers {
         uint256 duration,
         uint256 time
     );
-
+    event ERC1155BuyOrderUpdate(uint256 indexed buyOrderId, uint256 indexed category, uint256 priceInWei, uint256 quantity, uint256 time);
     event ERC1155BuyOrderExecute(
         uint256 indexed buyOrderId,
         address indexed buyer,
@@ -73,58 +73,68 @@ contract ERC1155BuyOrderFacet is Modifiers {
         require(cost >= 1e18, "ERC1155BuyOrder: cost should be 1 GHST or larger");
 
         address sender = LibMeta.msgSender();
-        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
-        require(ghstBalance >= cost, "ERC1155BuyOrder: Not enough GHST!");
-
         uint256 category = LibSharedMarketplace.getERC1155Category(_erc1155TokenAddress, _erc1155TokenId);
+        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
 
         uint256 oldBuyOrderId = s.buyerToERC1155BuyOrderId[_erc1155TokenAddress][_erc1155TokenId][sender];
         if (oldBuyOrderId != 0) {
-            ERC1155BuyOrder memory erc1155BuyOrder = s.erc1155BuyOrders[oldBuyOrderId];
+            ERC1155BuyOrder storage erc1155BuyOrder = s.erc1155BuyOrders[oldBuyOrderId];
             require(erc1155BuyOrder.timeCreated != 0, "ERC1155BuyOrder: ERC1155 buyOrder does not exist");
             require((erc1155BuyOrder.cancelled == false) && (erc1155BuyOrder.lastTimePurchased == 0), "ERC1155BuyOrder: Already processed");
             if ((erc1155BuyOrder.duration == 0) || (erc1155BuyOrder.timeCreated + erc1155BuyOrder.duration >= block.timestamp)) {
-                LibBuyOrder.cancelERC1155BuyOrder(oldBuyOrderId);
+                // Transfer GHST
+                uint256 oldCost = erc1155BuyOrder.quantity * erc1155BuyOrder.priceInWei;
+                if (cost > oldCost) {
+                    require(ghstBalance >= cost - oldCost, "ERC1155BuyOrder: Not enough GHST!");
+                    LibERC20.transferFrom(s.ghstContract, sender, address(this), cost - oldCost);
+                } else if (cost < oldCost) {
+                    LibERC20.transfer(s.ghstContract, sender, oldCost - cost);
+                }
+                // update and emit event
+                erc1155BuyOrder.priceInWei = _priceInWei;
+                erc1155BuyOrder.quantity = _quantity;
+                emit ERC1155BuyOrderUpdate(oldBuyOrderId, category, _priceInWei, _quantity, block.timestamp);
             }
+        } else {
+            // Transfer GHST
+            require(ghstBalance >= cost, "ERC1155BuyOrder: Not enough GHST!");
+            LibERC20.transferFrom(s.ghstContract, sender, address(this), cost);
+
+            // Place new buy order
+            s.nextERC1155BuyOrderId++;
+            uint256 buyOrderId = s.nextERC1155BuyOrderId;
+
+            s.erc1155TokenToBuyOrderIdIndexes[_erc1155TokenAddress][_erc1155TokenId][buyOrderId] = s
+            .erc1155TokenToBuyOrderIds[_erc1155TokenAddress][_erc1155TokenId].length;
+            s.erc1155TokenToBuyOrderIds[_erc1155TokenAddress][_erc1155TokenId].push(buyOrderId);
+            s.buyerToERC1155BuyOrderId[_erc1155TokenAddress][_erc1155TokenId][sender] = buyOrderId;
+
+            s.erc1155BuyOrders[buyOrderId] = ERC1155BuyOrder({
+                buyOrderId: buyOrderId,
+                buyer: sender,
+                erc1155TokenAddress: _erc1155TokenAddress,
+                erc1155TokenId: _erc1155TokenId,
+                priceInWei: _priceInWei,
+                quantity: _quantity,
+                sourceBuyOrderId: 0,
+                timeCreated: block.timestamp,
+                lastTimePurchased: 0,
+                duration: _duration,
+                completed: false,
+                cancelled: false
+            });
+            emit ERC1155BuyOrderAdd(
+                buyOrderId,
+                sender,
+                _erc1155TokenAddress,
+                _erc1155TokenId,
+                category,
+                _priceInWei,
+                _quantity,
+                _duration,
+                block.timestamp
+            );
         }
-
-        // Transfer GHST
-        LibERC20.transferFrom(s.ghstContract, sender, address(this), cost);
-
-        // Place new buy order
-        s.nextERC1155BuyOrderId++;
-        uint256 buyOrderId = s.nextERC1155BuyOrderId;
-
-        s.erc1155TokenToBuyOrderIdIndexes[_erc1155TokenAddress][_erc1155TokenId][buyOrderId] = s
-        .erc1155TokenToBuyOrderIds[_erc1155TokenAddress][_erc1155TokenId].length;
-        s.erc1155TokenToBuyOrderIds[_erc1155TokenAddress][_erc1155TokenId].push(buyOrderId);
-        s.buyerToERC1155BuyOrderId[_erc1155TokenAddress][_erc1155TokenId][sender] = buyOrderId;
-
-        s.erc1155BuyOrders[buyOrderId] = ERC1155BuyOrder({
-            buyOrderId: buyOrderId,
-            buyer: sender,
-            erc1155TokenAddress: _erc1155TokenAddress,
-            erc1155TokenId: _erc1155TokenId,
-            priceInWei: _priceInWei,
-            quantity: _quantity,
-            sourceBuyOrderId: 0,
-            timeCreated: block.timestamp,
-            lastTimePurchased: 0,
-            duration: _duration,
-            completed: false,
-            cancelled: false
-        });
-        emit ERC1155BuyOrderAdd(
-            buyOrderId,
-            sender,
-            _erc1155TokenAddress,
-            _erc1155TokenId,
-            category,
-            _priceInWei,
-            _quantity,
-            _duration,
-            block.timestamp
-        );
     }
 
     function cancelERC1155BuyOrder(uint256 _buyOrderId) external {
