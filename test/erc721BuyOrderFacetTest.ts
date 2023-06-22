@@ -401,14 +401,54 @@ describe("Testing ERC721 Buy Order", async function () {
     });
     it("Should revert when try to execute buy order with wrong buy order id", async function () {
       await expect(
-        erc721BuyOrderFacet.executeERC721BuyOrder(fourthBuyOrderId.add(10))
+        erc721BuyOrderFacet.executeERC721BuyOrder(
+          fourthBuyOrderId.add(10),
+          diamondAddress,
+          testGotchiId1,
+          highestPrice
+        )
       ).to.be.revertedWith("ERC721BuyOrder: ERC721 buyOrder does not exist");
+    });
+    it("Should revert when try to execute buy order with wrong erc721 token address", async function () {
+      await expect(
+        erc721BuyOrderFacet.executeERC721BuyOrder(
+          fourthBuyOrderId,
+          ethers.constants.AddressZero,
+          testGotchiId1,
+          highestPrice
+        )
+      ).to.be.revertedWith("ERC721BuyOrder: ERC721 token address not matched");
+    });
+    it("Should revert when try to execute buy order with wrong erc721 token id", async function () {
+      await expect(
+        erc721BuyOrderFacet.executeERC721BuyOrder(
+          fourthBuyOrderId,
+          diamondAddress,
+          testGotchiId1 + 1,
+          highestPrice
+        )
+      ).to.be.revertedWith("ERC721BuyOrder: ERC721 token id not matched");
+    });
+    it("Should revert when try to execute buy order with wrong buy order price", async function () {
+      await expect(
+        erc721BuyOrderFacet.executeERC721BuyOrder(
+          fourthBuyOrderId,
+          diamondAddress,
+          testGotchiId1,
+          price
+        )
+      ).to.be.revertedWith("ERC721BuyOrder: Price not matched");
     });
     it("Should revert when try to execute buy order with wrong account", async function () {
       await expect(
         (
           await erc721BuyOrderFacet.connect(maticHolder)
-        ).executeERC721BuyOrder(fourthBuyOrderId)
+        ).executeERC721BuyOrder(
+          fourthBuyOrderId,
+          diamondAddress,
+          testGotchiId1,
+          highestPrice
+        )
       ).to.be.revertedWith(
         "ERC721BuyOrder: Only aavegotchi owner can call this function"
       );
@@ -417,7 +457,12 @@ describe("Testing ERC721 Buy Order", async function () {
       await expect(
         (
           await erc721BuyOrderFacet.connect(gotchiOwner)
-        ).executeERC721BuyOrder(firstBuyOrderId)
+        ).executeERC721BuyOrder(
+          firstBuyOrderId,
+          diamondAddress,
+          testGotchiId1,
+          price
+        )
       ).to.be.revertedWith("ERC721BuyOrder: Already processed");
     });
     it("Should succeed when execute buy order with valid data", async function () {
@@ -430,7 +475,12 @@ describe("Testing ERC721 Buy Order", async function () {
       const receipt = await (
         await (
           await erc721BuyOrderFacet.connect(gotchiOwner)
-        ).executeERC721BuyOrder(fourthBuyOrderId)
+        ).executeERC721BuyOrder(
+          fourthBuyOrderId,
+          diamondAddress,
+          testGotchiId1,
+          highestPrice
+        )
       ).wait();
       const event = receipt!.events!.find(
         (e: any) => e.event === "ERC721BuyOrderExecuted"
@@ -498,7 +548,12 @@ describe("Testing ERC721 Buy Order", async function () {
         network
       );
       await expect(
-        erc721BuyOrderFacetWithBorrower.executeERC721BuyOrder(buyOrderId)
+        erc721BuyOrderFacetWithBorrower.executeERC721BuyOrder(
+          buyOrderId,
+          diamondAddress,
+          testGotchiId4,
+          price
+        )
       ).to.be.revertedWith(
         "ERC721BuyOrder: Not supported for aavegotchi in lending"
       );
@@ -602,7 +657,12 @@ describe("Testing ERC721 Buy Order", async function () {
       await expect(
         (
           await erc721BuyOrderFacet.connect(gotchiOwner3)
-        ).executeERC721BuyOrder(buyOrderId)
+        ).executeERC721BuyOrder(
+          buyOrderId,
+          diamondAddress,
+          testGotchiId3,
+          price
+        )
       ).to.be.revertedWith("ERC721BuyOrder: Invalid buy order");
     });
     it("Should fail if GHST balance changed for an gotchi", async function () {
@@ -637,7 +697,12 @@ describe("Testing ERC721 Buy Order", async function () {
       await expect(
         (
           await erc721BuyOrderFacet.connect(gotchiOwner3)
-        ).executeERC721BuyOrder(buyOrderId)
+        ).executeERC721BuyOrder(
+          buyOrderId,
+          diamondAddress,
+          testGotchiId3,
+          price
+        )
       ).to.be.revertedWith("ERC721BuyOrder: Invalid buy order");
     });
   });
@@ -681,7 +746,12 @@ describe("Testing ERC721 Buy Order", async function () {
       await expect(
         (
           await erc721BuyOrderFacet.connect(gotchiOwner3)
-        ).executeERC721BuyOrder(buyOrderId)
+        ).executeERC721BuyOrder(
+          buyOrderId,
+          diamondAddress,
+          testGotchiId3,
+          price
+        )
       ).to.be.revertedWith("ERC721BuyOrder: Already expired");
     });
   });

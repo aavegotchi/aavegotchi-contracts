@@ -17,7 +17,7 @@ export async function upgrade() {
         "function getERC721BuyOrderIdsByTokenId(address _erc721TokenAddress, uint256 _erc721TokenId) external view",
         "function getERC721BuyOrdersByTokenId(address _erc721TokenAddress, uint256 _erc721TokenId) external view",
         "function placeERC721BuyOrder(address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei, uint256 _duration, bool[] calldata _validationOptions) external",
-        "function executeERC721BuyOrder(uint256 _buyOrderId) external",
+        "function executeERC721BuyOrder(uint256 _buyOrderId, address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei) external",
         "function cancelERC721BuyOrder(uint256 _buyOrderId) external",
       ],
       removeSelectors: [],

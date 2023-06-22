@@ -145,11 +145,14 @@ contract ERC721BuyOrderFacet is Modifiers {
         LibBuyOrder.cancelERC721BuyOrder(_buyOrderId);
     }
 
-    function executeERC721BuyOrder(uint256 _buyOrderId) external {
+    function executeERC721BuyOrder(uint256 _buyOrderId, address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei) external {
         address sender = LibMeta.msgSender();
         ERC721BuyOrder storage erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
 
         require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
+        require(erc721BuyOrder.erc721TokenAddress == _erc721TokenAddress, "ERC721BuyOrder: ERC721 token address not matched");
+        require(erc721BuyOrder.erc721TokenId == _erc721TokenId, "ERC721BuyOrder: ERC721 token id not matched");
+        require(erc721BuyOrder.priceInWei == _priceInWei, "ERC721BuyOrder: Price not matched");
         require(sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner, "ERC721BuyOrder: Only aavegotchi owner can call this function");
         require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
         if (erc721BuyOrder.duration > 0) {
