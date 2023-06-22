@@ -5,6 +5,8 @@ import {LibAppStorage, AppStorage, ERC1155BuyOrder} from "./LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 
 library LibBuyOrder {
+    event ERC1155BuyOrderCanceled(uint256 indexed buyOrderId, uint256 time);
+
     function cancelERC1155BuyOrder(uint256 _buyOrderId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
@@ -21,6 +23,8 @@ library LibBuyOrder {
 
         // refund GHST to buyer
         LibERC20.transfer(s.ghstContract, erc1155BuyOrder.buyer, erc1155BuyOrder.priceInWei * erc1155BuyOrder.quantity);
+
+        emit ERC1155BuyOrderCanceled(_buyOrderId, block.timestamp);
     }
 
     function removeERC1155BuyOrder(uint256 _buyOrderId) internal {

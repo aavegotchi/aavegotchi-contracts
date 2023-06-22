@@ -319,9 +319,14 @@ describe("Testing ERC1155 Buy Order", async function () {
     });
     it("Should succeed if cancel valid buy order", async function () {
       const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
-      await (
+      const receipt = await (
         await erc1155BuyOrderFacet.cancelERC1155BuyOrder(secondBuyOrderId)
       ).wait();
+      const topic = ethers.utils.id("ERC1155BuyOrderCanceled(uint256,uint256)");
+      const event = receipt!.events!.find(
+        (event: any) => event.topics && event.topics[0] === topic
+      );
+      expect(event!.address).to.equal(diamondAddress);
       const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
       expect(newBalance.sub(mediumPrice.mul(quantity2))).to.equal(oldBalance);
     });
@@ -379,9 +384,7 @@ describe("Testing ERC1155 Buy Order", async function () {
           highPrice,
           quantity3
         )
-      ).to.be.revertedWith(
-        "ERC1155BuyOrder: ERC1155 token id not matched"
-      );
+      ).to.be.revertedWith("ERC1155BuyOrder: ERC1155 token id not matched");
     });
     it("Should revert when try to execute buy order with wrong buy order price", async function () {
       await expect(
