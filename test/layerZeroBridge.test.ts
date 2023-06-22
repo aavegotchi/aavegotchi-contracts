@@ -79,18 +79,25 @@ describe("Bridge ERC721: ", function () {
     await bridgeFacetPolygonSide.setLayerZeroBridge(bridgePolygonSide.address)
     await bridgeFacetGotchichainSide.setLayerZeroBridge(bridgeGotchichainSide.address)
 
-    let minGasToTransferAndStore = await bridgePolygonSide.minDstGasLookup(chainId_B, 1)
-    let transferGasPerToken = await bridgePolygonSide.dstChainIdToTransferGas(chainId_B)
+    const minGasToTransferAndStorePolygonSide = await bridgePolygonSide.minDstGasLookup(chainId_B, 1)
+    const transferGasPerTokenPolygonSide = await bridgePolygonSide.dstChainIdToTransferGas(chainId_B)
+
+    const minGasToTransferAndStoreGotchichainSide = await bridgeGotchichainSide.minDstGasLookup(chainId_B, 1)
+    const transferGasPerTokenGotchichainSide = await bridgeGotchichainSide.dstChainIdToTransferGas(chainId_B)
+
     console.log("minGasToTransferAndStore")
-    console.log(minGasToTransferAndStore.add(transferGasPerToken.mul(1)))
-    polygonAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, minGasToTransferAndStore.add(transferGasPerToken.mul(1))])
+    console.log(minGasToTransferAndStorePolygonSide.add(transferGasPerTokenPolygonSide.mul(1)))
+    console.log(minGasToTransferAndStoreGotchichainSide.add(transferGasPerTokenGotchichainSide.mul(1)))
+
+    polygonAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, minGasToTransferAndStorePolygonSide.add(transferGasPerTokenPolygonSide.mul(1))])
+    gotchichainAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, minGasToTransferAndStoreGotchichainSide.add(transferGasPerTokenGotchichainSide.mul(1))])
   })
 
-  it("sendFrom() - send NFT from Polygon to Gotchichain - without equipped item", async function () {
+  it.only("sendFrom() - send NFT from Polygon to Gotchichain - without equipped item", async function () {
     const tokenId = await mintPortals(owner.address)
 
     //Estimate nativeFees
-    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, defaultAdapterParams)).nativeFee
+    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, polygonAdapterParams)).nativeFee
 
     //Swaps token to other chain
     await aavegotchiFacetPolygonSide.approve(bridgePolygonSide.address, tokenId)
@@ -101,7 +108,7 @@ describe("Bridge ERC721: ", function () {
       tokenId,
       owner.address,
       ethers.constants.AddressZero,
-      defaultAdapterParams,
+      polygonAdapterParams,
       { value: nativeFee }
     )
     await sendFromTx.wait()
@@ -117,7 +124,7 @@ describe("Bridge ERC721: ", function () {
     const tokenId = await mintPortals(owner.address)
 
     //Estimate nativeFees
-    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, defaultAdapterParams)).nativeFee
+    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, polygonAdapterParams)).nativeFee
 
     //Swaps token to other chain
     await aavegotchiFacetPolygonSide.approve(bridgePolygonSide.address, tokenId)
@@ -128,7 +135,7 @@ describe("Bridge ERC721: ", function () {
       tokenId,
       owner.address,
       ethers.constants.AddressZero,
-      defaultAdapterParams,
+      polygonAdapterParams,
       { value: nativeFee }
     )
     await sendFromTx.wait()
@@ -146,8 +153,8 @@ describe("Bridge ERC721: ", function () {
       tokenId,
       owner.address,
       ethers.constants.AddressZero,
-      defaultAdapterParams,
-      { value: (await bridgeGotchichainSide.estimateSendFee(chainId_A, owner.address, tokenId, false, defaultAdapterParams)).nativeFee }
+      gotchichainAdapterParams,
+      { value: (await bridgeGotchichainSide.estimateSendFee(chainId_A, owner.address, tokenId, false, gotchichainAdapterParams)).nativeFee }
     )
     await sendFromTx.wait()
 
@@ -157,7 +164,7 @@ describe("Bridge ERC721: ", function () {
     expect(await aavegotchiFacetPolygonSide.ownerOf(tokenId)).to.be.equal(owner.address)
   })
 
-  it.only("sendFrom() - send NFT from Polygon to Gotchichain - with equipped item", async function () {
+  it("sendFrom() - send NFT from Polygon to Gotchichain - with equipped item", async function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
     //Estimate nativeFees
@@ -208,7 +215,7 @@ describe("Bridge ERC721: ", function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
     //Estimate nativeFees
-    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, defaultAdapterParams)).nativeFee
+    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, polygonAdapterParams)).nativeFee
 
     //Swaps token to other chain
     await aavegotchiFacetPolygonSide.approve(bridgePolygonSide.address, tokenId)
@@ -219,7 +226,7 @@ describe("Bridge ERC721: ", function () {
       tokenId,
       owner.address,
       ethers.constants.AddressZero,
-      defaultAdapterParams,
+      polygonAdapterParams,
       { value: nativeFee }
     )
     await sendFromTx.wait()
@@ -237,8 +244,8 @@ describe("Bridge ERC721: ", function () {
       tokenId,
       owner.address,
       ethers.constants.AddressZero,
-      defaultAdapterParams,
-      { value: (await bridgeGotchichainSide.estimateSendFee(chainId_A, owner.address, tokenId, false, defaultAdapterParams)).nativeFee }
+      gotchichainAdapterParams,
+      { value: (await bridgeGotchichainSide.estimateSendFee(chainId_A, owner.address, tokenId, false, gotchichainAdapterParams)).nativeFee }
     )
     await sendFromTx.wait()
 
@@ -267,7 +274,7 @@ describe("Bridge ERC721: ", function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
     //Estimate nativeFees
-    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, defaultAdapterParams)).nativeFee
+    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, polygonAdapterParams)).nativeFee
 
     //Swapping token to gotchichain
     await aavegotchiFacetPolygonSide.approve(bridgePolygonSide.address, tokenId)
@@ -278,7 +285,7 @@ describe("Bridge ERC721: ", function () {
       tokenId,
       owner.address,
       ethers.constants.AddressZero,
-      defaultAdapterParams,
+      polygonAdapterParams,
       { value: nativeFee }
     )
     await sendFromTx.wait()
@@ -298,8 +305,8 @@ describe("Bridge ERC721: ", function () {
       tokenId,
       owner.address,
       ethers.constants.AddressZero,
-      defaultAdapterParams,
-      { value: (await bridgeGotchichainSide.estimateSendFee(chainId_A, owner.address, tokenId, false, defaultAdapterParams)).nativeFee }
+      gotchichainAdapterParams,
+      { value: (await bridgeGotchichainSide.estimateSendFee(chainId_A, owner.address, tokenId, false, gotchichainAdapterParams)).nativeFee }
     )
     await sendFromTx.wait()
 
@@ -329,7 +336,7 @@ describe("Bridge ERC721: ", function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
     // Estimate nativeFees
-    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, defaultAdapterParams)).nativeFee
+    let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, polygonAdapterParams)).nativeFee
 
     // Swapping token to gotchichain
     await aavegotchiFacetPolygonSide.approve(bridgePolygonSide.address, tokenId)
@@ -340,7 +347,7 @@ describe("Bridge ERC721: ", function () {
       tokenId,
       owner.address,
       ethers.constants.AddressZero,
-      defaultAdapterParams,
+      polygonAdapterParams,
       { value: nativeFee }
     )
     await sendFromTx.wait()
@@ -377,8 +384,8 @@ describe("Bridge ERC721: ", function () {
       tokenId,
       owner.address,
       ethers.constants.AddressZero,
-      defaultAdapterParams,
-      { value: (await bridgeGotchichainSide.estimateSendFee(chainId_A, owner.address, tokenId, false, defaultAdapterParams)).nativeFee }
+      gotchichainAdapterParams,
+      { value: (await bridgeGotchichainSide.estimateSendFee(chainId_A, owner.address, tokenId, false, gotchichainAdapterParams)).nativeFee }
     )
     await sendFromTx.wait()
 
