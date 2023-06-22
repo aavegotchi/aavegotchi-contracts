@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
+import {LibAppStorage, AppStorage} from "./LibAppStorage.sol";
 
 struct BaazaarSplit {
     uint256 daoShare;
@@ -54,34 +55,71 @@ library LibSharedMarketplace {
     }
 
     function transferSales(SplitAddresses memory _a, BaazaarSplit memory split) internal {
-        LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.pixelCraft, split.pixelcraftShare);
-        LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.daoTreasury, split.daoShare);
+        if (_a.buyer == address(this)) {
+            LibERC20.transfer(_a.ghstContract, _a.pixelCraft, split.pixelcraftShare);
+            LibERC20.transfer(_a.ghstContract, _a.daoTreasury, split.daoShare);
+            LibERC20.transfer(_a.ghstContract, _a.rarityFarming, split.playerRewardsShare);
+            LibERC20.transfer(_a.ghstContract, _a.seller, split.sellerShare);
 
-        LibERC20.transferFrom((_a.ghstContract), _a.buyer, _a.rarityFarming, split.playerRewardsShare);
+            //handle affiliate split if necessary
+            if (split.affiliateShare > 0) {
+                LibERC20.transfer(_a.ghstContract, _a.affiliate, split.affiliateShare);
+            }
+            //handle royalty if necessary
+            if (_a.royalties.length > 0) {
+                for (uint256 i = 0; i < _a.royalties.length; i++) {
+                    if (split.royaltyShares[i] > 0) {
+                        LibERC20.transfer(_a.ghstContract, _a.royalties[i], split.royaltyShares[i]);
+                    }
+                }
+            }
+        } else {
+            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.pixelCraft, split.pixelcraftShare);
+            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.daoTreasury, split.daoShare);
+            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.rarityFarming, split.playerRewardsShare);
+            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.seller, split.sellerShare);
 
-        LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.seller, split.sellerShare);
-
-        //handle affiliate split if necessary
-        if (split.affiliateShare > 0) {
-            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.affiliate, split.affiliateShare);
-        }
-        //handle royalty if necessary
-        if (_a.royalties.length > 0) {
-            for (uint256 i = 0; i < _a.royalties.length; i++) {
-                if (split.royaltyShares[i] > 0) {
-                    LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.royalties[i], split.royaltyShares[i]);
+            //handle affiliate split if necessary
+            if (split.affiliateShare > 0) {
+                LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.affiliate, split.affiliateShare);
+            }
+            //handle royalty if necessary
+            if (_a.royalties.length > 0) {
+                for (uint256 i = 0; i < _a.royalties.length; i++) {
+                    if (split.royaltyShares[i] > 0) {
+                        LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.royalties[i], split.royaltyShares[i]);
+                    }
                 }
             }
         }
     }
 
-    function burnListingFee(
-        uint256 listingFee,
-        address owner,
-        address ghstContract
-    ) internal {
+    function burnListingFee(uint256 listingFee, address owner, address ghstContract) internal {
         if (listingFee > 0) {
             LibERC20.transferFrom(ghstContract, owner, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), listingFee);
+        }
+    }
+
+    ///@notice Query the category details of a ERC1155 NFT
+    ///@param _erc1155TokenAddress Contract address of NFT to query
+    ///@param _erc1155TypeId Identifier of the NFT to query
+    ///@return category_ Category of the NFT // 0 is wearable, 1 is badge, 2 is consumable, 3 is tickets
+    function getERC1155Category(address _erc1155TokenAddress, uint256 _erc1155TypeId) internal view returns (uint256 category_) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        if (_erc1155TokenAddress == s.forgeDiamond && _erc1155TypeId < 1_000_000_000) {
+            //Schematics are always supported to trade, so long as the wearable exists
+            //Schematic IDs are under 1_000_000_000 offset.
+            category_ = 7;
+            require(s.itemTypes[_erc1155TypeId].maxQuantity > 0, "ERC1155Marketplace: erc1155 item not supported");
+        } else {
+            category_ = s.erc1155Categories[_erc1155TokenAddress][_erc1155TypeId];
+        }
+
+        if (category_ == 0) {
+            require(
+                _erc1155TokenAddress == address(this) && s.itemTypes[_erc1155TypeId].maxQuantity > 0,
+                "ERC1155Marketplace: erc1155 item not supported"
+            );
         }
     }
 }

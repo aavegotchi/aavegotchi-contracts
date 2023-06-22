@@ -69,13 +69,14 @@ contract ERC1155BuyOrderFacet is Modifiers {
         uint256 _quantity,
         uint256 _duration
     ) external {
-        require(_priceInWei >= 1e18, "ERC1155BuyOrder: price should be 1 GHST or larger");
+        uint256 cost = _quantity * _priceInWei;
+        require(cost >= 1e18, "ERC1155BuyOrder: cost should be 1 GHST or larger");
 
         address sender = LibMeta.msgSender();
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
-        require(ghstBalance >= _priceInWei * _quantity, "ERC1155BuyOrder: Not enough GHST!");
+        require(ghstBalance >= cost, "ERC1155BuyOrder: Not enough GHST!");
 
-        uint256 category = LibERC1155Marketplace.getERC1155Category(_erc1155TokenAddress, _erc1155TokenId);
+        uint256 category = LibSharedMarketplace.getERC1155Category(_erc1155TokenAddress, _erc1155TokenId);
 
         uint256 oldBuyOrderId = s.buyerToERC1155BuyOrderId[_erc1155TokenAddress][_erc1155TokenId][sender];
         if (oldBuyOrderId != 0) {
@@ -88,7 +89,7 @@ contract ERC1155BuyOrderFacet is Modifiers {
         }
 
         // Transfer GHST
-        LibERC20.transferFrom(s.ghstContract, sender, address(this), _priceInWei * _quantity);
+        LibERC20.transferFrom(s.ghstContract, sender, address(this), cost);
 
         // Place new buy order
         s.nextERC1155BuyOrderId++;
@@ -141,7 +142,7 @@ contract ERC1155BuyOrderFacet is Modifiers {
 
     function executeERC1155BuyOrder(uint256 _buyOrderId, uint256 _quantity) external {
         address sender = LibMeta.msgSender();
-        ERC1155BuyOrder memory erc1155BuyOrder = s.erc1155BuyOrders[_buyOrderId];
+        ERC1155BuyOrder storage erc1155BuyOrder = s.erc1155BuyOrders[_buyOrderId];
 
         require(erc1155BuyOrder.timeCreated != 0, "ERC1155BuyOrder: ERC1155 buyOrder does not exist");
         require(erc1155BuyOrder.buyer != sender, "ERC1155BuyOrder: Buyer can't be seller");
@@ -151,13 +152,14 @@ contract ERC1155BuyOrderFacet is Modifiers {
         }
         require(erc1155BuyOrder.quantity >= _quantity, "ERC1155BuyOrder: Sell amount should not be larger than quantity of the buy order");
 
+        uint256 cost = _quantity * erc1155BuyOrder.priceInWei;
+        require(cost >= 1e18, "ERC1155BuyOrder: execution cost should be 1 GHST or larger");
+
         IERC1155 erc1155Token = IERC1155(erc1155BuyOrder.erc1155TokenAddress);
         require(erc1155Token.balanceOf(sender, erc1155BuyOrder.erc1155TokenId) >= _quantity, "ERC1155Marketplace: Not enough ERC1155 token");
 
         erc1155BuyOrder.quantity -= _quantity;
         erc1155BuyOrder.lastTimePurchased = block.timestamp;
-
-        uint256 cost = _quantity * erc1155BuyOrder.priceInWei;
 
         BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(cost, new uint256[](0), [10000, 0]);
         LibSharedMarketplace.transferSales(
@@ -224,7 +226,7 @@ contract ERC1155BuyOrderFacet is Modifiers {
             sender,
             erc1155BuyOrder.erc1155TokenAddress,
             erc1155BuyOrder.erc1155TokenId,
-            LibERC1155Marketplace.getERC1155Category(erc1155BuyOrder.erc1155TokenAddress, erc1155BuyOrder.erc1155TokenId),
+            LibSharedMarketplace.getERC1155Category(erc1155BuyOrder.erc1155TokenAddress, erc1155BuyOrder.erc1155TokenId),
             erc1155BuyOrder.priceInWei,
             _quantity,
             block.timestamp

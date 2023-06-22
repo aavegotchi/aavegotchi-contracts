@@ -71,7 +71,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _erc1155TypeId Identifier of the NFT to query
     ///@return category_ Category of the NFT // 0 is wearable, 1 is badge, 2 is consumable, 3 is tickets
     function getERC1155Category(address _erc1155TokenAddress, uint256 _erc1155TypeId) public view returns (uint256 category_) {
-        category_ = LibERC1155Marketplace.getERC1155Category(_erc1155TokenAddress, _erc1155TypeId);
+        category_ = LibSharedMarketplace.getERC1155Category(_erc1155TokenAddress, _erc1155TypeId);
     }
 
     ///@notice Allow an ERC1155 owner to list his NFTs for sale
@@ -119,7 +119,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint32 _whitelistId
     ) internal {
         address seller = LibMeta.msgSender();
-        uint256 category = getERC1155Category(_erc1155TokenAddress, _erc1155TypeId);
+        uint256 category = LibSharedMarketplace.getERC1155Category(_erc1155TokenAddress, _erc1155TypeId);
 
         IERC1155 erc1155Token = IERC1155(_erc1155TokenAddress);
         require(erc1155Token.balanceOf(seller, _erc1155TypeId) >= _quantity, "ERC1155Marketplace: Not enough ERC1155 token");
