@@ -140,11 +140,20 @@ contract ERC1155BuyOrderFacet is Modifiers {
         LibBuyOrder.cancelERC1155BuyOrder(_buyOrderId);
     }
 
-    function executeERC1155BuyOrder(uint256 _buyOrderId, uint256 _quantity) external {
+    function executeERC1155BuyOrder(
+        uint256 _buyOrderId,
+        address _erc1155TokenAddress,
+        uint256 _erc1155TokenId,
+        uint256 _priceInWei,
+        uint256 _quantity
+    ) external {
         address sender = LibMeta.msgSender();
         ERC1155BuyOrder storage erc1155BuyOrder = s.erc1155BuyOrders[_buyOrderId];
 
         require(erc1155BuyOrder.timeCreated != 0, "ERC1155BuyOrder: ERC1155 buyOrder does not exist");
+        require(erc1155BuyOrder.erc1155TokenAddress == _erc1155TokenAddress, "ERC1155BuyOrder: ERC1155 token address not matched");
+        require(erc1155BuyOrder.erc1155TokenId == _erc1155TokenId, "ERC1155BuyOrder: ERC1155 token id not matched");
+        require(erc1155BuyOrder.priceInWei == _priceInWei, "ERC1155BuyOrder: Price not matched");
         require(erc1155BuyOrder.buyer != sender, "ERC1155BuyOrder: Buyer can't be seller");
         require((erc1155BuyOrder.cancelled == false) && (erc1155BuyOrder.completed == false), "ERC1155BuyOrder: Already processed");
         if (erc1155BuyOrder.duration > 0) {

@@ -350,27 +350,85 @@ describe("Testing ERC1155 Buy Order", async function () {
       await expect(
         erc1155BuyOrderFacet.executeERC1155BuyOrder(
           fourthBuyOrderId.add(10),
+          diamondAddress,
+          testWearableId1,
+          highPrice,
           quantity3
         )
       ).to.be.revertedWith("ERC1155BuyOrder: ERC1155 buyOrder does not exist");
     });
+    it("Should revert when try to execute buy order with wrong ERC1155 token address", async function () {
+      await expect(
+        erc1155BuyOrderFacet.executeERC1155BuyOrder(
+          fourthBuyOrderId,
+          ethers.constants.AddressZero,
+          testWearableId1,
+          highPrice,
+          quantity3
+        )
+      ).to.be.revertedWith(
+        "ERC1155BuyOrder: ERC1155 token address not matched"
+      );
+    });
+    it("Should revert when try to execute buy order with wrong ERC1155 token id", async function () {
+      await expect(
+        erc1155BuyOrderFacet.executeERC1155BuyOrder(
+          fourthBuyOrderId,
+          diamondAddress,
+          testWearableId1 + 1,
+          highPrice,
+          quantity3
+        )
+      ).to.be.revertedWith(
+        "ERC1155BuyOrder: ERC1155 token id not matched"
+      );
+    });
+    it("Should revert when try to execute buy order with wrong buy order price", async function () {
+      await expect(
+        erc1155BuyOrderFacet.executeERC1155BuyOrder(
+          fourthBuyOrderId,
+          diamondAddress,
+          testWearableId1,
+          price,
+          quantity3
+        )
+      ).to.be.revertedWith("ERC1155BuyOrder: Price not matched");
+    });
     it("Should revert when try to execute buy order with buyer", async function () {
       await expect(
-        erc1155BuyOrderFacet.executeERC1155BuyOrder(fourthBuyOrderId, quantity3)
+        erc1155BuyOrderFacet.executeERC1155BuyOrder(
+          fourthBuyOrderId,
+          diamondAddress,
+          testWearableId1,
+          highPrice,
+          quantity3
+        )
       ).to.be.revertedWith("ERC1155BuyOrder: Buyer can't be seller");
     });
     it("Should revert when try to execute canceled buy order", async function () {
       await expect(
         (
           await erc1155BuyOrderFacet.connect(wearableOwner1)
-        ).executeERC1155BuyOrder(firstBuyOrderId, quantity1)
+        ).executeERC1155BuyOrder(
+          firstBuyOrderId,
+          diamondAddress,
+          testWearableId1,
+          price,
+          quantity1
+        )
       ).to.be.revertedWith("ERC1155BuyOrder: Already processed");
     });
     it("Should revert when try to execute buy order with larger quantity", async function () {
       await expect(
         (
           await erc1155BuyOrderFacet.connect(wearableOwner1)
-        ).executeERC1155BuyOrder(fourthBuyOrderId, quantity3 + 10)
+        ).executeERC1155BuyOrder(
+          fourthBuyOrderId,
+          diamondAddress,
+          testWearableId1,
+          highPrice,
+          quantity3 + 10
+        )
       ).to.be.revertedWith(
         "ERC1155BuyOrder: Sell amount should not be larger than quantity of the buy order"
       );
@@ -379,7 +437,13 @@ describe("Testing ERC1155 Buy Order", async function () {
       await expect(
         (
           await erc1155BuyOrderFacet.connect(maticHolder)
-        ).executeERC1155BuyOrder(fourthBuyOrderId, quantity3)
+        ).executeERC1155BuyOrder(
+          fourthBuyOrderId,
+          diamondAddress,
+          testWearableId1,
+          highPrice,
+          quantity3
+        )
       ).to.be.revertedWith("ERC1155Marketplace: Not enough ERC1155 token");
     });
     it("Should succeed and uncompleted when execute buy order with valid data and smaller quantity", async function () {
@@ -396,7 +460,13 @@ describe("Testing ERC1155 Buy Order", async function () {
       const receipt = await (
         await (
           await erc1155BuyOrderFacet.connect(wearableOwner1)
-        ).executeERC1155BuyOrder(fourthBuyOrderId, quantity2)
+        ).executeERC1155BuyOrder(
+          fourthBuyOrderId,
+          diamondAddress,
+          testWearableId1,
+          highPrice,
+          quantity2
+        )
       ).wait();
       const event = receipt!.events!.find(
         (e: any) => e.event === "ERC1155BuyOrderExecute"
@@ -454,7 +524,13 @@ describe("Testing ERC1155 Buy Order", async function () {
       const receipt = await (
         await (
           await erc1155BuyOrderFacet.connect(wearableOwner1)
-        ).executeERC1155BuyOrder(fourthBuyOrderId, remainedQuantity)
+        ).executeERC1155BuyOrder(
+          fourthBuyOrderId,
+          diamondAddress,
+          testWearableId1,
+          highPrice,
+          remainedQuantity
+        )
       ).wait();
       const event = receipt!.events!.find(
         (e: any) => e.event === "ERC1155BuyOrderExecute"
@@ -537,7 +613,13 @@ describe("Testing ERC1155 Buy Order", async function () {
       await expect(
         (
           await erc1155BuyOrderFacet.connect(wearableOwner2)
-        ).executeERC1155BuyOrder(buyOrderId, quantity1)
+        ).executeERC1155BuyOrder(
+          buyOrderId,
+          diamondAddress,
+          testWearableId2,
+          price,
+          quantity1
+        )
       ).to.be.revertedWith("ERC1155BuyOrder: Already expired");
     });
   });
