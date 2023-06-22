@@ -376,6 +376,23 @@ export const wearablesSvgs = [
   wearable("367_EyesofDevotion"),
   wearable("368_BeardofDivinity"),
   wearable("369_StaffofCreation"),
+  //szn 5 baadges
+  370,
+  371,
+  372,
+  373,
+  374,
+  375,
+  376,
+  377,
+  378,
+  379,
+  380,
+  381,
+  382,
+  383,
+  384,
+  385,
 ];
 
 export const sleeveSvgs = [
