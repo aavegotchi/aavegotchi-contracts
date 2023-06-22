@@ -255,6 +255,10 @@ export default async function main() {
     "ShopFacet",
     aavegotchiDiamond.address
   );
+  itemsFacet = await ethers.getContractAt(
+    "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
+    aavegotchiDiamond.address
+  );
   aavegotchiFacet = await ethers.getContractAt(
     "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
     aavegotchiDiamond.address
@@ -601,56 +605,58 @@ export default async function main() {
   console.log("Realm diamond set:" + strDisplay(receipt.gasUsed));
   totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
-  let numberPerMint = 1;
-  tx = await shopFacet.mintPortals(ownerAddress, numberPerMint);
-  receipt = await tx.wait();
-  console.log("Mint portals:" + strDisplay(receipt.gasUsed));
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  // let numberPerMint = 1;
+  // tx = await shopFacet.mintPortals(ownerAddress, numberPerMint);
+  // receipt = await tx.wait();
+  // console.log("Mint portals:" + strDisplay(receipt.gasUsed));
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
-  const gotchiIds = []
-  for (let i = 0; i < numberPerMint; i++) {
-    const gotchi = await aavegotchiFacet.getAavegotchi(i);
-    gotchiIds.push(gotchi.tokenId)
-    console.log(`Aavegotchi ID: ${i} owner is ${gotchi.owner} and status is closed portal (${gotchi.status == 0}) `);
-  }
+  // const gotchiIds = []
+  // for (let i = 0; i < numberPerMint; i++) {
+  //   const gotchi = await aavegotchiFacet.getAavegotchi(i);
+  //   gotchiIds.push(gotchi.tokenId)
+  //   console.log(`Aavegotchi ID: ${i} owner is ${gotchi.owner} and status is closed portal (${gotchi.status == 0}) `);
+  // }
 
-  await vrfFacet.openPortals(gotchiIds);
-  for (let i = 0; i < numberPerMint; i++) {
-    const gotchi = await aavegotchiFacet.getAavegotchi(i);
-    console.log(`Aavegotchi ID: ${i} status is open portal (${gotchi.status == 2}) `);
-  }
+  // await vrfFacet.openPortals(gotchiIds);
+  // for (let i = 0; i < numberPerMint; i++) {
+  //   const gotchi = await aavegotchiFacet.getAavegotchi(i);
+  //   console.log(`Aavegotchi ID: ${i} status is open portal (${gotchi.status == 2}) `);
+  // }
 
-  for (let i = 0; i < numberPerMint; i++) {
-    await aavegotchiGameFacet.claimAavegotchi(i, 0, ethers.utils.parseEther("10000"));
-    const gotchi = await aavegotchiFacet.getAavegotchi(i);
-    console.log(`Aavegotchi ID: ${i} status is claimed (${gotchi.status == 3})`);
-    console.log('aavegotchi owner', gotchi.owner)
-  }
+  // for (let i = 0; i < numberPerMint; i++) {
+  //   await aavegotchiGameFacet.claimAavegotchi(i, 0, ethers.utils.parseEther("10000"));
+  //   const gotchi = await aavegotchiFacet.getAavegotchi(i);
+  //   console.log(`Aavegotchi ID: ${i} status is claimed (${gotchi.status == 3})`);
+  //   console.log('aavegotchi owner', gotchi.owner)
+  // }
 
-  for (let i = 1; i < 200; i++) {
-    try {
-      tx = await ghstTokenContract.mint(ownerAddress, ethers.utils.parseEther('100000000000000000000000'))
-      await tx.wait()
+  // for (let i = 1; i < 200; i++) {
+  //   try {
+  //     tx = await ghstTokenContract.mint(ownerAddress, ethers.utils.parseEther('100000000000000000000000'))
+  //     await tx.wait()
 
-      tx = await ghstTokenContract.approve(shopFacet.address, ethers.utils.parseEther('100000000000000000000000'))
-      await tx.wait()
+  //     tx = await ghstTokenContract.approve(shopFacet.address, ethers.utils.parseEther('100000000000000000000000'))
+  //     await tx.wait()
 
-      tx = await shopFacet.purchaseItemsWithGhst(ownerAddress, [i], [1])
-      await tx.wait()
-      console.log(`purchased item with id ${i}`)
+  //     tx = await shopFacet.purchaseItemsWithGhst(ownerAddress, [i], [1])
+  //     await tx.wait()
+  //     console.log(`purchased item with id ${i}`)
 
-    } catch (e) {
-    }
-  }
+  //   } catch (e) {
+  //   }
+  // }
 
-  console.log('itemBalancesWithTypes')
-  console.log(await itemsFacet.itemBalancesWithTypes(ownerAddress))
+  // console.log('itemBalancesWithTypes')
+  // console.log(await itemsFacet.itemBalancesWithTypes(ownerAddress))
 
 
-  console.log('Equipping wearables')
-  tx = await itemsFacet.equipWearables(0, [0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-  await tx.wait()
+  // console.log('Equipping wearables')
+  // tx = await itemsFacet.equipWearables(0, [0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+  // await tx.wait()
 
+  // console.log('xxxxxx')
+  // console.log(await itemsFacet.equippedWearables(0))
 
 
   // TODO: allow revenue tokens?
