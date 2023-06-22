@@ -354,7 +354,7 @@ describe("Testing ERC721 Buy Order", async function () {
           await erc721BuyOrderFacet.connect(maticHolder)
         ).cancelERC721BuyOrder(firstBuyOrderId)
       ).to.be.revertedWith(
-        "ERC721BuyOrder: Only aavegotchi owner or buyer can call this function"
+        "ERC721BuyOrder: Only ERC721 token owner or buyer can call this function"
       );
     });
     it("Should revert when try to cancel canceled buy order", async function () {
@@ -450,7 +450,7 @@ describe("Testing ERC721 Buy Order", async function () {
           highestPrice
         )
       ).to.be.revertedWith(
-        "ERC721BuyOrder: Only aavegotchi owner can call this function"
+        "ERC721BuyOrder: Only ERC721 token owner can call this function"
       );
     });
     it("Should revert when try to execute canceled buy order", async function () {

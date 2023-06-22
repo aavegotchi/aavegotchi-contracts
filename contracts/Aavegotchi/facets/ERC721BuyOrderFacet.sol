@@ -74,11 +74,7 @@ contract ERC721BuyOrderFacet is Modifiers {
 
         uint256 category = LibSharedMarketplace.getERC721Category(_erc721TokenAddress, _erc721TokenId);
         require(category != LibAavegotchi.STATUS_VRF_PENDING, "ERC721BuyOrder: Cannot buy a portal that is pending VRF");
-        if (_erc721TokenAddress == address(this)) {
-            require(sender != s.aavegotchis[_erc721TokenId].owner, "ERC721BuyOrder: Owner can't be buyer");
-        } else {
-            require(sender != IERC721(_erc721TokenAddress).ownerOf(_erc721TokenId), "ERC721BuyOrder: Owner can't be buyer");
-        }
+        require(sender != IERC721(_erc721TokenAddress).ownerOf(_erc721TokenId), "ERC721BuyOrder: Owner can't be buyer");
         if (category == LibAavegotchi.STATUS_AAVEGOTCHI) {
             require(_validationOptions.length == 3, "ERC721BuyOrder: Not enough validation options for aavegotchi");
         }
@@ -137,17 +133,10 @@ contract ERC721BuyOrderFacet is Modifiers {
         ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
 
         require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
-        if (erc721BuyOrder.erc721TokenAddress == address(this)) {
-            require(
-                (sender == s.aavegotchis[erc721BuyOrder.erc721TokenId].owner) || (sender == erc721BuyOrder.buyer),
-                "ERC721BuyOrder: Only aavegotchi owner or buyer can call this function"
-            );
-        } else {
-            require(
-                (sender == IERC721(erc721BuyOrder.erc721TokenAddress).ownerOf(erc721BuyOrder.erc721TokenId)) || (sender == erc721BuyOrder.buyer),
-                "ERC721BuyOrder: Only ERC721 token owner or buyer can call this function"
-            );
-        }
+        require(
+            (sender == IERC721(erc721BuyOrder.erc721TokenAddress).ownerOf(erc721BuyOrder.erc721TokenId)) || (sender == erc721BuyOrder.buyer),
+            "ERC721BuyOrder: Only ERC721 token owner or buyer can call this function"
+        );
         require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
         if (erc721BuyOrder.duration > 0) {
             require(erc721BuyOrder.timeCreated + erc721BuyOrder.duration >= block.timestamp, "ERC721BuyOrder: Already expired");
@@ -164,11 +153,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         require(erc721BuyOrder.erc721TokenAddress == _erc721TokenAddress, "ERC721BuyOrder: ERC721 token address not matched");
         require(erc721BuyOrder.erc721TokenId == _erc721TokenId, "ERC721BuyOrder: ERC721 token id not matched");
         require(erc721BuyOrder.priceInWei == _priceInWei, "ERC721BuyOrder: Price not matched");
-        if (_erc721TokenAddress == address(this)) {
-            require(sender == s.aavegotchis[_erc721TokenId].owner, "ERC721BuyOrder: Only aavegotchi owner can call this function");
-        } else {
-            require(sender == IERC721(_erc721TokenAddress).ownerOf(_erc721TokenId), "ERC721BuyOrder: Only ERC721 token owner can call this function");
-        }
+        require(sender == IERC721(_erc721TokenAddress).ownerOf(_erc721TokenId), "ERC721BuyOrder: Only ERC721 token owner can call this function");
         require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
         if (erc721BuyOrder.duration > 0) {
             require(erc721BuyOrder.timeCreated + erc721BuyOrder.duration >= block.timestamp, "ERC721BuyOrder: Already expired");
