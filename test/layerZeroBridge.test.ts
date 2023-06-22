@@ -21,7 +21,7 @@ import deploySupernets from "../scripts/deploy-supernet";
 describe("Bridge ERC721: ", function () {
   const chainId_A = 1
   const chainId_B = 2
-  const minGasToStore = 100000
+  const minGasToStore = 80000
   const batchSizeLimit = 1
   let polygonAdapterParams: any
   let gotchichainAdapterParams: any
@@ -81,6 +81,8 @@ describe("Bridge ERC721: ", function () {
 
     let minGasToTransferAndStore = await bridgePolygonSide.minDstGasLookup(chainId_B, 1)
     let transferGasPerToken = await bridgePolygonSide.dstChainIdToTransferGas(chainId_B)
+    console.log("minGasToTransferAndStore")
+    console.log(minGasToTransferAndStore.add(transferGasPerToken.mul(1)))
     polygonAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, minGasToTransferAndStore.add(transferGasPerToken.mul(1))])
   })
 
@@ -189,6 +191,8 @@ describe("Bridge ERC721: ", function () {
     //Unequipping items
     await itemsFacetGotchichainSide.equipWearables(tokenId, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     
+    console.log("HEEYY")
+    console.log(await itemsFacetPolygonSide.itemBalancesWithTypes(owner.address))
     //Checking items balance after unequipping them
     expect((await itemsFacetGotchichainSide.itemBalancesWithTypes(owner.address))[0].itemId).to.be.equal(ethers.BigNumber.from(80))
     expect((await itemsFacetGotchichainSide.itemBalancesWithTypes(owner.address))[0].balance).to.be.equal(ethers.BigNumber.from(1))
