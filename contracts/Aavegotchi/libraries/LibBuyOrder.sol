@@ -10,6 +10,8 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import "../../shared/interfaces/IERC721.sol";
 
 library LibBuyOrder {
+    event ERC721BuyOrderCanceled(uint256 indexed buyOrderId, uint256 time);
+
     function cancelERC721BuyOrder(uint256 _buyOrderId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
@@ -26,6 +28,8 @@ library LibBuyOrder {
 
         // refund GHST to buyer
         LibERC20.transfer(s.ghstContract, erc721BuyOrder.buyer, erc721BuyOrder.priceInWei);
+
+        emit ERC721BuyOrderCanceled(_buyOrderId, block.timestamp);
     }
 
     function removeERC721BuyOrder(uint256 _buyOrderId) internal {

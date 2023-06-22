@@ -15,6 +15,7 @@ import {
   ItemsFacet,
   OwnershipFacet,
 } from "../typechain";
+import { utils } from "ethers";
 
 const { expect } = chai;
 
@@ -226,6 +227,14 @@ describe("Testing ERC721 Buy Order", async function () {
         secondBuyOrderId = event!.args!.buyOrderId;
         expect(event!.args!.buyer).to.equal(ghstHolderAddress);
         expect(event!.args!.duration).to.equal(duration0);
+
+        // cancel old one
+        const topic = utils.id("ERC721BuyOrderCanceled(uint256,uint256)");
+        const cancelEvent = receipt!.events!.find(
+          (event: any) => event.topics && event.topics[0] === topic
+        );
+        expect(cancelEvent!.address).to.equal(diamondAddress);
+
         const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
         expect(newBalance.add(mediumPrice).sub(price)).to.equal(oldBalance);
       });
@@ -263,6 +272,7 @@ describe("Testing ERC721 Buy Order", async function () {
         thirdBuyOrderId = event!.args!.buyOrderId;
         expect(event!.args!.buyer).to.equal(ghstHolder2Address);
         expect(event!.args!.duration).to.equal(duration0);
+
         const newBalance = await ghstERC20.balanceOf(ghstHolder2Address);
         expect(newBalance.add(mediumPrice)).to.equal(oldBalance);
       });
@@ -364,9 +374,14 @@ describe("Testing ERC721 Buy Order", async function () {
     });
     it("Should succeed if cancel valid buy order", async function () {
       const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
-      await (
+      const receipt = await (
         await erc721BuyOrderFacet.cancelERC721BuyOrder(secondBuyOrderId)
       ).wait();
+      const topic = utils.id("ERC721BuyOrderCanceled(uint256,uint256)");
+      const event = receipt!.events!.find(
+        (event: any) => event.topics && event.topics[0] === topic
+      );
+      expect(event!.address).to.equal(diamondAddress);
       const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
       expect(newBalance.sub(mediumPrice)).to.equal(oldBalance);
     });
