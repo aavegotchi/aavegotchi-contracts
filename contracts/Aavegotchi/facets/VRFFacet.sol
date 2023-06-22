@@ -126,7 +126,7 @@ contract VrfFacet is Modifiers {
             require(owner == s.aavegotchis[tokenId].owner, "AavegotchiFacet: Only aavegotchi owner can open a portal");
             require(s.aavegotchis[tokenId].locked == false, "AavegotchiFacet: Can't open portal when it is locked");
             drawRandomNumber(tokenId);
-            LibERC721Marketplace.cancelERC721Listing(address(this), tokenId, owner);
+            // LibERC721Marketplace.cancelERC721Listing(address(this), tokenId, owner);
         }
         emit OpenPortals(_tokenIds);
     }
@@ -134,9 +134,9 @@ contract VrfFacet is Modifiers {
     function drawRandomNumber(uint256 _tokenId) internal {
         s.aavegotchis[_tokenId].status = LibAavegotchi.STATUS_VRF_PENDING;
         uint256 fee = s.fee;
-        require(s.link.balanceOf(address(this)) >= fee, "VrfFacet: Not enough LINK");
+        // require(s.link.balanceOf(address(this)) >= fee, "VrfFacet: Not enough LINK");
         bytes32 l_keyHash = s.keyHash;
-        require(s.link.transferAndCall(s.vrfCoordinator, fee, abi.encode(l_keyHash, 0)), "VrfFacet: link transfer failed");
+        // require(s.link.transferAndCall(s.vrfCoordinator, fee, abi.encode(l_keyHash, 0)), "VrfFacet: link transfer failed");
         uint256 vrfSeed = uint256(keccak256(abi.encode(l_keyHash, 0, address(this), s.vrfNonces[l_keyHash])));
         s.vrfNonces[l_keyHash]++;
         bytes32 requestId = keccak256(abi.encodePacked(l_keyHash, vrfSeed));

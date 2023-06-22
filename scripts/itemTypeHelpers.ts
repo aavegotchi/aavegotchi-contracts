@@ -476,10 +476,9 @@ export function getAllItemTypes(
       slotPositions: stringToSlotPositions(itemType.slotPositions),
       ghstPrice: ethers.utils.parseEther(ghstPrice),
       rarityScoreModifier: calculateRarityScoreModifier(maxQuantity),
-      maxQuantity: 5,
+      maxQuantity: maxQuantity,
       totalQuantity: 0, //New items always start at 0
       name: itemType.name.trim(), //Trim the name to remove empty spaces
-      canPurchaseWithGhst: true,
     };
 
     if (!Array.isArray(itemType.allowedCollaterals)) {
@@ -526,23 +525,22 @@ export function getBaadgeItemTypes(
 function rarityLevelToGhstPrice(
   rarityLevel: rarityLevel | undefined
 ): BigNumberish {
-  return "5"
-  // switch (rarityLevel) {
-  //   case "common":
-  //     return "5";
-  //   case "uncommon":
-  //     return "10";
-  //   case "rare":
-  //     return "100";
-  //   case "legendary":
-  //     return "300";
-  //   case "mythical":
-  //     return "2000";
-  //   case "godlike":
-  //     return "10000";
-  //   default:
-  //     return "0";
-  // }
+  switch (rarityLevel) {
+    case "common":
+      return "5";
+    case "uncommon":
+      return "10";
+    case "rare":
+      return "100";
+    case "legendary":
+      return "300";
+    case "mythical":
+      return "2000";
+    case "godlike":
+      return "10000";
+    default:
+      return "0";
+  }
 }
 
 function rarityLevelToMaxQuantity(
