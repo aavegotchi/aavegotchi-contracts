@@ -83,7 +83,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         if (oldBuyOrderId != 0) {
             ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[oldBuyOrderId];
             require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
-            require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
+            require(erc721BuyOrder.cancelled == false && erc721BuyOrder.timePurchased == 0, "ERC721BuyOrder: Already processed");
             if ((erc721BuyOrder.duration == 0) || (erc721BuyOrder.timeCreated + erc721BuyOrder.duration >= block.timestamp)) {
                 LibBuyOrder.cancelERC721BuyOrder(oldBuyOrderId);
             }
@@ -137,7 +137,7 @@ contract ERC721BuyOrderFacet is Modifiers {
             sender == IERC721(erc721BuyOrder.erc721TokenAddress).ownerOf(erc721BuyOrder.erc721TokenId) || sender == erc721BuyOrder.buyer,
             "ERC721BuyOrder: Only ERC721 token owner or buyer can call this function"
         );
-        require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
+        require(erc721BuyOrder.cancelled == false && erc721BuyOrder.timePurchased == 0, "ERC721BuyOrder: Already processed");
         if (erc721BuyOrder.duration > 0) {
             require(erc721BuyOrder.timeCreated + erc721BuyOrder.duration >= block.timestamp, "ERC721BuyOrder: Already expired");
         }
@@ -154,7 +154,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         require(erc721BuyOrder.erc721TokenId == _erc721TokenId, "ERC721BuyOrder: ERC721 token id not matched");
         require(erc721BuyOrder.priceInWei == _priceInWei, "ERC721BuyOrder: Price not matched");
         require(sender == IERC721(_erc721TokenAddress).ownerOf(_erc721TokenId), "ERC721BuyOrder: Only ERC721 token owner can call this function");
-        require((erc721BuyOrder.cancelled == false) && (erc721BuyOrder.timePurchased == 0), "ERC721BuyOrder: Already processed");
+        require(erc721BuyOrder.cancelled == false && erc721BuyOrder.timePurchased == 0, "ERC721BuyOrder: Already processed");
         if (erc721BuyOrder.duration > 0) {
             require(erc721BuyOrder.timeCreated + erc721BuyOrder.duration >= block.timestamp, "ERC721BuyOrder: Already expired");
         }
