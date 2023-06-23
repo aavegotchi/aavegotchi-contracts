@@ -19,6 +19,7 @@ export async function upgrade() {
         "function placeERC721BuyOrder(address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei, uint256 _duration, bool[] calldata _validationOptions) external",
         "function executeERC721BuyOrder(uint256 _buyOrderId, address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei) external",
         "function cancelERC721BuyOrder(uint256 _buyOrderId) external",
+        "function getERC721BuyOrderStatuses(uint256[] calldata _buyOrderIds) external view",
       ],
       removeSelectors: [],
     },

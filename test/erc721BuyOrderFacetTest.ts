@@ -812,4 +812,14 @@ describe("Testing ERC721 Buy Order", async function () {
       expect(newBalance.add(price)).to.equal(oldBalance);
     });
   });
+
+  describe("Test ERC721BuyOrderFacet status getters", async function () {
+    it("Should get buy order status", async function () {
+      const status = await erc721BuyOrderFacet.getERC721BuyOrderStatuses([
+        firstBuyOrderId,
+      ]);
+
+      expect(status[0].status).to.equal("cancelled");
+    });
+  });
 });

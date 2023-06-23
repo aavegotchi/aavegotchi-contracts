@@ -40,6 +40,32 @@ contract ERC721BuyOrderFacet is Modifiers {
         require(buyOrder_.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
     }
 
+    struct StatusesReturn {
+        string status;
+        uint256 buyOrderId;
+    }
+
+    function getERC721BuyOrderStatuses(uint256[] calldata _buyOrderIds) external view returns (StatusesReturn[] memory statuses_) {
+        uint256 length = _buyOrderIds.length;
+        statuses_ = new StatusesReturn[](length);
+        for (uint256 i; i < length; i++) {
+            ERC721BuyOrder memory buyOrder = s.erc721BuyOrders[_buyOrderIds[i]];
+            if (buyOrder.timeCreated == 0) {
+                statuses_[i].status = "nonexistent";
+                statuses_[i].buyOrderId = _buyOrderIds[i];
+            } else if (buyOrder.cancelled == true) {
+                statuses_[i].status = "cancelled";
+                statuses_[i].buyOrderId = _buyOrderIds[i];
+            } else if (buyOrder.timePurchased != 0) {
+                statuses_[i].status = "executed";
+                statuses_[i].buyOrderId = _buyOrderIds[i];
+            } else {
+                statuses_[i].status = "pending";
+                statuses_[i].buyOrderId = _buyOrderIds[i];
+            }
+        }
+    }
+
     function getERC721BuyOrderIdsByTokenId(
         address _erc721TokenAddress,
         uint256 _erc721TokenId
