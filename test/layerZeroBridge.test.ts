@@ -13,15 +13,10 @@ import { setForgeProperties } from "../scripts/upgrades/forge/upgrade-forgeSette
 
 import deploySupernets from "../scripts/deploy-supernet";
 
-//770011019756000000000
-//770000011019756000000000
-
-//87964
-
 describe("Bridge ERC721: ", function () {
   const chainId_A = 1
   const chainId_B = 2
-  const minGasToStore = 80000
+  const minGasToStore = 150000
   const batchSizeLimit = 1
   let polygonAdapterParams: any
   let gotchichainAdapterParams: any
@@ -69,11 +64,11 @@ describe("Bridge ERC721: ", function () {
     await bridgeGotchichainSide.setDstChainIdToBatchLimit(chainId_A, batchSizeLimit)
     
     //Set min dst gas for swap
-    await bridgePolygonSide.setMinDstGas(chainId_B, 1, 350000)
-    await bridgeGotchichainSide.setMinDstGas(chainId_A, 1, 350000)
+    await bridgePolygonSide.setMinDstGas(chainId_B, 1, 35000)
+    await bridgeGotchichainSide.setMinDstGas(chainId_A, 1, 35000)
 
-    await bridgePolygonSide.setDstChainIdToTransferGas(chainId_B, 50000)
-    await bridgeGotchichainSide.setDstChainIdToTransferGas(chainId_A, 50000)
+    await bridgePolygonSide.setDstChainIdToTransferGas(chainId_B, 1950000)
+    await bridgeGotchichainSide.setDstChainIdToTransferGas(chainId_A, 1950000)
     
     //Set layer zero bridge on facet
     await bridgeFacetPolygonSide.setLayerZeroBridge(bridgePolygonSide.address)
@@ -84,10 +79,6 @@ describe("Bridge ERC721: ", function () {
 
     const minGasToTransferAndStoreGotchichainSide = await bridgeGotchichainSide.minDstGasLookup(chainId_A, 1)
     const transferGasPerTokenGotchichainSide = await bridgeGotchichainSide.dstChainIdToTransferGas(chainId_A)
-
-    console.log("minGasToTransferAndStore")
-    console.log(minGasToTransferAndStorePolygonSide.add(transferGasPerTokenPolygonSide.mul(1)))
-    console.log(minGasToTransferAndStoreGotchichainSide.add(transferGasPerTokenGotchichainSide.mul(1)))
 
     polygonAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, minGasToTransferAndStorePolygonSide.add(transferGasPerTokenPolygonSide.mul(1))])
     gotchichainAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, minGasToTransferAndStoreGotchichainSide.add(transferGasPerTokenGotchichainSide.mul(1))])
@@ -120,7 +111,7 @@ describe("Bridge ERC721: ", function () {
     expect(await aavegotchiFacetGotchichainSide.ownerOf(tokenId)).to.be.equal(owner.address)
   })
 
-  it.only("sendFrom() - send NFT from Polygon to Gotchichain and back to Polygon - without equipped item", async function () {
+  it("sendFrom() - send NFT from Polygon to Gotchichain and back to Polygon - without equipped item", async function () {
     const tokenId = await mintPortals(owner.address)
 
     //Estimate nativeFees
@@ -165,15 +156,21 @@ describe("Bridge ERC721: ", function () {
     expect(await aavegotchiFacetPolygonSide.ownerOf(tokenId)).to.be.equal(owner.address)
   })
 
-  it("sendFrom() - send NFT from Polygon to Gotchichain - with equipped item", async function () {
+  //work:
+  //necessary native fee: 100000400000
+  //necessary native fee: 1235319756000000000
+  //necessary native fee: 146319756000000000
+  //necessary native fee: 36319756000000000
+  //doesnt work:
+  //necessary native fee: 13549756000000000
+
+  it.only("sendFrom() - send NFT from Polygon to Gotchichain - with equipped item", async function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
     //Estimate nativeFees
     let nativeFee = (await bridgePolygonSide.estimateSendFee(chainId_B, owner.address, tokenId, false, polygonAdapterParams)).nativeFee
-    console.log('nativeFee', nativeFee.toString())
 
     //Swaping token to Gotchichain
-    console.log('Swaping token to Gotchichain')
     await aavegotchiFacetPolygonSide.approve(bridgePolygonSide.address, tokenId)
     let sendFromTx = await bridgePolygonSide.sendFrom(
       owner.address,
@@ -189,8 +186,6 @@ describe("Bridge ERC721: ", function () {
     
     //Checking Aavegotchi ownership in both chains
     expect(await aavegotchiFacetPolygonSide.ownerOf(tokenId)).to.equal(bridgePolygonSide.address)
-    const aavegotchiDatax = await bridgeFacetGotchichainSide.getAavegotchiData(tokenId)
-    console.log({ aavegotchiDatax })
     expect(await aavegotchiFacetGotchichainSide.ownerOf(tokenId)).to.be.equal(owner.address)
     
     //Checking items balance before unequipping them
