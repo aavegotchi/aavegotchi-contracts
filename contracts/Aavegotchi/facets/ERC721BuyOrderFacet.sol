@@ -159,10 +159,12 @@ contract ERC721BuyOrderFacet is Modifiers {
             require(erc721BuyOrder.timeCreated + erc721BuyOrder.duration >= block.timestamp, "ERC721BuyOrder: Already expired");
         }
 
-        // disable for gotchi in lending
-        uint256 category = LibSharedMarketplace.getERC721Category(_erc721TokenAddress, _erc721TokenId);
-        if (category == LibAavegotchi.STATUS_AAVEGOTCHI) {
-            require(!LibGotchiLending.isAavegotchiLent(uint32(_erc721TokenId)), "ERC721BuyOrder: Not supported for aavegotchi in lending");
+        if (erc721BuyOrder.erc721TokenAddress == address(this)) {
+            // disable for gotchi in lending
+            uint256 category = LibSharedMarketplace.getERC721Category(_erc721TokenAddress, _erc721TokenId);
+            if (category == LibAavegotchi.STATUS_AAVEGOTCHI) {
+                require(!LibGotchiLending.isAavegotchiLent(uint32(_erc721TokenId)), "ERC721BuyOrder: Not supported for aavegotchi in lending");
+            }
         }
 
         // hash validation
@@ -171,6 +173,9 @@ contract ERC721BuyOrderFacet is Modifiers {
                 LibBuyOrder.generateValidationHash(_erc721TokenAddress, _erc721TokenId, erc721BuyOrder.validationOptions),
             "ERC721BuyOrder: Invalid buy order"
         );
+
+        //Execute order
+        erc721BuyOrder.timePurchased = block.timestamp;
 
         BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(erc721BuyOrder.priceInWei, new uint256[](0), [10000, 0]);
 
@@ -197,7 +202,6 @@ contract ERC721BuyOrderFacet is Modifiers {
         }
 
         LibBuyOrder.removeERC721BuyOrder(_buyOrderId);
-        erc721BuyOrder.timePurchased = block.timestamp;
 
         emit ERC721BuyOrderExecuted(
             _buyOrderId,
