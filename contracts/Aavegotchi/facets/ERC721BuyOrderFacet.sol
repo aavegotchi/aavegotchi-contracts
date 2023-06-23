@@ -24,7 +24,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         bytes32 validationHash,
         uint256 time
     );
-
+    event ERC721BuyOrderCanceled(uint256 indexed buyOrderId, uint256 time);
     event ERC721BuyOrderExecuted(
         uint256 indexed buyOrderId,
         address indexed buyer,
@@ -86,6 +86,7 @@ contract ERC721BuyOrderFacet is Modifiers {
             require(erc721BuyOrder.cancelled == false && erc721BuyOrder.timePurchased == 0, "ERC721BuyOrder: Already processed");
             if ((erc721BuyOrder.duration == 0) || (erc721BuyOrder.timeCreated + erc721BuyOrder.duration >= block.timestamp)) {
                 LibBuyOrder.cancelERC721BuyOrder(oldBuyOrderId);
+                emit ERC721BuyOrderCanceled(oldBuyOrderId, block.timestamp);
             }
         }
 
@@ -143,6 +144,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         }
 
         LibBuyOrder.cancelERC721BuyOrder(_buyOrderId);
+        emit ERC721BuyOrderCanceled(_buyOrderId, block.timestamp);
     }
 
     function executeERC721BuyOrder(uint256 _buyOrderId, address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei) external {
