@@ -4,9 +4,8 @@ pragma solidity 0.8.1;
 import {LibAppStorage, AppStorage, ERC721BuyOrder} from "./LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibAavegotchi} from "./LibAavegotchi.sol";
+import {LibSharedMarketplace} from "./LibSharedMarketplace.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
-
-import "../../shared/interfaces/IERC721.sol";
 
 library LibBuyOrder {
     function cancelERC721BuyOrder(uint256 _buyOrderId) internal {
@@ -54,7 +53,8 @@ library LibBuyOrder {
     ) internal view returns (bytes32) {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
-        uint256 category = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
+        //Category is always validated
+        uint256 category = LibSharedMarketplace.getERC721Category(_erc721TokenAddress, _erc721TokenId);
         bytes memory _params = abi.encode(_erc721TokenId, category);
         if (category == LibAavegotchi.STATUS_AAVEGOTCHI) {
             // Aavegotchi

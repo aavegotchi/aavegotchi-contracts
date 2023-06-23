@@ -70,7 +70,7 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@param _erc721TokenId The identifier of the NFT to query
     ///@return category_ Category of the NFT // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi 4 == Realm.
     function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view returns (uint256 category_) {
-        category_ = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
+        category_ = LibSharedMarketplace.getERC721Category(_erc721TokenAddress, _erc721TokenId);
     }
 
     ///@notice Allow an ERC721 owner to list his NFT for sale
@@ -150,7 +150,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         s.nextERC721ListingId++;
         uint256 listingId = s.nextERC721ListingId;
 
-        uint256 category = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
+        uint256 category = LibSharedMarketplace.getERC721Category(_erc721TokenAddress, _erc721TokenId);
         require(category != LibAavegotchi.STATUS_VRF_PENDING, "ERC721Marketplace: Cannot list a portal that is pending VRF");
 
         uint256 oldListingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][msgSender];
@@ -344,6 +344,7 @@ contract ERC721MarketplaceFacet is Modifiers {
             IERC721(listing.erc721TokenAddress).safeTransferFrom(seller, _recipient, listing.erc721TokenId);
         }
 
+        //Cancel an existing buy order if it exists for the buyer
         uint256 buyerBuyOrderId = s.buyerToBuyOrderId[listing.erc721TokenAddress][listing.erc721TokenId][buyer];
         if (buyerBuyOrderId != 0) {
             LibBuyOrder.cancelERC721BuyOrder(buyerBuyOrderId);

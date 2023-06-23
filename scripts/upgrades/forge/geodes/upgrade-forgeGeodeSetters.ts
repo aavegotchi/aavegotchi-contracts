@@ -1,18 +1,18 @@
 import {
   ForgeDAOFacet,
   ForgeVRFFacet,
-  OwnershipFacet,
   ForgeFacet,
 } from "../../../../typechain";
 import { ethers, network } from "hardhat";
 import {
   diamondOwner,
+  gasPrice,
   impersonate,
   maticForgeDiamond,
   mumbaiForgeDiamond,
 } from "../../../helperFunctions";
 
-const isMumbai = true;
+const isMumbai = false;
 const forgeDiamondAddress = isMumbai ? mumbaiForgeDiamond : maticForgeDiamond;
 
 const winChance = {
@@ -95,17 +95,21 @@ export async function setForgeGeodeProperties() {
     "100000000000000",
     keyHash,
     vrfCoordinator,
-    link
+    link,
+    { gasPrice: gasPrice }
   );
 
-  await forgeDaoFacet.setGeodeWinChanceBips(winChance);
-  await forgeDaoFacet.setGeodePrizes(geodePrizeIds, geodePrizeQuantities);
+  await forgeDaoFacet.setGeodeWinChanceBips(winChance, { gasPrice: gasPrice });
+  await forgeDaoFacet.setGeodePrizes(geodePrizeIds, geodePrizeQuantities, {
+    gasPrice: gasPrice,
+  });
 
   // mint schematics
   await forgeFacet.adminMintBatch(
     forgeDiamondAddress,
     geodePrizeIds,
-    geodePrizeQuantities
+    geodePrizeQuantities,
+    { gasPrice: gasPrice }
   );
 
   console.log("Finished setForgeGeodeProperties.");

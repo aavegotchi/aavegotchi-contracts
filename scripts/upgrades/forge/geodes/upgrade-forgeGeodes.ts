@@ -6,13 +6,11 @@ import {
 } from "../../../../tasks/deployUpgrade";
 
 import {
-  maticDiamondAddress,
-  maticDiamondUpgrader,
   maticForgeDiamond,
   mumbaiForgeDiamond,
 } from "../../../helperFunctions";
 
-const isMumbai = true;
+const isMumbai = false;
 
 export async function upgradeForgeGeodes() {
   console.log("Upgrading Forge facets for Geodes.");
@@ -51,12 +49,13 @@ export async function upgradeForgeGeodes() {
         "function vrfCoordinator() external view returns (address)",
         "function link() external view returns (address)",
         "function keyHash() external view returns (bytes32)",
-        "function getMaxVrf() external view returns (uint256)",
+        "function getMaxVrf() external pure returns (uint256)",
         "function areGeodePrizesAvailable() public view returns (bool)",
         "function numTotalPrizesLeft() public view returns (uint256)",
         "function openGeodes(uint256[] calldata _geodeTokenIds, uint256[] calldata _amountPerToken) external",
         "function rawFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) external",
         "function getRequestInfo(address user) external view returns (tuple(address,bytes32,VrfStatus,uint256,uint256[],uint256[]) memory)",
+        "function getRequestInfoByRequestId(bytes32 requestId) external view returns (tuple(address,bytes32,VrfStatus,uint256,uint256[],uint256[]) memory)",
         "function claimWinnings() external",
         "function changeVrf(uint256 _newFee, bytes32 _keyHash, address _vrfCoordinator, address _link) external",
         "function removeLinkTokens(address _to, uint256 _value) external",
@@ -67,24 +66,15 @@ export async function upgradeForgeGeodes() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
-  // let iface: ForgeDAOFacetInterface = new ethers.utils.Interface(
-  //   ForgeDAOFacet__factory.abi
-  // ) as ForgeDAOFacetInterface;
-  //
-  // const calldata = iface.encodeFunctionData("setForge", [forgeAddress]);
-
   const signerAddress = await (await ethers.getSigners())[0].getAddress();
 
   const args: DeployUpgradeTaskArgs = {
-    // diamondUpgrader: maticDiamondUpgrader,
     diamondUpgrader: signerAddress,
     diamondAddress: isMumbai ? mumbaiForgeDiamond : maticForgeDiamond,
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,
     freshDeployment: false,
-    // initAddress: maticDiamondAddress,
-    // initCalldata: calldata,
   };
 
   await run("deployUpgrade", args);
