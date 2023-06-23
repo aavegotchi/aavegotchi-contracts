@@ -59,6 +59,7 @@ library LibBuyOrder {
     ) internal view returns (bytes32) {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
+        //Category is always validated
         uint256 category = LibSharedMarketplace.getERC721Category(_erc721TokenAddress, _erc721TokenId);
         bytes memory _params = abi.encode(_erc721TokenId, category);
         if (category == LibAavegotchi.STATUS_AAVEGOTCHI) {
