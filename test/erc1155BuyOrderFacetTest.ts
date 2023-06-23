@@ -267,11 +267,10 @@ describe("Testing ERC1155 Buy Order", async function () {
       const receipt = await (
         await erc1155BuyOrderFacet.cancelERC1155BuyOrder(firstBuyOrderId)
       ).wait();
-      const topic = ethers.utils.id("ERC1155BuyOrderCanceled(uint256,uint256)");
       const event = receipt!.events!.find(
-        (event: any) => event.topics && event.topics[0] === topic
+        (e: any) => e.event === "ERC1155BuyOrderCancel"
       );
-      expect(event!.address).to.equal(diamondAddress);
+      expect(event!.args!.buyOrderId).to.equal(firstBuyOrderId);
       const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
       expect(newBalance.sub(price.mul(quantity1))).to.equal(oldBalance);
     });

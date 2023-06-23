@@ -26,6 +26,7 @@ contract ERC1155BuyOrderFacet is Modifiers {
         uint256 time
     );
     event ERC1155BuyOrderUpdate(uint256 indexed buyOrderId, uint256 indexed category, uint256 priceInWei, uint256 quantity, uint256 time);
+    event ERC1155BuyOrderCancel(uint256 indexed buyOrderId, uint256 time);
     event ERC1155BuyOrderExecute(
         uint256 indexed buyOrderId,
         address indexed buyer,
@@ -148,6 +149,7 @@ contract ERC1155BuyOrderFacet is Modifiers {
         }
 
         LibBuyOrder.cancelERC1155BuyOrder(_buyOrderId);
+        emit ERC1155BuyOrderCancel(_buyOrderId, block.timestamp);
     }
 
     function executeERC1155BuyOrder(
