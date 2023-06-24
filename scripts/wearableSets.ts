@@ -1154,18 +1154,17 @@ function eightBitIntArrayToUint(array: number[] | string[]) {
   return BigNumber.from("0x" + uint.join(""));
 }
 
-const wearableSets = [];
+const _wearableSets = [];
 for (const wearableSet of wearableSetArrays) {
   if (!Array.isArray(wearableSet.allowedCollaterals)) {
     console.log(wearableSet);
     throw Error("Is not array");
   }
-  wearableSets.push({
+  _wearableSets.push({
     name: wearableSet.name,
     wearableIds: wearableSet.wearableIds,
     traitsBonuses: wearableSet.traitsBonuses,
     allowedCollaterals: wearableSet.allowedCollaterals,
   });
 }
-
-exports.wearableSets = wearableSets;
+export const wearableSets = _wearableSets;

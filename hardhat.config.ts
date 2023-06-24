@@ -81,6 +81,10 @@ export default {
       blockGasLimit: 20000000,
       gasPrice: 1000000000,
     },
+    supernet: {
+      url: process.env.SUPERNET_URL,
+      // accounts: [process.env.SECRET],
+    },
     // gorli: {
     //   url: process.env.GORLI,
     //   accounts: [process.env.SECRET],

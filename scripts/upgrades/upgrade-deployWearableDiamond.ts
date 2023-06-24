@@ -7,6 +7,7 @@ import {
 import { WearableDiamond__factory } from "../../typechain/factories/WearableDiamond__factory";
 
 import { gasPrice } from "../helperFunctions";
+import { aavegotchiDiamondAddressMatic } from "../../helpers/constants";
 // const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 
 //these already deployed facets(in the aavegotchi diamond) are added to the wearableDiamond directly
@@ -14,7 +15,12 @@ const aavegotchiCutFacet = "0x4f908Fa47F10bc2254dae7c74d8B797C1749A8a6";
 const aavegotchiLoupeFacet = "0x58f64b56B1e15D8C932c51287d814EDaa8d6feb9";
 const aavegotchiOwnerShipFacet = "0xAE7DF9f59FEc446903c64f21a76d039Bc81712ef";
 
-async function deployAndUpgradeWearableDiamond() {
+export async function deployAndUpgradeWearableDiamond(
+  cutFacet: string,
+  loupeFacet: string,
+  ownerShipFacet: string,
+  aavegotchiDiamond: string
+) {
   console.log("Deploying wearable diamond");
   // deploy Wearable Diamond
   const Diamond = (await ethers.getContractFactory(
@@ -25,9 +31,10 @@ async function deployAndUpgradeWearableDiamond() {
 
   const diamond = await Diamond.deploy(
     signerAddress,
-    aavegotchiCutFacet,
-    aavegotchiLoupeFacet,
-    aavegotchiOwnerShipFacet,
+    cutFacet,
+    loupeFacet,
+    ownerShipFacet,
+    aavegotchiDiamond,
     { gasPrice: gasPrice }
   );
   await diamond.deployed();
@@ -50,6 +57,7 @@ async function deployAndUpgradeWearableDiamond() {
         "function setBaseURI(string memory _value) external",
         "function safeTransferFrom(address _from,address _to,uint256 _id,uint256 _value,bytes calldata _data) external",
         "function safeBatchTransferFrom(address _from,address _to,uint256[] calldata _ids,uint256[] calldata _values,bytes calldata _data) external",
+        "function tokenURI(uint256 _tokenId) external view returns (string memory)",
       ],
       removeSelectors: [],
     },
@@ -78,10 +86,17 @@ async function deployAndUpgradeWearableDiamond() {
   };
 
   await run("deployUpgrade", args);
+
+  return diamond.address;
 }
 
 if (require.main === module) {
-  deployAndUpgradeWearableDiamond()
+  deployAndUpgradeWearableDiamond(
+    aavegotchiCutFacet,
+    aavegotchiLoupeFacet,
+    aavegotchiOwnerShipFacet,
+    aavegotchiDiamondAddressMatic
+  )
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

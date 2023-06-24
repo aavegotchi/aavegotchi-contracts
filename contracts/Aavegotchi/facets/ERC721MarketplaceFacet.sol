@@ -9,6 +9,7 @@ import {IERC2981} from "../../shared/interfaces/IERC2981.sol";
 import {IMultiRoyalty} from "../../shared/interfaces/IMultiRoyalty.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace, ERC721Listing} from "../libraries/LibERC721Marketplace.sol";
+import {LibBuyOrder} from "../libraries/LibBuyOrder.sol";
 import {Modifiers, ListingListItem} from "../libraries/LibAppStorage.sol";
 import {BaazaarSplit, LibSharedMarketplace, SplitAddresses} from "../libraries/LibSharedMarketplace.sol";
 
@@ -69,15 +70,7 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@param _erc721TokenId The identifier of the NFT to query
     ///@return category_ Category of the NFT // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi 4 == Realm.
     function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) public view returns (uint256 category_) {
-        require(
-            _erc721TokenAddress == address(this) || s.erc721Categories[_erc721TokenAddress][0] != 0,
-            "ERC721Marketplace: ERC721 category does not exist"
-        );
-        if (_erc721TokenAddress != address(this)) {
-            category_ = s.erc721Categories[_erc721TokenAddress][0];
-        } else {
-            category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
-        }
+        category_ = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
     }
 
     ///@notice Allow an ERC721 owner to list his NFT for sale
@@ -157,7 +150,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         s.nextERC721ListingId++;
         uint256 listingId = s.nextERC721ListingId;
 
-        uint256 category = getERC721Category(_erc721TokenAddress, _erc721TokenId);
+        uint256 category = LibAavegotchi.getERC721Category(_erc721TokenAddress, _erc721TokenId);
         require(category != LibAavegotchi.STATUS_VRF_PENDING, "ERC721Marketplace: Cannot list a portal that is pending VRF");
 
         uint256 oldListingId = s.erc721TokenToListingId[_erc721TokenAddress][_erc721TokenId][msgSender];
@@ -349,6 +342,11 @@ contract ERC721MarketplaceFacet is Modifiers {
         } else {
             // External contracts
             IERC721(listing.erc721TokenAddress).safeTransferFrom(seller, _recipient, listing.erc721TokenId);
+        }
+
+        uint256 buyerBuyOrderId = s.buyerToBuyOrderId[listing.erc721TokenAddress][listing.erc721TokenId][buyer];
+        if (buyerBuyOrderId != 0) {
+            LibBuyOrder.cancelERC721BuyOrder(buyerBuyOrderId);
         }
 
         emit ERC721ExecutedListing(

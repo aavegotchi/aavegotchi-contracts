@@ -61,6 +61,7 @@ library LibAavegotchi {
     uint8 constant STATUS_AAVEGOTCHI = 3;
 
     event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
+    event KinshipBurned(uint256 _tokenId, uint256 _value);
 
     function toNumericTraits(
         uint256 _randomNumber,
@@ -363,5 +364,34 @@ library LibAavegotchi {
         s.ownerTokenIdIndexes[_to][_tokenId] = s.ownerTokenIds[_to].length;
         s.ownerTokenIds[_to].push(uint32(_tokenId));
         emit LibERC721.Transfer(_from, _to, _tokenId);
+    }
+
+    ///@notice Query the category of an NFT
+    ///@param _erc721TokenAddress The contract address of the NFT to query
+    ///@param _erc721TokenId The identifier of the NFT to query
+    ///@return category_ Category of the NFT // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi 4 == Realm.
+    function getERC721Category(address _erc721TokenAddress, uint256 _erc721TokenId) internal view returns (uint256 category_) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+
+        require(
+            _erc721TokenAddress == address(this) || s.erc721Categories[_erc721TokenAddress][0] != 0,
+            "ERC721Marketplace: ERC721 category does not exist"
+        );
+        if (_erc721TokenAddress != address(this)) {
+            category_ = s.erc721Categories[_erc721TokenAddress][0];
+        } else {
+            category_ = s.aavegotchis[_erc721TokenId].status; // 0 == portal, 1 == vrf pending, 2 == open portal, 3 == Aavegotchi
+        }
+    }
+
+    function _reduceAavegotchiKinship(uint256 _tokenId, uint256 _amount) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        uint256 currentKinship = s.aavegotchis[_tokenId].interactionCount;
+        if (_amount > currentKinship) {
+            revert("Kinship too low to reduce");
+        } else {
+            s.aavegotchis[_tokenId].interactionCount -= _amount;
+            emit KinshipBurned(_tokenId, s.aavegotchis[_tokenId].interactionCount);
+        }
     }
 }

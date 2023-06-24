@@ -13,6 +13,10 @@ import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
 
+import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
+
+import {LibBitmapHelpers} from "../libraries/LibBitmapHelpers.sol";
+
 contract AavegotchiGameFacet is Modifiers {
     /// @dev This emits when the approved address for an NFT is changed or
     ///  reaffirmed. The zero address indicates there is no approved address.
@@ -231,7 +235,7 @@ contract AavegotchiGameFacet is Modifiers {
         aavegotchi.lastInteracted = uint40(block.timestamp - 12 hours);
         aavegotchi.interactionCount = 50;
         aavegotchi.claimTime = uint40(block.timestamp);
-
+        
         require(_stakeAmount >= option.minimumStake, "AavegotchiGameFacet: _stakeAmount less than minimum stake");
 
         aavegotchi.status = LibAavegotchi.STATUS_AAVEGOTCHI;
@@ -240,7 +244,7 @@ contract AavegotchiGameFacet is Modifiers {
         address escrow = address(new CollateralEscrow(option.collateralType));
         aavegotchi.escrow = escrow;
         address owner = LibMeta.msgSender();
-        LibERC20.transferFrom(option.collateralType, owner, escrow, _stakeAmount);
+        // LibERC20.transferFrom(option.collateralType, owner, escrow, _stakeAmount);
         LibERC721Marketplace.cancelERC721Listing(address(this), _tokenId, owner);
     }
 
@@ -301,11 +305,6 @@ contract AavegotchiGameFacet is Modifiers {
         s.realmAddress = _realm;
     }
 
-    function realmInteract(uint256 _tokenId) external {
-        require(msg.sender == s.realmAddress, "AavegotchiGamefacet: Not RealmAddress");
-        LibAavegotchi.interact(_tokenId);
-    }
-
     ///@notice Allow the owner of an NFT to spend skill points for it(basically to boost the numeric traits of that NFT)
     ///@dev only valid for claimed aavegotchis
     ///@param _tokenId The identifier of the NFT to spend the skill points on
@@ -327,5 +326,38 @@ contract AavegotchiGameFacet is Modifiers {
 
     function isAavegotchiLocked(uint256 _tokenId) external view returns (bool isLocked) {
         isLocked = s.aavegotchis[_tokenId].locked;
+    }
+
+    ///@notice Allow the current owner/borrower of an NFT to reduce kinship while channelling alchemica
+    ///@dev will revert if the gotchi kinship is too low to channel or if the lending listing does not enable channeling
+    ///@param _gotchiId Id of the Gotchi used to channel
+    function reduceKinshipViaChanneling(uint32 _gotchiId) external {
+        //only realmDiamond can reduce kinship
+        require(msg.sender == s.realmAddress, "GotchiLending: Only Realm can reduce kinship via channeling");
+        //no need to do checks on _gotchiId since realmDiamond handles that
+        //first check if aavegotchi is lent
+        if (LibGotchiLending.isAavegotchiLent(_gotchiId)) {
+            //short-circuit here
+            uint32 listingId = s.aavegotchiToListingId[_gotchiId];
+            if (LibBitmapHelpers.getValueInByte(0, s.gotchiLendings[listingId].permissions) == 0) {
+                revert("This listing has no permissions set");
+            }
+
+            //check if channelling is allowed for the listing
+            //check that the modifier is at least 1
+            //more checks can be introduced if more modifiers are added
+            if (LibBitmapHelpers.getValueInByte(0, s.gotchiLendings[listingId].permissions) > 0) {
+                //more checks can be introduced here as different permissions are added
+                LibAavegotchi._reduceAavegotchiKinship(_gotchiId, 2);
+            } else {
+                revert("Channeling not enabled by listing owner");
+            }
+        }
+        //if aavegotchi is not lent
+        else {
+            LibAavegotchi._reduceAavegotchiKinship(_gotchiId, 2);
+        }
+
+        LibAavegotchi.interact(_gotchiId);
     }
 }

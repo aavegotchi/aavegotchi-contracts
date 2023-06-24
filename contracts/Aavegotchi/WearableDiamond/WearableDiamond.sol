@@ -13,16 +13,12 @@ import {DiamondLoupeFacet} from "../../shared/facets/DiamondLoupeFacet.sol";
 import {OwnershipFacet} from "../../shared/facets/OwnershipFacet.sol";
 
 contract WearableDiamond {
-    constructor(
-        address _contractOwner,
-        address _diamondCutFacet,
-        address _diaomondLoupeFacet,
-        address _ownershipFacet
-    ) {
+    constructor(address _contractOwner, address _diamondCutFacet, address _diaomondLoupeFacet, address _ownershipFacet, address _aavegotchiDiamond) {
         WearableLibDiamond.setContractOwner(_contractOwner);
         WearableLibDiamond.addDiamondFunctions(_diamondCutFacet, _diaomondLoupeFacet, _ownershipFacet);
         WearableLibDiamond.DiamondStorage storage ds = WearableLibDiamond.diamondStorage();
         ds.supportedInterfaces[0xd9b67a26] = true; //erc1155
+        ds.aavegotchiDiamond = _aavegotchiDiamond;
     }
 
     // Find facet for function that is called and execute the
