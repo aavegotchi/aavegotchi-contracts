@@ -190,7 +190,7 @@ contract ItemsFacet is Modifiers {
         onlyUnlocked(_tokenId)
     {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
-        // require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
+        require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
         emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _wearablesToEquip);
 
         address sender = LibMeta.msgSender();
