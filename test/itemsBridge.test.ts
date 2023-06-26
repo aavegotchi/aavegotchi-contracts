@@ -1,15 +1,8 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { AavegotchiFacet, ItemsBridgeGotchichainSide, ItemsBridgePolygonSide, DAOFacet, ERC20MintableBurnable, ItemsFacet, PolygonXGotchichainBridgeFacet, ShopFacet, SvgFacet } from "../typechain";
-import { getAllItemTypes, SleeveObject } from "../scripts/itemTypeHelpers";
-import { itemTypes as allItemTypes } from "../data/itemTypes/itemTypes";
-import { wearableSets } from "../scripts/wearableSets";
+import { AavegotchiFacet, ItemsBridgeGotchichainSide, ItemsBridgePolygonSide, ERC20MintableBurnable, ItemsFacet, PolygonXGotchichainBridgeFacet, ShopFacet } from "../typechain";
 const LZEndpointMockCompiled = require("@layerzerolabs/solidity-examples/artifacts/contracts/mocks/LZEndpointMock.sol/LZEndpointMock.json")
-const diamond = require("../js/diamond-util/src/index.js");
-import { deployAndUpgradeWearableDiamond } from "../scripts/upgrades/upgrade-deployWearableDiamond";
-import { deployAndUpgradeForgeDiamond } from "../scripts/upgrades/forge/upgrade-deployAndUpgradeForgeDiamond";
-import { setForgeProperties } from "../scripts/upgrades/forge/upgrade-forgeSetters";
 
 import deploySupernets from "../scripts/deploy-supernet";
 
