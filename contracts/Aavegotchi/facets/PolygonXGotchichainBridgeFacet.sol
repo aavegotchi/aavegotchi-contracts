@@ -30,6 +30,23 @@ contract PolygonXGotchichainBridgeFacet is Modifiers {
         s.ownerTokenIdIndexes[_toAddress][_tokenId] = s.ownerTokenIds[_toAddress].length;
         s.ownerTokenIds[_toAddress].push(uint32(_tokenId));
     }
+    
+    function removeItemsFromOwner(address _owner, uint256[] calldata _tokenIds, uint256[] calldata _tokenAmounts) external onlyLayerZeroBridge() {
+        for (uint256 i; i < _tokenIds.length; i++) {
+            uint256 tokenId = _tokenIds[i];
+            uint256 tokenAmount = _tokenAmounts[i];
+            LibItems.removeFromOwner(_owner, tokenId, tokenAmount);
+        }
+    }
+
+        
+    function addItemsToOwner(address _owner, uint256[] calldata _tokenIds, uint256[] calldata _tokenAmounts) external onlyLayerZeroBridge() {
+        for (uint256 i; i < _tokenIds.length; i++) {
+            uint256 tokenId = _tokenIds[i];
+            uint256 tokenAmount = _tokenAmounts[i];
+            LibItems.addToOwner(_owner, tokenId, tokenAmount);
+        }
+    }
 
     function setLayerZeroBridge(address _newLayerZeroBridge) external onlyDaoOrOwner {
         layerZeroBridge = _newLayerZeroBridge;
@@ -38,4 +55,5 @@ contract PolygonXGotchichainBridgeFacet is Modifiers {
     function getAavegotchiData(uint256 _tokenId) external view returns (Aavegotchi memory aavegotchi_) {
         aavegotchi_ = s.aavegotchis[_tokenId];
     }
+
 }
