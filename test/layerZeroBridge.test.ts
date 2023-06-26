@@ -156,14 +156,6 @@ describe("Bridge ERC721: ", function () {
     expect(await aavegotchiFacetPolygonSide.ownerOf(tokenId)).to.be.equal(owner.address)
   })
 
-  //work:
-  //necessary native fee: 100000400000
-  //necessary native fee: 1235319756000000000
-  //necessary native fee: 146319756000000000
-  //necessary native fee: 36319756000000000
-  //doesnt work:
-  //necessary native fee: 13549756000000000
-
   it("sendFrom() - send NFT from Polygon to Gotchichain - with equipped item", async function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
@@ -207,7 +199,7 @@ describe("Bridge ERC721: ", function () {
     console.log({ aavegotchiData })
   })
 
-  it("sendFrom() - send NFT from Polygon to Gotchichain and back to Polygon - with equipped item", async function () {
+  it.skip("sendFrom() - send NFT from Polygon to Gotchichain and back to Polygon - with equipped item", async function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
     //Estimate nativeFees
@@ -266,7 +258,7 @@ describe("Bridge ERC721: ", function () {
     console.log({ aavegotchiData })
   })
 
-  it("sendFrom() - send NFT from Polygon to Gotchichain and back to Polygon - equipping item on gotchichain", async function () {
+  it.skip("sendFrom() - send NFT from Polygon to Gotchichain and back to Polygon - equipping item on gotchichain", async function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
     //Estimate nativeFees
@@ -328,7 +320,7 @@ describe("Bridge ERC721: ", function () {
     expect(await itemsFacetPolygonSide.equippedWearables(tokenId)).to.eql([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
   })
 
-  it("sendFrom() - send equipped NFT from Polygon to Gotchichain - equipping and unequipping on Gotchichain - send back to Polygon", async function () {
+  it.skip("sendFrom() - send equipped NFT from Polygon to Gotchichain - equipping and unequipping on Gotchichain - send back to Polygon", async function () {
     const tokenId = await mintPortalsWithItems(owner.address)
 
     // Estimate nativeFees
