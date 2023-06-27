@@ -27,6 +27,9 @@ describe("Bridge ERC721: ", function () {
   let aavegotchiGameFacetPolygonSide: AavegotchiGameFacet, aavegotchiGameFacetGotchichainSide: AavegotchiGameFacet
   let vrfFacetPolygonSide: VrfFacet, vrfFacetGotchichainSide: VrfFacet
 
+  // We define a fixture to reuse the same setup in every test.
+  // We use loadFixture to run this setup once, snapshot that state,
+  // and reset Hardhat Network to that snapshot in every test.
   async function deployFixture() {
     owner = (await ethers.getSigners())[0];
     alice = (await ethers.getSigners())[1];
