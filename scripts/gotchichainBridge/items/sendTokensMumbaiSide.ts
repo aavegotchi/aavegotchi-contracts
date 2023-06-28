@@ -25,7 +25,6 @@ export default async function main() {
   const defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, "350000"])
 
   const nativeFee = (await bridgePolygonSide.estimateSendFee(lzChainIdGotchichain, alice.address, tokenId, tokenAmount, false, defaultAdapterParams)).nativeFee
-  
   tx = await bridgePolygonSide.sendFrom(
     alice.address,
     lzChainIdGotchichain,
@@ -37,9 +36,10 @@ export default async function main() {
     defaultAdapterParams,
     { value: nativeFee }
   )
-  await tx.wait()
+  const receipt = await tx.wait()
 
-  console.log("Bridge setted on Polygon.");
+  console.log("Token transferred from Polygon to Gotchichain!");
+  console.log("Transaction hash:", receipt.transactionHash)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
