@@ -57,7 +57,8 @@ export async function queryAllAavegotchis(
     const result = await getUsersWithGotchisOfAddresses(
       addresses,
       blockTag,
-      index
+      index,
+      true
     );
 
     index += 1000;
@@ -111,7 +112,8 @@ export async function queryAllAavegotchis(
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
     const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(
       batch,
-      blockTag
+      blockTag,
+      true
     );
     vaultUsers.forEach((e) => {
       allGotchiIds = allGotchiIds.concat(e.gotchisOwned.map((f) => f.id));
