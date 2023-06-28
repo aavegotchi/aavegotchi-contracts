@@ -200,6 +200,20 @@ struct XPMerkleDrops {
     uint256 xpAmount; //10-sigprop, 20-coreprop
 }
 
+struct ERC721BuyOrder {
+    uint256 buyOrderId;
+    address buyer;
+    address erc721TokenAddress;
+    uint256 erc721TokenId;
+    uint256 priceInWei;
+    uint256 timeCreated;
+    uint256 timePurchased;
+    uint256 duration; //0 for unlimited
+    bool cancelled;
+    bytes32 validationHash;
+    bool[] validationOptions;
+}
+
 struct ERC1155BuyOrder {
     uint256 buyOrderId;
     address buyer;
@@ -329,6 +343,12 @@ struct AppStorage {
     mapping(bytes32 => XPMerkleDrops) xpDrops;
     mapping(uint256 => mapping(bytes32 => uint256)) xpClaimed;
     // states for buy orders
+    uint256 nextERC721BuyOrderId;
+    mapping(uint256 => ERC721BuyOrder) erc721BuyOrders; // buyOrderId => data
+    mapping(address => mapping(uint256 => uint256[])) erc721TokenToBuyOrderIds; // erc721 token address => erc721TokenId => buyOrderIds
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) erc721TokenToBuyOrderIdIndexes; // erc721 token address => erc721TokenId => buyOrderId => index
+    mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
+    // states for erc1155 buy orders
     uint256 nextERC1155BuyOrderId;
     mapping(uint256 => ERC1155BuyOrder) erc1155BuyOrders; // buyOrderId => data
     mapping(address => mapping(uint256 => uint256[])) erc1155TokenToBuyOrderIds; // erc1155 token address => erc1155TokenId => buyOrderIds
@@ -356,6 +376,10 @@ contract Modifiers {
     }
     modifier onlyUnlocked(uint256 _tokenId) {
         require(s.aavegotchis[_tokenId].locked == false, "LibAppStorage: Only callable on unlocked Aavegotchis");
+        _;
+    }
+    modifier onlyLocked(uint256 _tokenId) {
+        require(s.aavegotchis[_tokenId].locked == true, "LibAppStorage: Only callable on locked Aavegotchis");
         _;
     }
 
