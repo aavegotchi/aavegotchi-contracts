@@ -4,7 +4,8 @@ import { ethers } from "hardhat";
 
 const aavegotchDiamondAddressMumbai = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
 
-export default async function main(to: string) {
+export default async function main() {
+  const to = (await ethers.getSigners())[0].address
   const itemsFacetPolygonSide = await ethers.getContractAt("contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet", aavegotchDiamondAddressMumbai)
 
   const itemBalances = await itemsFacetPolygonSide.itemBalances(to) 
@@ -16,7 +17,7 @@ export default async function main(to: string) {
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 if (require.main === module) {
-  main("to")
+  main()
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
