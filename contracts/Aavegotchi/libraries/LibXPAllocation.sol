@@ -9,6 +9,15 @@ library LibXPAllocation {
     event XPClaimed(bytes32 indexed _propId, uint256 _gotchiId);
     event GrantExperience(uint256[] _tokenIds, uint256[] _xpValues);
 
+    struct ClaimStruct {
+        uint256 xpAmount;
+        bytes32 node;
+        bytes32 root;
+        uint256 gotchiId;
+        //optional
+        uint256 position;
+    }
+
     function _createXPDrop(bytes32 _propId, bytes32 _merkleRoot, uint256 _xpAmount) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         XPMerkleDrops storage xp = s.xpDrops[_propId];
@@ -27,29 +36,31 @@ library LibXPAllocation {
     ) internal {
         //short-circuits
         AppStorage storage s = LibAppStorage.diamondStorage();
-        uint256 xpAmount = s.xpDrops[_propId].xpAmount;
+        //initialize memory struct to escape `stack too deep`
+        ClaimStruct memory cStruct;
+        cStruct.xpAmount = s.xpDrops[_propId].xpAmount;
         //short-circuit here
-        if (xpAmount == 0) revert("NonExistentDrop");
+        if (cStruct.xpAmount == 0) revert("NonExistentDrop");
         //drops are unique by their roots
-        bytes32 node = keccak256(abi.encodePacked(_claimer, _gotchiIds));
-        bytes32 root = s.xpDrops[_propId].root;
+        cStruct.node = keccak256(abi.encodePacked(_claimer, _gotchiIds));
+        cStruct.root = s.xpDrops[_propId].root;
 
         //short-circuits do not revert entire claim process
         //proof is valid
-        if (LibMerkle.verify(_proof, root, node)) {
+        if (LibMerkle.verify(_proof, cStruct.root, cStruct.node)) {
             //claiming for a set of gotchis
             if (_onlyGotchis.length > 0) {
                 //make sure gotchi is a subset
                 for (uint256 i; i < _onlyGotchis.length; i++) {
-                    uint256 gotchiId = _onlyGotchis[i];
-                    uint256 position = _onlyGotchisPositions[i];
+                    cStruct.gotchiId = _onlyGotchis[i];
+                    cStruct.position = _onlyGotchisPositions[i];
 
                     //verify that gotchi is in _gotchiIds
-                    if (_gotchiIds[position] == gotchiId) {
+                    if (_gotchiIds[cStruct.position] == cStruct.gotchiId) {
                         //check claimed status
-                        if (s.xpClaimed[gotchiId][_propId] == 0) {
+                        if (s.xpClaimed[cStruct.gotchiId][_propId] == 0) {
                             //allocate xp
-                            _allocateXPViaDrop(_propId, gotchiId, xpAmount);
+                            _allocateXPViaDrop(_propId, cStruct.gotchiId, cStruct.xpAmount);
                         }
                     } else {
                         revert("GotchiIdMismatch");
@@ -58,11 +69,11 @@ library LibXPAllocation {
             } else {
                 //claiming for all gotchis
                 for (uint256 i; i < _gotchiIds.length; i++) {
-                    uint256 gotchiId = _gotchiIds[i];
+                    cStruct.gotchiId = _gotchiIds[i];
                     //check claimed status
-                    if (s.xpClaimed[gotchiId][_propId] == 0) {
+                    if (s.xpClaimed[cStruct.gotchiId][_propId] == 0) {
                         //allocate xp
-                        _allocateXPViaDrop(_propId, gotchiId, xpAmount);
+                        _allocateXPViaDrop(_propId, cStruct.gotchiId, cStruct.xpAmount);
                     }
                 }
             }
