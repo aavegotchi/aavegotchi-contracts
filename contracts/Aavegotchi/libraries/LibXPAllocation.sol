@@ -22,7 +22,8 @@ library LibXPAllocation {
         address _claimer,
         uint256[] calldata _gotchiIds,
         bytes32[] calldata _proof,
-        uint256[] calldata _onlyGotchis
+        uint256[] calldata _onlyGotchis,
+        uint256[] calldata _onlyGotchisPositions //position of each _onlyGotchi in _gotchiIds array
     ) internal {
         //short-circuits
         AppStorage storage s = LibAppStorage.diamondStorage();
@@ -41,12 +42,17 @@ library LibXPAllocation {
                 //make sure gotchi is a subset
                 for (uint256 i; i < _onlyGotchis.length; i++) {
                     uint256 gotchiId = _onlyGotchis[i];
-                    if (_inUintArray(_gotchiIds, gotchiId)) {
+                    uint256 position = _onlyGotchisPositions[i];
+
+                    //verify that gotchi is in _gotchiIds
+                    if (_gotchiIds[position] == gotchiId) {
                         //check claimed status
                         if (s.xpClaimed[gotchiId][_propId] == 0) {
                             //allocate xp
                             _allocateXPViaDrop(_propId, gotchiId, xpAmount);
                         }
+                    } else {
+                        revert("GotchiIdMismatch");
                     }
                 }
             } else {
