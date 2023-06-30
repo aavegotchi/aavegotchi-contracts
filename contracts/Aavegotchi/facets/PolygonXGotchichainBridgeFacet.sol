@@ -41,10 +41,6 @@ contract PolygonXGotchichainBridgeFacet is Modifiers {
         }
     }
 
-    function setLayerZeroBridge(address _newLayerZeroBridge) external onlyDaoOrOwner {
-        s.layerZeroBridge = _newLayerZeroBridge;
-    }
-
     function getAavegotchiData(uint256 _tokenId) external view returns (Aavegotchi memory aavegotchi_) {
         aavegotchi_ = s.aavegotchis[_tokenId];
     }

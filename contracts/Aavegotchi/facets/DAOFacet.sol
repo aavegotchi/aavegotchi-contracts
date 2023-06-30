@@ -417,4 +417,16 @@ contract DAOFacet is Modifiers {
             emit UpdateItemPrice(itemId, _newPrices[i]);
         }
     }
+
+    ///@notice Allow the DAO to add an address as a Layer Zero bridge
+    ///@param _newLayerZeroBridge The address to be added as Layer Zero bridge
+    function addLayerZeroBridgeAddress(address _newLayerZeroBridge) external onlyDaoOrOwner {
+        s.layerZeroBridgeAddresses[_newLayerZeroBridge] = true;
+    }
+
+    ///@notice Allow the DAO to remove an address that was an Layer Zero bridge
+    ///@param _layerZeroBridgeToRemove The address to be removed fron being a Layer Zero bridge
+    function removeLayerZeroBridgeAddress(address _layerZeroBridgeToRemove) external onlyDaoOrOwner {
+        s.layerZeroBridgeAddresses[_layerZeroBridgeToRemove] = false;
+    }
 }

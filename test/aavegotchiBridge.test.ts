@@ -3,7 +3,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { AavegotchiFacet, BridgeGotchichainSide, BridgePolygonSide, ERC20MintableBurnable, ItemsFacet, PolygonXGotchichainBridgeFacet, ShopFacet, AavegotchiGameFacet, VrfFacet } from "../typechain";
+import { AavegotchiFacet, BridgeGotchichainSide, BridgePolygonSide, ERC20MintableBurnable, ItemsFacet, PolygonXGotchichainBridgeFacet, ShopFacet, AavegotchiGameFacet, VrfFacet, DAOFacet } from "../typechain";
 const LZEndpointMockCompiled = require("@layerzerolabs/solidity-examples/artifacts/contracts/mocks/LZEndpointMock.sol/LZEndpointMock.json")
 
 import deploySupernets from "../scripts/deploy-supernet";
@@ -26,6 +26,7 @@ describe("Bridge ERC721: ", function () {
   let bridgeFacetPolygonSide: PolygonXGotchichainBridgeFacet, bridgeFacetGotchichainSide: PolygonXGotchichainBridgeFacet
   let aavegotchiGameFacetPolygonSide: AavegotchiGameFacet, aavegotchiGameFacetGotchichainSide: AavegotchiGameFacet
   let vrfFacetPolygonSide: VrfFacet, vrfFacetGotchichainSide: VrfFacet
+  let daoFacetPolygonSide: DAOFacet, daoFacetGotchichainSide: DAOFacet
 
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
@@ -34,8 +35,8 @@ describe("Bridge ERC721: ", function () {
     owner = (await ethers.getSigners())[0];
     alice = (await ethers.getSigners())[1];
 
-    ; ({ shopFacet: shopFacetPolygonSide, aavegotchiFacet: aavegotchiFacetPolygonSide, polygonXGotchichainBridgeFacet: bridgeFacetPolygonSide, itemsFacet: itemsFacetPolygonSide, ghstToken: ghstTokenPolygonSide, aavegotchiGameFacet: aavegotchiGameFacetPolygonSide, vrfFacet: vrfFacetPolygonSide } = await deploySupernets())
-    ; ({ shopFacet: shopFacetGotchichainSide, aavegotchiFacet: aavegotchiFacetGotchichainSide, polygonXGotchichainBridgeFacet: bridgeFacetGotchichainSide, itemsFacet: itemsFacetGotchichainSide, ghstToken: ghstTokenGotchichainSide, aavegotchiGameFacet: aavegotchiGameFacetGotchichainSide, vrfFacet: vrfFacetGotchichainSide } = await deploySupernets())
+    ; ({ shopFacet: shopFacetPolygonSide, aavegotchiFacet: aavegotchiFacetPolygonSide, polygonXGotchichainBridgeFacet: bridgeFacetPolygonSide, itemsFacet: itemsFacetPolygonSide, ghstToken: ghstTokenPolygonSide, aavegotchiGameFacet: aavegotchiGameFacetPolygonSide, vrfFacet: vrfFacetPolygonSide, daoFacet: daoFacetPolygonSide } = await deploySupernets())
+    ; ({ shopFacet: shopFacetGotchichainSide, aavegotchiFacet: aavegotchiFacetGotchichainSide, polygonXGotchichainBridgeFacet: bridgeFacetGotchichainSide, itemsFacet: itemsFacetGotchichainSide, ghstToken: ghstTokenGotchichainSide, aavegotchiGameFacet: aavegotchiGameFacetGotchichainSide, vrfFacet: vrfFacetGotchichainSide, daoFacet: daoFacetGotchichainSide } = await deploySupernets())
 
     LZEndpointMock = await ethers.getContractFactory(LZEndpointMockCompiled.abi, LZEndpointMockCompiled.bytecode)
     const BridgePolygonSide = await ethers.getContractFactory("BridgePolygonSide");
@@ -69,8 +70,8 @@ describe("Bridge ERC721: ", function () {
     await bridgeGotchichainSide.setDstChainIdToTransferGas(chainId_A, 1950000)
 
     //Set layer zero bridge on facet
-    await bridgeFacetPolygonSide.setLayerZeroBridge(bridgePolygonSide.address)
-    await bridgeFacetGotchichainSide.setLayerZeroBridge(bridgeGotchichainSide.address)
+    await daoFacetPolygonSide.addLayerZeroBridgeAddress(bridgePolygonSide.address)
+    await daoFacetGotchichainSide.addLayerZeroBridgeAddress(bridgeGotchichainSide.address)
 
     return {
       shopFacetPolygonSide, aavegotchiFacetPolygonSide, bridgeFacetPolygonSide, itemsFacetPolygonSide,
@@ -200,7 +201,6 @@ describe("Bridge ERC721: ", function () {
     //Unequipping items
     await itemsFacetGotchichainSide.equipWearables(tokenId, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
-    console.log("HEEYY")
     console.log(await itemsFacetPolygonSide.itemBalancesWithTypes(owner.address))
     //Checking items balance after unequipping them
     expect((await itemsFacetGotchichainSide.itemBalancesWithTypes(owner.address))[0].itemId).to.be.equal(ethers.BigNumber.from(80))

@@ -339,7 +339,7 @@ struct AppStorage {
     mapping(address => mapping(uint256 => uint256[])) erc721TokenToBuyOrderIds; // erc721 token address => erc721TokenId => buyOrderIds
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) erc721TokenToBuyOrderIdIndexes; // erc721 token address => erc721TokenId => buyOrderId => index
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
-    address layerZeroBridge;
+    mapping(address => bool) layerZeroBridgeAddresses;
 }
 
 library LibAppStorage {
@@ -409,8 +409,8 @@ contract Modifiers {
     modifier onlyLayerZeroBridge() {
         address sender = LibMeta.msgSender();
         require(
-            sender == s.layerZeroBridge, 
-            "PolygonXGotchichainBridgeFacet: Do not have access"
+            s.layerZeroBridgeAddresses[sender], 
+            "LibAppStorage: Do not have access"
         );
         _;
     }
