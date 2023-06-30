@@ -8,7 +8,7 @@ async function rarityPayout() {
     rounds: "4",
     totalAmount: "1500000",
     blockNumber: "44479233",
-    deployerAddress: "0x8D46fd7160940d89dA026D59B2e819208E714E82",
+    deployerAddress: "0xb6384935d68e9858f8385ebeed7db84fc93b1420",
     tieBreakerIndex: "0",
   };
   await run("rarityPayout", args);

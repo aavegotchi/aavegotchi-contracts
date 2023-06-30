@@ -60,7 +60,23 @@ contract ERC721BuyOrderFacet is Modifiers {
                 statuses_[i].status = "executed";
                 statuses_[i].buyOrderId = _buyOrderIds[i];
             } else {
-                statuses_[i].status = "pending";
+                bytes32 validationHash = LibBuyOrder.generateValidationHash(
+                    buyOrder.erc721TokenAddress,
+                    buyOrder.erc721TokenId,
+                    buyOrder.validationOptions
+                );
+
+                //Handle active states
+                if (validationHash != buyOrder.validationHash) {
+                    statuses_[i].status = "invalid";
+                } else if (buyOrder.duration != 0 && buyOrder.timeCreated + buyOrder.duration < block.timestamp) {
+                    statuses_[i].status = "expired";
+                } else {
+                    statuses_[i].status = "pending";
+                }
+
+                // hash validation
+
                 statuses_[i].buyOrderId = _buyOrderIds[i];
             }
         }
