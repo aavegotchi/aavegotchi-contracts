@@ -209,7 +209,7 @@ describe("Bridge ERC721: ", function () {
     //Checking equipped items
     expect(await itemsFacetGotchichainSide.equippedWearables(tokenId)).to.eql([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
-    const aavegotchiData = await bridgeFacetGotchichainSide.getAavegotchiData(tokenId)
+    const aavegotchiData = await aavegotchiFacetGotchichainSide.getAavegotchiData(tokenId)
     console.log({ aavegotchiData })
   })
 
@@ -268,7 +268,7 @@ describe("Bridge ERC721: ", function () {
     //Checking equipped items
     expect(await itemsFacetPolygonSide.equippedWearables(tokenId)).to.eql([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
-    const aavegotchiData = await bridgeFacetGotchichainSide.getAavegotchiData(tokenId)
+    const aavegotchiData = await aavegotchiFacetGotchichainSide.getAavegotchiData(tokenId)
     console.log({ aavegotchiData })
   })
 

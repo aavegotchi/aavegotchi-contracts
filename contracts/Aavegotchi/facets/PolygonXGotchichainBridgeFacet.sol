@@ -41,8 +41,4 @@ contract PolygonXGotchichainBridgeFacet is Modifiers {
         }
     }
 
-    function getAavegotchiData(uint256 _tokenId) external view returns (Aavegotchi memory aavegotchi_) {
-        aavegotchi_ = s.aavegotchis[_tokenId];
-    }
-
 }

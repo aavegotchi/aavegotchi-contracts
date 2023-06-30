@@ -17,7 +17,7 @@ contract BridgeGotchichainSide is ProxyONFT721 {
     function estimateSendBatchFee(uint16 _dstChainId, bytes memory _toAddress, uint[] memory _tokenIds, bool _useZro, bytes memory _adapterParams) public view override returns (uint nativeFee, uint zroFee) {
         Aavegotchi[] memory aavegotchis = new Aavegotchi[](_tokenIds.length);
         for (uint i = 0; i < _tokenIds.length; i++) {
-            aavegotchis[i] = PolygonXGotchichainBridgeFacet(address(token)).getAavegotchiData(_tokenIds[i]);
+            aavegotchis[i] = AavegotchiFacet(address(token)).getAavegotchiData(_tokenIds[i]);
         }
         bytes memory payload = abi.encode(_toAddress, _tokenIds, aavegotchis);
         return lzEndpoint.estimateFees(_dstChainId, address(this), payload, _useZro, _adapterParams);
@@ -31,7 +31,7 @@ contract BridgeGotchichainSide is ProxyONFT721 {
         Aavegotchi[] memory aavegotchis = new Aavegotchi[](_tokenIds.length);
         for (uint i = 0; i < _tokenIds.length; i++) {
             _debitFrom(_from, _dstChainId, _toAddress, _tokenIds[i]);
-            aavegotchis[i] = PolygonXGotchichainBridgeFacet(address(token)).getAavegotchiData(_tokenIds[i]);
+            aavegotchis[i] = AavegotchiFacet(address(token)).getAavegotchiData(_tokenIds[i]);
         }
 
         bytes memory payload = abi.encode(_toAddress, _tokenIds, aavegotchis);
