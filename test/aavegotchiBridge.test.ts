@@ -255,9 +255,10 @@ describe("Bridge ERC721: ", function () {
     expect(await aavegotchiFacetGotchichainSide.ownerOf(tokenId)).to.equal(bridgeGotchichainSide.address)
     expect(await aavegotchiFacetPolygonSide.ownerOf(tokenId)).to.be.equal(owner.address)
 
-    //Checking items balance before unequipping them
+    //Checking items balance and equipped items before unequipping them
     expect((await itemsFacetPolygonSide.itemBalances(owner.address)).length).to.be.equal(0)
-
+    expect(await itemsFacetPolygonSide.equippedWearables(tokenId)).to.eql([0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    
     //Unequipping items
     await itemsFacetPolygonSide.equipWearables(tokenId, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
