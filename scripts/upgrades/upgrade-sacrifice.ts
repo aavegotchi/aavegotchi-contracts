@@ -1,4 +1,4 @@
-import { ethers, run } from "hardhat";
+import { run } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
@@ -11,7 +11,7 @@ export async function upgrade() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName: "ERC721BuyOrderFacet",
+      facetName: "CollateralFacet",
       addSelectors: [],
       removeSelectors: [],
     },
@@ -24,7 +24,7 @@ export async function upgrade() {
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
-    useMultisig: true,
+    useMultisig: false,
   };
 
   await run("deployUpgrade", args);
