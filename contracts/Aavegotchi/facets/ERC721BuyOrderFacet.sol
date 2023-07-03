@@ -177,7 +177,7 @@ contract ERC721BuyOrderFacet is Modifiers {
 
         require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
         require(
-            sender == IERC721(erc721BuyOrder.erc721TokenAddress).ownerOf(erc721BuyOrder.erc721TokenId) || sender == erc721BuyOrder.buyer,
+            sender == erc721BuyOrder.buyer || sender == IERC721(erc721BuyOrder.erc721TokenAddress).ownerOf(erc721BuyOrder.erc721TokenId),
             "ERC721BuyOrder: Only ERC721 token owner or buyer can call this function"
         );
         require(erc721BuyOrder.cancelled == false && erc721BuyOrder.timePurchased == 0, "ERC721BuyOrder: Already processed");
