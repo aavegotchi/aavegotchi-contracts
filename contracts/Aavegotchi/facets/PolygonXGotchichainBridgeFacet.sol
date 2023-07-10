@@ -7,13 +7,6 @@ import {LibItems} from "../libraries/LibItems.sol";
 
 contract PolygonXGotchichainBridgeFacet is Modifiers {
 
-    address public layerZeroBridge;
-
-    modifier onlyLayerZeroBridge() {
-        require(msg.sender == layerZeroBridge, "PolygonXGotchichainBridgeFacet: Do not have access");
-        _;
-    }
-
     function setAavegotchiMetadata(uint _id, Aavegotchi memory _aavegotchi) external onlyLayerZeroBridge {
         s.aavegotchis[_id] = _aavegotchi;
         for (uint i; i < _aavegotchi.equippedWearables.length; i++) {
@@ -46,14 +39,6 @@ contract PolygonXGotchichainBridgeFacet is Modifiers {
             uint256 tokenAmount = _tokenAmounts[i];
             LibItems.addToOwner(_owner, tokenId, tokenAmount);
         }
-    }
-
-    function setLayerZeroBridge(address _newLayerZeroBridge) external onlyDaoOrOwner {
-        layerZeroBridge = _newLayerZeroBridge;
-    }
-
-    function getAavegotchiData(uint256 _tokenId) external view returns (Aavegotchi memory aavegotchi_) {
-        aavegotchi_ = s.aavegotchis[_tokenId];
     }
 
 }

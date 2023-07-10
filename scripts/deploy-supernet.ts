@@ -267,6 +267,10 @@ export default async function main() {
     "PolygonXGotchichainBridgeFacet",
     aavegotchiDiamond.address
   );
+  daoFacet = await ethers.getContractAt(
+    "DAOFacet",
+    aavegotchiDiamond.address
+  );
   aavegotchiGameFacet = await ethers.getContractAt("AavegotchiGameFacet", aavegotchiDiamond.address);
   vrfFacet = await ethers.getContractAt("VrfFacet", aavegotchiDiamond.address);
   svgFacet = await ethers.getContractAt("SvgFacet", aavegotchiDiamond.address);
@@ -684,6 +688,7 @@ export default async function main() {
     aavegotchiGameFacet,
     vrfFacet,
     ghstToken: ghstTokenContract,
+    daoFacet
   }
 }
 

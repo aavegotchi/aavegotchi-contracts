@@ -118,7 +118,7 @@ describe("Items Bridge: ", function () {
     expect(itemBalancesPolygon[0].balance).to.be.equal(ethers.BigNumber.from(1));
   })
 
-  it("sendBatchFrom() - Sending 3 items from Polygon to Gotchichain and then back to Polygon", async function () {
+  it("sendBatchFrom() - Sending 2 items from Polygon to Gotchichain and then back to Polygon", async function () {
     //Minting Items
     const tokenIds = ['80', '81']
     const tokenAmounts = ['1', '1']
