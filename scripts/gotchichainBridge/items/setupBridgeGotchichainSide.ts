@@ -2,23 +2,34 @@
 
 import { ethers } from "hardhat";
 
-const lzChainIdGotchichain = process.env.LZ_CHAIN_ID_GOTCHICHAIN as string
+const lzChainIdMumbai = process.env.LZ_CHAIN_ID_MUMBAI as string
 const aavegotchDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_GOTCHICHAIN as string
 const itemsBridgeAddressMumbai = process.env.ITEMS_BRIDGE_ADDRESS_MUMBAI as string
 const itemsBridgeAddressGotchichain = process.env.ITEMS_BRIDGE_ADDRESS_GOTCHICHAIN as string
 
 export default async function main() {
   const bridgeGotchichainSide = await ethers.getContractAt("ItemsBridgeGotchichainSide", itemsBridgeAddressGotchichain)
-  const bridgeFacetGotchichainSide = await ethers.getContractAt("PolygonXGotchichainBridgeFacet", aavegotchDiamondAddressGotchichain)
+  const daoFacetGotchichainSide = await ethers.getContractAt("DAOFacet", aavegotchDiamondAddressGotchichain)
 
-  await bridgeGotchichainSide.setUseCustomAdapterParams(true)
+  let tx = await bridgeGotchichainSide.setUseCustomAdapterParams(true)
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  await tx.wait()
   
-  await bridgeGotchichainSide.setTrustedRemote(lzChainIdGotchichain, ethers.utils.solidityPack(["address", "address"], [itemsBridgeAddressMumbai, bridgeGotchichainSide.address]))
+  tx = await bridgeGotchichainSide.setTrustedRemote(lzChainIdMumbai, ethers.utils.solidityPack(["address", "address"], [itemsBridgeAddressMumbai, bridgeGotchichainSide.address]))
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  await tx.wait()
 
-  await bridgeGotchichainSide.setMinDstGas(lzChainIdGotchichain, 1, 150000)
-  await bridgeGotchichainSide.setMinDstGas(lzChainIdGotchichain, 2, 150000)
+  tx = await bridgeGotchichainSide.setMinDstGas(lzChainIdMumbai, 1, 150000)
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  await tx.wait()
 
-  await bridgeFacetGotchichainSide.addLayerZeroBridge(bridgeGotchichainSide.address)
+  tx = await bridgeGotchichainSide.setMinDstGas(lzChainIdMumbai, 2, 150000)
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  await tx.wait()
+
+  tx = await daoFacetGotchichainSide.addLayerZeroBridgeAddress(bridgeGotchichainSide.address)
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  await tx.wait()
 
   console.log("Bridge setted on Gotchichain");
 }

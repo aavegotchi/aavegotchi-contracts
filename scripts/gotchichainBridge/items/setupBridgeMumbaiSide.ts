@@ -2,7 +2,7 @@
 
 import { ethers } from "hardhat";
 
-const lzChainIdMumbai = process.env.LZ_CHAIN_ID_MUMBAI as string
+const lzChainIdGotchichain = process.env.LZ_CHAIN_ID_GOTCHICHAIN as string
 const aavegotchDiamondAddressMumbai = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
 const itemsBridgeAddressMumbai = process.env.ITEMS_BRIDGE_ADDRESS_MUMBAI as string
 const itemsBridgeAddressGotchichain = process.env.ITEMS_BRIDGE_ADDRESS_GOTCHICHAIN as string
@@ -14,26 +14,27 @@ const txParams = {
 export default async function main() {
   const bridgePolygonSide = await ethers.getContractAt("ItemsBridgePolygonSide", itemsBridgeAddressMumbai)
   const bridgeFacetPolygonSide = await ethers.getContractAt("PolygonXGotchichainBridgeFacet", aavegotchDiamondAddressMumbai)
+  const daoFacetPolygonSide = await ethers.getContractAt("DAOFacet", aavegotchDiamondAddressMumbai)
 
-  // let tx = await bridgePolygonSide.setUseCustomAdapterParams(true, txParams)
-  // console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
-  // await tx.wait()
-  
-  // tx = await bridgePolygonSide.setTrustedRemote(lzChainIdMumbai, ethers.utils.solidityPack(["address", "address"], [itemsBridgeAddressGotchichain, bridgePolygonSide.address]), txParams)
-  // console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
-  // await tx.wait()
-
-  // tx = await bridgePolygonSide.setMinDstGas(lzChainIdMumbai, 1, 150000, txParams)
-  // console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
-  // await tx.wait()
-
-  // tx = await bridgePolygonSide.setMinDstGas(lzChainIdMumbai, 2, 150000, txParams)
-  // console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
-  // await tx.wait()
-
-  let tx = await bridgeFacetPolygonSide.setLayerZeroBridge(bridgePolygonSide.address, txParams)
+  let tx = await bridgePolygonSide.setUseCustomAdapterParams(true, txParams)
   console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
+  
+  tx = await bridgePolygonSide.setTrustedRemote(lzChainIdGotchichain, ethers.utils.solidityPack(["address", "address"], [itemsBridgeAddressGotchichain, bridgePolygonSide.address]), txParams)
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  await tx.wait()
+
+  tx = await bridgePolygonSide.setMinDstGas(lzChainIdGotchichain, 1, 150000, txParams)
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  await tx.wait()
+
+  tx = await bridgePolygonSide.setMinDstGas(lzChainIdGotchichain, 2, 150000, txParams)
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  await tx.wait()
+
+  // tx = await daoFacetPolygonSide.addLayerZeroBridgeAddress(bridgePolygonSide.address, txParams)
+  // console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  // await tx.wait()
 
   console.log("Bridge setted on Polygon.");
 }

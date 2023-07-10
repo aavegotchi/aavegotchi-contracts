@@ -23,32 +23,30 @@ export default async function main() {
   const bridgePolygonSide = await ethers.getContractAt("ItemsBridgePolygonSide", itemsBridgeAddressMumbai)
   const aavegotchiFacetPolygonSide = await ethers.getContractAt("contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet", aavegotchDiamondAddressMumbai)
 
-
-  console.log(await bridgePolygonSide.useCustomAdapterParams());
-
   // let tx = await aavegotchiFacetPolygonSide.setApprovalForAll(bridgePolygonSide.address, true,  {...txParams})
-  // console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  // console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
   // await tx.wait()
 
-  // const defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, "350000"])
+  const defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, "350000"])
 
-  // const nativeFee = (await bridgePolygonSide.estimateSendFee(lzChainIdGotchichain, alice.address, tokenId, tokenAmount, false, defaultAdapterParams)).nativeFee
-  // tx = await bridgePolygonSide.sendFrom(
-  //   alice.address,
-  //   lzChainIdGotchichain,
-  //   alice.address,
-  //   tokenId,
-  //   tokenAmount,
-  //   alice.address,
-  //   ethers.constants.AddressZero,
-  //   defaultAdapterParams,
-  //   { value: nativeFee }
-  // )
-  // console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
-  // const receipt = await tx.wait()
+  const nativeFee = (await bridgePolygonSide.estimateSendFee(lzChainIdGotchichain, alice.address, tokenId, tokenAmount, false, defaultAdapterParams)).nativeFee
+  console.log(`Native fee: ${nativeFee}`)
+  let tx = await bridgePolygonSide.sendFrom(
+    alice.address,
+    lzChainIdGotchichain,
+    alice.address,
+    tokenId,
+    tokenAmount,
+    alice.address,
+    ethers.constants.AddressZero,
+    defaultAdapterParams,
+    { value: nativeFee, ...txParams }
+  )
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  const receipt = await tx.wait()
 
-  // console.log("Token transferred from Polygon to Gotchichain!");
-  // console.log("Transaction hash:", receipt.transactionHash)
+  console.log("Token transferred from Polygon to Gotchichain!");
+  console.log("Transaction hash:", receipt.transactionHash)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
