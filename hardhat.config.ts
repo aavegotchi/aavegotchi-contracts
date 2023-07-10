@@ -78,7 +78,7 @@ export default {
     },
     supernet: {
       url: process.env.SUPERNET_URL,
-      // accounts: [process.env.SECRET],
+      accounts: [process.env.SECRET],
     },
     // gorli: {
     //   url: process.env.GORLI,
