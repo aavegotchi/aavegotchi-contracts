@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { AavegotchiFacet, ItemsBridgeGotchichainSide, ItemsBridgePolygonSide, ERC20MintableBurnable, ItemsFacet, PolygonXGotchichainBridgeFacet, ShopFacet } from "../typechain";
+import { AavegotchiFacet, ItemsBridgeGotchichainSide, ItemsBridgePolygonSide, ERC20MintableBurnable, ItemsFacet, PolygonXGotchichainBridgeFacet, ShopFacet, DAOFacet } from "../typechain";
 const LZEndpointMockCompiled = require("@layerzerolabs/solidity-examples/artifacts/contracts/mocks/LZEndpointMock.sol/LZEndpointMock.json")
 
 import deploySupernets from "../scripts/deploy-supernet";
@@ -16,6 +16,7 @@ describe("Items Bridge: ", function () {
   let LZEndpointMock: any, bridgePolygonSide: ItemsBridgePolygonSide, bridgeGotchichainSide: ItemsBridgeGotchichainSide
   let owner: SignerWithAddress
   let lzEndpointMockA: any, lzEndpointMockB: any
+  let daoFacetPolygonSide: DAOFacet, daoFacetGotchichainSide: DAOFacet
   let shopFacetPolygonSide: ShopFacet, shopFacetGotchichainSide: ShopFacet
   let aavegotchiFacetPolygonSide: AavegotchiFacet, aavegotchiFacetGotchichainSide: AavegotchiFacet
   let itemsFacetPolygonSide: ItemsFacet, itemsFacetGotchichainSide: ItemsFacet
@@ -25,8 +26,8 @@ describe("Items Bridge: ", function () {
   beforeEach(async function () {
     owner = (await ethers.getSigners())[0];
 
-    ; ({ shopFacet: shopFacetPolygonSide, aavegotchiFacet: aavegotchiFacetPolygonSide, polygonXGotchichainBridgeFacet: bridgeFacetPolygonSide, itemsFacet: itemsFacetPolygonSide, ghstToken: ghstTokenPolygonSide } = await deploySupernets())
-    ; ({ shopFacet: shopFacetGotchichainSide, aavegotchiFacet: aavegotchiFacetGotchichainSide, polygonXGotchichainBridgeFacet: bridgeFacetGotchichainSide, itemsFacet: itemsFacetGotchichainSide, ghstToken: ghstTokenGotchichainSide } = await deploySupernets())
+    ; ({ shopFacet: shopFacetPolygonSide, aavegotchiFacet: aavegotchiFacetPolygonSide, polygonXGotchichainBridgeFacet: bridgeFacetPolygonSide, itemsFacet: itemsFacetPolygonSide, ghstToken: ghstTokenPolygonSide, daoFacet: daoFacetPolygonSide } = await deploySupernets())
+    ; ({ shopFacet: shopFacetGotchichainSide, aavegotchiFacet: aavegotchiFacetGotchichainSide, polygonXGotchichainBridgeFacet: bridgeFacetGotchichainSide, itemsFacet: itemsFacetGotchichainSide, ghstToken: ghstTokenGotchichainSide, daoFacet: daoFacetGotchichainSide } = await deploySupernets())
 
     LZEndpointMock = await ethers.getContractFactory(LZEndpointMockCompiled.abi, LZEndpointMockCompiled.bytecode)
     const BridgePolygonSide = await ethers.getContractFactory("ItemsBridgePolygonSide");
@@ -59,8 +60,8 @@ describe("Items Bridge: ", function () {
     await bridgeGotchichainSide.setMinDstGas(chainId_A, 2, 150000)
     
     //Set layer zero bridge on facet
-    await bridgeFacetPolygonSide.setLayerZeroBridge(bridgePolygonSide.address)
-    await bridgeFacetGotchichainSide.setLayerZeroBridge(bridgeGotchichainSide.address)
+    await daoFacetPolygonSide.addLayerZeroBridgeAddress(bridgePolygonSide.address)
+    await daoFacetGotchichainSide.addLayerZeroBridgeAddress(bridgeGotchichainSide.address)
 
     await ghstTokenPolygonSide.mint(owner.address, ethers.utils.parseEther('100000000000000000000000'))
     await ghstTokenPolygonSide.approve(shopFacetPolygonSide.address, ethers.utils.parseEther('100000000000000000000000'))
