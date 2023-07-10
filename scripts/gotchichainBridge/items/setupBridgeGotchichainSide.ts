@@ -18,7 +18,7 @@ export default async function main() {
   await bridgeGotchichainSide.setMinDstGas(lzChainIdGotchichain, 1, 150000)
   await bridgeGotchichainSide.setMinDstGas(lzChainIdGotchichain, 2, 150000)
 
-  await bridgeFacetGotchichainSide.setLayerZeroBridge(bridgeGotchichainSide.address)
+  await bridgeFacetGotchichainSide.addLayerZeroBridge(bridgeGotchichainSide.address)
 
   console.log("Bridge setted on Gotchichain");
 }

@@ -5,6 +5,10 @@ import { ethers } from "hardhat";
 const aavegotchDiamondAddressMumbai = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
 const ghstDiamondAddressMumbai = process.env.GHST_DIAMOND_ADDRESS_MUMBAI as string
 
+const txParams = {
+  gasPrice: "2243367512"
+}
+
 export default async function main() {
   const tokenId = "80"
   const tokenAmount = "1"
@@ -17,24 +21,33 @@ export default async function main() {
   const itemPrice = (await itemsFacetPolygonSide.getItemType(tokenId)).ghstPrice
   
   console.log(`Minting ${itemPrice} GHST to ${to}`)
-  let tx = await ghstTokenPolygonSide.mint(itemPrice, to)
+  let tx = await ghstTokenPolygonSide.mint(itemPrice, to, {...txParams})
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  console.log(tx)
   await tx.wait()
   
   console.log('Approving GHST to shop')
-  tx = await ghstTokenPolygonSide.approve(shopFacetPolygonSide.address, "100000000000000000000")
+  tx = await ghstTokenPolygonSide.approve(shopFacetPolygonSide.address, "100000000000000000000", {...txParams})
   console.log(tx.hash)
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
-
-  console.log("xxx")
-  console.log(await ghstTokenPolygonSide.balanceOf(to))
-  console.log(await ghstTokenPolygonSide.allowance(to, shopFacetPolygonSide.address))
-
+  
+  // console.log(await ghstTokenPolygonSide.balanceOf(to))
+  // console.log(await ghstTokenPolygonSide.allowance(to, shopFacetPolygonSide.address))
+  
   console.log('Purchasing item')
-  tx = await shopFacetPolygonSide.purchaseItemsWithGhst(to, [tokenId], [tokenAmount])
+  tx = await shopFacetPolygonSide.purchaseItemsWithGhst(to, [tokenId], [tokenAmount], {...txParams})
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
-
+  
   console.log(`Purchased item ${tokenAmount} tokens of token with ID ${tokenId}`);
 }
+
+/**
+ * 1000000000
+ * 1500000017
+ * 
+ */
 
 const abi = [
   {
