@@ -81,6 +81,7 @@ export default async function main() {
     await ethers.getContractFactory("ERC20MintableBurnable")
   ).deploy()) as ERC20MintableBurnable;
   ghstDiamondAddress = ghstTokenContract.address;
+  await ghstTokenContract.deployed();
   console.log("GHST address:" + ghstDiamondAddress);
 
   // deploy DiamondCutFacet
