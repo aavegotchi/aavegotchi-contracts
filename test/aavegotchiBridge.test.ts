@@ -258,7 +258,7 @@ describe("Bridge ERC721: ", function () {
     //Checking items balance and equipped items before unequipping them
     expect((await itemsFacetPolygonSide.itemBalances(owner.address)).length).to.be.equal(0)
     expect(await itemsFacetPolygonSide.equippedWearables(tokenId)).to.eql([0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-    
+
     //Unequipping items
     await itemsFacetPolygonSide.equipWearables(tokenId, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
@@ -399,6 +399,43 @@ describe("Bridge ERC721: ", function () {
     // Checking equipped items
     expect(await itemsFacetPolygonSide.equippedWearables(tokenId)).to.eql([81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     expect((await itemsFacetPolygonSide.itemBalances(owner.address)).length).to.be.equal(0) // item 1 from slot 3 were unequipped and sent to owner
+  })
+
+  it.skip("Buy Portals", async function () {
+    const { haunt_ } = await aavegotchiGameFacetPolygonSide.currentHaunt()
+    console.log(`Current haunt price: ${haunt_.portalPrice}`)
+
+    console.log(`Minting ${haunt_.portalPrice} GHST to ${owner.address}`)
+    let tx = await ghstTokenPolygonSide.mint(owner.address, haunt_.portalPrice)
+    console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+    await tx.wait()
+
+    console.log('Approving GHST to shop')
+    tx = await ghstTokenPolygonSide.approve(shopFacetPolygonSide.address, haunt_.portalPrice)
+    console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+    await tx.wait()
+
+    console.log('Purchasing Aavegotchi')
+    tx = await shopFacetPolygonSide.buyPortals(owner.address, haunt_.portalPrice)
+    console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+    let txReceipt = await tx.wait()
+
+    let tokenId = ""
+    txReceipt.logs?.forEach((event) => {
+      if (event.topics[0] === shopFacetPolygonSide.interface.getEventTopic("BuyPortals")) {
+        tokenId = shopFacetPolygonSide.interface.decodeEventLog("BuyPortals", event.data)._tokenId
+      }
+    })
+
+    await vrfFacetPolygonSide.openPortals([tokenId]);
+
+    let gotchi = await aavegotchiFacetPolygonSide.getAavegotchi(tokenId);
+    console.log(`Aavegotchi ID: ${tokenId} status is open portal (${gotchi.status.toString() == "2"}) `);
+
+    await aavegotchiGameFacetPolygonSide.claimAavegotchi(tokenId, 0, ethers.utils.parseEther("10000"));
+    gotchi = await aavegotchiFacetPolygonSide.getAavegotchi(tokenId);
+    console.log(`Aavegotchi ID: ${tokenId} status is claimed (${gotchi.status.toString() == "3"})`);
+    console.log('aavegotchi owner', gotchi.owner)
   })
 
   async function mintPortals(to: string) {
