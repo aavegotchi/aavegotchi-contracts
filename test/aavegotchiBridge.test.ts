@@ -3,7 +3,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { AavegotchiFacet, BridgeGotchichainSide, BridgePolygonSide, ERC20MintableBurnable, ItemsFacet, PolygonXGotchichainBridgeFacet, ShopFacet, AavegotchiGameFacet, VrfFacet, DAOFacet } from "../typechain";
+import { AavegotchiFacet, AavegotchiBridgeGotchichainSide, AavegotchiBridgePolygonSide, ERC20MintableBurnable, ItemsFacet, PolygonXGotchichainBridgeFacet, ShopFacet, AavegotchiGameFacet, VrfFacet, DAOFacet } from "../typechain";
 const LZEndpointMockCompiled = require("@layerzerolabs/solidity-examples/artifacts/contracts/mocks/LZEndpointMock.sol/LZEndpointMock.json")
 
 import deploySupernets from "../scripts/deploy-supernet";
@@ -16,7 +16,7 @@ describe("Bridge ERC721: ", function () {
   let polygonAdapterParams: any
   let gotchichainAdapterParams: any
 
-  let LZEndpointMock: any, bridgePolygonSide: BridgePolygonSide, bridgeGotchichainSide: BridgeGotchichainSide
+  let LZEndpointMock: any, bridgePolygonSide: AavegotchiBridgePolygonSide, bridgeGotchichainSide: AavegotchiBridgeGotchichainSide
   let owner: SignerWithAddress, alice: SignerWithAddress
   let lzEndpointMockA: any, lzEndpointMockB: any
   let shopFacetPolygonSide: ShopFacet, shopFacetGotchichainSide: ShopFacet
@@ -39,8 +39,8 @@ describe("Bridge ERC721: ", function () {
     ; ({ shopFacet: shopFacetGotchichainSide, aavegotchiFacet: aavegotchiFacetGotchichainSide, polygonXGotchichainBridgeFacet: bridgeFacetGotchichainSide, itemsFacet: itemsFacetGotchichainSide, ghstToken: ghstTokenGotchichainSide, aavegotchiGameFacet: aavegotchiGameFacetGotchichainSide, vrfFacet: vrfFacetGotchichainSide, daoFacet: daoFacetGotchichainSide } = await deploySupernets())
 
     LZEndpointMock = await ethers.getContractFactory(LZEndpointMockCompiled.abi, LZEndpointMockCompiled.bytecode)
-    const BridgePolygonSide = await ethers.getContractFactory("BridgePolygonSide");
-    const BridgeGotchichainSide = await ethers.getContractFactory("BridgeGotchichainSide");
+    const BridgePolygonSide = await ethers.getContractFactory("AavegotchiBridgePolygonSide");
+    const BridgeGotchichainSide = await ethers.getContractFactory("AavegotchiBridgeGotchichainSide");
 
     //Deploying LZEndpointMock contracts
     lzEndpointMockA = await LZEndpointMock.deploy(chainId_A)
