@@ -10,7 +10,7 @@ const txParams = {
 }
 
 export default async function main() {
-  const tokenId = "80"
+  const tokenId = "81"
   const tokenAmount = "1"
   const to = (await ethers.getSigners())[0].address
   const shopFacetPolygonSide = await ethers.getContractAt("ShopFacet", aavegotchDiamondAddressMumbai)
