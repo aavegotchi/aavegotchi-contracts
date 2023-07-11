@@ -2,13 +2,10 @@
 
 import { ethers } from "hardhat";
 
-import mintItems from "./mintItems";
 
-const lzChainIdMumbai = process.env.LZ_CHAIN_ID_MUMBAI as string
 const lzChainIdGotchichain = process.env.LZ_CHAIN_ID_GOTCHICHAIN as string
 const aavegotchDiamondAddressMumbai = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
 const itemsBridgeAddressMumbai = process.env.ITEMS_BRIDGE_ADDRESS_MUMBAI as string
-const itemsBridgeAddressGotchichain = process.env.ITEMS_BRIDGE_ADDRESS_GOTCHICHAIN as string
 
 const txParams = {
   gasPrice: "2243367512"
@@ -17,8 +14,8 @@ const txParams = {
 export default async function main() {
   const alice = (await ethers.getSigners())[0]
 
-  const tokenId = 80
-  const tokenAmount = 1
+  const tokenIds = [80, 81]
+  const tokenAmounts = [1, 2]
 
   const bridgePolygonSide = await ethers.getContractAt("ItemsBridgePolygonSide", itemsBridgeAddressMumbai)
   const aavegotchiFacetPolygonSide = await ethers.getContractAt("contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet", aavegotchDiamondAddressMumbai)
@@ -29,14 +26,14 @@ export default async function main() {
 
   const defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, "350000"])
 
-  const nativeFee = (await bridgePolygonSide.estimateSendFee(lzChainIdGotchichain, alice.address, tokenId, tokenAmount, false, defaultAdapterParams)).nativeFee
+  const nativeFee = (await bridgePolygonSide.estimateSendBatchFee(lzChainIdGotchichain, alice.address, tokenIds, tokenAmounts, false, defaultAdapterParams)).nativeFee
   console.log(`Native fee: ${nativeFee}`)
-  tx = await bridgePolygonSide.sendFrom(
+  tx = await bridgePolygonSide.sendBatchFrom(
     alice.address,
     lzChainIdGotchichain,
     alice.address,
-    tokenId,
-    tokenAmount,
+    tokenIds,
+    tokenAmounts,
     alice.address,
     ethers.constants.AddressZero,
     defaultAdapterParams,

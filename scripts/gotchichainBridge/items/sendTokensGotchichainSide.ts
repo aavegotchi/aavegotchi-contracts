@@ -2,12 +2,8 @@
 
 import { ethers } from "hardhat";
 
-import mintItems from "./mintItems";
-
 const lzChainIdMumbai = process.env.LZ_CHAIN_ID_MUMBAI as string
-const lzChainIdGotchichain = process.env.LZ_CHAIN_ID_GOTCHICHAIN as string
-const aavegotchDiamondAddressMumbai = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
-const itemsBridgeAddressMumbai = process.env.ITEMS_BRIDGE_ADDRESS_MUMBAI as string
+const aavegotchDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_GOTCHICHAIN as string
 const itemsBridgeAddressGotchichain = process.env.ITEMS_BRIDGE_ADDRESS_GOTCHICHAIN as string
 
 const txParams = {
@@ -20,20 +16,20 @@ export default async function main() {
   const tokenId = 80
   const tokenAmount = 1
 
-  const bridgePolygonSide = await ethers.getContractAt("ItemsBridgePolygonSide", itemsBridgeAddressMumbai)
-  const aavegotchiFacetPolygonSide = await ethers.getContractAt("contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet", aavegotchDiamondAddressMumbai)
+  const bridgeGotchichainSide = await ethers.getContractAt("ItemsBridgeGotchichainSide", itemsBridgeAddressGotchichain)
+  const aavegotchiFacetGotchichainSide = await ethers.getContractAt("contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet", aavegotchDiamondAddressGotchichain)
 
-  let tx = await aavegotchiFacetPolygonSide.setApprovalForAll(bridgePolygonSide.address, true,  {...txParams})
+  let tx = await aavegotchiFacetGotchichainSide.setApprovalForAll(bridgeGotchichainSide.address, true,  {...txParams})
   console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
 
   const defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, "350000"])
 
-  const nativeFee = (await bridgePolygonSide.estimateSendFee(lzChainIdGotchichain, alice.address, tokenId, tokenAmount, false, defaultAdapterParams)).nativeFee
+  const nativeFee = (await bridgeGotchichainSide.estimateSendFee(lzChainIdMumbai, alice.address, tokenId, tokenAmount, false, defaultAdapterParams)).nativeFee
   console.log(`Native fee: ${nativeFee}`)
-  tx = await bridgePolygonSide.sendFrom(
+  tx = await bridgeGotchichainSide.sendFrom(
     alice.address,
-    lzChainIdGotchichain,
+    lzChainIdMumbai,
     alice.address,
     tokenId,
     tokenAmount,
