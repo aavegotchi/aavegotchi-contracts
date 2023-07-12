@@ -2,7 +2,6 @@
 
 import { ethers } from "hardhat";
 
-
 const lzChainIdMumbai = process.env.LZ_CHAIN_ID_MUMBAI as string
 const aavegotchDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_GOTCHICHAIN as string
 const itemsBridgeAddressGotchichain = process.env.ITEMS_BRIDGE_ADDRESS_GOTCHICHAIN as string
