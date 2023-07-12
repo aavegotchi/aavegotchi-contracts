@@ -11,7 +11,8 @@ export default async function main() {
   const aavegotchiBalances = await aavegotchiFacet.balanceOf(to)
   const allAavegotchisOfOwner = await aavegotchiFacet.allAavegotchisOfOwner(to)
 
-  console.log({allAavegotchisOfOwner})
+  console.log("All Avegotchis of Owner")
+  console.log(allAavegotchisOfOwner)
   console.log(`\nItem balances for ${to}: ${aavegotchiBalances.toString()}`);
 }
 
