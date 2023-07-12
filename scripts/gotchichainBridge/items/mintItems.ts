@@ -43,12 +43,6 @@ export default async function main() {
   console.log(`Purchased item ${tokenAmount} tokens of token with ID ${tokenId}`);
 }
 
-/**
- * 1000000000
- * 1500000017
- * 
- */
-
 const abi = [
   {
     "inputs": [
