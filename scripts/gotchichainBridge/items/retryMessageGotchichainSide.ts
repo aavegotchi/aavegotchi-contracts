@@ -2,7 +2,6 @@
 
 import { ethers } from "hardhat";
 
-import mintItems from "./mintItems";
 import { ItemsBridgeGotchichainSide } from "../../../typechain";
 
 const lzChainIdMumbai = process.env.LZ_CHAIN_ID_MUMBAI as string
