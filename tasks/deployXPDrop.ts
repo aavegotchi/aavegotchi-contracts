@@ -50,6 +50,9 @@ task("deployXPDrop", "Deploys an onchain airdrop for a certain proposal")
     ).connect(signer) as MerkleDropFacet;
 
     const proposalType = propType(prop.title);
+
+    console.log("title:", prop.title);
+
     const e =
       proposalType === "sigprop" ? 10 : proposalType === "coreprop" ? 20 : 0;
 

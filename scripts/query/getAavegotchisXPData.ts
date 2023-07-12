@@ -243,7 +243,10 @@ export async function generateMerkleTree(
 
   //write the tree to a file
 
-  const parentPath = getParentPath(propDetails.id);
+  const parentPath = getParentPath(propDetails.title, propDetails.id);
+
+  console.log("parent path:", parentPath);
+
   if (!fs.existsSync(parentPath)) {
     //create folder if it doesn't exist
     fs.mkdirSync(parentPath, { recursive: true });
@@ -272,8 +275,8 @@ export async function generateMerkleTree(
   };
 }
 
-export function getParentPath(propTitle: string): string {
-  return rootPath + `${propType(propTitle)}/${propTitle}`;
+export function getParentPath(propTitle: string, propId: string): string {
+  return rootPath + `${propType(propTitle)}/${propId}`;
 }
 
 function removeEmpty(data: GotchiData[]) {
@@ -293,7 +296,7 @@ function removeEmpty(data: GotchiData[]) {
 //gets the proof of a particular address
 export async function getProof(address: string, propId: string) {
   const prop: ProposalDetails = await getProposalDetails(propId);
-  const filePath = getParentPath(prop.title) + "/tree.json";
+  const filePath = getParentPath(prop.title, prop.id) + "/tree.json";
 
   //retrieve proof
   const jsonString = fs.readFileSync(filePath, "utf-8");
@@ -309,7 +312,7 @@ export async function getProof(address: string, propId: string) {
 
 export async function getGotchiIds(address: string, propId: string) {
   const prop: ProposalDetails = await getProposalDetails(propId);
-  const filePath = getParentPath(prop.title) + "/data.json";
+  const filePath = getParentPath(prop.title, prop.id) + "/data.json";
 
   //retrieve gotchiIds
   const jsonString = fs.readFileSync(filePath, "utf-8");
