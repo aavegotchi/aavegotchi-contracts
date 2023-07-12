@@ -2,11 +2,11 @@
 
 import { ethers } from "hardhat";
 
-const aavegotchDiamondAddressMumbai = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_MUMBAI as string
+const aavegotchDiamondAddressGotchichain = process.env.AAVEGOTCHI_DIAMOND_ADDRESS_GOTCHICHAIN as string
 
 export default async function main() {
   const to = (await ethers.getSigners())[0].address
-  const aavegotchiFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet", aavegotchDiamondAddressMumbai)
+  const aavegotchiFacet = await ethers.getContractAt("contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet", aavegotchDiamondAddressGotchichain)
 
   const aavegotchiBalances = await aavegotchiFacet.balanceOf(to)
   const allAavegotchisOfOwner = await aavegotchiFacet.allAavegotchisOfOwner(to)
