@@ -19,11 +19,13 @@ export default async function main() {
 
   const { haunt_ } = await aavegotchiGameFacetPolygonSide.currentHaunt()
   console.log(`Current haunt price: ${haunt_.portalPrice}`)
-
+  
+  let tx 
+  
   console.log(`Minting ${haunt_.portalPrice} GHST to ${to}`)
   const ghstValue = haunt_.portalPrice.add(ethers.utils.parseEther("10000"))
-  let tx = await ghstTokenPolygonSide.mint(ghstValue, to, txParams)
-  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  tx = await ghstTokenPolygonSide.mint(ghstValue, to, txParams)
+  console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
 
   console.log('Approving GHST to shop')
@@ -33,7 +35,7 @@ export default async function main() {
 
   console.log('Purchasing Aavegotchi')
   tx = await shopFacetPolygonSide.buyPortals(to, haunt_.portalPrice, txParams)
-  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
+  console.log(`Waiting for tx to be validated, tx hash: ${tx.hash}`)
   let txReceipt = await tx.wait()
 
   let tokenId = ""
@@ -62,12 +64,6 @@ export default async function main() {
 
   console.log(`Purchased aavegotchi, tokenId: ${tokenId}`);
 }
-
-/**
- * 1000000000
- * 1500000017
- * 
- */
 
 const abi = [
   {
