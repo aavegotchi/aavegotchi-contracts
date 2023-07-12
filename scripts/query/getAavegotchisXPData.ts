@@ -243,7 +243,7 @@ export async function generateMerkleTree(
 
   //write the tree to a file
 
-  const parentPath = getParentPath(propDetails.title, propDetails.id);
+  const parentPath = getParentPath(propDetails.id);
 
   console.log("parent path:", parentPath);
 
@@ -275,8 +275,8 @@ export async function generateMerkleTree(
   };
 }
 
-export function getParentPath(propTitle: string, propId: string): string {
-  return rootPath + `${propType(propTitle)}/${propId}`;
+export function getParentPath(propId: string): string {
+  return rootPath + `${propId}`;
 }
 
 function removeEmpty(data: GotchiData[]) {
@@ -296,7 +296,7 @@ function removeEmpty(data: GotchiData[]) {
 //gets the proof of a particular address
 export async function getProof(address: string, propId: string) {
   const prop: ProposalDetails = await getProposalDetails(propId);
-  const filePath = getParentPath(prop.title, prop.id) + "/tree.json";
+  const filePath = getParentPath(prop.id) + "/tree.json";
 
   //retrieve proof
   const jsonString = fs.readFileSync(filePath, "utf-8");
@@ -312,7 +312,7 @@ export async function getProof(address: string, propId: string) {
 
 export async function getGotchiIds(address: string, propId: string) {
   const prop: ProposalDetails = await getProposalDetails(propId);
-  const filePath = getParentPath(prop.title, prop.id) + "/data.json";
+  const filePath = getParentPath(prop.id) + "/data.json";
 
   //retrieve gotchiIds
   const jsonString = fs.readFileSync(filePath, "utf-8");
