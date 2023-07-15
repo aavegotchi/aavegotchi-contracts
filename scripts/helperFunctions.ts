@@ -25,6 +25,13 @@ export async function impersonate(
     method: "hardhat_impersonateAccount",
     params: [address],
   });
+
+  //give some ether
+  await ethers.provider.send("hardhat_setBalance", [
+    address,
+    "0x100000000000000000000",
+  ]);
+
   let signer = await ethers.getSigner(address);
   contract = contract.connect(signer);
   return contract;

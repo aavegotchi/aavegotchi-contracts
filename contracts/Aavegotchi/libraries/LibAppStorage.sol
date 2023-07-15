@@ -181,6 +181,12 @@ struct GotchiLending {
     uint32 period; //in seconds
     // storage slot 5
     address[] revenueTokens;
+    //storage slot 6
+    //this is a bitmap value that packs all the permissions of a listing into a single uint256
+    //each index represents a permission, therefore 32 indexes,== 32 possible permissions
+    //index 0 means no permission by default
+    //indexes can store up to 256 values (0-255), each value representing a modifer for that permission, but we only use 0-9
+    uint256 permissions; //0=none, 1=channelling
 }
 
 struct LendingListItem {
@@ -333,6 +339,7 @@ struct AppStorage {
     mapping(address => mapping(uint256 => uint256[])) erc721TokenToBuyOrderIds; // erc721 token address => erc721TokenId => buyOrderIds
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) erc721TokenToBuyOrderIdIndexes; // erc721 token address => erc721TokenId => buyOrderId => index
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
+    mapping(address => bool) layerZeroBridgeAddresses;
 }
 
 library LibAppStorage {
@@ -395,6 +402,15 @@ contract Modifiers {
         require(
             sender == LibDiamond.contractOwner() || s.itemManagers[sender] == true,
             "LibAppStorage: only an Owner or ItemManager can call this function"
+        );
+        _;
+    }
+
+    modifier onlyLayerZeroBridge() {
+        address sender = LibMeta.msgSender();
+        require(
+            s.layerZeroBridgeAddresses[sender],
+            "LibAppStorage: Do not have access"
         );
         _;
     }

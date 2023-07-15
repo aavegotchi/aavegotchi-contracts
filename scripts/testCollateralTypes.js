@@ -66,7 +66,7 @@ function getCollaterals (network, ghstAddress, testAddress) {
       if (collateralType.name === 'GHST') {
         item.collateralType = ghstAddress
       }
-    } else if (network === 'hardhat') {
+    } else if (network === 'hardhat' || network === 'localhost') {
       if (collateralType.name === 'GHST') item.collateralType = ghstAddress
       else if (collateralType.name === 'TEST') item.collateralType = testAddress
     } else if (network === 'mainnet') {

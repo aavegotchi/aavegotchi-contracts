@@ -31,6 +31,8 @@ contract DAOFacet is Modifiers {
     event ItemModifiersSet(uint256 _wearableId, int8[6] _traitModifiers, uint8 _rarityScoreModifier);
     event RemoveExperience(uint256[] _tokenIds, uint256[] _xpValues);
     event UpdateItemPrice(uint256 _itemId, uint256 _priceInWei);
+    event LayerZeroBridgeAdded(address _newLayerZeroBridge);
+    event LayerZeroBridgeRemoved(address _layerZeroBridgeToRemove);
 
     /***********************************|
    |             Read Functions         |
@@ -91,7 +93,7 @@ contract DAOFacet is Modifiers {
 
             //First handle global collateralTypes array
             uint256 index = s.collateralTypeIndexes[newCollateralType];
-            bool collateralExists = index > 0 || s.collateralTypes[0] == newCollateralType;
+            bool collateralExists = index > 0 || ((s.collateralTypes.length > 0) && (s.collateralTypes[0] == newCollateralType));
 
             if (!collateralExists) {
                 s.collateralTypes.push(newCollateralType);
@@ -416,5 +418,19 @@ contract DAOFacet is Modifiers {
             item.ghstPrice = _newPrices[i];
             emit UpdateItemPrice(itemId, _newPrices[i]);
         }
+    }
+
+    ///@notice Allow the DAO to add an address as a Layer Zero bridge
+    ///@param _newLayerZeroBridge The address to be added as Layer Zero bridge
+    function addLayerZeroBridgeAddress(address _newLayerZeroBridge) external onlyDaoOrOwner {
+        s.layerZeroBridgeAddresses[_newLayerZeroBridge] = true;
+        emit LayerZeroBridgeAdded(_newLayerZeroBridge);
+    }
+
+    ///@notice Allow the DAO to remove an address that was an Layer Zero bridge
+    ///@param _layerZeroBridgeToRemove The address to be removed fron being a Layer Zero bridge
+    function removeLayerZeroBridgeAddress(address _layerZeroBridgeToRemove) external onlyDaoOrOwner {
+        s.layerZeroBridgeAddresses[_layerZeroBridgeToRemove] = false;
+        emit LayerZeroBridgeRemoved(_layerZeroBridgeToRemove);
     }
 }
