@@ -43,7 +43,7 @@ function strDisplay(str) {
   return addCommas(str.toString());
 }
 
-async function main() {
+export default async function main() {
   let ghstDiamondAddress = ethers.constants.AddressZero;
   const ghstStakingDiamondAddress = ethers.constants.AddressZero; //todo
   const realmDiamondAddress = ethers.constants.AddressZero; //todo
@@ -64,7 +64,7 @@ async function main() {
 
   const accounts = await ethers.getSigners();
   const ownerAddress = await accounts[0].getAddress();
-  console.log("Owner: " + ownerAddress);
+  // console.log("Owner: " + ownerAddress);
 
   const dao = ownerAddress; // 'todo'
   const daoTreasury = ownerAddress;
@@ -77,7 +77,7 @@ async function main() {
     await ethers.getContractFactory("ERC20MintableBurnable")
   ).deploy()) as ERC20MintableBurnable;
   ghstDiamondAddress = ghstTokenContract.address;
-  console.log("GHST address:" + ghstDiamondAddress);
+  // console.log("GHST address:" + ghstDiamondAddress);
 
   // deploy DiamondCutFacet
   const DiamondCutFacet = await ethers.getContractFactory("DiamondCutFacet");
@@ -85,7 +85,7 @@ async function main() {
     gasLimit: gasLimit,
   });
   await diamondCutFacet.deployed();
-  console.log("DiamondCutFacet deployed:", diamondCutFacet.address);
+  // console.log("DiamondCutFacet deployed:", diamondCutFacet.address);
 
   // deploy DiamondLoupeFacet
   const DiamondLoupeFacet = await ethers.getContractFactory(
@@ -95,7 +95,7 @@ async function main() {
     gasLimit: gasLimit,
   });
   await diamondLoupeFacet.deployed();
-  console.log("DiamondLoupeFacet deployed:", diamondLoupeFacet.address);
+  // console.log("DiamondLoupeFacet deployed:", diamondLoupeFacet.address);
 
   // deploy OwnershipFacet
   const OwnershipFacet = await ethers.getContractFactory("OwnershipFacet");
@@ -103,7 +103,7 @@ async function main() {
     gasLimit: gasLimit,
   });
   await ownershipFacet.deployed();
-  console.log("OwnershipFacet deployed:", ownershipFacet.address);
+  // console.log("OwnershipFacet deployed:", ownershipFacet.address);
 
   let totalGasUsed = ethers.BigNumber.from("0");
   let tx;
@@ -121,14 +121,15 @@ async function main() {
       await facetInstance.deployed();
       const tx = facetInstance.deployTransaction;
       const receipt = await tx.wait();
-      console.log(`${facet} deploy gas used:` + strDisplay(receipt.gasUsed));
-      totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+      // console.log(`${facet} deploy gas used:` + strDisplay(receipt.gasUsed));
+      // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
       instances.push(facetInstance);
     }
     return instances;
   }
   let [
     bridgeFacet,
+    polygonXGotchichainBridgeFacet,
     aavegotchiFacet,
     aavegotchiGameFacet,
     svgFacet,
@@ -152,6 +153,7 @@ async function main() {
     merkleDropFacet,
   ] = await deployFacets(
     "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
+    "contracts/Aavegotchi/facets/PolygonXGotchichainBridgeFacet.sol:PolygonXGotchichainBridgeFacet",
     "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
     "AavegotchiGameFacet",
     "SvgFacet",
@@ -181,6 +183,7 @@ async function main() {
     initDiamond: "contracts/Aavegotchi/InitDiamond.sol:InitDiamond",
     facets: [
       ["BridgeFacet", bridgeFacet],
+      ["PolygonXGotchichainBridgeFacet", polygonXGotchichainBridgeFacet],
       ["AavegotchiFacet", aavegotchiFacet],
       ["AavegotchiGameFacet", aavegotchiGameFacet],
       ["SvgFacet", svgFacet],
@@ -221,14 +224,14 @@ async function main() {
       ],
     ],
   });
-  console.log("Aavegotchi diamond address:" + aavegotchiDiamond.address);
+  // console.log("Aavegotchi diamond address:" + aavegotchiDiamond.address);
 
   tx = aavegotchiDiamond.deployTransaction;
   receipt = await tx.wait();
-  console.log(
-    "Aavegotchi diamond deploy gas used:" + strDisplay(receipt.gasUsed)
-  );
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  // console.log(
+  //   "Aavegotchi diamond deploy gas used:" + strDisplay(receipt.gasUsed)
+  // );
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
   // get facets
   daoFacet = await ethers.getContractAt("DAOFacet", aavegotchiDiamond.address);
@@ -252,8 +255,20 @@ async function main() {
     "ShopFacet",
     aavegotchiDiamond.address
   );
+  itemsFacet = await ethers.getContractAt(
+    "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
+    aavegotchiDiamond.address
+  );
   aavegotchiFacet = await ethers.getContractAt(
     "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
+    aavegotchiDiamond.address
+  );
+  polygonXGotchichainBridgeFacet = await ethers.getContractAt(
+    "PolygonXGotchichainBridgeFacet",
+    aavegotchiDiamond.address
+  );
+  daoFacet = await ethers.getContractAt(
+    "DAOFacet",
     aavegotchiDiamond.address
   );
   aavegotchiGameFacet = await ethers.getContractAt("AavegotchiGameFacet", aavegotchiDiamond.address);
@@ -261,9 +276,9 @@ async function main() {
   svgFacet = await ethers.getContractAt("SvgFacet", aavegotchiDiamond.address);
 
   // add item managers
-  console.log("Adding item managers");
+  // console.log("Adding item managers");
   tx = await daoFacet.addItemManagers(itemManagers, { gasLimit: gasLimit });
-  console.log("Adding item managers tx:", tx.hash);
+  // console.log("Adding item managers tx:", tx.hash);
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Adding item manager failed: ${tx.hash}`);
@@ -276,11 +291,11 @@ async function main() {
     gasLimit: gasLimit,
   });
   receipt = await tx.wait();
-  console.log("Haunt created:" + strDisplay(receipt.gasUsed));
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  // console.log("Haunt created:" + strDisplay(receipt.gasUsed));
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
   // add collateral info for haunt
-  console.log("Adding Collateral Types");
+  // console.log("Adding Collateral Types");
   const { getCollaterals } = require("./testCollateralTypes.js");
   tx = await daoFacet.addCollateralTypes(
     1,
@@ -288,10 +303,10 @@ async function main() {
     { gasLimit: gasLimit }
   );
   receipt = await tx.wait();
-  console.log(
-    "Adding Collateral Types gas used::" + strDisplay(receipt.gasUsed)
-  );
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  // console.log(
+  //   "Adding Collateral Types gas used::" + strDisplay(receipt.gasUsed)
+  // );
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
   // deploy wearable diamond and set to aavegotchi diamond
   const wearableDiamondAddress = await deployAndUpgradeWearableDiamond(
@@ -305,18 +320,19 @@ async function main() {
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
-  console.log(
-    "Setting wearable diamond gas used::" + strDisplay(receipt.gasUsed)
-  );
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  // console.log(
+  //   "Setting wearable diamond gas used::" + strDisplay(receipt.gasUsed)
+  // );
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
   // add item types
-  console.log("Adding Item Types");
+  // console.log("Adding Item Types");
   const itemTypes = getAllItemTypes(allItemTypes, hre.ethers);
 
   let step = 20;
   let sliceStep = itemTypes.length / step;
   for (let i = 0; i < step; i++) {
+
     tx = await daoFacet.addItemTypes(
       itemTypes.slice(sliceStep * i, sliceStep * (i + 1)),
       { gasLimit: gasLimit }
@@ -325,16 +341,16 @@ async function main() {
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
     }
-    console.log(
-      `Adding Item Types (${i + 1} / ${step}) gas used:: ${strDisplay(
-        receipt.gasUsed
-      )}`
-    );
-    totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+    // console.log(
+    //   `Adding Item Types (${i + 1} / ${step}) gas used:: ${strDisplay(
+    //     receipt.gasUsed
+    //   )}`
+    // );
+    // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
   }
 
   // add wearable types sets
-  console.log("Adding Wearable Sets");
+  // console.log("Adding Wearable Sets");
   step = 2;
   sliceStep = wearableSets.length / step;
   for (let i = 0; i < step; i++) {
@@ -346,15 +362,15 @@ async function main() {
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
     }
-    console.log(
-      `Adding Wearable Sets (${i + 1} / ${step}) gas used:: ${strDisplay(
-        receipt.gasUsed
-      )}`
-    );
-    totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+    // console.log(
+    //   `Adding Wearable Sets (${i + 1} / ${step}) gas used:: ${strDisplay(
+    //     receipt.gasUsed
+    //   )}`
+    // );
+    // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
   }
 
-  console.log("Upload SVGs");
+  // console.log("Upload SVGs");
 
   const { aavegotchiSvgs } = require("../svgs/aavegotchi.js");
   const { eyeShapeSvgs } = require("../svgs/eyeShapes.js");
@@ -428,7 +444,7 @@ async function main() {
   await uploadSvgs(svgFacet, wearablesLeftSleeveSvgs, "sleeves-left", ethers);
   await uploadSvgs(svgFacet, wearablesRightSleeveSvgs, "sleeves-right", ethers);
   await uploadSvgs(svgFacet, wearablesBackSleeveSvgs, "sleeves-back", ethers);
-  console.log("Upload Done");
+  // console.log("Upload Done");
 
   interface SleeveInput {
     sleeveId: BigNumberish;
@@ -444,14 +460,14 @@ async function main() {
     sleevesSvgId++;
   }
 
-  console.log("Associating sleeves svgs with body wearable svgs.");
+  // console.log("Associating sleeves svgs with body wearable svgs.");
   tx = await svgFacet.setSleeves(sleevesInput);
   receipt = await tx.wait();
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
-  console.log("Sleeves associating gas used::" + strDisplay(receipt.gasUsed));
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  // console.log("Sleeves associating gas used::" + strDisplay(receipt.gasUsed));
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
   // console.log(`Mint prize items to target address: ${ownerAddress}`);
   // const itemIds: number[] = itemTypes.map((value) =>
@@ -480,11 +496,11 @@ async function main() {
   await setForgeProperties(forgeDiamondAddress);
   tx = await daoFacet.setForge(forgeDiamondAddress, { gasLimit: gasLimit });
   receipt = await tx.wait();
-  console.log("Forge diamond set:" + strDisplay(receipt.gasUsed));
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  // console.log("Forge diamond set:" + strDisplay(receipt.gasUsed));
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
   // add erc721 and 1155 categories
-  console.log("Adding ERC721 categories");
+  // console.log("Adding ERC721 categories");
   const erc721Categories = [
     {
       erc721TokenAddress: realmDiamondAddress,
@@ -502,12 +518,12 @@ async function main() {
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
-  console.log(
-    "Adding ERC721 categories gas used::" + strDisplay(receipt.gasUsed)
-  );
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  // console.log(
+  //   "Adding ERC721 categories gas used::" + strDisplay(receipt.gasUsed)
+  // );
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
-  console.log("Adding ERC1155 categories");
+  // console.log("Adding ERC1155 categories");
   const erc1155Categories = [];
   for (let i = 0; i < 6; i++) {
     erc1155Categories.push({
@@ -580,43 +596,72 @@ async function main() {
   if (!receipt.status) {
     throw Error(`Error:: ${tx.hash}`);
   }
-  console.log(
-    "Adding ERC1155 categories gas used::" + strDisplay(receipt.gasUsed)
-  );
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  // console.log(
+  //   "Adding ERC1155 categories gas used::" + strDisplay(receipt.gasUsed)
+  // );
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
   // set realm address
   tx = await aavegotchiGameFacet.setRealmAddress(realmDiamondAddress, {
     gasLimit: gasLimit,
   });
   receipt = await tx.wait();
-  console.log("Realm diamond set:" + strDisplay(receipt.gasUsed));
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  // console.log("Realm diamond set:" + strDisplay(receipt.gasUsed));
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
-  let numberPerMint = 5;
-  tx = await shopFacet.mintPortals(ownerAddress, numberPerMint);
-  receipt = await tx.wait();
-  console.log("Mint portals:" + strDisplay(receipt.gasUsed));
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  // let numberPerMint = 1;
+  // tx = await shopFacet.mintPortals(ownerAddress, numberPerMint);
+  // receipt = await tx.wait();
+  // console.log("Mint portals:" + strDisplay(receipt.gasUsed));
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
-  const gotchiIds = []
-  for (let i = 0; i < numberPerMint; i++) {
-    const gotchi = await aavegotchiFacet.getAavegotchi(i);
-    gotchiIds.push(gotchi.tokenId)
-    console.log(`Aavegotchi ID: ${i} owner is ${gotchi.owner} and status is closed portal (${gotchi.status == 0}) `);
-  }
+  // const gotchiIds = []
+  // for (let i = 0; i < numberPerMint; i++) {
+  //   const gotchi = await aavegotchiFacet.getAavegotchi(i);
+  //   gotchiIds.push(gotchi.tokenId)
+  //   console.log(`Aavegotchi ID: ${i} owner is ${gotchi.owner} and status is closed portal (${gotchi.status == 0}) `);
+  // }
 
-  await vrfFacet.openPortals(gotchiIds);
-  for (let i = 0; i < numberPerMint; i++) {
-    const gotchi = await aavegotchiFacet.getAavegotchi(i);
-    console.log(`Aavegotchi ID: ${i} status is open portal (${gotchi.status == 2}) `);
-  }
+  // await vrfFacet.openPortals(gotchiIds);
+  // for (let i = 0; i < numberPerMint; i++) {
+  //   const gotchi = await aavegotchiFacet.getAavegotchi(i);
+  //   console.log(`Aavegotchi ID: ${i} status is open portal (${gotchi.status == 2}) `);
+  // }
 
-  for (let i = 0; i < numberPerMint; i++) {
-    await aavegotchiGameFacet.claimAavegotchi(i, 0, ethers.utils.parseEther("10000"));
-    const gotchi = await aavegotchiFacet.getAavegotchi(i);
-    console.log(`Aavegotchi ID: ${i} status is claimed (${gotchi.status == 3}) `);
-  }
+  // for (let i = 0; i < numberPerMint; i++) {
+  //   await aavegotchiGameFacet.claimAavegotchi(i, 0, ethers.utils.parseEther("10000"));
+  //   const gotchi = await aavegotchiFacet.getAavegotchi(i);
+  //   console.log(`Aavegotchi ID: ${i} status is claimed (${gotchi.status == 3})`);
+  //   console.log('aavegotchi owner', gotchi.owner)
+  // }
+
+  // for (let i = 1; i < 200; i++) {
+  //   try {
+  //     tx = await ghstTokenContract.mint(ownerAddress, ethers.utils.parseEther('100000000000000000000000'))
+  //     await tx.wait()
+
+  //     tx = await ghstTokenContract.approve(shopFacet.address, ethers.utils.parseEther('100000000000000000000000'))
+  //     await tx.wait()
+
+  //     tx = await shopFacet.purchaseItemsWithGhst(ownerAddress, [i], [1])
+  //     await tx.wait()
+  //     console.log(`purchased item with id ${i}`)
+
+  //   } catch (e) {
+  //   }
+  // }
+
+  // console.log('itemBalancesWithTypes')
+  // console.log(await itemsFacet.itemBalancesWithTypes(ownerAddress))
+
+
+  // console.log('Equipping wearables')
+  // tx = await itemsFacet.equipWearables(0, [0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+  // await tx.wait()
+
+  // console.log('xxxxxx')
+  // console.log(await itemsFacet.equippedWearables(0))
+
 
   // TODO: allow revenue tokens?
 
@@ -633,7 +678,18 @@ async function main() {
   //   totalGasUsed = totalGasUsed.add(receipt.gasUsed)
   // // }
 
-  console.log("Total gas used: " + strDisplay(totalGasUsed));
+  // console.log("Total gas used: " + strDisplay(totalGasUsed));
+
+  return {
+    shopFacet,
+    aavegotchiFacet,
+    polygonXGotchichainBridgeFacet,
+    itemsFacet,
+    aavegotchiGameFacet,
+    vrfFacet,
+    ghstToken: ghstTokenContract,
+    daoFacet
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere
