@@ -18,8 +18,9 @@ import * as fs from "fs";
 import { propType } from "../helperFunctions";
 import { ethers } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { reduceGotchiData } from "../XPFilterhelper";
 
-interface GotchiData {
+export interface GotchiData {
   address: string;
   gotchiIds: string[];
 }
@@ -56,7 +57,8 @@ export async function queryAllAavegotchis(
     const result = await getUsersWithGotchisOfAddresses(
       addresses,
       blockTag,
-      index
+      index,
+      true
     );
 
     index += 1000;
@@ -64,13 +66,31 @@ export async function queryAllAavegotchis(
 
     //record id for each user
     result.users.forEach((e) => {
-      allGotchiIds = allGotchiIds.concat(e.gotchisLentOut);
       let gotchisOwned = e.batch1.map((f: GotchiId) => f.id);
       gotchisOwned = gotchisOwned.concat(e.batch2.map((f: GotchiId) => f.id));
       gotchisOwned = gotchisOwned.concat(e.batch3.map((f: GotchiId) => f.id));
       gotchisOwned = gotchisOwned.concat(e.batch4.map((f: GotchiId) => f.id));
       gotchisOwned = gotchisOwned.concat(e.batch5.map((f: GotchiId) => f.id));
+      gotchisOwned = gotchisOwned.concat(
+        e.batch1owned.map((f: GotchiId) => f.id)
+      );
+      gotchisOwned = gotchisOwned.concat(
+        e.batch2owned.map((f: GotchiId) => f.id)
+      );
+      gotchisOwned = gotchisOwned.concat(
+        e.batch3owned.map((f: GotchiId) => f.id)
+      );
+      gotchisOwned = gotchisOwned.concat(
+        e.batch4owned.map((f: GotchiId) => f.id)
+      );
+      gotchisOwned = gotchisOwned.concat(
+        e.batch5owned.map((f: GotchiId) => f.id)
+      );
       allGotchiIds = allGotchiIds.concat(gotchisOwned);
+
+      //eliminate duplicates in same address
+      gotchisOwned = [...new Set(gotchisOwned)];
+
       const map: GotchiData = {
         address: e.id,
         gotchiIds: [],
@@ -92,7 +112,8 @@ export async function queryAllAavegotchis(
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
     const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(
       batch,
-      blockTag
+      blockTag,
+      true
     );
     vaultUsers.forEach((e) => {
       allGotchiIds = allGotchiIds.concat(e.gotchisOwned.map((f) => f.id));
@@ -138,6 +159,8 @@ export async function queryAllAavegotchis(
   });
 
   finalData = removeEmpty(eliminateDuplicates(finalData));
+
+  finalData = reduceGotchiData(finalData);
 
   console.log("Unique addresses:", finalData.length);
   const x = new Set(allGotchiIds);
@@ -221,6 +244,9 @@ export async function generateMerkleTree(
   //write the tree to a file
 
   const parentPath = getParentPath(propDetails.id);
+
+  console.log("parent path:", parentPath);
+
   if (!fs.existsSync(parentPath)) {
     //create folder if it doesn't exist
     fs.mkdirSync(parentPath, { recursive: true });
@@ -249,8 +275,8 @@ export async function generateMerkleTree(
   };
 }
 
-export function getParentPath(propTitle: string): string {
-  return rootPath + `${propType(propTitle)}/${propTitle}`;
+export function getParentPath(propId: string): string {
+  return rootPath + `${propId}`;
 }
 
 function removeEmpty(data: GotchiData[]) {
@@ -270,7 +296,7 @@ function removeEmpty(data: GotchiData[]) {
 //gets the proof of a particular address
 export async function getProof(address: string, propId: string) {
   const prop: ProposalDetails = await getProposalDetails(propId);
-  const filePath = getParentPath(prop.title) + "/tree.json";
+  const filePath = getParentPath(prop.id) + "/tree.json";
 
   //retrieve proof
   const jsonString = fs.readFileSync(filePath, "utf-8");
@@ -286,7 +312,7 @@ export async function getProof(address: string, propId: string) {
 
 export async function getGotchiIds(address: string, propId: string) {
   const prop: ProposalDetails = await getProposalDetails(propId);
-  const filePath = getParentPath(prop.title) + "/data.json";
+  const filePath = getParentPath(prop.id) + "/data.json";
 
   //retrieve gotchiIds
   const jsonString = fs.readFileSync(filePath, "utf-8");
@@ -300,7 +326,7 @@ export async function getGotchiIds(address: string, propId: string) {
   }
 }
 
-async function writeToFile(fullPath: string, data: any) {
+export async function writeToFile(fullPath: string, data: any) {
   await new Promise<void>((resolve, reject) => {
     fs.writeFile(fullPath, JSON.stringify(data), (err) => {
       if (err) {

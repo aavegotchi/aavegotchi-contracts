@@ -24,42 +24,98 @@ interface Gotchi {
 interface UsersWithGotchisRes {
   users: {
     id: string;
-    gotchisLentOut: string[];
     batch1: Gotchi[];
     batch2: Gotchi[];
     batch3: Gotchi[];
     batch4: Gotchi[];
     batch5: Gotchi[];
+    batch1owned: Gotchi[];
+    batch2owned: Gotchi[];
+    batch3owned: Gotchi[];
+    batch4owned: Gotchi[];
+    batch5owned: Gotchi[];
   }[];
 }
 
 export function getUsersWithGotchisOfAddresses(
   addresses: string[],
   blockNumber: number,
-  index: Number = 0
+  index: Number = 0,
+  useBlockNumber: boolean
 ): Promise<UsersWithGotchisRes> {
   let addressesString = addresses.map((e) => `"${e}"`).join(",");
-  let query = `
+  let query = useBlockNumber
+    ? `
     {users(skip: ${index} first: 1000 block:{number:${blockNumber}} where: {id_in: [${addressesString}]}) {
       id
-      gotchisLentOut
-      batch1: gotchisOwned(first: 1000 block:{number:${blockNumber}} ) {
+      
+      batch1: gotchisOriginalOwned(first: 1000 block:{number:${blockNumber}} ) {
         id
       }
-      batch2: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 1000) {
+      batch2: gotchisOriginalOwned(first: 1000 block:{number:${blockNumber}} skip: 1000) {
         id
       }
-      batch3: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 2000) {
+      batch3: gotchisOriginalOwned(first: 1000 block:{number:${blockNumber}} skip: 2000) {
         id
       }
-      batch4: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 3000) {
+      batch4: gotchisOriginalOwned(first: 1000 block:{number:${blockNumber}} skip: 3000) {
         id
       }
-      batch5: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 4000) {
+      batch5: gotchisOriginalOwned(first: 1000 block:{number:${blockNumber}} skip: 4000) {
+        id
+      }
+      batch1owned: gotchisOwned(first: 1000 block:{number:${blockNumber}}) {
+        id
+      }
+      batch2owned: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 1000) {
+        id
+      }
+      batch3owned: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 2000) {
+        id
+      }
+      batch4owned: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 3000) {
+        id
+      }
+      batch5owned: gotchisOwned(first: 1000 block:{number:${blockNumber}} skip: 4000) {
         id
       }
     }}
-    `;
+    `
+    : `{users(skip: ${index} first: 1000 where: {id_in: [${addressesString}]}) {
+      id
+      
+      batch1: gotchisOriginalOwned(first: 1000) {
+        id
+      }
+      batch2: gotchisOriginalOwned(first: 1000 skip: 1000) {
+        id
+      }
+      batch3: gotchisOriginalOwned(first: 1000 skip: 2000) {
+        id
+      }
+      batch4: gotchisOriginalOwned(first: 1000 skip: 3000) {
+        id
+      }
+      batch5: gotchisOriginalOwned(first: 1000 skip: 4000) {
+        id
+      }
+      batch1owned: gotchisOwned(first: 1000) {
+        id
+      }
+      batch2owned: gotchisOwned(first: 1000 skip: 1000) {
+        id
+      }
+      batch3owned: gotchisOwned(first: 1000 skip: 2000) {
+        id
+      }
+      batch4owned: gotchisOwned(first: 1000 skip: 3000) {
+        id
+      }
+      batch5owned: gotchisOwned(first: 1000  skip: 4000) {
+        id
+      }
+    }}`;
+
   return request(maticGraphUrl, query);
 }
 
@@ -265,7 +321,8 @@ export async function getBorrowedGotchis(addresses: string[]) {
 
 export async function getVaultGotchis(
   addresses: string[],
-  blockTag: number
+  blockTag: number,
+  useBlockNumber: boolean
 ): Promise<UserGotchisOwned[]> {
   console.log("Fetching Vault subgraph gotchis");
 
@@ -278,17 +335,29 @@ export async function getVaultGotchis(
   for (let index = 0; index < batches; index++) {
     const batchId = index;
     const offset = batchId * batchSize;
-    queryData = queryData.concat(`
+    queryData = useBlockNumber
+      ? queryData.concat(`
       batch${batchId}: owners(where:{id_in:[${addresses
-      .slice(offset, offset + batchSize)
-      .map(
-        (add: string) => '"' + add.toLowerCase() + '"'
-      )}]},first:${batchSize},block:{number:${blockTag}}) {
+          .slice(offset, offset + batchSize)
+          .map(
+            (add: string) => '"' + add.toLowerCase() + '"'
+          )}]},first:${batchSize},block:{number:${blockTag}}) {
         id
         gotchis(first:1000) {
           id
         }}
-  `);
+  `)
+      : queryData.concat(`
+  batch${batchId}: owners(where:{id_in:[${addresses
+          .slice(offset, offset + batchSize)
+          .map(
+            (add: string) => '"' + add.toLowerCase() + '"'
+          )}]},first:${batchSize}) {
+    id
+    gotchis(first:1000) {
+      id
+    }}
+`);
   }
 
   queryData = queryData.concat(`}`);
@@ -405,7 +474,8 @@ export async function fetchGotchiLending(total: GotchiLending[], skip: number) {
 export async function getPolygonAndMainnetGotchis(
   addresses: string[],
   blockTag: number,
-  hre: HardhatRuntimeEnvironment
+  hre: HardhatRuntimeEnvironment,
+  useBlockNumber: boolean
 ) {
   //Queries
   //Aavegotchis in ATTENDEE's wallet
@@ -428,13 +498,13 @@ export async function getPolygonAndMainnetGotchis(
     const result = await getUsersWithGotchisOfAddresses(
       addresses,
       blockTag,
-      index
+      index,
+      useBlockNumber
     );
 
     index += 1000;
     prevLength = gotchiIds.length;
     result.users.forEach((e) => {
-      gotchiIds = gotchiIds.concat(e.gotchisLentOut);
       let gotchisOwned = e.batch1.map((f: GotchiId) => f.id);
       gotchisOwned = gotchisOwned.concat(e.batch2.map((f: GotchiId) => f.id));
       gotchisOwned = gotchisOwned.concat(e.batch3.map((f: GotchiId) => f.id));
@@ -454,7 +524,8 @@ export async function getPolygonAndMainnetGotchis(
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
     const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(
       batch,
-      blockTag
+      blockTag,
+      useBlockNumber
     );
     vaultUsers.forEach((e) => {
       gotchiIds = gotchiIds.concat(e.gotchisOwned.map((f) => f.id));

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
 import "../libraries/LibAppStorage.sol";
@@ -12,6 +13,7 @@ contract ForgeDAOFacet is Modifiers {
     event SetForgeTimeCostInBlocks(RarityValueIO newCosts);
     event SetSkillPointsEarnedFromForge(RarityValueIO newPoints);
     event SetGeodeWinChance(RarityValueIO newChances);
+    event SetGeodePrizes(uint256[] ids, uint256[] quantities);
     event SetSmeltingSkillPointReductionFactorBips(uint256 oldBips, uint256 newBips);
     event SetMaxSupplyPerToken(uint256[] tokenIds, uint256[] supplyPerTokenId);
     event SetAavegotchiDiamondAddress(address _address);
@@ -133,35 +135,47 @@ contract ForgeDAOFacet is Modifiers {
         return s.alloyBurnFeeInBips;
     }
 
-    //    // @notice Allow DAO to update percent chance to win from a Geode.
-    //    // @param points RarityValueIO struct of points
-    //    function setGeodeWinChance(RarityValueIO calldata chances) external onlyDaoOrOwner {
-    //        s.geodeWinChance[COMMON_RSM] = chances.common;
-    //        s.geodeWinChance[UNCOMMON_RSM] = chances.uncommon;
-    //        s.geodeWinChance[RARE_RSM] = chances.rare;
-    //        s.geodeWinChance[LEGENDARY_RSM] = chances.legendary;
-    //        s.geodeWinChance[MYTHICAL_RSM] = chances.mythical;
-    //        s.geodeWinChance[GODLIKE_RSM] = chances.godlike;
-    //
-    //        emit SetGeodeWinChance(chances);
-    //    }
-    //
-    //    // @notice Allow DAO to set which prizes can be won from a Geode.
-    //    // @param ids Token IDs of the available prizes
-    //    // @param quantities Initial amounts of each prize available
-    //    function setGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities) external onlyDaoOrOwner {
-    //        require(ids.length == quantities.length, "ForgeDAOFacet: mismatched arrays");
-    //
-    //        for (uint256 i; i < ids.length; i++){
-    //            if (s.geodePrizeQuantities[ids[i]] == 0){
-    //                // this ID is deleted from the array in the geode opening function when last item is won.
-    //                s.geodePrizeTokenIds.push(ids[i]);
-    //            }
-    //            s.geodePrizeQuantities[ids[i]] += quantities[i];
-    //        }
-    //
-    //        emit SetGeodePrizes(ids, quantities);
-    //    }
+    // @notice Allow DAO to update percent chance to win from a Geode.
+    // @param points RarityValueIO struct of points
+    function setGeodeWinChanceBips(RarityValueIO calldata chances) external onlyDaoOrOwner {
+        s.geodeWinChanceBips[COMMON_RSM] = chances.common;
+        s.geodeWinChanceBips[UNCOMMON_RSM] = chances.uncommon;
+        s.geodeWinChanceBips[RARE_RSM] = chances.rare;
+        s.geodeWinChanceBips[LEGENDARY_RSM] = chances.legendary;
+        s.geodeWinChanceBips[MYTHICAL_RSM] = chances.mythical;
+        s.geodeWinChanceBips[GODLIKE_RSM] = chances.godlike;
+
+        emit SetGeodeWinChance(chances);
+    }
+
+    // @notice Allow DAO to set which prizes can be won from a Geode.
+    // @param ids Token IDs of the available prizes
+    // @param quantities Initial amounts of each prize available
+    function setGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities) external onlyDaoOrOwner {
+        require(ids.length == quantities.length, "ForgeDAOFacet: mismatched arrays");
+
+        for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
+            delete s.geodePrizeQuantities[s.geodePrizeTokenIds[i]];
+        }
+        delete s.geodePrizeTokenIds;
+        for (uint256 i; i < ids.length; i++) {
+            if (s.geodePrizeQuantities[ids[i]] == 0) {
+                // this ID is deleted from the array in the geode opening function when last item is won.
+                s.geodePrizeTokenIds.push(ids[i]);
+            }
+            s.geodePrizeQuantities[ids[i]] = quantities[i];
+        }
+
+        emit SetGeodePrizes(ids, quantities);
+    }
+
+    function getGeodePrizesRemaining() external view returns (uint256[] memory, uint256[] memory) {
+        uint256[] memory quantities = new uint256[](s.geodePrizeTokenIds.length);
+        for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
+            quantities[i] = s.geodePrizeQuantities[s.geodePrizeTokenIds[i]];
+        }
+        return (s.geodePrizeTokenIds, quantities);
+    }
 
     // @dev Max supply is not practical to keep track of for each forge token. The contract logic should take care of this.
     // @notice Allow DAO to set max supply per Forge asset token.
