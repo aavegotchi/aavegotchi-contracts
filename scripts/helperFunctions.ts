@@ -266,8 +266,8 @@ export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
 
     const provider = new DefenderRelayProvider(credentials);
     return new DefenderRelaySigner(credentials, provider, {
-      speed: "fast",
-      validForSeconds: 3600,
+      speed: "safeLow",
+      validForSeconds: 7200,
     });
   } else if (hre.network.name === "tenderly") {
     //impersonate
