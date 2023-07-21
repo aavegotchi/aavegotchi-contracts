@@ -16,6 +16,7 @@ import {ItemType} from "../../libraries/LibAppStorage.sol";
 import {AavegotchiFacet} from "../../facets/AavegotchiFacet.sol";
 import {AavegotchiGameFacet} from "../../facets/AavegotchiGameFacet.sol";
 import {LendingGetterAndSetterFacet} from "../../facets/LendingGetterAndSetterFacet.sol";
+import {IERC1155Marketplace} from "../../../shared/interfaces/IERC1155Marketplace.sol";
 
 contract ForgeFacet is Modifiers {
     event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);
@@ -615,6 +616,7 @@ contract ForgeFacet is Modifiers {
 
         LibToken.removeFromOwner(from, id, amount);
         s._totalSupply[id] -= amount;
+        IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(address(this), id, from);
 
         emit TransferSingle(msg.sender, from, address(0), id, amount);
     }
@@ -636,6 +638,7 @@ contract ForgeFacet is Modifiers {
 
             LibToken.removeFromOwner(from, id, amount);
             s._totalSupply[id] -= amount;
+            IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(address(this), id, from);
         }
         emit TransferBatch(msg.sender, from, address(0), ids, amounts);
     }
