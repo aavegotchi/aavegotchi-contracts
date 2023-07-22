@@ -244,7 +244,7 @@ contract AavegotchiGameFacet is Modifiers {
         address escrow = address(new CollateralEscrow(option.collateralType));
         aavegotchi.escrow = escrow;
         address owner = LibMeta.msgSender();
-        LibERC20.transferFrom(option.collateralType, owner, escrow, _stakeAmount);
+        // LibERC20.transferFrom(option.collateralType, owner, escrow, _stakeAmount);
         LibERC721Marketplace.cancelERC721Listing(address(this), _tokenId, owner);
     }
 
