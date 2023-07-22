@@ -409,7 +409,7 @@ contract Modifiers {
     modifier onlyLayerZeroBridge() {
         address sender = LibMeta.msgSender();
         require(
-            s.layerZeroBridgeAddresses[sender],
+            s.layerZeroBridgeAddresses[sender], 
             "LibAppStorage: Do not have access"
         );
         _;
