@@ -140,7 +140,7 @@ export async function upgrade() {
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
-    useMultisig: true,
+    useMultisig: false,
     initAddress: maticDiamondAddress,
     initCalldata: payload,
   };
