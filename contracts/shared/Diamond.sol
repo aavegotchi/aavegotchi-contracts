@@ -13,9 +13,9 @@ import {DiamondLoupeFacet} from "./facets/DiamondLoupeFacet.sol";
 import {OwnershipFacet} from "./facets/OwnershipFacet.sol";
 
 contract Diamond {
-    constructor(address _contractOwner) {
+    constructor(address _contractOwner, address diamondCutFacetAddress, address diamondLoupeFacetAddress, address ownershipFacetAddress) {
         LibDiamond.setContractOwner(_contractOwner);
-        LibDiamond.addDiamondFunctions(address(new DiamondCutFacet()), address(new DiamondLoupeFacet()), address(new OwnershipFacet()));
+        LibDiamond.addDiamondFunctions(diamondCutFacetAddress, diamondLoupeFacetAddress, ownershipFacetAddress);
     }
 
     // Find facet for function that is called and execute the

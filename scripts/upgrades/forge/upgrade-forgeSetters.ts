@@ -131,16 +131,33 @@ export async function setForgeProperties(forgeDiamondAddress: string) {
   //     ).owner();
   //     forgeDaoFacet = await impersonate(owner, forgeDaoFacet, ethers, network);
   //   }
-  await forgeDaoFacet.setGltrAddress(GLTR);
-  await forgeDaoFacet.setAavegotchiDaoAddress(daoAddr);
-  await forgeDaoFacet.setAlloyDaoFeeInBips(500);
-  await forgeDaoFacet.setAlloyBurnFeeInBips(500);
-
-  await forgeDaoFacet.setForgeAlloyCost(alloyCosts);
-  await forgeDaoFacet.setForgeEssenceCost(essenceCost);
-  await forgeDaoFacet.setForgeTimeCostInBlocks(timeCost);
-  await forgeDaoFacet.setSkillPointsEarnedFromForge(skillPts);
-  await forgeDaoFacet.setSmeltingSkillPointReductionFactorBips(5000);
+  let tx = await forgeDaoFacet.setGltrAddress(GLTR);
+  console.log("tx:", tx.hash);
+  await tx.wait();
+  tx = await forgeDaoFacet.setAavegotchiDaoAddress(daoAddr);
+  console.log("tx:", tx.hash);
+  await tx.wait();
+  tx = await forgeDaoFacet.setAlloyDaoFeeInBips(500);
+  console.log("tx:", tx.hash);
+  await tx.wait();
+  tx = await forgeDaoFacet.setAlloyBurnFeeInBips(500);
+  console.log("tx:", tx.hash);
+  await tx.wait();
+  tx = await forgeDaoFacet.setForgeAlloyCost(alloyCosts);
+  console.log("tx:", tx.hash);
+  await tx.wait();
+  tx = await forgeDaoFacet.setForgeEssenceCost(essenceCost);
+  console.log("tx:", tx.hash);
+  await tx.wait();
+  tx = await forgeDaoFacet.setForgeTimeCostInBlocks(timeCost);
+  console.log("tx:", tx.hash);
+  await tx.wait();
+  tx = await forgeDaoFacet.setSkillPointsEarnedFromForge(skillPts);
+  console.log("tx:", tx.hash);
+  await tx.wait();
+  tx = await forgeDaoFacet.setSmeltingSkillPointReductionFactorBips(5000);
+  console.log("tx:", tx.hash);
+  await tx.wait();
   // }
 
   console.log("Finished setForgeProperties.");
