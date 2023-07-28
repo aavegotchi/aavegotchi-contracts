@@ -6,8 +6,7 @@ import "./ProxyONFT721.sol";
 import "../Aavegotchi/facets/AavegotchiFacet.sol";
 import "../Aavegotchi/facets/PolygonXGotchichainBridgeFacet.sol";
 
-contract BridgeGotchichainSide is ProxyONFT721 {
-
+contract AavegotchiBridgePolygonSide is ProxyONFT721 {
     constructor(
         uint256 _minGasToTransfer,
         address _lzEndpoint,
@@ -67,14 +66,7 @@ contract BridgeGotchichainSide is ProxyONFT721 {
     }
 
     function _creditTo(uint16, address _toAddress, uint _tokenId) internal override {
-        try token.ownerOf(_tokenId) {
-            token.safeTransferFrom(address(this), _toAddress, _tokenId);
-        } catch Error(string memory reason) {
-            if (_compare(reason, "AavegotchiFacet: invalid _tokenId")) {
-                PolygonXGotchichainBridgeFacet(address(token)).mintWithId(_toAddress, _tokenId);
-            }
-            // @todo: what to do?
-        }
+        token.safeTransferFrom(address(this), _toAddress, _tokenId);
     }
 
     function _updateAavegotchiMetadata(address newOwner, uint[] memory tokenIds, Aavegotchi[] memory aavegotchis) internal {
@@ -84,10 +76,4 @@ contract BridgeGotchichainSide is ProxyONFT721 {
         }
     }
 
-    function _compare(string memory str1, string memory str2) internal pure returns (bool) {
-        if (bytes(str1).length != bytes(str2).length) {
-            return false;
-        }
-        return keccak256(abi.encodePacked(str1)) == keccak256(abi.encodePacked(str2));
-    }
 }
