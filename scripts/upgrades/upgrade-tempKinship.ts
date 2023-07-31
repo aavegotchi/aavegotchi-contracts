@@ -108,6 +108,9 @@ export const tokenIds = [
   "10268",
   "5877",
 ];
+
+export const tokenIds2 = ["4230", "8588", "6853", "2290"];
+
 export async function upgrade() {
   const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 
@@ -134,7 +137,7 @@ export async function upgrade() {
   ];
   let iface = new ethers.utils.Interface(AavegotchiFacet__factory.abi);
   const joined = convertFacetAndSelectorsToString(facets);
-  const payload = iface.encodeFunctionData("tempBuffKinship", [tokenIds]);
+  const payload = iface.encodeFunctionData("tempBuffKinship", [tokenIds2]);
   const args: DeployUpgradeTaskArgs = {
     diamondUpgrader: diamondUpgrader,
     diamondAddress: maticDiamondAddress,
