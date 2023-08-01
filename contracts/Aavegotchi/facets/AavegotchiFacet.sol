@@ -279,7 +279,7 @@ contract AavegotchiFacet is Modifiers {
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             s.aavegotchis[tokenId].interactionCount += 2;
-            LibAavegotchi.interact(tokenId);
+            emit LibAavegotchi.AavegotchiInteract(tokenId, s.aavegotchis[tokenId].interactionCount);
         }
     }
 }
