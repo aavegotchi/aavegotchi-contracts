@@ -25,6 +25,13 @@ export async function impersonate(
     method: "hardhat_impersonateAccount",
     params: [address],
   });
+
+  //give some ether
+  await ethers.provider.send("hardhat_setBalance", [
+    address,
+    "0x100000000000000000000",
+  ]);
+
   let signer = await ethers.getSigner(address);
   contract = contract.connect(signer);
   return contract;
@@ -88,6 +95,13 @@ export const maticFakeGotchiCards =
 export const maticFakeGotchiArt = "0xA4E3513c98b30d4D7cc578d2C328Bd550725D1D0";
 
 export const maticForgeDiamond = "0x4fDfc1B53Fd1D80d969C984ba7a8CE4c7bAaD442";
+
+export const mumbaiOwner = "0x382038b034fa8Ea64C74C81d680669bDaC4D0636";
+export const mumbiaAavegotchiDiamond =
+  "0x83e73D9CF22dFc3A767EA1cE0611F7f50306622e";
+export const mumbaiWearableDiamond =
+  "0x1b1bcB49A744a09aEd636CDD9893508BdF1431A8";
+export const mumbaiForgeDiamond = "0x2E6cb85DD86141a2A284988E883fF377CA223afE";
 
 export async function diamondOwner(address: string, ethers: any) {
   return await (await ethers.getContractAt("OwnershipFacet", address)).owner();
@@ -263,8 +277,8 @@ export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
 
     const provider = new DefenderRelayProvider(credentials);
     return new DefenderRelaySigner(credentials, provider, {
-      speed: "fast",
-      validForSeconds: 3600,
+      speed: "safeLow",
+      validForSeconds: 7200,
     });
   } else if (hre.network.name === "tenderly") {
     //impersonate

@@ -181,6 +181,12 @@ struct GotchiLending {
     uint32 period; //in seconds
     // storage slot 5
     address[] revenueTokens;
+    //storage slot 6
+    //this is a bitmap value that packs all the permissions of a listing into a single uint256
+    //each index represents a permission, therefore 32 indexes,== 32 possible permissions
+    //index 0 means no permission by default
+    //indexes can store up to 256 values (0-255), each value representing a modifer for that permission, but we only use 0-9
+    uint256 permissions; //0=none, 1=channelling
 }
 
 struct LendingListItem {
@@ -198,6 +204,20 @@ struct Whitelist {
 struct XPMerkleDrops {
     bytes32 root;
     uint256 xpAmount; //10-sigprop, 20-coreprop
+}
+
+struct ERC721BuyOrder {
+    uint256 buyOrderId;
+    address buyer;
+    address erc721TokenAddress;
+    uint256 erc721TokenId;
+    uint256 priceInWei;
+    uint256 timeCreated;
+    uint256 timePurchased;
+    uint256 duration; //0 for unlimited
+    bool cancelled;
+    bytes32 validationHash;
+    bool[] validationOptions;
 }
 
 struct AppStorage {
@@ -313,6 +333,12 @@ struct AppStorage {
     //XP Drops
     mapping(bytes32 => XPMerkleDrops) xpDrops;
     mapping(uint256 => mapping(bytes32 => uint256)) xpClaimed;
+    // states for buy orders
+    uint256 nextERC721BuyOrderId;
+    mapping(uint256 => ERC721BuyOrder) erc721BuyOrders; // buyOrderId => data
+    mapping(address => mapping(uint256 => uint256[])) erc721TokenToBuyOrderIds; // erc721 token address => erc721TokenId => buyOrderIds
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) erc721TokenToBuyOrderIdIndexes; // erc721 token address => erc721TokenId => buyOrderId => index
+    mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
 }
 
 library LibAppStorage {
@@ -335,6 +361,10 @@ contract Modifiers {
     }
     modifier onlyUnlocked(uint256 _tokenId) {
         require(s.aavegotchis[_tokenId].locked == false, "LibAppStorage: Only callable on unlocked Aavegotchis");
+        _;
+    }
+    modifier onlyLocked(uint256 _tokenId) {
+        require(s.aavegotchis[_tokenId].locked == true, "LibAppStorage: Only callable on locked Aavegotchis");
         _;
     }
 
