@@ -273,13 +273,4 @@ contract AavegotchiFacet is Modifiers {
     function tokenURI(uint256 _tokenId) external pure returns (string memory) {
         return LibStrings.strWithUint("https://app.aavegotchi.com/metadata/aavegotchis/", _tokenId); //Here is your URL!
     }
-
-    function tempBuffKinship(uint256[] calldata _tokenIds) external onlyDaoOrOwner {
-        //update each aavegotchi's kinship by 2 and interact
-        for (uint256 i; i < _tokenIds.length; i++) {
-            uint256 tokenId = _tokenIds[i];
-            s.aavegotchis[tokenId].interactionCount += 2;
-            emit LibAavegotchi.AavegotchiInteract(tokenId, s.aavegotchis[tokenId].interactionCount);
-        }
-    }
 }
