@@ -162,6 +162,11 @@ export async function queryAllAavegotchis(
 
   finalData = reduceGotchiData(finalData);
 
+  //loop through all finalData.gotchiIds and remove duplicates
+  finalData.forEach((e) => {
+    e.gotchiIds = [...new Set(e.gotchiIds)];
+  });
+
   console.log("Unique addresses:", finalData.length);
   const x = new Set(allGotchiIds);
   const y = console.log("Unique Gotchis", Array.from(x).length);
