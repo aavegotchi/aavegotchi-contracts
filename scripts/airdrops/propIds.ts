@@ -177,6 +177,32 @@ const sigProps = [
     id: "0x3b8609c0632f23ea329f97d7c1de18f84313158aabd173f285c8494285636380",
     title: "Gotchi Battler funding",
   },
+  {
+    id: "0x42bbb17dd055adac28433a16b145ff45e732080402cf44e7d7dfec051555f16f",
+    title:
+      "SIG Proposal: Over-the-counter (OTC) Agreement for GHST Holdings of 0VIX Users",
+  },
+  {
+    id: "0x451ca91ce0403999fd4b57f14a9f8cc3a62fed001ea148e01dfec0e9bbbb467e",
+    title: "Sig-Prop: Return 0VIX funds to multisig",
+  },
+  {
+    id: "0x24e31f35168d1cc999288a38c012880c6ad4d41e604d66d1bbe4b67a00562990",
+    title: "Forge 2.0 New Schematics, Methodology, and Godlike Sets",
+  },
+  {
+    id: "0x08ea07c9f1b18cd56c280f82b2467acdd21de6a06a7ab44768f4a13b6a6c0372",
+    title: "Geodes, Schematic Distribution, and a Final non-drop ticket Raffle",
+  },
+  {
+    id: "0x0146fc3a188544b270dd5efc928f3d96e31a9d00bfc6a367fa77c8124bd4df93",
+    title: "Gotchi Crawler Demo Proposal",
+  },
+  //Skip Sigprop 92
+  {
+    id: "0x95c58ed45937af95c94df7bc959381435ea592bfff55355d8c04ed6d5b2727b6",
+    title: "Alchemica spending competion - season 3",
+  },
 ];
 
 const coreProps = [
@@ -364,5 +390,32 @@ const coreProps = [
   {
     id: "0x705c1bd8e3d6a6455241bfb0b236ea2504fc5bf7157a1073245ec01b4bacb62a",
     title: "[AGIP 86] Gotchi Battler funding",
+  },
+  {
+    id: "0x929b6df24a265c0b7ea7e6a4f49eac4f1852993c3c9be69ef38f07f8a462923e",
+    title:
+      "[AGIP87] Over-the-counter (OTC) Agreement for GHST Holdings of 0VIX Users",
+  },
+  {
+    id: "0x538e41dc85ec65809b2b072d4ebb7dd4af1c9c973cb09f416300b9cc3d3b588f",
+    title: "[AGIP 88] Return 0VIX funds to multisig",
+  },
+  {
+    id: "0xae17b512c7055fb2fa0ae2701666c417ebe2c80bc2901eda93d80239a9ca5c53",
+    title: "[AGIP 89] Forge 2.0 New Schematics, Methodology, and Godlike Sets",
+  },
+  {
+    id: "0x5116dcfea59bb27189e607e990746417840142115f31ecb6223a8748868b2a7f",
+    title:
+      "[AGIP 90] Geodes, Schematic Distribution, and a Final non-drop ticket Raffle",
+  },
+  {
+    id: "0x42da17ccfaf9c99bd5a904de5a9d1f1d72f8e7057594fbd20f9d328ad6b8a109",
+    title: "[AGIP 91] Gotchi Crawler Demo Proposal",
+  },
+  //AGIP 92 did not pass
+  {
+    id: "0xd3c0ca68dedf236a9418b51fb9743dc4428182d7b178528f80a448dd5b2aeb6e",
+    title: "[AGIP 93] Alchemica spending Competition - Season 3",
   },
 ];
