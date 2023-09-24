@@ -45,6 +45,10 @@ contract ERC721BuyOrderFacet is Modifiers {
         uint256 buyOrderId;
     }
 
+    ///@notice Batch query the status of multiple valid buy orders
+    ///@param _buyOrderIds An array of buy order ids to query
+    ///@return statuses_ An array of structs where each struct contains the status of each buy order in `_buyOrderIds`
+
     function getERC721BuyOrderStatuses(uint256[] calldata _buyOrderIds) external view returns (StatusesReturn[] memory statuses_) {
         uint256 length = _buyOrderIds.length;
         statuses_ = new StatusesReturn[](length);
@@ -82,6 +86,11 @@ contract ERC721BuyOrderFacet is Modifiers {
         }
     }
 
+    ///@notice Query all the valid buy order ids for a particular ERC721 token address and ERC721 token id
+    ///@param _erc721TokenAddress The address of the ERC721 token
+    ///@param _erc721TokenId The identifier of the ERC721 token
+    ///@return buyOrderIds_ An array of buy order ids that are valid for the query
+
     function getERC721BuyOrderIdsByTokenId(
         address _erc721TokenAddress,
         uint256 _erc721TokenId
@@ -89,6 +98,10 @@ contract ERC721BuyOrderFacet is Modifiers {
         buyOrderIds_ = s.erc721TokenToBuyOrderIds[_erc721TokenAddress][_erc721TokenId];
     }
 
+    ///@notice Query all the valid buy orders for a particular ERC721 token address and ERC721 token id
+    ///@param _erc721TokenAddress The address of the ERC721 token
+    ///@param _erc721TokenId The identifier of the ERC721 token
+    ///@return buyOrders_ An array of buy order structs that are valid for the query
     function getERC721BuyOrdersByTokenId(
         address _erc721TokenAddress,
         uint256 _erc721TokenId
@@ -101,6 +114,11 @@ contract ERC721BuyOrderFacet is Modifiers {
         }
     }
 
+    ///@notice Place a buy order for an ERC721 token
+    ///@param _erc721TokenAddress The address of the ERC721 token
+    ///@param _erc721TokenId The identifier of the ERC721 token
+    ///@param _priceInWei The price in GHST to buy the ERC721 token
+    ///@param _duration The duration of the buy order
     function placeERC721BuyOrder(
         address _erc721TokenAddress,
         uint256 _erc721TokenId,
@@ -171,6 +189,10 @@ contract ERC721BuyOrderFacet is Modifiers {
         );
     }
 
+    ///@notice Cancel an existing ERC721 buy order
+    ///@param _buyOrderId The identifier of the buy order
+    ///@dev Will revert if the buy order does not exist, is already cancelled or is already executed
+
     function cancelERC721BuyOrder(uint256 _buyOrderId) external {
         address sender = LibMeta.msgSender();
         ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
@@ -189,6 +211,12 @@ contract ERC721BuyOrderFacet is Modifiers {
         emit ERC721BuyOrderCanceled(_buyOrderId, block.timestamp);
     }
 
+    ///@notice Execute/Accept an existing ERC721 buy order
+    ///@param _buyOrderId The identifier of the buy order
+    ///@param _erc721TokenAddress The address of the ERC721 token
+    ///@param _erc721TokenId The identifier of the ERC721 token
+    ///@param _priceInWei The price in GHST to buy the ERC721 token
+    ///@dev Will revert if the buy order does not exist, is already cancelled or is already executed
     function executeERC721BuyOrder(uint256 _buyOrderId, address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei) external {
         address sender = LibMeta.msgSender();
         ERC721BuyOrder storage erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
