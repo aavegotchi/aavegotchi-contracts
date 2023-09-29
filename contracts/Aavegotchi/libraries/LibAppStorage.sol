@@ -4,6 +4,7 @@ import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {ILink} from "../interfaces/ILink.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {IERC7432} from "../interfaces/IERC7432.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
@@ -339,6 +340,18 @@ struct AppStorage {
     mapping(address => mapping(uint256 => uint256[])) erc721TokenToBuyOrderIds; // erc721 token address => erc721TokenId => buyOrderIds
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) erc721TokenToBuyOrderIdIndexes; // erc721 token address => erc721TokenId => buyOrderId => index
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
+    // ***
+    // Items Roles Registry
+    // ***
+    // grantee => tokenAddress => tokenId => role => struct(expirationDate, data)
+    mapping(address => mapping(address => mapping(uint256 => mapping(bytes32 => IERC7432.RoleData)))) itemsRoleAssignments;
+    // tokenAddress => tokenId => role => grantee
+    mapping(address => mapping(uint256 => mapping(bytes32 => address))) itemsLatestGrantees;
+    // grantor => tokenAddress => tokenId => operator => isApproved
+    mapping(address => mapping(address => mapping(uint256 => mapping(address => bool)))) itemsTokenIdApprovals;
+    // grantor => tokenAddress => operator => isApproved
+    mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
+
 }
 
 library LibAppStorage {
