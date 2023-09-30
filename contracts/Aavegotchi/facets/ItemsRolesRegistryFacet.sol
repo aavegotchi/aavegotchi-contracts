@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import {IERC7432} from "../interfaces/IERC7432.sol";
-import {IERC721} from "../../shared/interfaces/IERC721.sol";
+import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
 
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -17,21 +17,29 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
 
     /** Modifiers **/
 
-    modifier validExpirationDate(uint64 _expirationDate) {
-        require(_expirationDate > block.timestamp, "ItemsRolesRegistryFacet: expiration date must be in the future");
+    modifier onlyWearables(address _tokenAddress, uint256 _tokenId) {
+        require(_tokenAddress == s.wearableDiamond, "ItemsRolesRegistryFacet: Only Item NFTs are supported");
+        require(s.itemTypes[_tokenId].category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsRolesRegistryFacet: Only Items of type Wearable are supported");
         _;
     }
 
-    modifier onlyOwnerOrApproved(
-        address _tokenAddress,
-        uint256 _tokenId,
-        address _account
-    ) {
+    modifier onlyTokenOwner(address _tokenAddress, uint256 _tokenId, address _account) {
+        require(IERC1155(_tokenAddress).balanceOf(_account, _tokenId) > 0, "RolesRegistry: account must be token owner");
+        _;
+    }
+
+    modifier onlyOwnerOrApproved(address _tokenAddress, uint256 _tokenId, address _account) {
+        address sender = LibMeta.msgSender();
         require(
-            msg.sender == IERC721(_tokenAddress).ownerOf(_tokenId) ||
-            _isRoleApproved(_tokenAddress, _tokenId, _account, msg.sender),
+             IERC1155(_tokenAddress).balanceOf(sender, _tokenId) > 0 ||
+            _isRoleApproved(_tokenAddress, _tokenId, _account, sender),
             "ItemsRolesRegistryFacet: sender must be token owner or approved"
         );
+        _;
+    }
+
+    modifier validExpirationDate(uint64 _expirationDate) {
+        require(_expirationDate > block.timestamp, "ItemsRolesRegistryFacet: expiration date must be in the future");
         _;
     }
 
@@ -46,8 +54,8 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
         bool _revocable,
         bytes calldata _data
     ) external override {
-        // TODO
-        revert("Not implemented");
+        address sender = LibMeta.msgSender();
+        _grantRole(_role, _tokenAddress, _tokenId, sender, _grantee, _expirationDate, _revocable, _data);
     }
 
     function revokeRole(
@@ -72,19 +80,9 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
     )
         external
         override
-        // onlyOwnerOrApproved(_tokenAddress, _tokenId, _grantor)
+        onlyOwnerOrApproved(_tokenAddress, _tokenId, _grantor)
     {
-        // TODO checks for ownership and approval
-        require(_tokenAddress == s.wearableDiamond, "ItemsRolesRegistryFacet: Only Wearables are supported in this registry");
-        ItemType storage itemType = s.itemTypes[_tokenId];
-        require(itemType.category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsRolesRegistryFacet: Only Wearables are supported");
-
-        address sender = LibMeta.msgSender();
-        uint256 balToTransfer = 1;
-        LibItems.removeFromOwner(_grantor, _tokenId, balToTransfer);
-        LibItems.addToOwner(address(this), _tokenId, balToTransfer);
-        IEventHandlerFacet(_tokenAddress).emitTransferSingleEvent(sender, _grantor, address(this), _tokenId, balToTransfer);
-        LibERC1155Marketplace.updateERC1155Listing(address(this), _tokenId, _grantor);
+        _grantRole(_role, _tokenAddress, _tokenId, _grantor, _grantee, _expirationDate, _revocable, _data);
     }
 
     function revokeRoleFrom(
@@ -191,6 +189,56 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
         return
             isRoleApprovedForAll(_tokenAddress, _grantor, _operator) ||
             getApprovedRole(_tokenAddress, _tokenId, _grantor, _operator);
+    }
+
+    function _grantRole(
+        bytes32 _role,
+        address _tokenAddress,
+        uint256 _tokenId,
+        address _grantor,
+        address _grantee,
+        uint64 _expirationDate,
+        bool _revocable,
+        bytes calldata _data
+    )
+        internal
+        validExpirationDate(_expirationDate)
+        onlyWearables(_tokenAddress, _tokenId)
+        onlyTokenOwner(_tokenAddress, _tokenId, _grantor)
+    {
+        _depositWearable(_tokenAddress, _tokenId, _grantor);
+        _storeRole(_role, _tokenAddress, _tokenId, _grantor, _grantee, _expirationDate, _revocable, _data);
+    }
+
+    function _storeRole(
+        bytes32 _role,
+        address _tokenAddress,
+        uint256 _tokenId,
+        address _grantor,
+        address _grantee,
+        uint64 _expirationDate,
+        bool _revocable,
+        bytes calldata _data
+    ) internal {
+        address _lastGrantee = s.itemsLatestGrantees[_tokenAddress][_tokenId][_role];
+        RoleData memory _roleData = s.itemsRoleAssignments[_lastGrantee][_tokenAddress][_tokenId][_role];
+        bool _hasActiveAssignment = _roleData.expirationDate > block.timestamp;
+        if (_hasActiveAssignment) {
+            // only unique roles can be revocable
+            require(_roleData.revocable, "RolesRegistry: role is not revocable");
+        }
+
+        s.itemsRoleAssignments[_grantee][_tokenAddress][_tokenId][_role] = RoleData(_expirationDate, _revocable, _data);
+        s.itemsLatestGrantees[_tokenAddress][_tokenId][_role] = _grantee;
+        emit RoleGranted(_role, _tokenAddress, _tokenId, _grantor, _grantee, _expirationDate, _revocable, _data);
+    }
+
+    function _depositWearable(address _tokenAddress, uint256 _tokenId, address _grantor) internal {
+        LibItems.removeFromOwner(_grantor, _tokenId, 1);
+        LibItems.addToOwner(address(this), _tokenId, 1);
+        s.userWithdrawableBalances[_grantor][_tokenAddress][_tokenId] += 1;
+        IEventHandlerFacet(_tokenAddress).emitTransferSingleEvent(LibMeta.msgSender(), _grantor, address(this), _tokenId, 1);
+        LibERC1155Marketplace.updateERC1155Listing(address(this), _tokenId, _grantor);
     }
 
 }

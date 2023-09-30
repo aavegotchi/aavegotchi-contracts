@@ -351,7 +351,8 @@ struct AppStorage {
     mapping(address => mapping(address => mapping(uint256 => mapping(address => bool)))) itemsTokenIdApprovals;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
-
+    // grantor => tokenAddress => tokenId => withdrawableBalance
+    mapping(address => mapping(address => mapping(uint256 => uint256))) userWithdrawableBalances;
 }
 
 library LibAppStorage {
