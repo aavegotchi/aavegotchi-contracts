@@ -203,6 +203,14 @@ const sigProps = [
     id: "0x95c58ed45937af95c94df7bc959381435ea592bfff55355d8c04ed6d5b2727b6",
     title: "Alchemica spending competion - season 3",
   },
+  {
+    id: "0x24191cf52ade5500f0292f3b553659424df7c00d0e9945b9efe2807f97e97513",
+    title: "Revamp the Aavegotchi Rental Protocol to support Parcels and Wearables"
+  },
+  {
+    id: "0xded951f11b5b0ef037133c627159aea13acd4a10fe26d509076de5708244a62f",
+    title: "Gotchi Heroes Reworked Version Proposal"
+  }
 ];
 
 const coreProps = [
@@ -418,4 +426,12 @@ const coreProps = [
     id: "0xd3c0ca68dedf236a9418b51fb9743dc4428182d7b178528f80a448dd5b2aeb6e",
     title: "[AGIP 93] Alchemica spending Competition - Season 3",
   },
+  {
+    id: "0xd46fdc43cf05ad2059c1f1ddd9d129fafcf1a522a4623aaf21438ac6c1672478",
+    title: "[AGIP 94] Revamp the Aavegotchi Rental Protocol to support Parcels and Wearables"
+  },
+  {
+    id: "0x47a9ce6f103047d8cb10ca14cd7274cd8d13871080e32cbe0b4efedf6e0b888c",
+    title: "[AGIP 95] Gotchi Heroes Reworked Version Proposal"
+  }
 ];
