@@ -343,16 +343,23 @@ struct AppStorage {
     // ***
     // Items Roles Registry
     // ***
-    // grantee => tokenAddress => tokenId => role => struct(expirationDate, data)
-    mapping(address => mapping(address => mapping(uint256 => mapping(bytes32 => IERC7432.RoleData)))) itemsRoleAssignments;
-    // tokenAddress => tokenId => role => grantee
-    mapping(address => mapping(uint256 => mapping(bytes32 => address))) itemsLatestGrantees;
-    // grantor => tokenAddress => tokenId => operator => isApproved
-    mapping(address => mapping(address => mapping(uint256 => mapping(address => bool)))) itemsTokenIdApprovals;
+    // grantor => grantee => tokenAddress => tokenId => role => struct(expirationDate, data)
+    mapping(address => mapping(address => mapping(address => mapping(uint256 => mapping(bytes32 => IERC7432.RoleData))))) itemsRoleAssignments;
+    // grantor => tokenAddress => tokenId => role => grantee
+    mapping(address => mapping(address => mapping(uint256 => mapping(bytes32 => address)))) itemsLatestGrantees;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
     // grantor => tokenAddress => tokenId => withdrawableBalance
     mapping(address => mapping(address => mapping(uint256 => uint256))) userWithdrawableBalances;
+
+    // TODO new approach
+
+    // incremental identifier of items' roles
+    uint256 itemsRoleIds;
+    // roleId => grantedRole
+    mapping(uint256 => IERC7432.GrantedRole) grantedRoles;
+    // grantee => tokenAddress => tokenId => role => roleId[]
+
 }
 
 library LibAppStorage {
