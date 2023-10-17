@@ -108,6 +108,109 @@ const sigProps = [
     id: "0x9e71af4605d33f57f68ded125ea95da0b766cffa6eb709f2b320b5e095620de2",
     title: "Securing Protocol Rewards – Operational & funding request",
   },
+  {
+    id: "0x5e4b482614bf859199ef9134e3e8efaefe39047d4f1b48cd2750c4bb8374a0a0",
+    title: "Alchemica + GLTR Economic Taskforce funding",
+  },
+  {
+    id: "0x2d40a9c545d58a649ac519f74ece7860fa9ca92f7a276db4753b1749c934a190",
+    title: "Gotchi Lodge 2023 budget revision",
+  },
+  {
+    id: "0x483f8705d55038ccbcbc20ed723b538034c0f768bda2ec749b2738dafc418940",
+    title: "Liquidity provision : Reimbursement of the DAO",
+  },
+  {
+    id: "0x311efd4b571ade64041f1859adede6511aaefaf9e9380a7895b5fd7b3680694d",
+    title: "Liquidity provision : Adding the 2M$5 left in a Quickswap pool",
+  },
+  {
+    id: "0xc77a15f4e715fc9118334e50aec61546332be0011fed3740e20c8f71375b2e57",
+    title:
+      "DAO Meeting management and delivery. One-time disbursement for fulfilled deliverables",
+  },
+  {
+    id: "0x3b80a83886c8648168d2d9451dae55d01ceeb5f016fd3d7f6133bbf53de04b3b",
+    title: "Aavegotchi x Anata Collaboration",
+  },
+  {
+    id: "0x3aaf1baf461192154a33bd41863e0675341599c45a7a1223d6a1008d6c3f8dda",
+    title: "Create a DAO Treasury Dashboard",
+  },
+  {
+    id: "0x42c3aaf8988a5ca32e5cd035847655af6f9acc2141c3cdaa505a877badf66e41",
+    title: "AAVEGOTCHI SAIL for GHST SHIP",
+  },
+  {
+    id: "0xa094958ed44a7905f22b97dc48fc230951b915ede0e0c34017cc8cdc795a30c3",
+    title: "Alchemica Spending Competition Season 2",
+  },
+  {
+    id: "0xfcdb672f451ae4a2cdb7827ca8a686ed57027e977585bc1e30f46c6b8081eb0e",
+    title: "Forge 2.0 Request for Funding",
+  },
+  {
+    id: "0x8ef0d1bbe2fe75fb2304bfb6aea126db26a5300fb8a332680b603edcf7af263e",
+    title: "Fund development of Strategotchi - Digital Multiplayer version",
+  },
+  {
+    id: "0xa816498852ce504a6211102987466964d3bb4a944bcd6484afebdc76dd5c5172",
+    title: "DAO Directors : Treasury officer role",
+  },
+  {
+    id: "0x5bd52de503a1514c3004398d78db59df3c33839c468d5df95b10826e5c67cd9d",
+    title: "[Mechanic Change] -- Channel Alchemica through a -2 kinship burn",
+  },
+  {
+    id: "0x368446c881fbea341027014c1aba0004f33af0d2eb769a1a99ad86a665ffeedb",
+    title: "Thank Aavegotchi Pilot - Powered by Thrivecoin",
+  },
+  {
+    id: "0xb78e62609b02040049c304fb9f0d745a49b32b62a239a965c14ea07263019f0f",
+    title: "Rarity Farming Season 6",
+  },
+  {
+    id: "0x17b63fde4c0045768a12dc14c8a09b2a2bc6a5a7df7ef392e82e291904784e02",
+    title: "Schedule all Act 1 Parcel Surveys (re-rolls)",
+  },
+  {
+    id: "0x3b8609c0632f23ea329f97d7c1de18f84313158aabd173f285c8494285636380",
+    title: "Gotchi Battler funding",
+  },
+  {
+    id: "0x42bbb17dd055adac28433a16b145ff45e732080402cf44e7d7dfec051555f16f",
+    title:
+      "SIG Proposal: Over-the-counter (OTC) Agreement for GHST Holdings of 0VIX Users",
+  },
+  {
+    id: "0x451ca91ce0403999fd4b57f14a9f8cc3a62fed001ea148e01dfec0e9bbbb467e",
+    title: "Sig-Prop: Return 0VIX funds to multisig",
+  },
+  {
+    id: "0x24e31f35168d1cc999288a38c012880c6ad4d41e604d66d1bbe4b67a00562990",
+    title: "Forge 2.0 New Schematics, Methodology, and Godlike Sets",
+  },
+  {
+    id: "0x08ea07c9f1b18cd56c280f82b2467acdd21de6a06a7ab44768f4a13b6a6c0372",
+    title: "Geodes, Schematic Distribution, and a Final non-drop ticket Raffle",
+  },
+  {
+    id: "0x0146fc3a188544b270dd5efc928f3d96e31a9d00bfc6a367fa77c8124bd4df93",
+    title: "Gotchi Crawler Demo Proposal",
+  },
+  //Skip Sigprop 92
+  {
+    id: "0x95c58ed45937af95c94df7bc959381435ea592bfff55355d8c04ed6d5b2727b6",
+    title: "Alchemica spending competion - season 3",
+  },
+  {
+    id: "0x24191cf52ade5500f0292f3b553659424df7c00d0e9945b9efe2807f97e97513",
+    title: "Revamp the Aavegotchi Rental Protocol to support Parcels and Wearables"
+  },
+  {
+    id: "0xded951f11b5b0ef037133c627159aea13acd4a10fe26d509076de5708244a62f",
+    title: "Gotchi Heroes Reworked Version Proposal"
+  }
 ];
 
 const coreProps = [
@@ -224,4 +327,111 @@ const coreProps = [
     title:
       "[AGIP 69] Securing Protocol Rewards - Operational & Funding Request",
   },
+  {
+    id: "0x41c9e422c666c17d1961f7b210f9fa0278e6729f1a61e70a0719623c334abac6",
+    title: "[AGIP 70] Alchemica + GLTR Taskforce Funding",
+  },
+  {
+    id: "0xb8418b96099bc828a60aecf39b92f6d4c3f87a0a897c8bd5c85f0929798df967",
+    title: "[AGIP 71] Gotchi Lodge 2023 Budget Revision",
+  },
+  {
+    id: "0x7fe819f1bba47d2322d4bb1f1b796a3a13c96146ac90dba5f3ef436b10323aba",
+    title: "[AGIP 72] Liquidity Provision: Reimbursement of the DAO",
+  },
+  {
+    id: "0x9d2a5cbe986c1c1f30132c3e396470e6b67f7d74ce2afb6a681100ce209d27e0",
+    title:
+      "[AGIP 73] Liquidity Provision: Adding the $2.5M left in a Quickswap Pool",
+  },
+  {
+    id: "0x96c8936c66da9ef291e6bbfb2861db523aef347beeb787d0ad4fb01ea1089f89",
+    title:
+      "[AGIP 74] DAO Meeting Management and Delivery: One-time disbursement for fulfilled deliverables",
+  },
+  {
+    id: "0x75c2e9cc1472c6d18709ba53653b8e03f863afd8c42e58c5abb48f2d962069c2",
+    title: "[AGIP 75] Aavegotchi X Anata Collaboration",
+  },
+  {
+    id: "0x25c0def94d5fb016fb39ac823755dd2de447bd5de609d25cc108f182391ddcda",
+    title: "[AGIP 76] Create a DAO Treasury Dashboard",
+  },
+  {
+    id: "0xbf227c513737067b8e3aeb66eecfeb18d52129ac701317ca21c0a1d3ba7181e9",
+    title: "[AGIP 77] Aavegotchi GHST Ship Summoning",
+  },
+  {
+    id: "0xb7b45e605373b2835b92ee570b6aaf06219a1c8042e6a0a467d06c02da17b727",
+    title: "[AGIP 78] Alchemica Spending Competition Season 2",
+  },
+  {
+    id: "0xb07be37d556302c873bee9b232c8a54d5ab8925af72ce9f38828e91fdb6ab5a4",
+    title: "[AGIP 79] Forge 2.0 Request for Funding",
+  },
+  {
+    id: "0x19110d25764ffa927cbfc41297fd4c55f35d33a85c805f1cecc6326760f1b6bf",
+    title:
+      "[AGIP 80] Fund development of Strategotchi - Digital Multiplayer version",
+  },
+  {
+    id: "0x28700326fc76752543f263d05770fea9534cff73c107cf8775760bdba9ca1f1e",
+    title: "[AGIP 81] DAO Directors : Treasury officer role",
+  },
+  {
+    id: "0xade68c6cf0285a55e4cf914266761b9a505389ef4686e7972ad5426ac49cd238",
+    title:
+      "[AGIP 82] [Mechanic Change] -- Channel Alchemica through a -2 kinship burn",
+  },
+  {
+    id: "0x9c4951fcf5371ca2641b7db5ea4d31b64aac4f1f3dbcbc7c7f68a5889ea4b577",
+    title: "[AGIP 83] Thank Aavegotchi Pilot - Powered by Thrivecoin",
+  },
+  {
+    id: "0x0a5b7e0c7fb2137cfcb5a546c27f5ddcef066631e79b9d77d1b16e3a501f9e2f",
+    title: "[AGIP 84] Rarity Farming Season 6",
+  },
+  {
+    id: "0x00c00dc576a8729214934ecf329ef86c4a78428111b030af6fa49a60807c973b",
+    title: "[AGIP 85] Schedule all Act 1 Parcel Surveys (re-rolls)",
+  },
+  {
+    id: "0x705c1bd8e3d6a6455241bfb0b236ea2504fc5bf7157a1073245ec01b4bacb62a",
+    title: "[AGIP 86] Gotchi Battler funding",
+  },
+  {
+    id: "0x929b6df24a265c0b7ea7e6a4f49eac4f1852993c3c9be69ef38f07f8a462923e",
+    title:
+      "[AGIP87] Over-the-counter (OTC) Agreement for GHST Holdings of 0VIX Users",
+  },
+  {
+    id: "0x538e41dc85ec65809b2b072d4ebb7dd4af1c9c973cb09f416300b9cc3d3b588f",
+    title: "[AGIP 88] Return 0VIX funds to multisig",
+  },
+  {
+    id: "0xae17b512c7055fb2fa0ae2701666c417ebe2c80bc2901eda93d80239a9ca5c53",
+    title: "[AGIP 89] Forge 2.0 New Schematics, Methodology, and Godlike Sets",
+  },
+  {
+    id: "0x5116dcfea59bb27189e607e990746417840142115f31ecb6223a8748868b2a7f",
+    title:
+      "[AGIP 90] Geodes, Schematic Distribution, and a Final non-drop ticket Raffle",
+  },
+  {
+    id: "0x42da17ccfaf9c99bd5a904de5a9d1f1d72f8e7057594fbd20f9d328ad6b8a109",
+    title: "[AGIP 91] Gotchi Crawler Demo Proposal",
+  },
+  //AGIP 92 did not pass
+  {
+    id: "0xd3c0ca68dedf236a9418b51fb9743dc4428182d7b178528f80a448dd5b2aeb6e",
+    title: "[AGIP 93] Alchemica spending Competition - Season 3",
+  },
+  {
+    id: "0xd46fdc43cf05ad2059c1f1ddd9d129fafcf1a522a4623aaf21438ac6c1672478",
+    title: "[AGIP 94] Revamp the Aavegotchi Rental Protocol to support Parcels and Wearables"
+  },
+  {
+    id: "0x47a9ce6f103047d8cb10ca14cd7274cd8d13871080e32cbe0b4efedf6e0b888c",
+    title: "[AGIP 95] Gotchi Heroes Reworked Version Proposal"
+  }
 ];
