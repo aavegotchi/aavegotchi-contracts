@@ -4,7 +4,7 @@ import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {ILink} from "../interfaces/ILink.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {IERC7432} from "../interfaces/IERC7432.sol";
+import {IERC7432} from "../../shared/interfaces/IERC7432.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
@@ -351,15 +351,6 @@ struct AppStorage {
     mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
     // grantor => tokenAddress => tokenId => withdrawableBalance
     mapping(address => mapping(address => mapping(uint256 => uint256))) userWithdrawableBalances;
-
-    // TODO new approach
-
-    // incremental identifier of items' roles
-    uint256 itemsRoleIds;
-    // roleId => grantedRole
-    mapping(uint256 => IERC7432.GrantedRole) grantedRoles;
-    // grantee => tokenAddress => tokenId => role => roleId[]
-
 }
 
 library LibAppStorage {

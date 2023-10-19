@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {IERC7432} from "../interfaces/IERC7432.sol";
+import {IERC7432} from "../../shared/interfaces/IERC7432.sol";
 import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
 
 import {LibItems} from "../libraries/LibItems.sol";
@@ -12,27 +12,35 @@ import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
 
 import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 
-// TODO missing ERC-165 supportsInterface for ERC-7432
 contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
-
     /** Modifiers **/
 
     modifier onlyWearables(address _tokenAddress, uint256 _tokenId) {
         require(_tokenAddress == s.wearableDiamond, "ItemsRolesRegistryFacet: Only Item NFTs are supported");
-        require(s.itemTypes[_tokenId].category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsRolesRegistryFacet: Only Items of type Wearable are supported");
+        require(
+            s.itemTypes[_tokenId].category == LibItems.ITEM_CATEGORY_WEARABLE,
+            "ItemsRolesRegistryFacet: Only Items of type Wearable are supported"
+        );
         _;
     }
 
-    modifier onlyTokenOwner(address _tokenAddress, uint256 _tokenId, address _account) {
+    modifier onlyTokenOwner(
+        address _tokenAddress,
+        uint256 _tokenId,
+        address _account
+    ) {
         require(IERC1155(_tokenAddress).balanceOf(_account, _tokenId) > 0, "RolesRegistry: account must be token owner");
         _;
     }
 
-    modifier onlyOwnerOrApproved(address _tokenAddress, uint256 _tokenId, address _account) {
+    modifier onlyOwnerOrApproved(
+        address _tokenAddress,
+        uint256 _tokenId,
+        address _account
+    ) {
         address sender = LibMeta.msgSender();
         require(
-            IERC1155(_tokenAddress).balanceOf(sender, _tokenId) > 0 ||
-            isRoleApprovedForAll(_tokenAddress, _account, sender),
+            IERC1155(_tokenAddress).balanceOf(sender, _tokenId) > 0 || isRoleApprovedForAll(_tokenAddress, _account, sender),
             "ItemsRolesRegistryFacet: sender must be token owner or approved"
         );
         _;
@@ -45,54 +53,37 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
 
     /** External Functions **/
 
+    function grantRevocableRoleFrom(
+        RoleAssignment calldata _roleAssignment
+    ) external override onlyOwnerOrApproved(_roleAssignment.tokenAddress, _roleAssignment.tokenId, _roleAssignment.grantor) {
+        _grantRole(_roleAssignment, true);
+    }
+
     function grantRoleFrom(
-        bytes32 _role,
-        address _tokenAddress,
-        uint256 _tokenId,
-        uint256 _value,
-        address _grantor,
-        address _grantee,
-        uint64 _expirationDate,
-        bool _revocable,
-        bytes calldata _data
-    )
-        external
-        override
-        returns (uint256 roleId_)
-    {
-        GrantedRole memory grantRoleData = GrantedRole(
-            _role,
-            _tokenAddress,
-            _tokenId,
-            _value,
-            _grantor,
-            _grantee,
-            _expirationDate,
-            _revocable,
-            _data
-        );
-        roleId_ = _grantRole(grantRoleData);
+        RoleAssignment calldata _roleAssignment
+    ) external override onlyOwnerOrApproved(_roleAssignment.tokenAddress, _roleAssignment.tokenId, _roleAssignment.grantor) {
+        _grantRole(_roleAssignment, false);
     }
 
     function revokeRoleFrom(
-        uint256 _roleId
-    ) external override {
-        // TODO
-        revert("Not implemented");
+        bytes32 _role,
+        address _tokenAddress,
+        uint256 _tokenId,
+        address _revoker,
+        address _grantee
+    ) external override onlyTokenOwner(_tokenAddress, _tokenId, _revoker) {
+        address _caller = msg.sender == _revoker || msg.sender == _grantee ? msg.sender : _getApprovedCaller(_tokenAddress, _revoker, _grantee);
+        _revokeRole(_role, _tokenAddress, _tokenId, _revoker, _grantee, _caller);
     }
 
-    function setRoleApprovalForAll(
-        address _tokenAddress,
-        address _operator,
-        bool _approved
-    ) external override {
+    function setRoleApprovalForAll(address _tokenAddress, address _operator, bool _approved) external override {
         s.itemsTokenApprovals[msg.sender][_tokenAddress][_operator] = _approved;
         emit IERC7432.RoleApprovalForAll(_tokenAddress, _operator, _approved);
     }
 
     /** View Functions **/
 
-    function hasRole(
+    function hasNonUniqueRole(
         bytes32 _role,
         address _tokenAddress,
         uint256 _tokenId,
@@ -102,7 +93,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
         return s.itemsRoleAssignments[_grantor][_grantee][_tokenAddress][_tokenId][_role].expirationDate > block.timestamp;
     }
 
-    function hasUniqueRole(
+    function hasRole(
         bytes32 _role,
         address _tokenAddress,
         uint256 _tokenId,
@@ -120,9 +111,8 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
         uint256 _tokenId,
         address _grantor,
         address _grantee
-    ) external view override returns (bytes memory data_) {
-        RoleData memory _roleData = s.itemsRoleAssignments[_grantor][_grantee][_tokenAddress][_tokenId][_role];
-        return (_roleData.data);
+    ) external view override returns (RoleData memory) {
+        return s.itemsRoleAssignments[_grantor][_grantee][_tokenAddress][_tokenId][_role];
     }
 
     function roleExpirationDate(
@@ -132,50 +122,91 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
         address _grantor,
         address _grantee
     ) external view override returns (uint64 expirationDate_) {
-        RoleData memory _roleData = s.itemsRoleAssignments[_grantor][_grantee][_tokenAddress][_tokenId][_role];
-        return (_roleData.expirationDate);
+        return s.itemsRoleAssignments[_grantor][_grantee][_tokenAddress][_tokenId][_role].expirationDate;
     }
 
-    function isRoleApprovedForAll(
-        address _tokenAddress,
-        address _grantor,
-        address _operator
-    ) public view override returns (bool) {
+    function isRoleApprovedForAll(address _tokenAddress, address _grantor, address _operator) public view override returns (bool) {
         return s.itemsTokenApprovals[_grantor][_tokenAddress][_operator];
+    }
+
+    function lastGrantee(
+        bytes32 _role,
+        address _tokenAddress,
+        uint256 _tokenId,
+        address _grantor // not used, but needed for compatibility with ERC7432
+    ) public view override returns (address) {
+        return s.itemsLatestGrantees[_grantor][_tokenAddress][_tokenId][_role];
+    }
+
+    function supportsInterface(bytes4 interfaceId) external view virtual override returns (bool) {
+        return interfaceId == type(IERC7432).interfaceId;
     }
 
     /** Internal Functions **/
 
-    function _grantRole(GrantedRole memory _grantRoleData) internal
-        validExpirationDate(_grantRoleData.expirationDate)
-        onlyWearables(_grantRoleData.tokenAddress, _grantRoleData.tokenId)
-        onlyTokenOwner(_grantRoleData.tokenAddress, _grantRoleData.tokenId, _grantRoleData.grantor)
-        onlyOwnerOrApproved(_grantRoleData.tokenAddress, _grantRoleData.tokenId, _grantRoleData.grantor)
-        returns (uint256 roleId_)
-    {
-        _depositWearable(_grantRoleData.tokenAddress, _grantRoleData.tokenId, _grantRoleData.grantor);
-        roleId_ = _storeRole(_grantRoleData);
+    function _revokeRole(bytes32 _role, address _tokenAddress, uint256 _tokenId, address _revoker, address _grantee, address _caller) internal {
+        require(
+            _caller == _grantee || s.itemsRoleAssignments[_revoker][_grantee][_tokenAddress][_tokenId][_role].revocable,
+            "RolesRegistry: Role is not revocable or caller is not the grantee"
+        );
+        delete s.itemsRoleAssignments[_revoker][_grantee][_tokenAddress][_tokenId][_role];
+        delete s.itemsLatestGrantees[_revoker][_tokenAddress][_tokenId][_role];
+        emit RoleRevoked(_role, _tokenAddress, _tokenId, _revoker, _grantee);
     }
 
-    function _storeRole(
-        GrantedRole memory _grantRoleData
-    ) internal returns (uint256 roleId_) {
-//        address _lastGrantee = s.itemsLatestGrantees[_grantor][_tokenAddress][_tokenId][_role];
-//        RoleData memory _roleData = s.itemsRoleAssignments[_grantor][_lastGrantee][_tokenAddress][_tokenId][_role];
-//        bool _hasActiveAssignment = _roleData.expirationDate > block.timestamp;
-//        if (_hasActiveAssignment) {
-//            // only unique roles can be revocable
-//            require(_roleData.revocable, "RolesRegistry: role is not revocable");
-//        }
+    function _getApprovedCaller(address _tokenAddress, address _revoker, address _grantee) internal view returns (address) {
+        if (isRoleApprovedForAll(_tokenAddress, _grantee, msg.sender)) {
+            return _grantee;
+        } else if (isRoleApprovedForAll(_tokenAddress, _revoker, msg.sender)) {
+            return _revoker;
+        } else {
+            revert("RolesRegistry: sender must be approved");
+        }
+    }
 
-        // need to index both by the parameters and the roleId
-        // roleId => RoleData
-        roleId_ = s.itemsRoleIds++;
-        s.grantedRoles[roleId_] = _grantRoleData;
+    function _grantRole(
+        RoleAssignment calldata _roleAssignment,
+        bool _revocable
+    )
+        internal
+        validExpirationDate(_roleAssignment.expirationDate)
+        onlyWearables(_roleAssignment.tokenAddress, _roleAssignment.tokenId)
+        onlyTokenOwner(_roleAssignment.tokenAddress, _roleAssignment.tokenId, _roleAssignment.grantor)
+        onlyOwnerOrApproved(_roleAssignment.tokenAddress, _roleAssignment.tokenId, _roleAssignment.grantor)
+    {
+        _depositWearable(_roleAssignment.tokenAddress, _roleAssignment.tokenId, _roleAssignment.grantor);
+        _storeRole(_roleAssignment, _revocable);
+    }
 
-//        s.itemsRoleAssignments[_grantor][_grantee][_tokenAddress][_tokenId][_role] = RoleData(_expirationDate, _revocable, _data);
-//        s.itemsLatestGrantees[_grantor][_tokenAddress][_tokenId][_role] = _grantee;
-//        emit RoleGranted(_role, _tokenAddress, _tokenId, _grantor, _grantee, _expirationDate, _revocable, _data);
+    function _storeRole(RoleAssignment memory _roleAssignment, bool _revocable) internal {
+        address _lastGrantee = s.itemsLatestGrantees[_roleAssignment.grantor][_roleAssignment.tokenAddress][_roleAssignment.tokenId][
+            _roleAssignment.role
+        ];
+        RoleData memory _roleData = s.itemsRoleAssignments[_roleAssignment.grantor][_lastGrantee][_roleAssignment.tokenAddress][
+            _roleAssignment.tokenId
+        ][_roleAssignment.role];
+
+        bool _hasActiveAssignment = _roleData.expirationDate > block.timestamp;
+        if (_hasActiveAssignment) {
+            // only unique roles can be revocable
+            require(_roleData.revocable, "RolesRegistry: role is not revocable");
+        }
+
+        s.itemsRoleAssignments[_roleAssignment.grantor][_roleAssignment.grantee][_roleAssignment.tokenAddress][_roleAssignment.tokenId][
+            _roleAssignment.role
+        ] = RoleData(_roleAssignment.expirationDate, _revocable, _roleAssignment.data);
+        s.itemsLatestGrantees[_roleAssignment.grantor][_roleAssignment.tokenAddress][_roleAssignment.tokenId][_roleAssignment.role] = _roleAssignment
+            .grantee;
+        emit RoleGranted(
+            _roleAssignment.role,
+            _roleAssignment.tokenAddress,
+            _roleAssignment.tokenId,
+            _roleAssignment.grantor,
+            _roleAssignment.grantee,
+            _roleAssignment.expirationDate,
+            _revocable,
+            _roleAssignment.data
+        );
     }
 
     function _depositWearable(address _tokenAddress, uint256 _tokenId, address _grantor) internal {
@@ -185,5 +216,4 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
         IEventHandlerFacet(_tokenAddress).emitTransferSingleEvent(LibMeta.msgSender(), _grantor, address(this), _tokenId, 1);
         LibERC1155Marketplace.updateERC1155Listing(address(this), _tokenId, _grantor);
     }
-
 }

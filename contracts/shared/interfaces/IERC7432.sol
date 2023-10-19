@@ -2,25 +2,25 @@
 
 pragma solidity 0.8.1;
 
+import { IERC165 } from "./IERC165.sol";
+
 /// @title ERC-7432 Non-Fungible Token Roles
 /// @dev See https://eips.ethereum.org/EIPS/eip-7432
-/// Note: the ERC-165 identifier for this interface is 0x25be10b2.
-interface IERC7432 {
+/// Note: the ERC-165 identifier for this interface is 0x04984ac8.
+interface IERC7432 is IERC165 {
     struct RoleData {
         uint64 expirationDate;
         bool revocable;
         bytes data;
     }
 
-    struct GrantedRole {
+    struct RoleAssignment {
         bytes32 role;
         address tokenAddress;
         uint256 tokenId;
-        uint256 value;
         address grantor;
         address grantee;
         uint64 expirationDate;
-        bool revocable;
         bytes data;
     }
 
@@ -73,32 +73,25 @@ interface IERC7432 {
     /** External Functions **/
 
     /// @notice Grants a role on behalf of a user.
+    /// @param _roleAssignment The role assignment data.
+    function grantRoleFrom(RoleAssignment calldata _roleAssignment) external;
+
+    /// @notice Grants a role on behalf of a user.
+    /// @param _roleAssignment The role assignment data.
+    function grantRevocableRoleFrom(RoleAssignment calldata _roleAssignment) external;
+
+    /// @notice Revokes a role on behalf of a user.
     /// @param _role The role identifier.
     /// @param _tokenAddress The token address.
     /// @param _tokenId The token identifier.
-    /// @param _value The value of the token.
-    /// @param _grantor The user assigning the role.
-    /// @param _grantee The user that receives the role.
-    /// @param _expirationDate The expiration date of the role.
-    /// @param _revocable Whether the role is revocable or not.
-    /// @param _data Any additional data about the role.
-    /// @return roleId_ The identifier of the granted role.
-    function grantRoleFrom(
+    /// @param _revoker The user revoking the role.
+    /// @param _grantee The user that receives the role revocation.
+    function revokeRoleFrom(
         bytes32 _role,
         address _tokenAddress,
         uint256 _tokenId,
-        uint256 _value,
-        address _grantor,
-        address _grantee,
-        uint64 _expirationDate,
-        bool _revocable,
-        bytes calldata _data
-    ) external returns (uint256 roleId_);
-
-    /// @notice Revokes a role on behalf of a user.
-    /// @param _roleId The identifier of the granted role.
-    function revokeRoleFrom(
-        uint256 _roleId
+        address _revoker,
+        address _grantee
     ) external;
 
     /// @notice Approves operator to grant and revoke any roles on behalf of another user.
@@ -119,7 +112,7 @@ interface IERC7432 {
     /// @param _tokenId The token identifier.
     /// @param _grantor The user that assigned the role.
     /// @param _grantee The user that received the role.
-    function hasRole(
+    function hasNonUniqueRole(
         bytes32 _role,
         address _tokenAddress,
         uint256 _tokenId,
@@ -127,23 +120,13 @@ interface IERC7432 {
         address _grantee
     ) external view returns (bool);
 
-    // todo does hasRole need grantor?
-
-//    function roleBalanceOf(
-//        bytes32 _role,
-//        address _tokenAddress,
-//        uint256 _tokenId,
-//        address _grantor,
-//        address _grantee
-//    ) external view returns (uint256 balance_);
-
     /// @notice Checks if a user has a unique role.
     /// @param _role The role identifier.
     /// @param _tokenAddress The token address.
     /// @param _tokenId The token identifier.
     /// @param _grantor The user that assigned the role.
     /// @param _grantee The user that received the role.
-    function hasUniqueRole(
+    function hasRole(
         bytes32 _role,
         address _tokenAddress,
         uint256 _tokenId,
@@ -163,7 +146,7 @@ interface IERC7432 {
         uint256 _tokenId,
         address _grantor,
         address _grantee
-    ) external view returns (bytes memory data_);
+    ) external view returns (RoleData memory data_);
 
     /// @notice Returns the expiration date of a role assignment.
     /// @param _role The role identifier.
@@ -189,7 +172,15 @@ interface IERC7432 {
         address _operator
     ) external view returns (bool);
 
+    /// @notice Returns the last grantee of a role.
+    /// @param _role The role.
+    /// @param _tokenAddress The token address.
+    /// @param _tokenId The token ID.
+    /// @param _grantor The user that granted the role.
+    function lastGrantee(
+        bytes32 _role,
+        address _tokenAddress,
+        uint256 _tokenId,
+        address _grantor
+    ) external view returns (address);
 }
-
-
-
