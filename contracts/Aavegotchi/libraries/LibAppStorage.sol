@@ -221,6 +221,14 @@ struct ERC721BuyOrder {
     bool[] validationOptions;
 }
 
+struct AssignmentRecord {
+    uint256 tokenId;
+    address grantor;
+    uint64 amount;
+    address grantee;
+    uint64 expirationDate;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -351,6 +359,16 @@ struct AppStorage {
     mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
     // grantor => tokenAddress => tokenId => withdrawableBalance
     mapping(address => mapping(address => mapping(uint256 => uint256))) userWithdrawableBalances;
+    // ***
+    // Balance Records approach
+    // ***
+    // recordId => record
+    mapping(uint256 => AssignmentRecord) assignmentRecords;
+    // tokenId => grantor => recordIds
+    mapping(uint256 => mapping(address => uint256[])) userRecordIds;
+    // recordId => index
+    mapping(uint256 => uint256) recordIndexes;
+    uint256 currentRecordId;
 }
 
 library LibAppStorage {

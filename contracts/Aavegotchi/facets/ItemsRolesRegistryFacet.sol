@@ -8,7 +8,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
-import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ItemType, AssignmentRecord} from "../libraries/LibAppStorage.sol";
 
 import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 
@@ -142,12 +142,52 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
         return interfaceId == type(IERC7432).interfaceId;
     }
 
+    function withdrawableBalanceOf(address _account, uint256 _tokenId) public view returns (uint256 _balance) {
+        uint256[] memory recordIds = s.userRecordIds[_tokenId][_account];
+        _balance = s.userWithdrawableBalances[_account][s.wearableDiamond][_tokenId];
+        for (uint256 i = 0; i < recordIds.length; i++) {
+            if (block.timestamp <= s.assignmentRecords[recordIds[i]].expirationDate) {
+                _balance -= s.assignmentRecords[recordIds[i]].amount;
+            }
+        }
+    }
+
+    function withdrawWearable(uint256 _tokenId, uint256 _amount) public {
+        require(withdrawableBalanceOf(msg.sender, _tokenId) >= _amount, "ItemsRolesRegistryFacet: no withdrawable balance");
+        _deductBalanceAndRemoveAssignmentRecords(_tokenId, msg.sender, _amount);
+        LibItems.removeFromOwner(address(this), _tokenId, _amount);
+        LibItems.addToOwner(msg.sender, _tokenId, _amount);
+        IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(address(this), msg.sender, msg.sender, _tokenId, _amount);
+        LibERC1155Marketplace.updateERC1155Listing(address(this), _tokenId, msg.sender);
+    }
+
+    function _deductBalanceAndRemoveAssignmentRecords(uint256 _tokenId, address _account, uint256 _amount) internal {
+        uint256[] memory recordIds = s.userRecordIds[_tokenId][_account];
+        uint256 _withdrew = 0;
+
+        for (uint256 i; i < recordIds.length; i++) {
+            // Failsafe: Should never happen since all role record has amount 1
+            require(_withdrew <= _amount, "ItemsRolesRegistryFacet: withdrew more than requested");
+
+            if (_withdrew == _amount) {
+                break;
+            }
+
+            if (block.timestamp <= s.assignmentRecords[recordIds[i]].expirationDate) {
+                _withdrew += s.assignmentRecords[recordIds[i]].amount;
+                _removeAssignmentRecord(recordIds[i]);
+            }
+        }
+        // Update withdrawable balance
+        s.userWithdrawableBalances[_account][s.wearableDiamond][_tokenId] -= _amount;
+    }
+
     /** Internal Functions **/
 
     function _revokeRole(bytes32 _role, address _tokenAddress, uint256 _tokenId, address _revoker, address _grantee, address _caller) internal {
         require(
             _caller == _grantee || s.itemsRoleAssignments[_revoker][_grantee][_tokenAddress][_tokenId][_role].revocable,
-            "RolesRegistry: Role is not revocable or caller is not the grantee"
+            "ItemsRolesRegistryFacet: Role is not revocable or caller is not the grantee"
         );
         delete s.itemsRoleAssignments[_revoker][_grantee][_tokenAddress][_tokenId][_role];
         delete s.itemsLatestGrantees[_revoker][_tokenAddress][_tokenId][_role];
@@ -160,7 +200,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
         } else if (isRoleApprovedForAll(_tokenAddress, _revoker, msg.sender)) {
             return _revoker;
         } else {
-            revert("RolesRegistry: sender must be approved");
+            revert("ItemsRolesRegistryFacet: sender must be approved");
         }
     }
 
@@ -189,7 +229,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
         bool _hasActiveAssignment = _roleData.expirationDate > block.timestamp;
         if (_hasActiveAssignment) {
             // only unique roles can be revocable
-            require(_roleData.revocable, "RolesRegistry: role is not revocable");
+            require(_roleData.revocable, "ItemsRolesRegistryFacet: role is not revocable");
         }
 
         s.itemsRoleAssignments[_roleAssignment.grantor][_roleAssignment.grantee][_roleAssignment.tokenAddress][_roleAssignment.tokenId][
@@ -197,6 +237,9 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
         ] = RoleData(_roleAssignment.expirationDate, _revocable, _roleAssignment.data);
         s.itemsLatestGrantees[_roleAssignment.grantor][_roleAssignment.tokenAddress][_roleAssignment.tokenId][_roleAssignment.role] = _roleAssignment
             .grantee;
+
+        _addAssignmentRecord(_roleAssignment);
+
         emit RoleGranted(
             _roleAssignment.role,
             _roleAssignment.tokenAddress,
@@ -207,6 +250,33 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7432 {
             _revocable,
             _roleAssignment.data
         );
+    }
+
+    function _addAssignmentRecord(RoleAssignment memory _roleAssignment) internal {
+        s.currentRecordId += 1;
+        s.assignmentRecords[s.currentRecordId] = AssignmentRecord(
+            _roleAssignment.tokenId,
+            _roleAssignment.grantor,
+            1,
+            _roleAssignment.grantee,
+            _roleAssignment.expirationDate
+        );
+        s.userRecordIds[_roleAssignment.tokenId][_roleAssignment.grantor].push(s.currentRecordId);
+    }
+
+    function _removeAssignmentRecord(uint256 _recordId) internal {
+        AssignmentRecord memory _record = s.assignmentRecords[_recordId];
+        uint256 recordIndex = s.recordIndexes[_recordId];
+        uint256 lastRecordIndex = s.userRecordIds[_record.tokenId][_record.grantor].length - 1;
+
+        if (recordIndex != lastRecordIndex) {
+            uint256 lastRecordId = s.userRecordIds[_record.tokenId][_record.grantor][lastRecordIndex];
+            s.userRecordIds[_record.tokenId][_record.grantor][recordIndex] = lastRecordId;
+            s.recordIndexes[lastRecordId] = recordIndex;
+        }
+
+        s.userRecordIds[_record.tokenId][_record.grantor].pop();
+        delete s.recordIndexes[_recordId];
     }
 
     function _depositWearable(address _tokenAddress, uint256 _tokenId, address _grantor) internal {
