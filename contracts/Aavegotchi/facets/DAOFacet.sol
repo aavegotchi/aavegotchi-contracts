@@ -7,6 +7,7 @@ import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibXPAllocation} from "../libraries/LibXPAllocation.sol";
 import {GameManager} from "../libraries/LibAppStorage.sol";
 import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 
@@ -267,7 +268,7 @@ contract DAOFacet is Modifiers {
             s.aavegotchis[tokenId].experience += xp;
             gameManager.balance -= xp;
         }
-        emit GrantExperience(_tokenIds, _xpValues);
+        emit LibXPAllocation.GrantExperience(_tokenIds, _xpValues);
     }
 
     ///@notice Allow the DAO, a game manager or the aavegotchi diamond owner to remove XP(experience points) from multiple aavegotchis
