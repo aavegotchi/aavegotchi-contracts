@@ -33,11 +33,6 @@ library LibERC1155 {
     event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
 
     /**
-        @dev MUST emit when approval for a second party/operator address to manage all tokens for an owner address is enabled or disabled (absence of an event assumes disabled).        
-    */
-    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
-
-    /**
         @dev MUST emit when the URI is updated for a token ID.
         URIs are defined in RFC 3986.
         The URI MUST point to a JSON file that conforms to the "ERC-1155 Metadata URI JSON Schema".
