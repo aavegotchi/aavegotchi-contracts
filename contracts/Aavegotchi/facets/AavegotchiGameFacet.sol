@@ -324,6 +324,10 @@ contract AavegotchiGameFacet is Modifiers {
         emit SpendSkillpoints(_tokenId, _values);
     }
 
+    function resetUsedSkillPoints(uint256 _tokenId) public onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+        s.aavegotchis[_tokenId].usedSkillPoints = 0;
+    }
+
     function isAavegotchiLocked(uint256 _tokenId) external view returns (bool isLocked) {
         isLocked = s.aavegotchis[_tokenId].locked;
     }
