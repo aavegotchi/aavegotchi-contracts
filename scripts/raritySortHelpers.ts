@@ -319,7 +319,6 @@ export async function fetchAndSortLeaderboard(
 
   sortedData = [...new Set(sortedData)];
 
-  console.log("LEADERBOARD RESYLTD");
   // console.log("final sorted 1:", sortedData);
 
   return sortedData.slice(0, 7500);
