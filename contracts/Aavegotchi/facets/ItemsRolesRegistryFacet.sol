@@ -2,20 +2,21 @@
 pragma solidity 0.8.1;
 
 import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
-import { IERC165 } from '../../shared/interfaces/IERC165.sol';
-import { ISftRolesRegistry } from '../../shared/interfaces/ISftRolesRegistry.sol';
+import {IERC165} from '../../shared/interfaces/IERC165.sol';
+import {ISftRolesRegistry} from '../../shared/interfaces/ISftRolesRegistry.sol';
 
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
-import {Modifiers, ItemType, AssignmentRecord} from "../libraries/LibAppStorage.sol";
-import { IERC1155Receiver } from '@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol';
-import { ERC1155Holder, ERC1155Receiver } from '@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol';
-import { LinkedLists } from '../libraries/LibLinkedLists.sol';
+import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
+import {IERC1155Receiver} from '@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol';
+import {ERC1155Holder, ERC1155Receiver} from '@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol';
+import {LinkedLists} from '../libraries/LibLinkedLists.sol';
+import{IEventHandlerFacet} from "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 
 contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder {
-    using LinkedLists for LinkedLists.s.lists;
+    using LinkedLists for LinkedLists.Lists;
     using LinkedLists for LinkedLists.ListItem;
     
     /** Modifiers **/
@@ -77,7 +78,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
             _roleAssignment.tokenAddress,
             _roleAssignment.tokenId
         );
-        LinkedLists.ListItem storage item = s.lists.items[_roleAssignment.nonce];
+        LinkedLists.ListItem storage item = s.itemsLists.items[_roleAssignment.nonce];
         if (item.data.expirationDate == 0) {
             // nonce is not being used
 
@@ -113,9 +114,9 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
                     _roleAssignment.tokenAddress,
                     _roleAssignment.tokenId
                 );
-                s.lists.remove(oldRootKey, _roleAssignment.nonce);
+                s.itemsLists.remove(oldRootKey, _roleAssignment.nonce);
             } else {
-                s.lists.remove(rootKey, _roleAssignment.nonce);
+                s.itemsLists.remove(rootKey, _roleAssignment.nonce);
             }
         }
 
@@ -151,7 +152,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
             _roleAssignment.data
         );
 
-        s.lists.insert(_rootKey, _roleAssignment.nonce, data);
+        s.itemsLists.insert(_rootKey, _roleAssignment.nonce, data);
 
         emit RoleGranted(
             _roleAssignment.nonce,
@@ -168,7 +169,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     function revokeRoleFrom(RevokeRoleData calldata _revokeRoleData) external override {
-        LinkedLists.ListItem storage item = s.lists.items[_revokeRoleData.nonce];
+        LinkedLists.ListItem storage item = s.itemsLists.items[_revokeRoleData.nonce];
         address _grantee = item.data.grantee;
         require(item.data.hash == _hashRoleData(_revokeRoleData), 'ItemsRolesRegistryFacet: could not find role assignment');
 
@@ -188,7 +189,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         );
 
         // remove from the list
-        s.lists.remove(rootKey, _revokeRoleData.nonce);
+        s.itemsLists.remove(rootKey, _revokeRoleData.nonce);
 
         emit RoleRevoked(
             _revokeRoleData.nonce,
@@ -210,18 +211,18 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     function setRoleApprovalForAll(address _tokenAddress, address _operator, bool _isApproved) external override {
-        s.tokenApprovals[msg.sender][_tokenAddress][_operator] = _isApproved;
+        s.itemsTokenApprovals[msg.sender][_tokenAddress][_operator] = _isApproved;
         emit RoleApprovalForAll(_tokenAddress, _operator, _isApproved);
     }
 
     /** View Functions **/
 
-    function roleData(uint256 _nonce) external view returns (RoleData memory) {
-        return s.lists.items[_nonce].data;
+    function roleData(uint256 _nonce) override external view returns (RoleData memory) {
+        return s.itemsLists.items[_nonce].data;
     }
 
-    function roleExpirationDate(uint256 _nonce) external view returns (uint64 expirationDate_) {
-        return s.lists.items[_nonce].data.expirationDate;
+    function roleExpirationDate(uint256 _nonce) override external view returns (uint64 expirationDate_) {
+        return s.itemsLists.items[_nonce].data.expirationDate;
     }
 
     function isRoleApprovedForAll(
@@ -229,7 +230,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         address _grantor,
         address _operator
     ) public view override returns (bool) {
-        return s.tokenApprovals[_grantor][_tokenAddress][_operator];
+        return s.itemsTokenApprovals[_grantor][_tokenAddress][_operator];
     }
 
     function roleBalanceOf(
@@ -237,9 +238,9 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         address _tokenAddress,
         uint256 _tokenId,
         address _grantee
-    ) external view returns (uint256 balance_) {
+    ) external override view returns (uint256 balance_) {
         bytes32 rootKey = _getHeadKey(_grantee, _role, _tokenAddress, _tokenId);
-        uint256 currentNonce = s.lists.heads[rootKey];
+        uint256 currentNonce = s.itemsLists.heads[rootKey];
         if (currentNonce == 0) {
             return 0;
         }
@@ -248,7 +249,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         LinkedLists.ListItem storage currentItem;
         uint256 count = 0;
         while (currentNonce != 0) {
-            currentItem = s.lists.items[currentNonce];
+            currentItem = s.itemsLists.items[currentNonce];
             if (currentItem.data.expirationDate < block.timestamp) {
                 return balance_;
             }
@@ -261,7 +262,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     function supportsInterface(
         bytes4 interfaceId
     ) public view virtual override(ERC1155Receiver, IERC165) returns (bool) {
-        return interfaceId == type(IERCXXXX).interfaceId || interfaceId == type(IERC1155Receiver).interfaceId;
+        return interfaceId == type(ISftRolesRegistry).interfaceId || interfaceId == type(IERC1155Receiver).interfaceId;
     }
 
     /** Helper Functions **/
@@ -269,6 +270,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     function _transferFrom(
         address _from,
         address _to,
+        address _tokenAddress,
         uint256 _tokenId,
         uint256 _tokenAmount
     ) internal {

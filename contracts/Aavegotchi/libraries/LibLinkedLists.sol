@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: CC0-1.0
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.1;
 
 import { ISftRolesRegistry } from '../../shared/interfaces/ISftRolesRegistry.sol';
 
@@ -24,7 +24,7 @@ library LinkedLists {
         uint256 next;
     }
 
-    function insert(Lists storage _self, bytes32 _headKey, uint256 _nonce, IERCXXXX.RoleData memory _data) internal {
+    function insert(Lists storage _self, bytes32 _headKey, uint256 _nonce, ISftRolesRegistry.RoleData memory _data) internal {
         require(_nonce != EMPTY, 'LinkedLists: invalid nonce');
         require(_self.sizes[_headKey] < LIST_LIMIT, 'LinkedLists: list limit reached');
 
@@ -67,7 +67,7 @@ library LinkedLists {
         Lists storage _self,
         uint256 _previousNonce,
         uint256 _dataNonce,
-        IERCXXXX.RoleData memory _data
+        ISftRolesRegistry.RoleData memory _data
     ) internal {
         ListItem storage previousItem = _self.items[_previousNonce];
         if (previousItem.next == EMPTY) {

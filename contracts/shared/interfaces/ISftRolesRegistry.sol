@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: CC0-1.0
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.1;
 
 import { IERC165 } from './IERC165.sol';
 
