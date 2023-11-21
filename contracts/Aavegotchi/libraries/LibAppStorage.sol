@@ -4,7 +4,7 @@ import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {ILink} from "../interfaces/ILink.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {IERC7432} from "../../shared/interfaces/IERC7432.sol";
+import { LinkedLists } from "../libraries/LibLinkedLists.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
@@ -221,14 +221,6 @@ struct ERC721BuyOrder {
     bool[] validationOptions;
 }
 
-struct AssignmentRecord {
-    uint256 tokenId;
-    address grantor;
-    uint64 amount;
-    address grantee;
-    uint64 expirationDate;
-}
-
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -348,27 +340,10 @@ struct AppStorage {
     mapping(address => mapping(uint256 => uint256[])) erc721TokenToBuyOrderIds; // erc721 token address => erc721TokenId => buyOrderIds
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) erc721TokenToBuyOrderIdIndexes; // erc721 token address => erc721TokenId => buyOrderId => index
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
-    // ***
     // Items Roles Registry
-    // ***
-    // grantor => grantee => tokenAddress => tokenId => role => struct(expirationDate, data)
-    mapping(address => mapping(address => mapping(address => mapping(uint256 => mapping(bytes32 => IERC7432.RoleData))))) itemsRoleAssignments;
-    // grantor => tokenAddress => tokenId => role => grantee
-    mapping(address => mapping(address => mapping(uint256 => mapping(bytes32 => address)))) itemsLatestGrantees;
+    LinkedLists.Lists lists;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
-    // grantor => tokenAddress => tokenId => withdrawableBalance
-    mapping(address => mapping(address => mapping(uint256 => uint256))) userWithdrawableBalances;
-    // ***
-    // Balance Records approach
-    // ***
-    // recordId => record
-    mapping(uint256 => AssignmentRecord) assignmentRecords;
-    // tokenId => grantor => recordIds
-    mapping(uint256 => mapping(address => uint256[])) userRecordIds;
-    // recordId => index
-    mapping(uint256 => uint256) recordIndexes;
-    uint256 currentRecordId;
 }
 
 library LibAppStorage {
