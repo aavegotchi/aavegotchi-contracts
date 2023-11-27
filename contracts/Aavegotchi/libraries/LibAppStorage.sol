@@ -346,6 +346,9 @@ struct AppStorage {
     mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
     // delegationId => itemId => gotchiId
     mapping(uint256 => mapping(uint256 => uint256)) itemIdToDelegationIdToGotchiId;
+    
+    // itemId => gotchiId => delegationId
+    mapping(uint256 => mapping(uint256 => uint256)) itemIdToGotchiIdToDelegationId;
 }
 
 library LibAppStorage {

@@ -307,13 +307,15 @@ contract ItemsFacet is Modifiers {
                 
                 if(delegationId != 0){
                     require(s.itemsLists.items[delegationId].data.grantee == sender, "ItemsFacet: Wearable not delegated to sender");
-                    require(s.itemsLists.items[delegationId].data.expirationDate > block.timestamp || toEquipId == 0, "ItemsFacet: Wearable delegation expired");
                     require(s.itemIdToDelegationIdToGotchiId[delegationId][toEquipId] == _tokenId, "ItemsFacet: Wearable is not delegated to this gotchi");
+                    require(s.itemIdToGotchiIdToDelegationId[existingEquippedWearableId][_tokenId] == delegationId, "ItemsFacet: Wearable is not delegated to this gotchi");
                     // require(s.itemsLists.items[delegationId].data.role == keccak256("EQUIP_ROLE"), "ItemsFacet: Wearable does not have EQUIP_ROLE");
 
                     // remove wearable from Aavegotchi
                     LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
                     delete s.itemIdToDelegationIdToGotchiId[delegationId][toEquipId];
+                    delete s.itemIdToGotchiIdToDelegationId[existingEquippedWearableId][_tokenId];
+
                 } else if (s.itemTypes[existingEquippedWearableId].canBeTransferred) {
                     // remove wearable from Aavegotchi and transfer item to owner
                     LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
@@ -368,14 +370,19 @@ contract ItemsFacet is Modifiers {
 
                     if (delegationId != 0) {
                         require(s.itemIdToDelegationIdToGotchiId[delegationId][toEquipId] == 0, "ItemsFacet: Wearable already delegated to another gotchi");
+                        require(s.itemsLists.items[delegationId].data.expirationDate > block.timestamp , "ItemsFacet: Wearable delegation expired");
+                        require(s.itemsLists.items[delegationId].data.grantee == sender, "ItemsFacet: Wearable not delegated to sender");
+
                         uint256 delegatedBalance = s.itemsLists.items[delegationId].data.tokenAmount;
                         // check if they have enough delegated balance
                         require(delegatedBalance >= balToTransfer, "ItemsFacet: sender doesn't have enough delegated balance");
                         
                         s.itemIdToDelegationIdToGotchiId[delegationId][toEquipId] = _tokenId;
+                        s.itemIdToGotchiIdToDelegationId[toEquipId][_tokenId] = delegationId;
                     } else {
                         // if the sender doesn't have enough balance, check if they have enough delegated balance
                         require(nftBalance + s.ownerItemBalances[sender][toEquipId] >= neededBalance, "ItemsFacet: Wearable isn't in inventory");
+                        require(s.itemIdToGotchiIdToDelegationId[toEquipId][_tokenId] == 0, "ItemsFacet: Wearable already delegated to another gotchi");
             
                         LibItems.removeFromOwner(sender, toEquipId, balToTransfer);
                     }
