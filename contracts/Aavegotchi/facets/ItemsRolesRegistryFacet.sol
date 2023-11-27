@@ -14,6 +14,7 @@ import {IERC1155Receiver} from '@openzeppelin/contracts/token/ERC1155/IERC1155Re
 import {ERC1155Holder, ERC1155Receiver} from '@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol';
 import {LinkedLists} from '../libraries/LibLinkedLists.sol';
 import{IEventHandlerFacet} from "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
+import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 
 contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder {
     using LinkedLists for LinkedLists.Lists;
@@ -200,6 +201,14 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
             _revokeRoleData.revoker,
             _grantee
         );
+
+        if(s.itemIdToDelegationIdToGotchiId[_revokeRoleData.nonce][_revokeRoleData.tokenId] != 0) {
+            uint256 _gotchiId = s.itemIdToDelegationIdToGotchiId[_revokeRoleData.nonce][_revokeRoleData.tokenId];
+            LibItems.removeFromParent(address(this), _gotchiId, _revokeRoleData.tokenId, 1);
+            IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(this), msg.sender, _revokeRoleData.tokenId, 1);
+            emit LibERC1155.TransferFromParent(address(this), _gotchiId, _revokeRoleData.tokenId, 1);
+            delete s.itemIdToDelegationIdToGotchiId[_revokeRoleData.nonce][_revokeRoleData.tokenId];
+        }
 
         _transferFrom(
             address(this),

@@ -344,6 +344,8 @@ struct AppStorage {
     LinkedLists.Lists itemsLists;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
+    // delegationId => itemId => gotchiId
+    mapping(uint256 => mapping(uint256 => uint256)) itemIdToDelegationIdToGotchiId;
 }
 
 library LibAppStorage {
