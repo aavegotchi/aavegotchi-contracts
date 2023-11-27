@@ -182,7 +182,7 @@ contract ItemsFacet is Modifiers {
     ///@dev A wearable cannot be equipped in the wrong slot
     ///@param _tokenId The identifier of the aavegotchi to make changes to
     ///@param _wearablesToEquip An array containing the identifiers of the wearables to equip
-    function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip)
+    function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip, uint256[EQUIPPED_WEARABLE_SLOTS] calldata _delegationIds)
         external
         onlyAavegotchiOwner(_tokenId)
         onlyUnlocked(_tokenId)
@@ -295,21 +295,33 @@ contract ItemsFacet is Modifiers {
 
             //If the new wearable value is equal to the current equipped wearable in that slot
             //do nothing
-            if (toEquipId == existingEquippedWearableId || delegationId == 0) {
+            if (toEquipId == existingEquippedWearableId) {
                 continue;
             }
-
-            require(s.itemsLists.items[delegationId].data.grantee == sender, "ItemsFacet: Wearable not delegated to sender");
 
             //Equips new wearable (or sets to 0)
             aavegotchi.equippedWearables[slot] = uint16(toEquipId);
 
             //If a wearable was equipped in this slot and can be transferred, transfer back to diamond.
             if (existingEquippedWearableId != 0) {
-                require(s.itemIdToDelegationIdToGotchiId[delegationId][toEquipId] == _tokenId, "ItemsFacet: Wearable is not delegated to this gotchi");
-                delete s.itemIdToDelegationIdToGotchiId[delegationId][toEquipId];
-                // remove wearable from Aavegotchi and transfer item to owner
-                LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
+                
+                if(delegationId != 0){
+                    require(s.itemsLists.items[delegationId].data.grantee == sender, "ItemsFacet: Wearable not delegated to sender");
+                    require(s.itemsLists.items[delegationId].data.expirationDate > block.timestamp || toEquipId == 0, "ItemsFacet: Wearable delegation expired");
+                    require(s.itemIdToDelegationIdToGotchiId[delegationId][toEquipId] == _tokenId, "ItemsFacet: Wearable is not delegated to this gotchi");
+                    // require(s.itemsLists.items[delegationId].data.role == keccak256("EQUIP_ROLE"), "ItemsFacet: Wearable does not have EQUIP_ROLE");
+
+                    // remove wearable from Aavegotchi
+                    LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
+                    delete s.itemIdToDelegationIdToGotchiId[delegationId][toEquipId];
+                } else if (s.itemTypes[existingEquippedWearableId].canBeTransferred) {
+                    // remove wearable from Aavegotchi and transfer item to owner
+                    LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
+                    LibItems.addToOwner(sender, existingEquippedWearableId, 1);
+                } else {
+                    revert("ItemsFacet: Wearable can't be transferred");
+                }
+
                 IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, address(this), sender, existingEquippedWearableId, 1);
                 emit LibERC1155.TransferFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
             }
@@ -320,7 +332,6 @@ contract ItemsFacet is Modifiers {
                 require(LibAavegotchi.aavegotchiLevel(aavegotchi.experience) >= itemType.minLevel, "ItemsFacet: AG level lower than minLevel");
                 require(itemType.category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
                 require(itemType.slotPositions[slot] == true, "ItemsFacet: Wearable can't be equipped in slot");
-                require(s.itemIdToDelegationIdToGotchiId[delegationId][toEquipId] == 0, "ItemsFacet: Wearable already delegated to another gotchi");
                 {
                     bool canBeEquipped;
                     uint8[] memory allowedCollaterals = itemType.allowedCollaterals;
@@ -353,12 +364,22 @@ contract ItemsFacet is Modifiers {
                 }
 
                 if (nftBalance < neededBalance) {
-                    uint256 delegatedBalance = s.itemsLists.items[delegationId].data.tokenAmount;
                     uint256 balToTransfer = neededBalance - nftBalance;
 
-                    // check if they have enough delegated balance
-                    require(delegatedBalance >= balToTransfer, "ItemsFacet: sender doesn't have enough delegated balance");
-                    s.itemIdToDelegationIdToGotchiId[delegationId][toEquipId] = _tokenId;
+                    if (delegationId != 0) {
+                        require(s.itemIdToDelegationIdToGotchiId[delegationId][toEquipId] == 0, "ItemsFacet: Wearable already delegated to another gotchi");
+                        uint256 delegatedBalance = s.itemsLists.items[delegationId].data.tokenAmount;
+                        // check if they have enough delegated balance
+                        require(delegatedBalance >= balToTransfer, "ItemsFacet: sender doesn't have enough delegated balance");
+                        
+                        s.itemIdToDelegationIdToGotchiId[delegationId][toEquipId] = _tokenId;
+                    } else {
+                        // if the sender doesn't have enough balance, check if they have enough delegated balance
+                        require(nftBalance + s.ownerItemBalances[sender][toEquipId] >= neededBalance, "ItemsFacet: Wearable isn't in inventory");
+            
+                        LibItems.removeFromOwner(sender, toEquipId, balToTransfer);
+                    }
+
                     LibItems.addToParent(address(this), _tokenId, toEquipId, balToTransfer);
                     emit TransferToParent(address(this), _tokenId, toEquipId, balToTransfer);
                     IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, sender, address(this), toEquipId, balToTransfer);
