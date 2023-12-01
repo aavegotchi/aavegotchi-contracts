@@ -343,9 +343,9 @@ struct AppStorage {
     
     // Items Roles Registry
     // nonce => DepositInfo
-    mapping(uint256 => ISftRolesRegistry.DepositInfo) deposits;
+    mapping(uint256 => ISftRolesRegistry.DepositInfo) itemsDeposits;
     // nonce  => RoleAssignment
-    mapping(uint256 => ISftRolesRegistry.RoleData) roleAssignments;
+    mapping(uint256 => ISftRolesRegistry.RoleData) itemsRoleAssignments;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
     // nonce => itemId => gotchiId

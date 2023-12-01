@@ -52,11 +52,12 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     )
         external
         override
+        onlyWearables(_grantRoleData.tokenAddress, _grantRoleData.tokenId)
         validExpirationDate(_grantRoleData.expirationDate)
         onlyOwnerOrApprovedWithBalance(_grantRoleData.grantor, _grantRoleData.tokenAddress, _grantRoleData.tokenId, _grantRoleData.tokenAmount)
     {
         require(_grantRoleData.role != EQUIP_WEARABLE_ROLE, "SftRolesRegistry: EQUIP_WEARABLE_ROLE is not supported");
-        DepositInfo memory _depositInfo = s.deposits[_grantRoleData.nonce];
+        DepositInfo memory _depositInfo = s.itemsDeposits[_grantRoleData.nonce];
         if (_depositInfo.tokenAmount == 0) {
             _depositInfo = DepositInfo(_grantRoleData.grantor, _grantRoleData.tokenAddress, _grantRoleData.tokenId, _grantRoleData.tokenAmount);
             _deposit(_grantRoleData.nonce, _depositInfo);
@@ -75,7 +76,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         // validate if previous role assignment is expired or revocable
         require(_roleData.expirationDate < block.timestamp || _roleData.revocable, "SftRolesRegistry: role is not revocable or not expired");
 
-        s.roleAssignments[_nonce] = _roleData;
+        s.itemsRoleAssignments[_nonce] = _roleData;
 
         emit RoleGranted(
             _nonce,
@@ -93,9 +94,9 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
 
     function _deposit(uint256 _nonce, DepositInfo memory _depositInfo) internal {
         require(_depositInfo.tokenAmount > 0, "SftRolesRegistry: tokenAmount must be greater than zero");
-        require(s.deposits[_nonce].grantor == address(0), "SftRolesRegistry: deposit already exists");
+        require(s.itemsDeposits[_nonce].grantor == address(0), "SftRolesRegistry: deposit already exists");
 
-        s.deposits[_nonce] = _depositInfo;
+        s.itemsDeposits[_nonce] = _depositInfo;
 
         emit Deposited(_nonce, _depositInfo.tokenAddress, _depositInfo.tokenId, _depositInfo.tokenAmount, _depositInfo.grantor);
 
@@ -104,9 +105,9 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
 
     function revokeRoleFrom(uint256 _nonce, bytes32 _role) external override {
         // revoke(depositId, role1)
-        RoleData memory _roleData = s.roleAssignments[_nonce];
+        RoleData memory _roleData = s.itemsRoleAssignments[_nonce];
         require(_roleData.grantee != address(0), "SftRolesRegistry: role does not exist");
-        DepositInfo memory _depositInfo = s.deposits[_nonce];
+        DepositInfo memory _depositInfo = s.itemsDeposits[_nonce];
 
         address caller = _findCaller(_roleData, _depositInfo);
         if (_roleData.expirationDate > block.timestamp && !_roleData.revocable) {
@@ -123,7 +124,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
             delete s.itemIdToDelegationIdToGotchiId[_nonce][_depositInfo.tokenId];
         }
 
-        delete s.roleAssignments[_nonce];
+        delete s.itemsRoleAssignments[_nonce];
 
 
         emit RoleRevoked(
@@ -142,20 +143,20 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     )
         public
         onlyOwnerOrApprovedWithBalance(
-            s.deposits[_nonce].grantor,
-            s.deposits[_nonce].tokenAddress,
-            s.deposits[_nonce].tokenId,
-            s.deposits[_nonce].tokenAmount
+            s.itemsDeposits[_nonce].grantor,
+            s.itemsDeposits[_nonce].tokenAddress,
+            s.itemsDeposits[_nonce].tokenId,
+            s.itemsDeposits[_nonce].tokenAmount
         )
     {
-        DepositInfo memory _depositInfo = s.deposits[_nonce];
+        DepositInfo memory _depositInfo = s.itemsDeposits[_nonce];
         require(_depositInfo.tokenAmount > 0, "SftRolesRegistry: deposit does not exist");
         require(
-            s.roleAssignments[_nonce].grantee == address(0) || s.roleAssignments[_nonce].expirationDate < block.timestamp,
+            s.itemsRoleAssignments[_nonce].grantee == address(0) || s.itemsRoleAssignments[_nonce].expirationDate < block.timestamp,
             "SftRolesRegistry: nft is delegated"
         );
 
-        delete s.deposits[_nonce];
+        delete s.itemsDeposits[_nonce];
 
         _transferFrom(address(this), _depositInfo.grantor, _depositInfo.tokenAddress, _depositInfo.tokenId, _depositInfo.tokenAmount);
 
@@ -170,11 +171,11 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     /** View Functions **/
 
     function roleData(uint256 _nonce, bytes32 _role) external view override returns (RoleData memory) {
-        return s.roleAssignments[_nonce];
+        return s.itemsRoleAssignments[_nonce];
     }
 
     function roleExpirationDate(uint256 _nonce, bytes32 _role) external view override returns (uint64 expirationDate_) {
-        return s.roleAssignments[_nonce].expirationDate;
+        return s.itemsRoleAssignments[_nonce].expirationDate;
     }
 
     function isRoleApprovedForAll(address _tokenAddress, address _grantor, address _operator) public view override returns (bool) {

@@ -184,10 +184,38 @@ contract ItemsFacet is Modifiers {
     ///@param _wearablesToEquip An array containing the identifiers of the wearables to equip
     function equipWearables(
         uint256 _tokenId,
-        uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
-        uint256[EQUIPPED_WEARABLE_SLOTS] calldata _delegationIds
+        uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip
     )
         external
+    {
+        uint256[EQUIPPED_WEARABLE_SLOTS] memory delegationIds;
+        _equipWearables(_tokenId, _wearablesToEquip, delegationIds);
+    }
+
+    ///@notice Allow the owner of a claimed aavegotchi to equip/unequip wearables to his aavegotchi
+    ///@dev Only valid for claimed aavegotchis
+    ///@dev A zero value will unequip that slot and a non-zero value will equip that slot with the wearable whose identifier is provided
+    ///@dev A wearable cannot be equipped in the wrong slot
+    ///@param _tokenId The identifier of the aavegotchi to make changes to
+    ///@param _wearablesToEquip An array containing the identifiers of the wearables to equip
+    ///@param _depositIds An array containing the identifiers of the deposited wearables to equip
+    function equipDelegatedWearables(
+        uint256 _tokenId,
+        uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
+        uint256[EQUIPPED_WEARABLE_SLOTS] calldata _depositIds
+    )
+        external
+    {
+        _equipWearables(_tokenId, _wearablesToEquip, _depositIds);
+    }
+
+
+    function _equipWearables(
+        uint256 _tokenId,
+        uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
+        uint256[EQUIPPED_WEARABLE_SLOTS] memory _depositIds
+    )
+        internal
         onlyAavegotchiOwner(_tokenId)
         onlyUnlocked(_tokenId)
     {
@@ -305,7 +333,7 @@ contract ItemsFacet is Modifiers {
 
             //If a wearable was equipped in this slot and can be transferred, transfer back to diamond.
             if (existingEquippedWearableId != 0) {
-                _removeWearableFromGotchi(_delegationIds[slot], existingEquippedWearableId, _tokenId, toEquipId);
+                _removeWearableFromGotchi(_depositIds[slot], existingEquippedWearableId, _tokenId, toEquipId);
             }
 
             //If a wearable is being equipped
@@ -345,7 +373,7 @@ contract ItemsFacet is Modifiers {
                 }
                 uint256 _nftBalance = s.nftItemBalances[address(this)][_tokenId][toEquipId];
                 if (_nftBalance < neededBalance) {
-                    _addWearableToGotchi(_delegationIds[slot], _tokenId, toEquipId, neededBalance, _nftBalance);
+                    _addWearableToGotchi(_depositIds[slot], _tokenId, toEquipId, neededBalance, _nftBalance);
                 }
             }
             LibAavegotchi.interact(_tokenId);
@@ -363,10 +391,10 @@ contract ItemsFacet is Modifiers {
         address _sender = LibMeta.msgSender();
         if (_delegationId != 0) {
             require(s.itemIdToDelegationIdToGotchiId[_delegationId][_toEquipWearableId] == 0, "ItemsFacet: Wearable already delegated to another gotchi");
-            require(s.roleAssignments[_delegationId].expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
-            require(s.roleAssignments[_delegationId].grantee == LibMeta.msgSender(), "ItemsFacet: Wearable not delegated to sender");
+            require(s.itemsRoleAssignments[_delegationId].expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
+            require(s.itemsRoleAssignments[_delegationId].grantee == LibMeta.msgSender(), "ItemsFacet: Wearable not delegated to sender");
 
-            uint256 delegatedBalance = s.deposits[_delegationId].tokenAmount;
+            uint256 delegatedBalance = s.itemsDeposits[_delegationId].tokenAmount;
             // check if they have enough delegated balance
             require(delegatedBalance >= _balToTransfer, "ItemsFacet: sender doesn't have enough delegated balance");
         } else {
@@ -391,7 +419,7 @@ contract ItemsFacet is Modifiers {
     ) internal {
         address _sender = LibMeta.msgSender();
         if (_delegationId != 0) {
-            require(s.roleAssignments[_delegationId].grantee == LibMeta.msgSender(), "ItemsFacet: Wearable not delegated to sender");
+            require(s.itemsRoleAssignments[_delegationId].grantee == LibMeta.msgSender(), "ItemsFacet: Wearable not delegated to sender");
             require(
                 s.itemIdToDelegationIdToGotchiId[_delegationId][_toEquipWearableId] == _gotchiId,
                 "ItemsFacet: Wearable is not delegated to this gotchi"
