@@ -241,12 +241,8 @@ contract ItemsFacet is Modifiers {
             //If a wearable was equipped in this slot and can be transferred, transfer back to owner.
 
             if (existingEquippedWearableId != 0 && s.itemTypes[existingEquippedWearableId].canBeTransferred) {
-
                 // remove wearable from Aavegotchi and transfer item to owner
-                LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
-                LibItems.addToOwner(sender, existingEquippedWearableId, 1);
-                IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, address(this), sender, existingEquippedWearableId, 1);
-                emit LibERC1155.TransferFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
+                _removeWearableFromGotchi(_depositIds[slot], _tokenId, existingEquippedWearableId, toEquipId);
             }
 
             //If a wearable is being equipped
@@ -287,20 +283,14 @@ contract ItemsFacet is Modifiers {
                 }
 
                 if (nftBalance < neededBalance) {
-                    uint256 balToTransfer = neededBalance - nftBalance;
-
-                    // if the sender doesn't have enough balance, check if they have enough delegated balance
                     require(nftBalance + s.ownerItemBalances[sender][toEquipId] >= neededBalance, "ItemsFacet: Wearable isn't in inventory");
-        
-                    LibItems.removeFromOwner(sender, toEquipId, balToTransfer);
-                    LibItems.addToParent(address(this), _tokenId, toEquipId, balToTransfer);
-                    emit LibERC1155.TransferToParent(address(this), _tokenId, toEquipId, balToTransfer);
-                    IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, sender, address(this), toEquipId, balToTransfer);
-                    LibERC1155Marketplace.updateERC1155Listing(address(this), toEquipId, sender);
+
+                    //Transfer to Aavegotchi
+                    _addWearableToGotchi(_depositIds[slot], _tokenId, toEquipId, neededBalance, nftBalance);
                 }
-                LibAavegotchi.interact(_tokenId);
             }
         }
+        LibAavegotchi.interact(_tokenId);
     }
 
     function _addWearableToGotchi(
@@ -333,7 +323,7 @@ contract ItemsFacet is Modifiers {
         IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(_sender, _sender, address(this), _toEquipWearableId, _balToTransfer);
         LibERC1155Marketplace.updateERC1155Listing(address(this), _toEquipWearableId, _sender);
     }
-
+    
     function _removeWearableFromGotchi(
         uint256 _delegationId,
         uint256 _gotchiId,

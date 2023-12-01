@@ -56,7 +56,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         validExpirationDate(_grantRoleData.expirationDate)
         onlyOwnerOrApprovedWithBalance(_grantRoleData.grantor, _grantRoleData.tokenAddress, _grantRoleData.tokenId, _grantRoleData.tokenAmount)
     {
-        require(_grantRoleData.role != EQUIP_WEARABLE_ROLE, "SftRolesRegistry: EQUIP_WEARABLE_ROLE is not supported");
+        require(_grantRoleData.role != EQUIP_WEARABLE_ROLE, "ItemsRolesRegistryFacet: EQUIP_WEARABLE_ROLE is not supported");
         DepositInfo memory _depositInfo = s.itemsDeposits[_grantRoleData.nonce];
         if (_depositInfo.tokenAmount == 0) {
             _depositInfo = DepositInfo(_grantRoleData.grantor, _grantRoleData.tokenAddress, _grantRoleData.tokenId, _grantRoleData.tokenAmount);
@@ -74,7 +74,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
 
     function _grantOrUpdateRole(uint256 _nonce, DepositInfo memory _depositInfo, RoleData memory _roleData) internal {
         // validate if previous role assignment is expired or revocable
-        require(_roleData.expirationDate < block.timestamp || _roleData.revocable, "SftRolesRegistry: role is not revocable or not expired");
+        require(_roleData.expirationDate < block.timestamp || _roleData.revocable, "ItemsRolesRegistryFacet: role is not revocable or not expired");
 
         s.itemsRoleAssignments[_nonce] = _roleData;
 
@@ -93,8 +93,8 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     function _deposit(uint256 _nonce, DepositInfo memory _depositInfo) internal {
-        require(_depositInfo.tokenAmount > 0, "SftRolesRegistry: tokenAmount must be greater than zero");
-        require(s.itemsDeposits[_nonce].grantor == address(0), "SftRolesRegistry: deposit already exists");
+        require(_depositInfo.tokenAmount > 0, "ItemsRolesRegistryFacet: tokenAmount must be greater than zero");
+        require(s.itemsDeposits[_nonce].grantor == address(0), "ItemsRolesRegistryFacet: deposit already exists");
 
         s.itemsDeposits[_nonce] = _depositInfo;
 
@@ -106,13 +106,13 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     function revokeRoleFrom(uint256 _nonce, bytes32 _role) external override {
         // revoke(depositId, role1)
         RoleData memory _roleData = s.itemsRoleAssignments[_nonce];
-        require(_roleData.grantee != address(0), "SftRolesRegistry: role does not exist");
+        require(_roleData.grantee != address(0), "ItemsRolesRegistryFacet: role does not exist");
         DepositInfo memory _depositInfo = s.itemsDeposits[_nonce];
 
         address caller = _findCaller(_roleData, _depositInfo);
         if (_roleData.expirationDate > block.timestamp && !_roleData.revocable) {
             // if role is not expired and is not revocable, only the grantee can revoke it
-            require(caller == _roleData.grantee, "SftRolesRegistry: role is not revocable or caller is not the approved");
+            require(caller == _roleData.grantee, "ItemsRolesRegistryFacet: role is not revocable or caller is not the approved");
         }
 
 
@@ -150,10 +150,10 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         )
     {
         DepositInfo memory _depositInfo = s.itemsDeposits[_nonce];
-        require(_depositInfo.tokenAmount > 0, "SftRolesRegistry: deposit does not exist");
+        require(_depositInfo.tokenAmount > 0, "ItemsRolesRegistryFacet: deposit does not exist");
         require(
             s.itemsRoleAssignments[_nonce].grantee == address(0) || s.itemsRoleAssignments[_nonce].expirationDate < block.timestamp,
-            "SftRolesRegistry: nft is delegated"
+            "ItemsRolesRegistryFacet: nft is delegated"
         );
 
         delete s.itemsDeposits[_nonce];
@@ -204,6 +204,6 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
             return _roleData.grantee;
         }
 
-        revert("SftRolesRegistry: sender must be approved");
+        revert("ItemsRolesRegistryFacet: sender must be approved");
     }
 }
