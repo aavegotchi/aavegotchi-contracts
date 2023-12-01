@@ -358,10 +358,10 @@ contract ItemsFacet is Modifiers {
         address _sender = LibMeta.msgSender();
         if (_delegationId != 0) {
             require(s.itemIdToDelegationIdToGotchiId[_delegationId][_toEquipWearableId] == 0, "ItemsFacet: Wearable already delegated to another gotchi");
-            require(s.itemsLists.items[_delegationId].data.expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
-            require(s.itemsLists.items[_delegationId].data.grantee == LibMeta.msgSender(), "ItemsFacet: Wearable not delegated to sender");
+            require(s.roleAssignments[_delegationId].expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
+            require(s.roleAssignments[_delegationId].grantee == LibMeta.msgSender(), "ItemsFacet: Wearable not delegated to sender");
 
-            uint256 delegatedBalance = s.itemsLists.items[_delegationId].data.tokenAmount;
+            uint256 delegatedBalance = s.deposits[_delegationId].tokenAmount;
             // check if they have enough delegated balance
             require(delegatedBalance >= _balToTransfer, "ItemsFacet: sender doesn't have enough delegated balance");
         } else {
@@ -386,7 +386,7 @@ contract ItemsFacet is Modifiers {
     ) internal {
         address _sender = LibMeta.msgSender();
         if (_delegationId != 0) {
-            require(s.itemsLists.items[_delegationId].data.grantee == LibMeta.msgSender(), "ItemsFacet: Wearable not delegated to sender");
+            require(s.roleAssignments[_delegationId].grantee == LibMeta.msgSender(), "ItemsFacet: Wearable not delegated to sender");
             require(
                 s.itemIdToDelegationIdToGotchiId[_delegationId][_toEquipWearableId] == _gotchiId,
                 "ItemsFacet: Wearable is not delegated to this gotchi"
