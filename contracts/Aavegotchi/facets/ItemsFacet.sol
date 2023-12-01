@@ -68,7 +68,11 @@ contract ItemsFacet is Modifiers {
     /// @param _tokenId The ID of the parent token
     /// @param _id     ID of the token
     /// @return value The balance of the token
-    function balanceOfToken(address _tokenContract, uint256 _tokenId, uint256 _id) external view returns (uint256 value) {
+    function balanceOfToken(
+        address _tokenContract,
+        uint256 _tokenId,
+        uint256 _id
+    ) external view returns (uint256 value) {
         value = s.nftItemBalances[_tokenContract][_tokenId][_id];
     }
 
@@ -92,10 +96,11 @@ contract ItemsFacet is Modifiers {
     ///@param _tokenContract Contract address for the token to query
     ///@param _tokenId Identifier of the token to query
     ///@return itemBalancesOfTokenWithTypes_ An array of structs containing details about each item owned(including the types)
-    function itemBalancesOfTokenWithTypes(
-        address _tokenContract,
-        uint256 _tokenId
-    ) external view returns (ItemTypeIO[] memory itemBalancesOfTokenWithTypes_) {
+    function itemBalancesOfTokenWithTypes(address _tokenContract, uint256 _tokenId)
+        external
+        view
+        returns (ItemTypeIO[] memory itemBalancesOfTokenWithTypes_)
+    {
         itemBalancesOfTokenWithTypes_ = LibItems.itemBalancesOfTokenWithTypes(_tokenContract, _tokenId);
     }
 

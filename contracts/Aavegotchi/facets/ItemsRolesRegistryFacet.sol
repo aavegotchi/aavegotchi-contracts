@@ -194,10 +194,6 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         LibERC1155Marketplace.updateERC1155Listing(address(this), _tokenId, _to);
     }
 
-    function _hashRoleData(uint256 _nonce, bytes32 _role, address _tokenAddress, uint256 _tokenId, address _grantor) internal pure returns (bytes32) {
-        return keccak256(abi.encode(_nonce, _role, _tokenAddress, _tokenId, _grantor));
-    }
-
     function _findCaller(RoleData memory _roleData, DepositInfo memory _depositInfo) internal view returns (address) {
         if (_depositInfo.grantor == msg.sender || isRoleApprovedForAll(_depositInfo.tokenAddress, _depositInfo.grantor, msg.sender)) {
             return _depositInfo.grantor;
@@ -208,9 +204,5 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         }
 
         revert("SftRolesRegistry: sender must be approved");
-    }
-
-    function _getHeadKey(address _grantee, bytes32 _role, address _tokenAddress, uint256 _tokenId) internal pure returns (bytes32 rootKey_) {
-        return keccak256(abi.encodePacked(_grantee, _role, _tokenAddress, _tokenId));
     }
 }
