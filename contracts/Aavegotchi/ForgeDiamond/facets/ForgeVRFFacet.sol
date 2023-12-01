@@ -10,6 +10,7 @@ import {ForgeTokenFacet} from "./ForgeTokenFacet.sol";
 
 contract ForgeVRFFacet is Modifiers {
     // Maximum number of geodes that can be opened in one call.
+    uint8[] internal rarities = [uint8(COMMON_RSM), UNCOMMON_RSM, RARE_RSM, LEGENDARY_RSM, MYTHICAL_RSM, GODLIKE_RSM];
 
     event VrfResponse(address user, uint256 randomNumber, bytes32 requestId, uint256 blockNumber);
     event GeodeWin(address user, uint256 itemId, uint256 geodeTokenId, bytes32 requestId, uint256 blockNumber);
@@ -58,6 +59,14 @@ contract ForgeVRFFacet is Modifiers {
     function numTotalPrizesLeft() public view returns (uint256 total) {
         for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
             total += s.geodePrizeQuantities[s.geodePrizeTokenIds[i]];
+        }
+    }
+
+    // @notice returns array of prizes left indexed by rarity (common = 0, uncommon = 1, rare = 2, etc)
+    function numTotalPrizesLeftByRarity() public view returns (uint256[6] memory total) {
+        for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
+            uint idx = forgeFacet().getRsmIndex(s.geodePrizeRarities[s.geodePrizeTokenIds[i]]);
+            total[idx] += s.geodePrizeQuantities[s.geodePrizeTokenIds[i]];
         }
     }
 
@@ -162,6 +171,97 @@ contract ForgeVRFFacet is Modifiers {
         return s.vrfRequestIdToVrfRequestInfo[requestId];
     }
 
+    /**
+         * @notice get the current prize probabilities based on available prizes
+    */
+    function getCurrentPrizeProbabilityForGeode(uint8 geodeRsm) public view returns (uint256[6] memory newProbability){
+        // first win rarity, then win index of that rarity
+        mapping(uint8 => uint256) storage baseProbability = s.geodeWinChanceBips[geodeRsm];
+        uint256[6] memory prizesLeft = numTotalPrizesLeftByRarity();
+
+        // setup init return array
+        for (uint256 i; i < 6; i++){
+            newProbability[i] = baseProbability[rarities[i]];
+        }
+
+        // looping rarity idx backwards from 5 but stop at 1, because logic handles setting common probability (idx 0).
+        for (uint256 i = rarities.length - 1; i >= 1; i--){
+            if (prizesLeft[i] == 0){
+                newProbability[i - 1] += newProbability[i];
+                newProbability[i] = 0;
+            }
+        }
+    }
+
+    function getAvailablePrizesForRarity(uint8 rsm) public view returns (uint256[] memory) {
+        uint256[] memory temp = new uint256[](s.geodePrizeTokenIds.length);
+        uint256 amt = 0;
+        uint256 count = 0;
+
+        for (uint256 i; i < s.geodePrizeTokenIds.length; i++){
+            if (s.geodePrizeRarities[s.geodePrizeTokenIds[i]] == rsm){
+                temp[i] = s.geodePrizeTokenIds[i];
+                amt += 1;
+            }
+        }
+        // strip 0s
+        uint256[] memory prizes = new uint256[](amt);
+        for (uint256 i; i < temp.length; i++){
+            if (temp[i] != 0){
+                prizes[count] = temp[i];
+                count++;
+            }
+
+        }
+        return prizes;
+    }
+
+    function getWinRanges(uint256[6] memory winChanceByRarity) internal pure returns (uint256[] memory probabilityRanges){
+        probabilityRanges = new uint256[](winChanceByRarity.length);
+        probabilityRanges[0] = winChanceByRarity[0];
+
+        uint256 skip;
+        for (uint256 k = 1; k < winChanceByRarity.length - 1; k++){
+            if (winChanceByRarity[k] == 0) {
+                probabilityRanges[k] = 0;
+                skip += 1;
+            } else {
+                // due to many different possibilities of available prizes, need to use the
+                // previous number that isn't zero, which isn't necessarily the previous index.
+                probabilityRanges[k] = winChanceByRarity[k] + probabilityRanges[k - skip];
+                skip = 0;
+            }
+        }
+    }
+
+    function getRarityWon(uint256[] memory probabilityRanges, uint256 geodeRandNum) internal pure returns (uint256 rarityWonIndex) {
+        uint256 skip = 0;
+        for (uint256 k; k < probabilityRanges.length; k++){
+            if (probabilityRanges[k] == 0) {
+                skip += 1;
+            } else if (geodeRandNum <= probabilityRanges[k] && geodeRandNum > probabilityRanges[k - skip] ){
+                rarityWonIndex = k;
+            } else {
+                skip = 0;
+            }
+        }
+    }
+
+    struct PrizeCalculationData {
+        uint256 prizesLeft;
+        uint256 numWins;
+        uint256 modNum;
+        uint256 divNum;
+        uint256 geodeRandNum;
+        uint256 rarityWonIndex;
+        uint256 itemIdWon;
+        uint256[] probabilityRanges;
+        uint256[] prizes;
+        uint8 rsm;
+        uint256[6] winChanceByRarity;
+    }
+
+
     function claimWinnings() external whenNotPaused {
         address sender = LibMeta.msgSender();
 
@@ -173,47 +273,64 @@ contract ForgeVRFFacet is Modifiers {
         require(info.status == VrfStatus.READY_TO_CLAIM, "ForgeVRFFacet: not ready to claim");
         require(info.randomNumber != 0, "ForgeVRFFacet: invalid random number");
 
-        uint256 modNum = 10000;
-        uint256 divNum = 1;
-
-        uint256 prizesLeft = numTotalPrizesLeft();
-        uint256 numWins;
+        PrizeCalculationData memory data = PrizeCalculationData({
+            prizesLeft: numTotalPrizesLeft(),
+            numWins: 0,
+            modNum: 10000,
+            divNum: 1,
+            geodeRandNum: 0,
+            rarityWonIndex: 0,
+            itemIdWon: 0,
+            probabilityRanges: new uint256[](0),
+            prizes: new uint256[](0),
+            rsm: 0,
+            winChanceByRarity: [uint256(0), 0, 0, 0, 0, 0]
+        });
 
         for (uint256 i; i < info.geodeTokenIds.length; i++) {
-            uint8 rsm = forgeFacet().geodeRsmFromTokenId(info.geodeTokenIds[i]);
+            data.rsm = forgeFacet().geodeRsmFromTokenId(info.geodeTokenIds[i]);
+            data.winChanceByRarity = getCurrentPrizeProbabilityForGeode(data.rsm);
 
             for (uint256 j; j < info.amountPerToken[i]; j++) {
-                if (numWins < prizesLeft) {
+                if (data.numWins < data.prizesLeft) {
                     // geodeRandNum is a 4 digit (0-9999) subsection of the random number
-                    uint256 geodeRandNum = (info.randomNumber % modNum) / divNum;
+                    data.geodeRandNum = (info.randomNumber % data.modNum) / data.divNum;
 
-                    if (s.geodeWinChanceBips[rsm] >= geodeRandNum) {
-                        uint256 idx = geodeRandNum % s.geodePrizeTokenIds.length;
-                        uint256 itemIdWon = s.geodePrizeTokenIds[idx];
+                    // First create a list of win ranges.
+                    data.probabilityRanges = getWinRanges(data.winChanceByRarity);
+
+                    // choose rarity won if any
+                    data.rarityWonIndex = getRarityWon(data.probabilityRanges, data.geodeRandNum);
+
+                    if (data.rarityWonIndex > 0){
+                        data.prizes = getAvailablePrizesForRarity(rarities[data.rarityWonIndex]);
+                        uint256 idx = data.geodeRandNum % data.prizes.length;
+                        data.itemIdWon = data.prizes[idx];
 
                         // if last quantity of item won, rearrange array.
-                        if (s.geodePrizeQuantities[itemIdWon] == 1) {
+                        if (s.geodePrizeQuantities[data.itemIdWon] == 1) {
                             s.geodePrizeTokenIds[idx] = s.geodePrizeTokenIds[s.geodePrizeTokenIds.length - 1];
                             s.geodePrizeTokenIds.pop();
                         }
-                        s.geodePrizeQuantities[itemIdWon] -= 1;
-                        numWins++;
+                        s.geodePrizeQuantities[data.itemIdWon] -= 1;
+                        data.numWins++;
 
-                        forgeTokenFacet().safeTransferFrom(address(this), sender, itemIdWon, 1, "");
+                        forgeTokenFacet().safeTransferFrom(address(this), sender, data.itemIdWon, 1, "");
                         forgeFacet().burn(address(this), info.geodeTokenIds[i], 1);
 
-                        emit GeodeWin(sender, itemIdWon, info.geodeTokenIds[i], requestId, block.number);
+                        emit GeodeWin(sender, data.itemIdWon, info.geodeTokenIds[i], requestId, block.number);
                     } else {
                         forgeFacet().burn(address(this), info.geodeTokenIds[i], 1);
                         emit GeodeEmpty(sender, info.geodeTokenIds[i], requestId, block.number);
                     }
+
                 } else {
                     forgeTokenFacet().safeTransferFrom(address(this), sender, info.geodeTokenIds[i], 1, "");
                     emit GeodeRefunded(sender, info.geodeTokenIds[i], requestId, block.number);
                 }
 
-                divNum = modNum;
-                modNum *= 10000;
+                data.divNum = data.modNum;
+                data.modNum *= 10000;
             }
         }
         info.status = VrfStatus.CLAIMED;

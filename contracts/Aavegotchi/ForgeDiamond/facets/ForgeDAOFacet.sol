@@ -12,8 +12,8 @@ contract ForgeDAOFacet is Modifiers {
     event SetForgeEssenceCost(RarityValueIO newCosts);
     event SetForgeTimeCostInBlocks(RarityValueIO newCosts);
     event SetSkillPointsEarnedFromForge(RarityValueIO newPoints);
-    event SetGeodeWinChance(RarityValueIO newChances);
-    event SetGeodePrizes(uint256[] ids, uint256[] quantities);
+    event SetGeodeWinChance(MultiTierGeodeChanceIO newChances);
+    event SetGeodePrizes(uint256[] ids, uint256[] quantities, uint8[] rarities);
     event SetSmeltingSkillPointReductionFactorBips(uint256 oldBips, uint256 newBips);
     event SetMaxSupplyPerToken(uint256[] tokenIds, uint256[] supplyPerTokenId);
     event SetAavegotchiDiamondAddress(address _address);
@@ -135,15 +135,69 @@ contract ForgeDAOFacet is Modifiers {
         return s.alloyBurnFeeInBips;
     }
 
+//    // @notice Allow DAO to update percent chance to win from a Geode.
+//    // @param points RarityValueIO struct of points
+//    function setGeodeWinChanceBips(RarityValueIO calldata chances) external onlyDaoOrOwner {
+//        s.geodeWinChanceBips[COMMON_RSM] = chances.common;
+//        s.geodeWinChanceBips[UNCOMMON_RSM] = chances.uncommon;
+//        s.geodeWinChanceBips[RARE_RSM] = chances.rare;
+//        s.geodeWinChanceBips[LEGENDARY_RSM] = chances.legendary;
+//        s.geodeWinChanceBips[MYTHICAL_RSM] = chances.mythical;
+//        s.geodeWinChanceBips[GODLIKE_RSM] = chances.godlike;
+//
+//        emit SetGeodeWinChance(chances);
+//    }
+
     // @notice Allow DAO to update percent chance to win from a Geode.
     // @param points RarityValueIO struct of points
-    function setGeodeWinChanceBips(RarityValueIO calldata chances) external onlyDaoOrOwner {
-        s.geodeWinChanceBips[COMMON_RSM] = chances.common;
-        s.geodeWinChanceBips[UNCOMMON_RSM] = chances.uncommon;
-        s.geodeWinChanceBips[RARE_RSM] = chances.rare;
-        s.geodeWinChanceBips[LEGENDARY_RSM] = chances.legendary;
-        s.geodeWinChanceBips[MYTHICAL_RSM] = chances.mythical;
-        s.geodeWinChanceBips[GODLIKE_RSM] = chances.godlike;
+    function setGeodeMultiTierWinChanceBips(MultiTierGeodeChanceIO calldata chances) external onlyDaoOrOwner {
+        //common
+        s.geodeWinChanceBips[COMMON_RSM][COMMON_RSM] = chances.common.common;
+        s.geodeWinChanceBips[COMMON_RSM][UNCOMMON_RSM] = chances.common.uncommon;
+        s.geodeWinChanceBips[COMMON_RSM][RARE_RSM] = chances.common.rare;
+        s.geodeWinChanceBips[COMMON_RSM][LEGENDARY_RSM] = chances.common.legendary;
+        s.geodeWinChanceBips[COMMON_RSM][MYTHICAL_RSM] = chances.common.mythical;
+        s.geodeWinChanceBips[COMMON_RSM][GODLIKE_RSM] = chances.common.godlike;
+
+        //uncommon
+        s.geodeWinChanceBips[UNCOMMON_RSM][COMMON_RSM] = chances.uncommon.common;
+        s.geodeWinChanceBips[UNCOMMON_RSM][UNCOMMON_RSM] = chances.uncommon.uncommon;
+        s.geodeWinChanceBips[UNCOMMON_RSM][RARE_RSM] = chances.uncommon.rare;
+        s.geodeWinChanceBips[UNCOMMON_RSM][LEGENDARY_RSM] = chances.uncommon.legendary;
+        s.geodeWinChanceBips[UNCOMMON_RSM][MYTHICAL_RSM] = chances.uncommon.mythical;
+        s.geodeWinChanceBips[UNCOMMON_RSM][GODLIKE_RSM] = chances.uncommon.godlike;
+
+        //rare
+        s.geodeWinChanceBips[RARE_RSM][COMMON_RSM] = chances.rare.common;
+        s.geodeWinChanceBips[RARE_RSM][UNCOMMON_RSM] = chances.rare.uncommon;
+        s.geodeWinChanceBips[RARE_RSM][RARE_RSM] = chances.rare.rare;
+        s.geodeWinChanceBips[RARE_RSM][LEGENDARY_RSM] = chances.rare.legendary;
+        s.geodeWinChanceBips[RARE_RSM][MYTHICAL_RSM] = chances.rare.mythical;
+        s.geodeWinChanceBips[RARE_RSM][GODLIKE_RSM] = chances.rare.godlike;
+
+        //legendary
+        s.geodeWinChanceBips[LEGENDARY_RSM][COMMON_RSM] = chances.legendary.common;
+        s.geodeWinChanceBips[LEGENDARY_RSM][UNCOMMON_RSM] = chances.legendary.uncommon;
+        s.geodeWinChanceBips[LEGENDARY_RSM][RARE_RSM] = chances.legendary.rare;
+        s.geodeWinChanceBips[LEGENDARY_RSM][LEGENDARY_RSM] = chances.legendary.legendary;
+        s.geodeWinChanceBips[LEGENDARY_RSM][MYTHICAL_RSM] = chances.legendary.mythical;
+        s.geodeWinChanceBips[LEGENDARY_RSM][GODLIKE_RSM] = chances.legendary.godlike;
+
+        //mythical
+        s.geodeWinChanceBips[MYTHICAL_RSM][COMMON_RSM] = chances.mythical.common;
+        s.geodeWinChanceBips[MYTHICAL_RSM][UNCOMMON_RSM] = chances.mythical.uncommon;
+        s.geodeWinChanceBips[MYTHICAL_RSM][RARE_RSM] = chances.mythical.rare;
+        s.geodeWinChanceBips[MYTHICAL_RSM][LEGENDARY_RSM] = chances.mythical.legendary;
+        s.geodeWinChanceBips[MYTHICAL_RSM][MYTHICAL_RSM] = chances.mythical.mythical;
+        s.geodeWinChanceBips[MYTHICAL_RSM][GODLIKE_RSM] = chances.mythical.godlike;
+
+        //godlike
+        s.geodeWinChanceBips[GODLIKE_RSM][COMMON_RSM] = chances.godlike.common;
+        s.geodeWinChanceBips[GODLIKE_RSM][UNCOMMON_RSM] = chances.godlike.uncommon;
+        s.geodeWinChanceBips[GODLIKE_RSM][RARE_RSM] = chances.godlike.rare;
+        s.geodeWinChanceBips[GODLIKE_RSM][LEGENDARY_RSM] = chances.godlike.legendary;
+        s.geodeWinChanceBips[GODLIKE_RSM][MYTHICAL_RSM] = chances.godlike.mythical;
+        s.geodeWinChanceBips[GODLIKE_RSM][GODLIKE_RSM] = chances.godlike.godlike;
 
         emit SetGeodeWinChance(chances);
     }
@@ -151,8 +205,9 @@ contract ForgeDAOFacet is Modifiers {
     // @notice Allow DAO to set which prizes can be won from a Geode.
     // @param ids Token IDs of the available prizes
     // @param quantities Initial amounts of each prize available
-    function setGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities) external onlyDaoOrOwner {
-        require(ids.length == quantities.length, "ForgeDAOFacet: mismatched arrays");
+    // @param rarities Rarity level of each prize, denoted using rarity score modifier (i.e. common = 1, uncommon = 2, rare = 5, etc)
+    function setGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities, uint8[] calldata rarities) external onlyDaoOrOwner {
+        require(ids.length == quantities.length && quantities.length == rarities.length, "ForgeDAOFacet: mismatched arrays");
 
         for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
             delete s.geodePrizeQuantities[s.geodePrizeTokenIds[i]];
@@ -164,9 +219,10 @@ contract ForgeDAOFacet is Modifiers {
                 s.geodePrizeTokenIds.push(ids[i]);
             }
             s.geodePrizeQuantities[ids[i]] = quantities[i];
+            s.geodePrizeRarities[ids[i]] = rarities[i];
         }
 
-        emit SetGeodePrizes(ids, quantities);
+        emit SetGeodePrizes(ids, quantities, rarities);
     }
 
     function getGeodePrizesRemaining() external view returns (uint256[] memory, uint256[] memory) {
