@@ -168,10 +168,11 @@ struct AppStorage {
     mapping(uint8 => uint256) forgeTimeCostInBlocks;
     // Map rarity score modifier (which denotes item rarity) to number of skill points earned for successful forging.
     mapping(uint8 => uint256) skillPointsEarnedFromForge;
-    // Map rarity score modifier (which denotes item rarity) to percent chance (in bips) to win a prize.
-//    mapping(uint8 => uint256) geodeWinChanceBips;
 
-    mapping(uint8 => mapping(uint8 => uint256)) geodeWinChanceBips;
+    // Map rarity score modifier (which denotes item rarity) to percent chance (in bips) to win a prize.
+    /**** NOTE: Deprecated *****/
+    mapping(uint8 => uint256) geodeWinChanceBips;
+    /*********************/
 
     // Reduction factor for skillPointsEarnedFromForge for smelting.
     uint256 smeltingSkillPointReductionFactorBips;
@@ -190,6 +191,7 @@ struct AppStorage {
     bytes32 keyHash;
     uint144 vrfFee;
 
+    mapping(uint8 => mapping(uint8 => uint256)) geodeWinChanceMultiTierBips;
     mapping(uint256 => uint8) geodePrizeRarities;
 }
 

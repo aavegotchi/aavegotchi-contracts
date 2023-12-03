@@ -16,27 +16,37 @@ export async function upgradeForgeMultiTierGeodes() {
   console.log("Upgrading Forge facets for Multi Tier Geodes.");
 
   const multiTierGeodeChanceIO =
-    "tuple(tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike),tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike),tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike),tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike),tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike),tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike))"
+    "tuple(tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) common, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) uncommon, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) rare, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) legendary, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) mythical, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) godlike)"
+
 
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName:
         "contracts/Aavegotchi/ForgeDiamond/facets/ForgeDAOFacet.sol:ForgeDAOFacet",
       addSelectors: [
-        "function setGeodeMultiTierWinChanceBips(" + multiTierGeodeChanceIO + " calldata chances) external "
+        `function setGeodeMultiTierWinChanceBips(${multiTierGeodeChanceIO} calldata chances) external`,
+        "function setMultiTierGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities, uint8[] calldata rarities) external"
       ],
       removeSelectors: [
-        // "function setGeodeWinChanceBips(tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) calldata chances) external",
+        // "function setGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities) external"
       ],
     },
     {
       facetName:
         "contracts/Aavegotchi/ForgeDiamond/facets/ForgeVRFFacet.sol:ForgeVRFFacet",
       addSelectors: [
-        "function numTotalPrizesLeftByRarity() public view returns (uint256[6] memory total)",
-        "function getAvailablePrizesForRarity(uint8 rsm) public view returns (uint256[] memory prizes)",
-        "function getCurrentPrizeProbabilityForGeode(uint8 geodeRsm) public view returns (uint256[6] memory newProbability)"
+        "function numTotalPrizesLeftByRarity() public view",
+        "function getAvailablePrizesForRarity(uint8 rsm) public view",
+        "function getCurrentPrizeProbabilityForGeode(uint8 geodeRsm) public view"
 
+      ],
+      removeSelectors: [],
+    },
+    {
+      facetName:
+        "contracts/Aavegotchi/ForgeDiamond/facets/ForgeFacet.sol:ForgeFacet",
+      addSelectors: [
+        "function getRsmIndex(uint8 rsm) public pure"
       ],
       removeSelectors: [],
     },

@@ -9,9 +9,6 @@ import {ForgeFacet} from "./ForgeFacet.sol";
 import {ForgeTokenFacet} from "./ForgeTokenFacet.sol";
 
 contract ForgeVRFFacet is Modifiers {
-    // Maximum number of geodes that can be opened in one call.
-    uint8[] internal rarities = [uint8(COMMON_RSM), UNCOMMON_RSM, RARE_RSM, LEGENDARY_RSM, MYTHICAL_RSM, GODLIKE_RSM];
-
     event VrfResponse(address user, uint256 randomNumber, bytes32 requestId, uint256 blockNumber);
     event GeodeWin(address user, uint256 itemId, uint256 geodeTokenId, bytes32 requestId, uint256 blockNumber);
     event GeodeEmpty(address user, uint256 geodeTokenId, bytes32 requestId, uint256 blockNumber);
@@ -65,7 +62,7 @@ contract ForgeVRFFacet is Modifiers {
     // @notice returns array of prizes left indexed by rarity (common = 0, uncommon = 1, rare = 2, etc)
     function numTotalPrizesLeftByRarity() public view returns (uint256[6] memory total) {
         for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
-            uint idx = forgeFacet().getRsmIndex(s.geodePrizeRarities[s.geodePrizeTokenIds[i]]);
+            uint8 idx = forgeFacet().getRsmIndex(s.geodePrizeRarities[s.geodePrizeTokenIds[i]]);
             total[idx] += s.geodePrizeQuantities[s.geodePrizeTokenIds[i]];
         }
     }
@@ -174,14 +171,19 @@ contract ForgeVRFFacet is Modifiers {
     /**
          * @notice get the current prize probabilities based on available prizes
     */
-    function getCurrentPrizeProbabilityForGeode(uint8 geodeRsm) public view returns (uint256[6] memory newProbability){
-        // first win rarity, then win index of that rarity
-        mapping(uint8 => uint256) storage baseProbability = s.geodeWinChanceBips[geodeRsm];
+    function getCurrentPrizeProbabilityForGeode(uint8 geodeRsm) public view returns (uint256[6] memory) {
+        uint8[6] memory rarities = [uint8(COMMON_RSM), UNCOMMON_RSM, RARE_RSM, LEGENDARY_RSM, MYTHICAL_RSM, GODLIKE_RSM];
+        uint256[6] memory baseProbability;
+        uint256[6] memory newProbability;
+
+        for(uint8 i; i < rarities.length; i++){
+            baseProbability[i] = s.geodeWinChanceMultiTierBips[geodeRsm][rarities[i]];
+        }
         uint256[6] memory prizesLeft = numTotalPrizesLeftByRarity();
 
-        // setup init return array
-        for (uint256 i; i < 6; i++){
-            newProbability[i] = baseProbability[rarities[i]];
+        // need to setup init return array to properly adjust probabilities
+        for (uint8 i; i < 6; i++){
+            newProbability[i] = baseProbability[i];
         }
 
         // looping rarity idx backwards from 5 but stop at 1, because logic handles setting common probability (idx 0).
@@ -191,6 +193,12 @@ contract ForgeVRFFacet is Modifiers {
                 newProbability[i] = 0;
             }
         }
+        // handle common case (index 0)
+        if (prizesLeft[0] == 0){
+            newProbability[0] = 0;
+        }
+
+        return newProbability;
     }
 
     function getAvailablePrizesForRarity(uint8 rsm) public view returns (uint256[] memory) {
@@ -241,7 +249,6 @@ contract ForgeVRFFacet is Modifiers {
                 skip += 1;
             } else if (geodeRandNum <= probabilityRanges[k] && geodeRandNum > probabilityRanges[k - skip] ){
                 rarityWonIndex = k;
-            } else {
                 skip = 0;
             }
         }
@@ -272,6 +279,8 @@ contract ForgeVRFFacet is Modifiers {
 
         require(info.status == VrfStatus.READY_TO_CLAIM, "ForgeVRFFacet: not ready to claim");
         require(info.randomNumber != 0, "ForgeVRFFacet: invalid random number");
+
+        uint8[6] memory rarities = [uint8(COMMON_RSM), UNCOMMON_RSM, RARE_RSM, LEGENDARY_RSM, MYTHICAL_RSM, GODLIKE_RSM];
 
         PrizeCalculationData memory data = PrizeCalculationData({
             prizesLeft: numTotalPrizesLeft(),
