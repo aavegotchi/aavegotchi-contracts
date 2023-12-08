@@ -173,32 +173,28 @@ contract ForgeVRFFacet is Modifiers {
     */
     function getCurrentPrizeProbabilityForGeode(uint8 geodeRsm) public view returns (uint256[6] memory) {
         uint8[6] memory rarities = [uint8(COMMON_RSM), UNCOMMON_RSM, RARE_RSM, LEGENDARY_RSM, MYTHICAL_RSM, GODLIKE_RSM];
-        uint256[6] memory baseProbability;
-        uint256[6] memory newProbability;
+        uint256[6] memory probability;
 
+        // get base probabilities
         for(uint8 i; i < rarities.length; i++){
-            baseProbability[i] = s.geodeWinChanceMultiTierBips[geodeRsm][rarities[i]];
+            probability[i] = s.geodeWinChanceMultiTierBips[geodeRsm][rarities[i]];
         }
         uint256[6] memory prizesLeft = numTotalPrizesLeftByRarity();
 
-        // need to setup init return array to properly adjust probabilities
-        for (uint8 i; i < 6; i++){
-            newProbability[i] = baseProbability[i];
-        }
-
+        // modify baseProbabilities based on available items
         // looping rarity idx backwards from 5 but stop at 1, because logic handles setting common probability (idx 0).
         for (uint256 i = rarities.length - 1; i >= 1; i--){
             if (prizesLeft[i] == 0){
-                newProbability[i - 1] += newProbability[i];
-                newProbability[i] = 0;
+                probability[i - 1] += probability[i];
+                probability[i] = 0;
             }
         }
         // handle common case (index 0)
         if (prizesLeft[0] == 0){
-            newProbability[0] = 0;
+            probability[0] = 0;
         }
 
-        return newProbability;
+        return probability;
     }
 
     function getAvailablePrizesForRarity(uint8 rsm) public view returns (uint256[] memory) {
