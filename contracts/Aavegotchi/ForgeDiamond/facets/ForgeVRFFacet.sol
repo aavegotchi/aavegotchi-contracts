@@ -229,7 +229,7 @@ contract ForgeVRFFacet is Modifiers {
             lastNonZero = probabilityRanges[0];
         }
 
-        for (uint256 i = 1; i < winChanceByRarity.length - 1; i++){
+        for (uint256 i = 1; i < winChanceByRarity.length; i++){
             if (winChanceByRarity[i] == 0) {
                 probabilityRanges[i] = 0;
             } else {
