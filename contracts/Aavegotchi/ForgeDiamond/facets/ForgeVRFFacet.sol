@@ -220,34 +220,50 @@ contract ForgeVRFFacet is Modifiers {
         return prizes;
     }
 
-    function getWinRanges(uint256[6] memory winChanceByRarity) internal pure returns (uint256[] memory probabilityRanges){
+    function getWinRanges(uint256[6] memory winChanceByRarity) public pure returns (uint256[] memory probabilityRanges){
         probabilityRanges = new uint256[](winChanceByRarity.length);
         probabilityRanges[0] = winChanceByRarity[0];
 
-        uint256 skip;
-        for (uint256 k = 1; k < winChanceByRarity.length - 1; k++){
-            if (winChanceByRarity[k] == 0) {
-                probabilityRanges[k] = 0;
-                skip += 1;
+        uint256 lastNonZero;
+        if (probabilityRanges[0] != 0){
+            lastNonZero = probabilityRanges[0];
+        }
+
+        for (uint256 i = 1; i < winChanceByRarity.length - 1; i++){
+            if (winChanceByRarity[i] == 0) {
+                probabilityRanges[i] = 0;
             } else {
-                // due to many different possibilities of available prizes, need to use the
-                // previous number that isn't zero, which isn't necessarily the previous index.
-                probabilityRanges[k] = winChanceByRarity[k] + probabilityRanges[k - skip];
-                skip = 0;
+                probabilityRanges[i] = winChanceByRarity[i] + lastNonZero;
+                lastNonZero = winChanceByRarity[i] + lastNonZero;
             }
         }
     }
 
-    function getRarityWon(uint256[] memory probabilityRanges, uint256 geodeRandNum) internal pure returns (uint256 rarityWonIndex) {
-        uint256 skip = 0;
-        for (uint256 k; k < probabilityRanges.length; k++){
-            if (probabilityRanges[k] == 0) {
-                skip += 1;
-            } else if (geodeRandNum <= probabilityRanges[k] && geodeRandNum > probabilityRanges[k - skip] ){
-                rarityWonIndex = k;
-                skip = 0;
+    function getRarityWon(uint256[] memory probabilityRanges, uint256 geodeRandNum) internal pure returns (int) {
+        int rarityWonIndex = -1;
+
+        uint256 lastNonZero;
+        if (probabilityRanges[0] != 0){
+            lastNonZero = probabilityRanges[0];
+        }
+
+        if (geodeRandNum <= probabilityRanges[0] && geodeRandNum > 0){
+            rarityWonIndex = 0;
+        } else {
+            for (uint256 i = 1; i < probabilityRanges.length; i++){
+                if (probabilityRanges[i] == 0) {
+                    continue;
+                } else {
+                    if (geodeRandNum <= probabilityRanges[i] && geodeRandNum > lastNonZero ){
+                        rarityWonIndex = int(i);
+                        break;
+                    } else {
+                        lastNonZero = probabilityRanges[i];
+                    }
+                }
             }
         }
+        return rarityWonIndex;
     }
 
     struct PrizeCalculationData {
@@ -256,7 +272,7 @@ contract ForgeVRFFacet is Modifiers {
         uint256 modNum;
         uint256 divNum;
         uint256 geodeRandNum;
-        uint256 rarityWonIndex;
+        int rarityWonIndex;
         uint256 itemIdWon;
         uint256[] probabilityRanges;
         uint256[] prizes;
@@ -307,8 +323,8 @@ contract ForgeVRFFacet is Modifiers {
                     // choose rarity won if any
                     data.rarityWonIndex = getRarityWon(data.probabilityRanges, data.geodeRandNum);
 
-                    if (data.rarityWonIndex > 0){
-                        data.prizes = getAvailablePrizesForRarity(rarities[data.rarityWonIndex]);
+                    if (data.rarityWonIndex >= 0){
+                        data.prizes = getAvailablePrizesForRarity(rarities[uint(data.rarityWonIndex)]);
                         uint256 idx = data.geodeRandNum % data.prizes.length;
                         data.itemIdWon = data.prizes[idx];
 

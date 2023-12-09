@@ -37,7 +37,8 @@ export async function upgradeForgeMultiTierGeodes() {
       addSelectors: [
         "function numTotalPrizesLeftByRarity() public view",
         "function getAvailablePrizesForRarity(uint8 rsm) public view",
-        "function getCurrentPrizeProbabilityForGeode(uint8 geodeRsm) public view"
+        "function getCurrentPrizeProbabilityForGeode(uint8 geodeRsm) public view",
+        "function getWinRanges(uint256[6] memory winChanceByRarity) public view returns (uint256[] memory)"
 
       ],
       removeSelectors: [],

@@ -232,6 +232,7 @@ contract ForgeDAOFacet is Modifiers {
 
         for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
             delete s.geodePrizeQuantities[s.geodePrizeTokenIds[i]];
+            delete s.geodePrizeRarities[s.geodePrizeTokenIds[i]];
         }
         delete s.geodePrizeTokenIds;
         for (uint256 i; i < ids.length; i++) {

@@ -42,6 +42,7 @@ describe("Testing Geodes", async function () {
 
   let testVrf: ForgeVRFFacet;
   let testForge: ForgeFacet;
+  let testForgeToken: ForgeTokenFacet;
   let adminDao: ForgeDAOFacet;
   let adminForge: ForgeFacet;
 
@@ -83,7 +84,7 @@ describe("Testing Geodes", async function () {
     );
     adminForge = await impersonate("0x01F010a5e001fe9d6940758EA5e8c777885E351e", forgeFacet, ethers, network);
 
-    let testForgeToken: ForgeTokenFacet = await impersonate(
+    testForgeToken = await impersonate(
       testUser,
       forgeTokenFacet,
       ethers,
@@ -105,18 +106,93 @@ describe("Testing Geodes", async function () {
   });
 
   describe("tests", async function () {
-    it("should win prize", async function() {
+    it("should win prize, one item", async function() {
+      await adminForge.adminMint(testUser, GEODE_GODLIKE, 3);
+
       let geodePrizeIds = [370];
       let geodePrizeQuantities = [100];
       let geodePrizeRarities = [10];
 
+      // legendary
       await adminDao.setMultiTierGeodePrizes(geodePrizeIds, geodePrizeQuantities, geodePrizeRarities)
 
-      await adminForge.adminMint(testUser, 1000000007, 1);
-      await testVrf.openGeodes([1000000007], [1]);
+      await testVrf.openGeodes([GEODE_GODLIKE], [1]);
       await testVrf.claimWinnings()
 
       expect(Number(await forgeTokenFacet.balanceOf(testUser, 370))).to.equal(1);
+
+      //common
+      geodePrizeIds = [371];
+      geodePrizeQuantities = [100];
+      geodePrizeRarities = [1];
+
+      await adminDao.setMultiTierGeodePrizes(geodePrizeIds, geodePrizeQuantities, geodePrizeRarities)
+
+      await testVrf.openGeodes([GEODE_GODLIKE], [1]);
+      await testVrf.claimWinnings()
+
+      // uncommon
+      geodePrizeIds = [372];
+      geodePrizeQuantities = [100];
+      geodePrizeRarities = [2];
+
+      await adminDao.setMultiTierGeodePrizes(geodePrizeIds, geodePrizeQuantities, geodePrizeRarities)
+
+      await testVrf.openGeodes([GEODE_GODLIKE], [1]);
+      await testVrf.claimWinnings()
+
+
+      // assertions
+      expect(Number(await forgeTokenFacet.balanceOf(testUser, 370))).to.equal(1);
+      expect(Number(await forgeTokenFacet.balanceOf(testUser, 371))).to.equal(1);
+      expect(Number(await forgeTokenFacet.balanceOf(testUser, 372))).to.equal(1);
+
+
+      // cleanup for next tests
+      await testForgeToken.safeTransferFrom(testUser, "0x000000000000000000000000000000000000dead", 370, 1, "0x");
+      await testForgeToken.safeTransferFrom(testUser, "0x000000000000000000000000000000000000dead", 371, 1, "0x");
+      await testForgeToken.safeTransferFrom(testUser, "0x000000000000000000000000000000000000dead", 372, 1, "0x");
+    });
+
+    it("should test win ranges", async function() {
+      let geodePrizeIds = [370, 371, 372];
+      let geodePrizeQuantities = [100, 100];
+      let geodePrizeRarities = [1, 5, 20];
+
+      await adminDao.setMultiTierGeodePrizes(geodePrizeIds, geodePrizeQuantities, geodePrizeRarities)
+      let prob = await forgeVrfFacet.getCurrentPrizeProbabilityForGeode("50");
+      let ranges = await forgeVrfFacet.getWinRanges(prob);
+      console.log('godlike prob', prob);
+      console.log('godlike ranges', ranges);
+
+      expect(Number(ranges[0])).to.equal(0)
+      expect(Number(ranges[1])).to.equal(0)
+      expect(Number(ranges[2])).to.equal(0)
+      expect(Number(ranges[3])).to.equal(0)
+      expect(Number(ranges[4])).to.equal(10000)
+      expect(Number(ranges[5])).to.equal(0)
+    })
+
+    it("should win prize, multi item", async function() {
+      // test multiple items
+      let geodePrizeIds = [370, 371];
+      let geodePrizeQuantities = [100, 100];
+      let geodePrizeRarities = [10, 20];
+
+      await adminDao.setMultiTierGeodePrizes(geodePrizeIds, geodePrizeQuantities, geodePrizeRarities)
+      let prob = await forgeVrfFacet.getCurrentPrizeProbabilityForGeode("50");
+      let ranges = await forgeVrfFacet.getWinRanges(prob);
+      console.log('godlike prob', prob);
+      console.log('godlike ranges', ranges);
+
+      await adminForge.adminMint(testUser, GEODE_GODLIKE, 1);
+      await testVrf.openGeodes([GEODE_GODLIKE], [1]);
+      await testVrf.claimWinnings()
+
+      let bal370 = Number(await forgeTokenFacet.balanceOf(testUser, 370));
+      let bal371 = Number(await forgeTokenFacet.balanceOf(testUser, 371));
+
+      expect(bal370 == 1 || bal371 == 1).to.be.true;
     });
 
     it("should get probabilities", async function() {
