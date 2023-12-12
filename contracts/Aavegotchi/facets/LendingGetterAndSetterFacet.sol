@@ -12,6 +12,8 @@ import {LibBitmapHelpers} from "../libraries/LibBitmapHelpers.sol";
 contract LendingGetterAndSetterFacet is Modifiers {
     event LendingOperatorSet(address indexed lender, address indexed lendingOperator, uint32 indexed tokenId, bool isLendingOperator);
 
+    ///@notice Allow the Diamond owner to approve a set of tokens as revenue tokens
+    ///@param tokens An array of tokens to approve as revenue tokens
     function allowRevenueTokens(address[] calldata tokens) external onlyOwner {
         for (uint256 i = 0; i < tokens.length; ) {
             s.revenueTokenAllowed[tokens[i]] = true;
@@ -20,6 +22,9 @@ contract LendingGetterAndSetterFacet is Modifiers {
             }
         }
     }
+
+    ///@notice Allow the diamond owner to disapprove a set of tokens as revenue tokens
+    ///@param tokens An array of tokens to disapprove as revenue tokens
 
     function disallowRevenueTokens(address[] calldata tokens) external onlyOwner {
         for (uint256 i = 0; i < tokens.length; ) {
@@ -60,6 +65,9 @@ contract LendingGetterAndSetterFacet is Modifiers {
         bool _isLendingOperator;
     }
 
+    ///@notice Allow the owner of a set of tokens to batch set lending operators
+    ///@param _lendingOperator The address of the lending operator to set
+    ///@param _inputs An array of structs containing the tokenIds and whether or not to set the lending operator
     function batchSetLendingOperator(address _lendingOperator, LendingOperatorInputs[] calldata _inputs) external {
         for (uint256 i = 0; i < _inputs.length; ) {
             setLendingOperator(_lendingOperator, _inputs[i]._tokenId, _inputs[i]._isLendingOperator);
@@ -73,10 +81,18 @@ contract LendingGetterAndSetterFacet is Modifiers {
     ///                                    GETTERS                                  ///
     /////////////////////////////////////////////////////////////////////////////////*/
 
+    ///@notice Query if a token is approved as a revenue token
+    ///@param token The token to query
+    ///@return revenueTokenAllowed_ A boolean indicating if the token is approved as a revenue token
+
     function revenueTokenAllowed(address token) external view returns (bool) {
         return s.revenueTokenAllowed[token];
     }
 
+    ///@notice Query the renue tokens balances in a gotchi's escrow contract
+    ///@param _tokenId The identifier of the gotchi to query
+    ///@param _revenueTokens An array of tokens to query
+    ///@return revenueBalances An array of balances of the revenue tokens in the gotchi's escrow contract
     function getTokenBalancesInEscrow(uint32 _tokenId, address[] calldata _revenueTokens) external view returns (uint256[] memory revenueBalances) {
         revenueBalances = new uint256[](_revenueTokens.length);
         address escrow = LibAavegotchi.getAavegotchi(_tokenId).escrow;
@@ -87,6 +103,12 @@ contract LendingGetterAndSetterFacet is Modifiers {
             }
         }
     }
+
+    ///@notice Query if an address is a lending operator for a given token i.e approved by the lender
+    ///@param _lender The address of the lender
+    ///@param _lendingOperator The address of the lending operator to query
+    ///@param _tokenId The identifier of the token to query
+    ///@return isLendingOperator_ A boolean indicating if the address is a lending operator for the token
 
     function isLendingOperator(address _lender, address _lendingOperator, uint32 _tokenId) external view returns (bool) {
         return s.lendingOperators[_lender][_lendingOperator][_tokenId];
@@ -128,6 +150,9 @@ contract LendingGetterAndSetterFacet is Modifiers {
         listing_ = LibGotchiLending.getListing(s.aavegotchiToListingId[_erc721TokenId]);
     }
 
+    ///@notice Get an aavegotchi lending id through the tokenId
+    ///@param _erc721TokenId The identifier of the tokenId associated with the lending
+    ///@return listingId_ The identifier of the lending associated with the tokenIdwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
     function getGotchiLendingIdByToken(uint32 _erc721TokenId) external view returns (uint32) {
         return s.aavegotchiToListingId[_erc721TokenId];
     }
@@ -187,34 +212,58 @@ contract LendingGetterAndSetterFacet is Modifiers {
         }
     }
 
+    ///@notice Query all the lent out tokenIds of an address
+    ///@param _lender The address of the lender to query
+    ///@return tokenIds_ An array of tokenIds lent out by the lender
     function getLentTokenIdsOfLender(address _lender) external view returns (uint32[] memory tokenIds_) {
         tokenIds_ = s.lentTokenIds[_lender];
     }
 
+    ///@notice Query the amount of tokens lent out by an address
+    ///@param _lender The address of the lender to query
+    ///@return balance_ The amount of tokens lent out by the lender
     function balanceOfLentGotchis(address _lender) external view returns (uint256 balance_) {
         balance_ = s.lentTokenIds[_lender].length;
     }
 
+    ///@notice Query the amount of lendings currently owned by an address
+    ///@return The amount of lendings currently owned by an address
     function getGotchiLendingsLength() external view returns (uint256) {
         return s.nextGotchiListingId;
     }
 
+    ///@notice Query if a token is currently being lent out
+    ///@param _erc721TokenId The identifier of the token to query
+    ///@return isLent_ A boolean indicating if the token is currently being lent out
     function isAavegotchiLent(uint32 _erc721TokenId) external view returns (bool) {
         return LibGotchiLending.isAavegotchiLent(_erc721TokenId);
     }
 
+    ///@notice Query if a token is currently being listed for lending
+    ///@param _erc721TokenId The identifier of the token to query
+    ///@return isListed_ A boolean indicating if the token is currently being listed for lending
     function isAavegotchiListed(uint32 _erc721TokenId) external view returns (bool) {
         return LibGotchiLending.isAavegotchiListed(_erc721TokenId);
     }
 
+    ///@notice Query the Permission bitmap of a valid lending listing
+    ///@param _listingId The identifier of the lending listing to query
+    ///@return permissions_ A bitmap indicating the permissions of the lending listing
     function getLendingPermissionBitmap(uint32 _listingId) external view returns (uint256) {
         return s.gotchiLendings[_listingId].permissions;
     }
 
+    ///@notice Query all decoded permissions of a valid lending listing
+    ///@param _listingId The identifier of the lending listing to query
+    ///@return permissions_ An array of numbers representing all the lending permission modifiers of the lending listing
     function getAllLendingPermissions(uint32 _listingId) external view returns (uint8[32] memory permissions_) {
         permissions_ = LibBitmapHelpers.getAllNumbers(s.gotchiLendings[_listingId].permissions);
     }
 
+    ///@notice Query the specific lending permission modifier of a valid lending listing
+    ///@param _listingId The identifier of the lending listing to query
+    ///@param _permissionIndex The index of the lending permission modifier to query
+    ///@return A number representing the lending permission modifier of the lending listing
     function getLendingPermissionModifier(uint32 _listingId, uint8 _permissionIndex) public view returns (uint8) {
         return LibBitmapHelpers.getValueInByte(_permissionIndex, s.gotchiLendings[_listingId].permissions);
     }

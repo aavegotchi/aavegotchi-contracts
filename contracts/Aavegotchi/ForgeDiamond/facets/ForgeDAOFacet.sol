@@ -23,26 +23,36 @@ contract ForgeDAOFacet is Modifiers {
 
     //SETTERS
 
+    ///@notice Allow the DAO or owner to set the aavegotchi dao address
+    ///@param daoAddress The aavegotchi dao address to set
     function setAavegotchiDaoAddress(address daoAddress) external onlyDaoOrOwner {
         s.aavegotchiDAO = daoAddress;
         emit SetAavegotchiDaoAddress(daoAddress);
     }
 
+    ///@notice Allow the DAO or owner to set the GLTR token address
+    ///@param gltr The GLTR token address
     function setGltrAddress(address gltr) external onlyDaoOrOwner {
         s.gltr = gltr;
         emit SetGltrAddress(gltr);
     }
 
+    ///@notice Allow the DAO or owner to set the alloy dao fee
+    ///@param alloyDaoFeeInBips The allow dao fee in bips
     function setAlloyDaoFeeInBips(uint256 alloyDaoFeeInBips) external onlyDaoOrOwner {
         s.alloyDaoFeeInBips = alloyDaoFeeInBips;
         emit SetAlloyDaoFee(alloyDaoFeeInBips);
     }
 
+    ///@notice Allow the DAO or owner to set the alloy burn fee
+    ///@param alloyBurnFeeInBips The allow burn fee in bips
     function setAlloyBurnFeeInBips(uint256 alloyBurnFeeInBips) external onlyDaoOrOwner {
         s.alloyBurnFeeInBips = alloyBurnFeeInBips;
         emit SetAlloyBurnFee(alloyBurnFeeInBips);
     }
 
+    ///@notice Allow the DAO or owner to set the aavegotchi diamond address
+    ///@param _address The aavegotchi diamond address
     function setAavegotchiDiamondAddress(address _address) external onlyDaoOrOwner {
         s.aavegotchiDiamond = _address;
     }
@@ -65,7 +75,7 @@ contract ForgeDAOFacet is Modifiers {
     // @notice Allow DAO to update forging Essence cost
     // @param costs RarityValueIO struct of costs
     // @dev We convert RarityValueIO keys into a mapping that is referencable by equivalent rarity score modifier,
-    //      since this is what ForgeFacet functions have from itemTypes.
+    //  since this is what ForgeFacet functions have from itemTypes.
     function setForgeEssenceCost(RarityValueIO calldata costs) external onlyDaoOrOwner {
         s.forgeEssenceCost[COMMON_RSM] = costs.common;
         s.forgeEssenceCost[UNCOMMON_RSM] = costs.uncommon;
@@ -115,11 +125,13 @@ contract ForgeDAOFacet is Modifiers {
         emit SetSmeltingSkillPointReductionFactorBips(oldBips, s.smeltingSkillPointReductionFactorBips);
     }
 
+    ///@notice Allow the DAO or owner to pause the forge diamond
     function pauseContract() external onlyDaoOrOwner {
         s.contractPaused = true;
         emit ContractPaused();
     }
 
+    ///@notice Allow the DAO or owner to unpause the forge diamond
     function unpauseContract() external onlyDaoOrOwner {
         s.contractPaused = false;
         emit ContractUnpaused();
@@ -127,10 +139,14 @@ contract ForgeDAOFacet is Modifiers {
 
     //GETTERS
 
+    ///@notice Query the alloyDaoFeeInBips
+    ///@return  The alloyDaoFeeInBips
     function getAlloyDaoFeeInBips() external view returns (uint256) {
         return s.alloyDaoFeeInBips;
     }
 
+    ///@notice Query the alloyBurnFeeInBips
+    ///@return  The alloyBurnFeeInBips
     function getAlloyBurnFeeInBips() external view returns (uint256) {
         return s.alloyBurnFeeInBips;
     }
@@ -169,6 +185,9 @@ contract ForgeDAOFacet is Modifiers {
         emit SetGeodePrizes(ids, quantities);
     }
 
+    ///@notice Query the remaining geode prizes
+    ///@return The geode ids
+    ///@return The number of each corresponding geode id remaining
     function getGeodePrizesRemaining() external view returns (uint256[] memory, uint256[] memory) {
         uint256[] memory quantities = new uint256[](s.geodePrizeTokenIds.length);
         for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
