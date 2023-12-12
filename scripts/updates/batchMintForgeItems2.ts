@@ -48,6 +48,9 @@ export async function batchMintForgeItems() {
   const receipients = [itemManagerAlt, maticForgeDiamond];
 
   for (let j = 0; j < receipients.length; j++) {
+    const transferAmount = [];
+    const transferIds = [];
+
     const recipient = receipients[j];
     const percent = percents[j];
 
@@ -56,17 +59,19 @@ export async function batchMintForgeItems() {
         continue;
       }
       for (let j = 0; j < ids[i].length; j++) {
-        tokenIds.push(ids[i][j]);
-        tokenAmounts.push(totalAmounts[i] * percent);
+        transferIds.push(ids[i][j]);
+        transferAmount.push(totalAmounts[i] * percent);
       }
     }
 
-    console.log(`Batch minting to ${recipient}: ${tokenIds} ${tokenAmounts}`);
+    console.log(
+      `Batch minting to ${recipient}: ${transferIds} ${transferAmount}`
+    );
 
     const tx = await forgeFacet.adminMintBatch(
       recipient,
-      tokenIds,
-      tokenAmounts
+      transferIds,
+      transferAmount
     );
     const receipt = await tx.wait();
     if (!receipt.status) {
