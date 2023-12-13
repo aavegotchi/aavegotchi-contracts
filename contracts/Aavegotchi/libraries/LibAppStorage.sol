@@ -353,10 +353,12 @@ struct AppStorage {
     mapping(uint256 => ISftRolesRegistry.RoleData) itemsRoleAssignments;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
-    // depositId => itemId => gotchiId
-    mapping(uint256 => mapping(uint256 => uint256)) depositIdToItemIdToGotchiId;
-    // gotchiId => itemId => depositId
-    mapping(uint256 => mapping(uint256 => EquippedDelegatedItemInfo)) gotchiIdToItemIdToDepositId;
+    // depositId => gotchiIds
+    mapping(uint256 => EnumerableSet.UintSet) depositIdToEquippedGotchis;
+    // depositId => remainingBalance
+    mapping(uint256 => uint256) itemsDepositsUnequippedBalance;
+    // gotchiId => delegationInfo
+    mapping(uint256 => mapping(uint256 => EquippedDelegatedItemInfo)) gotchiIdToEquippedItemIdToDelegationInfo;
 }
 
 library LibAppStorage {
