@@ -356,7 +356,7 @@ struct AppStorage {
     // depositId => gotchiIds
     mapping(uint256 => EnumerableSet.UintSet) depositIdToEquippedGotchis;
     // depositId => remainingBalance
-    mapping(uint256 => uint256) itemsDepositsUndelegatedBalance;
+    mapping(uint256 => uint256) itemsDepositsUnequippedBalance;
     // gotchiId => delegationInfo
     mapping(uint256 => mapping(uint256 => EquippedDelegatedItemInfo)) gotchiIdToEquipedItemIdToDelegationInfo;
 }

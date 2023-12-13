@@ -306,12 +306,12 @@ contract ItemsFacet is Modifiers {
 
             require(s.itemsRoleAssignments[_depositId].grantee == LibMeta.msgSender(), "ItemsFacet: Wearable not delegated to sender or depositId not valid");
             require(s.itemsDeposits[_depositId].tokenId == _toEquipWearableId, "ItemsFacet: Delegated Wearable not of this delegation");
-            require(s.itemsDepositsUndelegatedBalance[_depositId] >= _balToTransfer, "ItemsFacet: Not enough delegated balance");
+            require(s.itemsDepositsUnequippedBalance[_depositId] >= _balToTransfer, "ItemsFacet: Not enough delegated balance");
             require(s.itemsRoleAssignments[_depositId].expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
 
             s.gotchiIdToEquipedItemIdToDelegationInfo[_gotchiId][_toEquipWearableId].depositId = _depositId;
             s.gotchiIdToEquipedItemIdToDelegationInfo[_gotchiId][_toEquipWearableId].balance += _balToTransfer;
-            s.itemsDepositsUndelegatedBalance[_depositId] -= _balToTransfer;
+            s.itemsDepositsUnequippedBalance[_depositId] -= _balToTransfer;
             require(s.depositIdToEquippedGotchis[_depositId].add(_gotchiId), "ItemsFacet: Unable to add gotchi to depositIdToEquippedGotchis");
         } else {
             // if the sender doesn't have enough balance, check if they have enough delegated balance
@@ -345,7 +345,7 @@ contract ItemsFacet is Modifiers {
                 s.gotchiIdToEquipedItemIdToDelegationInfo[_gotchiId][_existingEquippedWearableId].balance -= 1;
             }
             
-            s.itemsDepositsUndelegatedBalance[_depositId] += 1;
+            s.itemsDepositsUnequippedBalance[_depositId] += 1;
         } else if (s.itemTypes[_existingEquippedWearableId].canBeTransferred) {
 
             // Remove wearable from Aavegotchi and transfer item to owner

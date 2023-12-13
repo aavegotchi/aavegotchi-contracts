@@ -21,7 +21,6 @@ import {
   wearableAmounts,
   wearableDiamondAddress,
   wearableIds,
-  wearableSlots,
   RoleAssignment,
   buildRoleAssignment,
   generateRandomInt,
@@ -382,6 +381,17 @@ describe("ItemsRolesRegistryFacet", async () => {
         .to.emit(libERC1155, "TransferToParent")
         .withArgs(aavegotchiDiamondAddress, anotherGotchiId, wearableIds[1], 1)
         .to.not.emit(libEventHandler, "TransferSingle");
+
+      const anotherGotchiId2 = LargeGotchiOwnerAavegotchis[2];
+      await expect(
+        itemsFacet
+          .connect(grantee)
+          .equipDelegatedWearables(
+            anotherGotchiId2,
+            [0, 0, wearableIds[1], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, RoleAssignment.nonce, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          )
+      ).to.be.revertedWith("ItemsFacet: Not enough delegated balance");
 
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).revokeRoleFrom(
