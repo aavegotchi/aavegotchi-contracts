@@ -358,7 +358,7 @@ struct AppStorage {
     // depositId => remainingBalance
     mapping(uint256 => uint256) itemsDepositsUnequippedBalance;
     // gotchiId => delegationInfo
-    mapping(uint256 => mapping(uint256 => EquippedDelegatedItemInfo)) gotchiIdToEquipedItemIdToDelegationInfo;
+    mapping(uint256 => mapping(uint256 => EquippedDelegatedItemInfo)) gotchiIdToEquippedItemIdToDelegationInfo;
 }
 
 library LibAppStorage {
