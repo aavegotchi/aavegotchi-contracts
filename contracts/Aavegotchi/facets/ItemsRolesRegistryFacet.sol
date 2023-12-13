@@ -14,8 +14,10 @@ import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Re
 import {ERC1155Holder, ERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import {IEventHandlerFacet} from "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder {
+    using EnumerableSet for EnumerableSet.UintSet;
     bytes32 public constant UNIQUE_ROLE = keccak256("Player()");
 
     uint256 public constant MAX_EXPIRATION_DATE = 90 days;
@@ -135,9 +137,10 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
             require(caller == _roleData.grantee, "ItemsRolesRegistryFacet: depositId is not expired or is not revocable");
         }
 
-        _unequipDelegatedWearable(_depositId, _depositInfo.tokenId);
+        _unequipAllDelegatedWearables(_depositId, _depositInfo.tokenId);
 
         delete s.itemsRoleAssignments[_depositId];
+        delete s.itemsDeposits[_depositId];
 
         emit RoleRevoked(
             _depositId,
@@ -150,9 +153,20 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         );
     }
 
-    function _unequipDelegatedWearable(uint256 _depositId, uint256 _tokenIdToUnequip) internal {
-        uint256 _gotchiId = s.depositIdToItemIdToGotchiId[_depositId][_tokenIdToUnequip];
-        EquippedDelegatedItemInfo memory _equippedDelegatedItemInfo = s.gotchiIdToItemIdToDepositId[_gotchiId][_tokenIdToUnequip];
+    function _unequipAllDelegatedWearables(uint256 _depositId, uint256 _tokenIdToUnequip) internal {
+        uint256 _equippedGotchisLength = s.depositIdToEquippedGotchis[_depositId].length();
+
+        for(uint256 i; i < _equippedGotchisLength; i++) {
+            uint256 _gotchiId = s.depositIdToEquippedGotchis[_depositId].at(i);
+            _unequipDelegatedWearable(_gotchiId, _tokenIdToUnequip);
+        }
+
+        delete s.depositIdToEquippedGotchis[_depositId];
+        s.itemsDepositsUndelegatedBalance[_depositId] = s.itemsDeposits[_depositId].tokenAmount;
+    }
+
+    function _unequipDelegatedWearable(uint256 _gotchiId, uint256 _tokenIdToUnequip) internal {
+        EquippedDelegatedItemInfo memory _equippedDelegatedItemInfo = s.gotchiIdToEquipedItemIdToDelegationInfo[_gotchiId][_tokenIdToUnequip];
         uint256 _balanceToUnequip = _equippedDelegatedItemInfo.balance;
         if (_balanceToUnequip == 0) return; // If balance is 0, it means the item is not equipped, so we can return
 
@@ -166,9 +180,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
 
         LibItems.removeFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
         emit LibERC1155.TransferFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
-
-        delete s.depositIdToItemIdToGotchiId[_depositId][_tokenIdToUnequip];
-        delete s.gotchiIdToItemIdToDepositId[_gotchiId][_tokenIdToUnequip];
+        delete s.gotchiIdToEquipedItemIdToDelegationInfo[_gotchiId][_tokenIdToUnequip];
     }
 
     function withdraw(uint256 _depositId) external onlyOwnerOrApproved(s.itemsDeposits[_depositId].grantor, s.itemsDeposits[_depositId].tokenAddress) {
@@ -177,12 +189,13 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
             s.itemsRoleAssignments[_depositId].expirationDate < block.timestamp || s.itemsRoleAssignments[_depositId].revocable,
             "ItemsRolesRegistryFacet: token has an active role"
         );
-
+        
+        _unequipAllDelegatedWearables(_depositId, _depositInfo.tokenId); // If the item is equipped in some gotchi, it will be unequipped
         
         delete s.itemsDeposits[_depositId];
+        delete s.itemsDepositsUndelegatedBalance[_depositId];
         delete s.itemsRoleAssignments[_depositId];
 
-        _unequipDelegatedWearable(_depositId, _depositInfo.tokenId); // If the item is equipped in some gotchi, it will be unequipped
         _transferFrom(address(this), _depositInfo.grantor, _depositInfo.tokenAddress, _depositInfo.tokenId, _depositInfo.tokenAmount);
 
         emit Withdrew(_depositId, _depositInfo.grantor, _depositInfo.tokenAddress, _depositInfo.tokenId, _depositInfo.tokenAmount);
@@ -243,6 +256,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
             _grantRoleData.tokenId,
             _grantRoleData.tokenAmount
         );
+        s.itemsDepositsUndelegatedBalance[_grantRoleData.nonce] = _grantRoleData.tokenAmount;
 
         _transferFrom(_grantRoleData.grantor, address(this), _grantRoleData.tokenAddress, _grantRoleData.tokenId, _grantRoleData.tokenAmount);
     }
