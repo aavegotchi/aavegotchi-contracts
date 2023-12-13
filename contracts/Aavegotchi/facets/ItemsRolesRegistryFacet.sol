@@ -105,28 +105,6 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         _grantOrUpdateRole(_grantRoleData);
     }
 
-    function _grantOrUpdateRole(RoleAssignment calldata _grantRoleData) internal {
-        s.itemsRoleAssignments[_grantRoleData.nonce] = RoleData(
-            _grantRoleData.grantee,
-            _grantRoleData.expirationDate,
-            _grantRoleData.revocable,
-            _grantRoleData.data
-        );
-
-        emit RoleGranted(
-            _grantRoleData.nonce,
-            UNIQUE_ROLE,
-            _grantRoleData.tokenAddress,
-            _grantRoleData.tokenId,
-            _grantRoleData.tokenAmount,
-            _grantRoleData.grantor,
-            _grantRoleData.grantee,
-            _grantRoleData.expirationDate,
-            _grantRoleData.revocable,
-            _grantRoleData.data
-        );
-    }
-
     function revokeRoleFrom(uint256 _depositId, bytes32 _role, address _grantee) external override validRoleAndGrantee(_role, _grantee, _depositId) {
         RoleData memory _roleData = s.itemsRoleAssignments[_depositId];
         DepositInfo memory _depositInfo = s.itemsDeposits[_depositId];
@@ -138,7 +116,8 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         }
 
         _unequipAllDelegatedWearables(_depositId, _depositInfo.tokenId);
-
+        
+        s.itemsDepositsUnequippedBalance[_depositId] = s.itemsDeposits[_depositId].tokenAmount;
         delete s.itemsRoleAssignments[_depositId];
 
         emit RoleRevoked(
@@ -150,36 +129,6 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
             _depositInfo.grantor,
             _roleData.grantee
         );
-    }
-
-    function _unequipAllDelegatedWearables(uint256 _depositId, uint256 _tokenIdToUnequip) internal {
-        uint256 _equippedGotchisLength = s.depositIdToEquippedGotchis[_depositId].length();
-
-        for(uint256 i; i < _equippedGotchisLength; i++) {
-            uint256 _gotchiId = s.depositIdToEquippedGotchis[_depositId].at(i);
-            _unequipDelegatedWearable(_gotchiId, _tokenIdToUnequip);
-        }
-
-        delete s.depositIdToEquippedGotchis[_depositId];
-        s.itemsDepositsUnequippedBalance[_depositId] = s.itemsDeposits[_depositId].tokenAmount;
-    }
-
-    function _unequipDelegatedWearable(uint256 _gotchiId, uint256 _tokenIdToUnequip) internal {
-        EquippedDelegatedItemInfo memory _equippedDelegatedItemInfo = s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_tokenIdToUnequip];
-        uint256 _balanceToUnequip = _equippedDelegatedItemInfo.balance;
-        if (_balanceToUnequip == 0) return; // If balance is 0, it means the item is not equipped, so we can return
-
-        uint256 _unequippedBalance;
-        for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
-            if (_unequippedBalance == _balanceToUnequip) break;
-            if (s.aavegotchis[_gotchiId].equippedWearables[slot] != _tokenIdToUnequip) continue;
-            s.aavegotchis[_gotchiId].equippedWearables[slot] = 0;
-            _unequippedBalance++;
-        }
-
-        LibItems.removeFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
-        emit LibERC1155.TransferFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
-        delete s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_tokenIdToUnequip];
     }
 
     function withdraw(uint256 _depositId) external onlyOwnerOrApproved(s.itemsDeposits[_depositId].grantor, s.itemsDeposits[_depositId].tokenAddress) {
@@ -228,6 +177,57 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     /** Helper Functions **/
+
+    function _grantOrUpdateRole(RoleAssignment calldata _grantRoleData) internal {
+        s.itemsRoleAssignments[_grantRoleData.nonce] = RoleData(
+            _grantRoleData.grantee,
+            _grantRoleData.expirationDate,
+            _grantRoleData.revocable,
+            _grantRoleData.data
+        );
+
+        emit RoleGranted(
+            _grantRoleData.nonce,
+            UNIQUE_ROLE,
+            _grantRoleData.tokenAddress,
+            _grantRoleData.tokenId,
+            _grantRoleData.tokenAmount,
+            _grantRoleData.grantor,
+            _grantRoleData.grantee,
+            _grantRoleData.expirationDate,
+            _grantRoleData.revocable,
+            _grantRoleData.data
+        );
+    }
+
+    function _unequipAllDelegatedWearables(uint256 _depositId, uint256 _tokenIdToUnequip) internal {
+        uint256 _equippedGotchisLength = s.depositIdToEquippedGotchis[_depositId].length();
+
+        for(uint256 i; i < _equippedGotchisLength; i++) {
+            uint256 _gotchiId = s.depositIdToEquippedGotchis[_depositId].at(i);
+            _unequipDelegatedWearable(_gotchiId, _tokenIdToUnequip);
+        }
+
+        delete s.depositIdToEquippedGotchis[_depositId];
+    }
+
+    function _unequipDelegatedWearable(uint256 _gotchiId, uint256 _tokenIdToUnequip) internal {
+        EquippedDelegatedItemInfo memory _equippedDelegatedItemInfo = s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_tokenIdToUnequip];
+        uint256 _balanceToUnequip = _equippedDelegatedItemInfo.balance;
+        if (_balanceToUnequip == 0) return; // If balance is 0, it means the item is not equipped, so we can return
+
+        uint256 _unequippedBalance;
+        for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
+            if (_unequippedBalance == _balanceToUnequip) break;
+            if (s.aavegotchis[_gotchiId].equippedWearables[slot] != _tokenIdToUnequip) continue;
+            s.aavegotchis[_gotchiId].equippedWearables[slot] = 0;
+            _unequippedBalance++;
+        }
+
+        LibItems.removeFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
+        emit LibERC1155.TransferFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
+        delete s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_tokenIdToUnequip];
+    }
 
     function _transferFrom(address _from, address _to, address _tokenAddress, uint256 _tokenId, uint256 _tokenAmount) internal {
         LibItems.removeFromOwner(_from, _tokenId, _tokenAmount);

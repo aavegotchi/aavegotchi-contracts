@@ -332,12 +332,13 @@ contract ItemsFacet is Modifiers {
     ) internal {
         address _sender = LibMeta.msgSender();
         uint256 _depositId = s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_existingEquippedWearableId].depositId;
-        uint256 _delegatedBalance = s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_existingEquippedWearableId].balance;
 
         if (_depositId != 0) {
             // remove wearable from Aavegotchi and delete delegation
             LibItems.removeFromParent(address(this), _gotchiId, _existingEquippedWearableId, 1);
-
+            
+            uint256 _delegatedBalance = s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_existingEquippedWearableId].balance;
+            
             if(_delegatedBalance == 1) {
                 delete s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_existingEquippedWearableId];
                 s.depositIdToEquippedGotchis[_depositId].remove(_gotchiId);
@@ -346,14 +347,12 @@ contract ItemsFacet is Modifiers {
             }
             
             s.itemsDepositsUnequippedBalance[_depositId] += 1;
-        } else if (s.itemTypes[_existingEquippedWearableId].canBeTransferred) {
+        } else {
 
             // Remove wearable from Aavegotchi and transfer item to owner
             LibItems.removeFromParent(address(this), _gotchiId, _existingEquippedWearableId, 1);
             LibItems.addToOwner(_sender, _existingEquippedWearableId, 1);
             IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(_sender, address(this), _sender, _existingEquippedWearableId, 1);
-        } else {
-            revert("ItemsFacet: Wearable can't be transferred");
         }
         
         emit LibERC1155.TransferFromParent(address(this), _gotchiId, _existingEquippedWearableId, 1);
