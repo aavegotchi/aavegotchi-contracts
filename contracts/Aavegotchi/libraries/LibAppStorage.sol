@@ -221,6 +221,11 @@ struct ERC721BuyOrder {
     bool[] validationOptions;
 }
 
+struct EquipedDelegatedItemInfo {
+    uint256 depositId;
+    uint256 balance;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -342,17 +347,17 @@ struct AppStorage {
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
     
     // Items Roles Registry
-    // nonce => DepositInfo
+    // depositId => DepositInfo
     mapping(uint256 => ISftRolesRegistry.DepositInfo) itemsDeposits;
-    // nonce  => RoleAssignment
+    // depositId  => RoleAssignment
     mapping(uint256 => ISftRolesRegistry.RoleData) itemsRoleAssignments;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
-    // nonce => itemId => gotchiId
-    mapping(uint256 => mapping(uint256 => uint256)) itemIdToDelegationIdToGotchiId;
+    // depositId => itemId => gotchiId
+    mapping(uint256 => mapping(uint256 => uint256)) depositIdToItemIdToGotchiId;
     
-    // itemId => gotchiId => nonce
-    mapping(uint256 => mapping(uint256 => uint256)) itemIdToGotchiIdToDelegationId;
+    // gotchiId => itemId => depositId
+    mapping(uint256 => mapping(uint256 => EquipedDelegatedItemInfo)) gotchiIdToItemIdToDepositId;
 }
 
 library LibAppStorage {
