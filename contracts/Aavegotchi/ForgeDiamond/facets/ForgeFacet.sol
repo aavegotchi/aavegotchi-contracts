@@ -170,7 +170,7 @@ contract ForgeFacet is Modifiers {
         return percentTimeDiscountBips[level - 1] * 10;
     }
 
-    function getRsmIndex(uint8 rsm) internal pure returns (uint8) {
+    function getRsmIndex(uint8 rsm) public pure returns (uint8) {
         uint8[6] memory rsmIndexRef = [uint8(COMMON_RSM), UNCOMMON_RSM, RARE_RSM, LEGENDARY_RSM, MYTHICAL_RSM, GODLIKE_RSM];
         for (uint8 i; i < rsmIndexRef.length; i++) {
             if (rsmIndexRef[i] == rsm) {

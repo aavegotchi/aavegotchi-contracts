@@ -99,6 +99,15 @@ struct RarityValueIO {
     uint256 godlike;
 }
 
+struct MultiTierGeodeChanceIO {
+    RarityValueIO common;
+    RarityValueIO uncommon;
+    RarityValueIO rare;
+    RarityValueIO legendary;
+    RarityValueIO mythical;
+    RarityValueIO godlike;
+}
+
 struct ItemBalancesIO {
     uint256 tokenId;
     uint256 balance;
@@ -159,8 +168,12 @@ struct AppStorage {
     mapping(uint8 => uint256) forgeTimeCostInBlocks;
     // Map rarity score modifier (which denotes item rarity) to number of skill points earned for successful forging.
     mapping(uint8 => uint256) skillPointsEarnedFromForge;
+
     // Map rarity score modifier (which denotes item rarity) to percent chance (in bips) to win a prize.
+    /**** NOTE: Deprecated *****/
     mapping(uint8 => uint256) geodeWinChanceBips;
+    /*********************/
+
     // Reduction factor for skillPointsEarnedFromForge for smelting.
     uint256 smeltingSkillPointReductionFactorBips;
     //gotchi token ID to points map
@@ -177,6 +190,9 @@ struct AppStorage {
     address vrfCoordinator;
     bytes32 keyHash;
     uint144 vrfFee;
+
+    mapping(uint8 => mapping(uint8 => uint256)) geodeWinChanceMultiTierBips;
+    mapping(uint256 => uint8) geodePrizeRarities;
 }
 
 library LibAppStorage {

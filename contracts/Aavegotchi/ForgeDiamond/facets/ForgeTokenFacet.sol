@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.1;
+
 import "../libraries/LibAppStorage.sol";
 import {LibToken} from "../libraries/LibToken.sol";
 
