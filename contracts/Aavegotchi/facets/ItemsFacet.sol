@@ -193,6 +193,7 @@ contract ItemsFacet is Modifiers {
         external
     {
         uint256[EQUIPPED_WEARABLE_SLOTS] memory delegationIds;
+        emit EquipWearables(_tokenId, s.aavegotchis[_tokenId].equippedWearables, _wearablesToEquip);
         _equipWearables(_tokenId, _wearablesToEquip, delegationIds);
     }
 
@@ -210,6 +211,7 @@ contract ItemsFacet is Modifiers {
     )
         external
     {
+        emit EquipDelegatedWearables(_tokenId, s.aavegotchis[_tokenId].equippedWearables, _wearablesToEquip, _depositIds);
         _equipWearables(_tokenId, _wearablesToEquip, _depositIds);
     }
 
@@ -225,8 +227,6 @@ contract ItemsFacet is Modifiers {
     {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
-        emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _wearablesToEquip);
-        emit EquipDelegatedWearables(_tokenId, aavegotchi.equippedWearables, _wearablesToEquip, _depositIds);
 
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             uint256 toEquipId = _wearablesToEquip[slot];
