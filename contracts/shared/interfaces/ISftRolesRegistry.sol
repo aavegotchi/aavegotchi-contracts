@@ -2,11 +2,9 @@
 
 pragma solidity 0.8.1;
 
-import { IERC165 } from './IERC165.sol';
-
 /// @title Semi-Fungible Token Roles Registry Interface
 /// Note: the ERC-165 identifier for this interface is 0x1ec9fef7
-interface ISftRolesRegistry is IERC165 {
+interface ISftRolesRegistry {
       struct RoleData {
         address grantee;
         uint64 expirationDate;

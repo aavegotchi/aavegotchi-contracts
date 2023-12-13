@@ -681,7 +681,7 @@ describe("ItemsRolesRegistryFacet", async () => {
     })
   })
 
-  describe('ERC-165 supportsInterface', async () => {
+  describe.skip('ERC-165 supportsInterface', async () => {
     it('should return true if ERC1155Receiver interface id', async () => {
       expect(await ItemsRolesRegistryFacet.supportsInterface('0x4e2312e0')).to.be.true
     })

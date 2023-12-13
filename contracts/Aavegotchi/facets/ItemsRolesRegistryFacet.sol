@@ -9,7 +9,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
-import {Modifiers, ItemType, EQUIPPED_WEARABLE_SLOTS, EquipedDelegatedItemInfo} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ItemType, EQUIPPED_WEARABLE_SLOTS, EquippedDelegatedItemInfo} from "../libraries/LibAppStorage.sol";
 import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import {ERC1155Holder, ERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import {IEventHandlerFacet} from "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
@@ -50,7 +50,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     modifier onlyOwnerOrApproved(address _account, address _tokenAddress) {
-        require(_account == msg.sender || isRoleApprovedForAll(_tokenAddress, _account, msg.sender), "ItemsRolesRegistryFacet: account not approved");
+        require(_account == LibMeta.msgSender() || isRoleApprovedForAll(_tokenAddress, _account, LibMeta.msgSender()), "ItemsRolesRegistryFacet: account not approved");
         _;
     }
 
@@ -103,7 +103,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         _grantOrUpdateRole(_grantRoleData);
     }
 
-    function _grantOrUpdateRole(RoleAssignment memory _grantRoleData) internal {
+    function _grantOrUpdateRole(RoleAssignment calldata _grantRoleData) internal {
         s.itemsRoleAssignments[_grantRoleData.nonce] = RoleData(
             _grantRoleData.grantee,
             _grantRoleData.expirationDate,
@@ -135,16 +135,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
             require(caller == _roleData.grantee, "ItemsRolesRegistryFacet: depositId is not expired or is not revocable");
         }
 
-        uint256 _gotchiId = s.depositIdToItemIdToGotchiId[_depositId][_depositInfo.tokenId];
-        EquipedDelegatedItemInfo memory _equipedDelegatedItemInfo = s.gotchiIdToItemIdToDepositId[_gotchiId][_depositInfo.tokenId];
-        uint256 _balanceToUnequip = _equipedDelegatedItemInfo.balance;
-
-        if (_balanceToUnequip > 0) {
-            _unequipWearable(_gotchiId, _depositInfo.tokenId, _balanceToUnequip);
-
-            delete s.depositIdToItemIdToGotchiId[_depositId][_depositInfo.tokenId];
-            delete s.gotchiIdToItemIdToDepositId[_gotchiId][_depositInfo.tokenId];
-        }
+        _unequipDelegatedWearable(_depositId, _depositInfo.tokenId);
 
         delete s.itemsRoleAssignments[_depositId];
 
@@ -159,35 +150,46 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         );
     }
 
-    function _unequipWearable(uint256 _gotchiId, uint256 _wearableToUnequip, uint256 _balanceToUnequip) internal {
-        uint256 _unequipedBalance;
+    function _unequipDelegatedWearable(uint256 _depositId, uint256 _tokenIdToUnequip) internal {
+        uint256 _gotchiId = s.depositIdToItemIdToGotchiId[_depositId][_tokenIdToUnequip];
+        EquippedDelegatedItemInfo memory _equippedDelegatedItemInfo = s.gotchiIdToItemIdToDepositId[_gotchiId][_tokenIdToUnequip];
+        uint256 _balanceToUnequip = _equippedDelegatedItemInfo.balance;
+        if (_balanceToUnequip == 0) return; // If balance is 0, it means the item is not equipped, so we can return
+
+        uint256 _unequippedBalance;
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
-            if (_unequipedBalance == _balanceToUnequip) break;
-            if (s.aavegotchis[_gotchiId].equippedWearables[slot] != _wearableToUnequip) continue;
+            if (_unequippedBalance == _balanceToUnequip) break;
+            if (s.aavegotchis[_gotchiId].equippedWearables[slot] != _tokenIdToUnequip) continue;
             s.aavegotchis[_gotchiId].equippedWearables[slot] = 0;
-            _unequipedBalance++;
+            _unequippedBalance++;
         }
 
-        LibItems.removeFromParent(address(this), _gotchiId, _wearableToUnequip, _unequipedBalance);
-        emit LibERC1155.TransferFromParent(address(this), _gotchiId, _wearableToUnequip, _unequipedBalance);
+        LibItems.removeFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
+        emit LibERC1155.TransferFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
+
+        delete s.depositIdToItemIdToGotchiId[_depositId][_tokenIdToUnequip];
+        delete s.gotchiIdToItemIdToDepositId[_gotchiId][_tokenIdToUnequip];
     }
 
-    function withdraw(uint256 _depositId) public onlyOwnerOrApproved(s.itemsDeposits[_depositId].grantor, s.itemsDeposits[_depositId].tokenAddress) {
+    function withdraw(uint256 _depositId) external onlyOwnerOrApproved(s.itemsDeposits[_depositId].grantor, s.itemsDeposits[_depositId].tokenAddress) {
         DepositInfo memory _depositInfo = s.itemsDeposits[_depositId];
         require(
             s.itemsRoleAssignments[_depositId].expirationDate < block.timestamp || s.itemsRoleAssignments[_depositId].revocable,
             "ItemsRolesRegistryFacet: token has an active role"
         );
 
+        
         delete s.itemsDeposits[_depositId];
+        delete s.itemsRoleAssignments[_depositId];
 
+        _unequipDelegatedWearable(_depositId, _depositInfo.tokenId); // If the item is equipped in some gotchi, it will be unequipped
         _transferFrom(address(this), _depositInfo.grantor, _depositInfo.tokenAddress, _depositInfo.tokenId, _depositInfo.tokenAmount);
 
         emit Withdrew(_depositId, _depositInfo.grantor, _depositInfo.tokenAddress, _depositInfo.tokenId, _depositInfo.tokenAmount);
     }
 
     function setRoleApprovalForAll(address _tokenAddress, address _operator, bool _isApproved) external override {
-        s.itemsTokenApprovals[msg.sender][_tokenAddress][_operator] = _isApproved;
+        s.itemsTokenApprovals[LibMeta.msgSender()][_tokenAddress][_operator] = _isApproved;
         emit RoleApprovalForAll(_tokenAddress, _operator, _isApproved);
     }
 
@@ -213,10 +215,6 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         return s.itemsTokenApprovals[_grantor][_tokenAddress][_operator];
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155Receiver, IERC165) returns (bool) {
-        return interfaceId == type(ISftRolesRegistry).interfaceId || interfaceId == type(IERC1155Receiver).interfaceId;
-    }
-
     /** Helper Functions **/
 
     function _transferFrom(address _from, address _to, address _tokenAddress, uint256 _tokenId, uint256 _tokenAmount) internal {
@@ -227,11 +225,11 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     function _findCaller(RoleData memory _roleData, DepositInfo memory _depositInfo) internal view returns (address) {
-        if (_depositInfo.grantor == msg.sender || isRoleApprovedForAll(_depositInfo.tokenAddress, _depositInfo.grantor, msg.sender)) {
+        if (_depositInfo.grantor == LibMeta.msgSender() || isRoleApprovedForAll(_depositInfo.tokenAddress, _depositInfo.grantor, LibMeta.msgSender())) {
             return _depositInfo.grantor;
         }
 
-        if (_roleData.grantee == msg.sender || isRoleApprovedForAll(_depositInfo.tokenAddress, _roleData.grantee, msg.sender)) {
+        if (_roleData.grantee == LibMeta.msgSender() || isRoleApprovedForAll(_depositInfo.tokenAddress, _roleData.grantee, LibMeta.msgSender())) {
             return _roleData.grantee;
         }
 
