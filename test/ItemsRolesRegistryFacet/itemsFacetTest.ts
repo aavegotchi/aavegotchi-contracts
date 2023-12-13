@@ -592,6 +592,64 @@ describe("ItemsRolesRegistryFacet", async () => {
           )
       ).to.be.revertedWith("ItemsFacet: Not enough delegated balance");
     });
+    it('should equip delegated wearables in two gotchis with the same depositId and unequip all with withdraw', async () => {
+      RoleAssignment = await buildRoleAssignment({
+        tokenAddress: wearablesFacet.address,
+        tokenId: wearableIds[1],
+        tokenAmount: 2,
+        grantor: grantor.address,
+        grantee: LargeGotchiOwner,
+      });
+
+      await expect(
+        ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(RoleAssignment)
+      ).to.not.be.reverted;
+
+      const anotherGotchiId = LargeGotchiOwnerAavegotchis[1];
+      await expect(
+        itemsFacet
+          .connect(grantee)
+          .equipDelegatedWearables(
+            gotchiId,
+            [0, 0, wearableIds[1], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, RoleAssignment.nonce, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          )
+      )
+        .to.emit(libERC1155, "TransferToParent")
+        .withArgs(aavegotchiDiamondAddress, gotchiId, wearableIds[1], 1)
+        .to.not.emit(libEventHandler, "TransferSingle");
+
+      await expect(
+        itemsFacet
+          .connect(grantee)
+          .equipDelegatedWearables(
+            anotherGotchiId,
+            [0, 0, wearableIds[1], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, RoleAssignment.nonce, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          )
+      )
+        .to.emit(libERC1155, "TransferToParent")
+        .withArgs(aavegotchiDiamondAddress, anotherGotchiId, wearableIds[1], 1)
+        .to.not.emit(libEventHandler, "TransferSingle");
+
+      await expect(
+        ItemsRolesRegistryFacet.connect(grantor).withdraw(
+          RoleAssignment.nonce,
+        )
+      )
+        .to.emit(libERC1155, "TransferFromParent")
+        .withArgs(aavegotchiDiamondAddress, gotchiId, wearableIds[1], 1)
+        .to.emit(libERC1155, "TransferFromParent")
+        .withArgs(aavegotchiDiamondAddress, anotherGotchiId, wearableIds[1], 1)
+        .to.emit(libEventHandler, "TransferSingle")
+        .withArgs(
+          grantor.address,
+          aavegotchiDiamondAddress,
+          grantor.address,
+          wearableIds[1],
+          2
+        )
+    });
     it("should NOT equip a delegated wearable if the depositId is expired", async () => {
       await network.provider.send("evm_increaseTime", [ONE_DAY]);
       await expect(
@@ -604,5 +662,6 @@ describe("ItemsRolesRegistryFacet", async () => {
           )
       ).to.be.revertedWith("ItemsFacet: Wearable delegation expired");
     });
+  
   });
 });
