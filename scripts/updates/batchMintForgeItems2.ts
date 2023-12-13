@@ -1,6 +1,11 @@
 import { ethers, network } from "hardhat";
-import { itemManagerAlt, maticForgeDiamond } from "../helperFunctions";
+import {
+  gasPrice,
+  itemManagerAlt,
+  maticForgeDiamond,
+} from "../helperFunctions";
 import { ForgeFacet, ForgeTokenFacet } from "../../typechain";
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 export async function batchMintForgeItems() {
   let signer;
@@ -20,19 +25,15 @@ export async function batchMintForgeItems() {
     });
     signer = await ethers.provider.getSigner(owner);
   } else if (network.name === "matic") {
-    const accounts = await ethers.getSigners();
-    signer = accounts[0];
-    throw Error("Incorrect network selected");
-  }
+    //item manager - ledger
+    signer = new LedgerSigner(ethers.provider, "m/44'/60'/1'/0/0");
+  } else throw Error("Incorrect network selected");
 
   let forgeFacet = (await ethers.getContractAt(
     "contracts/Aavegotchi/ForgeDiamond/facets/ForgeFacet.sol:ForgeFacet",
     maticForgeDiamond,
     signer
   )) as ForgeFacet;
-
-  const tokenIds = [];
-  const tokenAmounts = [];
 
   // schematics
   const common = [370, 371, 372, 375];
@@ -71,8 +72,10 @@ export async function batchMintForgeItems() {
     const tx = await forgeFacet.adminMintBatch(
       recipient,
       transferIds,
-      transferAmount
+      transferAmount,
+      { gasPrice: gasPrice }
     );
+    console.log("tx hash:", tx.hash);
     const receipt = await tx.wait();
     if (!receipt.status) {
       throw Error(`Error with transaction: ${tx.hash}`);
