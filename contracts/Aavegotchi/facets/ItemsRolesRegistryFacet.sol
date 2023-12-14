@@ -15,6 +15,7 @@ import {ERC1155Holder, ERC1155Receiver} from "@openzeppelin/contracts/token/ERC1
 import {IEventHandlerFacet} from "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 
 contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -262,5 +263,15 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         s.itemsDepositsUnequippedBalance[_grantRoleData.grantor][_grantRoleData.nonce] = _grantRoleData.tokenAmount;
 
         _transferFrom(_grantRoleData.grantor, address(this), _grantRoleData.tokenAddress, _grantRoleData.tokenId, _grantRoleData.tokenAmount);
+    }
+
+    function init() public {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        ds.supportedInterfaces[0xd4ba61d5] = true;
+    }
+
+    constructor() {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        ds.supportedInterfaces[0xd4ba61d5] = true;
     }
 }

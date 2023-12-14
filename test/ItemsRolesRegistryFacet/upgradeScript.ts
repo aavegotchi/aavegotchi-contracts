@@ -148,5 +148,6 @@ export async function upgradeWithNewFacets({
   );
   console.log("------");
   console.log("Upgrade transaction hash: " + result.hash);
+  await result.wait();
   return diamondCut;
 }

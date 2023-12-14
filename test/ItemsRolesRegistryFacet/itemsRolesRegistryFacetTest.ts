@@ -4,7 +4,7 @@
 //@ts-ignore
 import { ethers, network } from "hardhat";
 import chai from "chai";
-import { DAOFacet, LibEventHandler, WearablesFacet } from "../../typechain";
+import { DAOFacet, DiamondLoupeFacet, LibEventHandler, WearablesFacet } from "../../typechain";
 
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -34,6 +34,7 @@ describe("ItemsRolesRegistryFacet", async () => {
   let wearablesFacet: WearablesFacet;
   let libEventHandler: LibEventHandler;
   let daoFacet: DAOFacet;
+  let diamondLoupeFacet: DiamondLoupeFacet;
 
   before(async () => {
     const signers = await ethers.getSigners();
@@ -48,10 +49,17 @@ describe("ItemsRolesRegistryFacet", async () => {
     });
     const diamondOwner = await ethers.provider.getSigner(diamondOwnerAddress);
 
+    diamondLoupeFacet = (await ethers.getContractAt(
+      "DiamondLoupeFacet",
+      aavegotchiDiamondAddress
+    )) as DiamondLoupeFacet;
+
     await upgradeWithNewFacets({
       diamondAddress: aavegotchiDiamondAddress,
       facetNames: ["ItemsRolesRegistryFacet"],
       signer: diamondOwner,
+      initFacetName: "InitItemsRolesRegistryFacet",
+      initArgs: [],
     });
 
     ItemsRolesRegistryFacet = await ethers.getContractAt(
@@ -691,13 +699,14 @@ describe("ItemsRolesRegistryFacet", async () => {
     })
   })
 
-  describe.skip('ERC-165 supportsInterface', async () => {
+  describe.only('ERC-165 supportsInterface', async () => {
     it('should return true if ERC1155Receiver interface id', async () => {
-      expect(await ItemsRolesRegistryFacet.supportsInterface('0x4e2312e0')).to.be.true
+      expect(await diamondLoupeFacet.supportsInterface('0x4e2312e0')).to.be.true
     })
 
-    it('should return true if IERCXXXX interface id', async () => {
-      expect(await ItemsRolesRegistryFacet.supportsInterface('0x1ec9fef7')).to.be.true
+    it('should return true if ISftRolesRegistry interface id', async () => {
+      await ItemsRolesRegistryFacet.init()
+      expect(await ItemsRolesRegistryFacet.supportsInterface("0xd4ba61d5")).to.be.true
     })
   })
 });
