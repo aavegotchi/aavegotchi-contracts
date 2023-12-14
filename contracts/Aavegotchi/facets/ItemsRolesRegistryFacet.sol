@@ -216,7 +216,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     function _unequipDelegatedWearable(uint256 _gotchiId, uint256 _tokenIdToUnequip) internal {
-        EquippedDelegatedItemInfo memory _equippedDelegatedItemInfo = s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_tokenIdToUnequip];
+        EquippedDelegatedItemInfo memory _equippedDelegatedItemInfo = s.gotchiEquippedItemsInfo[_gotchiId].equippedItemIdToDelegationInfo[_tokenIdToUnequip];
         uint256 _balanceToUnequip = _equippedDelegatedItemInfo.balance;
         if (_balanceToUnequip == 0) return; // If balance is 0, it means the item is not equipped, so we can return
 
@@ -230,7 +230,8 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
 
         LibItems.removeFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
         emit LibERC1155.TransferFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
-        delete s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_tokenIdToUnequip];
+        delete s.gotchiEquippedItemsInfo[_gotchiId].equippedItemIdToDelegationInfo[_tokenIdToUnequip];
+        s.gotchiEquippedItemsInfo[_gotchiId].equippedDelegateItemsCount -= _unequippedBalance;
     }
 
     function _transferFrom(address _from, address _to, address _tokenAddress, uint256 _tokenId, uint256 _tokenAmount) internal {

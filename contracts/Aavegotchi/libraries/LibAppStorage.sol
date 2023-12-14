@@ -231,6 +231,11 @@ struct ItemDepositId {
     address grantor;
 }
 
+struct GotchiEquippedItemsInfo {
+    mapping(uint256 => EquippedDelegatedItemInfo) equippedItemIdToDelegationInfo;
+    uint256 equippedDelegateItemsCount;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -364,8 +369,8 @@ struct AppStorage {
     mapping(address => mapping(uint256 => EnumerableSet.UintSet)) depositIdToEquippedGotchis;
     // grantor => depositId => remainingBalance
     mapping(address => mapping(uint256 => uint256)) itemsDepositsUnequippedBalance;
-    // gotchiId => delegationInfo
-    mapping(uint256 => mapping(uint256 => EquippedDelegatedItemInfo)) gotchiIdToEquippedItemIdToDelegationInfo;
+    // gotchiId => equippedItemsInfo
+    mapping(uint256 => GotchiEquippedItemsInfo) gotchiEquippedItemsInfo;
 }
 
 library LibAppStorage {
