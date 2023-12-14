@@ -366,5 +366,10 @@ describe("Testing Geodes", async function () {
       expect(Number(prob[4])).to.equal(0);
       expect(Number(prob[5])).to.equal(0);
     });
+
+    it("should test win chance getter", async function() {
+      let chance = await forgeDaoFacet.getGeodeWinChance(50, 50);
+      expect(Number(chance)).to.equal(2900)
+    });
   })
 });

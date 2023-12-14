@@ -25,7 +25,8 @@ export async function upgradeForgeMultiTierGeodes() {
         "contracts/Aavegotchi/ForgeDiamond/facets/ForgeDAOFacet.sol:ForgeDAOFacet",
       addSelectors: [
         `function setGeodeMultiTierWinChanceBips(${multiTierGeodeChanceIO} calldata chances) external`,
-        "function setMultiTierGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities, uint8[] calldata rarities) external"
+        "function setMultiTierGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities, uint8[] calldata rarities) external",
+        "function getGeodeWinChance(uint8 geodeRsm, uint8 prizeRsm) public view returns (uint256)"
       ],
       removeSelectors: [
         // "function setGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities) external"
