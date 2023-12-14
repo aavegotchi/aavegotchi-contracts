@@ -222,8 +222,13 @@ struct ERC721BuyOrder {
 }
 
 struct EquippedDelegatedItemInfo {
-    uint256 depositId;
+    ItemDepositId depositId;
     uint256 balance;
+}
+
+struct ItemDepositId {
+    uint256 nonce;
+    address grantor;
 }
 
 struct AppStorage {
@@ -347,16 +352,18 @@ struct AppStorage {
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
     
     // Items Roles Registry
-    // depositId => DepositInfo
-    mapping(uint256 => ISftRolesRegistry.DepositInfo) itemsDeposits;
-    // depositId  => RoleAssignment
-    mapping(uint256 => ISftRolesRegistry.RoleData) itemsRoleAssignments;
+    // grantor => depositId => DepositInfo
+    mapping(address => mapping(uint256 => ISftRolesRegistry.DepositInfo)) itemsDeposits;
+    // grantor => depositId  => RoleAssignment
+    mapping(address =>  mapping(uint256 => ISftRolesRegistry.RoleData)) itemsRoleAssignments;
     // grantor => tokenAddress => operator => isApproved
+    
+    // Auxilliary structs for Items Roles Registry
     mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
-    // depositId => gotchiIds
-    mapping(uint256 => EnumerableSet.UintSet) depositIdToEquippedGotchis;
-    // depositId => remainingBalance
-    mapping(uint256 => uint256) itemsDepositsUnequippedBalance;
+    // grantor => depositId => gotchiIds
+    mapping(address => mapping(uint256 => EnumerableSet.UintSet)) depositIdToEquippedGotchis;
+    // grantor => depositId => remainingBalance
+    mapping(address => mapping(uint256 => uint256)) itemsDepositsUnequippedBalance;
     // gotchiId => delegationInfo
     mapping(uint256 => mapping(uint256 => EquippedDelegatedItemInfo)) gotchiIdToEquippedItemIdToDelegationInfo;
 }

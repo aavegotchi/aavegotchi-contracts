@@ -17,6 +17,11 @@ export interface RoleAssignment {
   data: string;
 }
 
+export interface ItemDepositId {
+  nonce: number;
+  grantor: string;
+}
+
 export function generateRandomInt() {
   return Math.floor(Math.random() * 1000 * 1000) + 1;
 }

@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
-import {LibAppStorage, Modifiers, ItemType, Aavegotchi, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM} from "../libraries/LibAppStorage.sol";
+import {LibAppStorage, Modifiers, ItemType, Aavegotchi, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, ItemDepositId} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -28,7 +28,7 @@ contract ItemsFacet is Modifiers {
         uint256 balance;
     }
 
-    event EquipDelegatedWearables(uint256 indexed _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] _oldWearables, uint16[EQUIPPED_WEARABLE_SLOTS] _newWearables, uint256[EQUIPPED_WEARABLE_SLOTS] _depositIds);
+    event EquipDelegatedWearables(uint256 indexed _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] _oldWearables, uint16[EQUIPPED_WEARABLE_SLOTS] _newWearables, ItemDepositId[EQUIPPED_WEARABLE_SLOTS] _depositIds);
 
     ///@notice Returns balance for each item that exists for an account
     ///@param _account Address of the account to query
@@ -192,9 +192,9 @@ contract ItemsFacet is Modifiers {
     )
         external
     {
-        uint256[EQUIPPED_WEARABLE_SLOTS] memory delegationIds;
+        ItemDepositId[EQUIPPED_WEARABLE_SLOTS] memory _depositIds;
         emit EquipWearables(_tokenId, s.aavegotchis[_tokenId].equippedWearables, _wearablesToEquip);
-        _equipWearables(_tokenId, _wearablesToEquip, delegationIds);
+        _equipWearables(_tokenId, _wearablesToEquip, _depositIds);
     }
 
     ///@notice Allow the owner of a claimed aavegotchi to equip/unequip wearables to his aavegotchi
@@ -207,7 +207,7 @@ contract ItemsFacet is Modifiers {
     function equipDelegatedWearables(
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
-        uint256[EQUIPPED_WEARABLE_SLOTS] calldata _depositIds
+        ItemDepositId[EQUIPPED_WEARABLE_SLOTS] calldata _depositIds
     )
         external
     {
@@ -219,7 +219,7 @@ contract ItemsFacet is Modifiers {
     function _equipWearables(
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
-        uint256[EQUIPPED_WEARABLE_SLOTS] memory _depositIds
+        ItemDepositId[EQUIPPED_WEARABLE_SLOTS] memory _depositIds
     )
         internal
         onlyAavegotchiOwner(_tokenId)
@@ -295,24 +295,24 @@ contract ItemsFacet is Modifiers {
     }
 
     function _addWearableToGotchi(
-        uint256 _depositId,
+        ItemDepositId memory _depositId,
         uint256 _gotchiId,
         uint256 _toEquipWearableId,
         uint256 _neededBalance,
         uint256 _nftBalance
     ) internal {
         uint256 _balToTransfer = _neededBalance - _nftBalance;
-        if (_depositId != 0) {
-
-            require(s.itemsRoleAssignments[_depositId].grantee == LibMeta.msgSender(), "ItemsFacet: Wearable not delegated to sender or depositId not valid");
-            require(s.itemsDeposits[_depositId].tokenId == _toEquipWearableId, "ItemsFacet: Delegated Wearable not of this delegation");
-            require(s.itemsDepositsUnequippedBalance[_depositId] >= _balToTransfer, "ItemsFacet: Not enough delegated balance");
-            require(s.itemsRoleAssignments[_depositId].expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
+        if (_depositId.nonce != 0) {
+            
+            require(s.itemsRoleAssignments[_depositId.grantor][_depositId.nonce].grantee == LibMeta.msgSender(), "ItemsFacet: Wearable not delegated to sender or depositId not valid");
+            require(s.itemsDeposits[_depositId.grantor][_depositId.nonce].tokenId == _toEquipWearableId, "ItemsFacet: Delegated Wearable not of this delegation");
+            require(s.itemsDepositsUnequippedBalance[_depositId.grantor][_depositId.nonce] >= _balToTransfer, "ItemsFacet: Not enough delegated balance");
+            require(s.itemsRoleAssignments[_depositId.grantor][_depositId.nonce].expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
 
             s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_toEquipWearableId].depositId = _depositId;
             s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_toEquipWearableId].balance += _balToTransfer;
-            s.itemsDepositsUnequippedBalance[_depositId] -= _balToTransfer;
-            s.depositIdToEquippedGotchis[_depositId].add(_gotchiId);
+            s.itemsDepositsUnequippedBalance[_depositId.grantor][_depositId.nonce] -= _balToTransfer;
+            s.depositIdToEquippedGotchis[_depositId.grantor][_depositId.nonce].add(_gotchiId);
         } else {
             address _sender = LibMeta.msgSender();
             require(_nftBalance + s.ownerItemBalances[_sender][_toEquipWearableId] >= _neededBalance, "ItemsFacet: Wearable isn't in inventory");
@@ -333,20 +333,20 @@ contract ItemsFacet is Modifiers {
         LibItems.removeFromParent(address(this), _gotchiId, _existingEquippedWearableId, 1);
         emit LibERC1155.TransferFromParent(address(this), _gotchiId, _existingEquippedWearableId, 1);
         
-        uint256 _depositId = s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_existingEquippedWearableId].depositId;
-        if (_depositId != 0) {
+        ItemDepositId memory _depositId = s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_existingEquippedWearableId].depositId;
+        if (_depositId.nonce != 0) {
             // remove wearable from Aavegotchi and delete delegation
             
             uint256 _delegatedBalance = s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_existingEquippedWearableId].balance;
             
             if(_delegatedBalance == 1) {
                 delete s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_existingEquippedWearableId];
-                s.depositIdToEquippedGotchis[_depositId].remove(_gotchiId);
+                s.depositIdToEquippedGotchis[_depositId.grantor][_depositId.nonce].remove(_gotchiId);
             } else {
                 s.gotchiIdToEquippedItemIdToDelegationInfo[_gotchiId][_existingEquippedWearableId].balance -= 1;
             }
             
-            s.itemsDepositsUnequippedBalance[_depositId] += 1;
+            s.itemsDepositsUnequippedBalance[_depositId.grantor][_depositId.nonce] += 1;
         } else {
             address _sender = LibMeta.msgSender();
 
