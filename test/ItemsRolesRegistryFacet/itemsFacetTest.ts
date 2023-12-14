@@ -5,6 +5,7 @@
 import { ethers, network } from "hardhat";
 import chai from "chai";
 import {
+  AavegotchiFacet,
   DAOFacet,
   ItemsFacet,
   LibERC1155,
@@ -43,6 +44,7 @@ describe("ItemsRolesRegistryFacet", async () => {
   let libEventHandler: LibEventHandler;
   let itemsFacet: ItemsFacet;
   let daoFacet: DAOFacet;
+  let aavegotchiFacet: AavegotchiFacet;
   let libERC1155: LibERC1155;
 
   const gotchiId = LargeGotchiOwnerAavegotchis[0];
@@ -75,6 +77,7 @@ describe("ItemsRolesRegistryFacet", async () => {
       facetNames: [
         "ItemsRolesRegistryFacet",
         "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
+        "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet"
       ],
       signer: diamondOwner,
     });
@@ -103,6 +106,11 @@ describe("ItemsRolesRegistryFacet", async () => {
       "contracts/shared/libraries/LibERC1155.sol:LibERC1155",
       aavegotchiDiamondAddress
     )) as LibERC1155;
+
+    aavegotchiFacet = (await ethers.getContractAt(
+      "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
+      aavegotchiDiamondAddress
+    )) as AavegotchiFacet;
 
     await network.provider.request({
       method: "hardhat_impersonateAccount",
@@ -728,6 +736,39 @@ describe("ItemsRolesRegistryFacet", async () => {
           2
         );
     });
+    it('should NOT transfer an aavegotchi with delegated wearable equipped', async () => {
+      const anotherGotchiId = LargeGotchiOwnerAavegotchis[1];
+      const itemDepositIds: ItemDepositId[] = new Array(16).fill({
+        nonce: BigNumber.from(0),
+        grantor: AddressZero,
+      });
+
+      itemDepositIds[3] = {
+        nonce: RoleAssignment.nonce,
+        grantor: RoleAssignment.grantor,
+      };
+
+      await expect(
+        itemsFacet
+          .connect(grantee)
+          .equipDelegatedWearables(
+            anotherGotchiId,
+            [0, 0, 0, wearableIds[3], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            itemDepositIds
+          )
+      )
+        .to.emit(libERC1155, "TransferToParent")
+        .withArgs(aavegotchiDiamondAddress, anotherGotchiId, wearableIds[3], 1)
+        .to.not.emit(libEventHandler, "TransferSingle");
+
+      await expect(
+        aavegotchiFacet.connect(grantee).transferFrom(
+          await grantee.getAddress(),
+          grantor.address,
+          anotherGotchiId,
+        )
+      ).to.be.revertedWith("AavegotchiFacet: Can't transfer aavegotchi with delegated wearable equipped");
+    })
     it("should NOT equip a delegated wearable if the depositId is expired", async () => {
       await network.provider.send("evm_increaseTime", [ONE_DAY]);
       const itemDepositIds: ItemDepositId[] = new Array(16).fill({

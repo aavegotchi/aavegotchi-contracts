@@ -295,7 +295,6 @@ contract ItemsFacet is Modifiers {
             }
         }
         LibAavegotchi.interact(_tokenId);
-        aavegotchi.locked = s.gotchiEquippedItemsInfo[_tokenId].equippedDelegateItemsCount != 0;
     }
 
     function _addWearableToGotchi(
