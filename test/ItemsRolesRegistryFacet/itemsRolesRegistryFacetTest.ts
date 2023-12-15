@@ -4,7 +4,7 @@
 //@ts-ignore
 import { ethers, network } from "hardhat";
 import chai from "chai";
-import { DAOFacet, DiamondLoupeFacet, LibEventHandler, WearablesFacet } from "../../typechain";
+import { AavegotchiFacet, DAOFacet, DiamondLoupeFacet, LibEventHandler, WearablesFacet } from "../../typechain";
 
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -20,7 +20,7 @@ import {
   RoleAssignment,
   generateRoleId,
 } from "./helpers";
-import { itemManagerAlt } from "../../scripts/helperFunctions";
+import { itemManagerAlt, maticDiamondUpgrader } from "../../scripts/helperFunctions";
 import { upgradeWithNewFacets } from "./upgradeScript";
 
 const { expect } = chai;
@@ -35,6 +35,7 @@ describe("ItemsRolesRegistryFacet", async () => {
   let libEventHandler: LibEventHandler;
   let daoFacet: DAOFacet;
   let diamondLoupeFacet: DiamondLoupeFacet;
+  let aavegotchiFacet: AavegotchiFacet;
 
   before(async () => {
     const signers = await ethers.getSigners();
@@ -42,10 +43,11 @@ describe("ItemsRolesRegistryFacet", async () => {
     grantee = signers[1];
     anotherUser = signers[2];
 
-    const diamondOwnerAddress = "0x01F010a5e001fe9d6940758EA5e8c777885E351e";
+    const diamondOwnerAddress = "0x01F010a5e001fe9d6940758EA5e8c777885E351e"
+    const maticDiamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
     await network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [diamondOwnerAddress],
+      params: [maticDiamondUpgrader],
     });
     const diamondOwner = await ethers.provider.getSigner(diamondOwnerAddress);
 
@@ -76,6 +78,11 @@ describe("ItemsRolesRegistryFacet", async () => {
       "contracts/Aavegotchi/WearableDiamond/libraries/LibEventHandler.sol:LibEventHandler",
       wearableDiamondAddress
     )) as LibEventHandler;
+
+    aavegotchiFacet = (await ethers.getContractAt(
+      "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
+      aavegotchiDiamondAddress
+    )) as AavegotchiFacet;
 
     await network.provider.request({
       method: "hardhat_impersonateAccount",
@@ -705,8 +712,7 @@ describe("ItemsRolesRegistryFacet", async () => {
     })
 
     it('should return true if ISftRolesRegistry interface id', async () => {
-      await ItemsRolesRegistryFacet.init()
-      expect(await ItemsRolesRegistryFacet.supportsInterface("0xd4ba61d5")).to.be.true
+      expect(await diamondLoupeFacet.supportsInterface("0xd4ba61d5")).to.be.true
     })
   })
 });
