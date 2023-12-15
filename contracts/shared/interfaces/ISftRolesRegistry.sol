@@ -3,7 +3,6 @@
 pragma solidity 0.8.1;
 
 /// @title Semi-Fungible Token Roles Registry Interface
-/// Note: the ERC-165 identifier for this interface is 0x1ec9fef7
 interface ISftRolesRegistry {
       struct RoleData {
         address grantee;
@@ -13,7 +12,6 @@ interface ISftRolesRegistry {
     }
 
     struct DepositInfo {
-        address grantor;
         address tokenAddress;
         uint256 tokenId;
         uint256 tokenAmount;
@@ -97,10 +95,11 @@ interface ISftRolesRegistry {
     function grantRoleFrom(RoleAssignment calldata _roleAssignment) external;
 
     /// @notice Revokes a role on behalf of a user.
-    /// @param _nonce The identifier of the role assignment.
     /// @param _role The role identifier.
+    /// @param _nonce The identifier of the role assignment.
+    /// @param _revoker The user revoking the role.
     /// @param _grantee The user that gets their role revoked.
-    function revokeRoleFrom(uint256 _nonce, bytes32 _role, address _grantee) external;
+    function revokeRoleFrom(bytes32 _role, uint256 _nonce, address _revoker, address _grantee) external;
 
     /// @notice Approves operator to grant and revoke any roles on behalf of another user.
     /// @param _tokenAddress The token address.
@@ -108,19 +107,26 @@ interface ISftRolesRegistry {
     /// @param _approved The approval status.
     function setRoleApprovalForAll(address _tokenAddress, address _operator, bool _approved) external;
 
+    /// @notice Withdraws tokens back to grantor.
+    /// @param _nonce The identifier of the role assignment.
+    /// @param _grantor The user withdrawing the tokens.
+    function withdrawFrom(uint256 _nonce, address _grantor) external;
+
     /** View Functions **/
 
     /// @notice Returns the custom data of a role assignment.
-    /// @param _nonce The identifier of the role assignment.
     /// @param _role The role identifier.
+    /// @param _nonce The identifier of the role assignment.
+    /// @param _grantor The user that assigned the role.
     /// @param _grantee The user that gets their role revoked.
-    function roleData(uint256 _nonce, bytes32 _role, address _grantee) external view returns (RoleData memory data_);
+    function roleData(bytes32 _role, uint256 _nonce, address _grantor, address _grantee) external view returns (RoleData memory data_);
 
     /// @notice Returns the expiration date of a role assignment.
-    /// @param _nonce The identifier of the role assignment.
     /// @param _role The role identifier.
+    /// @param _nonce The identifier of the role assignment.
+    /// @param _grantor The user that assigned the role.
     /// @param _grantee The user that gets their role revoked.
-    function roleExpirationDate(uint256 _nonce, bytes32 _role, address _grantee) external view returns (uint64 expirationDate_);
+    function roleExpirationDate(bytes32 _role, uint256 _nonce, address _grantor, address _grantee) external view returns (uint64 expirationDate_);
 
     /// @notice Checks if the grantor approved the operator for all NFTs.
     /// @param _tokenAddress The token address.
