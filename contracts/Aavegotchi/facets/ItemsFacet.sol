@@ -228,7 +228,10 @@ contract ItemsFacet is Modifiers {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
 
-        for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
+        bool _sameHands =_wearablesToEquip[LibItems.WEARABLE_SLOT_HAND_LEFT] == _wearablesToEquip[LibItems.WEARABLE_SLOT_HAND_RIGHT];
+        bool _sameDeposits = _depositIds[LibItems.WEARABLE_SLOT_HAND_LEFT].nonce == _depositIds[LibItems.WEARABLE_SLOT_HAND_RIGHT].nonce;
+       
+       for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             uint256 toEquipId = _wearablesToEquip[slot];
             uint256 existingEquippedWearableId = aavegotchi.equippedWearables[slot];
 
@@ -273,16 +276,9 @@ contract ItemsFacet is Modifiers {
                 //Then check if this wearable is in the Aavegotchis inventory
                 uint256 nftBalance = s.nftItemBalances[address(this)][_tokenId][toEquipId];
                 uint256 neededBalance = 1;
-                if (slot == LibItems.WEARABLE_SLOT_HAND_LEFT) {
-                    if (_wearablesToEquip[LibItems.WEARABLE_SLOT_HAND_RIGHT] == toEquipId) {
-                        neededBalance = 2;
-                    }
-                }
 
-                if (slot == LibItems.WEARABLE_SLOT_HAND_RIGHT) {
-                    if (_wearablesToEquip[LibItems.WEARABLE_SLOT_HAND_LEFT] == toEquipId) {
-                        neededBalance = 2;
-                    }
+                if(slot == LibItems.WEARABLE_SLOT_HAND_LEFT && _sameHands && _sameDeposits || slot == LibItems.WEARABLE_SLOT_HAND_RIGHT && _sameHands && !_sameDeposits) {
+                    neededBalance = 2;
                 }
 
                 if (nftBalance < neededBalance) {
