@@ -362,9 +362,10 @@ struct AppStorage {
     // grantor => depositId  => RoleAssignment
     mapping(address =>  mapping(uint256 => ISftRolesRegistry.RoleData)) itemsRoleAssignments;
     // grantor => tokenAddress => operator => isApproved
-    
-    // Auxilliary structs for Items Roles Registry
     mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
+    
+
+    // Auxilliary structs for Items Roles Registry
     // grantor => depositId => gotchiIds
     mapping(address => mapping(uint256 => EnumerableSet.UintSet)) depositIdToEquippedGotchis;
     // grantor => depositId => remainingBalance
