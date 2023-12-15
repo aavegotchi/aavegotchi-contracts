@@ -42,7 +42,7 @@ describe("ItemsRolesRegistryFacet", async () => {
     grantee = signers[1];
     anotherUser = signers[2];
 
-    const diamondOwnerAddress = "0x01F010a5e001fe9d6940758EA5e8c777885E351e"
+    const diamondOwnerAddress = "0x01F010a5e001fe9d6940758EA5e8c777885E351e";
     await network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [diamondOwnerAddress],
@@ -56,16 +56,10 @@ describe("ItemsRolesRegistryFacet", async () => {
 
     await upgradeWithNewFacets({
       diamondAddress: aavegotchiDiamondAddress,
-      facetNames: ["ItemsRolesRegistryFacet"],
+      facetNames: ["ItemsRolesRegistryFacet", "DiamondLoupeFacet"],
       signer: diamondOwner,
       initFacetName: "InitItemsRolesRegistryFacet",
       initArgs: [],
-    });
-
-    await upgradeWithNewFacets({
-      diamondAddress: aavegotchiDiamondAddress,
-      facetNames: ["DiamondLoupeFacet"],
-      signer: diamondOwner,
     });
 
     ItemsRolesRegistryFacet = await ethers.getContractAt(
