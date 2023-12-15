@@ -4,7 +4,7 @@
 //@ts-ignore
 import { ethers, network } from "hardhat";
 import chai from "chai";
-import { AavegotchiFacet, DAOFacet, DiamondLoupeFacet, LibEventHandler, WearablesFacet } from "../../typechain";
+import { DAOFacet, DiamondLoupeFacet, LibEventHandler, WearablesFacet } from "../../typechain";
 
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -20,7 +20,7 @@ import {
   RoleAssignment,
   generateRoleId,
 } from "./helpers";
-import { itemManagerAlt, maticDiamondUpgrader } from "../../scripts/helperFunctions";
+import { itemManagerAlt } from "../../scripts/helperFunctions";
 import { upgradeWithNewFacets } from "./upgradeScript";
 
 const { expect } = chai;
@@ -35,7 +35,6 @@ describe("ItemsRolesRegistryFacet", async () => {
   let libEventHandler: LibEventHandler;
   let daoFacet: DAOFacet;
   let diamondLoupeFacet: DiamondLoupeFacet;
-  let aavegotchiFacet: AavegotchiFacet;
 
   before(async () => {
     const signers = await ethers.getSigners();
@@ -44,10 +43,9 @@ describe("ItemsRolesRegistryFacet", async () => {
     anotherUser = signers[2];
 
     const diamondOwnerAddress = "0x01F010a5e001fe9d6940758EA5e8c777885E351e"
-    const maticDiamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
     await network.provider.request({
       method: "hardhat_impersonateAccount",
-      params: [maticDiamondUpgrader],
+      params: [diamondOwnerAddress],
     });
     const diamondOwner = await ethers.provider.getSigner(diamondOwnerAddress);
 
@@ -64,6 +62,12 @@ describe("ItemsRolesRegistryFacet", async () => {
       initArgs: [],
     });
 
+    await upgradeWithNewFacets({
+      diamondAddress: aavegotchiDiamondAddress,
+      facetNames: ["DiamondLoupeFacet"],
+      signer: diamondOwner,
+    });
+
     ItemsRolesRegistryFacet = await ethers.getContractAt(
       "ItemsRolesRegistryFacet",
       aavegotchiDiamondAddress
@@ -78,11 +82,6 @@ describe("ItemsRolesRegistryFacet", async () => {
       "contracts/Aavegotchi/WearableDiamond/libraries/LibEventHandler.sol:LibEventHandler",
       wearableDiamondAddress
     )) as LibEventHandler;
-
-    aavegotchiFacet = (await ethers.getContractAt(
-      "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-      aavegotchiDiamondAddress
-    )) as AavegotchiFacet;
 
     await network.provider.request({
       method: "hardhat_impersonateAccount",
@@ -706,7 +705,7 @@ describe("ItemsRolesRegistryFacet", async () => {
     })
   })
 
-  describe.only('ERC-165 supportsInterface', async () => {
+  describe('ERC-165 supportsInterface', async () => {
     it('should return true if ERC1155Receiver interface id', async () => {
       expect(await diamondLoupeFacet.supportsInterface('0x4e2312e0')).to.be.true
     })

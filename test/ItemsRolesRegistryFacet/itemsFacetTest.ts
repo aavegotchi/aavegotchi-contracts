@@ -77,8 +77,6 @@ describe("ItemsRolesRegistryFacet", async () => {
         "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
       ],
       signer: diamondOwner,
-      initFacetName: "InitItemsRolesRegistry",
-      initArgs: [],
     });
 
     ItemsRolesRegistryFacet = await ethers.getContractAt(
