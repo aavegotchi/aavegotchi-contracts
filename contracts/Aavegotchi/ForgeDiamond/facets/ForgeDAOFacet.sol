@@ -200,6 +200,10 @@ contract ForgeDAOFacet is Modifiers {
         emit SetGeodeWinChance(chances);
     }
 
+    function getGeodeWinChance(uint8 geodeRsm, uint8 prizeRsm) public view returns (uint256) {
+        return s.geodeWinChanceMultiTierBips[geodeRsm][prizeRsm];
+    }
+
     // @notice Allow DAO to set which prizes can be won from a Geode.
     // @dev DEPRECATED
     // @param ids Token IDs of the available prizes
