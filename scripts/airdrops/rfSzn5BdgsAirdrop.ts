@@ -19,23 +19,23 @@ import { dataArgs as dataArgs4 } from "../../data/airdrops/rarityfarming/szn5/rn
 
 export async function main() {
   const baadges: string[] = [
-    "Aavegotchi-RF-SZN5-Trophy-1ST-PLACE-RARITY", //370
-    "Aavegotchi-RF-SZN5-Trophy-1ST-PLACE-KINSHIP", //371
-    "Aavegotchi-RF-SZN5-Trophy-1ST-PLACE-XP", //372
-    "Aavegotchi-RF-SZN5-Trophy-2ND-PLACE-RARITY", //373
-    "Aavegotchi-RF-SZN5-Trophy-2ND-PLACE-KINSHIP", //374
-    "Aavegotchi-RF-SZN5-Trophy-2ND-PLACE-XP", //375
-    "Aavegotchi-RF-SZN5-Trophy-3RD-PLACE-RARITY", //376
-    "Aavegotchi-RF-SZN5-Trophy-3RD-PLACE-KINSHIP", //377
-    "Aavegotchi-RF-SZN5-Trophy-3RD-PLACE-XP", //378
+    "Aavegotchi-RF-SZN5-Trophy-1ST-PLACE-RARITY", //388
+    "Aavegotchi-RF-SZN5-Trophy-1ST-PLACE-KINSHIP", //389
+    "Aavegotchi-RF-SZN5-Trophy-1ST-PLACE-XP", //390
+    "Aavegotchi-RF-SZN5-Trophy-2ND-PLACE-RARITY", //391
+    "Aavegotchi-RF-SZN5-Trophy-2ND-PLACE-KINSHIP", //392
+    "Aavegotchi-RF-SZN5-Trophy-2ND-PLACE-XP", //393
+    "Aavegotchi-RF-SZN5-Trophy-3RD-PLACE-RARITY", //394
+    "Aavegotchi-RF-SZN5-Trophy-3RD-PLACE-KINSHIP", //395
+    "Aavegotchi-RF-SZN5-Trophy-3RD-PLACE-XP", //396
 
-    "Aavegotchi-RF-SZN5-Baadge-TOP-RAANKED-PLAAYER", //379
-    "Aavegotchi-RF-SZN5-Baadge-TOP-10-RARITY", //380
-    "Aavegotchi-RF-SZN5-Baadge-TOP-10-KINSHIP", //381
-    "Aavegotchi-RF-SZN5-Baadge-TOP-10-XP", //382
-    "Aavegotchi-RF-SZN5-Baadge-TOP-100-RARITY", //383
-    "Aavegotchi-RF-SZN5-Baadge-TOP-100-KINSHIP", //384
-    "Aavegotchi-RF-SZN5-Baadge-TOP-100-XP", //385
+    "Aavegotchi-RF-SZN5-Baadge-TOP-RAANKED-PLAAYER", //397
+    "Aavegotchi-RF-SZN5-Baadge-TOP-10-RARITY", //398
+    "Aavegotchi-RF-SZN5-Baadge-TOP-10-KINSHIP", //399
+    "Aavegotchi-RF-SZN5-Baadge-TOP-10-XP", //400
+    "Aavegotchi-RF-SZN5-Baadge-TOP-100-RARITY", //401
+    "Aavegotchi-RF-SZN5-Baadge-TOP-100-KINSHIP", //402
+    "Aavegotchi-RF-SZN5-Baadge-TOP-100-XP", //403
   ];
 
   //Upload SVGs
@@ -126,7 +126,6 @@ export async function main() {
   );
   await run("airdropBaadges", kinshipChaampion);
 
-  //xp tie breakers go to gotchi id: 6952 for higher rf 4 average xp score
   console.log(itemTypes[2].name);
   console.log("XP Chaampion: ", xpRFSzn5[0]);
   const xpChaampion = await airdropTaskForBaadges(
