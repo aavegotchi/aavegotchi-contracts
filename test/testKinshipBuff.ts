@@ -3,19 +3,23 @@ import { maticDiamondAddress } from "../scripts/helperFunctions";
 import { AavegotchiGameFacet } from "../typechain";
 import { expect } from "chai";
 
-import { upgrade, tokenIds } from "../scripts/upgrades/upgrade-tempKinship";
+import {
+  upgrade,
+  tokenIds,
+  tokenIds2,
+} from "../scripts/upgrades/upgrade-tempKinship";
 import { BigNumber } from "ethers";
 
 describe("Kinship tests", async function () {
   this.timeout(200000000);
 
   it("Should increase kinship appropriately", async function () {
-    const prevKinship: BigNumber[] = await getCurrentKinship(tokenIds);
+    const prevKinship: BigNumber[] = await getCurrentKinship(tokenIds2);
     //upgrade and buff kinship
     await upgrade();
-    const currentKinship: BigNumber[] = await getCurrentKinship(tokenIds);
-    for (let i = 0; i < tokenIds.length; i++) {
-      const occ = countOccurrences(tokenIds, tokenIds[i]);
+    const currentKinship: BigNumber[] = await getCurrentKinship(tokenIds2);
+    for (let i = 0; i < tokenIds2.length; i++) {
+      const occ = countOccurrences(tokenIds2, tokenIds2[i]);
       expect(currentKinship[i]).to.equal(prevKinship[i].add(2 * occ));
     }
   });

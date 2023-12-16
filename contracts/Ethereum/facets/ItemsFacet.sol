@@ -75,26 +75,6 @@ contract ItemsFacet {
         }
     }
 
-    /// @notice Enable or disable approval for a third party ("operator") to manage
-    ///  all of `msg.sender`'s assets
-    /// @dev Emits the ApprovalForAll event. The contract MUST allow
-    ///  multiple operators per owner.
-    /// @param _operator Address to add to the set of authorized operators
-    /// @param _approved True if the operator is approved, false to revoke approval
-    function setApprovalForAll(address _operator, bool _approved) external {
-        address sender = LibMeta.msgSender();
-        s.operators[sender][_operator] = _approved;
-        emit LibERC721.ApprovalForAll(sender, _operator, _approved);
-    }
-
-    /// @notice Query if an address is an authorized operator for another address
-    /// @param _owner The address that owns the NFTs
-    /// @param _operator The address that acts on behalf of the owner
-    /// @return approved_ True if `_operator` is an approved operator for `_owner`, false otherwise
-    function isApprovedForAll(address _owner, address _operator) external view returns (bool approved_) {
-        approved_ = s.operators[_owner][_operator];
-    }
-
     /**
         @notice Transfers `_value` amount of an `_id` from the `_from` address to the `_to` address specified (with safety call).
         @dev Caller must be approved to manage the tokens being transferred out of the `_from` account (see "Approval" section of the standard).

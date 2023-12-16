@@ -1,3 +1,5 @@
+import { bodyWearableBack } from "../scripts/svgHelperFunctions";
+
 const fs = require("fs");
 
 export const wearablesRightSvgs = [
@@ -394,23 +396,6 @@ export const wearablesRightSvgs = [
   wearable("385_BlockScannersRight"),
   wearable("386_StaffCharmingRight"),
   wearable("387_RoflnogginRight"),
-  //szn 5 baadges
-  388,
-  389,
-  390,
-  391,
-  392,
-  393,
-  394,
-  395,
-  396,
-  397,
-  398,
-  399,
-  400,
-  401,
-  402,
-  403,
 ];
 
 export const wearablesBackSvgs = [
@@ -807,23 +792,6 @@ export const wearablesBackSvgs = [
   "385_BlockScanners",
   wearable("386_StaffCharmingBack"),
   wearable("387_RoflnogginBack"),
-  //szn 5 baadges
-  388,
-  389,
-  390,
-  391,
-  392,
-  393,
-  394,
-  395,
-  396,
-  397,
-  398,
-  399,
-  400,
-  401,
-  402,
-  403,
 ];
 
 export const wearablesLeftSvgs = [
@@ -1220,23 +1188,6 @@ export const wearablesLeftSvgs = [
   wearable("385_BlockScannersLeft"),
   wearable("386_StaffCharmingLeft"),
   wearable("387_RoflnogginLeft"),
-  //szn 5 baadges
-  388,
-  389,
-  390,
-  391,
-  392,
-  393,
-  394,
-  395,
-  396,
-  397,
-  398,
-  399,
-  400,
-  401,
-  402,
-  403,
 ];
 
 export const wearablesLeftSleeveSvgs = [
@@ -1441,6 +1392,10 @@ export const wearablesLeftSleeveSvgs = [
   sleeveWearableLeft("350_PixelcraftTee"),
   sleeveWearableLeft("362_FAKEShirt"),
   sleeveWearableLeft("366_HeavenlyRobes"),
+  //forge wearables2
+  sleeveWearableLeft("372_PartyDress"),
+  sleeveWearableLeft("373_Overalls"),
+  sleeveWearableLeft("383_SandboxHoodie"),
 ];
 
 export const wearablesRightSleeveSvgs = [
@@ -1641,10 +1596,15 @@ export const wearablesRightSleeveSvgs = [
   sleeveWearableRight("316_MarineJacket"),
   sleeveWearableRight("317_ThaaveSuit"),
   sleeveWearableRight("318_TrackSuit"),
+
   // forge wearables
   sleeveWearableRight("350_PixelcraftTee"),
   sleeveWearableRight("362_FAKEShirt"),
   sleeveWearableRight("366_HeavenlyRobes"),
+
+  sleeveWearableRight("372_PartyDress"),
+  sleeveWearableRight("373_Overalls"),
+  sleeveWearableRight("383_SandboxHoodie"),
 ];
 
 export const wearablesBackSleeveSvgs = [
@@ -1847,6 +1807,10 @@ export const wearablesBackSleeveSvgs = [
   sleeveWearableRight("350_PixelcraftTee"),
   sleeveWearableRight("362_FAKEShirt"),
   sleeveWearableRight("366_HeavenlyRobes"),
+  //forge wearables2
+  sleeveWearableRight("372_PartyDress"),
+  sleeveWearableRight("373_Overalls"),
+  sleeveWearableRight("383_SandboxHoodie"),
 ];
 
 function stripSvg(svg: string) {
