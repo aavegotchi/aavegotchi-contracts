@@ -6,6 +6,7 @@ import {
 } from "../../../../tasks/deployUpgrade";
 
 import {
+  itemManager,
   maticForgeDiamond,
   mumbaiForgeDiamond,
 } from "../../../helperFunctions";
@@ -16,8 +17,7 @@ export async function upgradeForgeMultiTierGeodes() {
   console.log("Upgrading Forge facets for Multi Tier Geodes.");
 
   const multiTierGeodeChanceIO =
-    "tuple(tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) common, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) uncommon, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) rare, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) legendary, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) mythical, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) godlike)"
-
+    "tuple(tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) common, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) uncommon, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) rare, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) legendary, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) mythical, tuple(uint256 common,uint256 uncommon,uint256 rare,uint256 legendary,uint256 mythical,uint256 godlike) godlike)";
 
   const facets: FacetsAndAddSelectors[] = [
     {
@@ -26,7 +26,7 @@ export async function upgradeForgeMultiTierGeodes() {
       addSelectors: [
         `function setGeodeMultiTierWinChanceBips(${multiTierGeodeChanceIO} calldata chances) external`,
         "function setMultiTierGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities, uint8[] calldata rarities) external",
-        "function getGeodeWinChance(uint8 geodeRsm, uint8 prizeRsm) public view returns (uint256)"
+        "function getGeodeWinChance(uint8 geodeRsm, uint8 prizeRsm) public view returns (uint256)",
       ],
       removeSelectors: [
         // "function setGeodePrizes(uint256[] calldata ids, uint256[] calldata quantities) external"
@@ -39,30 +39,25 @@ export async function upgradeForgeMultiTierGeodes() {
         "function numTotalPrizesLeftByRarity() public view",
         "function getAvailablePrizesForRarity(uint8 rsm) public view",
         "function getCurrentPrizeProbabilityForGeode(uint8 geodeRsm) public view",
-        "function getWinRanges(uint256[6] memory winChanceByRarity) public view returns (uint256[] memory)"
-
+        "function getWinRanges(uint256[6] memory winChanceByRarity) public view returns (uint256[] memory)",
       ],
       removeSelectors: [],
     },
     {
       facetName:
         "contracts/Aavegotchi/ForgeDiamond/facets/ForgeFacet.sol:ForgeFacet",
-      addSelectors: [
-        "function getRsmIndex(uint8 rsm) public pure"
-      ],
+      addSelectors: ["function getRsmIndex(uint8 rsm) public pure"],
       removeSelectors: [],
     },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
 
-  const signerAddress = await (await ethers.getSigners())[0].getAddress();
-
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: signerAddress,
+    diamondUpgrader: itemManager,
     diamondAddress: isMumbai ? mumbaiForgeDiamond : maticForgeDiamond,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     freshDeployment: false,
   };
