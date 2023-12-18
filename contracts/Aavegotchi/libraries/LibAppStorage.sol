@@ -232,6 +232,7 @@ struct ItemDepositId {
 }
 
 struct GotchiEquippedItemsInfo {
+    // wearableTokenId => equippedItemIdToDelegationInfo
     mapping(uint256 => EquippedDelegatedItemInfo) equippedItemIdToDelegationInfo;
     uint256 equippedDelegateItemsCount;
 }
@@ -362,7 +363,7 @@ struct AppStorage {
     // grantor => depositId  => RoleAssignment
     mapping(address =>  mapping(uint256 => ISftRolesRegistry.RoleData)) itemsRoleAssignments;
     // grantor => tokenAddress => operator => isApproved
-    mapping(address => mapping(address => mapping(address => bool))) itemsTokenApprovals;
+    mapping(address => mapping(address => mapping(address => bool))) itemsRoleApprovals;
     
 
     // Auxilliary structs for Items Roles Registry

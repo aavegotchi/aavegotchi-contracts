@@ -151,7 +151,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     function setRoleApprovalForAll(address _tokenAddress, address _operator, bool _isApproved) external override {
-        s.itemsTokenApprovals[LibMeta.msgSender()][_tokenAddress][_operator] = _isApproved;
+        s.itemsRoleApprovals[LibMeta.msgSender()][_tokenAddress][_operator] = _isApproved;
         emit RoleApprovalForAll(_tokenAddress, _operator, _isApproved);
     }
 
@@ -177,7 +177,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     function isRoleApprovedForAll(address _tokenAddress, address _grantor, address _operator) public view override returns (bool) {
-        return s.itemsTokenApprovals[_grantor][_tokenAddress][_operator];
+        return s.itemsRoleApprovals[_grantor][_tokenAddress][_operator];
     }
 
     /** Helper Functions **/

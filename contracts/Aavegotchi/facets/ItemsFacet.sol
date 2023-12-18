@@ -228,7 +228,7 @@ contract ItemsFacet is Modifiers {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
 
-        GotchiEquippedItemsInfo storage _equippedItemsInfo = s.gotchiEquippedItemsInfo[_tokenId];
+        
 
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             uint256 toEquipId = _wearablesToEquip[slot];
@@ -247,7 +247,7 @@ contract ItemsFacet is Modifiers {
 
             if (existingEquippedWearableId != 0 && s.itemTypes[existingEquippedWearableId].canBeTransferred) {
                 // remove wearable from Aavegotchi and transfer item to owner
-                _removeWearableFromGotchi(_tokenId, existingEquippedWearableId, _equippedItemsInfo);
+                _removeWearableFromGotchi(_tokenId, existingEquippedWearableId);
             }
 
             //If a wearable is being equipped
@@ -289,7 +289,7 @@ contract ItemsFacet is Modifiers {
 
                 if (nftBalance < neededBalance) {
                     //Transfer to Aavegotchi
-                    _addWearableToGotchi(_depositIds[slot], _tokenId, toEquipId, neededBalance - nftBalance, _equippedItemsInfo);
+                    _addWearableToGotchi(_depositIds[slot], _tokenId, toEquipId, neededBalance - nftBalance);
                 }
             }
         }
@@ -300,9 +300,9 @@ contract ItemsFacet is Modifiers {
         ItemDepositId memory _depositId,
         uint256 _gotchiId,
         uint256 _toEquipWearableId,
-        uint256 _balToTransfer,
-        GotchiEquippedItemsInfo storage _equippedItemsInfo
+        uint256 _balToTransfer
     ) internal {
+        GotchiEquippedItemsInfo storage _equippedItemsInfo = s.gotchiEquippedItemsInfo[_gotchiId];
         address _sender = LibMeta.msgSender();
         
         if (_depositId.nonce != 0) {
@@ -330,9 +330,9 @@ contract ItemsFacet is Modifiers {
     
     function _removeWearableFromGotchi(
         uint256 _gotchiId,
-        uint256 _existingEquippedWearableId,
-        GotchiEquippedItemsInfo storage _equippedItemsInfo
+        uint256 _existingEquippedWearableId
     ) internal {
+        GotchiEquippedItemsInfo storage _equippedItemsInfo = s.gotchiEquippedItemsInfo[_gotchiId];
         address _sender = LibMeta.msgSender();
 
         LibItems.removeFromParent(address(this), _gotchiId, _existingEquippedWearableId, 1);
