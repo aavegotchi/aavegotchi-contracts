@@ -339,9 +339,8 @@ contract ItemsFacet is Modifiers {
         ItemDepositId storage _depositId = _equippedItemsInfo.equippedItemIdToDelegationInfo[_existingEquippedWearableId].depositId;
         if (_depositId.nonce != 0) {
             // remove wearable from Aavegotchi and delete delegation
-            
             uint256 _delegatedBalance = _equippedItemsInfo.equippedItemIdToDelegationInfo[_existingEquippedWearableId].balance;
-            
+
             if(_delegatedBalance == 1) {
                 delete _equippedItemsInfo.equippedItemIdToDelegationInfo[_existingEquippedWearableId];
                 s.depositIdToEquippedGotchis[_depositId.grantor][_depositId.nonce].remove(_gotchiId);
@@ -352,7 +351,6 @@ contract ItemsFacet is Modifiers {
             s.itemsDepositsUnequippedBalance[_depositId.grantor][_depositId.nonce] += 1;
             _equippedItemsInfo.equippedDelegateItemsCount -= 1;
         } else {
-
             // Remove wearable from Aavegotchi and transfer item to owner
             LibItems.addToOwner(_sender, _existingEquippedWearableId, 1);
             IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(_sender, address(this), _sender, _existingEquippedWearableId, 1);
