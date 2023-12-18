@@ -25,9 +25,13 @@ export interface ItemDepositId {
 export function generateRandomInt() {
   return Math.floor(Math.random() * 1000 * 1000) + 1;
 }
-
-export const wearableIds = [201, 224, 218, 211];
-export const wearableAmounts = [2000, 2000, 2000, 2000];
+// 201 - hand - slot 4,5
+// 224 - eye - slot 2
+// 218 - head - slot 3
+// 211 - head - slot 3
+// 200 - body - slot 0
+// 152 - pet - slot 6
+export const wearableIds = [201, 224, 218, 211, 200, 152];
 export const aavegotchiDiamondAddress =
   "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
 export const wearableDiamondAddress =
