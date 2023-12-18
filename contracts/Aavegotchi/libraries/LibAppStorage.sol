@@ -221,20 +221,15 @@ struct ERC721BuyOrder {
     bool[] validationOptions;
 }
 
-struct EquippedDelegatedItemInfo {
-    ItemDepositId depositId;
-    uint256 balance;
-}
-
 struct ItemDepositId {
     uint256 nonce;
     address grantor;
 }
 
 struct GotchiEquippedItemsInfo {
-    // wearableTokenId => equippedItemIdToDelegationInfo
-    mapping(uint256 => EquippedDelegatedItemInfo) equippedItemIdToDelegationInfo;
-    uint256 equippedDelegateItemsCount;
+    // slotPosition => depositId
+    mapping(uint256 => ItemDepositId) equippedDelegatedItems;
+    uint256 equippedDelegatedItemsCount;
 }
 
 struct AppStorage {

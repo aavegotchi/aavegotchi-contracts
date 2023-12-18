@@ -9,7 +9,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
-import {Modifiers, ItemType, EQUIPPED_WEARABLE_SLOTS, EquippedDelegatedItemInfo} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ItemType, EQUIPPED_WEARABLE_SLOTS, GotchiEquippedItemsInfo} from "../libraries/LibAppStorage.sol";
 import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import {ERC1155Holder, ERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import {IEventHandlerFacet} from "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
@@ -208,30 +208,29 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         uint256 _equippedGotchisLength = s.depositIdToEquippedGotchis[_grantor][_nonce].length();
 
         for(uint256 i; i < _equippedGotchisLength; i++) {
-            uint256 _gotchiId = s.depositIdToEquippedGotchis[_grantor][_nonce].at(i);
-            _unequipDelegatedWearable(_gotchiId, _tokenIdToUnequip);
+            uint256 _gotchiId = s.depositIdToEquippedGotchis[_grantor][_depositId].at(i);
+            _unequipDelegatedWearable(_gotchiId, _tokenIdToUnequip, _grantor, _depositId);
         }
 
         delete s.depositIdToEquippedGotchis[_grantor][_nonce];
     }
 
-    function _unequipDelegatedWearable(uint256 _gotchiId, uint256 _tokenIdToUnequip) internal {
-        EquippedDelegatedItemInfo memory _equippedDelegatedItemInfo = s.gotchiEquippedItemsInfo[_gotchiId].equippedItemIdToDelegationInfo[_tokenIdToUnequip];
-        uint256 _balanceToUnequip = _equippedDelegatedItemInfo.balance;
-        if (_balanceToUnequip == 0) return; // If balance is 0, it means the item is not equipped, so we can return
+    function _unequipDelegatedWearable(uint256 _gotchiId, uint256 _tokenIdToUnequip, address _grantor, uint256 _nonce) internal {
+        GotchiEquippedItemsInfo storage _gotchiInfo = s.gotchiEquippedItemsInfo[_gotchiId];
 
         uint256 _unequippedBalance;
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
-            if (_unequippedBalance == _balanceToUnequip) break;
             if (s.aavegotchis[_gotchiId].equippedWearables[slot] != _tokenIdToUnequip) continue;
+            if(_gotchiInfo.equippedDelegatedItems[slot].nonce != _nonce || _gotchiInfo.equippedDelegatedItems[slot].grantor != _grantor) continue;
+            
             s.aavegotchis[_gotchiId].equippedWearables[slot] = 0;
+            delete _gotchiInfo.equippedDelegatedItems[slot];
             _unequippedBalance++;
         }
 
         LibItems.removeFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
         emit LibERC1155.TransferFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
-        delete s.gotchiEquippedItemsInfo[_gotchiId].equippedItemIdToDelegationInfo[_tokenIdToUnequip];
-        s.gotchiEquippedItemsInfo[_gotchiId].equippedDelegateItemsCount -= _unequippedBalance;
+        _gotchiInfo.equippedDelegatedItemsCount -= _unequippedBalance;
     }
 
     function _transferFrom(address _from, address _to, address _tokenAddress, uint256 _tokenId, uint256 _tokenAmount) internal {
