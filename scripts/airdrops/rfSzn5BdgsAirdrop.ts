@@ -40,7 +40,7 @@ export async function main() {
 
   //Upload SVGs
   let ids: number[] = [];
-  for (let i = 370; i <= 385; i++) {
+  for (let i = 388; i <= 403; i++) {
     ids.push(i);
   }
   let upload = await updateBaadgeTaskForSvgType(baadges, "sZN5Baadges", ids);
@@ -216,21 +216,21 @@ export async function main() {
   console.log("Begin airdrops!");
 
   //comment out for testing
-  for (let index = 0; index < batches; index++) {
-    console.log("Airdropping batch:", index);
-    let gotchiBatch = raankingNumbersArray.slice(
-      index * perBatch,
-      (index + 1) * perBatch
-    );
+  // for (let index = 0; index < batches; index++) {
+  //   console.log("Airdropping batch:", index);
+  //   let gotchiBatch = raankingNumbersArray.slice(
+  //     index * perBatch,
+  //     (index + 1) * perBatch
+  //   );
 
-    let plaayerAirdrop = await airdropTaskForBaadges(
-      [itemTypes[9]],
-      gotchiBatch
-    );
+  //   let plaayerAirdrop = await airdropTaskForBaadges(
+  //     [itemTypes[9]],
+  //     gotchiBatch
+  //   );
 
-    await run("airdropBaadges", plaayerAirdrop);
-    console.log("Complete Airdropping batch:", index);
-  }
+  //   await run("airdropBaadges", plaayerAirdrop);
+  //   console.log("Complete Airdropping batch:", index);
+  // }
 }
 
 if (require.main === module) {

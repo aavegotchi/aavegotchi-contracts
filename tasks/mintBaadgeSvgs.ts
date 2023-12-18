@@ -6,6 +6,7 @@ import {
   getRelayerSigner,
   itemManagerAlt,
   maticDiamondAddress,
+  xpRelayerAddress,
 } from "../scripts/helperFunctions";
 import { DAOFacet } from "../typechain/DAOFacet";
 import { BigNumberish } from "@ethersproject/bignumber";
@@ -16,14 +17,14 @@ export interface MintBaadgeTaskArgs {
   itemManager: string;
   itemFile: string;
   uploadItemTypes: boolean;
-  sendToItemManager: boolean;
+  sendToRelayer: boolean;
 }
 
 task("mintBaadgeSvgs", "Adds itemTypes and SVGs")
   .addParam("itemManager", "Address of the item manager", "0")
   .addParam("itemFile", "File name of the items to add")
   .addFlag("uploadItemTypes", "Upload itemTypes")
-  .addFlag("sendToItemManager", "Mint and send the items to itemManager")
+  .addFlag("sendToRelayer", "Mint and send the items to itemManager")
 
   .setAction(
     async (taskArgs: MintBaadgeTaskArgs, hre: HardhatRuntimeEnvironment) => {
@@ -34,8 +35,8 @@ task("mintBaadgeSvgs", "Adds itemTypes and SVGs")
       }
 
       const itemFile: string = taskArgs.itemFile;
-      const itemManager = taskArgs.itemManager;
-      const sendToItemManager = taskArgs.sendToItemManager;
+
+      const sendToRelayer = taskArgs.sendToRelayer;
       const uploadItemTypes = taskArgs.uploadItemTypes;
 
       const {
@@ -72,7 +73,7 @@ task("mintBaadgeSvgs", "Adds itemTypes and SVGs")
         console.log("Items were added:", tx.hash);
       }
 
-      if (sendToItemManager) {
+      if (sendToRelayer) {
         const itemIds: BigNumberish[] = [];
         const quantities: BigNumberish[] = [];
         currentItemTypes.forEach((itemType: ItemTypeOutput) => {
@@ -82,9 +83,9 @@ task("mintBaadgeSvgs", "Adds itemTypes and SVGs")
 
         console.log("final quantities:", itemIds, quantities);
 
-        console.log(`Mint prize items to Item Manager ${itemManager}`);
+        console.log(`Mint prize items to Defender Relayer ${xpRelayerAddress}`);
 
-        tx = await daoFacet.mintItems(itemManager, itemIds, quantities, {
+        tx = await daoFacet.mintItems(xpRelayerAddress, itemIds, quantities, {
           gasPrice: gasPrice,
         });
         receipt = await tx.wait();

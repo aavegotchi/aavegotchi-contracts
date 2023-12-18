@@ -11,7 +11,7 @@ import { dataArgs as dataArgs3 } from "../data/airdrops/rarityfarming/szn5/rnd3"
 import { dataArgs as dataArgs4 } from "../data/airdrops/rarityfarming/szn5/rnd4";
 
 import { getRfSznTypeRanking } from "../scripts/helperFunctions";
-
+import { main } from "../scripts/airdrops/rfSzn5BdgsAirdrop";
 describe("Airdrop SZN5 Baadges", async function () {
   this.timeout(200000000);
 
@@ -55,7 +55,7 @@ describe("Airdrop SZN5 Baadges", async function () {
 
     xpRFSzn5 = await getRfSznTypeRanking(xpArray, "xp");
 
-    //  await main();
+    await main();
   });
 
   it.only("Should airdrop szn5 champion baadges", async function () {

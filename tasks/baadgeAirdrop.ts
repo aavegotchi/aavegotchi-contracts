@@ -7,6 +7,7 @@ import {
   itemManagerAlt,
   gasPrice,
   getRelayerSigner,
+  xpRelayerAddress,
 } from "../scripts/helperFunctions";
 import { ItemsTransferFacet } from "../typechain";
 
@@ -67,7 +68,7 @@ task(
       )) as ItemsTransferFacet;
 
       const tx = await itemsTransferFacet.batchBatchTransferToParent(
-        itemManagerAlt,
+        xpRelayerAddress,
         maticDiamondAddress,
         tokenIds,
         batchIds,
