@@ -19,7 +19,6 @@ import {
   LargeGotchiOwner,
   LargeGotchiOwnerAavegotchis,
   aavegotchiDiamondAddress,
-  wearableAmounts,
   wearableDiamondAddress,
   wearableIds,
   RoleAssignment,
@@ -35,7 +34,7 @@ const { expect } = chai;
 
 const AddressZero = ethers.constants.AddressZero;
 
-describe("ItemsRolesRegistryFacet", async () => {
+describe("ItemsFacet", async () => {
   let ItemsRolesRegistryFacet: Contract;
   let grantor: SignerWithAddress;
   let grantee: Signer;
@@ -277,7 +276,9 @@ describe("ItemsRolesRegistryFacet", async () => {
           )
       )
         .to.emit(libERC1155, "TransferToParent")
-        .withArgs(aavegotchiDiamondAddress, gotchiId, wearableIds[0], 2)
+        .withArgs(aavegotchiDiamondAddress, gotchiId, wearableIds[0], 1)
+        .to.emit(libERC1155, "TransferToParent")
+        .withArgs(aavegotchiDiamondAddress, gotchiId, wearableIds[0], 1)
         .to.not.emit(libEventHandler, "TransferSingle");
 
       await expect(
@@ -350,7 +351,14 @@ describe("ItemsRolesRegistryFacet", async () => {
           LargeGotchiOwner,
           aavegotchiDiamondAddress,
           wearableIds[0],
-          2
+          1
+        ).to.emit(libEventHandler, "TransferSingle")
+        .withArgs(
+          LargeGotchiOwner,
+          LargeGotchiOwner,
+          aavegotchiDiamondAddress,
+          wearableIds[0],
+          1
         );
 
       await expect(
@@ -1001,7 +1009,14 @@ describe("ItemsRolesRegistryFacet", async () => {
           LargeGotchiOwner,
           aavegotchiDiamondAddress,
           wearableIds[0],
-          2
+          1
+        ).to.emit(libEventHandler, "TransferSingle")
+        .withArgs(
+          LargeGotchiOwner,
+          LargeGotchiOwner,
+          aavegotchiDiamondAddress,
+          wearableIds[0],
+          1
         )
 
       await expect(aavegotchiFacet.connect(grantee).transferFrom(granteeAddress, grantor.address, anotherGotchiId))
