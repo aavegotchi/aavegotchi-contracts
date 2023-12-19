@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
-import {LibAppStorage, Modifiers, ItemType, Aavegotchi, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, ItemDepositId, GotchiEquippedItemsInfo} from "../libraries/LibAppStorage.sol";
+import {LibAppStorage, Modifiers, ItemType, Aavegotchi, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, ItemDepositId, GotchiEquippedItemsInfo, UserRoleAssignmentsInfo} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -298,15 +298,17 @@ contract ItemsFacet is Modifiers {
         address _sender = LibMeta.msgSender();
         
         if (_depositId.nonce != 0) {
-            require(s.itemsRoleAssignments[_depositId.grantor][_depositId.nonce].grantee == _sender, "ItemsFacet: Wearable not delegated to sender or depositId not valid");
-            require(s.itemsDeposits[_depositId.grantor][_depositId.nonce].tokenId == _toEquipWearableId, "ItemsFacet: Delegated Wearable not of this delegation");
-            require(s.itemsDepositsUnequippedBalance[_depositId.grantor][_depositId.nonce] >= 1, "ItemsFacet: Not enough delegated balance");
-            require(s.itemsRoleAssignments[_depositId.grantor][_depositId.nonce].expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
+            UserRoleAssignmentsInfo storage _userInfo = s.userRoleAssignmentsInfo[_depositId.grantor][_depositId.nonce];
+
+            require(_userInfo.itemsRoleAssignments.grantee == _sender, "ItemsFacet: Wearable not delegated to sender or depositId not valid");
+            require(_userInfo.itemsDeposits.tokenId == _toEquipWearableId, "ItemsFacet: Delegated Wearable not of this delegation");
+            require(_userInfo.itemsDepositsUnequippedBalance >= 1, "ItemsFacet: Not enough delegated balance");
+            require(_userInfo.itemsRoleAssignments.expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
             
             _gotchiInfo.equippedDelegatedItems[_slot] = _depositId;
-            s.itemsDepositsUnequippedBalance[_depositId.grantor][_depositId.nonce] -= 1;
             _gotchiInfo.equippedDelegatedItemsCount += 1;
-            s.depositIdToEquippedGotchis[_depositId.grantor][_depositId.nonce].add(_gotchiId);
+            _userInfo.itemsDepositsUnequippedBalance -= 1;
+            _userInfo.depositIdToEquippedGotchis.add(_gotchiId);
         } else {
             require(s.ownerItemBalances[_sender][_toEquipWearableId] >= 1, "ItemsFacet: Wearable isn't in inventory");
 
@@ -334,15 +336,22 @@ contract ItemsFacet is Modifiers {
         
         if (_depositId.nonce != 0) {
             // remove wearable from Aavegotchi and delete delegation
-
-            if(!(_slot == LibItems.WEARABLE_SLOT_HAND_LEFT 
-                && (_gotchiInfo.equippedDelegatedItems[LibItems.WEARABLE_SLOT_HAND_RIGHT].nonce == _depositId.nonce
-                && _gotchiInfo.equippedDelegatedItems[LibItems.WEARABLE_SLOT_HAND_RIGHT].grantor == _depositId.grantor))) {
-                s.depositIdToEquippedGotchis[_depositId.grantor][_depositId.nonce].remove(_gotchiId);
+            UserRoleAssignmentsInfo storage _userInfo = s.userRoleAssignmentsInfo[_depositId.grantor][_depositId.nonce];
+            bool _sameHandDelegationEquipped = (
+                    _slot == LibItems.WEARABLE_SLOT_HAND_LEFT 
+                    && _gotchiInfo.equippedDelegatedItems[LibItems.WEARABLE_SLOT_HAND_RIGHT].nonce == _depositId.nonce
+                    && _gotchiInfo.equippedDelegatedItems[LibItems.WEARABLE_SLOT_HAND_RIGHT].grantor == _depositId.grantor) 
+                || 
+                (   _slot == LibItems.WEARABLE_SLOT_HAND_RIGHT
+                    && _gotchiInfo.equippedDelegatedItems[LibItems.WEARABLE_SLOT_HAND_LEFT].nonce == _depositId.nonce
+                    && _gotchiInfo.equippedDelegatedItems[LibItems.WEARABLE_SLOT_HAND_LEFT].grantor == _depositId.grantor);
+                
+            if(!_sameHandDelegationEquipped) {
+                _userInfo.depositIdToEquippedGotchis.remove(_gotchiId);
             }
             
             delete _gotchiInfo.equippedDelegatedItems[_slot];
-            s.itemsDepositsUnequippedBalance[_depositId.grantor][_depositId.nonce] += 1;
+            _userInfo.itemsDepositsUnequippedBalance += 1;
             _gotchiInfo.equippedDelegatedItemsCount -= 1;
         } else {
             // Remove wearable from Aavegotchi and transfer item to owner

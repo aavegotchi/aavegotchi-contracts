@@ -232,6 +232,13 @@ struct GotchiEquippedItemsInfo {
     uint256 equippedDelegatedItemsCount;
 }
 
+struct UserRoleAssignmentsInfo {
+ISftRolesRegistry.DepositInfo itemsDeposits;
+ISftRolesRegistry.RoleData itemsRoleAssignments;
+EnumerableSet.UintSet depositIdToEquippedGotchis;
+uint256 itemsDepositsUnequippedBalance;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -353,19 +360,12 @@ struct AppStorage {
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
     
     // Items Roles Registry
-    // grantor => depositId => DepositInfo
-    mapping(address => mapping(uint256 => ISftRolesRegistry.DepositInfo)) itemsDeposits;
-    // grantor => depositId  => RoleAssignment
-    mapping(address =>  mapping(uint256 => ISftRolesRegistry.RoleData)) itemsRoleAssignments;
+    // grantor => nonce => userRoleAssignmentsInfo
+    mapping(address => mapping(uint256 => UserRoleAssignmentsInfo)) userRoleAssignmentsInfo;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsRoleApprovals;
     
-
     // Auxilliary structs for Items Roles Registry
-    // grantor => depositId => gotchiIds
-    mapping(address => mapping(uint256 => EnumerableSet.UintSet)) depositIdToEquippedGotchis;
-    // grantor => depositId => remainingBalance
-    mapping(address => mapping(uint256 => uint256)) itemsDepositsUnequippedBalance;
     // gotchiId => equippedItemsInfo
     mapping(uint256 => GotchiEquippedItemsInfo) gotchiEquippedItemsInfo;
 }
