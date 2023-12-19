@@ -230,12 +230,14 @@ contract ItemsFacet is Modifiers {
         GotchiEquippedItemsInfo storage _gotchiInfo = s.gotchiEquippedItemsInfo[_tokenId];
 
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
-                
-            uint256 existingEquippedWearableId = aavegotchi.equippedWearables[slot];
+            
             uint256 toEquipId = _wearablesToEquip[slot];
-            ItemDepositId memory _depositIdToEquip = _depositsIdToEquip[slot];
-            ItemDepositId storage _existingEquippedDepositId = s.gotchiEquippedItemsInfo[_tokenId].equippedDelegatedItems[slot];
+            uint256 existingEquippedWearableId = aavegotchi.equippedWearables[slot];
             bool _sameWearablesIds = toEquipId == existingEquippedWearableId;
+
+            ItemDepositId memory _depositIdToEquip = _depositsIdToEquip[slot];
+            ItemDepositId storage _existingEquippedDepositId = _gotchiInfo.equippedDelegatedItems[slot];
+
             //If the new wearable value is equal to the current equipped wearable in that slot
             //do nothing
             if (_sameWearablesIds
@@ -312,7 +314,7 @@ contract ItemsFacet is Modifiers {
             IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(_sender, _sender, address(this), _toEquipWearableId, 1);
             LibERC1155Marketplace.updateERC1155Listing(address(this), _toEquipWearableId, _sender);
         }
-       
+
         LibItems.addToParent(address(this), _gotchiId, _toEquipWearableId, 1);
         emit LibERC1155.TransferToParent(address(this), _gotchiId, _toEquipWearableId, 1);
     }
