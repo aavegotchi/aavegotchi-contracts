@@ -219,7 +219,7 @@ contract ItemsFacet is Modifiers {
     function _equipWearables(
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
-        ItemDepositId[EQUIPPED_WEARABLE_SLOTS] memory _depositIdToEquip
+        ItemDepositId[EQUIPPED_WEARABLE_SLOTS] memory _depositsIdToEquip
     )
         internal
         onlyAavegotchiOwner(_tokenId)
@@ -227,18 +227,20 @@ contract ItemsFacet is Modifiers {
     {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
+        GotchiEquippedItemsInfo storage _gotchiInfo = s.gotchiEquippedItemsInfo[_tokenId];
 
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
                 
             uint256 existingEquippedWearableId = aavegotchi.equippedWearables[slot];
             uint256 toEquipId = _wearablesToEquip[slot];
+            ItemDepositId memory _depositIdToEquip = _depositsIdToEquip[slot];
             ItemDepositId storage _existingEquippedDepositId = s.gotchiEquippedItemsInfo[_tokenId].equippedDelegatedItems[slot];
-
+            bool _sameWearablesIds = toEquipId == existingEquippedWearableId;
             //If the new wearable value is equal to the current equipped wearable in that slot
             //do nothing
-            if (toEquipId == existingEquippedWearableId 
-                && _existingEquippedDepositId.nonce == _depositIdToEquip[slot].nonce 
-                && _existingEquippedDepositId.grantor == _depositIdToEquip[slot].grantor) {
+            if (_sameWearablesIds
+                && _existingEquippedDepositId.nonce == _depositIdToEquip.nonce 
+                && _existingEquippedDepositId.grantor == _depositIdToEquip.grantor) {
                 continue;
             }
 
@@ -246,10 +248,12 @@ contract ItemsFacet is Modifiers {
             aavegotchi.equippedWearables[slot] = uint16(toEquipId);
 
             //If a wearable was equipped in this slot and can be transferred, transfer back to owner.
-
             if (existingEquippedWearableId != 0 && s.itemTypes[existingEquippedWearableId].canBeTransferred) {
+                if(_sameWearablesIds && (slot == LibItems.WEARABLE_SLOT_HAND_LEFT || slot == LibItems.WEARABLE_SLOT_HAND_RIGHT)){
+                   delete aavegotchi.equippedWearables[slot];
+                }
                 // remove wearable from Aavegotchi and transfer item to owner
-                _removeWearableFromGotchi(_tokenId, existingEquippedWearableId, slot);
+                _removeWearableFromGotchi(_tokenId, existingEquippedWearableId, slot, _gotchiInfo);
             }
 
             //If a wearable is being equipped
@@ -275,7 +279,7 @@ contract ItemsFacet is Modifiers {
                 }
 
                 //Transfer to Aavegotchi
-                _addWearableToGotchi(_depositIdToEquip[slot], _tokenId, toEquipId, slot);
+                _addWearableToGotchi(_depositIdToEquip, _tokenId, toEquipId, slot, _gotchiInfo);
             }
         }
         LibAavegotchi.interact(_tokenId);
@@ -285,9 +289,10 @@ contract ItemsFacet is Modifiers {
         ItemDepositId memory _depositId,
         uint256 _gotchiId,
         uint256 _toEquipWearableId,
-        uint256 _slot
+        uint256 _slot,
+        GotchiEquippedItemsInfo storage _gotchiInfo
     ) internal {
-        GotchiEquippedItemsInfo storage _gotchiInfo = s.gotchiEquippedItemsInfo[_gotchiId];
+        
         address _sender = LibMeta.msgSender();
         
         if (_depositId.nonce != 0) {
@@ -307,7 +312,7 @@ contract ItemsFacet is Modifiers {
             IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(_sender, _sender, address(this), _toEquipWearableId, 1);
             LibERC1155Marketplace.updateERC1155Listing(address(this), _toEquipWearableId, _sender);
         }
-
+       
         LibItems.addToParent(address(this), _gotchiId, _toEquipWearableId, 1);
         emit LibERC1155.TransferToParent(address(this), _gotchiId, _toEquipWearableId, 1);
     }
@@ -315,15 +320,16 @@ contract ItemsFacet is Modifiers {
     function _removeWearableFromGotchi(
         uint256 _gotchiId,
         uint256 _existingEquippedWearableId,
-        uint256 _slot
+        uint256 _slot,
+        GotchiEquippedItemsInfo storage _gotchiInfo
     ) internal {
-        GotchiEquippedItemsInfo storage _gotchiInfo = s.gotchiEquippedItemsInfo[_gotchiId];
-        address _sender = LibMeta.msgSender();
-
+       
         LibItems.removeFromParent(address(this), _gotchiId, _existingEquippedWearableId, 1);
         emit LibERC1155.TransferFromParent(address(this), _gotchiId, _existingEquippedWearableId, 1);
-
+        
+        address _sender = LibMeta.msgSender();
         ItemDepositId storage _depositId = _gotchiInfo.equippedDelegatedItems[_slot];
+        
         if (_depositId.nonce != 0) {
             // remove wearable from Aavegotchi and delete delegation
 
