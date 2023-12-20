@@ -60,7 +60,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     ) {
         require(
             _grantee != address(0) && _grantee == s.recordInfo[_recordId].roleAssignment.grantee,
-            'SftRolesRegistry: grantee mismatch'
+            'ItemsRolesRegistryFacet: grantee mismatch'
         );
         _;
     }
@@ -73,7 +73,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         uint256 _tokenId,
         uint256 _tokenAmount
     ) external override onlyWearables(_tokenAddress, _tokenId) onlyOwnerOrApproved(_grantor, _tokenAddress) returns (uint256 recordId_) {
-        require(_tokenAmount > 0, 'SftRolesRegistry: tokenAmount must be greater than zero');
+        require(_tokenAmount > 0, 'ItemsRolesRegistryFacet: tokenAmount must be greater than zero');
         recordId_ = _createRecord(_grantor, _tokenAddress, _tokenId, _tokenAmount);
     }
 
@@ -97,7 +97,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     function revokeRoleFrom(uint256 _recordId, bytes32 _role, address _grantee) sameGrantee(_recordId, _role, _grantee) external override {
-        require(_role == UNIQUE_ROLE, 'SftRolesRegistry: role not supported');
+        require(_role == UNIQUE_ROLE, 'ItemsRolesRegistryFacet: role not supported');
         RecordInfo storage _recordInfo = s.recordInfo[_recordId];
         RoleAssignment storage _roleAssignment = _recordInfo.roleAssignment;
         Record storage _record = _recordInfo.record;
@@ -105,7 +105,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         address caller = _findCaller(_record.grantor, _roleAssignment.grantee, _record.tokenAddress);
         if (_roleAssignment.expirationDate > block.timestamp && !_roleAssignment.revocable) {
             // if role is not expired and is not revocable, only the grantee can revoke it
-            require(caller == _roleAssignment.grantee, "ItemsRolesRegistryFacet: nonce is not expired or is not revocable");
+            require(caller == _roleAssignment.grantee, "ItemsRolesRegistryFacet: role is not expired and is not revocable");
         }
 
         _unequipAllDelegatedWearables(_recordId, _record.tokenId);
@@ -120,7 +120,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     ) external override onlyOwnerOrApproved(s.recordInfo[_recordId].record.grantor, s.recordInfo[_recordId].record.tokenAddress) {
         RecordInfo storage _recordInfo = s.recordInfo[_recordId];
         Record memory _record = _recordInfo.record;
-        require(_record.tokenAmount > 0, "ItemsRolesRegistryFacet: nonce does not exist");
+        require(_record.tokenAmount > 0, "ItemsRolesRegistryFacet: record does not exist");
         require(
             _recordInfo.roleAssignment.expirationDate < block.timestamp || _recordInfo.roleAssignment.revocable,
             "ItemsRolesRegistryFacet: token has an active role"
