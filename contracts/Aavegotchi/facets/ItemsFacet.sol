@@ -28,7 +28,7 @@ contract ItemsFacet is Modifiers {
         uint256 balance;
     }
 
-    event EquipDelegatedWearables(uint256 indexed _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] _oldWearables, uint16[EQUIPPED_WEARABLE_SLOTS] _newWearables, uint256[EQUIPPED_WEARABLE_SLOTS] __recordIds);
+    event EquipDelegatedWearables(uint256 indexed _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] _oldWearables, uint16[EQUIPPED_WEARABLE_SLOTS] _newWearables, uint256[EQUIPPED_WEARABLE_SLOTS] _recordIds);
 
     ///@notice Returns balance for each item that exists for an account
     ///@param _account Address of the account to query
@@ -192,9 +192,9 @@ contract ItemsFacet is Modifiers {
     )
         external
     {
-        uint256[EQUIPPED_WEARABLE_SLOTS] memory __recordIds;
+        uint256[EQUIPPED_WEARABLE_SLOTS] memory _recordIds;
         emit EquipWearables(_tokenId, s.aavegotchis[_tokenId].equippedWearables, _wearablesToEquip);
-        _equipWearables(_tokenId, _wearablesToEquip, __recordIds);
+        _equipWearables(_tokenId, _wearablesToEquip, _recordIds);
     }
 
     ///@notice Allow the owner of a claimed aavegotchi to equip/unequip wearables to his aavegotchi
@@ -203,23 +203,23 @@ contract ItemsFacet is Modifiers {
     ///@dev A wearable cannot be equipped in the wrong slot
     ///@param _tokenId The identifier of the aavegotchi to make changes to
     ///@param _wearablesToEquip An array containing the identifiers of the wearables to equip
-    ///@param __recordIds An array containing the identifiers of the deposited wearables to equip
+    ///@param _recordIds An array containing the identifiers of the deposited wearables to equip
     function equipDelegatedWearables(
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
-        uint256[EQUIPPED_WEARABLE_SLOTS] calldata __recordIds
+        uint256[EQUIPPED_WEARABLE_SLOTS] calldata _recordIds
     )
         external
     {
-        emit EquipDelegatedWearables(_tokenId, s.aavegotchis[_tokenId].equippedWearables, _wearablesToEquip, __recordIds);
-        _equipWearables(_tokenId, _wearablesToEquip, __recordIds);
+        emit EquipDelegatedWearables(_tokenId, s.aavegotchis[_tokenId].equippedWearables, _wearablesToEquip, _recordIds);
+        _equipWearables(_tokenId, _wearablesToEquip, _recordIds);
     }
 
 
     function _equipWearables(
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
-        uint256[EQUIPPED_WEARABLE_SLOTS] memory __recordIdsToEquip
+        uint256[EQUIPPED_WEARABLE_SLOTS] memory _recordIdsToEquip
     )
         internal
         onlyAavegotchiOwner(_tokenId)
@@ -235,7 +235,7 @@ contract ItemsFacet is Modifiers {
             uint256 existingEquippedWearableId = aavegotchi.equippedWearables[slot];
             bool _sameWearablesIds = toEquipId == existingEquippedWearableId;
 
-            uint256 _recordIdToEquip = __recordIdsToEquip[slot];
+            uint256 _recordIdToEquip = _recordIdsToEquip[slot];
             uint256 _existingEquippedRecordId = _gotchiInfo.equippedDelegatedItems[slot];
 
             //If the new wearable value is equal to the current equipped wearable in that slot
