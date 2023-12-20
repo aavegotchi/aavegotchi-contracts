@@ -233,10 +233,10 @@ struct GotchiEquippedItemsInfo {
 }
 
 struct UserDelegatedItemsInfo {
-ISftRolesRegistry.DepositInfo deposit;
-ISftRolesRegistry.RoleData roleAssignment;
-EnumerableSet.UintSet equippedGotchis;
-uint256 availableBalance;
+    ISftRolesRegistry.DepositInfo deposit;
+    ISftRolesRegistry.RoleData roleAssignment;
+    EnumerableSet.UintSet equippedGotchis;
+    uint256 availableBalance;
 }
 
 struct AppStorage {

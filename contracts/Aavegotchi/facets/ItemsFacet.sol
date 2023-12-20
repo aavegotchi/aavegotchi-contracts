@@ -219,7 +219,7 @@ contract ItemsFacet is Modifiers {
     function _equipWearables(
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
-        ItemDepositId[EQUIPPED_WEARABLE_SLOTS] memory _depositsIdToEquip
+        ItemDepositId[EQUIPPED_WEARABLE_SLOTS] memory _depositIdsToEquip
     )
         internal
         onlyAavegotchiOwner(_tokenId)
@@ -235,7 +235,7 @@ contract ItemsFacet is Modifiers {
             uint256 existingEquippedWearableId = aavegotchi.equippedWearables[slot];
             bool _sameWearablesIds = toEquipId == existingEquippedWearableId;
 
-            ItemDepositId memory _depositIdToEquip = _depositsIdToEquip[slot];
+            ItemDepositId memory _depositIdToEquip = _depositIdsToEquip[slot];
             ItemDepositId storage _existingEquippedDepositId = _gotchiInfo.equippedDelegatedItems[slot];
 
             //If the new wearable value is equal to the current equipped wearable in that slot
