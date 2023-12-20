@@ -221,20 +221,15 @@ struct ERC721BuyOrder {
     bool[] validationOptions;
 }
 
-struct ItemDepositId {
-    uint256 nonce;
-    address grantor;
-}
-
 struct GotchiEquippedItemsInfo {
-    // slotPosition => depositId
-    mapping(uint256 => ItemDepositId) equippedDelegatedItems;
+    // slotPosition => recordId
+    mapping(uint256 => uint256) equippedDelegatedItems;
     uint256 equippedDelegatedItemsCount;
 }
 
-struct UserDelegatedItemsInfo {
-    ISftRolesRegistry.DepositInfo deposit;
-    ISftRolesRegistry.RoleData roleAssignment;
+struct RecordInfo {
+    ISftRolesRegistry.Record record;
+    ISftRolesRegistry.RoleAssignment roleAssignment;
     EnumerableSet.UintSet equippedGotchis;
     uint256 availableBalance;
 }
@@ -360,10 +355,11 @@ struct AppStorage {
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
     
     // Items Roles Registry
-    // grantor => nonce => userRoleAssignmentsInfo
-    mapping(address => mapping(uint256 => UserDelegatedItemsInfo)) userDelegatedItemsInfo;
+    // recordId => userRoleAssignmentsInfo
+    mapping(uint256 => RecordInfo) recordInfo;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsRoleApprovals;
+    uint256 itemsRecordIdcounter;
     
     // Auxilliary structs for Items Roles Registry
     // gotchiId => equippedItemsInfo
