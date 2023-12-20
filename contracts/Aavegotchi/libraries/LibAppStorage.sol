@@ -221,20 +221,22 @@ struct ERC721BuyOrder {
     bool[] validationOptions;
 }
 
-struct EquippedDelegatedItemInfo {
-    ItemDepositId depositId;
-    uint256 balance;
-}
-
 struct ItemDepositId {
     uint256 nonce;
     address grantor;
 }
 
 struct GotchiEquippedItemsInfo {
-    // wearableTokenId => equippedItemIdToDelegationInfo
-    mapping(uint256 => EquippedDelegatedItemInfo) equippedItemIdToDelegationInfo;
-    uint256 equippedDelegateItemsCount;
+    // slotPosition => depositId
+    mapping(uint256 => ItemDepositId) equippedDelegatedItems;
+    uint256 equippedDelegatedItemsCount;
+}
+
+struct UserDelegatedItemsInfo {
+    ISftRolesRegistry.DepositInfo deposit;
+    ISftRolesRegistry.RoleData roleAssignment;
+    EnumerableSet.UintSet equippedGotchis;
+    uint256 availableBalance;
 }
 
 struct AppStorage {
@@ -358,19 +360,12 @@ struct AppStorage {
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
     
     // Items Roles Registry
-    // grantor => depositId => DepositInfo
-    mapping(address => mapping(uint256 => ISftRolesRegistry.DepositInfo)) itemsDeposits;
-    // grantor => depositId  => RoleAssignment
-    mapping(address =>  mapping(uint256 => ISftRolesRegistry.RoleData)) itemsRoleAssignments;
+    // grantor => nonce => userRoleAssignmentsInfo
+    mapping(address => mapping(uint256 => UserDelegatedItemsInfo)) userDelegatedItemsInfo;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsRoleApprovals;
     
-
     // Auxilliary structs for Items Roles Registry
-    // grantor => depositId => gotchiIds
-    mapping(address => mapping(uint256 => EnumerableSet.UintSet)) depositIdToEquippedGotchis;
-    // grantor => depositId => remainingBalance
-    mapping(address => mapping(uint256 => uint256)) itemsDepositsUnequippedBalance;
     // gotchiId => equippedItemsInfo
     mapping(uint256 => GotchiEquippedItemsInfo) gotchiEquippedItemsInfo;
 }

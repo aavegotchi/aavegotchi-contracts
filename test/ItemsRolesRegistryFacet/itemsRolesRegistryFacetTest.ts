@@ -14,7 +14,6 @@ import {
   buildRoleAssignment,
   generateRandomInt,
   time,
-  wearableAmounts,
   wearableDiamondAddress,
   wearableIds,
   RoleAssignment,
@@ -87,7 +86,7 @@ describe("ItemsRolesRegistryFacet", async () => {
       await ethers.getContractAt("DAOFacet", aavegotchiDiamondAddress)
     ).connect(signer);
 
-    await daoFacet.updateItemTypeMaxQuantity(wearableIds, wearableAmounts);
+    await daoFacet.updateItemTypeMaxQuantity(wearableIds, wearableIds.map(() => 2000));
     await daoFacet.mintItems(
       grantor.address,
       wearableIds,

@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
-import {LibAppStorage, Modifiers, ItemType, Aavegotchi, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, ItemDepositId, GotchiEquippedItemsInfo} from "../libraries/LibAppStorage.sol";
+import {LibAppStorage, Modifiers, ItemType, Aavegotchi, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, ItemDepositId, GotchiEquippedItemsInfo, UserDelegatedItemsInfo} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -219,7 +219,7 @@ contract ItemsFacet is Modifiers {
     function _equipWearables(
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
-        ItemDepositId[EQUIPPED_WEARABLE_SLOTS] memory _depositIds
+        ItemDepositId[EQUIPPED_WEARABLE_SLOTS] memory _depositIdsToEquip
     )
         internal
         onlyAavegotchiOwner(_tokenId)
@@ -227,14 +227,22 @@ contract ItemsFacet is Modifiers {
     {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
+        GotchiEquippedItemsInfo storage _gotchiInfo = s.gotchiEquippedItemsInfo[_tokenId];
 
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
+            
             uint256 toEquipId = _wearablesToEquip[slot];
             uint256 existingEquippedWearableId = aavegotchi.equippedWearables[slot];
+            bool _sameWearablesIds = toEquipId == existingEquippedWearableId;
+
+            ItemDepositId memory _depositIdToEquip = _depositIdsToEquip[slot];
+            ItemDepositId storage _existingEquippedDepositId = _gotchiInfo.equippedDelegatedItems[slot];
 
             //If the new wearable value is equal to the current equipped wearable in that slot
             //do nothing
-            if (toEquipId == existingEquippedWearableId) {
+            if (_sameWearablesIds
+                && _existingEquippedDepositId.nonce == _depositIdToEquip.nonce 
+                && _existingEquippedDepositId.grantor == _depositIdToEquip.grantor) {
                 continue;
             }
 
@@ -242,10 +250,12 @@ contract ItemsFacet is Modifiers {
             aavegotchi.equippedWearables[slot] = uint16(toEquipId);
 
             //If a wearable was equipped in this slot and can be transferred, transfer back to owner.
-
             if (existingEquippedWearableId != 0 && s.itemTypes[existingEquippedWearableId].canBeTransferred) {
+                if(_sameWearablesIds && (slot == LibItems.WEARABLE_SLOT_HAND_LEFT || slot == LibItems.WEARABLE_SLOT_HAND_RIGHT)){
+                   delete aavegotchi.equippedWearables[slot];
+                }
                 // remove wearable from Aavegotchi and transfer item to owner
-                _removeWearableFromGotchi(_tokenId, existingEquippedWearableId);
+                _removeWearableFromGotchi(_tokenId, existingEquippedWearableId, slot, _gotchiInfo);
             }
 
             //If a wearable is being equipped
@@ -270,25 +280,8 @@ contract ItemsFacet is Modifiers {
                     }
                 }
 
-                //Then check if this wearable is in the Aavegotchis inventory
-                uint256 nftBalance = s.nftItemBalances[address(this)][_tokenId][toEquipId];
-                uint256 neededBalance = 1;
-                if (slot == LibItems.WEARABLE_SLOT_HAND_LEFT) {
-                    if (_wearablesToEquip[LibItems.WEARABLE_SLOT_HAND_RIGHT] == toEquipId) {
-                        neededBalance = 2;
-                    }
-                }
-
-                if (slot == LibItems.WEARABLE_SLOT_HAND_RIGHT) {
-                    if (_wearablesToEquip[LibItems.WEARABLE_SLOT_HAND_LEFT] == toEquipId) {
-                        neededBalance = 2;
-                    }
-                }
-
-                if (nftBalance < neededBalance) {
-                    //Transfer to Aavegotchi
-                    _addWearableToGotchi(_depositIds[slot], _tokenId, toEquipId, neededBalance - nftBalance);
-                }
+                //Transfer to Aavegotchi
+                _addWearableToGotchi(_depositIdToEquip, _tokenId, toEquipId, slot, _gotchiInfo);
             }
         }
         LibAavegotchi.interact(_tokenId);
@@ -298,58 +291,68 @@ contract ItemsFacet is Modifiers {
         ItemDepositId memory _depositId,
         uint256 _gotchiId,
         uint256 _toEquipWearableId,
-        uint256 _balToTransfer
+        uint256 _slot,
+        GotchiEquippedItemsInfo storage _gotchiInfo
     ) internal {
-        GotchiEquippedItemsInfo storage _equippedItemsInfo = s.gotchiEquippedItemsInfo[_gotchiId];
+        
         address _sender = LibMeta.msgSender();
         
         if (_depositId.nonce != 0) {
-            require(s.itemsRoleAssignments[_depositId.grantor][_depositId.nonce].grantee == _sender, "ItemsFacet: Wearable not delegated to sender or depositId not valid");
-            require(s.itemsDeposits[_depositId.grantor][_depositId.nonce].tokenId == _toEquipWearableId, "ItemsFacet: Delegated Wearable not of this delegation");
-            require(s.itemsDepositsUnequippedBalance[_depositId.grantor][_depositId.nonce] >= _balToTransfer, "ItemsFacet: Not enough delegated balance");
-            require(s.itemsRoleAssignments[_depositId.grantor][_depositId.nonce].expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
-            
-            _equippedItemsInfo.equippedItemIdToDelegationInfo[_toEquipWearableId].depositId = _depositId;
-            _equippedItemsInfo.equippedItemIdToDelegationInfo[_toEquipWearableId].balance += _balToTransfer;
-            s.itemsDepositsUnequippedBalance[_depositId.grantor][_depositId.nonce] -= _balToTransfer;
-            _equippedItemsInfo.equippedDelegateItemsCount += _balToTransfer;
-            s.depositIdToEquippedGotchis[_depositId.grantor][_depositId.nonce].add(_gotchiId);
-        } else {
-            require(s.ownerItemBalances[_sender][_toEquipWearableId] >= _balToTransfer, "ItemsFacet: Wearable isn't in inventory");
+            UserDelegatedItemsInfo storage _userInfo = s.userDelegatedItemsInfo[_depositId.grantor][_depositId.nonce];
 
-            LibItems.removeFromOwner(_sender, _toEquipWearableId, _balToTransfer);
-            IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(_sender, _sender, address(this), _toEquipWearableId, _balToTransfer);
+            require(_userInfo.roleAssignment.grantee == _sender, "ItemsFacet: Wearable not delegated to sender or depositId not valid");
+            require(_userInfo.roleAssignment.expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
+            require(_userInfo.deposit.tokenId == _toEquipWearableId, "ItemsFacet: Delegated Wearable not of this delegation");
+            require(_userInfo.availableBalance >= 1, "ItemsFacet: Not enough delegated balance");
+            
+            _gotchiInfo.equippedDelegatedItems[_slot] = _depositId;
+            _gotchiInfo.equippedDelegatedItemsCount += 1;
+            _userInfo.availableBalance -= 1;
+            _userInfo.equippedGotchis.add(_gotchiId);
+        } else {
+            require(s.ownerItemBalances[_sender][_toEquipWearableId] >= 1, "ItemsFacet: Wearable isn't in inventory");
+
+            LibItems.removeFromOwner(_sender, _toEquipWearableId, 1);
+            IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(_sender, _sender, address(this), _toEquipWearableId, 1);
             LibERC1155Marketplace.updateERC1155Listing(address(this), _toEquipWearableId, _sender);
         }
 
-        LibItems.addToParent(address(this), _gotchiId, _toEquipWearableId, _balToTransfer);
-        emit LibERC1155.TransferToParent(address(this), _gotchiId, _toEquipWearableId, _balToTransfer);
+        LibItems.addToParent(address(this), _gotchiId, _toEquipWearableId, 1);
+        emit LibERC1155.TransferToParent(address(this), _gotchiId, _toEquipWearableId, 1);
     }
     
     function _removeWearableFromGotchi(
         uint256 _gotchiId,
-        uint256 _existingEquippedWearableId
+        uint256 _existingEquippedWearableId,
+        uint256 _slot,
+        GotchiEquippedItemsInfo storage _gotchiInfo
     ) internal {
-        GotchiEquippedItemsInfo storage _equippedItemsInfo = s.gotchiEquippedItemsInfo[_gotchiId];
-        address _sender = LibMeta.msgSender();
-
+       
         LibItems.removeFromParent(address(this), _gotchiId, _existingEquippedWearableId, 1);
         emit LibERC1155.TransferFromParent(address(this), _gotchiId, _existingEquippedWearableId, 1);
-
-        ItemDepositId storage _depositId = _equippedItemsInfo.equippedItemIdToDelegationInfo[_existingEquippedWearableId].depositId;
+        
+        address _sender = LibMeta.msgSender();
+        ItemDepositId storage _depositId = _gotchiInfo.equippedDelegatedItems[_slot];
+        
         if (_depositId.nonce != 0) {
             // remove wearable from Aavegotchi and delete delegation
-            uint256 _delegatedBalance = _equippedItemsInfo.equippedItemIdToDelegationInfo[_existingEquippedWearableId].balance;
-
-            if(_delegatedBalance == 1) {
-                delete _equippedItemsInfo.equippedItemIdToDelegationInfo[_existingEquippedWearableId];
-                s.depositIdToEquippedGotchis[_depositId.grantor][_depositId.nonce].remove(_gotchiId);
-            } else {
-                _equippedItemsInfo.equippedItemIdToDelegationInfo[_existingEquippedWearableId].balance -= 1;
+            UserDelegatedItemsInfo storage _userInfo = s.userDelegatedItemsInfo[_depositId.grantor][_depositId.nonce];
+            bool _sameHandDelegationEquipped = (
+                    _slot == LibItems.WEARABLE_SLOT_HAND_LEFT 
+                    && _gotchiInfo.equippedDelegatedItems[LibItems.WEARABLE_SLOT_HAND_RIGHT].nonce == _depositId.nonce
+                    && _gotchiInfo.equippedDelegatedItems[LibItems.WEARABLE_SLOT_HAND_RIGHT].grantor == _depositId.grantor) 
+                || 
+                (   _slot == LibItems.WEARABLE_SLOT_HAND_RIGHT
+                    && _gotchiInfo.equippedDelegatedItems[LibItems.WEARABLE_SLOT_HAND_LEFT].nonce == _depositId.nonce
+                    && _gotchiInfo.equippedDelegatedItems[LibItems.WEARABLE_SLOT_HAND_LEFT].grantor == _depositId.grantor);
+                
+            if(!_sameHandDelegationEquipped) {
+                _userInfo.equippedGotchis.remove(_gotchiId);
             }
             
-            s.itemsDepositsUnequippedBalance[_depositId.grantor][_depositId.nonce] += 1;
-            _equippedItemsInfo.equippedDelegateItemsCount -= 1;
+            _userInfo.availableBalance += 1;
+            _gotchiInfo.equippedDelegatedItemsCount -= 1;
+            delete _gotchiInfo.equippedDelegatedItems[_slot];
         } else {
             // Remove wearable from Aavegotchi and transfer item to owner
             LibItems.addToOwner(_sender, _existingEquippedWearableId, 1);
