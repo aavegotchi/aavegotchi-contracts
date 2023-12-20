@@ -298,7 +298,7 @@ contract ItemsFacet is Modifiers {
         if (_recordId != 0) {
             RecordInfo storage _recordInfo = s.recordInfo[_recordId];
 
-            require(_recordInfo.roleAssignment.grantee == _sender, "ItemsFacet: Wearable not delegated to sender or _recordId not valid");
+            require(_recordInfo.roleAssignment.grantee == _sender, "ItemsFacet: Wearable not delegated to sender or recordId not valid");
             require(_recordInfo.roleAssignment.expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
             require(_recordInfo.record.tokenId == _toEquipWearableId, "ItemsFacet: Delegated Wearable not of this delegation");
             require(_recordInfo.availableBalance >= 1, "ItemsFacet: Not enough delegated balance");

@@ -172,7 +172,9 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         uint256 _tokenAmount
     ) internal returns (uint256 recordId_) {
         recordId_ = ++s.itemsRecordIdcounter;
-        s.recordInfo[recordId_].record = Record(_grantor, _tokenAddress, _tokenId, _tokenAmount);
+        RecordInfo storage _recordInfo = s.recordInfo[recordId_];
+        _recordInfo.record = Record(_grantor, _tokenAddress, _tokenId, _tokenAmount);
+        _recordInfo.availableBalance = _tokenAmount;
         _transferFrom(_grantor, address(this), _tokenAddress, _tokenId, _tokenAmount);
         emit RecordCreated(_grantor, recordId_, _tokenAddress, _tokenId, _tokenAmount);
     }

@@ -21,14 +21,15 @@ import {
   aavegotchiDiamondAddress,
   wearableDiamondAddress,
   wearableIds,
-  RoleAssignment,
-  buildRoleAssignment,
   generateRandomInt,
   ONE_DAY,
-  ItemDepositId,
+  buildRecord,
+  buildGrantRole,
+  time,
 } from "./helpers";
 import { itemManagerAlt } from "../../scripts/helperFunctions";
 import { upgradeWithNewFacets } from "./upgradeScript";
+import { GrantRoleData, Record } from "./types";
 
 const { expect } = chai;
 
@@ -47,11 +48,9 @@ describe("ItemsFacet", async () => {
   let libERC1155: LibERC1155;
 
   const gotchiId = LargeGotchiOwnerAavegotchis[0];
-  const emptyItemDepositIds: ItemDepositId[] = new Array(16).fill({
-    nonce: BigNumber.from(0),
-    grantor: AddressZero,
-  });
+  const emptyItemRecordIds = new Array(16).fill(BigNumber.from(0));
   const emptyWearableIds: number[] = new Array(16).fill(BigNumber.from(0));
+  const granteeAddress = LargeGotchiOwner;
 
   before(async () => {
     const signers = await ethers.getSigners();
@@ -135,42 +134,54 @@ describe("ItemsFacet", async () => {
   });
 
   describe("equipDelegatedWearables", () => {
-    let RoleAssignment: RoleAssignment;
+    let RecordCreated: Record;
+    let GrantRoleData: GrantRoleData;
+    let recordIdsCounter = 0;
+    let itemRecordIds: Number[];
+    let wearableIdsToEquip: Number[];
 
     beforeEach(async () => {
-      RoleAssignment = await buildRoleAssignment({
-        tokenAddress: wearablesFacet.address,
-        tokenId: wearableIds[3],
+      itemRecordIds = new Array(16).fill(0);
+      wearableIdsToEquip = new Array(16).fill(0);
+
+      RecordCreated = buildRecord({
         grantor: grantor.address,
-        grantee: LargeGotchiOwner,
+        tokenAddress: wearableDiamondAddress,
+        tokenId: wearableIds[3],
+      });
+      ++recordIdsCounter;
+      GrantRoleData = await buildGrantRole({
+        recordId: recordIdsCounter,
+        grantee: granteeAddress,
       });
       await wearablesFacet
         .connect(grantor)
         .setApprovalForAll(ItemsRolesRegistryFacet.address, true);
 
-      await expect(
-        ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(RoleAssignment)
-      ).to.not.be.reverted;
+      await ItemsRolesRegistryFacet.connect(grantor).createRecordFrom(
+        RecordCreated.grantor,
+        RecordCreated.tokenAddress,
+        RecordCreated.tokenId,
+        RecordCreated.tokenAmount
+      );
+      await ItemsRolesRegistryFacet.connect(grantor).grantRole(
+        GrantRoleData.recordId,
+        GrantRoleData.role,
+        GrantRoleData.grantee,
+        GrantRoleData.expirationDate,
+        GrantRoleData.revocable,
+        GrantRoleData.data
+      );
     });
 
     it("should equip and unequip delegated wearable", async () => {
-      const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-        nonce: BigNumber.from(0),
-        grantor: AddressZero,
-      });
-      itemDepositIds[3] = {
-        nonce: RoleAssignment.nonce,
-        grantor: RoleAssignment.grantor,
-      };
+      itemRecordIds[3] = GrantRoleData.recordId;
+      wearableIdsToEquip[3] = wearableIds[3];
 
       await expect(
         itemsFacet
           .connect(grantee)
-          .equipDelegatedWearables(
-            gotchiId,
-            [0, 0, 0, wearableIds[3], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            itemDepositIds
-          )
+          .equipDelegatedWearables(gotchiId, wearableIdsToEquip, itemRecordIds)
       )
         .to.emit(libERC1155, "TransferToParent")
         .withArgs(aavegotchiDiamondAddress, gotchiId, wearableIds[3], 1)
@@ -182,7 +193,7 @@ describe("ItemsFacet", async () => {
           .equipDelegatedWearables(
             gotchiId,
             emptyWearableIds,
-            emptyItemDepositIds
+            emptyItemRecordIds
           )
       )
         .to.emit(libERC1155, "TransferFromParent")
@@ -190,22 +201,12 @@ describe("ItemsFacet", async () => {
         .to.not.emit(libEventHandler, "TransferSingle");
     });
     it("should unequip a delegated wearable when the role is revoked", async () => {
-      const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-        nonce: BigNumber.from(0),
-        grantor: AddressZero,
-      });
-      itemDepositIds[3] = {
-        nonce: RoleAssignment.nonce,
-        grantor: RoleAssignment.grantor,
-      };
+      itemRecordIds[3] = GrantRoleData.recordId;
+      wearableIdsToEquip[3] = wearableIds[3];
       await expect(
         itemsFacet
           .connect(grantee)
-          .equipDelegatedWearables(
-            gotchiId,
-            [0, 0, 0, wearableIds[3], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            itemDepositIds
-          )
+          .equipDelegatedWearables(gotchiId, wearableIdsToEquip, itemRecordIds)
       )
         .to.emit(libERC1155, "TransferToParent")
         .withArgs(aavegotchiDiamondAddress, gotchiId, wearableIds[3], 1)
@@ -213,10 +214,9 @@ describe("ItemsFacet", async () => {
 
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).revokeRoleFrom(
-          RoleAssignment.role,
-          RoleAssignment.nonce,
-          RoleAssignment.grantor,
-          RoleAssignment.grantee
+          GrantRoleData.recordId,
+          GrantRoleData.role,
+          granteeAddress
         )
       )
         .to.emit(libERC1155, "TransferFromParent")
@@ -224,59 +224,21 @@ describe("ItemsFacet", async () => {
         .to.not.emit(libEventHandler, "TransferSingle");
     });
     it("should equip and unequip delegated hand wearables", async () => {
-      const newRoleAssignment = await buildRoleAssignment({
-        tokenAddress: wearablesFacet.address,
-        tokenId: wearableIds[0],
-        grantor: grantor.address,
-        grantee: LargeGotchiOwner,
-        tokenAmount: 2,
-      });
-
+      const { GrantRoleData: newGrantRoleData } = await createRoleAssignment(
+        ++recordIdsCounter,
+        wearableIds[0],
+        2
+      );
       // wearables[0] -> hands
-      await expect(
-        ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(
-          newRoleAssignment
-        )
-      ).to.not.be.reverted;
-
-      const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-        nonce: BigNumber.from(0),
-        grantor: AddressZero,
-      });
-      itemDepositIds[4] = {
-        nonce: newRoleAssignment.nonce,
-        grantor: newRoleAssignment.grantor,
-      };
-      itemDepositIds[5] = {
-        nonce: newRoleAssignment.nonce,
-        grantor: newRoleAssignment.grantor,
-      };
+      itemRecordIds[4] = newGrantRoleData.recordId;
+      itemRecordIds[5] = newGrantRoleData.recordId;
+      wearableIdsToEquip[4] = wearableIds[0];
+      wearableIdsToEquip[5] = wearableIds[0];
 
       await expect(
         itemsFacet
           .connect(grantee)
-          .equipDelegatedWearables(
-            gotchiId,
-            [
-              0,
-              0,
-              0,
-              0,
-              wearableIds[0],
-              wearableIds[0],
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-            ],
-            itemDepositIds
-          )
+          .equipDelegatedWearables(gotchiId, wearableIdsToEquip, itemRecordIds)
       )
         .to.emit(libERC1155, "TransferToParent")
         .withArgs(aavegotchiDiamondAddress, gotchiId, wearableIds[0], 1)
@@ -290,7 +252,7 @@ describe("ItemsFacet", async () => {
           .equipDelegatedWearables(
             gotchiId,
             emptyWearableIds,
-            emptyItemDepositIds
+            emptyItemRecordIds
           )
       )
         .to.emit(libERC1155, "TransferFromParent")
@@ -311,40 +273,16 @@ describe("ItemsFacet", async () => {
         );
       // wearables[0] -> hands
       // wearables[1] -> hat
-      const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-        nonce: BigNumber.from(0),
-        grantor: AddressZero,
-      });
-      itemDepositIds[3] = {
-        nonce: RoleAssignment.nonce,
-        grantor: RoleAssignment.grantor,
-      };
+
+      itemRecordIds[3] = GrantRoleData.recordId;
+      wearableIdsToEquip[3] = wearableIds[3];
+      wearableIdsToEquip[4] = wearableIds[0];
+      wearableIdsToEquip[5] = wearableIds[0];
 
       await expect(
         itemsFacet
           .connect(grantee)
-          .equipDelegatedWearables(
-            gotchiId,
-            [
-              0,
-              0,
-              0,
-              wearableIds[3],
-              wearableIds[0],
-              wearableIds[0],
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-            ],
-            itemDepositIds
-          )
+          .equipDelegatedWearables(gotchiId, wearableIdsToEquip, itemRecordIds)
       )
         .to.emit(libERC1155, "TransferToParent")
         .withArgs(aavegotchiDiamondAddress, gotchiId, wearableIds[3], 1)
@@ -371,7 +309,7 @@ describe("ItemsFacet", async () => {
           .equipDelegatedWearables(
             gotchiId,
             emptyWearableIds,
-            emptyItemDepositIds
+            emptyItemRecordIds
           )
       )
         .to.emit(libERC1155, "TransferFromParent")
@@ -394,36 +332,20 @@ describe("ItemsFacet", async () => {
         );
     });
     it("should equip delegated wearables in two gotchis with the same depositId and unequip all with revoke", async () => {
-      RoleAssignment = await buildRoleAssignment({
-        tokenAddress: wearablesFacet.address,
-        tokenId: wearableIds[1],
-        tokenAmount: 2,
-        grantor: grantor.address,
-        grantee: LargeGotchiOwner,
-      });
+      const { GrantRoleData, RecordCreated } = await createRoleAssignment(
+        ++recordIdsCounter,
+        wearableIds[1],
+        2
+      );
 
-      await expect(
-        ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(RoleAssignment)
-      ).to.not.be.reverted;
-
-      const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-        nonce: BigNumber.from(0),
-        grantor: AddressZero,
-      });
-      itemDepositIds[2] = {
-        nonce: RoleAssignment.nonce,
-        grantor: RoleAssignment.grantor,
-      };
+      itemRecordIds[2] = GrantRoleData.recordId;
+      wearableIdsToEquip[2] = wearableIds[1];
 
       const anotherGotchiId = LargeGotchiOwnerAavegotchis[1];
       await expect(
         itemsFacet
           .connect(grantee)
-          .equipDelegatedWearables(
-            gotchiId,
-            [0, 0, wearableIds[1], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            itemDepositIds
-          )
+          .equipDelegatedWearables(gotchiId, wearableIdsToEquip, itemRecordIds)
       )
         .to.emit(libERC1155, "TransferToParent")
         .withArgs(aavegotchiDiamondAddress, gotchiId, wearableIds[1], 1)
@@ -434,8 +356,8 @@ describe("ItemsFacet", async () => {
           .connect(grantee)
           .equipDelegatedWearables(
             anotherGotchiId,
-            [0, 0, wearableIds[1], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            itemDepositIds
+            wearableIdsToEquip,
+            itemRecordIds
           )
       )
         .to.emit(libERC1155, "TransferToParent")
@@ -448,17 +370,16 @@ describe("ItemsFacet", async () => {
           .connect(grantee)
           .equipDelegatedWearables(
             anotherGotchiId2,
-            [0, 0, wearableIds[1], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            itemDepositIds
+            wearableIdsToEquip,
+            itemRecordIds
           )
       ).to.be.revertedWith("ItemsFacet: Not enough delegated balance");
 
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).revokeRoleFrom(
-          RoleAssignment.role,
-          RoleAssignment.nonce,
-          RoleAssignment.grantor,
-          RoleAssignment.grantee
+          GrantRoleData.recordId,
+          GrantRoleData.role,
+          granteeAddress
         )
       )
         .to.emit(libERC1155, "TransferFromParent")
@@ -468,132 +389,59 @@ describe("ItemsFacet", async () => {
         .to.not.emit(libEventHandler, "TransferSingle");
     });
     it("should NOT equip a delegated wearable if the depositId is from another wearable", async () => {
-      const roleAssignment = await buildRoleAssignment({
-        tokenAddress: wearablesFacet.address,
-        tokenId: wearableIds[2],
-        grantor: grantor.address,
-        grantee: await grantee.getAddress(),
-      });
-      await wearablesFacet
-        .connect(grantor)
-        .setApprovalForAll(ItemsRolesRegistryFacet.address, true);
-
-      await expect(
-        ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(roleAssignment)
-      ).to.not.be.reverted;
-
-      const wrongNonce = RoleAssignment.nonce;
-      const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-        nonce: BigNumber.from(0),
-        grantor: AddressZero,
-      });
-      itemDepositIds[3] = {
-        nonce: wrongNonce,
-        grantor: RoleAssignment.grantor,
-      };
+      itemRecordIds[3] = GrantRoleData.recordId;
+      wearableIdsToEquip[3] = wearableIds[2];
 
       await expect(
         itemsFacet
           .connect(grantee)
-          .equipDelegatedWearables(
-            gotchiId,
-            [0, 0, 0, wearableIds[2], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            itemDepositIds
-          )
+          .equipDelegatedWearables(gotchiId, wearableIdsToEquip, itemRecordIds)
       ).to.be.revertedWith(
         "ItemsFacet: Delegated Wearable not of this delegation"
       );
     });
     it("should NOT equip a delegated wearable if the grantee is invalid for respective depositId", async () => {
-      const roleAssignment = await buildRoleAssignment({
-        tokenAddress: wearablesFacet.address,
-        tokenId: wearableIds[2],
-        grantor: grantor.address,
-        grantee: anotherUser.address,
-      });
-      await wearablesFacet
-        .connect(grantor)
-        .setApprovalForAll(ItemsRolesRegistryFacet.address, true);
+      const { GrantRoleData } = await createRoleAssignment(
+        ++recordIdsCounter,
+        wearableIds[2],
+        1,
+        anotherUser.address
+      );
 
-      await expect(
-        ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(roleAssignment)
-      ).to.not.be.reverted;
-      const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-        nonce: BigNumber.from(0),
-        grantor: AddressZero,
-      });
-      itemDepositIds[3] = {
-        nonce: roleAssignment.nonce,
-        grantor: roleAssignment.grantor,
-      };
+      itemRecordIds[3] = GrantRoleData.recordId;
+      wearableIdsToEquip[3] = wearableIds[2];
 
       await expect(
         itemsFacet
           .connect(grantee)
-          .equipDelegatedWearables(
-            gotchiId,
-            [0, 0, 0, wearableIds[2], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            itemDepositIds
-          )
+          .equipDelegatedWearables(gotchiId, wearableIdsToEquip, itemRecordIds)
       ).to.be.revertedWith(
-        "ItemsFacet: Wearable not delegated to sender or depositId not valid"
+        "ItemsFacet: Wearable not delegated to sender or recordId not valid"
       );
     });
     it("should NOT equip a delegated wearable if the depositId does not exist", async () => {
-      const roleAssignment = await buildRoleAssignment({
-        tokenAddress: wearablesFacet.address,
-        tokenId: wearableIds[2],
-        grantor: grantor.address,
-        grantee: await grantee.getAddress(),
-      });
-      await wearablesFacet
-        .connect(grantor)
-        .setApprovalForAll(ItemsRolesRegistryFacet.address, true);
+      await createRoleAssignment(++recordIdsCounter, wearableIds[2], 1);
 
-      await expect(
-        ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(roleAssignment)
-      ).to.not.be.reverted;
-
-      const wrongNonce = generateRandomInt();
-      const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-        nonce: BigNumber.from(0),
-        grantor: AddressZero,
-      });
-      itemDepositIds[3] = {
-        nonce: wrongNonce,
-        grantor: roleAssignment.grantor,
-      };
+      const wrongDepositId = generateRandomInt();
+      itemRecordIds[3] = wrongDepositId;
+      wearableIdsToEquip[3] = wearableIds[2];
 
       await expect(
         itemsFacet
           .connect(grantee)
-          .equipDelegatedWearables(
-            gotchiId,
-            [0, 0, 0, wearableIds[2], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            itemDepositIds
-          )
+          .equipDelegatedWearables(gotchiId, wearableIdsToEquip, itemRecordIds)
       ).to.be.revertedWith(
-        "ItemsFacet: Wearable not delegated to sender or depositId not valid"
+        "ItemsFacet: Wearable not delegated to sender or recordId not valid"
       );
     });
     it("should NOT equip a delegated wearable if the wearable is all delegated balance is already equipped in other gotchi", async () => {
-      const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-        nonce: BigNumber.from(0),
-        grantor: AddressZero,
-      });
-      itemDepositIds[3] = {
-        nonce: RoleAssignment.nonce,
-        grantor: RoleAssignment.grantor,
-      };
+      itemRecordIds[3] = GrantRoleData.recordId;
+      wearableIdsToEquip[3] = wearableIds[3];
 
       await expect(
         itemsFacet
           .connect(grantee)
-          .equipDelegatedWearables(
-            gotchiId,
-            [0, 0, 0, wearableIds[3], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            itemDepositIds
-          )
+          .equipDelegatedWearables(gotchiId, wearableIdsToEquip, itemRecordIds)
       )
         .to.emit(libERC1155, "TransferToParent")
         .withArgs(aavegotchiDiamondAddress, gotchiId, wearableIds[3], 1)
@@ -605,8 +453,8 @@ describe("ItemsFacet", async () => {
           .connect(grantee)
           .equipDelegatedWearables(
             anotherGotchiId,
-            [0, 0, 0, wearableIds[3], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            itemDepositIds
+            wearableIdsToEquip,
+            itemRecordIds
           )
       ).to.be.revertedWith("ItemsFacet: Not enough delegated balance");
 
@@ -617,7 +465,7 @@ describe("ItemsFacet", async () => {
           .equipDelegatedWearables(
             gotchiId,
             emptyWearableIds,
-            emptyItemDepositIds
+            emptyItemRecordIds
           )
       )
         .to.emit(libERC1155, "TransferFromParent")
@@ -625,92 +473,39 @@ describe("ItemsFacet", async () => {
         .to.not.emit(libEventHandler, "TransferSingle");
     });
     it("should NOT equip a delegated wearable if sender doesn't enough delegated balance", async function () {
-      const newRoleAssignment = await buildRoleAssignment({
-        tokenAddress: wearablesFacet.address,
-        tokenId: wearableIds[0],
-        grantor: grantor.address,
-        grantee: await grantee.getAddress(),
-        tokenAmount: 1,
-      });
-      await wearablesFacet
-        .connect(grantor)
-        .setApprovalForAll(ItemsRolesRegistryFacet.address, true);
+      const { GrantRoleData: newGrantRoleData } = await createRoleAssignment(
+        ++recordIdsCounter,
+        wearableIds[0],
+        1
+      );
 
-      await expect(
-        ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(
-          newRoleAssignment
-        )
-      ).to.not.be.reverted;
-      const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-        nonce: BigNumber.from(0),
-        grantor: AddressZero,
-      });
-      itemDepositIds[4] = {
-        nonce: newRoleAssignment.nonce,
-        grantor: newRoleAssignment.grantor,
-      };
-      itemDepositIds[5] = {
-        nonce: newRoleAssignment.nonce,
-        grantor: newRoleAssignment.grantor,
-      };
+      itemRecordIds[4] = newGrantRoleData.recordId;
+      itemRecordIds[5] = newGrantRoleData.recordId;
+      wearableIdsToEquip[4] = wearableIds[0];
+      wearableIdsToEquip[5] = wearableIds[0];
 
       await expect(
         itemsFacet
           .connect(grantee)
-          .equipDelegatedWearables(
-            gotchiId,
-            [
-              0,
-              0,
-              0,
-              0,
-              wearableIds[0],
-              wearableIds[0],
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-            ],
-            itemDepositIds
-          )
+          .equipDelegatedWearables(gotchiId, wearableIdsToEquip, itemRecordIds)
       ).to.be.revertedWith("ItemsFacet: Not enough delegated balance");
     });
     it("should equip delegated wearables in two gotchis with the same depositId and unequip all with withdraw", async () => {
-      RoleAssignment = await buildRoleAssignment({
-        tokenAddress: wearablesFacet.address,
-        tokenId: wearableIds[1],
-        tokenAmount: 2,
-        grantor: grantor.address,
-        grantee: LargeGotchiOwner,
-      });
-
-      await expect(
-        ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(RoleAssignment)
-      ).to.not.be.reverted;
+      const { GrantRoleData } = await createRoleAssignment(
+        ++recordIdsCounter,
+        wearableIds[1],
+        2
+      );
 
       const anotherGotchiId = LargeGotchiOwnerAavegotchis[1];
-      const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-        nonce: BigNumber.from(0),
-        grantor: AddressZero,
-      });
-      itemDepositIds[2] = {
-        nonce: RoleAssignment.nonce,
-        grantor: RoleAssignment.grantor,
-      };
+
+      (itemRecordIds[2] = GrantRoleData.recordId),
+        (wearableIdsToEquip[2] = wearableIds[1]);
+
       await expect(
         itemsFacet
           .connect(grantee)
-          .equipDelegatedWearables(
-            gotchiId,
-            [0, 0, wearableIds[1], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            itemDepositIds
-          )
+          .equipDelegatedWearables(gotchiId, wearableIdsToEquip, itemRecordIds)
       )
         .to.emit(libERC1155, "TransferToParent")
         .withArgs(aavegotchiDiamondAddress, gotchiId, wearableIds[1], 1)
@@ -721,8 +516,8 @@ describe("ItemsFacet", async () => {
           .connect(grantee)
           .equipDelegatedWearables(
             anotherGotchiId,
-            [0, 0, wearableIds[1], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            itemDepositIds
+            wearableIdsToEquip,
+            itemRecordIds
           )
       )
         .to.emit(libERC1155, "TransferToParent")
@@ -731,8 +526,7 @@ describe("ItemsFacet", async () => {
 
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).withdrawFrom(
-          RoleAssignment.nonce,
-          RoleAssignment.grantor
+          GrantRoleData.recordId
         )
       )
         .to.emit(libERC1155, "TransferFromParent")
@@ -751,23 +545,17 @@ describe("ItemsFacet", async () => {
     describe("edge cases", () => {
       it("should NOT transfer an aavegotchi with delegated wearable equipped", async () => {
         const anotherGotchiId = LargeGotchiOwnerAavegotchis[1];
-        const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-          nonce: BigNumber.from(0),
-          grantor: AddressZero,
-        });
 
-        itemDepositIds[3] = {
-          nonce: RoleAssignment.nonce,
-          grantor: RoleAssignment.grantor,
-        };
+        (itemRecordIds[3] = GrantRoleData.recordId),
+          (wearableIdsToEquip[3] = wearableIds[3]);
 
         await expect(
           itemsFacet
             .connect(grantee)
             .equipDelegatedWearables(
               anotherGotchiId,
-              [0, 0, 0, wearableIds[3], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-              itemDepositIds
+              wearableIdsToEquip,
+              itemRecordIds
             )
         )
           .to.emit(libERC1155, "TransferToParent")
@@ -797,7 +585,7 @@ describe("ItemsFacet", async () => {
             .equipDelegatedWearables(
               anotherGotchiId,
               emptyWearableIds,
-              emptyItemDepositIds
+              emptyItemRecordIds
             )
         )
           .to.emit(libERC1155, "TransferFromParent")
@@ -809,7 +597,7 @@ describe("ItemsFacet", async () => {
           )
           .to.not.emit(libEventHandler, "TransferSingle");
       });
-      it("should equip and unequip two gloves one not and one delegated", async () => {
+      it("should equip and unequp two gloves one delegated and one not", async () => {
         await wearablesFacet
           .connect(grantor)
           .safeTransferFrom(
@@ -819,55 +607,25 @@ describe("ItemsFacet", async () => {
             1,
             "0x"
           );
-
-        const granteeAddress = await grantee.getAddress();
-        const newRoleAssignment1 = await buildRoleAssignment({
-          tokenAddress: wearablesFacet.address,
-          tokenId: wearableIds[0],
-          grantor: grantor.address,
-          grantee: granteeAddress,
-          tokenAmount: 1,
-        });
-
-        await ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(
-          newRoleAssignment1
+        const { GrantRoleData: newGrantRoleData1 } = await createRoleAssignment(
+          ++recordIdsCounter,
+          wearableIds[0],
+          1
         );
 
         const anotherGotchiId = LargeGotchiOwnerAavegotchis[1];
-        const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-          nonce: 0,
-          grantor: AddressZero,
-        });
 
-        itemDepositIds[4] = {
-          nonce: newRoleAssignment1.nonce,
-          grantor: newRoleAssignment1.grantor,
-        };
+        itemRecordIds[5] = newGrantRoleData1.recordId;
+        wearableIdsToEquip[5] = wearableIds[0];
+        wearableIdsToEquip[4] = wearableIds[0];
 
         await expect(
           itemsFacet
             .connect(grantee)
             .equipDelegatedWearables(
               anotherGotchiId,
-              [
-                0,
-                0,
-                0,
-                0,
-                wearableIds[0],
-                wearableIds[0],
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-              ],
-              itemDepositIds
+              wearableIdsToEquip,
+              itemRecordIds
             )
         )
           .to.emit(libERC1155, "TransferToParent")
@@ -892,109 +650,7 @@ describe("ItemsFacet", async () => {
             .equipDelegatedWearables(
               anotherGotchiId,
               emptyWearableIds,
-              emptyItemDepositIds
-            )
-        )
-          .to.emit(libEventHandler, "TransferSingle")
-          .withArgs(
-            granteeAddress,
-            aavegotchiDiamondAddress,
-            granteeAddress,
-            wearableIds[0],
-            1
-          )
-          .to.emit(libERC1155, "TransferFromParent")
-          .withArgs(
-            aavegotchiDiamondAddress,
-            anotherGotchiId,
-            wearableIds[0],
-            1
-          );
-      });
-      it("should equip and unequp two gloves one delegated one not", async () => {
-        await wearablesFacet
-          .connect(grantor)
-          .safeTransferFrom(
-            grantor.address,
-            LargeGotchiOwner,
-            wearableIds[0],
-            1,
-            "0x"
-          );
-
-        const granteeAddress = await grantee.getAddress();
-        const newRoleAssignment1 = await buildRoleAssignment({
-          tokenAddress: wearablesFacet.address,
-          tokenId: wearableIds[0],
-          grantor: grantor.address,
-          grantee: granteeAddress,
-          tokenAmount: 1,
-        });
-
-        await ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(
-          newRoleAssignment1
-        );
-
-        const anotherGotchiId = LargeGotchiOwnerAavegotchis[1];
-        const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-          nonce: 0,
-          grantor: AddressZero,
-        });
-
-        itemDepositIds[5] = {
-          nonce: newRoleAssignment1.nonce,
-          grantor: newRoleAssignment1.grantor,
-        };
-
-        await expect(
-          itemsFacet
-            .connect(grantee)
-            .equipDelegatedWearables(
-              anotherGotchiId,
-              [
-                0,
-                0,
-                0,
-                0,
-                wearableIds[0],
-                wearableIds[0],
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-              ],
-              itemDepositIds
-            )
-        )
-          .to.emit(libERC1155, "TransferToParent")
-          .withArgs(
-            aavegotchiDiamondAddress,
-            anotherGotchiId,
-            wearableIds[0],
-            1
-          )
-          .to.emit(libEventHandler, "TransferSingle")
-          .withArgs(
-            granteeAddress,
-            granteeAddress,
-            aavegotchiDiamondAddress,
-            wearableIds[0],
-            1
-          );
-
-        await expect(
-          itemsFacet
-            .connect(grantee)
-            .equipDelegatedWearables(
-              anotherGotchiId,
-              emptyWearableIds,
-              emptyItemDepositIds
+              emptyItemRecordIds
             )
         )
           .to.emit(libEventHandler, "TransferSingle")
@@ -1023,55 +679,25 @@ describe("ItemsFacet", async () => {
             1,
             "0x"
           );
-
-        const granteeAddress = await grantee.getAddress();
-        const newRoleAssignment1 = await buildRoleAssignment({
-          tokenAddress: wearablesFacet.address,
-          tokenId: wearableIds[0],
-          grantor: grantor.address,
-          grantee: granteeAddress,
-          tokenAmount: 1,
-        });
-
-        await ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(
-          newRoleAssignment1
+        const { GrantRoleData: newGrantRoleData1 } = await createRoleAssignment(
+          ++recordIdsCounter,
+          wearableIds[0],
+          1
         );
 
         const anotherGotchiId = LargeGotchiOwnerAavegotchis[1];
-        const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-          nonce: 0,
-          grantor: AddressZero,
-        });
 
-        itemDepositIds[5] = {
-          nonce: newRoleAssignment1.nonce,
-          grantor: newRoleAssignment1.grantor,
-        };
-
+        itemRecordIds[5] = newGrantRoleData1.recordId
+        wearableIdsToEquip[5] = wearableIds[0];
+        wearableIdsToEquip[4] = wearableIds[0];
+         
         await expect(
           itemsFacet
             .connect(grantee)
             .equipDelegatedWearables(
               anotherGotchiId,
-              [
-                0,
-                0,
-                0,
-                0,
-                wearableIds[0],
-                wearableIds[0],
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-              ],
-              itemDepositIds
+              wearableIdsToEquip,
+              itemRecordIds
             )
         )
           .to.emit(libERC1155, "TransferToParent")
@@ -1090,13 +716,16 @@ describe("ItemsFacet", async () => {
             1
           );
 
+        wearableIdsToEquip[4] = 0;
+        itemRecordIds[4] = 0;
+
         await expect(
           itemsFacet
             .connect(grantee)
             .equipDelegatedWearables(
               anotherGotchiId,
               [0, 0, 0, 0, wearableIds[0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-              emptyItemDepositIds
+              itemRecordIds
             )
         )
           .to.emit(libERC1155, "TransferFromParent")
@@ -1113,8 +742,8 @@ describe("ItemsFacet", async () => {
             .connect(grantee)
             .equipDelegatedWearables(
               anotherGotchiId,
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-              emptyItemDepositIds
+              emptyWearableIds,
+              emptyItemRecordIds
             )
         )
           .to.emit(libEventHandler, "TransferSingle")
@@ -1133,51 +762,76 @@ describe("ItemsFacet", async () => {
             1
           );
       });
-      it('should equip two gloves one both delegated and unequip the right hand first and then the left with revokeRoleFrom', async () => {
-        const granteeAddress = await grantee.getAddress();
-        const newRoleAssignment1 = await buildRoleAssignment({
-          tokenAddress: wearablesFacet.address,
-          tokenId: wearableIds[0],
-          grantor: grantor.address,
-          grantee: granteeAddress,
-          tokenAmount: 2
-        });
-
-        await ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(newRoleAssignment1);
+      it("should equip two gloves one both delegated and unequip the right hand first and then the left with revokeRoleFrom", async () => {
+        const { GrantRoleData: newGrantRoleData1 } = await createRoleAssignment(++recordIdsCounter, wearableIds[0], 2);
 
         const anotherGotchiId = LargeGotchiOwnerAavegotchis[1];
-        const itemDepositIds: ItemDepositId[] = new Array(16).fill({nonce: 0, grantor: AddressZero});
 
-        itemDepositIds[4] = {
-          nonce: newRoleAssignment1.nonce,
-          grantor: newRoleAssignment1.grantor
-        };
-        itemDepositIds[5] = {
-          nonce: newRoleAssignment1.nonce,
-          grantor: newRoleAssignment1.grantor
-        };
+        itemRecordIds[4] = newGrantRoleData1.recordId
+        itemRecordIds[5] = newGrantRoleData1.recordId
+        wearableIdsToEquip[4] = wearableIds[0];
+        wearableIdsToEquip[5] = wearableIds[0];
 
-        await expect(itemsFacet.connect(grantee).equipDelegatedWearables(anotherGotchiId, [0, 0, 0, 0, wearableIds[0], wearableIds[0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], itemDepositIds))
-          .to.emit(libERC1155, 'TransferToParent')
-          .withArgs(aavegotchiDiamondAddress, anotherGotchiId, wearableIds[0], 1)
-          .to.emit(libERC1155, 'TransferToParent')
-          .withArgs(aavegotchiDiamondAddress, anotherGotchiId, wearableIds[0], 1)
+        await expect(
+          itemsFacet
+            .connect(grantee)
+            .equipDelegatedWearables(
+              anotherGotchiId,
+              wearableIdsToEquip,
+              itemRecordIds
+            )
+        )
+          .to.emit(libERC1155, "TransferToParent")
+          .withArgs(
+            aavegotchiDiamondAddress,
+            anotherGotchiId,
+            wearableIds[0],
+            1
+          )
+          .to.emit(libERC1155, "TransferToParent")
+          .withArgs(
+            aavegotchiDiamondAddress,
+            anotherGotchiId,
+            wearableIds[0],
+            1
+          );
 
-         itemDepositIds[5] = {
-          nonce: 0,
-          grantor: AddressZero
-        };
+        itemRecordIds[5] = 0
+        wearableIdsToEquip[5] = 0;
 
-        await expect(itemsFacet.connect(grantee).equipDelegatedWearables(anotherGotchiId, [0, 0, 0, 0, wearableIds[0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], itemDepositIds))
-          .to.emit(libERC1155, 'TransferFromParent')
-          .withArgs(aavegotchiDiamondAddress, anotherGotchiId, wearableIds[0], 1)
-          .to.not.emit(libEventHandler, 'TransferSingle');
+        await expect(
+          itemsFacet
+            .connect(grantee)
+            .equipDelegatedWearables(
+              anotherGotchiId,
+              wearableIdsToEquip,
+              itemRecordIds
+            )
+        )
+          .to.emit(libERC1155, "TransferFromParent")
+          .withArgs(
+            aavegotchiDiamondAddress,
+            anotherGotchiId,
+            wearableIds[0],
+            1
+          )
+          .to.not.emit(libEventHandler, "TransferSingle");
 
-      
-        await expect(ItemsRolesRegistryFacet.connect(grantor).revokeRoleFrom(newRoleAssignment1.role, newRoleAssignment1.nonce, newRoleAssignment1.grantor, newRoleAssignment1.grantee))
-        .to.emit(libERC1155, 'TransferFromParent')
-        .withArgs(aavegotchiDiamondAddress, anotherGotchiId, wearableIds[0], 1)
-      })
+        await expect(
+          ItemsRolesRegistryFacet.connect(grantor).revokeRoleFrom(
+            newGrantRoleData1.recordId,
+            newGrantRoleData1.role,
+            newGrantRoleData1.grantee,
+          )
+        )
+          .to.emit(libERC1155, "TransferFromParent")
+          .withArgs(
+            aavegotchiDiamondAddress,
+            anotherGotchiId,
+            wearableIds[0],
+            1
+          );
+      });
       it("should NOT transfer an aavegotchi with mixed wearables equipped", async () => {
         await wearablesFacet
           .connect(grantor)
@@ -1188,74 +842,30 @@ describe("ItemsFacet", async () => {
             2,
             "0x"
           );
+        
+        const { GrantRoleData: newGrantRoleData1 } = await createRoleAssignment(++recordIdsCounter, wearableIds[1], 1);
+        const { GrantRoleData: newGrantRoleData2 } = await createRoleAssignment(++recordIdsCounter, wearableIds[5], 1);
 
-        const granteeAddress = await grantee.getAddress();
-        const newRoleAssignment1 = await buildRoleAssignment({
-          tokenAddress: wearablesFacet.address,
-          tokenId: wearableIds[1],
-          grantor: grantor.address,
-          grantee: granteeAddress,
-          tokenAmount: 1,
-        });
-
-        const newRoleAssignment2 = await buildRoleAssignment({
-          tokenAddress: wearablesFacet.address,
-          tokenId: wearableIds[5],
-          grantor: grantor.address,
-          grantee: granteeAddress,
-          tokenAmount: 1,
-        });
-
-        await ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(
-          newRoleAssignment1
-        );
-        await ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(
-          newRoleAssignment2
-        );
 
         const anotherGotchiId = LargeGotchiOwnerAavegotchis[2];
-        const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-          nonce: BigNumber.from(0),
-          grantor: AddressZero,
-        });
 
-        itemDepositIds[2] = {
-          nonce: newRoleAssignment1.nonce,
-          grantor: newRoleAssignment1.grantor,
-        };
-        itemDepositIds[3] = {
-          nonce: RoleAssignment.nonce,
-          grantor: RoleAssignment.grantor,
-        };
-        itemDepositIds[6] = {
-          nonce: newRoleAssignment2.nonce,
-          grantor: newRoleAssignment2.grantor,
-        };
+        itemRecordIds[2] = newGrantRoleData1.recordId,
+        itemRecordIds[3] = GrantRoleData.recordId,
+        itemRecordIds[6] = newGrantRoleData2.recordId,
+        wearableIdsToEquip[2] = wearableIds[1];
+        wearableIdsToEquip[3] = wearableIds[3];
+        wearableIdsToEquip[4] = wearableIds[0];
+        wearableIdsToEquip[5] = wearableIds[0];
+        wearableIdsToEquip[6] = wearableIds[5];
+         
 
         await expect(
           itemsFacet
             .connect(grantee)
             .equipDelegatedWearables(
               anotherGotchiId,
-              [
-                0,
-                0,
-                wearableIds[1],
-                wearableIds[3],
-                wearableIds[0],
-                wearableIds[0],
-                wearableIds[5],
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-              ],
-              itemDepositIds
+              wearableIdsToEquip,
+              itemRecordIds
             )
         )
           .to.emit(libERC1155, "TransferToParent")
@@ -1291,38 +901,18 @@ describe("ItemsFacet", async () => {
         );
 
         // Unequip wearables [1] and [3]
-        itemDepositIds[2] = {
-          nonce: 0,
-          grantor: AddressZero,
-        };
-        itemDepositIds[3] = {
-          nonce: 0,
-          grantor: AddressZero,
-        };
+        itemRecordIds[2] = 0
+        itemRecordIds[3] = 0
+        wearableIdsToEquip[2] = 0;
+        wearableIdsToEquip[3] = 0;
+
         await expect(
           itemsFacet
             .connect(grantee)
             .equipDelegatedWearables(
               anotherGotchiId,
-              [
-                0,
-                0,
-                0,
-                0,
-                wearableIds[0],
-                wearableIds[0],
-                wearableIds[5],
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-              ],
-              itemDepositIds
+              wearableIdsToEquip,
+              itemRecordIds
             )
         )
           .to.emit(libERC1155, "TransferFromParent")
@@ -1348,15 +938,18 @@ describe("ItemsFacet", async () => {
         ).to.be.revertedWith(
           "AavegotchiFacet: Can't transfer when equipped with a delegated wearable"
         );
+
         // Unequip wearables [0]
+        wearableIdsToEquip[4] = 0;
+        wearableIdsToEquip[5] = 0;
 
         await expect(
           itemsFacet
             .connect(grantee)
             .equipDelegatedWearables(
               anotherGotchiId,
-              [0, 0, 0, 0, 0, 0, wearableIds[5], 0, 0, 0, 0, 0, 0, 0, 0, 0],
-              itemDepositIds
+              wearableIdsToEquip,
+              itemRecordIds
             )
         )
           .to.emit(libEventHandler, "TransferSingle")
@@ -1385,18 +978,16 @@ describe("ItemsFacet", async () => {
         );
 
         // Unequip wearables [5]
-        itemDepositIds[6] = {
-          nonce: 0,
-          grantor: AddressZero,
-        };
+        itemRecordIds[6] = 0
+        wearableIdsToEquip[6] = 0;
 
         await expect(
           itemsFacet
             .connect(grantee)
             .equipDelegatedWearables(
               anotherGotchiId,
-              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-              itemDepositIds
+              wearableIdsToEquip,
+              itemRecordIds
             )
         )
           .to.emit(libERC1155, "TransferFromParent")
@@ -1425,54 +1016,22 @@ describe("ItemsFacet", async () => {
             "0x"
           );
 
-        const granteeAddress = await grantee.getAddress();
-        const newRoleAssignment1 = await buildRoleAssignment({
-          tokenAddress: wearablesFacet.address,
-          tokenId: wearableIds[0],
-          grantor: grantor.address,
-          grantee: granteeAddress,
-          tokenAmount: 2,
-        });
-
-        await ItemsRolesRegistryFacet.connect(grantor).grantRoleFrom(
-          newRoleAssignment1
-        );
-
+        const { GrantRoleData: newGrantRoleData1 } = await createRoleAssignment(++recordIdsCounter, wearableIds[0], 2);
+        
         const anotherGotchiId = LargeGotchiOwnerAavegotchis[1];
-        const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-          nonce: 0,
-          grantor: AddressZero,
-        });
 
-        itemDepositIds[5] = {
-          nonce: newRoleAssignment1.nonce,
-          grantor: newRoleAssignment1.grantor,
-        };
+        itemRecordIds[5] = newGrantRoleData1.recordId,
+        wearableIdsToEquip[5] = wearableIds[0];
+        wearableIdsToEquip[4] = wearableIds[0];
+         
 
         await expect(
           itemsFacet
             .connect(grantee)
             .equipDelegatedWearables(
               anotherGotchiId,
-              [
-                0,
-                0,
-                0,
-                0,
-                wearableIds[0],
-                wearableIds[0],
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-              ],
-              itemDepositIds
+              wearableIdsToEquip,
+              itemRecordIds
             )
         )
           .to.emit(libERC1155, "TransferToParent")
@@ -1491,35 +1050,15 @@ describe("ItemsFacet", async () => {
             1
           );
 
-        itemDepositIds[4] = {
-          nonce: newRoleAssignment1.nonce,
-          grantor: newRoleAssignment1.grantor,
-        };
+        itemRecordIds[4] = newGrantRoleData1.recordId,
 
         await expect(
           itemsFacet
             .connect(grantee)
             .equipDelegatedWearables(
               anotherGotchiId,
-              [
-                0,
-                0,
-                0,
-                0,
-                wearableIds[0],
-                wearableIds[0],
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-              ],
-              itemDepositIds
+              wearableIdsToEquip,
+              itemRecordIds
             )
         )
           .to.emit(libEventHandler, "TransferSingle")
@@ -1546,26 +1085,55 @@ describe("ItemsFacet", async () => {
           );
       });
       it("should NOT equip a delegated wearable if the depositId is expired", async () => {
-        await network.provider.send("evm_increaseTime", [ONE_DAY]);
-        const itemDepositIds: ItemDepositId[] = new Array(16).fill({
-          nonce: BigNumber.from(0),
-          grantor: AddressZero,
-        });
-        itemDepositIds[3] = {
-          nonce: RoleAssignment.nonce,
-          grantor: RoleAssignment.grantor,
-        };
-
+        await time.increase(ONE_DAY)
+       
+        itemRecordIds[3] = GrantRoleData.recordId
+        wearableIdsToEquip[3] = wearableIds[3];
+         
         await expect(
           itemsFacet
             .connect(grantee)
             .equipDelegatedWearables(
               gotchiId,
-              [0, 0, 0, wearableIds[3], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-              itemDepositIds
+              wearableIdsToEquip,
+              itemRecordIds
             )
         ).to.be.revertedWith("ItemsFacet: Wearable delegation expired");
       });
     });
   });
+
+  async function createRoleAssignment(
+    recordId: number,
+    tokenId: number,
+    tokenAmount: number,
+    grantee: string = granteeAddress
+  ) {
+    const RecordCreated = buildRecord({
+      grantor: grantor.address,
+      tokenId,
+      tokenAmount,
+    });
+    const GrantRoleData = await buildGrantRole({
+      recordId,
+      grantee,
+    });
+
+    await ItemsRolesRegistryFacet.connect(grantor).createRecordFrom(
+      RecordCreated.grantor,
+      RecordCreated.tokenAddress,
+      RecordCreated.tokenId,
+      RecordCreated.tokenAmount
+    );
+    // wearables[0] -> hands
+    await ItemsRolesRegistryFacet.connect(grantor).grantRole(
+      GrantRoleData.recordId,
+      GrantRoleData.role,
+      GrantRoleData.grantee,
+      GrantRoleData.expirationDate,
+      GrantRoleData.revocable,
+      GrantRoleData.data
+    );
+    return { GrantRoleData, RecordCreated };
+  }
 });

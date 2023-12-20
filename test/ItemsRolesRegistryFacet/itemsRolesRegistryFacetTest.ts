@@ -9,7 +9,6 @@ import { DAOFacet, DiamondLoupeFacet, LibEventHandler, WearablesFacet } from "..
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
-  ONE_DAY,
   aavegotchiDiamondAddress,
   generateRandomInt,
   time,
@@ -24,7 +23,6 @@ import { upgradeWithNewFacets } from "./upgradeScript";
 import { GrantRoleData, Record } from "./types";
 
 const { expect } = chai;
-const { AddressZero } = ethers.constants;
 
 describe("ItemsRolesRegistryFacet", async () => {
   let ItemsRolesRegistryFacet: Contract;
@@ -34,7 +32,6 @@ describe("ItemsRolesRegistryFacet", async () => {
   let wearablesFacet: WearablesFacet;
   let libEventHandler: LibEventHandler;
   let daoFacet: DAOFacet;
-  let diamondLoupeFacet: DiamondLoupeFacet;
   let recordIdsCounter = 0;
 
   before(async () => {
@@ -49,11 +46,6 @@ describe("ItemsRolesRegistryFacet", async () => {
       params: [diamondOwnerAddress],
     });
     const diamondOwner = await ethers.provider.getSigner(diamondOwnerAddress);
-
-    diamondLoupeFacet = (await ethers.getContractAt(
-      "DiamondLoupeFacet",
-      aavegotchiDiamondAddress
-    )) as DiamondLoupeFacet;
 
     await upgradeWithNewFacets({
       diamondAddress: aavegotchiDiamondAddress,
