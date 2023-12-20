@@ -232,11 +232,11 @@ struct GotchiEquippedItemsInfo {
     uint256 equippedDelegatedItemsCount;
 }
 
-struct UserRoleAssignmentsInfo {
-ISftRolesRegistry.DepositInfo itemsDeposits;
-ISftRolesRegistry.RoleData itemsRoleAssignments;
-EnumerableSet.UintSet depositIdToEquippedGotchis;
-uint256 itemsDepositsUnequippedBalance;
+struct UserDelegatedItemsInfo {
+ISftRolesRegistry.DepositInfo deposit;
+ISftRolesRegistry.RoleData roleAssignment;
+EnumerableSet.UintSet equippedGotchis;
+uint256 availableBalance;
 }
 
 struct AppStorage {
@@ -361,7 +361,7 @@ struct AppStorage {
     
     // Items Roles Registry
     // grantor => nonce => userRoleAssignmentsInfo
-    mapping(address => mapping(uint256 => UserRoleAssignmentsInfo)) userRoleAssignmentsInfo;
+    mapping(address => mapping(uint256 => UserDelegatedItemsInfo)) userDelegatedItemsInfo;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsRoleApprovals;
     

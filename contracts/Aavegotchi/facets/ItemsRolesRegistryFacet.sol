@@ -9,7 +9,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
-import {Modifiers, ItemType, EQUIPPED_WEARABLE_SLOTS, GotchiEquippedItemsInfo, Aavegotchi, UserRoleAssignmentsInfo} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ItemType, EQUIPPED_WEARABLE_SLOTS, GotchiEquippedItemsInfo, Aavegotchi, UserDelegatedItemsInfo} from "../libraries/LibAppStorage.sol";
 import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import {ERC1155Holder, ERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import {IEventHandlerFacet} from "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
@@ -66,7 +66,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         uint256 _nonce
     ) {
         require(_role == UNIQUE_ROLE, "ItemsRolesRegistryFacet: role not supported");
-        require(_grantee == s.userRoleAssignmentsInfo[_grantor][_nonce].itemsRoleAssignments.grantee, "ItemsRolesRegistryFacet: grantee mismatch");
+        require(_grantee == s.userDelegatedItemsInfo[_grantor][_nonce].roleAssignment.grantee, "ItemsRolesRegistryFacet: grantee mismatch");
         _;
     }
 
@@ -87,17 +87,17 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         )
         onlyOwnerOrApproved(_grantRoleData.grantor, _grantRoleData.tokenAddress)
     {
-        UserRoleAssignmentsInfo storage _userInfo = s.userRoleAssignmentsInfo[_grantRoleData.grantor][_grantRoleData.nonce];
-        if (_userInfo.itemsDeposits.tokenAmount == 0) {
+        UserDelegatedItemsInfo storage _userInfo = s.userDelegatedItemsInfo[_grantRoleData.grantor][_grantRoleData.nonce];
+        if (_userInfo.deposit.tokenAmount == 0) {
             // transfer tokens
             _deposit(_grantRoleData);
         } else {
             // nonce exists
-            require(_userInfo.itemsDeposits.tokenAddress == _grantRoleData.tokenAddress, "ItemsRolesRegistryFacet: tokenAddress mismatch");
-            require(_userInfo.itemsDeposits.tokenId == _grantRoleData.tokenId, "ItemsRolesRegistryFacet: tokenId mismatch");
-            require(_userInfo.itemsDeposits.tokenAmount == _grantRoleData.tokenAmount, "ItemsRolesRegistryFacet: tokenAmount mismatch");
+            require(_userInfo.deposit.tokenAddress == _grantRoleData.tokenAddress, "ItemsRolesRegistryFacet: tokenAddress mismatch");
+            require(_userInfo.deposit.tokenId == _grantRoleData.tokenId, "ItemsRolesRegistryFacet: tokenId mismatch");
+            require(_userInfo.deposit.tokenAmount == _grantRoleData.tokenAmount, "ItemsRolesRegistryFacet: tokenAmount mismatch");
 
-            RoleData storage _roleData = _userInfo.itemsRoleAssignments;
+            RoleData storage _roleData = _userInfo.roleAssignment;
             require(
                 _roleData.expirationDate < block.timestamp || _roleData.revocable,
                 "ItemsRolesRegistryFacet: nonce is not expired or is not revocable"
@@ -112,9 +112,9 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         address _grantor,
         address _grantee
     ) external override validRoleAndGrantee(_role, _grantor, _grantee, _nonce) {
-        UserRoleAssignmentsInfo storage _userInfo = s.userRoleAssignmentsInfo[_grantor][_nonce];
-        RoleData memory _roleData = _userInfo.itemsRoleAssignments;
-        DepositInfo memory _depositInfo = _userInfo.itemsDeposits;
+        UserDelegatedItemsInfo storage _userInfo = s.userDelegatedItemsInfo[_grantor][_nonce];
+        RoleData memory _roleData = _userInfo.roleAssignment;
+        DepositInfo memory _depositInfo = _userInfo.deposit;
 
         address caller = _findCaller(_grantor, _roleData.grantee, _depositInfo.tokenAddress);
         if (_roleData.expirationDate > block.timestamp && !_roleData.revocable) {
@@ -124,8 +124,8 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
 
         _unequipAllDelegatedWearables(_nonce, _grantor, _depositInfo.tokenId);
 
-        _userInfo.itemsDepositsUnequippedBalance = _userInfo.itemsDeposits.tokenAmount;
-        delete _userInfo.itemsRoleAssignments;
+        _userInfo.availableBalance = _userInfo.deposit.tokenAmount;
+        delete _userInfo.roleAssignment;
 
         emit RoleRevoked(_nonce, UNIQUE_ROLE, _depositInfo.tokenAddress, _depositInfo.tokenId, _depositInfo.tokenAmount, _grantor, _roleData.grantee);
     }
@@ -133,20 +133,20 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     function withdrawFrom(
         uint256 _nonce,
         address _grantor
-    ) external override onlyOwnerOrApproved(_grantor, s.userRoleAssignmentsInfo[_grantor][_nonce].itemsDeposits.tokenAddress) {
-        UserRoleAssignmentsInfo storage _userInfo = s.userRoleAssignmentsInfo[_grantor][_nonce];
-        DepositInfo memory _depositInfo = _userInfo.itemsDeposits;
+    ) external override onlyOwnerOrApproved(_grantor, s.userDelegatedItemsInfo[_grantor][_nonce].deposit.tokenAddress) {
+        UserDelegatedItemsInfo storage _userInfo = s.userDelegatedItemsInfo[_grantor][_nonce];
+        DepositInfo memory _depositInfo = _userInfo.deposit;
         require(_depositInfo.tokenAmount > 0, "ItemsRolesRegistryFacet: nonce does not exist");
         require(
-            _userInfo.itemsRoleAssignments.expirationDate < block.timestamp || _userInfo.itemsRoleAssignments.revocable,
+            _userInfo.roleAssignment.expirationDate < block.timestamp || _userInfo.roleAssignment.revocable,
             "ItemsRolesRegistryFacet: token has an active role"
         );
 
         _unequipAllDelegatedWearables(_nonce, _grantor, _depositInfo.tokenId); // If the item is equipped in some gotchi, it will be unequipped
 
-        delete _userInfo.itemsDeposits;
-        delete _userInfo.itemsDepositsUnequippedBalance;
-        delete _userInfo.itemsRoleAssignments;
+        delete _userInfo.deposit;
+        delete _userInfo.availableBalance;
+        delete _userInfo.roleAssignment;
 
         _transferFrom(address(this), _grantor, _depositInfo.tokenAddress, _depositInfo.tokenId, _depositInfo.tokenAmount);
 
@@ -166,7 +166,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         address _grantor,
         address _grantee
     ) external view override validRoleAndGrantee(_role, _grantor, _grantee, _nonce) returns (RoleData memory) {
-        return s.userRoleAssignmentsInfo[_grantor][_nonce].itemsRoleAssignments;
+        return s.userDelegatedItemsInfo[_grantor][_nonce].roleAssignment;
     }
 
     function roleExpirationDate(
@@ -175,7 +175,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         address _grantor,
         address _grantee
     ) external view override validRoleAndGrantee(_role, _grantor, _grantee, _nonce) returns (uint64 expirationDate_) {
-        return s.userRoleAssignmentsInfo[_grantor][_nonce].itemsRoleAssignments.expirationDate;
+        return s.userDelegatedItemsInfo[_grantor][_nonce].roleAssignment.expirationDate;
     }
 
     function isRoleApprovedForAll(address _tokenAddress, address _grantor, address _operator) public view override returns (bool) {
@@ -185,8 +185,8 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     /** Helper Functions **/
 
     function _grantOrUpdateRole(RoleAssignment calldata _grantRoleData) internal {
-        UserRoleAssignmentsInfo storage _userInfo = s.userRoleAssignmentsInfo[_grantRoleData.grantor][_grantRoleData.nonce];
-        _userInfo.itemsRoleAssignments = RoleData(
+        UserDelegatedItemsInfo storage _userInfo = s.userDelegatedItemsInfo[_grantRoleData.grantor][_grantRoleData.nonce];
+        _userInfo.roleAssignment = RoleData(
             _grantRoleData.grantee,
             _grantRoleData.expirationDate,
             _grantRoleData.revocable,
@@ -208,15 +208,15 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     function _unequipAllDelegatedWearables(uint256 _nonce, address _grantor, uint256 _tokenIdToUnequip) internal {
-        UserRoleAssignmentsInfo storage _userInfo = s.userRoleAssignmentsInfo[_grantor][_nonce];
-        uint256 _equippedGotchisLength = _userInfo.depositIdToEquippedGotchis.length();
+        UserDelegatedItemsInfo storage _userInfo = s.userDelegatedItemsInfo[_grantor][_nonce];
+        uint256 _equippedGotchisLength = _userInfo.equippedGotchis.length();
 
         for (uint256 i; i < _equippedGotchisLength; i++) {
-            uint256 _gotchiId = _userInfo.depositIdToEquippedGotchis.at(i);
+            uint256 _gotchiId = _userInfo.equippedGotchis.at(i);
             _unequipDelegatedWearable(_gotchiId, _tokenIdToUnequip, _grantor, _nonce);
         }
 
-        delete _userInfo.depositIdToEquippedGotchis;
+        delete _userInfo.equippedGotchis;
     }
 
     function _unequipDelegatedWearable(uint256 _gotchiId, uint256 _tokenIdToUnequip, address _grantor, uint256 _nonce) internal {
@@ -259,9 +259,9 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     function _deposit(RoleAssignment calldata _grantRoleData) internal {
-        UserRoleAssignmentsInfo storage _userInfo = s.userRoleAssignmentsInfo[_grantRoleData.grantor][_grantRoleData.nonce];
-        _userInfo.itemsDeposits = DepositInfo(_grantRoleData.tokenAddress, _grantRoleData.tokenId, _grantRoleData.tokenAmount);
-        _userInfo.itemsDepositsUnequippedBalance = _grantRoleData.tokenAmount;
+        UserDelegatedItemsInfo storage _userInfo = s.userDelegatedItemsInfo[_grantRoleData.grantor][_grantRoleData.nonce];
+        _userInfo.deposit = DepositInfo(_grantRoleData.tokenAddress, _grantRoleData.tokenId, _grantRoleData.tokenAmount);
+        _userInfo.availableBalance = _grantRoleData.tokenAmount;
 
         _transferFrom(_grantRoleData.grantor, address(this), _grantRoleData.tokenAddress, _grantRoleData.tokenId, _grantRoleData.tokenAmount);
     }
