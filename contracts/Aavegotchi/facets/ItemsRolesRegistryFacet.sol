@@ -101,7 +101,6 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         }
 
         _unequipAllDelegatedWearables(_recordId, _record.tokenId);
-        _recordInfo.availableBalance = _recordInfo.record.tokenAmount;
 
         emit RoleRevoked(_recordId, _role, _roleAssignment.grantee);
         delete _recordInfo.roleAssignment;
@@ -121,7 +120,6 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         _unequipAllDelegatedWearables(_recordId, _record.tokenId); // If the item is equipped in some gotchi, it will be unequipped
 
         delete _recordInfo.record;
-        delete _recordInfo.availableBalance;
         delete _recordInfo.roleAssignment;
 
         emit Withdrew(_recordId);
@@ -169,7 +167,6 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         recordId_ = ++s.itemsRecordIdCounter;
         ItemRolesInfo storage _recordInfo = s.itemRolesRecordInfo[recordId_];
         _recordInfo.record = Record(_grantor, _tokenAddress, _tokenId, _tokenAmount);
-        _recordInfo.availableBalance = _tokenAmount;
         _transferFrom(_grantor, address(this), _tokenAddress, _tokenId, _tokenAmount);
         emit RecordCreated(_grantor, recordId_, _tokenAddress, _tokenId, _tokenAmount);
     }
@@ -196,6 +193,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         }
 
         delete _recordInfo.equippedGotchis;
+        delete _recordInfo.balanceUsed;
     }
 
     function _unequipDelegatedWearable(uint256 _gotchiId, uint256 _tokenIdToUnequip, uint256 _recordId) internal {

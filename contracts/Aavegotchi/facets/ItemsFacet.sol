@@ -307,11 +307,11 @@ contract ItemsFacet is Modifiers {
             require(_recordInfo.roleAssignment.grantee == _sender, "ItemsFacet: Wearable not delegated to sender or recordId not valid");
             require(_recordInfo.roleAssignment.expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
             require(_recordInfo.record.tokenId == _toEquipWearableId, "ItemsFacet: Delegated Wearable not of this delegation");
-            require(_recordInfo.availableBalance >= 1, "ItemsFacet: Not enough delegated balance");
+            require((_recordInfo.record.tokenAmount - _recordInfo.balanceUsed) >= 1, "ItemsFacet: Not enough delegated balance");
             
             _gotchiInfo.equippedDelegatedItems[_slot] = _recordId;
-            _gotchiInfo.equippedDelegatedItemsCount += 1;
-            _recordInfo.availableBalance -= 1;
+            _gotchiInfo.equippedDelegatedItemsCount++;
+            _recordInfo.balanceUsed++;
             _recordInfo.equippedGotchis.add(_gotchiId);
         } else {
             require(s.ownerItemBalances[_sender][_toEquipWearableId] >= 1, "ItemsFacet: Wearable isn't in inventory");
@@ -352,8 +352,8 @@ contract ItemsFacet is Modifiers {
                 _recordInfo.equippedGotchis.remove(_gotchiId);
             }
             
-            _recordInfo.availableBalance += 1;
-            _gotchiInfo.equippedDelegatedItemsCount -= 1;
+            _recordInfo.balanceUsed--;
+            _gotchiInfo.equippedDelegatedItemsCount--;
             delete _gotchiInfo.equippedDelegatedItems[_slot];
         } else {
             // Remove wearable from Aavegotchi and transfer item to owner

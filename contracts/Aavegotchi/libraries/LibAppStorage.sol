@@ -231,7 +231,7 @@ struct ItemRolesInfo {
     ISftRolesRegistry.Record record;
     ISftRolesRegistry.RoleAssignment roleAssignment;
     EnumerableSet.UintSet equippedGotchis;
-    uint256 availableBalance;
+    uint256 balanceUsed;
 }
 
 struct AppStorage {
