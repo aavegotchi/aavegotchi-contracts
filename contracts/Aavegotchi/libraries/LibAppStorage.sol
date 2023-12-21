@@ -221,10 +221,9 @@ struct ERC721BuyOrder {
     bool[] validationOptions;
 }
 
-struct GotchiEquippedItemsInfo {
-    // slotPosition => recordId
-    uint256[EQUIPPED_WEARABLE_SLOTS] equippedDelegatedItems;
-    uint256 equippedDelegatedItemsCount;
+struct GotchiEquippedRecordsInfo {
+    uint256[EQUIPPED_WEARABLE_SLOTS] equippedRecordIds;
+    uint256 equippedRecordIdsCount;
 }
 
 struct ItemRolesInfo {
@@ -361,9 +360,9 @@ struct AppStorage {
     mapping(address => mapping(address => mapping(address => bool))) itemsRoleApprovals;
     uint256 itemsRecordIdCounter;
     
-    // Auxilliary structs for Items Roles Registry
+    // Auxiliary structs for Items Roles Registry
     // gotchiId => equippedItemsInfo
-    mapping(uint256 => GotchiEquippedItemsInfo) gotchiEquippedItemsInfo;
+    mapping(uint256 => GotchiEquippedRecordsInfo) gotchiEquippedItemsInfo;
 }
 
 library LibAppStorage {

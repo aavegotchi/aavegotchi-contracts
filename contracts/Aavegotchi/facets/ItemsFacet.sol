@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
-import {LibAppStorage, Modifiers, ItemType, Aavegotchi, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, GotchiEquippedItemsInfo, ItemRolesInfo} from "../libraries/LibAppStorage.sol";
+import {LibAppStorage, Modifiers, ItemType, Aavegotchi, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, GotchiEquippedRecordsInfo, ItemRolesInfo} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -217,7 +217,7 @@ contract ItemsFacet is Modifiers {
     )
         external
     {
-        emit EquipDelegatedWearables(_tokenId, s.aavegotchis[_tokenId].equippedWearables, _wearablesToEquip, s.gotchiEquippedItemsInfo[_tokenId].equippedDelegatedItems ,_recordIds);
+        emit EquipDelegatedWearables(_tokenId, s.aavegotchis[_tokenId].equippedWearables, _wearablesToEquip, s.gotchiEquippedItemsInfo[_tokenId].equippedRecordIds ,_recordIds);
         _equipWearables(_tokenId, _wearablesToEquip, _recordIds);
     }
 
@@ -233,7 +233,7 @@ contract ItemsFacet is Modifiers {
     {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
-        GotchiEquippedItemsInfo storage _gotchiInfo = s.gotchiEquippedItemsInfo[_tokenId];
+        GotchiEquippedRecordsInfo storage _gotchiInfo = s.gotchiEquippedItemsInfo[_tokenId];
 
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             
@@ -242,7 +242,7 @@ contract ItemsFacet is Modifiers {
             bool _sameWearablesIds = toEquipId == existingEquippedWearableId;
 
             uint256 _recordIdToEquip = _recordIdsToEquip[slot];
-            uint256 _existingEquippedRecordId = _gotchiInfo.equippedDelegatedItems[slot];
+            uint256 _existingEquippedRecordId = _gotchiInfo.equippedRecordIds[slot];
 
             //If the new wearable value is equal to the current equipped wearable in that slot
             //do nothing
@@ -296,7 +296,7 @@ contract ItemsFacet is Modifiers {
         uint256 _gotchiId,
         uint256 _toEquipWearableId,
         uint256 _slot,
-        GotchiEquippedItemsInfo storage _gotchiInfo
+        GotchiEquippedRecordsInfo storage _gotchiInfo
     ) internal {
         
         address _sender = LibMeta.msgSender();
@@ -309,8 +309,8 @@ contract ItemsFacet is Modifiers {
             require(_recordInfo.record.tokenId == _toEquipWearableId, "ItemsFacet: Delegated Wearable not of this delegation");
             require((_recordInfo.record.tokenAmount - _recordInfo.balanceUsed) >= 1, "ItemsFacet: Not enough delegated balance");
             
-            _gotchiInfo.equippedDelegatedItems[_slot] = _recordId;
-            _gotchiInfo.equippedDelegatedItemsCount++;
+            _gotchiInfo.equippedRecordIds[_slot] = _recordId;
+            _gotchiInfo.equippedRecordIdsCount++;
             _recordInfo.balanceUsed++;
             _recordInfo.equippedGotchis.add(_gotchiId);
         } else {
@@ -329,32 +329,35 @@ contract ItemsFacet is Modifiers {
         uint256 _gotchiId,
         uint256 _existingEquippedWearableId,
         uint256 _slot,
-        GotchiEquippedItemsInfo storage _gotchiInfo
+        GotchiEquippedRecordsInfo storage _gotchiInfo
     ) internal {
        
         LibItems.removeFromParent(address(this), _gotchiId, _existingEquippedWearableId, 1);
         emit LibERC1155.TransferFromParent(address(this), _gotchiId, _existingEquippedWearableId, 1);
         
         address _sender = LibMeta.msgSender();
-        uint256 _recordIdToUnequip = _gotchiInfo.equippedDelegatedItems[_slot];
+        uint256 _recordIdToUnequip = _gotchiInfo.equippedRecordIds[_slot];
         
         if (_recordIdToUnequip != 0) {
             // remove wearable from Aavegotchi and delete delegation
             ItemRolesInfo storage _recordInfo = s.itemRolesRecordInfo[_recordIdToUnequip];
-            bool _sameHandDelegationEquipped = 
-            (_slot == LibItems.WEARABLE_SLOT_HAND_LEFT 
-            && _gotchiInfo.equippedDelegatedItems[LibItems.WEARABLE_SLOT_HAND_RIGHT] == _recordIdToUnequip) 
-            || 
-            (_slot == LibItems.WEARABLE_SLOT_HAND_RIGHT 
-            && _gotchiInfo.equippedDelegatedItems[LibItems.WEARABLE_SLOT_HAND_LEFT] == _recordIdToUnequip);
+            bool _sameHandDelegationEquipped =
+                (
+                    _slot == LibItems.WEARABLE_SLOT_HAND_LEFT &&
+                    _gotchiInfo.equippedRecordIds[LibItems.WEARABLE_SLOT_HAND_RIGHT] == _recordIdToUnequip
+                ) ||
+                (
+                    _slot == LibItems.WEARABLE_SLOT_HAND_RIGHT &&
+                    _gotchiInfo.equippedRecordIds[LibItems.WEARABLE_SLOT_HAND_LEFT] == _recordIdToUnequip
+                );
                 
             if(!_sameHandDelegationEquipped) {
                 _recordInfo.equippedGotchis.remove(_gotchiId);
             }
             
             _recordInfo.balanceUsed--;
-            _gotchiInfo.equippedDelegatedItemsCount--;
-            delete _gotchiInfo.equippedDelegatedItems[_slot];
+            _gotchiInfo.equippedRecordIdsCount--;
+            delete _gotchiInfo.equippedRecordIds[_slot];
         } else {
             // Remove wearable from Aavegotchi and transfer item to owner
             LibItems.addToOwner(_sender, _existingEquippedWearableId, 1);

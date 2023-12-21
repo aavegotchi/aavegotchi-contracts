@@ -9,7 +9,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
-import {Modifiers, ItemType, EQUIPPED_WEARABLE_SLOTS, GotchiEquippedItemsInfo, Aavegotchi, ItemRolesInfo} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ItemType, EQUIPPED_WEARABLE_SLOTS, GotchiEquippedRecordsInfo, Aavegotchi, ItemRolesInfo} from "../libraries/LibAppStorage.sol";
 import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import {ERC1155Holder, ERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import {IEventHandlerFacet} from "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
@@ -197,21 +197,21 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     function _unequipDelegatedWearable(uint256 _gotchiId, uint256 _tokenIdToUnequip, uint256 _recordId) internal {
-        GotchiEquippedItemsInfo storage _gotchiInfo = s.gotchiEquippedItemsInfo[_gotchiId];
+        GotchiEquippedRecordsInfo storage _gotchiInfo = s.gotchiEquippedItemsInfo[_gotchiId];
         Aavegotchi storage _aavegotchi = s.aavegotchis[_gotchiId];
         uint256 _unequippedBalance;
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
-            if (_aavegotchi.equippedWearables[slot] != _tokenIdToUnequip || _gotchiInfo.equippedDelegatedItems[slot] != _recordId) continue;
+            if (_aavegotchi.equippedWearables[slot] != _tokenIdToUnequip || _gotchiInfo.equippedRecordIds[slot] != _recordId) continue;
 
             delete _aavegotchi.equippedWearables[slot];
-            delete _gotchiInfo.equippedDelegatedItems[slot];
+            delete _gotchiInfo.equippedRecordIds[slot];
             _unequippedBalance++;
         }
 
         if (_unequippedBalance == 0) return;
         LibItems.removeFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
         emit LibERC1155.TransferFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
-        _gotchiInfo.equippedDelegatedItemsCount -= _unequippedBalance;
+        _gotchiInfo.equippedRecordIdsCount -= _unequippedBalance;
     }
 
     function _transferFrom(address _from, address _to, address _tokenAddress, uint256 _tokenId, uint256 _tokenAmount) internal {
