@@ -223,7 +223,7 @@ struct ERC721BuyOrder {
 
 struct GotchiEquippedItemsInfo {
     // slotPosition => recordId
-    mapping(uint256 => uint256) equippedDelegatedItems;
+    uint256[EQUIPPED_WEARABLE_SLOTS] equippedDelegatedItems;
     uint256 equippedDelegatedItemsCount;
 }
 

@@ -18,6 +18,14 @@ contract ItemsFacet is Modifiers {
 
     event EquipWearables(uint256 indexed _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] _oldWearables, uint16[EQUIPPED_WEARABLE_SLOTS] _newWearables);
     event UseConsumables(uint256 indexed _tokenId, uint256[] _itemIds, uint256[] _quantities);
+    event EquipDelegatedWearables(
+        uint256 indexed _tokenId, 
+        uint16[EQUIPPED_WEARABLE_SLOTS] _oldWearables, 
+        uint16[EQUIPPED_WEARABLE_SLOTS] _newWearables, 
+        uint256[EQUIPPED_WEARABLE_SLOTS] _oldRecordIds, 
+        uint256[EQUIPPED_WEARABLE_SLOTS] _newRecordIds
+    );
+
 
     /***********************************|
    |             Read Functions         |
@@ -27,8 +35,6 @@ contract ItemsFacet is Modifiers {
         uint256 itemId;
         uint256 balance;
     }
-
-    event EquipDelegatedWearables(uint256 indexed _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] _oldWearables, uint16[EQUIPPED_WEARABLE_SLOTS] _newWearables, uint256[EQUIPPED_WEARABLE_SLOTS] _recordIds);
 
     ///@notice Returns balance for each item that exists for an account
     ///@param _account Address of the account to query
@@ -211,7 +217,7 @@ contract ItemsFacet is Modifiers {
     )
         external
     {
-        emit EquipDelegatedWearables(_tokenId, s.aavegotchis[_tokenId].equippedWearables, _wearablesToEquip, _recordIds);
+        emit EquipDelegatedWearables(_tokenId, s.aavegotchis[_tokenId].equippedWearables, _wearablesToEquip, s.gotchiEquippedItemsInfo[_tokenId].equippedDelegatedItems ,_recordIds);
         _equipWearables(_tokenId, _wearablesToEquip, _recordIds);
     }
 
