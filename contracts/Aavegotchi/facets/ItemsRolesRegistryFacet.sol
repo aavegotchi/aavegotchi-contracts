@@ -9,7 +9,7 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
-import {Modifiers, ItemType, EQUIPPED_WEARABLE_SLOTS, GotchiEquippedItemsInfo, Aavegotchi, RecordInfo} from "../libraries/LibAppStorage.sol";
+import {Modifiers, ItemType, EQUIPPED_WEARABLE_SLOTS, GotchiEquippedItemsInfo, Aavegotchi, ItemRolesInfo} from "../libraries/LibAppStorage.sol";
 import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import {ERC1155Holder, ERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import {IEventHandlerFacet} from "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
@@ -43,8 +43,9 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     }
 
     modifier onlyOwnerOrApproved(address _account, address _tokenAddress) {
+        address _sender = LibMeta.msgSender();
         require(
-            _account == LibMeta.msgSender() || isRoleApprovedForAll(_tokenAddress, _account, LibMeta.msgSender()),
+            _account == _sender || isRoleApprovedForAll(_tokenAddress, _account, _sender),
             "ItemsRolesRegistryFacet: account not approved"
         );
         _;
@@ -55,7 +56,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         bytes32 _role,
         address _grantee
     ) {
-        require(_grantee != address(0) && _grantee == s.recordInfo[_recordId].roleAssignment.grantee, "ItemsRolesRegistryFacet: grantee mismatch");
+        require(_grantee != address(0) && _grantee == s.itemRolesRecordInfo[_recordId].roleAssignment.grantee, "ItemsRolesRegistryFacet: grantee mismatch");
         _;
     }
 
@@ -82,14 +83,14 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         external
         override
         validGrantRoleData(_expirationDate, _role)
-        onlyOwnerOrApproved(s.recordInfo[_recordId].record.grantor, s.recordInfo[_recordId].record.tokenAddress)
+        onlyOwnerOrApproved(s.itemRolesRecordInfo[_recordId].record.grantor, s.itemRolesRecordInfo[_recordId].record.tokenAddress)
     {
         _grantOrUpdateRole(_recordId, _role, _grantee, _expirationDate, _revocable, _data);
     }
 
     function revokeRoleFrom(uint256 _recordId, bytes32 _role, address _grantee) external override sameGrantee(_recordId, _role, _grantee) {
         require(_role == UNIQUE_ROLE, "ItemsRolesRegistryFacet: role not supported");
-        RecordInfo storage _recordInfo = s.recordInfo[_recordId];
+        ItemRolesInfo storage _recordInfo = s.itemRolesRecordInfo[_recordId];
         RoleAssignment storage _roleAssignment = _recordInfo.roleAssignment;
         Record storage _record = _recordInfo.record;
 
@@ -108,8 +109,8 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
 
     function withdrawFrom(
         uint256 _recordId
-    ) external override onlyOwnerOrApproved(s.recordInfo[_recordId].record.grantor, s.recordInfo[_recordId].record.tokenAddress) {
-        RecordInfo storage _recordInfo = s.recordInfo[_recordId];
+    ) external override onlyOwnerOrApproved(s.itemRolesRecordInfo[_recordId].record.grantor, s.itemRolesRecordInfo[_recordId].record.tokenAddress) {
+        ItemRolesInfo storage _recordInfo = s.itemRolesRecordInfo[_recordId];
         Record memory _record = _recordInfo.record;
         require(_record.tokenAmount > 0, "ItemsRolesRegistryFacet: record does not exist");
         require(
@@ -139,7 +140,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         bytes32 _role,
         address _grantee
     ) external view override sameGrantee(_recordId, _role, _grantee) returns (bytes memory data_) {
-        return s.recordInfo[_recordId].roleAssignment.data;
+        return s.itemRolesRecordInfo[_recordId].roleAssignment.data;
     }
 
     function roleExpirationDate(
@@ -147,7 +148,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         bytes32 _role,
         address _grantee
     ) external view override sameGrantee(_recordId, _role, _grantee) returns (uint64 expirationDate_) {
-        return s.recordInfo[_recordId].roleAssignment.expirationDate;
+        return s.itemRolesRecordInfo[_recordId].roleAssignment.expirationDate;
     }
 
     function isRoleRevocable(
@@ -155,7 +156,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         bytes32 _role,
         address _grantee
     ) external view override sameGrantee(_recordId, _role, _grantee) returns (bool revocable_) {
-        return s.recordInfo[_recordId].roleAssignment.revocable;
+        return s.itemRolesRecordInfo[_recordId].roleAssignment.revocable;
     }
 
     function isRoleApprovedForAll(address _tokenAddress, address _grantor, address _operator) public view override returns (bool) {
@@ -165,8 +166,8 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     /** Helper Functions **/
 
     function _createRecord(address _grantor, address _tokenAddress, uint256 _tokenId, uint256 _tokenAmount) internal returns (uint256 recordId_) {
-        recordId_ = ++s.itemsRecordIdcounter;
-        RecordInfo storage _recordInfo = s.recordInfo[recordId_];
+        recordId_ = ++s.itemsRecordIdCounter;
+        ItemRolesInfo storage _recordInfo = s.itemRolesRecordInfo[recordId_];
         _recordInfo.record = Record(_grantor, _tokenAddress, _tokenId, _tokenAmount);
         _recordInfo.availableBalance = _tokenAmount;
         _transferFrom(_grantor, address(this), _tokenAddress, _tokenId, _tokenAmount);
@@ -181,12 +182,12 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         bool _revocable,
         bytes calldata _data
     ) internal {
-        s.recordInfo[_recordId].roleAssignment = RoleAssignment(_grantee, _expirationDate, _revocable, _data);
+        s.itemRolesRecordInfo[_recordId].roleAssignment = RoleAssignment(_grantee, _expirationDate, _revocable, _data);
         emit RoleGranted(_recordId, _role, _grantee, _expirationDate, _revocable, _data);
     }
 
     function _unequipAllDelegatedWearables(uint256 _recordId, uint256 _tokenIdToUnequip) internal {
-        RecordInfo storage _recordInfo = s.recordInfo[_recordId];
+        ItemRolesInfo storage _recordInfo = s.itemRolesRecordInfo[_recordId];
         uint256 _equippedGotchisLength = _recordInfo.equippedGotchis.length();
 
         for (uint256 i; i < _equippedGotchisLength; i++) {

@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 
 import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
-import {LibAppStorage, Modifiers, ItemType, Aavegotchi, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, GotchiEquippedItemsInfo, RecordInfo} from "../libraries/LibAppStorage.sol";
+import {LibAppStorage, Modifiers, ItemType, Aavegotchi, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, GotchiEquippedItemsInfo, ItemRolesInfo} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -302,7 +302,7 @@ contract ItemsFacet is Modifiers {
         address _sender = LibMeta.msgSender();
         
         if (_recordId != 0) {
-            RecordInfo storage _recordInfo = s.recordInfo[_recordId];
+            ItemRolesInfo storage _recordInfo = s.itemRolesRecordInfo[_recordId];
 
             require(_recordInfo.roleAssignment.grantee == _sender, "ItemsFacet: Wearable not delegated to sender or recordId not valid");
             require(_recordInfo.roleAssignment.expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
@@ -340,7 +340,7 @@ contract ItemsFacet is Modifiers {
         
         if (_recordIdToUnequip != 0) {
             // remove wearable from Aavegotchi and delete delegation
-            RecordInfo storage _recordInfo = s.recordInfo[_recordIdToUnequip];
+            ItemRolesInfo storage _recordInfo = s.itemRolesRecordInfo[_recordIdToUnequip];
             bool _sameHandDelegationEquipped = 
             (_slot == LibItems.WEARABLE_SLOT_HAND_LEFT 
             && _gotchiInfo.equippedDelegatedItems[LibItems.WEARABLE_SLOT_HAND_RIGHT] == _recordIdToUnequip) 

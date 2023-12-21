@@ -227,7 +227,7 @@ struct GotchiEquippedItemsInfo {
     uint256 equippedDelegatedItemsCount;
 }
 
-struct RecordInfo {
+struct ItemRolesInfo {
     ISftRolesRegistry.Record record;
     ISftRolesRegistry.RoleAssignment roleAssignment;
     EnumerableSet.UintSet equippedGotchis;
@@ -356,10 +356,10 @@ struct AppStorage {
     
     // Items Roles Registry
     // recordId => userRoleAssignmentsInfo
-    mapping(uint256 => RecordInfo) recordInfo;
+    mapping(uint256 => ItemRolesInfo) itemRolesRecordInfo;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsRoleApprovals;
-    uint256 itemsRecordIdcounter;
+    uint256 itemsRecordIdCounter;
     
     // Auxilliary structs for Items Roles Registry
     // gotchiId => equippedItemsInfo
