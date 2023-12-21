@@ -1,26 +1,10 @@
 import { solidityKeccak256 } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { GrantRoleData, Record } from "./types";
 
 const { HashZero, AddressZero } = ethers.constants;
 export const ONE_DAY = 60 * 60 * 24;
 
-export interface RoleAssignment {
-  nonce: number;
-  role: string;
-  tokenAddress: string;
-  tokenId: number;
-  tokenAmount: number;
-  grantor: string;
-  grantee: string;
-  expirationDate: number;
-  revocable: boolean;
-  data: string;
-}
-
-export interface ItemDepositId {
-  nonce: number;
-  grantor: string;
-}
 
 export function generateRandomInt() {
   return Math.floor(Math.random() * 1000 * 1000) + 1;
@@ -39,45 +23,31 @@ export const wearableDiamondAddress =
 export const EQUIPPED_WEARABLE_SLOTS = 16;
 export const wearableSlots = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-export async function buildRoleAssignment({
-  // default values
-  nonce = generateRandomInt(),
-  role = "Player()",
+export function buildRecord({
+  grantor = AddressZero,
   tokenAddress = wearableDiamondAddress,
   tokenId = wearableIds[0],
   tokenAmount = 1,
-  grantor = AddressZero,
+}): Record {
+  return { grantor, tokenAddress, tokenId, tokenAmount }
+}
+
+export async function buildGrantRole({
+  recordId = generateRandomInt(),
+  role = 'Player()',
   grantee = AddressZero,
   expirationDate = null,
   revocable = true,
   data = HashZero,
-}: {
-  // types
-  nonce?: number;
-  role?: string;
-  tokenAddress?: string;
-  tokenId?: number;
-  tokenAmount?: number;
-  grantor?: string;
-  grantee?: string;
-  expirationDate?: number | null;
-  revocable?: boolean;
-  data?: string;
-} = {}): Promise<RoleAssignment> {
+}): Promise<GrantRoleData> {
   return {
-    nonce,
+    recordId,
     role: generateRoleId(role),
-    tokenAddress,
-    tokenId,
-    tokenAmount,
-    grantor,
     grantee,
-    expirationDate: expirationDate
-      ? expirationDate
-      : (await time.latest()) + ONE_DAY,
+    expirationDate: expirationDate ? expirationDate : (await time.latest()) + ONE_DAY,
     revocable,
     data,
-  };
+  }
 }
 
 export function generateRoleId(role: string) {

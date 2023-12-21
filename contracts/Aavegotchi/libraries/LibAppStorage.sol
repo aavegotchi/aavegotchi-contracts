@@ -221,22 +221,16 @@ struct ERC721BuyOrder {
     bool[] validationOptions;
 }
 
-struct ItemDepositId {
-    uint256 nonce;
-    address grantor;
+struct GotchiEquippedRecordsInfo {
+    uint256[EQUIPPED_WEARABLE_SLOTS] equippedRecordIds;
+    uint256 equippedRecordIdsCount;
 }
 
-struct GotchiEquippedItemsInfo {
-    // slotPosition => depositId
-    mapping(uint256 => ItemDepositId) equippedDelegatedItems;
-    uint256 equippedDelegatedItemsCount;
-}
-
-struct UserDelegatedItemsInfo {
-    ISftRolesRegistry.DepositInfo deposit;
-    ISftRolesRegistry.RoleData roleAssignment;
+struct ItemRolesInfo {
+    ISftRolesRegistry.Record record;
+    ISftRolesRegistry.RoleAssignment roleAssignment;
     EnumerableSet.UintSet equippedGotchis;
-    uint256 availableBalance;
+    uint256 balanceUsed;
 }
 
 struct AppStorage {
@@ -360,14 +354,15 @@ struct AppStorage {
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
     
     // Items Roles Registry
-    // grantor => nonce => userRoleAssignmentsInfo
-    mapping(address => mapping(uint256 => UserDelegatedItemsInfo)) userDelegatedItemsInfo;
+    // recordId => userRoleAssignmentsInfo
+    mapping(uint256 => ItemRolesInfo) itemRolesRecordInfo;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsRoleApprovals;
+    uint256 itemsRecordIdCounter;
     
-    // Auxilliary structs for Items Roles Registry
+    // Auxiliary structs for Items Roles Registry
     // gotchiId => equippedItemsInfo
-    mapping(uint256 => GotchiEquippedItemsInfo) gotchiEquippedItemsInfo;
+    mapping(uint256 => GotchiEquippedRecordsInfo) gotchiEquippedItemsInfo;
 }
 
 library LibAppStorage {
