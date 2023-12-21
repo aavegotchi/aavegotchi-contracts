@@ -611,6 +611,13 @@ describe("ItemsRolesRegistryFacet", async () => {
           anotherUser.address,
         ),
       ).to.be.revertedWith('ItemsRolesRegistryFacet: grantee mismatch')
+      await expect(
+        ItemsRolesRegistryFacet.connect(grantor).isRoleRevocable(
+          GrantRoleData.recordId,
+          GrantRoleData.role,
+          anotherUser.address,
+        ),
+      ).to.be.revertedWith('ItemsRolesRegistryFacet: grantee mismatch')
     })
 
     it('should return role data', async () => {
@@ -622,15 +629,21 @@ describe("ItemsRolesRegistryFacet", async () => {
         ),
       ).to.be.equal(GrantRoleData.expirationDate)
 
-      const roleDate = await ItemsRolesRegistryFacet.connect(grantor).roleData(
-        GrantRoleData.recordId,
-        GrantRoleData.role,
-        GrantRoleData.grantee,
-      )
-      expect(roleDate.grantee).to.be.equal(GrantRoleData.grantee)
-      expect(roleDate.expirationDate).to.be.equal(GrantRoleData.expirationDate)
-      expect(roleDate.revocable).to.be.equal(GrantRoleData.revocable)
-      expect(roleDate.data).to.be.equal(GrantRoleData.data)
+      expect(
+        await ItemsRolesRegistryFacet.connect(grantor).roleData(
+          GrantRoleData.recordId,
+          GrantRoleData.role,
+          GrantRoleData.grantee,
+        ),
+      ).to.be.equal(GrantRoleData.data)
+
+      expect(
+        await ItemsRolesRegistryFacet.connect(grantor).isRoleRevocable(
+          GrantRoleData.recordId,
+          GrantRoleData.role,
+          GrantRoleData.grantee,
+        ),
+      ).to.be.equal(GrantRoleData.revocable)
     })
   })
 
@@ -639,8 +652,8 @@ describe("ItemsRolesRegistryFacet", async () => {
       expect(await ItemsRolesRegistryFacet.supportsInterface('0x4e2312e0')).to.be.true
     })
 
-    it('should return true if ISftRolesRegistry interface id', async () => {
-      expect(await ItemsRolesRegistryFacet.supportsInterface('0xa4629326')).to.be.true
+    it('should return true if IItemsRolesRegistryFacet interface id', async () => {
+      expect(await ItemsRolesRegistryFacet.supportsInterface('0x42ba720c')).to.be.true
     })
   })
 

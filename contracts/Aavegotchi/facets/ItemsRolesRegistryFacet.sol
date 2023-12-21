@@ -33,10 +33,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         _;
     }
 
-    modifier validGrantRoleData(
-        uint64 _expirationDate,
-        bytes32 _role
-    ) {
+    modifier validGrantRoleData(uint64 _expirationDate, bytes32 _role) {
         require(
             _expirationDate > block.timestamp && _expirationDate <= block.timestamp + MAX_EXPIRATION_DATE,
             "ItemsRolesRegistryFacet: invalid expiration date"
@@ -58,10 +55,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         bytes32 _role,
         address _grantee
     ) {
-        require(
-            _grantee != address(0) && _grantee == s.recordInfo[_recordId].roleAssignment.grantee,
-            'ItemsRolesRegistryFacet: grantee mismatch'
-        );
+        require(_grantee != address(0) && _grantee == s.recordInfo[_recordId].roleAssignment.grantee, "ItemsRolesRegistryFacet: grantee mismatch");
         _;
     }
 
@@ -73,7 +67,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         uint256 _tokenId,
         uint256 _tokenAmount
     ) external override onlyWearables(_tokenAddress, _tokenId) onlyOwnerOrApproved(_grantor, _tokenAddress) returns (uint256 recordId_) {
-        require(_tokenAmount > 0, 'ItemsRolesRegistryFacet: tokenAmount must be greater than zero');
+        require(_tokenAmount > 0, "ItemsRolesRegistryFacet: tokenAmount must be greater than zero");
         recordId_ = _createRecord(_grantor, _tokenAddress, _tokenId, _tokenAmount);
     }
 
@@ -87,17 +81,14 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
     )
         external
         override
-        validGrantRoleData(
-            _expirationDate,
-            _role
-        )
+        validGrantRoleData(_expirationDate, _role)
         onlyOwnerOrApproved(s.recordInfo[_recordId].record.grantor, s.recordInfo[_recordId].record.tokenAddress)
     {
         _grantOrUpdateRole(_recordId, _role, _grantee, _expirationDate, _revocable, _data);
     }
 
-    function revokeRoleFrom(uint256 _recordId, bytes32 _role, address _grantee) sameGrantee(_recordId, _role, _grantee) external override {
-        require(_role == UNIQUE_ROLE, 'ItemsRolesRegistryFacet: role not supported');
+    function revokeRoleFrom(uint256 _recordId, bytes32 _role, address _grantee) external override sameGrantee(_recordId, _role, _grantee) {
+        require(_role == UNIQUE_ROLE, "ItemsRolesRegistryFacet: role not supported");
         RecordInfo storage _recordInfo = s.recordInfo[_recordId];
         RoleAssignment storage _roleAssignment = _recordInfo.roleAssignment;
         Record storage _record = _recordInfo.record;
@@ -147,16 +138,24 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         uint256 _recordId,
         bytes32 _role,
         address _grantee
-    ) external view override sameGrantee(_recordId, _role, _grantee) returns (RoleAssignment memory) {
-        return s.recordInfo[_recordId].roleAssignment;
+    ) external view override sameGrantee(_recordId, _role, _grantee) returns (bytes memory data_) {
+        return s.recordInfo[_recordId].roleAssignment.data;
     }
 
     function roleExpirationDate(
         uint256 _recordId,
         bytes32 _role,
         address _grantee
-    )  external view override sameGrantee(_recordId, _role, _grantee) returns (uint64 expirationDate_) {
+    ) external view override sameGrantee(_recordId, _role, _grantee) returns (uint64 expirationDate_) {
         return s.recordInfo[_recordId].roleAssignment.expirationDate;
+    }
+
+    function isRoleRevocable(
+        uint256 _recordId,
+        bytes32 _role,
+        address _grantee
+    ) external view override sameGrantee(_recordId, _role, _grantee) returns (bool revocable_) {
+        return s.recordInfo[_recordId].roleAssignment.revocable;
     }
 
     function isRoleApprovedForAll(address _tokenAddress, address _grantor, address _operator) public view override returns (bool) {
@@ -165,12 +164,7 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
 
     /** Helper Functions **/
 
-    function _createRecord(
-        address _grantor,
-        address _tokenAddress,
-        uint256 _tokenId,
-        uint256 _tokenAmount
-    ) internal returns (uint256 recordId_) {
+    function _createRecord(address _grantor, address _tokenAddress, uint256 _tokenId, uint256 _tokenAmount) internal returns (uint256 recordId_) {
         recordId_ = ++s.itemsRecordIdcounter;
         RecordInfo storage _recordInfo = s.recordInfo[recordId_];
         _recordInfo.record = Record(_grantor, _tokenAddress, _tokenId, _tokenAmount);

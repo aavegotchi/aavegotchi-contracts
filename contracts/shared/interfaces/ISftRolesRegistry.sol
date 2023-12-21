@@ -4,7 +4,8 @@ pragma solidity 0.8.1;
 
 /// @title Semi-Fungible Token Roles Registry Interface
 interface ISftRolesRegistry {
-        struct RoleAssignment {
+
+    struct RoleAssignment {
         address grantee;
         uint64 expirationDate;
         bool revocable;
@@ -119,29 +120,39 @@ interface ISftRolesRegistry {
     /// @param _recordId The record identifier.
     /// @param _role The role identifier.
     /// @param _grantee The user that received the role.
-    function roleData(
-        uint256 _recordId,
-        bytes32 _role,
-        address _grantee
-    ) external view returns (RoleAssignment memory data_);
+    /// @return data_ The custom data.
+    function roleData(uint256 _recordId, bytes32 _role, address _grantee) external view returns (bytes memory data_);
 
     /// @notice Returns the expiration date of a role assignment.
     /// @param _recordId The record identifier.
     /// @param _role The role identifier.
     /// @param _grantee The user that received the role.
+    /// @return expirationDate_ The expiration date.
     function roleExpirationDate(
         uint256 _recordId,
         bytes32 _role,
         address _grantee
     ) external view returns (uint64 expirationDate_);
 
+    /// @notice Returns the expiration date of a role assignment.
+    /// @param _recordId The record identifier.
+    /// @param _role The role identifier.
+    /// @param _grantee The user that received the role.
+    /// @return revocable_ Whether the role is revocable or not.
+    function isRoleRevocable(
+        uint256 _recordId,
+        bytes32 _role,
+        address _grantee
+    ) external view returns (bool revocable_);
+
     /// @notice Checks if the grantor approved the operator for all NFTs.
     /// @param _tokenAddress The token address.
     /// @param _grantor The user that approved the operator.
     /// @param _operator The user that can grant and revoke roles.
+    /// @return isApproved_ Whether the operator is approved or not.
     function isRoleApprovedForAll(
         address _tokenAddress,
         address _grantor,
         address _operator
-    ) external view returns (bool);
+    ) external view returns (bool isApproved_);
 }
