@@ -4,7 +4,7 @@ import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {ILink} from "../interfaces/ILink.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { ISftRolesRegistry } from "../../shared/interfaces/ISftRolesRegistry.sol";
+import {ISftRolesRegistry} from "../../shared/interfaces/ISftRolesRegistry.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
