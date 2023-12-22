@@ -185,16 +185,17 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
 
     function _unequipAllDelegatedWearables(uint256 _recordId, uint256 _tokenIdToUnequip) internal {
         ItemRolesInfo storage _recordInfo = s.itemRolesRecordInfo[_recordId];
-        uint256 _equippedGotchisLength = _recordInfo.equippedGotchis.length();
+        int256 _equippedGotchisLastIndex = int256(_recordInfo.equippedGotchis.length())-1;
 
-        for (uint256 i; i < _equippedGotchisLength; i++) {
-            uint256 _gotchiId = _recordInfo.equippedGotchis.at(i);
+        for(int256 i = _equippedGotchisLastIndex; i > -1; i--) {
+            uint256 _gotchiId = _recordInfo.equippedGotchis.at(uint256(i));
             _unequipDelegatedWearable(_gotchiId, _tokenIdToUnequip, _recordId);
             _recordInfo.equippedGotchis.remove(_gotchiId);
         }
 
         delete _recordInfo.balanceUsed;
     }
+
 
     function _unequipDelegatedWearable(uint256 _gotchiId, uint256 _tokenIdToUnequip, uint256 _recordId) internal {
         GotchiEquippedRecordsInfo storage _gotchiInfo = s.gotchiEquippedItemsInfo[_gotchiId];
