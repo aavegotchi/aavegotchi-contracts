@@ -20,8 +20,6 @@ contract ItemsFacet is Modifiers {
     event UseConsumables(uint256 indexed _tokenId, uint256[] _itemIds, uint256[] _quantities);
     event EquipDelegatedWearables(
         uint256 indexed _tokenId, 
-        uint16[EQUIPPED_WEARABLE_SLOTS] _oldWearables, 
-        uint16[EQUIPPED_WEARABLE_SLOTS] _newWearables, 
         uint256[EQUIPPED_WEARABLE_SLOTS] _oldRecordIds, 
         uint256[EQUIPPED_WEARABLE_SLOTS] _newRecordIds
     );
@@ -199,7 +197,6 @@ contract ItemsFacet is Modifiers {
         external
     {
         uint256[EQUIPPED_WEARABLE_SLOTS] memory _recordIds;
-        emit EquipWearables(_tokenId, s.aavegotchis[_tokenId].equippedWearables, _wearablesToEquip);
         _equipWearables(_tokenId, _wearablesToEquip, _recordIds);
     }
 
@@ -217,7 +214,7 @@ contract ItemsFacet is Modifiers {
     )
         external
     {
-        emit EquipDelegatedWearables(_tokenId, s.aavegotchis[_tokenId].equippedWearables, _wearablesToEquip, s.gotchiEquippedItemsInfo[_tokenId].equippedRecordIds ,_recordIds);
+        
         _equipWearables(_tokenId, _wearablesToEquip, _recordIds);
     }
 
@@ -233,6 +230,8 @@ contract ItemsFacet is Modifiers {
     {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
+        emit EquipWearables(_tokenId, s.aavegotchis[_tokenId].equippedWearables, _wearablesToEquip);
+        emit EquipDelegatedWearables(_tokenId, s.gotchiEquippedItemsInfo[_tokenId].equippedRecordIds, _recordIdsToEquip);
         GotchiEquippedRecordsInfo storage _gotchiInfo = s.gotchiEquippedItemsInfo[_tokenId];
 
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
@@ -254,8 +253,9 @@ contract ItemsFacet is Modifiers {
             aavegotchi.equippedWearables[slot] = uint16(toEquipId);
 
             //If a wearable was equipped in this slot and can be transferred, transfer back to owner.
+            
             if (existingEquippedWearableId != 0 && s.itemTypes[existingEquippedWearableId].canBeTransferred) {
-                if(_sameWearablesIds && (slot == LibItems.WEARABLE_SLOT_HAND_LEFT || slot == LibItems.WEARABLE_SLOT_HAND_RIGHT)){
+                if (_sameWearablesIds && (slot == LibItems.WEARABLE_SLOT_HAND_LEFT || slot == LibItems.WEARABLE_SLOT_HAND_RIGHT)) {
                    delete aavegotchi.equippedWearables[slot];
                 }
                 // remove wearable from Aavegotchi and transfer item to owner
@@ -307,7 +307,7 @@ contract ItemsFacet is Modifiers {
             require(_recordInfo.roleAssignment.grantee == _sender, "ItemsFacet: Wearable not delegated to sender or recordId not valid");
             require(_recordInfo.roleAssignment.expirationDate > block.timestamp, "ItemsFacet: Wearable delegation expired");
             require(_recordInfo.record.tokenId == _toEquipWearableId, "ItemsFacet: Delegated Wearable not of this delegation");
-            require((_recordInfo.record.tokenAmount - _recordInfo.balanceUsed) >= 1, "ItemsFacet: Not enough delegated balance");
+            require((_recordInfo.record.tokenAmount - _recordInfo.balanceUsed) > 0, "ItemsFacet: Not enough delegated balance");
             
             _gotchiInfo.equippedRecordIds[_slot] = _recordId;
             _gotchiInfo.equippedRecordIdsCount++;
