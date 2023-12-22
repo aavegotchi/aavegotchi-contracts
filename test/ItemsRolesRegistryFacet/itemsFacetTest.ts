@@ -847,7 +847,7 @@ describe("ItemsFacet", async () => {
         const { GrantRoleData: newGrantRoleData2 } = await createRoleAssignment(++recordIdsCounter, wearableIds[5], 1);
 
 
-        const anotherGotchiId = LargeGotchiOwnerAavegotchis[2];
+        const anotherGotchiId = LargeGotchiOwnerAavegotchis[3];
 
         itemRecordIds[2] = newGrantRoleData1.recordId,
         itemRecordIds[3] = GrantRoleData.recordId,
@@ -1098,7 +1098,7 @@ describe("ItemsFacet", async () => {
         const { GrantRoleData: newGrantRoleData1 } = await createRoleAssignment(++recordIdsCounter, wearableIds[0], 2);
         const { GrantRoleData: newGrantRoleData2 } = await createRoleAssignment(++recordIdsCounter, wearableIds[0], 2);
 
-        const anotherGotchiId = LargeGotchiOwnerAavegotchis[1];
+        const anotherGotchiId = LargeGotchiOwnerAavegotchis[2];
 
         itemRecordIds[4] = newGrantRoleData1.recordId
         itemRecordIds[5] = newGrantRoleData1.recordId
