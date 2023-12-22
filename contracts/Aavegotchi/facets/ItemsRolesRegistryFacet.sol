@@ -196,7 +196,6 @@ contract ItemsRolesRegistryFacet is Modifiers, ISftRolesRegistry, ERC1155Holder 
         delete _recordInfo.balanceUsed;
     }
 
-
     function _unequipDelegatedWearable(uint256 _gotchiId, uint256 _tokenIdToUnequip, uint256 _recordId) internal {
         GotchiEquippedRecordsInfo storage _gotchiInfo = s.gotchiEquippedItemsInfo[_gotchiId];
         Aavegotchi storage _aavegotchi = s.aavegotchis[_gotchiId];
