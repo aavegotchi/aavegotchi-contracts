@@ -1084,6 +1084,77 @@ describe("ItemsFacet", async () => {
             1
           );
       });
+      it('should equip and unequip two gloves of the same delegation and id, and then equip another with the same id but from another delegation', async function () {
+        await wearablesFacet
+          .connect(grantor)
+          .safeTransferFrom(
+            grantor.address,
+            LargeGotchiOwner,
+            wearableIds[0],
+            1,
+            "0x"
+          );
+
+        const { GrantRoleData: newGrantRoleData1 } = await createRoleAssignment(++recordIdsCounter, wearableIds[0], 2);
+        const { GrantRoleData: newGrantRoleData2 } = await createRoleAssignment(++recordIdsCounter, wearableIds[0], 2);
+
+        const anotherGotchiId = LargeGotchiOwnerAavegotchis[1];
+
+        itemRecordIds[4] = newGrantRoleData1.recordId
+        itemRecordIds[5] = newGrantRoleData1.recordId
+        wearableIdsToEquip[4] = wearableIds[0];
+        wearableIdsToEquip[5] = wearableIds[0];
+         
+
+        await expect(
+          itemsFacet
+            .connect(grantee)
+            .equipDelegatedWearables(
+              anotherGotchiId,
+              wearableIdsToEquip,
+              itemRecordIds
+            )
+        ).to.emit(libERC1155, "TransferToParent")
+          .withArgs(
+            aavegotchiDiamondAddress,
+            anotherGotchiId,
+            wearableIds[0],
+            1
+          )
+          .to.emit(libERC1155, "TransferToParent")
+          .withArgs(
+            aavegotchiDiamondAddress,
+            anotherGotchiId,
+            wearableIds[0],
+            1
+          );
+
+        itemRecordIds[5] = newGrantRoleData2.recordId,
+
+        await expect(
+          itemsFacet
+            .connect(grantee)
+            .equipDelegatedWearables(
+              anotherGotchiId,
+              wearableIdsToEquip,
+              itemRecordIds
+            )
+        )
+          .to.emit(libERC1155, "TransferFromParent")
+          .withArgs(
+            aavegotchiDiamondAddress,
+            anotherGotchiId,
+            wearableIds[0],
+            1
+          )
+          .to.emit(libERC1155, "TransferToParent")
+          .withArgs(
+            aavegotchiDiamondAddress,
+            anotherGotchiId,
+            wearableIds[0],
+            1
+          );
+      })
       it("should NOT equip a delegated wearable if the depositId is expired", async () => {
         await time.increase(ONE_DAY)
        
