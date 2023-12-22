@@ -136,6 +136,10 @@ contract AavegotchiFacet is Modifiers {
         require(!forgeFacet.isGotchiForging(_tokenId), "I'M BUSY FORGING DON'T BOTHER ME");
     }
 
+    function _enforceAavegotchiNotEquippedWithDelegatedItems(uint256 _tokenId) internal view {
+        require(s.gotchiEquippedItemsInfo[_tokenId].equippedRecordIdsCount == 0, "AavegotchiFacet: Can't transfer when equipped with a delegated wearable");
+    }
+
     /// @notice Transfers the ownership of an NFT from one address to another address
     /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
     ///  operator, or the approved address for this NFT. Throws if `_from` is
@@ -206,6 +210,7 @@ contract AavegotchiFacet is Modifiers {
     function internalTransferFrom(address _sender, address _from, address _to, uint256 _tokenId) internal {
         LibGotchiLending.enforceAavegotchiNotInLending(uint32(_tokenId), _sender);
         _enforceAavegotchiNotForging(_tokenId);
+        _enforceAavegotchiNotEquippedWithDelegatedItems(_tokenId);
 
         require(_to != address(0), "AavegotchiFacet: Can't transfer to 0 address");
         require(_from != address(0), "AavegotchiFacet: _from can't be 0 address");
