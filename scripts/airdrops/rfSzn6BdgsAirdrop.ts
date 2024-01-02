@@ -51,7 +51,7 @@ export async function main() {
   let mint = await mintSvgTaskForBaadges("rfSzn6Bdgs");
 
   console.log("mint:", mint);
-  await run("", mint);
+  await run("mintBaadgeSvgs", mint);
 
   //Airdrop
   const rarityArray = [

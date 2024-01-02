@@ -17,9 +17,9 @@ describe("Airdrop SZN6 Baadges", async function () {
 
   let aavegotchiFacet: AavegotchiFacet,
     signer: Signer,
-    rarityRFSzn5: number[],
-    kinshipRFSzn5: number[],
-    xpRFSzn5: number[];
+    rarityRFSzn6: number[],
+    kinshipRFSzn6: number[],
+    xpRFSzn6: number[];
 
   before(async function () {
     signer = await ethers.getSigner(maticDiamondAddress);
@@ -49,31 +49,31 @@ describe("Airdrop SZN6 Baadges", async function () {
       signer
     )) as AavegotchiFacet;
 
-    rarityRFSzn5 = await getRfSznTypeRanking(rarityArray, "rarity");
+    rarityRFSzn6 = await getRfSznTypeRanking(rarityArray, "rarity");
 
-    kinshipRFSzn5 = await getRfSznTypeRanking(kinshipArray, "kinship");
+    kinshipRFSzn6 = await getRfSznTypeRanking(kinshipArray, "kinship");
 
-    xpRFSzn5 = await getRfSznTypeRanking(xpArray, "xp");
+    xpRFSzn6 = await getRfSznTypeRanking(xpArray, "xp");
 
     await main();
   });
 
   it.only("Should airdrop szn6 champion baadges", async function () {
     //rarity champ
-    let rarityChamp = await aavegotchiFacet.getAavegotchi(rarityRFSzn5[0]);
+    let rarityChamp = await aavegotchiFacet.getAavegotchi(rarityRFSzn6[0]);
 
     let itemIds = getAavegotchiItemIds(rarityChamp);
 
     expect(exists(itemTypes[0].svgId.toString(), itemIds)).to.equal(true);
 
     //kinship champ
-    let kinshipChamp = await aavegotchiFacet.getAavegotchi(kinshipRFSzn5[0]);
+    let kinshipChamp = await aavegotchiFacet.getAavegotchi(kinshipRFSzn6[0]);
     itemIds = getAavegotchiItemIds(kinshipChamp);
 
     expect(exists(itemTypes[1].svgId.toString(), itemIds)).to.equal(true);
 
     //xp champ (tiebreaker)
-    let xpChamp = await aavegotchiFacet.getAavegotchi(xpRFSzn5[0]);
+    let xpChamp = await aavegotchiFacet.getAavegotchi(xpRFSzn6[0]);
     itemIds = getAavegotchiItemIds(xpChamp);
 
     expect(exists(itemTypes[2].svgId.toString(), itemIds)).to.equal(true);
@@ -81,37 +81,37 @@ describe("Airdrop SZN6 Baadges", async function () {
 
   it.only("Should airdrop szn6 2nd and 3rd place baadges", async function () {
     //rarity 2nd
-    let rarity2nd = await aavegotchiFacet.getAavegotchi(rarityRFSzn5[1]);
+    let rarity2nd = await aavegotchiFacet.getAavegotchi(rarityRFSzn6[1]);
     let itemIds = getAavegotchiItemIds(rarity2nd);
 
     expect(exists(itemTypes[3].svgId.toString(), itemIds)).to.equal(true);
 
     //kinship 2nd
-    let kinship2nd = await aavegotchiFacet.getAavegotchi(kinshipRFSzn5[1]);
+    let kinship2nd = await aavegotchiFacet.getAavegotchi(kinshipRFSzn6[1]);
     itemIds = getAavegotchiItemIds(kinship2nd);
 
     expect(exists(itemTypes[4].svgId.toString(), itemIds)).to.equal(true);
 
     // //xp 2nd
-    let xp2nd = await aavegotchiFacet.getAavegotchi(xpRFSzn5[1]);
+    let xp2nd = await aavegotchiFacet.getAavegotchi(xpRFSzn6[1]);
     itemIds = getAavegotchiItemIds(xp2nd);
 
     expect(exists(itemTypes[5].svgId.toString(), itemIds)).to.equal(true);
 
     //rarity 3rd
-    let rarity3rd = await aavegotchiFacet.getAavegotchi(rarityRFSzn5[2]);
+    let rarity3rd = await aavegotchiFacet.getAavegotchi(rarityRFSzn6[2]);
     itemIds = getAavegotchiItemIds(rarity3rd);
 
     expect(exists(itemTypes[6].svgId.toString(), itemIds)).to.equal(true);
 
     //kinship 3rd
-    let kinship3rd = await aavegotchiFacet.getAavegotchi(kinshipRFSzn5[2]);
+    let kinship3rd = await aavegotchiFacet.getAavegotchi(kinshipRFSzn6[2]);
     itemIds = getAavegotchiItemIds(kinship3rd);
 
     expect(exists(itemTypes[7].svgId.toString(), itemIds)).to.equal(true);
 
     //xp 3rd
-    let xp3rd = await aavegotchiFacet.getAavegotchi(xpRFSzn5[2]);
+    let xp3rd = await aavegotchiFacet.getAavegotchi(xpRFSzn6[2]);
     itemIds = getAavegotchiItemIds(xp3rd);
 
     expect(exists(itemTypes[8].svgId.toString(), itemIds)).to.equal(true);
@@ -119,34 +119,34 @@ describe("Airdrop SZN6 Baadges", async function () {
 
   it.only("Should airdrop szn6 top10 baadges", async function () {
     //rarity top 10
-    let rarityTop10 = await aavegotchiFacet.getAavegotchi(rarityRFSzn5[3]);
+    let rarityTop10 = await aavegotchiFacet.getAavegotchi(rarityRFSzn6[3]);
     let itemIds = getAavegotchiItemIds(rarityTop10);
 
     expect(exists(itemTypes[10].svgId.toString(), itemIds)).to.equal(true);
 
-    rarityTop10 = await aavegotchiFacet.getAavegotchi(rarityRFSzn5[9]);
+    rarityTop10 = await aavegotchiFacet.getAavegotchi(rarityRFSzn6[9]);
     itemIds = getAavegotchiItemIds(rarityTop10);
 
     expect(exists(itemTypes[10].svgId.toString(), itemIds)).to.equal(true);
 
     //kinship top 10
-    let kinshipTop10 = await aavegotchiFacet.getAavegotchi(kinshipRFSzn5[3]);
+    let kinshipTop10 = await aavegotchiFacet.getAavegotchi(kinshipRFSzn6[3]);
     itemIds = getAavegotchiItemIds(kinshipTop10);
 
     expect(exists(itemTypes[11].svgId.toString(), itemIds)).to.equal(true);
 
-    kinshipTop10 = await aavegotchiFacet.getAavegotchi(kinshipRFSzn5[9]);
+    kinshipTop10 = await aavegotchiFacet.getAavegotchi(kinshipRFSzn6[9]);
     itemIds = getAavegotchiItemIds(kinshipTop10);
 
     expect(exists(itemTypes[11].svgId.toString(), itemIds)).to.equal(true);
 
     //XP top 10
-    let xpTop10 = await aavegotchiFacet.getAavegotchi(xpRFSzn5[3]);
+    let xpTop10 = await aavegotchiFacet.getAavegotchi(xpRFSzn6[3]);
     itemIds = getAavegotchiItemIds(xpTop10);
 
     expect(exists(itemTypes[12].svgId.toString(), itemIds)).to.equal(true);
 
-    xpTop10 = await aavegotchiFacet.getAavegotchi(xpRFSzn5[9]);
+    xpTop10 = await aavegotchiFacet.getAavegotchi(xpRFSzn6[9]);
     itemIds = getAavegotchiItemIds(xpTop10);
 
     expect(exists(itemTypes[12].svgId.toString(), itemIds)).to.equal(true);
@@ -154,34 +154,34 @@ describe("Airdrop SZN6 Baadges", async function () {
 
   it.only("Should airdrop szn6 top100 baadges", async function () {
     //rarity top 100
-    let rarityTop100 = await aavegotchiFacet.getAavegotchi(rarityRFSzn5[10]);
+    let rarityTop100 = await aavegotchiFacet.getAavegotchi(rarityRFSzn6[10]);
     let itemIds = getAavegotchiItemIds(rarityTop100);
 
     expect(exists(itemTypes[13].svgId.toString(), itemIds)).to.equal(true);
 
-    rarityTop100 = await aavegotchiFacet.getAavegotchi(rarityRFSzn5[99]);
+    rarityTop100 = await aavegotchiFacet.getAavegotchi(rarityRFSzn6[99]);
     itemIds = getAavegotchiItemIds(rarityTop100);
 
     expect(exists(itemTypes[13].svgId.toString(), itemIds)).to.equal(true);
 
     //kinship top 100
-    let kinshipTop100 = await aavegotchiFacet.getAavegotchi(kinshipRFSzn5[10]);
+    let kinshipTop100 = await aavegotchiFacet.getAavegotchi(kinshipRFSzn6[10]);
     itemIds = getAavegotchiItemIds(kinshipTop100);
 
     expect(exists(itemTypes[14].svgId.toString(), itemIds)).to.equal(true);
 
-    kinshipTop100 = await aavegotchiFacet.getAavegotchi(kinshipRFSzn5[99]);
+    kinshipTop100 = await aavegotchiFacet.getAavegotchi(kinshipRFSzn6[99]);
     itemIds = getAavegotchiItemIds(kinshipTop100);
 
     expect(exists(itemTypes[14].svgId.toString(), itemIds)).to.equal(true);
 
     //XP top 100
-    let xpTop100 = await aavegotchiFacet.getAavegotchi(xpRFSzn5[10]);
+    let xpTop100 = await aavegotchiFacet.getAavegotchi(xpRFSzn6[10]);
     itemIds = getAavegotchiItemIds(xpTop100);
 
     expect(exists(itemTypes[15].svgId.toString(), itemIds)).to.equal(true);
 
-    xpTop100 = await aavegotchiFacet.getAavegotchi(xpRFSzn5[99]);
+    xpTop100 = await aavegotchiFacet.getAavegotchi(xpRFSzn6[99]);
     itemIds = getAavegotchiItemIds(xpTop100);
 
     expect(exists(itemTypes[15].svgId.toString(), itemIds)).to.equal(true);
