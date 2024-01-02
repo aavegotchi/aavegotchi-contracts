@@ -429,6 +429,23 @@ export const wearablesSvgs = [
   417,
   418,
   419,
+  //szn 7 badges
+  420,
+  421,
+  422,
+  423,
+  424,
+  425,
+  426,
+  427,
+  428,
+  429,
+  430,
+  431,
+  432,
+  433,
+  434,
+  435,
 ];
 
 export const sleeveSvgs = [
