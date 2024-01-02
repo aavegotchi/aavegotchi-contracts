@@ -413,6 +413,23 @@ export const wearablesRightSvgs = [
   401,
   402,
   403,
+  //szn 6 badges
+  404,
+  405,
+  406,
+  407,
+  408,
+  409,
+  410,
+  411,
+  412,
+  413,
+  414,
+  415,
+  416,
+  417,
+  418,
+  419,
 ];
 
 export const wearablesBackSvgs = [
@@ -826,6 +843,23 @@ export const wearablesBackSvgs = [
   401,
   402,
   403,
+  //szn 6 badges
+  404,
+  405,
+  406,
+  407,
+  408,
+  409,
+  410,
+  411,
+  412,
+  413,
+  414,
+  415,
+  416,
+  417,
+  418,
+  419,
 ];
 
 export const wearablesLeftSvgs = [
@@ -1239,6 +1273,23 @@ export const wearablesLeftSvgs = [
   401,
   402,
   403,
+  //szn 6 badges
+  404,
+  405,
+  406,
+  407,
+  408,
+  409,
+  410,
+  411,
+  412,
+  413,
+  414,
+  415,
+  416,
+  417,
+  418,
+  419,
 ];
 
 export const wearablesLeftSleeveSvgs = [
