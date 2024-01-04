@@ -1,13 +1,14 @@
 import { ethers, network } from "hardhat";
 import { gasPrice, maticTileDiamondAddress } from "../helperFunctions";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
+import { ERC1155_BAAZAAR_CATEGORY_TO_ID } from "../../helpers/constants";
 
 //all remaining tiles
 const tileIds = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
   23, 24, 25, 26, 27, 32, 33, 34, 35, 36, 37,
 ];
-const category = 5;
+const category = ERC1155_BAAZAAR_CATEGORY_TO_ID.TILE;
 
 async function main() {
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
