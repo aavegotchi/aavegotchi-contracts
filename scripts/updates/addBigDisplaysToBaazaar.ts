@@ -6,7 +6,7 @@ import {
 } from "../helperFunctions";
 import { ERC1155_BAAZAAR_CATEGORY_TO_ID } from "../../helpers/constants";
 
-const ids: number[] = [158, 159, 160, 161];
+const ids: number[] = [157,158, 159, 160, 161];
 const category = ERC1155_BAAZAAR_CATEGORY_TO_ID.INSTALLATION;
 
 async function main() {
