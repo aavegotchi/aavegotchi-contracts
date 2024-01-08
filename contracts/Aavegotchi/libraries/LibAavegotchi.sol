@@ -62,6 +62,8 @@ library LibAavegotchi {
 
     event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
     event KinshipBurned(uint256 _tokenId, uint256 _value);
+    event WearableSetAdded(uint256 indexed _tokenId, uint256 indexed _setId);
+    event WearableSetRemoved(uint256 indexed _tokenId, uint256 indexed _setId);
 
     function toNumericTraits(
         uint256 _randomNumber,
@@ -374,6 +376,109 @@ library LibAavegotchi {
         } else {
             s.aavegotchis[_tokenId].interactionCount -= _amount;
             emit KinshipBurned(_tokenId, s.aavegotchis[_tokenId].interactionCount);
+        }
+    }
+
+    function _massUpdateWearableSets(uint256 _tokenId, uint256[] memory _wearableSetIds) internal {
+        if (_wearableSetIds.length > 0) {
+            for (uint256 i; i < _wearableSetIds.length; i++) {
+                _updateWearableSet(_tokenId, _wearableSetIds[i]);
+            }
+        }
+    }
+
+    function _updateWearableSet(uint256 _tokenId, uint256 _wearableSetId) internal {
+        //do integrity check and update storage if needed
+        if (_checkWearableSetIntegrity(_tokenId, _wearableSetId)) {
+            //if integrity check passes, add wearableSet to aavegotchi
+            _addWearableSet(_tokenId, _wearableSetId);
+        } else {
+            //if integrity check fails, remove wearableSet from aavegotchi
+            _removeWearableSet(_tokenId, _wearableSetId);
+        }
+    }
+
+    function _checkWearableSetIntegrity(uint256 _tokenId, uint256 _wearableSetId) internal view returns (bool passed) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        //make sure wearableSet exists
+        // if (_wearableSetId >= s.wearableSets.length) {
+        //     revert("Wearable set does not exist");
+        // }
+        uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
+
+        if (equippedWearables.length > 0) {
+            //fetch all wearableIds from wearableSet
+            uint16[] memory wearableSetItems = s.wearableSets[_wearableSetId].wearableIds;
+            //check that all wearableIds are in equippedWearables
+
+            bool[] memory valid = new bool[](wearableSetItems.length);
+            // we use linear search since we cannot exceed 16 * 16 iterations at max
+            for (uint256 i; i < wearableSetItems.length; i++) {
+                uint256 wearableId = wearableSetItems[i];
+                for (uint256 j; j < equippedWearables.length; j++) {
+                    if (wearableId == equippedWearables[j]) {
+                        valid[i] = true;
+                        break;
+                    }
+                }
+            }
+            passed = true;
+            //check that all required items are equipped
+            for (uint256 i; i < valid.length; i++) {
+                if (valid[i] == false) {
+                    passed = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    function _addWearableSet(uint256 _tokenId, uint256 _wearableSetId) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        //get sets
+        uint256[] memory wearableSets = s.wearableSetIds[_tokenId];
+
+        if (wearableSets.length > 0) {
+            //check for existence
+            (bool exists, ) = _exists(_wearableSetId, wearableSets);
+            if (!exists) {
+                s.wearableSetIds[_tokenId].push(_wearableSetId);
+                emit WearableSetAdded(_tokenId, _wearableSetId);
+            }
+        } else {
+            s.wearableSetIds[_tokenId].push(_wearableSetId);
+            emit WearableSetAdded(_tokenId, _wearableSetId);
+        }
+    }
+
+    function _removeWearableSet(uint256 _tokenId, uint256 _wearableSetId) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        //get sets
+        uint256[] memory wearableSets = s.wearableSetIds[_tokenId];
+
+        if (wearableSets.length == 1 && wearableSets[0] == _wearableSetId) {
+            s.wearableSetIds[_tokenId].pop();
+            emit WearableSetRemoved(_tokenId, _wearableSetId);
+        }
+        if (wearableSets.length > 1) {
+            (bool exists, uint256 index) = _exists(_wearableSetId, wearableSets);
+            if (exists) {
+                for (uint256 i = index; i < wearableSets.length - 1; i++) {
+                    s.wearableSetIds[_tokenId][i] = s.wearableSetIds[_tokenId][i + 1];
+                }
+                s.wearableSetIds[_tokenId].pop();
+                emit WearableSetRemoved(_tokenId, _wearableSetId);
+            }
+        }
+    }
+
+    function _exists(uint256 _target, uint256[] memory _array) internal pure returns (bool exists_, uint256 index_) {
+        for (uint256 i; i < _array.length; i++) {
+            if (_target == _array[i]) {
+                exists_ = true;
+                index_ = i;
+                break;
+            }
         }
     }
 }

@@ -2,6 +2,7 @@
 pragma solidity 0.8.1;
 
 import {Modifiers, WearableSet} from "../libraries/LibAppStorage.sol";
+import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 
 contract WearableSetsFacet is Modifiers {
     ///@notice Query all available wearable sets
@@ -60,5 +61,14 @@ contract WearableSetsFacet is Modifiers {
                 mstore(wearableSetIds_, count)
             }
         }
+    }
+
+    function getTokenWearableSets(uint256 _tokenId) external view returns (uint256[] memory wearableSetIds_) {
+        wearableSetIds_ = s.wearableSetIds[_tokenId];
+    }
+
+    //used by existing tokens with existing offchain wearableSets
+    function addWearableSets(uint256 _tokenId, uint256[] memory _wearableSetIds) public {
+        LibAavegotchi._massUpdateWearableSets(_tokenId, _wearableSetIds);
     }
 }
