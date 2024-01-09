@@ -137,7 +137,7 @@ contract AavegotchiFacet is Modifiers {
     }
 
     function _enforceAavegotchiNotEquippedWithDelegatedItems(uint256 _tokenId) internal view {
-        require(s.gotchiEquippedItemsInfo[_tokenId].equippedRecordIdsCount == 0, "AavegotchiFacet: Can't transfer when equipped with a delegated wearable");
+        require(s.gotchiEquippedItemsInfo[_tokenId].equippedCommitmentIdsCount == 0, "AavegotchiFacet: Can't transfer when equipped with a delegated wearable");
     }
 
     /// @notice Transfers the ownership of an NFT from one address to another address

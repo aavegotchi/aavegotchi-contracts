@@ -15,12 +15,12 @@ import {
   wearableDiamondAddress,
   wearableIds,
   generateRoleId,
-  buildRecord,
+  buildCommitment,
   buildGrantRole,
 } from "./helpers";
 import { itemManagerAlt } from "../../scripts/helperFunctions";
 import { upgradeWithNewFacets } from "./upgradeScript";
-import { GrantRoleData, Record } from "./types";
+import { GrantRoleData, Commitment } from "./types";
 
 const { expect } = chai;
 
@@ -32,7 +32,7 @@ describe("ItemsRolesRegistryFacet", async () => {
   let wearablesFacet: WearablesFacet;
   let libEventHandler: LibEventHandler;
   let daoFacet: DAOFacet;
-  let recordIdsCounter = 0;
+  let commitmentIdsCounter = 0;
 
   before(async () => {
     const signers = await ethers.getSigners();
@@ -88,150 +88,150 @@ describe("ItemsRolesRegistryFacet", async () => {
     );
   });
 
-  describe('createRecordFrom', async () => {
+  describe('commitTokens', async () => {
     it('should revert when sender is not grantor or approved', async () => {
-      const record = buildRecord({grantor: grantor.address})
+      const commitment = buildCommitment({grantor: grantor.address})
       await expect(
-        ItemsRolesRegistryFacet.connect(anotherUser).createRecordFrom(
-          record.grantor,
-          record.tokenAddress,
-          record.tokenId,
-          record.tokenAmount,
+        ItemsRolesRegistryFacet.connect(anotherUser).commitTokens(
+          commitment.grantor,
+          commitment.tokenAddress,
+          commitment.tokenId,
+          commitment.tokenAmount,
         ),
       ).to.be.revertedWith('ItemsRolesRegistryFacet: account not approved')
     })
 
     it('should revert when tokenAmount is zero', async () => {
-      const record = buildRecord({
+      const commitment = buildCommitment({
         grantor: grantor.address,
         tokenAddress: wearableDiamondAddress,
         tokenAmount: 0,
       })
       await expect(
-        ItemsRolesRegistryFacet.connect(grantor).createRecordFrom(
-          record.grantor,
-          record.tokenAddress,
-          record.tokenId,
-          record.tokenAmount,
+        ItemsRolesRegistryFacet.connect(grantor).commitTokens(
+          commitment.grantor,
+          commitment.tokenAddress,
+          commitment.tokenId,
+          commitment.tokenAmount,
         ),
       ).to.be.revertedWith('ItemsRolesRegistryFacet: tokenAmount must be greater than zero')
     })
 
     it('should revert without a reason if tokenAddress is not an ERC-1155 contract', async () => {
-      const record = buildRecord({
+      const commitment = buildCommitment({
         grantor: grantor.address,
         tokenAmount: generateRandomInt(),
       })
       await expect(
-        ItemsRolesRegistryFacet.connect(grantor).createRecordFrom(
-          record.grantor,
-          record.tokenAddress,
-          record.tokenId,
-          record.tokenAmount,
+        ItemsRolesRegistryFacet.connect(grantor).commitTokens(
+          commitment.grantor,
+          commitment.tokenAddress,
+          commitment.tokenId,
+          commitment.tokenAmount,
         ),
       ).to.be.reverted
     })
 
     it('should revert when grantor does not have enough tokens', async () => {
-      const record = buildRecord({
+      const commitment = buildCommitment({
         grantor: grantor.address,
         tokenAddress: wearableDiamondAddress,
         tokenAmount: generateRandomInt() + 1,
       })
       await expect(
-        ItemsRolesRegistryFacet.connect(grantor).createRecordFrom(
-          record.grantor,
-          record.tokenAddress,
-          record.tokenId,
-          record.tokenAmount,
+        ItemsRolesRegistryFacet.connect(grantor).commitTokens(
+          commitment.grantor,
+          commitment.tokenAddress,
+          commitment.tokenId,
+          commitment.tokenAmount,
         ),
       ).to.be.revertedWith("LibItems: Doesn't have that many to transfer")
     })
 
-    it('should create record when sender is grantor', async () => {
-      const record = buildRecord({grantor: grantor.address})
-      recordIdsCounter++
+    it('should create commitment when sender is grantor', async () => {
+      const commitment = buildCommitment({grantor: grantor.address})
+      commitmentIdsCounter++
       await expect(
-        ItemsRolesRegistryFacet.connect(grantor).createRecordFrom(
-          record.grantor,
-          record.tokenAddress,
-          record.tokenId,
-          record.tokenAmount,
+        ItemsRolesRegistryFacet.connect(grantor).commitTokens(
+          commitment.grantor,
+          commitment.tokenAddress,
+          commitment.tokenId,
+          commitment.tokenAmount,
         ),
       )
-        .to.emit(ItemsRolesRegistryFacet, 'RecordCreated')
-        .withArgs(record.grantor, recordIdsCounter, record.tokenAddress, record.tokenId, record.tokenAmount)
+        .to.emit(ItemsRolesRegistryFacet, 'TokensCommitted')
+        .withArgs(commitment.grantor, commitmentIdsCounter, commitment.tokenAddress, commitment.tokenId, commitment.tokenAmount)
         .to.emit(libEventHandler, 'TransferSingle')
         .withArgs(
           grantor.address,
           grantor.address,
           aavegotchiDiamondAddress,
-          record.tokenId,
-          record.tokenAmount,
+          commitment.tokenId,
+          commitment.tokenAmount,
         )
     })
 
-    it('should create record when sender is approved', async () => {
-      const record = buildRecord({
+    it('should create commitment when sender is approved', async () => {
+      const commitment = buildCommitment({
         grantor: grantor.address,
         tokenAddress: wearableDiamondAddress,
       })
-      recordIdsCounter++
-      await ItemsRolesRegistryFacet.connect(grantor).setRoleApprovalForAll(record.tokenAddress, anotherUser.address, true)
+      commitmentIdsCounter++
+      await ItemsRolesRegistryFacet.connect(grantor).setRoleApprovalForAll(commitment.tokenAddress, anotherUser.address, true)
       await expect(
-        ItemsRolesRegistryFacet.connect(anotherUser).createRecordFrom(
-          record.grantor,
-          record.tokenAddress,
-          record.tokenId,
-          record.tokenAmount,
+        ItemsRolesRegistryFacet.connect(anotherUser).commitTokens(
+          commitment.grantor,
+          commitment.tokenAddress,
+          commitment.tokenId,
+          commitment.tokenAmount,
         ),
       )
-        .to.emit(ItemsRolesRegistryFacet, 'RecordCreated')
-        .withArgs(record.grantor, recordIdsCounter, record.tokenAddress, record.tokenId, record.tokenAmount)
+        .to.emit(ItemsRolesRegistryFacet, 'TokensCommitted')
+        .withArgs(commitment.grantor, commitmentIdsCounter, commitment.tokenAddress, commitment.tokenId, commitment.tokenAmount)
         .to.emit(libEventHandler, 'TransferSingle')
         .withArgs(
           anotherUser.address,
-          record.grantor,
+          commitment.grantor,
           aavegotchiDiamondAddress,
-          record.tokenId,
-          record.tokenAmount,
+          commitment.tokenId,
+          commitment.tokenAmount,
         )
     })
   })
 
   describe('grantRole', async () => {
-    let RecordCreated: Record
+    let TokensCommitted: Commitment
     let GrantRoleData: GrantRoleData
 
     beforeEach(async () => {
-      RecordCreated = buildRecord({
+      TokensCommitted = buildCommitment({
         grantor: grantor.address,
         tokenAddress: wearableDiamondAddress,
       })
-      recordIdsCounter++
+      commitmentIdsCounter++
       GrantRoleData = await buildGrantRole({
-        recordId: recordIdsCounter,
+        commitmentId: commitmentIdsCounter,
         grantee: grantee.address,
       })
       await expect(
-        ItemsRolesRegistryFacet.connect(grantor).createRecordFrom(
-          RecordCreated.grantor,
-          RecordCreated.tokenAddress,
-          RecordCreated.tokenId,
-          RecordCreated.tokenAmount,
+        ItemsRolesRegistryFacet.connect(grantor).commitTokens(
+          TokensCommitted.grantor,
+          TokensCommitted.tokenAddress,
+          TokensCommitted.tokenId,
+          TokensCommitted.tokenAmount,
         ),
       ).to.not.be.reverted
     })
 
     it('should revert when sender is not grantor or approved', async () => {
       await ItemsRolesRegistryFacet.connect(grantor).setRoleApprovalForAll(
-        RecordCreated.tokenAddress,
+        TokensCommitted.tokenAddress,
         anotherUser.address,
         false,
       )
       await expect(
         ItemsRolesRegistryFacet.connect(anotherUser).grantRole(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
           GrantRoleData.expirationDate,
@@ -244,7 +244,7 @@ describe("ItemsRolesRegistryFacet", async () => {
     it('should revert when role is not supported', async () => {
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).grantRole(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           generateRoleId('ANOTHER_ROLE'),
           GrantRoleData.grantee,
           GrantRoleData.expirationDate,
@@ -257,7 +257,7 @@ describe("ItemsRolesRegistryFacet", async () => {
     it('should revert when expirationDate is zero', async () => {
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).grantRole(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
           await time.latest(),
@@ -270,7 +270,7 @@ describe("ItemsRolesRegistryFacet", async () => {
     it('should grant role when sender is grantor', async () => {
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).grantRole(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
           GrantRoleData.expirationDate,
@@ -280,7 +280,7 @@ describe("ItemsRolesRegistryFacet", async () => {
       )
         .to.emit(ItemsRolesRegistryFacet, 'RoleGranted')
         .withArgs(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
           GrantRoleData.expirationDate,
@@ -291,13 +291,13 @@ describe("ItemsRolesRegistryFacet", async () => {
 
     it('should grant role when sender is approved', async () => {
       await ItemsRolesRegistryFacet.connect(grantor).setRoleApprovalForAll(
-        RecordCreated.tokenAddress,
+        TokensCommitted.tokenAddress,
         anotherUser.address,
         true,
       )
       await expect(
         ItemsRolesRegistryFacet.connect(anotherUser).grantRole(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
           GrantRoleData.expirationDate,
@@ -307,7 +307,7 @@ describe("ItemsRolesRegistryFacet", async () => {
       )
         .to.emit(ItemsRolesRegistryFacet, 'RoleGranted')
         .withArgs(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
           GrantRoleData.expirationDate,
@@ -318,30 +318,30 @@ describe("ItemsRolesRegistryFacet", async () => {
   })
 
   describe('revokeRole', async () => {
-    let RecordCreated: Record
+    let TokensCommitted: Commitment
     let GrantRoleData: GrantRoleData
 
     beforeEach(async () => {
-      RecordCreated = buildRecord({
+      TokensCommitted = buildCommitment({
         grantor: grantor.address,
         tokenAddress: wearableDiamondAddress,
       })
-      recordIdsCounter++
+      commitmentIdsCounter++
       GrantRoleData = await buildGrantRole({
-        recordId: recordIdsCounter,
+        commitmentId: commitmentIdsCounter,
         grantee: grantee.address,
       })
       await expect(
-        ItemsRolesRegistryFacet.connect(grantor).createRecordFrom(
-          RecordCreated.grantor,
-          RecordCreated.tokenAddress,
-          RecordCreated.tokenId,
-          RecordCreated.tokenAmount,
+        ItemsRolesRegistryFacet.connect(grantor).commitTokens(
+          TokensCommitted.grantor,
+          TokensCommitted.tokenAddress,
+          TokensCommitted.tokenId,
+          TokensCommitted.tokenAmount,
         ),
       ).to.not.be.reverted
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).grantRole(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
           GrantRoleData.expirationDate,
@@ -353,13 +353,13 @@ describe("ItemsRolesRegistryFacet", async () => {
 
     it('should revert when sender is not grantor or approved', async () => {
       await ItemsRolesRegistryFacet.connect(grantor).setRoleApprovalForAll(
-        RecordCreated.tokenAddress,
+        TokensCommitted.tokenAddress,
         anotherUser.address,
         false,
       )
       await expect(
-        ItemsRolesRegistryFacet.connect(anotherUser).revokeRoleFrom(
-          GrantRoleData.recordId,
+        ItemsRolesRegistryFacet.connect(anotherUser).revokeRole(
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           grantee.address,
         ),
@@ -368,8 +368,8 @@ describe("ItemsRolesRegistryFacet", async () => {
 
     it('should revert when the grantee is not the same', async () => {
       await expect(
-        ItemsRolesRegistryFacet.connect(grantor).revokeRoleFrom(
-          GrantRoleData.recordId,
+        ItemsRolesRegistryFacet.connect(grantor).revokeRole(
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           anotherUser.address,
         ),
@@ -377,18 +377,18 @@ describe("ItemsRolesRegistryFacet", async () => {
     })
 
     it('should revert when role is not expired and is not revocable', async () => {
-      const newRecordId = 2
+      const newCommitmentId = 2
       await expect(
-        ItemsRolesRegistryFacet.connect(grantor).createRecordFrom(
-          RecordCreated.grantor,
-          RecordCreated.tokenAddress,
-          RecordCreated.tokenId,
-          RecordCreated.tokenAmount,
+        ItemsRolesRegistryFacet.connect(grantor).commitTokens(
+          TokensCommitted.grantor,
+          TokensCommitted.tokenAddress,
+          TokensCommitted.tokenId,
+          TokensCommitted.tokenAmount,
         ),
       ).to.not.be.reverted
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).grantRole(
-          newRecordId,
+          newCommitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
           GrantRoleData.expirationDate,
@@ -397,14 +397,14 @@ describe("ItemsRolesRegistryFacet", async () => {
         ),
       ).to.not.be.reverted
       await expect(
-        ItemsRolesRegistryFacet.connect(grantor).revokeRoleFrom(newRecordId, GrantRoleData.role, GrantRoleData.grantee),
+        ItemsRolesRegistryFacet.connect(grantor).revokeRole(newCommitmentId, GrantRoleData.role, GrantRoleData.grantee),
       ).to.be.revertedWith('ItemsRolesRegistryFacet: role is not expired and is not revocable')
     })
 
     it('should revoke role when sender is grantee, and role is not expired nor revocable', async () => {
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).grantRole(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
           GrantRoleData.expirationDate,
@@ -414,115 +414,115 @@ describe("ItemsRolesRegistryFacet", async () => {
       ).to.not.be.reverted
 
       await expect(
-        ItemsRolesRegistryFacet.connect(grantee).revokeRoleFrom(
-          GrantRoleData.recordId,
+        ItemsRolesRegistryFacet.connect(grantee).revokeRole(
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
         ),
       )
         .to.emit(ItemsRolesRegistryFacet, 'RoleRevoked')
-        .withArgs(GrantRoleData.recordId, GrantRoleData.role, GrantRoleData.grantee)
+        .withArgs(GrantRoleData.commitmentId, GrantRoleData.role, GrantRoleData.grantee)
     })
 
     it('should revoke role when sender is grantor', async () => {
       await expect(
-        ItemsRolesRegistryFacet.connect(grantor).revokeRoleFrom(
-          GrantRoleData.recordId,
+        ItemsRolesRegistryFacet.connect(grantor).revokeRole(
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
         ),
       )
         .to.emit(ItemsRolesRegistryFacet, 'RoleRevoked')
-        .withArgs(GrantRoleData.recordId, GrantRoleData.role, GrantRoleData.grantee)
+        .withArgs(GrantRoleData.commitmentId, GrantRoleData.role, GrantRoleData.grantee)
     })
 
     it('should revoke role when sender is grantee', async () => {
       await expect(
-        ItemsRolesRegistryFacet.connect(grantee).revokeRoleFrom(
-          GrantRoleData.recordId,
+        ItemsRolesRegistryFacet.connect(grantee).revokeRole(
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
         ),
       )
         .to.emit(ItemsRolesRegistryFacet, 'RoleRevoked')
-        .withArgs(GrantRoleData.recordId, GrantRoleData.role, GrantRoleData.grantee)
+        .withArgs(GrantRoleData.commitmentId, GrantRoleData.role, GrantRoleData.grantee)
     })
 
     it('should revoke role when sender is approved by grantor', async () => {
       await ItemsRolesRegistryFacet.connect(grantor).setRoleApprovalForAll(
-        RecordCreated.tokenAddress,
+        TokensCommitted.tokenAddress,
         anotherUser.address,
         true,
       )
       await expect(
-        ItemsRolesRegistryFacet.connect(anotherUser).revokeRoleFrom(
-          GrantRoleData.recordId,
+        ItemsRolesRegistryFacet.connect(anotherUser).revokeRole(
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
         ),
       )
         .to.emit(ItemsRolesRegistryFacet, 'RoleRevoked')
-        .withArgs(GrantRoleData.recordId, GrantRoleData.role, GrantRoleData.grantee)
+        .withArgs(GrantRoleData.commitmentId, GrantRoleData.role, GrantRoleData.grantee)
     })
 
     it('should revoke role when sender is approved by grantee', async () => {
       await ItemsRolesRegistryFacet.connect(grantee).setRoleApprovalForAll(
-        RecordCreated.tokenAddress,
+        TokensCommitted.tokenAddress,
         anotherUser.address,
         true,
       )
       await expect(
-        ItemsRolesRegistryFacet.connect(anotherUser).revokeRoleFrom(
-          GrantRoleData.recordId,
+        ItemsRolesRegistryFacet.connect(anotherUser).revokeRole(
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
         ),
       )
         .to.emit(ItemsRolesRegistryFacet, 'RoleRevoked')
-        .withArgs(GrantRoleData.recordId, GrantRoleData.role, GrantRoleData.grantee)
+        .withArgs(GrantRoleData.commitmentId, GrantRoleData.role, GrantRoleData.grantee)
     })
   })
 
-  describe('withdrawFrom', async () => {
-    let RecordCreated: Record
+  describe('releaseTokens', async () => {
+    let TokensCommitted: Commitment
     let GrantRoleData: GrantRoleData
 
     beforeEach(async () => {
-      RecordCreated = buildRecord({
+      TokensCommitted = buildCommitment({
         grantor: grantor.address,
         tokenAddress: wearableDiamondAddress,
       })
-      recordIdsCounter++
+      commitmentIdsCounter++
       GrantRoleData = await buildGrantRole({
-        recordId: recordIdsCounter,
+        commitmentId: commitmentIdsCounter,
         grantee: grantee.address,
         revocable: false,
       })
       await expect(
-        ItemsRolesRegistryFacet.connect(grantor).createRecordFrom(
-          RecordCreated.grantor,
-          RecordCreated.tokenAddress,
-          RecordCreated.tokenId,
-          RecordCreated.tokenAmount,
+        ItemsRolesRegistryFacet.connect(grantor).commitTokens(
+          TokensCommitted.grantor,
+          TokensCommitted.tokenAddress,
+          TokensCommitted.tokenId,
+          TokensCommitted.tokenAmount,
         ),
       ).to.not.be.reverted
     })
 
     it('should revert when sender is not grantor or approved', async () => {
       await ItemsRolesRegistryFacet.connect(grantor).setRoleApprovalForAll(
-        RecordCreated.tokenAddress,
+        TokensCommitted.tokenAddress,
         anotherUser.address,
         false,
       )
-      await expect(ItemsRolesRegistryFacet.connect(anotherUser).withdrawFrom(GrantRoleData.recordId)).to.be.revertedWith(
+      await expect(ItemsRolesRegistryFacet.connect(anotherUser).releaseTokens(GrantRoleData.commitmentId)).to.be.revertedWith(
         'ItemsRolesRegistryFacet: account not approved',
       )
     })
 
-    it('should revert when record has an active role', async () => {
+    it('should revert when commitment has an active role', async () => {
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).grantRole(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
           GrantRoleData.expirationDate,
@@ -530,67 +530,67 @@ describe("ItemsRolesRegistryFacet", async () => {
           GrantRoleData.data,
         ),
       ).to.not.be.reverted
-      await expect(ItemsRolesRegistryFacet.connect(grantor).withdrawFrom(GrantRoleData.recordId)).to.be.revertedWith(
+      await expect(ItemsRolesRegistryFacet.connect(grantor).releaseTokens(GrantRoleData.commitmentId)).to.be.revertedWith(
         'ItemsRolesRegistryFacet: token has an active role',
       )
     })
 
     it('should withdraw tokens when sender is grantor', async () => {
-      await expect(ItemsRolesRegistryFacet.connect(grantor).withdrawFrom(GrantRoleData.recordId))
-        .to.emit(ItemsRolesRegistryFacet, 'Withdrew')
-        .withArgs(GrantRoleData.recordId)
+      await expect(ItemsRolesRegistryFacet.connect(grantor).releaseTokens(GrantRoleData.commitmentId))
+        .to.emit(ItemsRolesRegistryFacet, 'TokensReleased')
+        .withArgs(GrantRoleData.commitmentId)
         .to.emit(libEventHandler, 'TransferSingle')
         .withArgs(
           grantor.address,
           aavegotchiDiamondAddress,
           grantor.address,
-          RecordCreated.tokenId,
-          RecordCreated.tokenAmount,
+          TokensCommitted.tokenId,
+          TokensCommitted.tokenAmount,
         )
     })
 
     it('should withdraw tokens when sender is approved', async () => {
       await ItemsRolesRegistryFacet.connect(grantor).setRoleApprovalForAll(
-        RecordCreated.tokenAddress,
+        TokensCommitted.tokenAddress,
         anotherUser.address,
         true,
       )
-      await expect(ItemsRolesRegistryFacet.connect(anotherUser).withdrawFrom(GrantRoleData.recordId))
-        .to.emit(ItemsRolesRegistryFacet, 'Withdrew')
-        .withArgs(GrantRoleData.recordId)
+      await expect(ItemsRolesRegistryFacet.connect(anotherUser).releaseTokens(GrantRoleData.commitmentId))
+        .to.emit(ItemsRolesRegistryFacet, 'TokensReleased')
+        .withArgs(GrantRoleData.commitmentId)
         .to.emit(libEventHandler, 'TransferSingle')
         .withArgs(
           anotherUser.address,
           aavegotchiDiamondAddress,
           grantor.address,
-          RecordCreated.tokenId,
-          RecordCreated.tokenAmount,
+          TokensCommitted.tokenId,
+          TokensCommitted.tokenAmount,
         )
     })
   })
 
   describe('view functions', async () => {
-    let RecordCreated: Record
+    let TokensCommitted: Commitment
     let GrantRoleData: GrantRoleData
 
     beforeEach(async () => {
-      RecordCreated = buildRecord({grantor: grantor.address})
-      recordIdsCounter++
+      TokensCommitted = buildCommitment({grantor: grantor.address})
+      commitmentIdsCounter++
       GrantRoleData = await buildGrantRole({
-        recordId: recordIdsCounter,
+        commitmentId: commitmentIdsCounter,
         grantee: grantee.address,
       })
       await expect(
-        ItemsRolesRegistryFacet.connect(grantor).createRecordFrom(
-          RecordCreated.grantor,
-          RecordCreated.tokenAddress,
-          RecordCreated.tokenId,
-          RecordCreated.tokenAmount,
+        ItemsRolesRegistryFacet.connect(grantor).commitTokens(
+          TokensCommitted.grantor,
+          TokensCommitted.tokenAddress,
+          TokensCommitted.tokenId,
+          TokensCommitted.tokenAmount,
         ),
       ).to.not.be.reverted
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).grantRole(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
           GrantRoleData.expirationDate,
@@ -602,18 +602,18 @@ describe("ItemsRolesRegistryFacet", async () => {
 
     it('should revert when grantee is not the same', async () => {
       await expect(
-        ItemsRolesRegistryFacet.connect(grantor).roleData(GrantRoleData.recordId, GrantRoleData.role, anotherUser.address),
+        ItemsRolesRegistryFacet.connect(grantor).roleData(GrantRoleData.commitmentId, GrantRoleData.role, anotherUser.address),
       ).to.be.revertedWith('ItemsRolesRegistryFacet: grantee mismatch')
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).roleExpirationDate(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           anotherUser.address,
         ),
       ).to.be.revertedWith('ItemsRolesRegistryFacet: grantee mismatch')
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).isRoleRevocable(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           anotherUser.address,
         ),
@@ -623,7 +623,7 @@ describe("ItemsRolesRegistryFacet", async () => {
     it('should return role data', async () => {
       expect(
         await ItemsRolesRegistryFacet.connect(grantor).roleExpirationDate(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
         ),
@@ -631,7 +631,7 @@ describe("ItemsRolesRegistryFacet", async () => {
 
       expect(
         await ItemsRolesRegistryFacet.connect(grantor).roleData(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
         ),
@@ -639,7 +639,7 @@ describe("ItemsRolesRegistryFacet", async () => {
 
       expect(
         await ItemsRolesRegistryFacet.connect(grantor).isRoleRevocable(
-          GrantRoleData.recordId,
+          GrantRoleData.commitmentId,
           GrantRoleData.role,
           GrantRoleData.grantee,
         ),
@@ -653,7 +653,7 @@ describe("ItemsRolesRegistryFacet", async () => {
     })
 
     it('should return true if IItemsRolesRegistryFacet interface id', async () => {
-      expect(await ItemsRolesRegistryFacet.supportsInterface('0x42ba720c')).to.be.true
+      expect(await ItemsRolesRegistryFacet.supportsInterface('0xc4c8a71d')).to.be.true
     })
   })
 

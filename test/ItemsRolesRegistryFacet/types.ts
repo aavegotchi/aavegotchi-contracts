@@ -1,4 +1,4 @@
-export interface Record {
+export interface Commitment {
   grantor: string
   tokenAddress: string
   tokenId: number
@@ -6,7 +6,7 @@ export interface Record {
 }
 
 export interface GrantRoleData {
-  recordId: number
+  commitmentId: number
   role: string
   grantee: string
   expirationDate: number | null

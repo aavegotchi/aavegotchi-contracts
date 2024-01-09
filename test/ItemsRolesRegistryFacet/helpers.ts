@@ -1,6 +1,6 @@
 import { solidityKeccak256 } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { GrantRoleData, Record } from "./types";
+import { GrantRoleData, Commitment } from "./types";
 
 const { HashZero, AddressZero } = ethers.constants;
 export const ONE_DAY = 60 * 60 * 24;
@@ -23,17 +23,17 @@ export const wearableDiamondAddress =
 export const EQUIPPED_WEARABLE_SLOTS = 16;
 export const wearableSlots = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-export function buildRecord({
+export function buildCommitment({
   grantor = AddressZero,
   tokenAddress = wearableDiamondAddress,
   tokenId = wearableIds[0],
   tokenAmount = 1,
-}): Record {
+}): Commitment {
   return { grantor, tokenAddress, tokenId, tokenAmount }
 }
 
 export async function buildGrantRole({
-  recordId = generateRandomInt(),
+  commitmentId = generateRandomInt(),
   role = 'Player()',
   grantee = AddressZero,
   expirationDate = null,
@@ -41,7 +41,7 @@ export async function buildGrantRole({
   data = HashZero,
 }): Promise<GrantRoleData> {
   return {
-    recordId,
+    commitmentId,
     role: generateRoleId(role),
     grantee,
     expirationDate: expirationDate ? expirationDate : (await time.latest()) + ONE_DAY,
