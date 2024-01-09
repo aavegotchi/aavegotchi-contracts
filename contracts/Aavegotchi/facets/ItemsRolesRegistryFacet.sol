@@ -240,12 +240,12 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
 
     function _findCaller(address _grantor, address _grantee, address _tokenAddress) internal view returns (address) {
         address _sender = LibMeta.msgSender();
-        if (_grantor == _sender || isRoleApprovedForAll(_tokenAddress, _grantor, _sender)) {
-            return _grantor;
-        }
-
         if (_grantee == _sender || isRoleApprovedForAll(_tokenAddress, _grantee, _sender)) {
             return _grantee;
+        }
+
+        if (_grantor == _sender || isRoleApprovedForAll(_tokenAddress, _grantor, _sender)) {
+            return _grantor;
         }
 
         revert("ItemsRolesRegistryFacet: sender must be approved");
