@@ -376,6 +376,25 @@ export const wearablesSvgs = [
   wearable("367_EyesofDevotion"),
   wearable("368_BeardofDivinity"),
   wearable("369_StaffofCreation"),
+  //forge wearables2
+  wearable("370_WavyHair"),
+  wearable("371_PlasticEarrings"),
+  bodyWearable("372_PartyDress"),
+  bodyWearable("373_Overalls"),
+  wearable("374_LensFrensPlant"),
+  wearable("375_GMSeeds"),
+  wearable("376_LickBrain"),
+  wearable("377_LickEyes"),
+  wearable("378_LickTongue"),
+  wearable("379_LickTentacle"),
+  wearable("380_SebastienHair"),
+  wearable("381_VoxelEyes"),
+  wearable("382_GOATee"),
+  bodyWearable("383_SandboxHoodie"),
+  wearable("384_Faangs"),
+  wearable("385_BlockScanners"),
+  wearable("386_StaffCharming"),
+  wearable("387_Roflnoggin"),
 ];
 
 export const sleeveSvgs = [
@@ -579,6 +598,10 @@ export const sleeveSvgs = [
   sleeves("350_PixelcraftTee"),
   sleeves("362_FAKEShirt"),
   sleeves("366_HeavenlyRobes"),
+  //forge wearables2
+  sleeves("372_PartyDress"),
+  sleeves("373_Overalls"),
+  sleeves("383_SandboxHoodie"),
 ];
 
 function stripSvg(svg: string) {
