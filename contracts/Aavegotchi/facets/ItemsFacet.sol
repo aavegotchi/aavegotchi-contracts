@@ -14,8 +14,6 @@ import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 contract ItemsFacet is Modifiers {
     //using LibAppStorage for AppStorage;
 
-    event TransferToParent(address indexed _toContract, uint256 indexed _toTokenId, uint256 indexed _tokenTypeId, uint256 _value);
-
     event EquipWearables(uint256 indexed _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] _oldWearables, uint16[EQUIPPED_WEARABLE_SLOTS] _newWearables);
     event UseConsumables(uint256 indexed _tokenId, uint256[] _itemIds, uint256[] _quantities);
 
@@ -262,7 +260,7 @@ contract ItemsFacet is Modifiers {
                     //Transfer to Aavegotchi
                     LibItems.removeFromOwner(sender, toEquipId, balToTransfer);
                     LibItems.addToParent(address(this), _tokenId, toEquipId, balToTransfer);
-                    emit TransferToParent(address(this), _tokenId, toEquipId, balToTransfer);
+                    emit LibERC1155.TransferToParent(address(this), _tokenId, toEquipId, balToTransfer);
                     IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, sender, address(this), toEquipId, balToTransfer);
                     LibERC1155Marketplace.updateERC1155Listing(address(this), toEquipId, sender);
                 }
