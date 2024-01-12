@@ -15,7 +15,7 @@ export async function setRespecProperties() {
     )[0]
   )) as DAOFacet;
 
-  if (network.name === "hardhat") {
+  if (network.name === "hardhat" || network.name === "localhost") {
     daoFacet = await impersonate(
       await diamondOwner(maticDiamondAddress, ethers),
       daoFacet,

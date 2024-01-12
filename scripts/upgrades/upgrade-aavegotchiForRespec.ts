@@ -29,6 +29,7 @@ export async function upgradeAavegotchiForRepec() {
         "contracts/Aavegotchi/facets/AavegotchiGameFacet.sol:AavegotchiGameFacet",
       addSelectors: [
         "function resetSkillPoints(uint32 _tokenId) public",
+        "function getGotchiBaseNumericTraits(uint32 _tokenId) public returns (int16[6] memory numericTraits_)"
       ],
       removeSelectors: [],
     },

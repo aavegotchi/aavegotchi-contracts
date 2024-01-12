@@ -375,16 +375,18 @@ contract AavegotchiGameFacet is Modifiers {
             forgeTokenFacet.safeTransferFrom(msg.sender, s.daoDirectorTreasury, ESSENCE, 50, "0x");
         }
 
+        int16[NUMERIC_TRAITS_NUM] memory baseNumericTraits = getGotchiBaseNumericTraits(_tokenId);
+
+        s.gotchiRespecCount[_tokenId] += 1;
+        s.aavegotchis[_tokenId].numericTraits = baseNumericTraits;
+        s.aavegotchis[_tokenId].usedSkillPoints = 0;
+    }
+
+    function getGotchiBaseNumericTraits(uint32 _tokenId) public returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_) {
         // cast to uint256 for hauntCollateralTypes key
         uint256 hauntId = uint256(s.aavegotchis[_tokenId].hauntId);
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
         address collateralType = s.hauntCollateralTypes[hauntId][randomNumber % s.hauntCollateralTypes[hauntId].length];
-        int16[NUMERIC_TRAITS_NUM] memory baseNumericTraits =
-                            LibAavegotchi.toNumericTraits(randomNumber, s.collateralTypeInfo[collateralType].modifiers, hauntId);
-
-        s.gotchiRespecCount[_tokenId] += 1;
-
-        s.aavegotchis[_tokenId].numericTraits = baseNumericTraits;
-        s.aavegotchis[_tokenId].usedSkillPoints = 0;
+        numericTraits_ = LibAavegotchi.toNumericTraits(randomNumber, s.collateralTypeInfo[collateralType].modifiers, hauntId);
     }
 }
