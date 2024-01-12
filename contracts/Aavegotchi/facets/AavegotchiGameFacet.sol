@@ -17,6 +17,8 @@ import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 
 import {LibBitmapHelpers} from "../libraries/LibBitmapHelpers.sol";
 
+import {ForgeTokenFacet} from "../ForgeDiamond/facets/ForgeTokenFacet.sol";
+
 contract AavegotchiGameFacet is Modifiers {
     /// @dev This emits when the approved address for an NFT is changed or
     ///  reaffirmed. The zero address indicates there is no approved address.
@@ -324,10 +326,6 @@ contract AavegotchiGameFacet is Modifiers {
         emit SpendSkillpoints(_tokenId, _values);
     }
 
-    function resetUsedSkillPoints(uint256 _tokenId) public onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
-        s.aavegotchis[_tokenId].usedSkillPoints = 0;
-    }
-
     function isAavegotchiLocked(uint256 _tokenId) external view returns (bool isLocked) {
         isLocked = s.aavegotchis[_tokenId].locked;
     }
@@ -363,5 +361,30 @@ contract AavegotchiGameFacet is Modifiers {
         }
 
         LibAavegotchi.interact(_gotchiId);
+    }
+
+    ///@notice Allow the current owner of a gotchi to reassign all spent skill points
+    ///@dev Reverts if user doesn't have enough Essence to pay for the respec
+    ///@param _tokenId Id of the Gotchi to respec
+    function resetSkillPoints(uint32 _tokenId) public onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+        if (s.gotchiRespecCount[_tokenId] > 0){
+            ForgeTokenFacet forgeTokenFacet = ForgeTokenFacet(s.forgeDiamond);
+            uint256 ESSENCE = 1_000_000_001;
+
+            require(forgeTokenFacet.balanceOf(msg.sender, ESSENCE) > 50, "Not enough Essence");
+            forgeTokenFacet.safeTransferFrom(msg.sender, s.daoDirectorTreasury, ESSENCE, 50, "0x");
+        }
+
+        // cast to uint256 for hauntCollateralTypes key
+        uint256 hauntId = uint256(s.aavegotchis[_tokenId].hauntId);
+        uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
+        address collateralType = s.hauntCollateralTypes[hauntId][randomNumber % s.hauntCollateralTypes[hauntId].length];
+        int16[NUMERIC_TRAITS_NUM] memory baseNumericTraits =
+                            LibAavegotchi.toNumericTraits(randomNumber, s.collateralTypeInfo[collateralType].modifiers, hauntId);
+
+        s.gotchiRespecCount[_tokenId] += 1;
+
+        s.aavegotchis[_tokenId].numericTraits = baseNumericTraits;
+        s.aavegotchis[_tokenId].usedSkillPoints = 0;
     }
 }

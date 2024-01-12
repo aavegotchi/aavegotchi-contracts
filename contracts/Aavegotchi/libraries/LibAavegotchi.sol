@@ -132,7 +132,6 @@ library LibAavegotchi {
         uint256 _tokenId
     ) internal view returns (PortalAavegotchiTraitsIO[PORTAL_AAVEGOTCHIS_NUM] memory portalAavegotchiTraits_) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiFacet: Portal not open");
 
         uint256 randomNumber = s.tokenIdToRandomNumber[_tokenId];
 

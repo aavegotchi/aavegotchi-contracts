@@ -78,6 +78,14 @@ contract DAOFacet is Modifiers {
         s.forgeDiamond = _newForge;
     }
 
+    function setDaoDirectorTreasury(address treasuryAddr) external onlyDaoOrOwner {
+        s.daoDirectorTreasury = treasuryAddr;
+    }
+
+    function getDaoDirectorTreasury() public view returns (address) {
+        return s.daoDirectorTreasury;
+    }
+
     ///@notice Allow an item manager to add new collateral types to a haunt
     ///@dev If a certain collateral exists already, it will be overwritten
     ///@param _hauntId Identifier for haunt to add the collaterals to
