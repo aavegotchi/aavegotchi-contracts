@@ -339,6 +339,8 @@ struct AppStorage {
     mapping(address => mapping(uint256 => uint256[])) erc721TokenToBuyOrderIds; // erc721 token address => erc721TokenId => buyOrderIds
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) erc721TokenToBuyOrderIdIndexes; // erc721 token address => erc721TokenId => buyOrderId => index
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
+    //Wearable Sets
+    mapping(uint256 => uint256[]) wearableSetIds; //erc721 token Id => wearableSetIds
 }
 
 library LibAppStorage {
