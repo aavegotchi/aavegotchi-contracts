@@ -62,8 +62,7 @@ library LibAavegotchi {
 
     event AavegotchiInteract(uint256 indexed _tokenId, uint256 kinship);
     event KinshipBurned(uint256 _tokenId, uint256 _value);
-    event WearableSetAdded(uint256 indexed _tokenId, uint256 indexed _setId);
-    event WearableSetRemoved(uint256 indexed _tokenId, uint256 indexed _setId);
+    event WearableSetUpdated(uint256 indexed _tokenId, uint256[] wearableSets);
 
     function toNumericTraits(
         uint256 _randomNumber,
@@ -438,16 +437,19 @@ library LibAavegotchi {
         //get sets
         uint256[] memory wearableSets = s.wearableSetIds[_tokenId];
 
+        //this check should be removed if we decide to support multiple wearableSets concurrently
+        if (wearableSets.length > 0) revert("Multiple Sets not allowed");
+
         if (wearableSets.length > 0) {
             //check for existence
             (bool exists, ) = _exists(_wearableSetId, wearableSets);
             if (!exists) {
                 s.wearableSetIds[_tokenId].push(_wearableSetId);
-                emit WearableSetAdded(_tokenId, _wearableSetId);
+                emit WearableSetUpdated(_tokenId, s.wearableSetIds[_tokenId]);
             }
         } else {
             s.wearableSetIds[_tokenId].push(_wearableSetId);
-            emit WearableSetAdded(_tokenId, _wearableSetId);
+            emit WearableSetUpdated(_tokenId, s.wearableSetIds[_tokenId]);
         }
     }
 
@@ -458,7 +460,7 @@ library LibAavegotchi {
 
         if (wearableSets.length == 1 && wearableSets[0] == _wearableSetId) {
             s.wearableSetIds[_tokenId].pop();
-            emit WearableSetRemoved(_tokenId, _wearableSetId);
+            emit WearableSetUpdated(_tokenId, s.wearableSetIds[_tokenId]);
         }
         if (wearableSets.length > 1) {
             (bool exists, uint256 index) = _exists(_wearableSetId, wearableSets);
@@ -467,7 +469,7 @@ library LibAavegotchi {
                     s.wearableSetIds[_tokenId][i] = s.wearableSetIds[_tokenId][i + 1];
                 }
                 s.wearableSetIds[_tokenId].pop();
-                emit WearableSetRemoved(_tokenId, _wearableSetId);
+                emit WearableSetUpdated(_tokenId, s.wearableSetIds[_tokenId]);
             }
         }
     }

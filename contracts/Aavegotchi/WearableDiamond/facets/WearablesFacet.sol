@@ -5,7 +5,7 @@ import {LibEventHandler} from "../libraries/LibEventHandler.sol";
 import {WearableLibDiamond} from "../libraries/WearableLibDiamond.sol";
 import {LibStrings} from "../../../shared/libraries/LibStrings.sol";
 
-import {ItemsFacet} from "../../facets/ItemsFacet.sol";
+import {ItemsGetterFacet} from "../../facets/ItemsGetterFacet.sol";
 import {AavegotchiFacet} from "../../facets/AavegotchiFacet.sol";
 
 contract WearablesFacet {
@@ -13,8 +13,8 @@ contract WearablesFacet {
         pFacet = PeripheryFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND);
     }
 
-    function itemsFacet() internal pure returns (ItemsFacet iFacet) {
-        iFacet = ItemsFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND);
+    function itemsFacet() internal pure returns (ItemsGetterFacet iFacet) {
+        iFacet = ItemsGetterFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND);
     }
 
     function aavegotchiFacet() internal pure returns (AavegotchiFacet aFacet) {
@@ -65,25 +65,13 @@ contract WearablesFacet {
         }
     }
 
-    function safeTransferFrom(
-        address _from,
-        address _to,
-        uint256 _id,
-        uint256 _value,
-        bytes calldata _data
-    ) external {
+    function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
         periphery().peripherySafeTransferFrom(msg.sender, _from, _to, _id, _value, _data);
         //emit event
         LibEventHandler._receiveAndEmitTransferSingleEvent(msg.sender, _from, _to, _id, _value);
     }
 
-    function safeBatchTransferFrom(
-        address _from,
-        address _to,
-        uint256[] calldata _ids,
-        uint256[] calldata _values,
-        bytes calldata _data
-    ) external {
+    function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external {
         periphery().peripherySafeBatchTransferFrom(msg.sender, _from, _to, _ids, _values, _data);
         //emit event
         LibEventHandler._receiveAndEmitTransferBatchEvent(msg.sender, _from, _to, _ids, _values);

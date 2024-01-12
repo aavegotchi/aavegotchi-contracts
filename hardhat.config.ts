@@ -48,7 +48,7 @@ export default {
       forking: {
         url: process.env.MATIC_URL,
         timeout: 12000000,
-        // blockNumber: 31480850,
+        blockNumber: 52093245,
       },
       blockGasLimit: 20000000,
       timeout: 120000,

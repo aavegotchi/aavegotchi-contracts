@@ -4,9 +4,11 @@ import { AavegotchiFacet, ItemsFacet, WearableSetsFacet } from "../typechain";
 import { expect } from "chai";
 
 import { upgrade } from "../scripts/upgrades/upgrade-addWearableSetHandlers";
+import { ItemsGetterFacet } from "../typechain/ItemsGetterFacet";
 
 let erc721: AavegotchiFacet;
 let itemFacet: ItemsFacet;
+let itemsGetterFacet: ItemsGetterFacet;
 let wearableSetFacet: WearableSetsFacet;
 let owner: string;
 
@@ -19,6 +21,11 @@ describe("Onchain WearableSet tests", async function () {
       "WearableSetsFacet",
       maticDiamondAddress
     )) as WearableSetsFacet;
+
+    itemsGetterFacet = (await ethers.getContractAt(
+      "ItemsGetterFacet",
+      maticDiamondAddress
+    )) as ItemsGetterFacet;
   });
 
   //gotchis with existing sets offchain
@@ -46,7 +53,7 @@ describe("Onchain WearableSet tests", async function () {
   });
 
   it("Should remove a wearable set automatically if at most a dependent item is unequipped", async function () {
-    let wearables = [...(await itemFacet.equippedWearables(tokenId1))];
+    let wearables = [...(await itemsGetterFacet.equippedWearables(tokenId1))];
     tokenId1EquippedWearables = wearables;
 
     // Look for wearable 39
