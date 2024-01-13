@@ -367,7 +367,7 @@ contract AavegotchiGameFacet is Modifiers {
     ///@notice Allow the current owner of a gotchi to reassign all spent skill points
     ///@dev Reverts if user doesn't have enough Essence to pay for the respec
     ///@param _tokenId Id of the Gotchi to respec
-    function resetSkillPoints(uint32 _tokenId) public onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function resetSkillPoints(uint32 _tokenId) public onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) onlyDaoOrOwner {
         if (s.gotchiRespecCount[_tokenId] > 0){
             ForgeTokenFacet forgeTokenFacet = ForgeTokenFacet(s.forgeDiamond);
             uint256 ESSENCE = 1_000_000_001;
