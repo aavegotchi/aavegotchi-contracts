@@ -372,7 +372,7 @@ contract AavegotchiGameFacet is Modifiers {
             ForgeTokenFacet forgeTokenFacet = ForgeTokenFacet(s.forgeDiamond);
             uint256 ESSENCE = 1_000_000_001;
 
-            require(forgeTokenFacet.balanceOf(msg.sender, ESSENCE) > 50, "Not enough Essence");
+            require(forgeTokenFacet.balanceOf(msg.sender, ESSENCE) >= 50, "Not enough Essence");
             forgeTokenFacet.safeTransferFrom(msg.sender, s.daoDirectorTreasury, ESSENCE, 50, "0x");
         }
 
