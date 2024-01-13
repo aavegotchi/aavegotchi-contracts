@@ -11,6 +11,7 @@ import {
 
 import { upgradeAavegotchiForRepec } from "../../scripts/upgrades/upgrade-aavegotchiForRespec";
 import { releaseRespec } from "../../scripts/upgrades/upgrade-respecFinal";
+import axios from "axios";
 
 let impDaoOwner : DAOFacet;
 let impGame : AavegotchiGameFacet;
@@ -89,6 +90,9 @@ describe("Testing Respec potion", async function () {
 
       expect(await impGame.availableSkillPoints(474)).to.equal(10)
       expect(await impGame.getNumericTraits(474)).to.eql([99, 93, 92, 95, 91, 92])
+
+      // make sure getGotchiBaseNumericTraits is accurate
+      expect(await impGame.getGotchiBaseNumericTraits(474)).to.eql([99, 93, 92, 95, 91, 92])
       expect(await forgeTokenFacet.balanceOf(testUser, ESSENCE)).to.equal(Number(essenceBal) - 50)
     });
 
@@ -102,5 +106,64 @@ describe("Testing Respec potion", async function () {
       await expect(impGame.resetSkillPoints(474)).to.be.revertedWith("Not enough Essence")
     });
 
+    it("should test correct base traits from contract vs finding via subgraph portal options", async () => {
+      // WARNING: This is an extremely long running test. Reduce the loop counts (i < 25) to run on smaller subset
+
+      const subgraph = 'https://subgraph.satsuma-prod.com/tWYl5n5y04oz/aavegotchi/aavegotchi-core-matic/api';
+      let reqs = [];
+      let skipAmt = 0;
+      const query = `
+                {
+                  aavegotchis (
+                    orderBy: id,
+                    first: 1000,
+                    skip: ${skipAmt}
+                    where: {
+                      status:3
+                    }
+                    ) {
+                      id
+                      numericTraits
+                      status
+                      collateral
+                      portal {
+                        options {
+                          id
+                          baseRarityScore
+                          numericTraits
+                          collateralType
+                        }
+                      }
+                    }
+                }
+                `
+      for (let i = 0; i < 25; i++){
+        skipAmt = i * 1000
+        reqs.push(axios.post(subgraph, {query: query}))
+      }
+
+      let resps = await Promise.all(reqs)
+
+      for (let resp of resps) {
+        let data = resp.data.data;
+
+        for (let gotchi of data.aavegotchis) {
+          console.log("id", gotchi.id)
+
+          let baseFromPortal = gotchi.portal.options.filter(
+            p => p.collateralType == gotchi.collateral &&
+              p.numericTraits[4] == gotchi.numericTraits[4] &&
+              p.numericTraits[5] == gotchi.numericTraits[5])
+
+          if (baseFromPortal.length > 1) {
+            console.error("multiple matches for " + gotchi.id)
+          } else if (baseFromPortal.length == 1) {
+            expect(await impGame.getGotchiBaseNumericTraits(gotchi.id)).to.eql(baseFromPortal[0].numericTraits)
+          } else {
+            console.error("no matches for " + gotchi.id)
+          }
+        }
+      }
+    });
   });
 });
