@@ -389,7 +389,7 @@ contract AavegotchiGameFacet is Modifiers {
         // cast to uint256 for hauntCollateralTypes key
         uint256 hauntId = uint256(s.aavegotchis[_tokenId].hauntId);
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
-        address collateralType = s.hauntCollateralTypes[hauntId][randomNumber % s.hauntCollateralTypes[hauntId].length];
+        address collateralType = s.aavegotchis[_tokenId].collateralType;
         numericTraits_ = LibAavegotchi.toNumericTraits(randomNumber, s.collateralTypeInfo[collateralType].modifiers, hauntId);
     }
 }
