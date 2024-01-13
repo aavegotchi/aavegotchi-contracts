@@ -35,6 +35,7 @@ contract AavegotchiGameFacet is Modifiers {
     event SetBatchId(uint256 indexed _batchId, uint256[] tokenIds);
 
     event SpendSkillpoints(uint256 indexed _tokenId, int16[4] _values);
+    event ResetSkillpoints(uint256 indexed _tokenId);
 
     event LockAavegotchi(uint256 indexed _tokenId, uint256 _time);
     event UnLockAavegotchi(uint256 indexed _tokenId, uint256 _time);
@@ -380,9 +381,11 @@ contract AavegotchiGameFacet is Modifiers {
         s.gotchiRespecCount[_tokenId] += 1;
         s.aavegotchis[_tokenId].numericTraits = baseNumericTraits;
         s.aavegotchis[_tokenId].usedSkillPoints = 0;
+
+        emit ResetSkillpoints(_tokenId);
     }
 
-    function getGotchiBaseNumericTraits(uint32 _tokenId) public returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_) {
+    function getGotchiBaseNumericTraits(uint32 _tokenId) public view returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_) {
         // cast to uint256 for hauntCollateralTypes key
         uint256 hauntId = uint256(s.aavegotchis[_tokenId].hauntId);
         uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
