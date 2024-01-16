@@ -7,7 +7,7 @@ import {
 } from "../../scripts/svgHelperFunctions";
 
 import {
-  getRfSznTypeRanking,
+  rankStrings,
   getPlaayersIds,
   hasDuplicateGotchiIds,
 } from "../../scripts/helperFunctions";
@@ -73,7 +73,7 @@ export async function main() {
     dataArgs4.xpGotchis,
   ];
 
-  const rarityRFSzn6 = await getRfSznTypeRanking(rarityArray, "rarity");
+  const rarityRFSzn6 = await rankStrings(rarityArray);
   console.log("Rarity: ", rarityRFSzn6);
   const top10rarity = rarityRFSzn6.slice(3, 10);
   console.log("Top 10 Rarity", top10rarity);
@@ -81,14 +81,14 @@ export async function main() {
   console.log("Top 100 Rarity", top100rarity);
   console.log("Top 100 Rarity Array Length", top100rarity.length);
 
-  const kinshipRFSzn6 = await getRfSznTypeRanking(kinshipArray, "kinship");
+  const kinshipRFSzn6 = await rankStrings(kinshipArray);
   console.log("Kinship: ", kinshipRFSzn6);
   const top10kinship = kinshipRFSzn6.slice(3, 10);
   console.log("Top 10 Kinship", top10kinship);
   const top100kinship = kinshipRFSzn6.slice(10, 100);
   console.log("Top 100 Kinship", top100kinship);
 
-  const xpRFSzn6 = await getRfSznTypeRanking(xpArray, "xp");
+  const xpRFSzn6 = await rankStrings(xpArray);
   console.log("XP: ", xpRFSzn6);
   const top10xp = xpRFSzn6.slice(3, 10);
   console.log("Top 10 XP", top10xp);

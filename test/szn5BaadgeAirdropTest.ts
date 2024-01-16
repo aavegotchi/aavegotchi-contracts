@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { maticDiamondAddress } from "../scripts/helperFunctions";
+import { maticDiamondAddress, rankStrings } from "../scripts/helperFunctions";
 import { AavegotchiFacet } from "../typechain";
 import { Signer } from "@ethersproject/abstract-signer";
 import { expect } from "chai";
@@ -10,7 +10,6 @@ import { dataArgs as dataArgs2 } from "../data/airdrops/rarityfarming/szn5/rnd2"
 import { dataArgs as dataArgs3 } from "../data/airdrops/rarityfarming/szn5/rnd3";
 import { dataArgs as dataArgs4 } from "../data/airdrops/rarityfarming/szn5/rnd4";
 
-import { getRfSznTypeRanking } from "../scripts/helperFunctions";
 import { main } from "../scripts/airdrops/rfSzn5BdgsAirdrop";
 describe("Airdrop SZN5 Baadges", async function () {
   this.timeout(200000000);
@@ -49,11 +48,14 @@ describe("Airdrop SZN5 Baadges", async function () {
       signer
     )) as AavegotchiFacet;
 
-    rarityRFSzn5 = await getRfSznTypeRanking(rarityArray, "rarity");
+    rarityRFSzn5 = rankStrings(rarityArray);
+    console.log("rarityRFSzn5: ", rarityRFSzn5);
 
-    kinshipRFSzn5 = await getRfSznTypeRanking(kinshipArray, "kinship");
+    kinshipRFSzn5 = rankStrings(kinshipArray);
+    console.log("kinshipRFSzn5: ", kinshipRFSzn5);
 
-    xpRFSzn5 = await getRfSznTypeRanking(xpArray, "xp");
+    xpRFSzn5 = rankStrings(xpArray);
+    console.log("xpRFSzn5: ", xpRFSzn5);
 
     await main();
   });
@@ -61,21 +63,15 @@ describe("Airdrop SZN5 Baadges", async function () {
   it.only("Should airdrop szn5 champion baadges", async function () {
     //rarity champ
     let rarityChamp = await aavegotchiFacet.getAavegotchi(rarityRFSzn5[0]);
-
     let itemIds = getAavegotchiItemIds(rarityChamp);
-
     expect(exists(itemTypes[0].svgId.toString(), itemIds)).to.equal(true);
-
     //kinship champ
     let kinshipChamp = await aavegotchiFacet.getAavegotchi(kinshipRFSzn5[0]);
     itemIds = getAavegotchiItemIds(kinshipChamp);
-
     expect(exists(itemTypes[1].svgId.toString(), itemIds)).to.equal(true);
-
     //xp champ (tiebreaker)
     let xpChamp = await aavegotchiFacet.getAavegotchi(xpRFSzn5[0]);
     itemIds = getAavegotchiItemIds(xpChamp);
-
     expect(exists(itemTypes[2].svgId.toString(), itemIds)).to.equal(true);
   });
 

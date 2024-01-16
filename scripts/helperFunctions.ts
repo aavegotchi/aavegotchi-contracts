@@ -151,63 +151,96 @@ export async function getDiamondSigner(
   }
 }
 
-export interface rfRankingScore {
-  rfType: string;
-  gotchiId: string;
-  score: number;
-}
+// export interface rfRankingScore {
+//   rfType: string;
+//   gotchiId: string;
+//   score: number;
+// }
 
-export async function getRfSznTypeRanking(rounds: string[][], _rfType: string) {
-  console.log("*** " + _rfType + " ***");
-  const idsArray: number[] = [];
+// export async function getRfSznTypeRanking(rounds: string[][], _rfType: string) {
+//   console.log("*** " + _rfType + " ***");
+//   const idsArray: number[] = [];
 
-  let ranking = await setRfTypeObject(rounds[0], _rfType);
+//   let ranking = await setRfTypeObject(rounds[0], _rfType);
 
-  for (let i = 1; i < rounds.length; i++) {
-    ranking = await compareScoreArrays(ranking, rounds[i], _rfType);
-  }
+//   for (let i = 1; i < rounds.length; i++) {
+//     ranking = await compareScoreArrays(ranking, rounds[i], _rfType);
+//   }
 
-  const finalRanking: rfRankingScore[] = ranking.sort((a, b) => {
-    if (a.score > b.score) {
-      return 1;
-    } else if (a.score < b.score) {
-      return -1;
-    } else {
-      return 0;
-    }
+//   const finalRanking: rfRankingScore[] = ranking.sort((a, b) => {
+//     if (a.score > b.score) {
+//       return 1;
+//     } else if (a.score < b.score) {
+//       return -1;
+//     } else {
+//       return 0;
+//     }
+//   });
+//   // console.log(_rfType + " : " + finalRanking);
+//   for (let x = 0; x < finalRanking.length; x++) {
+//     idsArray.push(Number(finalRanking[x].gotchiId));
+//   }
+//   return idsArray;
+// }
+
+// export async function setRfTypeObject(rnd: string[], _rfType: string) {
+//   const ranking = [];
+
+//   for (let i = 0; i < rnd.length; i++) {
+//     let score: rfRankingScore = {
+//       rfType: _rfType,
+//       gotchiId: rnd[i],
+//       score: i,
+//     };
+//     ranking.push(score);
+//   }
+//   return ranking;
+// }
+
+// export async function compareScoreArrays(
+//   arr1: rfRankingScore[],
+//   arr2: string[],
+//   _rfType: string
+// ) {
+//   for (let i = 0; i < arr1.length; i++) {
+//     if (arr2.includes(arr1[i].gotchiId)) {
+//       arr1[i].score += arr2.indexOf(arr1[i].gotchiId);
+//     }
+//   }
+//   return arr1;
+// }
+
+export function rankStrings(gotchis: string[][]): number[] {
+  const indexCounts: { [key: string]: { [index: number]: number } } = {};
+
+  gotchis.forEach((array) => {
+    array.forEach((str, strIndex) => {
+      if (!indexCounts[str]) {
+        indexCounts[str] = {};
+      }
+      indexCounts[str][strIndex] = (indexCounts[str][strIndex] || 0) + 1;
+    });
   });
-  // console.log(_rfType + " : " + finalRanking);
-  for (let x = 0; x < finalRanking.length; x++) {
-    idsArray.push(Number(finalRanking[x].gotchiId));
-  }
-  return idsArray;
-}
 
-export async function setRfTypeObject(rnd: string[], _rfType: string) {
-  const ranking = [];
+  const finalArray: string[] = [];
 
-  for (let i = 0; i < rnd.length; i++) {
-    let score: rfRankingScore = {
-      rfType: _rfType,
-      gotchiId: rnd[i],
-      score: i,
-    };
-    ranking.push(score);
-  }
-  return ranking;
-}
+  for (let i = 0; i < gotchis[0].length; i++) {
+    let maxCount = 0;
+    let maxStr = "";
 
-export async function compareScoreArrays(
-  arr1: rfRankingScore[],
-  arr2: string[],
-  _rfType: string
-) {
-  for (let i = 0; i < arr1.length; i++) {
-    if (arr2.includes(arr1[i].gotchiId)) {
-      arr1[i].score += arr2.indexOf(arr1[i].gotchiId);
+    for (const str in indexCounts) {
+      const count = indexCounts[str][i] || 0;
+      if (count > maxCount) {
+        maxCount = count;
+        maxStr = str;
+      }
     }
+
+    finalArray[i] = maxStr;
   }
-  return arr1;
+
+  // Convert to array of numbers
+  return finalArray.map(Number);
 }
 
 export async function getPlaayersIds(round: string[][]) {

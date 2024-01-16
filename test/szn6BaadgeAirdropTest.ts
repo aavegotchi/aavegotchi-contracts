@@ -10,7 +10,7 @@ import { dataArgs as dataArgs2 } from "../data/airdrops/rarityfarming/szn6/rnd2"
 import { dataArgs as dataArgs3 } from "../data/airdrops/rarityfarming/szn6/rnd3";
 import { dataArgs as dataArgs4 } from "../data/airdrops/rarityfarming/szn6/rnd4";
 
-import { getRfSznTypeRanking } from "../scripts/helperFunctions";
+import { rankStrings } from "../scripts/helperFunctions";
 import { main } from "../scripts/airdrops/rfSzn6BdgsAirdrop";
 describe("Airdrop SZN6 Baadges", async function () {
   this.timeout(200000000);
@@ -49,11 +49,11 @@ describe("Airdrop SZN6 Baadges", async function () {
       signer
     )) as AavegotchiFacet;
 
-    rarityRFSzn6 = await getRfSznTypeRanking(rarityArray, "rarity");
+    rarityRFSzn5 = await rankStrings(rarityArray);
 
-    kinshipRFSzn6 = await getRfSznTypeRanking(kinshipArray, "kinship");
+    kinshipRFSzn5 = await rankStrings(kinshipArray);
 
-    xpRFSzn6 = await getRfSznTypeRanking(xpArray, "xp");
+    xpRFSzn5 = await rankStrings(xpArray);
 
     await main();
   });
