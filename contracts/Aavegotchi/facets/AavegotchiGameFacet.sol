@@ -93,6 +93,13 @@ contract AavegotchiGameFacet is Modifiers {
         numericTraits_ = LibAavegotchi.getNumericTraits(_tokenId);
     }
 
+    ///@notice Query the skill reset count of an Aavegotchi
+    ///@param _tokenId The identifier of the Aavegotchi to query
+    ///@return respecCount_ The number of times an aavegotchi has performed a skill reset
+    function respecCount(uint32 _tokenId) external view returns (uint256 respecCount_) {
+        respecCount_ = s.gotchiRespecCount[_tokenId];
+    }
+
     ///@notice Query the available skill points that can be used for an NFT
     ///@dev Will throw if the amount of skill points available is greater than or equal to the amount of skill points which have been used
     ///@param _tokenId The identifier of the NFT to query
@@ -367,7 +374,7 @@ contract AavegotchiGameFacet is Modifiers {
     ///@notice Allow the current owner of a gotchi to reassign all spent skill points
     ///@dev Reverts if user doesn't have enough Essence to pay for the respec
     ///@param _tokenId Id of the Gotchi to respec
-    function resetSkillPoints(uint32 _tokenId) public onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) onlyDaoOrOwner {
+    function resetSkillPoints(uint32 _tokenId) public onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         if (s.gotchiRespecCount[_tokenId] > 0){
             ForgeTokenFacet forgeTokenFacet = ForgeTokenFacet(s.forgeDiamond);
             uint256 ESSENCE = 1_000_000_001;
