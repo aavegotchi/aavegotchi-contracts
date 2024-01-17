@@ -20,6 +20,7 @@ export const aavegotchiDiamondAddress =
   "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
 export const wearableDiamondAddress =
   "0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f";
+export const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 export const EQUIPPED_WEARABLE_SLOTS = 16;
 export const wearableSlots = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 

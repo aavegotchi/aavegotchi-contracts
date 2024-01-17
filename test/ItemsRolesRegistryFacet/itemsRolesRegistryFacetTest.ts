@@ -4,7 +4,7 @@
 //@ts-ignore
 import { ethers, network } from "hardhat";
 import chai from "chai";
-import { DAOFacet, DiamondLoupeFacet, LibEventHandler, WearablesFacet } from "../../typechain";
+import { DAOFacet, LibEventHandler, WearablesFacet } from "../../typechain";
 
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -19,8 +19,8 @@ import {
   buildGrantRole,
 } from "./helpers";
 import { itemManagerAlt } from "../../scripts/helperFunctions";
-import { upgradeWithNewFacets } from "./upgradeScript";
 import { GrantRoleData, Commitment } from "./types";
+import { deployItemsRolesRegistryFacet } from "./deployTest";
 
 const { expect } = chai;
 
@@ -40,20 +40,7 @@ describe("ItemsRolesRegistryFacet", async () => {
     grantee = signers[1];
     anotherUser = signers[2];
 
-    const diamondOwnerAddress = "0x01F010a5e001fe9d6940758EA5e8c777885E351e";
-    await network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [diamondOwnerAddress],
-    });
-    const diamondOwner = await ethers.provider.getSigner(diamondOwnerAddress);
-
-    await upgradeWithNewFacets({
-      diamondAddress: aavegotchiDiamondAddress,
-      facetNames: ["ItemsRolesRegistryFacet", "DiamondLoupeFacet"],
-      signer: diamondOwner,
-      initFacetName: "InitItemsRolesRegistryFacet",
-      initArgs: [],
-    });
+    await deployItemsRolesRegistryFacet()
 
     ItemsRolesRegistryFacet = await ethers.getContractAt(
       "ItemsRolesRegistryFacet",

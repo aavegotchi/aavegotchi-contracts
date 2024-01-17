@@ -28,8 +28,8 @@ import {
   time,
 } from "./helpers";
 import { itemManagerAlt } from "../../scripts/helperFunctions";
-import { upgradeWithNewFacets } from "./upgradeScript";
 import { GrantRoleData, Commitment } from "./types";
+import { deployItemsRolesRegistryFacet, upgradeItemsFacet } from "./deployTest";
 
 const { expect } = chai;
 
@@ -63,22 +63,8 @@ describe("ItemsFacet", async () => {
     });
     grantee = await ethers.provider.getSigner(LargeGotchiOwner);
 
-    const diamondOwnerAddress = "0x01F010a5e001fe9d6940758EA5e8c777885E351e";
-    await network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [diamondOwnerAddress],
-    });
-    const diamondOwner = await ethers.provider.getSigner(diamondOwnerAddress);
-
-    await upgradeWithNewFacets({
-      diamondAddress: aavegotchiDiamondAddress,
-      facetNames: [
-        "ItemsRolesRegistryFacet",
-        "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
-        "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-      ],
-      signer: diamondOwner,
-    });
+    await deployItemsRolesRegistryFacet();
+    await upgradeItemsFacet();
 
     ItemsRolesRegistryFacet = await ethers.getContractAt(
       "ItemsRolesRegistryFacet",
