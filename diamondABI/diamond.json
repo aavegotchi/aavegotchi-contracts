@@ -723,6 +723,19 @@
         "internalType": "uint256",
         "name": "_tokenId",
         "type": "uint256"
+      }
+    ],
+    "name": "ResetSkillpoints",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
       },
       {
         "indexed": false,
@@ -882,6 +895,21 @@
   },
   {
     "inputs": [
+      { "internalType": "uint32", "name": "_tokenId", "type": "uint32" }
+    ],
+    "name": "getGotchiBaseNumericTraits",
+    "outputs": [
+      {
+        "internalType": "int16[6]",
+        "name": "numericTraits_",
+        "type": "int16[6]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
       { "internalType": "uint256", "name": "_tokenId", "type": "uint256" }
     ],
     "name": "getNumericTraits",
@@ -1006,6 +1034,15 @@
       { "internalType": "uint32", "name": "_gotchiId", "type": "uint32" }
     ],
     "name": "reduceKinshipViaChanneling",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint32", "name": "_tokenId", "type": "uint32" }
+    ],
+    "name": "resetSkillPoints",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2530,6 +2567,13 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getDaoDirectorTreasury",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       { "internalType": "uint256[]", "name": "_tokenIds", "type": "uint256[]" },
       { "internalType": "uint256[]", "name": "_xpValues", "type": "uint256[]" }
@@ -2609,6 +2653,15 @@
       }
     ],
     "name": "setDao",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "treasuryAddr", "type": "address" }
+    ],
+    "name": "setDaoDirectorTreasury",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

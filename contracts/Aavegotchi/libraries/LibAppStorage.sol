@@ -339,6 +339,10 @@ struct AppStorage {
     mapping(address => mapping(uint256 => uint256[])) erc721TokenToBuyOrderIds; // erc721 token address => erc721TokenId => buyOrderIds
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) erc721TokenToBuyOrderIdIndexes; // erc721 token address => erc721TokenId => buyOrderId => index
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
+
+    // respec
+    mapping(uint32 => uint256) gotchiRespecCount;
+    address daoDirectorTreasury;
 }
 
 library LibAppStorage {

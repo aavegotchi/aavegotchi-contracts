@@ -7263,7 +7263,7 @@ export const itemTypes: ItemTypeInput[] = [
     minLevel: 1,
     ghstPrice: "",
     maxQuantity: 5,
-    traitModifiers: [-4, 0, 0, -6, 0, 0],
+    traitModifiers: [0, 0, 0, -6, 0, 0],
     canPurchaseWithGhst: false,
     slotPositions: "head",
     category: 0,
