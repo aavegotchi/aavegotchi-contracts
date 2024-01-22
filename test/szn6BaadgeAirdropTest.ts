@@ -49,11 +49,11 @@ describe("Airdrop SZN6 Baadges", async function () {
       signer
     )) as AavegotchiFacet;
 
-    rarityRFSzn5 = await rankStrings(rarityArray);
+    rarityRFSzn6 = await rankStrings(rarityArray);
 
-    kinshipRFSzn5 = await rankStrings(kinshipArray);
+    kinshipRFSzn6 = await rankStrings(kinshipArray);
 
-    xpRFSzn5 = await rankStrings(xpArray);
+    xpRFSzn6 = await rankStrings(xpArray);
 
     await main();
   });
