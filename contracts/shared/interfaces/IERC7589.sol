@@ -13,7 +13,7 @@ interface IERC7589 {
         bytes data;
     }
 
-    struct Commitment {
+    struct Deposit {
         address grantor;
         address tokenAddress;
         uint256 tokenId;

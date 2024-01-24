@@ -6,7 +6,7 @@ export interface Commitment {
 }
 
 export interface GrantRoleData {
-  commitmentId: number
+  depositId: number
   role: string
   grantee: string
   expirationDate: number | null

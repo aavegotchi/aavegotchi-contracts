@@ -102,6 +102,11 @@ export async function upgradeItemsFacet() {
       facetName: "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
       addSelectors: [],
       removeSelectors: [],
+    }, 
+    {
+      facetName: 'contracts/Aavegotchi/facets/ERC721MarketplaceFacet.sol:ERC721MarketplaceFacet',
+      addSelectors: [],
+      removeSelectors: [],
     }
   ];
 

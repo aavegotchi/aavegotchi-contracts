@@ -34,7 +34,7 @@ export function buildCommitment({
 }
 
 export async function buildGrantRole({
-  commitmentId = generateRandomInt(),
+  depositId = generateRandomInt(),
   role = 'Player()',
   grantee = AddressZero,
   expirationDate = null,
@@ -42,7 +42,7 @@ export async function buildGrantRole({
   data = HashZero,
 }): Promise<GrantRoleData> {
   return {
-    commitmentId,
+    depositId,
     role: generateRoleId(role),
     grantee,
     expirationDate: expirationDate ? expirationDate : (await time.latest()) + ONE_DAY,

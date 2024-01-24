@@ -221,13 +221,14 @@ struct ERC721BuyOrder {
     bool[] validationOptions;
 }
 
-struct GotchiEquippedCommitmentsInfo {
-    uint256[EQUIPPED_WEARABLE_SLOTS] equippedCommitmentIds;
-    uint256 equippedCommitmentIdsCount;
+struct GotchiEquippedDepositsInfo {
+    // analog to equippedWearables, but to track delegatedWearables by their depositIds
+    uint256[EQUIPPED_WEARABLE_SLOTS] equippedDepositIds;
+    uint256 equippedDelegatedWearablesCount;
 }
 
 struct ItemRolesInfo {
-    IERC7589.Commitment commitment;
+    IERC7589.Deposit deposit;
     IERC7589.RoleAssignment roleAssignment;
     EnumerableSet.UintSet equippedGotchis;
     uint256 balanceUsed;
@@ -358,15 +359,16 @@ struct AppStorage {
     address daoDirectorTreasury;
     
     // Items Roles Registry
-    // commitmentId => userRoleCommitmentInfo
-    mapping(uint256 => ItemRolesInfo) itemRolesCommitmentInfo;
+    // depositId => userRoleDepositInfo
+    mapping(uint256 => ItemRolesInfo) itemRolesDepositInfo;
     // grantor => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool))) itemsRoleApprovals;
-    uint256 itemsCommitmentIdCounter;
+    // counter to generate depositIds for each new deposit created in Items Roles Registry
+    uint256 itemsDepositIdCounter;
     
     // Auxiliary structs for Items Roles Registry
-    // gotchiId => equippedItemsInfo
-    mapping(uint256 => GotchiEquippedCommitmentsInfo) gotchiEquippedItemsInfo;
+    // gotchiId => equippedDepositsInfo
+    mapping(uint256 => GotchiEquippedDepositsInfo) gotchiEquippedDepositsInfo;
 }
 
 library LibAppStorage {
