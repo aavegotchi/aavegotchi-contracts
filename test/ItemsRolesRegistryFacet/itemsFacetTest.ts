@@ -66,7 +66,7 @@ describe("ItemsFacet", async () => {
         },
       ],
     });
-    
+
     const signers = await ethers.getSigners();
     grantor = signers[0];
     anotherUser = signers[2];
@@ -891,6 +891,71 @@ describe("ItemsFacet", async () => {
             1
           );
       });
+      it("should equip and unequip with revokeRole two gloves of the same id, but different depositId", async () => {
+        const { GrantRoleData: newGrantRoleData1 } = await createRoleAssignment(++depositIdsCounter, wearableIds[0], 1);
+        const { GrantRoleData: newGrantRoleData2 } = await createRoleAssignment(++depositIdsCounter, wearableIds[0], 1);
+
+        const anotherGotchiId = LargeGotchiOwnerAavegotchis[1];
+
+        itemdepositIds[4] = newGrantRoleData1.depositId
+        itemdepositIds[5] = newGrantRoleData2.depositId
+        wearableIdsToEquip[4] = wearableIds[0];
+        wearableIdsToEquip[5] = wearableIds[0];
+
+        await expect(
+          itemsFacet
+            .connect(grantee)
+            .equipDelegatedWearables(
+              anotherGotchiId,
+              wearableIdsToEquip,
+              itemdepositIds
+            )
+        )
+          .to.emit(libERC1155, "TransferToParent")
+          .withArgs(
+            aavegotchiDiamondAddress,
+            anotherGotchiId,
+            wearableIds[0],
+            1
+          )
+          .to.emit(libERC1155, "TransferToParent")
+          .withArgs(
+            aavegotchiDiamondAddress,
+            anotherGotchiId,
+            wearableIds[0],
+            1
+          );
+
+        await expect(
+          ItemsRolesRegistryFacet.connect(grantor).revokeRole(
+            newGrantRoleData1.depositId,
+            newGrantRoleData1.role,
+            newGrantRoleData1.grantee,
+          )
+        )
+          .to.emit(libERC1155, "TransferFromParent")
+          .withArgs(
+            aavegotchiDiamondAddress,
+            anotherGotchiId,
+            wearableIds[0],
+            1
+          );
+
+        await expect(
+          ItemsRolesRegistryFacet.connect(grantor).revokeRole(
+            newGrantRoleData2.depositId,
+            newGrantRoleData2.role,
+            newGrantRoleData2.grantee,
+          )
+        )
+          .to.emit(libERC1155, "TransferFromParent")
+          .withArgs(
+            aavegotchiDiamondAddress,
+            anotherGotchiId,
+            wearableIds[0],
+            1
+          );
+      })
       it("should NOT transfer an aavegotchi with mixed wearables equipped", async () => {
         await wearablesFacet
           .connect(grantor)
