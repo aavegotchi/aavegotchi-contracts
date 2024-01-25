@@ -296,10 +296,10 @@ contract ItemsFacet is Modifiers {
                 aavegotchi.equippedWearables[slot] = uint16(toEquipId);
                 _gotchiInfo.equippedDepositIds[slot] = _depositIdToEquip;
 
-                //Transfer to Aavegotchi
                  if (_depositIdToEquip == 0) {
                     require(s.ownerItemBalances[sender][toEquipId] >= 1, "ItemsFacet: Wearable isn't in inventory");
-
+                    
+                    //Transfer to Aavegotchi	
                     LibItems.removeFromOwner(sender, toEquipId, 1);
                     LibItems.addToParent(address(this), _tokenId, toEquipId, 1);
                     emit LibERC1155.TransferToParent(address(this), _tokenId, toEquipId, 1);
