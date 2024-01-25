@@ -256,16 +256,15 @@ contract ItemsFacet is Modifiers {
                 // This is an edge case introduced by delegated Wearables, since users can now equip and unequip Wearables of same tokenId (but different depositId)
                 delete aavegotchi.equippedWearables[slot];
 
-                // remove wearable from Aavegotchi and transfer item to owner
-                if (_gotchiInfo.equippedDepositIds[slot] != 0) {
-                    // remove wearable from Aavegotchi
-                    LibDelegatedWearables.removeDelegatedWearableFromGotchi(slot, _tokenId, existingEquippedWearableId);
-                } else {
-                    // Remove wearable from Aavegotchi and transfer item to owner
+                if (_gotchiInfo.equippedDepositIds[slot] == 0) {
+                    // remove wearable from Aavegotchi and transfer item to owner
                     LibItems.removeFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
                     LibItems.addToOwner(sender, existingEquippedWearableId, 1);
                     IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, address(this), sender, existingEquippedWearableId, 1);
                     emit LibERC1155.TransferFromParent(address(this), _tokenId, existingEquippedWearableId, 1);
+                } else {
+                    // remove wearable from Aavegotchi
+                    LibDelegatedWearables.removeDelegatedWearableFromGotchi(slot, _tokenId, existingEquippedWearableId);
                 }
             }
 
