@@ -738,24 +738,45 @@ describe("ItemsRolesRegistryFacet", async () => {
       ).to.not.be.reverted
     })
 
-    it('should revert when grantee is not the same', async () => {
-      await expect(
-        ItemsRolesRegistryFacet.connect(grantor).roleData(GrantRoleData.depositId, GrantRoleData.role, anotherUser.address),
-      ).to.be.revertedWith('ItemsRolesRegistryFacet: grantee mismatch')
-      await expect(
-        ItemsRolesRegistryFacet.connect(grantor).roleExpirationDate(
+    it('should return default values when grantee is not the same', async () => {
+      expect(
+        await ItemsRolesRegistryFacet.connect(grantor).roleData(GrantRoleData.depositId, GrantRoleData.role, anotherUser.address),
+      ).to.be.equal("0x")
+      expect(
+        await ItemsRolesRegistryFacet.connect(grantor).roleExpirationDate(
           GrantRoleData.depositId,
           GrantRoleData.role,
           anotherUser.address,
         ),
-      ).to.be.revertedWith('ItemsRolesRegistryFacet: grantee mismatch')
-      await expect(
-        ItemsRolesRegistryFacet.connect(grantor).isRoleRevocable(
+      ).to.be.equal(0)
+       expect(
+        await ItemsRolesRegistryFacet.connect(grantor).isRoleRevocable(
           GrantRoleData.depositId,
           GrantRoleData.role,
           anotherUser.address,
         ),
-      ).to.be.revertedWith('ItemsRolesRegistryFacet: grantee mismatch')
+      ).to.be.equal(false)
+    })
+
+    it('should return default values when role is not supported', async () => {
+      const notSupportedRole = generateRoleId('ANOTHER_ROLE')
+      expect(
+        await ItemsRolesRegistryFacet.connect(grantor).roleData(GrantRoleData.depositId, notSupportedRole, GrantRoleData.grantee),
+      ).to.be.equal("0x")
+      expect(
+        await ItemsRolesRegistryFacet.connect(grantor).roleExpirationDate(
+          GrantRoleData.depositId,
+          notSupportedRole,
+          GrantRoleData.grantee,
+        ),
+      ).to.be.equal(0)
+       expect(
+        await ItemsRolesRegistryFacet.connect(grantor).isRoleRevocable(
+          GrantRoleData.depositId,
+          notSupportedRole,
+          GrantRoleData.grantee,
+        ),
+      ).to.be.equal(false)
     })
 
     it('should return role data', async () => {

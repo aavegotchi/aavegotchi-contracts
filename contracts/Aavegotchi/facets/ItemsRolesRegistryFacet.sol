@@ -73,12 +73,10 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
      * @notice Checks if the grantee is the same as the one in The deposit.
      * @dev It reverts if the grantee is not the same.
      * @param _depositId The deposit identifier.
-     * @param _role The role identifier.
      * @param _grantee The recipient the role.
      */
     modifier sameGrantee(
         uint256 _depositId,
-        bytes32 _role,
         address _grantee
     ) {
         // The grantee must match with the one on storage
@@ -131,7 +129,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     /// @param _depositId The deposit identifier.
     /// @param _role The role identifier.
     /// @param _grantee The recipient of the role revocation.
-    function revokeRole(uint256 _depositId, bytes32 _role, address _grantee) external override sameGrantee(_depositId, _role, _grantee) {
+    function revokeRole(uint256 _depositId, bytes32 _role, address _grantee) external override sameGrantee(_depositId, _grantee) {
         require(_role == UNIQUE_ROLE, "ItemsRolesRegistryFacet: role not supported");
         ItemRolesInfo storage _depositInfo = s.itemRolesDepositInfo[_depositId];
         RoleAssignment storage _roleAssignment = _depositInfo.roleAssignment;
@@ -226,7 +224,10 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
         uint256 _depositId,
         bytes32 _role,
         address _grantee
-    ) external view override sameGrantee(_depositId, _role, _grantee) returns (bytes memory data_) {
+    ) external view override returns (bytes memory data_) {
+        if(!_isValidRoleAndGrantee(_depositId, _role, _grantee)) {
+            return "";
+        }
         return s.itemRolesDepositInfo[_depositId].roleAssignment.data;
     }
 
@@ -239,7 +240,10 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
         uint256 _depositId,
         bytes32 _role,
         address _grantee
-    ) external view override sameGrantee(_depositId, _role, _grantee) returns (uint64 expirationDate_) {
+    ) external view override returns (uint64 expirationDate_) {
+        if(!_isValidRoleAndGrantee(_depositId, _role, _grantee)) {
+            return 0;
+        }
         return s.itemRolesDepositInfo[_depositId].roleAssignment.expirationDate;
     }
 
@@ -252,7 +256,10 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
         uint256 _depositId,
         bytes32 _role,
         address _grantee
-    ) external view override sameGrantee(_depositId, _role, _grantee) returns (bool revocable_) {
+    ) external view override returns (bool revocable_) {
+        if(!_isValidRoleAndGrantee(_depositId, _role, _grantee)) {
+            return false;
+        }
         return s.itemRolesDepositInfo[_depositId].roleAssignment.revocable;
     }
 
@@ -397,5 +404,16 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
         }
         // if the sender is not the grantee or the grantor, and is not approved by any of them, revert
         revert("ItemsRolesRegistryFacet: sender must be approved");
+    }
+
+    /**
+     * @notice Checks if the role and grantee are valid.
+     * @dev It returns true if the role is UNIQUE_ROLE and the grantee is the same as the one in the deposit.
+     * @param _depositId The deposit identifier.
+     * @param _role The role identifier.
+     * @param _grantee The recipient of the role.
+     */
+    function _isValidRoleAndGrantee(uint256 _depositId, bytes32 _role, address _grantee) internal view returns (bool) {
+        return _grantee == s.itemRolesDepositInfo[_depositId].roleAssignment.grantee && _role == UNIQUE_ROLE;
     }
 }

@@ -10,6 +10,13 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 library LibDelegatedWearables {
     using EnumerableSet for EnumerableSet.UintSet;
 
+    /**
+     * @notice Removes a delegated wearable from an Aavegotchi
+     * @dev Transfers the wearable from the Aavegotchi to the diamond and updates delegation info
+     * @param _slot The slot to remove the wearable from
+     * @param _gotchiId The id of the Aavegotchi
+     * @param _existingEquippedWearableId The id of the equipped wearable to be removed
+     */
     function removeDelegatedWearableFromGotchi(uint256 _slot, uint256 _gotchiId, uint256 _existingEquippedWearableId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
 
@@ -39,6 +46,13 @@ library LibDelegatedWearables {
         delete _gotchiInfo.equippedDepositIds[_slot];
     }
 
+    /**
+     * @notice Adds a delegated wearable to an Aavegotchi
+     * @dev Transfers the wearable from the diamond to the Aavegotchi and updates delegation info
+     * @param _depositIdToEquip The depositId of the Wearable to be equipped
+     * @param _gotchiId The id of the Aavegotchi
+     * @param _wearableIdToEquip The id of the wearable to be equipped
+     */
     function addDelegatedWearableToGotchi(uint256 _depositIdToEquip, uint256 _gotchiId, uint256 _wearableIdToEquip) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         GotchiEquippedDepositsInfo storage _gotchiInfo = s.gotchiEquippedDepositsInfo[_gotchiId];
