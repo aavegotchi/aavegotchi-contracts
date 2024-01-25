@@ -251,6 +251,7 @@ contract ItemsFacet is Modifiers {
             }
 
             //If a wearable was equipped in this slot and can be transferred, transfer back to owner.
+            
             if (existingEquippedWearableId != 0 && s.itemTypes[existingEquippedWearableId].canBeTransferred) {
                 // To prevent the function `removeFromParent` to revert, it's necessary first to unequip this Wearable (delete from storage slot)
                 // This is an edge case introduced by delegated Wearables, since users can now equip and unequip Wearables of same tokenId (but different depositId)
@@ -296,10 +297,7 @@ contract ItemsFacet is Modifiers {
                 _gotchiInfo.equippedDepositIds[slot] = _depositIdToEquip;
 
                 //Transfer to Aavegotchi
-                 if (_depositIdToEquip != 0) {
-                    // add wearable to Aavegotchi and add delegation
-                    LibDelegatedWearables.addDelegatedWearableToGotchi(_depositIdToEquip, _tokenId, toEquipId);
-                } else {
+                 if (_depositIdToEquip == 0) {
                     require(s.ownerItemBalances[sender][toEquipId] >= 1, "ItemsFacet: Wearable isn't in inventory");
 
                     LibItems.removeFromOwner(sender, toEquipId, 1);
@@ -307,6 +305,9 @@ contract ItemsFacet is Modifiers {
                     emit LibERC1155.TransferToParent(address(this), _tokenId, toEquipId, 1);
                     IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(sender, sender, address(this), toEquipId, 1);
                     LibERC1155Marketplace.updateERC1155Listing(address(this), toEquipId, sender);
+                } else {
+                    // add wearable to Aavegotchi and add delegation
+                    LibDelegatedWearables.addDelegatedWearableToGotchi(_depositIdToEquip, _tokenId, toEquipId);
                 }
             }
         }
