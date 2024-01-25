@@ -36,6 +36,17 @@ describe("ItemsRolesRegistryFacet", async () => {
   let depositIdsCounter = 0;
 
   before(async () => {
+    //reset hardat fork
+    await network.provider.request({
+      method: "hardhat_reset",
+      params: [
+        {
+          forking: {
+            jsonRpcUrl: process.env.MATIC_URL,
+          },
+        },
+      ],
+    });
     const signers = await ethers.getSigners();
     grantor = signers[0];
     grantee = signers[1];
@@ -184,6 +195,37 @@ describe("ItemsRolesRegistryFacet", async () => {
           commitment.tokenId,
           commitment.tokenAmount,
         )
+    })
+
+    it('should revert if tokenAddress is not WearableDiamond', async () => {
+      const commitment = buildCommitment({
+        grantor: grantor.address,
+        tokenAddress: aavegotchiDiamondAddress,
+      })
+      await expect(
+        ItemsRolesRegistryFacet.connect(grantor).commitTokens(
+          commitment.grantor,
+          commitment.tokenAddress,
+          commitment.tokenId,
+          commitment.tokenAmount,
+        ),
+      ).to.be.revertedWith('ItemsRolesRegistryFacet: Only Item NFTs are supported')
+    })
+
+    it('should revert if tokenId is not from wearable category', async function () {
+      const commitment = buildCommitment({
+        grantor: grantor.address,
+        tokenAddress: wearableDiamondAddress,
+        tokenId: 400,
+      })
+      await expect(
+        ItemsRolesRegistryFacet.connect(grantor).commitTokens(
+          commitment.grantor,
+          commitment.tokenAddress,
+          commitment.tokenId,
+          commitment.tokenAmount,
+        ),
+      ).to.be.revertedWith('ItemsRolesRegistryFacet: Only Items of type Wearable are supported')
     })
   })
 
@@ -544,6 +586,16 @@ describe("ItemsRolesRegistryFacet", async () => {
         .to.emit(ItemsRolesRegistryFacet, 'RoleRevoked')
         .withArgs(GrantRoleData.depositId, GrantRoleData.role, GrantRoleData.grantee)
     })
+
+    it('should revert when wrong role is passed', async () => {
+      await expect(
+        ItemsRolesRegistryFacet.connect(grantor).revokeRole(
+          GrantRoleData.depositId,
+          generateRoleId('ANOTHER_ROLE'),
+          GrantRoleData.grantee,
+        ),
+      ).to.be.revertedWith('ItemsRolesRegistryFacet: role not supported')
+    })
   })
 
   describe('releaseTokens', async () => {
@@ -582,7 +634,7 @@ describe("ItemsRolesRegistryFacet", async () => {
       )
     })
 
-    it('should revert when commitment has an active role', async () => {
+    it('should revert when deposit has an active role', async () => {
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).grantRole(
           GrantRoleData.depositId,
@@ -629,6 +681,29 @@ describe("ItemsRolesRegistryFacet", async () => {
           TokensCommitted.tokenId,
           TokensCommitted.tokenAmount,
         )
+    })
+
+    it('should withdraw tokens if there is a revocable role active', async function () {
+      await expect(
+        ItemsRolesRegistryFacet.connect(grantor).commitTokens(
+          TokensCommitted.grantor,
+          TokensCommitted.tokenAddress,
+          TokensCommitted.tokenId,
+          TokensCommitted.tokenAmount,
+        ),
+      ).to.not.be.reverted
+      depositIdsCounter++
+      await expect(
+        ItemsRolesRegistryFacet.connect(grantor).grantRole(
+          depositIdsCounter,
+          GrantRoleData.role,
+          GrantRoleData.grantee,
+          GrantRoleData.expirationDate,
+          true,
+          GrantRoleData.data,
+        ),
+      ).to.not.be.reverted
+      await expect(ItemsRolesRegistryFacet.connect(grantor).releaseTokens(depositIdsCounter)).to.not.be.reverted
     })
   })
 
@@ -707,6 +782,22 @@ describe("ItemsRolesRegistryFacet", async () => {
           GrantRoleData.grantee,
         ),
       ).to.be.equal(GrantRoleData.revocable)
+
+      expect(
+        await ItemsRolesRegistryFacet.connect(grantor).grantorOf(GrantRoleData.depositId),
+      ).to.be.equal(grantor.address)
+
+      expect(
+        await ItemsRolesRegistryFacet.connect(grantor).tokenAddressOf(GrantRoleData.depositId),
+      ).to.be.equal(TokensCommitted.tokenAddress)
+
+      expect(
+        await ItemsRolesRegistryFacet.connect(grantor).tokenIdOf(GrantRoleData.depositId),
+      ).to.be.equal(TokensCommitted.tokenId)
+
+      expect(
+        await ItemsRolesRegistryFacet.connect(grantor).tokenAmountOf(GrantRoleData.depositId),
+      ).to.be.equal(TokensCommitted.tokenAmount)
     })
   })
 

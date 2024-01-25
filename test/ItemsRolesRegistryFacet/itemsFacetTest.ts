@@ -55,6 +55,18 @@ describe("ItemsFacet", async () => {
   const granteeAddress = LargeGotchiOwner;
 
   before(async () => {
+    //reset hardat fork
+    await network.provider.request({
+      method: "hardhat_reset",
+      params: [
+        {
+          forking: {
+            jsonRpcUrl: process.env.MATIC_URL,
+          },
+        },
+      ],
+    });
+    
     const signers = await ethers.getSigners();
     grantor = signers[0];
     anotherUser = signers[2];
