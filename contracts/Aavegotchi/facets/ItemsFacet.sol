@@ -238,7 +238,6 @@ contract ItemsFacet is Modifiers {
         address sender = LibMeta.msgSender();
 
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
-            
             uint256 toEquipId = _wearablesToEquip[slot];
             uint256 existingEquippedWearableId = aavegotchi.equippedWearables[slot];
 
@@ -272,7 +271,25 @@ contract ItemsFacet is Modifiers {
 
             //If a wearable is being equipped
             if (toEquipId != 0) {
-                _checkIfWearableCanBeEquipped(toEquipId, _tokenId, slot);
+                ItemType storage itemType = s.itemTypes[toEquipId];
+                require(LibAavegotchi.aavegotchiLevel(aavegotchi.experience) >= itemType.minLevel, "ItemsFacet: AG level lower than minLevel");
+                require(itemType.category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
+                require(itemType.slotPositions[slot] == true, "ItemsFacet: Wearable can't be equipped in slot");
+                {
+                    bool canBeEquipped;
+                    uint8[] memory allowedCollaterals = itemType.allowedCollaterals;
+                    if (allowedCollaterals.length > 0) {
+                        uint256 collateralIndex = s.collateralTypeIndexes[aavegotchi.collateralType];
+
+                        for (uint256 i; i < allowedCollaterals.length; i++) {
+                            if (collateralIndex == allowedCollaterals[i]) {
+                                canBeEquipped = true;
+                                break;
+                            }
+                        }
+                        require(canBeEquipped, "ItemsFacet: Wearable can't be used for this collateral");
+                    }
+                }
                 
                 // Equips new Wearable
                 // Wearable is equip one by one, even if hands has the same id (different depositId)
@@ -295,29 +312,6 @@ contract ItemsFacet is Modifiers {
             }
         }
         LibAavegotchi.interact(_tokenId);
-    }
-
-    function _checkIfWearableCanBeEquipped(uint256 toEquipId, uint256 _tokenId, uint256 slot) internal view {
-        Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
-        ItemType storage itemType = s.itemTypes[toEquipId];
-        require(LibAavegotchi.aavegotchiLevel(aavegotchi.experience) >= itemType.minLevel, "ItemsFacet: AG level lower than minLevel");
-        require(itemType.category == LibItems.ITEM_CATEGORY_WEARABLE, "ItemsFacet: Only wearables can be equippped");
-        require(itemType.slotPositions[slot] == true, "ItemsFacet: Wearable can't be equipped in slot");
-        {
-            bool canBeEquipped;
-            uint8[] memory allowedCollaterals = itemType.allowedCollaterals;
-            if (allowedCollaterals.length > 0) {
-                uint256 collateralIndex = s.collateralTypeIndexes[aavegotchi.collateralType];
-
-                for (uint256 i; i < allowedCollaterals.length; i++) {
-                    if (collateralIndex == allowedCollaterals[i]) {
-                        canBeEquipped = true;
-                        break;
-                    }
-                }
-                require(canBeEquipped, "ItemsFacet: Wearable can't be used for this collateral");
-            }
-        }
     }
 
     ///@notice Allow the owner of an NFT to use multiple consumable items for his aavegotchi
