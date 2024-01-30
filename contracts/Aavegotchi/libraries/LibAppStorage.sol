@@ -4,6 +4,7 @@ import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {ILink} from "../interfaces/ILink.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {IERC7589} from "../../shared/interfaces/IERC7589.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
@@ -220,6 +221,19 @@ struct ERC721BuyOrder {
     bool[] validationOptions;
 }
 
+struct GotchiEquippedDepositsInfo {
+    // analog to equippedWearables, but to track delegatedWearables by their depositIds
+    uint256[EQUIPPED_WEARABLE_SLOTS] equippedDepositIds;
+    uint256 equippedDelegatedWearablesCount;
+}
+
+struct ItemRolesInfo {
+    IERC7589.Deposit deposit;
+    IERC7589.RoleAssignment roleAssignment;
+    EnumerableSet.UintSet equippedGotchis;
+    uint256 balanceUsed;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -343,6 +357,18 @@ struct AppStorage {
     // respec
     mapping(uint32 => uint256) gotchiRespecCount;
     address daoDirectorTreasury;
+    
+    // Items Roles Registry
+    // depositId => userRoleDepositInfo
+    mapping(uint256 => ItemRolesInfo) itemRolesDepositInfo;
+    // grantor => tokenAddress => operator => isApproved
+    mapping(address => mapping(address => mapping(address => bool))) itemsRoleApprovals;
+    // counter to generate depositIds for each new deposit created in Items Roles Registry
+    uint256 itemsDepositIdCounter;
+    
+    // Auxiliary structs for Items Roles Registry
+    // gotchiId => equippedDepositsInfo
+    mapping(uint256 => GotchiEquippedDepositsInfo) gotchiEquippedDepositsInfo;
 }
 
 library LibAppStorage {

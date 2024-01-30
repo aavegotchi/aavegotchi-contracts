@@ -138,6 +138,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         //Only unlocked Aavegotchis can be listed
         if (_erc721TokenAddress == address(this)) {
             require(s.aavegotchis[_erc721TokenId].locked == false, "ERC721Marketplace: Only callable on unlocked Aavegotchis");
+            require(s.gotchiEquippedDepositsInfo[_erc721TokenId].equippedDelegatedWearablesCount == 0, "ERC721Marketplace: Only callable on Aavegotchis with no delegated wearables equipped");
         }
 
         require(_priceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
