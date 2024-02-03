@@ -353,11 +353,9 @@ struct AppStorage {
     mapping(address => mapping(uint256 => uint256[])) erc721TokenToBuyOrderIds; // erc721 token address => erc721TokenId => buyOrderIds
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) erc721TokenToBuyOrderIdIndexes; // erc721 token address => erc721TokenId => buyOrderId => index
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
-
     // respec
     mapping(uint32 => uint256) gotchiRespecCount;
     address daoDirectorTreasury;
-    
     // Items Roles Registry
     // depositId => userRoleDepositInfo
     mapping(uint256 => ItemRolesInfo) itemRolesDepositInfo;
@@ -365,7 +363,6 @@ struct AppStorage {
     mapping(address => mapping(address => mapping(address => bool))) itemsRoleApprovals;
     // counter to generate depositIds for each new deposit created in Items Roles Registry
     uint256 itemsDepositIdCounter;
-    
     // Auxiliary structs for Items Roles Registry
     // gotchiId => equippedDepositsInfo
     mapping(uint256 => GotchiEquippedDepositsInfo) gotchiEquippedDepositsInfo;

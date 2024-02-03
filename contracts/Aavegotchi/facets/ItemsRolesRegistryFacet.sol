@@ -62,10 +62,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
      */
     modifier onlyOwnerOrApproved(address _account, address _tokenAddress) {
         address _sender = LibMeta.msgSender();
-        require(
-            _account == _sender || isRoleApprovedForAll(_tokenAddress, _account, _sender),
-            "ItemsRolesRegistryFacet: account not approved"
-        );
+        require(_account == _sender || isRoleApprovedForAll(_tokenAddress, _account, _sender), "ItemsRolesRegistryFacet: account not approved");
         _;
     }
 
@@ -75,12 +72,12 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
      * @param _depositId The deposit identifier.
      * @param _grantee The recipient the role.
      */
-    modifier sameGrantee(
-        uint256 _depositId,
-        address _grantee
-    ) {
+    modifier sameGrantee(uint256 _depositId, address _grantee) {
         // The grantee must match with the one on storage
-        require(_grantee != address(0) && _grantee == s.itemRolesDepositInfo[_depositId].roleAssignment.grantee, "ItemsRolesRegistryFacet: grantee mismatch");
+        require(
+            _grantee != address(0) && _grantee == s.itemRolesDepositInfo[_depositId].roleAssignment.grantee,
+            "ItemsRolesRegistryFacet: grantee mismatch"
+        );
         _;
     }
 
@@ -155,7 +152,11 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     /// @param _depositId The deposit identifier.
     function releaseTokens(
         uint256 _depositId
-    ) external override onlyOwnerOrApproved(s.itemRolesDepositInfo[_depositId].deposit.grantor, s.itemRolesDepositInfo[_depositId].deposit.tokenAddress) {
+    )
+        external
+        override
+        onlyOwnerOrApproved(s.itemRolesDepositInfo[_depositId].deposit.grantor, s.itemRolesDepositInfo[_depositId].deposit.tokenAddress)
+    {
         ItemRolesInfo storage _depositInfo = s.itemRolesDepositInfo[_depositId];
         Deposit memory _deposit = _depositInfo.deposit;
         require(_deposit.tokenAmount > 0, "ItemsRolesRegistryFacet: deposit does not exist");
@@ -165,8 +166,8 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
         );
 
         // If the item is equipped in any gotchis, it will be unequipped from all of them
-        _unequipAllDelegatedWearables(_depositId, _deposit.tokenId); 
-        
+        _unequipAllDelegatedWearables(_depositId, _deposit.tokenId);
+
         // We delete the deposit info before transferring the tokens to avoid any kind of reentrancy
         delete _depositInfo.deposit;
         delete _depositInfo.roleAssignment;
@@ -190,28 +191,28 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     /// @notice Returns the owner of The deposit (grantor).
     /// @param _depositId The deposit identifier.
     /// @return grantor_ The deposit owner.
-    function grantorOf(uint256 _depositId) override external view returns (address grantor_) {
+    function grantorOf(uint256 _depositId) external view override returns (address grantor_) {
         grantor_ = s.itemRolesDepositInfo[_depositId].deposit.grantor;
     }
 
     /// @notice Returns the address of the token committed.
     /// @param _depositId The deposit identifier.
     /// @return tokenAddress_ The token address.
-    function tokenAddressOf(uint256 _depositId) override external view returns (address tokenAddress_) {
+    function tokenAddressOf(uint256 _depositId) external view override returns (address tokenAddress_) {
         tokenAddress_ = s.itemRolesDepositInfo[_depositId].deposit.tokenAddress;
     }
 
     /// @notice Returns the identifier of the token committed.
     /// @param _depositId The deposit identifier.
     /// @return tokenId_ The token identifier.
-    function tokenIdOf(uint256 _depositId) override external view returns (uint256 tokenId_) {
+    function tokenIdOf(uint256 _depositId) external view override returns (uint256 tokenId_) {
         tokenId_ = s.itemRolesDepositInfo[_depositId].deposit.tokenId;
     }
 
     /// @notice Returns the amount of tokens committed.
     /// @param _depositId The deposit identifier.
     /// @return tokenAmount_ The token amount.
-    function tokenAmountOf(uint256 _depositId) override external view returns (uint256 tokenAmount_) {
+    function tokenAmountOf(uint256 _depositId) external view override returns (uint256 tokenAmount_) {
         tokenAmount_ = s.itemRolesDepositInfo[_depositId].deposit.tokenAmount;
     }
 
@@ -220,12 +221,8 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     /// @param _role The role identifier.
     /// @param _grantee The recipient the role.
     /// @return data_ The custom data.
-    function roleData(
-        uint256 _depositId,
-        bytes32 _role,
-        address _grantee
-    ) external view override returns (bytes memory data_) {
-        if(!_isValidRoleAndGrantee(_depositId, _role, _grantee)) {
+    function roleData(uint256 _depositId, bytes32 _role, address _grantee) external view override returns (bytes memory data_) {
+        if (!_isValidRoleAndGrantee(_depositId, _role, _grantee)) {
             return "";
         }
         return s.itemRolesDepositInfo[_depositId].roleAssignment.data;
@@ -236,12 +233,8 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     /// @param _role The role identifier.
     /// @param _grantee The recipient the role.
     /// @return expirationDate_ The expiration date.
-    function roleExpirationDate(
-        uint256 _depositId,
-        bytes32 _role,
-        address _grantee
-    ) external view override returns (uint64 expirationDate_) {
-        if(!_isValidRoleAndGrantee(_depositId, _role, _grantee)) {
+    function roleExpirationDate(uint256 _depositId, bytes32 _role, address _grantee) external view override returns (uint64 expirationDate_) {
+        if (!_isValidRoleAndGrantee(_depositId, _role, _grantee)) {
             return 0;
         }
         return s.itemRolesDepositInfo[_depositId].roleAssignment.expirationDate;
@@ -252,12 +245,8 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     /// @param _role The role identifier.
     /// @param _grantee The recipient the role.
     /// @return revocable_ Whether the role is revocable or not.
-    function isRoleRevocable(
-        uint256 _depositId,
-        bytes32 _role,
-        address _grantee
-    ) external view override returns (bool revocable_) {
-        if(!_isValidRoleAndGrantee(_depositId, _role, _grantee)) {
+    function isRoleRevocable(uint256 _depositId, bytes32 _role, address _grantee) external view override returns (bool revocable_) {
+        if (!_isValidRoleAndGrantee(_depositId, _role, _grantee)) {
             return false;
         }
         return s.itemRolesDepositInfo[_depositId].roleAssignment.revocable;
@@ -329,7 +318,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
         ItemRolesInfo storage _depositInfo = s.itemRolesDepositInfo[_depositId];
         uint256 _equippedGotchisLength = _depositInfo.equippedGotchis.length();
 
-        for(uint256 i = _equippedGotchisLength; i > 0;) {
+        for (uint256 i = _equippedGotchisLength; i > 0; ) {
             // We need to remove the item from the end of the enumerable set, because in each interation array length is decreased
             i--;
             uint256 _gotchiId = _depositInfo.equippedGotchis.at(i);
@@ -388,7 +377,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     /**
      * @notice Finds the caller of the function.
      * @dev The caller must be the grantee or the grantor, or the grantee or grantor must have approved the caller.
-     * @param _grantor The grantor of The deposit. 
+     * @param _grantor The grantor of The deposit.
      * @param _grantee The grantee of The deposit.
      * @param _tokenAddress The token address.
      */
