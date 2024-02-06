@@ -136,6 +136,12 @@ describe("ItemsFacet", async () => {
       wearableIds,
       wearableIds.map(() => 1000)
     );
+
+    //Unequip all previous wearables from test gotchis
+    await itemsFacet.connect(grantee).equipWearables(gotchiId, emptyWearableIds);
+    await itemsFacet.connect(grantee).equipWearables(LargeGotchiOwnerAavegotchis[1], emptyWearableIds);
+    await itemsFacet.connect(grantee).equipWearables(LargeGotchiOwnerAavegotchis[2], emptyWearableIds);
+    await itemsFacet.connect(grantee).equipWearables(LargeGotchiOwnerAavegotchis[3], emptyWearableIds);
   });
 
   describe("equipDelegatedWearables", () => {
