@@ -185,7 +185,10 @@ contract ItemsFacet is Modifiers {
     ///@dev A wearable cannot be equipped in the wrong slot
     ///@param _tokenId The identifier of the aavegotchi to make changes to
     ///@param _wearablesToEquip An array containing the identifiers of the wearables to equip
-    function equipWearables(uint256 _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip) external {
+    function equipWearables(
+        uint256 _tokenId, 
+        uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip
+    ) onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) external {
         uint256[EQUIPPED_WEARABLE_SLOTS] memory _depositIds;
         _equipWearables(_tokenId, _wearablesToEquip, _depositIds);
     }
@@ -201,7 +204,7 @@ contract ItemsFacet is Modifiers {
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
         uint256[EQUIPPED_WEARABLE_SLOTS] calldata _depositIds
-    ) external {
+    ) onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) external {
         _equipWearables(_tokenId, _wearablesToEquip, _depositIds);
     }
 
@@ -209,7 +212,7 @@ contract ItemsFacet is Modifiers {
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
         uint256[EQUIPPED_WEARABLE_SLOTS] memory _depositIdsToEquip
-    ) internal onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
+    ) internal {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
 
         // Get the GotchiEquippedDepositsInfo struct
@@ -217,10 +220,6 @@ contract ItemsFacet is Modifiers {
 
         // Only valid for claimed aavegotchis
         require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
-
-        //todo: move this event to the bottom
-        emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _wearablesToEquip);
-        emit EquipDelegatedWearables(_tokenId, gotchiDepositInfo.equippedDepositIds, _depositIdsToEquip);
 
         address sender = LibMeta.msgSender();
 
@@ -300,6 +299,9 @@ contract ItemsFacet is Modifiers {
             }
         }
         LibAavegotchi.interact(_tokenId);
+
+        emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _wearablesToEquip);
+        emit EquipDelegatedWearables(_tokenId, gotchiDepositInfo.equippedDepositIds, _depositIdsToEquip);
     }
 
     ///@notice Allow the owner of an NFT to use multiple consumable items for his aavegotchi
