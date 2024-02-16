@@ -19,7 +19,6 @@ contract ItemsFacet is Modifiers {
     using EnumerableSet for EnumerableSet.UintSet;
 
     event UseConsumables(uint256 indexed _tokenId, uint256[] _itemIds, uint256[] _quantities);
-    
 
     /***********************************|
    |             Read Functions         |
