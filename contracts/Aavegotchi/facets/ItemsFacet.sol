@@ -12,18 +12,14 @@ import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {LibDelegatedWearables} from "../libraries/LibDelegatedWearables.sol";
+import {LibItemsEvents} from "../libraries/LibItemsEvents.sol";
 
 contract ItemsFacet is Modifiers {
     //using LibAppStorage for AppStorage;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    event EquipWearables(uint256 indexed _tokenId, uint16[EQUIPPED_WEARABLE_SLOTS] _oldWearables, uint16[EQUIPPED_WEARABLE_SLOTS] _newWearables);
     event UseConsumables(uint256 indexed _tokenId, uint256[] _itemIds, uint256[] _quantities);
-    event EquipDelegatedWearables(
-        uint256 indexed _tokenId,
-        uint256[EQUIPPED_WEARABLE_SLOTS] _oldDepositIds,
-        uint256[EQUIPPED_WEARABLE_SLOTS] _newDepositIds
-    );
+    
 
     /***********************************|
    |             Read Functions         |
@@ -300,8 +296,8 @@ contract ItemsFacet is Modifiers {
         }
         LibAavegotchi.interact(_tokenId);
 
-        emit EquipWearables(_tokenId, aavegotchi.equippedWearables, _wearablesToEquip);
-        emit EquipDelegatedWearables(_tokenId, gotchiDepositInfo.equippedDepositIds, _depositIdsToEquip);
+        emit LibItemsEvents.EquipWearables(_tokenId, aavegotchi.equippedWearables, _wearablesToEquip);
+        emit LibItemsEvents.EquipDelegatedWearables(_tokenId, gotchiDepositInfo.equippedDepositIds, _depositIdsToEquip);
     }
 
     ///@notice Allow the owner of an NFT to use multiple consumable items for his aavegotchi

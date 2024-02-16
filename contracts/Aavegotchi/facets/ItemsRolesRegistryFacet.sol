@@ -15,6 +15,7 @@ import {ERC1155Holder, ERC1155Receiver} from "@openzeppelin/contracts/token/ERC1
 import {IEventHandlerFacet} from "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {LibItemsEvents} from "../libraries/LibItemsEvents.sol";
 
 contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -341,6 +342,9 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
         GotchiEquippedDepositsInfo storage _gotchiInfo = s.gotchiEquippedDepositsInfo[_gotchiId];
         Aavegotchi storage _aavegotchi = s.aavegotchis[_gotchiId];
         uint256 _unequippedBalance;
+        uint16[EQUIPPED_WEARABLE_SLOTS] memory _previousEquippedWearables = _aavegotchi.equippedWearables;
+        uint256[EQUIPPED_WEARABLE_SLOTS] memory _previousEquippedDepositIds = _gotchiInfo.equippedDepositIds;
+        
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             // if the item is not equipped in the slot or the deposit is not the same, continue
             if (_aavegotchi.equippedWearables[slot] != _tokenIdToUnequip || _gotchiInfo.equippedDepositIds[slot] != _depositId) continue;
@@ -354,6 +358,8 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
         if (_unequippedBalance == 0) return;
         LibItems.removeFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
         emit LibERC1155.TransferFromParent(address(this), _gotchiId, _tokenIdToUnequip, _unequippedBalance);
+        emit LibItemsEvents.EquipWearables(_gotchiId, _previousEquippedWearables, _aavegotchi.equippedWearables);
+        emit LibItemsEvents.EquipDelegatedWearables(_gotchiId, _previousEquippedDepositIds, _gotchiInfo.equippedDepositIds);
         // update the gotchi's equipped balance to reflect the unequipped items
         _gotchiInfo.equippedDelegatedWearablesCount -= _unequippedBalance;
     }
