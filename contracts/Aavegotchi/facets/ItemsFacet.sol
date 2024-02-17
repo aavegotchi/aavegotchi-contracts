@@ -215,6 +215,8 @@ contract ItemsFacet is Modifiers {
 
         // Only valid for claimed aavegotchis
         require(aavegotchi.status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
+        emit LibItemsEvents.EquipWearables(_tokenId, aavegotchi.equippedWearables, _wearablesToEquip);
+        emit LibItemsEvents.EquipDelegatedWearables(_tokenId, gotchiDepositInfo.equippedDepositIds, _depositIdsToEquip);
 
         address sender = LibMeta.msgSender();
 
@@ -295,8 +297,6 @@ contract ItemsFacet is Modifiers {
         }
         LibAavegotchi.interact(_tokenId);
 
-        emit LibItemsEvents.EquipWearables(_tokenId, aavegotchi.equippedWearables, _wearablesToEquip);
-        emit LibItemsEvents.EquipDelegatedWearables(_tokenId, gotchiDepositInfo.equippedDepositIds, _depositIdsToEquip);
     }
 
     ///@notice Allow the owner of an NFT to use multiple consumable items for his aavegotchi
