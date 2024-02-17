@@ -304,6 +304,11 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
             _depositInfo.roleAssignment.expirationDate < block.timestamp || _depositInfo.roleAssignment.revocable,
             "ItemsRolesRegistryFacet: token has an active role"
         );
+
+        if(_depositInfo.roleAssignment.revocable || _depositInfo.roleAssignment.expirationDate != 0){
+            _unequipAllDelegatedWearables(_depositId, _depositInfo.deposit.tokenId);
+        }
+
         // Associate the role assignment to the deposit
         _depositInfo.roleAssignment = RoleAssignment(_grantee, _expirationDate, _revocable, _data);
         emit RoleGranted(_depositId, _role, _grantee, _expirationDate, _revocable, _data);

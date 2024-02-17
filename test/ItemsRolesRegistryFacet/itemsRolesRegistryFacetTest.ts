@@ -21,7 +21,7 @@ import {
 } from "./helpers";
 import { itemManagerAlt } from "../../scripts/helperFunctions";
 import { GrantRoleData, Commitment } from "./types";
-import { deployItemsRolesRegistryFacet } from "./deployTest";
+import { deployItemsRolesRegistryFacet, upgradeItemsRolesRegistryFacet } from "./deployTest";
 
 const { expect } = chai;
 
@@ -30,7 +30,6 @@ describe("ItemsRolesRegistryFacet", async () => {
   let grantor: SignerWithAddress;
   let grantee: SignerWithAddress;
   let anotherUser: SignerWithAddress;
-  let wearablesFacet: WearablesFacet;
   let libEventHandler: LibEventHandler;
   let daoFacet: DAOFacet;
   let depositIdsCounter = 0;
@@ -52,17 +51,12 @@ describe("ItemsRolesRegistryFacet", async () => {
     grantee = signers[1];
     anotherUser = signers[2];
 
-    await deployItemsRolesRegistryFacet()
+    await upgradeItemsRolesRegistryFacet();
 
     ItemsRolesRegistryFacet = await ethers.getContractAt(
       "ItemsRolesRegistryFacet",
       aavegotchiDiamondAddress
     );
-
-    wearablesFacet = (await ethers.getContractAt(
-      "contracts/Aavegotchi/WearableDiamond/facets/WearablesFacet.sol:WearablesFacet",
-      wearableDiamondAddress
-    )) as WearablesFacet;
 
     libEventHandler = (await ethers.getContractAt(
       "contracts/Aavegotchi/WearableDiamond/libraries/LibEventHandler.sol:LibEventHandler",
@@ -149,7 +143,12 @@ describe("ItemsRolesRegistryFacet", async () => {
 
     it('should create commitment when sender is grantor', async () => {
       const commitment = buildCommitment({grantor: grantor.address})
-      depositIdsCounter++
+      depositIdsCounter = await ItemsRolesRegistryFacet.connect(grantor).callStatic.commitTokens(
+        commitment.grantor,
+        commitment.tokenAddress,
+        commitment.tokenId,
+        commitment.tokenAmount,
+      )
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).commitTokens(
           commitment.grantor,
@@ -175,8 +174,13 @@ describe("ItemsRolesRegistryFacet", async () => {
         grantor: grantor.address,
         tokenAddress: wearableDiamondAddress,
       })
-      depositIdsCounter++
       await ItemsRolesRegistryFacet.connect(grantor).setRoleApprovalForAll(commitment.tokenAddress, anotherUser.address, true)
+      depositIdsCounter = await ItemsRolesRegistryFacet.connect(anotherUser).callStatic.commitTokens(
+        commitment.grantor,
+        commitment.tokenAddress,
+        commitment.tokenId,
+        commitment.tokenAmount,
+      )
       await expect(
         ItemsRolesRegistryFacet.connect(anotherUser).commitTokens(
           commitment.grantor,
@@ -238,7 +242,12 @@ describe("ItemsRolesRegistryFacet", async () => {
         grantor: grantor.address,
         tokenAddress: wearableDiamondAddress,
       })
-      depositIdsCounter++
+      depositIdsCounter = await ItemsRolesRegistryFacet.connect(grantor).callStatic.commitTokens(
+        TokensCommitted.grantor,
+        TokensCommitted.tokenAddress,
+        TokensCommitted.tokenId,
+        TokensCommitted.tokenAmount,
+      )
       GrantRoleData = await buildGrantRole({
         depositId: depositIdsCounter,
         grantee: grantee.address,
@@ -431,7 +440,12 @@ describe("ItemsRolesRegistryFacet", async () => {
         grantor: grantor.address,
         tokenAddress: wearableDiamondAddress,
       })
-      depositIdsCounter++
+      depositIdsCounter = await ItemsRolesRegistryFacet.connect(grantor).callStatic.commitTokens(
+        TokensCommitted.grantor,
+        TokensCommitted.tokenAddress,
+        TokensCommitted.tokenId,
+        TokensCommitted.tokenAmount,
+      )
       GrantRoleData = await buildGrantRole({
         depositId: depositIdsCounter,
         grantee: grantee.address,
@@ -482,7 +496,12 @@ describe("ItemsRolesRegistryFacet", async () => {
     })
 
     it('should revert when role is not expired and is not revocable', async () => {
-      const newdepositId = 2
+      const newdepositId = await ItemsRolesRegistryFacet.connect(grantor).callStatic.commitTokens(
+        TokensCommitted.grantor,
+        TokensCommitted.tokenAddress,
+        TokensCommitted.tokenId,
+        TokensCommitted.tokenAmount,
+      )
       await expect(
         ItemsRolesRegistryFacet.connect(grantor).commitTokens(
           TokensCommitted.grantor,

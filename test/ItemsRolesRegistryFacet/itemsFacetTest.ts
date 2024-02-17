@@ -1232,13 +1232,13 @@ describe("ItemsFacet", async () => {
 
         const { GrantRoleData: newGrantRoleData1 } = await createRoleAssignment(++depositIdsCounter, wearableIds[0], 2);
         
-        
+
 
         itemdepositIds[5] = newGrantRoleData1.depositId,
         wearableIdsToEquip[5] = wearableIds[0];
         wearableIdsToEquip[4] = wearableIds[0];
          
-
+        
         await expect(
           itemsFacet
             .connect(grantee)
@@ -1384,6 +1384,55 @@ describe("ItemsFacet", async () => {
               itemdepositIds
             )
         ).to.be.revertedWith("ItemsFacet: Wearable delegation expired");
+      });
+      it("should unequip a delegated wearable when a revocable delegation is granted to another grantee", async () => {
+        const grantee2 = (await ethers.getSigners())[3];
+        const grantee2Gotchi = LargeGotchiOwnerAavegotchis[4];
+        await aavegotchiFacet.connect(grantee).transferFrom(granteeAddress, grantee2.address, grantee2Gotchi);
+
+        itemdepositIds[3] = GrantRoleData.depositId
+        wearableIdsToEquip[3] = wearableIds[3];
+         
+        await expect(
+          itemsFacet
+            .connect(grantee)
+            .equipDelegatedWearables(
+              gotchiId,
+              wearableIdsToEquip,
+              itemdepositIds
+            ))
+            .to.emit(libERC1155, "TransferToParent")
+            .withArgs(
+              aavegotchiDiamondAddress,
+              gotchiId,
+              wearableIds[3],
+              1
+            )
+
+        await ItemsRolesRegistryFacet.connect(grantor).grantRole(
+          depositIdsCounter,
+          GrantRoleData.role,
+          grantee2.address,
+          GrantRoleData.expirationDate,
+          GrantRoleData.revocable,
+          GrantRoleData.data
+        );
+
+        await expect(
+          itemsFacet
+            .connect(grantee2)
+            .equipDelegatedWearables(
+              grantee2Gotchi,
+              wearableIdsToEquip,
+              itemdepositIds
+            ))
+            .to.emit(libERC1155, "TransferToParent")
+            .withArgs(
+              aavegotchiDiamondAddress,
+              grantee2Gotchi,
+              wearableIds[3],
+              1
+            )
       });
     });
   });
