@@ -305,7 +305,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
             "ItemsRolesRegistryFacet: token has an active role"
         );
 
-        if(_depositInfo.roleAssignment._grantee != _grantee) {
+        if(_depositInfo.roleAssignment.grantee != _grantee) {
             // if depositId is being delegated to a new user, we need to make sure that Aavegotchis not owned by the new user are using these Wearables
             _unequipAllDelegatedWearables(_depositId, _depositInfo.deposit.tokenId);
         }
