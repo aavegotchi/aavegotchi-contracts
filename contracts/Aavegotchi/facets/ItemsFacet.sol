@@ -118,13 +118,13 @@ contract ItemsFacet is Modifiers {
         }
     }
 
-    ///@notice Query the current wearables equipped for an NFT
+    /* ///@notice Query the current wearables equipped for an NFT
     ///@dev only valid for claimed aavegotchis
     ///@param _tokenId Identifier of the NFT to query
     ///@return wearableIds_ An array containing the Identifiers of the wearable items currently equipped for the NFT
     function equippedWearables(uint256 _tokenId) external view returns (uint16[EQUIPPED_WEARABLE_SLOTS] memory wearableIds_) {
         wearableIds_ = s.aavegotchis[_tokenId].equippedWearables;
-    }
+    } */
 
     ///@notice Query the item type of a particular item
     ///@param _itemId Item to query
@@ -233,12 +233,13 @@ contract ItemsFacet is Modifiers {
                 continue;
             }
 
+            // To prevent the function `removeFromParent` to revert, it's necessary first to unequip this Wearable (delete from storage slot)
+            // This is an edge case introduced by delegated Wearables, since users can now equip and unequip Wearables of same tokenId (but different depositId)
+            // Also for the cases of items that cannot be transferred, but can be unequipped, we need to do it unconditionaly (do not put it inside the any if statement)
+            delete aavegotchi.equippedWearables[slot];
+
             //Handle unequipping wearable case
             if (existingEquippedWearableId != 0 && s.itemTypes[existingEquippedWearableId].canBeTransferred) {
-                // To prevent the function `removeFromParent` to revert, it's necessary first to unequip this Wearable (delete from storage slot)
-                // This is an edge case introduced by delegated Wearables, since users can now equip and unequip Wearables of same tokenId (but different depositId)
-                delete aavegotchi.equippedWearables[slot];
-
                 //If no deposits have been made to this gotchi for this slot, it's a normal wearable unequipping case.
                 if (gotchiDepositInfo.equippedDepositIds[slot] == 0) {
                     // remove wearable from Aavegotchi and transfer item to owner

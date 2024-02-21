@@ -127,12 +127,33 @@ export async function upgradeItemsRolesRegistryFacet() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "contracts/Aavegotchi/facets/ItemsRolesRegistryFacet.sol:ItemsRolesRegistryFacet",
-      addSelectors: [
-        "function UNIQUE_ROLE() external view returns (bytes32)",
-        "function MAX_EXPIRATION_DATE() external view returns (uint256)",
-      ],
+      addSelectors: [],
       removeSelectors: [],
     },
+    {
+      facetName: "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    }
+  ];
+
+  //@ts-ignore
+  const joined = convertFacetAndSelectorsToString(facets);
+
+  const args: DeployUpgradeTaskArgs = {
+    diamondUpgrader: diamondUpgrader,
+    diamondAddress: aavegotchiDiamondAddress,
+    facetsAndAddSelectors: joined,
+    useLedger: false,
+    useMultisig: false,
+    freshDeployment: false,
+  };
+
+  await run("deployUpgrade", args);
+}
+
+export async function upgradeItemsFacetFacet() {
+  const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
       addSelectors: [],

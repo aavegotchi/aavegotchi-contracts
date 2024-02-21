@@ -1434,6 +1434,44 @@ describe("ItemsFacet", async () => {
               1
             )
       });
+      it("should unequip a wearable background 210 from aavegotchi 4160 but not transfer out", async () => {
+        // onwer of gotchi 4160: 0xAd0CEb6Dc055477b8a737B630D6210EFa76a2265
+
+        const specificGotchiOwnerAddress = "0xAd0CEb6Dc055477b8a737B630D6210EFa76a2265"
+        const specificGotchiId = 4160
+        const wearableId = 210
+
+        await network.provider.request({
+          method: "hardhat_impersonateAccount",
+          params: [specificGotchiOwnerAddress],
+        });
+
+        const specificGotchiOwner = await ethers.provider.getSigner(specificGotchiOwnerAddress);
+        let oldEquippedWearables = Array(16).fill(0)
+        oldEquippedWearables[7] = wearableId
+        await expect(
+          itemsFacet
+            .connect(specificGotchiOwner)
+            .equipDelegatedWearables(
+              specificGotchiId,
+              emptyWearableIds,
+              emptyItemdepositIds
+            ))
+            .to.emit(libItemsEvents, "EquipWearables")
+            .withArgs(
+              specificGotchiId,
+              oldEquippedWearables,
+              emptyWearableIds,
+            )
+            .to.not.emit(libERC1155, "TransferFromParent")
+            .to.not.emit(libEventHandler, "TransferSingle");
+
+          const balance = await wearablesFacet.balanceOf(specificGotchiOwnerAddress, wearableId)
+          expect(balance).to.equal(0)
+
+          const aavegotchi = await aavegotchiFacet.getAavegotchi(specificGotchiId)
+          expect(aavegotchi.equippedWearables[7]).to.be.equal(0)
+      })
     });
   });
 
