@@ -1434,8 +1434,7 @@ describe("ItemsFacet", async () => {
               1
             )
       });
-      it("should unequip a wearable background 210 from aavegotchi 4160 but not transfer out", async () => {
-        // onwer of gotchi 4160: 0xAd0CEb6Dc055477b8a737B630D6210EFa76a2265
+      it("should unequip and equip a wearable background 210 from aavegotchi 4160 but not transfer it", async () => {
 
         const specificGotchiOwnerAddress = "0xAd0CEb6Dc055477b8a737B630D6210EFa76a2265"
         const specificGotchiId = 4160
