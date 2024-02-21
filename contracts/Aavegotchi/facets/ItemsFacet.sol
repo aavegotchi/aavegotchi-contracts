@@ -235,7 +235,7 @@ contract ItemsFacet is Modifiers {
 
             // To prevent the function `removeFromParent` to revert, it's necessary first to unequip this Wearable (delete from storage slot)
             // This is an edge case introduced by delegated Wearables, since users can now equip and unequip Wearables of same tokenId (but different depositId)
-            // Also for the cases of items that cannot be transferred, but can be unequipped, we need to do it unconditionaly (do not put it inside the any if statement)
+            // This is also necessary regardless of whether the item is transferrable or not. Non-transferrable items can still be equipped/unequipped (they just aren't transferred back to the user's wallet)
             delete aavegotchi.equippedWearables[slot];
 
             //Handle unequipping wearable case
