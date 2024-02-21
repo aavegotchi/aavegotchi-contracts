@@ -1469,8 +1469,28 @@ describe("ItemsFacet", async () => {
           const balance = await wearablesFacet.balanceOf(specificGotchiOwnerAddress, wearableId)
           expect(balance).to.equal(0)
 
-          const aavegotchi = await aavegotchiFacet.getAavegotchi(specificGotchiId)
-          expect(aavegotchi.equippedWearables[7]).to.be.equal(0)
+          const aavegotchiBefore = await aavegotchiFacet.getAavegotchi(specificGotchiId)
+          expect(aavegotchiBefore.equippedWearables[7]).to.be.equal(0)
+
+          await expect(
+            itemsFacet
+              .connect(specificGotchiOwner)
+              .equipDelegatedWearables(
+                specificGotchiId,
+                oldEquippedWearables,
+                emptyItemdepositIds
+              ))
+              .to.emit(libItemsEvents, "EquipWearables")
+              .withArgs(
+                specificGotchiId,
+                emptyWearableIds,
+                oldEquippedWearables,
+              )
+              .to.not.emit(libERC1155, "TransferToParent")
+              .to.not.emit(libEventHandler, "TransferSingle");
+
+          const aavegotchiAfter = await aavegotchiFacet.getAavegotchi(specificGotchiId)
+          expect(aavegotchiAfter.equippedWearables[7]).to.be.equal(wearableId)
       })
     });
   });

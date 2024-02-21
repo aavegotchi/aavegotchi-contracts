@@ -118,13 +118,13 @@ contract ItemsFacet is Modifiers {
         }
     }
 
-    /* ///@notice Query the current wearables equipped for an NFT
+    ///@notice Query the current wearables equipped for an NFT
     ///@dev only valid for claimed aavegotchis
     ///@param _tokenId Identifier of the NFT to query
     ///@return wearableIds_ An array containing the Identifiers of the wearable items currently equipped for the NFT
     function equippedWearables(uint256 _tokenId) external view returns (uint16[EQUIPPED_WEARABLE_SLOTS] memory wearableIds_) {
         wearableIds_ = s.aavegotchis[_tokenId].equippedWearables;
-    } */
+    }
 
     ///@notice Query the item type of a particular item
     ///@param _itemId Item to query
@@ -282,6 +282,8 @@ contract ItemsFacet is Modifiers {
 
                 // If no deposits have been made to this gotchi for this slot, it's a normal wearable equipping case.
                 if (depositIdToEquip == 0) {
+                    // We need to check if wearable is already in the inventory, if it is, we don't transfer it from the owner
+                    if(s.nftItemBalances[address(this)][_tokenId][toEquipId] == 1) continue;
                     require(s.ownerItemBalances[sender][toEquipId] >= 1, "ItemsFacet: Wearable isn't in inventory");
 
                     //Transfer to Aavegotchi
