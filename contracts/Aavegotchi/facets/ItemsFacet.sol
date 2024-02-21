@@ -283,7 +283,8 @@ contract ItemsFacet is Modifiers {
                 // If no deposits have been made to this gotchi for this slot, it's a normal wearable equipping case.
                 if (depositIdToEquip == 0) {
                     // We need to check if wearable is already in the inventory, if it is, we don't transfer it from the owner
-                    if(s.nftItemBalances[address(this)][_tokenId][toEquipId] == 1) continue;
+                    uint256 maxBalance = slot == LibItems.WEARABLE_SLOT_HAND_LEFT || slot == LibItems.WEARABLE_SLOT_HAND_RIGHT ? 2 : 1;
+                    if(s.nftItemBalances[address(this)][_tokenId][toEquipId] >= maxBalance) continue;
                     require(s.ownerItemBalances[sender][toEquipId] >= 1, "ItemsFacet: Wearable isn't in inventory");
 
                     //Transfer to Aavegotchi
