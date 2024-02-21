@@ -152,7 +152,7 @@ export async function upgradeItemsRolesRegistryFacet() {
   await run("deployUpgrade", args);
 }
 
-export async function upgradeItemsFacetFacet() {
+export async function upgradeItemsFacetOnly() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",

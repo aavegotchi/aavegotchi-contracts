@@ -30,7 +30,7 @@ import {
 } from "./helpers";
 import { itemManagerAlt } from "../../scripts/helperFunctions";
 import { GrantRoleData, Commitment } from "./types";
-import { upgradeItemsRolesRegistryFacet } from "./deployTest";
+import { upgradeItemsFacetOnly } from "./deployTest";
 import { LibItemsEvents } from "../../typechain/LibItemsEvents";
 
 const { expect } = chai;
@@ -78,7 +78,7 @@ describe("ItemsFacet", async () => {
     });
     grantee = await ethers.provider.getSigner(LargeGotchiOwner);
 
-    await upgradeItemsRolesRegistryFacet();
+    await upgradeItemsFacetOnly();
 
     ItemsRolesRegistryFacet = await ethers.getContractAt(
       "ItemsRolesRegistryFacet",
