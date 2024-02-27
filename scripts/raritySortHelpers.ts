@@ -148,6 +148,33 @@ export function leaderboardQuery(
   }`;
 }
 
+export function selectedGotchisQueryPerBlock(
+  blockNumber: string,
+  gotchiIds: string[][]
+) {
+  const reqs: string[] = [];
+  const categories = ["withSetsRarityScore", "experience", "kinship"];
+
+  for (let i = 0; i < categories.length; i++) {
+    reqs.push(`
+${categories[i]}1000:
+    aavegotchis
+      (block:{number: ${blockNumber}} 
+      first:1000, 
+      where: {
+        gotchiId_in: [${gotchiIds[i]}]
+      }
+    ) {
+      id
+      ${categories[i]}
+  }`);
+  }
+
+  return `{
+    ${reqs.join("")}
+  }`;
+}
+
 export const findSets = (equipped: number[]) => {
   //todo: add all sets
   const setData = wearableSetArrays;

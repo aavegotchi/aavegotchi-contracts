@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { maticDiamondAddress, rankStrings } from "../scripts/helperFunctions";
+import { maticDiamondAddress, rankIds } from "../scripts/helperFunctions";
 import { AavegotchiFacet } from "../typechain";
 import { Signer } from "@ethersproject/abstract-signer";
 import { expect } from "chai";
@@ -11,6 +11,7 @@ import { dataArgs as dataArgs3 } from "../data/airdrops/rarityfarming/szn5/rnd3"
 import { dataArgs as dataArgs4 } from "../data/airdrops/rarityfarming/szn5/rnd4";
 
 import { main } from "../scripts/airdrops/rfSzn5BdgsAirdrop";
+import { getGotchisForASeason } from "../scripts/getGotchis";
 describe("Airdrop SZN5 Baadges", async function () {
   this.timeout(200000000);
 
@@ -48,14 +49,18 @@ describe("Airdrop SZN5 Baadges", async function () {
       signer
     )) as AavegotchiFacet;
 
-    rarityRFSzn5 = rankStrings(rarityArray);
-    console.log("rarityRFSzn5: ", rarityRFSzn5);
+    let tieBreaker = await getGotchisForASeason("5");
+    const [rarityBreaker, kinshipBreaker, xpBreaker] = tieBreaker;
 
-    kinshipRFSzn5 = rankStrings(kinshipArray);
-    console.log("kinshipRFSzn5: ", kinshipRFSzn5);
+    rarityRFSzn5 = await rankIds(rarityArray, rarityBreaker).map((id) =>
+      parseInt(id)
+    );
 
-    xpRFSzn5 = rankStrings(xpArray);
-    console.log("xpRFSzn5: ", xpRFSzn5);
+    kinshipRFSzn5 = await rankIds(kinshipArray, kinshipBreaker).map((id) =>
+      parseInt(id)
+    );
+
+    xpRFSzn5 = await rankIds(xpArray, xpBreaker).map((id) => parseInt(id));
 
     await main();
   });
@@ -184,7 +189,7 @@ describe("Airdrop SZN5 Baadges", async function () {
   });
 });
 
-function getAavegotchiItemIds(gotchi: any) {
+export function getAavegotchiItemIds(gotchi: any) {
   let itemIds: string[] = [];
   const allItems: any[] = gotchi.items;
   allItems.forEach((item) => {
@@ -193,6 +198,6 @@ function getAavegotchiItemIds(gotchi: any) {
   return itemIds;
 }
 
-function exists(itemId: string, itemIds: string[]) {
+export function exists(itemId: string, itemIds: string[]) {
   return itemIds.includes(itemId);
 }

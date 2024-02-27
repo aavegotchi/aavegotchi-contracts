@@ -207,7 +207,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     minLevel: 0,
     canBeTransferred: false,
     rarityLevel: "common",
-    maxQuantity: 12809,
+    maxQuantity: 12846,
     totalQuantity: 0,
     setId: [],
     author: "xibot",

@@ -10,8 +10,10 @@ import { dataArgs as dataArgs2 } from "../data/airdrops/rarityfarming/szn6/rnd2"
 import { dataArgs as dataArgs3 } from "../data/airdrops/rarityfarming/szn6/rnd3";
 import { dataArgs as dataArgs4 } from "../data/airdrops/rarityfarming/szn6/rnd4";
 
-import { rankStrings } from "../scripts/helperFunctions";
+import { rankIds } from "../scripts/helperFunctions";
 import { main } from "../scripts/airdrops/rfSzn6BdgsAirdrop";
+import { getGotchisForASeason } from "../scripts/getGotchis";
+
 describe("Airdrop SZN6 Baadges", async function () {
   this.timeout(200000000);
 
@@ -49,11 +51,18 @@ describe("Airdrop SZN6 Baadges", async function () {
       signer
     )) as AavegotchiFacet;
 
-    rarityRFSzn6 = await rankStrings(rarityArray);
+    let tieBreaker = await getGotchisForASeason("6");
+    const [rarityBreaker, kinshipBreaker, xpBreaker] = tieBreaker;
 
-    kinshipRFSzn6 = await rankStrings(kinshipArray);
+    rarityRFSzn6 = await rankIds(rarityArray, rarityBreaker).map((id) =>
+      parseInt(id)
+    );
 
-    xpRFSzn6 = await rankStrings(xpArray);
+    kinshipRFSzn6 = await rankIds(kinshipArray, kinshipBreaker).map((id) =>
+      parseInt(id)
+    );
+
+    xpRFSzn6 = await rankIds(xpArray, xpBreaker).map((id) => parseInt(id));
 
     await main();
   });

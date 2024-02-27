@@ -43,7 +43,6 @@ task(
 
       let amountDropped = 0;
 
-      console.log("BadgeIds: ", badgeIds);
       _ids.push(Number(badgeIds));
       _values.push(1);
 
