@@ -4,7 +4,7 @@ import { ethers, network } from "hardhat";
 import { maticDiamondAddress } from "./helperFunctions";
 import { ghstAddress } from "../helpers/constants";
 
-async function deployGHSTOFT() {
+async function deployGHSTAdapter() {
   const accounts = await ethers.getSigners();
 
   let testing = ["hardhat"].includes(network.name);
@@ -24,28 +24,25 @@ async function deployGHSTOFT() {
     signer = await ethers.provider.getSigner(owner);
 
     //use default signer for base for now
-  } else if (network.name === "base") {
+    //we are only deploying on polygon
+  } else if (network.name === "matic") {
     signer = accounts[0];
   } else {
     throw Error("Incorrect network selected");
   }
 
-  const GHSTOFT = await ethers.getContractFactory("GHSTOFT");
+  const GHSTOFTAdapter = await ethers.getContractFactory("GHSTOFTAdapter");
 
-  const baseLZEndpoint = "0xb6319cC6c8c27A8F5dAF0dD3DF91EA35C4720dd7";
+  const polygonLZEndpoint = "0x3c2269811836af69497E5F486A85D7316753cf62";
 
-  const ghstoft = await GHSTOFT.deploy(
-    "Aavegotchi(GHST) Token",
-    "GHST",
-    baseLZEndpoint,
+  const ghstOftAdapter = await GHSTOFTAdapter.deploy(
+    ghstAddress,
+    polygonLZEndpoint,
     owner
   );
-
-  //after deployment we need to set the ghst contract on polygon as a trusted pair
-  // await ghstoft.setPeer(109, ghstAddress);
 }
 
-deployGHSTOFT()
+deployGHSTAdapter()
   .then(() => process.exit(1))
   .catch((error) => {
     console.error(error);
