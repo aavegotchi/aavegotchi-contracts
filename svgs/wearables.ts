@@ -395,6 +395,23 @@ export const wearablesSvgs = [
   wearable("385_BlockScanners"),
   wearable("386_StaffCharming"),
   wearable("387_Roflnoggin"),
+  //szn 5 baadges
+  388,
+  389,
+  390,
+  391,
+  392,
+  393,
+  394,
+  395,
+  396,
+  397,
+  398,
+  399,
+  400,
+  401,
+  402,
+  403,
 ];
 
 export const sleeveSvgs = [
