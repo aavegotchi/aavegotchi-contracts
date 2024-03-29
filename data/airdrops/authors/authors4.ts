@@ -1,4 +1,4 @@
-//AGIPs 60-83
+//AGIPs 84-99
 
 export const tokenIds = [
   "5369",
