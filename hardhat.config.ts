@@ -9,9 +9,6 @@ import "solidity-coverage";
 //import './tasks/generateDiamondABI.js';
 import * as dotenv from "dotenv";
 import "@typechain/hardhat";
-import { BigNumber } from "ethers";
-
-require("hardhat-tracer");
 
 dotenv.config({ path: __dirname + "/.env" });
 

@@ -110,7 +110,7 @@ export function constructRewardArray(
   return rewardArray;
 }
 
-export function getFIlePaths(
+export function getFilePaths(
   typeformCSV: string,
   strategotchiCSV: string,
   tournament: number

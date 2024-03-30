@@ -1,7 +1,7 @@
 import {
   constructRewardArray,
   dropXPStrategotchi1,
-  getFIlePaths,
+  getFilePaths,
   getStrategotchiAddresses,
 } from "../../parseStrategotchiAddresses";
 
@@ -10,7 +10,7 @@ async function grantXPStrategotchi1() {
   const typeform = "responses";
   const strategotchicsv = "strategotchi";
 
-  const [typeformPath, strategotchiPath] = getFIlePaths(
+  const [typeformPath, strategotchiPath] = getFilePaths(
     typeform,
     strategotchicsv,
     tournament
