@@ -7499,6 +7499,7 @@ export const rarityRoundRewards: string[] = [
   "16.57",
   "16.57",
   "16.57",
+  "16.57",
 ];
 
 export const kinshipRoundRewards: string[] = [
