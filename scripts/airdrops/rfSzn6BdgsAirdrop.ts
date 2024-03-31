@@ -7,7 +7,11 @@ import { dataArgs as dataArgs2 } from "../../data/airdrops/rarityfarming/szn6/rn
 import { dataArgs as dataArgs3 } from "../../data/airdrops/rarityfarming/szn6/rnd3";
 import { dataArgs as dataArgs4 } from "../../data/airdrops/rarityfarming/szn6/rnd4";
 import { getGotchisForASeason } from "../getGotchis";
-import { airdropBaadges, assertBaadgeQuantities } from "./baadgeHelpers";
+import {
+  airdropBaadges,
+  airdropRaankedBaadges,
+  assertBaadgeQuantities,
+} from "./baadgeHelpers";
 import {
   updateBaadgeTaskForSvgType,
   mintSvgTaskForBaadges,
@@ -55,7 +59,12 @@ export async function main() {
   ];
 
   //do raanked baadges amount check
-  await assertBaadgeQuantities(itemTypes, rarityArray, kinshipArray, xpArray);
+  const totalPlayers = await assertBaadgeQuantities(
+    itemTypes,
+    rarityArray,
+    kinshipArray,
+    xpArray
+  );
 
   //Upload SVGs
   let ids: number[] = [];
@@ -86,7 +95,7 @@ export async function main() {
   await airdropBaadges(itemTypes, [rarityRFSzn6, kinshipRFSzn6, xpRFSzn6]);
 
   //airdrop ranked
-  //  await airdropRaankedBaadges(itemTypes, totalPlaayers);
+  //await airdropRaankedBaadges(itemTypes, totalPlayers);
 }
 
 if (require.main === module) {

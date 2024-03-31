@@ -12,7 +12,11 @@ import { dataArgs as dataArgs2 } from "../../data/airdrops/rarityfarming/szn7/rn
 import { dataArgs as dataArgs3 } from "../../data/airdrops/rarityfarming/szn7/rnd3";
 import { dataArgs as dataArgs4 } from "../../data/airdrops/rarityfarming/szn7/rnd4";
 import { getGotchisForASeason } from "../getGotchis";
-import { assertBaadgeQuantities, airdropBaadges } from "./baadgeHelpers";
+import {
+  assertBaadgeQuantities,
+  airdropBaadges,
+  airdropRaankedBaadges,
+} from "./baadgeHelpers";
 
 export async function main() {
   const baadges: string[] = [
@@ -54,7 +58,12 @@ export async function main() {
   ];
 
   //do raanked baadges amount check
-  await assertBaadgeQuantities(itemTypes, rarityArray, kinshipArray, xpArray);
+  const totalPlayers = await assertBaadgeQuantities(
+    itemTypes,
+    rarityArray,
+    kinshipArray,
+    xpArray
+  );
 
   //Upload SVGs
   let ids: number[] = [];
@@ -87,7 +96,7 @@ export async function main() {
   await airdropBaadges(itemTypes, [rarityRFSzn6, kinshipRFSzn6, xpRFSzn6]);
 
   //airdrop ranked
-  //  await airdropRaankedBaadges(itemTypes, totalPlaayers);
+  // await airdropRaankedBaadges(itemTypes, totalPlayers);
 }
 
 if (require.main === module) {

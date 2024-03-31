@@ -113,55 +113,57 @@ export async function assertBaadgeQuantities(
   itemTypes: ItemTypeInputNew[],
   rarityArray: string[][],
   kinshipArray: string[][],
-  xpArray: string[][]
+  xpArray: string[][],
+  overrideAssertion?: boolean
 ) {
-  //do champion amount checks
-  if (
-    itemTypes[0].maxQuantity !== 1 ||
-    itemTypes[1].maxQuantity !== 1 ||
-    itemTypes[2].maxQuantity !== 1
-  ) {
-    throw new Error("Champion Baadge Quantity is not 1");
+  if (!overrideAssertion) {
+    //do champion amount checks
+    if (
+      itemTypes[0].maxQuantity !== 1 ||
+      itemTypes[1].maxQuantity !== 1 ||
+      itemTypes[2].maxQuantity !== 1
+    ) {
+      throw new Error("Champion Baadge Quantity is not 1");
+    }
+
+    //do 2nd place amount checks
+    if (
+      itemTypes[3].maxQuantity !== 1 ||
+      itemTypes[4].maxQuantity !== 1 ||
+      itemTypes[5].maxQuantity !== 1
+    ) {
+      throw new Error("2nd Place Baadge Quantity is not 1");
+    }
+
+    //do 3rd place amount checks
+
+    if (
+      itemTypes[6].maxQuantity !== 1 ||
+      itemTypes[7].maxQuantity !== 1 ||
+      itemTypes[8].maxQuantity !== 1
+    ) {
+      throw new Error("3rd Place Baadge Quantity is not 1");
+    }
+
+    //do top 10 amount checks
+
+    if (
+      itemTypes[10].maxQuantity !== 7 ||
+      itemTypes[11].maxQuantity !== 7 ||
+      itemTypes[12].maxQuantity !== 7
+    ) {
+      throw new Error("Top 10 Baadge Quantity is not 7");
+    }
+
+    //do top 100 amount checks
+    if (
+      itemTypes[13].maxQuantity !== 90 ||
+      itemTypes[14].maxQuantity !== 90 ||
+      itemTypes[15].maxQuantity !== 90
+    ) {
+      throw new Error("Top 100 Baadge Quantity is not 90");
+    }
   }
-
-  //do 2nd place amount checks
-  if (
-    itemTypes[3].maxQuantity !== 1 ||
-    itemTypes[4].maxQuantity !== 1 ||
-    itemTypes[5].maxQuantity !== 1
-  ) {
-    throw new Error("2nd Place Baadge Quantity is not 1");
-  }
-
-  //do 3rd place amount checks
-
-  if (
-    itemTypes[6].maxQuantity !== 1 ||
-    itemTypes[7].maxQuantity !== 1 ||
-    itemTypes[8].maxQuantity !== 1
-  ) {
-    throw new Error("3rd Place Baadge Quantity is not 1");
-  }
-
-  //do top 10 amount checks
-
-  if (
-    itemTypes[10].maxQuantity !== 7 ||
-    itemTypes[11].maxQuantity !== 7 ||
-    itemTypes[12].maxQuantity !== 7
-  ) {
-    throw new Error("Top 10 Baadge Quantity is not 7");
-  }
-
-  //do top 100 amount checks
-  if (
-    itemTypes[13].maxQuantity !== 90 ||
-    itemTypes[14].maxQuantity !== 90 ||
-    itemTypes[15].maxQuantity !== 90
-  ) {
-    throw new Error("Top 100 Baadge Quantity is not 90");
-  }
-
   //do raanked amount checks
   const rarityPlaayers = await getPlaayersIds(rarityArray);
   const kinshipPlaayers = await getPlaayersIds(kinshipArray);
@@ -182,4 +184,5 @@ export async function assertBaadgeQuantities(
     console.log("Max Quantity: ", itemTypes[9].maxQuantity);
     throw new Error("Total Plaayers does not match max quantity");
   }
+  return totalPlaayers;
 }
