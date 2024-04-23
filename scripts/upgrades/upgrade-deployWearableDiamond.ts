@@ -14,7 +14,7 @@ const aavegotchiCutFacet = "0x4f908Fa47F10bc2254dae7c74d8B797C1749A8a6";
 const aavegotchiLoupeFacet = "0x58f64b56B1e15D8C932c51287d814EDaa8d6feb9";
 const aavegotchiOwnerShipFacet = "0xAE7DF9f59FEc446903c64f21a76d039Bc81712ef";
 
-async function deployAndUpgradeWearableDiamond() {
+export async function deployAndUpgradeWearableDiamond() {
   console.log("Deploying wearable diamond");
   // deploy Wearable Diamond
   const Diamond = (await ethers.getContractFactory(
