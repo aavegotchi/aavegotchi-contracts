@@ -3,7 +3,7 @@ import { RarityPayoutTaskArgs } from "../../../../tasks/rarityPayouts";
 
 async function rarityPayout() {
   const args: RarityPayoutTaskArgs = {
-    season: "7",
+    season: "8",
     rarityDataFile: "rnd4",
     rounds: "4",
     totalAmount: "1350000",
