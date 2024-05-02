@@ -3,7 +3,7 @@ import { SideDimensions, Dimensions } from "../scripts/itemTypeHelpers";
 export const sideViewDimensions1: SideDimensions[] = [
   {
     itemId: 0,
-    name: "The Void",
+    name: "Void",
     side: "none",
     dimensions: { x: 0, y: 0, width: 0, height: 0 },
   },

@@ -9,6 +9,15 @@ contract Diamond {
         LibDiamond.addDiamondFunctions(address(new DiamondCutFacet()), address(new DiamondLoupeFacet()), address(new OwnershipFacet()));
     }
 
+    //an immutable function that returns the diamondCut, diamondLoupe, and ownership facet addresses for testing
+
+    function getDefaultFacetAddresses() public view returns (address diamondCut, address diamondLoupe, address ownership) {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        diamondCut = ds.facetAddresses[0];
+        diamondLoupe = ds.facetAddresses[1];
+        ownership = ds.facetAddresses[2];
+    }
+
     // Find facet for function that is called and execute the
     // function if a facet is found and return any value.
     fallback() external payable {

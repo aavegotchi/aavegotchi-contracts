@@ -1,11 +1,12 @@
 /* global ethers hre */
 
 import { ethers, network } from "hardhat";
-import { deployAndUpgradeWearableDiamond } from "./upgrades/upgrade-deployWearableDiamond";
+import { deployAndUpgradeWearableDiamond } from "./upgrades/upgrade-deployWearableDiamondTest";
 import {
   getItemTypes,
   ItemTypeInputNew,
   SleeveObject,
+  toItemTypeInputNew,
 } from "./itemTypeHelpers";
 import { itemTypes as allItemTypes } from "../data/itemTypes/itemTypes";
 import { wearableSetArrays } from "./wearableSets";
@@ -13,7 +14,7 @@ import { DAOFacet, SvgFacet } from "../typechain";
 import { BigNumberish } from "@ethersproject/bignumber";
 import { uploadSvgs } from "./svgHelperFunctions";
 import { getWearables } from "../svgs/allWearables";
-import { deployAndUpgradeForgeDiamond } from "./upgrades/forge/upgrade-deployAndUpgradeForgeDiamond";
+import { deployAndUpgradeForgeDiamond } from "./upgrades/forge/upgrade-deployAndUpgradeForgeTest";
 import { setForgeProperties } from "./upgrades/forge/upgrade-forgeSetters";
 import { aavegotchiSvgs as aavegotchiSideSvgs } from "../svgs/aavegotchi-side-typeScript";
 
@@ -29,8 +30,10 @@ import {
   wearablesRightSleeveSvgs,
   wearablesBackSleeveSvgs,
 } from "../svgs/wearables-sides";
+import { aavegotchiSvgs } from "../svgs/aavegotchi";
 
 const diamond = require("../js/diamond-util/src/index.js");
+const { getCollaterals } = require("./testCollateralTypes.js");
 
 function addCommas(nStr: any) {
   nStr += "";
@@ -266,7 +269,7 @@ async function main() {
 
   // add collateral info for haunt
   console.log("Adding Collateral Types");
-  const { getCollaterals } = require("./testCollateralTypes.js");
+
   tx = await daoFacet.addCollateralTypes(
     1,
     getCollaterals(network.name, ghstDiamondAddress),
@@ -279,7 +282,14 @@ async function main() {
   totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
   // deploy wearable diamond and set to aavegotchi diamond
-  const wearableDiamondAddress = await deployAndUpgradeWearableDiamond();
+  const [cutAddress, loupeAddress, ownershipAddress] =
+    await aavegotchiDiamond.getDefaultFacetAddresses();
+  const wearableDiamondAddress = await deployAndUpgradeWearableDiamond(
+    cutAddress,
+    loupeAddress,
+    ownershipAddress,
+    aavegotchiDiamond.address
+  );
   tx = await peripheryFacet.setPeriphery(wearableDiamondAddress);
   receipt = await tx.wait();
   if (!receipt.status) {
@@ -292,7 +302,12 @@ async function main() {
 
   // add item types
   console.log("Adding Item Types");
-  const itemTypes = getItemTypes(allItemTypes as ItemTypeInputNew[], ethers);
+  //convert all itemtypes to itemTypeNew
+  let itemTypes2: ItemTypeInputNew[] = [];
+  for (let i = 0; i < allItemTypes.length; i++) {
+    itemTypes2.push(toItemTypeInputNew(allItemTypes[i]));
+  }
+  const itemTypes = getItemTypes(itemTypes2, ethers);
 
   let step = 20;
   let sliceStep = itemTypes.length / step;
@@ -311,6 +326,7 @@ async function main() {
       )}`
     );
     totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+    console.log("finished adding itemTypes");
   }
 
   // add wearable types sets
@@ -336,7 +352,6 @@ async function main() {
 
   console.log("Upload SVGs");
 
-  const { aavegotchiSvgs } = require("../svgs/aavegotchi.js");
   const { eyeShapeSvgs } = require("../svgs/eyeShapes.js");
   const collateralsSvgs = [
     '<g class="gotchi-collateral"><path d="M36 15v-1h-1v-1h-1v-1h-4v1h-1v1h-1v1h-1v4h1v1h1v1h1v1h4v-1h1v-1h1v-1h1v-4h-1z" fill="#ac15f9"/><path d="M33 21h-3v1h4v-1h-1z" fill="#7e18f8"/><path d="M35 14v-1h-1v-1h-4v1h-1v1h-1v1h8v-1h-1z" fill="#fa34f3"/><path d="M36 15h-9v2h10v-2h-1z" fill="#cf15f9"/><path d="M35 19h-7v1h1v1h6v-1h1v-1h-1z" fill="#8f17f9"/></g>',
@@ -348,30 +363,37 @@ async function main() {
     '<g class="gotchi-collateral"><path d="M41 14v1h-1v4h1v1h1v1h1v-7z" fill="#7e18f8"/></g>',
   ];
 
+  console.log("uploading aavegotchiSvgs");
   await uploadSvgs(svgFacet, aavegotchiSvgs, "aavegotchi", ethers);
+  console.log("uploading collaterals");
   await uploadSvgs(svgFacet, collateralsSvgs, "collaterals", ethers);
+  console.log("uploading eyeShapes");
   await uploadSvgs(svgFacet, eyeShapeSvgs, "eyeShapes", ethers);
+  console.log("uploading aavegotchiSideSvgsLeft");
   await uploadSvgs(
     svgFacet,
     aavegotchiSideSvgs.left,
     "aavegotchi-left",
     ethers
   );
+  console.log("uploading aavegotchiSideSvgsRight");
   await uploadSvgs(
     svgFacet,
     aavegotchiSideSvgs.right,
     "aavegotchi-right",
     ethers
   );
+  console.log("uploading aavegotchiSideSvgsBack");
   await uploadSvgs(
     svgFacet,
     aavegotchiSideSvgs.back,
     "aavegotchi-back",
     ethers
   );
+  console.log("uploading collateralsLeft");
   await uploadSvgs(svgFacet, collateralsLeftSvgs, "collaterals-left", ethers);
   await uploadSvgs(svgFacet, collateralsRightSvgs, "collaterals-right", ethers);
-  await uploadSvgs(svgFacet, [""], "collaterals-back", ethers);
+  // await uploadSvgs(svgFacet, [""], "collaterals-back", ethers);
   await uploadSvgs(svgFacet, eyeShapesLeftSvgs, "eyeShapes-left", ethers);
   await uploadSvgs(svgFacet, eyeShapesRightSvgs, "eyeShapes-right", ethers);
   await uploadSvgs(
@@ -382,36 +404,45 @@ async function main() {
   );
 
   const { sleeves, wearables } = getWearables();
+
   const svgsArray: string[] = wearables;
   const sleeveSvgsArray: SleeveObject[] = sleeves;
 
+  console.log("Uploading wearables");
   await uploadSvgs(svgFacet, svgsArray, "wearables", ethers);
+  console.log("Uploading sleeves");
   await uploadSvgs(
     svgFacet,
     sleeveSvgsArray.map((value) => value.svg),
     "sleeves",
     ethers
   );
+  console.log("Uploading wearablesleft");
   await uploadSvgs(
     svgFacet,
     wearablesLeftSvgs as string[],
     "wearables-left",
     ethers
   );
+  console.log("Uploading wearablesRight");
   await uploadSvgs(
     svgFacet,
     wearablesRightSvgs as string[],
     "wearables-right",
     ethers
   );
+  console.log("Uploading wearablesBack");
   await uploadSvgs(
     svgFacet,
     wearablesBackSvgs as string[],
     "wearables-back",
     ethers
   );
+  console.log("Uploading wearablesLeftSleeve");
   await uploadSvgs(svgFacet, wearablesLeftSleeveSvgs, "sleeves-left", ethers);
+  console.log("Uploading wearablesRightSleeve");
   await uploadSvgs(svgFacet, wearablesRightSleeveSvgs, "sleeves-right", ethers);
+  console.log("Uploading wearablesBackSleeve");
   await uploadSvgs(svgFacet, wearablesBackSleeveSvgs, "sleeves-back", ethers);
   console.log("Upload Done");
 
@@ -455,7 +486,13 @@ async function main() {
   // console.log("Prize items minted:", tx.hash);
 
   // forge
-  let forgeDiamondAddress = await deployAndUpgradeForgeDiamond();
+  let forgeDiamondAddress = await deployAndUpgradeForgeDiamond(
+    cutAddress,
+    loupeAddress,
+    ownershipAddress,
+    aavegotchiDiamond.address,
+    wearableDiamondAddress
+  );
   await setForgeProperties(forgeDiamondAddress);
   tx = await daoFacet.setForge(forgeDiamondAddress, { gasLimit: gasLimit });
   receipt = await tx.wait();
