@@ -102,11 +102,7 @@ export function readSvg(name: string, folder: string) {
   //folder is usually svgItems but could also be svgItems/subfolder
   let svg;
 
-  try {
-    svg = fs.readFileSync(`./svgs/${folder}/${name}.svg`, "utf8");
-  } catch (error) {
-    console.error(error);
-  }
+  svg = fs.readFileSync(`./svgs/${folder}/${name}.svg`, "utf8");
 
   return stripSvg(svg);
 }
