@@ -12,8 +12,7 @@ export async function upgradeBatchEscrow() {
 
   const facets: FacetsAndAddSelectors[] = [
     {
-      facetName:
-        "contracts/Aavegotchi/facets/EscrowFacet.sol:EscrowFacet",
+      facetName: "contracts/Aavegotchi/facets/EscrowFacet.sol:EscrowFacet",
       addSelectors: [
         "function batchTransferEscrow(uint256[] calldata _tokenIds,address[] calldata _erc20Contracts,address[] calldata _recipients,uint256[] calldata _transferAmounts) external",
       ],
@@ -24,8 +23,7 @@ export async function upgradeBatchEscrow() {
   const joined = convertFacetAndSelectorsToString(facets);
 
   const args: DeployUpgradeTaskArgs = {
-    // diamondUpgrader: maticDiamondUpgrader,
-    diamondUpgrader: maticDiamondUpgrader,
+    diamondOwner: maticDiamondUpgrader,
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
