@@ -110,13 +110,7 @@ contract ForgeTokenFacet is Modifiers {
     /**
      * @dev See {IERC1155-safeTransferFrom}.
      */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) public {
+    function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory data) public {
         require(from == msg.sender || isApprovedForAll(from, msg.sender), "ForgeTokenFacet: caller is not token owner or approved");
         _safeTransferFrom(from, to, id, amount, data);
     }
@@ -141,18 +135,12 @@ contract ForgeTokenFacet is Modifiers {
      * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155Received} and return the
      * acceptance magic value.
      */
-    function _safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) internal {
+    function _safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory data) internal {
         require(to != address(0), "ForgeTokenFacet: transfer to the zero address");
 
         LibToken.removeFromOwner(from, id, amount);
         LibToken.addToOwner(to, id, amount);
-        IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(s.aavegotchiDiamond, id, from);
+        IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(address(this), id, from);
 
         emit TransferSingle(LibMeta.msgSender(), from, to, id, amount);
 
@@ -169,13 +157,7 @@ contract ForgeTokenFacet is Modifiers {
      * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155BatchReceived} and return the
      * acceptance magic value.
      */
-    function _safeBatchTransferFrom(
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) internal {
+    function _safeBatchTransferFrom(address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) internal {
         require(ids.length == amounts.length, "ForgeTokenFacet: ids and amounts length mismatch");
         require(to != address(0), "ForgeTokenFacet: transfer to the zero address");
 
@@ -185,7 +167,7 @@ contract ForgeTokenFacet is Modifiers {
 
             LibToken.removeFromOwner(from, id, amount);
             LibToken.addToOwner(to, id, amount);
-            IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(s.aavegotchiDiamond, id, from);
+            IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(address(this), id, from);
         }
 
         emit TransferBatch(LibMeta.msgSender(), from, to, ids, amounts);
@@ -198,24 +180,13 @@ contract ForgeTokenFacet is Modifiers {
      *
      * Emits an {ApprovalForAll} event.
      */
-    function _setApprovalForAll(
-        address owner,
-        address operator,
-        bool approved
-    ) internal virtual {
+    function _setApprovalForAll(address owner, address operator, bool approved) internal virtual {
         require(owner != operator, "ForgeTokenFacet: setting approval status for self");
         s._operatorApprovals[owner][operator] = approved;
         emit ApprovalForAll(owner, operator, approved);
     }
 
-    function _doSafeTransferAcceptanceCheck(
-        address operator,
-        address from,
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) private {
+    function _doSafeTransferAcceptanceCheck(address operator, address from, address to, uint256 id, uint256 amount, bytes memory data) private {
         if (isContract(to)) {
             try IERC1155Receiver(to).onERC1155Received(operator, from, id, amount, data) returns (bytes4 response) {
                 if (response != IERC1155Receiver.onERC1155Received.selector) {
@@ -260,23 +231,11 @@ contract ForgeTokenFacet is Modifiers {
     }
 
     // @dev Add support for receiving ERC1155 tokens.
-    function onERC1155Received(
-        address,
-        address,
-        uint256,
-        uint256,
-        bytes memory
-    ) external returns (bytes4) {
+    function onERC1155Received(address, address, uint256, uint256, bytes memory) external returns (bytes4) {
         return this.onERC1155Received.selector;
     }
 
-    function onERC1155BatchReceived(
-        address,
-        address,
-        uint256[] memory,
-        uint256[] memory,
-        bytes memory
-    ) external returns (bytes4) {
+    function onERC1155BatchReceived(address, address, uint256[] memory, uint256[] memory, bytes memory) external returns (bytes4) {
         return this.onERC1155BatchReceived.selector;
     }
 }
