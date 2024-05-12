@@ -89,7 +89,7 @@ task(
   "deployUpgrade",
   "Deploys a Diamond Cut, given an address, facets and addSelectors, and removeSelectors"
 )
-  .addParam("owner", "Address of the contract owner")
+  .addParam("diamondOwner", "Address of the contract owner")
   .addParam("diamondAddress", "Address of the Diamond to upgrade")
   .addParam(
     "facetsAndAddSelectors",
