@@ -4282,7 +4282,7 @@ task("rarityPayout")
       for (const [i, txGroup] of txData.entries()) {
         console.log("Current index is:", i);
 
-        if (i < 1) continue; // Skip the indices before this one
+        // if (i < 1) continue; // Skip the indices before this one
 
         let tokenIds: string[] = [];
         let amounts: string[] = [];
