@@ -47,6 +47,7 @@
     "@anders-t/ethers-ledger": "^1.0.4",
     "@ethersproject/experimental": "^5.4.0",
     "@ethersproject/hardware-wallets": "github:mudgen/ethers-ledger",
+    "@layerzerolabs/lz-evm-oapp-v2": "^2.1.13",
     "@nomiclabs/hardhat-etherscan": "^3.0.0",
     "@openzeppelin/contracts": "^4.5.0",
     "@openzeppelin/contracts-upgradeable": "^4.5.2",

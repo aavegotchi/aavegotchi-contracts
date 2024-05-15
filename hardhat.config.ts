@@ -135,6 +135,15 @@ export default {
         },
       },
       {
+        version: "0.8.21",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+      {
         version: "0.4.24",
         settings: {
           optimizer: {
