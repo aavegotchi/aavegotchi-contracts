@@ -368,14 +368,14 @@ export const wearablesSvgs = [
   wearable("359_ForgeGoggles"),
   wearable("360_GeodeSmasher"),
   wearable("361_Geo"),
-  bodyWearable("362_FAKEShirt"),
-  wearable("363_FAKEBeret"),
+  bodyWearable("362_FakeShirt"),
+  wearable("363_FakeBeret"),
   wearable("364_PaintBrush"),
   wearable("365_PaintPalette"),
   bodyWearable("366_HeavenlyRobes"),
-  wearable("367_EyesofDevotion"),
-  wearable("368_BeardofDivinity"),
-  wearable("369_StaffofCreation"),
+  wearable("367_EyesOfDevotion"),
+  wearable("368_BeardOfDivinity"),
+  wearable("369_StaffOfCreation"),
   //forge wearables2
   wearable("370_WavyHair"),
   wearable("371_PlasticEarrings"),
@@ -596,7 +596,7 @@ export const sleeveSvgs = [
   sleeves("318_TrackSuit"),
   // forge wearables
   sleeves("350_PixelcraftTee"),
-  sleeves("362_FAKEShirt"),
+  sleeves("362_FakeShirt"),
   sleeves("366_HeavenlyRobes"),
   //forge wearables2
   sleeves("372_PartyDress"),
