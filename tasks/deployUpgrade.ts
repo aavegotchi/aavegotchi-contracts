@@ -129,7 +129,7 @@ task(
         throw new Error("Not master branch!");
       }
 
-      console.log("instantiatre signer");
+      console.log("instantiate signer");
 
       //Instantiate the Signer
       let signer: Signer;

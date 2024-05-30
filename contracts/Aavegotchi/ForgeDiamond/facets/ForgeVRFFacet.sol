@@ -8,6 +8,8 @@ import {ILink} from "../../interfaces/ILink.sol";
 import {ForgeFacet} from "./ForgeFacet.sol";
 import {ForgeTokenFacet} from "./ForgeTokenFacet.sol";
 
+import "hardhat/console.sol";
+
 contract ForgeVRFFacet is Modifiers {
     event VrfResponse(address user, uint256 randomNumber, bytes32 requestId, uint256 blockNumber);
     event GeodeWin(address user, uint256 itemId, uint256 geodeTokenId, bytes32 requestId, uint256 blockNumber);
@@ -169,28 +171,28 @@ contract ForgeVRFFacet is Modifiers {
     }
 
     /**
-         * @notice get the current prize probabilities based on available prizes
-    */
+     * @notice get the current prize probabilities based on available prizes
+     */
     function getCurrentPrizeProbabilityForGeode(uint8 geodeRsm) public view returns (uint256[6] memory) {
         uint8[6] memory rarities = [uint8(COMMON_RSM), UNCOMMON_RSM, RARE_RSM, LEGENDARY_RSM, MYTHICAL_RSM, GODLIKE_RSM];
         uint256[6] memory probability;
 
         // get base probabilities
-        for(uint8 i; i < rarities.length; i++){
+        for (uint8 i; i < rarities.length; i++) {
             probability[i] = s.geodeWinChanceMultiTierBips[geodeRsm][rarities[i]];
         }
         uint256[6] memory prizesLeft = numTotalPrizesLeftByRarity();
 
         // modify baseProbabilities based on available items
         // looping rarity idx backwards from 5 but stop at 1, because logic handles setting common probability (idx 0).
-        for (uint256 i = rarities.length - 1; i >= 1; i--){
-            if (prizesLeft[i] == 0){
+        for (uint256 i = rarities.length - 1; i >= 1; i--) {
+            if (prizesLeft[i] == 0) {
                 probability[i - 1] += probability[i];
                 probability[i] = 0;
             }
         }
         // handle common case (index 0)
-        if (prizesLeft[0] == 0){
+        if (prizesLeft[0] == 0) {
             probability[0] = 0;
         }
 
@@ -202,34 +204,33 @@ contract ForgeVRFFacet is Modifiers {
         uint256 amt = 0;
         uint256 count = 0;
 
-        for (uint256 i; i < s.geodePrizeTokenIds.length; i++){
-            if (s.geodePrizeRarities[s.geodePrizeTokenIds[i]] == rsm){
+        for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
+            if (s.geodePrizeRarities[s.geodePrizeTokenIds[i]] == rsm) {
                 temp[i] = s.geodePrizeTokenIds[i];
                 amt += 1;
             }
         }
         // strip 0s
         uint256[] memory prizes = new uint256[](amt);
-        for (uint256 i; i < temp.length; i++){
-            if (temp[i] != 0){
+        for (uint256 i; i < temp.length; i++) {
+            if (temp[i] != 0) {
                 prizes[count] = temp[i];
                 count++;
             }
-
         }
         return prizes;
     }
 
-    function getWinRanges(uint256[6] memory winChanceByRarity) public pure returns (uint256[] memory probabilityRanges){
+    function getWinRanges(uint256[6] memory winChanceByRarity) public pure returns (uint256[] memory probabilityRanges) {
         probabilityRanges = new uint256[](winChanceByRarity.length);
         probabilityRanges[0] = winChanceByRarity[0];
 
         uint256 lastNonZero;
-        if (probabilityRanges[0] != 0){
+        if (probabilityRanges[0] != 0) {
             lastNonZero = probabilityRanges[0];
         }
 
-        for (uint256 i = 1; i < winChanceByRarity.length; i++){
+        for (uint256 i = 1; i < winChanceByRarity.length; i++) {
             if (winChanceByRarity[i] == 0) {
                 probabilityRanges[i] = 0;
             } else {
@@ -243,18 +244,18 @@ contract ForgeVRFFacet is Modifiers {
         int rarityWonIndex = -1;
 
         uint256 lastNonZero;
-        if (probabilityRanges[0] != 0){
+        if (probabilityRanges[0] != 0) {
             lastNonZero = probabilityRanges[0];
         }
 
-        if (geodeRandNum <= probabilityRanges[0] && geodeRandNum > 0){
+        if (geodeRandNum <= probabilityRanges[0] && geodeRandNum > 0) {
             rarityWonIndex = 0;
         } else {
-            for (uint256 i = 1; i < probabilityRanges.length; i++){
+            for (uint256 i = 1; i < probabilityRanges.length; i++) {
                 if (probabilityRanges[i] == 0) {
                     continue;
                 } else {
-                    if (geodeRandNum <= probabilityRanges[i] && geodeRandNum > lastNonZero ){
+                    if (geodeRandNum <= probabilityRanges[i] && geodeRandNum > lastNonZero) {
                         rarityWonIndex = int(i);
                         break;
                     } else {
@@ -279,7 +280,6 @@ contract ForgeVRFFacet is Modifiers {
         uint8 rsm;
         uint256[6] winChanceByRarity;
     }
-
 
     function claimWinnings() external whenNotPaused {
         address sender = LibMeta.msgSender();
@@ -322,17 +322,50 @@ contract ForgeVRFFacet is Modifiers {
 
                     // choose rarity won if any
                     data.rarityWonIndex = getRarityWon(data.probabilityRanges, data.geodeRandNum);
+                    console.log("Rarity won index: %d");
+                    console.log(uint256(data.rarityWonIndex));
 
-                    if (data.rarityWonIndex >= 0){
+                    if (data.rarityWonIndex >= 0) {
                         data.prizes = getAvailablePrizesForRarity(rarities[uint(data.rarityWonIndex)]);
+                        console.log(data.prizes.length);
+                        for (uint r = 0; r < data.prizes.length; r++) {
+                            console.log("Prize");
+                            console.log(data.prizes[r]);
+                        }
+                        // checked specific rarity, no prizes available, refund geode
+                        if (data.prizes.length == 0) {
+                            forgeTokenFacet().safeTransferFrom(address(this), sender, info.geodeTokenIds[i], 1, "");
+                            emit GeodeRefunded(sender, info.geodeTokenIds[i], requestId, block.number);
+                            data.divNum = data.modNum;
+                            data.modNum *= 10000;
+                            continue;
+                        }
                         uint256 idx = data.geodeRandNum % data.prizes.length;
-                        data.itemIdWon = data.prizes[idx];
 
+                        data.itemIdWon = data.prizes[idx];
+                        console.log("Item won");
+                        console.log(data.itemIdWon);
                         // if last quantity of item won, rearrange array.
                         if (s.geodePrizeQuantities[data.itemIdWon] == 1) {
-                            s.geodePrizeTokenIds[idx] = s.geodePrizeTokenIds[s.geodePrizeTokenIds.length - 1];
+                            // find index in geodePrizeTokenIds
+                            uint256 tokenIdsIndex;
+                            for (uint256 k; k < s.geodePrizeTokenIds.length; k++) {
+                                if (s.geodePrizeTokenIds[k] == data.itemIdWon) {
+                                    tokenIdsIndex = k;
+                                    break;
+                                }
+                            }
+                            s.geodePrizeTokenIds[tokenIdsIndex] = s.geodePrizeTokenIds[s.geodePrizeTokenIds.length - 1];
                             s.geodePrizeTokenIds.pop();
+
+                            s.geodePrizeQuantities[tokenIdsIndex] = s.geodePrizeQuantities[tokenIdsIndex]--;
                         }
+
+                        for (uint r = 0; r < s.geodePrizeTokenIds.length; r++) {
+                            console.log("Prizes After");
+                            console.log(s.geodePrizeTokenIds[r]);
+                        }
+
                         s.geodePrizeQuantities[data.itemIdWon] -= 1;
                         data.numWins++;
 
@@ -344,7 +377,6 @@ contract ForgeVRFFacet is Modifiers {
                         forgeFacet().burn(address(this), info.geodeTokenIds[i], 1);
                         emit GeodeEmpty(sender, info.geodeTokenIds[i], requestId, block.number);
                     }
-
                 } else {
                     forgeTokenFacet().safeTransferFrom(address(this), sender, info.geodeTokenIds[i], 1, "");
                     emit GeodeRefunded(sender, info.geodeTokenIds[i], requestId, block.number);
