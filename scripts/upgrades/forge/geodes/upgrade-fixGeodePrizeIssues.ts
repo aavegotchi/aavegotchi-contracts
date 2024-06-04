@@ -11,7 +11,8 @@ import {
   diamondOwner,
   impersonate,
 } from "../../../helperFunctions";
-import { ForgeDAOFacet } from "../../../../typechain";
+import { ForgeDAOFacet, ForgeDAOFacet__factory } from "../../../../typechain";
+import { ForgeDAOFacetInterface } from "../../../../typechain/ForgeDAOFacet";
 
 const isMumbai = false;
 
@@ -37,6 +38,11 @@ export async function upgradeForgeGeodeFix() {
   const joined = convertFacetAndSelectorsToString(facets);
 
   const owner = await diamondOwner(maticForgeDiamond, ethers);
+
+  const iface: ForgeDAOFacetInterface = new ethers.utils.Interface(
+    ForgeDAOFacet__factory.abi
+  ) as ForgeDAOFacetInterface;
+  const calldata = iface.encodeFunctionData("tempFixQuantity");
   const args: DeployUpgradeTaskArgs = {
     diamondAddress: isMumbai ? mumbaiForgeDiamond : maticForgeDiamond,
     facetsAndAddSelectors: joined,
@@ -44,22 +50,35 @@ export async function upgradeForgeGeodeFix() {
     useMultisig: false,
     freshDeployment: false,
     diamondOwner: owner,
+    initAddress: maticForgeDiamond,
+    initCalldata: calldata,
   };
 
   await run("deployUpgrade", args);
 
-  console.log("Fixing array ");
-
-  let forgeDaoFacet = (await ethers.getContractAt(
-    "contracts/Aavegotchi/ForgeDiamond/facets/ForgeDAOFacet.sol:ForgeDAOFacet",
-    maticForgeDiamond
-  )) as ForgeDAOFacet;
-
-  forgeDaoFacet = await impersonate(owner, forgeDaoFacet, ethers, network);
-
-  await forgeDaoFacet.tempFixQuantity();
-
   console.log("Finished Fixing and resetting.");
+
+  console.log("removing temp function");
+  const facets2: FacetsAndAddSelectors[] = [
+    {
+      facetName:
+        "contracts/Aavegotchi/ForgeDiamond/facets/ForgeDAOFacet.sol:ForgeDAOFacet",
+      addSelectors: [],
+      removeSelectors: ["function tempFixQuantity() external"],
+    },
+  ];
+
+  const joined2 = convertFacetAndSelectorsToString(facets2);
+  const args2: DeployUpgradeTaskArgs = {
+    diamondAddress: isMumbai ? mumbaiForgeDiamond : maticForgeDiamond,
+    facetsAndAddSelectors: joined2,
+    useLedger: false,
+    useMultisig: false,
+    freshDeployment: false,
+    diamondOwner: owner,
+  };
+  await run("deployUpgrade", args2);
+  console.log("Removed temp function");
 }
 
 if (require.main === module) {

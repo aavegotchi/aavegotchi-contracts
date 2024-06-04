@@ -107,8 +107,6 @@ task(
 
   .setAction(
     async (taskArgs: DeployUpgradeTaskArgs, hre: HardhatRuntimeEnvironment) => {
-      console.log("hellooo");
-
       const facets: string = taskArgs.facetsAndAddSelectors;
       const facetsAndAddSelectors: FacetsAndAddSelectors[] =
         convertStringToFacetAndSelectors(facets);
@@ -141,8 +139,6 @@ task(
       //   )) as OwnershipFacet
       // ).owner();
       const testing = ["hardhat", "localhost"].includes(hre.network.name);
-
-      console.log("yoooo", testing);
 
       if (testing) {
         await hre.network.provider.request({
@@ -181,8 +177,6 @@ task(
       else {
         throw Error("Incorrect network selected");
       }
-
-      console.log("got our sigfner:", signer);
 
       //Create the cut
       const deployedFacets = [];

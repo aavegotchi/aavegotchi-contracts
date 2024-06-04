@@ -260,15 +260,15 @@ contract ForgeDAOFacet is Modifiers {
     }
 
     function tempFixQuantity() external onlyDaoOrOwner {
+        uint256 idx;
         for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
-            uint256 idx;
             if (s.geodePrizeTokenIds[i] == 361) {
                 idx = i;
                 break;
             }
-            s.geodePrizeTokenIds[idx] = 387;
-            s.geodePrizeQuantities[idx] = 3;
         }
+        s.geodePrizeTokenIds[idx] = 387;
+        s.geodePrizeQuantities[idx] = 3;
     }
 
     // @dev Max supply is not practical to keep track of for each forge token. The contract logic should take care of this.
