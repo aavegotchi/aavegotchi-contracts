@@ -322,6 +322,8 @@ contract ForgeVRFFacet is Modifiers {
 
                     // choose rarity won if any
                     data.rarityWonIndex = getRarityWon(data.probabilityRanges, data.geodeRandNum);
+                    // this will output an overflowed number, only leaving it due to hardhat console.log not supporting
+                    // signed int's.
                     console.log("Rarity won index: %d", uint256(data.rarityWonIndex));
 
                     if (data.rarityWonIndex >= 0) {
@@ -331,21 +333,6 @@ contract ForgeVRFFacet is Modifiers {
                             console.log("Prize");
                             console.log(data.prizes[r]);
                         }
-
-                        /////////////////
-                        // @dev this condition can be removed prior to deployment, it will never be true due to probabilities
-                        // being shifted in getWinRanges. Refactoring needs to be done outside of the data.rarityWonIndex >= 0
-                        // condition to account for when no prizes are available for a certain tier of geode. This may
-                        // not actually be possible so can be relegated to a warning in the UI.
-                        // checked specific rarity, no prizes available, refund geode
-                        if (data.prizes.length == 0) {
-                            forgeTokenFacet().safeTransferFrom(address(this), sender, info.geodeTokenIds[i], 1, "");
-                            emit GeodeRefunded(sender, info.geodeTokenIds[i], requestId, block.number);
-                            data.divNum = data.modNum;
-                            data.modNum *= 10000;
-                            continue;
-                        }
-                        //////////////////
 
                         uint256 idx = data.geodeRandNum % data.prizes.length;
 
