@@ -8,17 +8,21 @@ import {
   WearablesFacet,
 } from "../../typechain";
 import { impersonate, maticForgeDiamond } from "../../scripts/helperFunctions";
+import * as helpers from "@nomicfoundation/hardhat-network-helpers";
 
 import { releaseMultiTierGeodes } from "../../scripts/upgrades/forge/geodes/upgrade-forgeMultiTierGeodeFinal";
 
 import { upgradeForgeGeodeFix } from "../../scripts/upgrades/forge/geodes/upgrade-fixGeodePrizeIssues";
+import {GEODE_LEGENDARY, GEODE_MYTHICAL, GEODE_GODLIKE} from "../../helpers/constants";
 
 const WEARABLE_GAP_OFFSET = 1_000_000_000;
-const GEODE_GODLIKE = WEARABLE_GAP_OFFSET + 7;
+// const GEODE_GODLIKE = WEARABLE_GAP_OFFSET + 7;
 
 // NOTE: tests use tempFulfillRandomness in ForgeVRFFacet
 describe("Testing Geodes", async function () {
-  const testUser = "0x77427023e70cafd983dabaf3488d8d83ecb15b96";
+
+  // const testUser = "0x77427023e70cafd983dabaf3488d8d83ecb15b96";
+  const testUser = "0x60c4ae0EE854a20eA7796a9678090767679B30FC";
   let WEARABLE_DIAMOND = "0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f";
 
   let forgeDiamondAddress = maticForgeDiamond;
@@ -35,6 +39,8 @@ describe("Testing Geodes", async function () {
   let adminForge: ForgeFacet;
 
   before(async function () {
+    await helpers.mine()
+
     await upgradeForgeGeodeFix();
 
     // const geodePrizeIds = [370, 371, 372, 373, 374, 375, 376, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 387];
@@ -89,6 +95,15 @@ describe("Testing Geodes", async function () {
     testVrf = await impersonate(testUser, forgeVrfFacet, ethers, network);
     testForge = await impersonate(testUser, forgeFacet, ethers, network);
 
+    adminDao = await impersonate(
+        // itemManagerAlt,
+        "0x01F010a5e001fe9d6940758EA5e8c777885E351e",
+        forgeDaoFacet,
+        ethers,
+        network
+    );
+    adminForge = await impersonate("0x01F010a5e001fe9d6940758EA5e8c777885E351e", forgeFacet, ethers, network);
+
     // transfer testing LINK amount
     // await linkContractTest.transferFrom(
     //   testUser,
@@ -101,165 +116,103 @@ describe("Testing Geodes", async function () {
   });
 
   describe("tests", async function () {
-    // it("should get probabilities", async function () {
-    //   let geodePrizeIds = [
-    //     370, 371, 372, 373, 374, 375, 376, 377, 378, 379, 380, 381, 382, 383,
-    //     384, 385, 386, 387,
-    //   ];
-    //   let geodePrizeQuantities = [
-    //     100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
-    //     100, 100, 100, 100,
-    //   ];
-    //   let geodePrizeRarities = [
-    //     1, 1, 1, 2, 5, 1, 5, 2, 5, 5, 10, 10, 10, 10, 20, 50, 50, 50,
-    //   ];
-
-    //   await adminDao.setMultiTierGeodePrizes(
-    //     geodePrizeIds,
-    //     geodePrizeQuantities,
-    //     geodePrizeRarities
-    //   );
-
-    //   // full prize pool, godlike geode
-    //   let prob = await forgeVrfFacet.getCurrentPrizeProbabilityForGeode("50");
-    //   expect(Number(prob[0])).to.equal(0);
-    //   expect(Number(prob[1])).to.equal(0);
-    //   expect(Number(prob[2])).to.equal(0);
-    //   expect(Number(prob[3])).to.equal(1700);
-    //   expect(Number(prob[4])).to.equal(5400);
-    //   expect(Number(prob[5])).to.equal(2900);
-
-    //   // Setup only legendary prizes and test for a godlike and rare geode
-    //   geodePrizeIds = [370, 371];
-    //   geodePrizeQuantities = [100, 100];
-    //   geodePrizeRarities = [10, 10];
-
-    //   await adminDao.setMultiTierGeodePrizes(
-    //     geodePrizeIds,
-    //     geodePrizeQuantities,
-    //     geodePrizeRarities
-    //   );
-
-    //   prob = await forgeVrfFacet.getCurrentPrizeProbabilityForGeode("50");
-    //   expect(Number(prob[0])).to.equal(0);
-    //   expect(Number(prob[1])).to.equal(0);
-    //   expect(Number(prob[2])).to.equal(0);
-    //   expect(Number(prob[3])).to.equal(10000);
-    //   expect(Number(prob[4])).to.equal(0);
-    //   expect(Number(prob[5])).to.equal(0);
-
-    //   prob = await forgeVrfFacet.getCurrentPrizeProbabilityForGeode("5");
-    //   expect(Number(prob[0])).to.equal(0);
-    //   expect(Number(prob[1])).to.equal(0);
-    //   expect(Number(prob[2])).to.equal(0);
-    //   expect(Number(prob[3])).to.equal(400);
-    //   expect(Number(prob[4])).to.equal(0);
-    //   expect(Number(prob[5])).to.equal(0);
-
-    //   // missing godlike prize, godlike and mythical geodes
-    //   geodePrizeIds = [370, 371, 372, 373, 374];
-    //   geodePrizeQuantities = [100, 100, 100, 100, 100];
-    //   geodePrizeRarities = [1, 2, 5, 10, 20];
-
-    //   await adminDao.setMultiTierGeodePrizes(
-    //     geodePrizeIds,
-    //     geodePrizeQuantities,
-    //     geodePrizeRarities
-    //   );
-
-    //   prob = await forgeVrfFacet.getCurrentPrizeProbabilityForGeode("50");
-    //   expect(Number(prob[0])).to.equal(0);
-    //   expect(Number(prob[1])).to.equal(0);
-    //   expect(Number(prob[2])).to.equal(0);
-    //   expect(Number(prob[3])).to.equal(1700);
-    //   expect(Number(prob[4])).to.equal(8300);
-    //   expect(Number(prob[5])).to.equal(0);
-
-    //   prob = await forgeVrfFacet.getCurrentPrizeProbabilityForGeode("20");
-    //   expect(Number(prob[0])).to.equal(0);
-    //   expect(Number(prob[1])).to.equal(800);
-    //   expect(Number(prob[2])).to.equal(1800);
-    //   expect(Number(prob[3])).to.equal(3800);
-    //   expect(Number(prob[4])).to.equal(2200);
-    //   expect(Number(prob[5])).to.equal(0);
-
-    //   // only common prizes, godlike and mythical geodes
-    //   geodePrizeIds = [370, 371];
-    //   geodePrizeQuantities = [100, 100];
-    //   geodePrizeRarities = [1, 1];
-
-    //   await adminDao.setMultiTierGeodePrizes(
-    //     geodePrizeIds,
-    //     geodePrizeQuantities,
-    //     geodePrizeRarities
-    //   );
-
-    //   prob = await forgeVrfFacet.getCurrentPrizeProbabilityForGeode("50");
-    //   expect(Number(prob[0])).to.equal(10000);
-    //   expect(Number(prob[1])).to.equal(0);
-    //   expect(Number(prob[2])).to.equal(0);
-    //   expect(Number(prob[3])).to.equal(0);
-    //   expect(Number(prob[4])).to.equal(0);
-    //   expect(Number(prob[5])).to.equal(0);
-
-    //   prob = await forgeVrfFacet.getCurrentPrizeProbabilityForGeode("20");
-    //   expect(Number(prob[0])).to.equal(8600);
-    //   expect(Number(prob[1])).to.equal(0);
-    //   expect(Number(prob[2])).to.equal(0);
-    //   expect(Number(prob[3])).to.equal(0);
-    //   expect(Number(prob[4])).to.equal(0);
-    //   expect(Number(prob[5])).to.equal(0);
-
-    //   // only godlike prizes, common and mythical geodes
-    //   geodePrizeIds = [370, 371];
-    //   geodePrizeQuantities = [100, 100];
-    //   geodePrizeRarities = [50, 50];
-
-    //   await adminDao.setMultiTierGeodePrizes(
-    //     geodePrizeIds,
-    //     geodePrizeQuantities,
-    //     geodePrizeRarities
-    //   );
-
-    //   prob = await forgeVrfFacet.getCurrentPrizeProbabilityForGeode("1");
-    //   expect(Number(prob[0])).to.equal(0);
-    //   expect(Number(prob[1])).to.equal(0);
-    //   expect(Number(prob[2])).to.equal(0);
-    //   expect(Number(prob[3])).to.equal(0);
-    //   expect(Number(prob[4])).to.equal(0);
-    //   expect(Number(prob[5])).to.equal(0);
-
-    //   prob = await forgeVrfFacet.getCurrentPrizeProbabilityForGeode("20");
-    //   expect(Number(prob[0])).to.equal(0);
-    //   expect(Number(prob[1])).to.equal(0);
-    //   expect(Number(prob[2])).to.equal(0);
-    //   expect(Number(prob[3])).to.equal(0);
-    //   expect(Number(prob[4])).to.equal(0);
-    //   expect(Number(prob[5])).to.equal(200);
-
-    //   // empty prizes, godlike geode
-    //   geodePrizeIds = [];
-    //   geodePrizeQuantities = [];
-    //   geodePrizeRarities = [];
-
-    //   await adminDao.setMultiTierGeodePrizes(
-    //     geodePrizeIds,
-    //     geodePrizeQuantities,
-    //     geodePrizeRarities
-    //   );
-
-    //   prob = await forgeVrfFacet.getCurrentPrizeProbabilityForGeode("50");
-    //   expect(Number(prob[0])).to.equal(0);
-    //   expect(Number(prob[1])).to.equal(0);
-    //   expect(Number(prob[2])).to.equal(0);
-    //   expect(Number(prob[3])).to.equal(0);
-    //   expect(Number(prob[4])).to.equal(0);
-    //   expect(Number(prob[5])).to.equal(0);
-    // });
 
     it("claiming should work fine", async function () {
-      const r = forgeVrfFacet.claimWinnings();
+      let failingUser = "0x77427023e70cafd983dabaf3488d8d83ecb15b96"
+      const failingForgeVrfFacet = await impersonate(failingUser, forgeVrfFacet, ethers, network);
+      const r = failingForgeVrfFacet.claimWinnings();
       expect(r).to.not.be.reverted;
+    });
+
+    it('should test array rearrangement', async () => {
+      let testLegGeodeAmount = 40
+      let testGodGeodeAmount = 15
+      let geodePrizeIds = [370, 371, 372, 373, 374, 375, 376, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 387];
+      let geodePrizeQuantities = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+      let geodePrizeRarities = [1, 1, 1, 2, 5, 1, 5, 2, 5, 5, 10, 10, 10, 10, 20, 50, 50, 50];
+
+      await adminDao.setMultiTierGeodePrizes(geodePrizeIds, geodePrizeQuantities, geodePrizeRarities)
+      await adminForge.adminMint(testUser, GEODE_LEGENDARY, testLegGeodeAmount);
+      await adminForge.adminMint(testUser, GEODE_GODLIKE, testGodGeodeAmount);
+
+      console.log("prizes remaining", await adminDao.getGeodePrizesRemaining())
+      let newGeodePrizeIds = [...geodePrizeIds];
+      newGeodePrizeIds = newGeodePrizeIds.map(i => Number(i))
+
+      function findEventArgs(events, eventName) {
+        let _event = null;
+
+        for (const event of events) {
+          if (event.event === eventName) {
+            _event = event.args;
+          }
+        }
+        return _event
+      }
+
+      async function testGeodeOfRarity(geodeRarity, amount)  {
+        for (let i = 0; i < amount; i++){
+          console.log("i", i);
+
+          if (newGeodePrizeIds.length == 0){
+            await expect(testVrf.openGeodes([geodeRarity], [1])).to.be.revertedWith("ForgeVRFFacet: No prizes currently available")
+            continue;
+          }
+
+          const tx = await testVrf.openGeodes([geodeRarity], [1])
+          let tmp = await tx.wait()
+
+          const txClaim = await testVrf.claimWinnings()
+          let result = await txClaim.wait()
+
+          let events = ["GeodeWin", "GeodeEmpty", "GeodeRefunded"]
+          let eventArgs;
+          let eventIdx: number;
+
+          for (let i = 0; i < events.length; i++){
+            let tmp = findEventArgs(result.events, events[i])
+            if (tmp) {
+              eventArgs = tmp
+              eventIdx = i
+              break;
+            }
+          }
+
+          let prizeIdWon;
+          if (events[eventIdx] == "GeodeWin"){
+            prizeIdWon = Number(eventArgs[1])
+            console.log("prizeIdWon", prizeIdWon);
+
+            let rearranged = (await adminDao.getGeodePrizesRemaining())[0]
+            rearranged = rearranged.map(i => Number(i))
+
+            let oldIdx = newGeodePrizeIds.findIndex(n => n == prizeIdWon)
+            let oldLastId = newGeodePrizeIds[newGeodePrizeIds.length - 1]
+
+            // if the prize that was won happened to be the last item in the pre-rearranged array,
+            // it will be undefined after calling getGeodePrizesRemaining because it was popped.
+            if (oldIdx == newGeodePrizeIds.length - 1) {
+              expect(rearranged[oldIdx]).to.be.equal(undefined)
+            } else {
+              expect(rearranged[oldIdx]).to.be.equal(oldLastId)
+              expect(rearranged.findIndex(n => n == prizeIdWon)).to.be.equal(-1)
+            }
+
+            newGeodePrizeIds = rearranged;
+          } else if (events[eventIdx] == "GeodeEmpty"){
+            console.log("GeodeEmpty");
+          } else if (events[eventIdx] == "GeodeRefunded"){
+            console.log("GeodeRefunded");
+          }
+        }
+      }
+
+      console.log("testing legendaries")
+      await testGeodeOfRarity(GEODE_LEGENDARY, testLegGeodeAmount)
+
+      console.log("testing gods")
+      await testGeodeOfRarity(GEODE_GODLIKE, testGodGeodeAmount)
+
     });
   });
 });
