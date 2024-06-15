@@ -9,10 +9,10 @@ import {
   maticForgeDiamond,
   mumbaiForgeDiamond,
   diamondOwner,
-  impersonate,
 } from "../../../helperFunctions";
-import { ForgeDAOFacet, ForgeDAOFacet__factory } from "../../../../typechain";
+import { ForgeDAOFacet__factory } from "../../../../typechain";
 import { ForgeDAOFacetInterface } from "../../../../typechain/ForgeDAOFacet";
+import * as helpers from "@nomicfoundation/hardhat-network-helpers";
 
 const isMumbai = false;
 
@@ -36,6 +36,8 @@ export async function upgradeForgeGeodeFix() {
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
+
+  await helpers.mine();
 
   const owner = await diamondOwner(maticForgeDiamond, ethers);
 
