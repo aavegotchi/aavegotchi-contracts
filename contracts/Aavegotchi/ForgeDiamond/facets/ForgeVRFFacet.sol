@@ -8,7 +8,7 @@ import {ILink} from "../../interfaces/ILink.sol";
 import {ForgeFacet} from "./ForgeFacet.sol";
 import {ForgeTokenFacet} from "./ForgeTokenFacet.sol";
 
-import "hardhat/console.sol";
+
 
 contract ForgeVRFFacet is Modifiers {
     event VrfResponse(address user, uint256 randomNumber, bytes32 requestId, uint256 blockNumber);
@@ -116,21 +116,21 @@ contract ForgeVRFFacet is Modifiers {
         s.vrfUserToRequestIds[sender].push(requestId);
 
         // for testing
-        tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _geodeTokenIds[0]))));
+       // tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _geodeTokenIds[0]))));
     }
 
     // for testing purpose only
-     function tempFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) internal {
-         VrfRequestInfo storage info = s.vrfRequestIdToVrfRequestInfo[_requestId];
+    //  function tempFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) internal {
+    //      VrfRequestInfo storage info = s.vrfRequestIdToVrfRequestInfo[_requestId];
 
-         require(s.userVrfPending[info.user], "ForgeVRFFacet: VRF is not pending for user");
-         require(info.status == VrfStatus.PENDING, "ForgeVRFFacet: VRF request is not pending");
+    //      require(s.userVrfPending[info.user], "ForgeVRFFacet: VRF is not pending for user");
+    //      require(info.status == VrfStatus.PENDING, "ForgeVRFFacet: VRF request is not pending");
 
-         info.randomNumber = _randomNumber;
-         info.status = VrfStatus.READY_TO_CLAIM;
+    //      info.randomNumber = _randomNumber;
+    //      info.status = VrfStatus.READY_TO_CLAIM;
 
-         emit VrfResponse(info.user, _randomNumber, _requestId, block.number);
-     }
+    //      emit VrfResponse(info.user, _randomNumber, _requestId, block.number);
+    //  }
 
     /**
          * @notice fulfillRandomness handles the VRF response. Your contract must
@@ -322,23 +322,16 @@ contract ForgeVRFFacet is Modifiers {
 
                     // choose rarity won if any
                     data.rarityWonIndex = getRarityWon(data.probabilityRanges, data.geodeRandNum);
-                    // this will output an overflowed number, only leaving it due to hardhat console.log not supporting
-                    // signed int's.
-                    console.log("Rarity won index: %d", uint256(data.rarityWonIndex));
 
                     if (data.rarityWonIndex >= 0) {
                         data.prizes = getAvailablePrizesForRarity(rarities[uint(data.rarityWonIndex)]);
-                        console.log(data.prizes.length);
-                        for (uint r = 0; r < data.prizes.length; r++) {
-                            console.log("Prize");
-                            console.log(data.prizes[r]);
-                        }
+                    
+                     
 
                         uint256 idx = data.geodeRandNum % data.prizes.length;
 
                         data.itemIdWon = data.prizes[idx];
-                        console.log("Item won");
-                        console.log(data.itemIdWon);
+              
                         // if last quantity of item won, rearrange array.
                         if (s.geodePrizeQuantities[data.itemIdWon] == 1) {
                             // find index in geodePrizeTokenIds
@@ -349,18 +342,13 @@ contract ForgeVRFFacet is Modifiers {
                                     break;
                                 }
                             }
-                            console.log("tokenIdsIndex", tokenIdsIndex);
-                            console.log("s.geodePrizeTokenIds[tokenIdsIndex]", s.geodePrizeTokenIds[tokenIdsIndex]);
-                            console.log("s.geodePrizeTokenIds[s.geodePrizeTokenIds.length - 1]", s.geodePrizeTokenIds[s.geodePrizeTokenIds.length - 1]);
+               
 
                             s.geodePrizeTokenIds[tokenIdsIndex] = s.geodePrizeTokenIds[s.geodePrizeTokenIds.length - 1];
                             s.geodePrizeTokenIds.pop();
                         }
 
-                        for (uint r = 0; r < s.geodePrizeTokenIds.length; r++) {
-                            console.log("Prizes After");
-                            console.log(s.geodePrizeTokenIds[r]);
-                        }
+                      
 
                         s.geodePrizeQuantities[data.itemIdWon] -= 1;
                         data.numWins++;
@@ -370,7 +358,7 @@ contract ForgeVRFFacet is Modifiers {
 
                         emit GeodeWin(sender, data.itemIdWon, info.geodeTokenIds[i], requestId, block.number);
                     } else {
-                        console.log("Nothing won");
+                      
 
                         forgeFacet().burn(address(this), info.geodeTokenIds[i], 1);
                         emit GeodeEmpty(sender, info.geodeTokenIds[i], requestId, block.number);
