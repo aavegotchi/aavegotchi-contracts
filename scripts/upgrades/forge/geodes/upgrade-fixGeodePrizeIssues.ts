@@ -37,7 +37,7 @@ export async function upgradeForgeGeodeFix() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
-  await helpers.mine();
+  // await helpers.mine();
 
   const owner = await diamondOwner(maticForgeDiamond, ethers);
 
@@ -48,7 +48,7 @@ export async function upgradeForgeGeodeFix() {
   const args: DeployUpgradeTaskArgs = {
     diamondAddress: isMumbai ? mumbaiForgeDiamond : maticForgeDiamond,
     facetsAndAddSelectors: joined,
-    useLedger: false,
+    useLedger: true,
     useMultisig: false,
     freshDeployment: false,
     diamondOwner: owner,
