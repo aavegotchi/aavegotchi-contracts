@@ -225,7 +225,8 @@ const sigProps = [
     title: "Aavegotchi DAO Mission Statement",
   },
   {
-    //no sigprop for agip 99
+    id: "0x0e3aab22b79d92dedc7b0f1c2ee4d405f10dc79cb55719f3540daf38d04febd0",
+    title: "IRL Taask Force",
   },
   {
     id: "0x48ed1bfe262897452dbccdada4f280c8c5d2a41150640fb583e3f5df50eb6572",
@@ -284,6 +285,46 @@ const sigProps = [
   {
     id: "0x212d3baf686a5903de904f1ae41995e9caedf7b490ec511bb67636c362c77151",
     title: "Gas Fee Reimbursement for DAO Directors",
+  },
+  {
+    id: "0xb1c3b5c9954e3e7a00498296396b4b516bae69ba6a62b4e1c9c3d209d1eaf672",
+    title: "Strategotchi V2.0 funding",
+  },
+  {
+    id: "0xc0549f5d1bf319645e3835ed4404d8ed6bd364c1f30ca4a60b542ce9a12c56bf",
+    title: "FAKEwaar Continuing Development Fund",
+  },
+  {
+    id: "0x8a3fcec5a5f4686d805dd7995279d4a62723238c4e8198673cbff204fd578b4a",
+    title: "Elected Facilitators for DAO Meetings",
+  },
+  {
+    id: "0x6f06c1434b218cc1673ee6b34a0e11feefc4db101b291d0057748a287917b2d4",
+    title: "Custom IRL Aavegotchi Physical Arcade Machine",
+  },
+  {
+    id: "0x63537aa0e51e8f5c52d12b23874ce837c68a3ae78a1528d860797b58af522a2b",
+    title: "Proposal to Add Liquidity on Aerodrome and earn AERO",
+  },
+  {
+    id: "0xfa46eb6789d3230b7a56919aa3902bd835053049ab59e56b04e9185f06abea60",
+    title: "Convert all DAO-owned $DAI/$aDAI -> $USDC/$aUSDC",
+  },
+  {
+    id: "0xad47cd52673adaa683163864fd2c73120186a6086f6b581b0305687eda8d58a3",
+    title: "Allocation of Aerodrome POL Rewards",
+  },
+  {
+    id: "0x04a70afb2d93046600ae74a24926ac34161902e24c336aac705dbee7683880e1",
+    title: "AavegotchiDAO MCON III Sponsorship Package",
+  },
+  {
+    id: "0x9cda0125cd357f78a6f406b0a81f3bf2e2bc0dae3bae0e7e4292ebef86f8861d",
+    title: "Allocation of Quickswap POL Rewards",
+  },
+  {
+    id: "0x9b3d0d73ff761611be704a786b207a4f74c697febfdb1e95414d83c55989a05f",
+    title: "Community Wearable Schematics Release",
   },
 ];
 
@@ -583,5 +624,45 @@ const coreProps = [
   {
     id: "0x9e2dfd4a35b6069df9c0e29a4d88f197a3a6af816f5275b210a768521c734b97",
     title: "[AGIP 113] Gas Fee Reimbursement for DAO Directors",
+  },
+  {
+    id: "0x1470e49097b506d8aa9f017f1fd13328f456cba790c8df48bc789375c6cd723a",
+    title: "[AGIP 114] Strategotchi V2.0 & Voxel Unity SDK funding",
+  },
+  {
+    id: "0x62cb52138d0d66f0b363156f0be470d2289f7e64aa0b00a98f09a52ec6e4cba4",
+    title: "[AGIP 115] FAKEwaar Continuing Development Fund",
+  },
+  {
+    id: "0x4ffa41a2ab80839e03bbc0eaa1d4f8b210f294aad043343809d4f8b36059f11a",
+    title: "[AGIP 116] Elected Facilitators for DAO Meetings",
+  },
+  {
+    id: "0xad9c32042678c6250507f602a57ea52846efe8391d781bc9476683e9347bef63",
+    title: "[AGIP 117] Custom IRL Aavegotchi Physical Arcade Machine",
+  },
+  {
+    id: "0xba11262fc75ec6b49dafcdfb55c6aa3395ce58c18aa377b6a955d695a27ff3f0",
+    title: "[AGIP 118] Proposal to Add Liquidity on Aerodrome and earn AERO",
+  },
+  {
+    id: "0x2d8df1e8ad91c9b928e9d0c319e8cabfef103e48fbc7a8933d889b1389a17873",
+    title: "[AGIP 119] Convert all DAO-owned $DAI/$aDAI -> $USDC/$aUSDC",
+  },
+  {
+    id: "0xbb7e75512a55d15a6233e13a83af5ce5638c36b5a96e3dde8c4560acf904038a",
+    title: "[AGIP 120] Allocation of Aerodrome POL Rewards",
+  },
+  {
+    id: "0xb5441817ecff8a693937ff1c16562c9d1d43c4bbf76490220d7d34da181bb43d",
+    title: "[AGIP 121] AavegotchiDAO MCON III Sponsorship Package",
+  },
+  {
+    id: "0xd7de27500ffa8d360848e7655a32a7b7a00ac46fc13ab156ef51dfebb4101d4a",
+    title: "[AGIP 122] Allocation of Quickswap POL Rewards",
+  },
+  {
+    id: "0xff8daa93be9021f9f0a49cb8394ef49f868261bd9828faa351611c9854bbf0db",
+    title: "[AGIP 123] Community Wearable Schematics Release",
   },
 ];
