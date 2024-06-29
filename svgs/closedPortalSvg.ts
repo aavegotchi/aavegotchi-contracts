@@ -2,13 +2,13 @@
 
 const fs = require("fs");
 
-const portals = [];
+export const closedPortals: string[] = [];
 
 portal("h1-closed");
 portal("h1-closed");
 portal("h2-closed");
 
-function stripSvg(svg) {
+function stripSvg(svg: string) {
   // removes svg tag
   if (svg.includes("viewBox")) {
     svg = svg.slice(svg.indexOf(">") + 1);
@@ -17,13 +17,11 @@ function stripSvg(svg) {
   return svg;
 }
 
-function readSvg(name) {
+function readSvg(name: string) {
   return stripSvg(fs.readFileSync(`./svgs/${name}.svg`, "utf8"));
 }
 
-function portal(name) {
-  const svg = readSvg(name);
-  portals.push(svg);
+function portal(name: string) {
+  const svg: string = readSvg(name);
+  closedPortals.push(svg);
 }
-
-exports.closedPortalSvgs = portals;

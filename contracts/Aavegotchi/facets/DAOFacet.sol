@@ -99,7 +99,12 @@ contract DAOFacet is Modifiers {
 
             //First handle global collateralTypes array
             uint256 index = s.collateralTypeIndexes[newCollateralType];
-            bool collateralExists = index > 0 || s.collateralTypes[0] == newCollateralType;
+
+            bool collateralExists = index > 0;
+
+            if (!collateralExists && s.collateralTypes.length == 1 && s.collateralTypes[0] == newCollateralType) {
+                collateralExists = true;
+            }
 
             if (!collateralExists) {
                 s.collateralTypes.push(newCollateralType);
