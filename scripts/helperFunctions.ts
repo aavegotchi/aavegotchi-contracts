@@ -140,6 +140,10 @@ export async function getDiamondSigner(
       method: "hardhat_impersonateAccount",
       params: [override ? override : owner],
     });
+    await hre.network.provider.request({
+      method: "hardhat_setBalance",
+      params: [owner, "0x1000000000000000000000000"],
+    });
     return await hre.ethers.getSigner(override ? override : owner);
   } else if (hre.network.name === "matic") {
     console.log("Diamond signer - Matic");
@@ -152,67 +156,138 @@ export async function getDiamondSigner(
   }
 }
 
-export interface rfRankingScore {
-  rfType: string;
-  gotchiId: string;
-  score: number;
-}
+// export interface rfRankingScore {
+//   rfType: string;
+//   gotchiId: string;
+//   score: number;
+// }
 
-export async function getRfSznTypeRanking(rounds: string[][], _rfType: string) {
-  console.log("*** " + _rfType + " ***");
-  const idsArray: number[] = [];
+// export async function getRfSznTypeRanking(rounds: string[][], _rfType: string) {
+//   console.log("*** " + _rfType + " ***");
+//   const idsArray: number[] = [];
 
-  let ranking = await setRfTypeObject(rounds[0], _rfType);
+//   //get all unique gotchiIds from rounds
+//   const ids = await getPlaayersIds(rounds);
 
-  for (let i = 1; i < rounds.length; i++) {
-    ranking = await compareScoreArrays(ranking, rounds[i], _rfType);
-  }
+//   //initialize object for all participants
+//   let ranking = await setRfTypeObject(rounds[0], _rfType);
 
-  const finalRanking: rfRankingScore[] = ranking.sort((a, b) => {
-    if (a.score > b.score) {
-      return 1;
-    } else if (a.score < b.score) {
-      return -1;
+//   for (let i = 0; i < rounds.length; i++) {
+//     ranking = await compareScoreArrays(ranking, rounds[i], ids, _rfType);
+//   }
+//   console.log(ranking);
+
+//   const finalRanking: rfRankingScore[] = ranking.sort((a, b) => {
+//     if (a.score > b.score) {
+//       return -1;
+//     } else if (a.score < b.score) {
+//       return 1;
+//     } else {
+//       return 0;
+//     }
+//   });
+//   // console.log(_rfType + " : " + finalRanking);
+//   for (let x = 0; x < finalRanking.length; x++) {
+//     idsArray.push(Number(finalRanking[x].gotchiId));
+//   }
+//   return idsArray;
+// }
+
+// export async function setRfTypeObject(rnd: string[], _rfType: string) {
+//   const ranking = [];
+
+//   //initialize rfRanking object
+//   for (let i = 0; i < rnd.length; i++) {
+//     let score: rfRankingScore = {
+//       rfType: _rfType,
+//       gotchiId: rnd[i],
+//       score: 0,
+//     };
+//     ranking.push(score);
+//   }
+//   return ranking;
+// }
+
+// export async function compareScoreArrays(
+//   arr1: rfRankingScore[],
+//   arr2: string[],
+//   arr3: string[],
+//   _rfType: string
+// ) {
+//   for (let i = 0; i < arr1.length; i++) {
+//     if (arr3.includes(arr1[i].gotchiId)) {
+//       const index = arr2.indexOf(arr1[i].gotchiId);
+
+//       arr1[i].score += arr2.length - index;
+//       // if (arr1[i].gotchiId === "13681" || arr1[i].gotchiId === "15560") {
+//       //   console.log(arr1[i].gotchiId + " " + arr1[i].score);
+//       // }
+//     }
+//   }
+//   return arr1;
+// }
+
+export function rankIds(arrays: string[][], tiebreaker: number[]): string[] {
+  let rankings: string[] = [];
+  let assigned: { [key: string]: boolean } = {};
+  let pending: string[] = [];
+
+  for (let i = 0; i < arrays[0].length; i++) {
+    let counts: { [key: string]: number } = {};
+
+    // Count the frequency of each ID at this index
+    arrays.forEach((array) => {
+      let id = array[i];
+      counts[id] = (counts[id] || 0) + 1;
+    });
+
+    // Sort the IDs based on frequency and tiebreaker ranking
+    let sortedIds = Object.keys(counts).sort((a, b) => {
+      if (counts[b] - counts[a] !== 0) {
+        return counts[b] - counts[a];
+      } else {
+        return tiebreaker.indexOf(Number(a)) - tiebreaker.indexOf(Number(b));
+      }
+    });
+
+    // Check if there are any pending IDs with a higher frequency at this index
+    let pendingId = pending.find((id) => counts[id] > counts[sortedIds[0]]);
+    if (pendingId) {
+      rankings[i] = pendingId;
+      assigned[pendingId] = true;
+      pending = pending.filter((id) => id !== pendingId);
     } else {
-      return 0;
+      // Assign the highest ranked ID to this index, if it hasn't been assigned yet
+      for (let id of sortedIds) {
+        if (!assigned[id]) {
+          rankings[i] = id;
+          assigned[id] = true;
+          break;
+        }
+      }
     }
-  });
-  // console.log(_rfType + " : " + finalRanking);
-  for (let x = 0; x < finalRanking.length; x++) {
-    idsArray.push(Number(finalRanking[x].gotchiId));
+
+    // Add the remaining IDs to the pending list
+    pending = pending.concat(sortedIds.filter((id) => !assigned[id]));
   }
-  return idsArray;
-}
 
-export async function setRfTypeObject(rnd: string[], _rfType: string) {
-  const ranking = [];
-
-  for (let i = 0; i < rnd.length; i++) {
-    let score: rfRankingScore = {
-      rfType: _rfType,
-      gotchiId: rnd[i],
-      score: i,
-    };
-    ranking.push(score);
-  }
-  return ranking;
-}
-
-export async function compareScoreArrays(
-  arr1: rfRankingScore[],
-  arr2: string[],
-  _rfType: string
-) {
-  for (let i = 0; i < arr1.length; i++) {
-    if (arr2.includes(arr1[i].gotchiId)) {
-      arr1[i].score += arr2.indexOf(arr1[i].gotchiId);
+  // Fill any remaining indices with the remaining IDs in the tiebreaker order
+  for (let i = 0; i < arrays[0].length; i++) {
+    if (!rankings[i]) {
+      for (let id of tiebreaker) {
+        if (!assigned[id]) {
+          rankings[i] = String(id);
+          assigned[id] = true;
+          break;
+        }
+      }
     }
   }
-  return arr1;
+  console.log(rankings);
+  return rankings;
 }
 
 export async function getPlaayersIds(round: string[][]) {
-  console.log("*** RAANKED ***");
   const array: string[] = round[0];
 
   for (let i = 0; i < round.length; i++) {
