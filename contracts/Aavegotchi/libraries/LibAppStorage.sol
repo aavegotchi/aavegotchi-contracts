@@ -5,6 +5,7 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {ILink} from "../interfaces/ILink.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IERC7589} from "../../shared/interfaces/IERC7589.sol";
+import {IERC7432} from "../../shared/interfaces/IERC7432.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
@@ -234,6 +235,21 @@ struct ItemRolesInfo {
     uint256 balanceUsed;
 }
 
+struct ParcelItemsRolesInfo {
+    IERC7432.Role role;
+}
+
+  // Parcel Roles 
+
+struct RoleData {
+        address recipient;
+        uint64 expirationDate;
+        bool revocable;
+        bytes data;
+}
+
+
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -366,6 +382,23 @@ struct AppStorage {
     // Auxiliary structs for Items Roles Registry
     // gotchiId => equippedDepositsInfo
     mapping(uint256 => GotchiEquippedDepositsInfo) gotchiEquippedDepositsInfo;
+
+  
+    // Parcel Roles
+
+    mapping(address => mapping(uint256 => mapping(bytes32 => RoleData )))  roles;
+
+    // tokenAddress => tokenId => owner
+    mapping(address => mapping(uint256 => address))  originalOwners;
+
+     // owner => tokenAddress => operator => isApproved
+    mapping(address => mapping(address => mapping(address => bool)))  tokenApprovals;
+
+    mapping(bytes32 => bool)  isRoleAllowed;
+
+    bytes32[]  allowedRoles;
+
+
 }
 
 library LibAppStorage {
