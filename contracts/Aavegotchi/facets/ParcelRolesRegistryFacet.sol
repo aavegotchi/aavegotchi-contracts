@@ -46,7 +46,6 @@ contract ParcelRolesRegistryFacet is Modifiers, IERC7432 {
      * @param _tokenAddress The token address.
      * @param _tokenId The token identifier.
      */
-
     modifier onlyRealm(address _tokenAddress, uint256 _tokenId) {
         uint256 category = LibSharedMarketplace.getERC721Category(_tokenAddress, _tokenId);
         require(_tokenAddress == s.realmAddress, "ParcelRolesRegistryFacet: Only Item NFTs are supported");
