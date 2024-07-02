@@ -243,8 +243,11 @@ struct ParcelItemsRolesInfo {
 
 struct RoleData {
         address recipient;
+
         uint64 expirationDate;
+
         bool revocable;
+
         bytes data;
 }
 
@@ -386,15 +389,16 @@ struct AppStorage {
   
     // Parcel Roles
 
-    mapping(address => mapping(uint256 => mapping(bytes32 => RoleData )))  roles;
+    mapping(address => mapping(uint256 => mapping(bytes32 => RoleData )))  erc7432_roles;
 
     // tokenAddress => tokenId => owner
-    mapping(address => mapping(uint256 => address))  originalOwners;
+    mapping(address => mapping(uint256 => address))  erc7432OriginalOwners;
 
      // owner => tokenAddress => operator => isApproved
     mapping(address => mapping(address => mapping(address => bool)))  tokenApprovals;
 
-    mapping(bytes32 => bool)  isRoleAllowed;
+    // tokenAddress => roleId => isAllowed
+    mapping(address => mapping(bytes32 => bool)) isRoleAllowed;
 
     bytes32[]  allowedRoles;
 
