@@ -131,7 +131,7 @@ contract ParcelRolesRegistryFacet is Modifiers, IERC7432 {
     }
 
     function setRoleApprovalForAll(address _tokenAddress, address _operator, bool _approved) external override {
-        s.tokenApprovals[msg.sender][_tokenAddress][_operator] = _approved;
+        s.itemsRoleApprovals[msg.sender][_tokenAddress][_operator] = _approved;
         emit RoleApprovalForAll(_tokenAddress, _operator, _approved);
     }
 

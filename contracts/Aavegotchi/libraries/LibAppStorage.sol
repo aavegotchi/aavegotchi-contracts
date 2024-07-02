@@ -235,20 +235,16 @@ struct ItemRolesInfo {
     uint256 balanceUsed;
 }
 
+  // Parcel Roles 
 struct ParcelItemsRolesInfo {
     IERC7432.Role role;
 }
 
-  // Parcel Roles 
-
 struct RoleData {
-        address recipient;
-
-        uint64 expirationDate;
-
-        bool revocable;
-
-        bytes data;
+    address recipient;
+    uint64 expirationDate;
+    bool revocable;
+    bytes data;
 }
 
 
@@ -385,24 +381,14 @@ struct AppStorage {
     // Auxiliary structs for Items Roles Registry
     // gotchiId => equippedDepositsInfo
     mapping(uint256 => GotchiEquippedDepositsInfo) gotchiEquippedDepositsInfo;
-
-  
     // Parcel Roles
-
-    mapping(address => mapping(uint256 => mapping(bytes32 => RoleData )))  erc7432_roles;
-
-    // tokenAddress => tokenId => owner
-    mapping(address => mapping(uint256 => address))  erc7432OriginalOwners;
-
-     // owner => tokenAddress => operator => isApproved
-    mapping(address => mapping(address => mapping(address => bool)))  tokenApprovals;
-
-    // tokenAddress => roleId => isAllowed
+    // tokenAddress => tokenId  => role
+    mapping(address => mapping(uint256 => mapping(bytes32 => RoleData ))) erc7432_roles;
+    //tokenAddress => tokenId => owner
+    mapping(address => mapping(uint256 => address)) erc7432OriginalOwners;
+    //tokenAddress => roleId => isAllowed
     mapping(address => mapping(bytes32 => bool)) isRoleAllowed;
-
-    bytes32[]  allowedRoles;
-
-
+    bytes32[] allowedRoles;
 }
 
 library LibAppStorage {
