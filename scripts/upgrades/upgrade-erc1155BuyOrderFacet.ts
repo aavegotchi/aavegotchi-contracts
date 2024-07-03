@@ -4,10 +4,9 @@ import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
-import { maticDiamondAddress } from "../helperFunctions";
+import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
 
 export async function upgrade() {
-  const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 
   const facets: FacetsAndAddSelectors[] = [
     {
@@ -32,7 +31,7 @@ export async function upgrade() {
   const joined = convertFacetAndSelectorsToString(facets);
 
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: diamondUpgrader,
+    diamondOwner: maticDiamondUpgrader,
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
