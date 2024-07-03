@@ -16,13 +16,13 @@ describe("Testing ERC1155 Buy Order", async function () {
   const ghstAddress = "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7";
   const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
   const maticHolderAddress = "0xd70250731A72C33BFB93016E3D1F0CA160dF7e42";
-  const ghstHolderAddress = "0xb4473cfEeDC9a0E94612c6ce883677b63f830DB8";
+  const ghstHolderAddress = "0xA387E90acd30769844dBD2a97b7E307E7e1Ce4Cc";
   const ghstHolder2Address = "0x45fdb9d9Ff3105392bf5F1A3828F9523314117A7";
   const pixelcraftAddress = "0xD4151c984e6CF33E04FFAAF06c3374B2926Ecc64";
   const daoAddress = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
   const testWearableId1 = 228;
   const wearableOwnerAddress1 = "0xae79077D8d922d071797a7F8849430Fed488c005"; //owner of testWearableId1
-  const testWearableId2 = 230; // no buy orders
+  const testWearableId2 = 232; // no buy orders
   const wearableOwnerAddress2 = "0xae79077D8d922d071797a7F8849430Fed488c005"; //owner of testWearableId2
   const price = ethers.utils.parseUnits("5", "ether");
   const mediumPrice = ethers.utils.parseUnits("7", "ether");
