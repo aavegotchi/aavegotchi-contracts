@@ -4,6 +4,7 @@ import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {ILink} from "../interfaces/ILink.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {IERC7589} from "../../shared/interfaces/IERC7589.sol";
 
 uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
@@ -181,6 +182,12 @@ struct GotchiLending {
     uint32 period; //in seconds
     // storage slot 5
     address[] revenueTokens;
+    //storage slot 6
+    //this is a bitmap value that packs all the permissions of a listing into a single uint256
+    //each index represents a permission, therefore 32 indexes,== 32 possible permissions
+    //index 0 means no permission by default
+    //indexes can store up to 256 values (0-255), each value representing a modifer for that permission, but we only use 0-9
+    uint256 permissions; //0=none, 1=channelling
 }
 
 struct LendingListItem {
@@ -212,6 +219,19 @@ struct ERC721BuyOrder {
     bool cancelled;
     bytes32 validationHash;
     bool[] validationOptions;
+}
+
+struct GotchiEquippedDepositsInfo {
+    // analog to equippedWearables, but to track delegatedWearables by their depositIds
+    uint256[EQUIPPED_WEARABLE_SLOTS] equippedDepositIds;
+    uint256 equippedDelegatedWearablesCount;
+}
+
+struct ItemRolesInfo {
+    IERC7589.Deposit deposit;
+    IERC7589.RoleAssignment roleAssignment;
+    EnumerableSet.UintSet equippedGotchis;
+    uint256 balanceUsed;
 }
 
 struct ERC1155BuyOrder {
@@ -348,6 +368,19 @@ struct AppStorage {
     mapping(address => mapping(uint256 => uint256[])) erc721TokenToBuyOrderIds; // erc721 token address => erc721TokenId => buyOrderIds
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) erc721TokenToBuyOrderIdIndexes; // erc721 token address => erc721TokenId => buyOrderId => index
     mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToBuyOrderId; // erc721 token address => erc721TokenId => sender => buyOrderId
+    // respec
+    mapping(uint32 => uint256) gotchiRespecCount;
+    address daoDirectorTreasury;
+    // Items Roles Registry
+    // depositId => userRoleDepositInfo
+    mapping(uint256 => ItemRolesInfo) itemRolesDepositInfo;
+    // grantor => tokenAddress => operator => isApproved
+    mapping(address => mapping(address => mapping(address => bool))) itemsRoleApprovals;
+    // counter to generate depositIds for each new deposit created in Items Roles Registry
+    uint256 itemsDepositIdCounter;
+    // Auxiliary structs for Items Roles Registry
+    // gotchiId => equippedDepositsInfo
+    mapping(uint256 => GotchiEquippedDepositsInfo) gotchiEquippedDepositsInfo;
     // states for erc1155 buy orders
     uint256 nextERC1155BuyOrderId;
     mapping(uint256 => ERC1155BuyOrder) erc1155BuyOrders; // buyOrderId => data

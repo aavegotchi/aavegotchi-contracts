@@ -47,7 +47,9 @@ task("grantXP", "Grants XP to Gotchis by addresses")
 
     const { finalUsers, tokenIds } = await getPolygonAndMainnetGotchis(
       addresses,
-      hre
+      0,
+      hre,
+      false
     );
 
     const diamondAddress = maticDiamondAddress;

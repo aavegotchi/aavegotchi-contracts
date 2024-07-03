@@ -60,7 +60,23 @@ contract ERC721BuyOrderFacet is Modifiers {
                 statuses_[i].status = "executed";
                 statuses_[i].buyOrderId = _buyOrderIds[i];
             } else {
-                statuses_[i].status = "pending";
+                bytes32 validationHash = LibBuyOrder.generateValidationHash(
+                    buyOrder.erc721TokenAddress,
+                    buyOrder.erc721TokenId,
+                    buyOrder.validationOptions
+                );
+
+                //Handle active states
+                if (validationHash != buyOrder.validationHash) {
+                    statuses_[i].status = "invalid";
+                } else if (buyOrder.duration != 0 && buyOrder.timeCreated + buyOrder.duration < block.timestamp) {
+                    statuses_[i].status = "expired";
+                } else {
+                    statuses_[i].status = "pending";
+                }
+
+                // hash validation
+
                 statuses_[i].buyOrderId = _buyOrderIds[i];
             }
         }
@@ -161,7 +177,7 @@ contract ERC721BuyOrderFacet is Modifiers {
 
         require(erc721BuyOrder.timeCreated != 0, "ERC721BuyOrder: ERC721 buyOrder does not exist");
         require(
-            sender == IERC721(erc721BuyOrder.erc721TokenAddress).ownerOf(erc721BuyOrder.erc721TokenId) || sender == erc721BuyOrder.buyer,
+            sender == erc721BuyOrder.buyer || sender == IERC721(erc721BuyOrder.erc721TokenAddress).ownerOf(erc721BuyOrder.erc721TokenId),
             "ERC721BuyOrder: Only ERC721 token owner or buyer can call this function"
         );
         require(erc721BuyOrder.cancelled == false && erc721BuyOrder.timePurchased == 0, "ERC721BuyOrder: Already processed");

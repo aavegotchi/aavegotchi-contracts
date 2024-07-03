@@ -5,45 +5,45 @@ import { wearableSetArrays } from "./wearableSets";
 import { maticGraphUrl } from "./query/queryAavegotchis";
 // const totalResults: number = 6000;
 
-export function findSets(equipped: number[]) {
-  const setData = wearableSetArrays;
-  const foundSets: Array<FoundSet> = [];
+// export function findSets(equipped: number[]) {
+//   const setData = wearableSetArrays;
+//   const foundSets: Array<FoundSet> = [];
 
-  const getEquipmentIds = (acc: Array<number>, value: number) => {
-    if (Number(value) > 0) {
-      acc.push(Number(value));
-    }
-    return acc;
-  };
+//   const getEquipmentIds = (acc: Array<number>, value: number) => {
+//     if (Number(value) > 0) {
+//       acc.push(Number(value));
+//     }
+//     return acc;
+//   };
 
-  const equippedIds = equipped?.reduce(getEquipmentIds, []);
+//   const equippedIds = equipped?.reduce(getEquipmentIds, []);
 
-  for (const wearableSet of setData) {
-    const setWearableIds = wearableSet.wearableIds.reduce(getEquipmentIds, []);
-    if (
-      setWearableIds.every((wearableId: number) =>
-        equippedIds?.includes(wearableId)
-      ) /*&& setWearableIds.length > numWearableIds*/
-    ) {
-      const setFound = {
-        name: wearableSet.name,
-        wearableIds: setWearableIds,
-        traitsBonuses: wearableSet.traitsBonuses.map((v: any) => Number(v)),
-        allowedCollaterals: wearableSet.allowedCollaterals.map((v: any) =>
-          Number(v)
-        ),
-      };
+//   for (const wearableSet of setData) {
+//     const setWearableIds = wearableSet.wearableIds.reduce(getEquipmentIds, []);
+//     if (
+//       setWearableIds.every((wearableId: number) =>
+//         equippedIds?.includes(wearableId)
+//       ) /*&& setWearableIds.length > numWearableIds*/
+//     ) {
+//       const setFound = {
+//         name: wearableSet.name,
+//         wearableIds: setWearableIds,
+//         traitsBonuses: wearableSet.traitsBonuses.map((v: any) => Number(v)),
+//         allowedCollaterals: wearableSet.allowedCollaterals.map((v: any) =>
+//           Number(v)
+//         ),
+//       };
 
-      foundSets.push(setFound);
-    }
-  }
+//       foundSets.push(setFound);
+//     }
+//   }
 
-  foundSets.sort(function (a, b) {
-    return b.traitsBonuses[0] - a.traitsBonuses[0];
-  });
+//   foundSets.sort(function (a, b) {
+//     return b.traitsBonuses[0] - a.traitsBonuses[0];
+//   });
 
-  return foundSets;
-}
+//   return foundSets;
+// }
 
 export function calculateRarityScore(traitArray: number[]) {
   const energy: number = returnRarity(traitArray[0]);
@@ -148,59 +148,94 @@ export function leaderboardQuery(
   }`;
 }
 
-export function leaderboardQueryOld(
-  orderBy: string,
-  orderDirection: string,
-  blockNumber: string,
-  extraFilters?: string
-): string {
-  const extraWhere = extraFilters ? "," + extraFilters : "";
-  const where = `where:{baseRarityScore_gt:0, owner_not:"0x0000000000000000000000000000000000000000" ${extraWhere}}`;
-  const aavegotchi = `
-    id
-    name
-    baseRarityScore
-    modifiedRarityScore
-    withSetsRarityScore
-    numericTraits
-    modifiedNumericTraits
-    withSetsNumericTraits
-    stakedAmount
-    equippedWearables
-    kinship
-    equippedSetID
-    equippedSetName
-    experience
-    level
-    collateral
-    hauntId
-    lastInteracted
-    owner {
-        id
-    }`;
-  return `
-    {
-      top1000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, ${where}) {
-        ${aavegotchi}
-      }
-      top2000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:1000, ${where}) {
-        ${aavegotchi}
-      }
-      top3000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:2000, ${where}) {
-        ${aavegotchi}
-      }
-      top4000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:3000, ${where}) {
-        ${aavegotchi}
-      }
-      top5000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:4000, ${where}) {
-        ${aavegotchi}
-      }
-      top6000: aavegotchis(block:{number:${blockNumber}}, orderBy:${orderBy},orderDirection:${orderDirection}, first:1000, skip:5000, ${where}) {
-        ${aavegotchi}
-      }
+export const findSets = (equipped: number[]) => {
+  //todo: add all sets
+  const setData = wearableSetArrays;
+  const foundSets: Array<FoundSet> = [];
+
+  const getEquipmentIds = (acc: Array<number>, value: number) => {
+    if (Number(value) > 0) {
+      acc.push(Number(value));
     }
-  `;
-}
+    return acc;
+  };
+
+  const equippedIds = equipped?.reduce(getEquipmentIds, []);
+
+  for (const wearableSet of setData) {
+    const setWearableIds = wearableSet.wearableIds.reduce(getEquipmentIds, []);
+    if (
+      setWearableIds.every((wearableId) =>
+        equippedIds?.includes(wearableId)
+      ) /*&& setWearableIds.length > numWearableIds*/
+    ) {
+      const setFound = {
+        name: wearableSet.name,
+        wearableIds: setWearableIds,
+        traitsBonuses: wearableSet.traitsBonuses.map((v) => Number(v)),
+        allowedCollaterals: wearableSet.allowedCollaterals.map((v) =>
+          Number(v)
+        ),
+      };
+
+      foundSets.push(setFound);
+    }
+  }
+
+  foundSets.sort((a, b) => {
+    return b.traitsBonuses[0] - a.traitsBonuses[0];
+  });
+
+  foundSets.sort((a, b) => b.wearableIds.length - a.wearableIds.length);
+
+  return foundSets;
+};
+
+const findRightGotchiBonuses = (gotchi: any) => {
+  if (!gotchi) return;
+  // Shallow clone the gotchi to prevent mutating the original object's top-level properties
+  const newGotchi = { ...gotchi };
+
+  // Deep clone arrays to prevent mutating the original object's array properties
+  newGotchi.equippedWearables = [...gotchi.equippedWearables];
+  newGotchi.modifiedNumericTraits = [...gotchi.modifiedNumericTraits];
+
+  const foundSets = findSets(newGotchi.equippedWearables);
+
+  if (foundSets.length > 0) {
+    const bestSet = foundSets[0];
+    const setTraitBonuses: number[] = bestSet.traitsBonuses;
+    const brsBonus = setTraitBonuses[0];
+
+    // Deep clone the numeric traits to modify them without affecting the original
+    const withSetsNumericTraits = [...newGotchi.modifiedNumericTraits];
+
+    const beforeSetBonus = calculateRarityScore(
+      newGotchi.modifiedNumericTraits
+    );
+
+    setTraitBonuses.slice(1).forEach((trait, index) => {
+      withSetsNumericTraits[index] += trait;
+    });
+
+    const afterSetBonus = calculateRarityScore(withSetsNumericTraits);
+
+    const bonusDifference = afterSetBonus - beforeSetBonus;
+
+    newGotchi.withSetsNumericTraits = withSetsNumericTraits;
+
+    newGotchi.withSetsRarityScore = (
+      Number(newGotchi.modifiedRarityScore) +
+      bonusDifference +
+      brsBonus
+    ).toString();
+    newGotchi.equippedSetName = bestSet.name; // Set the name after calculating traits
+  } else {
+    newGotchi.withSetsNumericTraits = newGotchi.modifiedNumericTraits;
+    newGotchi.withSetsRarityScore = newGotchi.modifiedRarityScore;
+  }
+  return newGotchi;
+};
 
 export async function fetchAndSortLeaderboard(
   category: "withSetsRarityScore" | "kinship" | "experience",
@@ -210,64 +245,19 @@ export async function fetchAndSortLeaderboard(
   let eachFinalResult: LeaderboardAavegotchi[] = [];
   const query = leaderboardQuery(`${category}`, "desc", blockNumber);
 
-  const queryresponse = await request(maticGraphUrl, query);
+  const queryResponse: LeaderboardAavegotchi[] = await request(
+    maticGraphUrl,
+    query
+  );
 
-  const leaderboardResults: LeaderboardAavegotchi[] = Object.values(
-    queryresponse
+  let leaderboardResults: LeaderboardAavegotchi[] = Object.values(
+    queryResponse
   ).flat(1) as LeaderboardAavegotchi[];
 
-  //Add in set bonuses
-  leaderboardResults.map((leaderboardGotchi) => {
-    //  if (leaderboardGotchi.withSetsRarityScore === null) {
-    const foundSets = findSets(leaderboardGotchi.equippedWearables);
-
-    if (foundSets.length > 0) {
-      const bestSet = foundSets[0];
-
-      const setTraitBonuses: number[] = bestSet.traitsBonuses;
-      const brsBonus = setTraitBonuses[0];
-
-      const nrg = setTraitBonuses[1];
-      const agg = setTraitBonuses[2];
-      const spk = setTraitBonuses[3];
-      const brn = setTraitBonuses[4];
-      const setBonusArray = [nrg, agg, spk, brn];
-
-      leaderboardGotchi.equippedSetName = bestSet.name;
-
-      const withSetsNumericTraits = leaderboardGotchi.modifiedNumericTraits;
-
-      const beforeSetBonus = calculateRarityScore(
-        leaderboardGotchi.modifiedNumericTraits
-      );
-
-      setBonusArray.forEach((trait, index) => {
-        withSetsNumericTraits[index] =
-          withSetsNumericTraits[index] + setBonusArray[index];
-      });
-
-      const afterSetBonus = calculateRarityScore(withSetsNumericTraits);
-
-      const bonusDifference = afterSetBonus - beforeSetBonus;
-
-      leaderboardGotchi.withSetsNumericTraits = withSetsNumericTraits;
-
-      leaderboardGotchi.withSetsRarityScore = Number(
-        Number(leaderboardGotchi.modifiedRarityScore) +
-          Number(bonusDifference) +
-          Number(brsBonus)
-      ).toString();
-    } else {
-      leaderboardGotchi.withSetsRarityScore =
-        leaderboardGotchi.modifiedRarityScore;
-      leaderboardGotchi.withSetsNumericTraits =
-        leaderboardGotchi.modifiedNumericTraits;
-    }
-
-    eachFinalResult.push(leaderboardGotchi);
-    // }
-    return leaderboardGotchi;
-  });
+  // Add in set bonuses
+  eachFinalResult = leaderboardResults.map((val) =>
+    findRightGotchiBonuses(val)
+  );
 
   function _sortByBRS(a: LeaderboardAavegotchi, b: LeaderboardAavegotchi) {
     if (a.withSetsRarityScore == b.withSetsRarityScore) {
@@ -329,7 +319,7 @@ export async function fetchAndSortLeaderboard(
 
   sortedData = [...new Set(sortedData)];
 
-  // eachFinalResult = sortedData.slice(0, 7500);
+  // console.log("final sorted 1:", sortedData);
 
   return sortedData.slice(0, 7500);
 }

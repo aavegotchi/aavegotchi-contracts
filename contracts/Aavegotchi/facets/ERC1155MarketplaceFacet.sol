@@ -41,8 +41,6 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@dev Is sent in tandem with ERC1155ExecutedListing
     event ERC1155ExecutedToRecipient(uint256 indexed listingId, address indexed buyer, address indexed recipient);
 
-    event ERC1155ListingCancelled(uint256 indexed listingId);
-
     event ChangedListingFee(uint256 listingFeeInWei);
 
     ///@notice Allow the aavegotchi diamond owner or DAO to set the default listing fee

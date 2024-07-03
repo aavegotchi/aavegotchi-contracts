@@ -13,6 +13,12 @@ import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
 
+import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
+
+import {LibBitmapHelpers} from "../libraries/LibBitmapHelpers.sol";
+
+import {ForgeTokenFacet} from "../ForgeDiamond/facets/ForgeTokenFacet.sol";
+
 contract AavegotchiGameFacet is Modifiers {
     /// @dev This emits when the approved address for an NFT is changed or
     ///  reaffirmed. The zero address indicates there is no approved address.
@@ -29,6 +35,7 @@ contract AavegotchiGameFacet is Modifiers {
     event SetBatchId(uint256 indexed _batchId, uint256[] tokenIds);
 
     event SpendSkillpoints(uint256 indexed _tokenId, int16[4] _values);
+    event ResetSkillpoints(uint256 indexed _tokenId);
 
     event LockAavegotchi(uint256 indexed _tokenId, uint256 _time);
     event UnLockAavegotchi(uint256 indexed _tokenId, uint256 _time);
@@ -84,6 +91,13 @@ contract AavegotchiGameFacet is Modifiers {
     ///@return numericTraits_ A six-element array containing integers,each representing the traits of the NFT with identifier `_tokenId`
     function getNumericTraits(uint256 _tokenId) external view returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_) {
         numericTraits_ = LibAavegotchi.getNumericTraits(_tokenId);
+    }
+
+    ///@notice Query the skill reset count of an Aavegotchi
+    ///@param _tokenId The identifier of the Aavegotchi to query
+    ///@return respecCount_ The number of times an aavegotchi has performed a skill reset
+    function respecCount(uint32 _tokenId) external view returns (uint256 respecCount_) {
+        respecCount_ = s.gotchiRespecCount[_tokenId];
     }
 
     ///@notice Query the available skill points that can be used for an NFT
@@ -301,11 +315,6 @@ contract AavegotchiGameFacet is Modifiers {
         s.realmAddress = _realm;
     }
 
-    function realmInteract(uint256 _tokenId) external {
-        require(msg.sender == s.realmAddress, "AavegotchiGamefacet: Not RealmAddress");
-        LibAavegotchi.interact(_tokenId);
-    }
-
     ///@notice Allow the owner of an NFT to spend skill points for it(basically to boost the numeric traits of that NFT)
     ///@dev only valid for claimed aavegotchis
     ///@param _tokenId The identifier of the NFT to spend the skill points on
@@ -327,5 +336,67 @@ contract AavegotchiGameFacet is Modifiers {
 
     function isAavegotchiLocked(uint256 _tokenId) external view returns (bool isLocked) {
         isLocked = s.aavegotchis[_tokenId].locked;
+    }
+
+    ///@notice Allow the current owner/borrower of an NFT to reduce kinship while channelling alchemica
+    ///@dev will revert if the gotchi kinship is too low to channel or if the lending listing does not enable channeling
+    ///@param _gotchiId Id of the Gotchi used to channel
+    function reduceKinshipViaChanneling(uint32 _gotchiId) external {
+        //only realmDiamond can reduce kinship
+        require(msg.sender == s.realmAddress, "GotchiLending: Only Realm can reduce kinship via channeling");
+        //no need to do checks on _gotchiId since realmDiamond handles that
+        //first check if aavegotchi is lent
+        if (LibGotchiLending.isAavegotchiLent(_gotchiId)) {
+            //short-circuit here
+            uint32 listingId = s.aavegotchiToListingId[_gotchiId];
+            if (LibBitmapHelpers.getValueInByte(0, s.gotchiLendings[listingId].permissions) == 0) {
+                revert("This listing has no permissions set");
+            }
+
+            //check if channelling is allowed for the listing
+            //check that the modifier is at least 1
+            //more checks can be introduced if more modifiers are added
+            if (LibBitmapHelpers.getValueInByte(0, s.gotchiLendings[listingId].permissions) > 0) {
+                //more checks can be introduced here as different permissions are added
+                LibAavegotchi._reduceAavegotchiKinship(_gotchiId, 2);
+            } else {
+                revert("Channeling not enabled by listing owner");
+            }
+        }
+        //if aavegotchi is not lent
+        else {
+            LibAavegotchi._reduceAavegotchiKinship(_gotchiId, 2);
+        }
+
+        LibAavegotchi.interact(_gotchiId);
+    }
+
+    ///@notice Allow the current owner of a gotchi to reassign all spent skill points
+    ///@dev Reverts if user doesn't have enough Essence to pay for the respec
+    ///@param _tokenId Id of the Gotchi to respec
+    function resetSkillPoints(uint32 _tokenId) public onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+        if (s.gotchiRespecCount[_tokenId] > 0) {
+            ForgeTokenFacet forgeTokenFacet = ForgeTokenFacet(s.forgeDiamond);
+            uint256 ESSENCE = 1_000_000_001;
+
+            require(forgeTokenFacet.balanceOf(msg.sender, ESSENCE) >= 50, "Not enough Essence");
+            forgeTokenFacet.safeTransferFrom(msg.sender, s.daoDirectorTreasury, ESSENCE, 50, "0x");
+        }
+
+        int16[NUMERIC_TRAITS_NUM] memory baseNumericTraits = getGotchiBaseNumericTraits(_tokenId);
+
+        s.gotchiRespecCount[_tokenId] += 1;
+        s.aavegotchis[_tokenId].numericTraits = baseNumericTraits;
+        s.aavegotchis[_tokenId].usedSkillPoints = 0;
+
+        emit ResetSkillpoints(_tokenId);
+    }
+
+    function getGotchiBaseNumericTraits(uint32 _tokenId) public view returns (int16[NUMERIC_TRAITS_NUM] memory numericTraits_) {
+        // cast to uint256 for hauntCollateralTypes key
+        uint256 hauntId = uint256(s.aavegotchis[_tokenId].hauntId);
+        uint256 randomNumber = s.aavegotchis[_tokenId].randomNumber;
+        address collateralType = s.aavegotchis[_tokenId].collateralType;
+        numericTraits_ = LibAavegotchi.toNumericTraits(randomNumber, s.collateralTypeInfo[collateralType].modifiers, hauntId);
     }
 }

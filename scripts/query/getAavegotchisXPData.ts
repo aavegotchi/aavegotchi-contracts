@@ -57,7 +57,8 @@ export async function queryAllAavegotchis(
     const result = await getUsersWithGotchisOfAddresses(
       addresses,
       blockTag,
-      index
+      index,
+      true
     );
 
     index += 1000;
@@ -111,7 +112,8 @@ export async function queryAllAavegotchis(
     const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
     const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(
       batch,
-      blockTag
+      blockTag,
+      true
     );
     vaultUsers.forEach((e) => {
       allGotchiIds = allGotchiIds.concat(e.gotchisOwned.map((f) => f.id));
@@ -159,6 +161,11 @@ export async function queryAllAavegotchis(
   finalData = removeEmpty(eliminateDuplicates(finalData));
 
   finalData = reduceGotchiData(finalData);
+
+  //loop through all finalData.gotchiIds and remove duplicates
+  finalData.forEach((e) => {
+    e.gotchiIds = [...new Set(e.gotchiIds)];
+  });
 
   console.log("Unique addresses:", finalData.length);
   const x = new Set(allGotchiIds);
@@ -242,6 +249,9 @@ export async function generateMerkleTree(
   //write the tree to a file
 
   const parentPath = getParentPath(propDetails.id);
+
+  console.log("parent path:", parentPath);
+
   if (!fs.existsSync(parentPath)) {
     //create folder if it doesn't exist
     fs.mkdirSync(parentPath, { recursive: true });
@@ -270,8 +280,8 @@ export async function generateMerkleTree(
   };
 }
 
-export function getParentPath(propTitle: string): string {
-  return rootPath + `${propType(propTitle)}/${propTitle}`;
+export function getParentPath(propId: string): string {
+  return rootPath + `${propId}`;
 }
 
 function removeEmpty(data: GotchiData[]) {
@@ -291,7 +301,7 @@ function removeEmpty(data: GotchiData[]) {
 //gets the proof of a particular address
 export async function getProof(address: string, propId: string) {
   const prop: ProposalDetails = await getProposalDetails(propId);
-  const filePath = getParentPath(prop.title) + "/tree.json";
+  const filePath = getParentPath(prop.id) + "/tree.json";
 
   //retrieve proof
   const jsonString = fs.readFileSync(filePath, "utf-8");
@@ -307,7 +317,7 @@ export async function getProof(address: string, propId: string) {
 
 export async function getGotchiIds(address: string, propId: string) {
   const prop: ProposalDetails = await getProposalDetails(propId);
-  const filePath = getParentPath(prop.title) + "/data.json";
+  const filePath = getParentPath(prop.id) + "/data.json";
 
   //retrieve gotchiIds
   const jsonString = fs.readFileSync(filePath, "utf-8");
