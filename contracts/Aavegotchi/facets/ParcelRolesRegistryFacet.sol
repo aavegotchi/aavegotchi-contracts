@@ -29,17 +29,13 @@ contract ParcelRolesRegistryFacet is Modifiers, IERC7432 {
             ROLE_UPGRADE_INSTALLATIONS
         ];
         for (uint256 i = 0; i < initialRoles.length; i++) {
+            s.validRoles[initialRoles[i]] = true;
             s.allowedRoles.push(initialRoles[i]);
         }
     }
 
     /** Modifiers **/
-
-    modifier onlyAllowedRole(address _tokenAddress, bytes32 _roleId) {
-        require(s.isRoleAllowed[_tokenAddress][_roleId], "ParcelRolesRegistryFacet: role is not allowed");
-        _;
-    }
-
+    
     /**
      * @notice Checks if the token is a wearable.
      * @dev It reverts if the token is not a wearable.
@@ -65,9 +61,14 @@ contract ParcelRolesRegistryFacet is Modifiers, IERC7432 {
         _;
     }
 
+    modifier onlyValidRole(bytes32 _roleId) {
+        require(s.validRoles[_roleId], "ParcelRolesRegistryFacet: invalid role ID");
+        _;
+    }
+
     /** External Functions **/
 
-    function grantRole(IERC7432.Role calldata _role) external override onlyRealm(_role.tokenAddress, _role.tokenId) {
+    function grantRole(IERC7432.Role calldata _role) external override onlyRealm(_role.tokenAddress, _role.tokenId) onlyValidRole(_role.roleId){
         require(_role.expirationDate > block.timestamp, "ParcelRolesRegistryFacet: expiration date must be in the future");
 
         // deposit NFT if necessary
@@ -97,7 +98,7 @@ contract ParcelRolesRegistryFacet is Modifiers, IERC7432 {
         );
     }
 
-    function revokeRole(address _tokenAddress, uint256 _tokenId, bytes32 _roleId) external override onlyAllowedRole(_tokenAddress, _roleId) {
+    function revokeRole(address _tokenAddress, uint256 _tokenId, bytes32 _roleId) external override {
         address _recipient = s.erc7432_roles[_tokenAddress][_tokenId][_roleId].recipient;
         address _caller = _getApprovedCaller(_tokenAddress, _tokenId, _recipient);
 
@@ -133,24 +134,6 @@ contract ParcelRolesRegistryFacet is Modifiers, IERC7432 {
     function setRoleApprovalForAll(address _tokenAddress, address _operator, bool _approved) external override {
         s.itemsRoleApprovals[msg.sender][_tokenAddress][_operator] = _approved;
         emit RoleApprovalForAll(_tokenAddress, _operator, _approved);
-    }
-
-    // @notice Checks if the grantor approved the operator for all SFTs.
-    /// @param _tokenAddress The token address.
-    /// @param _tokenId The token identifier..
-    /// @param _roles roles that will be available for the token.
-    function setAlloweRoles(address _tokenAddress, uint256 _tokenId, bytes32[] calldata _roles) external {
-        address originalOwner_ = s.erc7432OriginalOwners[_tokenAddress][_tokenId];
-
-        require(
-            originalOwner_ == msg.sender || isRoleApprovedForAll(_tokenAddress, originalOwner_, msg.sender),
-            "ParcelRolesRegistryFacet: sender must be owner or approved"
-        );
-
-        for (uint256 i = 0; i < _roles.length; i++) {
-            require(isRoleInAllowedRoles(_roles[i]), "ParcelRolesRegistryFacet: role is not in allowed roles");
-            s.isRoleAllowed[_tokenAddress][_roles[i]] = true;
-        }
     }
 
     /** View Functions **/
@@ -262,14 +245,5 @@ contract ParcelRolesRegistryFacet is Modifiers, IERC7432 {
             return originalOwner;
         }
         revert("ParcelRolesRegistryFacet: role does not exist or sender is not approved");
-    }
-
-    function isRoleInAllowedRoles(bytes32 _role) internal view returns (bool) {
-        for (uint256 i = 0; i < s.allowedRoles.length; i++) {
-            if (s.allowedRoles[i] == _role) {
-                return true;
-            }
-        }
-        return false;
     }
 }

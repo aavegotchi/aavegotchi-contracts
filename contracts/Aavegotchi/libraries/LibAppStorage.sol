@@ -383,11 +383,13 @@ struct AppStorage {
     mapping(uint256 => GotchiEquippedDepositsInfo) gotchiEquippedDepositsInfo;
     // Parcel Roles
     // tokenAddress => tokenId  => role
-    mapping(address => mapping(uint256 => mapping(bytes32 => RoleData ))) erc7432_roles;
+    mapping(address => mapping(uint256 => mapping(bytes32 => RoleData))) erc7432_roles;
     //tokenAddress => tokenId => owner
     mapping(address => mapping(uint256 => address)) erc7432OriginalOwners;
     //tokenAddress => roleId => isAllowed
     mapping(address => mapping(bytes32 => bool)) isRoleAllowed;
+    //roleId => isAllowed
+    mapping(bytes32 => bool) validRoles;
     bytes32[] allowedRoles;
 }
 
