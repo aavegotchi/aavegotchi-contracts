@@ -88,7 +88,7 @@ describe("Testing ERC1155 Buy Order", async function () {
   });
 
   describe("Testing placeERC1155BuyOrder", async function () {
-    it("Should revert if cost is lower than 1 GHST", async function () {
+    it("Should revert if cost is lower than 0.001 GHST", async function () {
       await expect(
         erc1155BuyOrderFacet.placeERC1155BuyOrder(
           diamondAddress,
@@ -97,7 +97,7 @@ describe("Testing ERC1155 Buy Order", async function () {
           quantity1,
           duration0
         )
-      ).to.be.revertedWith("ERC1155BuyOrder: cost should be 1 GHST or larger");
+      ).to.be.revertedWith("ERC1155BuyOrder: cost should be 0.001 GHST or larger");
       await expect(
         erc1155BuyOrderFacet.placeERC1155BuyOrder(
           diamondAddress,
@@ -106,16 +106,16 @@ describe("Testing ERC1155 Buy Order", async function () {
           0,
           duration0
         )
-      ).to.be.revertedWith("ERC1155BuyOrder: cost should be 1 GHST or larger");
+      ).to.be.revertedWith("ERC1155BuyOrder: cost should be 0.001 GHST or larger");
       await expect(
         erc1155BuyOrderFacet.placeERC1155BuyOrder(
           diamondAddress,
           testWearableId1,
-          ethers.utils.parseUnits("0.1", "ether"),
+          ethers.utils.parseUnits("0.0001", "ether"),
           1,
           duration0
         )
-      ).to.be.revertedWith("ERC1155BuyOrder: cost should be 1 GHST or larger");
+      ).to.be.revertedWith("ERC1155BuyOrder: cost should be 0.001 GHST or larger");
     });
     it("Should revert if buyer have not enough GHST", async function () {
       await expect(

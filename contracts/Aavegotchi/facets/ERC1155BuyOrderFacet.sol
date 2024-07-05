@@ -71,7 +71,7 @@ contract ERC1155BuyOrderFacet is Modifiers {
         uint256 _duration
     ) external {
         uint256 cost = _quantity * _priceInWei;
-        require(cost >= 1e18, "ERC1155BuyOrder: cost should be 1 GHST or larger");
+        require(cost >= 1e15, "ERC1155BuyOrder: cost should be 0.001 GHST or larger");
 
         address sender = LibMeta.msgSender();
         uint256 category = LibSharedMarketplace.getERC1155Category(_erc1155TokenAddress, _erc1155TokenId);
@@ -174,7 +174,7 @@ contract ERC1155BuyOrderFacet is Modifiers {
         require(erc1155BuyOrder.quantity >= _quantity, "ERC1155BuyOrder: Sell amount should not be larger than quantity of the buy order");
 
         uint256 cost = _quantity * erc1155BuyOrder.priceInWei;
-        require(cost >= 1e18, "ERC1155BuyOrder: execution cost should be 1 GHST or larger");
+        require(cost >= 1e15, "ERC1155BuyOrder: execution cost should be 0.001 GHST or larger");
 
         IERC1155 erc1155Token = IERC1155(erc1155BuyOrder.erc1155TokenAddress);
         require(erc1155Token.balanceOf(sender, erc1155BuyOrder.erc1155TokenId) >= _quantity, "ERC1155Marketplace: Not enough ERC1155 token");
