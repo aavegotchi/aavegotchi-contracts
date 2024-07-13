@@ -104,6 +104,8 @@ contract ERC1155BuyOrderFacet is Modifiers {
                 erc1155BuyOrder.quantity = _quantity;
                 emit ERC1155BuyOrderUpdate(oldBuyOrderId, category, _priceInWei, _quantity, block.timestamp);
             }
+
+            //New order
         } else {
             // Transfer GHST
             require(ghstBalance >= cost, "ERC1155BuyOrder: Not enough GHST!");
@@ -152,6 +154,7 @@ contract ERC1155BuyOrderFacet is Modifiers {
         require(erc1155BuyOrder.timeCreated != 0, "ERC1155BuyOrder: ERC1155 buyOrder does not exist");
         require(sender == erc1155BuyOrder.buyer, "ERC1155BuyOrder: Only buyer can call this function");
         require((erc1155BuyOrder.cancelled == false) && (erc1155BuyOrder.completed == false), "ERC1155BuyOrder: Already processed");
+
         if (erc1155BuyOrder.duration > 0) {
             require(erc1155BuyOrder.timeCreated + erc1155BuyOrder.duration >= block.timestamp, "ERC1155BuyOrder: Already expired");
         }
