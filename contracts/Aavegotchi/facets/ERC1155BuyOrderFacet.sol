@@ -78,17 +78,25 @@ contract ERC1155BuyOrderFacet is Modifiers {
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
 
         uint256 oldBuyOrderId = s.buyerToERC1155BuyOrderId[_erc1155TokenAddress][_erc1155TokenId][sender];
+
+        //If an order exists from this user, first refund the GHST
         if (oldBuyOrderId != 0) {
             ERC1155BuyOrder storage erc1155BuyOrder = s.erc1155BuyOrders[oldBuyOrderId];
             require(erc1155BuyOrder.timeCreated != 0, "ERC1155BuyOrder: ERC1155 buyOrder does not exist");
             require((erc1155BuyOrder.cancelled == false) && (erc1155BuyOrder.lastTimePurchased == 0), "ERC1155BuyOrder: Already processed");
+
+            //If the order is still valid, update the order
             if ((erc1155BuyOrder.duration == 0) || (erc1155BuyOrder.timeCreated + erc1155BuyOrder.duration >= block.timestamp)) {
                 // Transfer GHST
                 uint256 oldCost = erc1155BuyOrder.quantity * erc1155BuyOrder.priceInWei;
+                uint256 difference = cost - oldCost;
                 if (cost > oldCost) {
-                    require(ghstBalance >= cost - oldCost, "ERC1155BuyOrder: Not enough GHST!");
-                    LibERC20.transferFrom(s.ghstContract, sender, address(this), cost - oldCost);
+                    require(ghstBalance >= difference, "ERC1155BuyOrder: Not enough GHST!");
+
+                    //Transfer the difference to the contract
+                    LibERC20.transferFrom(s.ghstContract, sender, address(this), difference);
                 } else if (cost < oldCost) {
+                    //Transfer the extra amount back to the user
                     LibERC20.transfer(s.ghstContract, sender, oldCost - cost);
                 }
                 // update and emit event
