@@ -89,8 +89,9 @@ contract ERC1155BuyOrderFacet is Modifiers {
             if ((erc1155BuyOrder.duration == 0) || (erc1155BuyOrder.timeCreated + erc1155BuyOrder.duration >= block.timestamp)) {
                 // Transfer GHST
                 uint256 oldCost = erc1155BuyOrder.quantity * erc1155BuyOrder.priceInWei;
-                uint256 difference = cost - oldCost;
+
                 if (cost > oldCost) {
+                    uint256 difference = cost - oldCost;
                     require(ghstBalance >= difference, "ERC1155BuyOrder: Not enough GHST!");
 
                     //Transfer the difference to the contract
