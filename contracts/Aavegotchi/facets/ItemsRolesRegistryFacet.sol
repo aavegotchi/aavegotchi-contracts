@@ -383,7 +383,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
         LibItems.removeFromOwner(_from, _tokenId, _tokenAmount);
         LibItems.addToOwner(_to, _tokenId, _tokenAmount);
         IEventHandlerFacet(_tokenAddress).emitTransferSingleEvent(LibMeta.msgSender(), _from, _to, _tokenId, _tokenAmount);
-        LibERC1155Marketplace.updateERC1155Listing(address(this), _tokenId, _to);
+        LibERC1155Marketplace.updateERC1155Listing(address(this), _tokenId, _from);
     }
 
     /**
