@@ -39,30 +39,6 @@ contract ERC1155BuyOrderFacet is Modifiers {
         uint256 time
     );
 
-    function getERC1155BuyOrder(uint256 _buyOrderId) external view returns (ERC1155BuyOrder memory buyOrder_) {
-        buyOrder_ = s.erc1155BuyOrders[_buyOrderId];
-        require(buyOrder_.timeCreated != 0, "ERC1155BuyOrder: ERC1155 buyOrder does not exist");
-    }
-
-    function getERC1155BuyOrderIdsByTokenId(
-        address _erc1155TokenAddress,
-        uint256 _erc1155TokenId
-    ) external view returns (uint256[] memory buyOrderIds_) {
-        buyOrderIds_ = s.erc1155TokenToBuyOrderIds[_erc1155TokenAddress][_erc1155TokenId];
-    }
-
-    function getERC1155BuyOrdersByTokenId(
-        address _erc1155TokenAddress,
-        uint256 _erc1155TokenId
-    ) external view returns (ERC1155BuyOrder[] memory buyOrders_) {
-        uint256[] memory buyOrderIds = s.erc1155TokenToBuyOrderIds[_erc1155TokenAddress][_erc1155TokenId];
-        uint256 length = buyOrderIds.length;
-        buyOrders_ = new ERC1155BuyOrder[](length);
-        for (uint256 i; i < length; i++) {
-            buyOrders_[i] = s.erc1155BuyOrders[buyOrderIds[i]];
-        }
-    }
-
     function placeERC1155BuyOrder(
         address _erc1155TokenAddress,
         uint256 _erc1155TokenId,
@@ -116,9 +92,6 @@ contract ERC1155BuyOrderFacet is Modifiers {
             s.nextERC1155BuyOrderId++;
             uint256 buyOrderId = s.nextERC1155BuyOrderId;
 
-            s.erc1155TokenToBuyOrderIdIndexes[_erc1155TokenAddress][_erc1155TokenId][buyOrderId] = s
-            .erc1155TokenToBuyOrderIds[_erc1155TokenAddress][_erc1155TokenId].length;
-            s.erc1155TokenToBuyOrderIds[_erc1155TokenAddress][_erc1155TokenId].push(buyOrderId);
             s.buyerToERC1155BuyOrderId[_erc1155TokenAddress][_erc1155TokenId][sender] = buyOrderId;
 
             s.erc1155BuyOrders[buyOrderId] = ERC1155BuyOrder({

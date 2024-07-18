@@ -40,7 +40,6 @@ describe("Testing ERC1155 Buy Order", async function () {
   let ghstHolder: any;
   let firstBuyOrderId: any;
   let secondBuyOrderId: any;
-  let thirdBuyOrderId: any;
   let fourthBuyOrderId: any;
 
   before(async function () {
@@ -281,101 +280,6 @@ describe("Testing ERC1155 Buy Order", async function () {
     });
   });
 
-  describe("Testing getERC1155BuyOrder", async function () {
-    before(async function () {
-      const receipt = await (
-        await erc1155BuyOrderFacet.placeERC1155BuyOrder(
-          diamondAddress,
-          testWearableId1,
-          mediumPrice,
-          quantity2,
-          duration0
-        )
-      ).wait();
-      const event = receipt!.events!.find(
-        (e: any) => e.event === "ERC1155BuyOrderAdd"
-      );
-      thirdBuyOrderId = event!.args!.buyOrderId;
-    });
-    it("Should revert when try to get buy order with wrong id", async function () {
-      await expect(
-        erc1155BuyOrderFacet.getERC1155BuyOrder(thirdBuyOrderId.add(1))
-      ).to.be.revertedWith("ERC1155BuyOrder: ERC1155 buyOrder does not exist");
-    });
-    it("Should fetch buy order data with correct buy order id for all status (both cancelled and not)", async function () {
-      let buyOrder = await erc1155BuyOrderFacet.getERC1155BuyOrder(
-        firstBuyOrderId
-      );
-      expect(buyOrder.buyOrderId).to.equal(firstBuyOrderId);
-      expect(buyOrder.erc1155TokenId).to.equal(testWearableId1);
-      expect(buyOrder.duration).to.equal(duration1);
-      expect(buyOrder.cancelled).to.equal(true);
-      buyOrder = await erc1155BuyOrderFacet.getERC1155BuyOrder(
-        secondBuyOrderId
-      );
-      expect(buyOrder.buyOrderId).to.equal(secondBuyOrderId);
-      expect(buyOrder.erc1155TokenId).to.equal(testWearableId1);
-      expect(buyOrder.duration).to.equal(duration0);
-      expect(buyOrder.cancelled).to.equal(false);
-      buyOrder = await erc1155BuyOrderFacet.getERC1155BuyOrder(thirdBuyOrderId);
-      expect(buyOrder.buyOrderId).to.equal(thirdBuyOrderId);
-      expect(buyOrder.erc1155TokenId).to.equal(testWearableId1);
-      expect(buyOrder.duration).to.equal(duration0);
-      expect(buyOrder.cancelled).to.equal(false);
-    });
-  });
-
-  describe("Testing getERC1155BuyOrderIdsByTokenId", async function () {
-    it("Should return empty array with wrong wearable id", async function () {
-      const buyOrderIds =
-        await erc1155BuyOrderFacet.getERC1155BuyOrderIdsByTokenId(
-          diamondAddress,
-          testWearableId2
-        );
-      expect(buyOrderIds.length).to.equal(0);
-    });
-    it("Should fetch active(not cancelled) buy order ids with correct wearable id", async function () {
-      const buyOrderIds =
-        await erc1155BuyOrderFacet.getERC1155BuyOrderIdsByTokenId(
-          diamondAddress,
-          testWearableId1
-        );
-      expect(buyOrderIds.length).to.equal(2);
-      expect(buyOrderIds[0]).to.equal(secondBuyOrderId);
-      expect(buyOrderIds[1]).to.equal(thirdBuyOrderId);
-    });
-  });
-
-  describe("Testing getERC1155BuyOrdersByTokenId", async function () {
-    after(async function () {
-      await (
-        await erc1155BuyOrderFacet.cancelERC1155BuyOrder(thirdBuyOrderId)
-      ).wait();
-    });
-    it("Should return empty array with wrong wearable id", async function () {
-      const buyOrders = await erc1155BuyOrderFacet.getERC1155BuyOrdersByTokenId(
-        diamondAddress,
-        testWearableId2
-      );
-      expect(buyOrders.length).to.equal(0);
-    });
-    it("Should fetch active(not cancelled) buy orders data with correct wearable id", async function () {
-      const buyOrders = await erc1155BuyOrderFacet.getERC1155BuyOrdersByTokenId(
-        diamondAddress,
-        testWearableId1
-      );
-      expect(buyOrders.length).to.equal(2);
-      expect(buyOrders[0].buyOrderId).to.equal(secondBuyOrderId);
-      expect(buyOrders[0].erc1155TokenId).to.equal(testWearableId1);
-      expect(buyOrders[0].duration).to.equal(duration0);
-      expect(buyOrders[0].cancelled).to.equal(false);
-      expect(buyOrders[1].buyOrderId).to.equal(thirdBuyOrderId);
-      expect(buyOrders[1].erc1155TokenId).to.equal(testWearableId1);
-      expect(buyOrders[1].duration).to.equal(duration0);
-      expect(buyOrders[1].cancelled).to.equal(false);
-    });
-  });
-
   describe("Testing executeERC1155BuyOrder (without duration)", async function () {
     before(async function () {
       await (
@@ -546,15 +450,6 @@ describe("Testing ERC1155 Buy Order", async function () {
       expect(wearableBalanceAfter.sub(wearableBalanceBefore)).to.equal(
         quantity2
       );
-
-      // Check buy order status
-      const buyOrder = await erc1155BuyOrderFacet.getERC1155BuyOrder(
-        fourthBuyOrderId
-      );
-      expect(buyOrder.buyOrderId).to.equal(fourthBuyOrderId);
-      expect(buyOrder.lastTimePurchased.gt(0)).to.equal(true);
-      expect(buyOrder.quantity.toNumber()).to.equal(quantity3 - quantity2);
-      expect(buyOrder.completed).to.equal(false);
     });
     it("Should succeed and completed when execute buy order with valid data and remained quantity", async function () {
       const buyerOldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
@@ -610,15 +505,6 @@ describe("Testing ERC1155 Buy Order", async function () {
       expect(wearableBalanceAfter.sub(wearableBalanceBefore)).to.equal(
         remainedQuantity
       );
-
-      // Check buy order status
-      const buyOrder = await erc1155BuyOrderFacet.getERC1155BuyOrder(
-        fourthBuyOrderId
-      );
-      expect(buyOrder.buyOrderId).to.equal(fourthBuyOrderId);
-      expect(buyOrder.lastTimePurchased.gt(0)).to.equal(true);
-      expect(buyOrder.quantity.toNumber()).to.equal(0);
-      expect(buyOrder.completed).to.equal(true);
     });
   });
 
