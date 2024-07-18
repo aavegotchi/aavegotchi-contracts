@@ -225,6 +225,7 @@ contract ERC1155BuyOrderFacet is Modifiers {
                 new bytes(0)
             );
         }
+        LibERC1155Marketplace.updateERC1155Listing(erc1155BuyOrder.erc1155TokenAddress, erc1155BuyOrder.erc1155TokenId, sender);
 
         emit ERC1155BuyOrderExecute(
             _buyOrderId,
