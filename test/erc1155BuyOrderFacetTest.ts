@@ -96,7 +96,9 @@ describe("Testing ERC1155 Buy Order", async function () {
           quantity1,
           duration0
         )
-      ).to.be.revertedWith("ERC1155BuyOrder: cost should be 0.001 GHST or larger");
+      ).to.be.revertedWith(
+        "ERC1155BuyOrder: cost should be 0.001 GHST or larger"
+      );
       await expect(
         erc1155BuyOrderFacet.placeERC1155BuyOrder(
           diamondAddress,
@@ -105,7 +107,9 @@ describe("Testing ERC1155 Buy Order", async function () {
           0,
           duration0
         )
-      ).to.be.revertedWith("ERC1155BuyOrder: cost should be 0.001 GHST or larger");
+      ).to.be.revertedWith(
+        "ERC1155BuyOrder: cost should be 0.001 GHST or larger"
+      );
       await expect(
         erc1155BuyOrderFacet.placeERC1155BuyOrder(
           diamondAddress,
@@ -114,7 +118,9 @@ describe("Testing ERC1155 Buy Order", async function () {
           1,
           duration0
         )
-      ).to.be.revertedWith("ERC1155BuyOrder: cost should be 0.001 GHST or larger");
+      ).to.be.revertedWith(
+        "ERC1155BuyOrder: cost should be 0.001 GHST or larger"
+      );
     });
     it("Should revert if buyer have not enough GHST", async function () {
       await expect(
@@ -153,7 +159,7 @@ describe("Testing ERC1155 Buy Order", async function () {
       });
     });
     describe("If there's already buy order from same buyer", async function () {
-      it("Should succeed and GHST should be transferred if cost is greater than old one", async function () {
+      it("Should succeed without affect previous order", async function () {
         const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
         await (
           await ghstERC20.connect(ghstHolder)
@@ -168,40 +174,12 @@ describe("Testing ERC1155 Buy Order", async function () {
           )
         ).wait();
         const event = receipt!.events!.find(
-          (e: any) => e.event === "ERC1155BuyOrderUpdate"
+          (e: any) => e.event === "ERC1155BuyOrderAdd"
         );
-        expect(event!.args!.buyOrderId).to.equal(firstBuyOrderId);
         expect(event!.args!.priceInWei).to.equal(mediumPrice);
         expect(event!.args!.quantity).to.equal(quantity2);
         const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
-        expect(
-          newBalance.add(mediumPrice.mul(quantity2)).sub(price.mul(quantity1))
-        ).to.equal(oldBalance);
-      });
-      it("Should succeed and GHST should be returned if cost is lower than old one", async function () {
-        const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
-        await (
-          await ghstERC20.connect(ghstHolder)
-        ).approve(diamondAddress, mediumPrice.mul(quantity2));
-        const receipt = await (
-          await erc1155BuyOrderFacet.placeERC1155BuyOrder(
-            diamondAddress,
-            testWearableId1,
-            price,
-            quantity1,
-            duration0
-          )
-        ).wait();
-        const event = receipt!.events!.find(
-          (e: any) => e.event === "ERC1155BuyOrderUpdate"
-        );
-        expect(event!.args!.buyOrderId).to.equal(firstBuyOrderId);
-        expect(event!.args!.priceInWei).to.equal(price);
-        expect(event!.args!.quantity).to.equal(quantity1);
-        const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
-        expect(
-          newBalance.add(price.mul(quantity1)).sub(mediumPrice.mul(quantity2))
-        ).to.equal(oldBalance);
+        expect(newBalance.add(mediumPrice.mul(quantity2))).to.equal(oldBalance);
       });
     });
     describe("If there's already buy order from other buyer", async function () {

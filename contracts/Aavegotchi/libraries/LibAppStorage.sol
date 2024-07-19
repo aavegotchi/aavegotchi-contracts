@@ -384,7 +384,6 @@ struct AppStorage {
     // states for erc1155 buy orders
     uint256 nextERC1155BuyOrderId;
     mapping(uint256 => ERC1155BuyOrder) erc1155BuyOrders; // buyOrderId => data
-    mapping(address => mapping(uint256 => mapping(address => uint256))) buyerToERC1155BuyOrderId; // erc1155 token address => erc1155TokenId => sender => buyOrderId
 }
 
 library LibAppStorage {
