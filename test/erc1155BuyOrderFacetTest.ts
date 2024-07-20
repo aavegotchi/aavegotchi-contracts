@@ -515,11 +515,6 @@ describe("Testing ERC1155 Buy Order", async function () {
       ethers.provider.send("evm_increaseTime", [duration1 + 1]);
       ethers.provider.send("evm_mine", []);
     });
-    it("Should fail if cancel expired buy order", async function () {
-      await expect(
-        erc1155BuyOrderFacet.cancelERC1155BuyOrder(buyOrderId)
-      ).to.be.revertedWith("ERC1155BuyOrder: Already expired");
-    });
     it("Should fail if execute expired buy order", async function () {
       await expect(
         (
@@ -532,6 +527,58 @@ describe("Testing ERC1155 Buy Order", async function () {
           quantity1
         )
       ).to.be.revertedWith("ERC1155BuyOrder: Already expired");
+    });
+    it("Should succeed if anyone cancel expired buy order", async function () {
+      const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+      const receipt = await (
+        await erc1155BuyOrderFacet.cancelERC1155BuyOrder(buyOrderId)
+      ).wait();
+      const event = receipt!.events!.find(
+        (e: any) => e.event === "ERC1155BuyOrderCancel"
+      );
+      expect(event!.args!.buyOrderId).to.equal(buyOrderId);
+      const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+      expect(newBalance.sub(price.mul(quantity1))).to.equal(oldBalance);
+    });
+    it("Should fail if non-buyer cancel buy order before expired", async function () {
+      await network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [wearableOwnerAddress2],
+      });
+      wearableOwner2 = await ethers.getSigner(wearableOwnerAddress2);
+      await (
+        await ghstERC20.connect(ghstHolder)
+      ).approve(diamondAddress, price);
+      const receipt = await (
+        await erc1155BuyOrderFacet.placeERC1155BuyOrder(
+          diamondAddress,
+          testWearableId2,
+          price,
+          quantity1,
+          duration1
+        )
+      ).wait();
+      const event = receipt!.events!.find(
+        (e: any) => e.event === "ERC1155BuyOrderAdd"
+      );
+      buyOrderId = event!.args!.buyOrderId;
+      await expect(
+        (
+          await erc1155BuyOrderFacet.connect(maticHolder)
+        ).cancelERC1155BuyOrder(buyOrderId)
+      ).to.be.revertedWith("ERC1155BuyOrder: Only buyer can call this function");
+    });
+    it("Should succeed if buyer cancel buy order before expired", async function () {
+      const oldBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+      const receipt = await (
+        await erc1155BuyOrderFacet.cancelERC1155BuyOrder(buyOrderId)
+      ).wait();
+      const event = receipt!.events!.find(
+        (e: any) => e.event === "ERC1155BuyOrderCancel"
+      );
+      expect(event!.args!.buyOrderId).to.equal(buyOrderId);
+      const newBalance = await ghstERC20.balanceOf(ghstHolderAddress);
+      expect(newBalance.sub(price.mul(quantity1))).to.equal(oldBalance);
     });
   });
 });

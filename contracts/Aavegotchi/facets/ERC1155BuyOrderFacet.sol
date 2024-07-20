@@ -93,11 +93,9 @@ contract ERC1155BuyOrderFacet is Modifiers {
         address sender = LibMeta.msgSender();
         ERC1155BuyOrder memory erc1155BuyOrder = s.erc1155BuyOrders[_buyOrderId];
         require(erc1155BuyOrder.timeCreated != 0, "ERC1155BuyOrder: ERC1155 buyOrder does not exist");
-        require(sender == erc1155BuyOrder.buyer, "ERC1155BuyOrder: Only buyer can call this function");
         require((erc1155BuyOrder.cancelled == false) && (erc1155BuyOrder.completed == false), "ERC1155BuyOrder: Already processed");
-
-        if (erc1155BuyOrder.duration > 0) {
-            require(erc1155BuyOrder.timeCreated + erc1155BuyOrder.duration >= block.timestamp, "ERC1155BuyOrder: Already expired");
+        if ((erc1155BuyOrder.duration == 0) || ((erc1155BuyOrder.duration > 0) && (erc1155BuyOrder.timeCreated + erc1155BuyOrder.duration > block.timestamp))) {
+            require(sender == erc1155BuyOrder.buyer, "ERC1155BuyOrder: Only buyer can call this function");
         }
 
         LibBuyOrder.cancelERC1155BuyOrder(_buyOrderId);
