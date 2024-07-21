@@ -241,7 +241,6 @@ struct ERC1155BuyOrder {
     uint256 erc1155TokenId;
     uint256 priceInWei;
     uint256 quantity;
-    uint256 sourceBuyOrderId;
     uint256 timeCreated;
     uint256 lastTimePurchased;
     uint256 duration; //0 for unlimited

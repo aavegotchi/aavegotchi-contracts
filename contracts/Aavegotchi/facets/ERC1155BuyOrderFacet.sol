@@ -69,7 +69,6 @@ contract ERC1155BuyOrderFacet is Modifiers {
             erc1155TokenId: _erc1155TokenId,
             priceInWei: _priceInWei,
             quantity: _quantity,
-            sourceBuyOrderId: 0,
             timeCreated: block.timestamp,
             lastTimePurchased: 0,
             duration: _duration,
@@ -147,23 +146,6 @@ contract ERC1155BuyOrderFacet is Modifiers {
             split
         );
 
-        // new sub buy order
-        s.nextERC1155BuyOrderId++;
-        uint256 subBuyOrderId = s.nextERC1155BuyOrderId;
-        s.erc1155BuyOrders[subBuyOrderId] = ERC1155BuyOrder({
-            buyOrderId: subBuyOrderId,
-            buyer: erc1155BuyOrder.buyer,
-            erc1155TokenAddress: erc1155BuyOrder.erc1155TokenAddress,
-            erc1155TokenId: erc1155BuyOrder.erc1155TokenId,
-            priceInWei: erc1155BuyOrder.priceInWei,
-            quantity: _quantity,
-            sourceBuyOrderId: _buyOrderId,
-            timeCreated: block.timestamp,
-            lastTimePurchased: block.timestamp,
-            duration: erc1155BuyOrder.duration,
-            completed: true,
-            cancelled: false
-        });
         if (erc1155BuyOrder.quantity == 0) {
             erc1155BuyOrder.completed = true;
         }
