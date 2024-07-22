@@ -25,7 +25,7 @@ export function maxQuantityToRarity(quantity: number) {
 export const itemTypes: ItemTypeInput[] = [
   {
     svgId: 0,
-    name: "The Void",
+    name: "Void",
     setId: [],
     author: "Xibot",
     description: "The Void",

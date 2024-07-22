@@ -72,6 +72,10 @@ export default {
       gasPrice: 1000000000,
       timeout: 90000,
     },
+    amoy: {
+      url: "https://polygon-amoy.infura.io/v3/e9c1880243764d849a4970565ccbf8c7",
+      accounts: [process.env.SECRET_2],
+    },
 
     // gorli: {
     //   url: process.env.GORLI,

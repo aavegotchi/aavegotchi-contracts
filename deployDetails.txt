@@ -1,0 +1,662 @@
+/home/timidan/Desktop/aavegotchi-contracts
+/home/timidan/Desktop/aavegotchi-contracts
+
+/home/timidan/Desktop/aavegotchi-contracts
+/home/timidan/Desktop/aavegotchi-contracts
+No need to generate any newer typings.
+/home/timidan/Desktop/aavegotchi-contracts
+/home/timidan/Desktop/aavegotchi-contracts
+/home/timidan/Desktop/aavegotchi-contracts
+/home/timidan/Desktop/aavegotchi-contracts
+No need to generate any newer typings.
+/home/timidan/Desktop/aavegotchi-contracts
+/home/timidan/Desktop/aavegotchi-contracts
+Owner: 0xB9D736c48351Bad464710ee73BA80A0A659c1795
+contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet deploy gas used:1,667,887
+contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet deploy gas used:3,843,801
+AavegotchiGameFacet deploy gas used:4,468,163
+SvgFacet deploy gas used:3,933,501
+contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet deploy gas used:5,356,501
+ItemsTransferFacet deploy gas used:2,959,227
+CollateralFacet deploy gas used:1,717,078
+DAOFacet deploy gas used:4,913,317
+VrfFacet deploy gas used:942,881
+ShopFacet deploy gas used:2,164,055
+MetaTransactionsFacet deploy gas used:485,236
+ERC1155MarketplaceFacet deploy gas used:3,613,023
+ERC721MarketplaceFacet deploy gas used:3,653,031
+EscrowFacet deploy gas used:1,156,135
+GotchiLendingFacet deploy gas used:4,499,431
+LendingGetterAndSetterFacet deploy gas used:3,000,337
+MarketplaceGetterFacet deploy gas used:3,088,135
+SvgViewsFacet deploy gas used:4,911,002
+WearableSetsFacet deploy gas used:665,380
+WhitelistFacet deploy gas used:1,166,508
+PeripheryFacet deploy gas used:1,443,876
+MerkleDropFacet deploy gas used:933,573
+ERC721BuyOrderFacet deploy gas used:3,698,617
+ItemsRolesRegistryFacet deploy gas used:2,546,875
+VoucherMigrationFacet deploy gas used:664,492
+--
+Using already deployed BridgeFacet: 0xC2Be4609649286712F91fbE4A9d4e308248dEF3f
+--
+Using already deployed AavegotchiFacet: 0xA7DAb41D57dc45D88b7e0dDF8427D69bEc6D0d9F
+--
+Using already deployed AavegotchiGameFacet: 0xDeab08cb9fd358EB1E9184C88A5C507411cf7D4c
+--
+Using already deployed SvgFacet: 0xCC01c2f256a5458aA0b74Aa445Ffbc3dda7F564E
+--
+Using already deployed ItemsFacet: 0x5542c51d871Fe6DA5dB854C6fc7A93B58e608e3B
+--
+Using already deployed ItemsTransferFacet: 0xbD12540a105728C0086B46947A1BDAF4FfA1320d
+--
+Using already deployed CollateralFacet: 0x32A6802F80736c4dB7daC9B91BE14D70308F3779
+--
+Using already deployed DAOFacet: 0x845470389254Dc07f01fc29A76e3eA2915a6d4a4
+--
+Using already deployed VrfFacet: 0xE94241183E2070bC506B352e5E4B03e8CE07C19D
+--
+Using already deployed ShopFacet: 0xfCE1e6854E2A43d58736Dfa0c84772FB2492Ee28
+--
+Using already deployed MetaTransactionsFacet: 0xF2a9d64E8b1DB7b061b52fbD78ECA29E5e64A18D
+--
+Using already deployed ERC1155MarketplaceFacet: 0x833ee6bE5c5c8bd22aF65BB482A78129Cc072585
+--
+Using already deployed ERC721MarketplaceFacet: 0x7dE92Bc53A5B72af467fB6cd2B91e8fa7a66e950
+--
+Using already deployed EscrowFacet: 0x7cb997224b8492490Ac68d80049FF7DD650E89Cb
+--
+Using already deployed GotchiLendingFacet: 0xbD9c6b1DFfd2aED27A48b76904B3f08d1aD7B2F4
+--
+Using already deployed LendingGetterAndSetterFacet: 0xD9db26212E2440BF58AbD4562767e59d3EAEacD4
+--
+Using already deployed MarketplaceGetterFacet: 0xA22E747075d2f08F0B27DB4e3F1feb43362daA37
+--
+Using already deployed SvgViewsFacet: 0x87567393B4efd7485662a8621AF8Fb12886649C3
+--
+Using already deployed WearableSetsFacet: 0x8D295570f4055F5593B20489FC2aDD1bb53fBd4c
+--
+Using already deployed WhitelistFacet: 0x28Df2766d3400f235719aA40Ace2b903f365b0c5
+--
+Using already deployed PeripheryFacet: 0x962f80C51417B9FE8c4d8AF7A69e04c918175A77
+--
+Using already deployed MerkleDropFacet: 0x63f98FD482afc5941Fb23958201D7A8803691702
+--
+Using already deployed ERC721BuyOrderFacet: 0xBDc274F1ff0f40a954164d06ACaBe9b37A42235b
+--
+Using already deployed ItemsRolesRegistryFacet: 0x854a42967DDA881c3fcbDDbA3A349615Aa40E61f
+--
+Using already deployed VoucherMigrationFacet: 0x7E1Fd55536d46CEa6D0b8C566D118Bc98b9B088A
+--
+--
+Setting up diamondCut args
+--
+BridgeFacet
+[
+  'childChainManager()',
+  'deposit(address,bytes)',
+  'setChildChainManager(address)',
+  'withdrawAavegotchiBatch(uint256[])',
+  'withdrawItemsBatch(uint256[],uint256[])'
+]
+--
+AavegotchiFacet
+[
+  'aavegotchiClaimTime(uint256)',
+  'allAavegotchisOfOwner(address)',
+  'approve(address,uint256)',
+  'balanceOf(address)',
+  'batchOwnerOf(uint256[])',
+  'getAavegotchi(uint256)',
+  'getApproved(uint256)',
+  'isApprovedForAll(address,address)',
+  'isPetOperatorForAll(address,address)',
+  'name()',
+  'ownerOf(uint256)',
+  'safeBatchTransferFrom(address,address,uint256[],bytes)',
+  'safeTransferFrom(address,address,uint256)',
+  'safeTransferFrom(address,address,uint256,bytes)',
+  'setApprovalForAll(address,bool)',
+  'setPetOperatorForAll(address,bool)',
+  'symbol()',
+  'tokenByIndex(uint256)',
+  'tokenIdsOfOwner(address)',
+  'tokenOfOwnerByIndex(address,uint256)',
+  'tokenURI(uint256)',
+  'totalSupply()',
+  'transferFrom(address,address,uint256)'
+]
+--
+AavegotchiGameFacet
+[
+  'aavegotchiLevel(uint256)',
+  'aavegotchiNameAvailable(string)',
+  'availableSkillPoints(uint256)',
+  'baseRarityScore(int16[6])',
+  'claimAavegotchi(uint256,uint256,uint256)',
+  'currentHaunt()',
+  'getGotchiBaseNumericTraits(uint32)',
+  'getNumericTraits(uint256)',
+  'ghstAddress()',
+  'interact(uint256[])',
+  'isAavegotchiLocked(uint256)',
+  'kinship(uint256)',
+  'modifiedTraitsAndRarityScore(uint256)',
+  'portalAavegotchiTraits(uint256)',
+  'rarityMultiplier(int16[6])',
+  'reduceKinshipViaChanneling(uint32)',
+  'resetSkillPoints(uint32)',
+  'respecCount(uint32)',
+  'revenueShares()',
+  'setAavegotchiName(uint256,string)',
+  'setRealmAddress(address)',
+  'spendSkillPoints(uint256,int16[4])',
+  'tokenIdsWithKinship(address,uint256,uint256,bool)',
+  'xpUntilNextLevel(uint256)'
+]
+--
+SvgFacet
+[
+  'deleteLastSvgLayers(bytes32,uint256)',
+  'getAavegotchiSvg(uint256)',
+  'getItemSvg(uint256)',
+  'getNextSleeveId()',
+  'getSvg(bytes32,uint256)',
+  'getSvgs(bytes32,uint256[])',
+  'portalAavegotchisSvg(uint256)',
+  'previewAavegotchi(uint256,address,int16[6],uint16[16])',
+  'setItemsDimensions(uint256[],(uint8,uint8,uint8,uint8)[])',
+  'setSleeves((uint256,uint256)[])',
+  'storeSvg(string,(bytes32,uint256[])[])',
+  'updateSvg(string,(bytes32,uint256[],uint256[])[])'
+]
+--
+ItemsFacet
+[
+  'balanceOf(address,uint256)',
+  'balanceOfBatch(address[],uint256[])',
+  'balanceOfToken(address,uint256,uint256)',
+  'equipDelegatedWearables(uint256,uint16[16],uint256[16])',
+  'equipWearables(uint256,uint16[16])',
+  'equippedWearables(uint256)',
+  'getItemType(uint256)',
+  'getItemTypes(uint256[])',
+  'itemBalances(address)',
+  'itemBalancesOfToken(address,uint256)',
+  'itemBalancesOfTokenWithTypes(address,uint256)',
+  'itemBalancesWithTypes(address)',
+  'setBaseURI(string)',
+  'uri(uint256)',
+  'useConsumables(uint256,uint256[],uint256[])'
+]
+--
+ItemsTransferFacet
+[
+  'batchBatchTransferToParent(address,address,uint256[],uint256[][],uint256[][])',
+  'batchTransferAsChild(address,uint256,address,uint256,uint256[],uint256[])',
+  'batchTransferFromParent(address,uint256,address,uint256[],uint256[])',
+  'batchTransferToParent(address,address,uint256,uint256[],uint256[])',
+  'extractItemsFromDiamond(address,uint256[],uint256[])',
+  'extractItemsFromSacrificedGotchi(address,uint256,uint256[],uint256[])',
+  'onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)',
+  'onERC1155Received(address,address,uint256,uint256,bytes)',
+  'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)',
+  'safeTransferFrom(address,address,uint256,uint256,bytes)',
+  'transferAsChild(address,uint256,address,uint256,uint256,uint256)',
+  'transferFromParent(address,uint256,address,uint256,uint256)',
+  'transferToParent(address,address,uint256,uint256,uint256)'
+]
+--
+CollateralFacet
+[
+  'collateralBalance(uint256)',
+  'collateralInfo(uint256,uint256)',
+  'collaterals(uint256)',
+  'decreaseAndDestroy(uint256,uint256)',
+  'decreaseStake(uint256,uint256)',
+  'getAllCollateralTypes()',
+  'getCollateralInfo(uint256)',
+  'increaseStake(uint256,uint256)',
+  'setCollateralEyeShapeSvgId(address,uint8)'
+]
+--
+DAOFacet
+[
+  'addCollateralTypes(uint256,(address,(int16[6],bytes3,bytes3,bytes3,uint8,uint8,uint16,bool))[])',
+  'addGameManagers(address[],uint256[])',
+  'addItemManagers(address[])',
+  'addItemTypes((string,string,string,int8[6],bool[16],uint8[],(uint8,uint8,uint8,uint8),uint256,uint256,uint256,uint32,uint8,bool,uint16,bool,uint8,int16,uint32)[])',
+  'addItemTypesAndSvgs((string,string,string,int8[6],bool[16],uint8[],(uint8,uint8,uint8,uint8),uint256,uint256,uint256,uint32,uint8,bool,uint16,bool,uint8,int16,uint32)[],string,(bytes32,uint256[])[])',
+  'addWearableSets((string,uint8[],uint16[],int8[5])[])',
+  'batchUpdateItemsPrice(uint256[],uint256[])',
+  'createHaunt(uint24,uint96,bytes3)',
+  'createHauntWithPayload((uint24,uint96,bytes3,(address,(int16[6],bytes3,bytes3,bytes3,uint8,uint8,uint16,bool))[],string,(bytes32,uint256[])[],string,(bytes32,uint256[])[]))',
+  'gameManagerBalance(address)',
+  'gameManagerRefreshTime(address)',
+  'getDaoDirectorTreasury()',
+  'grantExperience(uint256[],uint256[])',
+  'isGameManager(address)',
+  'mintItems(address,uint256[],uint256[])',
+  'removeExperience(uint256[],uint256[])',
+  'removeGameManagers(address[])',
+  'removeItemManagers(address[])',
+  'setDao(address,address)',
+  'setDaoDirectorTreasury(address)',
+  'setForge(address)',
+  'setItemTraitModifiersAndRarityModifier(uint256,int8[6],uint8)',
+  'setWearableSlotPositions(uint256,bool[16])',
+  'updateCollateralModifiers(address,int16[6])',
+  'updateItemTypeMaxQuantity(uint256[],uint256[])',
+  'updateItemTypes(uint256[],(string,string,string,int8[6],bool[16],uint8[],(uint8,uint8,uint8,uint8),uint256,uint256,uint256,uint32,uint8,bool,uint16,bool,uint8,int16,uint32)[])',
+  'updateWearableSets(uint256[],(string,uint8[],uint16[],int8[5])[])'
+]
+--
+VrfFacet
+[
+  'changeVrf(uint64,bytes32,address)',
+  'getVrfInfo()',
+  'keyHash()',
+  'openPortals(uint256[])',
+  'rawFulfillRandomness(uint256,uint256[])',
+  'vrfCoordinator()'
+]
+--
+ShopFacet
+[
+  'buyPortals(address,uint256)',
+  'mintPortals(address,uint256)',
+  'purchaseItemsWithGhst(address,uint256[],uint256[])',
+  'purchaseTransferItemsWithGhst(address,uint256[],uint256[])'
+]
+--
+MetaTransactionsFacet
+[
+  'executeMetaTransaction(address,bytes,bytes32,bytes32,uint8)',
+  'getNonce(address)'
+]
+--
+ERC1155MarketplaceFacet
+[
+  'batchExecuteERC1155Listing((uint256,address,uint256,uint256,uint256,address)[])',
+  'batchUpdateERC1155ListingPriceAndQuantity(uint256[],uint256[],uint256[])',
+  'cancelERC1155Listing(uint256)',
+  'cancelERC1155Listings(uint256[])',
+  'executeERC1155Listing(uint256,uint256,uint256)',
+  'executeERC1155ListingToRecipient(uint256,address,uint256,uint256,uint256,address)',
+  'getERC1155Category(address,uint256)',
+  'setERC1155Categories((address,uint256,uint256)[])',
+  'setERC1155Listing(address,uint256,uint256,uint256)',
+  'setERC1155ListingWithSplit(address,uint256,uint256,uint256,uint16[2],address)',
+  'setERC1155ListingWithWhitelist(address,uint256,uint256,uint256,uint16[2],address,uint32)',
+  'setListingFee(uint256)',
+  'updateBatchERC1155Listing(address,uint256[],address)',
+  'updateERC1155Listing(address,uint256,address)',
+  'updateERC1155ListingPriceAndQuantity(uint256,uint256,uint256)'
+]
+--
+ERC721MarketplaceFacet
+[
+  'addERC721Listing(address,uint256,uint256)',
+  'addERC721ListingWithSplit(address,uint256,uint256,uint16[2],address)',
+  'addERC721ListingWithWhitelist(address,uint256,uint256,uint16[2],address,uint32)',
+  'batchExecuteERC721Listing((uint256,address,uint256,uint256,address)[])',
+  'batchUpdateERC721ListingPrice(uint256[],uint256[])',
+  'cancelERC721Listing(uint256)',
+  'cancelERC721ListingByToken(address,uint256)',
+  'cancelERC721Listings(uint256[])',
+  'executeERC721ListingToRecipient(uint256,address,uint256,uint256,address)',
+  'getERC721Category(address,uint256)',
+  'setERC721Categories((address,uint256)[])',
+  'updateERC721Listing(address,uint256,address)',
+  'updateERC721ListingPrice(uint256,uint256)'
+]
+--
+EscrowFacet
+[
+  'batchDepositERC20(uint256[],address[],uint256[])',
+  'batchDepositGHST(uint256[],uint256[])',
+  'batchTransferEscrow(uint256[],address[],address[],uint256[])',
+  'depositERC20(uint256,address,uint256)',
+  'escrowBalance(uint256,address)',
+  'gotchiEscrow(uint256)',
+  'transferEscrow(uint256,address,address,uint256)'
+]
+--
+GotchiLendingFacet
+[
+  'addGotchiLending(uint32,uint96,uint32,uint8[3],address,address,uint32,address[],uint256)',
+  'addGotchiListing((uint32,uint96,uint32,uint8[3],address,address,uint32,address[],uint256))',
+  'agreeGotchiLending(uint32,uint32,uint96,uint32,uint8[3])',
+  'batchAddGotchiListing((uint32,uint96,uint32,uint8[3],address,address,uint32,address[],uint256)[])',
+  'batchCancelGotchiLending(uint32[])',
+  'batchCancelGotchiLendingByToken(uint32[])',
+  'batchClaimAndEndAndRelistGotchiLending(uint32[])',
+  'batchClaimAndEndGotchiLending(uint32[])',
+  'batchClaimGotchiLending(uint32[])',
+  'batchExtendGotchiLending((uint32,uint32)[])',
+  'cancelGotchiLending(uint32)',
+  'cancelGotchiLendingByToken(uint32)',
+  'claimAndEndAndRelistGotchiLending(uint32)',
+  'claimAndEndGotchiLending(uint32)',
+  'claimGotchiLending(uint32)',
+  'extendGotchiLending(uint32,uint32)'
+]
+--
+LendingGetterAndSetterFacet
+[
+  'allowRevenueTokens(address[])',
+  'balanceOfLentGotchis(address)',
+  'batchSetLendingOperator(address,(uint32,bool)[])',
+  'disallowRevenueTokens(address[])',
+  'getAllLendingPermissions(uint32)',
+  'getGotchiLendingFromToken(uint32)',
+  'getGotchiLendingIdByToken(uint32)',
+  'getGotchiLendingListingInfo(uint32)',
+  'getGotchiLendings(bytes32,uint256)',
+  'getGotchiLendingsLength()',
+  'getLendingListingInfo(uint32)',
+  'getLendingPermissionBitmap(uint32)',
+  'getLendingPermissionModifier(uint32,uint8)',
+  'getLentTokenIdsOfLender(address)',
+  'getOwnerGotchiLendings(address,bytes32,uint256)',
+  'getOwnerGotchiLendingsLength(address,bytes32)',
+  'getTokenBalancesInEscrow(uint32,address[])',
+  'isAavegotchiLent(uint32)',
+  'isAavegotchiListed(uint32)',
+  'isLendingOperator(address,address,uint32)',
+  'lendingPermissionSetToNone(uint32)',
+  'revenueTokenAllowed(address)',
+  'setLendingOperator(address,uint32,bool)'
+]
+--
+MarketplaceGetterFacet
+[
+  'getAavegotchiListing(uint256)',
+  'getAavegotchiListings(uint256,string,uint256)',
+  'getERC1155Listing(uint256)',
+  'getERC1155ListingFromToken(address,uint256,address)',
+  'getERC1155Listings(uint256,string,uint256)',
+  'getERC721Listing(uint256)',
+  'getERC721ListingFromToken(address,uint256,address)',
+  'getERC721Listings(uint256,string,uint256)',
+  'getListingFeeInWei()',
+  'getOwnerAavegotchiListings(address,uint256,string,uint256)',
+  'getOwnerERC1155Listings(address,uint256,string,uint256)',
+  'getOwnerERC721Listings(address,uint256,string,uint256)'
+]
+--
+SvgViewsFacet
+[
+  'getAavegotchiSideSvgs(uint256)',
+  'getItemSvgs(uint256)',
+  'getItemsSvgs(uint256[])',
+  'previewSideAavegotchi(uint256,address,int16[6],uint16[16])',
+  'setSideViewDimensions((uint256,string,(uint8,uint8,uint8,uint8))[])',
+  'setSideViewExceptions((uint256,uint256,bytes32,bool)[])'
+]
+--
+WearableSetsFacet
+[
+  'findWearableSets(uint256[])',
+  'getWearableSet(uint256)',
+  'getWearableSets()',
+  'totalWearableSets()'
+]
+--
+WhitelistFacet
+[
+  'createWhitelist(string,address[])',
+  'getBorrowLimit(uint32)',
+  'getWhitelist(uint32)',
+  'getWhitelistAccessRight(uint32,uint256)',
+  'getWhitelistsLength()',
+  'isWhitelisted(uint32,address)',
+  'removeAddressesFromWhitelist(uint32,address[])',
+  'setBorrowLimit(uint32,uint256)',
+  'setWhitelistAccessRight(uint32,uint256,uint256)',
+  'transferOwnershipOfWhitelist(uint32,address)',
+  'updateWhitelist(uint32,address[])',
+  'whitelistExists(uint32)',
+  'whitelistOwner(uint32)'
+]
+--
+PeripheryFacet
+[
+  'peripherySafeBatchTransferFrom(address,address,address,uint256[],uint256[],bytes)',
+  'peripherySafeTransferFrom(address,address,address,uint256,uint256,bytes)',
+  'peripherySetApprovalForAll(address,bool,address)',
+  'peripherySetBaseURI(string)',
+  'removeInterface()',
+  'setPeriphery(address)'
+]
+--
+MerkleDropFacet
+[
+  'batchDropClaimXPDrop(bytes32[],address[],uint256[][],bytes32[][],uint256[][],uint256[][])',
+  'batchGotchiClaimXPDrop(bytes32,address[],uint256[][],bytes32[][],uint256[][],uint256[][])',
+  'claimXPDrop(bytes32,address,uint256[],bytes32[],uint256[],uint256[])',
+  'createXPDrop(bytes32,bytes32,uint256)',
+  'isClaimed(bytes32,uint256)',
+  'viewXPDrop(bytes32)'
+]
+--
+ERC721BuyOrderFacet
+[
+  'cancelERC721BuyOrder(uint256)',
+  'executeERC721BuyOrder(uint256,address,uint256,uint256)',
+  'getERC721BuyOrder(uint256)',
+  'getERC721BuyOrderIdsByTokenId(address,uint256)',
+  'getERC721BuyOrderStatuses(uint256[])',
+  'getERC721BuyOrdersByTokenId(address,uint256)',
+  'placeERC721BuyOrder(address,uint256,uint256,uint256,bool[])'
+]
+--
+ItemsRolesRegistryFacet
+[
+  'MAX_EXPIRATION_DATE()',
+  'UNIQUE_ROLE()',
+  'commitTokens(address,address,uint256,uint256)',
+  'grantRole(uint256,bytes32,address,uint64,bool,bytes)',
+  'grantorOf(uint256)',
+  'isRoleApprovedForAll(address,address,address)',
+  'isRoleRevocable(uint256,bytes32,address)',
+  'releaseTokens(uint256)',
+  'revokeRole(uint256,bytes32,address)',
+  'roleData(uint256,bytes32,address)',
+  'roleExpirationDate(uint256,bytes32,address)',
+  'setRoleApprovalForAll(address,address,bool)',
+  'tokenAddressOf(uint256)',
+  'tokenAmountOf(uint256)',
+  'tokenIdOf(uint256)'
+]
+--
+VoucherMigrationFacet
+[ 'migrateVouchers((address,uint256[],uint256[])[])' ]
+--
+--
+Deploying contracts/Aavegotchi/InitDiamond.sol:InitDiamond
+Encoding diamondCut init function call
+Deploying AavegotchiDiamond
+Diamond deploy transaction hash:0xa8bd3dbee3f186385dd5f7e1dab5f6b107a841fa910bbe6c1b98b2b5ad94e805
+AavegotchiDiamond deployed: 0xC80DB01aeDAD5F6E3088c75F60E52f579Cf1D3Cb
+Diamond owner: 0xB9D736c48351Bad464710ee73BA80A0A659c1795
+DiamondCut success!
+Transaction hash:0x0b1284931db67b6837e7ae34d4c7a49ae296bcc2cdf54f0da098002e61f72dd8
+--
+Aavegotchi diamond address:0xC80DB01aeDAD5F6E3088c75F60E52f579Cf1D3Cb
+Aavegotchi diamond deploy gas used:3,887,941
+Vrf info: [
+  BigNumber { value: "27" },
+  '0x3f631d5ec60a0ce16203bcd6aff7ffbc423e22e452786288e172d467354304c8',
+  '0x7E10652Cb79Ba97bC1D0F38a1e8FaD8464a8a908',
+  'Aavegotchi'
+]
+contracts/Aavegotchi/WearableDiamond/facets/EventHandlerFacet.sol:EventHandlerFacet deploy gas used:411,022
+contracts/Aavegotchi/WearableDiamond/facets/WearablesFacet.sol:WearablesFacet deploy gas used:1,081,232
+--
+Using already deployed EventHandlerFacet: 0x88d428abEf548eF994400D3b0E5f06aAAD52Ab26
+--
+Using already deployed WearablesFacet: 0x4E6Db77528cb7252eb34E79A7277B08488fa92A9
+--
+--
+Setting up diamondCut args
+--
+EventHandlerFacet
+[
+  'emitApprovalEvent(address,address,bool)',
+  'emitTransferBatchEvent(address,address,address,uint256[],uint256[])',
+  'emitTransferSingleEvent(address,address,address,uint256,uint256)',
+  'emitUriEvent(string,uint256)'
+]
+--
+WearablesFacet
+[
+  'balanceOf(address,uint256)',
+  'balanceOfBatch(address[],uint256[])',
+  'isApprovedForAll(address,address)',
+  'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)',
+  'safeTransferFrom(address,address,uint256,uint256,bytes)',
+  'setApprovalForAll(address,bool)',
+  'setBaseURI(string)',
+  'tokenURI(uint256)',
+  'uri(uint256)'
+]
+--
+--
+Deploying WearableDiamond
+0xB9D736c48351Bad464710ee73BA80A0A659c1795 0x9b14ad7E403937Df33FE652c36a74B096683cFD1 0x74cAEbe23bEe29c5772B0b5b39bFb99426b060b9 0x29AF44bee8C504378C514e938DdC8bd0c6c16163 0xC80DB01aeDAD5F6E3088c75F60E52f579Cf1D3Cb
+here1
+here2
+Diamond deploy transaction hash:0x176bdbd83b1d5ec9c68cd688efec8e99b8cf574b0d78c738e81b911c51348798
+WearableDiamond deployed: 0xAA201d960404140296Ea85570940830be08DAc70
+DiamondCut success!
+Transaction hash:0x682d92cfeb16a3ae3b244f37d437e53ad160078a2844f8a5d33e29c7536319ee
+--
+Wearable diamond address:0xAA201d960404140296Ea85570940830be08DAc70
+Wearable diamond deploy gas used:2,019,722
+Setting wearable diamond gas used::51,207
+contracts/Aavegotchi/ForgeDiamond/facets/ForgeFacet.sol:ForgeFacet deploy gas used:4,461,040
+contracts/Aavegotchi/ForgeDiamond/facets/ForgeDAOFacet.sol:ForgeDAOFacet deploy gas used:2,007,233
+contracts/Aavegotchi/ForgeDiamond/facets/ForgeTokenFacet.sol:ForgeTokenFacet deploy gas used:1,727,704
+contracts/Aavegotchi/ForgeDiamond/facets/ForgeVRFFacet.sol:ForgeVRFFacet deploy gas used:2,763,382
+--
+Using already deployed ForgeFacet: 0x28AE8Be05C184d1125E430a5249fC571D8Ae7EB9
+--
+Using already deployed ForgeDAOFacet: 0xE2773Fca76421cD55E732a2D276c35f06A3B2877
+--
+Using already deployed ForgeTokenFacet: 0x63154db0196f85Ac07D4df4a96568915e5dB8082
+--
+Using already deployed ForgeVRFFacet: 0x6ade6645F71e0a050e58E4000d69D4cF1dC0c173
+--
+--
+Setting up diamondCut args
+--
+ForgeFacet
+[
+  'adminMint(address,uint256,uint256)',
+  'adminMintBatch(address,uint256[],uint256[])',
+  'burn(address,uint256,uint256)',
+  'claimForgeQueueItems(uint256[])',
+  'fixInvalidTokenIds(address[])',
+  'forgeTime(uint256,uint8)',
+  'forgeWearables(uint256[],uint256[],uint40[])',
+  'geodeRsmFromTokenId(uint256)',
+  'geodeTokenIdFromRsm(uint8)',
+  'getAavegotchiSmithingLevel(uint256)',
+  'getAavegotchiSmithingSkillPts(uint256)',
+  'getCoreTokenId(uint8,bool[16])',
+  'getForgeQueue()',
+  'getForgeQueueItem(uint256)',
+  'getForgeQueueItemsByOwner(address)',
+  'getRsmIndex(uint8)',
+  'getSmithingLevelMultiplierBips(uint256)',
+  'isForgeable(uint256)',
+  'isGotchiForging(uint256)',
+  'mintEssence(address)',
+  'reduceQueueTime(uint256[],uint40[])',
+  'smeltWearables(uint256[],uint256[])'
+]
+--
+ForgeDAOFacet
+[
+  'getAlloyBurnFeeInBips()',
+  'getAlloyDaoFeeInBips()',
+  'getGeodePrizesRemaining()',
+  'getGeodeWinChance(uint8,uint8)',
+  'pauseContract()',
+  'setAavegotchiDaoAddress(address)',
+  'setAavegotchiDiamondAddress(address)',
+  'setAlloyBurnFeeInBips(uint256)',
+  'setAlloyDaoFeeInBips(uint256)',
+  'setForgeAlloyCost((uint256,uint256,uint256,uint256,uint256,uint256))',
+  'setForgeEssenceCost((uint256,uint256,uint256,uint256,uint256,uint256))',
+  'setForgeTimeCostInBlocks((uint256,uint256,uint256,uint256,uint256,uint256))',
+  'setGeodeMultiTierWinChanceBips(((uint256,uint256,uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256,uint256),(uint256,uint256,uint256,uint256,uint256,uint256)))',
+  'setGeodePrizes(uint256[],uint256[])',
+  'setGeodeWinChanceBips((uint256,uint256,uint256,uint256,uint256,uint256))',
+  'setGltrAddress(address)',
+  'setMultiTierGeodePrizes(uint256[],uint256[],uint8[])',
+  'setSkillPointsEarnedFromForge((uint256,uint256,uint256,uint256,uint256,uint256))',
+  'setSmeltingSkillPointReductionFactorBips(uint256)',
+  'tempFixQuantity()',
+  'unpauseContract()'
+]
+--
+ForgeTokenFacet
+[
+  'balanceOf(address,uint256)',
+  'balanceOfBatch(address[],uint256[])',
+  'balanceOfOwner(address)',
+  'isApprovedForAll(address,address)',
+  'name()',
+  'onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)',
+  'onERC1155Received(address,address,uint256,uint256,bytes)',
+  'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)',
+  'safeTransferFrom(address,address,uint256,uint256,bytes)',
+  'setApprovalForAll(address,bool)',
+  'setBaseURI(string)',
+  'symbol()',
+  'totalSupply(uint256)',
+  'uri(uint256)'
+]
+--
+ForgeVRFFacet
+[
+  'areGeodePrizesAvailable()',
+  'changeVrf(uint256,bytes32,address,address)',
+  'claimWinnings()',
+  'getAvailablePrizesForRarity(uint8)',
+  'getCurrentPrizeProbabilityForGeode(uint8)',
+  'getMaxVrf()',
+  'getRequestInfo(address)',
+  'getRequestInfoByRequestId(bytes32)',
+  'getWinRanges(uint256[6])',
+  'keyHash()',
+  'link()',
+  'linkBalance()',
+  'numTotalPrizesLeft()',
+  'numTotalPrizesLeftByRarity()',
+  'openGeodes(uint256[],uint256[])',
+  'rawFulfillRandomness(bytes32,uint256)',
+  'removeLinkTokens(address,uint256)',
+  'vrfCoordinator()'
+]
+--
+--
+Deploying ForgeDiamond
+0xB9D736c48351Bad464710ee73BA80A0A659c1795 0x9b14ad7E403937Df33FE652c36a74B096683cFD1 0x74cAEbe23bEe29c5772B0b5b39bFb99426b060b9 0x29AF44bee8C504378C514e938DdC8bd0c6c16163 0xC80DB01aeDAD5F6E3088c75F60E52f579Cf1D3Cb 0xAA201d960404140296Ea85570940830be08DAc70
+here1
+here2
+Diamond deploy transaction hash:0xe20ce13d7db4e05f29814870ec0836c6d0e9eb18ad90f50d80f100226b528281
+ForgeDiamond deployed: 0xF7c2AC46723Ad844620F798ECe67f5C673120FB6
+DiamondCut success!
+Transaction hash:0xc4a1df6c976a67fe4cb97e629d9d0612633ba7ded667562d6f019e9eeec13f1b
+--
+Forge diamond address:0xF7c2AC46723Ad844620F798ECe67f5C673120FB6
+Wearable diamond deploy gas used:2,019,722
+Adding item managers
+Adding item managers tx: 0x4c3a9a455cc3232921dc23f1e5920be3ab64df16d56c8568b999306c67c5a293
+Haunt created:104,677
+Adding Collateral Types
+Adding Collateral Types gas used::200,615
+approved ghst

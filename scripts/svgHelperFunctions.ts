@@ -99,7 +99,13 @@ export function stripSvg(svg: string) {
 
 export function readSvg(name: string, folder: string) {
   //folder is usually svgItems but could also be svgItems/subfolder
-  return stripSvg(fs.readFileSync(`./svgs/${folder}/${name}.svg`, "utf8"));
+  let svg;
+  try {
+    svg = fs.readFileSync(`./svgs/${folder}/${name}.svg`, "utf8");
+  } catch (error) {
+    console.error(error);
+  }
+  return stripSvg(svg);
 }
 
 export function wearable(name: string, folder: string) {
