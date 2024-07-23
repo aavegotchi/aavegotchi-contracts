@@ -578,7 +578,7 @@ export const sleeveSvgs = [
   sleeves("234_ShaamanPoncho"),
   sleeves("241_WGMIShirt"),
   sleeves("244_VNeckShirt"),
-  "248_UpOnlyShirt",
+  sleeves("248_UpOnlyShirt"),
   "250_CoinGeckoTee",
   "253_AastronautSuit",
   "256_LilBubbleSpaceSuit",
