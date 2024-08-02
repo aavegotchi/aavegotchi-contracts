@@ -2,9 +2,8 @@ import { Signer } from "ethers";
 import { ethers, network, run } from "hardhat";
 import { itemManagerAlt } from "./helperFunctions";
 import {
-  bodyWearable,
-  BodyWearableOutput,
   updateSleevesTaskForSvgType,
+  updateSvgTaskForSvgType,
 } from "./svgHelperFunctions";
 
 async function main() {
@@ -26,13 +25,14 @@ async function main() {
   }
 
   const sleeve = await updateSleevesTaskForSvgType([36], "front");
-  const wearableId = 248;
-  const output: BodyWearableOutput = bodyWearable(
-    `${wearableId}_UpOnlyShirt`,
-    "svgItems"
-  );
 
+  const body = await updateSvgTaskForSvgType([160], "front");
+
+  //UpOnlyShirt sleeve fix
   await run("updateSvgs", sleeve);
+
+  //LilPumpThread Frontview fix
+  await run("updateSvgs", body);
 }
 
 if (require.main === module) {
