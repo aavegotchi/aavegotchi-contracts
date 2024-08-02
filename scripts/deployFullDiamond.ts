@@ -62,17 +62,18 @@ async function main() {
     throw Error("No network settings for " + network.name);
   }
 
+  //amoy
   const ghstContract = "0xF679b8D109b2d23931237Ce948a7D784727c0897";
   const ghstStakingDiamondAddress =
-    "0x7279afC1C28b730f274961825Aae6163b5FeC600";
-  const realmDiamondAddress = "0x726F201A9aB38cD56D60ee392165F1434C4F193D";
+    "0xae83d5fc564Ef58224e934ba4Df72a100d5082a0";
+  const realmDiamondAddress = "0x5a4faEb79951bAAa0866B72fD6517E693c8E4620";
   const installationDiamondAddress =
-    "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A"; //todo
-  const tileDiamondAddress = "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355"; //todo
+    "0x514b7c55FB3DFf3533B58D85CD25Ba04bb30612D";
+  const tileDiamondAddress = "0xCa6F4Ef19a1Beb9BeF12f64b395087E5680bcB22";
   const fakeGotchiArtDiamondAddress =
-    "0x330088c3372f4F78cF023DF16E1e1564109191dc";
+    "0x330088c3372f4F78cF023DF16E1e1564109191dc"; //todo
   const fakeGotchiCardDiamondAddress =
-    "0x9E282FE4a0be6A0C4B9f7d9fEF10547da35c52EA";
+    "0x9E282FE4a0be6A0C4B9f7d9fEF10547da35c52EA"; //todo
 
   const name = "Aavegotchi";
   const symbol = "GOTCHI";
@@ -512,7 +513,7 @@ async function main() {
     "aavegotchi-back",
     ethers
   );
-  console.log("uploading collateralsLeft");
+  console.log("uploading collateral-side svgs");
   await uploadSvgs(svgFacet, collateralsLeftSvgs, "collaterals-left", ethers);
   await uploadSvgs(svgFacet, collateralsRightSvgs, "collaterals-right", ethers);
   await uploadSvgs(svgFacet, [""], "collaterals-back", ethers);
