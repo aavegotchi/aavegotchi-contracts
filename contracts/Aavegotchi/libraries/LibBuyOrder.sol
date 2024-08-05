@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {LibAppStorage, AppStorage, ERC721BuyOrder} from "./LibAppStorage.sol";
+import {LibAppStorage, AppStorage, ERC721BuyOrder, ERC1155BuyOrder} from "./LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibAavegotchi} from "./LibAavegotchi.sol";
 import {LibSharedMarketplace} from "./LibSharedMarketplace.sol";
@@ -73,5 +73,22 @@ library LibBuyOrder {
             }
         }
         return keccak256(_params);
+    }
+
+    function cancelERC1155BuyOrder(uint256 _buyOrderId) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+
+        ERC1155BuyOrder memory erc1155BuyOrder = s.erc1155BuyOrders[_buyOrderId];
+        if (erc1155BuyOrder.timeCreated == 0) {
+            return;
+        }
+        if ((erc1155BuyOrder.cancelled == true) || (erc1155BuyOrder.completed == true)) {
+            return;
+        }
+
+        s.erc1155BuyOrders[_buyOrderId].cancelled = true;
+
+        // refund GHST to buyer
+        LibERC20.transfer(s.ghstContract, erc1155BuyOrder.buyer, erc1155BuyOrder.priceInWei * erc1155BuyOrder.quantity);
     }
 }
