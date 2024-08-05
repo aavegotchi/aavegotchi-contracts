@@ -1,13 +1,19 @@
+import { diamondOwner } from "../../scripts/helperFunctions";
 import {
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
   convertFacetAndSelectorsToString,
 } from "../../tasks/deployUpgrade";
+import { InitItemsRolesRegistryFacet__factory, OwnershipFacet } from "../../typechain";
 import { InitItemsRolesRegistryFacetInterface } from "../../typechain/InitItemsRolesRegistryFacet";
-import { aavegotchiDiamondAddress, diamondUpgrader } from "./helpers";
+import { aavegotchiDiamondAddress, diamondUpgrader , } from "./helpers";
 import { ethers, run } from "hardhat";
+const owner = "0x01F010a5e001fe9d6940758EA5e8c777885E351e";
 
 export async function deployItemsRolesRegistryFacet() {
+
+
+
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName:
@@ -47,7 +53,7 @@ export async function deployItemsRolesRegistryFacet() {
   const joined = convertFacetAndSelectorsToString(facets);
 
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: diamondUpgrader,
+    diamondOwner: owner,
     diamondAddress: aavegotchiDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: false,
@@ -56,6 +62,8 @@ export async function deployItemsRolesRegistryFacet() {
     initAddress: aavegotchiDiamondAddress,
     initCalldata: payload,
   };
+
+
 
   await run("deployUpgrade", args);
 
@@ -75,9 +83,8 @@ async function removeInitItemsRolesRegistryFacet() {
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
-
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: diamondUpgrader,
+    diamondOwner: owner,
     diamondAddress: aavegotchiDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: false,
@@ -110,9 +117,8 @@ export async function upgradeItemsFacet() {
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
-
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: diamondUpgrader,
+    diamondOwner: owner,
     diamondAddress: aavegotchiDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: false,
@@ -139,9 +145,8 @@ export async function upgradeItemsRolesRegistryFacet() {
 
   //@ts-ignore
   const joined = convertFacetAndSelectorsToString(facets);
-
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: diamondUpgrader,
+    diamondOwner: owner,
     diamondAddress: aavegotchiDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: false,
@@ -163,9 +168,32 @@ export async function upgradeItemsFacetOnly() {
 
   //@ts-ignore
   const joined = convertFacetAndSelectorsToString(facets);
-
   const args: DeployUpgradeTaskArgs = {
-    diamondUpgrader: diamondUpgrader,
+    diamondOwner: owner,
+    diamondAddress: aavegotchiDiamondAddress,
+    facetsAndAddSelectors: joined,
+    useLedger: false,
+    useMultisig: false,
+    freshDeployment: false,
+  };
+
+  await run("deployUpgrade", args);
+}
+
+export async function RolesRegistryUnlistedBazaarTest() {
+  
+  const facets: FacetsAndAddSelectors[] = [
+    {
+      facetName: "contracts/Aavegotchi/facets/ItemsRolesRegistryFacet.sol:ItemsRolesRegistryFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
+  ];
+
+  //@ts-ignore
+  const joined = convertFacetAndSelectorsToString(facets);
+  const args: DeployUpgradeTaskArgs = {
+    diamondOwner: owner,
     diamondAddress: aavegotchiDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: false,
