@@ -10,11 +10,13 @@ import { gasPrice } from "../helperFunctions";
 // const diamondUpgrader = "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
 
 //these already deployed facets(in the aavegotchi diamond) are added to the wearableDiamond directly
-const aavegotchiCutFacet = "0x4f908Fa47F10bc2254dae7c74d8B797C1749A8a6";
-const aavegotchiLoupeFacet = "0x58f64b56B1e15D8C932c51287d814EDaa8d6feb9";
-const aavegotchiOwnerShipFacet = "0xAE7DF9f59FEc446903c64f21a76d039Bc81712ef";
 
-export async function deployAndUpgradeWearableDiamond() {
+export async function deployAndUpgradeWearableDiamond(
+  aavegotchiCutFacet: string,
+  aavegotchiLoupeFacet: string,
+  aavegotchiOwnerShipFacet: string,
+  aavegotchiDiamondAddress: string
+) {
   console.log("Deploying wearable diamond");
   // deploy Wearable Diamond
   const Diamond = (await ethers.getContractFactory(
@@ -28,6 +30,7 @@ export async function deployAndUpgradeWearableDiamond() {
     aavegotchiCutFacet,
     aavegotchiLoupeFacet,
     aavegotchiOwnerShipFacet,
+    aavegotchiDiamondAddress,
     { gasPrice: gasPrice }
   );
   await diamond.deployed();
@@ -78,14 +81,15 @@ export async function deployAndUpgradeWearableDiamond() {
   };
 
   await run("deployUpgrade", args);
+  return diamond.address;
 }
 
-if (require.main === module) {
-  deployAndUpgradeWearableDiamond()
-    .then(() => process.exit(0))
-    // .then(() => console.log('upgrade completed') /* process.exit(0) */)
-    .catch((error) => {
-      console.error(error);
-      process.exit(1);
-    });
-}
+// if (require.main === module) {
+//   deployAndUpgradeWearableDiamond()
+//     .then(() => process.exit(0))
+//     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
+//     .catch((error) => {
+//       console.error(error);
+//       process.exit(1);
+//     });
+// }

@@ -17,11 +17,15 @@ contract ForgeDiamond {
         address _contractOwner,
         address _diamondCutFacet,
         address _diaomondLoupeFacet,
-        address _ownershipFacet
+        address _ownershipFacet,
+        address _aavegotchiDiamond,
+        address wearableDiamond
     ) {
         ForgeLibDiamond.setContractOwner(_contractOwner);
         ForgeLibDiamond.addDiamondFunctions(_diamondCutFacet, _diaomondLoupeFacet, _ownershipFacet);
         ForgeLibDiamond.DiamondStorage storage ds = ForgeLibDiamond.diamondStorage();
+        ds.AAVEGOTCHI_DIAMOND = _aavegotchiDiamond;
+        ds.WEARABLE_DIAMOND = wearableDiamond;
         ds.supportedInterfaces[0xd9b67a26] = true; //erc1155
     }
 

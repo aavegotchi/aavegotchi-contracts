@@ -82,6 +82,7 @@ export function printSizeInfo(
   for (const size of sizes) {
     console.log(svgType + ":" + size);
     // for (const nextSize of size) {
+
     totalSize += Number(size.toString());
     // }
   }
@@ -99,7 +100,11 @@ export function stripSvg(svg: string) {
 
 export function readSvg(name: string, folder: string) {
   //folder is usually svgItems but could also be svgItems/subfolder
-  return stripSvg(fs.readFileSync(`./svgs/${folder}/${name}.svg`, "utf8"));
+  let svg;
+
+  svg = fs.readFileSync(`./svgs/${folder}/${name}.svg`, "utf8");
+
+  return stripSvg(svg);
 }
 
 export function wearable(name: string, folder: string) {
@@ -269,7 +274,7 @@ export async function uploadSvgs(
     );
 
     //this might be incorrect
-    // printSizeInfo(svgType, svgTypesAndSizes[0].sizes);
+    //printSizeInfo(svgType, svgTypesAndSizes[0].sizes);
 
     let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes);
     console.log("tx:", tx.hash);
