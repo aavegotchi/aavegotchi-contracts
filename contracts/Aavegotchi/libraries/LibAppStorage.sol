@@ -13,7 +13,7 @@ uint256 constant PORTAL_AAVEGOTCHIS_NUM = 10;
 
 uint16 constant REQUEST_CONFIRMATIONS = 3;
 uint32 constant NO_OF_WORDS = 1;
-uint32 constant VRF_GAS_LIMIT = 200_000;
+uint32 constant VRF_GAS_LIMIT = 2_500_000;
 
 //  switch (traitType) {
 //         case 0:
@@ -238,6 +238,20 @@ struct ItemRolesInfo {
     uint256 balanceUsed;
 }
 
+struct ERC1155BuyOrder {
+    uint256 buyOrderId;
+    address buyer;
+    address erc1155TokenAddress;
+    uint256 erc1155TokenId;
+    uint256 priceInWei;
+    uint256 quantity;
+    uint256 timeCreated;
+    uint256 lastTimePurchased;
+    uint256 duration; //0 for unlimited
+    bool cancelled;
+    bool completed;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -369,6 +383,9 @@ struct AppStorage {
     // Auxiliary structs for Items Roles Registry
     // gotchiId => equippedDepositsInfo
     mapping(uint256 => GotchiEquippedDepositsInfo) gotchiEquippedDepositsInfo;
+    // states for erc1155 buy orders
+    uint256 nextERC1155BuyOrderId;
+    mapping(uint256 => ERC1155BuyOrder) erc1155BuyOrders; // buyOrderId => data
 }
 
 library LibAppStorage {
