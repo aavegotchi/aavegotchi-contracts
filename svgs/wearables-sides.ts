@@ -396,6 +396,23 @@ export const wearablesRightSvgs = [
   wearable("385_BlockScannersRight"),
   wearable("386_StaffCharmingRight"),
   wearable("387_RoflnogginRight"),
+  //szn 5 baadges
+  388,
+  389,
+  390,
+  391,
+  392,
+  393,
+  394,
+  395,
+  396,
+  397,
+  398,
+  399,
+  400,
+  401,
+  402,
+  403,
 ];
 
 export const wearablesBackSvgs = [
@@ -792,6 +809,23 @@ export const wearablesBackSvgs = [
   "385_BlockScanners",
   wearable("386_StaffCharmingBack"),
   wearable("387_RoflnogginBack"),
+  //szn 5 baadges
+  388,
+  389,
+  390,
+  391,
+  392,
+  393,
+  394,
+  395,
+  396,
+  397,
+  398,
+  399,
+  400,
+  401,
+  402,
+  403,
 ];
 
 export const wearablesLeftSvgs = [
@@ -1188,6 +1222,23 @@ export const wearablesLeftSvgs = [
   wearable("385_BlockScannersLeft"),
   wearable("386_StaffCharmingLeft"),
   wearable("387_RoflnogginLeft"),
+  //szn 5 baadges
+  388,
+  389,
+  390,
+  391,
+  392,
+  393,
+  394,
+  395,
+  396,
+  397,
+  398,
+  399,
+  400,
+  401,
+  402,
+  403,
 ];
 
 export const wearablesLeftSleeveSvgs = [

@@ -140,6 +140,10 @@ export async function getDiamondSigner(
       method: "hardhat_impersonateAccount",
       params: [override ? override : owner],
     });
+    await hre.network.provider.request({
+      method: "hardhat_setBalance",
+      params: [owner, "0x1000000000000000000000000"],
+    });
     return await hre.ethers.getSigner(override ? override : owner);
   } else if (hre.network.name === "matic") {
     console.log("Diamond signer - Matic");
