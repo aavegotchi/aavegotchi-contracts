@@ -15,6 +15,7 @@ import { DAOFacet, SvgFacet } from "../typechain";
 import { BigNumberish, BigNumber } from "@ethersproject/bignumber";
 import { uploadSvgs } from "./svgHelperFunctions";
 import { getWearables } from "../svgs/allWearables";
+import { closedPortals, openedPortals } from "../svgs/portals";
 
 import { setForgeProperties } from "./upgrades/forge/upgrade-forgeSetters";
 import { aavegotchiSvgs as aavegotchiSideSvgs } from "../svgs/aavegotchi-side-typeScript";
@@ -31,7 +32,8 @@ import {
   wearablesRightSleeveSvgs,
   wearablesBackSleeveSvgs,
 } from "../svgs/wearables-sides";
-import { aavegotchiSvgs } from "../svgs/aavegotchi";
+
+import { aavegotchiSvgs } from "../svgs/aavegotchi-typescript";
 import { run } from "hardhat";
 import { allSideViewDimensions } from "../svgs/sideViewDimensions";
 import { convertSideDimensionsToTaskFormat } from "../tasks/updateItemSideDimensions";
@@ -485,6 +487,10 @@ async function main() {
   const collateralsRightSvgs = [
     '<g class="gotchi-collateral"><path d="M41 14v1h-1v4h1v1h1v1h1v-7z" fill="#7e18f8"/></g>',
   ];
+
+  console.log("uploading portal svgs");
+  await uploadSvgs(svgFacet, openedPortals, "portal-open", ethers);
+  await uploadSvgs(svgFacet, closedPortals, "portal-closed", ethers);
 
   console.log("uploading aavegotchiSvgs");
   await uploadSvgs(svgFacet, aavegotchiSvgs, "aavegotchi", ethers);

@@ -4,9 +4,13 @@ const fs = require("fs");
 
 export const closedPortals: string[] = [];
 
-portal("h1-closed");
-portal("h1-closed");
-portal("h2-closed");
+export const openedPortals: string[] = [];
+
+portal("h1-closed", true);
+portal("h2-closed", true);
+
+portal("h1-open", false);
+portal("h2-open", false);
 
 function stripSvg(svg: string) {
   // removes svg tag
@@ -21,7 +25,11 @@ function readSvg(name: string) {
   return stripSvg(fs.readFileSync(`./svgs/${name}.svg`, "utf8"));
 }
 
-function portal(name: string) {
+function portal(name: string, closed: boolean) {
   const svg: string = readSvg(name);
-  closedPortals.push(svg);
+  if (closed) {
+    closedPortals.push(svg);
+  } else {
+    openedPortals.push(svg);
+  }
 }

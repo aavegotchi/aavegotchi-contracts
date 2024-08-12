@@ -1,5 +1,5 @@
 const fs = require("fs");
-import { closedPortals } from "./closedPortalSvg";
+import { closedPortals } from "./portals";
 
 const openPortal = fs.readFileSync("./svgs/openPortal.svg", "utf8");
 
