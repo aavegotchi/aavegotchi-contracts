@@ -7,6 +7,7 @@ import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibSvg} from "../libraries/LibSvg.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibXPAllocation} from "../libraries/LibXPAllocation.sol";
 import {GameManager} from "../libraries/LibAppStorage.sol";
 import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 
@@ -19,7 +20,6 @@ contract DAOFacet is Modifiers {
     event AddItemType(ItemType _itemType);
     event UpdateItemType(uint256 indexed _itemId, ItemType _itemType);
     event CreateHaunt(uint256 indexed _hauntId, uint256 _hauntMaxSize, uint256 _portalPrice, bytes32 _bodyColor);
-    event GrantExperience(uint256[] _tokenIds, uint256[] _xpValues);
     event AddWearableSet(WearableSet _wearableSet);
     event UpdateWearableSet(uint256 _setId, WearableSet _wearableSet);
     event ItemTypeMaxQuantity(uint256[] _itemIds, uint256[] _maxQuanities);
@@ -78,6 +78,14 @@ contract DAOFacet is Modifiers {
     function setForge(address _newForge) external onlyDaoOrOwner {
         emit ForgeTransferred(s.forgeDiamond, _newForge);
         s.forgeDiamond = _newForge;
+    }
+
+    function setDaoDirectorTreasury(address treasuryAddr) external onlyDaoOrOwner {
+        s.daoDirectorTreasury = treasuryAddr;
+    }
+
+    function getDaoDirectorTreasury() public view returns (address) {
+        return s.daoDirectorTreasury;
     }
 
     ///@notice Allow an item manager to add new collateral types to a haunt
@@ -269,7 +277,7 @@ contract DAOFacet is Modifiers {
             s.aavegotchis[tokenId].experience += xp;
             gameManager.balance -= xp;
         }
-        emit GrantExperience(_tokenIds, _xpValues);
+        emit LibXPAllocation.GrantExperience(_tokenIds, _xpValues);
     }
 
     ///@notice Allow the DAO, a game manager or the aavegotchi diamond owner to remove XP(experience points) from multiple aavegotchis

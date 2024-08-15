@@ -8,8 +8,7 @@ import {
 } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
 
-import { OwnershipFacet } from "../typechain/OwnershipFacet";
-import { IDiamondLoupe, IDiamondCut } from "../typechain";
+import { IDiamondCut } from "../typechain";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import {
   gasPrice,
@@ -20,7 +19,6 @@ import {
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { sendToMultisig } from "../scripts/libraries/multisig/multisig";
-import { sendToTenderly } from "../scripts/libraries/tenderly";
 
 export interface FacetsAndAddSelectors {
   facetName: string;
@@ -32,7 +30,7 @@ type FacetCutType = { Add: 0; Replace: 1; Remove: 2 };
 const FacetCutAction: FacetCutType = { Add: 0, Replace: 1, Remove: 2 };
 
 export interface DeployUpgradeTaskArgs {
-  diamondUpgrader: string;
+  diamondOwner: string;
   diamondAddress: string;
   facetsAndAddSelectors: string;
   useMultisig: boolean;
@@ -91,7 +89,7 @@ task(
   "deployUpgrade",
   "Deploys a Diamond Cut, given an address, facets and addSelectors, and removeSelectors"
 )
-  .addParam("diamondUpgrader", "Address of the multisig signer")
+  .addParam("diamondOwner", "Address of the contract owner")
   .addParam("diamondAddress", "Address of the Diamond to upgrade")
   .addParam(
     "facetsAndAddSelectors",
@@ -112,7 +110,10 @@ task(
       const facets: string = taskArgs.facetsAndAddSelectors;
       const facetsAndAddSelectors: FacetsAndAddSelectors[] =
         convertStringToFacetAndSelectors(facets);
-      const diamondUpgrader: string = taskArgs.diamondUpgrader;
+
+      console.log("facetsAndAddSelectors:", facetsAndAddSelectors);
+
+      const diamondOwner: string = taskArgs.diamondOwner;
       const diamondAddress: string = taskArgs.diamondAddress;
       const useMultisig = taskArgs.useMultisig;
       const useLedger = taskArgs.useLedger;
@@ -120,18 +121,23 @@ task(
       const initCalldata = taskArgs.initCalldata;
 
       const branch = require("git-branch");
+
+      console.log("branch:", branch);
       if (hre.network.name === "matic" && branch.sync() !== "master") {
         throw new Error("Not master branch!");
       }
 
+      console.log("instantiate signer");
+
       //Instantiate the Signer
       let signer: Signer;
-      const owner = await (
-        (await hre.ethers.getContractAt(
-          "OwnershipFacet",
-          diamondAddress
-        )) as OwnershipFacet
-      ).owner();
+      const owner = diamondOwner;
+      // const owner = await (
+      //   (await hre.ethers.getContractAt(
+      //     "OwnershipFacet",
+      //     diamondAddress
+      //   )) as OwnershipFacet
+      // ).owner();
       const testing = ["hardhat", "localhost"].includes(hre.network.name);
 
       if (testing) {
@@ -139,6 +145,8 @@ task(
           method: "hardhat_impersonateAccount",
           params: [owner],
         });
+
+        console.log("impersonated!");
 
         await hre.network.provider.request({
           method: "hardhat_setBalance",
@@ -152,22 +160,25 @@ task(
         hre.network.name === "supernet"
       ) {
         if (useLedger) {
-          signer = new LedgerSigner(hre.ethers.provider);
+          signer = new LedgerSigner(hre.ethers.provider, "m/44'/60'/1'/0/0");
         } else signer = (await hre.ethers.getSigners())[0];
-      } else if (hre.network.name === "tenderly") {
-        if (useLedger) {
-          signer = new LedgerSigner(hre.ethers.provider);
-        } else {
-          signer = (await hre.ethers.getSigners())[0];
-        }
+      }
 
-        await hre.ethers.provider.send("tenderly_setBalance", [
-          [await signer.getAddress(), owner],
-          hre.ethers.utils.hexValue(
-            hre.ethers.utils.parseUnits("10000", "ether").toHexString()
-          ),
-        ]);
-      } else {
+      // else if (hre.network.name === "tenderly") {
+      //   if (useLedger) {
+      //     signer = new LedgerSigner(hre.ethers.provider);
+      //   } else {
+      //     signer = (await hre.ethers.getSigners())[0];
+      //   }
+
+      //   await hre.ethers.provider.send("tenderly_setBalance", [
+      //     [await signer.getAddress(), owner],
+      //     hre.ethers.utils.hexValue(
+      //       hre.ethers.utils.parseUnits("10000", "ether").toHexString()
+      //     ),
+      //   ]);
+      // }
+      else {
         throw Error("Incorrect network selected");
       }
 
@@ -299,7 +310,7 @@ task(
               initCalldata ? initCalldata : "0x",
               { gasLimit: 800000 }
             );
-          await sendToMultisig(diamondUpgrader, signer, tx, hre.ethers);
+          await sendToMultisig(diamondOwner, signer, tx, hre.ethers);
         } else {
           const tx: ContractTransaction = await diamondCut.diamondCut(
             cut,

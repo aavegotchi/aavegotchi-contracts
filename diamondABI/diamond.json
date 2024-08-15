@@ -723,6 +723,19 @@
         "internalType": "uint256",
         "name": "_tokenId",
         "type": "uint256"
+      }
+    ],
+    "name": "ResetSkillpoints",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
       },
       {
         "indexed": false,
@@ -882,6 +895,21 @@
   },
   {
     "inputs": [
+      { "internalType": "uint32", "name": "_tokenId", "type": "uint32" }
+    ],
+    "name": "getGotchiBaseNumericTraits",
+    "outputs": [
+      {
+        "internalType": "int16[6]",
+        "name": "numericTraits_",
+        "type": "int16[6]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
       { "internalType": "uint256", "name": "_tokenId", "type": "uint256" }
     ],
     "name": "getNumericTraits",
@@ -1006,6 +1034,15 @@
       { "internalType": "uint32", "name": "_gotchiId", "type": "uint32" }
     ],
     "name": "reduceKinshipViaChanneling",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint32", "name": "_tokenId", "type": "uint32" }
+    ],
+    "name": "resetSkillPoints",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1815,25 +1852,6 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "_tokenIds",
-        "type": "uint256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "_xpValues",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "GrantExperience",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": true,
         "internalType": "address",
         "name": "newItemManager_",
@@ -2549,6 +2567,13 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getDaoDirectorTreasury",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       { "internalType": "uint256[]", "name": "_tokenIds", "type": "uint256[]" },
       { "internalType": "uint256[]", "name": "_xpValues", "type": "uint256[]" }
@@ -2628,6 +2653,15 @@
       }
     ],
     "name": "setDao",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "treasuryAddr", "type": "address" }
+    ],
+    "name": "setDaoDirectorTreasury",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2976,19 +3010,6 @@
         "internalType": "uint256",
         "name": "listingId",
         "type": "uint256"
-      }
-    ],
-    "name": "ERC1155ListingCancelled",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "listingId",
-        "type": "uint256"
       },
       {
         "indexed": false,
@@ -3301,6 +3322,357 @@
       { "internalType": "uint256", "name": "_priceInWei", "type": "uint256" }
     ],
     "name": "updateERC1155ListingPriceAndQuantity",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "buyOrderId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "buyer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "erc721TokenAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "erc721TokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "category",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "priceInWei",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "duration",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "validationHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "time",
+        "type": "uint256"
+      }
+    ],
+    "name": "ERC721BuyOrderAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "buyOrderId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "time",
+        "type": "uint256"
+      }
+    ],
+    "name": "ERC721BuyOrderCanceled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "buyOrderId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "buyer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "seller",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "erc721TokenAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "erc721TokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "priceInWei",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "time",
+        "type": "uint256"
+      }
+    ],
+    "name": "ERC721BuyOrderExecuted",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_buyOrderId", "type": "uint256" }
+    ],
+    "name": "cancelERC721BuyOrder",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_buyOrderId", "type": "uint256" },
+      {
+        "internalType": "address",
+        "name": "_erc721TokenAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_erc721TokenId",
+        "type": "uint256"
+      },
+      { "internalType": "uint256", "name": "_priceInWei", "type": "uint256" }
+    ],
+    "name": "executeERC721BuyOrder",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_buyOrderId", "type": "uint256" }
+    ],
+    "name": "getERC721BuyOrder",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "buyOrderId",
+            "type": "uint256"
+          },
+          { "internalType": "address", "name": "buyer", "type": "address" },
+          {
+            "internalType": "address",
+            "name": "erc721TokenAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "erc721TokenId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "priceInWei",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeCreated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timePurchased",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "duration", "type": "uint256" },
+          { "internalType": "bool", "name": "cancelled", "type": "bool" },
+          {
+            "internalType": "bytes32",
+            "name": "validationHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool[]",
+            "name": "validationOptions",
+            "type": "bool[]"
+          }
+        ],
+        "internalType": "struct ERC721BuyOrder",
+        "name": "buyOrder_",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_erc721TokenAddress",
+        "type": "address"
+      },
+      { "internalType": "uint256", "name": "_erc721TokenId", "type": "uint256" }
+    ],
+    "name": "getERC721BuyOrderIdsByTokenId",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "buyOrderIds_",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "_buyOrderIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "getERC721BuyOrderStatuses",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "string", "name": "status", "type": "string" },
+          { "internalType": "uint256", "name": "buyOrderId", "type": "uint256" }
+        ],
+        "internalType": "struct ERC721BuyOrderFacet.StatusesReturn[]",
+        "name": "statuses_",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_erc721TokenAddress",
+        "type": "address"
+      },
+      { "internalType": "uint256", "name": "_erc721TokenId", "type": "uint256" }
+    ],
+    "name": "getERC721BuyOrdersByTokenId",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "buyOrderId",
+            "type": "uint256"
+          },
+          { "internalType": "address", "name": "buyer", "type": "address" },
+          {
+            "internalType": "address",
+            "name": "erc721TokenAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "erc721TokenId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "priceInWei",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeCreated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timePurchased",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "duration", "type": "uint256" },
+          { "internalType": "bool", "name": "cancelled", "type": "bool" },
+          {
+            "internalType": "bytes32",
+            "name": "validationHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bool[]",
+            "name": "validationOptions",
+            "type": "bool[]"
+          }
+        ],
+        "internalType": "struct ERC721BuyOrder[]",
+        "name": "buyOrders_",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_erc721TokenAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_erc721TokenId",
+        "type": "uint256"
+      },
+      { "internalType": "uint256", "name": "_priceInWei", "type": "uint256" },
+      { "internalType": "uint256", "name": "_duration", "type": "uint256" },
+      {
+        "internalType": "bool[]",
+        "name": "_validationOptions",
+        "type": "bool[]"
+      }
+    ],
+    "name": "placeERC721BuyOrder",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -4138,37 +4510,6 @@
       }
     ],
     "name": "EquipWearables",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "_toContract",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "_toTokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "_tokenTypeId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "_value",
-        "type": "uint256"
-      }
-    ],
-    "name": "TransferToParent",
     "type": "event"
   },
   {
@@ -7048,6 +7389,11 @@
         "internalType": "uint256[][]",
         "name": "_onlyGotchis",
         "type": "uint256[][]"
+      },
+      {
+        "internalType": "uint256[][]",
+        "name": "_onlyGotchisPositions",
+        "type": "uint256[][]"
       }
     ],
     "name": "batchDropClaimXPDrop",
@@ -7073,6 +7419,11 @@
         "internalType": "uint256[][]",
         "name": "_onlyGotchis",
         "type": "uint256[][]"
+      },
+      {
+        "internalType": "uint256[][]",
+        "name": "_onlyGotchisPositions",
+        "type": "uint256[][]"
       }
     ],
     "name": "batchGotchiClaimXPDrop",
@@ -7089,6 +7440,11 @@
       {
         "internalType": "uint256[]",
         "name": "_onlyGotchis",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_onlyGotchisPositions",
         "type": "uint256[]"
       }
     ],
@@ -8940,31 +9296,6 @@
       }
     ],
     "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "_owner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "_operator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "_approved",
-        "type": "bool"
-      }
-    ],
-    "name": "ApprovalForAll",
     "type": "event"
   },
   {

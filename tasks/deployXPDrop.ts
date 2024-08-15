@@ -38,7 +38,10 @@ task("deployXPDrop", "Deploys an onchain airdrop for a certain proposal")
       signer = await hre.ethers.provider.getSigner(gameManager);
       //uses relayer signer since it is a game manager
     } else if (hre.network.name === "matic") {
-      signer = await getRelayerSigner(hre);
+      const accounts = await hre.ethers.getSigners();
+      signer = accounts[0];
+
+      //await getRelayerSigner(hre);
     } else {
       throw Error("Incorrect network selected");
     }
@@ -50,6 +53,9 @@ task("deployXPDrop", "Deploys an onchain airdrop for a certain proposal")
     ).connect(signer) as MerkleDropFacet;
 
     const proposalType = propType(prop.title);
+
+    console.log("title:", prop.title);
+
     const e =
       proposalType === "sigprop" ? 10 : proposalType === "coreprop" ? 20 : 0;
 

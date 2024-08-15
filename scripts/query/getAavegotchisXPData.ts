@@ -1,7 +1,7 @@
 import {
-  getEthSubgraphGotchis,
+  // getEthSubgraphGotchis,
   getUsersWithGotchisOfAddresses,
-  getVaultGotchis,
+  // getVaultGotchis,
   GotchiId,
 } from "./queryAavegotchis";
 import { UserGotchisOwned } from "../../types";
@@ -103,64 +103,69 @@ export async function queryAllAavegotchis(
     });
   } while (allGotchiIds.length != prevLength);
 
-  const batchSize = 1000;
-  const batches = Math.ceil(addresses.length / batchSize);
-  let mainnetUsers: UserGotchisOwned[] = [];
+  // const batchSize = 1000;
+  // const batches = Math.ceil(addresses.length / batchSize);
+  // let mainnetUsers: UserGotchisOwned[] = [];
 
-  //get vault gotchis
-  for (let index = 0; index < batches; index++) {
-    const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
-    const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(
-      batch,
-      blockTag,
-      true
-    );
-    vaultUsers.forEach((e) => {
-      allGotchiIds = allGotchiIds.concat(e.gotchisOwned.map((f) => f.id));
-      addGotchiId(
-        finalData,
-        e.id,
-        e.gotchisOwned.map((f) => f.id)
-      );
-    });
-  }
+  // //get vault gotchis
+  // for (let index = 0; index < batches; index++) {
+  //   const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
+  //   const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(
+  //     batch,
+  //     blockTag,
+  //     true
+  //   );
+  //   vaultUsers.forEach((e) => {
+  //     allGotchiIds = allGotchiIds.concat(e.gotchisOwned.map((f) => f.id));
+  //     addGotchiId(
+  //       finalData,
+  //       e.id,
+  //       e.gotchisOwned.map((f) => f.id)
+  //     );
+  //   });
+  // }
 
-  //Ethereum
-  for (let index = 0; index < batches; index++) {
-    const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
-    const users: UserGotchisOwned[] = await getEthSubgraphGotchis(batch);
+  // //Ethereum
+  // for (let index = 0; index < batches; index++) {
+  //   const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
+  //   const users: UserGotchisOwned[] = await getEthSubgraphGotchis(batch);
 
-    if (users.length > 0) {
-      mainnetUsers = mainnetUsers.concat(users);
-    }
-  }
-  //Handle mainnet Gotchis
-  const mainnetTokenIds: string[] = [];
-  mainnetUsers.forEach((user) => {
-    let claimedGotchis: string[] = [];
-    //make sure gotchis are claimed
+  //   if (users.length > 0) {
+  //     mainnetUsers = mainnetUsers.concat(users);
+  //   }
+  // }
+  // //Handle mainnet Gotchis
+  // const mainnetTokenIds: string[] = [];
+  // mainnetUsers.forEach((user) => {
+  //   let claimedGotchis: string[] = [];
+  //   //make sure gotchis are claimed
 
-    user.gotchisOwned.forEach((gotchi) => {
-      //get status
-      if (gotchi.status === "3") {
-        claimedGotchis.push(gotchi.id);
-        allGotchiIds.push(gotchi.id);
-      }
-      if (claimedGotchis.length > 0) {
-        addGotchiId(
-          finalData,
-          user.id,
-          user.gotchisOwned.map((f) => f.id)
-        );
-      }
+  //   user.gotchisOwned.forEach((gotchi) => {
+  //     //get status
+  //     if (gotchi.status === "3") {
+  //       claimedGotchis.push(gotchi.id);
+  //       allGotchiIds.push(gotchi.id);
+  //     }
+  //     if (claimedGotchis.length > 0) {
+  //       addGotchiId(
+  //         finalData,
+  //         user.id,
+  //         user.gotchisOwned.map((f) => f.id)
+  //       );
+  //     }
 
-      mainnetTokenIds.push(gotchi.id);
-    });
-  });
+  //     mainnetTokenIds.push(gotchi.id);
+  //   });
+  // });
 
   finalData = removeEmpty(eliminateDuplicates(finalData));
 
   finalData = reduceGotchiData(finalData);
+
+  //loop through all finalData.gotchiIds and remove duplicates
+  finalData.forEach((e) => {
+    e.gotchiIds = [...new Set(e.gotchiIds)];
+  });
 
   console.log("Unique addresses:", finalData.length);
   const x = new Set(allGotchiIds);
@@ -244,6 +249,9 @@ export async function generateMerkleTree(
   //write the tree to a file
 
   const parentPath = getParentPath(propDetails.id);
+
+  console.log("parent path:", parentPath);
+
   if (!fs.existsSync(parentPath)) {
     //create folder if it doesn't exist
     fs.mkdirSync(parentPath, { recursive: true });
@@ -272,8 +280,8 @@ export async function generateMerkleTree(
   };
 }
 
-export function getParentPath(propTitle: string): string {
-  return rootPath + `${propType(propTitle)}/${propTitle}`;
+export function getParentPath(propId: string): string {
+  return rootPath + `${propId}`;
 }
 
 function removeEmpty(data: GotchiData[]) {
@@ -293,7 +301,7 @@ function removeEmpty(data: GotchiData[]) {
 //gets the proof of a particular address
 export async function getProof(address: string, propId: string) {
   const prop: ProposalDetails = await getProposalDetails(propId);
-  const filePath = getParentPath(prop.title) + "/tree.json";
+  const filePath = getParentPath(prop.id) + "/tree.json";
 
   //retrieve proof
   const jsonString = fs.readFileSync(filePath, "utf-8");
@@ -309,7 +317,7 @@ export async function getProof(address: string, propId: string) {
 
 export async function getGotchiIds(address: string, propId: string) {
   const prop: ProposalDetails = await getProposalDetails(propId);
-  const filePath = getParentPath(prop.title) + "/data.json";
+  const filePath = getParentPath(prop.id) + "/data.json";
 
   //retrieve gotchiIds
   const jsonString = fs.readFileSync(filePath, "utf-8");

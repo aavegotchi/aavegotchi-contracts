@@ -8,9 +8,9 @@ import {ILink} from "../../interfaces/ILink.sol";
 import {ForgeFacet} from "./ForgeFacet.sol";
 import {ForgeTokenFacet} from "./ForgeTokenFacet.sol";
 
-contract ForgeVRFFacet is Modifiers {
-    // Maximum number of geodes that can be opened in one call.
 
+
+contract ForgeVRFFacet is Modifiers {
     event VrfResponse(address user, uint256 randomNumber, bytes32 requestId, uint256 blockNumber);
     event GeodeWin(address user, uint256 itemId, uint256 geodeTokenId, bytes32 requestId, uint256 blockNumber);
     event GeodeEmpty(address user, uint256 geodeTokenId, bytes32 requestId, uint256 blockNumber);
@@ -61,6 +61,14 @@ contract ForgeVRFFacet is Modifiers {
         }
     }
 
+    // @notice returns array of prizes left indexed by rarity (common = 0, uncommon = 1, rare = 2, etc)
+    function numTotalPrizesLeftByRarity() public view returns (uint256[6] memory total) {
+        for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
+            uint8 idx = forgeFacet().getRsmIndex(s.geodePrizeRarities[s.geodePrizeTokenIds[i]]);
+            total[idx] += s.geodePrizeQuantities[s.geodePrizeTokenIds[i]];
+        }
+    }
+
     function openGeodes(uint256[] calldata _geodeTokenIds, uint256[] calldata _amountPerToken) external whenNotPaused {
         require(_geodeTokenIds.length > 0, "ForgeVRFFacet: Cannot open 0 geodes");
         require(areGeodePrizesAvailable(), "ForgeVRFFacet: No prizes currently available");
@@ -108,21 +116,21 @@ contract ForgeVRFFacet is Modifiers {
         s.vrfUserToRequestIds[sender].push(requestId);
 
         // for testing
-        //        tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _geodeTokenIds[0]))));
+       // tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _geodeTokenIds[0]))));
     }
 
     // for testing purpose only
-    // function tempFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) internal {
-    //     VrfRequestInfo storage info = s.vrfRequestIdToVrfRequestInfo[_requestId];
+    //  function tempFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) internal {
+    //      VrfRequestInfo storage info = s.vrfRequestIdToVrfRequestInfo[_requestId];
 
-    //     require(s.userVrfPending[info.user], "ForgeVRFFacet: VRF is not pending for user");
-    //     require(info.status == VrfStatus.PENDING, "ForgeVRFFacet: VRF request is not pending");
+    //      require(s.userVrfPending[info.user], "ForgeVRFFacet: VRF is not pending for user");
+    //      require(info.status == VrfStatus.PENDING, "ForgeVRFFacet: VRF request is not pending");
 
-    //     info.randomNumber = _randomNumber;
-    //     info.status = VrfStatus.READY_TO_CLAIM;
+    //      info.randomNumber = _randomNumber;
+    //      info.status = VrfStatus.READY_TO_CLAIM;
 
-    //     emit VrfResponse(info.user, _randomNumber, _requestId, block.number);
-    // }
+    //      emit VrfResponse(info.user, _randomNumber, _requestId, block.number);
+    //  }
 
     /**
          * @notice fulfillRandomness handles the VRF response. Your contract must
@@ -162,6 +170,117 @@ contract ForgeVRFFacet is Modifiers {
         return s.vrfRequestIdToVrfRequestInfo[requestId];
     }
 
+    /**
+     * @notice get the current prize probabilities based on available prizes
+     */
+    function getCurrentPrizeProbabilityForGeode(uint8 geodeRsm) public view returns (uint256[6] memory) {
+        uint8[6] memory rarities = [uint8(COMMON_RSM), UNCOMMON_RSM, RARE_RSM, LEGENDARY_RSM, MYTHICAL_RSM, GODLIKE_RSM];
+        uint256[6] memory probability;
+
+        // get base probabilities
+        for (uint8 i; i < rarities.length; i++) {
+            probability[i] = s.geodeWinChanceMultiTierBips[geodeRsm][rarities[i]];
+        }
+        uint256[6] memory prizesLeft = numTotalPrizesLeftByRarity();
+
+        // modify baseProbabilities based on available items
+        // looping rarity idx backwards from 5 but stop at 1, because logic handles setting common probability (idx 0).
+        for (uint256 i = rarities.length - 1; i >= 1; i--) {
+            if (prizesLeft[i] == 0) {
+                probability[i - 1] += probability[i];
+                probability[i] = 0;
+            }
+        }
+        // handle common case (index 0)
+        if (prizesLeft[0] == 0) {
+            probability[0] = 0;
+        }
+
+        return probability;
+    }
+
+    function getAvailablePrizesForRarity(uint8 rsm) public view returns (uint256[] memory) {
+        uint256[] memory temp = new uint256[](s.geodePrizeTokenIds.length);
+        uint256 amt = 0;
+        uint256 count = 0;
+
+        for (uint256 i; i < s.geodePrizeTokenIds.length; i++) {
+            if (s.geodePrizeRarities[s.geodePrizeTokenIds[i]] == rsm) {
+                temp[i] = s.geodePrizeTokenIds[i];
+                amt += 1;
+            }
+        }
+        // strip 0s
+        uint256[] memory prizes = new uint256[](amt);
+        for (uint256 i; i < temp.length; i++) {
+            if (temp[i] != 0) {
+                prizes[count] = temp[i];
+                count++;
+            }
+        }
+        return prizes;
+    }
+
+    function getWinRanges(uint256[6] memory winChanceByRarity) public pure returns (uint256[] memory probabilityRanges) {
+        probabilityRanges = new uint256[](winChanceByRarity.length);
+        probabilityRanges[0] = winChanceByRarity[0];
+
+        uint256 lastNonZero;
+        if (probabilityRanges[0] != 0) {
+            lastNonZero = probabilityRanges[0];
+        }
+
+        for (uint256 i = 1; i < winChanceByRarity.length; i++) {
+            if (winChanceByRarity[i] == 0) {
+                probabilityRanges[i] = 0;
+            } else {
+                probabilityRanges[i] = winChanceByRarity[i] + lastNonZero;
+                lastNonZero = winChanceByRarity[i] + lastNonZero;
+            }
+        }
+    }
+
+    function getRarityWon(uint256[] memory probabilityRanges, uint256 geodeRandNum) internal pure returns (int) {
+        int rarityWonIndex = -1;
+
+        uint256 lastNonZero;
+        if (probabilityRanges[0] != 0) {
+            lastNonZero = probabilityRanges[0];
+        }
+
+        if (geodeRandNum <= probabilityRanges[0] && geodeRandNum > 0) {
+            rarityWonIndex = 0;
+        } else {
+            for (uint256 i = 1; i < probabilityRanges.length; i++) {
+                if (probabilityRanges[i] == 0) {
+                    continue;
+                } else {
+                    if (geodeRandNum <= probabilityRanges[i] && geodeRandNum > lastNonZero) {
+                        rarityWonIndex = int(i);
+                        break;
+                    } else {
+                        lastNonZero = probabilityRanges[i];
+                    }
+                }
+            }
+        }
+        return rarityWonIndex;
+    }
+
+    struct PrizeCalculationData {
+        uint256 prizesLeft;
+        uint256 numWins;
+        uint256 modNum;
+        uint256 divNum;
+        uint256 geodeRandNum;
+        int rarityWonIndex;
+        uint256 itemIdWon;
+        uint256[] probabilityRanges;
+        uint256[] prizes;
+        uint8 rsm;
+        uint256[6] winChanceByRarity;
+    }
+
     function claimWinnings() external whenNotPaused {
         address sender = LibMeta.msgSender();
 
@@ -173,37 +292,74 @@ contract ForgeVRFFacet is Modifiers {
         require(info.status == VrfStatus.READY_TO_CLAIM, "ForgeVRFFacet: not ready to claim");
         require(info.randomNumber != 0, "ForgeVRFFacet: invalid random number");
 
-        uint256 modNum = 10000;
-        uint256 divNum = 1;
+        uint8[6] memory rarities = [uint8(COMMON_RSM), UNCOMMON_RSM, RARE_RSM, LEGENDARY_RSM, MYTHICAL_RSM, GODLIKE_RSM];
 
-        uint256 prizesLeft = numTotalPrizesLeft();
-        uint256 numWins;
+        PrizeCalculationData memory data = PrizeCalculationData({
+            prizesLeft: numTotalPrizesLeft(),
+            numWins: 0,
+            modNum: 10000,
+            divNum: 1,
+            geodeRandNum: 0,
+            rarityWonIndex: 0,
+            itemIdWon: 0,
+            probabilityRanges: new uint256[](0),
+            prizes: new uint256[](0),
+            rsm: 0,
+            winChanceByRarity: [uint256(0), 0, 0, 0, 0, 0]
+        });
 
         for (uint256 i; i < info.geodeTokenIds.length; i++) {
-            uint8 rsm = forgeFacet().geodeRsmFromTokenId(info.geodeTokenIds[i]);
+            data.rsm = forgeFacet().geodeRsmFromTokenId(info.geodeTokenIds[i]);
+            data.winChanceByRarity = getCurrentPrizeProbabilityForGeode(data.rsm);
 
             for (uint256 j; j < info.amountPerToken[i]; j++) {
-                if (numWins < prizesLeft) {
+                if (data.numWins < data.prizesLeft) {
                     // geodeRandNum is a 4 digit (0-9999) subsection of the random number
-                    uint256 geodeRandNum = (info.randomNumber % modNum) / divNum;
+                    data.geodeRandNum = (info.randomNumber % data.modNum) / data.divNum;
 
-                    if (s.geodeWinChanceBips[rsm] >= geodeRandNum) {
-                        uint256 idx = geodeRandNum % s.geodePrizeTokenIds.length;
-                        uint256 itemIdWon = s.geodePrizeTokenIds[idx];
+                    // First create a list of win ranges.
+                    data.probabilityRanges = getWinRanges(data.winChanceByRarity);
 
+                    // choose rarity won if any
+                    data.rarityWonIndex = getRarityWon(data.probabilityRanges, data.geodeRandNum);
+
+                    if (data.rarityWonIndex >= 0) {
+                        data.prizes = getAvailablePrizesForRarity(rarities[uint(data.rarityWonIndex)]);
+                    
+                     
+
+                        uint256 idx = data.geodeRandNum % data.prizes.length;
+
+                        data.itemIdWon = data.prizes[idx];
+              
                         // if last quantity of item won, rearrange array.
-                        if (s.geodePrizeQuantities[itemIdWon] == 1) {
-                            s.geodePrizeTokenIds[idx] = s.geodePrizeTokenIds[s.geodePrizeTokenIds.length - 1];
+                        if (s.geodePrizeQuantities[data.itemIdWon] == 1) {
+                            // find index in geodePrizeTokenIds
+                            uint256 tokenIdsIndex;
+                            for (uint256 k; k < s.geodePrizeTokenIds.length; k++) {
+                                if (s.geodePrizeTokenIds[k] == data.itemIdWon) {
+                                    tokenIdsIndex = k;
+                                    break;
+                                }
+                            }
+               
+
+                            s.geodePrizeTokenIds[tokenIdsIndex] = s.geodePrizeTokenIds[s.geodePrizeTokenIds.length - 1];
                             s.geodePrizeTokenIds.pop();
                         }
-                        s.geodePrizeQuantities[itemIdWon] -= 1;
-                        numWins++;
 
-                        forgeTokenFacet().safeTransferFrom(address(this), sender, itemIdWon, 1, "");
+                      
+
+                        s.geodePrizeQuantities[data.itemIdWon] -= 1;
+                        data.numWins++;
+
+                        forgeTokenFacet().safeTransferFrom(address(this), sender, data.itemIdWon, 1, "");
                         forgeFacet().burn(address(this), info.geodeTokenIds[i], 1);
 
-                        emit GeodeWin(sender, itemIdWon, info.geodeTokenIds[i], requestId, block.number);
+                        emit GeodeWin(sender, data.itemIdWon, info.geodeTokenIds[i], requestId, block.number);
                     } else {
+                      
+
                         forgeFacet().burn(address(this), info.geodeTokenIds[i], 1);
                         emit GeodeEmpty(sender, info.geodeTokenIds[i], requestId, block.number);
                     }
@@ -212,8 +368,8 @@ contract ForgeVRFFacet is Modifiers {
                     emit GeodeRefunded(sender, info.geodeTokenIds[i], requestId, block.number);
                 }
 
-                divNum = modNum;
-                modNum *= 10000;
+                data.divNum = data.modNum;
+                data.modNum *= 10000;
             }
         }
         info.status = VrfStatus.CLAIMED;

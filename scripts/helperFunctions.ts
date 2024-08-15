@@ -78,9 +78,9 @@ export function getSelector(func: string, ethers: any) {
 export const maticDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
 
 export const maticDiamondUpgrader =
-  "0x35fe3df776474a7b24b3b1ec6e745a830fdad351";
+  "0x01F010a5e001fe9d6940758EA5e8c777885E351e";
 
-export const itemManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
+export const itemManager = "0x01F010a5e001fe9d6940758EA5e8c777885E351e";
 
 export const itemManagerAlt = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
 
@@ -88,6 +88,11 @@ export const gameManager = "0xa370f2ADd2A9Fba8759147995d6A0641F8d7C119";
 
 export const maticRealmDiamondAddress =
   "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11";
+
+export const maticInstallationDiamondAddress =
+  "0x19f870bD94A34b3adAa9CaA439d333DA18d6812A";
+export const maticTileDiamondAddress =
+  "0x9216c31d8146bCB3eA5a9162Dc1702e8AEDCa355";
 
 export const maticFakeGotchiCards =
   "0x9f6BcC63e86D44c46e85564E9383E650dc0b56D7";
@@ -273,8 +278,8 @@ export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
 
     const provider = new DefenderRelayProvider(credentials);
     return new DefenderRelaySigner(credentials, provider, {
-      speed: "fast",
-      validForSeconds: 3600,
+      speed: "safeLow",
+      validForSeconds: 7200,
     });
   } else if (hre.network.name === "tenderly") {
     //impersonate

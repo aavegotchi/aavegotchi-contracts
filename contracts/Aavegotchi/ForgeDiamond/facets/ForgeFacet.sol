@@ -16,6 +16,7 @@ import {ItemType} from "../../libraries/LibAppStorage.sol";
 import {AavegotchiFacet} from "../../facets/AavegotchiFacet.sol";
 import {AavegotchiGameFacet} from "../../facets/AavegotchiGameFacet.sol";
 import {LendingGetterAndSetterFacet} from "../../facets/LendingGetterAndSetterFacet.sol";
+import {IERC1155Marketplace} from "../../../shared/interfaces/IERC1155Marketplace.sol";
 
 contract ForgeFacet is Modifiers {
     event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);
@@ -169,7 +170,7 @@ contract ForgeFacet is Modifiers {
         return percentTimeDiscountBips[level - 1] * 10;
     }
 
-    function getRsmIndex(uint8 rsm) internal pure returns (uint8) {
+    function getRsmIndex(uint8 rsm) public pure returns (uint8) {
         uint8[6] memory rsmIndexRef = [uint8(COMMON_RSM), UNCOMMON_RSM, RARE_RSM, LEGENDARY_RSM, MYTHICAL_RSM, GODLIKE_RSM];
         for (uint8 i; i < rsmIndexRef.length; i++) {
             if (rsmIndexRef[i] == rsm) {
@@ -585,6 +586,7 @@ contract ForgeFacet is Modifiers {
 
         LibToken.removeFromOwner(from, id, amount);
         s._totalSupply[id] -= amount;
+        IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(address(this), id, from);
 
         emit TransferSingle(msg.sender, from, address(0), id, amount);
     }
@@ -602,6 +604,7 @@ contract ForgeFacet is Modifiers {
 
             LibToken.removeFromOwner(from, id, amount);
             s._totalSupply[id] -= amount;
+            IERC1155Marketplace(s.aavegotchiDiamond).updateERC1155Listing(address(this), id, from);
         }
         emit TransferBatch(msg.sender, from, address(0), ids, amounts);
     }

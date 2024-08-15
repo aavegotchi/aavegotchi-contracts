@@ -12,7 +12,7 @@ import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {IERC721TokenReceiver} from "../../shared/interfaces/IERC721TokenReceiver.sol";
 
-import { ForgeFacet } from "../ForgeDiamond/facets/ForgeFacet.sol";
+import {ForgeFacet} from "../ForgeDiamond/facets/ForgeFacet.sol";
 
 contract AavegotchiFacet is Modifiers {
     event PetOperatorApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
@@ -143,6 +143,13 @@ contract AavegotchiFacet is Modifiers {
         require(!forgeFacet.isGotchiForging(_tokenId), "I'M BUSY FORGING DON'T BOTHER ME");
     }
 
+    function _enforceAavegotchiNotEquippedWithDelegatedItems(uint256 _tokenId) internal view {
+        require(
+            s.gotchiEquippedDepositsInfo[_tokenId].equippedDelegatedWearablesCount == 0,
+            "AavegotchiFacet: Can't transfer when equipped with a delegated wearable"
+        );
+    }
+
     /// @notice Transfers the ownership of an NFT from one address to another address
     /// @dev Throws unless `LibMeta.msgSender()` is the current owner, an authorized
     ///  operator, or the approved address for this NFT. Throws if `_from` is
@@ -155,12 +162,7 @@ contract AavegotchiFacet is Modifiers {
     /// @param _to The new owner
     /// @param _tokenId The NFT to transfer
     /// @param _data Additional data with no specified format, sent in call to `_to`
-    function safeTransferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId,
-        bytes calldata _data
-    ) external {
+    function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes calldata _data) external {
         address sender = LibMeta.msgSender();
         internalTransferFrom(sender, _from, _to, _tokenId);
         LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, _data);
@@ -179,12 +181,7 @@ contract AavegotchiFacet is Modifiers {
     /// @param _tokenIds An array containing the identifiers of the NFTs to transfer
     /// @param _data Additional data with no specified format, sent in call to `_to`
 
-    function safeBatchTransferFrom(
-        address _from,
-        address _to,
-        uint256[] calldata _tokenIds,
-        bytes calldata _data
-    ) external {
+    function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _tokenIds, bytes calldata _data) external {
         address sender = LibMeta.msgSender();
         for (uint256 index = 0; index < _tokenIds.length; index++) {
             uint256 _tokenId = _tokenIds[index];
@@ -199,14 +196,10 @@ contract AavegotchiFacet is Modifiers {
     /// @param _from The current owner of the NFT
     /// @param _to The new owner
     /// @param _tokenId The NFT to transfer
-    function safeTransferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external {
+    function safeTransferFrom(address _from, address _to, uint256 _tokenId) external {
         address sender = LibMeta.msgSender();
         internalTransferFrom(sender, _from, _to, _tokenId);
-        // LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
+        LibERC721.checkOnERC721Received(sender, _from, _to, _tokenId, "");
     }
 
     /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
@@ -219,23 +212,15 @@ contract AavegotchiFacet is Modifiers {
     /// @param _from The current owner of the NFT
     /// @param _to The new owner
     /// @param _tokenId The NFT to transfer
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external {
+    function transferFrom(address _from, address _to, uint256 _tokenId) external {
         internalTransferFrom(LibMeta.msgSender(), _from, _to, _tokenId);
     }
 
     // This function is used by transfer functions
-    function internalTransferFrom(
-        address _sender,
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) internal {
-        // LibGotchiLending.enforceAavegotchiNotInLending(uint32(_tokenId), _sender);
-        // _enforceAavegotchiNotForging(_tokenId);
+    function internalTransferFrom(address _sender, address _from, address _to, uint256 _tokenId) internal {
+        LibGotchiLending.enforceAavegotchiNotInLending(uint32(_tokenId), _sender);
+        _enforceAavegotchiNotForging(_tokenId);
+        _enforceAavegotchiNotEquippedWithDelegatedItems(_tokenId);
 
         require(_to != address(0), "AavegotchiFacet: Can't transfer to 0 address");
         require(_from != address(0), "AavegotchiFacet: _from can't be 0 address");

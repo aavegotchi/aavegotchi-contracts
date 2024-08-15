@@ -556,6 +556,14 @@ export async function updateSvgTaskForSideSleeves(_itemIds: number[]) {
   const sideViews = ["left", "right", "back"];
   let taskArray = [];
 
+  //for sleeves, we have to make sure all the arrays have the same length
+  if (
+    leftSleeve.length !== rightSleeve.length ||
+    leftSleeve.length !== backSleeve.length
+  ) {
+    console.error("Sleeves arrays are not the same length");
+    return;
+  }
   for (let index = 0; index < _itemIds.length; index++) {
     const itemId = _itemIds[index];
     const sideArrays = [

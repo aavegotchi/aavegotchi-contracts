@@ -1,3 +1,5 @@
+import { bodyWearableBack } from "../scripts/svgHelperFunctions";
+
 const fs = require("fs");
 
 export const wearablesRightSvgs = [
@@ -375,6 +377,25 @@ export const wearablesRightSvgs = [
   wearable("367_EyesofDevotionRight"),
   wearable("368_BeardofDivinityRight"),
   wearable("369_StaffofCreationRight"),
+  //forge wearables2
+  wearable("370_WavyHairRight"),
+  wearable("371_PlasticEarringsRight"),
+  bodyWearableRight("372_PartyDress"),
+  bodyWearableRight("373_Overalls"),
+  "374_LensFrensPlantRight",
+  wearable("375_GMSeedsRight"),
+  wearable("376_LickBrainRight"),
+  wearable("377_LickEyesRight"),
+  wearable("378_LickTongueRight"),
+  wearable("379_LickTentacleRight"),
+  wearable("380_SebastienHairRight"),
+  wearable("381_VoxelEyesRight"),
+  wearable("382_GOATeeRight"),
+  bodyWearableRight("383_SandboxHoodie"),
+  wearable("384_FaangsRight"),
+  wearable("385_BlockScannersRight"),
+  wearable("386_StaffCharmingRight"),
+  wearable("387_RoflnogginRight"),
 ];
 
 export const wearablesBackSvgs = [
@@ -752,6 +773,25 @@ export const wearablesBackSvgs = [
   // "367_EyesofDevotionBack",
   // "368_BeardofDivinityBack",
   wearable("369_StaffofCreationBack"),
+  //forge wearables2
+  wearable("370_WavyHairBack"),
+  wearable("371_PlasticEarringsBack"),
+  bodyWearable("372_PartyDress"),
+  bodyWearable("373_Overalls"),
+  wearable("374_LensFrensPlantBack"),
+  wearable("375_GMSeedsBack"),
+  wearable("376_LickBrainBack"),
+  wearable("377_LickEyesBack"),
+  "378_LickTongue",
+  wearable("379_LickTentacleBack"),
+  wearable("380_SebastienHairBack"),
+  "381_VoxelEyes",
+  "382_GOATee",
+  bodyWearable("383_SandboxHoodie"),
+  "384_Faangs",
+  "385_BlockScanners",
+  wearable("386_StaffCharmingBack"),
+  wearable("387_RoflnogginBack"),
 ];
 
 export const wearablesLeftSvgs = [
@@ -1129,6 +1169,25 @@ export const wearablesLeftSvgs = [
   wearable("367_EyesofDevotionLeft"),
   wearable("368_BeardofDivinityLeft"),
   wearable("369_StaffofCreationLeft"),
+  //forge wearables2
+  wearable("370_WavyHairLeft"),
+  wearable("371_PlasticEarringsLeft"),
+  bodyWearableLeft("372_PartyDress"),
+  bodyWearableLeft("373_Overalls"),
+  wearable("374_LensFrensPlantLeft"),
+  wearable("375_GMSeedsLeft"),
+  wearable("376_LickBrainLeft"),
+  wearable("377_LickEyesLeft"),
+  wearable("378_LickTongueLeft"),
+  wearable("379_LickTentacleLeft"),
+  wearable("380_SebastienHairLeft"),
+  wearable("381_VoxelEyesLeft"),
+  wearable("382_GOATeeLeft"),
+  bodyWearableLeft("383_SandboxHoodie"),
+  wearable("384_FaangsLeft"),
+  wearable("385_BlockScannersLeft"),
+  wearable("386_StaffCharmingLeft"),
+  wearable("387_RoflnogginLeft"),
 ];
 
 export const wearablesLeftSleeveSvgs = [
@@ -1333,6 +1392,10 @@ export const wearablesLeftSleeveSvgs = [
   sleeveWearableLeft("350_PixelcraftTee"),
   sleeveWearableLeft("362_FAKEShirt"),
   sleeveWearableLeft("366_HeavenlyRobes"),
+  //forge wearables2
+  sleeveWearableLeft("372_PartyDress"),
+  sleeveWearableLeft("373_Overalls"),
+  sleeveWearableLeft("383_SandboxHoodie"),
 ];
 
 export const wearablesRightSleeveSvgs = [
@@ -1533,10 +1596,15 @@ export const wearablesRightSleeveSvgs = [
   sleeveWearableRight("316_MarineJacket"),
   sleeveWearableRight("317_ThaaveSuit"),
   sleeveWearableRight("318_TrackSuit"),
+
   // forge wearables
   sleeveWearableRight("350_PixelcraftTee"),
   sleeveWearableRight("362_FAKEShirt"),
   sleeveWearableRight("366_HeavenlyRobes"),
+
+  sleeveWearableRight("372_PartyDress"),
+  sleeveWearableRight("373_Overalls"),
+  sleeveWearableRight("383_SandboxHoodie"),
 ];
 
 export const wearablesBackSleeveSvgs = [
@@ -1739,6 +1807,10 @@ export const wearablesBackSleeveSvgs = [
   sleeveWearableRight("350_PixelcraftTee"),
   sleeveWearableRight("362_FAKEShirt"),
   sleeveWearableRight("366_HeavenlyRobes"),
+  //forge wearables2
+  sleeveWearableRight("372_PartyDress"),
+  sleeveWearableRight("373_Overalls"),
+  sleeveWearableRight("383_SandboxHoodie"),
 ];
 
 function stripSvg(svg: string) {
