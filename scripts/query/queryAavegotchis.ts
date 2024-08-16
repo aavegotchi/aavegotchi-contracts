@@ -9,11 +9,11 @@ import {
 
 export const maticGraphUrl: string = process.env.SUBGRAPH_CORE_MATIC as string;
 
-export const ethGraphUrl: string =
-  "https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-ethereum";
+// export const ethGraphUrl: string =
+("https://api.thegraph.com/subgraphs/name/aavegotchi/aavegotchi-ethereum");
 
-export const vaultGraphUrl: string =
-  "https://api.thegraph.com/subgraphs/name/aavegotchi/gotchi-vault";
+// export const vaultGraphUrl: string =
+("https://api.thegraph.com/subgraphs/name/aavegotchi/gotchi-vault");
 
 export const blockllamaUrl: string = "https://coins.llama.fi/block/polygon";
 
@@ -319,78 +319,78 @@ export async function getBorrowedGotchis(addresses: string[]) {
   return removeEmpty(userGotchisOwned);
 }
 
-export async function getVaultGotchis(
-  addresses: string[],
-  blockTag: number,
-  useBlockNumber: boolean
-): Promise<UserGotchisOwned[]> {
-  console.log("Fetching Vault subgraph gotchis");
+// export async function getVaultGotchis(
+//   addresses: string[],
+//   blockTag: number,
+//   useBlockNumber: boolean
+// ): Promise<UserGotchisOwned[]> {
+//   console.log("Fetching Vault subgraph gotchis");
 
-  const batchSize = 150;
+//   const batchSize = 150;
 
-  const batches = Math.ceil(addresses.length / batchSize);
+//   const batches = Math.ceil(addresses.length / batchSize);
 
-  let queryData = `{`;
+//   let queryData = `{`;
 
-  for (let index = 0; index < batches; index++) {
-    const batchId = index;
-    const offset = batchId * batchSize;
-    queryData = useBlockNumber
-      ? queryData.concat(`
-      batch${batchId}: owners(where:{id_in:[${addresses
-          .slice(offset, offset + batchSize)
-          .map(
-            (add: string) => '"' + add.toLowerCase() + '"'
-          )}]},first:${batchSize},block:{number:${blockTag}}) {
-        id
-        gotchis(first:1000) {
-          id
-        }}
-  `)
-      : queryData.concat(`
-  batch${batchId}: owners(where:{id_in:[${addresses
-          .slice(offset, offset + batchSize)
-          .map(
-            (add: string) => '"' + add.toLowerCase() + '"'
-          )}]},first:${batchSize}) {
-    id
-    gotchis(first:1000) {
-      id
-    }}
-`);
-  }
+//   for (let index = 0; index < batches; index++) {
+//     const batchId = index;
+//     const offset = batchId * batchSize;
+//     queryData = useBlockNumber
+//       ? queryData.concat(`
+//       batch${batchId}: owners(where:{id_in:[${addresses
+//           .slice(offset, offset + batchSize)
+//           .map(
+//             (add: string) => '"' + add.toLowerCase() + '"'
+//           )}]},first:${batchSize},block:{number:${blockTag}}) {
+//         id
+//         gotchis(first:1000) {
+//           id
+//         }}
+//   `)
+//       : queryData.concat(`
+//   batch${batchId}: owners(where:{id_in:[${addresses
+//           .slice(offset, offset + batchSize)
+//           .map(
+//             (add: string) => '"' + add.toLowerCase() + '"'
+//           )}]},first:${batchSize}) {
+//     id
+//     gotchis(first:1000) {
+//       id
+//     }}
+// `);
+//   }
 
-  queryData = queryData.concat(`}`);
+//   queryData = queryData.concat(`}`);
 
-  if (queryData == "{}") return [];
+//   if (queryData == "{}") return [];
 
-  const res = await request(vaultGraphUrl, queryData);
+//   const res = await request(vaultGraphUrl, queryData);
 
-  let finalResponse: VaultGotchisOwned[] = [];
-  for (let index = 0; index < batches; index++) {
-    const batch: VaultGotchisOwned[] = res[`batch${index}`];
-    finalResponse = finalResponse.concat(batch);
-  }
+//   let finalResponse: VaultGotchisOwned[] = [];
+//   for (let index = 0; index < batches; index++) {
+//     const batch: VaultGotchisOwned[] = res[`batch${index}`];
+//     finalResponse = finalResponse.concat(batch);
+//   }
 
-  const userGotchisOwned: UserGotchisOwned[] = finalResponse.map((val) => {
-    return {
-      gotchisOwned: val.gotchis.map((gotchi) => {
-        return { id: gotchi.id, status: "3" };
-      }),
-      id: val.id,
-    };
-  });
+//   const userGotchisOwned: UserGotchisOwned[] = finalResponse.map((val) => {
+//     return {
+//       gotchisOwned: val.gotchis.map((gotchi) => {
+//         return { id: gotchi.id, status: "3" };
+//       }),
+//       id: val.id,
+//     };
+//   });
 
-  return removeEmpty(userGotchisOwned);
-}
+//   return removeEmpty(userGotchisOwned);
+// }
 
-export async function getEthSubgraphGotchis(
-  addresses: string[]
-): Promise<UserGotchisOwned[]> {
-  console.log("Fetching ETH subgraph gotchis");
+// export async function getEthSubgraphGotchis(
+//   addresses: string[]
+// ): Promise<UserGotchisOwned[]> {
+//   console.log("Fetching ETH subgraph gotchis");
 
-  return await querySubgraph(addresses, ethGraphUrl, false);
-}
+//   return await querySubgraph(addresses, ethGraphUrl, false);
+// }
 
 export async function queryAavegotchis(ids: string[]) {
   ids = ids.map((id) => `"${id}"`);
@@ -519,29 +519,29 @@ export async function getPolygonAndMainnetGotchis(
   const batches = Math.ceil(addresses.length / batchSize);
   let mainnetUsers: UserGotchisOwned[] = [];
 
-  // Fetch Gotchis in Vault
-  for (let index = 0; index < batches; index++) {
-    const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
-    const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(
-      batch,
-      blockTag,
-      useBlockNumber
-    );
-    vaultUsers.forEach((e) => {
-      gotchiIds = gotchiIds.concat(e.gotchisOwned.map((f) => f.id));
-      fetchedAddresses.push(e.id);
-    });
-  }
+  // // Fetch Gotchis in Vault
+  // for (let index = 0; index < batches; index++) {
+  //   const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
+  //   const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(
+  //     batch,
+  //     blockTag,
+  //     useBlockNumber
+  //   );
+  //   vaultUsers.forEach((e) => {
+  //     gotchiIds = gotchiIds.concat(e.gotchisOwned.map((f) => f.id));
+  //     fetchedAddresses.push(e.id);
+  //   });
+  // }
 
-  //Ethereum
-  for (let index = 0; index < batches; index++) {
-    const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
-    const users: UserGotchisOwned[] = await getEthSubgraphGotchis(batch);
+  // //Ethereum
+  // for (let index = 0; index < batches; index++) {
+  //   const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
+  //   const users: UserGotchisOwned[] = await getEthSubgraphGotchis(batch);
 
-    if (users.length > 0) {
-      mainnetUsers = mainnetUsers.concat(users);
-    }
-  }
+  //   if (users.length > 0) {
+  //     mainnetUsers = mainnetUsers.concat(users);
+  //   }
+  // }
 
   //Handle mainnet Gotchis
   const mainnetTokenIds: string[] = [];

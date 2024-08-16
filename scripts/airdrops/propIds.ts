@@ -205,12 +205,127 @@ const sigProps = [
   },
   {
     id: "0x24191cf52ade5500f0292f3b553659424df7c00d0e9945b9efe2807f97e97513",
-    title: "Revamp the Aavegotchi Rental Protocol to support Parcels and Wearables"
+    title:
+      "Revamp the Aavegotchi Rental Protocol to support Parcels and Wearables",
   },
   {
     id: "0xded951f11b5b0ef037133c627159aea13acd4a10fe26d509076de5708244a62f",
-    title: "Gotchi Heroes Reworked Version Proposal"
-  }
+    title: "Gotchi Heroes Reworked Version Proposal",
+  },
+  {
+    id: "0x12136b11853cdc116af694d23e83190481119fb7e71048d2fc4ef160d3c0c32b",
+    title: "Rarity Farming Season 7",
+  },
+  {
+    id: "0xb5f59d03cc0e0db509357d4a80f368af1ae6567cd1c57240c251cb1107da56b2",
+    title: "Gotchi Crawler Leaderboard Prize Pool Funding",
+  },
+  {
+    id: "0xa3236a927c8e75bb96d2e69e51015b1689a5425a6394d52b0257eefa38d84b68",
+    title: "Aavegotchi DAO Mission Statement",
+  },
+  {
+    id: "0x0e3aab22b79d92dedc7b0f1c2ee4d405f10dc79cb55719f3540daf38d04febd0",
+    title: "IRL Taask Force",
+  },
+  {
+    id: "0x48ed1bfe262897452dbccdada4f280c8c5d2a41150640fb583e3f5df50eb6572",
+    title: "MECHAGOTCHIS V1 - Funding Proposal",
+  },
+  {
+    id: "0x782d1fe91e144788819da2d6c965a1d58aa0e670f2f1bc7a501429b823c9b4a8",
+    title: "Strategotchi V1: Funding Proposal",
+  },
+  {
+    id: "0x0486b8e67ca6e62572f46bac263bebb7a5a6e45420d4be33e29e3707dd81f7e6",
+    title: "Dropt | TFG Alpha Funding Proposal",
+  },
+  {
+    id: "0x1607f167c1f4f1dc9e817c7da387886655e39c8982f25423ce8ad8d90d82c10e",
+    title:
+      "Strategic Treasury Diversification into Ethereum with $3M ETH Purchase",
+  },
+  {
+    id: "0xf450366e0d33ce08c2c86e16b7463b6a1696849893dc6ffb8f00fdf40118d803",
+    title: "Upgrading the ATF",
+  },
+  {
+    id: "0xa66c045753435dda2bc8b35e95fe0dbda5087b1665c9ea50e64c82fbf6fdfe26",
+    title: "Supply  ~3.5M Treasury DAI to Aave",
+  },
+  {
+    id: "0x10aa77a1fb0b348dfd5f40b0643f61d67c31a37129ca5cb0f452bdd951f4cf88",
+    title: "Aavegotchi x Sandbox Experience - Expansion & Maintenance",
+  },
+  {
+    id: "0x6714bd532f3bca44a2a92c221d3b57f51682c57047f15505a1205493b7ee4cbf",
+    title: "Gotchi Battler Protocol Rewards",
+  },
+  {
+    id: "0xf483d72d6bc3f6bfe318905211a5a274520695d9af9174f948e65bb8869aea82",
+    title: "Gotchi Battler V1.5 funding",
+  },
+  {
+    id: "0x21817797ee5a9ec55743cc7899c81ebe9e05ec02c7cd7bd6d5fbd220cd4129e4",
+    title: "Rarity Farming Season 8 (Re-repost)",
+  },
+  {
+    id: "0xb009a2990660eee0fb9babd9cbd431340f2188db0b7f6d7fed9203c709729e6b",
+    title:
+      "Sigprop: Lend 600k GHST to improve liquidity and orderbooks on major CEXs",
+  },
+  {
+    id: "0x2561da8b465ad0b7542e89fa6101ce38c828d505910593c3b576ef2a867e9bc1",
+    title: "Staking 350 ETH with Lido and Acquiring rETH ",
+  },
+  {
+    id: "0x9fffad99521c41c1443b9b8501722adbac990e5677bbec9480b2f2c76408a5d4",
+    title: "Establishing an ETH Sell Ladder",
+  },
+  {
+    id: "0x212d3baf686a5903de904f1ae41995e9caedf7b490ec511bb67636c362c77151",
+    title: "Gas Fee Reimbursement for DAO Directors",
+  },
+  {
+    id: "0xb1c3b5c9954e3e7a00498296396b4b516bae69ba6a62b4e1c9c3d209d1eaf672",
+    title: "Strategotchi V2.0 funding",
+  },
+  {
+    id: "0xc0549f5d1bf319645e3835ed4404d8ed6bd364c1f30ca4a60b542ce9a12c56bf",
+    title: "FAKEwaar Continuing Development Fund",
+  },
+  {
+    id: "0x8a3fcec5a5f4686d805dd7995279d4a62723238c4e8198673cbff204fd578b4a",
+    title: "Elected Facilitators for DAO Meetings",
+  },
+  {
+    id: "0x6f06c1434b218cc1673ee6b34a0e11feefc4db101b291d0057748a287917b2d4",
+    title: "Custom IRL Aavegotchi Physical Arcade Machine",
+  },
+  {
+    id: "0x63537aa0e51e8f5c52d12b23874ce837c68a3ae78a1528d860797b58af522a2b",
+    title: "Proposal to Add Liquidity on Aerodrome and earn AERO",
+  },
+  {
+    id: "0xfa46eb6789d3230b7a56919aa3902bd835053049ab59e56b04e9185f06abea60",
+    title: "Convert all DAO-owned $DAI/$aDAI -> $USDC/$aUSDC",
+  },
+  {
+    id: "0xad47cd52673adaa683163864fd2c73120186a6086f6b581b0305687eda8d58a3",
+    title: "Allocation of Aerodrome POL Rewards",
+  },
+  {
+    id: "0x04a70afb2d93046600ae74a24926ac34161902e24c336aac705dbee7683880e1",
+    title: "AavegotchiDAO MCON III Sponsorship Package",
+  },
+  {
+    id: "0x9cda0125cd357f78a6f406b0a81f3bf2e2bc0dae3bae0e7e4292ebef86f8861d",
+    title: "Allocation of Quickswap POL Rewards",
+  },
+  {
+    id: "0x9b3d0d73ff761611be704a786b207a4f74c697febfdb1e95414d83c55989a05f",
+    title: "Community Wearable Schematics Release",
+  },
 ];
 
 const coreProps = [
@@ -428,10 +543,126 @@ const coreProps = [
   },
   {
     id: "0xd46fdc43cf05ad2059c1f1ddd9d129fafcf1a522a4623aaf21438ac6c1672478",
-    title: "[AGIP 94] Revamp the Aavegotchi Rental Protocol to support Parcels and Wearables"
+    title:
+      "[AGIP 94] Revamp the Aavegotchi Rental Protocol to support Parcels and Wearables",
   },
   {
     id: "0x47a9ce6f103047d8cb10ca14cd7274cd8d13871080e32cbe0b4efedf6e0b888c",
-    title: "[AGIP 95] Gotchi Heroes Reworked Version Proposal"
-  }
+    title: "[AGIP 95] Gotchi Heroes Reworked Version Proposal",
+  },
+  {
+    id: "0x4fec11f6ee6c58dc3caa0face6d4894ac1704e63a18be5c9da25b259bac84eb1",
+    title: "[AGIP 96] Rarity Farming Season 7",
+  },
+  {
+    id: "0x5fa86c431e3e0d5429906f86d1182781b7f0366f554a57631cf0c8fd2dd1c2b5",
+    title: "[AGIP 97] Gotchi Crawler Leaderboard Prize Pool Funding",
+  },
+  {
+    id: "0xc4a9034b518ae0ba34181e3f835fa1f525efbf9bc1172b2cdd3fac7bfda5599e",
+    title: "[AGIP 98] Aavegotchi DAO Mission Statement",
+  },
+  {
+    id: "0x551268ae0158295bfa0e818cac2ddf1356149f1dfbdb9727028f29833b3e53e5",
+    title: "[AGIP 99] Gotchi Greetoors (formerly ITF) Funding",
+  },
+  {
+    id: "0xd26cce5529ae0bf5bdba4c17d3a9a39c823c186c86ed3805ad9fc1876d14bd87",
+    title: "[AGIP 100] MECHAGOTCHIS V1 ",
+  },
+  {
+    id: "0xce52040a02927a460303484c408f10ac0405a2c4bb3ffa1a0262ab5b42f9df44",
+    title: "[AGIP 101] Strategotchi V1: Funding Proposal",
+  },
+  {
+    id: "0xac53f22b919be753d98f159df7d5f6883861ecb7c5c47f35b3ebfdec2f6be3c6",
+    title: "[AGIP 102] Dropt | TFG Alpha Funding Proposal",
+  },
+  {
+    id: "0x2585c9a492118092309a0c60738f704129297e4384c7bec47694e02a6448bf94",
+    title:
+      "[AGIP 103] Strategic Treasury Diversification into Ethereum with $3M ETH Purchase",
+  },
+  {
+    id: "0xce4c9735a8c6ba58adc123b6e91fe94c729cf45546db88647ecdb9bf77ebb485",
+    title: "[AGIP 104] Upgrading the ATF",
+  },
+  {
+    id: "0x7a2767fdecf22ff48fe0cc200c5a4018c8950ab7dbdee8b8f39135bd63733d5f",
+    title: "[AGIP 105] Supply  ~3.5M Treasury DAI to Aave",
+  },
+  {
+    id: "0x4c05f8411850c2155c423417c6ce554e1750a04d31ec1b9bf85b716d46a50745",
+    title:
+      "[AGIP 106] Aavegotchi x Sandbox Experience - Expansion & Maintenance",
+  },
+  {
+    id: "0xd80bddef82f5543ff581139ef060e9571fcf2825df15e7bda7f740cddc6c8459",
+    title: "[AGIP 107] Gotchi Battler -  Prize Pool Funding",
+  },
+  {
+    id: "0x5b328a78c8461910ec5cc9240eb9143efcfcc4a537304c30235d969ffab02ec3",
+    title: "[AGIP 108] Gotchi Battler V1.5 funding",
+  },
+  {
+    id: "0xe2536a75bf80798f65559eeb832312198d9a9c640b5660f432e1e71de60dd945",
+    title: "[AGIP 109] Rarity Farming Season 8",
+  },
+  {
+    id: "0x53725868842a2b7c6e2cf251eaeb5c939b7272c3c849ef3814ac7bc9b62469eb",
+    title:
+      "[AGIP 110] Lend 600k GHST to improve liquidity and orderbooks on major CEXs",
+  },
+  {
+    id: "0xce481514fa4f8c08b1384a2fdec32cf4b90fb24bedcf834cbf1e87ddafac418f",
+    title: "[AGIP 111] Staking 350 ETH with Lido and Acquiring rETH ",
+  },
+  {
+    id: "0xc4a1181fa1d6ede81e71c195aab84a21c1431f8a8b28221100e42720b84c2df3",
+    title: "[AGIP 112] Establishing an ETH Sell Ladder",
+  },
+  {
+    id: "0x9e2dfd4a35b6069df9c0e29a4d88f197a3a6af816f5275b210a768521c734b97",
+    title: "[AGIP 113] Gas Fee Reimbursement for DAO Directors",
+  },
+  {
+    id: "0x1470e49097b506d8aa9f017f1fd13328f456cba790c8df48bc789375c6cd723a",
+    title: "[AGIP 114] Strategotchi V2.0 & Voxel Unity SDK funding",
+  },
+  {
+    id: "0x62cb52138d0d66f0b363156f0be470d2289f7e64aa0b00a98f09a52ec6e4cba4",
+    title: "[AGIP 115] FAKEwaar Continuing Development Fund",
+  },
+  {
+    id: "0x4ffa41a2ab80839e03bbc0eaa1d4f8b210f294aad043343809d4f8b36059f11a",
+    title: "[AGIP 116] Elected Facilitators for DAO Meetings",
+  },
+  {
+    id: "0xad9c32042678c6250507f602a57ea52846efe8391d781bc9476683e9347bef63",
+    title: "[AGIP 117] Custom IRL Aavegotchi Physical Arcade Machine",
+  },
+  {
+    id: "0xba11262fc75ec6b49dafcdfb55c6aa3395ce58c18aa377b6a955d695a27ff3f0",
+    title: "[AGIP 118] Proposal to Add Liquidity on Aerodrome and earn AERO",
+  },
+  {
+    id: "0x2d8df1e8ad91c9b928e9d0c319e8cabfef103e48fbc7a8933d889b1389a17873",
+    title: "[AGIP 119] Convert all DAO-owned $DAI/$aDAI -> $USDC/$aUSDC",
+  },
+  {
+    id: "0xbb7e75512a55d15a6233e13a83af5ce5638c36b5a96e3dde8c4560acf904038a",
+    title: "[AGIP 120] Allocation of Aerodrome POL Rewards",
+  },
+  {
+    id: "0xb5441817ecff8a693937ff1c16562c9d1d43c4bbf76490220d7d34da181bb43d",
+    title: "[AGIP 121] AavegotchiDAO MCON III Sponsorship Package",
+  },
+  {
+    id: "0xd7de27500ffa8d360848e7655a32a7b7a00ac46fc13ab156ef51dfebb4101d4a",
+    title: "[AGIP 122] Allocation of Quickswap POL Rewards",
+  },
+  {
+    id: "0xff8daa93be9021f9f0a49cb8394ef49f868261bd9828faa351611c9854bbf0db",
+    title: "[AGIP 123] Community Wearable Schematics Release",
+  },
 ];

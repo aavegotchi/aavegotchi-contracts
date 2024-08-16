@@ -1,7 +1,7 @@
 import {
-  getEthSubgraphGotchis,
+  // getEthSubgraphGotchis,
   getUsersWithGotchisOfAddresses,
-  getVaultGotchis,
+  // getVaultGotchis,
   GotchiId,
 } from "./queryAavegotchis";
 import { UserGotchisOwned } from "../../types";
@@ -103,60 +103,60 @@ export async function queryAllAavegotchis(
     });
   } while (allGotchiIds.length != prevLength);
 
-  const batchSize = 1000;
-  const batches = Math.ceil(addresses.length / batchSize);
-  let mainnetUsers: UserGotchisOwned[] = [];
+  // const batchSize = 1000;
+  // const batches = Math.ceil(addresses.length / batchSize);
+  // let mainnetUsers: UserGotchisOwned[] = [];
 
-  //get vault gotchis
-  for (let index = 0; index < batches; index++) {
-    const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
-    const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(
-      batch,
-      blockTag,
-      true
-    );
-    vaultUsers.forEach((e) => {
-      allGotchiIds = allGotchiIds.concat(e.gotchisOwned.map((f) => f.id));
-      addGotchiId(
-        finalData,
-        e.id,
-        e.gotchisOwned.map((f) => f.id)
-      );
-    });
-  }
+  // //get vault gotchis
+  // for (let index = 0; index < batches; index++) {
+  //   const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
+  //   const vaultUsers: UserGotchisOwned[] = await getVaultGotchis(
+  //     batch,
+  //     blockTag,
+  //     true
+  //   );
+  //   vaultUsers.forEach((e) => {
+  //     allGotchiIds = allGotchiIds.concat(e.gotchisOwned.map((f) => f.id));
+  //     addGotchiId(
+  //       finalData,
+  //       e.id,
+  //       e.gotchisOwned.map((f) => f.id)
+  //     );
+  //   });
+  // }
 
-  //Ethereum
-  for (let index = 0; index < batches; index++) {
-    const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
-    const users: UserGotchisOwned[] = await getEthSubgraphGotchis(batch);
+  // //Ethereum
+  // for (let index = 0; index < batches; index++) {
+  //   const batch = addresses.slice(index * batchSize, batchSize * (index + 1));
+  //   const users: UserGotchisOwned[] = await getEthSubgraphGotchis(batch);
 
-    if (users.length > 0) {
-      mainnetUsers = mainnetUsers.concat(users);
-    }
-  }
-  //Handle mainnet Gotchis
-  const mainnetTokenIds: string[] = [];
-  mainnetUsers.forEach((user) => {
-    let claimedGotchis: string[] = [];
-    //make sure gotchis are claimed
+  //   if (users.length > 0) {
+  //     mainnetUsers = mainnetUsers.concat(users);
+  //   }
+  // }
+  // //Handle mainnet Gotchis
+  // const mainnetTokenIds: string[] = [];
+  // mainnetUsers.forEach((user) => {
+  //   let claimedGotchis: string[] = [];
+  //   //make sure gotchis are claimed
 
-    user.gotchisOwned.forEach((gotchi) => {
-      //get status
-      if (gotchi.status === "3") {
-        claimedGotchis.push(gotchi.id);
-        allGotchiIds.push(gotchi.id);
-      }
-      if (claimedGotchis.length > 0) {
-        addGotchiId(
-          finalData,
-          user.id,
-          user.gotchisOwned.map((f) => f.id)
-        );
-      }
+  //   user.gotchisOwned.forEach((gotchi) => {
+  //     //get status
+  //     if (gotchi.status === "3") {
+  //       claimedGotchis.push(gotchi.id);
+  //       allGotchiIds.push(gotchi.id);
+  //     }
+  //     if (claimedGotchis.length > 0) {
+  //       addGotchiId(
+  //         finalData,
+  //         user.id,
+  //         user.gotchisOwned.map((f) => f.id)
+  //       );
+  //     }
 
-      mainnetTokenIds.push(gotchi.id);
-    });
-  });
+  //     mainnetTokenIds.push(gotchi.id);
+  //   });
+  // });
 
   finalData = removeEmpty(eliminateDuplicates(finalData));
 

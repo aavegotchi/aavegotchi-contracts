@@ -9,9 +9,6 @@ import "solidity-coverage";
 //import './tasks/generateDiamondABI.js';
 import * as dotenv from "dotenv";
 import "@typechain/hardhat";
-import { BigNumber } from "ethers";
-
-require("hardhat-tracer");
 
 dotenv.config({ path: __dirname + "/.env" });
 
@@ -75,12 +72,7 @@ export default {
       gasPrice: 1000000000,
       timeout: 90000,
     },
-    mumbai: {
-      url: process.env.MUMBAI_URL,
-      accounts: [process.env.SECRET],
-      blockGasLimit: 20000000,
-      gasPrice: 1000000000,
-    },
+
     // gorli: {
     //   url: process.env.GORLI,
     //   accounts: [process.env.SECRET],

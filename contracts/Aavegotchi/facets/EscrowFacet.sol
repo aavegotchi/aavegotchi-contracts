@@ -21,11 +21,7 @@ contract EscrowFacet is Modifiers {
     ///@param _tokenId The identifier of the NFT receiving the ERC20 token
     ///@param _erc20Contract The contract address of the ERC20 token to be deposited
     ///@param _value The amount of ERC20 tokens to deposit
-    function depositERC20(
-        uint256 _tokenId,
-        address _erc20Contract,
-        uint256 _value
-    ) public {
+    function depositERC20(uint256 _tokenId, address _erc20Contract, uint256 _value) public {
         address escrow = s.aavegotchis[_tokenId].escrow;
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         require(escrow != address(0), "EscrowFacet: Does not have an escrow");
@@ -41,11 +37,7 @@ contract EscrowFacet is Modifiers {
     ///@param _tokenIds An array containing the identifiers of the NFTs receiving the ERC20 tokens
     ///@param _erc20Contracts An array containing the contract addresses of the ERC20 tokens to be deposited
     ///@param _values An array containing the amounts of ERC20 tokens to deposit
-    function batchDepositERC20(
-        uint256[] calldata _tokenIds,
-        address[] calldata _erc20Contracts,
-        uint256[] calldata _values
-    ) external {
+    function batchDepositERC20(uint256[] calldata _tokenIds, address[] calldata _erc20Contracts, uint256[] calldata _values) external {
         require(_tokenIds.length == _values.length, "EscrowFacet: TokenIDs and Values length must match");
         require(_tokenIds.length == _erc20Contracts.length, "EscrowFacet: TokenIDs and ERC20Contracts length must match");
 
@@ -99,7 +91,7 @@ contract EscrowFacet is Modifiers {
         address _erc20Contract,
         address _recipient,
         uint256 _transferAmount
-    ) external onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
+    ) public onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
         address escrow = s.aavegotchis[_tokenId].escrow;
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         require(escrow != address(0), "EscrowFacet: Does not have an escrow");
@@ -114,5 +106,30 @@ contract EscrowFacet is Modifiers {
             CollateralEscrow(escrow).approveAavegotchiDiamond(_erc20Contract);
         }
         LibERC20.transferFrom(_erc20Contract, escrow, _recipient, _transferAmount);
+    }
+
+    ///@notice Allow the owner of the aavegotchi to transfer out any ERC20 token in the escrow to an external address
+    ///@dev Will throw if there is an attempt to transfer out the collateral ERC20 token
+    ///@param _tokenIds Identifiers of NFTs holding the ERC20 token
+    ///@param _erc20Contracts Contract addresses of ERC20 tokens to transfer out
+    ///@param _recipients Addresses of the receivers
+    ///@param _transferAmounts Amount of ERC20 tokens to transfer out
+    function batchTransferEscrow(
+        uint256[] calldata _tokenIds,
+        address[] calldata _erc20Contracts,
+        address[] calldata _recipients,
+        uint256[] calldata _transferAmounts
+    ) external {
+        require(_tokenIds.length == _erc20Contracts.length, "EscrowFacet: TokenIDs and ERC20Contracts length must match");
+        require(_tokenIds.length == _recipients.length, "EscrowFacet: TokenIDs and Recipients length must match");
+        require(_tokenIds.length == _transferAmounts.length, "EscrowFacet: TokenIDs and TransferAmounts length must match");
+
+        for (uint256 index = 0; index < _tokenIds.length; index++) {
+            uint256 tokenId = _tokenIds[index];
+            address erc20Contract = _erc20Contracts[index];
+            address recipient = _recipients[index];
+            uint256 _transferAmount = _transferAmounts[index];
+            transferEscrow(tokenId, erc20Contract, recipient, _transferAmount);
+        }
     }
 }
