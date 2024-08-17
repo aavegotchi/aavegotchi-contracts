@@ -366,7 +366,6 @@ struct AppStorage {
     // Auxiliary structs for Items Roles Registry
     // gotchiId => equippedDepositsInfo
     mapping(uint256 => GotchiEquippedDepositsInfo) gotchiEquippedDepositsInfo;
-    mapping(address => bool) layerZeroBridgeAddresses;
 }
 
 library LibAppStorage {
@@ -429,15 +428,6 @@ contract Modifiers {
         require(
             sender == LibDiamond.contractOwner() || s.itemManagers[sender] == true,
             "LibAppStorage: only an Owner or ItemManager can call this function"
-        );
-        _;
-    }
-
-    modifier onlyLayerZeroBridge() {
-        address sender = LibMeta.msgSender();
-        require(
-            s.layerZeroBridgeAddresses[sender],
-            "LibAppStorage: Do not have access"
         );
         _;
     }
