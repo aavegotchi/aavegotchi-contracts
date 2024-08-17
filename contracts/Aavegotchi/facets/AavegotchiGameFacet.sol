@@ -230,7 +230,7 @@ contract AavegotchiGameFacet is Modifiers {
     ///@param _tokenId The identifier of NFT to claim an Aavegotchi from
     ///@param _option The index of the aavegotchi to claim(1-10)
     ///@param _stakeAmount Minimum amount of collateral tokens needed to be sent to the new aavegotchi escrow contract
-    function claimAavegotchi(uint256 _tokenId, uint256 _option, uint256 _stakeAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function claimAavegotchi(uint256 _tokenId, uint256 _option, uint256 _stakeAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) onlyEnabled {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiGameFacet: Portal not open");
         require(_option < PORTAL_AAVEGOTCHIS_NUM, "AavegotchiGameFacet: Only 10 aavegotchi options available");
@@ -264,7 +264,7 @@ contract AavegotchiGameFacet is Modifiers {
     ///@param _tokenId the identifier if the NFT to name
     ///@param _name Preferred name to give the claimed aavegotchi
 
-    function setAavegotchiName(uint256 _tokenId, string calldata _name) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function setAavegotchiName(uint256 _tokenId, string calldata _name) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) onlyEnabled {
         require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "AavegotchiGameFacet: Must claim Aavegotchi before setting name");
         string memory lowerName = LibAavegotchi.validateAndLowerName(_name);
         string memory existingName = s.aavegotchis[_tokenId].name;
@@ -319,7 +319,7 @@ contract AavegotchiGameFacet is Modifiers {
     ///@dev only valid for claimed aavegotchis
     ///@param _tokenId The identifier of the NFT to spend the skill points on
     ///@param _values An array of four integers that represent the values of the skill points
-    function spendSkillPoints(uint256 _tokenId, int16[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function spendSkillPoints(uint256 _tokenId, int16[4] calldata _values) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) onlyEnabled {
         //To test (Dan): Prevent underflow (is this ok?), see require below
         uint256 totalUsed;
         for (uint256 index; index < _values.length; index++) {
@@ -374,7 +374,7 @@ contract AavegotchiGameFacet is Modifiers {
     ///@notice Allow the current owner of a gotchi to reassign all spent skill points
     ///@dev Reverts if user doesn't have enough Essence to pay for the respec
     ///@param _tokenId Id of the Gotchi to respec
-    function resetSkillPoints(uint32 _tokenId) public onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function resetSkillPoints(uint32 _tokenId) public onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) onlyEnabled {
         if (s.gotchiRespecCount[_tokenId] > 0) {
             ForgeTokenFacet forgeTokenFacet = ForgeTokenFacet(s.forgeDiamond);
             uint256 ESSENCE = 1_000_000_001;
