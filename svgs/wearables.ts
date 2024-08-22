@@ -1,3 +1,5 @@
+import { BigNumberish } from "@ethersproject/bignumber";
+
 const fs = require("fs");
 
 export const wearablesSvgs = [
@@ -406,7 +408,7 @@ export const sleeveSvgs = [
   // "5_SnowCamoPantsRight", // body but no sleeves
   // '6_M67GrenadeRight',
   // '7_MarineCapRight',
-  // sleeves("8_MarineJacket"), // sleeves("8_MarineJacket"),
+  sleeves("8_MarineJacket"), // sleeves("8_MarineJacket"),
   // '9_WalkieTalkie',
   // '10_LinkWhiteHatRight',
   sleeves("11_MessDress"), // sleeves("11_MessDress"),
@@ -423,7 +425,7 @@ export const sleeveSvgs = [
   sleeves("22_CaptainAaveSuit"), // sleeves("22_CaptainAaveSuit"),
   // '23_CaptainAaveShieldRight',
   // '24_ThaaveHelmetRight',
-  // sleeves("25_ThaaveSuit"),
+  sleeves("25_ThaaveSuit"),
   // '26_ThaaveHammerRight',
   // '27_MarcHairRight',
   sleeves("28_MarcOutfit"), // sleeves("28_MarcOutfit"),
@@ -523,7 +525,7 @@ export const sleeveSvgs = [
   // '122_MilkshakeRight',
   // '123_AppleJuiceRight',
   // '124_BeerHelmetRight',
-  // sleeves("125_TrackSuit"),
+  sleeves("125_TrackSuit"),
   // '126_KinshipPotionRight',
   // '127_GreaterKinshipPotionRight',
   // '128_XPPotionRight',
@@ -579,9 +581,9 @@ export const sleeveSvgs = [
   sleeves("241_WGMIShirt"),
   sleeves("244_VNeckShirt"),
   sleeves("248_UpOnlyShirt"),
-  "250_CoinGeckoTee",
-  "253_AastronautSuit",
-  "256_LilBubbleSpaceSuit",
+  sleeves("250_CoinGeckoTee"),
+  sleeves("253_AastronautSuit"),
+  sleeves("256_LilBubbleSpaceSuit"),
   sleeves("258_Hanfu"),
   sleeves("293_LeatherTunic"),
   sleeves("297_AnimalSkins"),
@@ -603,6 +605,13 @@ export const sleeveSvgs = [
   sleeves("373_Overalls"),
   sleeves("383_SandboxHoodie"),
 ];
+
+export const allSleeves: Array<BigNumberish> = [
+  8, 11, 15, 16, 19, 22, 25, 28, 31, 37, 43, 46, 50, 54, 56, 74, 85, 91,
+  102, 105, 109, 112, 114, 115, 125, 135, 138, 150, 160, 162,
+  203, 213, 220, 222, 231, 234, 241, 244, 248, 250, 253, 256, 258, 293, 297,
+  303, 307, 310, 314, 350, 362, 366, 372, 373, 383
+]
 
 function stripSvg(svg: string) {
   // removes svg tag

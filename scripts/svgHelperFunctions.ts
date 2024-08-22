@@ -251,9 +251,9 @@ export async function uploadSvgs(
   while (true) {
     let itemsSize = 0;
     while (true) {
-      console.log("continuing Upload");
+      // console.log("continuing Upload");
       if (svgItemsEnd === svgs.length) {
-        console.log("continuing Upload");
+        // console.log("continuing Upload");
         break;
       }
       itemsSize += svgs[svgItemsEnd].length;

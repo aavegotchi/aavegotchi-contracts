@@ -69,7 +69,7 @@ contract ForgeVRFFacet is Modifiers {
         }
     }
 
-    function openGeodes(uint256[] calldata _geodeTokenIds, uint256[] calldata _amountPerToken) external whenNotPaused {
+    function openGeodes(uint256[] calldata _geodeTokenIds, uint256[] calldata _amountPerToken) external whenNotPaused onlyEnabled {
         require(_geodeTokenIds.length > 0, "ForgeVRFFacet: Cannot open 0 geodes");
         require(areGeodePrizesAvailable(), "ForgeVRFFacet: No prizes currently available");
         require(_geodeTokenIds.length == _amountPerToken.length, "ForgeVRFFacet: mismatched arrays");

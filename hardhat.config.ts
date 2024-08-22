@@ -72,7 +72,10 @@ export default {
       gasPrice: 1000000000,
       timeout: 90000,
     },
-
+    supernet: {
+      url: process.env.SUPERNET_URL,
+      accounts: [process.env.SECRET],
+    },
     // gorli: {
     //   url: process.env.GORLI,
     //   accounts: [process.env.SECRET],

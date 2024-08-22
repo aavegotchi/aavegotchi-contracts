@@ -437,4 +437,10 @@ contract Modifiers {
         require(sender == s.wearableDiamond, "LibAppStorage: Not wearable diamond");
         _;
     }
+
+    modifier onlyEnabled() {
+        // enabled for polygon only
+        require(block.chainid == 137, "LibAppStorage: Disabled function" );
+        _;
+    }
 }

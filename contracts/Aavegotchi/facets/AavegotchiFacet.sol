@@ -4,7 +4,7 @@ pragma solidity 0.8.1;
 import {LibAavegotchi, AavegotchiInfo} from "../libraries/LibAavegotchi.sol";
 
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
-import {AppStorage, Modifiers} from "../libraries/LibAppStorage.sol";
+import {AppStorage, Modifiers, Aavegotchi} from "../libraries/LibAppStorage.sol";
 import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 // import "hardhat/console.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -38,6 +38,13 @@ contract AavegotchiFacet is Modifiers {
     ///@return aavegotchiInfo_ a struct containing all details about
     function getAavegotchi(uint256 _tokenId) external view returns (AavegotchiInfo memory aavegotchiInfo_) {
         aavegotchiInfo_ = LibAavegotchi.getAavegotchi(_tokenId);
+    }
+
+    ///@notice Query details relating to an NFT
+    ///@param _tokenId the identifier of the NFT to query
+    ///@return aavegotchi_ an Aavegotchi struct containing details about the aavegotchi
+    function getAavegotchiData(uint256 _tokenId) external view returns (Aavegotchi memory aavegotchi_) {
+        aavegotchi_ = s.aavegotchis[_tokenId];
     }
 
     ///@notice returns the time an NFT was claimed

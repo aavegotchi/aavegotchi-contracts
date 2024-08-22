@@ -1153,7 +1153,6 @@ export const wearableSetArrays: WearableSet[] = [
     traitsBonuses: [8, -2, 0, 0, 3],
     allowedCollaterals: [],
   },
-
   {
     setId: 161,
     name: "Starlet",
@@ -1191,18 +1190,44 @@ export const wearableSetArrays: WearableSet[] = [
   },
 ];
 
-const wearableSets = [];
+function sixteenBitArrayToUint(array: number[] | string[]) {
+  const uint = [];
+  for (let item of array) {
+    if (typeof item === "string") {
+      item = parseInt(item);
+    }
+    uint.unshift(item.toString(16).padStart(4, "0"));
+  }
+  if (array.length > 0) return BigNumber.from("0x" + uint.join(""));
+  return BigNumber.from(0);
+}
+
+function eightBitIntArrayToUint(array: number[] | string[]) {
+  if (array.length === 0) {
+    return BigNumber.from(0);
+  }
+  const uint = [];
+  for (const num of array) {
+    if (num > 127) {
+      throw Error("Value beyond signed 8 int ");
+    }
+    const value = BigNumber.from(num).toTwos(8);
+    uint.unshift(value.toHexString().slice(2));
+  }
+  return BigNumber.from("0x" + uint.join(""));
+}
+
+const _wearableSets = [];
 for (const wearableSet of wearableSetArrays) {
   if (!Array.isArray(wearableSet.allowedCollaterals)) {
     console.log(wearableSet);
     throw Error("Is not array");
   }
-  wearableSets.push({
+  _wearableSets.push({
     name: wearableSet.name,
     wearableIds: wearableSet.wearableIds,
     traitsBonuses: wearableSet.traitsBonuses,
     allowedCollaterals: wearableSet.allowedCollaterals,
   });
 }
-
-exports.wearableSets = wearableSets;
+export const wearableSets = _wearableSets;

@@ -56,6 +56,7 @@ async function deploy ({
   diamondName,
   initDiamond,
   facets,
+  diamondConstructorFacets,
   owner,
   args = [],
   txArgs = {}
@@ -63,16 +64,19 @@ async function deploy ({
   if (arguments.length !== 1) {
     throw Error(`Requires only 1 map argument. ${arguments.length} arguments used.`)
   }
+
   facets = await deployFacets(facets)
+
   const diamondFactory = await ethers.getContractFactory('Diamond')
   const diamondCut = []
   console.log('--')
   console.log('Setting up diamondCut args')
   console.log('--')
+  
   for (const [name, deployedFacet] of facets) {
-    console.log(name)
-    console.log(getSignatures(deployedFacet))
-    console.log('--')
+    // console.log(name)
+    // console.log(getSignatures(deployedFacet))
+    // console.log('--')
     diamondCut.push([
       deployedFacet.address,
       FacetCutAction.Add,
@@ -84,10 +88,12 @@ async function deploy ({
   let result
   if (typeof initDiamond === 'string') {
     const initDiamondName = initDiamond
-    console.log(`Deploying ${initDiamondName}`)
+    console.log(`Deploying ${initDiamondName}...`)
+
     initDiamond = await ethers.getContractFactory(initDiamond)
     initDiamond = await initDiamond.deploy()
     await initDiamond.deployed()
+
     result = await initDiamond.deployTransaction.wait()
     if (!result.status) {
       throw (Error(`Deploying ${initDiamondName} TRANSACTION FAILED!!! -------------------------------------------`))
@@ -103,10 +109,11 @@ async function deploy ({
   //   functionCall = initDiamond.interface.encodeFunctionData()
   // }
 
-  console.log(`Deploying ${diamondName}`)
+  console.log(`Deploying ${diamondName}...`)
 
-  const deployedDiamond = await diamondFactory.deploy(owner)
+  const deployedDiamond = await diamondFactory.deploy(owner, diamondConstructorFacets[0], diamondConstructorFacets[1], diamondConstructorFacets[2])
   await deployedDiamond.deployed()
+
   result = await deployedDiamond.deployTransaction.wait()
   if (!result.status) {
     console.log('Deploying diamond TRANSACTION FAILED!!! -------------------------------------------')
@@ -132,6 +139,7 @@ async function deploy ({
   console.log('DiamondCut success!')
   console.log('Transaction hash:' + tx.hash)
   console.log('--')
+
   return deployedDiamond
 }
 
