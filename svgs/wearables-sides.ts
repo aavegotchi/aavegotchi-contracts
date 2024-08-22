@@ -396,6 +396,21 @@ export const wearablesRightSvgs = [
   wearable("385_BlockScannersRight"),
   wearable("386_StaffCharmingRight"),
   wearable("387_RoflnogginRight"),
+  //gotchigang-contest
+  wearable("388_GrannyGlassesRight"),
+  wearable("389_FrecklesRight"),
+  "CommonStohn",
+  wearable("391_BasedShadesRight"),
+  wearable("392_RastaGlassesRight"),
+  wearable("393_BracesRight"),
+  "394_UncommonStohn",
+  wearable("395_AlohaFlowersRight"),
+  wearable("396_BaableGumRight"),
+  "397_RareStohn",
+  wearable("398_CheapMaskRight"),
+  "399_WildFungi",
+  wearable("400_KawaiiMouthRight"),
+  "401_BabyLicky",
 ];
 
 export const wearablesBackSvgs = [
@@ -792,6 +807,21 @@ export const wearablesBackSvgs = [
   "385_BlockScanners",
   wearable("386_StaffCharmingBack"),
   wearable("387_RoflnogginBack"),
+  //gotchigang-contest
+  wearable("388_GrannyGlassesBack"),
+  "389_Freckles",
+  wearable("390_CommonStohnBack"),
+  wearable("391_BasedShadesBack"),
+  wearable("392_RastaGlassesBack"),
+  "393_Braces",
+  wearable("394_UncommonStohnBack"),
+  wearable("395_AlohaFlowersBack"),
+  "396_BaableGum",
+  wearable("397_RareStohnBack"),
+  wearable("398_CheapMaskBack"),
+  wearable("399_WildFungiBack"),
+  "400_KawaiiMouth",
+  wearable("401_BabyLickyBack"),
 ];
 
 export const wearablesLeftSvgs = [
@@ -1188,6 +1218,21 @@ export const wearablesLeftSvgs = [
   wearable("385_BlockScannersLeft"),
   wearable("386_StaffCharmingLeft"),
   wearable("387_RoflnogginLeft"),
+  //gotchigang-contest
+  wearable("388_GrannyGlassesLeft"),
+  wearable("389_FrecklesLeft"),
+  wearable("390_CommonStohnLeft"),
+  wearable("391_BasedShadesLeft"),
+  wearable("392_RastaGlassesLeft"),
+  wearable("393_BracesLeft"),
+  wearable("394_UncommonStohnLeft"),
+  wearable("395_AlohaFlowersLeft"),
+  wearable("396_BaableGumLeft"),
+  wearable("397_RareStohnLeft"),
+  wearable("398_CheapMaskLeft"),
+  wearable("399_WildFungiLeft"),
+  wearable("400_KawaiiMouthLeft"),
+  wearable("401_BabyLickyLeft"),
 ];
 
 export const wearablesLeftSleeveSvgs = [

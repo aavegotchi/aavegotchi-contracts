@@ -395,6 +395,21 @@ export const wearablesSvgs = [
   wearable("385_BlockScanners"),
   wearable("386_StaffCharming"),
   wearable("387_Roflnoggin"),
+  //gotchigang-contest
+  wearable("388_GrannyGlasses"),
+  wearable("389_Freckles"),
+  wearable("390_CommonStohn"),
+  wearable("391_BasedShades"),
+  wearable("392_RastaGlasses"),
+  wearable("393_Braces"),
+  wearable("394_UncommonStohn"),
+  wearable("395_AlohaFlowers"),
+  wearable("396_BaableGum"),
+  wearable("397_RareStohn"),
+  wearable("398_CheapMask"),
+  wearable("399_WildFungi"),
+  wearable("400_KawaiiMouth"),
+  wearable("401_BabyLicky"),
 ];
 
 export const sleeveSvgs = [
