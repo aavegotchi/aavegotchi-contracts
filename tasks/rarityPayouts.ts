@@ -6,8 +6,8 @@ import { parseEther, formatEther } from "@ethersproject/units";
 import { ERC20, EscrowFacet } from "../typechain";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import {
-  maticDiamondAddress,
   getRelayerSigner,
+  maticDiamondAddress,
 } from "../scripts/helperFunctions";
 import { LeaderboardDataName, LeaderboardType } from "../types";
 import {
@@ -4014,17 +4014,10 @@ const sacrificedList = {
 };
 
 export let tiebreakerIndex: string;
-// const rookieFilter: string = "hauntId:2";
 
-import {
-  RarityFarmingData,
-  RarityFarmingRewardArgs,
-  rarityRewards,
-} from "../types";
-import {
-  aavegotchiDiamondAddressMatic,
-  ghstAddress,
-} from "../helpers/constants";
+import { RarityFarmingData, rarityRewards } from "../types";
+import { generateSeasonRewards } from "../scripts/generateRewards";
+import { ghstAddress } from "../helpers/constants";
 
 function addCommas(nStr: string) {
   nStr += "";
@@ -4050,6 +4043,9 @@ export interface RarityPayoutTaskArgs {
   blockNumber: string;
   tieBreakerIndex: string;
   deployerAddress: string;
+  rarityParams: string;
+  kinshipParams: string;
+  xpParams: string;
 }
 
 interface TxArgs {
@@ -4068,11 +4064,50 @@ task("rarityPayout")
   .setAction(
     async (taskArgs: RarityPayoutTaskArgs, hre: HardhatRuntimeEnvironment) => {
       const filename: string = taskArgs.rarityDataFile;
-      const diamondAddress = maticDiamondAddress;
       const deployerAddress = taskArgs.deployerAddress;
 
+      const rarityParams = taskArgs.rarityParams.split(",");
+      const kinshipParams = taskArgs.kinshipParams.split(",");
+      const xpParams = taskArgs.xpParams.split(",");
+
+      const rounds = Number(taskArgs.rounds);
+
+      const rarityRoundRewards = generateSeasonRewards(
+        "rarity",
+        Number(rarityParams[0]), //total amount
+        Number(rarityParams[1]), //num winners
+        Number(rarityParams[2]) //y value
+      );
+
+      // check that the total amounts for the three leaderboards add up to the total amount for the round
+
+      const individualRoundAmount =
+        Number(rarityParams[0]) +
+        Number(kinshipParams[0]) +
+        Number(xpParams[0]);
+
+      if (individualRoundAmount !== Number(taskArgs.totalAmount)) {
+        throw new Error(
+          "Total amount for the round does not match the sum of the individual leaderboard amounts"
+        );
+      }
+
+      const kinshipRoundRewards = generateSeasonRewards(
+        "kinship",
+        Number(kinshipParams[0]), //total amount
+        Number(kinshipParams[1]), //num winners
+        Number(kinshipParams[2]) //y value
+      );
+
+      const xpRoundRewards = generateSeasonRewards(
+        "xp",
+        Number(xpParams[0]), //total amount
+        Number(xpParams[1]), //num winners
+        Number(xpParams[2]) //y value
+      );
+
       console.log("deployer:", deployerAddress);
-      // const accounts = await hre.ethers.getSigners();
+      // const accounts = await hre.ethers.getSigners(;
       tiebreakerIndex = taskArgs.tieBreakerIndex;
 
       const testing = ["hardhat", "localhost"].includes(hre.network.name);
@@ -4082,6 +4117,7 @@ task("rarityPayout")
           method: "hardhat_impersonateAccount",
           params: [deployerAddress],
         });
+        console.log("testing:");
         signer = await hre.ethers.provider.getSigner(deployerAddress);
       } else if (hre.network.name === "matic") {
         signer = await getRelayerSigner(hre);
@@ -4089,20 +4125,12 @@ task("rarityPayout")
         throw Error("Incorrect network selected");
       }
 
-      const rounds = Number(taskArgs.rounds);
-
       const signerAddress = await signer.getAddress();
       if (signerAddress.toLowerCase() !== deployerAddress.toLowerCase()) {
         throw new Error(
           `Deployer ${deployerAddress} does not match signer ${signerAddress}`
         );
       }
-
-      //Get rewards for this season
-      const {
-        rewardArgs,
-      } = require(`../data/airdrops/rarityfarming/szn${taskArgs.season}/rewards`);
-      const rewards: RarityFarmingRewardArgs = rewardArgs;
 
       const maxProcess = 500;
       const finalRewards: rarityRewards = {};
@@ -4113,22 +4141,12 @@ task("rarityPayout")
       } = require(`../data/airdrops/rarityfarming/szn${taskArgs.season}/${filename}.ts`);
       const data: RarityFarmingData = dataArgs;
 
-      const leaderboards = [
-        "withSetsRarityScore",
-        "kinship",
-        "experience",
-        // "kinship",
-        // "experience",
-      ];
+      const leaderboards = ["withSetsRarityScore", "kinship", "experience"];
       const dataNames: LeaderboardDataName[] = [
         "rarityGotchis",
         "kinshipGotchis",
         "xpGotchis",
-        // "rookieKinshipGotchis",
-        // "rookieXpGotchis",
       ];
-
-      //handle rookie now
 
       const leaderboardResults: RarityFarmingData = {
         rarityGotchis: [],
@@ -4151,6 +4169,8 @@ task("rarityPayout")
           index
         ] as LeaderboardDataName;
 
+        console.log("check correctness");
+
         const correct = confirmCorrectness(result, data[dataName]);
 
         console.log("correct:", correct);
@@ -4162,29 +4182,18 @@ task("rarityPayout")
         leaderboardResults[dataName] = result;
       }
 
-      //get rewards
-      const rarityRoundRewards: string[] = rewards.rarity;
-      const kinshipRoundRewards: string[] = rewards.kinship;
-      const xpRoundRewards: string[] = rewards.xp;
-      // const rookieKinshipRoundRewards: string[] = rewards.rookieKinship;
-      // const rookieXpRoundRewards: string[] = rewards.rookieXp;
-
-      //Iterate through all 5000 spots
+      //Iterate through all 7500 spots
       for (let index = 0; index < 7500; index++) {
         const gotchis: string[] = [
           leaderboardResults.rarityGotchis[index],
           leaderboardResults.kinshipGotchis[index],
           leaderboardResults.xpGotchis[index],
-          // leaderboardResults.rookieKinshipGotchis[index],
-          // leaderboardResults.rookieXpGotchis[index],
         ];
 
-        const rewards: string[][] = [
+        const rewards: number[][] = [
           rarityRoundRewards,
           kinshipRoundRewards,
           xpRoundRewards,
-          // rookieKinshipRoundRewards,
-          // rookieXpRoundRewards,
         ];
 
         rewards.forEach((leaderboard, i) => {
@@ -4220,16 +4229,26 @@ task("rarityPayout")
         sorted.push(`${key}: ${finalRewards[key]}`);
       });
 
+      if (roundAmount - talliedAmount > 1 || roundAmount - talliedAmount < -1) {
+        throw new Error(
+          `Tallied amount ${talliedAmount} does not match round amount ${roundAmount}`
+        );
+      }
+
+      console.log("final rewards:", finalRewards);
+
       console.log("Total GHST to send:", talliedAmount);
       console.log("Round amount:", roundAmount);
 
-      let totalGhstSent = BigNumber.from(0);
-      let txData = [];
+      let txData: TxArgs[][] = [];
       let txGroup: TxArgs[] = [];
       let tokenIdsNum = 0;
 
+      //Prepare rewards for each round
+
       for (const gotchiID of Object.keys(finalRewards)) {
         let amount = finalRewards[gotchiID];
+
         let parsedAmount = BigNumber.from(parseEther(amount.toString()));
         let finalParsed = parsedAmount.toString();
 
@@ -4253,81 +4272,113 @@ task("rarityPayout")
         tokenIdsNum = 0;
       }
 
-      // const ghstToken = (await hre.ethers.getContractAt(
-      //   "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
-      //   ghstAddress,
-      //   signer
-      // )) as ERC20;
+      console.log("set allowance for:", deployerAddress);
 
-      // console.log("ghst token signer:", ghstToken.signer);
-
-      // const allowance = await ghstToken.allowance(
+      // await setAllowance(
+      //   hre,
+      //   signer,
       //   deployerAddress,
-      //   aavegotchiDiamondAddressMatic
+      //   maticDiamondAddress,
+      //   ghstAddress
       // );
 
-      // console.log("allownce:", allowance.toString());
-
-      // if (allowance.lt(hre.ethers.utils.parseEther("375000"))) {
-      //   console.log("Setting allowance");
-
-      //   const tx = await ghstToken.approve(
-      //     aavegotchiDiamondAddressMatic,
-      //     hre.ethers.constants.MaxUint256
-      //   );
-      //   await tx.wait();
-      //   console.log("Allowance set!");
-      // }
-
-      for (const [i, txGroup] of txData.entries()) {
-        console.log("Current index is:", i);
-
-        // if (i < 1) continue; // Skip the indices before this one
-
-        let tokenIds: string[] = [];
-        let amounts: string[] = [];
-
-        txGroup.forEach((sendData) => {
-          if (
-            sacrificedList.data.aavegotchis
-              .map((val) => val.id)
-              .includes(sendData.tokenID)
-          ) {
-            console.log(
-              `Removing ${sendData.tokenID} because it's been sacrificed`
-            );
-          } else {
-            tokenIds.push(sendData.tokenID);
-            amounts.push(sendData.parsedAmount);
-          }
-        });
-
-        let totalAmount = amounts.reduce((prev, curr) => {
-          return BigNumber.from(prev).add(BigNumber.from(curr)).toString();
-        });
-
-        totalGhstSent = totalGhstSent.add(totalAmount);
-
-        console.log(
-          `Sending ${formatEther(totalAmount)} GHST to ${
-            tokenIds.length
-          } Gotchis (from ${tokenIds[0]} to ${tokenIds[tokenIds.length - 1]})`
-        );
-
-        const escrowFacet = (
-          await hre.ethers.getContractAt("EscrowFacet", diamondAddress)
-        ).connect(signer) as EscrowFacet;
-
-        const tx = await escrowFacet.batchDepositGHST(tokenIds, amounts);
-        console.log("Transaction completed with tx hash:", tx.hash);
-
-        let receipt: ContractReceipt = await tx.wait();
-        console.log("receipt:", receipt.transactionHash);
-        console.log("Gas used:", strDisplay(receipt.gasUsed.toString()));
-        if (!receipt.status) {
-          throw Error(`Error:: ${tx.hash}`);
-        }
-        console.log("Total GHST Sent:", formatEther(totalGhstSent));
-      }
+      await sendGhst(hre, signer, txData);
     }
   );
+
+async function setAllowance(
+  hre: HardhatRuntimeEnvironment,
+  signer: Signer,
+  deployerAddress: string,
+  aavegotchiDiamondAddressMatic: string,
+  ghstAddress: string
+) {
+  const ghstToken = (await hre.ethers.getContractAt(
+    "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
+    ghstAddress,
+    signer
+  )) as ERC20;
+
+  console.log("ghst token signer:", ghstToken.signer);
+
+  const allowance = await ghstToken.allowance(
+    deployerAddress,
+    aavegotchiDiamondAddressMatic
+  );
+
+  console.log("allownce:", allowance.toString());
+
+  if (allowance.lt(hre.ethers.utils.parseEther("375000"))) {
+    console.log("Setting allowance");
+
+    const tx = await ghstToken.approve(
+      aavegotchiDiamondAddressMatic,
+      hre.ethers.constants.MaxUint256
+    );
+    await tx.wait();
+    console.log("Allowance set!");
+  }
+}
+
+async function sendGhst(
+  hre: HardhatRuntimeEnvironment,
+  signer: Signer,
+  txData: TxArgs[][]
+) {
+  let totalGhstSent = BigNumber.from(0);
+
+  for (const [i, txGroup] of txData.entries()) {
+    console.log("Current index is:", i);
+
+    // if (i < 1) continue; // Skip the indices before this one
+
+    let tokenIds: string[] = [];
+    let amounts: string[] = [];
+
+    txGroup.forEach((sendData) => {
+      if (
+        sacrificedList.data.aavegotchis
+          .map((val) => val.id)
+          .includes(sendData.tokenID)
+      ) {
+        console.log(
+          `Removing ${sendData.tokenID} because it's been sacrificed`
+        );
+      } else {
+        tokenIds.push(sendData.tokenID);
+        amounts.push(sendData.parsedAmount);
+      }
+    });
+
+    let totalAmount = amounts.reduce((prev, curr) => {
+      return BigNumber.from(prev).add(BigNumber.from(curr)).toString();
+    });
+
+    totalGhstSent = totalGhstSent.add(totalAmount);
+
+    console.log(
+      `Sending ${formatEther(totalAmount)} GHST to ${
+        tokenIds.length
+      } Gotchis (from ${tokenIds[0]} to ${tokenIds[tokenIds.length - 1]})`
+    );
+
+    const escrowFacet = (
+      await hre.ethers.getContractAt("EscrowFacet", maticDiamondAddress)
+    ).connect(signer) as EscrowFacet;
+
+    try {
+      const tx = await escrowFacet.batchDepositGHST(tokenIds, amounts);
+      console.log("Transaction completed with tx hash:", tx.hash);
+
+      let receipt: ContractReceipt = await tx.wait();
+      console.log("receipt:", receipt.transactionHash);
+      console.log("Gas used:", strDisplay(receipt.gasUsed.toString()));
+      if (!receipt.status) {
+        throw Error(`Error:: ${tx.hash}`);
+      }
+      console.log("Total GHST Sent:", formatEther(totalGhstSent));
+    } catch (error) {
+      console.log("error:", error);
+    }
+  }
+}

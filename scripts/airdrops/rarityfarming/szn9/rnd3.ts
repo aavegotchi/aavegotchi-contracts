@@ -3,13 +3,13 @@ import { RarityPayoutTaskArgs } from "../../../../tasks/rarityPayouts";
 
 async function rarityPayout() {
   const args: RarityPayoutTaskArgs = {
-    season: "8",
-    rarityDataFile: "rnd1",
+    season: "9",
+    rarityDataFile: "rnd3",
     rounds: "4",
-    totalAmount: "1350000",
-    blockNumber: "55253790",
-    deployerAddress: "0xb6384935d68e9858f8385ebeed7db84fc93b1420",
-    tieBreakerIndex: "0",
+    totalAmount: "1200000",
+    blockNumber: "",
+    deployerAddress: "0x821049b2273b0ccd34a64d1b08a3346f110ecae2",
+    tieBreakerIndex: "2",
     rarityParams: [750000.0, 7500, 0.94].toString(),
     kinshipParams: [300000.0, 7500, 0.76].toString(),
     xpParams: [150000.0, 7500, 0.65].toString(),
