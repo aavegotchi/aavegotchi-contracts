@@ -12,7 +12,11 @@ import {
 import { convertSideDimensionsToTaskFormat } from "../../tasks/updateItemSideDimensions";
 import { convertExceptionsToTaskFormat } from "../../tasks/updateWearableExceptions";
 import { AddItemTypesTaskArgs } from "../../tasks/addItemTypes";
-import { diamondOwner, maticDiamondAddress } from "../helperFunctions";
+import {
+  diamondOwner,
+  maticDiamondAddress,
+  maticForgeDiamond,
+} from "../helperFunctions";
 
 export async function addGotchigangWearableSideViewsAndItemTypes() {
   //upload wearables and add itemtypes
@@ -35,7 +39,7 @@ export async function addGotchigangWearableSideViewsAndItemTypes() {
     replaceWearableSvgs: true,
     replaceSleeveSvgs: false,
     associateSleeves: false,
-    sendToAddress: "", //TODO
+    sendToAddress: maticForgeDiamond, //TODO
   };
 
   await run("addItemTypes", args);

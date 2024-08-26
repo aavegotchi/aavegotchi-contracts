@@ -159,7 +159,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     minLevel: 1,
     ghstPrice: 0,
     maxQuantity: 250,
-    traitModifiers: [3, 0, 0, 0, 0, 0],
+    traitModifiers: [-3, 0, 0, 0, 0, 0],
     canPurchaseWithGhst: false,
     slotPositions: "face",
     category: 0,
