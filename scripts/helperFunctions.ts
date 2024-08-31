@@ -7,6 +7,8 @@ import {
   DefenderRelaySigner,
 } from "defender-relay-client/lib/ethers";
 
+import { fundSigner } from "../helpers/helpers";
+
 export const gasPrice = 570000000000;
 
 export function delay(milliseconds: number) {
@@ -266,6 +268,10 @@ export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [xpRelayerAddress],
+    });
+    await hre.network.provider.request({
+      method: "hardhat_setBalance",
+      params: [xpRelayerAddress, "0x100000000000000000000000"],
     });
     return await hre.ethers.provider.getSigner(xpRelayerAddress);
   } else if (hre.network.name === "matic") {

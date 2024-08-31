@@ -2,7 +2,7 @@ import { ItemTypeInputNew } from "../../scripts/itemTypeHelpers";
 
 export const itemTypes: ItemTypeInputNew[] = [
   {
-    svgId: 388,
+    svgId: 404,
     name: "Granny Glasses",
     setId: [],
     author: "SOJU",
@@ -23,7 +23,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "common",
   },
   {
-    svgId: 389,
+    svgId: 405,
     name: "Freckles",
     setId: [],
     author: "[GFA] z_tef",
@@ -44,7 +44,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "common",
   },
   {
-    svgId: 390,
+    svgId: 406,
     name: "Common Stohn",
     setId: [],
     author: "SOJU",
@@ -65,7 +65,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "common",
   },
   {
-    svgId: 391,
+    svgId: 407,
     name: "Based Shades",
     setId: [],
     author: "Oliver Spoon",
@@ -86,7 +86,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "uncommon",
   },
   {
-    svgId: 392,
+    svgId: 408,
     name: "Rasta Glasses",
     setId: [],
     author: "[GFA] z_tef",
@@ -107,7 +107,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "uncommon",
   },
   {
-    svgId: 393,
+    svgId: 409,
     name: "Braces",
     setId: [],
     author: "oggysk",
@@ -128,7 +128,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "uncommon",
   },
   {
-    svgId: 394,
+    svgId: 410,
     name: "Uncommon Stohn",
     setId: [],
     author: "SOJU",
@@ -149,7 +149,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "uncommon",
   },
   {
-    svgId: 395,
+    svgId: 411,
     name: "Aloha Flowers",
     setId: [],
     author: "XIBOT",
@@ -170,7 +170,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "rare",
   },
   {
-    svgId: 396,
+    svgId: 412,
     name: "Baable Gum",
     setId: [],
     author: "XIBOT",
@@ -191,7 +191,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "rare",
   },
   {
-    svgId: 397,
+    svgId: 413,
     name: "Rare Stohn",
     setId: [],
     author: "SOJU",
@@ -212,7 +212,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "rare",
   },
   {
-    svgId: 398,
+    svgId: 414,
     name: "Cheap Mask",
     setId: [],
     author: "XIBOT",
@@ -233,7 +233,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "legendary",
   },
   {
-    svgId: 399,
+    svgId: 415,
     name: "Wild Fungi",
     setId: [],
     author: "XIBOT",
@@ -254,7 +254,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "legendary",
   },
   {
-    svgId: 400,
+    svgId: 416,
     name: "Kawaii Mouth",
     setId: [],
     author: "Oliver Spoon",
@@ -275,7 +275,7 @@ export const itemTypes: ItemTypeInputNew[] = [
     rarityLevel: "mythical",
   },
   {
-    svgId: 401,
+    svgId: 417,
     name: "Baby Licky",
     setId: [],
     author: "Laggin",

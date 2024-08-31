@@ -35,8 +35,8 @@ export async function addGotchigangWearableSideViewsAndItemTypes() {
     uploadWearableSvgs: true,
     uploadSleeveSvgs: false,
 
-    replaceItemTypes: true,
-    replaceWearableSvgs: true,
+    replaceItemTypes: false,
+    replaceWearableSvgs: false,
     replaceSleeveSvgs: false,
     associateSleeves: false,
     sendToAddress: maticForgeDiamond, //TODO
@@ -46,7 +46,7 @@ export async function addGotchigangWearableSideViewsAndItemTypes() {
 
   //upload side views
   const itemIds: number[] = [
-    //389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401,
+    //404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417
   ];
   for (let index = 0; index < itemTypes.length; index++) {
     itemIds.push(Number(itemTypes[index].svgId));

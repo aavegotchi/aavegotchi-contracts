@@ -39,11 +39,11 @@ export async function sendWearablesToForge() {
   let forgeAddress2 = "0x511997786FfBb021ACCC73e121411dABFc320BC8";
 
   // schematics
-  const common = [388, 389, 390];
-  const uncommon = [391, 392, 393, 394];
-  const rare = [395, 396, 397];
-  const legendary = [398, 399];
-  const mythical = [400, 401];
+  const common = [404, 405, 406];
+  const uncommon = [407, 408, 409, 410];
+  const rare = [411, 412, 413];
+  const legendary = [414, 415];
+  const mythical = [416, 417];
 
   const ids1 = [...common, ...uncommon, ...rare];
   const ids2 = [...common, ...uncommon, ...rare, ...legendary, ...mythical];
