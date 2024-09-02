@@ -24,7 +24,11 @@ export interface SideDimensions {
 export interface Exceptions {
   itemId: BigNumberish;
   slotPosition: BigNumberish;
-  side: string;
+  side:
+    | "wearables-back"
+    | "wearables-left"
+    | "wearables-right"
+    | "wearables-front";
   exceptionBool: boolean;
 }
 

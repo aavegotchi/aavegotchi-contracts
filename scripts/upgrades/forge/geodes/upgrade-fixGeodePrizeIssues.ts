@@ -12,7 +12,6 @@ import {
 } from "../../../helperFunctions";
 import { ForgeDAOFacet__factory } from "../../../../typechain";
 import { ForgeDAOFacetInterface } from "../../../../typechain/ForgeDAOFacet";
-import * as helpers from "@nomicfoundation/hardhat-network-helpers";
 
 const isMumbai = false;
 
