@@ -8,11 +8,15 @@ import { ForgeFacet, ForgeTokenFacet } from "../../typechain";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { BigNumberish } from "ethers";
 import { sendWearablesToForge } from "./sendWearablesToForge";
+import * as helpers from "@nomicfoundation/hardhat-network-helpers";
 
 export async function batchMintForgeItems() {
   let signer;
   const testing = ["hardhat", "localhost"].includes(network.name);
   if (testing) {
+    //Fix the hardfork issue
+    await helpers.mine();
+
     const ownershipFacet = await ethers.getContractAt(
       "OwnershipFacet",
       maticForgeDiamond

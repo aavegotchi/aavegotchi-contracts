@@ -4021,10 +4021,6 @@ import {
   RarityFarmingRewardArgs,
   rarityRewards,
 } from "../types";
-import {
-  aavegotchiDiamondAddressMatic,
-  ghstAddress,
-} from "../helpers/constants";
 
 function addCommas(nStr: string) {
   nStr += "";
