@@ -1,22 +1,15 @@
-import { ethers, run } from "hardhat";
+import { run } from "hardhat";
 import { itemTypes } from "../../data/itemTypes/gotchigangwearables";
 
 import {
   sideViewDimensions,
   gotchigangSideExceptions,
 } from "../../data/itemTypes/gotchigangwearableSideViews";
-import {
-  updateSvgTaskForSideSleeves,
-  updateSvgTaskForSideViews,
-} from "../svgHelperFunctions";
+import { updateSvgTaskForSideViews } from "../svgHelperFunctions";
 import { convertSideDimensionsToTaskFormat } from "../../tasks/updateItemSideDimensions";
 import { convertExceptionsToTaskFormat } from "../../tasks/updateWearableExceptions";
 import { AddItemTypesTaskArgs } from "../../tasks/addItemTypes";
-import {
-  diamondOwner,
-  maticDiamondAddress,
-  maticForgeDiamond,
-} from "../helperFunctions";
+import { maticDiamondAddress, maticForgeDiamond } from "../helperFunctions";
 
 export async function addGotchigangWearableSideViewsAndItemTypes() {
   //upload wearables and add itemtypes
@@ -39,9 +32,10 @@ export async function addGotchigangWearableSideViewsAndItemTypes() {
     replaceWearableSvgs: false,
     replaceSleeveSvgs: false,
     associateSleeves: false,
-    sendToAddress: maticForgeDiamond, //TODO
+    sendToAddress: maticForgeDiamond,
   };
 
+  //Add item types and upload front view svgs
   await run("addItemTypes", args);
 
   //upload side views

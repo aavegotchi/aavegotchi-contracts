@@ -7,6 +7,38 @@ import {
 import { ForgeTokenFacet } from "../../typechain";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
+/*
+Send the following schematics to 0x4a478E4593A5D557dB640642c34Ae52800084451
+Granny glasses: 52
+Freckles: 42
+Common Stohn: 26
+Based Shades: 20
+Rasta Glasses: 19
+Braces: 25
+Uncommon Stohn: 12
+Aloha Flowers: 10
+Baable Gum: 10
+Rare Stohn: 5
+
+___
+
+Send the following schematics to 0x511997786FfBb021ACCC73e121411dABFc320BC8
+Granny glasses: 100
+Freckles: 100
+Common Stohn: 100
+Based Shades: 50
+Rasta Glasses: 50
+Braces: 50
+Uncommon Stohn: 50
+Aloha Flowers: 25
+Baable Gum: 25
+Rare Stohn: 25
+Wild Fungi: 10
+Face Mask: 10
+Kawaii Mouth: 5
+Baby Licky: 5
+*/
+
 export async function sendWearablesToForge() {
   let signer;
   const testing = ["hardhat", "localhost"].includes(network.name);
