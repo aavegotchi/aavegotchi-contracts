@@ -15,7 +15,57 @@ import {
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import * as helpers from "@nomicfoundation/hardhat-network-helpers";
 
-export async function batchMintForgeItems() {
+export const forgeAddresses = [
+  "0x4a478E4593A5D557dB640642c34Ae52800084451",
+  "0x511997786FfBb021ACCC73e121411dABFc320BC8",
+  maticForgeDiamond,
+];
+
+export const itemIds = {
+  common: [404, 405, 406],
+  uncommon: [407, 408, 409, 410],
+  rare: [411, 412, 413],
+  legendary: [414, 415],
+  mythical: [416, 417],
+};
+
+/*
+Send the following schematics to 0x4a478E4593A5D557dB640642c34Ae52800084451
+Granny glasses: 52
+Freckles: 42
+Common Stohn: 26
+Based Shades: 20
+Rasta Glasses: 19
+Braces: 25
+Uncommon Stohn: 12
+Aloha Flowers: 10
+Baable Gum: 10
+Rare Stohn: 5
+
+___
+
+Send the following schematics to 0x511997786FfBb021ACCC73e121411dABFc320BC8
+Granny glasses: 100
+Freckles: 100
+Common Stohn: 100
+Based Shades: 50
+Rasta Glasses: 50
+Braces: 50
+Uncommon Stohn: 50
+Aloha Flowers: 25
+Baable Gum: 25
+Rare Stohn: 25
+Wild Fungi: 10
+Face Mask: 10
+Kawaii Mouth: 5
+Baby Licky: 5
+*/
+export const predefinedAmounts = [
+  [52, 42, 26, 20, 19, 25, 12, 10, 10, 5],
+  [100, 100, 100, 50, 50, 50, 50, 25, 25, 25, 10, 10, 5, 5],
+];
+
+export async function batchMintGotchigangWearables() {
   let signer;
   const testing = ["hardhat", "localhost"].includes(network.name);
 
@@ -82,20 +132,6 @@ export async function batchMintForgeItems() {
     signer
   )) as ForgeFacet;
 
-  const forgeAddresses = [
-    "0x4a478E4593A5D557dB640642c34Ae52800084451",
-    "0x511997786FfBb021ACCC73e121411dABFc320BC8",
-    maticForgeDiamond,
-  ];
-
-  const itemIds = {
-    common: [404, 405, 406],
-    uncommon: [407, 408, 409, 410],
-    rare: [411, 412, 413],
-    legendary: [414, 415],
-    mythical: [416, 417],
-  };
-
   const totalAmounts = [1000, 500, 250, 100, 10];
   const ids = Object.values(itemIds).flat();
 
@@ -138,10 +174,6 @@ Face Mask: 10
 Kawaii Mouth: 5
 Baby Licky: 5
 */
-  const predefinedAmounts = [
-    [52, 42, 26, 20, 19, 25, 12, 10, 10, 5],
-    [100, 100, 100, 50, 50, 50, 50, 25, 25, 25, 10, 10, 5, 5],
-  ];
 
   const amountsToForge = amounts.map(
     (total, i) =>
@@ -192,7 +224,7 @@ Baby Licky: 5
 }
 
 if (require.main === module) {
-  batchMintForgeItems()
+  batchMintGotchigangWearables()
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
