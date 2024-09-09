@@ -616,7 +616,7 @@ export async function mintSvgTaskForBaadges(fileName: string) {
     itemManager: itemManagerAlt,
     itemFile: fileName,
     uploadItemTypes: true,
-    sendToItemManager: true,
+    sendToRelayer: true,
   };
 
   return taskArgs;
