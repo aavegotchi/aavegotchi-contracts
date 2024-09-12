@@ -539,6 +539,12 @@ export async function updateSvgTaskForSideViews(_itemIds: number[]) {
   const sideViews = ["left", "right", "back"];
   let taskArray = [];
 
+  //assert length
+  if (left.length !== right.length || left.length !== back.length) {
+    console.error("Side views arrays are not the same length");
+    return;
+  }
+
   for (let index = 0; index < _itemIds.length; index++) {
     const itemId = _itemIds[index];
     const sideArrays = [left[itemId], right[itemId], back[itemId]];

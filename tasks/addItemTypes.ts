@@ -180,16 +180,17 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       }
 
       console.log("final quantities:", itemIds, quantities);
+      if (sendToAddress) {
+        console.log(`Mint prize items to target address: ${sendToAddress}`);
 
-      console.log(`Mint prize items to target address: ${sendToAddress}`);
+        tx = await daoFacet.mintItems(sendToAddress, itemIds, quantities);
+        console.log("tx hash:", tx.hash);
+        receipt = await tx.wait();
+        if (!receipt.status) {
+          throw Error(`Error:: ${tx.hash}`);
+        }
 
-      tx = await daoFacet.mintItems(sendToAddress, itemIds, quantities);
-      console.log("tx hash:", tx.hash);
-      receipt = await tx.wait();
-      if (!receipt.status) {
-        throw Error(`Error:: ${tx.hash}`);
+        console.log("Prize items minted:", tx.hash);
       }
-
-      console.log("Prize items minted:", tx.hash);
     }
   );

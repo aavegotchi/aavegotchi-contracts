@@ -326,6 +326,23 @@ const sigProps = [
     id: "0x9b3d0d73ff761611be704a786b207a4f74c697febfdb1e95414d83c55989a05f",
     title: "Community Wearable Schematics Release",
   },
+  {
+    id: "0xa4a817931adb599979eccec3dbb5e774b224c1d4da2609b532addb2e060f5888",
+    title: "Fund creation of Ghostly Gladiator MVP ($6,500)",
+  },
+  {
+    id: "0xe815c428df8f4e6933c7e04586c1e4b0add22924d4f77e4b067f89ff4bd3f207",
+    title:
+      "Gotchichain Battleverse Demo - An Open-Source Battleverse Built with Godot",
+  },
+  {
+    id: "0xc07a34474c3b92c0472479a7570eb743c470af14eb485fa2a841d2b0869b7044",
+    title: "Rarity Farming Season 9",
+  },
+  {
+    id: "0x41a8eefa0d919e84a6fc6e2ef3b62b776f98deb4627defe310c056e30d091cfc",
+    title: "Increasing XP Award to 250 XP for Succesful CORE AGIPs",
+  },
 ];
 
 const coreProps = [
@@ -664,5 +681,22 @@ const coreProps = [
   {
     id: "0xff8daa93be9021f9f0a49cb8394ef49f868261bd9828faa351611c9854bbf0db",
     title: "[AGIP 123] Community Wearable Schematics Release",
+  },
+  {
+    id: "0xcf83de78265ceb5d891bb83e7774962bdb6a320871474b4e6e3e05fece458f54",
+    title: "[AGIP 124] Fund Creation of Ghostly Gladiator MVP",
+  },
+  {
+    id: "0xf8f9b32ce931aa8d3ae6279fb78f1de87737cdb64d2fb8dbc5adc19df2ebf722",
+    title:
+      "[AGIP 125] Gotchichain Battleverse Demo - An Open-Source Battleverse Built with Godot",
+  },
+  {
+    id: "0xb46614973c1f9e244b037788fbb31bc1909ce4bb4a56b85f39c6554a53163c0a",
+    title: "[AGIP 126] Rarity Farming Season 9",
+  },
+  {
+    id: "0x307f6d8e39de3ce35886714e07586f838d42aa0556c66b19a142b1d8f2ba1703",
+    title: "[AGIP 127] Increasing XP Award to 250 XP for Succesful CORE AGIPs",
   },
 ];
