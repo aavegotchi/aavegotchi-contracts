@@ -80,6 +80,19 @@ export type rarityLevel =
   | "mythical"
   | "godlike";
 
+export type Author =
+  | "GFA"
+  | "z_tef"
+  | "Laggin"
+  | "XIBOT"
+  | "xibot"
+  | "oggysk"
+  | "Oliver Spoon"
+  | "[GFA] z_tef"
+  | "THE FORGE"
+  | "soju"
+  | "SOJU";
+
 export interface ItemTypeInputNew {
   name: string;
   description: string;
@@ -88,7 +101,7 @@ export interface ItemTypeInputNew {
   canBeTransferred: boolean;
   rarityLevel: rarityLevel;
   setId: BigNumberish[];
-  author: string;
+  author: Author;
   dimensions: Dimensions;
   allowedCollaterals: BigNumberish[];
   ghstPrice: BigNumberish | BigNumberish;
