@@ -132,7 +132,7 @@ export async function batchMintGotchigangWearables() {
     signer
   )) as ForgeFacet;
 
-  const totalAmounts = [1000, 500, 250, 100, 10];
+  const totalAmounts = [1000, 500, 250, 100, 50];
   const ids = Object.values(itemIds).flat();
 
   const amounts = Object.entries(itemIds).flatMap(([rarity, ids]) =>
