@@ -119,6 +119,14 @@ export function getWearables() {
     }
   });
 
+  console.log(
+    "returning",
+    wearables.length,
+    "total wearables and",
+    sleeves.length,
+    "total sleeves"
+  );
+
   return { wearables: wearables, sleeves: sleeves };
 }
 

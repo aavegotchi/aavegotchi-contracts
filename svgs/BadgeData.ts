@@ -140,12 +140,38 @@ export const szn4BadgeIds = [
   349,
 ];
 
+export const szn5BadgeSvgs = [
+  "Aavegotchi-RF-SZN5-Trophy-1ST-PLACE-RARITY", //388
+  "Aavegotchi-RF-SZN5-Trophy-1ST-PLACE-KINSHIP", //389
+  "Aavegotchi-RF-SZN5-Trophy-1ST-PLACE-XP", //390
+  "Aavegotchi-RF-SZN5-Trophy-2ND-PLACE-RARITY", //391
+  "Aavegotchi-RF-SZN5-Trophy-2ND-PLACE-KINSHIP", //392
+  "Aavegotchi-RF-SZN5-Trophy-2ND-PLACE-XP", //393
+  "Aavegotchi-RF-SZN5-Trophy-3RD-PLACE-RARITY", //394
+  "Aavegotchi-RF-SZN5-Trophy-3RD-PLACE-KINSHIP", //395
+  "Aavegotchi-RF-SZN5-Trophy-3RD-PLACE-XP", //396
+
+  "Aavegotchi-RF-SZN5-Baadge-TOP-RAANKED-PLAAYER", //397
+  "Aavegotchi-RF-SZN5-Baadge-TOP-10-RARITY", //398
+  "Aavegotchi-RF-SZN5-Baadge-TOP-10-KINSHIP", //399
+  "Aavegotchi-RF-SZN5-Baadge-TOP-10-XP", //400
+  "Aavegotchi-RF-SZN5-Baadge-TOP-100-RARITY", //401
+  "Aavegotchi-RF-SZN5-Baadge-TOP-100-KINSHIP", //402
+  "Aavegotchi-RF-SZN5-Baadge-TOP-100-XP", //403
+];
+
+export const szn5BadgeIds = [
+  388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402,
+  403,
+];
+
 export const allBadges: number[] = [
-  163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 176, 177, 178,
-  179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193,
-  194, 195, 196, 197, 198, 175, 264, 265, 266, 267, 268, 269, 270, 271, 272,
+  163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177,
+  178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192,
+  193, 194, 195, 196, 197, 198, 264, 265, 266, 267, 268, 269, 270, 271, 272,
   273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287,
   288, 289, 290, 291, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326,
   327, 328, 329, 330, 331, 332, 333, 334, 335, 336, 337, 338, 339, 340, 341,
-  342, 343, 344, 345, 346, 347, 348, 349,
+  342, 343, 344, 345, 346, 347, 348, 349, 388, 389, 390, 391, 392, 393, 394,
+  395, 396, 397, 398, 399, 400, 401, 402, 403,
 ];

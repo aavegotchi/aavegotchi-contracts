@@ -14,6 +14,8 @@ import {
   szn3BadgeSvgs,
   szn4BadgeIds,
   szn4BadgeSvgs,
+  szn5BadgeIds,
+  szn5BadgeSvgs,
   tooorkeyBadgeIds,
   tooorkeyBadgeSvgs,
   uniclyBaadgeId,
@@ -37,8 +39,10 @@ export function getBaadge(id: number) {
   readBadgesBatch("baadges", szn2BadgeSvgs, szn2BadgeIds);
   readBadgesBatch("sZN3Baadges", szn3BadgeSvgs, szn3BadgeIds);
   readBadgesBatch("sZN4Baadges", szn4BadgeSvgs, szn4BadgeIds);
+  readBadgesBatch("sZN5Baadges", szn5BadgeSvgs, szn5BadgeIds);
   readBadgesBatch("pumpkinBadge", tooorkeyBadgeSvgs, tooorkeyBadgeIds);
   readBadgesBatch("pumpkinBadge", pumpkinBadgeSvgs, pumpkinBadgeIds);
+
   const svg = BaadgeSvgMap.get(id);
   if (svg === undefined) {
     console.error("svg not found for id: ", id);
