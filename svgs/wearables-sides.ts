@@ -692,6 +692,7 @@ export const wearablesBackSvgs = [
   bodyWearable("258_Hanfu"),
   // 258,
   "259_BushyEyebrows",
+  wearable("260_AncientBeard"),
   wearable("261_AantenaBotBack"),
   "262_RadarEyes",
   wearable("263_SignalHeadsetBack"),

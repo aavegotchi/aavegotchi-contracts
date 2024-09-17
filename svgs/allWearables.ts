@@ -4,6 +4,12 @@ import {
   BodyWearableOutput,
   wearable,
 } from "../scripts/svgHelperFunctions";
+import {
+  wearablesLeftSvgs,
+  wearablesRightSvgs,
+  wearablesBackSvgs,
+} from "../svgs/wearables-sides";
+import { sleeveSvgs } from "./wearables";
 import { itemTypes } from "../data/itemTypes/itemTypes";
 import { allSleeves } from "./wearables";
 import { allBadges } from "./BadgeData";
@@ -119,15 +125,37 @@ export function getWearables() {
     }
   });
 
+  console.log(`Right side views length: ${wearablesRightSvgs.length}`);
+  console.log(`Left side views length: ${wearablesLeftSvgs.length}`);
+  console.log(`Back side views length: ${wearablesBackSvgs.length}`);
+
+  if (
+    [wearablesRightSvgs, wearablesLeftSvgs, wearablesBackSvgs, sleeves].some(
+      (arr1, index, arrs) =>
+        arrs.slice(index + 1).some((arr2) => arr1.length !== arr2.length)
+    )
+  ) {
+    throw new Error("All side views must be the same length.");
+  }
   console.log(
     "returning",
     wearables.length,
     "total wearables and",
     sleeves.length,
-    "total sleeves"
+    "total sleeves and",
+    wearablesRightSvgs.length,
+    "total side views"
   );
+
+  console.log("All wearable svgs are in sync.");
 
   return { wearables: wearables, sleeves: sleeves };
 }
 
-// getWearables();
+function getStartingSleeveIndex() {
+  if (allSleeves.length !== sleeveSvgs.length) {
+    throw new Error("allSleeves and sleeveSvgs must have the same length.");
+  }
+
+  return allSleeves.length;
+}

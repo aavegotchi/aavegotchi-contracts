@@ -28,7 +28,6 @@ const BaadgeSvgMap = new Map<number, string>();
 //create a number to svg map
 
 export function getBaadge(id: number) {
-  readBadgesBatch("svgItems", szn1BadgeSvgs, szn1BadgeIds);
   readBadgesBatch("svgItems", coindeskConsensusSvg, coindeskConsensus);
   readBadgesBatch("svgItems", uniclyBaadgeSvg, uniclyBaadgeId);
   readBadgesBatch(
@@ -36,12 +35,13 @@ export function getBaadge(id: number) {
     aastronautMemberBadgeSvg,
     aastronautMemberBadgeId
   );
+  readBadgesBatch("svgItems", szn1BadgeSvgs, szn1BadgeIds);
+  readBadgesBatch("baadges", tooorkeyBadgeSvgs, tooorkeyBadgeIds);
+  readBadgesBatch("pumpkinBadge", pumpkinBadgeSvgs, pumpkinBadgeIds);
   readBadgesBatch("baadges", szn2BadgeSvgs, szn2BadgeIds);
   readBadgesBatch("sZN3Baadges", szn3BadgeSvgs, szn3BadgeIds);
   readBadgesBatch("sZN4Baadges", szn4BadgeSvgs, szn4BadgeIds);
   readBadgesBatch("sZN5Baadges", szn5BadgeSvgs, szn5BadgeIds);
-  readBadgesBatch("pumpkinBadge", tooorkeyBadgeSvgs, tooorkeyBadgeIds);
-  readBadgesBatch("pumpkinBadge", pumpkinBadgeSvgs, pumpkinBadgeIds);
 
   const svg = BaadgeSvgMap.get(id);
   if (svg === undefined) {

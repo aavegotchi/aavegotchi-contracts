@@ -114,7 +114,7 @@ export const szn3BadgeIds = [
 export const pumpkinBadgeSvgs = ["GotchiSmaash2022-Baadge-Final-Pixelart"];
 export const pumpkinBadgeIds = [332];
 
-export const tooorkeyBadgeSvgs = ["GotchiSmaash2022-Baadge-Final-Pixelart"];
+export const tooorkeyBadgeSvgs = ["Aavegotchi-TOOORKEY-CHAASE-Badge"];
 export const tooorkeyBadgeIds = [333];
 
 export const szn4BadgeSvgs = [

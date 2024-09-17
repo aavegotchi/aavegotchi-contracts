@@ -51,12 +51,12 @@ export function convertStringToExceptionsArray(
     output.push({
       itemId: itemIdsOutput[index],
       slotPosition: slotPositionsOutput[index],
-      side: sidesOutput[index],
+      side: ethers.utils.formatBytes32String(sidesOutput[index]),
       exceptionBool:
         exceptionBoolsOutput[index].toLowerCase() === "true" ? true : false,
     });
   });
-  // console.log("Output: ", output);
+  console.log("Output: ", output);
   return output;
 }
 
