@@ -46,7 +46,7 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
       const itemFile: string = taskArgs.itemFile;
       const diamondAddress: string = taskArgs.diamondAddress;
       const svgFile: string = taskArgs.svgFile;
-      const sleeveStartId: string = taskArgs.sleeveStartId;
+      let sleeveStartId: string = taskArgs.sleeveStartId;
       const sendToAddress = taskArgs.sendToAddress;
       const uploadItemTypes = taskArgs.uploadItemTypes;
       const uploadWearableSvgs = taskArgs.uploadWearableSvgs;
@@ -87,6 +87,8 @@ task("addItemTypes", "Adds itemTypes and SVGs ")
         diamondAddress,
         signer
       )) as SvgFacet;
+
+      sleeveStartId = (await svgFacet.getNextSleeveId()).toString();
 
       if (uploadItemTypes) {
         console.log("Adding items", 0, "to", currentItemTypes.length);

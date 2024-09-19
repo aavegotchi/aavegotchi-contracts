@@ -9,7 +9,6 @@ import {
   wearablesRightSvgs,
   wearablesBackSvgs,
 } from "../svgs/wearables-sides";
-import { sleeveSvgs } from "./wearables";
 import { itemTypes } from "../data/itemTypes/itemTypes";
 import { allSleeves } from "./wearables";
 import { allBadges } from "./BadgeData";
@@ -68,6 +67,7 @@ const svgMapping: { [key: number]: string } = {
   242: "YellowManbun",
   244: "VNeckShirt",
   248: "UpOnlyShirt",
+  249: "CoinGeckoEyes",
   250: "CoinGeckoTee",
   251: "CoinGeckoCandies",
   253: "AastronautSuit",
@@ -81,13 +81,14 @@ const svgMapping: { [key: number]: string } = {
   363: "FakeBeret",
   367: "EyesOfDevotion",
   368: "BeardOfDivinity",
-  369: "StaffOfCreatio",
+  369: "StaffOfCreation",
 };
 
 export function getWearables() {
   const wearables: string[] = [];
   const sleeves: SleeveObject[] = [];
   let wearableName: string;
+  console.log(itemTypes.length);
 
   itemTypes.forEach((itemType) => {
     itemType as ItemTypeInputNew;
@@ -112,12 +113,13 @@ export function getWearables() {
     }
   });
 
+  console.log(wearables.length);
   console.log(`Right side views length: ${wearablesRightSvgs.length}`);
   console.log(`Left side views length: ${wearablesLeftSvgs.length}`);
   console.log(`Back side views length: ${wearablesBackSvgs.length}`);
 
   if (
-    [wearablesRightSvgs, wearablesLeftSvgs, wearablesBackSvgs, sleeves].some(
+    [wearablesRightSvgs, wearablesLeftSvgs, wearablesBackSvgs, wearables].some(
       (arr1, index, arrs) =>
         arrs.slice(index + 1).some((arr2) => arr1.length !== arr2.length)
     )
@@ -137,12 +139,4 @@ export function getWearables() {
   console.log("All wearable svgs are in sync.");
 
   return { wearables: wearables, sleeves: sleeves };
-}
-
-function getStartingSleeveIndex() {
-  if (allSleeves.length !== sleeveSvgs.length) {
-    throw new Error("allSleeves and sleeveSvgs must have the same length.");
-  }
-
-  return allSleeves.length;
 }

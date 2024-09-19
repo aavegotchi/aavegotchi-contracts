@@ -294,11 +294,10 @@ contract SvgFacet is Modifiers {
         ag_ = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">', svg_, "</svg>"));
     }
 
-    function addBodyAndWearableSvgLayers(bytes memory _body, uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables)
-        internal
-        view
-        returns (bytes memory svg_)
-    {
+    function addBodyAndWearableSvgLayers(
+        bytes memory _body,
+        uint16[EQUIPPED_WEARABLE_SLOTS] memory equippedWearables
+    ) internal view returns (bytes memory svg_) {
         AavegotchiLayers memory layers;
 
         // If background is equipped

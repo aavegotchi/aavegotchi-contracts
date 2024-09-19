@@ -294,7 +294,7 @@ export async function updateSvgs(
   ethers: any
 ) {
   if (svgs.length != svgIds.length)
-    console.error("svg length does not matcch svgid length");
+    console.error("svg length does not match svgid length");
   for (let index = 0; index < svgIds.length; index++) {
     const svgId = svgIds[index];
     const svg = svgs[index];
