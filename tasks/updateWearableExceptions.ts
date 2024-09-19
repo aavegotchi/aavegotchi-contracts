@@ -29,7 +29,7 @@ export function convertExceptionsToTaskFormat(exceptions: Exceptions[]) {
     sides: items.map((item: Exceptions) => item.side).join(),
     exceptionBools: items.map((item: Exceptions) => item.exceptionBool).join(),
   };
-  //  console.log("Task Arg: ", exceptionsTaskArg);
+  console.log("Task Arg: ", exceptionsTaskArg);
 
   return exceptionsTaskArg;
 }
@@ -88,13 +88,7 @@ task(
         hre.ethers
       );
 
-      let signer: Signer;
-      if (hre.network.name === "mainnet") {
-        signer = await getRelayerSigner(hre);
-      } else {
-        const signers = await hre.ethers.getSigners();
-        signer = signers[0];
-      }
+      const signer: Signer = await getRelayerSigner(hre);
       const svgViewsFacet = (await hre.ethers.getContractAt(
         "SvgViewsFacet",
         maticDiamondAddress,
@@ -104,7 +98,7 @@ task(
       let tx = await svgViewsFacet.setSideViewExceptions(exceptions);
       console.log("tx hash:", tx.hash);
       let receipt = await tx.wait();
-      console.log("Exception Set!, gas used:", receipt.gasUsed.toString());
+      console.log("Exception Set!");
       if (!receipt.status) {
         throw Error(`Error with transaction: ${tx.hash}`);
       }

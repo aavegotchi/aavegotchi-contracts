@@ -123,30 +123,6 @@ export interface ItemTypeInputNew {
   maxQuantity?: number;
 }
 
-export function toItemTypeInputNew(item: ItemTypeInput): ItemTypeInputNew {
-  return {
-    name: item.name,
-    description: item.description,
-    svgId: item.svgId,
-    minLevel: item.minLevel,
-    canBeTransferred: item.canBeTransferred,
-    rarityLevel: maxQuantityToRarity(Number(item.maxQuantity)),
-    setId: item.setId,
-    author: item.author,
-    dimensions: item.dimensions,
-    allowedCollaterals: item.allowedCollaterals,
-    ghstPrice: item.ghstPrice,
-    traitModifiers: item.traitModifiers,
-    slotPositions: item.slotPositions,
-    category: item.category,
-    experienceBonus: item.experienceBonus,
-    kinshipBonus: item.kinshipBonus,
-    canPurchaseWithGhst: item.canPurchaseWithGhst,
-    maxQuantity: Number(item.maxQuantity),
-    totalQuantity: Number(item.totalQuantity),
-  };
-}
-
 export interface ItemTypeOutput {
   name: string;
   description: string;
@@ -458,9 +434,6 @@ export function calculateRarityScoreModifier(maxQuantity: number): number {
   return 0;
 }
 
-//exclude some tems from traitBooster checklist
-const excludedItems = [0, 26, 100, 105, 126, 127, 128, 129];
-
 export function getItemTypes(
   itemTypes: ItemTypeInputNew[],
   ethers: any
@@ -485,14 +458,9 @@ export function getItemTypes(
       Number(prev) + Math.abs(Number(cur));
     let traitBoosters = itemType.traitModifiers.reduce(reducer, 0);
 
-    if (
-      itemType.category !== 1 &&
-      !excludedItems.includes(Number(itemType.svgId))
-    ) {
+    if (itemType.category !== 1) {
       if (traitBoosters !== rarityLevelToTraitBoosters(itemType.rarityLevel)) {
-        throw Error(
-          `Trait Booster for ${itemType.name}  does not match rarity`
-        );
+        throw Error(`Trait Booster for ${itemType.name} does not match rarity`);
       }
     }
 
@@ -570,15 +538,6 @@ function rarityLevelToMaxQuantity(rarityLevel: rarityLevel): number {
     case "godlike":
       return 5;
   }
-}
-
-export function maxQuantityToRarity(quantity: number) {
-  if (quantity >= 1000) return "common";
-  else if (quantity >= 500) return "uncommon";
-  else if (quantity >= 250) return "rare";
-  else if (quantity >= 100) return "legendary";
-  else if (quantity >= 10) return "mythical";
-  else return "godlike";
 }
 
 export function rarityLevelToTraitBoosters(rarityLevel: rarityLevel): number {

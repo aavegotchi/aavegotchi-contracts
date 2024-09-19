@@ -17,7 +17,7 @@ import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {LibItemsEvents} from "../libraries/LibItemsEvents.sol";
 
-contract ItemsRolesRegistryFacet is Modifiers, IERC7589 {
+contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     using EnumerableSet for EnumerableSet.UintSet;
     bytes32 public constant UNIQUE_ROLE = keccak256("Player()");
 
