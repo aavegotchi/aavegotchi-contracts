@@ -6399,6 +6399,21 @@ export let allSideViewDimensions: SideDimensions[] = sideViewDimensions1.concat(
   forge2
 );
 
+//loop through all the sideView arrays and move their elements to the main array
+
+export let allSideViewDimensions: SideDimensions[] = sideViewDimensions1.concat(
+  sideViewDimensions2,
+  sideViewDimensions3,
+  sideViewDimensions4,
+  sideViewDimensions5,
+  sideViewDimensions6,
+  sideViewDimensions7,
+  sideViewDimensions8,
+  sideViewDimensions9,
+  forge1,
+  forge2
+);
+
 /*
 sideViewDimensions1 = sideViewDimensions1.map((value) => {
   delete value.name;
