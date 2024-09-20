@@ -1,10 +1,4 @@
-import { ethers } from "ethers";
 import { Exceptions } from "../scripts/itemTypeHelpers";
-
-export const front = ethers.utils.formatBytes32String("wearables-front");
-export const back = ethers.utils.formatBytes32String("wearables-back");
-export const left = ethers.utils.formatBytes32String("wearables-left");
-export const right = ethers.utils.formatBytes32String("wearables-right");
 
 export const allExceptions: Exceptions[] = [
   //body

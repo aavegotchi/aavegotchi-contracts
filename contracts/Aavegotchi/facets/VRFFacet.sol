@@ -6,8 +6,6 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {ILink} from "../interfaces/ILink.sol";
-import {VRFCoordinatorV2Interface} from "../interfaces/VRFCoordinatorV2Interface.sol";
-import {REQUEST_CONFIRMATIONS, NO_OF_WORDS, VRF_GAS_LIMIT} from "../libraries/LibAppStorage.sol";
 
 //import "hardhat/console.sol";
 
@@ -94,17 +92,17 @@ contract VrfFacet is Modifiers {
    |            Read Functions          |
    |__________________________________*/
 
-    // function linkBalance() external view returns (uint256 linkBalance_) {
-    //     linkBalance_ = s.link.balanceOf(address(this));
-    // }
+    function linkBalance() external view returns (uint256 linkBalance_) {
+        linkBalance_ = s.link.balanceOf(address(this));
+    }
 
     function vrfCoordinator() external view returns (address) {
         return s.vrfCoordinator;
     }
 
-    // function link() external view returns (address) {
-    //     return address(s.link);
-    // }
+    function link() external view returns (address) {
+        return address(s.link);
+    }
 
     function keyHash() external view returns (bytes32) {
         return s.keyHash;
@@ -133,22 +131,22 @@ contract VrfFacet is Modifiers {
         emit OpenPortals(_tokenIds);
     }
 
-    function drawRandomNumber(uint256 _tokenId) internal returns (uint256 requestId_) {
+    function drawRandomNumber(uint256 _tokenId) internal {
         s.aavegotchis[_tokenId].status = LibAavegotchi.STATUS_VRF_PENDING;
-        requestId_ = VRFCoordinatorV2Interface(s.vrfCoordinator).requestRandomWords(
-            s.keyHash,
-            s.subscriptionId,
-            REQUEST_CONFIRMATIONS,
-            VRF_GAS_LIMIT,
-            NO_OF_WORDS
-        );
-        s.vrfRequestIdToTokenId[requestId_] = _tokenId;
+        uint256 fee = s.fee;
+        require(s.link.balanceOf(address(this)) >= fee, "VrfFacet: Not enough LINK");
+        bytes32 l_keyHash = s.keyHash;
+        require(s.link.transferAndCall(s.vrfCoordinator, fee, abi.encode(l_keyHash, 0)), "VrfFacet: link transfer failed");
+        uint256 vrfSeed = uint256(keccak256(abi.encode(l_keyHash, 0, address(this), s.vrfNonces[l_keyHash])));
+        s.vrfNonces[l_keyHash]++;
+        bytes32 requestId = keccak256(abi.encodePacked(l_keyHash, vrfSeed));
+        s.vrfRequestIdToTokenId[requestId] = _tokenId;
         // for testing
-        //  tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _tokenId))));
+        tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _tokenId))));
     }
 
     // for testing purpose only
-    function tempFulfillRandomness(uint256 _requestId, uint256 _randomNumber) internal {
+    function tempFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) internal {
         // console.log("bytes");
         // console.logBytes32(_requestId);
         //_requestId; // mentioned here to remove unused variable warning
@@ -176,18 +174,19 @@ contract VrfFacet is Modifiers {
      * @dev rawFulfillRandomness, below.)
      *
      * @param _requestId The Id initially returned by requestRandomness
-     * @param _randomWords the VRF output
+     * @param _randomNumber the VRF output
      */
-    function rawFulfillRandomness(uint256 _requestId, uint256[] memory _randomWords) external {
-        require(LibMeta.msgSender() == s.vrfCoordinator, "Only VRFCoordinator can fulfill");
+    function rawFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) external {
         uint256 tokenId = s.vrfRequestIdToTokenId[_requestId];
-        require(s.aavegotchis[tokenId].status == LibAavegotchi.STATUS_VRF_PENDING, "VrfFacet: VRF is not pending");
 
+        require(LibMeta.msgSender() == s.vrfCoordinator, "Only VRFCoordinator can fulfill");
+
+        require(s.aavegotchis[tokenId].status == LibAavegotchi.STATUS_VRF_PENDING, "VrfFacet: VRF is not pending");
         s.aavegotchis[tokenId].status = LibAavegotchi.STATUS_OPEN_PORTAL;
-        s.tokenIdToRandomNumber[tokenId] = _randomWords[0];
+        s.tokenIdToRandomNumber[tokenId] = _randomNumber;
 
         emit PortalOpened(tokenId);
-        emit VrfRandomNumber(tokenId, _randomWords[0], block.timestamp);
+        emit VrfRandomNumber(tokenId, _randomNumber, block.timestamp);
     }
 
     ///@notice Allow the aavegotchi diamond owner to change the vrf details
@@ -195,9 +194,14 @@ contract VrfFacet is Modifiers {
     //@param _keyHash New keyhash
     //@param _vrfCoordinator The new vrf coordinator address
     //@param _link New LINK token contract address
-    function changeVrf(uint64 _newSubscriptionId, bytes32 _keyHash, address _vrfCoordinator) external onlyOwner {
-        if (_newSubscriptionId != 0) {
-            s.subscriptionId = _newSubscriptionId;
+    function changeVrf(
+        uint256 _newFee,
+        bytes32 _keyHash,
+        address _vrfCoordinator,
+        address _link
+    ) external onlyOwner {
+        if (_newFee != 0) {
+            s.fee = uint96(_newFee);
         }
         if (_keyHash != 0) {
             s.keyHash = _keyHash;
@@ -205,13 +209,13 @@ contract VrfFacet is Modifiers {
         if (_vrfCoordinator != address(0)) {
             s.vrfCoordinator = _vrfCoordinator;
         }
+        if (_link != address(0)) {
+            s.link = ILink(_link);
+        }
     }
 
-    function getVrfInfo() public view returns (uint64, bytes32, address, string memory) {
-        return (s.subscriptionId, s.keyHash, s.vrfCoordinator, s.name);
+    // Remove the LINK tokens from this contract that are used to pay for VRF random number fees
+    function removeLinkTokens(address _to, uint256 _value) external onlyOwner {
+        s.link.transfer(_to, _value);
     }
-    // // Remove the LINK tokens from this contract that are used to pay for VRF random number fees
-    // function removeLinkTokens(address _to, uint256 _value) external onlyOwner {
-    //     s.link.transfer(_to, _value);
-    // }
 }

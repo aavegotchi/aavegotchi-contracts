@@ -9,16 +9,16 @@ import {ItemsFacet} from "../../facets/ItemsFacet.sol";
 import {AavegotchiFacet} from "../../facets/AavegotchiFacet.sol";
 
 contract WearablesFacet {
-    function periphery() internal view returns (PeripheryFacet pFacet) {
-        pFacet = PeripheryFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND());
+    function periphery() internal pure returns (PeripheryFacet pFacet) {
+        pFacet = PeripheryFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND);
     }
 
-    function itemsFacet() internal view returns (ItemsFacet iFacet) {
-        iFacet = ItemsFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND());
+    function itemsFacet() internal pure returns (ItemsFacet iFacet) {
+        iFacet = ItemsFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND);
     }
 
-    function aavegotchiFacet() internal view returns (AavegotchiFacet aFacet) {
-        aFacet = AavegotchiFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND());
+    function aavegotchiFacet() internal pure returns (AavegotchiFacet aFacet) {
+        aFacet = AavegotchiFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND);
     }
 
     //READ
@@ -39,7 +39,7 @@ contract WearablesFacet {
         approved_ = aavegotchiFacet().isApprovedForAll(_owner, _operator);
     }
 
-    function tokenURI(uint256 _tokenId) external view returns (string memory) {
+    function tokenURI(uint256 _tokenId) external pure returns (string memory) {
         return aavegotchiFacet().tokenURI(_tokenId);
     }
 
@@ -65,13 +65,25 @@ contract WearablesFacet {
         }
     }
 
-    function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _id,
+        uint256 _value,
+        bytes calldata _data
+    ) external {
         periphery().peripherySafeTransferFrom(msg.sender, _from, _to, _id, _value, _data);
         //emit event
         LibEventHandler._receiveAndEmitTransferSingleEvent(msg.sender, _from, _to, _id, _value);
     }
 
-    function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external {
+    function safeBatchTransferFrom(
+        address _from,
+        address _to,
+        uint256[] calldata _ids,
+        uint256[] calldata _values,
+        bytes calldata _data
+    ) external {
         periphery().peripherySafeBatchTransferFrom(msg.sender, _from, _to, _ids, _values, _data);
         //emit event
         LibEventHandler._receiveAndEmitTransferBatchEvent(msg.sender, _from, _to, _ids, _values);

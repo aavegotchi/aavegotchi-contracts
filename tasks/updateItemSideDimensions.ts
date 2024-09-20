@@ -49,6 +49,8 @@ export function convertStringToSideDimensionsArray(
   const sideDimensions: Dimensions[] =
     convertStringToDimensionsArray(dimensions);
 
+  console.log("side dimensions:", sideDimensions);
+
   itemIdsOutput.forEach((_, index) => {
     output.push({
       itemId: itemIdsOutput[index],
@@ -80,13 +82,7 @@ task(
           taskArgs.dimensions
         );
 
-      let signer: Signer;
-      if (hre.network.name === "mainnet") {
-        signer = await getRelayerSigner(hre);
-      } else {
-        const signers = await hre.ethers.getSigners();
-        signer = signers[0];
-      }
+      const signer: Signer = await getRelayerSigner(hre);
       const svgViewsFacet = (await hre.ethers.getContractAt(
         "SvgViewsFacet",
         maticDiamondAddress,
@@ -96,11 +92,7 @@ task(
       let tx = await svgViewsFacet.setSideViewDimensions(sideDimensions);
       console.log("tx hash:", tx.hash);
       let receipt = await tx.wait();
-      console.log(
-        "New Dimensions set!",
-        "gas used:",
-        receipt.gasUsed.toString()
-      );
+      console.log("New Dimensions set!");
       if (!receipt.status) {
         throw Error(`Error with transaction: ${tx.hash}`);
       }

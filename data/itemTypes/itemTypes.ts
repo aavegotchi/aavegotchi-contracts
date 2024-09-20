@@ -1,4 +1,4 @@
-import { ItemTypeInput, ItemTypeInputNew } from "../../scripts/itemTypeHelpers";
+import { ItemTypeInput } from "../../scripts/itemTypeHelpers";
 
 /* global ethers */
 /*
@@ -25,7 +25,7 @@ export function maxQuantityToRarity(quantity: number) {
 export const itemTypes: ItemTypeInput[] = [
   {
     svgId: 0,
-    name: "Void",
+    name: "The Void",
     setId: [],
     author: "Xibot",
     description: "The Void",
@@ -4605,7 +4605,6 @@ export const itemTypes: ItemTypeInput[] = [
     kinshipBonus: 0,
     canPurchaseWithGhst: false,
   },
-
   {
     svgId: 199,
     name: "Steampunk Goggles",
@@ -9075,7 +9074,7 @@ export const itemTypes: ItemTypeInput[] = [
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 0,
-    maxQuantity: 10,
+    maxQuantity: 50,
     traitModifiers: [0, 0, 0, -5, 0, 0],
     canPurchaseWithGhst: false,
     slotPositions: "face",
@@ -9095,7 +9094,7 @@ export const itemTypes: ItemTypeInput[] = [
     allowedCollaterals: [],
     minLevel: 1,
     ghstPrice: 0,
-    maxQuantity: 10,
+    maxQuantity: 50,
     traitModifiers: [2, 0, 0, -3, 0, 0],
     canPurchaseWithGhst: false,
     slotPositions: "pet",

@@ -13,11 +13,15 @@ import {DiamondLoupeFacet} from "../../shared/facets/DiamondLoupeFacet.sol";
 import {OwnershipFacet} from "../../shared/facets/OwnershipFacet.sol";
 
 contract WearableDiamond {
-    constructor(address _contractOwner, address _diamondCutFacet, address _diaomondLoupeFacet, address _ownershipFacet, address aavegotchiDiamond) {
+    constructor(
+        address _contractOwner,
+        address _diamondCutFacet,
+        address _diaomondLoupeFacet,
+        address _ownershipFacet
+    ) {
         WearableLibDiamond.setContractOwner(_contractOwner);
         WearableLibDiamond.addDiamondFunctions(_diamondCutFacet, _diaomondLoupeFacet, _ownershipFacet);
         WearableLibDiamond.DiamondStorage storage ds = WearableLibDiamond.diamondStorage();
-        ds.AAVEGOTCHI_DIAMOND = aavegotchiDiamond;
         ds.supportedInterfaces[0xd9b67a26] = true; //erc1155
     }
 

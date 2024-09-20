@@ -99,13 +99,7 @@ export function stripSvg(svg: string) {
 
 export function readSvg(name: string, folder: string) {
   //folder is usually svgItems but could also be svgItems/subfolder
-  let svg;
-  try {
-    svg = fs.readFileSync(`./svgs/${folder}/${name}.svg`, "utf8");
-  } catch (error) {
-    console.error(error);
-  }
-  return stripSvg(svg);
+  return stripSvg(fs.readFileSync(`./svgs/${folder}/${name}.svg`, "utf8"));
 }
 
 export function wearable(name: string, folder: string) {
@@ -300,7 +294,7 @@ export async function updateSvgs(
   ethers: any
 ) {
   if (svgs.length != svgIds.length)
-    console.error("svg length does not matcch svgid length");
+    console.error("svg length does not match svgid length");
   for (let index = 0; index < svgIds.length; index++) {
     const svgId = svgIds[index];
     const svg = svgs[index];

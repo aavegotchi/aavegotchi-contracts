@@ -2,6 +2,7 @@ import { SideDimensions, Dimensions } from "../scripts/itemTypeHelpers";
 
 import { sideViewDimensions as forge1 } from "../data/itemTypes/forgewearablesSideViews";
 import { sideViewDimensions as forge2 } from "../data/itemTypes/forgewearablesSideViews2";
+import { sideViewDimensions as gotchigangSideviews } from "../data/itemTypes/gotchigangwearableSideViews";
 export const sideViewDimensions1: SideDimensions[] = [
   {
     itemId: 0,
