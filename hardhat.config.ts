@@ -76,6 +76,10 @@ export default {
       url: process.env.SUPERNET_URL,
       accounts: [process.env.SECRET],
     },
+    polter: {
+      url: process.env.POLTER_DEVNET_URL,
+      accounts: [process.env.SECRET],
+    },
     // gorli: {
     //   url: process.env.GORLI,
     //   accounts: [process.env.SECRET],
