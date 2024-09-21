@@ -386,6 +386,8 @@ struct AppStorage {
     // states for erc1155 buy orders
     uint256 nextERC1155BuyOrderId;
     mapping(uint256 => ERC1155BuyOrder) erc1155BuyOrders; // buyOrderId => data
+    address gotchGeistBridge;
+    address itemGeistBridge;
 }
 
 library LibAppStorage {
@@ -448,6 +450,24 @@ contract Modifiers {
         require(
             sender == LibDiamond.contractOwner() || s.itemManagers[sender] == true,
             "LibAppStorage: only an Owner or ItemManager can call this function"
+        );
+        _;
+    }
+
+    modifier onlyGotchiGeistBridge() {
+        address sender = LibMeta.msgSender();
+        require(
+            sender == s.gotchGeistBridge,
+            "LibAppStorage: Do not have access"
+        );
+        _;
+    }
+
+    modifier onlyItemGeistBridge() {
+        address sender = LibMeta.msgSender();
+        require(
+            sender == s.itemGeistBridge,
+            "LibAppStorage: Do not have access"
         );
         _;
     }
