@@ -2,7 +2,7 @@
 pragma solidity 0.8.1;
 import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
-import {ILink} from "../interfaces/ILink.sol";
+
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IERC7589} from "../../shared/interfaces/IERC7589.sol";
 
@@ -10,6 +10,10 @@ uint256 constant EQUIPPED_WEARABLE_SLOTS = 16;
 uint256 constant NUMERIC_TRAITS_NUM = 6;
 uint256 constant TRAIT_BONUSES_NUM = 5;
 uint256 constant PORTAL_AAVEGOTCHIS_NUM = 10;
+
+uint16 constant REQUEST_CONFIRMATIONS = 3;
+uint32 constant NO_OF_WORDS = 1;
+uint32 constant VRF_GAS_LIMIT = 2_500_000;
 
 //  switch (traitType) {
 //         case 0:
@@ -234,6 +238,20 @@ struct ItemRolesInfo {
     uint256 balanceUsed;
 }
 
+struct ERC1155BuyOrder {
+    uint256 buyOrderId;
+    address buyer;
+    address erc1155TokenAddress;
+    uint256 erc1155TokenId;
+    uint256 priceInWei;
+    uint256 quantity;
+    uint256 timeCreated;
+    uint256 lastTimePurchased;
+    uint256 duration; //0 for unlimited
+    bool cancelled;
+    bool completed;
+}
+
 struct AppStorage {
     mapping(address => AavegotchiCollateralTypeInfo) collateralTypeInfo;
     mapping(address => uint256) collateralTypeIndexes;
@@ -275,12 +293,11 @@ struct AppStorage {
     string itemsBaseUri;
     bytes32 domainSeparator;
     //VRF
-    mapping(bytes32 => uint256) vrfRequestIdToTokenId;
-    mapping(bytes32 => uint256) vrfNonces;
+    mapping(uint256 => uint256) vrfRequestIdToTokenId;
+    // mapping(bytes32 => uint256) vrfNonces;
     bytes32 keyHash;
-    uint144 fee;
+    uint64 subscriptionId;
     address vrfCoordinator;
-    ILink link;
     // Marketplace
     uint256 nextERC1155ListingId;
     // erc1155 category => erc1155Order
@@ -366,6 +383,9 @@ struct AppStorage {
     // Auxiliary structs for Items Roles Registry
     // gotchiId => equippedDepositsInfo
     mapping(uint256 => GotchiEquippedDepositsInfo) gotchiEquippedDepositsInfo;
+    // states for erc1155 buy orders
+    uint256 nextERC1155BuyOrderId;
+    mapping(uint256 => ERC1155BuyOrder) erc1155BuyOrders; // buyOrderId => data
 }
 
 library LibAppStorage {

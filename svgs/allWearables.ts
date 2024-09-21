@@ -130,7 +130,7 @@ export function getWearables() {
     "returning",
     wearables.length,
     "total wearables and",
-    sleeves.length,
+    sleeves.length + 2, //2 sleeve gaps
     "total sleeves and",
     wearablesRightSvgs.length,
     "total side views"
