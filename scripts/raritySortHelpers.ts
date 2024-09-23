@@ -3,47 +3,6 @@ import request from "graphql-request";
 
 import { wearableSetArrays } from "./wearableSets";
 import { maticGraphUrl } from "./query/queryAavegotchis";
-// const totalResults: number = 6000;
-
-// export function findSets(equipped: number[]) {
-//   const setData = wearableSetArrays;
-//   const foundSets: Array<FoundSet> = [];
-
-//   const getEquipmentIds = (acc: Array<number>, value: number) => {
-//     if (Number(value) > 0) {
-//       acc.push(Number(value));
-//     }
-//     return acc;
-//   };
-
-//   const equippedIds = equipped?.reduce(getEquipmentIds, []);
-
-//   for (const wearableSet of setData) {
-//     const setWearableIds = wearableSet.wearableIds.reduce(getEquipmentIds, []);
-//     if (
-//       setWearableIds.every((wearableId: number) =>
-//         equippedIds?.includes(wearableId)
-//       ) /*&& setWearableIds.length > numWearableIds*/
-//     ) {
-//       const setFound = {
-//         name: wearableSet.name,
-//         wearableIds: setWearableIds,
-//         traitsBonuses: wearableSet.traitsBonuses.map((v: any) => Number(v)),
-//         allowedCollaterals: wearableSet.allowedCollaterals.map((v: any) =>
-//           Number(v)
-//         ),
-//       };
-
-//       foundSets.push(setFound);
-//     }
-//   }
-
-//   foundSets.sort(function (a, b) {
-//     return b.traitsBonuses[0] - a.traitsBonuses[0];
-//   });
-
-//   return foundSets;
-// }
 
 export function calculateRarityScore(traitArray: number[]) {
   const energy: number = returnRarity(traitArray[0]);
@@ -99,14 +58,42 @@ export function confirmCorrectness(
   return j;
 }
 
-export function leaderboardQuery(
-  orderBy: string,
-  orderDirection: string,
-  blockNumber: string,
-  extraFilters?: string
-): string {
-  // const extraWhere = extraFilters ? "," + extraFilters : "";
-  // const where = `where:{baseRarityScore_gt:0, owner_not:"0x0000000000000000000000000000000000000000" ${extraWhere}}`;
+export interface SacrificedGotchi {
+  id: string;
+}
+
+export async function fetchSacrificedGotchis(): Promise<SacrificedGotchi[]> {
+  const maxResults = 5000;
+  const batchSize = 1000;
+  const batches = Math.ceil(maxResults / batchSize);
+
+  const queries = [];
+  for (let i = 0; i < batches; i++) {
+    queries.push(`
+      batch${i}: aavegotchis(
+        first: ${batchSize},
+        skip: ${i * batchSize},
+        where: {owner: "0x0000000000000000000000000000000000000000"}
+      ) {
+        id
+      }
+    `);
+  }
+
+  const query = `
+    {
+      ${queries.join("\n")}
+    }
+  `;
+
+  const response: Record<string, SacrificedGotchi[]> = await request(
+    maticGraphUrl,
+    query
+  );
+  return Object.values(response).flat();
+}
+
+export function leaderboardQuery(blockNumber: string): string {
   const aavegotchi = `
     id
     name
@@ -243,7 +230,7 @@ export async function fetchAndSortLeaderboard(
   tieBreakerIndex: number
 ) {
   let eachFinalResult: LeaderboardAavegotchi[] = [];
-  const query = leaderboardQuery(`${category}`, "desc", blockNumber);
+  const query = leaderboardQuery(blockNumber);
 
   const queryResponse: LeaderboardAavegotchi[] = await request(
     maticGraphUrl,
