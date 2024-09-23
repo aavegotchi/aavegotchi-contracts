@@ -73,8 +73,12 @@ export default {
       timeout: 90000,
     },
     amoy: {
-      url: process.env.AMOY,
-      accounts: [process.env.SECRET_2],
+      url: process.env.AMOY_URL,
+      accounts: [process.env.SECRET],
+    },
+    polter: {
+      url: process.env.POLTER_DEVNET_URL,
+      accounts: [process.env.SECRET],
     },
 
     // gorli: {

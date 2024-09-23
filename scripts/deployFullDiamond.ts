@@ -60,12 +60,12 @@ function strDisplay(str: any) {
 }
 
 async function main() {
-  if (!["hardhat", "localhost"].includes(network.name)) {
+  if (!["hardhat", "localhost", "amoy", "polter"].includes(network.name)) {
     throw Error("No network settings for " + network.name);
   }
 
   //amoy
-  const ghstContract = "0xF679b8D109b2d23931237Ce948a7D784727c0897";
+  const ghstContract = "0xB40B75b4a8e5153357b3e5e4343d997B1a1019f9";
   const ghstStakingDiamondAddress =
     "0xae83d5fc564Ef58224e934ba4Df72a100d5082a0";
   const realmDiamondAddress = "0x5a4faEb79951bAAa0866B72fD6517E693c8E4620";
@@ -114,11 +114,6 @@ async function main() {
       symbol,
     ],
   ];
-
-  const ghstTokenContract = await ethers.getContractAt(
-    "GHSTFacet",
-    ghstContract
-  );
 
   const gasLimit = 12300000;
   let totalGasUsed = ethers.BigNumber.from("0");
@@ -441,8 +436,8 @@ async function main() {
     totalGasUsed = totalGasUsed.add(receipt.gasUsed);
   }
 
-  //add sideview dimensions in batches of 700
-  step = 700;
+  //add sideview dimensions in batches of 200
+  step = 200;
   console.log("adding", allSideViewDimensions.length, "sideviews");
   let sliceStep = Math.ceil(allSideViewDimensions.length / step);
 
@@ -453,7 +448,7 @@ async function main() {
     console.log(`Adding Sideview Dimensions (${i + 1} / ${sliceStep})`);
     await run(
       "updateItemSideDimensions",
-      convertSideDimensionsToTaskFormat(batch)
+      convertSideDimensionsToTaskFormat(batch, aavegotchiDiamond.address)
     );
   }
 
@@ -472,7 +467,7 @@ async function main() {
     console.log(`Adding Sideview Exceptions (${i + 1} / ${sliceStep}) `);
     const tx = await run(
       "updateWearableExceptions",
-      convertExceptionsToTaskFormat(slice)
+      convertExceptionsToTaskFormat(slice, aavegotchiDiamond.address)
     );
   }
 
@@ -609,114 +604,114 @@ async function main() {
   totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
   // add erc721 and 1155 categories
-  console.log("Adding ERC721 categories");
-  const erc721Categories = [
-    {
-      erc721TokenAddress: realmDiamondAddress,
-      category: 4,
-    },
-    {
-      erc721TokenAddress: fakeGotchiArtDiamondAddress,
-      category: 5,
-    },
-  ];
-  tx = await erc721MarketplaceFacet.setERC721Categories(erc721Categories, {
-    gasLimit: gasLimit,
-  });
-  receipt = await tx.wait();
-  if (!receipt.status) {
-    throw Error(`Error:: ${tx.hash}`);
-  }
-  console.log(
-    "Adding ERC721 categories gas used::" + strDisplay(receipt.gasUsed)
-  );
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
-
-  console.log("Adding ERC1155 categories");
-  const erc1155Categories = [];
-  for (let i = 0; i < 6; i++) {
-    erc1155Categories.push({
-      erc1155TokenAddress: ghstStakingDiamondAddress,
-      erc1155TypeId: i,
-      category: 3,
-    });
-  }
-  [
-    1, 141, 142, 143, 144, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
-    156,
-  ].forEach((id) => {
-    erc1155Categories.push({
-      erc1155TokenAddress: installationDiamondAddress,
-      erc1155TypeId: id,
-      category: 4,
-    });
-  });
-  Array.from({ length: 31 }, (_, index) => index + 1).forEach((id) => {
-    erc1155Categories.push({
-      erc1155TokenAddress: tileDiamondAddress,
-      erc1155TypeId: id,
-      category: 5,
-    });
-  });
-  erc1155Categories.push({
-    erc1155TokenAddress: fakeGotchiCardDiamondAddress,
-    erc1155TypeId: 0,
-    category: 6,
-  });
-
-  const offset = 1_000_000_000;
-  const alloyCategory = 7;
-  const geodesCategory = 9;
-  const essenceCategory = 10;
-  const coresCategory = 11;
-  const alloyIds = [offset];
-  const essenceIds = [offset + 1];
-  const geodeIds = []; //[offset + 2, offset +3, offset+4, offset+5, offset+6, offset+7];
-  for (let i = offset + 2; i < offset + 8; i++) {
-    geodeIds.push(i);
-  }
-  const coreIds = [];
-  for (let i = offset + 8; i < offset + 44; i++) {
-    coreIds.push(i);
-  }
-  const forgeFinalArray = [
-    [alloyCategory, alloyIds],
-    [geodesCategory, geodeIds],
-    [essenceCategory, essenceIds],
-    [coresCategory, coreIds],
-  ];
-  forgeFinalArray.forEach((el) => {
-    const category = el[0];
-    const toAdd = el[1] as number[];
-
-    for (let index = 0; index < toAdd.length; index++) {
-      erc1155Categories.push({
-        erc1155TokenAddress: forgeDiamond.address,
-        erc1155TypeId: toAdd[index],
-        category: category,
-      });
-    }
-  });
-
-  tx = await erc1155MarketplaceFacet.setERC1155Categories(erc1155Categories, {
-    gasLimit: gasLimit,
-  });
-  receipt = await tx.wait();
-  if (!receipt.status) {
-    throw Error(`Error:: ${tx.hash}`);
-  }
-  console.log(
-    "Adding ERC1155 categories gas used::" + strDisplay(receipt.gasUsed)
-  );
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
-
+  // console.log("Adding ERC721 categories");
+  // const erc721Categories = [
+  //   {
+  //     erc721TokenAddress: realmDiamondAddress,
+  //     category: 4,
+  //   },
+  //   {
+  //     erc721TokenAddress: fakeGotchiArtDiamondAddress,
+  //     category: 5,
+  //   },
+  // ];
+  // tx = await erc721MarketplaceFacet.setERC721Categories(erc721Categories, {
+  //   gasLimit: gasLimit,
+  // });
+  // receipt = await tx.wait();
+  // if (!receipt.status) {
+  //   throw Error(`Error:: ${tx.hash}`);
+  // }
+  // console.log(
+  //   "Adding ERC721 categories gas used::" + strDisplay(receipt.gasUsed)
+  // );
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  //
+  // console.log("Adding ERC1155 categories");
+  // const erc1155Categories = [];
+  // for (let i = 0; i < 6; i++) {
+  //   erc1155Categories.push({
+  //     erc1155TokenAddress: ghstStakingDiamondAddress,
+  //     erc1155TypeId: i,
+  //     category: 3,
+  //   });
+  // }
+  // [
+  //   1, 141, 142, 143, 144, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
+  //   156,
+  // ].forEach((id) => {
+  //   erc1155Categories.push({
+  //     erc1155TokenAddress: installationDiamondAddress,
+  //     erc1155TypeId: id,
+  //     category: 4,
+  //   });
+  // });
+  // Array.from({ length: 31 }, (_, index) => index + 1).forEach((id) => {
+  //   erc1155Categories.push({
+  //     erc1155TokenAddress: tileDiamondAddress,
+  //     erc1155TypeId: id,
+  //     category: 5,
+  //   });
+  // });
+  // erc1155Categories.push({
+  //   erc1155TokenAddress: fakeGotchiCardDiamondAddress,
+  //   erc1155TypeId: 0,
+  //   category: 6,
+  // });
+  //
+  // const offset = 1_000_000_000;
+  // const alloyCategory = 7;
+  // const geodesCategory = 9;
+  // const essenceCategory = 10;
+  // const coresCategory = 11;
+  // const alloyIds = [offset];
+  // const essenceIds = [offset + 1];
+  // const geodeIds = []; //[offset + 2, offset +3, offset+4, offset+5, offset+6, offset+7];
+  // for (let i = offset + 2; i < offset + 8; i++) {
+  //   geodeIds.push(i);
+  // }
+  // const coreIds = [];
+  // for (let i = offset + 8; i < offset + 44; i++) {
+  //   coreIds.push(i);
+  // }
+  // const forgeFinalArray = [
+  //   [alloyCategory, alloyIds],
+  //   [geodesCategory, geodeIds],
+  //   [essenceCategory, essenceIds],
+  //   [coresCategory, coreIds],
+  // ];
+  // forgeFinalArray.forEach((el) => {
+  //   const category = el[0];
+  //   const toAdd = el[1] as number[];
+  //
+  //   for (let index = 0; index < toAdd.length; index++) {
+  //     erc1155Categories.push({
+  //       erc1155TokenAddress: forgeDiamond.address,
+  //       erc1155TypeId: toAdd[index],
+  //       category: category,
+  //     });
+  //   }
+  // });
+  //
+  // tx = await erc1155MarketplaceFacet.setERC1155Categories(erc1155Categories, {
+  //   gasLimit: gasLimit,
+  // });
+  // receipt = await tx.wait();
+  // if (!receipt.status) {
+  //   throw Error(`Error:: ${tx.hash}`);
+  // }
+  // console.log(
+  //   "Adding ERC1155 categories gas used::" + strDisplay(receipt.gasUsed)
+  // );
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  //
   // set realm address
-  tx = await aavegotchiGameFacet.setRealmAddress(realmDiamondAddress, {
-    gasLimit: gasLimit,
-  });
-  receipt = await tx.wait();
-  console.log("Realm diamond set:" + strDisplay(receipt.gasUsed));
-  totalGasUsed = totalGasUsed.add(receipt.gasUsed);
+  // tx = await aavegotchiGameFacet.setRealmAddress(realmDiamondAddress, {
+  //   gasLimit: gasLimit,
+  // });
+  // receipt = await tx.wait();
+  // console.log("Realm diamond set:" + strDisplay(receipt.gasUsed));
+  // totalGasUsed = totalGasUsed.add(receipt.gasUsed);
 
   console.log("Total gas used: " + strDisplay(totalGasUsed));
 }
