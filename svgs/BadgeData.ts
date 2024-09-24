@@ -150,7 +150,6 @@ export const szn5BadgeSvgs = [
   "Aavegotchi-RF-SZN5-Trophy-3RD-PLACE-RARITY", //394
   "Aavegotchi-RF-SZN5-Trophy-3RD-PLACE-KINSHIP", //395
   "Aavegotchi-RF-SZN5-Trophy-3RD-PLACE-XP", //396
-
   "Aavegotchi-RF-SZN5-Baadge-TOP-RAANKED-PLAAYER", //397
   "Aavegotchi-RF-SZN5-Baadge-TOP-10-RARITY", //398
   "Aavegotchi-RF-SZN5-Baadge-TOP-10-KINSHIP", //399
@@ -159,7 +158,6 @@ export const szn5BadgeSvgs = [
   "Aavegotchi-RF-SZN5-Baadge-TOP-100-KINSHIP", //402
   "Aavegotchi-RF-SZN5-Baadge-TOP-100-XP", //403
 ];
-
 export const szn5BadgeIds = [
   388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402,
   403,
