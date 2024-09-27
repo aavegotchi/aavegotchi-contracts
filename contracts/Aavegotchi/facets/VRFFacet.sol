@@ -178,7 +178,7 @@ contract VrfFacet is Modifiers {
      * @param _requestId The Id initially returned by requestRandomness
      * @param _randomWords the VRF output
      */
-    function rawFulfillRandomness(uint256 _requestId, uint256[] memory _randomWords) external {
+    function rawFulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) external {
         require(LibMeta.msgSender() == s.vrfCoordinator, "Only VRFCoordinator can fulfill");
         uint256 tokenId = s.vrfRequestIdToTokenId[_requestId];
         require(s.aavegotchis[tokenId].status == LibAavegotchi.STATUS_VRF_PENDING, "VrfFacet: VRF is not pending");

@@ -2,47 +2,52 @@
 
 import { ethers, network } from "hardhat";
 import { maticDiamondAddress } from "../helperFunctions";
+import { AMOY_DIAMOND } from "../../helpers/constants";
 
 export default async function main() {
+  const gasPrice = "70000000000";
   let gotchiBridgeAddress;
   let itemBridgeAddress;
   let diamondAddress;
   if (network.name === "polter") {
-    diamondAddress = "0x6b54b36A54b068152f0f39FdA0Bf96e02176D95B"
+    diamondAddress = "0x6b54b36A54b068152f0f39FdA0Bf96e02176D95B";
     // controller address
-    gotchiBridgeAddress = "0xEa4BE882A0105E44DEF336F8B2d4FB2E317e6877"
-    itemBridgeAddress = "0xEa4BE882A0105E44DEF336F8B2d4FB2E317e6877"
+    gotchiBridgeAddress = "0xEa4BE882A0105E44DEF336F8B2d4FB2E317e6877";
+    itemBridgeAddress = "0xEa4BE882A0105E44DEF336F8B2d4FB2E317e6877";
   } else if (network.name === "amoy") {
-    diamondAddress = "0xC80DB01aeDAD5F6E3088c75F60E52f579Cf1D3Cb"
+    diamondAddress = AMOY_DIAMOND;
     // vault address
-    gotchiBridgeAddress = "0xfc1a9d9898e7a48D75EF6f18F5c042f8fc2E9055"
-    itemBridgeAddress = "0xfc1a9d9898e7a48D75EF6f18F5c042f8fc2E9055"
+    gotchiBridgeAddress = "0xfc1a9d9898e7a48D75EF6f18F5c042f8fc2E9055";
+    itemBridgeAddress = "0xfc1a9d9898e7a48D75EF6f18F5c042f8fc2E9055";
   } else if (network.name === "matic") {
-    diamondAddress = maticDiamondAddress
+    diamondAddress = maticDiamondAddress;
     // TODO: vault address
-    gotchiBridgeAddress = ""
-    itemBridgeAddress = ""
-
+    gotchiBridgeAddress = "";
+    itemBridgeAddress = "";
   } else if (network.name === "geist") {
-    diamondAddress = ""
+    diamondAddress = "";
     // TODO: controller address
-    gotchiBridgeAddress = ""
-    itemBridgeAddress = ""
+    gotchiBridgeAddress = "";
+    itemBridgeAddress = "";
   } else {
     throw Error("No network settings for " + network.name);
   }
 
-  const daoFacet = await ethers.getContractAt("DAOFacet", diamondAddress)
+  const daoFacet = await ethers.getContractAt("DAOFacet", diamondAddress);
 
-  console.log(`Configuring gotchi bridge...`)
-  let tx = await daoFacet.updateGotchiGeistBridge(gotchiBridgeAddress)
-  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
-  await tx.wait()
+  console.log(`Configuring gotchi bridge...`);
+  let tx = await daoFacet.updateGotchiGeistBridge(gotchiBridgeAddress, {
+    gasPrice: gasPrice,
+  });
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`);
+  await tx.wait();
 
-  console.log(`Configuring items bridge...`)
-  tx = await daoFacet.updateItemGeistBridge(itemBridgeAddress)
-  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
-  await tx.wait()
+  console.log(`Configuring items bridge...`);
+  tx = await daoFacet.updateItemGeistBridge(itemBridgeAddress, {
+    gasPrice: gasPrice,
+  });
+  console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`);
+  await tx.wait();
 
   console.log(`Bridge configured on ${network.name}.`);
 }

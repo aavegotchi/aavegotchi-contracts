@@ -5,6 +5,7 @@ import {
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
 import { maticDiamondAddress } from "../helperFunctions";
+import { AMOY_DIAMOND_OWNER, AMOY_DIAMOND } from "../../helpers/constants";
 
 export async function upgrade() {
   const diamondOwner = "0x01F010a5e001fe9d6940758EA5e8c777885E351e";
@@ -55,10 +56,9 @@ export async function upgrade() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
-
   const args: DeployUpgradeTaskArgs = {
-    diamondOwner: diamondOwner,
-    diamondAddress: maticDiamondAddress,
+    diamondOwner: AMOY_DIAMOND_OWNER,
+    diamondAddress: AMOY_DIAMOND,
     // diamondAddress: '0x6b54b36A54b068152f0f39FdA0Bf96e02176D95B',
     facetsAndAddSelectors: joined,
     useLedger: false,
