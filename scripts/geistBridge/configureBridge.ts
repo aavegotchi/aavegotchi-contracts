@@ -35,12 +35,12 @@ export default async function main() {
   const daoFacet = await ethers.getContractAt("DAOFacet", diamondAddress)
 
   console.log(`Configuring gotchi bridge...`)
-  let tx = await daoFacet.updateGotchiGeistBridge("0xEa4BE882A0105E44DEF336F8B2d4FB2E317e6877")
+  let tx = await daoFacet.updateGotchiGeistBridge(gotchiBridgeAddress)
   console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
 
   console.log(`Configuring items bridge...`)
-  tx = await daoFacet.updateItemGeistBridge("0xEa4BE882A0105E44DEF336F8B2d4FB2E317e6877")
+  tx = await daoFacet.updateItemGeistBridge(itemBridgeAddress)
   console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
   await tx.wait()
 
