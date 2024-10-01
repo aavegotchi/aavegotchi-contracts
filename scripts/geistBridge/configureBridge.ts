@@ -12,13 +12,13 @@ export default async function main() {
   if (network.name === "polter") {
     diamondAddress = "0x6b54b36A54b068152f0f39FdA0Bf96e02176D95B";
     // controller address
-    gotchiBridgeAddress = "0x9C7e1dc50c944272a69Ff900E3cB9A59b33E9042";
-    itemBridgeAddress = "0x9C7e1dc50c944272a69Ff900E3cB9A59b33E9042";
+    gotchiBridgeAddress = "0x38161F1a033D86aea6D222AEdE57702046414CA5";
+    itemBridgeAddress = "0x38161F1a033D86aea6D222AEdE57702046414CA5";
   } else if (network.name === "amoy") {
     diamondAddress = AMOY_DIAMOND;
     // vault address
-    gotchiBridgeAddress = "0xe07bCa11D493c6f151AE35DdC31EA0Ce1B54Fe9E";
-    itemBridgeAddress = "0xe07bCa11D493c6f151AE35DdC31EA0Ce1B54Fe9E";
+    gotchiBridgeAddress = "0x09011fcA980Df5d22E5ff2262051Bc28C430E11c";
+    itemBridgeAddress = "0x09011fcA980Df5d22E5ff2262051Bc28C430E11c";
   } else if (network.name === "matic") {
     diamondAddress = maticDiamondAddress;
     // TODO: vault address
