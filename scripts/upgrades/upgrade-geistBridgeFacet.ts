@@ -14,44 +14,44 @@ export async function upgrade() {
     {
       facetName: "PolygonXGeistBridgeFacet",
       addSelectors: [
-        "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable",
-        "function setMetadata(uint _tokenId, bytes memory _metadata) external",
-        "function mint(address _to, uint _tokenId) external",
-        "function burn(address _from, uint _tokenId) external",
-        "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable",
-        "function mint(address _to, uint _tokenId, uint _quantity) external",
-        "function burn(address _from, uint _tokenId, uint _quantity) external",
+        // "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable",
+        // "function setMetadata(uint _tokenId, bytes memory _metadata) external",
+        // "function mint(address _to, uint _tokenId) external",
+        // "function burn(address _from, uint _tokenId) external",
+        // "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable",
+        // "function mint(address _to, uint _tokenId, uint _quantity) external",
+        // "function burn(address _from, uint _tokenId, uint _quantity) external",
       ],
       removeSelectors: [],
     },
-    {
-      facetName: "DAOFacet",
-      addSelectors: [
-        "function updateGotchiGeistBridge(address _newBridge) external",
-        "function updateItemGeistBridge(address _newBridge) external",
-      ],
-      removeSelectors: [],
-    },
-    {
-      facetName: "AavegotchiGameFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "CollateralFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "EscrowFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "VrfFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "DAOFacet",
+    //   addSelectors: [
+    //     "function updateGotchiGeistBridge(address _newBridge) external",
+    //     "function updateItemGeistBridge(address _newBridge) external",
+    //   ],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "AavegotchiGameFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "CollateralFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "EscrowFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "VrfFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
@@ -59,6 +59,7 @@ export async function upgrade() {
   const args: DeployUpgradeTaskArgs = {
     diamondOwner: AMOY_DIAMOND_OWNER,
     diamondAddress: AMOY_DIAMOND,
+    // diamondOwner: '0xd38Df837a1EAd12ee16f8b8b7E5F58703f841668',
     // diamondAddress: '0x6b54b36A54b068152f0f39FdA0Bf96e02176D95B',
     facetsAndAddSelectors: joined,
     useLedger: false,

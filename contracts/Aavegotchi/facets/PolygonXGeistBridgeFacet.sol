@@ -38,7 +38,7 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         }
     }
 
-    function mint(address _to, uint _tokenId) external onlyGotchiGeistBridge() {
+    function mint(address _to, uint _tokenId) external onlyGotchiGeistBridge {
         s.aavegotchis[_tokenId].owner = _to;
         s.tokenIds.push(uint32(_tokenId));
         s.ownerTokenIdIndexes[_to][_tokenId] = s.ownerTokenIds[_to].length;
@@ -46,7 +46,7 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         emit LibERC721.Transfer(address(0), _to, _tokenId);
     }
 
-    function burn(address _from, uint _tokenId) external onlyGotchiGeistBridge() {
+    function burn(address _from, uint _tokenId) external onlyGotchiGeistBridge {
         s.aavegotchis[_tokenId].owner = address(0);
         uint256 index = s.ownerTokenIdIndexes[_from][_tokenId];
         uint256 lastIndex = s.ownerTokenIds[_from].length - 1;
@@ -84,7 +84,7 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         INFTBridge(s.itemGeistBridge).bridge(_receiver, msg.sender, _tokenId, _amount, _msgGasLimit, _connector, new bytes(0), new bytes(0));
     }
 
-    function mint(address _to, uint _tokenId, uint _quantity) external onlyItemGeistBridge() {
+    function mint(address _to, uint _tokenId, uint _quantity) external onlyItemGeistBridge {
         uint256 totalQuantity = s.itemTypes[_tokenId].totalQuantity + _quantity;
         require(totalQuantity <= s.itemTypes[_tokenId].maxQuantity, "BridgeFacet: Total item quantity exceeds max quantity");
 
@@ -92,7 +92,7 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         s.itemTypes[_tokenId].totalQuantity = totalQuantity;
     }
 
-    function burn(address _from, uint _tokenId, uint _quantity) external onlyItemGeistBridge() {
+    function burn(address _from, uint _tokenId, uint _quantity) external onlyItemGeistBridge {
         require(_quantity <= s.itemTypes[_tokenId].totalQuantity, "BridgeFacet: item quantity exceeds total quantity");
 
         LibItems.removeFromOwner(_from, _tokenId, _quantity);
