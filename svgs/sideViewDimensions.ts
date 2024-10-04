@@ -1,5 +1,8 @@
 import { SideDimensions, Dimensions } from "../scripts/itemTypeHelpers";
 
+import { sideViewDimensions as forge1 } from "../data/itemTypes/forgewearablesSideViews";
+import { sideViewDimensions as forge2 } from "../data/itemTypes/forgewearablesSideViews2";
+import { sideViewDimensions as gotchigangSideviews } from "../data/itemTypes/gotchigangwearableSideViews";
 export const sideViewDimensions1: SideDimensions[] = [
   {
     itemId: 0,
@@ -6380,6 +6383,21 @@ export const sideViewDimensions9 = [
     dimensions: { x: 26, y: 6, width: 12, height: 25 },
   },
 ];
+
+//loop through all the sideView arrays and move their elements to the main array
+
+export let allSideViewDimensions: SideDimensions[] = sideViewDimensions1.concat(
+  sideViewDimensions2,
+  sideViewDimensions3,
+  sideViewDimensions4,
+  sideViewDimensions5,
+  sideViewDimensions6,
+  sideViewDimensions7,
+  sideViewDimensions8,
+  sideViewDimensions9,
+  forge1,
+  forge2
+);
 
 /*
 sideViewDimensions1 = sideViewDimensions1.map((value) => {
