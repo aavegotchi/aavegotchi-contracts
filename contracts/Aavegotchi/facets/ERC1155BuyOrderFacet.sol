@@ -52,7 +52,6 @@ contract ERC1155BuyOrderFacet is Modifiers {
         uint256 category = LibSharedMarketplace.getERC1155Category(_erc1155TokenAddress, _erc1155TokenId);
         uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
 
-        //If an order exists from this user, first refund the GHST
         // New order
         // Transfer GHST
         require(ghstBalance >= cost, "ERC1155BuyOrder: Not enough GHST!");
@@ -93,7 +92,12 @@ contract ERC1155BuyOrderFacet is Modifiers {
         ERC1155BuyOrder memory erc1155BuyOrder = s.erc1155BuyOrders[_buyOrderId];
         require(erc1155BuyOrder.timeCreated != 0, "ERC1155BuyOrder: ERC1155 buyOrder does not exist");
         require((erc1155BuyOrder.cancelled == false) && (erc1155BuyOrder.completed == false), "ERC1155BuyOrder: Already processed");
-        if ((erc1155BuyOrder.duration == 0) || ((erc1155BuyOrder.duration > 0) && (erc1155BuyOrder.timeCreated + erc1155BuyOrder.duration > block.timestamp))) {
+
+        //Anyone can cancel an expired order
+        if (
+            (erc1155BuyOrder.duration == 0) ||
+            ((erc1155BuyOrder.duration > 0) && (erc1155BuyOrder.timeCreated + erc1155BuyOrder.duration > block.timestamp))
+        ) {
             require(sender == erc1155BuyOrder.buyer, "ERC1155BuyOrder: Only buyer can call this function");
         }
 
