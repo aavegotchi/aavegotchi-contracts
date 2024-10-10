@@ -168,7 +168,6 @@ struct AppStorage {
     mapping(uint8 => uint256) forgeTimeCostInBlocks;
     // Map rarity score modifier (which denotes item rarity) to number of skill points earned for successful forging.
     mapping(uint8 => uint256) skillPointsEarnedFromForge;
-
     // Map rarity score modifier (which denotes item rarity) to percent chance (in bips) to win a prize.
     /**** NOTE: Deprecated *****/
     mapping(uint8 => uint256) geodeWinChanceBips;
@@ -190,7 +189,6 @@ struct AppStorage {
     address vrfCoordinator;
     bytes32 keyHash;
     uint144 vrfFee;
-
     mapping(uint8 => mapping(uint8 => uint256)) geodeWinChanceMultiTierBips;
     mapping(uint256 => uint8) geodePrizeRarities;
 }
@@ -217,9 +215,9 @@ contract Modifiers {
         _;
     }
 
-    modifier onlyEnabled() {
+    modifier onlyPolygon() {
         // enabled for polygon only
-        require(block.chainid == 137, "LibAppStorage: Disabled function" );
+        require(block.chainid == 137, "LibAppStorage: Disabled function");
         _;
     }
 }

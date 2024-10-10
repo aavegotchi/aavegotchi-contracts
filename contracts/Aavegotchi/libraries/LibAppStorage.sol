@@ -456,19 +456,13 @@ contract Modifiers {
 
     modifier onlyGotchiGeistBridge() {
         address sender = LibMeta.msgSender();
-        require(
-            sender == s.gotchGeistBridge,
-            "LibAppStorage: Do not have access"
-        );
+        require(sender == s.gotchGeistBridge, "LibAppStorage: Do not have access");
         _;
     }
 
     modifier onlyItemGeistBridge() {
         address sender = LibMeta.msgSender();
-        require(
-            sender == s.itemGeistBridge,
-            "LibAppStorage: Do not have access"
-        );
+        require(sender == s.itemGeistBridge, "LibAppStorage: Do not have access");
         _;
     }
 
@@ -478,9 +472,9 @@ contract Modifiers {
         _;
     }
 
-    modifier onlyEnabled() {
+    modifier onlyPolygon() {
         // enabled for polygon only
-        require(block.chainid == 137, "LibAppStorage: Disabled function" );
+        require(block.chainid == 137, "LibAppStorage: Disabled function");
         _;
     }
 }

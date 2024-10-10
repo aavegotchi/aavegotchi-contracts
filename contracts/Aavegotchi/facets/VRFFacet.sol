@@ -120,7 +120,7 @@ contract VrfFacet is Modifiers {
     //     }
     // }
 
-    function openPortals(uint256[] calldata _tokenIds) external onlyEnabled {
+    function openPortals(uint256[] calldata _tokenIds) external onlyPolygon {
         address owner = LibMeta.msgSender();
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
