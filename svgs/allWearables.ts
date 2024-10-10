@@ -12,7 +12,7 @@ import {
 import { itemTypes } from "../data/itemTypes/itemTypes";
 import { allSleeves } from "./wearables";
 import { allBadges } from "./BadgeData";
-import { getBaadge } from "./allBadges";
+import { badge } from "./allBadges";
 
 //for wearables that have irregular file names
 const svgMapping: { [key: number]: string } = {
@@ -97,7 +97,7 @@ export function getWearables() {
       svgMapping[Number(itemType.svgId)] || itemType.name.split(" ").join("");
 
     if (allBadges.includes(Number(itemType.svgId))) {
-      wearables.push(getBaadge(Number(itemType.svgId)));
+      wearables.push(badge(Number(itemType.svgId)));
     } else if (
       itemType.slotPositions === "body" &&
       allSleeves.includes(itemType.svgId)
@@ -130,7 +130,8 @@ export function getWearables() {
     "returning",
     wearables.length,
     "total wearables and",
-    sleeves.length + 2, //2 sleeve gaps
+    //sleeves has 2 gaps onchain
+    sleeves.length + 2,
     "total sleeves and",
     wearablesRightSvgs.length,
     "total side views"

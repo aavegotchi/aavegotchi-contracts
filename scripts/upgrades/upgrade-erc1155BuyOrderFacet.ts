@@ -8,6 +8,9 @@ import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
 import { AMOY_DIAMON_OWNER, AMOY_DIAMOND } from "../../helpers/constants";
 
 export async function upgrade() {
+
+export async function upgrade() {
+
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "ERC1155BuyOrderFacet",
@@ -21,6 +24,7 @@ export async function upgrade() {
     {
       facetName:
         "contracts/Aavegotchi/facets/ERC1155MarketplaceFacet.sol:ERC1155MarketplaceFacet",
+      facetName: "ERC1155MarketplaceFacet",
       addSelectors: [],
       removeSelectors: [],
     },
@@ -34,6 +38,11 @@ export async function upgrade() {
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,
+    diamondOwner: maticDiamondUpgrader,
+    diamondAddress: maticDiamondAddress,
+    facetsAndAddSelectors: joined,
+    useLedger: true,
+    useMultisig: true,
   };
 
   await run("deployUpgrade", args);
