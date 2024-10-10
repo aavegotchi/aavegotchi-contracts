@@ -72,6 +72,14 @@ export default {
       gasPrice: 1000000000,
       timeout: 90000,
     },
+    amoy: {
+      url: process.env.AMOY_URL,
+      accounts: [process.env.SECRET],
+    },
+    polter: {
+      url: process.env.POLTER_DEVNET_URL,
+      accounts: [process.env.SECRET],
+    },
 
     // gorli: {
     //   url: process.env.GORLI,
