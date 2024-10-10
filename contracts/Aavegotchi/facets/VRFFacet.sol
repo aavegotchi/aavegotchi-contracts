@@ -118,7 +118,7 @@ contract VrfFacet is Modifiers {
     //     }
     // }
 
-    function openPortals(uint256[] calldata _tokenIds) external onlyEnabled {
+    function openPortals(uint256[] calldata _tokenIds) external onlyPolygon {
         address owner = LibMeta.msgSender();
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
@@ -194,12 +194,7 @@ contract VrfFacet is Modifiers {
     //@param _keyHash New keyhash
     //@param _vrfCoordinator The new vrf coordinator address
     //@param _link New LINK token contract address
-    function changeVrf(
-        uint256 _newFee,
-        bytes32 _keyHash,
-        address _vrfCoordinator,
-        address _link
-    ) external onlyOwner {
+    function changeVrf(uint256 _newFee, bytes32 _keyHash, address _vrfCoordinator, address _link) external onlyOwner {
         if (_newFee != 0) {
             s.fee = uint96(_newFee);
         }

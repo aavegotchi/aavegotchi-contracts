@@ -176,7 +176,11 @@ contract DAOFacet is Modifiers {
     ///@param _hauntMaxSize The maximum number of portals in the new haunt
     ///@param _portalPrice The base price of portals in the new haunt(in $GHST)
     ///@param _bodyColor The universal body color applied to NFTs in the new haunt
-    function createHaunt(uint24 _hauntMaxSize, uint96 _portalPrice, bytes3 _bodyColor) external onlyDaoOrOwner onlyEnabled returns (uint256 hauntId_) {
+    function createHaunt(
+        uint24 _hauntMaxSize,
+        uint96 _portalPrice,
+        bytes3 _bodyColor
+    ) external onlyDaoOrOwner onlyPolygon returns (uint256 hauntId_) {
         uint256 currentHauntId = s.currentHauntId;
         require(
             s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
@@ -204,7 +208,7 @@ contract DAOFacet is Modifiers {
     //May overload the block gas limit but worth trying
     ///@notice allow an item manager to create a new Haunt, also uploagding the collateral types,collateral svgs,eyeshape types and eyeshape svgs all in one transaction
     ///@param _payload A struct containing all details needed to be uploaded for a new Haunt
-    function createHauntWithPayload(CreateHauntPayload calldata _payload) external onlyItemManager onlyEnabled returns (uint256 hauntId_) {
+    function createHauntWithPayload(CreateHauntPayload calldata _payload) external onlyItemManager onlyPolygon returns (uint256 hauntId_) {
         uint256 currentHauntId = s.currentHauntId;
         require(
             s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
