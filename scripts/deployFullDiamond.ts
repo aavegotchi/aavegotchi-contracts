@@ -165,6 +165,7 @@ async function main() {
     itemsRolesRegistryFacet,
     voucherMigrationFacet,
     erc1155BuyOrderFacet,
+    polygonXGeistBridgeFacet,
   ] = await deployFacets(
     "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
     "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
@@ -191,7 +192,8 @@ async function main() {
     "ERC721BuyOrderFacet",
     "ItemsRolesRegistryFacet",
     "VoucherMigrationFacet",
-    "ERC1155BuyOrderFacet"
+    "ERC1155BuyOrderFacet",
+    "PolygonXGeistBridgeFacet"
   );
 
   const aavegotchiDiamond = await diamond.deploy({
@@ -224,6 +226,7 @@ async function main() {
       ["ItemsRolesRegistryFacet", itemsRolesRegistryFacet],
       ["VoucherMigrationFacet", voucherMigrationFacet],
       ["ERC1155BuyOrderFacet", erc1155BuyOrderFacet],
+      ["PolygonXGeistBridgeFacet", polygonXGeistBridgeFacet],
     ],
     owner: ownerAddress,
     args: initArgs,

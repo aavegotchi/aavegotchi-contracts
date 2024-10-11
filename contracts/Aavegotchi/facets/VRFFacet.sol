@@ -144,7 +144,7 @@ contract VrfFacet is Modifiers {
         );
         s.vrfRequestIdToTokenId[requestId_] = _tokenId;
         // for testing
-        //  tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _tokenId))));
+        //  tempFulfillRandomness(requestId_, uint256(keccak256(abi.encodePacked(block.number, _tokenId))));
     }
 
     // for testing purpose only

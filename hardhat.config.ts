@@ -77,7 +77,11 @@ export default {
       accounts: [process.env.SECRET],
     },
     polter: {
-      url: process.env.POLTER_DEVNET_URL,
+      url: process.env.POLTER_TESTNET_URL,
+      accounts: [process.env.SECRET],
+    },
+    "base-sepolia": {
+      url: process.env.BASE_SEPOLIA_URL,
       accounts: [process.env.SECRET],
     },
 

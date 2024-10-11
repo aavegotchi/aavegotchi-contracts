@@ -57,10 +57,10 @@ export async function upgrade() {
   const joined = convertFacetAndSelectorsToString(facets);
 
   const args: DeployUpgradeTaskArgs = {
-    diamondOwner: AMOY_DIAMOND_OWNER,
-    diamondAddress: AMOY_DIAMOND,
-    // diamondOwner: '0xd38Df837a1EAd12ee16f8b8b7E5F58703f841668',
-    // diamondAddress: '0x6b54b36A54b068152f0f39FdA0Bf96e02176D95B',
+    // diamondOwner: AMOY_DIAMOND_OWNER,
+    // diamondAddress: AMOY_DIAMOND,
+    diamondOwner: '0xd38Df837a1EAd12ee16f8b8b7E5F58703f841668', // polter-testnet
+    diamondAddress: '0x4ca68c04651363AE38C9F2A686b4A00ee52BF12b', // polter-testnet
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,
