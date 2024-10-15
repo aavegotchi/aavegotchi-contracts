@@ -1,6 +1,5 @@
 import axios from "axios";
 import { maticGraphUrl } from "./queryAavegotchis";
-import readline from "readline";
 
 interface Aavegotchi {
   id: string;
@@ -138,26 +137,11 @@ async function queryAllGotchiOwners(blockNumber: number) {
   console.log("Results saved to gotchiOwnersByInteraction.json");
 }
 
-// New function to get user input
-function getUserInput(prompt: string): Promise<string> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question(prompt, (answer) => {
-      rl.close();
-      resolve(answer);
-    });
-  });
-}
-
 // Modified main execution function
 async function main() {
   try {
-    const blockNumberInput = await getUserInput("Enter the block number: ");
-    const blockNumber = parseInt(blockNumberInput, 10);
+    // const blockNumberInput = await getUserInput("Enter the block number: ");
+    const blockNumber = 63019151; //parseInt(blockNumberInput, 10);
 
     if (isNaN(blockNumber)) {
       throw new Error("Invalid block number");
