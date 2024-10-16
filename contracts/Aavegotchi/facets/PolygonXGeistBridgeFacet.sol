@@ -5,7 +5,9 @@ import {Aavegotchi, Modifiers} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
+import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {INFTBridge} from "../../shared/interfaces/INFTBridge.sol";
+import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 
 contract PolygonXGeistBridgeFacet is Modifiers {
 
@@ -22,18 +24,29 @@ contract PolygonXGeistBridgeFacet is Modifiers {
             if (_aavegotchi.equippedWearables[i] != 0) {
                 uint wearableId = _aavegotchi.equippedWearables[i];
                 LibItems.removeFromParent(address(this), _tokenId, wearableId, 1);
+                LibItems.addToOwner(s.itemGeistBridge, wearableId, 1);
+                IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(this), s.itemGeistBridge, wearableId, 1);
+                emit LibERC1155.TransferFromParent(address(this), _tokenId, wearableId, 1);
             }
         }
     }
 
-    function setMetadata(uint _tokenId, bytes memory _metadata) external onlyGotchiGeistBridge {
+    function setMetadata(uint _tokenId, bytes memory _metadata, bool isMint) external onlyGotchiGeistBridge {
         Aavegotchi memory _aavegotchi = abi.decode(_metadata, (Aavegotchi));
         s.aavegotchis[_tokenId] = _aavegotchi;
 
         for (uint i; i < _aavegotchi.equippedWearables.length; i++) {
             if (_aavegotchi.equippedWearables[i] != 0) {
                 uint wearableId = _aavegotchi.equippedWearables[i];
+                if (isMint) { // if bridge is controller, mint
+                    s.itemTypes[wearableId].totalQuantity += 1;
+                    IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(0), address(this), wearableId, 1);
+                } else { // if bridge is vault
+                    LibItems.removeFromOwner(s.itemGeistBridge, wearableId, 1);
+                    IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, s.itemGeistBridge, address(this), wearableId, 1);
+                }
                 LibItems.addToParent(address(this), _tokenId, wearableId, 1);
+                emit LibERC1155.TransferToParent(address(this), _tokenId, wearableId, 1);
             }
         }
     }
@@ -47,7 +60,22 @@ contract PolygonXGeistBridgeFacet is Modifiers {
     }
 
     function burn(address _from, uint _tokenId) external onlyGotchiGeistBridge {
-        s.aavegotchis[_tokenId].owner = address(0);
+        // burn items before burn gotchi
+        Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
+        for (uint i; i < _aavegotchi.equippedWearables.length; i++) {
+            if (_aavegotchi.equippedWearables[i] != 0) {
+                uint wearableId = _aavegotchi.equippedWearables[i];
+                LibItems.removeFromParent(address(this), _tokenId, wearableId, 1);
+                LibItems.addToOwner(address(0), wearableId, 1);
+                s.itemTypes[wearableId].totalQuantity -= 1;
+
+                IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(this), address(0), wearableId, 1);
+                emit LibERC1155.TransferFromParent(address(this), _tokenId, wearableId, 1);
+            }
+        }
+
+        // burn gotchi
+        _aavegotchi.owner = address(0);
         uint256 index = s.ownerTokenIdIndexes[_from][_tokenId];
         uint256 lastIndex = s.ownerTokenIds[_from].length - 1;
         if (index != lastIndex) {
@@ -67,11 +95,11 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         emit LibERC721.Transfer(_from, address(0), _tokenId);
 
         // delete aavegotchi info
-        string memory name = s.aavegotchis[_tokenId].name;
+        string memory name = _aavegotchi.name;
         if (bytes(name).length > 0) {
             delete s.aavegotchiNamesUsed[LibAavegotchi.validateAndLowerName(name)];
         }
-        delete s.aavegotchis[_tokenId];
+        delete _aavegotchi;
     }
 
     function bridgeItem(
