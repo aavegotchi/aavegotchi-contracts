@@ -19,6 +19,9 @@ async function queryAllGotchiOwners(blockNumber: number) {
   let lastId = "";
   const allAavegotchis: Aavegotchi[] = [];
 
+  // Save the results to a file
+  const fs = require("fs");
+
   while (allAavegotchis.length < totalGotchis) {
     const query = `
       query {
@@ -117,6 +120,40 @@ async function queryAllGotchiOwners(blockNumber: number) {
     sortedOwners.forEach(([owner, count], index) => {
       console.log(`${index + 1}. Owner: ${owner}, Aavegotchis: ${count}`);
     });
+
+    // Prepare data for airdrop.csv
+    const airdropData = new Map<string, number>();
+
+    ["lastMonth", "lastSixMonths", "lastYear"].forEach((groupName) => {
+      const group = ownershipGroups[groupName as keyof typeof ownershipGroups];
+      group.forEach((count, owner) => {
+        airdropData.set(owner, (airdropData.get(owner) || 0) + count);
+      });
+    });
+
+    // Convert Map to array and sort by count (descending)
+    const sortedAirdropData = Array.from(airdropData.entries()).sort(
+      (a, b) => b[1] - a[1]
+    );
+
+    // Prepare CSV content
+    let csvContent = "address,gotchi_count\n";
+    sortedAirdropData.forEach(([address, count]) => {
+      csvContent += `${address},${count}\n`;
+    });
+
+    // Write to airdrop.csv
+    fs.writeFileSync("airdrop.csv", csvContent);
+    console.log("Airdrop data saved to airdrop.csv");
+
+    // Write to airdrop.json
+    const jsonContent = JSON.stringify(
+      Object.fromEntries(sortedAirdropData),
+      null,
+      2
+    );
+    fs.writeFileSync("airdrop.json", jsonContent);
+    console.log("Airdrop data saved to airdrop.json");
   }
 
   // Convert Maps to objects for JSON serialization
@@ -127,8 +164,6 @@ async function queryAllGotchiOwners(blockNumber: number) {
     ])
   );
 
-  // Save the results to a file
-  const fs = require("fs");
   fs.writeFileSync(
     "gotchiOwnersByInteraction.json",
     JSON.stringify(ownershipObject, null, 2)
@@ -141,7 +176,7 @@ async function queryAllGotchiOwners(blockNumber: number) {
 async function main() {
   try {
     // const blockNumberInput = await getUserInput("Enter the block number: ");
-    const blockNumber = 63019151; //parseInt(blockNumberInput, 10);
+    const blockNumber = 63066714; //parseInt(blockNumberInput, 10);
 
     if (isNaN(blockNumber)) {
       throw new Error("Invalid block number");
