@@ -60,7 +60,7 @@ function strDisplay(str: any) {
 }
 
 async function main() {
-  if (!["hardhat", "localhost", "amoy", "polter"].includes(network.name)) {
+  if (!["hardhat", "localhost", "amoy", "polter", "base-sepolia"].includes(network.name)) {
     throw Error("No network settings for " + network.name);
   }
 

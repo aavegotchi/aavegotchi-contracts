@@ -184,7 +184,7 @@ contract DAOFacet is Modifiers {
         uint24 _hauntMaxSize,
         uint96 _portalPrice,
         bytes3 _bodyColor
-    ) external onlyDaoOrOwner onlyPolygon returns (uint256 hauntId_) {
+    ) external onlyDaoOrOwner returns (uint256 hauntId_) {
         uint256 currentHauntId = s.currentHauntId;
         require(
             s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,

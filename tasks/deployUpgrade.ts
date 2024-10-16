@@ -157,6 +157,7 @@ task(
       } else if (
         hre.network.name === "matic" ||
         hre.network.name === "polter" ||
+        hre.network.name === "base-sepolia" ||
         hre.network.name === "amoy"
       ) {
         if (useLedger) {
