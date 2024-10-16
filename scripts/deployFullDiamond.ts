@@ -397,8 +397,17 @@ async function main() {
     const end = start + step;
     const batch = itemTypes.slice(start, end); // Get current batch
 
-    const tx = await daoFacet.addItemTypes(batch, { gasLimit: gasLimit });
-    const receipt = await tx.wait();
+    let tx = await daoFacet.addItemTypes(batch, { gasLimit: gasLimit });
+    let receipt = await tx.wait();
+
+    // const itemIds = [];
+    // const quantities = [];
+    // batch.forEach((itemType) => {
+    //   itemIds.push(itemType.svgId);
+    //   quantities.push(itemType.maxQuantity);
+    // });
+    // tx = await daoFacet.mintItems(ownerAddress, itemIds, quantities , { gasLimit: gasLimit });
+    // receipt = await tx.wait();
 
     if (!receipt.status) {
       throw Error(`Error:: ${tx.hash}`);
