@@ -72,6 +72,18 @@ export default {
       gasPrice: 1000000000,
       timeout: 90000,
     },
+    amoy: {
+      url: process.env.AMOY_URL,
+      accounts: [process.env.SECRET],
+    },
+    polter: {
+      url: process.env.POLTER_TESTNET_URL,
+      accounts: [process.env.SECRET],
+    },
+    "base-sepolia": {
+      url: process.env.BASE_SEPOLIA_URL,
+      accounts: [process.env.SECRET],
+    },
 
     // gorli: {
     //   url: process.env.GORLI,

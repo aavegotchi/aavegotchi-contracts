@@ -14,7 +14,6 @@ import {
 } from "../../typechain";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 import * as helpers from "@nomicfoundation/hardhat-network-helpers";
-import { WEARABLE_BASE_QUANTITIES } from "../../helpers/constants";
 
 export const forgeAddresses = [
   "0x4a478E4593A5D557dB640642c34Ae52800084451",
@@ -133,13 +132,7 @@ export async function batchMintGotchigangWearables() {
     signer
   )) as ForgeFacet;
 
-  const totalAmounts = [
-    WEARABLE_BASE_QUANTITIES.COMMON,
-    WEARABLE_BASE_QUANTITIES.UNCOMMON,
-    WEARABLE_BASE_QUANTITIES.RARE,
-    WEARABLE_BASE_QUANTITIES.LEGENDARY,
-    WEARABLE_BASE_QUANTITIES.MYTHICAL,
-  ];
+  const totalAmounts = [1000, 500, 250, 100, 10];
   const ids = Object.values(itemIds).flat();
 
   const amounts = Object.entries(itemIds).flatMap(([rarity, ids]) =>
