@@ -79,12 +79,6 @@ contract AavegotchiGameFacet is Modifiers {
         portalAavegotchiTraits_ = LibAavegotchi.portalAavegotchiTraits(_tokenId);
     }
 
-    ///@notice Query the $GHST token address
-    ///@return contract_ the deployed address of the $GHST token contract
-    function ghstAddress() external view returns (address contract_) {
-        contract_ = s.ghstContract;
-    }
-
     ///@notice Query the numeric traits of an NFT
     ///@dev Only valid for claimed Aavegotchis
     ///@param _tokenId The identifier of the NFT to query

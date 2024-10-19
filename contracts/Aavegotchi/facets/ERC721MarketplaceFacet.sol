@@ -3,7 +3,6 @@ pragma solidity 0.8.1;
 
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
-import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {IERC165} from "../../shared/interfaces/IERC165.sol";
 import {IERC2981} from "../../shared/interfaces/IERC2981.sol";
 import {IMultiRoyalty} from "../../shared/interfaces/IMultiRoyalty.sol";
@@ -192,11 +191,6 @@ contract ERC721MarketplaceFacet is Modifiers {
         if (_erc721TokenAddress == address(this)) {
             s.aavegotchis[_erc721TokenId].locked = true;
         }
-
-        //Burn listing fee
-        if (s.listingFeeInWei > 0) {
-            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, msgSender, s.ghstContract);
-        }
     }
 
     ///@notice Allow an ERC721 owner to update list price of his NFT for sale
@@ -205,9 +199,6 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@param _priceInWei The price of the item
     function updateERC721ListingPrice(uint256 _listingId, uint256 _priceInWei) external {
         LibERC721Marketplace.updateERC721ListingPrice(_listingId, _priceInWei);
-        if (s.listingFeeInWei > 0) {
-            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, LibMeta.msgSender(), s.ghstContract);
-        }
     }
 
     function batchUpdateERC721ListingPrice(uint256[] calldata _listingIds, uint256[] calldata _priceInWeis) external {
@@ -215,11 +206,6 @@ contract ERC721MarketplaceFacet is Modifiers {
 
         for (uint256 i; i < _listingIds.length; i++) {
             LibERC721Marketplace.updateERC721ListingPrice(_listingIds[i], _priceInWeis[i]);
-        }
-
-        if (s.listingFeeInWei > 0) {
-            uint256 totalFee = s.listingFeeInWei * _listingIds.length;
-            LibSharedMarketplace.burnListingFee(totalFee, LibMeta.msgSender(), s.ghstContract);
         }
     }
 
@@ -250,7 +236,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 _priceInWei,
         uint256 _tokenId,
         address _recipient
-    ) external {
+    ) external payable {
         handleExecuteERC721Listing(_listingId, _contractAddress, _priceInWei, _tokenId, _recipient);
     }
 
@@ -268,7 +254,7 @@ contract ERC721MarketplaceFacet is Modifiers {
     }
 
     ///@notice execute gotchi listings in batch
-    function batchExecuteERC721Listing(ExecuteERC721ListingParams[] calldata listings) external {
+    function batchExecuteERC721Listing(ExecuteERC721ListingParams[] calldata listings) external payable {
         require(listings.length <= 10, "ERC721Marketplace: length should be lower than 10");
         for (uint256 i = 0; i < listings.length; i++) {
             handleExecuteERC721Listing(
@@ -289,6 +275,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         address _recipient
     ) internal {
         ERC721Listing storage listing = s.erc721Listings[_listingId];
+        require(msg.value >= _priceInWei, "ERC721MarketplaceFacet: Not enough GHST sent");
         require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
         require(listing.cancelled == false, "ERC721Marketplace: listing cancelled");
         require(listing.timeCreated != 0, "ERC721Marketplace: listing not found");
@@ -301,7 +288,6 @@ contract ERC721MarketplaceFacet is Modifiers {
         if (listing.whitelistId > 0) {
             require(s.isWhitelisted[listing.whitelistId][buyer] > 0, "ERC721Marketplace: Not whitelisted address");
         }
-        require(IERC20(s.ghstContract).balanceOf(buyer) >= _priceInWei, "ERC721Marketplace: Not enough GHST");
 
         listing.timePurchased = block.timestamp;
         LibERC721Marketplace.removeERC721ListingItem(_listingId, seller);
@@ -328,7 +314,6 @@ contract ERC721MarketplaceFacet is Modifiers {
 
         LibSharedMarketplace.transferSales(
             SplitAddresses({
-                ghstContract: s.ghstContract,
                 buyer: buyer,
                 seller: seller,
                 affiliate: listing.affiliate,

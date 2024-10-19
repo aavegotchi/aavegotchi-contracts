@@ -286,7 +286,7 @@ library LibAavegotchi {
         }
     }
 
-    // Need to ensure there is no overflow of _ghst
+    // // Need to ensure there is no overflow of _ghst
     function purchase(address _from, uint256 _ghst) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         //33% to burn address
@@ -301,13 +301,23 @@ library LibAavegotchi {
         //10% to DAO
         uint256 daoShare = (_ghst - burnShare - companyShare - rarityFarmShare);
 
-        // Using 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF as burn address.
-        // GHST token contract does not allow transferring to address(0) address: https://etherscan.io/address/0x3F382DbD960E3a9bbCeaE22651E88158d2791550#code
-        address ghstContract = s.ghstContract;
-        LibERC20.transferFrom(ghstContract, _from, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
-        LibERC20.transferFrom(ghstContract, _from, s.pixelCraft, companyShare);
-        LibERC20.transferFrom(ghstContract, _from, s.rarityFarming, rarityFarmShare);
-        LibERC20.transferFrom(ghstContract, _from, s.dao, daoShare);
+        //transfer ETH
+        // Transfer ETH to burn address
+        payable(address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)).transfer(burnShare);
+
+        // Transfer ETH to Pixelcraft wallet
+        payable(s.pixelCraft).transfer(companyShare);
+
+        // Transfer ETH to rarity farming rewards
+        payable(s.rarityFarming).transfer(rarityFarmShare);
+
+        // Transfer ETH to DAO
+        payable(s.dao).transfer(daoShare);
+
+        // LibERC20.transferFrom(ghstContract, _from, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
+        // LibERC20.transferFrom(ghstContract, _from, s.pixelCraft, companyShare);
+        // LibERC20.transferFrom(ghstContract, _from, s.rarityFarming, rarityFarmShare);
+        // LibERC20.transferFrom(ghstContract, _from, s.dao, daoShare);
     }
 
     function sqrt(uint256 x) internal pure returns (uint256 y) {

@@ -3,7 +3,6 @@ pragma solidity 0.8.1;
 
 import {Modifiers} from "../libraries/LibAppStorage.sol";
 import {LibERC1155Marketplace, ERC1155Listing} from "../libraries/LibERC1155Marketplace.sol";
-import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibItems} from "../libraries/LibItems.sol";
@@ -40,15 +39,6 @@ contract ERC1155MarketplaceFacet is Modifiers {
 
     ///@dev Is sent in tandem with ERC1155ExecutedListing
     event ERC1155ExecutedToRecipient(uint256 indexed listingId, address indexed buyer, address indexed recipient);
-
-    event ChangedListingFee(uint256 listingFeeInWei);
-
-    ///@notice Allow the aavegotchi diamond owner or DAO to set the default listing fee
-    ///@param _listingFeeInWei The new listing fee in wei
-    function setListingFee(uint256 _listingFeeInWei) external onlyDaoOrOwner {
-        s.listingFeeInWei = _listingFeeInWei;
-        emit ChangedListingFee(s.listingFeeInWei);
-    }
 
     struct Category {
         address erc1155TokenAddress;
@@ -170,11 +160,6 @@ contract ERC1155MarketplaceFacet is Modifiers {
             listing.quantity = _quantity;
             emit LibERC1155Marketplace.UpdateERC1155Listing(listingId, _quantity, listing.priceInWei, block.timestamp);
         }
-
-        //Burn listing fee
-        if (s.listingFeeInWei > 0) {
-            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, LibMeta.msgSender(), s.ghstContract);
-        }
     }
 
     ///@notice Allow an ERC1155 owner to cancel his NFT listing through the listingID
@@ -190,7 +175,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _listingId The identifier of the listing to execute
     ///@param _quantity The amount of ERC1155 NFTs execute/buy
     ///@param _priceInWei the cost price of the ERC1155 NFTs individually
-    function executeERC1155Listing(uint256 _listingId, uint256 _quantity, uint256 _priceInWei) external {
+    function executeERC1155Listing(uint256 _listingId, uint256 _quantity, uint256 _priceInWei) external payable {
         ERC1155Listing storage listing = s.erc1155Listings[_listingId];
         handleExecuteERC1155Listing(_listingId, listing.erc1155TokenAddress, listing.erc1155TypeId, _quantity, _priceInWei, LibMeta.msgSender());
     }
@@ -210,7 +195,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 _quantity,
         uint256 _priceInWei,
         address _recipient
-    ) external {
+    ) external payable {
         handleExecuteERC1155Listing(_listingId, _contractAddress, _itemId, _quantity, _priceInWei, _recipient);
     }
 
@@ -230,7 +215,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     }
 
     ///@notice execute ERC1155 listings in batch
-    function batchExecuteERC1155Listing(ExecuteERC1155ListingParams[] calldata listings) external {
+    function batchExecuteERC1155Listing(ExecuteERC1155ListingParams[] calldata listings) external payable {
         require(listings.length <= 10, "ERC1155Marketplace: length should be lower than 10");
         for (uint256 i = 0; i < listings.length; i++) {
             handleExecuteERC1155Listing(
@@ -269,7 +254,15 @@ contract ERC1155MarketplaceFacet is Modifiers {
         require(_quantity <= listing.quantity, "ERC1155Marketplace: quantity is greater than listing");
         listing.quantity -= _quantity;
         uint256 cost = _quantity * _priceInWei;
-        require(IERC20(s.ghstContract).balanceOf(buyer) >= cost, "ERC1155Marketplace: not enough GHST");
+
+        // Transfer ETH from buyer to contract
+        require(msg.value >= cost, "ERC1155Marketplace: Insufficient GHST sent");
+
+        // Refund excess ETH if sent more than required
+        if (msg.value > cost) {
+            payable(buyer).transfer(msg.value - cost);
+        }
+
         {
             BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(
                 cost,
@@ -279,7 +272,6 @@ contract ERC1155MarketplaceFacet is Modifiers {
 
             LibSharedMarketplace.transferSales(
                 SplitAddresses({
-                    ghstContract: s.ghstContract,
                     buyer: buyer,
                     seller: seller,
                     affiliate: listing.affiliate,
@@ -386,9 +378,6 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _priceInWei The price of the item
     function updateERC1155ListingPriceAndQuantity(uint256 _listingId, uint256 _quantity, uint256 _priceInWei) external {
         LibERC1155Marketplace.updateERC1155ListingPriceAndQuantity(_listingId, _quantity, _priceInWei);
-        if (s.listingFeeInWei > 0) {
-            LibSharedMarketplace.burnListingFee(s.listingFeeInWei, LibMeta.msgSender(), s.ghstContract);
-        }
     }
 
     function batchUpdateERC1155ListingPriceAndQuantity(
@@ -401,11 +390,6 @@ contract ERC1155MarketplaceFacet is Modifiers {
 
         for (uint256 i; i < _listingIds.length; i++) {
             LibERC1155Marketplace.updateERC1155ListingPriceAndQuantity(_listingIds[i], _quantities[i], _priceInWeis[i]);
-        }
-
-        if (s.listingFeeInWei > 0) {
-            uint256 totalFee = s.listingFeeInWei * _listingIds.length;
-            LibSharedMarketplace.burnListingFee(totalFee, LibMeta.msgSender(), s.ghstContract);
         }
     }
 }

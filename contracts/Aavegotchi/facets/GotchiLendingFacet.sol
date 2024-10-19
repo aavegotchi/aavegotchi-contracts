@@ -75,7 +75,7 @@ contract GotchiLendingFacet is Modifiers {
         uint96 _initialCost,
         uint32 _period,
         uint8[3] calldata _revenueSplit
-    ) external {
+    ) external payable {
         address sender = LibMeta.msgSender();
         //LibGotchiLending.addBorrowerTokenId(sender, _erc721TokenId); // This functions as a check for whether the sender already has a borrow after the upgrade
         LibGotchiLending._agreeGotchiLending(sender, _listingId, _erc721TokenId, _initialCost, _period, _revenueSplit);

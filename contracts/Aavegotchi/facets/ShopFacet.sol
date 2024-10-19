@@ -3,7 +3,6 @@ pragma solidity 0.8.1;
 
 import {Modifiers, AppStorage, ItemType, Haunt} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
-// import "hardhat/console.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
@@ -41,7 +40,7 @@ contract ShopFacet is Modifiers {
     ///@dev Only portals from haunt 1 can be purchased via the contract
     ///@param _to Address to send the portal once purchased
     ///@param _ghst The amount of GHST the buyer is willing to pay //calculation will be done to know how much portal he recieves based on the haunt's portal price
-    function buyPortals(address _to, uint256 _ghst) external {
+    function buyPortals(address _to, uint256 _ghst) external onlyPolygon {
         uint256 currentHauntId = s.currentHauntId;
         require(currentHauntId == 1, "ShopFacet: Can only purchase from Haunt 1");
         Haunt storage haunt = s.haunts[currentHauntId];
@@ -93,7 +92,7 @@ contract ShopFacet is Modifiers {
     ///@dev Will throw if the max number of portals for the current haunt has been reached
     ///@param _to The destination of the minted portals
     ///@param _amount the amunt of portals to mint
-    function mintPortals(address _to, uint256 _amount) external onlyItemManager {
+    function mintPortals(address _to, uint256 _amount) external onlyItemManager onlyPolygon {
         uint256 currentHauntId = s.currentHauntId;
         Haunt storage haunt = s.haunts[currentHauntId];
         address sender = LibMeta.msgSender();
@@ -115,16 +114,12 @@ contract ShopFacet is Modifiers {
         s.tokenIdCounter = tokenId;
     }
 
-    ///@notice Allow an address to purchase multiple items
-    ///@dev Buying an item typically mints it, it will throw if an item has reached its maximum quantity
-    ///@param _to Address to send the items once purchased
-    ///@param _itemIds The identifiers of the items to be purchased
-    ///@param _quantities The quantities of each item to be bought
-    function purchaseItemsWithGhst(
-        address _to,
-        uint256[] calldata _itemIds,
-        uint256[] calldata _quantities
-    ) external {
+    // /@notice Allow an address to purchase multiple items
+    // /@dev Buying an item typically mints it, it will throw if an item has reached its maximum quantity
+    // /@param _to Address to send the items once purchased
+    // /@param _itemIds The identifiers of the items to be purchased
+    // /@param _quantities The quantities of each item to be bought
+    function purchaseItemsWithGhst(address _to, uint256[] calldata _itemIds, uint256[] calldata _quantities) external payable onlyPolygon {
         address sender = LibMeta.msgSender();
         require(_itemIds.length == _quantities.length, "ShopFacet: _itemIds not same length as _quantities");
         uint256 totalPrice;
@@ -139,46 +134,43 @@ contract ShopFacet is Modifiers {
             totalPrice += quantity * itemType.ghstPrice;
             LibItems.addToOwner(_to, itemId, quantity);
         }
-        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
-        require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
+
+        require(msg.value >= totalPrice, "ShopFacet: Insufficient GHST value");
+
         emit PurchaseItemsWithGhst(sender, _to, _itemIds, _quantities, totalPrice);
         IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, address(0), _to, _itemIds, _quantities);
         LibAavegotchi.purchase(sender, totalPrice);
         LibERC1155.onERC1155BatchReceived(sender, address(0), _to, _itemIds, _quantities, "");
     }
 
-    ///@notice Allow an address to purchase multiple items after they have been minted
-    ///@dev Only one item per transaction can be purchased from the Diamond contract
-    ///@param _to Address to send the items once purchased
-    ///@param _itemIds The identifiers of the items to be purchased
-    ///@param _quantities The quantities of each item to be bought
+    // /@notice Allow an address to purchase multiple items after they have been minted
+    // /@dev Only one item per transaction can be purchased from the Diamond contract
+    // /@param _to Address to send the items once purchased
+    // /@param _itemIds The identifiers of the items to be purchased
+    // /@param _quantities The quantities of each item to be bought
 
-    function purchaseTransferItemsWithGhst(
-        address _to,
-        uint256[] calldata _itemIds,
-        uint256[] calldata _quantities
-    ) external {
-        require(_to != address(0), "ShopFacet: Can't transfer to 0 address");
-        require(_itemIds.length == _quantities.length, "ShopFacet: ids not same length as values");
-        address sender = LibMeta.msgSender();
-        address from = address(this);
-        uint256 totalPrice;
-        for (uint256 i; i < _itemIds.length; i++) {
-            uint256 itemId = _itemIds[i];
-            uint256 quantity = _quantities[i];
-            require(quantity == 1, "ShopFacet: Can only purchase 1 of an item per transaction");
-            ItemType storage itemType = s.itemTypes[itemId];
-            require(itemType.canPurchaseWithGhst, "ShopFacet: Can't purchase item type with GHST");
-            totalPrice += quantity * itemType.ghstPrice;
-            LibItems.removeFromOwner(from, itemId, quantity);
-            LibItems.addToOwner(_to, itemId, quantity);
-            LibERC1155Marketplace.updateERC1155Listing(address(this), itemId, from);
-        }
-        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
-        require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
-        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, from, _to, _itemIds, _quantities);
-        emit PurchaseTransferItemsWithGhst(sender, _to, _itemIds, _quantities, totalPrice);
-        LibAavegotchi.purchase(sender, totalPrice);
-        LibERC1155.onERC1155BatchReceived(sender, from, _to, _itemIds, _quantities, "");
-    }
+    // function purchaseTransferItemsWithGhst(address _to, uint256[] calldata _itemIds, uint256[] calldata _quantities) external onlyPolygon {
+    //     require(_to != address(0), "ShopFacet: Can't transfer to 0 address");
+    //     require(_itemIds.length == _quantities.length, "ShopFacet: ids not same length as values");
+    //     address sender = LibMeta.msgSender();
+    //     address from = address(this);
+    //     uint256 totalPrice;
+    //     for (uint256 i; i < _itemIds.length; i++) {
+    //         uint256 itemId = _itemIds[i];
+    //         uint256 quantity = _quantities[i];
+    //         require(quantity == 1, "ShopFacet: Can only purchase 1 of an item per transaction");
+    //         ItemType storage itemType = s.itemTypes[itemId];
+    //         require(itemType.canPurchaseWithGhst, "ShopFacet: Can't purchase item type with GHST");
+    //         totalPrice += quantity * itemType.ghstPrice;
+    //         LibItems.removeFromOwner(from, itemId, quantity);
+    //         LibItems.addToOwner(_to, itemId, quantity);
+    //         LibERC1155Marketplace.updateERC1155Listing(address(this), itemId, from);
+    //     }
+    //     uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
+    //     require(ghstBalance >= totalPrice, "ShopFacet: Not enough GHST!");
+    //     IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, from, _to, _itemIds, _quantities);
+    //     emit PurchaseTransferItemsWithGhst(sender, _to, _itemIds, _quantities, totalPrice);
+    //     LibAavegotchi.purchase(sender, totalPrice);
+    //     LibERC1155.onERC1155BatchReceived(sender, from, _to, _itemIds, _quantities, "");
+    // }
 }

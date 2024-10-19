@@ -1,6 +1,7 @@
 /* global ethers */
 
-const { ethers } = require("hardhat");
+import { ethers } from "hardhat";
+import { Contract, ContractFactory } from "ethers";
 
 const FacetCutAction = {
   Add: 0,
@@ -9,14 +10,15 @@ const FacetCutAction = {
 };
 
 // eslint-disable-next-line no-unused-vars
-function getSignatures(contract) {
+function getSignatures(contract: Contract) {
   return Object.keys(contract.interface.functions);
 }
 
-function getSelectors(contract) {
+function getSelectors(contract: Contract) {
   const signatures = Object.keys(contract.interface.functions);
   const selectors = signatures.reduce((acc, val) => {
     if (val !== "init(bytes)") {
+      //@ts-ignore
       acc.push(contract.interface.getSighash(val));
     }
     return acc;
@@ -24,7 +26,7 @@ function getSelectors(contract) {
   return selectors;
 }
 
-async function deployFacets(facets) {
+async function deployFacets(facets: any[]) {
   console.log("--");
   const deployed = [];
   for (const facet of facets) {
@@ -60,13 +62,20 @@ async function deployFacets(facets) {
   return deployed;
 }
 
-async function deploy({
+export async function deploy({
   diamondName,
   initDiamond,
   facets,
   owner,
   args = [],
   txArgs = {},
+}: {
+  diamondName: string;
+  initDiamond: string;
+  facets: any[];
+  owner: string;
+  args?: any[];
+  txArgs?: any;
 }) {
   if (arguments.length !== 1) {
     throw Error(
@@ -161,11 +170,16 @@ async function deploy({
   return deployedDiamond;
 }
 
-async function deployWithoutInit({
+export async function deployWithoutInit({
   diamondName,
   facets,
   args = [],
   txArgs = {},
+}: {
+  diamondName: string;
+  facets: any[];
+  args?: any[];
+  txArgs?: any;
 }) {
   if (arguments.length !== 1) {
     throw Error(
@@ -174,7 +188,7 @@ async function deployWithoutInit({
   }
   facets = await deployFacets(facets);
   const diamondFactory = await ethers.getContractFactory(diamondName);
-  const diamondCut = [];
+  const diamondCut: any[] = [];
   console.log("--");
   console.log("Setting up diamondCut args");
   console.log("--");
@@ -252,6 +266,12 @@ async function upgrade({
   txArgs = {},
   initFacetName = undefined,
   initArgs,
+}: {
+  diamondAddress: string;
+  diamondCut: any;
+  txArgs?: any;
+  initFacetName?: string;
+  initArgs?: any;
 }) {
   if (arguments.length !== 1) {
     throw Error(
@@ -456,6 +476,12 @@ async function upgradeWithNewFacets({
   selectorsToRemove = [],
   initFacetName = undefined,
   initArgs = [],
+}: {
+  diamondAddress: string;
+  facetNames: any[];
+  selectorsToRemove?: any[];
+  initFacetName?: string;
+  initArgs?: any[];
 }) {
   if (arguments.length === 1) {
     throw Error(
@@ -471,7 +497,7 @@ async function upgradeWithNewFacets({
     diamondAddress
   );
 
-  const diamondCut = [];
+  const diamondCut: any[] = [];
   const existingFacets = await diamondLoupeFacet.facets();
   const undeployed = [];
   const deployed = [];
@@ -504,8 +530,8 @@ async function upgradeWithNewFacets({
     await deployedFactory.deployed();
     console.log("--");
     console.log(`${name} deployed: ${deployedFactory.address}`);
-    const add = [];
-    const replace = [];
+    const add: any[] = [];
+    const replace: any[] = [];
     for (const selector of getSelectors(deployedFactory)) {
       if (!inFacets(selector, existingFacets)) {
         add.push(selector);

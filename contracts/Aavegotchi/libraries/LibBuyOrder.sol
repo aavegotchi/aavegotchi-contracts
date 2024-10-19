@@ -5,7 +5,7 @@ import {LibAppStorage, AppStorage, ERC721BuyOrder, ERC1155BuyOrder} from "./LibA
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibAavegotchi} from "./LibAavegotchi.sol";
 import {LibSharedMarketplace} from "./LibSharedMarketplace.sol";
-import {IERC20} from "../../shared/interfaces/IERC20.sol";
+// import {IERC20} from "../../shared/interfaces/IERC20.sol";
 
 library LibBuyOrder {
     function cancelERC721BuyOrder(uint256 _buyOrderId) internal {
@@ -23,7 +23,8 @@ library LibBuyOrder {
         s.erc721BuyOrders[_buyOrderId].cancelled = true;
 
         // refund GHST to buyer
-        LibERC20.transfer(s.ghstContract, erc721BuyOrder.buyer, erc721BuyOrder.priceInWei);
+        (bool success, ) = erc721BuyOrder.buyer.call{value: erc721BuyOrder.priceInWei}("");
+        require(success, "ETH transfer to buyer failed");
     }
 
     function removeERC721BuyOrder(uint256 _buyOrderId) internal {
@@ -65,7 +66,11 @@ library LibBuyOrder {
             }
             if (_validationOptions[1]) {
                 // GHST
-                _params = abi.encode(_params, IERC20(s.ghstContract).balanceOf(s.aavegotchis[_erc721TokenId].escrow));
+
+                //check eth balance of erc721tokenid escrow
+                uint256 ghstBalance = address(s.aavegotchis[_erc721TokenId].escrow).balance;
+
+                _params = abi.encode(_params, ghstBalance);
             }
             if (_validationOptions[2]) {
                 // skill points
@@ -89,6 +94,8 @@ library LibBuyOrder {
         s.erc1155BuyOrders[_buyOrderId].cancelled = true;
 
         // refund GHST to buyer
-        LibERC20.transfer(s.ghstContract, erc1155BuyOrder.buyer, erc1155BuyOrder.priceInWei * erc1155BuyOrder.quantity);
+
+        (bool success, ) = erc1155BuyOrder.buyer.call{value: erc1155BuyOrder.priceInWei * erc1155BuyOrder.quantity}("");
+        require(success, "ETH transfer to buyer failed");
     }
 }
