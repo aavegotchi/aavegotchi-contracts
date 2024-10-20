@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {LibAavegotchi, AavegotchiInfo} from "../libraries/LibAavegotchi.sol";
-import {IERC721} from "../../shared/interfaces/IERC721.sol";
-import {LibERC20} from "../../shared/libraries/LibERC20.sol";
-import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 import {Modifiers, GotchiLending} from "../libraries/LibAppStorage.sol";
@@ -75,7 +71,7 @@ contract GotchiLendingFacet is Modifiers {
         uint96 _initialCost,
         uint32 _period,
         uint8[3] calldata _revenueSplit
-    ) external {
+    ) external payable {
         address sender = LibMeta.msgSender();
         //LibGotchiLending.addBorrowerTokenId(sender, _erc721TokenId); // This functions as a check for whether the sender already has a borrow after the upgrade
         LibGotchiLending._agreeGotchiLending(sender, _listingId, _erc721TokenId, _initialCost, _period, _revenueSplit);

@@ -4,8 +4,6 @@ pragma solidity 0.8.1;
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {LibBuyOrder} from "../libraries/LibBuyOrder.sol";
 import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";
-import {LibERC20} from "../../shared/libraries/LibERC20.sol";
-import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
@@ -107,12 +105,12 @@ contract ERC721BuyOrderFacet is Modifiers {
         uint256 _priceInWei,
         uint256 _duration,
         bool[] calldata _validationOptions // 0: BRS, 1: GHST, 2: skill points
-    ) external {
+    ) external payable {
         require(_priceInWei >= 1e18, "ERC721BuyOrder: price should be 1 GHST or larger");
 
+        require(msg.value == _priceInWei, "ERC721BuyOrder: Not enough GHST!");
+
         address sender = LibMeta.msgSender();
-        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
-        require(ghstBalance >= _priceInWei, "ERC721BuyOrder: Not enough GHST!");
 
         uint256 category = LibSharedMarketplace.getERC721Category(_erc721TokenAddress, _erc721TokenId);
         require(category != LibAavegotchi.STATUS_VRF_PENDING, "ERC721BuyOrder: Cannot buy a portal that is pending VRF");
@@ -131,9 +129,6 @@ contract ERC721BuyOrderFacet is Modifiers {
                 emit ERC721BuyOrderCanceled(oldBuyOrderId, block.timestamp);
             }
         }
-
-        // Transfer GHST
-        LibERC20.transferFrom(s.ghstContract, sender, address(this), _priceInWei);
 
         // Place new buy order
         s.nextERC721BuyOrderId++;
@@ -225,7 +220,6 @@ contract ERC721BuyOrderFacet is Modifiers {
 
         LibSharedMarketplace.transferSales(
             SplitAddresses({
-                ghstContract: s.ghstContract,
                 buyer: address(this),
                 seller: sender,
                 affiliate: address(0),

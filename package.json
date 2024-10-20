@@ -61,6 +61,7 @@
     "hardhat": "^2.22.5",
     "merkletreejs": "^0.3.9",
     "node-hid": "^2.1.1",
-    "solc": "^0.8.7-fixed"
+    "solc": "^0.8.7-fixed",
+    "solmate": "^6.2.0"
   }
 }

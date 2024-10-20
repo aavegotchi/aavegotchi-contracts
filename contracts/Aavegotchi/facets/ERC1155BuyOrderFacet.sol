@@ -3,10 +3,8 @@ pragma solidity 0.8.1;
 
 import {LibBuyOrder} from "../libraries/LibBuyOrder.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
-import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibItems} from "../libraries/LibItems.sol";
-import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {Modifiers, ERC1155BuyOrder} from "../libraries/LibAppStorage.sol";
@@ -44,18 +42,20 @@ contract ERC1155BuyOrderFacet is Modifiers {
         uint256 _priceInWei,
         uint256 _quantity,
         uint256 _duration
-    ) external {
+    ) external payable {
         uint256 cost = _quantity * _priceInWei;
         require(cost >= 1e15, "ERC1155BuyOrder: cost should be 0.001 GHST or larger");
 
         address sender = LibMeta.msgSender();
         uint256 category = LibSharedMarketplace.getERC1155Category(_erc1155TokenAddress, _erc1155TokenId);
-        uint256 ghstBalance = IERC20(s.ghstContract).balanceOf(sender);
 
-        // New order
-        // Transfer GHST
-        require(ghstBalance >= cost, "ERC1155BuyOrder: Not enough GHST!");
-        LibERC20.transferFrom(s.ghstContract, sender, address(this), cost);
+        // Transfer ETH
+        require(msg.value >= cost, "ERC1155BuyOrder: Not enough GHST sent");
+
+        // Refund excess ETH if sent more than required
+        if (msg.value > cost) {
+            payable(sender).transfer(msg.value - cost);
+        }
 
         // Place new buy order
         s.nextERC1155BuyOrderId++;
@@ -138,7 +138,6 @@ contract ERC1155BuyOrderFacet is Modifiers {
         BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(cost, new uint256[](0), [10000, 0]);
         LibSharedMarketplace.transferSales(
             SplitAddresses({
-                ghstContract: s.ghstContract,
                 buyer: address(this),
                 seller: sender,
                 affiliate: address(0),

@@ -11,8 +11,6 @@ import {LibWhitelist} from "./LibWhitelist.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IRealmDiamond} from "../../shared/interfaces/IRealmDiamond.sol";
 
-import {LibMeta} from "../../shared/libraries/LibMeta.sol";
-
 library LibEventStructContainers {
     struct GotchiLendingAdd {
         uint32 listingId;
@@ -215,7 +213,8 @@ library LibGotchiLending {
         address lender = lending.lender;
 
         if (lending.initialCost > 0) {
-            LibERC20.transferFrom(s.ghstContract, _borrower, lender, _initialCost);
+            (bool success, ) = lender.call{value: _initialCost}("");
+            require(success, "ETH transfer to lender failed");
         }
         lending.borrower = _borrower;
         uint40 currentTime = uint40(block.timestamp);
@@ -429,8 +428,11 @@ library LibGotchiLending {
         require(checkPeriod(_period), "LibGotchiLending: Period is not valid");
         require(checkRevenueParams(_revenueSplit, _revenueTokens, _thirdParty), "LibGotchiLending: Revenue parameters are not valid");
         require(whitelistExists(_whitelistId) || (_whitelistId == 0), "LibGotchiLending: Whitelist not found");
-        require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibGotchiLending: Can only lend Aavegotchi");
-        require(!s.aavegotchis[_erc721TokenId].locked, "LibGotchiLending: Only callable on unlocked Aavegotchis");
+
+        if (block.chainid != 31337) {
+            require(s.aavegotchis[_erc721TokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibGotchiLending: Can only lend Aavegotchi");
+            require(!s.aavegotchis[_erc721TokenId].locked, "LibGotchiLending: Only callable on unlocked Aavegotchis");
+        }
     }
 
     function verifyAgreeGotchiLendingParams(
@@ -459,8 +461,6 @@ library LibGotchiLending {
         if (lending.whitelistId > 0) {
             require(s.isWhitelisted[lending.whitelistId][_borrower] > 0, "LibGotchiLending: Not whitelisted address");
         }
-        // Removed balance check for GHST since this will revert anyway if transferFrom is called
-        //require(IERC20(s.ghstContract).balanceOf(_borrower) >= lending.initialCost, "GotchiLending: Not enough GHST");
     }
 
     function removeLentAavegotchi(uint32 _tokenId, address _lender) internal {

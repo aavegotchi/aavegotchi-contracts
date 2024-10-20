@@ -45,7 +45,6 @@ contract InitDiamond {
         ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
         ds.supportedInterfaces[type(IERC173).interfaceId] = true;
 
-        s.ghstContract = _args.ghstContract;
         s.keyHash = _args.chainlinkKeyHash;
         s.subscriptionId = (_args.subscriptionId);
         s.vrfCoordinator = _args.vrfCoordinator;

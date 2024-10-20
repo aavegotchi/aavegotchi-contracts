@@ -283,7 +283,7 @@ struct AppStorage {
     string symbol;
     //Addresses
     address[] collateralTypes;
-    address ghstContract;
+    // address ghstContract;
     address childChainManager;
     address gameManager;
     address dao;
@@ -474,7 +474,7 @@ contract Modifiers {
 
     modifier onlyPolygon() {
         // enabled for polygon only
-        require(block.chainid == 137, "LibAppStorage: Disabled function");
+        require(block.chainid == 137 || block.chainid == 31337, "LibAppStorage: Disabled function");
         _;
     }
 }

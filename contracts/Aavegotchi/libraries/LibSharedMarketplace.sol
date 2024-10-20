@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
-import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibAppStorage, AppStorage} from "./LibAppStorage.sol";
 
 struct BaazaarSplit {
@@ -13,7 +12,6 @@ struct BaazaarSplit {
 }
 
 struct SplitAddresses {
-    address ghstContract;
     address buyer;
     address seller;
     address affiliate;
@@ -56,47 +54,59 @@ library LibSharedMarketplace {
 
     function transferSales(SplitAddresses memory _a, BaazaarSplit memory split) internal {
         if (_a.buyer == address(this)) {
-            LibERC20.transfer(_a.ghstContract, _a.pixelCraft, split.pixelcraftShare);
-            LibERC20.transfer(_a.ghstContract, _a.daoTreasury, split.daoShare);
-            LibERC20.transfer(_a.ghstContract, _a.rarityFarming, split.playerRewardsShare);
-            LibERC20.transfer(_a.ghstContract, _a.seller, split.sellerShare);
+            (bool success, ) = _a.pixelCraft.call{value: split.pixelcraftShare}("");
+            require(success, "ETH transfer to pixelCraft failed");
+
+            (success, ) = _a.daoTreasury.call{value: split.daoShare}("");
+            require(success, "ETH transfer to daoTreasury failed");
+
+            (success, ) = _a.rarityFarming.call{value: split.playerRewardsShare}("");
+            require(success, "ETH transfer to rarityFarming failed");
+
+            (success, ) = _a.seller.call{value: split.sellerShare}("");
+            require(success, "ETH transfer to seller failed");
 
             //handle affiliate split if necessary
             if (split.affiliateShare > 0) {
-                LibERC20.transfer(_a.ghstContract, _a.affiliate, split.affiliateShare);
+                (success, ) = _a.affiliate.call{value: split.affiliateShare}("");
+                require(success, "ETH transfer to affiliate failed");
             }
             //handle royalty if necessary
             if (_a.royalties.length > 0) {
                 for (uint256 i = 0; i < _a.royalties.length; i++) {
                     if (split.royaltyShares[i] > 0) {
-                        LibERC20.transfer(_a.ghstContract, _a.royalties[i], split.royaltyShares[i]);
+                        (success, ) = _a.royalties[i].call{value: split.royaltyShares[i]}("");
+                        require(success, "ETH transfer to royalty failed");
                     }
                 }
             }
         } else {
-            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.pixelCraft, split.pixelcraftShare);
-            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.daoTreasury, split.daoShare);
-            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.rarityFarming, split.playerRewardsShare);
-            LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.seller, split.sellerShare);
+            (bool success, ) = _a.pixelCraft.call{value: split.pixelcraftShare}("");
+            require(success, "ETH transfer to pixelCraft failed");
+
+            (success, ) = _a.daoTreasury.call{value: split.daoShare}("");
+            require(success, "ETH transfer to daoTreasury failed");
+
+            (success, ) = _a.rarityFarming.call{value: split.playerRewardsShare}("");
+            require(success, "ETH transfer to rarityFarming failed");
+
+            (success, ) = _a.seller.call{value: split.sellerShare}("");
+            require(success, "ETH transfer to seller failed");
 
             //handle affiliate split if necessary
             if (split.affiliateShare > 0) {
-                LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.affiliate, split.affiliateShare);
+                (success, ) = _a.affiliate.call{value: split.affiliateShare}("");
+                require(success, "ETH transfer to affiliate failed");
             }
             //handle royalty if necessary
             if (_a.royalties.length > 0) {
                 for (uint256 i = 0; i < _a.royalties.length; i++) {
                     if (split.royaltyShares[i] > 0) {
-                        LibERC20.transferFrom(_a.ghstContract, _a.buyer, _a.royalties[i], split.royaltyShares[i]);
+                        (success, ) = _a.royalties[i].call{value: split.royaltyShares[i]}("");
+                        require(success, "ETH transfer to royalty failed");
                     }
                 }
             }
-        }
-    }
-
-    function burnListingFee(uint256 listingFee, address owner, address ghstContract) internal {
-        if (listingFee > 0) {
-            LibERC20.transferFrom(ghstContract, owner, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), listingFee);
         }
     }
 
