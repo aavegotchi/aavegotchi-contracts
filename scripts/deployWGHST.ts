@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { WGHST__factory } from "../typechain";
 
-async function main() {
+export async function deployWGHST() {
   console.log("Deploying WGHST contract...");
 
   const [deployer] = await ethers.getSigners();
@@ -15,45 +15,49 @@ async function main() {
 
   await wghst.deployed();
 
-  console.log("WGHST deployed to:", wghst.address);
+  // console.log("WGHST deployed to:", wghst.address);
 
-  //deposit 1 eth
-  await wghst.deposit({ value: ethers.utils.parseEther("1") });
+  // //deposit 1 eth
+  // await wghst.deposit({ value: ethers.utils.parseEther("1") });
 
-  console.log(
-    "WGHST balance of deployer:",
-    await wghst.balanceOf(deployer.address)
-  );
+  // console.log(
+  //   "WGHST balance of deployer:",
+  //   await wghst.balanceOf(deployer.address)
+  // );
 
-  await wghst.withdraw(ethers.utils.parseEther("1"));
+  // await wghst.withdraw(ethers.utils.parseEther("1"));
 
-  console.log(
-    "WGHST balance of deployer:",
-    await wghst.balanceOf(deployer.address)
-  );
+  // console.log(
+  //   "WGHST balance of deployer:",
+  //   await wghst.balanceOf(deployer.address)
+  // );
 
-  // Transfer GHST directly to WGHST
-  await deployer.sendTransaction({
-    to: wghst.address,
-    value: ethers.utils.parseEther("1"),
-  });
+  // // Transfer GHST directly to WGHST
+  // await deployer.sendTransaction({
+  //   to: wghst.address,
+  //   value: ethers.utils.parseEther("1"),
+  // });
 
-  console.log(
-    "WGHST balance of deployer:",
-    await wghst.balanceOf(deployer.address)
-  );
+  // console.log(
+  //   "WGHST balance of deployer:",
+  //   await wghst.balanceOf(deployer.address)
+  // );
 
-  await wghst.withdraw(ethers.utils.parseEther("1"));
+  // await wghst.withdraw(ethers.utils.parseEther("1"));
 
-  console.log(
-    "WGHST balance of deployer:",
-    await wghst.balanceOf(deployer.address)
-  );
+  // console.log(
+  //   "WGHST balance of deployer:",
+  //   await wghst.balanceOf(deployer.address)
+  // );
+
+  return wghst;
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+if (require.main === module) {
+  deployWGHST()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}
