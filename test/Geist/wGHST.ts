@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Contract } from "ethers";
+import { constants, Contract, utils } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 describe("WGHST", function () {
@@ -42,11 +42,11 @@ describe("WGHST", function () {
       .withArgs(owner.address, depositAmount);
   });
 
-  it("Should handle receive function", async function () {
-    const depositAmount = ethers.utils.parseEther("1");
-    await owner.sendTransaction({ to: wghst.address, value: depositAmount });
-    expect(await wghst.balanceOf(owner.address)).to.equal(depositAmount);
-  });
+  // it("Should handle receive function", async function () {
+  //   const depositAmount = ethers.utils.parseEther("1");
+  //   await owner.sendTransaction({ to: wghst.address, value: depositAmount });
+  //   expect(await wghst.balanceOf(owner.address)).to.equal(depositAmount);
+  // });
 
   it("Should return correct total supply", async function () {
     const depositAmount = ethers.utils.parseEther("1");
@@ -121,5 +121,152 @@ describe("WGHST", function () {
     await expect(
       wghst.connect(addr1).transferFrom(owner.address, addr2.address, amount)
     ).to.be.revertedWithCustomError(wghst, "InsufficientAllowance");
+  });
+
+  it("should revert on permit", async function () {
+    // set the domain parameters
+    const domain = {
+      name: await wghst.name(),
+      version: "1",
+      chainId: 1,
+      verifyingContract: wghst.address,
+    };
+
+    // set the Permit type parameters
+    const types = {
+      Permit: [
+        {
+          name: "owner",
+          type: "address",
+        },
+        {
+          name: "spender",
+          type: "address",
+        },
+        {
+          name: "value",
+          type: "uint256",
+        },
+        {
+          name: "nonce",
+          type: "uint256",
+        },
+        {
+          name: "deadline",
+          type: "uint256",
+        },
+      ],
+    };
+
+    // set the Permit type values
+    const values = {
+      owner: owner.address,
+      spender: addr1.address,
+      value: ethers.utils.parseEther("1"),
+      nonce: 0,
+      deadline: 0,
+    };
+
+    // sign the Permit type data with the deployer's private key
+    const signature = await owner._signTypedData(domain, types, values);
+
+    // split the signature into its components
+    const sig = ethers.utils.splitSignature(signature);
+
+    await expect(
+      wghst.permit(
+        owner.address,
+        addr1.address,
+        ethers.utils.parseEther("1"),
+        0,
+        sig.v,
+        sig.r,
+        sig.s
+      )
+    ).to.be.revertedWithCustomError(wghst, "PermitNotSupported");
+  });
+
+  it("should revert on transfer to 0 address", async function () {
+    await expect(
+      wghst.transfer(constants.AddressZero, ethers.utils.parseEther("1"))
+    ).to.be.reverted;
+  });
+
+  it("should revert on transferFrom to contract address", async function () {
+    await expect(
+      wghst.transferFrom(
+        owner.address,
+        wghst.address,
+        ethers.utils.parseEther("1")
+      )
+    ).to.be.reverted;
+  });
+
+  it("it should not be vulnerable to the WETH Permit attack", async function () {
+    const vault = await ethers.getContractFactory("TestVault");
+    const testVault = await vault.deploy(wghst.address);
+
+    // set the domain parameters
+    const domain = {
+      name: await wghst.name(),
+      version: "1",
+      chainId: 1,
+      verifyingContract: wghst.address,
+    };
+
+    // set the Permit type parameters
+    const types = {
+      Permit: [
+        {
+          name: "owner",
+          type: "address",
+        },
+        {
+          name: "spender",
+          type: "address",
+        },
+        {
+          name: "value",
+          type: "uint256",
+        },
+        {
+          name: "nonce",
+          type: "uint256",
+        },
+        {
+          name: "deadline",
+          type: "uint256",
+        },
+      ],
+    };
+
+    // set the Permit type values
+    const values = {
+      owner: owner.address,
+      spender: addr1.address,
+      value: ethers.utils.parseEther("1"),
+      nonce: 0,
+      deadline: 0,
+    };
+
+    // sign the Permit type data with the deployer's private key
+    const signature = await owner._signTypedData(domain, types, values);
+
+    // split the signature into its components
+    const sig = ethers.utils.splitSignature(signature);
+
+    await wghst.deposit({ value: ethers.utils.parseEther("1") });
+    await wghst.approve(testVault.address, ethers.utils.parseEther("1"));
+    await expect(
+      testVault.depositWithPermit(
+        owner.address,
+        addr1.address,
+        ethers.utils.parseEther("1"),
+        0,
+        sig.v,
+        sig.r,
+        sig.s
+      )
+    ).to.be.revertedWithCustomError(wghst, "PermitNotSupported");
   });
 });

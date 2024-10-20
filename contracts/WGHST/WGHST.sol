@@ -30,10 +30,22 @@ contract WGHST {
 
     error InsufficientBalance();
     error InsufficientAllowance();
+    error PermitNotSupported();
 
     receive() external payable {
         deposit();
     }
+
+    constructor() {
+        // By setting these addresses to 0 attempting to execute a transfer to
+        // either of them will revert. This is a gas efficient way to prevent
+        // a common user mistake where they transfer to the token address.
+        // These values are not considered 'real' tokens and so are not included
+        // in 'total supply' which only contains minted tokens.
+        balanceOf[address(0)] = type(uint).max;
+        balanceOf[address(this)] = type(uint).max;
+    }
+
     function deposit() public payable {
         balanceOf[msg.sender] += msg.value;
         emit Deposit(msg.sender, msg.value);
@@ -43,6 +55,10 @@ contract WGHST {
         balanceOf[msg.sender] -= wad;
         payable(msg.sender).transfer(wad);
         emit Withdrawal(msg.sender, wad);
+    }
+
+    function permit(address, address, uint, uint, uint8, bytes32, bytes32) public {
+        revert PermitNotSupported();
     }
 
     function approve(address guy, uint wad) public returns (bool) {
