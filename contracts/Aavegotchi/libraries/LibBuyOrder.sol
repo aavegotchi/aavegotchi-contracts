@@ -2,10 +2,8 @@
 pragma solidity 0.8.1;
 
 import {LibAppStorage, AppStorage, ERC721BuyOrder, ERC1155BuyOrder} from "./LibAppStorage.sol";
-import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {LibAavegotchi} from "./LibAavegotchi.sol";
 import {LibSharedMarketplace} from "./LibSharedMarketplace.sol";
-// import {IERC20} from "../../shared/interfaces/IERC20.sol";
 
 library LibBuyOrder {
     function cancelERC721BuyOrder(uint256 _buyOrderId) internal {

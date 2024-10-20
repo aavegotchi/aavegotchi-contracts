@@ -11,8 +11,6 @@ import {LibWhitelist} from "./LibWhitelist.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IRealmDiamond} from "../../shared/interfaces/IRealmDiamond.sol";
 
-import {LibMeta} from "../../shared/libraries/LibMeta.sol";
-
 library LibEventStructContainers {
     struct GotchiLendingAdd {
         uint32 listingId;
@@ -217,8 +215,6 @@ library LibGotchiLending {
         if (lending.initialCost > 0) {
             (bool success, ) = lender.call{value: _initialCost}("");
             require(success, "ETH transfer to lender failed");
-
-            //LibERC20.transferFrom(s.ghstContract, _borrower, lender, _initialCost);
         }
         lending.borrower = _borrower;
         uint40 currentTime = uint40(block.timestamp);

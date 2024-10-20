@@ -606,4 +606,12 @@ describe("Baazaar Test", function () {
     });
   });
   // Add more tests here for listing, buying, cancelling, etc.
+
+  describe("Gotchi Lending", () => {
+    //should be able to lend a gotchi
+    //should be able to agree to a lending with upfront GHST
+    //upfront GHST should be paid to the lender
+    //should be able to claim revenue
+    //should be able to cancel a listing
+  });
 });

@@ -3,9 +3,6 @@ pragma solidity 0.8.1;
 
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibAppStorage, AavegotchiCollateralTypeInfo, AppStorage, Aavegotchi, ItemType, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM} from "./LibAppStorage.sol";
-import {LibERC20} from "../../shared/libraries/LibERC20.sol";
-import {LibMeta} from "../../shared/libraries/LibMeta.sol";
-import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
 
@@ -313,11 +310,6 @@ library LibAavegotchi {
 
         // Transfer ETH to DAO
         payable(s.dao).transfer(daoShare);
-
-        // LibERC20.transferFrom(ghstContract, _from, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), burnShare);
-        // LibERC20.transferFrom(ghstContract, _from, s.pixelCraft, companyShare);
-        // LibERC20.transferFrom(ghstContract, _from, s.rarityFarming, rarityFarmShare);
-        // LibERC20.transferFrom(ghstContract, _from, s.dao, daoShare);
     }
 
     function sqrt(uint256 x) internal pure returns (uint256 y) {
@@ -347,10 +339,6 @@ library LibAavegotchi {
         }
         return string(name);
     }
-
-    // function addTokenToUser(address _to, uint256 _tokenId) internal {}
-
-    // function removeTokenFromUser(address _from, uint256 _tokenId) internal {}
 
     function transfer(address _from, address _to, uint256 _tokenId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
