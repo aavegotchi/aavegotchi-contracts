@@ -108,7 +108,7 @@ contract ERC721BuyOrderFacet is Modifiers {
     ) external payable {
         require(_priceInWei >= 1e18, "ERC721BuyOrder: price should be 1 GHST or larger");
 
-        require(msg.value == _priceInWei, "ERC721BuyOrder: Not enough GHST!");
+        require(msg.value == _priceInWei, "ERC721BuyOrder: GHST amount mismatch!");
 
         address sender = LibMeta.msgSender();
 
