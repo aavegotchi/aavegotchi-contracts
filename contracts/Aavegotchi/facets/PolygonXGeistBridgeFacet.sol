@@ -15,18 +15,22 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         address _receiver,
         uint256 _tokenId,
         uint256 _msgGasLimit,
-        address _connector
+        address _connector,
+        bool _hasVault
     ) external payable {
         Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
         bytes memory _metadata = abi.encode(_aavegotchi);
         INFTBridge(s.gotchGeistBridge).bridge(_receiver, msg.sender, _tokenId, 1, _msgGasLimit, _connector, _metadata, new bytes(0));
-        for (uint i; i < _aavegotchi.equippedWearables.length; i++) {
-            if (_aavegotchi.equippedWearables[i] != 0) {
-                uint wearableId = _aavegotchi.equippedWearables[i];
-                LibItems.removeFromParent(address(this), _tokenId, wearableId, 1);
-                LibItems.addToOwner(s.itemGeistBridge, wearableId, 1);
-                IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(this), s.itemGeistBridge, wearableId, 1);
-                emit LibERC1155.TransferFromParent(address(this), _tokenId, wearableId, 1);
+        if (_hasVault) { // this module should work when has vault
+            for (uint slot; slot < _aavegotchi.equippedWearables.length; slot++) {
+                uint wearableId = _aavegotchi.equippedWearables[slot];
+                if (wearableId != 0) {
+                    delete s.aavegotchis[_tokenId].equippedWearables[slot];
+                    LibItems.removeFromParent(address(this), _tokenId, wearableId, 1);
+                    LibItems.addToOwner(s.itemGeistBridge, wearableId, 1);
+                    IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(this), s.itemGeistBridge, wearableId, 1);
+                    emit LibERC1155.TransferFromParent(address(this), _tokenId, wearableId, 1);
+                }
             }
         }
     }
@@ -35,9 +39,9 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         Aavegotchi memory _aavegotchi = abi.decode(_metadata, (Aavegotchi));
         s.aavegotchis[_tokenId] = _aavegotchi;
 
-        for (uint i; i < _aavegotchi.equippedWearables.length; i++) {
-            if (_aavegotchi.equippedWearables[i] != 0) {
-                uint wearableId = _aavegotchi.equippedWearables[i];
+        for (uint slot; slot < _aavegotchi.equippedWearables.length; slot++) {
+            if (_aavegotchi.equippedWearables[slot] != 0) {
+                uint wearableId = _aavegotchi.equippedWearables[slot];
                 if (isMint) { // if bridge is controller, mint
                     s.itemTypes[wearableId].totalQuantity += 1;
                     IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(0), address(this), wearableId, 1);
@@ -62,9 +66,10 @@ contract PolygonXGeistBridgeFacet is Modifiers {
     function burn(address _from, uint _tokenId) external onlyGotchiGeistBridge {
         // burn items before burn gotchi
         Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
-        for (uint i; i < _aavegotchi.equippedWearables.length; i++) {
-            if (_aavegotchi.equippedWearables[i] != 0) {
-                uint wearableId = _aavegotchi.equippedWearables[i];
+        for (uint slot; slot < _aavegotchi.equippedWearables.length; slot++) {
+            uint wearableId = _aavegotchi.equippedWearables[slot];
+            if (wearableId != 0) {
+                delete s.aavegotchis[_tokenId].equippedWearables[slot];
                 LibItems.removeFromParent(address(this), _tokenId, wearableId, 1);
                 LibItems.addToOwner(address(0), wearableId, 1);
                 s.itemTypes[wearableId].totalQuantity -= 1;
@@ -99,7 +104,7 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         if (bytes(name).length > 0) {
             delete s.aavegotchiNamesUsed[LibAavegotchi.validateAndLowerName(name)];
         }
-        delete _aavegotchi;
+        delete s.aavegotchis[_tokenId];
     }
 
     function bridgeItem(
@@ -118,6 +123,7 @@ contract PolygonXGeistBridgeFacet is Modifiers {
 
         LibItems.addToOwner(_to, _tokenId, _quantity);
         s.itemTypes[_tokenId].totalQuantity = totalQuantity;
+        IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(0), _to, _tokenId, _quantity);
     }
 
     function burn(address _from, uint _tokenId, uint _quantity) external onlyItemGeistBridge {

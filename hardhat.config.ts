@@ -38,7 +38,20 @@ require("./tasks/deployXPDrop");
 // Go to https://buidler.dev/config/ to learn more
 export default {
   etherscan: {
-    apiKey: process.env.POLYGON_API_KEY,
+    apiKey: {
+      // matic: process.env.POLYGON_API_KEY,
+      polter: 'empty',
+    },
+    customChains: [
+      {
+        network: "polter",
+        chainId: 631571,
+        urls: {
+          apiURL: "https://polter-testnet.explorer.alchemy.com/api",
+          browserURL: "https://polter-testnet.explorer.alchemy.com"
+        }
+      }
+    ]
   },
   networks: {
     hardhat: {
@@ -84,7 +97,6 @@ export default {
       url: process.env.BASE_SEPOLIA_URL,
       accounts: [process.env.SECRET],
     },
-
     // gorli: {
     //   url: process.env.GORLI,
     //   accounts: [process.env.SECRET],

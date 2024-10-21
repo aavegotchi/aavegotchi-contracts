@@ -14,7 +14,7 @@ export async function upgrade() {
     {
       facetName: "PolygonXGeistBridgeFacet",
       addSelectors: [
-        "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable",
+        "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector, bool _hasVault) external payable",
         "function setMetadata(uint _tokenId, bytes memory _metadata, bool isMint) external",
         "function mint(address _to, uint _tokenId) external",
         "function burn(address _from, uint _tokenId) external",
@@ -60,7 +60,8 @@ export async function upgrade() {
     // diamondOwner: AMOY_DIAMOND_OWNER,
     // diamondAddress: AMOY_DIAMOND,
     diamondOwner: '0xd38Df837a1EAd12ee16f8b8b7E5F58703f841668', // polter-testnet
-    diamondAddress: '0x4ca68c04651363AE38C9F2A686b4A00ee52BF12b', // polter-testnet
+    diamondAddress: '0x1F0eb9099b9c398323dcf2F133dFdAD9dE7cF994', // polter-testnet
+    // diamondAddress: '0x87C969d083189927049f8fF3747703FB9f7a8AEd', // base-sepolia
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,

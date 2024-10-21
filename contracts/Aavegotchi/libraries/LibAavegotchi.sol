@@ -159,7 +159,7 @@ library LibAavegotchi {
             aavegotchiInfo_.equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
             aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
             aavegotchiInfo_.escrow = s.aavegotchis[_tokenId].escrow;
-            aavegotchiInfo_.stakedAmount = IERC20(aavegotchiInfo_.collateral).balanceOf(aavegotchiInfo_.escrow);
+//            aavegotchiInfo_.stakedAmount = IERC20(aavegotchiInfo_.collateral).balanceOf(aavegotchiInfo_.escrow);
             aavegotchiInfo_.minimumStake = s.aavegotchis[_tokenId].minimumStake;
             aavegotchiInfo_.kinship = kinship(_tokenId);
             aavegotchiInfo_.lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
