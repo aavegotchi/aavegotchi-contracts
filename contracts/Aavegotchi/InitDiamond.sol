@@ -20,9 +20,8 @@ contract InitDiamond {
         address rarityFarming;
         address ghstContract;
         bytes32 chainlinkKeyHash;
-        uint256 chainlinkFee;
+        uint64 subscriptionId;
         address vrfCoordinator;
-        address linkAddress;
         address childChainManager;
         string name;
         string symbol;
@@ -48,9 +47,8 @@ contract InitDiamond {
 
         s.ghstContract = _args.ghstContract;
         s.keyHash = _args.chainlinkKeyHash;
-        s.fee = uint144(_args.chainlinkFee);
+        s.subscriptionId = (_args.subscriptionId);
         s.vrfCoordinator = _args.vrfCoordinator;
-        s.link = ILink(_args.linkAddress);
 
         s.listingFeeInWei = 1e17;
 
