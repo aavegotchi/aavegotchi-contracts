@@ -275,7 +275,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         address _recipient
     ) internal {
         ERC721Listing storage listing = s.erc721Listings[_listingId];
-        require(msg.value == _priceInWei, "ERC721MarketplaceFacet: Not enough GHST sent");
+        require(msg.value == _priceInWei, "ERC721MarketplaceFacet: GHST amount mismatch");
         require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
         require(listing.cancelled == false, "ERC721Marketplace: listing cancelled");
         require(listing.timeCreated != 0, "ERC721Marketplace: listing not found");
