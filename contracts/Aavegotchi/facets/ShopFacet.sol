@@ -135,7 +135,7 @@ contract ShopFacet is Modifiers {
             LibItems.addToOwner(_to, itemId, quantity);
         }
 
-        require(msg.value == totalPrice, "ShopFacet: Insufficient GHST value");
+        require(msg.value == totalPrice, "ShopFacet: GHST value mismatch");
 
         emit PurchaseItemsWithGhst(sender, _to, _itemIds, _quantities, totalPrice);
         IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(sender, address(0), _to, _itemIds, _quantities);
