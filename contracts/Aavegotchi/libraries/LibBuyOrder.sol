@@ -21,7 +21,7 @@ library LibBuyOrder {
         s.erc721BuyOrders[_buyOrderId].cancelled = true;
 
         // refund GHST to buyer
-        (bool success, ) = erc721BuyOrder.buyer.call{value: erc721BuyOrder.priceInWei}("");
+        (bool success, ) = payable(erc721BuyOrder.buyer).call{value: erc721BuyOrder.priceInWei}("");
         require(success, "ETH transfer to buyer failed");
     }
 
@@ -93,7 +93,7 @@ library LibBuyOrder {
 
         // refund GHST to buyer
 
-        (bool success, ) = erc1155BuyOrder.buyer.call{value: erc1155BuyOrder.priceInWei * erc1155BuyOrder.quantity}("");
+        (bool success, ) = payable(erc1155BuyOrder.buyer).call{value: erc1155BuyOrder.priceInWei * erc1155BuyOrder.quantity}("");
         require(success, "ETH transfer to buyer failed");
     }
 }

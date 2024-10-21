@@ -213,7 +213,7 @@ library LibGotchiLending {
         address lender = lending.lender;
 
         if (lending.initialCost > 0) {
-            (bool success, ) = lender.call{value: _initialCost}("");
+            (bool success, ) = payable(lender).call{value: _initialCost}("");
             require(success, "ETH transfer to lender failed");
         }
         lending.borrower = _borrower;

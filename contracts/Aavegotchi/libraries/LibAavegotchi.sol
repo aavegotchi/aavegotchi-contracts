@@ -300,16 +300,20 @@ library LibAavegotchi {
 
         //transfer ETH
         // Transfer ETH to burn address
-        payable(address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)).transfer(burnShare);
+        (bool success, ) = payable(address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)).call{value: burnShare}("");
+        require(success, "ETH transfer to burn address failed");
 
         // Transfer ETH to Pixelcraft wallet
-        payable(s.pixelCraft).transfer(companyShare);
+        (success, ) = payable(s.pixelCraft).call{value: companyShare}("");
+        require(success, "ETH transfer to Pixelcraft wallet failed");
 
         // Transfer ETH to rarity farming rewards
-        payable(s.rarityFarming).transfer(rarityFarmShare);
+        (success, ) = payable(s.rarityFarming).call{value: rarityFarmShare}("");
+        require(success, "ETH transfer to rarity farming rewards failed");
 
         // Transfer ETH to DAO
-        payable(s.dao).transfer(daoShare);
+        (success, ) = payable(s.dao).call{value: daoShare}("");
+        require(success, "ETH transfer to DAO failed");
     }
 
     function sqrt(uint256 x) internal pure returns (uint256 y) {
