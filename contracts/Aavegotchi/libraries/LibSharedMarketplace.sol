@@ -54,55 +54,55 @@ library LibSharedMarketplace {
 
     function transferSales(SplitAddresses memory _a, BaazaarSplit memory split) internal {
         if (_a.buyer == address(this)) {
-            (bool success, ) = _a.pixelCraft.call{value: split.pixelcraftShare}("");
+            (bool success, ) = payable(_a.pixelCraft).call{value: split.pixelcraftShare}("");
             require(success, "ETH transfer to pixelCraft failed");
 
-            (success, ) = _a.daoTreasury.call{value: split.daoShare}("");
+            (success, ) = payable(_a.daoTreasury).call{value: split.daoShare}("");
             require(success, "ETH transfer to daoTreasury failed");
 
-            (success, ) = _a.rarityFarming.call{value: split.playerRewardsShare}("");
+            (success, ) = payable(_a.rarityFarming).call{value: split.playerRewardsShare}("");
             require(success, "ETH transfer to rarityFarming failed");
 
-            (success, ) = _a.seller.call{value: split.sellerShare}("");
+            (success, ) = payable(_a.seller).call{value: split.sellerShare}("");
             require(success, "ETH transfer to seller failed");
 
             //handle affiliate split if necessary
             if (split.affiliateShare > 0) {
-                (success, ) = _a.affiliate.call{value: split.affiliateShare}("");
+                (success, ) = payable(_a.affiliate).call{value: split.affiliateShare}("");
                 require(success, "ETH transfer to affiliate failed");
             }
             //handle royalty if necessary
             if (_a.royalties.length > 0) {
                 for (uint256 i = 0; i < _a.royalties.length; i++) {
                     if (split.royaltyShares[i] > 0) {
-                        (success, ) = _a.royalties[i].call{value: split.royaltyShares[i]}("");
+                        (success, ) = payable(_a.royalties[i]).call{value: split.royaltyShares[i]}("");
                         require(success, "ETH transfer to royalty failed");
                     }
                 }
             }
         } else {
-            (bool success, ) = _a.pixelCraft.call{value: split.pixelcraftShare}("");
+            (bool success, ) = payable(_a.pixelCraft).call{value: split.pixelcraftShare}("");
             require(success, "ETH transfer to pixelCraft failed");
 
-            (success, ) = _a.daoTreasury.call{value: split.daoShare}("");
+            (success, ) = payable(_a.daoTreasury).call{value: split.daoShare}("");
             require(success, "ETH transfer to daoTreasury failed");
 
-            (success, ) = _a.rarityFarming.call{value: split.playerRewardsShare}("");
+            (success, ) = payable(_a.rarityFarming).call{value: split.playerRewardsShare}("");
             require(success, "ETH transfer to rarityFarming failed");
 
-            (success, ) = _a.seller.call{value: split.sellerShare}("");
+            (success, ) = payable(_a.seller).call{value: split.sellerShare}("");
             require(success, "ETH transfer to seller failed");
 
             //handle affiliate split if necessary
             if (split.affiliateShare > 0) {
-                (success, ) = _a.affiliate.call{value: split.affiliateShare}("");
+                (success, ) = payable(_a.affiliate).call{value: split.affiliateShare}("");
                 require(success, "ETH transfer to affiliate failed");
             }
             //handle royalty if necessary
             if (_a.royalties.length > 0) {
                 for (uint256 i = 0; i < _a.royalties.length; i++) {
                     if (split.royaltyShares[i] > 0) {
-                        (success, ) = _a.royalties[i].call{value: split.royaltyShares[i]}("");
+                        (success, ) = payable(_a.royalties[i]).call{value: split.royaltyShares[i]}("");
                         require(success, "ETH transfer to royalty failed");
                     }
                 }
