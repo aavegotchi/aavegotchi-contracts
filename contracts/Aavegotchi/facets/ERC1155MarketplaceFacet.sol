@@ -256,12 +256,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 cost = _quantity * _priceInWei;
 
         // Transfer ETH from buyer to contract
-        require(msg.value >= cost, "ERC1155Marketplace: Insufficient GHST sent");
-
-        // Refund excess ETH if sent more than required
-        if (msg.value > cost) {
-            payable(buyer).transfer(msg.value - cost);
-        }
+        require(msg.value == cost, "ERC1155Marketplace: Insufficient GHST sent");
 
         {
             BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(
