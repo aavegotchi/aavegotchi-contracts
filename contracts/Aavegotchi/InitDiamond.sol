@@ -18,13 +18,13 @@ contract InitDiamond {
         address daoTreasury;
         address pixelCraft;
         address rarityFarming;
-        address ghstContract;
         bytes32 chainlinkKeyHash;
         uint64 subscriptionId;
         address vrfCoordinator;
         address childChainManager;
         string name;
         string symbol;
+        address wghstContract;
     }
 
     function init(Args memory _args) external {
@@ -53,5 +53,6 @@ contract InitDiamond {
 
         s.name = _args.name;
         s.symbol = _args.symbol;
+        s.wghstContract = _args.wghstContract;
     }
 }

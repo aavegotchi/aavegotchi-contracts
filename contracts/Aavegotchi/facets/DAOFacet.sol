@@ -33,6 +33,7 @@ contract DAOFacet is Modifiers {
     event UpdateItemPrice(uint256 _itemId, uint256 _priceInWei);
     event GotchiGeistBridgeUpdate(address _newBridge);
     event ItemGeistBridgeUpdate(address _newBridge);
+    event WGHSTContractUpdate(address _newWGHSTContract);
 
     /***********************************|
    |             Read Functions         |
@@ -180,11 +181,7 @@ contract DAOFacet is Modifiers {
     ///@param _hauntMaxSize The maximum number of portals in the new haunt
     ///@param _portalPrice The base price of portals in the new haunt(in $GHST)
     ///@param _bodyColor The universal body color applied to NFTs in the new haunt
-    function createHaunt(
-        uint24 _hauntMaxSize,
-        uint96 _portalPrice,
-        bytes3 _bodyColor
-    ) external onlyDaoOrOwner returns (uint256 hauntId_) {
+    function createHaunt(uint24 _hauntMaxSize, uint96 _portalPrice, bytes3 _bodyColor) external onlyDaoOrOwner returns (uint256 hauntId_) {
         uint256 currentHauntId = s.currentHauntId;
         require(
             s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
@@ -448,5 +445,14 @@ contract DAOFacet is Modifiers {
     function updateItemGeistBridge(address _newBridge) external onlyDaoOrOwner {
         s.itemGeistBridge = _newBridge;
         emit ItemGeistBridgeUpdate(_newBridge);
+    }
+
+    function setWGHSTContract(address _wghstContract) external onlyDaoOrOwner {
+        s.wghstContract = _wghstContract;
+        emit WGHSTContractUpdate(_wghstContract);
+    }
+
+    function getWGHSTContract() external view returns (address) {
+        return s.wghstContract;
     }
 }

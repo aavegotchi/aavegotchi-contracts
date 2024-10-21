@@ -42,6 +42,7 @@ import { convertExceptionsToTaskFormat } from "../tasks/updateWearableExceptions
 import { xpRelayerAddress } from "./helperFunctions";
 
 import { deploy, deployWithoutInit } from "../js/diamond-util/src/index";
+import { deployWGHST } from "./deployWGHST";
 
 // const diamond = require("../js/diamond-util/src/index.js");
 const { collaterals } = require("./testCollateralTypes.js");
@@ -72,7 +73,6 @@ export async function deployFullDiamond() {
   }
 
   //amoy
-  const ghstContract = "0xB40B75b4a8e5153357b3e5e4343d997B1a1019f9";
   const ghstStakingDiamondAddress =
     "0xae83d5fc564Ef58224e934ba4Df72a100d5082a0";
   const realmDiamondAddress = "0x5a4faEb79951bAAa0866B72fD6517E693c8E4620";
@@ -100,6 +100,9 @@ export async function deployFullDiamond() {
 
   console.log("Owner: " + ownerAddress);
 
+  const wghst = await deployWGHST();
+  const wghstContractAddress = wghst.address;
+
   const dao = ownerAddress; // 'todo'
   const daoTreasury = ownerAddress;
   const rarityFarming = ownerAddress; // 'todo'
@@ -112,13 +115,13 @@ export async function deployFullDiamond() {
       daoTreasury,
       pixelCraft,
       rarityFarming,
-      ghstContract,
       keyHash,
       subscriptionIdAmoy,
       vrfCoordinatorAmoy,
       childChainManager,
       name,
       symbol,
+      wghstContractAddress,
     ],
   ];
 

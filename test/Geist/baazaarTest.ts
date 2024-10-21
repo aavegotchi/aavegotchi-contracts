@@ -9,8 +9,6 @@ import {
   MarketplaceGetterFacet,
   ItemsFacet,
   DAOFacet,
-  GotchiLendingFacet,
-  LendingGetterAndSetterFacet,
   WGHST,
 } from "../../typechain";
 
@@ -26,8 +24,7 @@ describe("Baazaar Test", function () {
   let marketplaceGetterFacet: MarketplaceGetterFacet;
   let aavegotchiFacet: AavegotchiFacet;
   let erc1155MarketplaceFacet: ERC1155MarketplaceFacet;
-  let gotchiLendingFacet: GotchiLendingFacet;
-  let lendingGetterFacet: LendingGetterAndSetterFacet;
+
   let itemsFacet: ItemsFacet;
   let shopFacet: ShopFacet;
   let owner: SignerWithAddress;
@@ -39,15 +36,7 @@ describe("Baazaar Test", function () {
   let aavegotchiDiamondAddress: string;
   let listingPrice: BigNumber;
   let ghstTokenAddress: string;
-  let ghstToken: WGHST;
   let borrower: SignerWithAddress;
-  let gotchiLendingListingId: number;
-
-  const revenueSplit = [60, 40, 0] as [
-    BigNumberish,
-    BigNumberish,
-    BigNumberish
-  ];
 
   let daoFacet: DAOFacet;
 
@@ -60,10 +49,6 @@ describe("Baazaar Test", function () {
     [owner, addr1, addr2, addr3, addr4, addr5] = await ethers.getSigners();
 
     borrower = addr1;
-
-    const wghst = await deployWGHST();
-    ghstTokenAddress = wghst.address;
-    ghstToken = wghst;
 
     // Deploy the full diamond
     const deployVars = await deployFullDiamond();
@@ -89,6 +74,8 @@ describe("Baazaar Test", function () {
       aavegotchiDiamondAddress
     );
 
+    daoFacet = await ethers.getContractAt("DAOFacet", aavegotchiDiamondAddress);
+
     //@ts-ignore
     aavegotchiFacet = await ethers.getContractAt(
       "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
@@ -100,18 +87,20 @@ describe("Baazaar Test", function () {
       "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
       aavegotchiDiamondAddress
     );
+  });
 
-    //@ts-ignore
-    lendingGetterFacet = await ethers.getContractAt(
-      "contracts/Aavegotchi/facets/LendingGetterAndSetterFacet.sol:LendingGetterAndSetterFacet",
-      aavegotchiDiamondAddress
-    );
+  describe("WGHST", () => {
+    it("should expect WGHST to be set during init", async () => {
+      const wghstContract = await daoFacet.getWGHSTContract();
+      expect(wghstContract).to.not.equal(ethers.constants.AddressZero);
+      console.log("ghstTokenAddress", wghstContract);
+    });
 
-    //@ts-ignore
-    gotchiLendingFacet = await ethers.getContractAt(
-      "contracts/Aavegotchi/facets/GotchiLendingFacet.sol:GotchiLendingFacet",
-      aavegotchiDiamondAddress
-    );
+    it("should be able to set the WGHST contract", async () => {
+      await daoFacet.setWGHSTContract(addr1.address);
+      const wghstContract = await daoFacet.getWGHSTContract();
+      expect(wghstContract).to.equal(addr1.address);
+    });
   });
 
   describe("ERC721 Marketplace", () => {
@@ -640,233 +629,4 @@ describe("Baazaar Test", function () {
     });
   });
   // Add more tests here for listing, buying, cancelling, etc.
-
-  describe("Gotchi Lending", () => {
-    it("should be able to allow a revenue token", async function () {
-      await lendingGetterFacet.allowRevenueTokens([ghstTokenAddress]);
-    });
-
-    it("should be able to summon a gotchi", async function () {});
-
-    it("should be able to lend a gotchi", async function () {
-      const tokenId = 1;
-      const initialCost = ethers.utils.parseEther("100");
-      const period = 86400; // 1 day
-
-      const whitelistId = 0;
-      const revenueTokens = [ghstTokenAddress];
-      const permissions = 0;
-
-      const tx = await gotchiLendingFacet.connect(owner).addGotchiListing({
-        tokenId,
-        initialCost,
-        period,
-        revenueSplit,
-        originalOwner: owner.address,
-        thirdParty: ethers.constants.AddressZero,
-        whitelistId,
-        revenueTokens,
-        permissions,
-      });
-      const receipt = await tx.wait();
-      const event = receipt.events?.find((x) => x.event === "GotchiLendingAdd");
-
-      console.log("event", event);
-
-      expect(event).to.not.be.undefined;
-
-      const listing = await lendingGetterFacet.getGotchiLendingFromToken(
-        tokenId
-      );
-
-      console.log("listing", listing);
-
-      gotchiLendingListingId = listing.listingId;
-
-      expect(listing.lender).to.equal(owner.address);
-      expect(listing.erc721TokenId).to.equal(tokenId);
-      expect(listing.initialCost).to.equal(initialCost);
-      expect(listing.period).to.equal(period);
-    });
-
-    it("should be able to agree to a lending with upfront GHST", async function () {
-      const tokenId = 1;
-      const initialCost = ethers.utils.parseEther("100");
-
-      console.log("gotchiLendingListingId", gotchiLendingListingId);
-
-      await ghstToken
-        .connect(borrower)
-        .approve(aavegotchiDiamondAddress, initialCost);
-
-      await expect(
-        gotchiLendingFacet
-          .connect(borrower)
-          .agreeGotchiLending(
-            gotchiLendingListingId,
-            tokenId,
-            initialCost,
-            86400,
-            revenueSplit,
-            { value: initialCost }
-          )
-      ).to.emit(gotchiLendingFacet, "ExecuteGotchiLending");
-
-      const lending = await lendingGetterFacet.getGotchiLendingFromToken(
-        tokenId
-      );
-      expect(lending.borrower).to.equal(borrower.address);
-    });
-
-    it("upfront GHST should be paid to the lender", async function () {
-      const initialCost = ethers.utils.parseEther("100");
-      const lenderBalanceBefore = await ghstToken.balanceOf(owner.address);
-
-      await gotchiLendingFacet
-        .connect(borrower)
-        .agreeGotchiLending(
-          gotchiLendingListingId,
-          1,
-          initialCost,
-          86400,
-          revenueSplit,
-          {
-            value: initialCost,
-          }
-        );
-
-      const lenderBalanceAfter = await ghstToken.balanceOf(owner.address);
-      expect(lenderBalanceAfter.sub(lenderBalanceBefore)).to.equal(initialCost);
-    });
-
-    it("should be able to claim revenue", async function () {
-      const tokenId = 1;
-      const revenueAmount = ethers.utils.parseEther("10");
-
-      // Simulate some revenue
-      await ghstToken.transfer(aavegotchiDiamondAddress, revenueAmount);
-
-      const lenderBalanceBefore = await ghstToken.balanceOf(owner.address);
-      const borrowerBalanceBefore = await ghstToken.balanceOf(borrower.address);
-
-      await gotchiLendingFacet.connect(owner).claimGotchiLending(tokenId);
-
-      const lenderBalanceAfter = await ghstToken.balanceOf(owner.address);
-      const borrowerBalanceAfter = await ghstToken.balanceOf(borrower.address);
-
-      expect(lenderBalanceAfter.sub(lenderBalanceBefore)).to.be.gt(0);
-      expect(borrowerBalanceAfter.sub(borrowerBalanceBefore)).to.be.gt(0);
-    });
-
-    it("should be able to cancel a listing", async function () {
-      const tokenId = 2;
-      await gotchiLendingFacet.connect(owner).addGotchiListing({
-        tokenId,
-        initialCost: ethers.utils.parseEther("100"),
-        period: 86400,
-        revenueSplit: revenueSplit,
-        originalOwner: owner.address,
-        thirdParty: ethers.constants.AddressZero,
-        whitelistId: 0,
-        revenueTokens: [ghstTokenAddress],
-        permissions: 0,
-      });
-
-      await expect(
-        gotchiLendingFacet.connect(owner).cancelGotchiLendingByToken(tokenId)
-      ).to.emit(gotchiLendingFacet, "GotchiLendingCancel");
-
-      const listing = await lendingGetterFacet.getGotchiLendingFromToken(
-        tokenId
-      );
-      expect(listing.lender).to.equal(ethers.constants.AddressZero);
-    });
-
-    it("should not allow non-owner to cancel a listing", async function () {
-      const tokenId = 3;
-      await gotchiLendingFacet.connect(owner).addGotchiListing({
-        tokenId,
-        initialCost: ethers.utils.parseEther("100"),
-        period: 86400,
-        revenueSplit: revenueSplit,
-        originalOwner: owner.address,
-        thirdParty: ethers.constants.AddressZero,
-        whitelistId: 0,
-        revenueTokens: [ghstTokenAddress],
-        permissions: 0,
-      });
-
-      await expect(
-        gotchiLendingFacet.connect(borrower).cancelGotchiLendingByToken(tokenId)
-      ).to.be.revertedWith(
-        "GotchiLending: Only the lender or lending operator can cancel the lending"
-      );
-    });
-
-    it("should be able to extend a lending", async function () {
-      const tokenId = 1;
-      const extension = 86400; // 1 day
-
-      await gotchiLendingFacet
-        .connect(owner)
-        .extendGotchiLending(tokenId, extension);
-
-      const lending = await lendingGetterFacet.getGotchiLendingFromToken(
-        tokenId
-      );
-      expect(lending.period).to.equal(86400 * 2); // Original period + extension
-    });
-
-    it("should be able to claim and end a lending", async function () {
-      const tokenId = 1;
-
-      // Fast forward time to end of lending period
-      await ethers.provider.send("evm_increaseTime", [86400 * 2]);
-      await ethers.provider.send("evm_mine", []);
-
-      await expect(
-        gotchiLendingFacet.connect(owner).claimAndEndGotchiLending(tokenId)
-      ).to.emit(gotchiLendingFacet, "GotchiLendingEnd");
-
-      const lending = await lendingGetterFacet.getGotchiLendingFromToken(
-        tokenId
-      );
-      expect(lending.completed).to.be.true;
-    });
-
-    it("should be able to batch add gotchi listings", async function () {
-      const listings = [
-        {
-          tokenId: 4,
-          initialCost: ethers.utils.parseEther("100"),
-          period: 86400,
-          revenueSplit: revenueSplit,
-          originalOwner: owner.address,
-          thirdParty: ethers.constants.AddressZero,
-          whitelistId: 0,
-          revenueTokens: [ghstTokenAddress],
-          permissions: 0,
-        },
-        {
-          tokenId: 5,
-          initialCost: ethers.utils.parseEther("200"),
-          period: 172800,
-          revenueSplit: revenueSplit,
-          originalOwner: owner.address,
-          thirdParty: ethers.constants.AddressZero,
-          whitelistId: 0,
-          revenueTokens: [ghstTokenAddress],
-          permissions: 0,
-        },
-      ];
-
-      // await expect(
-      //   gotchiLendingFacet.connect(owner).batchAddGotchiListing(listings)
-      // )
-      //   .to.emit(gotchiLendingFacet, "GotchiLendingAdd")
-      //   .withArgs(4, owner.address, ethers.utils.parseEther("100"), 86400)
-      //   .to.emit(gotchiLendingFacet, "GotchiLendingAdd")
-      //   .withArgs(5, owner.address, ethers.utils.parseEther("200"), 172800);
-    });
-  });
 });
