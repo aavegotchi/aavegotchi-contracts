@@ -50,7 +50,7 @@ contract ERC1155BuyOrderFacet is Modifiers {
         uint256 category = LibSharedMarketplace.getERC1155Category(_erc1155TokenAddress, _erc1155TokenId);
 
         // Transfer ETH
-        require(msg.value == cost, "ERC1155BuyOrder: Not enough GHST sent");
+        require(msg.value == cost, "ERC1155BuyOrder:GHST amount mismatch");
 
         // Place new buy order
         s.nextERC1155BuyOrderId++;
