@@ -93,10 +93,15 @@ export default async function main() {
   //   await tx.wait()
   // }
 
-  // equip gotchi
-  // for (let tokenId = 106; tokenId < 110; tokenId++) {
-  //   console.log(`Trying to equip a gotchi. Token Id: ${tokenId}`);
-  //   tx = await itemsFacet.equipWearables(tokenId, [15, 13, 14, 10, 29, 12, 151, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+  // equip/unequip gotchi
+  // for (let tokenId = 106; tokenId < 107; tokenId++) {
+  //   console.log(`Trying to equip/unequip a gotchi. Token Id: ${tokenId}`);
+  //   // // equip all slots
+  //   // tx = await itemsFacet.equipWearables(tokenId, [15, 13, 14, 10, 29, 12, 151, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+  //   // equip some slots
+  //   tx = await itemsFacet.equipWearables(tokenId, [15, 0, 14, 0, 29, 0, 151, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+  //   // // unequip all
+  //   // tx = await itemsFacet.equipWearables(tokenId, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
   //   console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
   //   await tx.wait()
   // }
