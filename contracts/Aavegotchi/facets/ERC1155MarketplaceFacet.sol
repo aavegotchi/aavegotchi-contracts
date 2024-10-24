@@ -256,7 +256,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 cost = _quantity * _priceInWei;
 
         // Transfer ETH from buyer to contract
-        require(msg.value == cost, "ERC1155Marketplace: GHST amount mismtch");
+        require(msg.value == cost, "ERC1155Marketplace: GHST amount mismatch");
 
         {
             BaazaarSplit memory split = LibSharedMarketplace.getBaazaarSplit(
