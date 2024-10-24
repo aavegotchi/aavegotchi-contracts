@@ -230,7 +230,11 @@ contract AavegotchiGameFacet is Modifiers {
     ///@param _tokenId The identifier of NFT to claim an Aavegotchi from
     ///@param _option The index of the aavegotchi to claim(1-10)
     ///@param _stakeAmount Minimum amount of collateral tokens needed to be sent to the new aavegotchi escrow contract
-    function claimAavegotchi(uint256 _tokenId, uint256 _option, uint256 _stakeAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function claimAavegotchi(
+        uint256 _tokenId,
+        uint256 _option,
+        uint256 _stakeAmount
+    ) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiGameFacet: Portal not open");
         require(_option < PORTAL_AAVEGOTCHIS_NUM, "AavegotchiGameFacet: Only 10 aavegotchi options available");

@@ -31,6 +31,8 @@ contract DAOFacet is Modifiers {
     event ItemModifiersSet(uint256 _wearableId, int8[6] _traitModifiers, uint8 _rarityScoreModifier);
     event RemoveExperience(uint256[] _tokenIds, uint256[] _xpValues);
     event UpdateItemPrice(uint256 _itemId, uint256 _priceInWei);
+    event GotchiGeistBridgeUpdate(address _newBridge);
+    event ItemGeistBridgeUpdate(address _newBridge);
 
     /***********************************|
    |             Read Functions         |
@@ -99,7 +101,11 @@ contract DAOFacet is Modifiers {
 
             //First handle global collateralTypes array
             uint256 index = s.collateralTypeIndexes[newCollateralType];
-            bool collateralExists = index > 0 || s.collateralTypes[0] == newCollateralType;
+            bool collateralExists = index > 0;
+
+            if (!collateralExists && s.collateralTypes.length == 1 && s.collateralTypes[0] == newCollateralType) {
+                collateralExists = true;
+            }
 
             if (!collateralExists) {
                 s.collateralTypes.push(newCollateralType);
@@ -174,7 +180,11 @@ contract DAOFacet is Modifiers {
     ///@param _hauntMaxSize The maximum number of portals in the new haunt
     ///@param _portalPrice The base price of portals in the new haunt(in $GHST)
     ///@param _bodyColor The universal body color applied to NFTs in the new haunt
-    function createHaunt(uint24 _hauntMaxSize, uint96 _portalPrice, bytes3 _bodyColor) external onlyDaoOrOwner returns (uint256 hauntId_) {
+    function createHaunt(
+        uint24 _hauntMaxSize,
+        uint96 _portalPrice,
+        bytes3 _bodyColor
+    ) external onlyDaoOrOwner returns (uint256 hauntId_) {
         uint256 currentHauntId = s.currentHauntId;
         require(
             s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
@@ -424,5 +434,19 @@ contract DAOFacet is Modifiers {
             item.ghstPrice = _newPrices[i];
             emit UpdateItemPrice(itemId, _newPrices[i]);
         }
+    }
+
+    ///@notice Allow the DAO to update an address as a Geist bridge of the gotchi
+    ///@param _newBridge The address to be update as a bridge
+    function updateGotchiGeistBridge(address _newBridge) external onlyDaoOrOwner {
+        s.gotchGeistBridge = _newBridge;
+        emit GotchiGeistBridgeUpdate(_newBridge);
+    }
+
+    ///@notice Allow the DAO to update an address as a Geist bridge of the item
+    ///@param _newBridge The address to be update as a bridge
+    function updateItemGeistBridge(address _newBridge) external onlyDaoOrOwner {
+        s.itemGeistBridge = _newBridge;
+        emit ItemGeistBridgeUpdate(_newBridge);
     }
 }
