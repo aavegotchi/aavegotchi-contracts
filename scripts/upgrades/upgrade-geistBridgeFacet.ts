@@ -24,34 +24,6 @@ export async function upgrade() {
       ],
       removeSelectors: [],
     },
-    {
-      facetName: "DAOFacet",
-      addSelectors: [
-        "function updateGotchiGeistBridge(address _newBridge) external",
-        "function updateItemGeistBridge(address _newBridge) external",
-      ],
-      removeSelectors: [],
-    },
-    {
-      facetName: "AavegotchiGameFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "CollateralFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "EscrowFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "VrfFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
@@ -59,9 +31,8 @@ export async function upgrade() {
   const args: DeployUpgradeTaskArgs = {
     // diamondOwner: AMOY_DIAMOND_OWNER,
     // diamondAddress: AMOY_DIAMOND,
-    diamondOwner: '0xd38Df837a1EAd12ee16f8b8b7E5F58703f841668', // polter-testnet
-    diamondAddress: '0x1F0eb9099b9c398323dcf2F133dFdAD9dE7cF994', // polter-testnet
-    // diamondAddress: '0x87C969d083189927049f8fF3747703FB9f7a8AEd', // base-sepolia
+    diamondOwner: '0xd38Df837a1EAd12ee16f8b8b7E5F58703f841668',
+    diamondAddress: '0x87C969d083189927049f8fF3747703FB9f7a8AEd', // base-sepolia
     facetsAndAddSelectors: joined,
     useLedger: false,
     useMultisig: false,

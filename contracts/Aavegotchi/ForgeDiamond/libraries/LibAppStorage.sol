@@ -214,10 +214,4 @@ contract Modifiers {
         require(!s.contractPaused, "LibAppStorage: Contract paused");
         _;
     }
-
-    modifier onlyPolygon() {
-        // enabled for polygon only
-        require(block.chainid == 137, "LibAppStorage: Disabled function");
-        _;
-    }
 }

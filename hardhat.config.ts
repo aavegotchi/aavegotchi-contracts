@@ -39,19 +39,8 @@ require("./tasks/deployXPDrop");
 export default {
   etherscan: {
     apiKey: {
-      // matic: process.env.POLYGON_API_KEY,
-      polter: 'empty',
+      matic: process.env.POLYGON_API_KEY,
     },
-    customChains: [
-      {
-        network: "polter",
-        chainId: 631571,
-        urls: {
-          apiURL: "https://polter-testnet.explorer.alchemy.com/api",
-          browserURL: "https://polter-testnet.explorer.alchemy.com"
-        }
-      }
-    ]
   },
   networks: {
     hardhat: {
@@ -87,10 +76,6 @@ export default {
     },
     amoy: {
       url: process.env.AMOY_URL,
-      accounts: [process.env.SECRET],
-    },
-    polter: {
-      url: process.env.POLTER_TESTNET_URL,
       accounts: [process.env.SECRET],
     },
     "base-sepolia": {

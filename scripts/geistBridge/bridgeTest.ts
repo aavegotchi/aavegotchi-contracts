@@ -9,14 +9,7 @@ export default async function main() {
   let gotchiConnectorAddress;
   let itemBridgeAddress;
   let itemConnectorAddress;
-  if (network.name === "polter") {
-    diamondAddress = "0x1F0eb9099b9c398323dcf2F133dFdAD9dE7cF994"
-    // controller address
-    gotchiBridgeAddress = "0x651ae3874e3485bAdc8cE39bC29e53A1fa14fD8F"
-    gotchiConnectorAddress = "0xd9290D5A86985C84aaF662dbc2cc59abFb06F6a7"
-    itemBridgeAddress = "0xB54f6A7b222fcf6eE1C1163A781609e60BaE5008"
-    itemConnectorAddress = "0xcDe1769Cc8Af3772183c35aF97ca0a43C090D7f0"
-  } else if (network.name === "base-sepolia") {
+  if (network.name === "base-sepolia") {
     diamondAddress = "0x87C969d083189927049f8fF3747703FB9f7a8AEd"
     // vault address
     gotchiBridgeAddress = "0x0e915A936d4a7E300B749112DA80D047Bf580DA7"
@@ -25,13 +18,6 @@ export default async function main() {
     itemConnectorAddress = "0xff2b3CdaA9882b89c8d64a6904263A58c4644762"
   } else if (network.name === "matic") {
     diamondAddress = maticDiamondAddress
-    // TODO: connector address
-    gotchiBridgeAddress = ""
-    gotchiConnectorAddress = ""
-    itemBridgeAddress = ""
-    itemConnectorAddress = ""
-  } else if (network.name === "geist") {
-    diamondAddress = ""
     // TODO: connector address
     gotchiBridgeAddress = ""
     gotchiConnectorAddress = ""

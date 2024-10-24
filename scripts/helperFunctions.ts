@@ -287,7 +287,7 @@ export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
       speed: "safeLow",
       validForSeconds: 7200,
     });
-  } else if (["tenderly", "polter", "base-sepolia", "amoy"].includes(hre.network.name)) {
+  } else if (["tenderly", "base-sepolia", "amoy"].includes(hre.network.name)) {
     //impersonate
     return (await hre.ethers.getSigners())[0];
   } else {
