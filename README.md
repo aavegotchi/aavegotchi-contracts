@@ -1,7 +1,7 @@
 # Welcome to the Aavegotchi Contracts!
 
 
-NOTE: This repository is only for the Polygon version of Aavegotchi. For the Geist deployment, please visit [https://github.com/aavegotchi/aavegotchi-geist]([url](https://github.com/aavegotchi/aavegotchi-geist)).
+## **NOTE: This repository is only for the Polygon version of Aavegotchi. For the Geist deployment, please visit [Aavegotchi Geist]((https://github.com/aavegotchi/aavegotchi-geist)).**
 
 
 Aavegotchis are fully onchain NFTs, powered by the ERC721, ERC1155, and ERC998 standards. The contracts also implement the EIP-2535 Diamonds standard, which allows for modular upgradeability. 
