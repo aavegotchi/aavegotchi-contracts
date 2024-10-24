@@ -10,11 +10,6 @@ export default async function main() {
   let itemBridgeAddress;
   let diamondAddress;
   let tx;
-  // if (network.name === "amoy") {
-  //   diamondAddress = AMOY_DIAMOND;
-  //   // vault address
-  //   gotchiBridgeAddress = "0x09011fcA980Df5d22E5ff2262051Bc28C430E11c";
-  //   itemBridgeAddress = "0x09011fcA980Df5d22E5ff2262051Bc28C430E11c";
   if (network.name === "base-sepolia") {
     diamondAddress = "0x87C969d083189927049f8fF3747703FB9f7a8AEd";
     // vault address

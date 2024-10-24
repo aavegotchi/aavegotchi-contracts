@@ -57,8 +57,7 @@ export default async function main() {
     await tx.wait()
 
     console.log(`Trying to bridge a gotchi. Token Id:${tokenId}`);
-    const hasVault = network.name === "base-sepolia";
-    tx = await bridgeFacet.bridgeGotchi(signer.address, tokenId, gasLimit, gotchiConnectorAddress, hasVault, {gasPrice: gasPrice})
+    tx = await bridgeFacet.bridgeGotchi(signer.address, tokenId, gasLimit, gotchiConnectorAddress, {gasPrice: gasPrice})
     console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
     await tx.wait()
   }

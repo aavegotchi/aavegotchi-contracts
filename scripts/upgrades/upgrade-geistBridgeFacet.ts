@@ -5,7 +5,6 @@ import {
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
 import { maticDiamondAddress } from "../helperFunctions";
-import { AMOY_DIAMOND_OWNER, AMOY_DIAMOND } from "../../helpers/constants";
 
 export async function upgrade() {
   const diamondOwner = "0x01F010a5e001fe9d6940758EA5e8c777885E351e";
@@ -14,13 +13,9 @@ export async function upgrade() {
     {
       facetName: "PolygonXGeistBridgeFacet",
       addSelectors: [
-        "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector, bool _hasVault) external payable",
-        "function setMetadata(uint _tokenId, bytes memory _metadata, bool isMint) external",
-        "function mint(address _to, uint _tokenId) external",
-        "function burn(address _from, uint _tokenId) external",
+        "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable",
+        "function setMetadata(uint _tokenId, bytes memory _metadata) external",
         "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable",
-        "function mint(address _to, uint _tokenId, uint _quantity) external",
-        "function burn(address _from, uint _tokenId, uint _quantity) external",
       ],
       removeSelectors: [],
     },
