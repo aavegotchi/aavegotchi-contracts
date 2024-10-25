@@ -19,6 +19,14 @@ export async function upgrade() {
       ],
       removeSelectors: [],
     },
+    {
+      facetName: "DAOFacet",
+      addSelectors: [
+        "function updateGotchiGeistBridge(address _newBridge) external",
+        "function updateItemGeistBridge(address _newBridge) external",
+      ],
+      removeSelectors: [],
+    },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
