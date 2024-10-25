@@ -7,6 +7,8 @@ import {LibItems} from "../libraries/LibItems.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {INFTBridge} from "../../shared/interfaces/INFTBridge.sol";
+import {LibERC20} from "../../shared/libraries/LibERC20.sol";
+import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 
 contract PolygonXGeistBridgeFacet is Modifiers {
@@ -18,6 +20,10 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         address _connector
     ) external payable {
         Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
+        // force unstake from escrow
+        uint256 currentStake = IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow);
+        LibERC20.transferFrom(_aavegotchi.collateralType, _aavegotchi.escrow, msg.sender, currentStake);
+
         bytes memory _metadata = abi.encode(_aavegotchi);
         INFTBridge(s.gotchGeistBridge).bridge(_receiver, msg.sender, _tokenId, 1, _msgGasLimit, _connector, _metadata, new bytes(0));
         for (uint slot; slot < _aavegotchi.equippedWearables.length; slot++) {
