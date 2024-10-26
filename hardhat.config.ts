@@ -72,7 +72,10 @@ export default {
       gasPrice: 1000000000,
       timeout: 90000,
     },
-
+    "base-sepolia": {
+      url: process.env.BASE_SEPOLIA_URL,
+      accounts: [process.env.SECRET],
+    },
     // gorli: {
     //   url: process.env.GORLI,
     //   accounts: [process.env.SECRET],
