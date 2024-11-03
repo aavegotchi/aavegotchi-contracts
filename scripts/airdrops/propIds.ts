@@ -343,6 +343,27 @@ const sigProps = [
     id: "0x41a8eefa0d919e84a6fc6e2ef3b62b776f98deb4627defe310c056e30d091cfc",
     title: "Increasing XP Award to 250 XP for Succesful CORE AGIPs",
   },
+  {
+    id: "0x4ccd858c4db0933066a5c41386ffc008d87347fa5b582f23a44c7c47b9a12d27",
+    title: "Replacement DAO Director Election",
+  },
+  {
+    id: "0x4341932033531173746139ca670c533e6edd795b453075858de2d17457360899",
+    title: "Tipping for Aavegotchi community apps",
+  },
+  //no sigprop 130
+  {
+    id: "0x8a0f395fe3a966d5d52477d09b6c4e34f6e5053f70a8e65d118901adfc15078f",
+    title: "Forge Competition Pilot Season 1",
+  },
+  {
+    id: "0x094419732ba0037d626f90c99b65c9810b4a3627eaf41f30cda6ca334e390b24",
+    title: "Gotchi Battler V1.7 & V2 funding request",
+  },
+  {
+    id: "0x09bccefc981f6dad5e8f96045a57d6abe06685cf2572f75bf0444eb0c8253660",
+    title: "Funding Renewal Proposal for Pixelcraft Studios, 2024-2025",
+  },
 ];
 
 const coreProps = [
@@ -698,5 +719,28 @@ const coreProps = [
   {
     id: "0x307f6d8e39de3ce35886714e07586f838d42aa0556c66b19a142b1d8f2ba1703",
     title: "[AGIP 127] Increasing XP Award to 250 XP for Succesful CORE AGIPs",
+  },
+  //xp rewards for authors of successful coreprops increased to 250
+  {
+    id: "0x76a91e48a9a1b12852f055be07c2661d3d4a208091db9edbb16ba73b3cef3e55",
+    title: "[AGIP 128] Replacement DAO Director Election",
+  },
+  {
+    id: "0xef468935df62924bbf897d45a92da9876da20e30fdb6d7b7f18c2c847b198b86",
+    title: "[AGIP 129] Tipping for Aavegotchi community apps",
+  },
+  //no coreprop 130
+  {
+    id: "0x00942985e9dd86bfc0362e25a83611d9854a81f2d1d75392db185440f764c405",
+    title: "[AGIP 131] Forge Competition Pilot Season 1",
+  },
+  {
+    id: "0x4c1529a8fd0385d793838bd4d997aab84b2eb0f8344f941e2fab906ee5172308",
+    title: "[AGIP 132] Gotchi Battler V1.7 & V2 funding request",
+  },
+  {
+    id: "0x5142f7e9d4b416c0c6531ef23e5637fb56a34e731b73c0f10a26a25a72ef2077",
+    title:
+      "[AGIP 133] Funding Renewal Proposal for Pixelcraft Studios, 2024-2025",
   },
 ];
