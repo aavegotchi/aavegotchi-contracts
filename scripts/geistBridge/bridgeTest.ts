@@ -12,10 +12,10 @@ export default async function main() {
   if (network.name === "base-sepolia") {
     diamondAddress = "0x87C969d083189927049f8fF3747703FB9f7a8AEd"
     // vault address
-    gotchiBridgeAddress = "0x0e915A936d4a7E300B749112DA80D047Bf580DA7"
-    gotchiConnectorAddress = "0x06C845Df424C9DD61Eb4D59ceCa631b597CC3c5F"
-    itemBridgeAddress = "0xde94E671f4612D0F020851173e9fD99d3A6Cc9F3"
-    itemConnectorAddress = "0xff2b3CdaA9882b89c8d64a6904263A58c4644762"
+    gotchiBridgeAddress = "0x110A646276961C2d8a54b951bbC8B169E0F573c4"
+    gotchiConnectorAddress = "0xd912F40C27E317db2334e210de892e9dc92816af"
+    itemBridgeAddress = "0x130119B300049A80C20B2D3bfdFCfd021373E5e7"
+    itemConnectorAddress = "0xb8388b23222876FAC04b464fA0d6A064c67A14FC"
   } else if (network.name === "matic") {
     diamondAddress = maticDiamondAddress
     // TODO: connector address
