@@ -19,7 +19,25 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         uint256 _msgGasLimit,
         address _connector
     ) external payable {
-        _bridgeGotchi(_receiver, _tokenId, _msgGasLimit, _connector);
+        Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
+        // force unstake from escrow
+        if(_aavegotchi.collateralType != address(0)) {
+            uint256 currentStake = IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow);
+            LibERC20.transferFrom(_aavegotchi.collateralType, _aavegotchi.escrow, msg.sender, currentStake);
+        }
+
+        bytes memory _metadata = abi.encode(_aavegotchi);
+        INFTBridge(s.gotchGeistBridge).bridge(_receiver, msg.sender, _tokenId, 1, _msgGasLimit, _connector, _metadata, new bytes(0));
+        for (uint slot; slot < _aavegotchi.equippedWearables.length; slot++) {
+            uint wearableId = _aavegotchi.equippedWearables[slot];
+            if (wearableId != 0) {
+                delete s.aavegotchis[_tokenId].equippedWearables[slot];
+                LibItems.removeFromParent(address(this), _tokenId, wearableId, 1);
+                LibItems.addToOwner(s.itemGeistBridge, wearableId, 1);
+                IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(this), s.itemGeistBridge, wearableId, 1);
+                emit LibERC1155.TransferFromParent(address(this), _tokenId, wearableId, 1);
+            }
+        }
     }
 
     struct GotchiBridgingParams {
@@ -43,8 +61,10 @@ contract PolygonXGeistBridgeFacet is Modifiers {
     ) internal {
         Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
         // force unstake from escrow
-        uint256 currentStake = IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow);
-        LibERC20.transferFrom(_aavegotchi.collateralType, _aavegotchi.escrow, msg.sender, currentStake);
+        if(_aavegotchi.collateralType != address(0)) {
+            uint256 currentStake = IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow);
+            LibERC20.transferFrom(_aavegotchi.collateralType, _aavegotchi.escrow, msg.sender, currentStake);
+        }
 
         bytes memory _metadata = abi.encode(_aavegotchi);
         INFTBridge(s.gotchGeistBridge).bridge(_receiver, msg.sender, _tokenId, 1, _msgGasLimit, _connector, _metadata, new bytes(0));
@@ -82,7 +102,7 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         uint256 _msgGasLimit,
         address _connector
     ) external payable {
-        _bridgeItem(_receiver, _tokenId, _amount, _msgGasLimit, _connector);
+        INFTBridge(s.itemGeistBridge).bridge(_receiver, msg.sender, _tokenId, _amount, _msgGasLimit, _connector, new bytes(0), new bytes(0));
     }
 
     struct ItemBridgingParams {
