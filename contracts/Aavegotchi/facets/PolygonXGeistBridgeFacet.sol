@@ -19,6 +19,28 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         uint256 _msgGasLimit,
         address _connector
     ) external payable {
+        _bridgeGotchi(_receiver, _tokenId, _msgGasLimit, _connector);
+    }
+
+    struct GotchiBridgingParams {
+        address receiver;
+        uint256 tokenId;
+        uint256 msgGasLimit;
+    }
+
+    function bridgeGotchis(GotchiBridgingParams[] calldata bridgingParams, address _connector) external payable {
+        require(bridgingParams.length <= 5, "PolygonXGeistBridgeFacet: length should be lower than 5");
+        for (uint256 i = 0; i < bridgingParams.length; i++) {
+            _bridgeGotchi(bridgingParams[i].receiver, bridgingParams[i].tokenId, bridgingParams[i].msgGasLimit, _connector);
+        }
+    }
+
+    function _bridgeGotchi(
+        address _receiver,
+        uint256 _tokenId,
+        uint256 _msgGasLimit,
+        address _connector
+    ) internal {
         Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
         // force unstake from escrow
         uint256 currentStake = IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow);
@@ -60,6 +82,30 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         uint256 _msgGasLimit,
         address _connector
     ) external payable {
+        _bridgeItem(_receiver, _tokenId, _amount, _msgGasLimit, _connector);
+    }
+
+    struct ItemBridgingParams {
+        address receiver;
+        uint256 tokenId;
+        uint256 amount;
+        uint256 msgGasLimit;
+    }
+
+    function bridgeItems(ItemBridgingParams[] calldata bridgingParams, address _connector) external payable {
+        require(bridgingParams.length <= 5, "PolygonXGeistBridgeFacet: length should be lower than 5");
+        for (uint256 i = 0; i < bridgingParams.length; i++) {
+            _bridgeItem(bridgingParams[i].receiver, bridgingParams[i].tokenId, bridgingParams[i].amount, bridgingParams[i].msgGasLimit, _connector);
+        }
+    }
+
+    function _bridgeItem(
+        address _receiver,
+        uint256 _tokenId,
+        uint256 _amount,
+        uint256 _msgGasLimit,
+        address _connector
+    ) internal {
         INFTBridge(s.itemGeistBridge).bridge(_receiver, msg.sender, _tokenId, _amount, _msgGasLimit, _connector, new bytes(0), new bytes(0));
     }
 }

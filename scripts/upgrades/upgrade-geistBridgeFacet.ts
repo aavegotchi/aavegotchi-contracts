@@ -15,6 +15,8 @@ export async function upgrade() {
         "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable",
         "function setMetadata(uint _tokenId, bytes memory _metadata) external",
         "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable",
+        "function bridgeGotchis(tuple(address receiver, uint256 tokenId, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
+        "function bridgeItems(tuple(address receiver, uint256 tokenId, uint256 amount, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
       ],
       removeSelectors: [],
     },
