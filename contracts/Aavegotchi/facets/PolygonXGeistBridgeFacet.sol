@@ -12,19 +12,13 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 
 contract PolygonXGeistBridgeFacet is Modifiers {
-
-    function bridgeGotchi(
-        address _receiver,
-        uint256 _tokenId,
-        uint256 _msgGasLimit,
-        address _connector
-    ) external payable {
+    function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable {
         Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
         // force unstake from escrow
-        if(_aavegotchi.collateralType != address(0)) {
-            uint256 currentStake = IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow);
-            LibERC20.transferFrom(_aavegotchi.collateralType, _aavegotchi.escrow, msg.sender, currentStake);
-        }
+        // if(_aavegotchi.collateralType != address(0)) {
+        //     uint256 currentStake = IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow);
+        //     LibERC20.transferFrom(_aavegotchi.collateralType, _aavegotchi.escrow, msg.sender, currentStake);
+        // }
 
         bytes memory _metadata = abi.encode(_aavegotchi);
         INFTBridge(s.gotchGeistBridge).bridge(_receiver, msg.sender, _tokenId, 1, _msgGasLimit, _connector, _metadata, new bytes(0));
@@ -40,6 +34,14 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         }
     }
 
+    function getGotchiBridge() external view returns (address) {
+        return s.gotchGeistBridge;
+    }
+
+    function getItemBridge() external view returns (address) {
+        return s.itemGeistBridge;
+    }
+
     struct GotchiBridgingParams {
         address receiver;
         uint256 tokenId;
@@ -53,18 +55,13 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         }
     }
 
-    function _bridgeGotchi(
-        address _receiver,
-        uint256 _tokenId,
-        uint256 _msgGasLimit,
-        address _connector
-    ) internal {
+    function _bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) internal {
         Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
         // force unstake from escrow
-        if(_aavegotchi.collateralType != address(0)) {
-            uint256 currentStake = IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow);
-            LibERC20.transferFrom(_aavegotchi.collateralType, _aavegotchi.escrow, msg.sender, currentStake);
-        }
+        // if (_aavegotchi.collateralType != address(0)) {
+        //     uint256 currentStake = IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow);
+        //     LibERC20.transferFrom(_aavegotchi.collateralType, _aavegotchi.escrow, msg.sender, currentStake);
+        // }
 
         bytes memory _metadata = abi.encode(_aavegotchi);
         INFTBridge(s.gotchGeistBridge).bridge(_receiver, msg.sender, _tokenId, 1, _msgGasLimit, _connector, _metadata, new bytes(0));
@@ -95,13 +92,7 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         }
     }
 
-    function bridgeItem(
-        address _receiver,
-        uint256 _tokenId,
-        uint256 _amount,
-        uint256 _msgGasLimit,
-        address _connector
-    ) external payable {
+    function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable {
         INFTBridge(s.itemGeistBridge).bridge(_receiver, msg.sender, _tokenId, _amount, _msgGasLimit, _connector, new bytes(0), new bytes(0));
     }
 
@@ -119,13 +110,7 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         }
     }
 
-    function _bridgeItem(
-        address _receiver,
-        uint256 _tokenId,
-        uint256 _amount,
-        uint256 _msgGasLimit,
-        address _connector
-    ) internal {
+    function _bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) internal {
         INFTBridge(s.itemGeistBridge).bridge(_receiver, msg.sender, _tokenId, _amount, _msgGasLimit, _connector, new bytes(0), new bytes(0));
     }
 }

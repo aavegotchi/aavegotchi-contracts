@@ -43,7 +43,7 @@ export default {
   networks: {
     hardhat: {
       forking: {
-        url: process.env.MATIC_URL,
+        url: process.env.BASE_SEPOLIA_URL,
         timeout: 12000000,
         // blockNumber: 31480850,
       },
@@ -72,7 +72,7 @@ export default {
       gasPrice: 1000000000,
       timeout: 90000,
     },
-    "base-sepolia": {
+    baseSepolia: {
       url: process.env.BASE_SEPOLIA_URL,
       accounts: [process.env.SECRET],
     },

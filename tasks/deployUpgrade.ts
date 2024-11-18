@@ -10,12 +10,7 @@ import { Signer } from "@ethersproject/abstract-signer";
 
 import { IDiamondCut } from "../typechain";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
-import {
-  gasPrice,
-  getSelectors,
-  getSighashes,
-  delay,
-} from "../scripts/helperFunctions";
+import { getSelectors, getSighashes, delay } from "../scripts/helperFunctions";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { sendToMultisig } from "../scripts/libraries/multisig/multisig";
@@ -156,7 +151,7 @@ task(
         signer = await hre.ethers.getSigner(owner);
       } else if (
         hre.network.name === "matic" ||
-        hre.network.name === "base-sepolia" ||
+        hre.network.name === "baseSepolia" ||
         hre.network.name === "amoy"
       ) {
         if (useLedger) {
@@ -194,9 +189,7 @@ task(
           const factory = (await hre.ethers.getContractFactory(
             facet.facetName
           )) as ContractFactory;
-          const deployedFacet: Contract = await factory.deploy({
-            gasPrice: gasPrice,
-          });
+          const deployedFacet: Contract = await factory.deploy();
           await deployedFacet.deployed();
           console.log(
             `Deployed Facet Address for ${facet.facetName}:`,
@@ -315,10 +308,7 @@ task(
           const tx: ContractTransaction = await diamondCut.diamondCut(
             cut,
             initAddress ? initAddress : hre.ethers.constants.AddressZero,
-            initCalldata ? initCalldata : "0x",
-            {
-              gasPrice: gasPrice,
-            }
+            initCalldata ? initCalldata : "0x"
           );
 
           const receipt: ContractReceipt = await tx.wait();
