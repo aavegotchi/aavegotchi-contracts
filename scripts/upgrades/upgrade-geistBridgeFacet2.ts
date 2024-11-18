@@ -6,14 +6,11 @@ import {
 } from "../../tasks/deployUpgrade";
 import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
 
-export async function upgrade() {
+export async function upgradeBridge() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "PolygonXGeistBridgeFacet",
-      addSelectors: [
-        "function getGotchiBridge() external view returns (address)",
-        "function getItemBridge() external view returns (address)",
-      ],
+      addSelectors: [],
       removeSelectors: [],
     },
   ];
@@ -52,7 +49,7 @@ export async function upgrade() {
 }
 
 if (require.main === module) {
-  upgrade()
+  upgradeBridge()
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

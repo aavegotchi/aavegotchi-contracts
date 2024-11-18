@@ -28,7 +28,11 @@ contract PolygonXGeistBridgeFacet is Modifiers {
                 delete s.aavegotchis[_tokenId].equippedWearables[slot];
                 LibItems.removeFromParent(address(this), _tokenId, wearableId, 1);
                 LibItems.addToOwner(s.itemGeistBridge, wearableId, 1);
-                IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(this), s.itemGeistBridge, wearableId, 1);
+
+                if (block.chainid == 137) {
+                    //wearable diamond is not set on Base Sepolia
+                    IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(this), s.itemGeistBridge, wearableId, 1);
+                }
                 emit LibERC1155.TransferFromParent(address(this), _tokenId, wearableId, 1);
             }
         }

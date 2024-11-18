@@ -2,52 +2,37 @@
 
 import { ethers, network } from "hardhat";
 import { maticDiamondAddress } from "../helperFunctions";
+import { upgradeBridge } from "../upgrades/upgrade-geistBridgeFacet2";
+import { bridgeConfig } from "./bridgeConfig";
 
 export default async function main() {
-  const config = {
-    "84532": {
-      GOTCHI: {
-        isAppChain: false,
-        NonMintableToken: "0x87C969d083189927049f8fF3747703FB9f7a8AEd",
-        Vault: "0x110A646276961C2d8a54b951bbC8B169E0F573c4",
-        connectors: {
-          "631571": {
-            FAST: "0xd912F40C27E317db2334e210de892e9dc92816af",
-          },
-        },
-      },
-    },
-    "631571": {
-      GOTCHI: {
-        isAppChain: true,
-        MintableToken: "0x1F0eb9099b9c398323dcf2F133dFdAD9dE7cF994",
-        Controller: "0x5ABB7E28160f82A84e389aDcc9d8CE3F7a0C8D92",
-        connectors: {
-          "84532": {
-            FAST: "0xE7af5160334aded39DD9826cBcBa0B51A1B184e9",
-          },
-        },
-      },
-    },
-  };
-
   let diamondAddress;
   let vault;
   let connector;
   // let itemBridgeAddress;
   // let itemConnectorAddress;
-  if (network.name === "polter") {
-    diamondAddress = config[631571].GOTCHI.MintableToken;
+
+  console.log("network:", network.name);
+
+  await upgradeBridge();
+  console.log("Bridge upgraded");
+
+  if (network.name === "hardhat") {
+    diamondAddress = "0x87C969d083189927049f8fF3747703FB9f7a8AEd";
+    vault = bridgeConfig[84532].GOTCHI.Vault;
+    connector = bridgeConfig[84532].GOTCHI.connectors["631571"].FAST;
+  } else if (network.name === "polter") {
+    diamondAddress = bridgeConfig[631571].GOTCHI.MintableToken;
     // controller address
-    vault = config[631571].GOTCHI.Controller;
-    connector = config[631571].GOTCHI.connectors["84532"].FAST;
+    vault = bridgeConfig[631571].GOTCHI.Controller;
+    connector = bridgeConfig[631571].GOTCHI.connectors["84532"].FAST;
     // itemBridgeAddress = "0x10Cf0D5C1986a7Aa98aDb3bfa3529c1BBDa59FB9";
     // itemConnectorAddress = "0x27fA28c1f241E5dEA9AA583751E5D968a28FD9D5";
   } else if (network.name === "baseSepolia") {
     diamondAddress = "0x87C969d083189927049f8fF3747703FB9f7a8AEd";
     // vault address
-    vault = config[84532].GOTCHI.Vault;
-    connector = config[84532].GOTCHI.connectors["631571"].FAST;
+    vault = bridgeConfig[84532].GOTCHI.Vault;
+    connector = bridgeConfig[84532].GOTCHI.connectors["631571"].FAST;
     // itemBridgeAddress = "0x130119B300049A80C20B2D3bfdFCfd021373E5e7";
     // itemConnectorAddress = "0xb8388b23222876FAC04b464fA0d6A064c67A14FC";
   } else if (network.name === "matic") {
@@ -68,14 +53,24 @@ export default async function main() {
     throw Error("No network settings for " + network.name);
   }
 
+  const accounts = await ethers.getSigners();
+  let signer = accounts[0];
+
+  //impersonate the owner
+  const owner = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
+  await network.provider.request({
+    method: "hardhat_impersonateAccount",
+    params: [owner],
+  });
+
+  signer = await ethers.getSigner(owner);
+
   const bridgeFacet = await ethers.getContractAt(
     "PolygonXGeistBridgeFacet",
-    diamondAddress
+    diamondAddress,
+    signer
   );
-  const aavegotchiFacet = await ethers.getContractAt(
-    "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-    diamondAddress
-  );
+
   // const svgFacet = await ethers.getContractAt("SvgFacet", diamondAddress);
   // const daoFacet = await ethers.getContractAt("DAOFacet", diamondAddress);
   // const itemsFacet = await ethers.getContractAt(
@@ -83,8 +78,6 @@ export default async function main() {
   //   diamondAddress
   // );
 
-  const accounts = await ethers.getSigners();
-  const signer = accounts[0];
   const gasLimit = 1000000;
   const gasPrice = 100000000000;
   let tx;
@@ -93,9 +86,6 @@ export default async function main() {
   // tx = await aavegotchiFacet.setApprovalForAll(itemBridgeAddress, true)
   // console.log(`Wating for tx to be validated, tx hash: ${tx.hash}`)
   // await tx.wait()
-
-  const aavegotchi = await aavegotchiFacet.getAavegotchi(512);
-  console.log("aavegotchi:", aavegotchi);
 
   const tokenId = 512;
 
