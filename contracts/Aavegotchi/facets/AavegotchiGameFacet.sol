@@ -229,8 +229,7 @@ contract AavegotchiGameFacet is Modifiers {
     ///@dev If the NFT(Portal) with identifier `_tokenId` is listed for sale on the baazaar while it is being unlocked, that listing is cancelled
     ///@param _tokenId The identifier of NFT to claim an Aavegotchi from
     ///@param _option The index of the aavegotchi to claim(1-10)
-    ///@param _stakeAmount Minimum amount of collateral tokens needed to be sent to the new aavegotchi escrow contract
-    function claimAavegotchi(uint256 _tokenId, uint256 _option, uint256 _stakeAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function claimAavegotchi(uint256 _tokenId, uint256 _option) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
         require(aavegotchi.status == LibAavegotchi.STATUS_OPEN_PORTAL, "AavegotchiGameFacet: Portal not open");
         require(_option < PORTAL_AAVEGOTCHIS_NUM, "AavegotchiGameFacet: Only 10 aavegotchi options available");
@@ -241,12 +240,10 @@ contract AavegotchiGameFacet is Modifiers {
         aavegotchi.randomNumber = option.randomNumber;
         aavegotchi.numericTraits = option.numericTraits;
         aavegotchi.collateralType = option.collateralType;
-        aavegotchi.minimumStake = option.minimumStake;
+        aavegotchi.minimumStake = option.minimumStake; //no longer needed but keeping in case we use it again later
         aavegotchi.lastInteracted = uint40(block.timestamp - 12 hours);
         aavegotchi.interactionCount = 50;
         aavegotchi.claimTime = uint40(block.timestamp);
-
-        require(_stakeAmount >= option.minimumStake, "AavegotchiGameFacet: _stakeAmount less than minimum stake");
 
         aavegotchi.status = LibAavegotchi.STATUS_AAVEGOTCHI;
         emit ClaimAavegotchi(_tokenId);
@@ -254,7 +251,7 @@ contract AavegotchiGameFacet is Modifiers {
         address escrow = address(new CollateralEscrow(option.collateralType));
         aavegotchi.escrow = escrow;
         address owner = LibMeta.msgSender();
-        LibERC20.transferFrom(option.collateralType, owner, escrow, _stakeAmount);
+
         LibERC721Marketplace.cancelERC721Listing(address(this), _tokenId, owner);
     }
 

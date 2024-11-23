@@ -11,8 +11,6 @@ import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 
 import {ForgeFacet} from "../ForgeDiamond/facets/ForgeFacet.sol";
 
-// import "hardhat/console.sol";
-
 contract CollateralFacet is Modifiers {
     event IncreaseStake(uint256 indexed _tokenId, uint256 _stakeAmount);
     event DecreaseStake(uint256 indexed _tokenId, uint256 _reduceAmount);
@@ -100,10 +98,8 @@ contract CollateralFacet is Modifiers {
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 
         address collateralType = s.aavegotchis[_tokenId].collateralType;
-        uint256 currentStake = IERC20(collateralType).balanceOf(escrow);
-        uint256 minimumStake = s.aavegotchis[_tokenId].minimumStake;
+        require(IERC20(collateralType).balanceOf(escrow) >= _reduceAmount, "CollateralFacet: Not enough collateral to decrease");
 
-        require(currentStake - _reduceAmount >= minimumStake, "CollateralFacet: Cannot reduce below minimum stake");
         emit DecreaseStake(_tokenId, _reduceAmount);
         LibERC20.transferFrom(collateralType, escrow, LibMeta.msgSender(), _reduceAmount);
     }
