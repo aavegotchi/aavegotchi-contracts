@@ -39,6 +39,7 @@ import { AirdropBaadgeTaskArgs } from "../tasks/baadgeAirdrop";
 import { MintBaadgeTaskArgs } from "../tasks/mintBaadgeSvgs";
 const fs = require("fs");
 import { SleeveObject, ItemTypeInputNew } from "./itemTypeHelpers";
+import { DeploymentConfig } from "./deployFullDiamond";
 
 export interface SvgTypesAndSizes {
   svgType: BytesLike;
@@ -242,18 +243,21 @@ export async function uploadSvgs(
   svgFacet: SvgFacet,
   svgs: string[],
   svgType: string,
-  ethers: any
+  ethers: any,
+  deploymentConfig: DeploymentConfig
 ) {
-  console.log("starting Upload");
+  // Check if svgsUploaded exists and if this specific svgType is already uploaded
 
   let svgItemsStart = 0;
   let svgItemsEnd = 0;
+
+  let uniqueId = "";
+  let isUploaded = false;
+
   while (true) {
     let itemsSize = 0;
     while (true) {
-      console.log("continuing Upload");
       if (svgItemsEnd === svgs.length) {
-        console.log("continuing Upload");
         break;
       }
       itemsSize += svgs[svgItemsEnd].length;
@@ -268,14 +272,33 @@ export async function uploadSvgs(
       ethers
     );
 
-    //this might be incorrect
-    // printSizeInfo(svgType, svgTypesAndSizes[0].sizes);
+    if (!deploymentConfig.svgsUploaded[svgType]) {
+      deploymentConfig.svgsUploaded[svgType] = {};
+    }
 
-    let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes);
-    console.log("tx:", tx.hash);
-    let receipt = await tx.wait();
-    if (!receipt.status) {
-      throw Error(`Error:: ${tx.hash}`);
+    uniqueId = `${svgItemsStart}_${svgItemsEnd}`;
+
+    isUploaded = deploymentConfig.svgsUploaded?.[svgType]?.[uniqueId];
+
+    console.log(uniqueId, isUploaded);
+
+    if (isUploaded) {
+      console.log(`${svgType} already uploaded, skipping`);
+    } else {
+      console.log(`${svgType} not uploaded, uploading`);
+
+      let tx = await svgFacet.storeSvg(svg, svgTypesAndSizes);
+      console.log("tx:", tx.hash);
+      let receipt = await tx.wait();
+
+      //todo:
+      deploymentConfig.svgsUploaded![svgType][
+        `${svgItemsStart}_${svgItemsEnd}`
+      ] = true;
+
+      if (!receipt.status) {
+        throw Error(`Error:: ${tx.hash}`);
+      }
     }
 
     // console.log(svgItemsEnd, svg.length);
@@ -322,7 +345,8 @@ export async function uploadOrUpdateSvg(
   svgType: string,
   svgId: number[],
   svgFacet: SvgFacet,
-  ethers: any
+  ethers: any,
+  deploymentConfig: DeploymentConfig
 ) {
   // if (typeof svg === "number") svg = [""];
   const idUpload = [];
@@ -347,7 +371,7 @@ export async function uploadOrUpdateSvg(
   }
   if (idUpload.length > 0) {
     console.log(`Svg ${svgType} #${idUpload} does not exist, uploading`);
-    await uploadSvgs(svgFacet, svgUpload, svgType, ethers);
+    await uploadSvgs(svgFacet, svgUpload, svgType, ethers, deploymentConfig);
   }
 }
 

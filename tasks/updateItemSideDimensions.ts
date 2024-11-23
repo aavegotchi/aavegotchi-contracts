@@ -19,10 +19,12 @@ export interface UpdateItemSideDimensionsTaskArgs {
   itemIds: string;
   sides: string;
   dimensions: string;
+  diamondAddress: string;
 }
 
 export function convertSideDimensionsToTaskFormat(
-  dimensions: SideDimensions[]
+  dimensions: SideDimensions[],
+  diamondAddress: string
 ) {
   const items: SideDimensions[] = [];
   for (let index = 0; index < dimensions.length; index++) {
@@ -34,6 +36,7 @@ export function convertSideDimensionsToTaskFormat(
     dimensions: convertDimensionsArrayToString(
       items.map((item) => item.dimensions)
     ),
+    diamondAddress,
   };
   return sideDimensionsTaskArgs;
 }

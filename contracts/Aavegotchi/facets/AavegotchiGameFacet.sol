@@ -1,14 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {LibAavegotchi, AavegotchiInfo, NUMERIC_TRAITS_NUM, AavegotchiCollateralTypeInfo, PortalAavegotchiTraitsIO, InternalPortalAavegotchiTraitsIO, PORTAL_AAVEGOTCHIS_NUM} from "../libraries/LibAavegotchi.sol";
+import {LibAavegotchi, NUMERIC_TRAITS_NUM, AavegotchiCollateralTypeInfo, PortalAavegotchiTraitsIO, InternalPortalAavegotchiTraitsIO, PORTAL_AAVEGOTCHIS_NUM} from "../libraries/LibAavegotchi.sol";
 
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
-
-import {IERC20} from "../../shared/interfaces/IERC20.sol";
-import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 import {Modifiers, Haunt, Aavegotchi} from "../libraries/LibAppStorage.sol";
-import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721Marketplace} from "../libraries/LibERC721Marketplace.sol";

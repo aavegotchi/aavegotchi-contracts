@@ -36,13 +36,13 @@ library ForgeLibDiamond {
         mapping(bytes4 => bool) supportedInterfaces;
         // owner of the contract
         address contractOwner;
-        //aavegotchi master diamond address
-        address aavegotchiDiamond;
     }
 
     bytes32 public constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
-    address public constant AAVEGOTCHI_DIAMOND = 0x86935F11C86623deC8a25696E1C19a8659CbF95d;
-    address public constant WEARABLE_DIAMOND = 0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f;
+
+    //todo: ensure these are set in future upgrades on Polygon
+    // address public constant AAVEGOTCHI_DIAMOND = 0x86935F11C86623deC8a25696E1C19a8659CbF95d;
+    // address public constant WEARABLE_DIAMOND = 0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
@@ -68,17 +68,9 @@ library ForgeLibDiamond {
         require(LibMeta.msgSender() == diamondStorage().contractOwner, "LibDiamond: Must be contract owner");
     }
 
-    function enforceIsDiamond() internal view {
-        require(msg.sender == AAVEGOTCHI_DIAMOND, "LibDiamond: Caller must be Aavegotchi Diamond");
-    }
-
     event DiamondCut(IDiamondCut.FacetCut[] _diamondCut, address _init, bytes _calldata);
 
-    function addDiamondFunctions(
-        address _diamondCutFacet,
-        address _diamondLoupeFacet,
-        address _ownershipFacet
-    ) internal {
+    function addDiamondFunctions(address _diamondCutFacet, address _diamondLoupeFacet, address _ownershipFacet) internal {
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](3);
         bytes4[] memory functionSelectors = new bytes4[](1);
         functionSelectors[0] = IDiamondCut.diamondCut.selector;
@@ -102,11 +94,7 @@ library ForgeLibDiamond {
     }
 
     // Internal function version of diamondCut
-    function diamondCut(
-        IDiamondCut.FacetCut[] memory _diamondCut,
-        address _init,
-        bytes memory _calldata
-    ) internal {
+    function diamondCut(IDiamondCut.FacetCut[] memory _diamondCut, address _init, bytes memory _calldata) internal {
         for (uint256 facetIndex; facetIndex < _diamondCut.length; facetIndex++) {
             IDiamondCut.FacetCutAction action = _diamondCut[facetIndex].action;
             if (action == IDiamondCut.FacetCutAction.Add) {

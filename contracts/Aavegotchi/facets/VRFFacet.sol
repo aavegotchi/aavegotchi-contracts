@@ -133,12 +133,12 @@ contract VrfFacet is Modifiers {
 
     function drawRandomNumber(uint256 _tokenId) internal {
         s.aavegotchis[_tokenId].status = LibAavegotchi.STATUS_VRF_PENDING;
-        uint256 fee = s.fee;
-        require(s.link.balanceOf(address(this)) >= fee, "VrfFacet: Not enough LINK");
+        // uint256 fee = s.fee;
+        // require(s.link.balanceOf(address(this)) >= fee, "VrfFacet: Not enough LINK");
         bytes32 l_keyHash = s.keyHash;
-        require(s.link.transferAndCall(s.vrfCoordinator, fee, abi.encode(l_keyHash, 0)), "VrfFacet: link transfer failed");
+        // require(s.link.transferAndCall(s.vrfCoordinator, fee, abi.encode(l_keyHash, 0)), "VrfFacet: link transfer failed");
         uint256 vrfSeed = uint256(keccak256(abi.encode(l_keyHash, 0, address(this), s.vrfNonces[l_keyHash])));
-        s.vrfNonces[l_keyHash]++;
+        // s.vrfNonces[l_keyHash]++;
         bytes32 requestId = keccak256(abi.encodePacked(l_keyHash, vrfSeed));
         s.vrfRequestIdToTokenId[requestId] = _tokenId;
         // for testing
@@ -194,12 +194,7 @@ contract VrfFacet is Modifiers {
     //@param _keyHash New keyhash
     //@param _vrfCoordinator The new vrf coordinator address
     //@param _link New LINK token contract address
-    function changeVrf(
-        uint256 _newFee,
-        bytes32 _keyHash,
-        address _vrfCoordinator,
-        address _link
-    ) external onlyOwner {
+    function changeVrf(uint256 _newFee, bytes32 _keyHash, address _vrfCoordinator, address _link) external onlyOwner {
         if (_newFee != 0) {
             s.fee = uint96(_newFee);
         }

@@ -1,6 +1,6 @@
 import { Contract } from "@ethersproject/contracts";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DiamondLoupeFacet, OwnershipFacet } from "../typechain";
+import { DiamondLoupeFacet, OwnershipFacet, IDiamondCut } from "../typechain";
 import * as fs from "fs";
 import {
   DefenderRelayProvider,
@@ -8,6 +8,7 @@ import {
 } from "defender-relay-client/lib/ethers";
 
 import { fundSigner } from "../helpers/helpers";
+import { BytesLike } from "ethers";
 
 export const gasPrice = 570000000000;
 
@@ -315,4 +316,65 @@ export function logXPRecipients(
     fs.writeFileSync(parentFile, JSON.stringify(data));
     console.log("finished writing to file");
   }
+}
+
+export const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 };
+
+export async function getDiamondCut(
+  diamondAddress: string,
+  FacetNames: string[],
+  ethers: any,
+  diamondInit: any,
+  showDiamondCut: boolean = false
+) {
+  const cut: IDiamondCut.FacetCutStruct[] = [];
+
+  const uniqueSelectors = new Set();
+
+  for (const FacetName of FacetNames) {
+    const localSelectors = new Set();
+
+    const Facet = await ethers.getContractFactory(FacetName);
+    const facet = await Facet.deploy();
+    await facet.deployed();
+    console.log(`${FacetName} deployed: ${facet.address}`);
+
+    const selectors = getSelectors(facet);
+    for (const selector of selectors) {
+      if (uniqueSelectors.has(selector)) {
+        const functionName = facet.interface.getFunction(selector).name;
+
+        throw new Error(
+          `Selector ${selector} (${functionName}) already in diamond, omitting.`
+        );
+      } else {
+        uniqueSelectors.add(selector);
+        localSelectors.add(selector);
+      }
+    }
+
+    cut.push({
+      facetAddress: facet.address,
+      action: FacetCutAction.Add,
+      functionSelectors: Array.from(localSelectors) as BytesLike[],
+    });
+  }
+
+  return cut;
+
+  // upgrade diamond with facets
+  console.log("");
+  console.log("Diamond Cut:", cut);
+  const diamondCut = await ethers.getContractAt("IDiamondCut", diamondAddress);
+  let tx;
+  let receipt;
+  // call to init function
+  let functionCall = diamondInit.interface.encodeFunctionData("init");
+  tx = await diamondCut.diamondCut(cut, diamondInit.address, functionCall);
+  console.log("Diamond cut tx: ", tx.hash);
+  receipt = await tx.wait();
+  if (!receipt.status) {
+    throw Error(`Diamond upgrade failed: ${tx.hash}`);
+  }
+  console.log("Completed diamond cut");
 }

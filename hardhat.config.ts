@@ -40,13 +40,23 @@ export default {
   etherscan: {
     apiKey: process.env.POLYGON_API_KEY,
   },
+  customChains: [
+    {
+      network: "baseSepolia",
+      chainId: 5,
+      urls: {
+        apiURL: "https://api-goerli.etherscan.io/api",
+        browserURL: "https://goerli.etherscan.io",
+      },
+    },
+  ],
   networks: {
     hardhat: {
-      forking: {
-        url: process.env.BASE_SEPOLIA_URL,
-        timeout: 12000000,
-        // blockNumber: 31480850,
-      },
+      // forking: {
+      //   url: process.env.BASE_SEPOLIA_URL,
+      //   timeout: 12000000,
+      //   // blockNumber: 31480850,
+      // },
       blockGasLimit: 20000000,
       timeout: 120000,
       gas: "auto",

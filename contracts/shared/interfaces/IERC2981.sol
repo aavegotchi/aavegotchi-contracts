@@ -5,7 +5,7 @@ import "./IERC165.sol";
 
 /// @title IERC2981
 /// @dev Interface for the ERC2981 - Token Royalty standard
-interface IERC2981 is IERC165 {
+interface IERC2981 {
     /// ERC165 bytes to add to interface array - set in parent contract
     /// implementing this standard
     ///
@@ -27,5 +27,5 @@ interface IERC2981 is IERC165 {
     /// @param interfaceID The interface identifier, as specified in ERC-165
     /// @return `true` if the contract implements
     ///         `_INTERFACE_ID_ERC2981` and `false` otherwise
-    function supportsInterface(bytes4 interfaceID) external view override returns (bool);
+    // function supportsInterface(bytes4 interfaceID) external view override returns (bool);
 }

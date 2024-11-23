@@ -15,12 +15,17 @@ export async function upgradeRemoveMinStake() {
     {
       facetName: "AavegotchiGameFacet",
       addSelectors: [
-        "function claimAavegotchi(uint256 _tokenId, uint256 _option) external",
+        // "function claimAavegotchi(uint256 _tokenId, uint256 _option) external",
       ],
       removeSelectors: [
-        "function claimAavegotchi(uint256 _tokenId, uint256 _option, uint256 _stakeAmount) external",
+        // "function claimAavegotchi(uint256 _tokenId, uint256 _option, uint256 _stakeAmount) external",
       ],
     },
+    // {
+    //   facetName: "CollateralFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);

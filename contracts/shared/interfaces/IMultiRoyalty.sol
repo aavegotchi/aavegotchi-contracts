@@ -5,7 +5,7 @@ import "./IERC165.sol";
 
 /// @title IMultiRoyalty
 /// @dev Interface for the MultiRoyalty standard (will update to EIP when submitted)
-interface IMultiRoyalty is IERC165 {
+interface IMultiRoyalty {
     /// ERC165 bytes to add to interface array - set in parent contract
     /// implementing this standard
     ///
@@ -19,10 +19,10 @@ interface IMultiRoyalty is IERC165 {
     /// @param _salePrice - the sale price of the NFT asset specified by _tokenId
     /// @return receivers - address of who should be sent the royalty payment
     /// @return royaltyAmounts - the royalty payment amount for _salePrice
-    function multiRoyaltyInfo(uint256 _tokenId, uint256 _salePrice)
-        external
-        view
-        returns (address[] memory receivers, uint256[] memory royaltyAmounts);
+    function multiRoyaltyInfo(
+        uint256 _tokenId,
+        uint256 _salePrice
+    ) external view returns (address[] memory receivers, uint256[] memory royaltyAmounts);
 
     /// @notice Informs callers that this contract supports multi royalty standard
     /// @dev If `_registerInterface(_INTERFACE_ID)` is called
@@ -30,5 +30,5 @@ interface IMultiRoyalty is IERC165 {
     /// @param interfaceID The interface identifier, as specified in ERC-165
     /// @return `true` if the contract implements
     ///         `_INTERFACE_ID` and `false` otherwise
-    function supportsInterface(bytes4 interfaceID) external view override returns (bool);
+    // function supportsInterface(bytes4 interfaceID) external view override returns (bool);
 }

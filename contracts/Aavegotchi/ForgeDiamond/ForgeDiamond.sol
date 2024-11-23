@@ -11,17 +11,16 @@ import {ForgeLibDiamond} from "./libraries/ForgeLibDiamond.sol";
 import {DiamondCutFacet} from "../../shared/facets/DiamondCutFacet.sol";
 import {DiamondLoupeFacet} from "../../shared/facets/DiamondLoupeFacet.sol";
 import {OwnershipFacet} from "../../shared/facets/OwnershipFacet.sol";
+import {LibAppStorage} from "./libraries/LibAppStorage.sol";
 
 contract ForgeDiamond {
-    constructor(
-        address _contractOwner,
-        address _diamondCutFacet,
-        address _diaomondLoupeFacet,
-        address _ownershipFacet
-    ) {
+    constructor(address _contractOwner, address _aavegotchiDiamond, address _wearableDiamond) {
         ForgeLibDiamond.setContractOwner(_contractOwner);
-        ForgeLibDiamond.addDiamondFunctions(_diamondCutFacet, _diaomondLoupeFacet, _ownershipFacet);
+        ForgeLibDiamond.addDiamondFunctions(address(new DiamondCutFacet()), address(new DiamondLoupeFacet()), address(new OwnershipFacet()));
         ForgeLibDiamond.DiamondStorage storage ds = ForgeLibDiamond.diamondStorage();
+
+        LibAppStorage.diamondStorage().aavegotchiDiamond = _aavegotchiDiamond;
+        LibAppStorage.diamondStorage().wearableDiamond = _wearableDiamond;
         ds.supportedInterfaces[0xd9b67a26] = true; //erc1155
     }
 

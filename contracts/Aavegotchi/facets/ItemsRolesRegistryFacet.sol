@@ -1,23 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.1;
 
-import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
-import {IERC165} from "../../shared/interfaces/IERC165.sol";
 import {IERC7589} from "../../shared/interfaces/IERC7589.sol";
 
 import {LibItems} from "../libraries/LibItems.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
-import {Modifiers, ItemType, EQUIPPED_WEARABLE_SLOTS, GotchiEquippedDepositsInfo, Aavegotchi, ItemRolesInfo} from "../libraries/LibAppStorage.sol";
-import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import {ERC1155Holder, ERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
+import {Modifiers, EQUIPPED_WEARABLE_SLOTS, GotchiEquippedDepositsInfo, Aavegotchi, ItemRolesInfo} from "../libraries/LibAppStorage.sol";
 import {IEventHandlerFacet} from "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {LibItemsEvents} from "../libraries/LibItemsEvents.sol";
 
-contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
+contract ItemsRolesRegistryFacet is Modifiers, IERC7589 {
     using EnumerableSet for EnumerableSet.UintSet;
     bytes32 public constant UNIQUE_ROLE = keccak256("Player()");
 
@@ -305,7 +301,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
             "ItemsRolesRegistryFacet: token has an active role"
         );
 
-        if(_depositInfo.roleAssignment.grantee != _grantee) {
+        if (_depositInfo.roleAssignment.grantee != _grantee) {
             // if depositId is being delegated to a new user, we need to make sure that Aavegotchis not owned by the new user are using these Wearables
             _unequipAllDelegatedWearables(_depositId, _depositInfo.deposit.tokenId);
         }
@@ -350,7 +346,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
         uint256 _unequippedBalance;
         uint16[EQUIPPED_WEARABLE_SLOTS] memory _previousEquippedWearables = _aavegotchi.equippedWearables;
         uint256[EQUIPPED_WEARABLE_SLOTS] memory _previousEquippedDepositIds = _gotchiInfo.equippedDepositIds;
-        
+
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             // if the item is not equipped in the slot or the deposit is not the same, continue
             if (_aavegotchi.equippedWearables[slot] != _tokenIdToUnequip || _gotchiInfo.equippedDepositIds[slot] != _depositId) continue;

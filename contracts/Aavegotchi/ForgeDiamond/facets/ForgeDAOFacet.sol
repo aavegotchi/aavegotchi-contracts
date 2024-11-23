@@ -48,6 +48,11 @@ contract ForgeDAOFacet is Modifiers {
         s.aavegotchiDiamond = _address;
     }
 
+    function setDiamondAddresses(address _aavegotchiDiamond, address _wearableDiamond) external onlyDaoOrOwner {
+        s.aavegotchiDiamond = _aavegotchiDiamond;
+        s.wearableDiamond = _wearableDiamond;
+    }
+
     // @notice Allow DAO to update forging Alloy cost
     // @param costs RarityValueIO struct of costs.
     // @dev We convert RarityValueIO keys into a mapping that is referencable by equivalent rarity score modifier,

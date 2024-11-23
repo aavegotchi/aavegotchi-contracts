@@ -93,3 +93,22 @@ export enum WEARABLE_BASE_QUANTITIES {
   MYTHICAL = 50,
   GODLIKE = 10,
 }
+
+interface NetworkAddresses {
+  wghst: string;
+}
+
+export const networkAddresses: Record<number, NetworkAddresses> = {
+  137: {
+    wghst: "0x443650Be09A02Be6fa79Ba19169A853A33581660",
+  },
+  31337: {
+    wghst: "0x443650Be09A02Be6fa79Ba19169A853A33581660",
+  },
+  631571: {
+    wghst: "0x443650Be09A02Be6fa79Ba19169A853A33581660",
+  },
+  63157: {
+    wghst: "0x74e2051A9Cd994F83f2d789448dCa4a3e879964c",
+  },
+};
