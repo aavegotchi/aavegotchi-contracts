@@ -8,8 +8,6 @@ import {ILink} from "../../interfaces/ILink.sol";
 import {ForgeFacet} from "./ForgeFacet.sol";
 import {ForgeTokenFacet} from "./ForgeTokenFacet.sol";
 
-
-
 contract ForgeVRFFacet is Modifiers {
     event VrfResponse(address user, uint256 randomNumber, bytes32 requestId, uint256 blockNumber);
     event GeodeWin(address user, uint256 itemId, uint256 geodeTokenId, bytes32 requestId, uint256 blockNumber);
@@ -116,7 +114,7 @@ contract ForgeVRFFacet is Modifiers {
         s.vrfUserToRequestIds[sender].push(requestId);
 
         // for testing
-       // tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _geodeTokenIds[0]))));
+        // tempFulfillRandomness(requestId, uint256(keccak256(abi.encodePacked(block.number, _geodeTokenIds[0]))));
     }
 
     // for testing purpose only
@@ -325,13 +323,11 @@ contract ForgeVRFFacet is Modifiers {
 
                     if (data.rarityWonIndex >= 0) {
                         data.prizes = getAvailablePrizesForRarity(rarities[uint(data.rarityWonIndex)]);
-                    
-                     
 
                         uint256 idx = data.geodeRandNum % data.prizes.length;
 
                         data.itemIdWon = data.prizes[idx];
-              
+
                         // if last quantity of item won, rearrange array.
                         if (s.geodePrizeQuantities[data.itemIdWon] == 1) {
                             // find index in geodePrizeTokenIds
@@ -342,13 +338,10 @@ contract ForgeVRFFacet is Modifiers {
                                     break;
                                 }
                             }
-               
 
                             s.geodePrizeTokenIds[tokenIdsIndex] = s.geodePrizeTokenIds[s.geodePrizeTokenIds.length - 1];
                             s.geodePrizeTokenIds.pop();
                         }
-
-                      
 
                         s.geodePrizeQuantities[data.itemIdWon] -= 1;
                         data.numWins++;
@@ -358,8 +351,6 @@ contract ForgeVRFFacet is Modifiers {
 
                         emit GeodeWin(sender, data.itemIdWon, info.geodeTokenIds[i], requestId, block.number);
                     } else {
-                      
-
                         forgeFacet().burn(address(this), info.geodeTokenIds[i], 1);
                         emit GeodeEmpty(sender, info.geodeTokenIds[i], requestId, block.number);
                     }

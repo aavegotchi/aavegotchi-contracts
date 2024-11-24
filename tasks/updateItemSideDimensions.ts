@@ -19,10 +19,12 @@ export interface UpdateItemSideDimensionsTaskArgs {
   itemIds: string;
   sides: string;
   dimensions: string;
+  diamondAddress: string;
 }
 
 export function convertSideDimensionsToTaskFormat(
-  dimensions: SideDimensions[]
+  dimensions: SideDimensions[],
+  diamondAddress: string
 ) {
   const items: SideDimensions[] = [];
   for (let index = 0; index < dimensions.length; index++) {
@@ -34,6 +36,7 @@ export function convertSideDimensionsToTaskFormat(
     dimensions: convertDimensionsArrayToString(
       items.map((item) => item.dimensions)
     ),
+    diamondAddress
   };
   return sideDimensionsTaskArgs;
 }
@@ -69,7 +72,7 @@ task(
   .addParam("itemIds", "Item IDs to update dimensions")
   .addParam("sides", "Item side to be updated dimensions")
   .addParam("dimensions", "New dimensions of each item")
-
+  .addOptionalParam("diamondAddress", "Diamond address to update", maticDiamondAddress)
   .setAction(
     async (
       taskArgs: UpdateItemSideDimensionsTaskArgs,
@@ -85,7 +88,7 @@ task(
       const signer: Signer = await getRelayerSigner(hre);
       const svgViewsFacet = (await hre.ethers.getContractAt(
         "SvgViewsFacet",
-        maticDiamondAddress,
+        taskArgs.diamondAddress,
         signer
       )) as SvgViewsFacet;
 

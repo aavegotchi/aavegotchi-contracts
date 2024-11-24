@@ -38,7 +38,9 @@ require("./tasks/deployXPDrop");
 // Go to https://buidler.dev/config/ to learn more
 export default {
   etherscan: {
-    apiKey: process.env.POLYGON_API_KEY,
+    apiKey: {
+      matic: process.env.POLYGON_API_KEY,
+    },
   },
   networks: {
     hardhat: {
@@ -72,7 +74,14 @@ export default {
       gasPrice: 1000000000,
       timeout: 90000,
     },
-
+    amoy: {
+      url: process.env.AMOY_URL,
+      accounts: [process.env.SECRET],
+    },
+    "base-sepolia": {
+      url: process.env.BASE_SEPOLIA_URL,
+      accounts: [process.env.SECRET],
+    },
     // gorli: {
     //   url: process.env.GORLI,
     //   accounts: [process.env.SECRET],
