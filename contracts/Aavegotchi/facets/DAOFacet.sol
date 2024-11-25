@@ -92,7 +92,7 @@ contract DAOFacet is Modifiers {
     ///@dev If a certain collateral exists already, it will be overwritten
     ///@param _hauntId Identifier for haunt to add the collaterals to
     ///@param _collateralTypes An array of structs where each struct contains details about a particular collateral
-    function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) public onlyItemManager {
+    function addCollateralTypes(uint256 _hauntId, AavegotchiCollateralTypeIO[] calldata _collateralTypes) public onlyDaoOrOwner {
         for (uint256 i; i < _collateralTypes.length; i++) {
             address newCollateralType = _collateralTypes[i].collateralType;
 
@@ -182,10 +182,10 @@ contract DAOFacet is Modifiers {
     ///@param _bodyColor The universal body color applied to NFTs in the new haunt
     function createHaunt(uint24 _hauntMaxSize, uint96 _portalPrice, bytes3 _bodyColor) external onlyDaoOrOwner returns (uint256 hauntId_) {
         uint256 currentHauntId = s.currentHauntId;
-        require(
-            s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
-            "AavegotchiFacet: Haunt must be full before creating new"
-        );
+        // require(
+        //     s.haunts[currentHauntId].totalCount == s.haunts[currentHauntId].hauntMaxSize,
+        //     "AavegotchiFacet: Haunt must be full before creating new"
+        // );
         hauntId_ = currentHauntId + 1;
         s.currentHauntId = uint16(hauntId_);
         s.haunts[hauntId_].hauntMaxSize = _hauntMaxSize;

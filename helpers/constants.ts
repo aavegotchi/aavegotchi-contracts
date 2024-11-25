@@ -96,19 +96,28 @@ export enum WEARABLE_BASE_QUANTITIES {
 
 interface NetworkAddresses {
   wghst: string;
+  ghst: string;
 }
 
 export const networkAddresses: Record<number, NetworkAddresses> = {
   137: {
     wghst: "0x443650Be09A02Be6fa79Ba19169A853A33581660",
+    ghst: "0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7",
   },
   31337: {
     wghst: "0x443650Be09A02Be6fa79Ba19169A853A33581660",
+    ghst: "0x3f382dbd960e3a9bbceae22651e88158d2791550",
   },
   631571: {
     wghst: "0x443650Be09A02Be6fa79Ba19169A853A33581660",
+    ghst: "0x443650Be09A02Be6fa79Ba19169A853A33581660",
   },
   63157: {
     wghst: "0x74e2051A9Cd994F83f2d789448dCa4a3e879964c",
+    ghst: "",
+  },
+  84532: {
+    ghst: "0xe97f36a00058aa7dfc4e85d23532c3f70453a7ae",
+    wghst: "",
   },
 };

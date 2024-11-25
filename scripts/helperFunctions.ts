@@ -288,7 +288,9 @@ export async function getRelayerSigner(hre: HardhatRuntimeEnvironment) {
       speed: "safeLow",
       validForSeconds: 7200,
     });
-  } else if (["tenderly", "base-sepolia", "amoy"].includes(hre.network.name)) {
+  } else if (
+    ["tenderly", "base-sepolia", "amoy", "polter"].includes(hre.network.name)
+  ) {
     //impersonate
     return (await hre.ethers.getSigners())[0];
   } else {
@@ -334,10 +336,10 @@ export async function getDiamondCut(
   for (const FacetName of FacetNames) {
     const localSelectors = new Set();
 
-    const Facet = await ethers.getContractFactory(FacetName);
-    const facet = await Facet.deploy();
-    await facet.deployed();
-    console.log(`${FacetName} deployed: ${facet.address}`);
+    // const Facet = await ethers.getContractFactory(FacetName);
+    // const facet = await Facet.deploy();
+    // await facet.deployed();
+    // console.log(`${FacetName} deployed: ${facet.address}`);
 
     const selectors = getSelectors(facet);
     for (const selector of selectors) {

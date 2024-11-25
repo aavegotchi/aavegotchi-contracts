@@ -1,4 +1,4 @@
-const { NonceManager } = require("@ethersproject/experimental");
+import { ethers, network } from "hardhat";
 
 async function batchMintPortals() {
   const accounts = await ethers.getSigners();
@@ -10,17 +10,17 @@ async function batchMintPortals() {
   const itemManager = "0x8D46fd7160940d89dA026D59B2e819208E714E82";
 
   const gasPrice = 50000000000;
+  let signer;
 
-  let testing = ["hardhat"].includes(hre.network.name);
+  let testing = ["hardhat"].includes(network.name);
 
   if (testing) {
-    await hre.network.provider.request({
+    await network.provider.request({
       method: "hardhat_impersonateAccount",
       params: [itemManager],
     });
     signer = await ethers.provider.getSigner(itemManager);
-    nonceManagedSigner = new NonceManager(signer);
-  } else if (hre.network.name === "matic") {
+  } else if (network.name === "matic") {
     signer = accounts[0]; // new ethers.Wallet(process.env.ITEM_MANAGER);
   } else {
     throw Error("Incorrect network selected");

@@ -86,6 +86,10 @@ export default {
       url: process.env.BASE_SEPOLIA_URL,
       accounts: [process.env.SECRET],
     },
+    polter: {
+      url: process.env.POLTER_TESTNET_URL,
+      accounts: [process.env.SECRET],
+    },
     // gorli: {
     //   url: process.env.GORLI,
     //   accounts: [process.env.SECRET],

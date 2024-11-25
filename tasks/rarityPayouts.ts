@@ -5,10 +5,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { parseEther, formatEther } from "@ethersproject/units";
 import { ERC20, EscrowFacet } from "../typechain";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import {
-  getRelayerSigner,
-  maticDiamondAddress,
-} from "../scripts/helperFunctions";
+import { getRelayerSigner } from "../scripts/helperFunctions";
 import { LeaderboardDataName, LeaderboardType } from "../types";
 import {
   stripGotchis,
@@ -49,6 +46,7 @@ export interface RarityPayoutTaskArgs {
   rarityParams: string;
   kinshipParams: string;
   xpParams: string;
+  diamondAddress: string;
 }
 
 interface TxArgs {
@@ -64,6 +62,7 @@ task("rarityPayout")
   )
   .addParam("deployerAddress")
   .addParam("tieBreakerIndex", "The Tiebreaker index")
+  .addParam("diamondAddress", "Address of the diamond")
   .setAction(
     async (taskArgs: RarityPayoutTaskArgs, hre: HardhatRuntimeEnvironment) => {
       const filename: string = taskArgs.rarityDataFile;
@@ -283,7 +282,7 @@ task("rarityPayout")
       //   ghstAddress
       // );
 
-      await sendGhst(hre, signer, txData);
+      await sendGhst(hre, signer, txData, taskArgs.diamondAddress);
     }
   );
 
@@ -329,7 +328,8 @@ interface SacrificedGotchi {
 async function sendGhst(
   hre: HardhatRuntimeEnvironment,
   signer: Signer,
-  txData: TxArgs[][]
+  txData: TxArgs[][],
+  diamondAddress: string
 ) {
   let totalGhstSent = BigNumber.from(0);
 
@@ -368,7 +368,7 @@ async function sendGhst(
     );
 
     const escrowFacet = (
-      await hre.ethers.getContractAt("EscrowFacet", maticDiamondAddress)
+      await hre.ethers.getContractAt("EscrowFacet", diamondAddress)
     ).connect(signer) as EscrowFacet;
 
     try {

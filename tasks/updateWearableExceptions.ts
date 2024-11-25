@@ -1,12 +1,6 @@
 import { task } from "hardhat/config";
 import { Signer } from "@ethersproject/abstract-signer";
-import {
-  gasPrice,
-  getDiamondSigner,
-  getRelayerSigner,
-  itemManager,
-  maticDiamondAddress,
-} from "../scripts/helperFunctions";
+import { getRelayerSigner } from "../scripts/helperFunctions";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { SvgViewsFacet } from "../typechain";
 import { Exceptions } from "../scripts/itemTypeHelpers";
@@ -78,6 +72,7 @@ task(
     "exceptionBools",
     "Determines whether or not wearble ID is exception"
   )
+  .addParam("diamondAddress", "Address of the diamond")
 
   .setAction(
     async (
@@ -95,7 +90,7 @@ task(
       const signer: Signer = await getRelayerSigner(hre);
       const svgViewsFacet = (await hre.ethers.getContractAt(
         "SvgViewsFacet",
-        maticDiamondAddress,
+        taskArgs.diamondAddress,
         signer
       )) as SvgViewsFacet;
 

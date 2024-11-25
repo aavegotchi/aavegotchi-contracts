@@ -4,7 +4,6 @@ import {
   gasPrice,
   getDiamondSigner,
   itemManager,
-  maticDiamondAddress,
 } from "../scripts/helperFunctions";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { SvgFacet } from "../typechain";
@@ -13,6 +12,7 @@ import { Dimensions } from "../scripts/itemTypeHelpers";
 export interface UpdateItemDimensionsTaskArgs {
   itemIds: string;
   dimensions: string;
+  diamondAddress: string;
 }
 
 export function convertDimensionsArrayToString(
@@ -56,6 +56,7 @@ task(
 )
   .addParam("itemIds", "Item IDs to update dimensions")
   .addParam("dimensions", "New dimensions of each item")
+  .addParam("diamondAddress", "Address of the diamond")
 
   .setAction(
     async (
@@ -71,7 +72,7 @@ task(
 
       const svgFacet = (await hre.ethers.getContractAt(
         "SvgFacet",
-        maticDiamondAddress,
+        taskArgs.diamondAddress,
         signer
       )) as SvgFacet;
 

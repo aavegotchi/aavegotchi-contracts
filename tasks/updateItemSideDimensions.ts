@@ -1,12 +1,6 @@
 import { task } from "hardhat/config";
 import { Signer } from "@ethersproject/abstract-signer";
-import {
-  gasPrice,
-  getDiamondSigner,
-  getRelayerSigner,
-  itemManager,
-  maticDiamondAddress,
-} from "../scripts/helperFunctions";
+import { getRelayerSigner } from "../scripts/helperFunctions";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { SvgViewsFacet } from "../typechain";
 import { Dimensions, SideDimensions } from "../scripts/itemTypeHelpers";
@@ -72,6 +66,7 @@ task(
   .addParam("itemIds", "Item IDs to update dimensions")
   .addParam("sides", "Item side to be updated dimensions")
   .addParam("dimensions", "New dimensions of each item")
+  .addParam("diamondAddress", "Address of the diamond")
 
   .setAction(
     async (
@@ -85,10 +80,12 @@ task(
           taskArgs.dimensions
         );
 
+      console.log("log side dimensions array:", sideDimensions);
+
       const signer: Signer = await getRelayerSigner(hre);
       const svgViewsFacet = (await hre.ethers.getContractAt(
         "SvgViewsFacet",
-        maticDiamondAddress,
+        taskArgs.diamondAddress,
         signer
       )) as SvgViewsFacet;
 

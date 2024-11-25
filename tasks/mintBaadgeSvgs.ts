@@ -24,7 +24,7 @@ task("mintBaadgeSvgs", "Adds itemTypes and SVGs")
   .addParam("itemFile", "File name of the items to add")
   .addFlag("uploadItemTypes", "Upload itemTypes")
   .addFlag("sendToItemManager", "Mint and send the items to itemManager")
-
+  .addParam("diamondAddress", "Address of the diamond")
   .setAction(
     async (taskArgs: MintBaadgeTaskArgs, hre: HardhatRuntimeEnvironment) => {
       console.log("item manager:", taskArgs.itemManager);
