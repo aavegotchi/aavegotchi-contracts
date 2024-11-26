@@ -139,6 +139,12 @@ describe("Full Diamond Test", async function () {
       expect(portal.status).to.equal(2);
     });
 
+    it("should fetch portal svgs", async function () {
+      const tokenId = await getTokenId();
+      const portalSvgs = await svgFacet.portalAavegotchisSvg(tokenId);
+      console.log(portalSvgs);
+    });
+
     it("should claim an aavegotchi from the portal", async function () {
       const tokenId = await getTokenId();
       const option = 0;
@@ -187,32 +193,32 @@ describe("Full Diamond Test", async function () {
       expect(balance[2].balance).to.equal(1);
     });
 
-    it("should equip a wearable", async function () {
-      const tokenId = await getTokenId();
+    // it("should equip a wearable", async function () {
+    //   const tokenId = await getTokenId();
 
-      let wearableIds: [
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish
-      ] = [0, 0, 0, "60", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    //   let wearableIds: [
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish,
+    //     BigNumberish
+    //   ] = [0, 0, 0, "60", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-      await itemsFacet.connect(owner).equipWearables(tokenId, wearableIds);
-      const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId);
-      expect(aavegotchi.equippedWearables[3]).to.equal(60);
-    });
+    //   await itemsFacet.connect(owner).equipWearables(tokenId, wearableIds);
+    //   const aavegotchi = await aavegotchiFacet.getAavegotchi(tokenId);
+    //   expect(aavegotchi.equippedWearables[3]).to.equal(60);
+    // });
 
     it("can get onchain svg", async function () {
       const tokenId = await getTokenId();

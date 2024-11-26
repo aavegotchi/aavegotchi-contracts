@@ -120,4 +120,8 @@ export const networkAddresses: Record<number, NetworkAddresses> = {
     ghst: "0xe97f36a00058aa7dfc4e85d23532c3f70453a7ae",
     wghst: "",
   },
+  80002: {
+    ghst: "0xF679b8D109b2d23931237Ce948a7D784727c0897",
+    wghst: "0xF679b8D109b2d23931237Ce948a7D784727c0897",
+  },
 };

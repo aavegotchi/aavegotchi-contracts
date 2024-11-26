@@ -1,5 +1,7 @@
 import { ethers, network } from "hardhat";
 import { openPortal } from "./query/openPortals";
+import { networkAddresses } from "../helpers/constants";
+import { ERC20 } from "../typechain";
 
 async function batchMintPortals() {
   const accounts = await ethers.getSigners();
@@ -31,48 +33,39 @@ async function batchMintPortals() {
   console.log("Deploying Account: " + itemManager + "\n---");
 
   let totalGasUsed = ethers.BigNumber.from("0");
-  let shopFacet;
   let diamondAddress = "0xf81FFb9E2a72574d3C4Cf4E293D4Fec4A708F2B1";
 
   console.log(`Batch minting Portals to Item Manager: ${itemManager}`);
 
-  shopFacet = await ethers.getContractAt("ShopFacet", diamondAddress, signer);
+  const ids = [60, 61, 62];
+  const amounts = [1, 1, 1];
 
   let numberPerMint = 10;
   const maxNumber = 10; //15000;
   //Mint 2000 ERC721s
 
-  const gameFacet = await ethers.getContractAt(
-    "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-    diamondAddress
+  const ghstContractAddress = networkAddresses[84532].ghst;
+
+  const erc20Contract = (await ethers.getContractAt(
+    "ERC20Token",
+    ghstContractAddress,
+    signer
+  )) as ERC20;
+
+  const balance = await erc20Contract.balanceOf(itemManager);
+  console.log("Balance of GHST:", balance.toString());
+
+  await erc20Contract.approve(diamondAddress, balance);
+
+  const shopFacet = await ethers.getContractAt(
+    "ShopFacet",
+    diamondAddress,
+    signer
   );
-
-  let remaining = maxNumber;
-
-  let promises = [];
-  let totalMinted = 0;
 
   const to = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
 
-  while (remaining > 0) {
-    //Reset numberPerMint if remaining is low
-    if (remaining < numberPerMint) numberPerMint = remaining;
-
-    console.log(`Minting ${numberPerMint} Portals of ${maxNumber}!`);
-    let r = await shopFacet.mintPortals(to, numberPerMint, {
-      gasPrice: gasPrice,
-    });
-    console.log("tx hash:", r.hash);
-    totalMinted += numberPerMint;
-    remaining -= numberPerMint;
-    totalGasUsed = totalGasUsed.add(r.gasLimit);
-    promises.push(r);
-    console.log("Total minted:", totalMinted);
-    const balance = await gameFacet.balanceOf(to);
-    console.log("Balance of Item Manager:", balance.toString());
-  }
-
-  await Promise.all(promises);
+  await shopFacet.purchaseItemsWithGhst(to, ids, amounts);
 
   console.log("Used Gas:", totalGasUsed.toString());
 }

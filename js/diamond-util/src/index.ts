@@ -3,6 +3,10 @@
 import { ethers } from "hardhat";
 import { Contract, ContractFactory } from "ethers";
 import { getDiamondCut } from "../../../scripts/helperFunctions";
+import {
+  DeploymentConfig,
+  saveDeploymentConfig,
+} from "../../../scripts/deployFullDiamond";
 
 const FacetCutAction = {
   Add: 0,
@@ -27,11 +31,20 @@ function getSelectors(contract: Contract) {
   return selectors;
 }
 
-async function deployFacets(facets: any[]) {
+async function deployFacets(
+  facets: any[],
+  diamondName: string,
+  deploymentConfig: DeploymentConfig
+) {
   console.log("--");
   const deployed = [];
+
+  // Get existing facets from deployment config
+  const existingFacets = deploymentConfig[diamondName]?.facets || {};
+
   for (const facet of facets) {
     if (Array.isArray(facet)) {
+      // Handle existing array-style facets
       if (typeof facet[0] !== "string") {
         throw Error(
           `Error using facet: facet name must be a string. Bad input: ${facet[0]}`
@@ -46,18 +59,48 @@ async function deployFacets(facets: any[]) {
       console.log("--");
       deployed.push(facet);
     } else {
+      // Handle string facet names
       if (typeof facet !== "string") {
         throw Error(
           `Error deploying facet: facet name must be a string. Bad input: ${facet}`
         );
       }
-      const facetFactory = await ethers.getContractFactory(facet);
-      console.log(`Deploying ${facet}`);
-      const deployedFactory = await facetFactory.deploy();
-      await deployedFactory.deployed();
-      console.log(`${facet} deployed: ${deployedFactory.address}`);
-      console.log("--");
-      deployed.push([facet, deployedFactory]);
+
+      // Check if facet exists in deployment config
+      if (existingFacets[facet]) {
+        console.log(
+          `Using existing ${facet} from config: ${existingFacets[facet]}`
+        );
+        const existingContract = await ethers.getContractAt(
+          facet,
+          existingFacets[facet]
+        );
+        deployed.push([facet, existingContract]);
+      } else {
+        // Deploy new facet
+        const facetFactory = await ethers.getContractFactory(facet);
+        console.log(`Deploying ${facet}`);
+        const deployedFactory = await facetFactory.deploy();
+        await deployedFactory.deployed();
+
+        if (!deploymentConfig[diamondName]) {
+          deploymentConfig[diamondName] = {
+            name: diamondName,
+            facets: {},
+          };
+        }
+
+        if (!deploymentConfig[diamondName].facets) {
+          deploymentConfig[diamondName].facets = {};
+        }
+
+        deploymentConfig[diamondName].facets[facet] = deployedFactory.address;
+        await saveDeploymentConfig(deploymentConfig);
+
+        console.log(`${facet} deployed: ${deployedFactory.address}`);
+        console.log("--");
+        deployed.push([facet, deployedFactory]);
+      }
     }
   }
   return deployed;
@@ -70,6 +113,7 @@ interface DeployArgs {
   owner: string;
   args?: any[];
   txArgs?: any;
+  deploymentConfig: DeploymentConfig;
 }
 
 export async function deploy({
@@ -79,6 +123,7 @@ export async function deploy({
   owner,
   args = [],
   txArgs = {},
+  deploymentConfig,
 }: DeployArgs) {
   if (arguments.length !== 1) {
     throw Error(
@@ -87,7 +132,11 @@ export async function deploy({
   }
 
   //First deploy the facets
-  const deployedFacets = await deployFacets(facetNames);
+  const deployedFacets = await deployFacets(
+    facetNames,
+    diamondName,
+    deploymentConfig
+  );
   const diamondFactory = await ethers.getContractFactory("Diamond");
   let diamondCut = [];
   console.log("--");
@@ -183,6 +232,7 @@ interface DeployWithoutInitArgs {
   facetNames: string[];
   args?: any[];
   txArgs?: any;
+  deploymentConfig: DeploymentConfig;
 }
 
 export async function deployWithoutInit({
@@ -190,6 +240,7 @@ export async function deployWithoutInit({
   facetNames,
   args = [],
   txArgs = {},
+  deploymentConfig,
 }: DeployWithoutInitArgs) {
   if (arguments.length !== 1) {
     throw Error(
@@ -197,7 +248,11 @@ export async function deployWithoutInit({
     );
   }
 
-  const deployedFacets = await deployFacets(facetNames);
+  const deployedFacets = await deployFacets(
+    facetNames,
+    diamondName,
+    deploymentConfig
+  );
 
   const diamondFactory = await ethers.getContractFactory(diamondName);
   let diamondCut: any[] = [];

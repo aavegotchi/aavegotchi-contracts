@@ -63,6 +63,10 @@ import { networkAddresses } from "../helpers/constants";
 // Import fs and path for file operations
 import * as os from "os";
 import { Contract } from "ethers";
+import {
+  collateralsLeftSvgs,
+  collateralsRightSvgs,
+} from "../svgs/collaterals-sides";
 
 // Define the interface for the deployment configuration
 export interface DeploymentConfig {
@@ -96,7 +100,7 @@ export interface DeploymentConfig {
 const CONFIG_PATH = path.join(__dirname, "../deployment-config.json");
 
 // Load the deployment configuration specific to the current chainId
-function loadDeploymentConfig(
+export function loadDeploymentConfig(
   chainId: number,
   useFreshDeploy: boolean = false
 ): DeploymentConfig {
@@ -156,7 +160,7 @@ function loadDeploymentConfig(
 }
 
 // Save the deployment configuration specific to the current chainId
-function saveDeploymentConfig(config: DeploymentConfig) {
+export function saveDeploymentConfig(config: DeploymentConfig) {
   let allConfigs: Record<number, DeploymentConfig> = {};
   try {
     const data = fs.readFileSync(CONFIG_PATH, "utf8");
@@ -187,7 +191,8 @@ function strDisplay(str: any) {
 async function deployForgeDiamond(
   ownerAddress: string,
   aavegotchiDiamondAddress: string,
-  wearableDiamondAddress: string
+  wearableDiamondAddress: string,
+  deploymentConfig: DeploymentConfig
 ) {
   // Deploy forge facets
 
@@ -200,6 +205,7 @@ async function deployForgeDiamond(
       "ForgeDAOFacet",
     ],
     args: [ownerAddress, aavegotchiDiamondAddress, wearableDiamondAddress],
+    deploymentConfig,
   });
 
   return forgeDiamond;
@@ -452,16 +458,14 @@ async function uploadAllSvgs(
   const { eyeShapeSvgs } = require("../svgs/eyeShapes.js");
   const { eyeShapeSvgs: eyeShapeH2Svgs } = require("../svgs/eyeShapesH2.js");
 
-  const collateralsSvgs = [
-    '<g class="gotchi-collateral"><path d="M36 15v-1h-1v-1h-1v-1h-4v1h-1v1h-1v1h-1v4h1v1h1v1h1v1h4v-1h1v-1h1v-1h1v-4h-1z" fill="#ac15f9"/><path d="M33 21h-3v1h4v-1h-1z" fill="#7e18f8"/><path d="M35 14v-1h-1v-1h-4v1h-1v1h-1v1h8v-1h-1z" fill="#fa34f3"/><path d="M36 15h-9v2h10v-2h-1z" fill="#cf15f9"/><path d="M35 19h-7v1h1v1h6v-1h1v-1h-1z" fill="#8f17f9"/></g>',
-  ];
-  const collateralsLeftSvgs = [
-    '<g class="gotchi-collateral"><path d="M23 15v-1h-2v7h1v-1h1v-1h1v-4z" fill="#7e18f8"/></g>',
-  ];
-  const collateralsRightSvgs = [
-    '<g class="gotchi-collateral"><path d="M41 14v1h-1v4h1v1h1v1h1v-7z" fill="#7e18f8"/></g>',
-  ];
-  const collateralsBackSvgs = [""];
+  const {
+    collateralsSvgs: h1CollateralsSvgs,
+  } = require("../svgs/collaterals.js");
+  const {
+    collateralsSvgs: h2CollateralsSvgs,
+  } = require("../svgs/collateralsH2.js");
+
+  const collateralsSvgs = h1CollateralsSvgs.concat(h2CollateralsSvgs);
 
   deploymentConfig.svgsUploaded = deploymentConfig.svgsUploaded || {};
 
@@ -473,14 +477,13 @@ async function uploadAllSvgs(
     "portal-closed": closedPortals,
     aavegotchi: aavegotchiSvgs,
     collaterals: collateralsSvgs,
-
     eyeShapes: eyeShapeSvgs,
     "aavegotchi-left": aavegotchiSideSvgs.left,
     "aavegotchi-right": aavegotchiSideSvgs.right,
     "aavegotchi-back": aavegotchiSideSvgs.back,
     "collaterals-left": collateralsLeftSvgs,
     "collaterals-right": collateralsRightSvgs,
-    "collaterals-back": collateralsBackSvgs,
+    "collaterals-back": collateralsLeftSvgs.map(() => ``),
     "eyeShapes-left": eyeShapesLeftSvgs,
     "eyeShapes-right": eyeShapesRightSvgs,
     "eyeShapes-back": eyeShapesLeftSvgs.map(() => ``),
@@ -660,7 +663,7 @@ async function setRealmAddress(
 
 export async function deployFullDiamond(useFreshDeploy: boolean = false) {
   if (
-    !["hardhat", "localhost", "amoy", "polter", "base-sepolia"].includes(
+    !["hardhat", "localhost", "amoy", "polter", "baseSepolia"].includes(
       network.name
     )
   ) {
@@ -672,6 +675,12 @@ export async function deployFullDiamond(useFreshDeploy: boolean = false) {
 
   if (network.name === "polter") {
     chainId = 631571;
+  }
+  if (network.name === "amoy") {
+    chainId = 80002;
+  }
+  if (network.name === "baseSepolia") {
+    chainId = 84532;
   }
 
   // Load existing deployment configuration
@@ -795,6 +804,7 @@ export async function deployFullDiamond(useFreshDeploy: boolean = false) {
         ],
         owner: ownerAddress,
         args: initArgs,
+        deploymentConfig,
       });
 
       console.log("Aavegotchi diamond address:" + aavegotchiDiamond.address);
@@ -835,6 +845,7 @@ export async function deployFullDiamond(useFreshDeploy: boolean = false) {
         diamondName: "WearableDiamond",
         args: [ownerAddress, aavegotchiDiamond.address],
         facetNames: ["EventHandlerFacet", "WearablesFacet"],
+        deploymentConfig,
       });
 
       console.log("Wearable diamond address:" + wearableDiamond.address);
@@ -885,7 +896,8 @@ export async function deployFullDiamond(useFreshDeploy: boolean = false) {
       forgeDiamond = await deployForgeDiamond(
         ownerAddress,
         aavegotchiDiamond.address,
-        wearableDiamond.address
+        wearableDiamond.address,
+        deploymentConfig
       );
       console.log("Forge diamond address:" + forgeDiamond.address);
 

@@ -90,6 +90,10 @@ export default {
       url: process.env.POLTER_TESTNET_URL,
       accounts: [process.env.SECRET],
     },
+    amoy: {
+      url: process.env.AMOY_URL,
+      accounts: [process.env.SECRET],
+    },
     // gorli: {
     //   url: process.env.GORLI,
     //   accounts: [process.env.SECRET],

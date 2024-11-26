@@ -175,6 +175,10 @@ export function getCollaterals(network: string, ghstAddress: string) {
       item.collateralType = collateralType.maticAddress;
     } else if (network === "polter") {
       item.collateralType = collateralType.maticAddress;
+    } else if (network === "amoy") {
+      item.collateralType = ghstAddress;
+    } else if (network === "baseSepolia") {
+      item.collateralType = ghstAddress;
     }
 
     item.collateralTypeInfo = collateralTypeInfo;

@@ -125,7 +125,7 @@ const testCollaterals = [
 
 export function getCollaterals(network: string, ghstAddress: string) {
   const testing = ["hardhat", "localhost"].includes(network);
-  const collateralArr = testing ? testCollaterals : collaterals;
+  const collateralArr = collaterals; //testing ? testCollaterals : collaterals;
   const collateralTypes = [];
   for (const collateralType of collateralArr) {
     const collateralTypeInfo = {
@@ -152,6 +152,10 @@ export function getCollaterals(network: string, ghstAddress: string) {
       item.collateralType = collateralType.maticAddress;
     } else if (network === "polter") {
       item.collateralType = collateralType.maticAddress;
+    } else if (network === "amoy") {
+      item.collateralType = ghstAddress;
+    } else if (network === "baseSepolia") {
+      item.collateralType = ghstAddress;
     }
     item.collateralTypeInfo = collateralTypeInfo;
     collateralTypes.push(item);
