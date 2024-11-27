@@ -176,7 +176,7 @@ async function queryAllGotchiOwners(blockNumber: number) {
 async function main() {
   try {
     // const blockNumberInput = await getUserInput("Enter the block number: ");
-    const blockNumber = 63422376; //parseInt(blockNumberInput, 10);
+    const blockNumber = 63675732; //parseInt(blockNumberInput, 10);
 
     if (isNaN(blockNumber)) {
       throw new Error("Invalid block number");
