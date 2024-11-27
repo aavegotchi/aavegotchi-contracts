@@ -100,8 +100,8 @@ contract CollateralFacet is Modifiers {
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         uint256 currentStake = IERC20(collateralType).balanceOf(escrow);
         uint256 minimumStake = s.aavegotchis[_tokenId].minimumStake;
-        require(currentStake - _reduceAmount >= minimumStake, "CollateralFacet: Cannot reduce below minimum stake");
 
+        require(currentStake - _reduceAmount >= minimumStake, "CollateralFacet: Cannot reduce below minimum stake");
         emit DecreaseStake(_tokenId, _reduceAmount);
         LibERC20.transferFrom(collateralType, escrow, LibMeta.msgSender(), _reduceAmount);
     }
