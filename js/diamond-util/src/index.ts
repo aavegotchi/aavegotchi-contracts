@@ -142,9 +142,18 @@ export async function deploy({
   console.log("--");
   console.log("Setting up diamondCut args");
   console.log("--");
+
+  const signatures = new Set<string>();
+
   for (const [name, deployedFacet] of deployedFacets) {
     console.log(name);
     console.log(getSignatures(deployedFacet));
+    for (const signature of getSignatures(deployedFacet)) {
+      if (signatures.has(signature)) {
+        throw Error(`Duplicate selector: ${signature}`);
+      }
+      signatures.add(signature);
+    }
     console.log("--");
     diamondCut.push([
       deployedFacet.address,
@@ -152,6 +161,7 @@ export async function deploy({
       getSelectors(deployedFacet),
     ]);
   }
+
   console.log("--");
 
   let result;

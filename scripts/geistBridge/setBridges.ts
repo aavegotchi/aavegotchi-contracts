@@ -12,7 +12,7 @@ export default async function main() {
   if (network.name === "baseSepolia") {
     diamondAddress = bridgeConfig[84532].GOTCHI.NonMintableToken;
     gotchiBridgeAddress = bridgeConfig[84532].GOTCHI.Vault;
-    itemBridgeAddress = bridgeConfig[84532].GOTCHI_ITEM.Vault;
+    // itemBridgeAddress = bridgeConfig[84532].GOTCHI_ITEM.Vault;
   } else if (network.name === "matic") {
     diamondAddress = maticDiamondAddress;
     // TODO: Set production bridge addresses
@@ -53,14 +53,14 @@ export default async function main() {
     console.log("Gotchi Bridge set");
   }
 
-  if (currentItemBridge !== itemBridgeAddress) {
-    console.log("Setting Item Bridge address:", itemBridgeAddress);
-    const tx2 = await daoFacet.updateItemGeistBridge(itemBridgeAddress, {
-      gasPrice,
-    });
-    await tx2.wait();
-    console.log("Item Bridge set");
-  }
+  // if (currentItemBridge !== itemBridgeAddress) {
+  //   console.log("Setting Item Bridge address:", itemBridgeAddress);
+  //   const tx2 = await daoFacet.updateItemGeistBridge(itemBridgeAddress, {
+  //     gasPrice,
+  //   });
+  //   await tx2.wait();
+  //   console.log("Item Bridge set");
+  // }
 }
 
 if (require.main === module) {

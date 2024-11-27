@@ -63,7 +63,7 @@ async function batchMintPortals() {
     signer
   );
 
-  const to = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
+  const to = "0xAd0CEb6Dc055477b8a737B630D6210EFa76a2265";
 
   await shopFacet.purchaseItemsWithGhst(to, ids, amounts);
 

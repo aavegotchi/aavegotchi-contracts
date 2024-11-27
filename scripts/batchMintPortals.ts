@@ -52,7 +52,7 @@ async function batchMintPortals() {
   let promises = [];
   let totalMinted = 0;
 
-  const to = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
+  const to = "0xAd0CEb6Dc055477b8a737B630D6210EFa76a2265";
 
   while (remaining > 0) {
     //Reset numberPerMint if remaining is low

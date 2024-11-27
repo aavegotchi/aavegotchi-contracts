@@ -12,8 +12,6 @@ import {IERC165} from "../interfaces/IERC165.sol";
 import {IERC173} from "../interfaces/IERC173.sol";
 import {LibMeta} from "./LibMeta.sol";
 
-import "hardhat/console.sol";
-
 library LibDiamond {
     bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
 
@@ -125,12 +123,6 @@ library LibDiamond {
             bytes4 selector = _functionSelectors[selectorIndex];
 
             address oldFacetAddress = ds.selectorToFacetAndPosition[selector].facetAddress;
-
-            if (oldFacetAddress != address(0)) {
-                console.log("oldFacetAddress", oldFacetAddress);
-                console.log("selector:");
-                console.logBytes4(selector);
-            }
 
             require(oldFacetAddress == address(0), "LibDiamondCut: Can't add function that already exists");
             ds.facetFunctionSelectors[_facetAddress].functionSelectors.push(selector);
