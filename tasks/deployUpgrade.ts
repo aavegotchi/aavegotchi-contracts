@@ -10,7 +10,12 @@ import { Signer } from "@ethersproject/abstract-signer";
 
 import { IDiamondCut } from "../typechain";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
-import { getSelectors, getSighashes, delay } from "../scripts/helperFunctions";
+import {
+  getSelectors,
+  getSighashes,
+  delay,
+  gasPrice,
+} from "../scripts/helperFunctions";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { sendToMultisig } from "../scripts/libraries/multisig/multisig";
@@ -314,10 +319,13 @@ task(
             );
           await sendToMultisig(diamondOwner, signer, tx, hre.ethers);
         } else {
+          console.log("Executing cut:", cut);
+
           const tx: ContractTransaction = await diamondCut.diamondCut(
             cut,
             initAddress ? initAddress : hre.ethers.constants.AddressZero,
-            initCalldata ? initCalldata : "0x"
+            initCalldata ? initCalldata : "0x",
+            { gasPrice: gasPrice }
           );
 
           const receipt: ContractReceipt = await tx.wait();

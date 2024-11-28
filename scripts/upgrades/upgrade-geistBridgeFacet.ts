@@ -26,15 +26,15 @@ export async function upgrade() {
     {
       facetName: "PolygonXGeistBridgeFacet",
       addSelectors: [
-        "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable",
-        "function setMetadata(uint _tokenId, bytes memory _metadata) external",
+        // "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable",
+        // "function setMetadata(uint _tokenId, bytes memory _metadata) external",
         // "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable",
         // "function bridgeGotchis(tuple(address receiver, uint256 tokenId, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
         // "function bridgeItems(tuple(address receiver, uint256 tokenId, uint256 amount, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
-        "function setBridges(address _gotchiBridge, address _itemBridge) external",
-        "function getGotchiBridge() external view returns (address)",
-        "function getItemBridge() external view returns (address)",
-        "function getMinFees(address connector_, uint256 msgGasLimit_, uint256 payloadSize_) external view returns (uint256)",
+        // "function setBridges(address _gotchiBridge, address _itemBridge) external",
+        // "function getGotchiBridge() external view returns (address)",
+        // "function getItemBridge() external view returns (address)",
+        // "function getMinFees(address connector_, uint256 msgGasLimit_, uint256 payloadSize_) external view returns (uint256)",
       ],
       removeSelectors: [],
     },
@@ -92,18 +92,15 @@ export async function upgrade() {
     );
     await tx.wait();
 
-    const minFees = await bridge.getMinFees(
-      connector,
-      5000000,
-      getPayloadSize(connector)
-    );
+    // const minFees = await bridge.getMinFees(
+    //   connector,
+    //   5000000,
+    //   getPayloadSize(connector)
+    // );
 
-    console.log("Min fees:", minFees);
+    // console.log("Min fees:", minFees);
 
-    tx = await bridge.bridgeGotchi(owner, tokenId, 5000000, connector, {
-      gasPrice: minFees,
-      value: minFees,
-    });
+    tx = await bridge.bridgeGotchi(owner, tokenId, 5000000, connector);
     await tx.wait();
     console.log("Gotchi bridged");
   }

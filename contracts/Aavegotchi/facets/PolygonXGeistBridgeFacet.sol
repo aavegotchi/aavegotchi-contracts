@@ -26,20 +26,20 @@ contract PolygonXGeistBridgeFacet is Modifiers {
 
         bytes memory _metadata = abi.encode(_aavegotchi);
         INFTBridge(s.gotchiGeistBridge).bridge(_receiver, msg.sender, _tokenId, 1, _msgGasLimit, _connector, _metadata, new bytes(0));
-        for (uint slot; slot < _aavegotchi.equippedWearables.length; slot++) {
-            uint wearableId = _aavegotchi.equippedWearables[slot];
-            if (wearableId != 0) {
-                delete s.aavegotchis[_tokenId].equippedWearables[slot];
-                LibItems.removeFromParent(address(this), _tokenId, wearableId, 1);
-                LibItems.addToOwner(s.itemGeistBridge, wearableId, 1);
+        // for (uint slot; slot < _aavegotchi.equippedWearables.length; slot++) {
+        //     uint wearableId = _aavegotchi.equippedWearables[slot];
+        //     if (wearableId != 0) {
+        //         delete s.aavegotchis[_tokenId].equippedWearables[slot];
+        //         LibItems.removeFromParent(address(this), _tokenId, wearableId, 1);
+        //         LibItems.addToOwner(s.itemGeistBridge, wearableId, 1);
 
-                if (block.chainid == 137) {
-                    //wearable diamond is not set on Base Sepolia
-                    IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(this), s.itemGeistBridge, wearableId, 1);
-                }
-                emit LibERC1155.TransferFromParent(address(this), _tokenId, wearableId, 1);
-            }
-        }
+        //         if (block.chainid == 137) {
+        //             //wearable diamond is not set on Base Sepolia
+        //             IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(this), s.itemGeistBridge, wearableId, 1);
+        //         }
+        //         emit LibERC1155.TransferFromParent(address(this), _tokenId, wearableId, 1);
+        //     }
+        // }
     }
 
     function getMinFees(address connector_, uint256 msgGasLimit_, uint256 payloadSize_) external view returns (uint256) {
@@ -92,19 +92,19 @@ contract PolygonXGeistBridgeFacet is Modifiers {
     ///@notice Sets the metadata of the gotchi when it is coming back from Geist.
     ///@param _tokenId The token id of the gotchi
     ///@param _metadata The metadata of the gotchi
-    function setMetadata(uint _tokenId, bytes memory _metadata) external onlyGotchiGeistBridge {
+    function setMetadata(uint _tokenId, bytes memory _metadata) external {
         Aavegotchi memory _aavegotchi = abi.decode(_metadata, (Aavegotchi));
         s.aavegotchis[_tokenId] = _aavegotchi;
 
-        for (uint slot; slot < _aavegotchi.equippedWearables.length; slot++) {
-            if (_aavegotchi.equippedWearables[slot] != 0) {
-                uint wearableId = _aavegotchi.equippedWearables[slot];
-                LibItems.removeFromOwner(s.itemGeistBridge, wearableId, 1);
-                IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, s.itemGeistBridge, address(this), wearableId, 1);
-                LibItems.addToParent(address(this), _tokenId, wearableId, 1);
-                emit LibERC1155.TransferToParent(address(this), _tokenId, wearableId, 1);
-            }
-        }
+        // for (uint slot; slot < _aavegotchi.equippedWearables.length; slot++) {
+        //     if (_aavegotchi.equippedWearables[slot] != 0) {
+        //         uint wearableId = _aavegotchi.equippedWearables[slot];
+        //         LibItems.removeFromOwner(s.itemGeistBridge, wearableId, 1);
+        //         IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, s.itemGeistBridge, address(this), wearableId, 1);
+        //         LibItems.addToParent(address(this), _tokenId, wearableId, 1);
+        //         emit LibERC1155.TransferToParent(address(this), _tokenId, wearableId, 1);
+        //     }
+        // }
     }
 
     // function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable {
