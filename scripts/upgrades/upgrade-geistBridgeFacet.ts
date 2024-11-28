@@ -100,7 +100,10 @@ export async function upgrade() {
 
     // console.log("Min fees:", minFees);
 
-    tx = await bridge.bridgeGotchi(owner, tokenId, 5000000, connector);
+    tx = await bridge.bridgeGotchi(owner, tokenId, 5000000, connector, {
+      value: ethers.utils.parseEther("0.1"),
+    });
+
     await tx.wait();
     console.log("Gotchi bridged");
   }
