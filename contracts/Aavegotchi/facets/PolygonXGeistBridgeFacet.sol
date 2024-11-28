@@ -12,8 +12,7 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
 
 contract PolygonXGeistBridgeFacet is Modifiers {
-    event GotchiGeistBridgeUpdate(address _newBridge);
-    event ItemGeistBridgeUpdate(address _newBridge);
+    event GeistBridgesSet(address _gotchiBridge, address _itemBridge);
 
     function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable {
         require(_tokenId == 6018, "Testing");
@@ -130,17 +129,9 @@ contract PolygonXGeistBridgeFacet is Modifiers {
     //     INFTBridge(s.itemGeistBridge).bridge(_receiver, msg.sender, _tokenId, _amount, _msgGasLimit, _connector, new bytes(0), new bytes(0));
     // }
 
-    ///@notice Allow the DAO to update an address as a Geist bridge of the gotchi
-    ///@param _newBridge The address to be update as a bridge
-    function updateGotchiGeistBridge(address _newBridge) external onlyDaoOrOwner {
-        s.gotchiGeistBridge = _newBridge;
-        emit GotchiGeistBridgeUpdate(_newBridge);
-    }
-
-    ///@notice Allow the DAO to update an address as a Geist bridge of the item
-    ///@param _newBridge The address to be update as a bridge
-    function updateItemGeistBridge(address _newBridge) external onlyDaoOrOwner {
-        s.itemGeistBridge = _newBridge;
-        emit ItemGeistBridgeUpdate(_newBridge);
+    function setBridges(address _gotchiBridge, address _itemBridge) external onlyDaoOrOwner {
+        s.gotchiGeistBridge = _gotchiBridge;
+        s.itemGeistBridge = _itemBridge;
+        emit GeistBridgesSet(_gotchiBridge, _itemBridge);
     }
 }

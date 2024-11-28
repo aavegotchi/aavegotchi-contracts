@@ -7,7 +7,8 @@ import {
 import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
 import setBridges from "../geistBridge/setBridges";
 import { bridgeConfig } from "../geistBridge/bridgeConfig";
-import { utils } from "ethers";
+import { PolygonXGeistBridgeFacet__factory } from "../../typechain";
+import { constants } from "ethers";
 
 const gasLimit = 500_000;
 
@@ -30,8 +31,7 @@ export async function upgrade() {
         // "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable",
         // "function bridgeGotchis(tuple(address receiver, uint256 tokenId, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
         // "function bridgeItems(tuple(address receiver, uint256 tokenId, uint256 amount, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
-        "function updateGotchiGeistBridge(address _newBridge) external",
-        "function updateItemGeistBridge(address _newBridge) external",
+        "function setBridges(address _gotchiBridge, address _itemBridge) external",
         "function getGotchiBridge() external view returns (address)",
         "function getItemBridge() external view returns (address)",
         "function getMinFees(address connector_, uint256 msgGasLimit_, uint256 payloadSize_) external view returns (uint256)",
@@ -42,6 +42,12 @@ export async function upgrade() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
+  let iface = new ethers.utils.Interface(PolygonXGeistBridgeFacet__factory.abi);
+  const payload = iface.encodeFunctionData("setBridges", [
+    bridgeConfig[137].GOTCHI.Vault,
+    constants.AddressZero,
+  ]);
+
   const args: DeployUpgradeTaskArgs = {
     diamondOwner: maticDiamondUpgrader,
     diamondAddress: maticDiamondAddress,
@@ -49,14 +55,14 @@ export async function upgrade() {
     // diamondAddress: '0x87C969d083189927049f8fF3747703FB9f7a8AEd', // base-sepolia
     facetsAndAddSelectors: joined,
     useLedger: true,
-    useMultisig: true,
-    initAddress: ethers.constants.AddressZero,
-    initCalldata: "0x",
+    useMultisig: false,
+    initAddress: maticDiamondAddress,
+    initCalldata: payload,
   };
 
   await run("deployUpgrade", args);
 
-  await setBridges();
+  // await setBridges();
 
   if (network.name === "hardhat") {
     //try to bridge a gotchi

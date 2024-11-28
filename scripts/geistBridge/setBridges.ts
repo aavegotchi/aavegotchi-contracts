@@ -3,13 +3,13 @@
 import { ethers, network } from "hardhat";
 import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
 import { bridgeConfig } from "./bridgeConfig";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 export default async function setBridges() {
   let diamondAddress;
   let gotchiBridgeAddress;
   let itemBridgeAddress;
-  let signer: SignerWithAddress = (await ethers.getSigners())[0];
+  let signer; //: /SignerWithAddress = (await ethers.getSigners())[0];
   const maticDiamondOwner = maticDiamondUpgrader;
 
   if (network.name === "hardhat") {
@@ -29,6 +29,7 @@ export default async function setBridges() {
     diamondAddress = maticDiamondAddress;
     // TODO: Set production bridge addresses
     gotchiBridgeAddress = bridgeConfig[137].GOTCHI.Vault;
+    signer = new LedgerSigner(ethers.provider, "m/44'/60'/2'/0/0");
     // itemBridgeAddress = bridgeConfig[137].GOTCHI_ITEM.Vault;
   } else {
     throw Error("No network settings for " + network.name);
