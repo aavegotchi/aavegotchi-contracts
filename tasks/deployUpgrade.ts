@@ -189,7 +189,16 @@ task(
           const factory = (await hre.ethers.getContractFactory(
             facet.facetName
           )) as ContractFactory;
+
           const deployedFacet: Contract = await factory.deploy();
+
+          const signatures = Object.keys(deployedFacet.interface.functions);
+
+          for (const signature of signatures) {
+            const selector = deployedFacet.interface.getSighash(signature);
+            console.log("selector for signature:", signature, selector);
+          }
+
           await deployedFacet.deployed();
           console.log(
             `Deployed Facet Address for ${facet.facetName}:`,

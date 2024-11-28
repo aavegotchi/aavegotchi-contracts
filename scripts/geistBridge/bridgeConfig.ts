@@ -43,4 +43,28 @@ export const bridgeConfig = {
       },
     },
   },
+  "137": {
+    GOTCHI: {
+      isAppChain: false,
+      NonMintableToken: "0x86935F11C86623deC8a25696E1C19a8659CbF95d",
+      Vault: "0xD1b06A7D98Bcd581D9C61B43c7582BA080D1bfE7",
+      connectors: {
+        "63157": {
+          FAST: "0xFC8DA8fCb656F6D3924be886871F41A294dDe3Fc",
+        },
+      },
+    },
+  },
+  "63157": {
+    GOTCHI: {
+      isAppChain: true,
+      MintableToken: "0x6Acc828BbbC6874de40Ca20bfeA7Cd2a2DA8DA8c",
+      Controller: "0xa2b4d61884aC0aF9C63cB00c28245F8Ba9F64108",
+      connectors: {
+        "137": {
+          FAST: "0xc13d8456B349091C13E6b8cc449E594e94f97C97",
+        },
+      },
+    },
+  },
 };

@@ -43,7 +43,7 @@ export default {
   networks: {
     hardhat: {
       forking: {
-        url: process.env.BASE_SEPOLIA_URL,
+        url: process.env.MATIC_URL,
         timeout: 12000000,
         // blockNumber: 31480850,
       },

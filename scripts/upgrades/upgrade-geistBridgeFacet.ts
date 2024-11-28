@@ -1,13 +1,15 @@
-import { ethers, run } from "hardhat";
+import { ethers, network, run } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
 import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
+import setBridges from "../geistBridge/setBridges";
+import { bridgeConfig } from "../geistBridge/bridgeConfig";
+import { utils } from "ethers";
 
 export async function upgrade() {
-
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "PolygonXGeistBridgeFacet",
@@ -15,16 +17,12 @@ export async function upgrade() {
         "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable",
         "function setMetadata(uint _tokenId, bytes memory _metadata) external",
         "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable",
-        "function bridgeGotchis(tuple(address receiver, uint256 tokenId, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
+        // "function bridgeGotchis(tuple(address receiver, uint256 tokenId, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
         "function bridgeItems(tuple(address receiver, uint256 tokenId, uint256 amount, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
-      ],
-      removeSelectors: [],
-    },
-    {
-      facetName: "DAOFacet",
-      addSelectors: [
         "function updateGotchiGeistBridge(address _newBridge) external",
         "function updateItemGeistBridge(address _newBridge) external",
+        "function getGotchiBridge() external view returns (address)",
+        "function getItemBridge() external view returns (address)",
       ],
       removeSelectors: [],
     },
@@ -45,6 +43,44 @@ export async function upgrade() {
   };
 
   await run("deployUpgrade", args);
+
+  await setBridges();
+
+  if (network.name === "hardhat") {
+    //try to bridge a gotchi
+    const tokenId = 6018;
+    const owner = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
+    const connector = bridgeConfig[137].GOTCHI.connectors[63157].FAST;
+
+    const signer = await ethers.getImpersonatedSigner(owner);
+
+    console.log("signer:", signer.address);
+
+    const bridge = await ethers.getContractAt(
+      "PolygonXGeistBridgeFacet",
+      maticDiamondAddress,
+      signer
+    );
+
+    const erc721Facet = await ethers.getContractAt(
+      "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
+      maticDiamondAddress,
+      signer
+    );
+
+    let tx = await erc721Facet.setApprovalForAll(
+      bridgeConfig[137].GOTCHI.Vault,
+      true
+    );
+    await tx.wait();
+
+    tx = await bridge.bridgeGotchi(owner, tokenId, 5000000, connector, {
+      gasPrice: 1000000000000000,
+      value: utils.parseEther("0.01"),
+    });
+    await tx.wait();
+    console.log("Gotchi bridged");
+  }
 }
 
 if (require.main === module) {

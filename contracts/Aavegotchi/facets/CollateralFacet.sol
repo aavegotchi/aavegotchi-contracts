@@ -11,6 +11,8 @@ import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 
 import {ForgeFacet} from "../ForgeDiamond/facets/ForgeFacet.sol";
 
+// import "hardhat/console.sol";
+
 contract CollateralFacet is Modifiers {
     event IncreaseStake(uint256 indexed _tokenId, uint256 _stakeAmount);
     event DecreaseStake(uint256 indexed _tokenId, uint256 _reduceAmount);

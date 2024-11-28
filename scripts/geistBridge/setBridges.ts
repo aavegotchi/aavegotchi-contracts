@@ -1,40 +1,51 @@
 /* global ethers hre */
 
 import { ethers, network } from "hardhat";
-import { maticDiamondAddress } from "../helperFunctions";
+import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
 import { bridgeConfig } from "./bridgeConfig";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-export default async function main() {
+export default async function setBridges() {
   let diamondAddress;
   let gotchiBridgeAddress;
   let itemBridgeAddress;
+  let signer: SignerWithAddress = (await ethers.getSigners())[0];
+  const maticDiamondOwner = maticDiamondUpgrader;
 
-  if (network.name === "baseSepolia") {
+  if (network.name === "hardhat") {
+    diamondAddress = maticDiamondAddress;
+    gotchiBridgeAddress = bridgeConfig[137].GOTCHI.Vault;
+
+    signer = await ethers.getImpersonatedSigner(maticDiamondOwner);
+
+    // itemBridgeAddress = bridgeConfig[137].GOTCHI_ITEM.Vault;
+  } else if (network.name === "baseSepolia") {
     diamondAddress = bridgeConfig[84532].GOTCHI.NonMintableToken;
     gotchiBridgeAddress = bridgeConfig[84532].GOTCHI.Vault;
     itemBridgeAddress = bridgeConfig[84532].GOTCHI_ITEM.Vault;
+
+    signer = (await ethers.getSigners())[0];
   } else if (network.name === "matic") {
     diamondAddress = maticDiamondAddress;
     // TODO: Set production bridge addresses
-    gotchiBridgeAddress = "";
-    itemBridgeAddress = "";
+    gotchiBridgeAddress = bridgeConfig[137].GOTCHI.Vault;
+    // itemBridgeAddress = bridgeConfig[137].GOTCHI_ITEM.Vault;
   } else {
     throw Error("No network settings for " + network.name);
   }
 
-  const accounts = await ethers.getSigners();
-  const signer = accounts[0];
+  // const accounts = await ethers.getSigners();
+
   const gasPrice = 100000000000;
 
-  const daoFacet = await ethers.getContractAt("DAOFacet", diamondAddress);
-
-  const gotchiBridge = await ethers.getContractAt(
+  const bridgeFacet = await ethers.getContractAt(
     "PolygonXGeistBridgeFacet",
-    diamondAddress
+    diamondAddress,
+    signer
   );
 
-  const currentGotchiBridge = await gotchiBridge.getGotchiBridge();
-  const currentItemBridge = await gotchiBridge.getItemBridge();
+  const currentGotchiBridge = await bridgeFacet.getGotchiBridge();
+  const currentItemBridge = await bridgeFacet.getItemBridge();
 
   if (
     currentGotchiBridge === gotchiBridgeAddress &&
@@ -46,25 +57,25 @@ export default async function main() {
 
   if (currentGotchiBridge !== gotchiBridgeAddress) {
     console.log("Setting Gotchi Bridge address:", gotchiBridgeAddress);
-    const tx1 = await daoFacet.updateGotchiGeistBridge(gotchiBridgeAddress, {
+    const tx1 = await bridgeFacet.updateGotchiGeistBridge(gotchiBridgeAddress, {
       gasPrice,
     });
     await tx1.wait();
     console.log("Gotchi Bridge set");
   }
 
-  if (currentItemBridge !== itemBridgeAddress) {
-    console.log("Setting Item Bridge address:", itemBridgeAddress);
-    const tx2 = await daoFacet.updateItemGeistBridge(itemBridgeAddress, {
-      gasPrice,
-    });
-    await tx2.wait();
-    console.log("Item Bridge set");
-  }
+  // if (currentItemBridge !== itemBridgeAddress) {
+  //   console.log("Setting Item Bridge address:", itemBridgeAddress);
+  //   const tx2 = await bridgeFacet.updateItemGeistBridge(itemBridgeAddress, {
+  //     gasPrice,
+  //   });
+  //   await tx2.wait();
+  //   console.log("Item Bridge set");
+  // }
 }
 
 if (require.main === module) {
-  main()
+  setBridges()
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);

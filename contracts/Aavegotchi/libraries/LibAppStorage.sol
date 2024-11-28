@@ -383,7 +383,7 @@ struct AppStorage {
     // states for erc1155 buy orders
     uint256 nextERC1155BuyOrderId;
     mapping(uint256 => ERC1155BuyOrder) erc1155BuyOrders; // buyOrderId => data
-    address gotchGeistBridge;
+    address gotchiGeistBridge;
     address itemGeistBridge;
 }
 
@@ -453,7 +453,7 @@ contract Modifiers {
 
     modifier onlyGotchiGeistBridge() {
         address sender = LibMeta.msgSender();
-        require(sender == s.gotchGeistBridge, "LibAppStorage: Do not have access");
+        require(sender == s.gotchiGeistBridge, "LibAppStorage: Do not have access");
         _;
     }
 

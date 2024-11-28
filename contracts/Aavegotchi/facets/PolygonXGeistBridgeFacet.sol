@@ -24,7 +24,7 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         // }
 
         bytes memory _metadata = abi.encode(_aavegotchi);
-        INFTBridge(s.gotchGeistBridge).bridge(_receiver, msg.sender, _tokenId, 1, _msgGasLimit, _connector, _metadata, new bytes(0));
+        INFTBridge(s.gotchiGeistBridge).bridge(_receiver, msg.sender, _tokenId, 1, _msgGasLimit, _connector, _metadata, new bytes(0));
         for (uint slot; slot < _aavegotchi.equippedWearables.length; slot++) {
             uint wearableId = _aavegotchi.equippedWearables[slot];
             if (wearableId != 0) {
@@ -42,48 +42,51 @@ contract PolygonXGeistBridgeFacet is Modifiers {
     }
 
     function getGotchiBridge() external view returns (address) {
-        return s.gotchGeistBridge;
+        return s.gotchiGeistBridge;
     }
 
     function getItemBridge() external view returns (address) {
         return s.itemGeistBridge;
     }
 
-    struct GotchiBridgingParams {
-        address receiver;
-        uint256 tokenId;
-        uint256 msgGasLimit;
-    }
+    // struct GotchiBridgingParams {
+    //     address receiver;
+    //     uint256 tokenId;
+    //     uint256 msgGasLimit;
+    // }
 
-    function bridgeGotchis(GotchiBridgingParams[] calldata bridgingParams, address _connector) external payable {
-        require(bridgingParams.length <= 5, "PolygonXGeistBridgeFacet: length should be lower than 5");
-        for (uint256 i = 0; i < bridgingParams.length; i++) {
-            _bridgeGotchi(bridgingParams[i].receiver, bridgingParams[i].tokenId, bridgingParams[i].msgGasLimit, _connector);
-        }
-    }
+    // function bridgeGotchis(GotchiBridgingParams[] calldata bridgingParams, address _connector) external payable {
+    //     require(bridgingParams.length <= 5, "PolygonXGeistBridgeFacet: length should be lower than 5");
+    //     for (uint256 i = 0; i < bridgingParams.length; i++) {
+    //         _bridgeGotchi(bridgingParams[i].receiver, bridgingParams[i].tokenId, bridgingParams[i].msgGasLimit, _connector);
+    //     }
+    // }
 
-    function _bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) internal {
-        Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
-        // force unstake from escrow
-        // if (_aavegotchi.collateralType != address(0)) {
-        //     uint256 currentStake = IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow);
-        //     LibERC20.transferFrom(_aavegotchi.collateralType, _aavegotchi.escrow, msg.sender, currentStake);
-        // }
+    // function _bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) internal {
+    //     Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
+    //     // force unstake from escrow
+    //     // if (_aavegotchi.collateralType != address(0)) {
+    //     //     uint256 currentStake = IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow);
+    //     //     LibERC20.transferFrom(_aavegotchi.collateralType, _aavegotchi.escrow, msg.sender, currentStake);
+    //     // }
 
-        bytes memory _metadata = abi.encode(_aavegotchi);
-        INFTBridge(s.gotchGeistBridge).bridge(_receiver, msg.sender, _tokenId, 1, _msgGasLimit, _connector, _metadata, new bytes(0));
-        for (uint slot; slot < _aavegotchi.equippedWearables.length; slot++) {
-            uint wearableId = _aavegotchi.equippedWearables[slot];
-            if (wearableId != 0) {
-                delete s.aavegotchis[_tokenId].equippedWearables[slot];
-                LibItems.removeFromParent(address(this), _tokenId, wearableId, 1);
-                LibItems.addToOwner(s.itemGeistBridge, wearableId, 1);
-                IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(this), s.itemGeistBridge, wearableId, 1);
-                emit LibERC1155.TransferFromParent(address(this), _tokenId, wearableId, 1);
-            }
-        }
-    }
+    //     bytes memory _metadata = abi.encode(_aavegotchi);
+    //     INFTBridge(s.gotchiGeistBridge).bridge(_receiver, msg.sender, _tokenId, 1, _msgGasLimit, _connector, _metadata, new bytes(0));
+    //     for (uint slot; slot < _aavegotchi.equippedWearables.length; slot++) {
+    //         uint wearableId = _aavegotchi.equippedWearables[slot];
+    //         if (wearableId != 0) {
+    //             delete s.aavegotchis[_tokenId].equippedWearables[slot];
+    //             LibItems.removeFromParent(address(this), _tokenId, wearableId, 1);
+    //             LibItems.addToOwner(s.itemGeistBridge, wearableId, 1);
+    //             IEventHandlerFacet(s.wearableDiamond).emitTransferSingleEvent(msg.sender, address(this), s.itemGeistBridge, wearableId, 1);
+    //             emit LibERC1155.TransferFromParent(address(this), _tokenId, wearableId, 1);
+    //         }
+    //     }
+    // }
 
+    ///@notice Sets the metadata of the gotchi when it is coming back from Geist.
+    ///@param _tokenId The token id of the gotchi
+    ///@param _metadata The metadata of the gotchi
     function setMetadata(uint _tokenId, bytes memory _metadata) external onlyGotchiGeistBridge {
         Aavegotchi memory _aavegotchi = abi.decode(_metadata, (Aavegotchi));
         s.aavegotchis[_tokenId] = _aavegotchi;
@@ -124,7 +127,7 @@ contract PolygonXGeistBridgeFacet is Modifiers {
     ///@notice Allow the DAO to update an address as a Geist bridge of the gotchi
     ///@param _newBridge The address to be update as a bridge
     function updateGotchiGeistBridge(address _newBridge) external onlyDaoOrOwner {
-        s.gotchGeistBridge = _newBridge;
+        s.gotchiGeistBridge = _newBridge;
         emit GotchiGeistBridgeUpdate(_newBridge);
     }
 
