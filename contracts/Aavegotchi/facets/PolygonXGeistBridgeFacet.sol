@@ -17,6 +17,9 @@ contract PolygonXGeistBridgeFacet is Modifiers {
     function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable {
         require(_tokenId == 6018, "Testing");
 
+        require(s.gotchiGeistBridge != address(0), "Gotchi bridge not set");
+        require(s.itemGeistBridge != address(0), "Item bridge not set");
+
         Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
         // force unstake from escrow
         // if(_aavegotchi.collateralType != address(0)) {

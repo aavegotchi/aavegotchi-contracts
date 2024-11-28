@@ -45,7 +45,7 @@ export async function upgrade() {
   let iface = new ethers.utils.Interface(PolygonXGeistBridgeFacet__factory.abi);
   const payload = iface.encodeFunctionData("setBridges", [
     bridgeConfig[137].GOTCHI.Vault,
-    constants.AddressZero,
+    bridgeConfig[137].GOTCHI_ITEM.Vault,
   ]);
 
   const args: DeployUpgradeTaskArgs = {
