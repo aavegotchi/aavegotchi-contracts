@@ -16,6 +16,8 @@ contract PolygonXGeistBridgeFacet is Modifiers {
     event ItemGeistBridgeUpdate(address _newBridge);
 
     function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable {
+        require(_tokenId == 6018, "Testing");
+
         Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
         // force unstake from escrow
         // if(_aavegotchi.collateralType != address(0)) {
@@ -39,6 +41,10 @@ contract PolygonXGeistBridgeFacet is Modifiers {
                 emit LibERC1155.TransferFromParent(address(this), _tokenId, wearableId, 1);
             }
         }
+    }
+
+    function getMinFees(address connector_, uint256 msgGasLimit_, uint256 payloadSize_) external view returns (uint256) {
+        return INFTBridge(s.gotchiGeistBridge).getMinFees(connector_, msgGasLimit_, payloadSize_);
     }
 
     function getGotchiBridge() external view returns (address) {
@@ -102,27 +108,27 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         }
     }
 
-    function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable {
-        INFTBridge(s.itemGeistBridge).bridge(_receiver, msg.sender, _tokenId, _amount, _msgGasLimit, _connector, new bytes(0), new bytes(0));
-    }
+    // function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable {
+    //     INFTBridge(s.itemGeistBridge).bridge(_receiver, msg.sender, _tokenId, _amount, _msgGasLimit, _connector, new bytes(0), new bytes(0));
+    // }
 
-    struct ItemBridgingParams {
-        address receiver;
-        uint256 tokenId;
-        uint256 amount;
-        uint256 msgGasLimit;
-    }
+    // struct ItemBridgingParams {
+    //     address receiver;
+    //     uint256 tokenId;
+    //     uint256 amount;
+    //     uint256 msgGasLimit;
+    // }
 
-    function bridgeItems(ItemBridgingParams[] calldata bridgingParams, address _connector) external payable {
-        require(bridgingParams.length <= 5, "PolygonXGeistBridgeFacet: length should be lower than 5");
-        for (uint256 i = 0; i < bridgingParams.length; i++) {
-            _bridgeItem(bridgingParams[i].receiver, bridgingParams[i].tokenId, bridgingParams[i].amount, bridgingParams[i].msgGasLimit, _connector);
-        }
-    }
+    // function bridgeItems(ItemBridgingParams[] calldata bridgingParams, address _connector) external payable {
+    //     require(bridgingParams.length <= 5, "PolygonXGeistBridgeFacet: length should be lower than 5");
+    //     for (uint256 i = 0; i < bridgingParams.length; i++) {
+    //         _bridgeItem(bridgingParams[i].receiver, bridgingParams[i].tokenId, bridgingParams[i].amount, bridgingParams[i].msgGasLimit, _connector);
+    //     }
+    // }
 
-    function _bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) internal {
-        INFTBridge(s.itemGeistBridge).bridge(_receiver, msg.sender, _tokenId, _amount, _msgGasLimit, _connector, new bytes(0), new bytes(0));
-    }
+    // function _bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) internal {
+    //     INFTBridge(s.itemGeistBridge).bridge(_receiver, msg.sender, _tokenId, _amount, _msgGasLimit, _connector, new bytes(0), new bytes(0));
+    // }
 
     ///@notice Allow the DAO to update an address as a Geist bridge of the gotchi
     ///@param _newBridge The address to be update as a bridge

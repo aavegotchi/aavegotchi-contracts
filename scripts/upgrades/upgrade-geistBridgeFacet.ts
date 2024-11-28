@@ -9,6 +9,17 @@ import setBridges from "../geistBridge/setBridges";
 import { bridgeConfig } from "../geistBridge/bridgeConfig";
 import { utils } from "ethers";
 
+const gasLimit = 500_000;
+
+function getPayloadSize(address: string) {
+  const payload = ethers.utils.defaultAbiCoder.encode(
+    ["address", "uint256"],
+    [address, gasLimit]
+  );
+
+  return payload.length;
+}
+
 export async function upgrade() {
   const facets: FacetsAndAddSelectors[] = [
     {
@@ -16,13 +27,14 @@ export async function upgrade() {
       addSelectors: [
         "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable",
         "function setMetadata(uint _tokenId, bytes memory _metadata) external",
-        "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable",
+        // "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable",
         // "function bridgeGotchis(tuple(address receiver, uint256 tokenId, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
-        "function bridgeItems(tuple(address receiver, uint256 tokenId, uint256 amount, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
+        // "function bridgeItems(tuple(address receiver, uint256 tokenId, uint256 amount, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
         "function updateGotchiGeistBridge(address _newBridge) external",
         "function updateItemGeistBridge(address _newBridge) external",
         "function getGotchiBridge() external view returns (address)",
         "function getItemBridge() external view returns (address)",
+        "function getMinFees(address connector_, uint256 msgGasLimit_, uint256 payloadSize_) external view returns (uint256)",
       ],
       removeSelectors: [],
     },
@@ -74,9 +86,17 @@ export async function upgrade() {
     );
     await tx.wait();
 
+    const minFees = await bridge.getMinFees(
+      connector,
+      5000000,
+      getPayloadSize(connector)
+    );
+
+    console.log("Min fees:", minFees);
+
     tx = await bridge.bridgeGotchi(owner, tokenId, 5000000, connector, {
-      gasPrice: 1000000000000000,
-      value: utils.parseEther("0.01"),
+      gasPrice: minFees,
+      value: minFees,
     });
     await tx.wait();
     console.log("Gotchi bridged");
