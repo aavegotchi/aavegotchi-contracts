@@ -6,7 +6,7 @@ import {
 } from "../../tasks/deployUpgrade";
 import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
 
-export async function upgradeDiamondCutFacet() {
+export async function upgradeDiamondCutFacet(diamondAddress: string) {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "DiamondCutFacet",
@@ -19,7 +19,7 @@ export async function upgradeDiamondCutFacet() {
 
   const args: DeployUpgradeTaskArgs = {
     diamondOwner: maticDiamondUpgrader,
-    diamondAddress: maticDiamondAddress,
+    diamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
@@ -31,7 +31,7 @@ export async function upgradeDiamondCutFacet() {
 }
 
 if (require.main === module) {
-  upgradeDiamondCutFacet()
+  upgradeDiamondCutFacet(maticDiamondAddress)
     .then(() => process.exit(0))
     // .then(() => console.log('upgrade completed') /* process.exit(0) */)
     .catch((error) => {

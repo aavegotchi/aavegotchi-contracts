@@ -7,8 +7,11 @@ import {LibStrings} from "../../../shared/libraries/LibStrings.sol";
 
 import {ItemsFacet} from "../../facets/ItemsFacet.sol";
 import {AavegotchiFacet} from "../../facets/AavegotchiFacet.sol";
+import {INFTBridge} from "../../../shared/interfaces/INFTBridge.sol";
 
 contract WearablesFacet {
+    event ItemGeistBridgeSet(address indexed itemGeistBridge);
+
     function periphery() internal pure returns (PeripheryFacet pFacet) {
         pFacet = PeripheryFacet(WearableLibDiamond.AAVEGOTCHI_DIAMOND);
     }
@@ -39,11 +42,11 @@ contract WearablesFacet {
         approved_ = aavegotchiFacet().isApprovedForAll(_owner, _operator);
     }
 
-    function tokenURI(uint256 _tokenId) external pure returns (string memory) {
-        return aavegotchiFacet().tokenURI(_tokenId);
-    }
+    // function tokenURI(uint256 _tokenId) external pure returns (string memory) {
+    //     return aavegotchiFacet().tokenURI(_tokenId);
+    // }
 
-    //  function contractURI() public view returns (string memory) {
+    // function contractURI() public view returns (string memory) {
     //     return "https://app.aavegotchi.com/metadata/items/[id]";
     // }
 
@@ -65,27 +68,59 @@ contract WearablesFacet {
         }
     }
 
-    function safeTransferFrom(
-        address _from,
-        address _to,
-        uint256 _id,
-        uint256 _value,
-        bytes calldata _data
-    ) external {
+    function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
         periphery().peripherySafeTransferFrom(msg.sender, _from, _to, _id, _value, _data);
         //emit event
         LibEventHandler._receiveAndEmitTransferSingleEvent(msg.sender, _from, _to, _id, _value);
     }
 
-    function safeBatchTransferFrom(
-        address _from,
-        address _to,
-        uint256[] calldata _ids,
-        uint256[] calldata _values,
-        bytes calldata _data
-    ) external {
+    function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external {
         periphery().peripherySafeBatchTransferFrom(msg.sender, _from, _to, _ids, _values, _data);
         //emit event
         LibEventHandler._receiveAndEmitTransferBatchEvent(msg.sender, _from, _to, _ids, _values);
     }
+
+    function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable {
+        WearableLibDiamond.DiamondStorage storage ds = WearableLibDiamond.diamondStorage();
+        INFTBridge(ds.itemGeistBridge).bridge{value: msg.value}(
+            _receiver,
+            msg.sender,
+            _tokenId,
+            _amount,
+            _msgGasLimit,
+            _connector,
+            new bytes(0),
+            new bytes(0)
+        );
+    }
+
+    function setItemGeistBridge(address _itemBridge) external {
+        WearableLibDiamond.enforceIsContractOwner();
+        WearableLibDiamond.DiamondStorage storage ds = WearableLibDiamond.diamondStorage();
+        ds.itemGeistBridge = _itemBridge;
+        emit ItemGeistBridgeSet(_itemBridge);
+    }
+
+    function getItemGeistBridge() external view returns (address) {
+        WearableLibDiamond.DiamondStorage storage ds = WearableLibDiamond.diamondStorage();
+        return ds.itemGeistBridge;
+    }
+
+    // struct ItemBridgingParams {
+    //     address receiver;
+    //     uint256 tokenId;
+    //     uint256 amount;
+    //     uint256 msgGasLimit;
+    // }
+
+    // function bridgeItems(ItemBridgingParams[] calldata bridgingParams, address _connector) external payable {
+    //     require(bridgingParams.length <= 5, "PolygonXGeistBridgeFacet: length should be lower than 5");
+    //     for (uint256 i = 0; i < bridgingParams.length; i++) {
+    //         _bridgeItem(bridgingParams[i].receiver, bridgingParams[i].tokenId, bridgingParams[i].amount, bridgingParams[i].msgGasLimit, _connector);
+    //     }
+    // }
+
+    // function _bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) internal {
+    //     INFTBridge(s.itemGeistBridge).bridge(_receiver, msg.sender, _tokenId, _amount, _msgGasLimit, _connector, new bytes(0), new bytes(0));
+    // }
 }

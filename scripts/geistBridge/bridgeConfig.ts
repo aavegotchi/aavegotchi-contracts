@@ -58,10 +58,10 @@ export const bridgeConfig = {
     GOTCHI_ITEM: {
       isAppChain: false,
       NonMintableToken: "0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f",
-      Vault: "0x3D3Bef5f85A667e0b28Db33668CE1929089e5e1a",
+      Vault: "0xA421Ed8a4E3cfbFbFd2F621b27bd3C27D71C8b97",
       connectors: {
         "63157": {
-          FAST: "0xcCDA08a4EE78Ee6adf033722365729Bd891cE5C0",
+          FAST: "0x1A9E2D17122B747871a1088FC38952c7dc5d8334",
         },
       },
     },
@@ -80,10 +80,10 @@ export const bridgeConfig = {
     GOTCHI_ITEM: {
       isAppChain: true,
       MintableToken: "0xaC336aB3CFC58698B582205A861A5C6B798c01B9",
-      Controller: "0x249730060B7A2740E4C1C9aDA34086e38a4f46D2",
+      Controller: "0x4924E6B720D7283bF2d90104A480a9CFadAb1b77",
       connectors: {
         "137": {
-          FAST: "0xdCA266A667a5b4449B3663CBeE303b96cC81a430",
+          FAST: "0xaf6b8fbacEec187A954C1e85D3614c58C393AA28",
         },
       },
     },

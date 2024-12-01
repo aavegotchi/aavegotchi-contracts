@@ -41,6 +41,7 @@ library WearableLibDiamond {
         address contractOwner;
         //aavegotchi master diamond address
         address aavegotchiDiamond;
+        address itemGeistBridge;
     }
 
     function diamondStorage() internal pure returns (DiamondStorage storage ds) {
@@ -73,11 +74,7 @@ library WearableLibDiamond {
 
     event DiamondCut(IDiamondCut.FacetCut[] _diamondCut, address _init, bytes _calldata);
 
-    function addDiamondFunctions(
-        address _diamondCutFacet,
-        address _diamondLoupeFacet,
-        address _ownershipFacet
-    ) internal {
+    function addDiamondFunctions(address _diamondCutFacet, address _diamondLoupeFacet, address _ownershipFacet) internal {
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](3);
         bytes4[] memory functionSelectors = new bytes4[](1);
         functionSelectors[0] = IDiamondCut.diamondCut.selector;
@@ -101,11 +98,7 @@ library WearableLibDiamond {
     }
 
     // Internal function version of diamondCut
-    function diamondCut(
-        IDiamondCut.FacetCut[] memory _diamondCut,
-        address _init,
-        bytes memory _calldata
-    ) internal {
+    function diamondCut(IDiamondCut.FacetCut[] memory _diamondCut, address _init, bytes memory _calldata) internal {
         for (uint256 facetIndex; facetIndex < _diamondCut.length; facetIndex++) {
             IDiamondCut.FacetCutAction action = _diamondCut[facetIndex].action;
             if (action == IDiamondCut.FacetCutAction.Add) {

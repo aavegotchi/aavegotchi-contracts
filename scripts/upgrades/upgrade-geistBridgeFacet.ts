@@ -5,10 +5,8 @@ import {
   FacetsAndAddSelectors,
 } from "../../tasks/deployUpgrade";
 import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
-import setBridges from "../geistBridge/setBridges";
 import { bridgeConfig } from "../geistBridge/bridgeConfig";
-import { PolygonXGeistBridgeFacet__factory } from "../../typechain";
-import { constants } from "ethers";
+import { ItemsFacet } from "../../typechain";
 
 const gasLimit = 500_000;
 
@@ -28,7 +26,6 @@ export async function upgrade() {
       addSelectors: [
         // "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable",
         // "function setMetadata(uint _tokenId, bytes memory _metadata) external",
-        "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable",
         // "function bridgeGotchis(tuple(address receiver, uint256 tokenId, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
         // "function bridgeItems(tuple(address receiver, uint256 tokenId, uint256 amount, uint256 msgGasLimit)[] calldata bridgingParams, address _connector) external payable",
         // "function setBridges(address _gotchiBridge, address _itemBridge) external",
@@ -36,17 +33,24 @@ export async function upgrade() {
         // "function getItemBridge() external view returns (address)",
         // "function getMinFees(address connector_, uint256 msgGasLimit_, uint256 payloadSize_) external view returns (uint256)",
       ],
+      removeSelectors: [
+        // "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable",
+      ],
+    },
+    {
+      facetName: "ItemsFacet",
+      addSelectors: [],
       removeSelectors: [],
     },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
 
-  let iface = new ethers.utils.Interface(PolygonXGeistBridgeFacet__factory.abi);
-  const payload = iface.encodeFunctionData("setBridges", [
-    bridgeConfig[137].GOTCHI.Vault,
-    bridgeConfig[137].GOTCHI_ITEM.Vault,
-  ]);
+  // let iface = new ethers.utils.Interface(PolygonXGeistBridgeFacet__factory.abi);
+  // const payload = iface.encodeFunctionData("setBridges", [
+  //   bridgeConfig[137].GOTCHI.Vault,
+  //   bridgeConfig[137].GOTCHI_ITEM.Vault,
+  // ]);
 
   const args: DeployUpgradeTaskArgs = {
     diamondOwner: maticDiamondUpgrader,
@@ -56,8 +60,8 @@ export async function upgrade() {
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
-    initAddress: maticDiamondAddress,
-    initCalldata: payload,
+    initAddress: ethers.constants.AddressZero,
+    initCalldata: "0x",
   };
 
   await run("deployUpgrade", args);
@@ -92,20 +96,12 @@ export async function upgrade() {
     );
     await tx.wait();
 
-    // const minFees = await bridge.getMinFees(
-    //   connector,
-    //   5000000,
-    //   getPayloadSize(connector)
-    // );
-
-    // console.log("Min fees:", minFees);
-
-    tx = await bridge.bridgeGotchi(owner, tokenId, 5000000, connector, {
-      value: ethers.utils.parseEther("0.1"),
+    tx = await bridge.bridgeGotchi(owner, tokenId, gasLimit, connector, {
+      value: ethers.utils.parseEther("0.3"),
     });
 
     await tx.wait();
-    console.log("Gotchi bridged");
+    console.log("Gotchis bridged");
   }
 }
 

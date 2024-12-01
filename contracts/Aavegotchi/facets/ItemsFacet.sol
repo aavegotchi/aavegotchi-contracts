@@ -32,7 +32,7 @@ contract ItemsFacet is Modifiers {
     ///@notice Returns balance for each item that exists for an account
     ///@param _account Address of the account to query
     ///@return bals_ An array of structs,each struct containing details about each item owned
-    function itemBalances(address _account) external view returns (ItemIdIO[] memory bals_) {
+    function itemBalances(address _account) public view returns (ItemIdIO[] memory bals_) {
         uint256 count = s.ownerItems[_account].length;
         bals_ = new ItemIdIO[](count);
         for (uint256 i; i < count; i++) {
@@ -181,9 +181,9 @@ contract ItemsFacet is Modifiers {
     ///@param _tokenId The identifier of the aavegotchi to make changes to
     ///@param _wearablesToEquip An array containing the identifiers of the wearables to equip
     function equipWearables(
-        uint256 _tokenId, 
+        uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip
-    ) onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) external {
+    ) external onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
         uint256[EQUIPPED_WEARABLE_SLOTS] memory _depositIds;
         _equipWearables(_tokenId, _wearablesToEquip, _depositIds);
     }
@@ -199,7 +199,7 @@ contract ItemsFacet is Modifiers {
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
         uint256[EQUIPPED_WEARABLE_SLOTS] calldata _depositIds
-    ) onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) external {
+    ) external onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
         _equipWearables(_tokenId, _wearablesToEquip, _depositIds);
     }
 
@@ -284,7 +284,7 @@ contract ItemsFacet is Modifiers {
                 if (depositIdToEquip == 0) {
                     // We need to check if wearable is already in the inventory, if it is, we don't transfer it from the owner
                     uint256 maxBalance = slot == LibItems.WEARABLE_SLOT_HAND_LEFT || slot == LibItems.WEARABLE_SLOT_HAND_RIGHT ? 2 : 1;
-                    if(s.nftItemBalances[address(this)][_tokenId][toEquipId] >= maxBalance) continue;
+                    if (s.nftItemBalances[address(this)][_tokenId][toEquipId] >= maxBalance) continue;
                     require(s.ownerItemBalances[sender][toEquipId] >= 1, "ItemsFacet: Wearable isn't in inventory");
 
                     //Transfer to Aavegotchi
@@ -300,7 +300,6 @@ contract ItemsFacet is Modifiers {
             }
         }
         LibAavegotchi.interact(_tokenId);
-
     }
 
     ///@notice Allow the owner of an NFT to use multiple consumable items for his aavegotchi

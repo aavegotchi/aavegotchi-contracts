@@ -457,12 +457,6 @@ contract Modifiers {
         _;
     }
 
-    modifier onlyItemGeistBridge() {
-        address sender = LibMeta.msgSender();
-        require(sender == s.itemGeistBridge, "LibAppStorage: Do not have access");
-        _;
-    }
-
     modifier onlyPeriphery() {
         address sender = LibMeta.msgSender();
         require(sender == s.wearableDiamond, "LibAppStorage: Not wearable diamond");
