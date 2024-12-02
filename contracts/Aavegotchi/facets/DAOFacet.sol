@@ -5,7 +5,7 @@ import {Modifiers, ItemType, WearableSet, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_
 import {AavegotchiCollateralTypeIO} from "../libraries/LibAavegotchi.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibItems} from "../libraries/LibItems.sol";
-import {LibSvg} from "../libraries/LibSvg.sol";
+import {LibSvg} from "../libraries/LibSVG.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibXPAllocation} from "../libraries/LibXPAllocation.sol";
 import {GameManager} from "../libraries/LibAppStorage.sol";
