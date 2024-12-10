@@ -37,11 +37,6 @@ export async function upgrade() {
         // "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable",
       ],
     },
-    {
-      facetName: "ItemsFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
@@ -70,7 +65,7 @@ export async function upgrade() {
 
   if (network.name === "hardhat") {
     //try to bridge a gotchi
-    const tokenId = 6018;
+    const tokenId = 1463;
     const owner = "0xC3c2e1Cf099Bc6e1fA94ce358562BCbD5cc59FE5";
     const connector = bridgeConfig[137].GOTCHI.connectors[63157].FAST;
 
