@@ -10,14 +10,9 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 
 import {ForgeFacet} from "../ForgeDiamond/facets/ForgeFacet.sol";
-
-// import "hardhat/console.sol";
+import {LibCollateralsEvents} from "../libraries/LibCollaterals.sol";
 
 contract CollateralFacet is Modifiers {
-    event IncreaseStake(uint256 indexed _tokenId, uint256 _stakeAmount);
-    event DecreaseStake(uint256 indexed _tokenId, uint256 _reduceAmount);
-    event ExperienceTransfer(uint256 indexed _fromTokenId, uint256 indexed _toTokenId, uint256 experience);
-
     /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -86,7 +81,7 @@ contract CollateralFacet is Modifiers {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
         address collateralType = s.aavegotchis[_tokenId].collateralType;
-        emit IncreaseStake(_tokenId, _stakeAmount);
+        LibCollateralsEvents.IncreaseStake(_tokenId, _stakeAmount);
         LibERC20.transferFrom(collateralType, LibMeta.msgSender(), escrow, _stakeAmount);
     }
 
@@ -100,11 +95,8 @@ contract CollateralFacet is Modifiers {
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 
         address collateralType = s.aavegotchis[_tokenId].collateralType;
-        uint256 currentStake = IERC20(collateralType).balanceOf(escrow);
-        uint256 minimumStake = s.aavegotchis[_tokenId].minimumStake;
 
-        require(currentStake - _reduceAmount >= minimumStake, "CollateralFacet: Cannot reduce below minimum stake");
-        emit DecreaseStake(_tokenId, _reduceAmount);
+        LibCollateralsEvents.DecreaseStake(_tokenId, _reduceAmount);
         LibERC20.transferFrom(collateralType, escrow, LibMeta.msgSender(), _reduceAmount);
     }
 
@@ -125,7 +117,7 @@ contract CollateralFacet is Modifiers {
         if (_tokenId == _toId) revert("CollateralFacet: Cannot send to burned Aavegotchi");
         else {
             uint256 experience = s.aavegotchis[_tokenId].experience;
-            emit ExperienceTransfer(_tokenId, _toId, experience);
+            LibCollateralsEvents.ExperienceTransfer(_tokenId, _toId, experience);
             s.aavegotchis[_toId].experience += experience;
         }
 
@@ -153,7 +145,7 @@ contract CollateralFacet is Modifiers {
         // transfer all collateral to LibMeta.msgSender()
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         uint256 reduceAmount = IERC20(collateralType).balanceOf(escrow);
-        emit DecreaseStake(_tokenId, reduceAmount);
+        LibCollateralsEvents.DecreaseStake(_tokenId, reduceAmount);
         LibERC20.transferFrom(collateralType, escrow, owner, reduceAmount);
 
         // delete aavegotchi info

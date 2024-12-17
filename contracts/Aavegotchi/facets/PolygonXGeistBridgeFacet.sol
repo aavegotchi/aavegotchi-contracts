@@ -6,29 +6,32 @@ import {Aavegotchi, Modifiers} from "../libraries/LibAppStorage.sol";
 import {INFTBridge} from "../../shared/interfaces/INFTBridge.sol";
 import {ItemType} from "../libraries/LibItems.sol";
 import {ItemsFacet} from "./ItemsFacet.sol";
-
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {LibERC20} from "../../shared/libraries/LibERC20.sol";
+import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibCollateralsEvents} from "../libraries/LibCollaterals.sol";
 contract PolygonXGeistBridgeFacet is Modifiers {
     event GeistBridgesSet(address _gotchiBridge, address _itemBridge);
 
     function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable {
-        // require(_tokenId == 6018 || _tokenId == 21496 || _tokenId == 1463, "Testing");
+        Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
 
         require(s.gotchiGeistBridge != address(0), "Gotchi bridge not set");
         require(s.itemGeistBridge != address(0), "Item bridge not set");
 
-        // // force unstake from escrow
-        // if (_aavegotchi.collateralType != address(0)) {
-        //     uint256 currentStake = IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow);
-        //     EscrowFacet(address(this)).transferEscrow(_tokenId, _aavegotchi.collateralType, msg.sender, currentStake);
-        // }
+        require(address(_aavegotchi.escrow) != address(0), "CollateralFacet: Does not have an escrow");
 
-        // // force remove GHST from pocket
-        // if (_aavegotchi.collateralType != address(0)) {
-        //     uint256 currentStake = IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow);
-        //     EscrowFacet(address(this)).transferEscrow(_tokenId, _aavegotchi.collateralType, msg.sender, currentStake);
-        // }
+        // force unstake from escrow
+        LibERC20.transferFrom(
+            _aavegotchi.collateralType,
+            _aavegotchi.escrow,
+            LibMeta.msgSender(),
+            IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow)
+        );
+        LibCollateralsEvents.DecreaseStake(_tokenId, IERC20(_aavegotchi.collateralType).balanceOf(_aavegotchi.escrow));
 
-        Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
+        // //force remove GHST from pocket
+        LibERC20.transferFrom(s.ghstContract, _aavegotchi.escrow, msg.sender, IERC20(s.ghstContract).balanceOf(_aavegotchi.escrow));
 
         for (uint256 slot; slot < _aavegotchi.equippedWearables.length; slot++) {
             uint256 wearableId = _aavegotchi.equippedWearables[slot];
