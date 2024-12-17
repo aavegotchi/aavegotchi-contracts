@@ -95,6 +95,8 @@ contract EscrowFacet is Modifiers {
         address escrow = s.aavegotchis[_tokenId].escrow;
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         require(escrow != address(0), "EscrowFacet: Does not have an escrow");
+
+        //technically can remove this now, but we'll leave it to retain DecreaseStake as the canonical way
         require(collateralType != _erc20Contract, "EscrowFacet: Transferring ERC20 token CANNOT be same as collateral ERC20 token");
 
         uint256 balance = IERC20(_erc20Contract).balanceOf(escrow);
