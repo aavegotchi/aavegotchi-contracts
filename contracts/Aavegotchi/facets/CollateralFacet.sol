@@ -100,6 +100,21 @@ contract CollateralFacet is Modifiers {
         LibERC20.transferFrom(collateralType, escrow, LibMeta.msgSender(), _reduceAmount);
     }
 
+    ///@notice Allow the owner of an aavegotchi to remove all collateral from their aavegotchi
+    ///@dev Only valid for claimed aavegotchis
+    ///@param _tokenIds The identifiers of the NFTs to remove collateral from
+    function batchRemoveCollateral(uint256[] calldata _tokenIds) external {
+        for (uint256 i; i < _tokenIds.length; i++) {
+            require(s.aavegotchis[_tokenIds[i]].owner == LibMeta.msgSender(), "CollateralFacet: Aavegotchi not owned by caller");
+            address collateralType = s.aavegotchis[_tokenIds[i]].collateralType;
+            address escrow = s.aavegotchis[_tokenIds[i]].escrow;
+            uint256 reduceAmount = IERC20(collateralType).balanceOf(escrow);
+
+            LibCollateralsEvents.DecreaseStake(_tokenIds[i], reduceAmount);
+            LibERC20.transferFrom(collateralType, escrow, LibMeta.msgSender(), reduceAmount);
+        }
+    }
+
     ///@notice Allow the owner of an aavegotchi to destroy his aavegotchi and transfer the XP points to another aavegotchi
     ///@dev Only valid for claimed aavegotchisi
     ///@dev Name assigned to destroyed aavegotchi is freed up for use by another aavegotch

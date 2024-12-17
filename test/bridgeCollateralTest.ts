@@ -96,4 +96,37 @@ describe("Testing Geist Bridge Collateral and GHST Auto-Withdraw", async functio
     );
     expect(escrowGhstBalanceAfter).to.be.eq("0");
   });
+
+  it("Test Batch Remove Collateral", async function () {
+    const tokenIds = ["21496", "12937"];
+
+    const collateralBalanceBefore1 = await collateralFacet.collateralBalance(
+      tokenIds[0]
+    );
+    const collateralBalanceBefore2 = await collateralFacet.collateralBalance(
+      tokenIds[1]
+    );
+
+    const tx = await collateralFacet
+      .connect(signer)
+      .batchRemoveCollateral(tokenIds);
+    await tx.wait();
+
+    const collateralBalanceAfter1 = (
+      await collateralFacet.collateralBalance(tokenIds[0])
+    ).balance_;
+    const collateralBalanceAfter2 = (
+      await collateralFacet.collateralBalance(tokenIds[1])
+    ).balance_;
+
+    expect(collateralBalanceAfter1).to.be.eq(0);
+    expect(collateralBalanceAfter2).to.be.eq(0);
+  });
+
+  it("Non owners should not be able to batch remove collateral", async function () {
+    const tokenIds = ["21496", "12937"];
+    await expect(
+      collateralFacet.connect(nonOwner).batchRemoveCollateral(tokenIds)
+    ).to.be.revertedWith("CollateralFacet: Aavegotchi not owned by caller");
+  });
 });
