@@ -24,12 +24,16 @@ contract PolygonXGeistBridgeFacet is Modifiers {
         address escrow = _aavegotchi.escrow;
         address collateralType = _aavegotchi.collateralType;
 
-        // force unstake from escrow
-        LibERC20.transferFrom(collateralType, escrow, LibMeta.msgSender(), IERC20(collateralType).balanceOf(escrow));
-        LibCollateralsEvents.DecreaseStake(_tokenId, IERC20(collateralType).balanceOf(escrow));
+        if (IERC20(collateralType).balanceOf(escrow) > 0) {
+            // force unstake escrow
+            LibERC20.transferFrom(collateralType, escrow, _aavegotchi.owner, IERC20(collateralType).balanceOf(escrow));
+            LibCollateralsEvents.DecreaseStake(_tokenId, IERC20(collateralType).balanceOf(escrow));
+        }
 
-        // //force remove GHST from pocket
-        LibERC20.transferFrom(s.ghstContract, escrow, LibMeta.msgSender(), IERC20(s.ghstContract).balanceOf(escrow));
+        if (IERC20(s.ghstContract).balanceOf(escrow) > 0) {
+            // force remove GHST from pocket
+            LibERC20.transferFrom(s.ghstContract, escrow, _aavegotchi.owner, IERC20(s.ghstContract).balanceOf(escrow));
+        }
 
         for (uint256 slot; slot < _aavegotchi.equippedWearables.length; slot++) {
             uint256 wearableId = _aavegotchi.equippedWearables[slot];
