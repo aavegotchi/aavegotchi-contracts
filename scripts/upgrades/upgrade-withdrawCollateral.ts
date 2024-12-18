@@ -23,11 +23,6 @@ export async function upgradeWithdrawCollateral() {
       addSelectors: [],
       removeSelectors: [],
     },
-    {
-      facetName: "PolygonXGeistBridgeFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
