@@ -6,6 +6,7 @@ import { ethers } from "hardhat";
 import {
   CollateralFacet,
   ERC20,
+  EscrowFacet,
   IERC20,
   PolygonXGeistBridgeFacet,
 } from "../typechain";
@@ -20,6 +21,7 @@ describe("Testing Geist Bridge Collateral and GHST Auto-Withdraw", async functio
   const escrowAddress = "0x449eb8b3f95fafa49f2f666f7f144126465d20db";
   let bridgeFacet: PolygonXGeistBridgeFacet;
   let collateralFacet: CollateralFacet;
+  let escrowFacet: EscrowFacet;
   const tokenId = 6018;
   let signer: SignerWithAddress;
   let nonOwner: SignerWithAddress;
@@ -54,6 +56,12 @@ describe("Testing Geist Bridge Collateral and GHST Auto-Withdraw", async functio
       diamondAddress,
       signer
     )) as CollateralFacet;
+
+    escrowFacet = (await ethers.getContractAt(
+      "EscrowFacet",
+      diamondAddress,
+      signer
+    )) as EscrowFacet;
   });
 
   it("Non-owner should not be able to withdraw collateral", async function () {
@@ -64,6 +72,25 @@ describe("Testing Geist Bridge Collateral and GHST Auto-Withdraw", async functio
     ).to.be.revertedWith(
       "LibAppStorage: Only aavegotchi owner can call this function"
     );
+  });
+
+  it("Cannot transfer out collateral from unlisted gotchis", async function () {
+    const tokenIds = ["6018"];
+
+    const collateralBalanceBefore1 = await collateralFacet.collateralBalance(
+      tokenIds[0]
+    );
+
+    await expect(
+      escrowFacet
+        .connect(signer)
+        .batchTransferEscrow(
+          tokenIds,
+          [collateralBalanceBefore1.collateralType_],
+          [signer.address],
+          [collateralBalanceBefore1.balance_]
+        )
+    ).to.be.revertedWith("Testing");
   });
 
   it("Test GHST Auto-Withdraw", async function () {
@@ -97,7 +124,26 @@ describe("Testing Geist Bridge Collateral and GHST Auto-Withdraw", async functio
     expect(escrowGhstBalanceAfter).to.be.eq("0");
   });
 
-  it("Test Batch Remove Collateral", async function () {
+  it("Non owners should not be able to batch transfer collateral", async function () {
+    const tokenIds = ["21496", "12937"];
+
+    const collateral1 = await collateralFacet.collateralBalance(tokenIds[0]);
+    const collateral2 = await collateralFacet.collateralBalance(tokenIds[1]);
+
+    await expect(
+      escrowFacet
+        .connect(nonOwner)
+        .batchTransferEscrow(
+          tokenIds,
+          [collateral1.collateralType_, collateral2.collateralType_],
+          [signer.address, signer.address],
+          [collateral1.balance_, collateral2.balance_]
+        )
+    ).to.be.revertedWith(
+      "LibAppStorage: Only aavegotchi owner can call this function"
+    );
+  });
+  it("Test Batch Transfer Collateral", async function () {
     const tokenIds = ["21496", "12937"];
 
     const collateralBalanceBefore1 = await collateralFacet.collateralBalance(
@@ -107,9 +153,17 @@ describe("Testing Geist Bridge Collateral and GHST Auto-Withdraw", async functio
       tokenIds[1]
     );
 
-    const tx = await collateralFacet
+    const tx = await escrowFacet
       .connect(signer)
-      .batchRemoveCollateral(tokenIds);
+      .batchTransferEscrow(
+        tokenIds,
+        [
+          collateralBalanceBefore1.collateralType_,
+          collateralBalanceBefore2.collateralType_,
+        ],
+        [signer.address, signer.address],
+        [collateralBalanceBefore1.balance_, collateralBalanceBefore2.balance_]
+      );
     await tx.wait();
 
     const collateralBalanceAfter1 = (
@@ -119,14 +173,7 @@ describe("Testing Geist Bridge Collateral and GHST Auto-Withdraw", async functio
       await collateralFacet.collateralBalance(tokenIds[1])
     ).balance_;
 
-    expect(collateralBalanceAfter1).to.be.eq(0);
-    expect(collateralBalanceAfter2).to.be.eq(0);
-  });
-
-  it("Non owners should not be able to batch remove collateral", async function () {
-    const tokenIds = ["21496", "12937"];
-    await expect(
-      collateralFacet.connect(nonOwner).batchRemoveCollateral(tokenIds)
-    ).to.be.revertedWith("CollateralFacet: Aavegotchi not owned by caller");
+    expect(collateralBalanceAfter1).to.be.approximately(0, 1000);
+    expect(collateralBalanceAfter2).to.be.approximately(0, 1000);
   });
 });

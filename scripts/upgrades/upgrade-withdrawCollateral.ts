@@ -15,9 +15,7 @@ export async function upgradeWithdrawCollateral() {
     },
     {
       facetName: "CollateralFacet",
-      addSelectors: [
-        "function batchRemoveCollateral(uint256[] calldata _tokenIds) external",
-      ],
+      addSelectors: [],
       removeSelectors: [],
     },
     {

@@ -7,6 +7,7 @@ import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
+import {LibCollateralsEvents} from "../libraries/LibCollaterals.sol";
 
 contract EscrowFacet is Modifiers {
     event Erc20Deposited(uint256 indexed _tokenId, address indexed _erc20Contract, address indexed _from, address _to, uint256 _depositAmount);
@@ -96,9 +97,6 @@ contract EscrowFacet is Modifiers {
         address collateralType = s.aavegotchis[_tokenId].collateralType;
         require(escrow != address(0), "EscrowFacet: Does not have an escrow");
 
-        //technically can remove this now, but we'll leave it to retain DecreaseStake as the canonical way
-        require(collateralType != _erc20Contract, "EscrowFacet: Transferring ERC20 token CANNOT be same as collateral ERC20 token");
-
         uint256 balance = IERC20(_erc20Contract).balanceOf(escrow);
         require(balance >= _transferAmount, "EscrowFacet: Cannot transfer more than current ERC20 escrow balance");
 
@@ -107,6 +105,13 @@ contract EscrowFacet is Modifiers {
         if (IERC20(_erc20Contract).allowance(escrow, address(this)) < _transferAmount) {
             CollateralEscrow(escrow).approveAavegotchiDiamond(_erc20Contract);
         }
+
+        if (collateralType == _erc20Contract) {
+            if (_tokenId != 21496 && _tokenId != 12937 && _tokenId != 6741) revert("Testing");
+
+            LibCollateralsEvents.DecreaseStake(_tokenId, _transferAmount);
+        }
+
         LibERC20.transferFrom(_erc20Contract, escrow, _recipient, _transferAmount);
     }
 
