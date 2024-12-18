@@ -100,7 +100,6 @@ contract CollateralFacet is Modifiers {
 
         //todo: will remove this after final testing
         require(currentStake - _reduceAmount >= minimumStake, "CollateralFacet: Cannot reduce below minimum stake");
-
         LibCollateralsEvents.DecreaseStake(_tokenId, _reduceAmount);
         LibERC20.transferFrom(collateralType, escrow, LibMeta.msgSender(), _reduceAmount);
     }
