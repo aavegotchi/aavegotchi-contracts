@@ -13,6 +13,9 @@ import {ForgeFacet} from "../ForgeDiamond/facets/ForgeFacet.sol";
 import {LibCollateralsEvents} from "../libraries/LibCollaterals.sol";
 
 contract CollateralFacet is Modifiers {
+    event IncreaseStake(uint256 indexed _tokenId, uint256 _stakeAmount);
+    event ExperienceTransfer(uint256 indexed _fromTokenId, uint256 indexed _toTokenId, uint256 experience);
+
     /***********************************|
    |             Read Functions         |
    |__________________________________*/
@@ -81,7 +84,7 @@ contract CollateralFacet is Modifiers {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
         address collateralType = s.aavegotchis[_tokenId].collateralType;
-        LibCollateralsEvents.IncreaseStake(_tokenId, _stakeAmount);
+        emit IncreaseStake(_tokenId, _stakeAmount);
         LibERC20.transferFrom(collateralType, LibMeta.msgSender(), escrow, _stakeAmount);
     }
 
@@ -121,7 +124,7 @@ contract CollateralFacet is Modifiers {
         if (_tokenId == _toId) revert("CollateralFacet: Cannot send to burned Aavegotchi");
         else {
             uint256 experience = s.aavegotchis[_tokenId].experience;
-            LibCollateralsEvents.ExperienceTransfer(_tokenId, _toId, experience);
+            emit ExperienceTransfer(_tokenId, _toId, experience);
             s.aavegotchis[_toId].experience += experience;
         }
 
