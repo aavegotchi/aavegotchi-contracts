@@ -107,8 +107,6 @@ contract EscrowFacet is Modifiers {
         }
 
         if (collateralType == _erc20Contract) {
-            if (_tokenId != 21496 && _tokenId != 12937 && _tokenId != 6741) revert("Testing");
-
             LibCollateralsEvents.DecreaseStake(_tokenId, _transferAmount);
         }
 
