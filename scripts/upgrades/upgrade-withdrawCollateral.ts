@@ -8,20 +8,29 @@ import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
 
 export async function upgradeWithdrawCollateral() {
   const facets: FacetsAndAddSelectors[] = [
+    // {
+    //   facetName: "PolygonXGeistBridgeFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "CollateralFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "EscrowFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
     {
-      facetName: "PolygonXGeistBridgeFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "CollateralFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "EscrowFacet",
-      addSelectors: [],
-      removeSelectors: [],
+      facetName: "AavegotchiGameFacet",
+      addSelectors: [
+        "function claimAavegotchi(uint256 _tokenId, uint256 _option) external",
+      ],
+      removeSelectors: [
+        "function claimAavegotchi(uint256 _tokenId, uint256 _option, uint256 _stakeAmount) external",
+      ],
     },
   ];
 
