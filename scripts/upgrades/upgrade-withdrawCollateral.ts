@@ -13,25 +13,25 @@ export async function upgradeWithdrawCollateral() {
     //   addSelectors: [],
     //   removeSelectors: [],
     // },
-    // {
-    //   facetName: "CollateralFacet",
-    //   addSelectors: [],
-    //   removeSelectors: [],
-    // },
+    {
+      facetName: "CollateralFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
     // {
     //   facetName: "EscrowFacet",
     //   addSelectors: [],
     //   removeSelectors: [],
     // },
-    {
-      facetName: "AavegotchiGameFacet",
-      addSelectors: [
-        "function claimAavegotchi(uint256 _tokenId, uint256 _option) external",
-      ],
-      removeSelectors: [
-        "function claimAavegotchi(uint256 _tokenId, uint256 _option, uint256 _stakeAmount) external",
-      ],
-    },
+    // {
+    //   facetName: "AavegotchiGameFacet",
+    //   addSelectors: [
+    //     "function claimAavegotchi(uint256 _tokenId, uint256 _option) external",
+    //   ],
+    //   removeSelectors: [
+    //     "function claimAavegotchi(uint256 _tokenId, uint256 _option, uint256 _stakeAmount) external",
+    //   ],
+    // },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
