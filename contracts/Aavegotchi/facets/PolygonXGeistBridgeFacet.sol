@@ -14,8 +14,6 @@ contract PolygonXGeistBridgeFacet is Modifiers {
     event GeistBridgesSet(address _gotchiBridge, address _itemBridge);
 
     function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable {
-        require(_tokenId == 6018 || _tokenId == 21496 || _tokenId == 1463, "Testing");
-
         Aavegotchi memory _aavegotchi = s.aavegotchis[_tokenId];
 
         require(s.gotchiGeistBridge != address(0), "Gotchi bridge not set");
