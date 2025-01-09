@@ -13,7 +13,7 @@ async function main() {
     maticDiamondAddress
   )) as AavegotchiFacet;
 
-  const aavegotchi = await aavegotchiFacet.getAavegotchi("14117");
+  const aavegotchi = await aavegotchiFacet.getAavegotchi("6018");
 
   console.log(aavegotchi);
 }

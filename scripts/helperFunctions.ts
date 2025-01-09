@@ -7,9 +7,7 @@ import {
   DefenderRelaySigner,
 } from "defender-relay-client/lib/ethers";
 
-import { fundSigner } from "../helpers/helpers";
-
-export const gasPrice = 570000000000;
+export const gasPrice = 150000000000;
 
 export function delay(milliseconds: number) {
   return new Promise((resolve) => {
