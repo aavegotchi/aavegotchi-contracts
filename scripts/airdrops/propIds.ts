@@ -343,6 +343,60 @@ const sigProps = [
     id: "0x41a8eefa0d919e84a6fc6e2ef3b62b776f98deb4627defe310c056e30d091cfc",
     title: "Increasing XP Award to 250 XP for Succesful CORE AGIPs",
   },
+  {
+    id: "0x4ccd858c4db0933066a5c41386ffc008d87347fa5b582f23a44c7c47b9a12d27",
+    title: "Replacement DAO Director Election",
+  },
+  {
+    id: "0x4341932033531173746139ca670c533e6edd795b453075858de2d17457360899",
+    title: "Tipping for Aavegotchi community apps",
+  },
+  //no sigprop 130
+  {
+    id: "0x8a0f395fe3a966d5d52477d09b6c4e34f6e5053f70a8e65d118901adfc15078f",
+    title: "Forge Competition Pilot Season 1",
+  },
+  {
+    id: "0x094419732ba0037d626f90c99b65c9810b4a3627eaf41f30cda6ca334e390b24",
+    title: "Gotchi Battler V1.7 & V2 funding request",
+  },
+  {
+    id: "0x09bccefc981f6dad5e8f96045a57d6abe06685cf2572f75bf0444eb0c8253660",
+    title: "Funding Renewal Proposal for Pixelcraft Studios, 2024-2025",
+  },
+  {
+    id: "0x8852af28d47a02097b7e9510b87d785bc1984813b4b474f8e8ad57b6b7b568be",
+    title: "Smol funding request for Grid Gladiator V1 ($8000)",
+  },
+  {
+    id: "0x5fdebaefab3fa208fa4662ad1919530a98d4ac494836fb45aa0d46b36bf0498b",
+    title: "Official DAPP new features added by the DAO",
+  },
+  {
+    id: "0xb8578f9d94434cf536f0fdbce6d1baec26fafeba78c10129d955dadeeeba12ad",
+    title:
+      "Aavegotchi x TheSandbox - Maintenance renewal & termination (Reviewed Budget)",
+  },
+  {
+    id: "0xb628be6b12c543d3ef50182716921ad375186429063909136a1d1129676755d6",
+    title: "Enable Collateral Withdrawal from Aavegotchis Without Sacrifice",
+  },
+  {
+    id: "0x677d704fc7059eaf3467f23cde3581ef66096f5f1e8d55dcee54048436ff0566",
+    title: "Gotchi Greetoors V2 (revised)",
+  },
+  {
+    id: "0xc5324f9c7a3c0d8298a2ceee89c5457e95dc04cde545d61dc0902ef487055181",
+    title: "Defining DAO Director Term Lengths & Process for Future Elections",
+  },
+  {
+    id: "0x1df75275fb195fc6f1cac6c6830a96558b381049ab4519be7ac8720df12dd9a1",
+    title: "Renewal and Election of DAO Facilitator Roles",
+  },
+  {
+    id: "0xdd05c504c39fa18b6415427777fe96a6079a040deb1b7c7848947223e38e9d88",
+    title: "Rarity Farming Season 10",
+  },
 ];
 
 const coreProps = [
@@ -698,5 +752,62 @@ const coreProps = [
   {
     id: "0x307f6d8e39de3ce35886714e07586f838d42aa0556c66b19a142b1d8f2ba1703",
     title: "[AGIP 127] Increasing XP Award to 250 XP for Succesful CORE AGIPs",
+  },
+  {
+    id: "0x76a91e48a9a1b12852f055be07c2661d3d4a208091db9edbb16ba73b3cef3e55",
+    title: "[AGIP 128] Replacement DAO Director Election",
+  },
+  {
+    id: "0xef468935df62924bbf897d45a92da9876da20e30fdb6d7b7f18c2c847b198b86",
+    title: "[AGIP 129] Tipping for Aavegotchi community apps",
+  },
+  //no coreprop 130
+  {
+    id: "0x00942985e9dd86bfc0362e25a83611d9854a81f2d1d75392db185440f764c405",
+    title: "[AGIP 131] Forge Competition Pilot Season 1",
+  },
+  {
+    id: "0x4c1529a8fd0385d793838bd4d997aab84b2eb0f8344f941e2fab906ee5172308",
+    title: "[AGIP 132] Gotchi Battler V1.7 & V2 funding request",
+  },
+  {
+    id: "0x5142f7e9d4b416c0c6531ef23e5637fb56a34e731b73c0f10a26a25a72ef2077",
+    title:
+      "[AGIP 133] Funding Renewal Proposal for Pixelcraft Studios, 2024-2025",
+  },
+  {
+    id: "0x4a6d74f3bc0cc93e10098ee9a882ebcf8124ab0efc0f6abd278eb716f7cceeb4",
+    title: "[AGIP 134] Smol funding request for Grid Gladiator V1 ($8000)",
+  },
+  {
+    id: "0x63f270df7ab2b36f638999e76b634baacba041d3e4450616aef56c6fcdb08dcc",
+    title: "[AGIP135] Official DAPP new features added by the DAO",
+  },
+  {
+    id: "0x31b5bcf9b37a7ce844e1942b876ff579c800c050eac07b5b0a482005ba59b471",
+    title:
+      "[AGIP 136] Aavegotchi x TheSandbox - Maintenance renewal & termination (Reviewed Budget)",
+  },
+  {
+    id: "0x530eb8319bd1cc13d0a86fafb54d1e77547e8899da05326a55f2007ae1ad8883",
+    title:
+      "[AGIP 137] Enable Collateral Withdrawal from Aavegotchis Without Sacrifice",
+  },
+  {
+    id: "0x0e447db3aa3734f95b2b30c0fee6cc50dc2b83cec032c83fb65c8fd5e14cad76",
+    title: "[AGIP138] Gotchi Greetoors V2",
+  },
+  {
+    id: "0x272bea39a5f2e13a5afc65d7c9e70ffb5a9da06d4b6d169eb7a0d72aab10b7cf",
+    title:
+      "[AGIP139] Defining DAO Director Term Lengths & Process for Future Elections",
+  },
+  {
+    id: "0x3413724d3b8ae64d610a64cd9479f1733400e0246c8c852bc889561d994bc5fc",
+    title: "[AGIP 140] Renewal and Election of DAO Facilitator Roles",
+  },
+  {
+    id: "0x2edea7d431755c64cacbd2727a49eee1951ef06051fadc1c3f88cd951e89d4a2",
+    title: "[AGIP 141] Rarity Farming Season 10",
   },
 ];
