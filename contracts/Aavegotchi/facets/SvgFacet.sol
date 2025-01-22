@@ -5,7 +5,7 @@ import {AppStorage, SvgLayer, Dimensions} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi, PortalAavegotchiTraitsIO, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM, NUMERIC_TRAITS_NUM} from "../libraries/LibAavegotchi.sol";
 import {LibItems} from "../libraries/LibItems.sol";
 import {Modifiers, ItemType} from "../libraries/LibAppStorage.sol";
-import {LibSvg} from "../libraries/LibSvg.sol";
+import {LibSvg} from "../libraries/LibSVG.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
 
 contract SvgFacet is Modifiers {
