@@ -7,7 +7,7 @@ async function rarityPayout() {
     rarityDataFile: "rnd2",
     rounds: "4",
     totalAmount: "1200000",
-    blockNumber: "",
+    blockNumber: "67490569",
     deployerAddress: "0x821049b2273b0ccd34a64d1b08a3346f110ecae2",
     tieBreakerIndex: "1",
     rarityParams: [750000.0, 7500, 0.94].toString(),
