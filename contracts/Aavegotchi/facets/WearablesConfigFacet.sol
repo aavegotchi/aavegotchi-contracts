@@ -23,7 +23,6 @@ contract WearablesConfigFacet is Modifiers {
     /// @notice Creates and stores a new wearables configuration (max 65535 per Aavegotchi per owner).
     /// @notice First three slots are free, the rest are paid.
     /// @notice To create a wearables config for someone else aavegotchi there is a fee
-    /// @notice We support wearables config creation for unbridged gotchis (config owner is set to sender)
     /// @param _tokenId The ID of the aavegotchi to create the wearables configuration for.
     /// @param _name The name of the wearables configuration.
     /// @param _wearablesToStore The wearables to store for this wearables configuration.
@@ -37,8 +36,8 @@ contract WearablesConfigFacet is Modifiers {
         payable
         returns (uint16 wearablesConfigId)
     {
-        // check that creation of this wearables config is allowed (only aavegotchi or unbridged)
-        require(LibWearablesConfig._checkAavegotchiOrUnbridged(_tokenId), "WearablesConfigFacet: Not allowed to create wearables config");
+        // check that creation of this wearables config is allowed (only unsacrificed aavegotchi)
+        require(LibWearablesConfig._isAavegotchi(_tokenId), "WearablesConfigFacet: Invalid aavegotchi token id");
         // check that wearables are valid and for the right slots
         require(LibWearablesConfig._checkValidWearables(_wearablesToStore), "WearablesConfigFacet: Invalid wearables");
         // check that name is not empty
@@ -50,11 +49,6 @@ contract WearablesConfigFacet is Modifiers {
         bool notowner;
         uint256 fee;
          
-        if (owner == address(0)) {
-          // set the owner to the sender for unbridged gotchis
-          owner = sender;
-        }
-
         // get the next available slot
         wearablesConfigId = LibWearablesConfig._getNextWearablesConfigId(owner, _tokenId);
         // solidity will throw if slots used overflows
@@ -66,8 +60,7 @@ contract WearablesConfigFacet is Modifiers {
             fee += WEARABLESCONFIG_SLOT_PRICE;
         }
 
-        // if the sender is not the owner and the gotchi has been bridged
-        // then they need to pay a fee to the owner
+        // if the sender is not the owner then they need to pay a fee to the owner
         if (sender != owner) {
             notowner = true;
             fee += WEARABLESCONFIG_OWNER_FEE;
@@ -115,21 +108,16 @@ contract WearablesConfigFacet is Modifiers {
     )
         external payable
     {
-        // check that update of this wearables config is allowed (only aavegotchi or unbridged)
-        require(LibWearablesConfig._checkAavegotchiOrUnbridged(_tokenId), "WearablesConfigFacet: Not allowed to update wearables config");
+        // check that update of this wearables config is allowed (only unsacrificed aavegotchis)
+        require(LibWearablesConfig._isAavegotchi(_tokenId), "WearablesConfigFacet: Invalid aavegotchi token id");
         // check that wearables are valid and for the right slots
         require(LibWearablesConfig._checkValidWearables(_wearablesToStore), "WearablesConfigFacet: Invalid wearables");
 
         address sender = LibMeta.msgSender();
         address owner = s.aavegotchis[_tokenId].owner;
 
-        if (owner == address(0)) {
-          // save the wearables config under the sender for unbridged aavegotchis
-          owner = sender;
-        } else {
-          // make sure that the sender is also the owner of this aavegotchi
-          require(sender == owner, "WearablesConfigFacet: Only the owner can update wearables config");
-        }
+        // make sure that the sender is also the owner of this aavegotchi
+        require(sender == owner, "WearablesConfigFacet: Only the owner can update wearables config");
 
         // make sure we are updating an existing wearables config
         require(LibWearablesConfig._wearablesConfigExists(owner, _tokenId, _wearablesConfigId), "WearablesConfigFacet: invalid id, WearablesConfig not found");

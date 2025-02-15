@@ -621,7 +621,7 @@ describe("Testing Wearables Config", async function () {
           wearablesToStore,
         ),
       ).to.be.revertedWith(
-        "WearablesConfigFacet: Not allowed to create wearables config",
+        "WearablesConfigFacet: Invalid aavegotchi token id",
       );
     });
     it("Should revert for an invalid id (over max supply)", async function () {
@@ -632,7 +632,7 @@ describe("Testing Wearables Config", async function () {
           wearablesToStore,
         ),
       ).to.be.revertedWith(
-        "LibWearablesConfig: Invalid tokenId for unbridged aavegotchi",
+        "WearablesConfigFacet: Invalid aavegotchi token id",
       );
     });
   });
