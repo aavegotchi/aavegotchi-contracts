@@ -2,6 +2,7 @@
 pragma solidity 0.8.1;
 
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
+import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {Modifiers, WearablesConfig, EQUIPPED_WEARABLE_SLOTS} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {LibWearablesConfig} from "../libraries/LibWearablesConfig.sol";
@@ -15,10 +16,10 @@ contract WearablesConfigFacet is Modifiers {
     uint256 public constant WEARABLESCONFIG_OWNER_FEE = 100000000000000000; // 0.1 GHST
 
     // events
-    event WearablesConfigCreated(address indexed owner, uint256 indexed tokenId, uint16 indexed wearablesConfigId, uint16[EQUIPPED_WEARABLE_SLOTS] wearables, uint256 value);
+    event WearablesConfigCreated(address indexed owner, uint256 indexed tokenId, uint16 indexed wearablesConfigId, uint16[EQUIPPED_WEARABLE_SLOTS] wearables, uint256 amount);
     event WearablesConfigUpdated(address indexed owner, uint256 indexed tokenId, uint16 indexed wearablesConfigId, uint16[EQUIPPED_WEARABLE_SLOTS] wearables);
-    event WearablesConfigDaoPaymentReceived(address indexed owner, uint256 indexed tokenId, uint16 indexed wearablesConfigId, uint256 value);
-    event WearablesConfigOwnerPaymentReceived(address indexed sender, address indexed owner, uint256 indexed tokenId, uint16 wearablesConfigId, uint256 value);
+    event WearablesConfigDaoPaymentReceived(address indexed owner, uint256 indexed tokenId, uint16 indexed wearablesConfigId, uint256 amount);
+    event WearablesConfigOwnerPaymentReceived(address indexed sender, address indexed owner, uint256 indexed tokenId, uint16 wearablesConfigId, uint256 amount);
 
     /// @notice Creates and stores a new wearables configuration (max 65535 per Aavegotchi per owner).
     /// @notice First three slots are free, the rest are paid.
@@ -33,7 +34,6 @@ contract WearablesConfigFacet is Modifiers {
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToStore
     )
         external
-        payable
         returns (uint16 wearablesConfigId)
     {
         // check that creation of this wearables config is allowed (only unsacrificed aavegotchi)
@@ -43,6 +43,7 @@ contract WearablesConfigFacet is Modifiers {
         // check that name is not empty
         require(bytes(_name).length > 0, "WearablesConfigFacet: WearablesConfig name cannot be blank");
 
+        address ghstContract = s.ghstContract;
         address sender = LibMeta.msgSender();
         address owner = s.aavegotchis[_tokenId].owner;
         bool paidslot;
@@ -67,20 +68,16 @@ contract WearablesConfigFacet is Modifiers {
         }
 
         if (fee > 0) {
-            require(msg.value == fee, "WearablesConfigFacet: Incorrect GHST value sent");
-
             if (paidslot) {
                 // send GHST to the dao treasury
-                (bool success, ) = payable(s.daoTreasury).call{value: WEARABLESCONFIG_SLOT_PRICE}("");
-                require(success, "WearablesConfigFacet: Failed to send GHST to DAO treasury");
+                LibERC20.transferFrom(ghstContract, sender, s.daoTreasury, WEARABLESCONFIG_SLOT_PRICE);
 
                 emit WearablesConfigDaoPaymentReceived(owner, _tokenId, wearablesConfigId, WEARABLESCONFIG_SLOT_PRICE);
             }
 
             if (notowner) {
                 // send GHST to the owner
-                (bool success, ) = payable(owner).call{value: WEARABLESCONFIG_OWNER_FEE}("");
-                require(success, "WearablesConfigFacet: Failed to send GHST to owner");
+                LibERC20.transferFrom(ghstContract, sender, owner, WEARABLESCONFIG_OWNER_FEE);
 
                 emit WearablesConfigOwnerPaymentReceived(sender, owner, _tokenId, wearablesConfigId, WEARABLESCONFIG_OWNER_FEE);
             }
@@ -91,7 +88,7 @@ contract WearablesConfigFacet is Modifiers {
         s.gotchiWearableConfigs[_tokenId][owner].push(wearablesConfig);
         s.ownerGotchiSlotsUsed[owner][_tokenId] += 1;
 
-        emit WearablesConfigCreated(owner, _tokenId, wearablesConfigId, _wearablesToStore, msg.value);
+        emit WearablesConfigCreated(owner, _tokenId, wearablesConfigId, _wearablesToStore, fee);
     }
 
     /// @notice Updates the wearables config for the given wearables config id
@@ -106,7 +103,7 @@ contract WearablesConfigFacet is Modifiers {
         string calldata _name,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToStore
     )
-        external payable
+        external
     {
         // check that update of this wearables config is allowed (only unsacrificed aavegotchis)
         require(LibWearablesConfig._isAavegotchi(_tokenId), "WearablesConfigFacet: Invalid aavegotchi token id");

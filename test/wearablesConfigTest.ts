@@ -7,19 +7,23 @@ import chai from "chai";
 import { upgrade } from "../scripts/upgrades/upgrade-wearablesConfigFacet";
 import { impersonate, resetChain } from "../scripts/helperFunctions";
 import {
+  IERC20,
   AavegotchiFacet,
   WearablesConfigFacet,
   GotchiLendingFacet,
   LendingGetterAndSetterFacet,
 } from "../typechain";
+import {
+  aavegotchiDAOAddress,
+  aavegotchiDiamondAddressMatic,
+  ghstAddress,
+} from "../helpers/constants";
 import * as helpers from "@nomicfoundation/hardhat-network-helpers";
 
 const { expect } = chai;
 
 describe("Testing Wearables Config", async function () {
   this.timeout(300000);
-
-  const diamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d"; // polygon mainnet
 
   const slotPrice = ethers.utils.parseUnits("1", "ether");
   const wearablesToStore = [
@@ -38,7 +42,7 @@ describe("Testing Wearables Config", async function () {
 
   let aavegotchiOwnerAddress: any;
   let anotherAavegotchiOwnerAddress: any;
-  let daoAddress: any;
+  let ghst: IERC20;
   let aavegotchiFacet: AavegotchiFacet;
   let lendingGetterFacet: LendingGetterAndSetterFacet;
   let aavegotchiFacetWithOwner: AavegotchiFacet;
@@ -56,27 +60,25 @@ describe("Testing Wearables Config", async function () {
 
     aavegotchiFacet = (await ethers.getContractAt(
       "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-      diamondAddress,
+      aavegotchiDiamondAddressMatic,
     )) as AavegotchiFacet;
 
     lendingGetterFacet = await ethers.getContractAt(
       "LendingGetterAndSetterFacet",
-      diamondAddress,
+      aavegotchiDiamondAddressMatic,
     );
 
     aavegotchiOwnerAddress = await aavegotchiFacet.ownerOf(aavegotchiId);
     anotherAavegotchiOwnerAddress = await aavegotchiFacet.ownerOf(someoneElseAavegotchiId);
 
-    daoAddress = "0xb208f8BB431f580CC4b216826AFfB128cd1431aB";
-
     const gotchiLendingFacet = (await ethers.getContractAt(
       "GotchiLendingFacet",
-      diamondAddress,
+      aavegotchiDiamondAddressMatic,
     )) as GotchiLendingFacet;
 
     const wearablesConfigFacet = (await ethers.getContractAt(
       "WearablesConfigFacet",
-      diamondAddress,
+      aavegotchiDiamondAddressMatic,
     )) as WearablesConfigFacet;
 
     aavegotchiFacetWithOwner = await impersonate(
@@ -113,6 +115,14 @@ describe("Testing Wearables Config", async function () {
       ethers,
       network,
     );
+
+    const aavegotchiOwner = await ethers.getSigner(aavegotchiOwnerAddress);
+    ghst = (await ethers.getContractAt(
+      "contracts/shared/interfaces/IERC20.sol:IERC20",
+      ghstAddress,
+      aavegotchiOwner
+    )) as IERC20;
+    await ghst.approve(aavegotchiDiamondAddressMatic, ethers.utils.parseEther("100000000"));
   });
 
   describe("Testing createWearablesConfig", async function () {
@@ -154,12 +164,12 @@ describe("Testing Wearables Config", async function () {
       const tokenId = event!.args!.tokenId;
       const wearablesConfigId = event!.args!.wearablesConfigId;
       const wearables = event!.args!.wearables;
-      const value = event!.args!.value;
+      const amount = event!.args!.amount;
       expect(owner).to.equal(aavegotchiOwnerAddress);
       expect(tokenId).to.equal(aavegotchiId);
       expect(wearablesConfigId).to.equal(0);
       expect(wearables).to.eql(wearablesToStore);
-      expect(value).to.equal(0);
+      expect(amount).to.equal(0);
     });
   });
 
@@ -409,34 +419,14 @@ describe("Testing Wearables Config", async function () {
         ),
       ).to.equal(3);
     });
-    it("Should not be able to create a 4th for free", async function () {
-      await expect(
-        wearablesConfigFacetWithOwner.createWearablesConfig(
-          aavegotchiId,
-          "Test 4th",
-          wearablesToStore,
-        ),
-      ).to.be.revertedWith("WearablesConfigFacet: Incorrect GHST value sent");
-    });
-    it("Should not be able to create a 4th for more than 1 GHST", async function () {
-      await expect(
-        wearablesConfigFacetWithOwner.createWearablesConfig(
-          aavegotchiId,
-          "Test 4th",
-          wearablesToStore,
-          { value: ethers.utils.parseEther("10") },
-        ),
-      ).to.be.revertedWith("WearablesConfigFacet: Incorrect GHST value sent");
-    });
-    it("Should be able to pay for the 4th (with event emitted)", async function () {
-      const daoBalanceBefore = await ethers.provider.getBalance(daoAddress);
+    it("Should have to pay for the 4th (with event emitted)", async function () {
+      const daoBalanceBefore = await ghst.balanceOf(aavegotchiDAOAddress);
       const receipt = await // config #4 (id: 3)
       (
         await wearablesConfigFacetWithOwner.createWearablesConfig(
           aavegotchiId,
           "Test 4th",
           wearablesToStore,
-          { value: ethers.utils.parseEther("1") },
         )
       ).wait();
       // check that event is emitted with the right parameters
@@ -446,13 +436,13 @@ describe("Testing Wearables Config", async function () {
       const owner = event!.args!.owner;
       const tokenId = event!.args!.tokenId;
       const wearablesConfigId = event!.args!.wearablesConfigId;
-      const value = event!.args!.value;
+      const amount = event!.args!.amount;
       expect(owner).to.equal(aavegotchiOwnerAddress);
       expect(tokenId).to.equal(aavegotchiId);
       expect(wearablesConfigId).to.equal(3);
-      expect(value).to.equal(ethers.utils.parseEther("1"));
+      expect(amount).to.equal(ethers.utils.parseEther("1"));
       // compare balance before and after for dao address
-      const daoBalanceAfter = await ethers.provider.getBalance(daoAddress);
+      const daoBalanceAfter = await ghst.balanceOf(aavegotchiDAOAddress);
       expect(daoBalanceAfter).to.equal(
         daoBalanceBefore.add(ethers.utils.parseEther("1")),
       );
@@ -505,7 +495,7 @@ describe("Testing Wearables Config", async function () {
       expect(lending.borrower).to.equal(anotherAavegotchiOwnerAddress);
 
       // config #5 (id: 4)
-      await wearablesConfigFacetWithOtherOwner.createWearablesConfig(aavegotchiId, "Test Rental", wearablesToStore, { value: ethers.utils.parseEther("1") })
+      await wearablesConfigFacetWithOtherOwner.createWearablesConfig(aavegotchiId, "Test Rental", wearablesToStore)
       expect(
         await wearablesConfigFacetWithOwner.getWearablesConfigName(anotherAavegotchiOwnerAddress, aavegotchiId, 0)
       ).to.equal("Test Rental");
@@ -522,14 +512,13 @@ describe("Testing Wearables Config", async function () {
     });
     it("Should have to pay a fee on create for rented out gotchi", async function () {
       const owner = await aavegotchiFacet.ownerOf(rentedOutAavegotchiId);
-      const ownerBalanceBefore = await ethers.provider.getBalance(owner);
+      const ownerBalanceBefore = await ghst.balanceOf(owner);
       await wearablesConfigFacetWithOwner.createWearablesConfig(
         rentedOutAavegotchiId,
         "Test Rented Out",
         wearablesToStore,
-        { value: ethers.utils.parseEther("0.1") }
       );
-      const ownerBalanceAfter = await ethers.provider.getBalance(owner);
+      const ownerBalanceAfter = await ghst.balanceOf(owner);
       expect(ownerBalanceAfter).to.equal(
         ownerBalanceBefore.add(ethers.utils.parseEther("0.1")),
       );
@@ -545,15 +534,14 @@ describe("Testing Wearables Config", async function () {
   describe("Testing for other owners gotchis", async function () {
     it("Should have to pay a fee for a gotchi not owned (create)", async function () {
       const owner = await aavegotchiFacet.ownerOf(someoneElseAavegotchiId);
-      const ownerBalanceBefore = await ethers.provider.getBalance(owner);
+      const ownerBalanceBefore = await ghst.balanceOf(owner);
       // alt config #1 (id: 0)
       await wearablesConfigFacetWithOwner.createWearablesConfig(
         someoneElseAavegotchiId,
         "Test Create for Aavegotchi not Owned",
         wearablesToStore,
-        { value: ethers.utils.parseEther("0.1") },
       );
-      const ownerBalanceAfter = await ethers.provider.getBalance(owner);
+      const ownerBalanceAfter = await ghst.balanceOf(owner);
       expect(ownerBalanceAfter).to.equal(
         ownerBalanceBefore.add(ethers.utils.parseEther("0.1")),
       );
@@ -567,34 +555,31 @@ describe("Testing Wearables Config", async function () {
     });
     it("Should have to pay a fee in addition of the slot for a gotchi not owned (create)", async function () {
       const owner = await aavegotchiFacet.ownerOf(someoneElseAavegotchiId);
-      const ownerBalanceBefore = await ethers.provider.getBalance(owner);
-      const daoBalanceBefore = await ethers.provider.getBalance(daoAddress);
+      const ownerBalanceBefore = await ghst.balanceOf(owner);
+      const daoBalanceBefore = await ghst.balanceOf(aavegotchiDAOAddress);
       // alt config #2 (id: 1)
       await wearablesConfigFacetWithOwner.createWearablesConfig(
         someoneElseAavegotchiId,
         "Test Create for Aavegotchi not Owned",
         wearablesToStore,
-        { value: ethers.utils.parseEther("0.1") },
       );
       // alt config #3 (id: 2)
       await wearablesConfigFacetWithOwner.createWearablesConfig(
         someoneElseAavegotchiId,
         "Test Create for Aavegotchi not Owned",
         wearablesToStore,
-        { value: ethers.utils.parseEther("0.1") },
       );
       // alt config #4 (id: 3)
       await wearablesConfigFacetWithOwner.createWearablesConfig(
         someoneElseAavegotchiId,
         "Test Create for Aavegotchi not Owned",
         wearablesToStore,
-        { value: ethers.utils.parseEther("1.1") },
       );
-      const ownerBalanceAfter = await ethers.provider.getBalance(owner);
+      const ownerBalanceAfter = await ghst.balanceOf(owner);
       expect(ownerBalanceAfter).to.equal(
         ownerBalanceBefore.add(ethers.utils.parseEther("0.3")),
       );
-      const daoBalanceAfter = await ethers.provider.getBalance(daoAddress);
+      const daoBalanceAfter = await ghst.balanceOf(aavegotchiDAOAddress);
       expect(daoBalanceAfter).to.equal(
         daoBalanceBefore.add(ethers.utils.parseEther("1")),
       );
@@ -643,7 +628,6 @@ describe("Testing Wearables Config", async function () {
           aavegotchiId,
           "Test Invalid Wearable Id",
           wearablesToStoreWithInvalidId,
-          { value: ethers.utils.parseEther("1") },
         ),
       ).to.be.revertedWith("LibWearablesConfig: Item type does not exist");
     });
@@ -663,7 +647,6 @@ describe("Testing Wearables Config", async function () {
           aavegotchiId,
           "Test Invalid Wearable Slot",
           wearablesToStoreWithInvalidSlot,
-          { value: ethers.utils.parseEther("1") },
         ),
       ).to.be.revertedWith("WearablesConfigFacet: Invalid wearables");
     });
