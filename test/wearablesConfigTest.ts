@@ -509,6 +509,7 @@ describe("Testing Wearables Config", async function () {
       expect(
         await wearablesConfigFacetWithOwner.getWearablesConfigWearables(anotherAavegotchiOwnerAddress, aavegotchiId, 0)
       ).to.eql(newWearablesToStore);
+      await gotchiLendingFacetWithOtherOwner.claimAndEndGotchiLending(aavegotchiId);
     });
     it("Should have to pay a fee on create for rented out gotchi", async function () {
       const owner = await aavegotchiFacet.ownerOf(rentedOutAavegotchiId);
@@ -593,7 +594,7 @@ describe("Testing Wearables Config", async function () {
           wearablesToStore,
         ),
       ).to.be.revertedWith(
-        "WearablesConfigFacet: Only the owner can update wearables config",
+        "LibAppStorage: Only aavegotchi owner can call this function",
       );
     });
   });

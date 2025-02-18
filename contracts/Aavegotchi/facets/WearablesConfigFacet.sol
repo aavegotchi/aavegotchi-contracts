@@ -104,17 +104,12 @@ contract WearablesConfigFacet is Modifiers {
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToStore
     )
         external
+        onlyAavegotchiOwner(_tokenId)
     {
-        // check that update of this wearables config is allowed (only unsacrificed aavegotchis)
-        require(LibWearablesConfig._isAavegotchi(_tokenId), "WearablesConfigFacet: Invalid aavegotchi token id");
         // check that wearables are valid and for the right slots
         require(LibWearablesConfig._checkValidWearables(_wearablesToStore), "WearablesConfigFacet: Invalid wearables");
 
-        address sender = LibMeta.msgSender();
         address owner = s.aavegotchis[_tokenId].owner;
-
-        // make sure that the sender is also the owner of this aavegotchi
-        require(sender == owner, "WearablesConfigFacet: Only the owner can update wearables config");
 
         // make sure we are updating an existing wearables config
         require(LibWearablesConfig._wearablesConfigExists(owner, _tokenId, _wearablesConfigId), "WearablesConfigFacet: invalid id, WearablesConfig not found");
