@@ -159,7 +159,7 @@ contract ItemsFacet is Modifiers {
 
     /**
         @notice Set the base url for all voucher types
-        @param _value The new base url        
+        @param _value The new base url
     */
     function setBaseURI(string memory _value) external onlyDaoOrOwner {
         // require(LibMeta.msgSender() == s.contractOwner, "ItemsFacet: Must be contract owner");
@@ -183,7 +183,7 @@ contract ItemsFacet is Modifiers {
     function equipWearables(
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip
-    ) external onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
+    ) onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) public {
         uint256[EQUIPPED_WEARABLE_SLOTS] memory _depositIds;
         _equipWearables(_tokenId, _wearablesToEquip, _depositIds);
     }
@@ -199,8 +199,42 @@ contract ItemsFacet is Modifiers {
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
         uint256[EQUIPPED_WEARABLE_SLOTS] calldata _depositIds
-    ) external onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
+    ) onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) public {
         _equipWearables(_tokenId, _wearablesToEquip, _depositIds);
+    }
+
+    ///@notice Allow the owner of a claimed aavegotchi to equip/unequip wearables to his aavegotchis in batch
+    ///@dev Arrays in _wearablesToEquip need to be the same length as _tokenIds
+    ///@dev _wearablesToEquip are equiped to aavegotchis in the order of _tokenIds
+    ///@param _tokenIds Array containing the identifiers of the aavegotchis to make changes to
+    ///@param _wearablesToEquip An array of arrays containing the identifiers of the wearables to equip for aavegotchi in _tokenIds
+    function batchEquipWearables(
+        uint256[] calldata _tokenIds,
+        uint16[EQUIPPED_WEARABLE_SLOTS][] calldata _wearablesToEquip
+    ) external {
+        require(_wearablesToEquip.length == _tokenIds.length, "ItemsFacet: _wearablesToEquip length not same as _tokenIds length");
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            equipWearables(_tokenIds[i], _wearablesToEquip[i]);
+        }
+    }
+
+    ///@notice Allow the owner of a claimed aavegotchi to equip/unequip wearables to his aavegotchis in batch
+    ///@dev Arrays in _wearablesToEquip need to be the same length as _tokenIds
+    ///@dev _wearablesToEquip are equiped to aavegotchis in the order of _tokenIds
+    ///@dev _depositIds are equiped to aavegotchis in the order of _tokenIds
+    ///@param _tokenIds Array containing the identifiers of the aavegotchis to make changes to
+    ///@param _wearablesToEquip An array of arrays containing the identifiers of the wearables to equip for aavegotchis in _tokenIds
+    ///@param _depositIds An array of arrays containing the identifiers of the deposited wearables to equip for aavegotchis in _tokenIds
+    function batchEquipDelegatedWearables(
+        uint256[] calldata _tokenIds,
+        uint16[EQUIPPED_WEARABLE_SLOTS][] calldata _wearablesToEquip,
+        uint256[EQUIPPED_WEARABLE_SLOTS][] calldata _depositIds
+    ) external {
+        require(_wearablesToEquip.length == _tokenIds.length, "ItemsFacet: _wearablesToEquip length not same as _tokenIds length");
+        require(_depositIds.length == _tokenIds.length, "ItemsFacet: _depositIds length not same as _tokenIds length");
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            equipDelegatedWearables(_tokenIds[i], _wearablesToEquip[i], _depositIds[i]);
+        }
     }
 
     function _equipWearables(
