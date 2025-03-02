@@ -8,18 +8,34 @@ import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {LibWearablesConfig} from "../libraries/LibWearablesConfig.sol";
 
 contract WearablesConfigFacet is Modifiers {
-
     // constants
-    uint16 public constant WEARABLESCONFIG_MAX_SLOTS = 2**16 - 1;
-    uint16 public constant WEARABLESCONFIG_FREE_SLOTS = 3;
-    uint256 public constant WEARABLESCONFIG_SLOT_PRICE = 1000000000000000000; // 1 GHST
-    uint256 public constant WEARABLESCONFIG_OWNER_FEE = 100000000000000000; // 0.1 GHST
+    uint16 private constant WEARABLESCONFIG_MAX_SLOTS = 2 ** 16 - 1;
+    uint16 private constant WEARABLESCONFIG_FREE_SLOTS = 3;
+    uint256 private constant WEARABLESCONFIG_SLOT_PRICE = 1000000000000000000; // 1 GHST
+    uint256 private constant WEARABLESCONFIG_OWNER_FEE = 100000000000000000; // 0.1 GHST
 
     // events
-    event WearablesConfigCreated(address indexed owner, uint256 indexed tokenId, uint16 indexed wearablesConfigId, uint16[EQUIPPED_WEARABLE_SLOTS] wearables, uint256 amount);
-    event WearablesConfigUpdated(address indexed owner, uint256 indexed tokenId, uint16 indexed wearablesConfigId, uint16[EQUIPPED_WEARABLE_SLOTS] wearables);
+    event WearablesConfigCreated(
+        address indexed owner,
+        uint256 indexed tokenId,
+        uint16 indexed wearablesConfigId,
+        uint16[EQUIPPED_WEARABLE_SLOTS] wearables,
+        uint256 amount
+    );
+    event WearablesConfigUpdated(
+        address indexed owner,
+        uint256 indexed tokenId,
+        uint16 indexed wearablesConfigId,
+        uint16[EQUIPPED_WEARABLE_SLOTS] wearables
+    );
     event WearablesConfigDaoPaymentReceived(address indexed owner, uint256 indexed tokenId, uint16 indexed wearablesConfigId, uint256 amount);
-    event WearablesConfigOwnerPaymentReceived(address indexed sender, address indexed owner, uint256 indexed tokenId, uint16 wearablesConfigId, uint256 amount);
+    event WearablesConfigOwnerPaymentReceived(
+        address indexed sender,
+        address indexed owner,
+        uint256 indexed tokenId,
+        uint16 wearablesConfigId,
+        uint256 amount
+    );
 
     /// @notice Creates and stores a new wearables configuration (max 65535 per Aavegotchi per owner).
     /// @notice First three slots are free, the rest are paid.
@@ -32,10 +48,7 @@ contract WearablesConfigFacet is Modifiers {
         uint256 _tokenId,
         string calldata _name,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToStore
-    )
-        external
-        returns (uint16 wearablesConfigId)
-    {
+    ) external returns (uint16 wearablesConfigId) {
         // check that creation of this wearables config is allowed (only unsacrificed aavegotchi)
         require(LibWearablesConfig._isAavegotchi(_tokenId), "WearablesConfigFacet: Invalid aavegotchi token id");
         // check that wearables are valid and for the right slots
@@ -49,7 +62,7 @@ contract WearablesConfigFacet is Modifiers {
         bool paidslot;
         bool notowner;
         uint256 fee;
-         
+
         // get the next available slot
         wearablesConfigId = LibWearablesConfig._getNextWearablesConfigId(owner, _tokenId);
         // solidity will throw if slots used overflows
@@ -102,17 +115,17 @@ contract WearablesConfigFacet is Modifiers {
         uint16 _wearablesConfigId,
         string calldata _name,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToStore
-    )
-        external
-        onlyAavegotchiOwner(_tokenId)
-    {
+    ) external onlyAavegotchiOwner(_tokenId) {
         // check that wearables are valid and for the right slots
         require(LibWearablesConfig._checkValidWearables(_wearablesToStore), "WearablesConfigFacet: Invalid wearables");
 
         address owner = s.aavegotchis[_tokenId].owner;
 
         // make sure we are updating an existing wearables config
-        require(LibWearablesConfig._wearablesConfigExists(owner, _tokenId, _wearablesConfigId), "WearablesConfigFacet: invalid id, WearablesConfig not found");
+        require(
+            LibWearablesConfig._wearablesConfigExists(owner, _tokenId, _wearablesConfigId),
+            "WearablesConfigFacet: invalid id, WearablesConfig not found"
+        );
 
         // skip if name is empty
         if (bytes(_name).length > 0) {
@@ -139,8 +152,15 @@ contract WearablesConfigFacet is Modifiers {
     /// @param _tokenId The ID of the aavegotchi to update the wearables configuration for
     /// @param _wearablesConfigId The ID of the wearables configuration to update
     /// @return wearablesConfig The wearables config
-    function getWearablesConfig(address _owner, uint256 _tokenId, uint16 _wearablesConfigId) external view returns (WearablesConfig memory wearablesConfig) {
-        require(LibWearablesConfig._wearablesConfigExists(_owner, _tokenId, _wearablesConfigId), "WearablesConfigFacet: invalid id, WearablesConfig not found");
+    function getWearablesConfig(
+        address _owner,
+        uint256 _tokenId,
+        uint16 _wearablesConfigId
+    ) external view returns (WearablesConfig memory wearablesConfig) {
+        require(
+            LibWearablesConfig._wearablesConfigExists(_owner, _tokenId, _wearablesConfigId),
+            "WearablesConfigFacet: invalid id, WearablesConfig not found"
+        );
         return s.gotchiWearableConfigs[_tokenId][_owner][_wearablesConfigId];
     }
 
@@ -150,7 +170,10 @@ contract WearablesConfigFacet is Modifiers {
     /// @param _wearablesConfigId The ID of the wearables configuration to update
     /// @return name The name of the wearables config
     function getWearablesConfigName(address _owner, uint256 _tokenId, uint16 _wearablesConfigId) external view returns (string memory name) {
-        require(LibWearablesConfig._wearablesConfigExists(_owner, _tokenId, _wearablesConfigId), "WearablesConfigFacet: invalid id, WearablesConfig not found");
+        require(
+            LibWearablesConfig._wearablesConfigExists(_owner, _tokenId, _wearablesConfigId),
+            "WearablesConfigFacet: invalid id, WearablesConfig not found"
+        );
         name = s.gotchiWearableConfigs[_tokenId][_owner][_wearablesConfigId].name;
     }
 
@@ -159,8 +182,15 @@ contract WearablesConfigFacet is Modifiers {
     /// @param _tokenId The ID of the aavegotchi to update the wearables configuration for
     /// @param _wearablesConfigId The ID of the wearables configuration to update
     /// @return wearables The wearables stored for this wearables config
-    function getWearablesConfigWearables(address _owner, uint256 _tokenId, uint16 _wearablesConfigId) external view returns (uint16[EQUIPPED_WEARABLE_SLOTS] memory wearables) {
-        require(LibWearablesConfig._wearablesConfigExists(_owner, _tokenId, _wearablesConfigId), "WearablesConfigFacet: invalid id, WearablesConfig not found");
+    function getWearablesConfigWearables(
+        address _owner,
+        uint256 _tokenId,
+        uint16 _wearablesConfigId
+    ) external view returns (uint16[EQUIPPED_WEARABLE_SLOTS] memory wearables) {
+        require(
+            LibWearablesConfig._wearablesConfigExists(_owner, _tokenId, _wearablesConfigId),
+            "WearablesConfigFacet: invalid id, WearablesConfig not found"
+        );
         wearables = s.gotchiWearableConfigs[_tokenId][_owner][_wearablesConfigId].wearables;
     }
 
