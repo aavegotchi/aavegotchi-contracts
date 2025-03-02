@@ -43,10 +43,11 @@ export default {
   },
   networks: {
     hardhat: {
+      allowUnlimitedContractSize: true, // for testing
       forking: {
         url: process.env.MATIC_URL,
         timeout: 12000000,
-        // blockNumber: 64956403,
+        // blockNumber: 67964593,
       },
       blockGasLimit: 20000000,
       timeout: 120000,
