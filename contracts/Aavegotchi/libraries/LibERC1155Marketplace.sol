@@ -127,7 +127,7 @@ library LibERC1155Marketplace {
         require(listing.timeCreated != 0, "ERC1155Marketplace: listing not found");
         require(listing.sold == false, "ERC1155Marketplace: listing is sold out");
         require(listing.cancelled == false, "ERC1155Marketplace: listing already cancelled");
-        require(_quantity * _priceInWei >= 1e18, "ERC1155Marketplace: cost should be 1 GHST or larger");
+        require(_quantity * _priceInWei >= 1e15, "ERC1155Marketplace: cost should be 0.001 GHST or larger");
         require(listing.seller == msg.sender, "ERC1155Marketplace: Not seller of ERC1155 listing");
         require(
             IERC1155(listing.erc1155TokenAddress).balanceOf(listing.seller, listing.erc1155TypeId) >= _quantity,

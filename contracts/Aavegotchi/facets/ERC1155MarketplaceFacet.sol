@@ -127,7 +127,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         );
 
         uint256 cost = _quantity * _priceInWei;
-        require(cost >= 1e18, "ERC1155Marketplace: cost should be 1 GHST or larger");
+        require(cost >= 1e15, "ERC1155Marketplace: cost should be 0.001 GHST or larger");
         require(_principalSplit[0] + _principalSplit[1] == 10000, "ERC1155Marketplace: Sum of principal splits not 10000");
         if (_affiliate == address(0)) {
             require(_principalSplit[1] == 0, "ERC1155Marketplace: Affiliate split must be 0 for address(0)");
