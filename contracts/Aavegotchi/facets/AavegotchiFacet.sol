@@ -40,6 +40,13 @@ contract AavegotchiFacet is Modifiers {
         aavegotchiInfo_ = LibAavegotchi.getAavegotchi(_tokenId);
     }
 
+    function batchGetAavegotchi(uint256[] calldata _tokenIds) external view returns (AavegotchiInfo[] memory aavegotchiInfos_) {
+        aavegotchiInfos_ = new AavegotchiInfo[](_tokenIds.length);
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            aavegotchiInfos_[i] = LibAavegotchi.getAavegotchi(_tokenIds[i]);
+        }
+    }
+
     ///@notice returns the time an NFT was claimed
     ///@dev will return 0 if the NFT is still an unclaimed portal
     ///@param _tokenId the identifier of the NFT
