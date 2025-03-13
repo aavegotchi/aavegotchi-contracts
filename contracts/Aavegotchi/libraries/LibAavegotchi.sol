@@ -3,11 +3,9 @@ pragma solidity 0.8.1;
 
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibAppStorage, AavegotchiCollateralTypeInfo, AppStorage, Aavegotchi, ItemType, NUMERIC_TRAITS_NUM, EQUIPPED_WEARABLE_SLOTS, PORTAL_AAVEGOTCHIS_NUM} from "./LibAppStorage.sol";
-import {LibERC20} from "../../shared/libraries/LibERC20.sol";
-import {LibMeta} from "../../shared/libraries/LibMeta.sol";
-import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
+import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 
 struct AavegotchiCollateralTypeIO {
     address collateralType;
@@ -115,17 +113,17 @@ library LibAavegotchi {
         singlePortalAavegotchiTraits_.numericTraits = toNumericTraits(randomNumberN, s.collateralTypeInfo[collateralType].modifiers, _hauntId);
         singlePortalAavegotchiTraits_.collateralType = collateralType;
 
-        AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
-        uint256 conversionRate = collateralInfo.conversionRate;
+        // AavegotchiCollateralTypeInfo memory collateralInfo = s.collateralTypeInfo[collateralType];
+        // uint256 conversionRate = collateralInfo.conversionRate;
 
         //Get rarity multiplier
-        uint256 multiplier = rarityMultiplier(singlePortalAavegotchiTraits_.numericTraits);
+        // uint256 multiplier = rarityMultiplier(singlePortalAavegotchiTraits_.numericTraits);
 
         //First we get the base price of our collateral in terms of DAI
-        uint256 collateralDAIPrice = ((10 ** IERC20(collateralType).decimals()) / conversionRate);
+        // uint256 collateralDAIPrice = ((10 ** IERC20(collateralType).decimals()) / conversionRate);
 
         //Then multiply by the rarity multiplier
-        singlePortalAavegotchiTraits_.minimumStake = collateralDAIPrice * multiplier;
+        singlePortalAavegotchiTraits_.minimumStake = 0; //collateralDAIPrice * multiplier;
     }
 
     function portalAavegotchiTraits(
@@ -157,9 +155,9 @@ library LibAavegotchi {
         if (aavegotchiInfo_.status == STATUS_AAVEGOTCHI) {
             aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
             aavegotchiInfo_.equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
-            aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
+            aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType; //this collateral doesn't exist on Polter/Geist
             aavegotchiInfo_.escrow = s.aavegotchis[_tokenId].escrow;
-            aavegotchiInfo_.stakedAmount = IERC20(aavegotchiInfo_.collateral).balanceOf(aavegotchiInfo_.escrow);
+            aavegotchiInfo_.stakedAmount = IERC20(s.ghstContract).balanceOf(aavegotchiInfo_.escrow);
             aavegotchiInfo_.minimumStake = s.aavegotchis[_tokenId].minimumStake;
             aavegotchiInfo_.kinship = kinship(_tokenId);
             aavegotchiInfo_.lastInteracted = s.aavegotchis[_tokenId].lastInteracted;
@@ -175,6 +173,10 @@ library LibAavegotchi {
         }
     }
 
+    function getAavegotchiBridged(uint256 _tokenId) internal view returns (Aavegotchi memory aavegotchiInfo_) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        return s.aavegotchis[_tokenId];
+    }
     //Only valid for claimed Aavegotchis
     function modifiedTraitsAndRarityScore(
         uint256 _tokenId
@@ -337,10 +339,6 @@ library LibAavegotchi {
         }
         return string(name);
     }
-
-    // function addTokenToUser(address _to, uint256 _tokenId) internal {}
-
-    // function removeTokenFromUser(address _from, uint256 _tokenId) internal {}
 
     function transfer(address _from, address _to, uint256 _tokenId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();

@@ -4,7 +4,7 @@ pragma solidity 0.8.1;
 import {LibAavegotchi, AavegotchiInfo} from "../libraries/LibAavegotchi.sol";
 
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
-import {AppStorage, Modifiers} from "../libraries/LibAppStorage.sol";
+import {AppStorage, Modifiers, Aavegotchi} from "../libraries/LibAppStorage.sol";
 import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 // import "hardhat/console.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -40,10 +40,10 @@ contract AavegotchiFacet is Modifiers {
         aavegotchiInfo_ = LibAavegotchi.getAavegotchi(_tokenId);
     }
 
-    function batchGetAavegotchi(uint256[] calldata _tokenIds) external view returns (AavegotchiInfo[] memory aavegotchiInfos_) {
-        aavegotchiInfos_ = new AavegotchiInfo[](_tokenIds.length);
+    function batchGetAavegotchi(uint256[] calldata _tokenIds) external view returns (Aavegotchi[] memory aavegotchiInfos_) {
+        aavegotchiInfos_ = new Aavegotchi[](_tokenIds.length);
         for (uint256 i = 0; i < _tokenIds.length; i++) {
-            aavegotchiInfos_[i] = LibAavegotchi.getAavegotchi(_tokenIds[i]);
+            aavegotchiInfos_[i] = LibAavegotchi.getAavegotchiBridged(_tokenIds[i]);
         }
     }
 
