@@ -12,9 +12,7 @@ export async function upgradeBatchGetAavegotchi() {
     {
       facetName:
         "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
-      addSelectors: [
-        "function batchGetAavegotchi(uint256[] calldata _tokenIds) external view returns (AavegotchiInfo[] memory aavegotchiInfos_)",
-      ],
+      addSelectors: [],
       removeSelectors: [],
     },
   ];
