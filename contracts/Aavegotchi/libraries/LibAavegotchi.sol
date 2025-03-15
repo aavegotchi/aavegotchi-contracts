@@ -175,6 +175,10 @@ library LibAavegotchi {
         }
     }
 
+    function getAavegotchiBridged(uint256 _tokenId) internal view returns (Aavegotchi memory aavegotchiInfo_) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        return s.aavegotchis[_tokenId];
+    }
     //Only valid for claimed Aavegotchis
     function modifiedTraitsAndRarityScore(
         uint256 _tokenId
