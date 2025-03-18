@@ -40,7 +40,7 @@ contract AavegotchiFacet is Modifiers {
         aavegotchiInfo_ = LibAavegotchi.getAavegotchi(_tokenId);
     }
 
-    function batchGetAavegotchi(uint256[] calldata _tokenIds) external view returns (AavegotchiBridged[] memory aavegotchiInfos_) {
+    function batchGetBridgedAavegotchi(uint256[] calldata _tokenIds) external view returns (AavegotchiBridged[] memory aavegotchiInfos_) {
         aavegotchiInfos_ = new AavegotchiBridged[](_tokenIds.length);
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             aavegotchiInfos_[i] = LibAavegotchi.getAavegotchiBridged(_tokenIds[i]);
