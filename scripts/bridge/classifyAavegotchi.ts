@@ -138,13 +138,8 @@ function processWearables(
   equippedWearables: number[],
   items: number[]
 ): Record<string, EquippedItem> | null {
-  // Skip if both arrays are empty or all zeros
-  if (
-    (equippedWearables.every((item) => item === 0) &&
-      items.every((item) => item === 0)) ||
-    !equippedWearables.length ||
-    !items.length
-  ) {
+  // Skip if no items array or if items array is empty/all zeros
+  if (!items || items.every((item) => item === 0)) {
     return null;
   }
 
@@ -154,7 +149,13 @@ function processWearables(
 
   // Process each valid ID
   validIds.forEach((itemId) => {
-    const count = equippedWearables.filter((id) => id === itemId).length;
+    // Count equipped instances
+    const equippedCount =
+      equippedWearables?.filter((id) => id === itemId).length || 0;
+
+    // If item exists in items but not equipped, it's a badge (amount = 1)
+    const count = equippedCount || 1;
+
     wearablesMap[itemId.toString()] = {
       itemId: itemId.toString(),
       amount: count.toString(),
@@ -163,6 +164,9 @@ function processWearables(
 
   return Object.keys(wearablesMap).length > 0 ? wearablesMap : null;
 }
+
+// Add constant for metadata file path
+const METADATA_FILE = path.join(METADATA_DIR, "aavegotchiMetadata.json");
 
 async function main() {
   if (!fs.existsSync(METADATA_DIR)) {
@@ -207,7 +211,7 @@ async function main() {
   }
 
   console.log("Reading Aavegotchi metadata...");
-  const metadata = JSON.parse(fs.readFileSync(METADATA_DIR, "utf8"));
+  const metadata = JSON.parse(fs.readFileSync(METADATA_FILE, "utf8"));
 
   // Load existing data
   const existingData = loadExistingData();
