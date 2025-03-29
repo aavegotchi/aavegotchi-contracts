@@ -19,23 +19,23 @@ contract BridgeFacet is Modifiers {
     uint256 internal constant ERC721_TOKEN_TYPE = 721;
     uint256 internal constant ERC1155_TOKEN_TYPE = 1155;
 
-///@notice Allow the Aavegotchi Diamond owner or Dao to change the childChain manager address
-///@param _newChildChainManager Address of the new childChain manager
+    ///@notice Allow the Aavegotchi Diamond owner or Dao to change the childChain manager address
+    ///@param _newChildChainManager Address of the new childChain manager
     function setChildChainManager(address _newChildChainManager) external onlyDaoOrOwner {
         s.childChainManager = _newChildChainManager;
     }
 
-///@notice Query the current address of the childChain Manager
-///@return The current address of the childChain Manager
+    ///@notice Query the current address of the childChain Manager
+    ///@return The current address of the childChain Manager
     function childChainManager() external view returns (address) {
         return s.childChainManager;
     }
 
-///@notice Allows abatch withdrawal of ERC1155 NFTs/items by the owner
-///@dev Only 20 items can be withdrawn in a single transaction, will throw if more than that
-///@param _ids An array containing the identifiers of the items to withdraw
-///@param _values An array containing the value/number of each item to withdraw
-    function withdrawItemsBatch(uint256[] calldata _ids, uint256[] calldata _values) external {
+    ///@notice Allows abatch withdrawal of ERC1155 NFTs/items by the owner
+    ///@dev Only 20 items can be withdrawn in a single transaction, will throw if more than that
+    ///@param _ids An array containing the identifiers of the items to withdraw
+    ///@param _values An array containing the value/number of each item to withdraw
+    function withdrawItemsBatch(uint256[] calldata _ids, uint256[] calldata _values) external diamondPaused {
         require(_ids.length == _values.length, "Bridge: ids not same length as values");
         require(_ids.length <= 20, "Items: exceeded max number of ids for single transaction");
         address owner = LibMeta.msgSender();
@@ -49,10 +49,10 @@ contract BridgeFacet is Modifiers {
         emit WithdrawnItems(owner, _ids, _values);
     }
 
-///@notice Allows abatch withdrawal of ERC721 NFTs by the owner
-///@dev Only 20 NFTs can be withdrawn in a single transaction, will throw if more than that
-///@param _tokenIds An array containing the identifiers of the NFTs to withdraw
-    function withdrawAavegotchiBatch(uint256[] calldata _tokenIds) external {
+    ///@notice Allows abatch withdrawal of ERC721 NFTs by the owner
+    ///@dev Only 20 NFTs can be withdrawn in a single transaction, will throw if more than that
+    ///@param _tokenIds An array containing the identifiers of the NFTs to withdraw
+    function withdrawAavegotchiBatch(uint256[] calldata _tokenIds) external diamondPaused {
         address owner = LibMeta.msgSender();
         require(_tokenIds.length <= 20, "Bridge: exceeds withdraw limit for single transaction");
         for (uint256 i; i < _tokenIds.length; i++) {
@@ -72,7 +72,7 @@ contract BridgeFacet is Modifiers {
      * @param _user user address for whom deposit is being done
      * @param _depositData abi encoded tokenId
      */
-    function deposit(address _user, bytes calldata _depositData) external {
+    function deposit(address _user, bytes calldata _depositData) external diamondPaused {
         require(msg.sender == s.childChainManager, "Bridge: only childChainManager can call this function");
         (uint256 tokenType, bytes memory tokenDepositData) = abi.decode(_depositData, (uint256, bytes));
         if (tokenType == ERC1155_TOKEN_TYPE) {

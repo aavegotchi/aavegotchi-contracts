@@ -80,7 +80,7 @@ contract CollateralFacet is Modifiers {
     ///@param _tokenId The identifier of the NFT to increase
     ///@param _stakeAmount The amount of collateral tokens to increase the current collateral by
 
-    function increaseStake(uint256 _tokenId, uint256 _stakeAmount) external onlyAavegotchiOwner(_tokenId) {
+    function increaseStake(uint256 _tokenId, uint256 _stakeAmount) external diamondPaused onlyAavegotchiOwner(_tokenId) {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
         address collateralType = s.aavegotchis[_tokenId].collateralType;
@@ -93,7 +93,7 @@ contract CollateralFacet is Modifiers {
     ///@dev Will throw if it is reduced less than the minimum stake
     ///@param _tokenId The identifier of the NFT to decrease
     ///@param _reduceAmount The amount of collateral tokens to decrease the current collateral by
-    function decreaseStake(uint256 _tokenId, uint256 _reduceAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function decreaseStake(uint256 _tokenId, uint256 _reduceAmount) external diamondPaused onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 
@@ -109,7 +109,7 @@ contract CollateralFacet is Modifiers {
     ///@param _tokenId Identifier of NFT to destroy
     ///@param _toId Identifier of another claimed aavegotchi where the XP of the sacrificed aavegotchi will be sent
 
-    function decreaseAndDestroy(uint256 _tokenId, uint256 _toId) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function decreaseAndDestroy(uint256 _tokenId, uint256 _toId) external diamondPaused onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 

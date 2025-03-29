@@ -94,7 +94,7 @@ const KEY_TO_DATA_MAP = {
 
 const PROGRESS_FILE = path.join(OUTPUT_DIR, "classification_progress.json");
 const ANALYTICS_FILE = path.join(OUTPUT_DIR, "analytics.json");
-const SAVE_INTERVAL = 5 * 60 * 1000; // Save every 5 minutes
+const SAVE_INTERVAL = 1 * 60 * 1000; // Save every 1 minute
 
 function initializeFiles() {
   if (!fs.existsSync(OUTPUT_DIR)) {
@@ -236,7 +236,7 @@ async function classifyAndSaveData(nftOwners: NFTOwner[]) {
 
     try {
       const balances = tokenBalances.map((tb) => ({
-        tokenId: tb.tokenId.slice(2),
+        tokenId: parseInt(tb.tokenId.slice(2), 16).toString(),
         balance: tb.balance,
       }));
 

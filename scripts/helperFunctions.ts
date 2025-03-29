@@ -76,6 +76,8 @@ export function getSelector(func: string, ethers: any) {
 }
 
 export const maticDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
+export const maticWearableDiamondAddress =
+  "0x58de9AaBCaeEC0f69883C94318810ad79Cc6a44f";
 
 export const maticDiamondUpgrader =
   "0x01F010a5e001fe9d6940758EA5e8c777885E351e";

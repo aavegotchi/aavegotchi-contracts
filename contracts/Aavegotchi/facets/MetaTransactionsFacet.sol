@@ -2,6 +2,7 @@
 pragma solidity 0.8.1;
 
 import {AppStorage} from "../libraries/LibAppStorage.sol";
+import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 
 contract MetaTransactionsFacet {
     AppStorage internal s;
@@ -46,13 +47,7 @@ contract MetaTransactionsFacet {
         nonce_ = s.metaNonces[user];
     }
 
-    function verify(
-        address user,
-        MetaTransaction memory metaTx,
-        bytes32 sigR,
-        bytes32 sigS,
-        uint8 sigV
-    ) internal view returns (bool) {
+    function verify(address user, MetaTransaction memory metaTx, bytes32 sigR, bytes32 sigS, uint8 sigV) internal view returns (bool) {
         address signer = ecrecover(toTypedMessageHash(hashMetaTransaction(metaTx)), sigV, sigR, sigS);
         require(signer != address(0), "Invalid signature");
         return signer == user;
@@ -76,6 +71,9 @@ contract MetaTransactionsFacet {
         bytes32 sigS,
         uint8 sigV
     ) public payable returns (bytes memory) {
+        if (msg.sender != LibDiamond.contractOwner()) {
+            require(!s.diamondPaused, "AppStorage: Diamond paused");
+        }
         bytes4 destinationFunctionSig = convertBytesToBytes4(functionSignature);
         require(destinationFunctionSig != msg.sig, "functionSignature can not be of executeMetaTransaction method");
         uint256 nonce = s.metaNonces[userAddress];

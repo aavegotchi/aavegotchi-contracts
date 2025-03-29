@@ -95,7 +95,14 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
         address _tokenAddress,
         uint256 _tokenId,
         uint256 _tokenAmount
-    ) external override onlyWearables(_tokenAddress, _tokenId) onlyOwnerOrApproved(_grantor, _tokenAddress) returns (uint256 depositId_) {
+    )
+        external
+        override
+        diamondPaused
+        onlyWearables(_tokenAddress, _tokenId)
+        onlyOwnerOrApproved(_grantor, _tokenAddress)
+        returns (uint256 depositId_)
+    {
         require(_tokenAmount > 0, "ItemsRolesRegistryFacet: tokenAmount must be greater than zero");
         depositId_ = _createDeposit(_grantor, _tokenAddress, _tokenId, _tokenAmount);
     }
@@ -117,6 +124,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     )
         external
         override
+        diamondPaused
         validGrantRoleData(_expirationDate, _role)
         onlyOwnerOrApproved(s.itemRolesDepositInfo[_depositId].deposit.grantor, s.itemRolesDepositInfo[_depositId].deposit.tokenAddress)
     {
@@ -127,7 +135,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     /// @param _depositId The deposit identifier.
     /// @param _role The role identifier.
     /// @param _grantee The recipient of the role revocation.
-    function revokeRole(uint256 _depositId, bytes32 _role, address _grantee) external override sameGrantee(_depositId, _grantee) {
+    function revokeRole(uint256 _depositId, bytes32 _role, address _grantee) external override diamondPaused sameGrantee(_depositId, _grantee) {
         require(_role == UNIQUE_ROLE, "ItemsRolesRegistryFacet: role not supported");
         ItemRolesInfo storage _depositInfo = s.itemRolesDepositInfo[_depositId];
         RoleAssignment storage _roleAssignment = _depositInfo.roleAssignment;
@@ -156,6 +164,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     )
         external
         override
+        diamondPaused
         onlyOwnerOrApproved(s.itemRolesDepositInfo[_depositId].deposit.grantor, s.itemRolesDepositInfo[_depositId].deposit.tokenAddress)
     {
         ItemRolesInfo storage _depositInfo = s.itemRolesDepositInfo[_depositId];
@@ -182,7 +191,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     /// @param _tokenAddress The token address.
     /// @param _operator The user approved to grant and revoke roles.
     /// @param _isApproved The approval status.
-    function setRoleApprovalForAll(address _tokenAddress, address _operator, bool _isApproved) external override {
+    function setRoleApprovalForAll(address _tokenAddress, address _operator, bool _isApproved) external override diamondPaused {
         s.itemsRoleApprovals[LibMeta.msgSender()][_tokenAddress][_operator] = _isApproved;
         emit RoleApprovalForAll(_tokenAddress, _operator, _isApproved);
     }
@@ -305,7 +314,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
             "ItemsRolesRegistryFacet: token has an active role"
         );
 
-        if(_depositInfo.roleAssignment.grantee != _grantee) {
+        if (_depositInfo.roleAssignment.grantee != _grantee) {
             // if depositId is being delegated to a new user, we need to make sure that Aavegotchis not owned by the new user are using these Wearables
             _unequipAllDelegatedWearables(_depositId, _depositInfo.deposit.tokenId);
         }
@@ -350,7 +359,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
         uint256 _unequippedBalance;
         uint16[EQUIPPED_WEARABLE_SLOTS] memory _previousEquippedWearables = _aavegotchi.equippedWearables;
         uint256[EQUIPPED_WEARABLE_SLOTS] memory _previousEquippedDepositIds = _gotchiInfo.equippedDepositIds;
-        
+
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             // if the item is not equipped in the slot or the deposit is not the same, continue
             if (_aavegotchi.equippedWearables[slot] != _tokenIdToUnequip || _gotchiInfo.equippedDepositIds[slot] != _depositId) continue;

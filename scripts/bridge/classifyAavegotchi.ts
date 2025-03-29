@@ -156,8 +156,11 @@ function processWearables(
     // If item exists in items but not equipped, it's a badge (amount = 1)
     const count = equippedCount || 1;
 
-    wearablesMap[itemId.toString()] = {
-      itemId: itemId.toString(),
+    // Convert hex to decimal string
+    const decimalId = parseInt(itemId.toString()).toString();
+
+    wearablesMap[decimalId] = {
+      itemId: decimalId,
       amount: count.toString(),
     };
   });

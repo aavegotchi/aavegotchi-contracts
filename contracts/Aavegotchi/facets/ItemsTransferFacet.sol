@@ -25,7 +25,7 @@ contract ItemsTransferFacet is Modifiers {
         @param _value   Transfer amount
         @param _data    Additional data with no specified format, MUST be sent unaltered in call to `onERC1155Received` on `_to`
     */
-    function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
+    function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external diamondPaused {
         require(_to != address(0), "ItemsTransfer: Can't transfer to 0 address");
         address sender = LibMeta.msgSender();
         require(sender == _from || s.operators[_from][sender] || sender == address(this), "ItemsTransfer: Not owner and not approved to transfer");
@@ -52,7 +52,13 @@ contract ItemsTransferFacet is Modifiers {
         @param _values  Transfer amounts per token type (order and length must match _ids array)
         @param _data    Additional data with no specified format, MUST be sent unaltered in call to the `ERC1155TokenReceiver` hook(s) on `_to`
     */
-    function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external {
+    function safeBatchTransferFrom(
+        address _from,
+        address _to,
+        uint256[] calldata _ids,
+        uint256[] calldata _values,
+        bytes calldata _data
+    ) external diamondPaused {
         require(_to != address(0), "ItemsTransfer: Can't transfer to 0 address");
         require(_ids.length == _values.length, "ItemsTransfer: ids not same length as values");
         address sender = LibMeta.msgSender();
@@ -68,19 +74,13 @@ contract ItemsTransferFacet is Modifiers {
         LibERC1155.onERC1155BatchReceived(sender, _from, _to, _ids, _values, _data);
     }
 
-    function simMissingIds(uint256[] calldata _ids) external onlyOwner {
-        //by default filled with 0
-        uint256[] memory values = new uint256[](_ids.length);
-        IEventHandlerFacet(s.wearableDiamond).emitTransferBatchEvent(address(this), address(this), address(this), _ids, values);
-    }
-
     /// @notice Transfer token from owner address to a token
     /// @param _from The owner address
     /// @param _id ID of the token
     /// @param _toContract The ERC721 contract of the receiving token
     /// @param _toTokenId The receiving token
     /// @param _value The amount of tokens to transfer
-    function transferToParent(address _from, address _toContract, uint256 _toTokenId, uint256 _id, uint256 _value) external {
+    function transferToParent(address _from, address _toContract, uint256 _toTokenId, uint256 _id, uint256 _value) external diamondPaused {
         require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
         address sender = LibMeta.msgSender();
         require(sender == _from || s.operators[_from][sender], "ItemsTransfer: Not owner and not approved to transfer");
@@ -127,7 +127,7 @@ contract ItemsTransferFacet is Modifiers {
         uint256 _toTokenId,
         uint256[] calldata _ids,
         uint256[] calldata _values
-    ) public {
+    ) public diamondPaused {
         require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
         require(_ids.length == _values.length, "ItemsTransfer: ids.length not the same as values.length");
         address sender = LibMeta.msgSender();
@@ -168,7 +168,7 @@ contract ItemsTransferFacet is Modifiers {
     /// @param _to The address the token is transferred to
     /// @param _id ID of the token
     /// @param _value The amount of tokens to transfer
-    function transferFromParent(address _fromContract, uint256 _fromTokenId, address _to, uint256 _id, uint256 _value) external {
+    function transferFromParent(address _fromContract, uint256 _fromTokenId, address _to, uint256 _id, uint256 _value) external diamondPaused {
         require(_to != address(0), "ItemsTransfer: Can't transfer to 0 address");
 
         //To do: Check if the item can be transferred.
@@ -194,7 +194,7 @@ contract ItemsTransferFacet is Modifiers {
         address _to,
         uint256[] calldata _ids,
         uint256[] calldata _values
-    ) external {
+    ) external diamondPaused {
         require(_ids.length == _values.length, "ItemsTransfer: ids.length not the same as values.length");
         require(_to != address(0), "ItemsTransfer: Can't transfer to 0 address");
         address sender = LibMeta.msgSender();
@@ -227,7 +227,7 @@ contract ItemsTransferFacet is Modifiers {
         uint256 _toTokenId,
         uint256 _id,
         uint256 _value
-    ) external {
+    ) external diamondPaused {
         require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
 
         //To do: Check if the item can be transferred.
@@ -255,7 +255,7 @@ contract ItemsTransferFacet is Modifiers {
         uint256 _toTokenId,
         uint256[] calldata _ids,
         uint256[] calldata _values
-    ) external {
+    ) external diamondPaused {
         require(_ids.length == _values.length, "ItemsTransfer: ids.length not the same as values.length");
         require(_toContract != address(0), "ItemsTransfer: Can't transfer to 0 address");
         address sender = LibMeta.msgSender();
