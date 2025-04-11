@@ -2,15 +2,17 @@ import { upgrade as upgradeWearableDiamond } from "./wearableDiamond/upgrade-add
 import { upgrade as upgradeForgeDiamond } from "./forge/upgrade-addFreezeFn";
 import { upgrade as upgradeAavegotchiDiamond } from "./upgrade-addFreezeFn";
 
-async function main() {
+export async function main() {
   await upgradeWearableDiamond();
   await upgradeForgeDiamond();
   await upgradeAavegotchiDiamond();
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+if (require.main === module) {
+  main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}

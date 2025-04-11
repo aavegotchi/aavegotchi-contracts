@@ -14,7 +14,7 @@ import { ethers } from "hardhat";
 import { getOwner, isSafe } from "./classifyAavegotchi";
 dotenv.config();
 
-const OUTPUT_DIR = path.join(BASE_OUTPUT_DIR, "forgeWearables");
+export const OUTPUT_DIR = path.join(BASE_OUTPUT_DIR, "forgeWearables");
 const config = {
   apiKey: process.env.ALCHEMY_KEY,
   network: Network.MATIC_MAINNET,
