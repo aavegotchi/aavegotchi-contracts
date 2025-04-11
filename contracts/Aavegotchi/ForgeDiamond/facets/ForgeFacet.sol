@@ -288,11 +288,7 @@ contract ForgeFacet is Modifiers {
         }
     }
 
-    function _forge(
-        uint256 itemId,
-        uint256 gotchiId,
-        uint40 _gltr
-    ) internal onlyAavegotchiOwner(gotchiId) onlyAavegotchiUnlocked(gotchiId) {
+    function _forge(uint256 itemId, uint256 gotchiId, uint40 _gltr) internal onlyAavegotchiOwner(gotchiId) onlyAavegotchiUnlocked(gotchiId) {
         require(!s.gotchiForging[gotchiId].isForging, "ForgeFacet: Aavegotchi already forging");
 
         address sender = LibMeta.msgSender();
@@ -389,7 +385,7 @@ contract ForgeFacet is Modifiers {
     /// @dev amount expressed in block numbers
     /// @param _gotchiIds An array containing the gotchi ID queues to speed up
     /// @param _amounts An array containing the corresponding amounts of $GLTR tokens to pay for each queue speedup
-    function reduceQueueTime(uint256[] calldata _gotchiIds, uint40[] calldata _amounts) external {
+    function reduceQueueTime(uint256[] calldata _gotchiIds, uint40[] calldata _amounts) external whenNotPaused {
         require(_gotchiIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
         for (uint256 i; i < _gotchiIds.length; i++) {
             uint256 gotchiId = _gotchiIds[i];
@@ -403,7 +399,7 @@ contract ForgeFacet is Modifiers {
 
             uint40 blockLeft = queueItem.readyBlock - uint40(block.number);
             uint40 removeBlocks = _amounts[i] <= blockLeft ? _amounts[i] : blockLeft;
-            uint256 burnAmount = uint256(removeBlocks) * 10**18;
+            uint256 burnAmount = uint256(removeBlocks) * 10 ** 18;
 
             require(
                 gltrContract().transferFrom(msg.sender, 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF, burnAmount),
@@ -451,11 +447,7 @@ contract ForgeFacet is Modifiers {
         }
     }
 
-    function forgeWearables(
-        uint256[] calldata _itemIds,
-        uint256[] calldata _gotchiIds,
-        uint40[] calldata _gltr
-    ) external whenNotPaused {
+    function forgeWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds, uint40[] calldata _gltr) external whenNotPaused {
         require(_itemIds.length == _gotchiIds.length && _gotchiIds.length == _gltr.length, "ForgeFacet: mismatched array lengths");
 
         for (uint256 i; i < _itemIds.length; i++) {
@@ -475,9 +467,7 @@ contract ForgeFacet is Modifiers {
     // @notice Allow Aavegotchi diamond to mint essence.
     // @dev Only called from CollateralFacet's decreaseAndDestroy function. Not including a whenNotPaused modifier
     //      here to avoid impacts to aavegotchi sacrifice functionality.
-    function mintEssence(
-        address owner /*uint256 gotchiId*/
-    ) external {
+    function mintEssence(address owner /*uint256 gotchiId*/) external {
         require(LibMeta.msgSender() == ForgeLibDiamond.AAVEGOTCHI_DIAMOND, "ForgeFacet: Can only be called by Aavegotchi Diamond");
         //        require(aavegotchiFacet.ownerOf(gotchiId) == address(0), "ForgeFacet: Aavegotchi not sacrificed");
 
@@ -522,41 +512,25 @@ contract ForgeFacet is Modifiers {
         }
     }
 
-    function _mintItem(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) internal {
+    function _mintItem(address account, uint256 id, uint256 amount) internal {
         // mint doesnt exceed max supply
         //        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
         _mint(account, id, amount);
     }
 
-    function adminMint(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) external onlyDaoOrOwner {
+    function adminMint(address account, uint256 id, uint256 amount) external onlyDaoOrOwner {
         // mint doesnt exceed max supply
         //        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
         _mint(account, id, amount);
     }
 
-    function adminMintBatch(
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts
-    ) external onlyDaoOrOwner {
+    function adminMintBatch(address to, uint256[] memory ids, uint256[] memory amounts) external onlyDaoOrOwner {
         // mint doesnt exceed max supply
         //        require(totalSupply(id) + amount <= s.maxSupplyByToken[id], "ForgeFacet: mint would exceed max supply");
         _mintBatch(to, ids, amounts);
     }
 
-    function burn(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) external {
+    function burn(address account, uint256 id, uint256 amount) external whenNotPaused {
         require(
             account == msg.sender || forgeTokenFacet().isApprovedForAll(account, msg.sender),
             "ForgeFacet: caller is not token owner or approved"
@@ -568,11 +542,7 @@ contract ForgeFacet is Modifiers {
     //    function _mintBatchItems(address to, uint256[] memory ids, uint256[] memory amounts) internal {
     //        _mintBatch(to, ids, amounts, "");
     //    }
-    function _burnItem(
-        address account,
-        uint256 id,
-        uint256 amount
-    ) internal {
+    function _burnItem(address account, uint256 id, uint256 amount) internal {
         _burn(account, id, amount);
     }
 
@@ -604,11 +574,7 @@ contract ForgeFacet is Modifiers {
         emit TransferBatch(msg.sender, address(0), to, ids, amounts);
     }
 
-    function _burn(
-        address from,
-        uint256 id,
-        uint256 amount
-    ) internal virtual {
+    function _burn(address from, uint256 id, uint256 amount) internal virtual {
         require(from != address(0), "ForgeTokenFacet: burn from the zero address");
 
         uint256 fromBalance = s._balances[id][from];
@@ -621,11 +587,7 @@ contract ForgeFacet is Modifiers {
         emit TransferSingle(msg.sender, from, address(0), id, amount);
     }
 
-    function _burnBatch(
-        address from,
-        uint256[] memory ids,
-        uint256[] memory amounts
-    ) internal virtual {
+    function _burnBatch(address from, uint256[] memory ids, uint256[] memory amounts) internal virtual {
         require(from != address(0), "ForgeTokenFacet: burn from the zero address");
         require(ids.length == amounts.length, "ForgeTokenFacet: ids and amounts length mismatch");
 

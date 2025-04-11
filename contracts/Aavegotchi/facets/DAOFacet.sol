@@ -402,6 +402,10 @@ contract DAOFacet is Modifiers {
         emit WearableSlotPositionsSet(_wearableId, _slotPositions);
     }
 
+    function toggleDiamondPaused() external onlyOwner {
+        s.diamondPaused = !s.diamondPaused;
+    }
+
     ///@notice Allow an item manager to set the trait and rarity modifiers of an item/wearable
     ///@dev Only valid for existing wearables
     ///@param _wearableId The identifier of the wearable to set

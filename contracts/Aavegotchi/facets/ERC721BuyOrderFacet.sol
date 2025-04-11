@@ -107,7 +107,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         uint256 _priceInWei,
         uint256 _duration,
         bool[] calldata _validationOptions // 0: BRS, 1: GHST, 2: skill points
-    ) external {
+    ) external diamondPaused {
         require(_priceInWei >= 1e18, "ERC721BuyOrder: price should be 1 GHST or larger");
 
         address sender = LibMeta.msgSender();
@@ -171,7 +171,7 @@ contract ERC721BuyOrderFacet is Modifiers {
         );
     }
 
-    function cancelERC721BuyOrder(uint256 _buyOrderId) external {
+    function cancelERC721BuyOrder(uint256 _buyOrderId) external diamondPaused {
         address sender = LibMeta.msgSender();
         ERC721BuyOrder memory erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
 
@@ -189,7 +189,12 @@ contract ERC721BuyOrderFacet is Modifiers {
         emit ERC721BuyOrderCanceled(_buyOrderId, block.timestamp);
     }
 
-    function executeERC721BuyOrder(uint256 _buyOrderId, address _erc721TokenAddress, uint256 _erc721TokenId, uint256 _priceInWei) external {
+    function executeERC721BuyOrder(
+        uint256 _buyOrderId,
+        address _erc721TokenAddress,
+        uint256 _erc721TokenId,
+        uint256 _priceInWei
+    ) external diamondPaused {
         address sender = LibMeta.msgSender();
         ERC721BuyOrder storage erc721BuyOrder = s.erc721BuyOrders[_buyOrderId];
 
