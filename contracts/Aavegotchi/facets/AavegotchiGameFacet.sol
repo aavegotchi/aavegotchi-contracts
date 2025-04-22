@@ -7,7 +7,7 @@ import {LibAppStorage} from "../libraries/LibAppStorage.sol";
 
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
 import {LibStrings} from "../../shared/libraries/LibStrings.sol";
-import {Modifiers, Haunt, Aavegotchi, ItemType} from "../libraries/LibAppStorage.sol";
+import {Modifiers, Haunt, Aavegotchi} from "../libraries/LibAppStorage.sol";
 import {LibERC20} from "../../shared/libraries/LibERC20.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
@@ -18,12 +18,6 @@ import {LibGotchiLending} from "../libraries/LibGotchiLending.sol";
 import {LibBitmapHelpers} from "../libraries/LibBitmapHelpers.sol";
 
 import {ForgeTokenFacet} from "../ForgeDiamond/facets/ForgeTokenFacet.sol";
-
-import "../WearableDiamond/interfaces/IEventHandlerFacet.sol";
-
-import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
-
-import {LibERC1155Marketplace} from "../libraries/LibERC1155Marketplace.sol";
 
 contract AavegotchiGameFacet is Modifiers {
     /// @dev This emits when the approved address for an NFT is changed or
