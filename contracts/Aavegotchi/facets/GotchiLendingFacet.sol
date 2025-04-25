@@ -32,7 +32,7 @@ contract GotchiLendingFacet is Modifiers {
     ///@notice Allow an aavegotchi lender (msg sender) or their lending operator to add request for lending
     ///@dev If the lending request exist, cancel it and replaces it with the new one
     ///@dev If the lending is active, unable to cancel
-    function addGotchiListing(AddGotchiListing memory p) public diamondPaused {
+    function addGotchiListing(AddGotchiListing memory p) public diamondNotPaused {
         address sender = LibMeta.msgSender();
         address tokenOwner = s.aavegotchis[p.tokenId].owner;
         bool isLendingOperator = s.lendingOperators[tokenOwner][sender][p.tokenId];
@@ -54,7 +54,7 @@ contract GotchiLendingFacet is Modifiers {
 
     ///@notice Allow an aavegotchi lender or lending operator to cancel his NFT lending through the listingId
     ///@param _listingId The identifier of the lending to be cancelled
-    function cancelGotchiLending(uint32 _listingId) public diamondPaused {
+    function cancelGotchiLending(uint32 _listingId) public diamondNotPaused {
         GotchiLending storage lending = s.gotchiLendings[_listingId];
         require(lending.timeCreated != 0, "GotchiLending: Listing not found");
         address sender = LibMeta.msgSender();
@@ -75,7 +75,7 @@ contract GotchiLendingFacet is Modifiers {
         uint96 _initialCost,
         uint32 _period,
         uint8[3] calldata _revenueSplit
-    ) external diamondPaused {
+    ) external diamondNotPaused {
         address sender = LibMeta.msgSender();
         //LibGotchiLending.addBorrowerTokenId(sender, _erc721TokenId); // This functions as a check for whether the sender already has a borrow after the upgrade
         LibGotchiLending._agreeGotchiLending(sender, _listingId, _erc721TokenId, _initialCost, _period, _revenueSplit);
@@ -84,7 +84,7 @@ contract GotchiLendingFacet is Modifiers {
     ///@notice Allow to claim revenue from the lending
     ///@dev Will throw if the NFT has not been lent or if the lending has been canceled already
     ///@param _tokenId The identifier of the lent aavegotchi to claim
-    function claimGotchiLending(uint32 _tokenId) public diamondPaused {
+    function claimGotchiLending(uint32 _tokenId) public diamondNotPaused {
         uint32 listingId = LibGotchiLending.tokenIdToListingId(_tokenId);
         GotchiLending storage lending = s.gotchiLendings[listingId];
         address lender = lending.lender;
@@ -99,7 +99,7 @@ contract GotchiLendingFacet is Modifiers {
     ///@notice Allow a lender or borrower or lending operator to claim revenue from the lending and end the listing
     ///@dev Will throw if the NFT has not been lent or if the lending has been canceled already
     ///@param _tokenId The identifier of the lent aavegotchi to claim
-    function claimAndEndGotchiLending(uint32 _tokenId) public diamondPaused {
+    function claimAndEndGotchiLending(uint32 _tokenId) public diamondNotPaused {
         uint32 listingId = LibGotchiLending.tokenIdToListingId(_tokenId);
         GotchiLending storage lending = s.gotchiLendings[listingId];
 
@@ -119,7 +119,7 @@ contract GotchiLendingFacet is Modifiers {
     }
 
     ///@notice Allows a lender or lending operator to extend a current listing
-    function extendGotchiLending(uint32 _tokenId, uint32 extension) public diamondPaused {
+    function extendGotchiLending(uint32 _tokenId, uint32 extension) public diamondNotPaused {
         GotchiLending storage lending = s.gotchiLendings[LibGotchiLending.tokenIdToListingId(_tokenId)];
         address lender = lending.lender;
         address sender = LibMeta.msgSender();

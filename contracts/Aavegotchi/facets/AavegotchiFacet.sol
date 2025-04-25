@@ -217,7 +217,7 @@ contract AavegotchiFacet is Modifiers {
     }
 
     // This function is used by transfer functions
-    function internalTransferFrom(address _sender, address _from, address _to, uint256 _tokenId) internal diamondPaused {
+    function internalTransferFrom(address _sender, address _from, address _to, uint256 _tokenId) internal diamondNotPaused {
         LibGotchiLending.enforceAavegotchiNotInLending(uint32(_tokenId), _sender);
         _enforceAavegotchiNotForging(_tokenId);
         _enforceAavegotchiNotEquippedWithDelegatedItems(_tokenId);
@@ -239,7 +239,7 @@ contract AavegotchiFacet is Modifiers {
     ///  operator of the current owner.
     /// @param _approved The new approved NFT controller
     /// @param _tokenId The NFT to approve
-    function approve(address _approved, uint256 _tokenId) external diamondPaused {
+    function approve(address _approved, uint256 _tokenId) external diamondNotPaused {
         address owner = s.aavegotchis[_tokenId].owner;
         require(owner == LibMeta.msgSender() || s.operators[owner][LibMeta.msgSender()], "ERC721: Not owner or operator of token.");
         s.approved[_tokenId] = _approved;
@@ -252,7 +252,7 @@ contract AavegotchiFacet is Modifiers {
     ///  multiple operators per owner.
     /// @param _operator Address to add to the set of authorized operators
     /// @param _approved True if the operator is approved, false to revoke approval
-    function setApprovalForAll(address _operator, bool _approved) external diamondPaused {
+    function setApprovalForAll(address _operator, bool _approved) external diamondNotPaused {
         s.operators[LibMeta.msgSender()][_operator] = _approved;
         emit LibERC721.ApprovalForAll(LibMeta.msgSender(), _operator, _approved);
     }
@@ -262,7 +262,7 @@ contract AavegotchiFacet is Modifiers {
     ///@param _operator Address to disable/enable as a pet operator
     ///@param _approved True if operator is approved,False if approval is revoked
 
-    function setPetOperatorForAll(address _operator, bool _approved) external diamondPaused {
+    function setPetOperatorForAll(address _operator, bool _approved) external diamondNotPaused {
         s.petOperators[LibMeta.msgSender()][_operator] = _approved;
         emit PetOperatorApprovalForAll(LibMeta.msgSender(), _operator, _approved);
     }

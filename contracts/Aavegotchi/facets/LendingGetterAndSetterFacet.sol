@@ -49,7 +49,7 @@ contract LendingGetterAndSetterFacet is Modifiers {
         address _lendingOperator,
         uint32 _tokenId,
         bool _isLendingOperator
-    ) public diamondPaused onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
+    ) public diamondNotPaused onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
         address sender = LibMeta.msgSender();
         s.lendingOperators[sender][_lendingOperator][_tokenId] = _isLendingOperator;
         emit LendingOperatorSet(sender, _lendingOperator, _tokenId, _isLendingOperator);

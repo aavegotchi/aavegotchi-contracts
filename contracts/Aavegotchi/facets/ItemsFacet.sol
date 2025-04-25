@@ -236,7 +236,7 @@ contract ItemsFacet is Modifiers {
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
         uint256[EQUIPPED_WEARABLE_SLOTS] memory _depositIdsToEquip
-    ) internal diamondPaused {
+    ) internal diamondNotPaused {
         Aavegotchi storage aavegotchi = s.aavegotchis[_tokenId];
 
         // Get the GotchiEquippedDepositsInfo struct

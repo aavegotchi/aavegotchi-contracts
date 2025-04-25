@@ -115,7 +115,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint16[2] memory _principalSplit,
         address _affiliate,
         uint32 _whitelistId
-    ) internal diamondPaused {
+    ) internal diamondNotPaused {
         address seller = LibMeta.msgSender();
         uint256 category = LibSharedMarketplace.getERC1155Category(_erc1155TokenAddress, _erc1155TypeId);
 
@@ -180,7 +180,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@notice Allow an ERC1155 owner to cancel his NFT listing through the listingID
     ///@param _listingId The identifier of the listing to be cancelled
 
-    function cancelERC1155Listing(uint256 _listingId) external diamondPaused {
+    function cancelERC1155Listing(uint256 _listingId) external diamondNotPaused {
         LibERC1155Marketplace.cancelERC1155Listing(_listingId, LibMeta.msgSender());
     }
 
@@ -251,7 +251,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 _quantity,
         uint256 _priceInWei,
         address _recipient
-    ) internal diamondPaused {
+    ) internal diamondNotPaused {
         ERC1155Listing storage listing = s.erc1155Listings[_listingId];
         require(listing.timeCreated != 0, "ERC1155Marketplace: listing not found");
         require(listing.sold == false, "ERC1155Marketplace: listing is sold out");
@@ -349,7 +349,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _erc1155TokenAddress Contract address of the ERC1155 token
     ///@param _erc1155TypeId Identifier of the ERC1155 token
     ///@param _owner Owner of the ERC1155 token
-    function updateERC1155Listing(address _erc1155TokenAddress, uint256 _erc1155TypeId, address _owner) external diamondPaused {
+    function updateERC1155Listing(address _erc1155TokenAddress, uint256 _erc1155TypeId, address _owner) external diamondNotPaused {
         LibERC1155Marketplace.updateERC1155Listing(_erc1155TokenAddress, _erc1155TypeId, _owner);
     }
 
@@ -357,7 +357,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _erc1155TokenAddress Contract address of the ERC1155 token
     ///@param _erc1155TypeIds An array containing the identifiers of the ERC1155 tokens to update
     ///@param _owner Owner of the ERC1155 tokens
-    function updateBatchERC1155Listing(address _erc1155TokenAddress, uint256[] calldata _erc1155TypeIds, address _owner) external diamondPaused {
+    function updateBatchERC1155Listing(address _erc1155TokenAddress, uint256[] calldata _erc1155TypeIds, address _owner) external diamondNotPaused {
         for (uint256 i; i < _erc1155TypeIds.length; i++) {
             LibERC1155Marketplace.updateERC1155Listing(_erc1155TokenAddress, _erc1155TypeIds[i], _owner);
         }
@@ -365,7 +365,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
 
     ///@notice Allow an ERC1155 owner to cancel his NFT listings through the listingIDs
     ///@param _listingIds An array containing the identifiers of the listings to be cancelled
-    function cancelERC1155Listings(uint256[] calldata _listingIds) external diamondPaused onlyOwner {
+    function cancelERC1155Listings(uint256[] calldata _listingIds) external diamondNotPaused onlyOwner {
         for (uint256 i; i < _listingIds.length; i++) {
             uint256 listingId = _listingIds[i];
 
@@ -384,7 +384,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
     ///@param _listingId The identifier of the listing to execute
     ///@param _quantity The amount of ERC1155 NFTs execute/buy
     ///@param _priceInWei The price of the item
-    function updateERC1155ListingPriceAndQuantity(uint256 _listingId, uint256 _quantity, uint256 _priceInWei) external diamondPaused {
+    function updateERC1155ListingPriceAndQuantity(uint256 _listingId, uint256 _quantity, uint256 _priceInWei) external diamondNotPaused {
         LibERC1155Marketplace.updateERC1155ListingPriceAndQuantity(_listingId, _quantity, _priceInWei);
         if (s.listingFeeInWei > 0) {
             LibSharedMarketplace.burnListingFee(s.listingFeeInWei, LibMeta.msgSender(), s.ghstContract);
@@ -395,7 +395,7 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256[] calldata _listingIds,
         uint256[] calldata _quantities,
         uint256[] calldata _priceInWeis
-    ) external diamondPaused {
+    ) external diamondNotPaused {
         require(_listingIds.length == _quantities.length, "ERC1155Marketplace: listing ids not same length as quantities");
         require(_listingIds.length == _priceInWeis.length, "ERC1155Marketplace: listing ids not same length as prices");
 
