@@ -53,6 +53,7 @@ contract WearablesFacet {
     //WRITE
 
     function setApprovalForAll(address _operator, bool _approved) external {
+        WearableLibDiamond.enforceDiamondPaused();
         periphery().peripherySetApprovalForAll(_operator, _approved, msg.sender);
         //emit event
         //previous address in frame should be the owner
@@ -69,42 +70,49 @@ contract WearablesFacet {
     }
 
     function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) external {
+        WearableLibDiamond.enforceDiamondPaused();
         periphery().peripherySafeTransferFrom(msg.sender, _from, _to, _id, _value, _data);
         //emit event
         LibEventHandler._receiveAndEmitTransferSingleEvent(msg.sender, _from, _to, _id, _value);
     }
 
     function safeBatchTransferFrom(address _from, address _to, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external {
+        WearableLibDiamond.enforceDiamondPaused();
         periphery().peripherySafeBatchTransferFrom(msg.sender, _from, _to, _ids, _values, _data);
         //emit event
         LibEventHandler._receiveAndEmitTransferBatchEvent(msg.sender, _from, _to, _ids, _values);
     }
 
-    function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable {
-        WearableLibDiamond.DiamondStorage storage ds = WearableLibDiamond.diamondStorage();
-        INFTBridge(ds.itemGeistBridge).bridge{value: msg.value}(
-            _receiver,
-            msg.sender,
-            _tokenId,
-            _amount,
-            _msgGasLimit,
-            _connector,
-            new bytes(0),
-            new bytes(0)
-        );
-    }
-
-    function setItemGeistBridge(address _itemBridge) external {
+    function toggleDiamondPaused() external {
         WearableLibDiamond.enforceIsContractOwner();
-        WearableLibDiamond.DiamondStorage storage ds = WearableLibDiamond.diamondStorage();
-        ds.itemGeistBridge = _itemBridge;
-        emit ItemGeistBridgeSet(_itemBridge);
+        WearableLibDiamond.diamondStorage().diamondPaused = !WearableLibDiamond.diamondStorage().diamondPaused;
     }
 
-    function getItemGeistBridge() external view returns (address) {
-        WearableLibDiamond.DiamondStorage storage ds = WearableLibDiamond.diamondStorage();
-        return ds.itemGeistBridge;
-    }
+    // function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable {
+    //     WearableLibDiamond.DiamondStorage storage ds = WearableLibDiamond.diamondStorage();
+    //     INFTBridge(ds.itemGeistBridge).bridge{value: msg.value}(
+    //         _receiver,
+    //         msg.sender,
+    //         _tokenId,
+    //         _amount,
+    //         _msgGasLimit,
+    //         _connector,
+    //         new bytes(0),
+    //         new bytes(0)
+    //     );
+    // }
+
+    // function setItemGeistBridge(address _itemBridge) external {
+    //     WearableLibDiamond.enforceIsContractOwner();
+    //     WearableLibDiamond.DiamondStorage storage ds = WearableLibDiamond.diamondStorage();
+    //     ds.itemGeistBridge = _itemBridge;
+    //     emit ItemGeistBridgeSet(_itemBridge);
+    // }
+
+    // function getItemGeistBridge() external view returns (address) {
+    //     WearableLibDiamond.DiamondStorage storage ds = WearableLibDiamond.diamondStorage();
+    //     return ds.itemGeistBridge;
+    // }
 
     // struct ItemBridgingParams {
     //     address receiver;

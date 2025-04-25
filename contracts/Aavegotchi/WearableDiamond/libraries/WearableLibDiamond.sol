@@ -41,13 +41,22 @@ library WearableLibDiamond {
         address contractOwner;
         //aavegotchi master diamond address
         address aavegotchiDiamond;
+        //unused
         address itemGeistBridge;
+        //pause state
+        bool diamondPaused;
     }
 
     function diamondStorage() internal pure returns (DiamondStorage storage ds) {
         bytes32 position = DIAMOND_STORAGE_POSITION;
         assembly {
             ds.slot := position
+        }
+    }
+
+    function enforceDiamondPaused() internal view {
+        if (msg.sender != diamondStorage().contractOwner) {
+            require(!diamondStorage().diamondPaused, "AppStorage: Diamond paused");
         }
     }
 

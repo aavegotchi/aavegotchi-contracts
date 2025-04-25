@@ -53,6 +53,7 @@
     "@openzeppelin/contracts-upgradeable": "^4.5.2",
     "@types/mocha": "^9.0.0",
     "alchemy-sdk": "^2.4.1",
+    "apollo-fetch": "^0.7.0",
     "axios": "^0.21.1",
     "csv-parser": "^3.0.0",
     "git-branch": "^2.0.1",

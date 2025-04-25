@@ -9,6 +9,8 @@ import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 import {CollateralEscrow} from "../CollateralEscrow.sol";
 import {LibCollateralsEvents} from "../libraries/LibCollaterals.sol";
 
+//Escrow operations should not be affected by diamond pause
+
 contract EscrowFacet is Modifiers {
     event Erc20Deposited(uint256 indexed _tokenId, address indexed _erc20Contract, address indexed _from, address _to, uint256 _depositAmount);
     event TransferEscrow(uint256 indexed _tokenId, address indexed _erc20Contract, address _from, address indexed _to, uint256 _transferAmount);
