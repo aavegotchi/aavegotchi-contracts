@@ -27,6 +27,7 @@ export interface AavegotchiInfo {
   lastInteracted: number; // The last time this Aavegotchi was interacted with
   locked: boolean;
   items: number[]; // Array of item IDs owned by this Aavegotchi
+  respecCount: BigNumber;
 }
 
 interface AavegotchiMetadataMap {
@@ -127,6 +128,7 @@ async function main() {
             lastInteracted: gotchi.lastInteracted,
             locked: gotchi.locked,
             items: toNumbers(gotchi.items),
+            respecCount: gotchi.respecCount,
           };
           allAavegotchis[tokenId.toString()] = metadata;
         });
