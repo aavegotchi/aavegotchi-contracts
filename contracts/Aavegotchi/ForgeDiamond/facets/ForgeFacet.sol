@@ -330,6 +330,7 @@ contract ForgeFacet is Modifiers {
             wearablesFacet().safeTransferFrom(address(this), sender, itemId, 1, "");
             emit ForgeTimeReduced(0, gotchiId, itemId, _gltr);
         } else {
+            require(!s.forgingPaused, "ForgeFacet: Forging is paused");
             uint40 readyBlock = uint40(block.number) + uint40(forgeReqTime) - _gltr;
             ForgeQueueItem memory newQueueItem = ForgeQueueItem(itemId, gotchiId, s.forgeQueueId, readyBlock, false);
             s.forgeQueue.push(newQueueItem);

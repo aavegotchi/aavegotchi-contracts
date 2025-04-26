@@ -126,6 +126,10 @@ contract ForgeDAOFacet is Modifiers {
         emit ContractUnpaused();
     }
 
+    function toggleForging() external onlyDaoOrOwner {
+        s.forgingPaused = !s.forgingPaused;
+    }
+
     //GETTERS
 
     function getAlloyDaoFeeInBips() external view returns (uint256) {
