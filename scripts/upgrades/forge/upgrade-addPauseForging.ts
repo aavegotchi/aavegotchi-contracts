@@ -1,4 +1,4 @@
-import { run } from "hardhat";
+import { ethers, run } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
@@ -6,6 +6,8 @@ import {
 } from "../../../tasks/deployUpgrade";
 
 import { maticDiamondUpgrader } from "../../helperFunctions";
+import { ForgeDAOFacetInterface } from "../../../typechain/ForgeDAOFacet";
+import { ForgeDAOFacet__factory } from "../../../typechain";
 
 export async function addPauseForging() {
   const forgeDiamond = "0x4fDfc1B53Fd1D80d969C984ba7a8CE4c7bAaD442";
@@ -13,7 +15,7 @@ export async function addPauseForging() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName: "ForgeDAOFacet",
-      addSelectors: [`function toggleForging() external`],
+      addSelectors: [`function toggleForging(bool) external`],
       removeSelectors: [],
     },
     {
@@ -24,6 +26,12 @@ export async function addPauseForging() {
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
+
+  let iface: ForgeDAOFacetInterface = new ethers.utils.Interface(
+    ForgeDAOFacet__factory.abi
+  ) as ForgeDAOFacetInterface;
+
+  const calldata = iface.encodeFunctionData("toggleForging", [true]);
 
   const args: DeployUpgradeTaskArgs = {
     diamondOwner: maticDiamondUpgrader,

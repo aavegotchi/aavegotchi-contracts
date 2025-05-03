@@ -126,8 +126,8 @@ contract ForgeDAOFacet is Modifiers {
         emit ContractUnpaused();
     }
 
-    function toggleForging() external onlyDaoOrOwner {
-        s.forgingPaused = !s.forgingPaused;
+    function toggleForging(bool pause) external onlyDaoOrOwner {
+        s.forgingPaused = pause;
     }
 
     //GETTERS
