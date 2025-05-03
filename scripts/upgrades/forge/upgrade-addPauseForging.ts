@@ -40,6 +40,8 @@ export async function addPauseForging() {
     useLedger: true,
     useMultisig: false,
     freshDeployment: true,
+    initAddress: "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11",
+    initCalldata: calldata,
   };
 
   await run("deployUpgrade", args);
