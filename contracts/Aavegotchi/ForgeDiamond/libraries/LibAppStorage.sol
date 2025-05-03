@@ -191,6 +191,7 @@ struct AppStorage {
     uint144 vrfFee;
     mapping(uint8 => mapping(uint8 => uint256)) geodeWinChanceMultiTierBips;
     mapping(uint256 => uint8) geodePrizeRarities;
+    bool forgingPaused;
 }
 
 library LibAppStorage {

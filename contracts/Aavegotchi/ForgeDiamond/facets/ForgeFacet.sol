@@ -280,7 +280,9 @@ contract ForgeFacet is Modifiers {
         emit ItemSmelted(itemId, gotchiId);
     }
 
-    function smeltWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds) external whenNotPaused {
+    //todo: Add back whenNotPaused modifier for final freeze
+
+    function smeltWearables(uint256[] calldata _itemIds, uint256[] calldata _gotchiIds) external {
         require(_itemIds.length == _gotchiIds.length, "ForgeFacet: mismatched array lengths");
 
         for (uint256 i; i < _itemIds.length; i++) {
@@ -330,6 +332,7 @@ contract ForgeFacet is Modifiers {
             wearablesFacet().safeTransferFrom(address(this), sender, itemId, 1, "");
             emit ForgeTimeReduced(0, gotchiId, itemId, _gltr);
         } else {
+            require(!s.forgingPaused, "ForgeFacet: Forging is paused");
             uint40 readyBlock = uint40(block.number) + uint40(forgeReqTime) - _gltr;
             ForgeQueueItem memory newQueueItem = ForgeQueueItem(itemId, gotchiId, s.forgeQueueId, readyBlock, false);
             s.forgeQueue.push(newQueueItem);
@@ -356,7 +359,9 @@ contract ForgeFacet is Modifiers {
         return (s.forgeTimeCostInBlocks[rsm] * getSmithingLevelMultiplierBips(gotchiId)) / 10000;
     }
 
-    function claimForgeQueueItems(uint256[] calldata gotchiIds) external whenNotPaused {
+    //todo: Add back whenNotPaused modifier for final freeze
+
+    function claimForgeQueueItems(uint256[] calldata gotchiIds) external {
         for (uint256 i; i < gotchiIds.length; i++) {
             _claimQueueItem(gotchiIds[i]);
         }
