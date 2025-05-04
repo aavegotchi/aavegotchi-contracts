@@ -40,7 +40,7 @@ export async function addPauseForging() {
     useLedger: true,
     useMultisig: false,
     freshDeployment: false,
-    initAddress: "0x1D0360BaC7299C86Ec8E99d0c1C9A95FEfaF2a11",
+    initAddress: forgeDiamond,
     initCalldata: calldata,
   };
 
