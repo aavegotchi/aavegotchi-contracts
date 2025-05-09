@@ -38,7 +38,6 @@ interface TokenStatistics {
     gnosisSafes: number;
     vaultHoldings: number;
     gbmHoldings: number;
-    rafflesHoldings: number;
     diamondHoldings: number;
     forgeDiamondHoldings: number;
   };
@@ -75,7 +74,6 @@ const DATA_TO_FILE_MAP = {
   contractHolders: "contractHolders",
   vault: "vaultHolders",
   gbmDiamond: "gbmDiamondHolders",
-  raffles: "rafflesHolders",
   contractEOAs: "contractEOAs",
   gnosisSafes: "gnosisSafeContracts",
   aavegotchiDiamond: "aavegotchiDiamond",
@@ -108,6 +106,8 @@ const ADDRESS_TO_CATEGORY: Record<keyof typeof ADDRESSES, AddressCategory> = {
   vault: AddressCategory.Vault,
   gbmDiamond: AddressCategory.GBM,
   raffles: AddressCategory.Raffles,
+  raffles2: AddressCategory.Raffles,
+  raffleOwner: AddressCategory.Regular,
   aavegotchiDiamond: AddressCategory.Diamond,
   forgeDiamond: AddressCategory.Forge,
 };
@@ -151,7 +151,6 @@ function loadExistingData() {
     contractHolders: {} as AggregatedOwnership,
     vaultHolders: [] as TokenBalance[],
     gbmDiamondHolders: [] as TokenBalance[],
-    rafflesHolders: [] as TokenBalance[],
     contractEOAs: [] as ContractOwnership[],
     gnosisSafeContracts: [] as SafeDetails[],
     aavegotchiDiamond: [] as TokenBalance[],
@@ -194,8 +193,6 @@ function updateTokenStats(
       .length,
     gbmHoldings: data.gbmDiamondHolders.filter((t) => t.tokenId === tokenId)
       .length,
-    rafflesHoldings: data.rafflesHolders.filter((t) => t.tokenId === tokenId)
-      .length,
     diamondHoldings: data.aavegotchiDiamond.filter((t) => t.tokenId === tokenId)
       .length,
     forgeDiamondHoldings: data.forgeDiamond.filter((t) => t.tokenId === tokenId)
@@ -215,7 +212,6 @@ function getCumulativeStats(
     gnosisSafes: data.gnosisSafeContracts.length,
     vaultHoldings: data.vaultHolders.length,
     gbmHoldings: data.gbmDiamondHolders.length,
-    rafflesHoldings: data.rafflesHolders.length,
     diamondHoldings: data.aavegotchiDiamond.length,
     totalTokensProcessed: progress.completedIds.length,
     forgeDiamondHoldings: data.forgeDiamond.length,
@@ -354,7 +350,13 @@ async function classifyHolders(rawData: RawHolderData) {
           data.gbmDiamondHolders.push(tokenBalance);
           break;
         case AddressCategory.Raffles:
-          data.rafflesHolders.push(tokenBalance);
+          // Instead of adding to rafflesHolders, add to regularHolders under the new owner
+          if (!data.regularHolders[ADDRESSES.raffleOwner.toLowerCase()]) {
+            data.regularHolders[ADDRESSES.raffleOwner.toLowerCase()] = [];
+          }
+          data.regularHolders[ADDRESSES.raffleOwner.toLowerCase()].push(
+            tokenBalance
+          );
           break;
         case AddressCategory.Diamond:
           data.aavegotchiDiamond.push(tokenBalance);
@@ -438,7 +440,6 @@ async function main() {
   console.log(`Gnosis Safes: ${finalStats.gnosisSafes}`);
   console.log(`Vault Holdings: ${finalStats.vaultHoldings}`);
   console.log(`GBM Holdings: ${finalStats.gbmHoldings}`);
-  console.log(`Raffles Holdings: ${finalStats.rafflesHoldings}`);
   console.log(`Diamond Holdings: ${finalStats.diamondHoldings}`);
   console.log(`Forge Diamond Holdings: ${finalStats.forgeDiamondHoldings}`);
 }

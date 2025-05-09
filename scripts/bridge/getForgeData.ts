@@ -249,9 +249,20 @@ async function classifyAndSaveData(nftOwners: NFTOwner[]) {
       } else if (owner === ADDRESSES.gbmDiamond.toLowerCase()) {
         data.gbmDiamondHolders.push(...balances);
         progress.analytics.specialAddresses.gbm += balances.length;
-      } else if (owner === ADDRESSES.raffles.toLowerCase()) {
-        data.rafflesHolders.push(...balances);
-        progress.analytics.specialAddresses.raffles += balances.length;
+      } else if (
+        owner === ADDRESSES.raffles.toLowerCase() ||
+        owner === ADDRESSES.raffles2.toLowerCase()
+      ) {
+        // Instead of adding to rafflesHolders, add to regularHolders under the new owner
+        if (!data.regularHolders[ADDRESSES.raffleOwner.toLowerCase()]) {
+          data.regularHolders[ADDRESSES.raffleOwner.toLowerCase()] = [];
+        }
+        data.regularHolders[ADDRESSES.raffleOwner.toLowerCase()].push(
+          ...balances
+        );
+        progress.analytics.regularHolders.add(
+          ADDRESSES.raffleOwner.toLowerCase()
+        );
       } else if (owner === ADDRESSES.aavegotchiDiamond.toLowerCase()) {
         data.aavegotchiDiamond.push(...balances);
         progress.analytics.specialAddresses.diamond += balances.length;

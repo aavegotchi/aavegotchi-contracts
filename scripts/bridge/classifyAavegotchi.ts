@@ -11,6 +11,9 @@ import {
   ContractOwnership,
   SafeDetails,
   EquippedItem,
+  getAavegotchiOwnerEth,
+  getVaultOwner,
+  AAVEGOTCHI_DIAMOND_BASE,
 } from "./constants";
 
 interface OwnershipMap {
@@ -31,13 +34,9 @@ const FILES = {
     OUTPUT_DIR,
     "aavegotchi-contractsWithoutEOAs.json"
   ),
-
-  vault: path.join(OUTPUT_DIR, "aavegotchi-vault.json"),
   gbmDiamond: path.join(OUTPUT_DIR, "aavegotchi-gbmDiamond.json"),
-  raffles: path.join(OUTPUT_DIR, "aavegotchi-raffles.json"),
   contractEOAs: path.join(OUTPUT_DIR, "aavegotchi-contractsWithEOA.json"),
   gnosisSafes: path.join(OUTPUT_DIR, "aavegotchi-safe.json"),
-  aavegotchiDiamond: path.join(OUTPUT_DIR, "aavegotchi-diamond.json"),
   wearables: path.join(OUTPUT_DIR, "aavegotchi998Data.json"),
 };
 
@@ -56,7 +55,7 @@ export const isSafe = async (contractAddress: string): Promise<boolean> => {
     const safe = await ethers.getContractAt("ISafe", contractAddress);
     console.log(contractAddress);
     const version = await safe.VERSION();
-    console.debug(`Safe version: ${version}`);
+    console.debug(`Found a safe`);
     return version === "1.3.0";
   } catch (error) {
     console.debug(`Not a Safe`);
@@ -71,12 +70,9 @@ interface Progress {
     regularHoldersCount: number;
     contractHoldersCount: number;
     excludedCount: number;
-    vaultCount: number;
     gbmCount: number;
-    rafflesCount: number;
     contractEOAsCount: number;
     gnosisSafeCount: number;
-    aavegotchiDiamondCount: number;
   };
 }
 
@@ -88,12 +84,9 @@ function initializeFiles() {
   const initialData = {
     regularHolders: {},
     contractHolders: {},
-    vault: [],
     gbmDiamond: [],
-    raffles: [],
     contractEOAs: [],
     gnosisSafes: [],
-    aavegotchiDiamond: [],
   };
 
   for (const [key, path] of Object.entries(FILES)) {
@@ -115,12 +108,9 @@ function loadExistingData() {
   const data = {
     regularHolders: {} as OwnershipMap,
     contractHolders: {} as OwnershipMap,
-    vaultHolders: [] as string[],
     gbmDiamondHolders: [] as string[],
-    rafflesHolders: [] as string[],
     contractEOAs: [] as ContractOwnership[],
     gnosisSafeContracts: [] as SafeDetails[],
-    aavegotchiDiamond: [] as string[],
   };
 
   // Load existing data from files
@@ -197,12 +187,9 @@ async function main() {
       regularHoldersCount: 0,
       contractHoldersCount: 0,
       excludedCount: 0,
-      vaultCount: 0,
       gbmCount: 0,
-      rafflesCount: 0,
       contractEOAsCount: 0,
       gnosisSafeCount: 0,
-      aavegotchiDiamondCount: 0,
     },
   };
 
@@ -220,12 +207,9 @@ async function main() {
   const existingData = loadExistingData();
   const regularHolders: OwnershipMap = existingData.regularHolders;
   const contractHolders: OwnershipMap = existingData.contractHolders;
-  const vaultHolders: string[] = existingData.vaultHolders;
   const gbmDiamondHolders: string[] = existingData.gbmDiamondHolders;
-  const rafflesHolders: string[] = existingData.rafflesHolders;
   const contractEOAs: ContractOwnership[] = existingData.contractEOAs;
   const gnosisSafeContracts: SafeDetails[] = existingData.gnosisSafeContracts;
-  const aavegotchiDiamond: string[] = existingData.aavegotchiDiamond;
   // Get unique owners
   const uniqueOwners = [
     ...new Set(
@@ -259,21 +243,133 @@ async function main() {
       if (excludedAddresses.includes(owner)) {
         progress.statistics.excludedCount++;
       } else if (owner === ADDRESSES.vault.toLowerCase()) {
-        vaultHolders.push(...ownerTokens);
-        progress.statistics.vaultCount = vaultHolders.length;
+        // Get true owners for all tokens in vault
+        console.log(`Processing ${ownerTokens.length} Vault Aavegotchis`);
+        const trueOwners = await getVaultOwner(ownerTokens, ethers);
+
+        // Group tokens by their true owners
+        const tokensByOwner = ownerTokens.reduce(
+          (acc: Record<string, string[]>, tokenId) => {
+            const trueOwner = trueOwners[tokenId];
+            if (!acc[trueOwner]) acc[trueOwner] = [];
+            acc[trueOwner].push(tokenId);
+            return acc;
+          },
+          {}
+        );
+
+        // Process each group of tokens
+        for (const [trueOwner, tokens] of Object.entries(tokensByOwner)) {
+          const trueOwnerLower = trueOwner.toLowerCase();
+
+          if (excludedAddresses.includes(trueOwnerLower)) {
+            progress.statistics.excludedCount++;
+          } else {
+            if (!regularHolders[trueOwnerLower]) {
+              regularHolders[trueOwnerLower] = [];
+            }
+            regularHolders[trueOwnerLower].push(...tokens);
+            progress.statistics.regularHoldersCount++;
+
+            // Update metadata with true owner
+            tokens.forEach((tokenId) => {
+              if (metadata[tokenId]) {
+                metadata[tokenId].owner = trueOwnerLower;
+              }
+            });
+          }
+        }
+        console.log(
+          `Successfully processed ${
+            Object.keys(tokensByOwner).length
+          } unique owners from the vault`
+        );
       } else if (owner === ADDRESSES.aavegotchiDiamond.toLowerCase()) {
-        aavegotchiDiamond.push(...ownerTokens);
-        progress.statistics.aavegotchiDiamondCount = aavegotchiDiamond.length;
-      } else if (owner === ADDRESSES.gbmDiamond.toLowerCase()) {
-        gbmDiamondHolders.push(...ownerTokens);
-        progress.statistics.gbmCount = gbmDiamondHolders.length;
-      } else if (owner === ADDRESSES.raffles.toLowerCase()) {
-        rafflesHolders.push(...ownerTokens);
-        progress.statistics.rafflesCount = rafflesHolders.length;
+        // Get true owners for all tokens held by Diamond
+        console.log(`Processing ${ownerTokens.length} Bridged Aavegotchis`);
+        const trueOwners = await getAavegotchiOwnerEth(ownerTokens);
+
+        // Log tokens missing from subgraph
+        const missingTokens = ownerTokens.filter((id) => !trueOwners[id]);
+        if (missingTokens.length > 0) {
+          console.log(
+            `Warning: ${missingTokens.length} tokens missing from eth subgraph have been allocated to the aavegotchi Diamond on target chain`
+          );
+          // make the owner of the tokens to be the aavegotchi diamond on base
+          missingTokens.forEach((tokenId) => {
+            metadata[tokenId].owner = AAVEGOTCHI_DIAMOND_BASE.toLowerCase();
+          });
+
+          //allocate the tokens to the aavegotchi diamond on base
+          if (!regularHolders[AAVEGOTCHI_DIAMOND_BASE.toLowerCase()]) {
+            regularHolders[AAVEGOTCHI_DIAMOND_BASE.toLowerCase()] = [];
+          }
+          regularHolders[AAVEGOTCHI_DIAMOND_BASE.toLowerCase()].push(
+            ...missingTokens
+          );
+        }
+
+        // Group tokens by their true owners
+        const tokensByOwner = ownerTokens.reduce(
+          (acc: Record<string, string[]>, tokenId) => {
+            const trueOwner = trueOwners[tokenId];
+            if (!acc[trueOwner]) acc[trueOwner] = [];
+
+            acc[trueOwner].push(tokenId);
+
+            return acc;
+          },
+          {}
+        );
+
+        // Process each group of tokens - all owners are EOAs
+        for (const [trueOwner, tokens] of Object.entries(tokensByOwner)) {
+          const trueOwnerLower = trueOwner.toLowerCase();
+
+          if (excludedAddresses.includes(trueOwnerLower)) {
+            progress.statistics.excludedCount++;
+          } else {
+            if (!regularHolders[trueOwnerLower]) {
+              regularHolders[trueOwnerLower] = [];
+            }
+            regularHolders[trueOwnerLower].push(...tokens);
+            progress.statistics.regularHoldersCount++;
+
+            // Update metadata with true owner
+            tokens.forEach((tokenId) => {
+              if (metadata[tokenId]) {
+                metadata[tokenId].owner = trueOwnerLower;
+              }
+            });
+          }
+        }
+        console.log(
+          `Successfully processed ${
+            Object.keys(tokensByOwner).length
+          } unique owners from the eth subgraph`
+        );
+      } else if (
+        owner === ADDRESSES.raffles.toLowerCase() ||
+        owner === ADDRESSES.raffles2.toLowerCase()
+      ) {
+        // Add to regularHolders under the PC wallet
+        if (!regularHolders[ADDRESSES.raffleOwner.toLowerCase()]) {
+          regularHolders[ADDRESSES.raffleOwner.toLowerCase()] = [];
+        }
+        regularHolders[ADDRESSES.raffleOwner.toLowerCase()].push(
+          ...ownerTokens
+        );
+        progress.statistics.regularHoldersCount++;
+
+        // Update metadata owner for these tokens
+        ownerTokens.forEach((tokenId) => {
+          if (metadata[tokenId]) {
+            metadata[tokenId].owner = ADDRESSES.raffleOwner.toLowerCase();
+          }
+        });
       } else {
         const code = await ethers.provider.getCode(owner);
         if (code !== "0x") {
-          // progress.statistics.contractHoldersCount++;
           const contractOwner = await getOwner(owner);
           if (contractOwner) {
             const existingContract = contractEOAs.find(
@@ -330,13 +426,10 @@ async function main() {
         await saveProgress(progress, {
           regularHolders,
           contractHolders,
-          vaultHolders,
           gbmDiamondHolders,
-          rafflesHolders,
           contractEOAs,
           gnosisSafeContracts,
           wearables: wearablesMap,
-          aavegotchiDiamond,
         });
         batchCount = 0;
         progress.lastSaveTimestamp = Date.now();
@@ -356,17 +449,17 @@ async function main() {
     }
   }
 
+  // Save the updated metadata
+  fs.writeFileSync(METADATA_FILE, JSON.stringify(metadata, null, 2));
+
   // Final save
   await saveProgress(progress, {
     regularHolders,
     contractHolders,
-    vaultHolders,
     gbmDiamondHolders,
-    rafflesHolders,
     contractEOAs,
     gnosisSafeContracts,
     wearables: wearablesMap,
-    aavegotchiDiamond,
   });
 
   console.log("\n=== Final Statistics ===");
@@ -378,13 +471,10 @@ async function saveProgress(
   data: {
     regularHolders: OwnershipMap;
     contractHolders: OwnershipMap;
-    vaultHolders: string[];
     gbmDiamondHolders: string[];
-    rafflesHolders: string[];
     contractEOAs: ContractOwnership[];
     gnosisSafeContracts: SafeDetails[];
     wearables: AavegotchiWearables;
-    aavegotchiDiamond: string[];
   }
 ) {
   // Save progress
@@ -394,13 +484,10 @@ async function saveProgress(
   const dataToSave = [
     { path: FILES.regularHolders, data: data.regularHolders },
     { path: FILES.contractHolders, data: data.contractHolders },
-    { path: FILES.vault, data: data.vaultHolders },
     { path: FILES.gbmDiamond, data: data.gbmDiamondHolders },
-    { path: FILES.raffles, data: data.rafflesHolders },
     { path: FILES.contractEOAs, data: data.contractEOAs },
     { path: FILES.gnosisSafes, data: data.gnosisSafeContracts },
     { path: FILES.wearables, data: data.wearables },
-    { path: FILES.aavegotchiDiamond, data: data.aavegotchiDiamond },
   ];
 
   for (const { path, data: fileData } of dataToSave) {
@@ -412,12 +499,9 @@ function printStatistics(stats: Progress["statistics"]) {
   console.log(`Regular holders: ${stats.regularHoldersCount}`);
   console.log(`Contract holders: ${stats.contractHoldersCount}`);
   console.log(`Excluded addresses: ${stats.excludedCount}`);
-  console.log(`Vault holds: ${stats.vaultCount}`);
   console.log(`GBM Diamond holds: ${stats.gbmCount}`);
-  console.log(`Raffles Contract holds: ${stats.rafflesCount}`);
   console.log(`Contract EOAs: ${stats.contractEOAsCount}`);
   console.log(`Gnosis Safe contracts: ${stats.gnosisSafeCount}`);
-  console.log(`Aavegotchi Diamond holds: ${stats.aavegotchiDiamondCount}`);
 }
 
 if (require.main === module) {
