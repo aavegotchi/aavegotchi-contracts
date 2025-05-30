@@ -61,6 +61,7 @@ struct AavegotchiBridged {
     address escrow;
     uint256[] items;
     uint256 respecCount;
+    uint256 baseRandomNumber;
 }
 
 struct PortalAavegotchiTraitsIO {
@@ -176,8 +177,8 @@ library LibAavegotchi {
         aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
         aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
+        aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         if (aavegotchiInfo_.status == STATUS_AAVEGOTCHI) {
-            aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
             aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
             aavegotchiInfo_.equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
             aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
@@ -195,8 +196,6 @@ library LibAavegotchi {
             (aavegotchiInfo_.modifiedNumericTraits, aavegotchiInfo_.modifiedRarityScore) = modifiedTraitsAndRarityScore(_tokenId);
             aavegotchiInfo_.locked = s.aavegotchis[_tokenId].locked;
             aavegotchiInfo_.items = LibItems.itemBalancesOfTokenWithTypes(address(this), _tokenId);
-        } else {
-            aavegotchiInfo_.randomNumber = s.tokenIdToRandomNumber[_tokenId];
         }
     }
 
@@ -207,7 +206,7 @@ library LibAavegotchi {
         aavegotchiInfo_.temporaryTraitBoosts = aavegotchi.temporaryTraitBoosts;
         aavegotchiInfo_.numericTraits = aavegotchi.numericTraits;
         aavegotchiInfo_.name = aavegotchi.name;
-        aavegotchiInfo_.randomNumber = s.tokenIdToRandomNumber[_tokenId];
+        aavegotchiInfo_.randomNumber = aavegotchi.randomNumber;
         aavegotchiInfo_.experience = aavegotchi.experience;
         aavegotchiInfo_.minimumStake = aavegotchi.minimumStake;
         aavegotchiInfo_.usedSkillPoints = aavegotchi.usedSkillPoints;
@@ -223,6 +222,7 @@ library LibAavegotchi {
         aavegotchiInfo_.escrow = aavegotchi.escrow;
         aavegotchiInfo_.items = s.nftItems[address(this)][_tokenId];
         aavegotchiInfo_.respecCount = s.gotchiRespecCount[uint32(_tokenId)];
+        aavegotchiInfo_.baseRandomNumber = s.tokenIdToRandomNumber[_tokenId];
     }
     //Only valid for claimed Aavegotchis
     function modifiedTraitsAndRarityScore(
