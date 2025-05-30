@@ -174,7 +174,7 @@ library LibAavegotchi {
         AppStorage storage s = LibAppStorage.diamondStorage();
         aavegotchiInfo_.tokenId = _tokenId;
         aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
-        aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
+        aavegotchiInfo_.randomNumber = s.tokenIdToRandomNumber[_tokenId];
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
         aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
         if (aavegotchiInfo_.status == STATUS_AAVEGOTCHI) {
@@ -205,7 +205,7 @@ library LibAavegotchi {
         aavegotchiInfo_.temporaryTraitBoosts = aavegotchi.temporaryTraitBoosts;
         aavegotchiInfo_.numericTraits = aavegotchi.numericTraits;
         aavegotchiInfo_.name = aavegotchi.name;
-        aavegotchiInfo_.randomNumber = aavegotchi.randomNumber;
+        aavegotchiInfo_.randomNumber = s.tokenIdToRandomNumber[_tokenId];
         aavegotchiInfo_.experience = aavegotchi.experience;
         aavegotchiInfo_.minimumStake = aavegotchi.minimumStake;
         aavegotchiInfo_.usedSkillPoints = aavegotchi.usedSkillPoints;
