@@ -174,10 +174,10 @@ library LibAavegotchi {
         AppStorage storage s = LibAppStorage.diamondStorage();
         aavegotchiInfo_.tokenId = _tokenId;
         aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
-        aavegotchiInfo_.randomNumber = s.tokenIdToRandomNumber[_tokenId];
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
         aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
         if (aavegotchiInfo_.status == STATUS_AAVEGOTCHI) {
+            aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
             aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
             aavegotchiInfo_.equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
             aavegotchiInfo_.collateral = s.aavegotchis[_tokenId].collateralType;
@@ -195,6 +195,8 @@ library LibAavegotchi {
             (aavegotchiInfo_.modifiedNumericTraits, aavegotchiInfo_.modifiedRarityScore) = modifiedTraitsAndRarityScore(_tokenId);
             aavegotchiInfo_.locked = s.aavegotchis[_tokenId].locked;
             aavegotchiInfo_.items = LibItems.itemBalancesOfTokenWithTypes(address(this), _tokenId);
+        } else {
+            aavegotchiInfo_.randomNumber = s.tokenIdToRandomNumber[_tokenId];
         }
     }
 
