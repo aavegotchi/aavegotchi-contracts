@@ -175,9 +175,9 @@ library LibAavegotchi {
         AppStorage storage s = LibAppStorage.diamondStorage();
         aavegotchiInfo_.tokenId = _tokenId;
         aavegotchiInfo_.owner = s.aavegotchis[_tokenId].owner;
+        aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         aavegotchiInfo_.status = s.aavegotchis[_tokenId].status;
         aavegotchiInfo_.hauntId = s.aavegotchis[_tokenId].hauntId;
-        aavegotchiInfo_.randomNumber = s.aavegotchis[_tokenId].randomNumber;
         if (aavegotchiInfo_.status == STATUS_AAVEGOTCHI) {
             aavegotchiInfo_.name = s.aavegotchis[_tokenId].name;
             aavegotchiInfo_.equippedWearables = s.aavegotchis[_tokenId].equippedWearables;
