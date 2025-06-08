@@ -4,6 +4,7 @@ import path from "path";
 import { AavegotchiFacet } from "../../typechain";
 import dotenv from "dotenv";
 import { BigNumber } from "ethers";
+import { AAVEGOTCHI_METADATA_DIR } from "./constants";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ export interface AavegotchiInfo {
   locked: boolean;
   items: number[]; // Array of item IDs owned by this Aavegotchi
   respecCount: BigNumber;
+  baseRandomNumber: BigNumber;
 }
 
 interface AavegotchiMetadataMap {
@@ -42,8 +44,8 @@ interface Progress {
 const BATCH_SIZE = 20; // Number of Aavegotchis to fetch per batch
 const MAX_RETRIES = 3;
 const TOTAL_AAVEGOTCHIS = 25000;
-const OUTPUT_DIR = `${__dirname}/metadata`;
-const PROGRESS_FILE = `${OUTPUT_DIR}/fetch_progress.json`;
+
+const PROGRESS_FILE = `${AAVEGOTCHI_METADATA_DIR}/fetch_progress.json`;
 
 function chunk<T>(array: T[], size: number): T[][] {
   const chunks: T[][] = [];
@@ -53,7 +55,10 @@ function chunk<T>(array: T[], size: number): T[][] {
   return chunks;
 }
 
-const OUTPUT_FILE = path.join(OUTPUT_DIR, "aavegotchiMetadata.json");
+const OUTPUT_FILE = path.join(
+  AAVEGOTCHI_METADATA_DIR,
+  "aavegotchiMetadata.json"
+);
 
 async function main() {
   const aavegotchiDiamondAddress = "0x86935F11C86623deC8a25696E1C19a8659CbF95d";
@@ -63,8 +68,8 @@ async function main() {
   )) as AavegotchiFacet;
 
   // Create output directory if it doesn't exist
-  if (!fs.existsSync(OUTPUT_DIR)) {
-    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  if (!fs.existsSync(AAVEGOTCHI_METADATA_DIR)) {
+    fs.mkdirSync(AAVEGOTCHI_METADATA_DIR, { recursive: true });
   }
 
   // Initialize or load existing metadata file
@@ -129,6 +134,7 @@ async function main() {
             locked: gotchi.locked,
             items: toNumbers(gotchi.items),
             respecCount: gotchi.respecCount,
+            baseRandomNumber: gotchi.baseRandomNumber,
           };
           allAavegotchis[tokenId.toString()] = metadata;
         });

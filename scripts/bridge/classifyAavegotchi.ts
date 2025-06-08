@@ -7,13 +7,13 @@ import {
   ADDRESSES,
   excludedAddresses,
   BASE_OUTPUT_DIR,
-  METADATA_DIR,
+  AAVEGOTCHI_METADATA_DIR,
   ContractOwnership,
   SafeDetails,
   EquippedItem,
   getAavegotchiOwnerEth,
   getVaultOwner,
-  AAVEGOTCHI_DIAMOND_BASE,
+  // AAVEGOTCHI_DIAMOND_BASE,
 } from "./constants";
 
 interface OwnershipMap {
@@ -38,6 +38,7 @@ const FILES = {
   contractEOAs: path.join(OUTPUT_DIR, "aavegotchi-contractsWithEOA.json"),
   gnosisSafes: path.join(OUTPUT_DIR, "aavegotchi-safe.json"),
   wearables: path.join(OUTPUT_DIR, "aavegotchi998Data.json"),
+  aavegotchiDiamond: path.join(OUTPUT_DIR, "aavegotchi-aavegotchiDiamond.json"),
 };
 
 export const getOwner = async (contractAddress: string): Promise<string> => {
@@ -73,6 +74,7 @@ interface Progress {
     gbmCount: number;
     contractEOAsCount: number;
     gnosisSafeCount: number;
+    aavegotchiDiamondCount: number;
   };
 }
 
@@ -87,6 +89,7 @@ function initializeFiles() {
     gbmDiamond: [],
     contractEOAs: [],
     gnosisSafes: [],
+    aavegotchiDiamond: [],
   };
 
   for (const [key, path] of Object.entries(FILES)) {
@@ -111,6 +114,7 @@ function loadExistingData() {
     gbmDiamondHolders: [] as string[],
     contractEOAs: [] as ContractOwnership[],
     gnosisSafeContracts: [] as SafeDetails[],
+    aavegotchiDiamond: [] as string[],
   };
 
   // Load existing data from files
@@ -159,12 +163,15 @@ function processWearables(
 }
 
 // Add constant for metadata file path
-const METADATA_FILE = path.join(METADATA_DIR, "aavegotchiMetadata.json");
+const METADATA_FILE = path.join(
+  AAVEGOTCHI_METADATA_DIR,
+  "aavegotchiMetadata.json"
+);
 
 async function main() {
-  if (!fs.existsSync(METADATA_DIR)) {
+  if (!fs.existsSync(AAVEGOTCHI_METADATA_DIR)) {
     console.error("\nError: Aavegotchi metadata file not found!");
-    console.error(`Expected location: ${METADATA_DIR}`);
+    console.error(`Expected location: ${AAVEGOTCHI_METADATA_DIR}`);
     console.error("\nTo generate the metadata file, run:");
     console.error(
       "npx hardhat run scripts/bridge/getAavegotchiMetadata.ts --network {network}"
@@ -190,6 +197,7 @@ async function main() {
       gbmCount: 0,
       contractEOAsCount: 0,
       gnosisSafeCount: 0,
+      aavegotchiDiamondCount: 0,
     },
   };
 
@@ -210,6 +218,7 @@ async function main() {
   const gbmDiamondHolders: string[] = existingData.gbmDiamondHolders;
   const contractEOAs: ContractOwnership[] = existingData.contractEOAs;
   const gnosisSafeContracts: SafeDetails[] = existingData.gnosisSafeContracts;
+  const aavegotchiDiamond: string[] = existingData.aavegotchiDiamond;
   // Get unique owners
   const uniqueOwners = [
     ...new Set(
@@ -233,7 +242,7 @@ async function main() {
 
     try {
       // Get all tokens for this owner
-      const ownerTokens = Object.entries(
+      let ownerTokens = Object.entries(
         metadata as Record<string, AavegotchiInfo>
       )
         .filter(([_, data]) => data.owner.toLowerCase() === owner)
@@ -295,19 +304,18 @@ async function main() {
           console.log(
             `Warning: ${missingTokens.length} tokens missing from eth subgraph have been allocated to the aavegotchi Diamond on target chain`
           );
-          // make the owner of the tokens to be the aavegotchi diamond on base
-          missingTokens.forEach((tokenId) => {
-            metadata[tokenId].owner = AAVEGOTCHI_DIAMOND_BASE.toLowerCase();
-          });
 
-          //allocate the tokens to the aavegotchi diamond on base
-          if (!regularHolders[AAVEGOTCHI_DIAMOND_BASE.toLowerCase()]) {
-            regularHolders[AAVEGOTCHI_DIAMOND_BASE.toLowerCase()] = [];
-          }
-          regularHolders[AAVEGOTCHI_DIAMOND_BASE.toLowerCase()].push(
-            ...missingTokens
-          );
+          //allocate the tokens to the aavegotchi diamond , do not update the metadata
+          aavegotchiDiamond.push(...missingTokens.map(String)); // Ensure they are strings
+
+          // Update progress statistics based on the length of the actual array
+          progress.statistics.aavegotchiDiamondCount = aavegotchiDiamond.length;
         }
+
+        //remove the tokens that have been allocated to the aavegotchi diamond from the ownerTokens
+        ownerTokens = ownerTokens.filter(
+          (tokenId) => !aavegotchiDiamond.includes(String(tokenId))
+        );
 
         // Group tokens by their true owners
         const tokensByOwner = ownerTokens.reduce(
@@ -430,6 +438,7 @@ async function main() {
           contractEOAs,
           gnosisSafeContracts,
           wearables: wearablesMap,
+          aavegotchiDiamond,
         });
         batchCount = 0;
         progress.lastSaveTimestamp = Date.now();
@@ -460,6 +469,7 @@ async function main() {
     contractEOAs,
     gnosisSafeContracts,
     wearables: wearablesMap,
+    aavegotchiDiamond,
   });
 
   console.log("\n=== Final Statistics ===");
@@ -475,6 +485,7 @@ async function saveProgress(
     contractEOAs: ContractOwnership[];
     gnosisSafeContracts: SafeDetails[];
     wearables: AavegotchiWearables;
+    aavegotchiDiamond: string[];
   }
 ) {
   // Save progress
@@ -488,6 +499,7 @@ async function saveProgress(
     { path: FILES.contractEOAs, data: data.contractEOAs },
     { path: FILES.gnosisSafes, data: data.gnosisSafeContracts },
     { path: FILES.wearables, data: data.wearables },
+    { path: FILES.aavegotchiDiamond, data: data.aavegotchiDiamond },
   ];
 
   for (const { path, data: fileData } of dataToSave) {
@@ -502,6 +514,7 @@ function printStatistics(stats: Progress["statistics"]) {
   console.log(`GBM Diamond holds: ${stats.gbmCount}`);
   console.log(`Contract EOAs: ${stats.contractEOAsCount}`);
   console.log(`Gnosis Safe contracts: ${stats.gnosisSafeCount}`);
+  console.log(`Aavegotchi Diamond: ${stats.aavegotchiDiamondCount}`);
 }
 
 if (require.main === module) {

@@ -7,6 +7,7 @@ import {
   SafeDetails,
   TokenBalance,
   ContractOwnership,
+  FORGE_OUTPUT_DIR,
 } from "./constants";
 import path from "path";
 import dotenv from "dotenv";
@@ -14,25 +15,27 @@ import { ethers } from "hardhat";
 import { getOwner, isSafe } from "./classifyAavegotchi";
 dotenv.config();
 
-export const OUTPUT_DIR = path.join(BASE_OUTPUT_DIR, "forgeWearables");
 const config = {
   apiKey: process.env.ALCHEMY_KEY,
   network: Network.MATIC_MAINNET,
 };
 
 const FILES = {
-  regularHolders: path.join(OUTPUT_DIR, "forgeWearables-regular.json"),
+  regularHolders: path.join(FORGE_OUTPUT_DIR, "forgeWearables-regular.json"),
   contractHolders: path.join(
-    OUTPUT_DIR,
+    FORGE_OUTPUT_DIR,
     "forgeWearables-contractsWithoutEOAs.json"
   ),
-  vault: path.join(OUTPUT_DIR, "forgeWearables-vault.json"),
-  gbmDiamond: path.join(OUTPUT_DIR, "forgeWearables-gbmDiamond.json"),
-  raffles: path.join(OUTPUT_DIR, "forgeWearables-raffles.json"),
-  contractEOAs: path.join(OUTPUT_DIR, "forgeWearables-contractsWithEOA.json"),
-  gnosisSafes: path.join(OUTPUT_DIR, "forgeWearables-safe.json"),
-  aavegotchiDiamond: path.join(OUTPUT_DIR, "forgeWearables-diamond.json"),
-  forgeDiamond: path.join(OUTPUT_DIR, "forgeWearables-forgeDiamond.json"),
+  vault: path.join(FORGE_OUTPUT_DIR, "forgeWearables-vault.json"),
+  gbmDiamond: path.join(FORGE_OUTPUT_DIR, "forgeWearables-gbmDiamond.json"),
+  raffles: path.join(FORGE_OUTPUT_DIR, "forgeWearables-raffles.json"),
+  contractEOAs: path.join(
+    FORGE_OUTPUT_DIR,
+    "forgeWearables-contractsWithEOA.json"
+  ),
+  gnosisSafes: path.join(FORGE_OUTPUT_DIR, "forgeWearables-safe.json"),
+  aavegotchiDiamond: path.join(FORGE_OUTPUT_DIR, "forgeWearables-diamond.json"),
+  forgeDiamond: path.join(FORGE_OUTPUT_DIR, "forgeWearables-forgeDiamond.json"),
 };
 
 interface NFTOwner {
@@ -92,13 +95,16 @@ const KEY_TO_DATA_MAP = {
   forgeDiamond: "forgeDiamond",
 } as const;
 
-const PROGRESS_FILE = path.join(OUTPUT_DIR, "classification_progress.json");
-const ANALYTICS_FILE = path.join(OUTPUT_DIR, "analytics.json");
+const PROGRESS_FILE = path.join(
+  FORGE_OUTPUT_DIR,
+  "classification_progress.json"
+);
+const ANALYTICS_FILE = path.join(FORGE_OUTPUT_DIR, "analytics.json");
 const SAVE_INTERVAL = 1 * 60 * 1000; // Save every 1 minute
 
 function initializeFiles() {
-  if (!fs.existsSync(OUTPUT_DIR)) {
-    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  if (!fs.existsSync(FORGE_OUTPUT_DIR)) {
+    fs.mkdirSync(FORGE_OUTPUT_DIR, { recursive: true });
   }
 
   const initialData = {

@@ -61,6 +61,7 @@ struct AavegotchiBridged {
     address escrow;
     uint256[] items;
     uint256 respecCount;
+    uint256 baseRandomNumber;
 }
 
 struct PortalAavegotchiTraitsIO {
@@ -221,6 +222,7 @@ library LibAavegotchi {
         aavegotchiInfo_.escrow = aavegotchi.escrow;
         aavegotchiInfo_.items = s.nftItems[address(this)][_tokenId];
         aavegotchiInfo_.respecCount = s.gotchiRespecCount[uint32(_tokenId)];
+        aavegotchiInfo_.baseRandomNumber = s.tokenIdToRandomNumber[_tokenId];
     }
     //Only valid for claimed Aavegotchis
     function modifiedTraitsAndRarityScore(

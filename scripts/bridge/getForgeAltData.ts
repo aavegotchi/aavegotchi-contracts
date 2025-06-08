@@ -1,7 +1,6 @@
 import { BigNumber } from "ethers";
-import { OUTPUT_DIR } from "./getForgeData";
 import { ethers } from "hardhat";
-import { ADDRESSES } from "./constants";
+import { ADDRESSES, FORGE_OUTPUT_DIR } from "./constants";
 
 import fs from "fs";
 import path from "path";
@@ -69,7 +68,7 @@ async function getForgeAltData() {
   //we have 25k gotchis max, most of them don't have smithing skill points
   //fetch for 1000 at a time
   const batchSize = 1000;
-  const totalGotchiIds = 1000;
+  const totalGotchiIds = 25000;
   const allGotchiSmithingSkillPoints: {
     gotchiId: BigNumber[];
     skillPoints: BigNumber[];
@@ -143,7 +142,7 @@ async function getForgeAltData() {
 
   //write to file
   fs.writeFileSync(
-    path.join(OUTPUT_DIR, "forgeAltData.json"),
+    path.join(FORGE_OUTPUT_DIR, "forgeAltData.json"),
     JSON.stringify(data, null, 2)
   );
 }

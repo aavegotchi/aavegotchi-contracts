@@ -32,10 +32,6 @@ export interface EquippedItem {
   amount: string;
 }
 
-//NOTE:aavegotchiDiamond address on base/base sepolia
-export const AAVEGOTCHI_DIAMOND_BASE =
-  "0x86e527A5863975d0141514D20248aD17B6BF92D0";
-
 // Special addresses
 export const ADDRESSES = {
   vault: "0xdd564df884fd4e217c9ee6f65b4ba6e5641eac63",
@@ -55,11 +51,25 @@ export const excludedAddresses = [
 ].map((a) => a.toLowerCase());
 
 // Base directories
-export const BASE_OUTPUT_DIR = path.join(__dirname, "data");
-export const METADATA_DIR = path.join(__dirname, "metadata");
+export const BASE_OUTPUT_DIR = path.join(__dirname, "cloneData");
+
+export const AAVEGOTCHI_DIR = path.join(`${BASE_OUTPUT_DIR}`, "aavegotchi");
+export const AAVEGOTCHI_METADATA_DIR = path.join(
+  `${AAVEGOTCHI_DIR}`,
+  "metadata"
+);
+
+export const AAVEGOTCHI_WEARABLES_DIR = path.join(
+  `${BASE_OUTPUT_DIR}`,
+  "wearables"
+);
+
+export const FORGE_OUTPUT_DIR = path.join(
+  `${BASE_OUTPUT_DIR}`,
+  "forgeWearables"
+);
 
 export async function getAavegotchiOwnerEth(aavegotchiIds: string[]) {
-  let noOwnerCount = 0;
   const query = gql`
     {
       aavegotchis(where: {id_in: ${JSON.stringify(aavegotchiIds)}}) {

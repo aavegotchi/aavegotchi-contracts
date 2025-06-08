@@ -11,6 +11,7 @@ import {
   TokenBalance,
   ContractOwnership,
   SafeDetails,
+  AAVEGOTCHI_WEARABLES_DIR,
 } from "./constants";
 
 dotenv.config();
@@ -48,25 +49,42 @@ interface RawHolderData {
   [tokenId: string]: WearableOwner[];
 }
 
-const OUTPUT_DIR = path.join(BASE_OUTPUT_DIR, "wearables");
 const FILES = {
-  regularHolders: path.join(OUTPUT_DIR, "wearables-regular.json"),
-  contractHolders: path.join(OUTPUT_DIR, "wearables-contractsWithoutEOAs.json"),
-  vault: path.join(OUTPUT_DIR, "wearables-vault.json"),
-  gbmDiamond: path.join(OUTPUT_DIR, "wearables-gbmDiamond.json"),
-  raffles: path.join(OUTPUT_DIR, "wearables-raffles.json"),
-  contractEOAs: path.join(OUTPUT_DIR, "wearables-contractsWithEOA.json"),
-  gnosisSafes: path.join(OUTPUT_DIR, "wearables-safe.json"),
-  aavegotchiDiamond: path.join(OUTPUT_DIR, "wearables-diamond.json"),
-  forgeDiamond: path.join(OUTPUT_DIR, "wearables-forgeDiamond.json"),
+  regularHolders: path.join(AAVEGOTCHI_WEARABLES_DIR, "wearables-regular.json"),
+  contractHolders: path.join(
+    AAVEGOTCHI_WEARABLES_DIR,
+    "wearables-contractsWithoutEOAs.json"
+  ),
+  vault: path.join(AAVEGOTCHI_WEARABLES_DIR, "wearables-vault.json"),
+  gbmDiamond: path.join(AAVEGOTCHI_WEARABLES_DIR, "wearables-gbmDiamond.json"),
+  raffles: path.join(AAVEGOTCHI_WEARABLES_DIR, "wearables-raffles.json"),
+  contractEOAs: path.join(
+    AAVEGOTCHI_WEARABLES_DIR,
+    "wearables-contractsWithEOA.json"
+  ),
+  gnosisSafes: path.join(AAVEGOTCHI_WEARABLES_DIR, "wearables-safe.json"),
+  aavegotchiDiamond: path.join(
+    AAVEGOTCHI_WEARABLES_DIR,
+    "wearables-diamond.json"
+  ),
+  forgeDiamond: path.join(
+    AAVEGOTCHI_WEARABLES_DIR,
+    "wearables-forgeDiamond.json"
+  ),
 };
 
 // Add these constants
-const PROGRESS_FILE = path.join(OUTPUT_DIR, "fetch_progress.json");
-const STATS_FILE = path.join(OUTPUT_DIR, "token_statistics.json");
+const PROGRESS_FILE = path.join(
+  AAVEGOTCHI_WEARABLES_DIR,
+  "fetch_progress.json"
+);
+const STATS_FILE = path.join(AAVEGOTCHI_WEARABLES_DIR, "token_statistics.json");
 
 // Add new file path
-const RAW_DATA_FILE = path.join(OUTPUT_DIR, "raw_holder_data.json");
+const RAW_DATA_FILE = path.join(
+  AAVEGOTCHI_WEARABLES_DIR,
+  "raw_holder_data.json"
+);
 
 // Add mapping between file keys and data keys
 const DATA_TO_FILE_MAP = {
@@ -126,8 +144,8 @@ function initializeFiles() {
     forgeDiamond: [],
   };
 
-  if (!fs.existsSync(OUTPUT_DIR)) {
-    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  if (!fs.existsSync(AAVEGOTCHI_WEARABLES_DIR)) {
+    fs.mkdirSync(AAVEGOTCHI_WEARABLES_DIR, { recursive: true });
   }
 
   for (const [key, filePath] of Object.entries(FILES)) {
@@ -221,15 +239,15 @@ function getCumulativeStats(
 // New function to fetch all holder data
 async function fetchAllHolderData() {
   const first = 5000;
-  const allWearableIds = Array.from({ length: 10 }, (_, i) =>
+  const allWearableIds = Array.from({ length: 417 }, (_, i) =>
     (i + 1).toString()
   );
   const uri = process.env.SUBGRAPH_CORE_MATIC;
   const client = new GraphQLClient(uri);
 
   // Create directory if it doesn't exist
-  if (!fs.existsSync(OUTPUT_DIR)) {
-    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  if (!fs.existsSync(AAVEGOTCHI_WEARABLES_DIR)) {
+    fs.mkdirSync(AAVEGOTCHI_WEARABLES_DIR, { recursive: true });
   }
 
   // Initialize or load raw data
@@ -409,10 +427,15 @@ async function classifyHolders(rawData: RawHolderData) {
 
     updateTokenStats(stats, wearableId, data);
     // Save data files
-    for (const [fileKey, filePath] of Object.entries(FILES)) {
-      const dataKey =
-        DATA_TO_FILE_MAP[fileKey as keyof typeof DATA_TO_FILE_MAP];
-      fs.writeFileSync(filePath, JSON.stringify(data[dataKey], null, 2));
+    for (const fileMapKey of Object.keys(DATA_TO_FILE_MAP) as Array<
+      keyof typeof DATA_TO_FILE_MAP
+    >) {
+      const dataPropertyKey = DATA_TO_FILE_MAP[fileMapKey];
+      const filePath = FILES[fileMapKey];
+      fs.writeFileSync(
+        filePath,
+        JSON.stringify(data[dataPropertyKey], null, 2)
+      );
     }
   }
 
