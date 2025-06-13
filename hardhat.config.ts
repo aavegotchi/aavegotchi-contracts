@@ -49,6 +49,14 @@ export default {
         timeout: 12000000,
         // blockNumber: 67964593,
       },
+      chainId: 137,
+      chains: {
+        137: {
+          hardforkHistory: {
+            london: 2000000,
+          },
+        },
+      },
       blockGasLimit: 20000000,
       timeout: 120000,
       gas: "auto",

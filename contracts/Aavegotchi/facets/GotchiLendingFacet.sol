@@ -118,6 +118,22 @@ contract GotchiLendingFacet is Modifiers {
         LibGotchiLending.endGotchiLending(lending);
     }
 
+    //forcefully ends an already active lending listing
+    function batchForceEndGotchiLending(uint32[] calldata _listingIds) external onlyDaoOrOwner {
+        for (uint256 i = 0; i < _listingIds.length; ) {
+            GotchiLending storage lending = s.gotchiLendings[_listingIds[i]];
+            uint256 listingId = _listingIds[i];
+            require(lending.completed == false, "GotchiLending: Listing already completed");
+            require(lending.canceled == false, "GotchiLending: Listing already cancelled");
+
+            LibGotchiLending.claimGotchiLending(uint32(listingId));
+            LibGotchiLending.endGotchiLending(lending);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     ///@notice Allows a lender or lending operator to extend a current listing
     function extendGotchiLending(uint32 _tokenId, uint32 extension) public diamondNotPaused {
         GotchiLending storage lending = s.gotchiLendings[LibGotchiLending.tokenIdToListingId(_tokenId)];
