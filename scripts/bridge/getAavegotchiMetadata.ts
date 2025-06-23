@@ -4,7 +4,7 @@ import path from "path";
 import { AavegotchiFacet } from "../../typechain";
 import dotenv from "dotenv";
 import { BigNumber } from "ethers";
-import { AAVEGOTCHI_METADATA_DIR } from "./constants";
+import { AAVEGOTCHI_METADATA_DIR, writeBlockNumber } from "./constants";
 
 dotenv.config();
 
@@ -66,6 +66,9 @@ async function main() {
     "contracts/Aavegotchi/facets/AavegotchiFacet.sol:AavegotchiFacet",
     aavegotchiDiamondAddress
   )) as AavegotchiFacet;
+
+  //write block number
+  writeBlockNumber("aavegotchis", ethers);
 
   // Create output directory if it doesn't exist
   if (!fs.existsSync(AAVEGOTCHI_METADATA_DIR)) {
@@ -131,7 +134,7 @@ async function main() {
             lastTemporaryBoost: gotchi.lastTemporaryBoost,
             hauntId: gotchi.hauntId,
             lastInteracted: gotchi.lastInteracted,
-            locked: gotchi.locked,
+            locked: false,
             items: toNumbers(gotchi.items),
             respecCount: gotchi.respecCount,
             baseRandomNumber: gotchi.baseRandomNumber,

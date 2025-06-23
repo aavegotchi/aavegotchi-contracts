@@ -41,9 +41,10 @@ async function fetchUnfinishedLendings() {
         gotchiLendings(
           first: ${first}
           skip: ${skip}
-          where: { completed: false, cancelled: false }
+          where: { completed: false, cancelled: false borrower_not:null}
         ) {
           id
+            gotchiTokenId
         }
       }
     `;
@@ -96,7 +97,9 @@ function saveProgress(progress: Progress) {
 async function main() {
   // Step 1: Fetch and save all lending IDs
   const lendingIds = await fetchUnfinishedLendings();
-  console.log(`\nTotal unfinished lendings found: ${lendingIds.length}`);
+  console.log(
+    `\nTotal unfinished/ongoing lendings found: ${lendingIds.length}`
+  );
 
   if (!fs.existsSync(LENDINGS_OUTPUT_DIR)) {
     fs.mkdirSync(LENDINGS_OUTPUT_DIR, { recursive: true });

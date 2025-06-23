@@ -8,6 +8,7 @@ import {
   TokenBalance,
   ContractOwnership,
   FORGE_OUTPUT_DIR,
+  writeBlockNumber,
 } from "./constants";
 import path from "path";
 import dotenv from "dotenv";
@@ -346,6 +347,9 @@ async function classifyAndSaveData(nftOwners: NFTOwner[]) {
 }
 
 async function main() {
+  //write block number
+  writeBlockNumber("forgeItems", ethers);
+
   try {
     initializeFiles();
     const allNfts = await getForgeData();

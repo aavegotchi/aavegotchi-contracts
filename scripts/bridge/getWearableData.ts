@@ -12,6 +12,7 @@ import {
   ContractOwnership,
   SafeDetails,
   AAVEGOTCHI_WEARABLES_DIR,
+  writeBlockNumber,
 } from "./constants";
 
 dotenv.config();
@@ -445,6 +446,8 @@ async function classifyHolders(rawData: RawHolderData) {
 // Modified main function
 async function main() {
   console.log("Step 1: Fetching all holder data...");
+  //write block number
+  writeBlockNumber("wearables", ethers);
   const rawData = await fetchAllHolderData();
 
   console.log("\nStep 2: Classifying holders...");

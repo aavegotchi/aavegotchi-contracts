@@ -69,6 +69,17 @@ export const FORGE_OUTPUT_DIR = path.join(
   "forgeWearables"
 );
 
+export const BLOCKNUMBERFILE = path.join(
+  `${BASE_OUTPUT_DIR}`,
+  "blockNumber.json"
+);
+
+interface BlockNumber {
+  aavegotchis: number;
+  forgeItems: number;
+  wearables: number;
+}
+
 export async function getAavegotchiOwnerEth(aavegotchiIds: string[]) {
   const query = gql`
     {
@@ -114,4 +125,30 @@ export async function getVaultOwner(tokenIds: string[], ethers: any) {
 
   console.log(`Found ${Object.keys(owners).length} vault owners`);
   return owners;
+}
+
+import fs from "fs";
+
+export async function writeBlockNumber(
+  assetType: "aavegotchis" | "forgeItems" | "wearables",
+  ethers: any
+) {
+  const blockNumber = await ethers.provider.getBlockNumber();
+  console.log(
+    `Using anchor Block number for ${assetType} data: ${blockNumber}`
+  );
+  //create the file if it doesn't exist
+  if (!fs.existsSync(BLOCKNUMBERFILE)) {
+    fs.writeFileSync(
+      BLOCKNUMBERFILE,
+      JSON.stringify({ [assetType]: blockNumber }, null, 2)
+    );
+  }
+  //read the file and only update the assetType block number
+  const blockNumberObject: BlockNumber = JSON.parse(
+    fs.readFileSync(BLOCKNUMBERFILE, "utf8")
+  );
+  //direct update the block number
+  blockNumberObject[assetType] = blockNumber;
+  fs.writeFileSync(BLOCKNUMBERFILE, JSON.stringify(blockNumberObject, null, 2));
 }
