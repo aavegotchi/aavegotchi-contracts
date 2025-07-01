@@ -42,6 +42,15 @@ contract ItemsFacet is Modifiers {
         }
     }
 
+    function batchItemBalances(address[] calldata _accounts) external view returns (ItemIdIO[][] memory bals_) {
+        uint256 count = _accounts.length;
+        bals_ = new ItemIdIO[][](count);
+        for (uint256 i; i < count; i++) {
+            address account = _accounts[i];
+            bals_[i] = itemBalances(account);
+        }
+    }
+
     ///@notice Returns balance for each item(and their types) that exists for an account
     ///@param _owner Address of the account to query
     ///@return output_ An array of structs containing details about each item owned(including the item types)
@@ -183,7 +192,7 @@ contract ItemsFacet is Modifiers {
     function equipWearables(
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip
-    ) onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) public {
+    ) public onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
         uint256[EQUIPPED_WEARABLE_SLOTS] memory _depositIds;
         _equipWearables(_tokenId, _wearablesToEquip, _depositIds);
     }
@@ -199,7 +208,7 @@ contract ItemsFacet is Modifiers {
         uint256 _tokenId,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToEquip,
         uint256[EQUIPPED_WEARABLE_SLOTS] calldata _depositIds
-    ) onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) public {
+    ) public onlyAavegotchiOwner(_tokenId) onlyUnlocked(_tokenId) {
         _equipWearables(_tokenId, _wearablesToEquip, _depositIds);
     }
 
@@ -208,10 +217,7 @@ contract ItemsFacet is Modifiers {
     ///@dev _wearablesToEquip are equiped to aavegotchis in the order of _tokenIds
     ///@param _tokenIds Array containing the identifiers of the aavegotchis to make changes to
     ///@param _wearablesToEquip An array of arrays containing the identifiers of the wearables to equip for aavegotchi in _tokenIds
-    function batchEquipWearables(
-        uint256[] calldata _tokenIds,
-        uint16[EQUIPPED_WEARABLE_SLOTS][] calldata _wearablesToEquip
-    ) external {
+    function batchEquipWearables(uint256[] calldata _tokenIds, uint16[EQUIPPED_WEARABLE_SLOTS][] calldata _wearablesToEquip) external {
         require(_wearablesToEquip.length == _tokenIds.length, "ItemsFacet: _wearablesToEquip length not same as _tokenIds length");
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             equipWearables(_tokenIds[i], _wearablesToEquip[i]);
