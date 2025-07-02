@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { ADDRESSES, FORGE_OUTPUT_DIR } from "./constants";
+import { ADDRESSES, FORGE_OUTPUT_DIR, writeBlockNumber } from "./constants";
 
 import fs from "fs";
 import path from "path";
@@ -44,6 +44,7 @@ const data: ForgeAltData = {
 };
 
 async function getForgeAltData() {
+  const blockNumber = await writeBlockNumber("forgeItems", ethers);
   const forgeDiamond = await ethers.getContractAt(
     "ForgeViewsFacet",
     ADDRESSES.forgeDiamond
@@ -54,17 +55,32 @@ async function getForgeAltData() {
   );
 
   //get rarity score modifiers
-  const alloyCosts = await forgeDiamond.getAllForgeAlloyCost();
-  const essenceCosts = await forgeDiamond.getAllForgeEssenceCost();
-  const timeCosts = await forgeDiamond.getAllForgeTimeCostInBlocks();
-  const skillPoints =
-    await forgeDiamond.getAllForgeSkillPointsEarnedFromForge();
+  const alloyCosts = await forgeDiamond.getAllForgeAlloyCost({
+    blockTag: blockNumber,
+  });
+  const essenceCosts = await forgeDiamond.getAllForgeEssenceCost({
+    blockTag: blockNumber,
+  });
+  const timeCosts = await forgeDiamond.getAllForgeTimeCostInBlocks({
+    blockTag: blockNumber,
+  });
+  const skillPoints = await forgeDiamond.getAllForgeSkillPointsEarnedFromForge({
+    blockTag: blockNumber,
+  });
   const smeltingSkillPointReductionFactorBips =
-    await forgeDiamond.getSmeltingSkillPointReductionFactorBips();
+    await forgeDiamond.getSmeltingSkillPointReductionFactorBips({
+      blockTag: blockNumber,
+    });
   const geodeWinChanceMultiTierBip =
-    await forgeDiamond.getAllGeodeWinChanceMultiTierBips();
-  const geodeRarities = await forgeDiamond.getAllGeodeRarities();
-  const geodePrizes = await forgeDAOFacet.getGeodePrizesRemaining();
+    await forgeDiamond.getAllGeodeWinChanceMultiTierBips({
+      blockTag: blockNumber,
+    });
+  const geodeRarities = await forgeDiamond.getAllGeodeRarities({
+    blockTag: blockNumber,
+  });
+  const geodePrizes = await forgeDAOFacet.getGeodePrizesRemaining({
+    blockTag: blockNumber,
+  });
   //we have 25k gotchis max, most of them don't have smithing skill points
   //fetch for 1000 at a time
   const batchSize = 1000;

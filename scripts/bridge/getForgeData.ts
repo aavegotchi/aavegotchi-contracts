@@ -131,6 +131,8 @@ function initializeFiles() {
 }
 
 async function getForgeData() {
+  const blockNumber = await writeBlockNumber("forgeItems", ethers);
+
   const alchemy = new Alchemy(config);
   let pageKey = null;
   let allNfts: any[] = [];
@@ -141,6 +143,7 @@ async function getForgeData() {
       {
         pageKey: pageKey,
         withTokenBalances: true,
+        block: blockNumber.toString(),
       }
     );
 
@@ -347,9 +350,6 @@ async function classifyAndSaveData(nftOwners: NFTOwner[]) {
 }
 
 async function main() {
-  //write block number
-  writeBlockNumber("forgeItems", ethers);
-
   try {
     initializeFiles();
     const allNfts = await getForgeData();

@@ -26,10 +26,9 @@ interface AggregatedOwnership {
   [owner: string]: TokenBalance[];
 }
 
-interface TokenProgress {
-  completedIds: string[];
-  currentId?: string;
-  currentSkip?: number;
+// NEW: track progress by processed addresses instead of token IDs
+interface AddressProgress {
+  completedAddresses: string[];
 }
 
 interface TokenStatistics {
@@ -131,6 +130,76 @@ const ADDRESS_TO_CATEGORY: Record<keyof typeof ADDRESSES, AddressCategory> = {
   forgeDiamond: AddressCategory.Forge,
 };
 
+// Maximum owners per balanceOfBatch call
+const CHUNK_SIZE = 200;
+
+// Helper: fetch owners per tokenId using the existing subgraph query
+async function fetchOwnersPerToken(
+  tokenId: string,
+  first: number,
+  blockNumber: number,
+  client: GraphQLClient
+): Promise<string[]> {
+  const owners: string[] = [];
+  let skip = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const query = gql`{
+      itemType(id:"${tokenId}", block: {number:${blockNumber}}) {
+        owners(first:${first}, skip:${skip}, orderBy: owner, orderDirection: desc, where:{ balance_gt:"0" }) {
+          owner
+        }
+      }
+    }`;
+    try {
+      const resp = await client.request(query);
+      const batch = (resp.itemType?.owners as Array<{ owner: string }>) || [];
+      batch.forEach((o) => owners.push(o.owner.toLowerCase()));
+      if (batch.length < first) {
+        hasMore = false;
+      } else {
+        skip += first;
+      }
+      await new Promise((r) => setTimeout(r, 50));
+    } catch (e) {
+      console.error(`Subgraph error token ${tokenId} skip ${skip}:`, e);
+      hasMore = false;
+    }
+  }
+  return owners;
+}
+
+// Helper: balanceOfBatch with retry to withstand transient RPC failures
+async function balanceOfBatchWithRetry(
+  contract: any,
+  owners: string[],
+  ids: number[],
+  blockTag?: number,
+  maxAttempts = 3
+): Promise<any[]> {
+  let attempt = 0;
+  while (attempt < maxAttempts) {
+    try {
+      return await contract.balanceOfBatch(
+        owners,
+        ids,
+        blockTag ? { blockTag } : {}
+      );
+    } catch (err) {
+      attempt++;
+      console.error(
+        `balanceOfBatch attempt ${attempt} failed:`,
+        err?.reason || err
+      );
+      if (attempt >= maxAttempts) throw err;
+      // wait 1s * attempt before retry
+      await new Promise((r) => setTimeout(r, 1000 * attempt));
+    }
+  }
+  return [];
+}
+
 // Initialize files function
 function initializeFiles() {
   const initialData = {
@@ -187,14 +256,22 @@ function loadExistingData() {
   return data;
 }
 
-function loadProgress(): TokenProgress {
+function loadProgress(): AddressProgress {
   if (fs.existsSync(PROGRESS_FILE)) {
-    return JSON.parse(fs.readFileSync(PROGRESS_FILE, "utf8"));
+    const data = JSON.parse(fs.readFileSync(PROGRESS_FILE, "utf8"));
+    // Backward-compat: convert old schema to new
+    if (!Array.isArray(data.completedAddresses)) {
+      data.completedAddresses = Array.isArray(data.completedIds)
+        ? data.completedIds
+        : [];
+      delete data.completedIds;
+    }
+    return data as AddressProgress;
   }
-  return { completedIds: [] };
+  return { completedAddresses: [] };
 }
 
-function saveProgress(progress: TokenProgress) {
+function saveProgress(progress: AddressProgress) {
   fs.writeFileSync(PROGRESS_FILE, JSON.stringify(progress, null, 2));
 }
 
@@ -222,7 +299,7 @@ function updateTokenStats(
 
 function getCumulativeStats(
   data: ReturnType<typeof loadExistingData>,
-  progress: TokenProgress
+  progress: AddressProgress
 ) {
   return {
     regularHolders: Object.keys(data.regularHolders).length,
@@ -232,79 +309,131 @@ function getCumulativeStats(
     vaultHoldings: data.vaultHolders.length,
     gbmHoldings: data.gbmDiamondHolders.length,
     diamondHoldings: data.aavegotchiDiamond.length,
-    totalTokensProcessed: progress.completedIds.length,
+    totalTokensProcessed: progress.completedAddresses.length,
     forgeDiamondHoldings: data.forgeDiamond.length,
   };
 }
 
-// New function to fetch all holder data
-async function fetchAllHolderData() {
+// New helper: discover all unique holder addresses via the subgraph
+async function fetchAllUniqueAddresses(): Promise<string[]> {
+  const blockNumber = await writeBlockNumber("wearables", ethers);
   const first = 5000;
+  const client = new GraphQLClient(process.env.SUBGRAPH_CORE_MATIC);
+
+  const addresses = new Set<string>();
   const allWearableIds = Array.from({ length: 417 }, (_, i) =>
     (i + 1).toString()
   );
-  const uri = process.env.SUBGRAPH_CORE_MATIC;
-  const client = new GraphQLClient(uri);
 
-  // Create directory if it doesn't exist
+  for (const wearableId of allWearableIds) {
+    console.log(`Discovering owners for wearable ID ${wearableId}`);
+    let skip = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      const query = gql`{
+        itemType(id: "${wearableId}", block: {number:${blockNumber}}) {
+          owners(first: ${first}, skip: ${skip}, orderBy: owner, orderDirection: desc, where: { balance_gt: "0" }) {
+            owner
+          }
+        }
+      }`;
+
+      try {
+        const resp = await client.request(query);
+        const owners =
+          (resp.itemType?.owners as Array<{ owner: string }>) || [];
+        owners.forEach((o) => addresses.add(o.owner.toLowerCase()));
+        if (owners.length < first) {
+          hasMore = false;
+        } else {
+          skip += first;
+        }
+        await new Promise((res) => setTimeout(res, 50));
+      } catch (err) {
+        console.error(
+          `Subgraph query failed for wearable ${wearableId} at skip ${skip}:`,
+          err
+        );
+        hasMore = false; // break out on error to continue with next id
+      }
+    }
+  }
+
+  console.log(`Discovered ${addresses.size} unique holder addresses`);
+  return Array.from(addresses);
+}
+
+// Re-implement fetchAllHolderData using balanceOfBatch batching
+async function fetchAllHolderData() {
   if (!fs.existsSync(AAVEGOTCHI_WEARABLES_DIR)) {
     fs.mkdirSync(AAVEGOTCHI_WEARABLES_DIR, { recursive: true });
   }
 
-  // Initialize or load raw data
   let rawData: RawHolderData = {};
   if (fs.existsSync(RAW_DATA_FILE)) {
     rawData = JSON.parse(fs.readFileSync(RAW_DATA_FILE, "utf8"));
-  } else {
-    fs.writeFileSync(RAW_DATA_FILE, JSON.stringify({}, null, 2));
   }
 
-  const progress = loadProgress();
-
-  // Filter out completed IDs
-  const remainingIds = allWearableIds.filter(
-    (id) => !progress.completedIds.includes(id)
+  const client = new GraphQLClient(process.env.SUBGRAPH_CORE_MATIC);
+  const blockNumber = await writeBlockNumber("wearables", ethers);
+  const itemsFacet = await ethers.getContractAt(
+    "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
+    ADDRESSES.aavegotchiDiamond
   );
 
-  for (const wearableId of remainingIds) {
-    console.log(`Fetching data for wearable ID: ${wearableId}`);
-    let hasMore = true;
-    let skip =
-      progress.currentId === wearableId ? progress.currentSkip || 0 : 0;
-    let owners: WearableOwner[] = [];
+  for (let id = 1; id <= 417; id++) {
+    const tokenId = id.toString();
+    console.log(`Fetching holders & balances for wearable ${tokenId}`);
 
-    while (hasMore) {
+    // 1. discover owners via subgraph
+    const owners = await fetchOwnersPerToken(
+      tokenId,
+      5000,
+      blockNumber,
+      client
+    );
+    if (owners.length === 0) continue;
+
+    // 2. batch on-chain balance fetch
+    const batches = Math.ceil(owners.length / CHUNK_SIZE);
+    for (let b = 0; b < batches; b++) {
+      const slice = owners.slice(b * CHUNK_SIZE, (b + 1) * CHUNK_SIZE);
+      const ids = new Array(slice.length).fill(id);
       try {
-        const response = await client.request(gql`{
-          itemType(id: "${wearableId}") {
-            owners(first: ${first}, skip: ${skip}, orderBy: owner, orderDirection: desc, where: { balance_gt: "0" }) {
-              owner
-              balance
-            }
-          }
-        }`);
-
-        const newOwners = response.itemType.owners;
-        if (newOwners.length < first) hasMore = false;
-        owners = owners.concat(newOwners);
-
-        skip += first;
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      } catch (error) {
-        console.error(
-          `Error fetching wearable ${wearableId} at skip ${skip}:`,
-          error
+        const balances: any[] = await balanceOfBatchWithRetry(
+          itemsFacet,
+          slice,
+          ids,
+          blockNumber
         );
-        hasMore = false;
+        balances.forEach((bal: any, idx: number) => {
+          const balNum = parseInt(bal.toString());
+          if (balNum > 0) {
+            if (!rawData[tokenId]) rawData[tokenId] = [];
+            rawData[tokenId].push({
+              owner: slice[idx].toLowerCase(),
+              balance: balNum.toString(),
+            });
+          }
+        });
+      } catch (err) {
+        console.error(
+          `balanceOfBatch failed token ${tokenId} batch ${b}:`,
+          err
+        );
       }
+      await new Promise((r) => setTimeout(r, 50));
     }
 
-    rawData[wearableId] = owners;
+    // Save after each token processed
     fs.writeFileSync(RAW_DATA_FILE, JSON.stringify(rawData, null, 2));
-    progress.completedIds.push(wearableId);
-    saveProgress(progress);
+    console.log(
+      `Saved token ${tokenId} data with ${
+        rawData[tokenId]?.length || 0
+      } holders.`
+    );
   }
-
   return rawData;
 }
 
@@ -447,14 +576,13 @@ async function classifyHolders(rawData: RawHolderData) {
 async function main() {
   console.log("Step 1: Fetching all holder data...");
   //write block number
-  writeBlockNumber("wearables", ethers);
   const rawData = await fetchAllHolderData();
 
   console.log("\nStep 2: Classifying holders...");
   const { data } = await classifyHolders(rawData);
 
   //delete raw data
-  fs.unlinkSync(RAW_DATA_FILE);
+  // fs.unlinkSync(RAW_DATA_FILE);
 
   const finalStats = getCumulativeStats(data, loadProgress());
   console.log("\nCumulative Statistics:");

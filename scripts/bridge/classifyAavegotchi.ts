@@ -13,8 +13,15 @@ import {
   EquippedItem,
   getAavegotchiOwnerEth,
   getVaultOwner,
+  writeBlockNumber,
   // AAVEGOTCHI_DIAMOND_BASE,
 } from "./constants";
+
+// New imports for owner-refresh
+import { GraphQLClient, gql } from "graphql-request";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 interface OwnershipMap {
   [owner: string]: string[]; // Array of tokenIds
@@ -80,7 +87,7 @@ interface Progress {
 
 const PROGRESS_FILE = path.join(OUTPUT_DIR, "classification-progress.json");
 const BATCH_SIZE = 100; // Process 100 owners before saving
-const SAVE_INTERVAL = 5 * 60 * 1000; // Save every 5 minutes
+const SAVE_INTERVAL = 2 * 60 * 1000; // Save every 2 minutes
 
 function initializeFiles() {
   const initialData = {
@@ -168,6 +175,102 @@ const METADATA_FILE = path.join(
   "aavegotchiMetadata.json"
 );
 
+// =========================  Owner refresh helpers  ========================= //
+
+interface Lending {
+  id: string;
+  gotchiTokenId: string;
+  originalOwner: string;
+  lender: string;
+}
+
+async function fetchUnfinishedLendings(
+  blockNumber: number
+): Promise<Lending[]> {
+  const uri = process.env.SUBGRAPH_CORE_MATIC;
+  if (!uri) {
+    console.warn(
+      "SUBGRAPH_CORE_MATIC env variable not set – skipping lending owner refresh."
+    );
+    return [];
+  }
+
+  const client = new GraphQLClient(uri);
+  const allLendings: Lending[] = [];
+  let skip = 0;
+  const first = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const query = gql`
+      {
+        gotchiLendings(
+          first: ${first}
+          block: {number:${blockNumber}}
+          skip: ${skip}
+          where: { completed: false, cancelled: false, borrower_not: null }
+        ) {
+          id
+          gotchiTokenId
+          originalOwner
+          lender
+        }
+      }
+    `;
+
+    try {
+      const response = await client.request<{ gotchiLendings: Lending[] }>(
+        query
+      );
+      const lendings = response.gotchiLendings;
+
+      if (lendings.length > 0) {
+        allLendings.push(...lendings);
+        skip += first;
+      }
+
+      if (lendings.length < first) {
+        hasMore = false;
+      }
+    } catch (error) {
+      console.error(`Error fetching lendings at skip ${skip}:`, error);
+      hasMore = false;
+    }
+  }
+
+  return allLendings;
+}
+
+async function refreshMetadataOwners(
+  metadata: Record<string, AavegotchiInfo>,
+  blockNumber: number
+) {
+  try {
+    const lendings = await fetchUnfinishedLendings(blockNumber);
+    console.log(
+      `Found ${lendings.length} ongoing lendings; refreshing owners…`
+    );
+
+    let updated = 0;
+    lendings.forEach((l) => {
+      const tokenId = l.gotchiTokenId;
+      if (metadata[tokenId]) {
+        metadata[tokenId].owner = l.lender.toLowerCase();
+        updated += 1;
+      }
+    });
+
+    if (updated > 0) {
+      fs.writeFileSync(METADATA_FILE, JSON.stringify(metadata, null, 2));
+      console.log(`Owner refresh complete – ${updated} records updated.`);
+    } else {
+      console.log("No metadata owners needed refreshing.");
+    }
+  } catch (err) {
+    console.error("Owner refresh failed – proceeding without it:", err);
+  }
+}
+
 async function main() {
   if (!fs.existsSync(AAVEGOTCHI_METADATA_DIR)) {
     console.error("\nError: Aavegotchi metadata file not found!");
@@ -185,6 +288,7 @@ async function main() {
 
   // Initialize files if they don't exist
   initializeFiles();
+  const blockNumber = await writeBlockNumber("aavegotchis", ethers);
 
   // Initialize or load progress
   let progress: Progress = {
@@ -210,6 +314,10 @@ async function main() {
 
   console.log("Reading Aavegotchi metadata...");
   const metadata = JSON.parse(fs.readFileSync(METADATA_FILE, "utf8"));
+
+  // Immediately bring owner data up-to-date using ongoing lending data so that
+  // classification works on fresh information.
+  await refreshMetadataOwners(metadata, blockNumber);
 
   // Load existing data
   const existingData = loadExistingData();
@@ -254,7 +362,11 @@ async function main() {
       } else if (owner === ADDRESSES.vault.toLowerCase()) {
         // Get true owners for all tokens in vault
         console.log(`Processing ${ownerTokens.length} Vault Aavegotchis`);
-        const trueOwners = await getVaultOwner(ownerTokens, ethers);
+        const trueOwners = await getVaultOwner(
+          ownerTokens,
+          ethers,
+          blockNumber
+        );
 
         // Group tokens by their true owners
         const tokensByOwner = ownerTokens.reduce(
@@ -375,6 +487,9 @@ async function main() {
             metadata[tokenId].owner = ADDRESSES.raffleOwner.toLowerCase();
           }
         });
+      } else if (owner === ADDRESSES.gbmDiamond.toLowerCase()) {
+        gbmDiamondHolders.push(...ownerTokens);
+        progress.statistics.gbmCount = gbmDiamondHolders.length;
       } else {
         const code = await ethers.provider.getCode(owner);
         if (code !== "0x") {
@@ -431,15 +546,19 @@ async function main() {
         batchCount >= BATCH_SIZE ||
         Date.now() - progress.lastSaveTimestamp >= SAVE_INTERVAL
       ) {
-        await saveProgress(progress, {
-          regularHolders,
-          contractHolders,
-          gbmDiamondHolders,
-          contractEOAs,
-          gnosisSafeContracts,
-          wearables: wearablesMap,
-          aavegotchiDiamond,
-        });
+        await saveProgress(
+          progress,
+          {
+            regularHolders,
+            contractHolders,
+            gbmDiamondHolders,
+            contractEOAs,
+            gnosisSafeContracts,
+            wearables: wearablesMap,
+            aavegotchiDiamond,
+          },
+          metadata
+        );
         batchCount = 0;
         progress.lastSaveTimestamp = Date.now();
 
@@ -462,15 +581,19 @@ async function main() {
   fs.writeFileSync(METADATA_FILE, JSON.stringify(metadata, null, 2));
 
   // Final save
-  await saveProgress(progress, {
-    regularHolders,
-    contractHolders,
-    gbmDiamondHolders,
-    contractEOAs,
-    gnosisSafeContracts,
-    wearables: wearablesMap,
-    aavegotchiDiamond,
-  });
+  await saveProgress(
+    progress,
+    {
+      regularHolders,
+      contractHolders,
+      gbmDiamondHolders,
+      contractEOAs,
+      gnosisSafeContracts,
+      wearables: wearablesMap,
+      aavegotchiDiamond,
+    },
+    metadata
+  );
 
   console.log("\n=== Final Statistics ===");
   printStatistics(progress.statistics);
@@ -486,7 +609,8 @@ async function saveProgress(
     gnosisSafeContracts: SafeDetails[];
     wearables: AavegotchiWearables;
     aavegotchiDiamond: string[];
-  }
+  },
+  metadata: Record<string, AavegotchiInfo>
 ) {
   // Save progress
   fs.writeFileSync(PROGRESS_FILE, JSON.stringify(progress, null, 2));
@@ -505,6 +629,8 @@ async function saveProgress(
   for (const { path, data: fileData } of dataToSave) {
     fs.writeFileSync(path, JSON.stringify(fileData, null, 2));
   }
+
+  fs.writeFileSync(METADATA_FILE, JSON.stringify(metadata, null, 2));
 }
 
 function printStatistics(stats: Progress["statistics"]) {

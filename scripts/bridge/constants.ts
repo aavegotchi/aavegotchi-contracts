@@ -6,6 +6,9 @@ import dotenv from "dotenv";
 import { maticDiamondAddress } from "../helperFunctions";
 dotenv.config();
 
+//keep this undefined if you want to use latest blockNumber
+export let BLOCK_NUMBER = 73121283;
+
 const graphQLClient = new GraphQLClient(process.env.SUBGRAPH_AAVEGOTHI_ETH);
 
 // Shared interfaces
@@ -48,6 +51,7 @@ export const excludedAddresses = [
   "0x0000000000000000000000000000000000000000",
   "0x000000000000000000000000000000000000dEaD",
   "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
+  "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266", //hardhat exposed pk, now a 702 contract breaking erc1155 received validations
 ].map((a) => a.toLowerCase());
 
 // Base directories
@@ -110,13 +114,19 @@ export async function getAavegotchiOwnerEth(aavegotchiIds: string[]) {
   return owners;
 }
 
-export async function getVaultOwner(tokenIds: string[], ethers: any) {
+export async function getVaultOwner(
+  tokenIds: string[],
+  ethers: any,
+  blockNumber: number
+) {
   const vault = await ethers.getContractAt("IVault", ADDRESSES.vault);
   const owners: Record<string, string> = {};
 
   for (const tokenId of tokenIds) {
     try {
-      const owner = await vault.getDepositor(maticDiamondAddress, tokenId);
+      const owner = await vault.getDepositor(maticDiamondAddress, tokenId, {
+        blockTag: blockNumber,
+      });
       owners[tokenId] = owner.toLowerCase();
     } catch (error) {
       console.error(`Error getting vault owner for token ${tokenId}:`, error);
@@ -133,11 +143,17 @@ export async function writeBlockNumber(
   assetType: "aavegotchis" | "forgeItems" | "wearables",
   ethers: any
 ) {
-  const blockNumber = await ethers.provider.getBlockNumber();
+  let blockNumber = BLOCK_NUMBER;
+  if (!BLOCK_NUMBER) {
+    blockNumber = await ethers.provider.getBlockNumber();
+  }
   console.log(
     `Using anchor Block number for ${assetType} data: ${blockNumber}`
   );
-  //create the file if it doesn't exist
+  //create the file and folder if it doesn't exist
+  if (!fs.existsSync(BASE_OUTPUT_DIR)) {
+    fs.mkdirSync(BASE_OUTPUT_DIR);
+  }
   if (!fs.existsSync(BLOCKNUMBERFILE)) {
     fs.writeFileSync(
       BLOCKNUMBERFILE,
@@ -151,4 +167,5 @@ export async function writeBlockNumber(
   //direct update the block number
   blockNumberObject[assetType] = blockNumber;
   fs.writeFileSync(BLOCKNUMBERFILE, JSON.stringify(blockNumberObject, null, 2));
+  return blockNumber;
 }

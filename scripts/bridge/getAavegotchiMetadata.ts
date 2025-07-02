@@ -67,8 +67,7 @@ async function main() {
     aavegotchiDiamondAddress
   )) as AavegotchiFacet;
 
-  //write block number
-  writeBlockNumber("aavegotchis", ethers);
+  const blockNumber = await writeBlockNumber("aavegotchis", ethers);
 
   // Create output directory if it doesn't exist
   if (!fs.existsSync(AAVEGOTCHI_METADATA_DIR)) {
@@ -111,7 +110,9 @@ async function main() {
     while (!success && retries < MAX_RETRIES) {
       try {
         console.log(`Fetching batch ${i + 1}/${batches.length}`);
-        const batchData = await contract.batchGetBridgedAavegotchi(batch);
+        const batchData = await contract.batchGetBridgedAavegotchi(batch, {
+          blockTag: blockNumber,
+        });
 
         // Process batch data
         batchData.forEach((gotchi, index) => {
