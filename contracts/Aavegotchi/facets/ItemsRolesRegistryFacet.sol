@@ -151,13 +151,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
 
     /// @notice Releases tokens back to grantor.
     /// @param _depositId The deposit identifier.
-    function releaseTokens(
-        uint256 _depositId
-    )
-        external
-        override
-        onlyOwnerOrApproved(s.itemRolesDepositInfo[_depositId].deposit.grantor, s.itemRolesDepositInfo[_depositId].deposit.tokenAddress)
-    {
+    function releaseTokens(uint256 _depositId) public override onlyDaoOrOwner {
         ItemRolesInfo storage _depositInfo = s.itemRolesDepositInfo[_depositId];
         Deposit memory _deposit = _depositInfo.deposit;
         require(_deposit.tokenAmount > 0, "ItemsRolesRegistryFacet: deposit does not exist");
@@ -305,7 +299,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
             "ItemsRolesRegistryFacet: token has an active role"
         );
 
-        if(_depositInfo.roleAssignment.grantee != _grantee) {
+        if (_depositInfo.roleAssignment.grantee != _grantee) {
             // if depositId is being delegated to a new user, we need to make sure that Aavegotchis not owned by the new user are using these Wearables
             _unequipAllDelegatedWearables(_depositId, _depositInfo.deposit.tokenId);
         }
@@ -350,7 +344,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
         uint256 _unequippedBalance;
         uint16[EQUIPPED_WEARABLE_SLOTS] memory _previousEquippedWearables = _aavegotchi.equippedWearables;
         uint256[EQUIPPED_WEARABLE_SLOTS] memory _previousEquippedDepositIds = _gotchiInfo.equippedDepositIds;
-        
+
         for (uint256 slot; slot < EQUIPPED_WEARABLE_SLOTS; slot++) {
             // if the item is not equipped in the slot or the deposit is not the same, continue
             if (_aavegotchi.equippedWearables[slot] != _tokenIdToUnequip || _gotchiInfo.equippedDepositIds[slot] != _depositId) continue;
