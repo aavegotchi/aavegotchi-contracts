@@ -524,18 +524,15 @@ async function main() {
         }
       }
 
-      // Process wearables for each Aavegotchi
-      Object.entries(metadata as Record<string, AavegotchiInfo>)
-        .filter(([_, data]) => data.owner.toLowerCase() === owner)
-        .forEach(([tokenId, data]) => {
-          const wearables = processWearables(
-            data.equippedWearables,
-            data.items
-          );
-          if (wearables) {
-            wearablesMap[tokenId] = wearables;
-          }
-        });
+      // Process wearables for this owner's tokens directly to avoid skipping
+      // Gotchis whose owner address may be mutated inside the special-case
+      // branches above.
+      ownerTokens.forEach((tokenId) => {
+        const dataObj = (metadata as Record<string, AavegotchiInfo>)[tokenId];
+        if (!dataObj) return;
+        const w = processWearables(dataObj.equippedWearables, dataObj.items);
+        if (w) wearablesMap[tokenId] = w;
+      });
 
       // Mark owner as processed
       progress.processedOwners.push(owner);
