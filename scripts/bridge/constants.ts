@@ -169,3 +169,22 @@ export async function writeBlockNumber(
   fs.writeFileSync(BLOCKNUMBERFILE, JSON.stringify(blockNumberObject, null, 2));
   return blockNumber;
 }
+
+export async function isRealContract(
+  provider: any,
+  addr: string
+): Promise<boolean> {
+  const code = await provider.getCode(addr);
+
+  // No code at all → definitely an EOA
+  if (code === "0x") return false;
+
+  // 7702 stub: 34 bytes and starts with 0xef0100
+  if (code.slice(2, 8) === "ef0100") {
+    console.log("7702 stub");
+    return false;
+  }
+
+  // Anything else is a normal contract
+  return true;
+}

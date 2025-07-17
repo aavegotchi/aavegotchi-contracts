@@ -14,6 +14,7 @@ import {
   getAavegotchiOwnerEth,
   getVaultOwner,
   writeBlockNumber,
+  isRealContract,
   // AAVEGOTCHI_DIAMOND_BASE,
 } from "./constants";
 
@@ -491,8 +492,8 @@ async function main() {
         gbmDiamondHolders.push(...ownerTokens);
         progress.statistics.gbmCount = gbmDiamondHolders.length;
       } else {
-        const code = await ethers.provider.getCode(owner);
-        if (code !== "0x") {
+        const isContract = await isRealContract(ethers.provider, owner);
+        if (isContract) {
           const contractOwner = await getOwner(owner);
           if (contractOwner) {
             const existingContract = contractEOAs.find(

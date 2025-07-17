@@ -9,6 +9,7 @@ import {
   ContractOwnership,
   FORGE_OUTPUT_DIR,
   writeBlockNumber,
+  isRealContract,
 } from "./constants";
 import path from "path";
 import dotenv from "dotenv";
@@ -221,6 +222,7 @@ function saveProgress(progress: Progress, data: ClassifiedData) {
 }
 
 async function classifyAndSaveData(nftOwners: NFTOwner[]) {
+  const blockNumber = await writeBlockNumber("forgeItems", ethers);
   const data: ClassifiedData = {
     regularHolders: {},
     contractHolders: {},
@@ -280,8 +282,8 @@ async function classifyAndSaveData(nftOwners: NFTOwner[]) {
         data.forgeDiamond.push(...balances);
         progress.analytics.specialAddresses.forge += balances.length;
       } else {
-        const code = await ethers.provider.getCode(owner);
-        if (code !== "0x") {
+        const isContract = await isRealContract(ethers.provider, owner);
+        if (isContract) {
           const contractOwner = await getOwner(owner);
           if (contractOwner) {
             data.contractEOAs.push({
