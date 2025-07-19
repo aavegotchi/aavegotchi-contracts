@@ -16,7 +16,7 @@ export async function upgrade() {
     {
       facetName:
         "contracts/Aavegotchi/WearableDiamond/facets/WearablesFacet.sol:WearablesFacet",
-      addSelectors: ["function toggleDiamondPaused() external"],
+      addSelectors: ["function toggleDiamondPaused(bool _paused) external"],
       removeSelectors: [
         "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external",
         "function setItemGeistBridge(address _itemBridge) external",

@@ -35,7 +35,7 @@ export async function upgrade() {
 
     {
       facetName: "DAOFacet",
-      addSelectors: ["function toggleDiamondPaused() external"],
+      addSelectors: ["function toggleDiamondPaused(bool _paused) external"],
       removeSelectors: [],
     },
     {
