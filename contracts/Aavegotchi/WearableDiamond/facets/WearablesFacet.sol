@@ -83,9 +83,11 @@ contract WearablesFacet {
         LibEventHandler._receiveAndEmitTransferBatchEvent(msg.sender, _from, _to, _ids, _values);
     }
 
-    function toggleDiamondPaused() external {
+    event DiamondPausedToggled(bool _paused);
+    function toggleDiamondPaused(bool _paused) external {
         WearableLibDiamond.enforceIsContractOwner();
-        WearableLibDiamond.diamondStorage().diamondPaused = !WearableLibDiamond.diamondStorage().diamondPaused;
+        WearableLibDiamond.diamondStorage().diamondPaused = _paused;
+        emit DiamondPausedToggled(_paused);
     }
 
     // function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external payable {

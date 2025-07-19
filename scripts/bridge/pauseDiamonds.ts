@@ -6,21 +6,31 @@ import {
   maticWearableDiamondAddress,
 } from "../helperFunctions";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
+import { DAOFacet, ForgeDAOFacet, WearablesFacet } from "../../typechain";
 
 export async function lockDiamonds() {
   let signer;
 
   const testing = ["hardhat", "localhost"].includes(network.name);
-  let aavegotchiDiamond;
-  let forgeDiamond;
-  let wearableDiamond;
+  let aavegotchiDiamond: DAOFacet;
+  let forgeDiamond: ForgeDAOFacet;
+  let wearableDiamond: WearablesFacet;
+
+  aavegotchiDiamond = (await ethers.getContractAt(
+    "DAOFacet",
+    maticDiamondAddress
+  )) as DAOFacet;
+
+  wearableDiamond = await ethers.getContractAt(
+    "WearablesFacet",
+    maticWearableDiamondAddress
+  );
+
+  forgeDiamond = await ethers.getContractAt("ForgeDAOFacet", maticForgeDiamond);
 
   if (testing) {
     const aavegotchiDiamondOwner = await getOwner(maticDiamondAddress);
-    aavegotchiDiamond = await ethers.getContractAt(
-      "DAOFacet",
-      maticDiamondAddress
-    );
+
     aavegotchiDiamond = await impersonate(
       aavegotchiDiamondOwner,
       aavegotchiDiamond,
@@ -29,10 +39,7 @@ export async function lockDiamonds() {
     );
 
     const forgeDiamondOwner = await getOwner(maticForgeDiamond);
-    forgeDiamond = await ethers.getContractAt(
-      "ForgeDAOFacet",
-      maticForgeDiamond
-    );
+
     forgeDiamond = await impersonate(
       forgeDiamondOwner,
       forgeDiamond,
@@ -41,10 +48,7 @@ export async function lockDiamonds() {
     );
 
     const wearableDiamondOwner = await getOwner(maticWearableDiamondAddress);
-    wearableDiamond = await ethers.getContractAt(
-      "WearablesFacet",
-      maticWearableDiamondAddress
-    );
+
     wearableDiamond = await impersonate(
       wearableDiamondOwner,
       wearableDiamond,
@@ -56,13 +60,13 @@ export async function lockDiamonds() {
     signer = new LedgerSigner(ethers.provider, "m/44'/60'/1'/0/0");
   } else throw Error("Incorrect network selected");
 
-  let tx = await aavegotchiDiamond.toggleDiamondPaused();
+  let tx = await aavegotchiDiamond.connect(signer).toggleDiamondPaused(true);
   await tx.wait();
   console.log("Aavegotchi diamond paused at txn", tx.hash);
-  tx = await wearableDiamond.toggleDiamondPaused();
+  tx = await wearableDiamond.connect(signer).toggleDiamondPaused(true);
   await tx.wait();
   console.log("Wearable diamond paused at txn", tx.hash);
-  tx = await forgeDiamond.pauseContract();
+  tx = await forgeDiamond.connect(signer).pauseContract();
   await tx.wait();
   console.log("Forge diamond paused at txn", tx.hash);
   console.log("Diamonds paused");
