@@ -83,11 +83,6 @@ export async function upgrade() {
       addSelectors: [],
       removeSelectors: [],
     },
-    {
-      facetName: "GotchiLendingFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
 
     {
       facetName: "ItemsRolesRegistryFacet",
