@@ -277,7 +277,7 @@ contract AavegotchiGameFacet is Modifiers {
     ///@dev only valid for claimed aavegotchis
     ///@dev Kinship will only increase if the lastInteracted minus the current time is greater than or equal to 12 hours
     ///@param _tokenIds An array containing the token identifiers of the claimed aavegotchis that are to be interacted with
-    function interact(uint256[] calldata _tokenIds) external {
+    function interact(uint256[] calldata _tokenIds) external whenNotPaused {
         address sender = LibMeta.msgSender();
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
