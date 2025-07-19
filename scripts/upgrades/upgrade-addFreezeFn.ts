@@ -148,22 +148,14 @@ export async function upgrade() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
-  //set the wearable diamond address
-  let iface: DAOFacetInterface = new ethers.utils.Interface(
-    DAOFacet__factory.abi
-  ) as DAOFacetInterface;
-
-  //NOTE: running this upgrade also pauses the diamond
-  const calldata = iface.encodeFunctionData("toggleDiamondPaused", []);
-
   const args: DeployUpgradeTaskArgs = {
     diamondOwner: maticDiamondUpgrader,
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
-    initAddress: maticDiamondAddress,
-    initCalldata: calldata,
+    initAddress: ethers.constants.AddressZero,
+    initCalldata: "0x",
   };
 
   await run("deployUpgrade", args);
