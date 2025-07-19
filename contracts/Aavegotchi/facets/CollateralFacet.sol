@@ -93,7 +93,7 @@ contract CollateralFacet is Modifiers {
     ///@dev Will throw if it is reduced less than the minimum stake
     ///@param _tokenId The identifier of the NFT to decrease
     ///@param _reduceAmount The amount of collateral tokens to decrease the current collateral by
-    function decreaseStake(uint256 _tokenId, uint256 _reduceAmount) external whenNotPaused onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    function decreaseStake(uint256 _tokenId, uint256 _reduceAmount) external onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         address escrow = s.aavegotchis[_tokenId].escrow;
         require(escrow != address(0), "CollateralFacet: Does not have an escrow");
 
