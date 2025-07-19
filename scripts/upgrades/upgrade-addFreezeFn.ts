@@ -1,4 +1,4 @@
-import { run } from "hardhat";
+import { ethers, run } from "hardhat";
 import {
   convertFacetAndSelectorsToString,
   DeployUpgradeTaskArgs,
@@ -6,6 +6,8 @@ import {
 } from "../../tasks/deployUpgrade";
 import { maticDiamondAddress, maticDiamondUpgrader } from "../helperFunctions";
 import { diamondUpgrader } from "../../test/ItemsRolesRegistryFacet/helpers";
+import { DAOFacetInterface } from "../../typechain/DAOFacet";
+import { DAOFacet__factory } from "../../typechain";
 
 export async function upgrade() {
   const facets: FacetsAndAddSelectors[] = [
@@ -137,12 +139,21 @@ export async function upgrade() {
 
   const joined = convertFacetAndSelectorsToString(facets);
 
+  //set the wearable diamond address
+  let iface: DAOFacetInterface = new ethers.utils.Interface(
+    DAOFacet__factory.abi
+  ) as DAOFacetInterface;
+
+  const calldata = iface.encodeFunctionData("toggleDiamondPaused", []);
+
   const args: DeployUpgradeTaskArgs = {
     diamondOwner: maticDiamondUpgrader,
     diamondAddress: maticDiamondAddress,
     facetsAndAddSelectors: joined,
     useLedger: true,
     useMultisig: false,
+    initAddress: maticDiamondAddress,
+    initCalldata: calldata,
   };
 
   await run("deployUpgrade", args);
