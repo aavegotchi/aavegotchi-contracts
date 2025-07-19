@@ -35,7 +35,7 @@ contract BridgeFacet is Modifiers {
     ///@dev Only 20 items can be withdrawn in a single transaction, will throw if more than that
     ///@param _ids An array containing the identifiers of the items to withdraw
     ///@param _values An array containing the value/number of each item to withdraw
-    function withdrawItemsBatch(uint256[] calldata _ids, uint256[] calldata _values) external diamondNotPaused {
+    function withdrawItemsBatch(uint256[] calldata _ids, uint256[] calldata _values) external whenNotPaused {
         require(_ids.length == _values.length, "Bridge: ids not same length as values");
         require(_ids.length <= 20, "Items: exceeded max number of ids for single transaction");
         address owner = LibMeta.msgSender();
@@ -52,7 +52,7 @@ contract BridgeFacet is Modifiers {
     ///@notice Allows abatch withdrawal of ERC721 NFTs by the owner
     ///@dev Only 20 NFTs can be withdrawn in a single transaction, will throw if more than that
     ///@param _tokenIds An array containing the identifiers of the NFTs to withdraw
-    function withdrawAavegotchiBatch(uint256[] calldata _tokenIds) external diamondNotPaused {
+    function withdrawAavegotchiBatch(uint256[] calldata _tokenIds) external whenNotPaused {
         address owner = LibMeta.msgSender();
         require(_tokenIds.length <= 20, "Bridge: exceeds withdraw limit for single transaction");
         for (uint256 i; i < _tokenIds.length; i++) {
@@ -72,7 +72,7 @@ contract BridgeFacet is Modifiers {
      * @param _user user address for whom deposit is being done
      * @param _depositData abi encoded tokenId
      */
-    function deposit(address _user, bytes calldata _depositData) external diamondNotPaused {
+    function deposit(address _user, bytes calldata _depositData) external whenNotPaused {
         require(msg.sender == s.childChainManager, "Bridge: only childChainManager can call this function");
         (uint256 tokenType, bytes memory tokenDepositData) = abi.decode(_depositData, (uint256, bytes));
         if (tokenType == ERC1155_TOKEN_TYPE) {

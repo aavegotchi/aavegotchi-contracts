@@ -41,7 +41,7 @@ contract ShopFacet is Modifiers {
     ///@dev Only portals from haunt 1 can be purchased via the contract
     ///@param _to Address to send the portal once purchased
     ///@param _ghst The amount of GHST the buyer is willing to pay //calculation will be done to know how much portal he recieves based on the haunt's portal price
-    function buyPortals(address _to, uint256 _ghst) external diamondNotPaused {
+    function buyPortals(address _to, uint256 _ghst) external whenNotPaused {
         uint256 currentHauntId = s.currentHauntId;
         require(currentHauntId == 1, "ShopFacet: Can only purchase from Haunt 1");
         Haunt storage haunt = s.haunts[currentHauntId];
@@ -120,7 +120,7 @@ contract ShopFacet is Modifiers {
     ///@param _to Address to send the items once purchased
     ///@param _itemIds The identifiers of the items to be purchased
     ///@param _quantities The quantities of each item to be bought
-    function purchaseItemsWithGhst(address _to, uint256[] calldata _itemIds, uint256[] calldata _quantities) external diamondNotPaused {
+    function purchaseItemsWithGhst(address _to, uint256[] calldata _itemIds, uint256[] calldata _quantities) external whenNotPaused {
         address sender = LibMeta.msgSender();
         require(_itemIds.length == _quantities.length, "ShopFacet: _itemIds not same length as _quantities");
         uint256 totalPrice;
@@ -149,7 +149,7 @@ contract ShopFacet is Modifiers {
     ///@param _itemIds The identifiers of the items to be purchased
     ///@param _quantities The quantities of each item to be bought
 
-    function purchaseTransferItemsWithGhst(address _to, uint256[] calldata _itemIds, uint256[] calldata _quantities) external diamondNotPaused {
+    function purchaseTransferItemsWithGhst(address _to, uint256[] calldata _itemIds, uint256[] calldata _quantities) external whenNotPaused {
         require(_to != address(0), "ShopFacet: Can't transfer to 0 address");
         require(_itemIds.length == _quantities.length, "ShopFacet: ids not same length as values");
         address sender = LibMeta.msgSender();

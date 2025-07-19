@@ -98,7 +98,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     )
         external
         override
-        diamondNotPaused
+        whenNotPaused
         onlyWearables(_tokenAddress, _tokenId)
         onlyOwnerOrApproved(_grantor, _tokenAddress)
         returns (uint256 depositId_)
@@ -124,7 +124,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     )
         external
         override
-        diamondNotPaused
+        whenNotPaused
         validGrantRoleData(_expirationDate, _role)
         onlyOwnerOrApproved(s.itemRolesDepositInfo[_depositId].deposit.grantor, s.itemRolesDepositInfo[_depositId].deposit.tokenAddress)
     {
@@ -135,7 +135,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     /// @param _depositId The deposit identifier.
     /// @param _role The role identifier.
     /// @param _grantee The recipient of the role revocation.
-    function revokeRole(uint256 _depositId, bytes32 _role, address _grantee) external override diamondNotPaused sameGrantee(_depositId, _grantee) {
+    function revokeRole(uint256 _depositId, bytes32 _role, address _grantee) external override whenNotPaused sameGrantee(_depositId, _grantee) {
         require(_role == UNIQUE_ROLE, "ItemsRolesRegistryFacet: role not supported");
         ItemRolesInfo storage _depositInfo = s.itemRolesDepositInfo[_depositId];
         RoleAssignment storage _roleAssignment = _depositInfo.roleAssignment;
@@ -164,7 +164,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     )
         external
         override
-        diamondNotPaused
+        whenNotPaused
         onlyOwnerOrApproved(s.itemRolesDepositInfo[_depositId].deposit.grantor, s.itemRolesDepositInfo[_depositId].deposit.tokenAddress)
     {
         ItemRolesInfo storage _depositInfo = s.itemRolesDepositInfo[_depositId];
@@ -191,7 +191,7 @@ contract ItemsRolesRegistryFacet is Modifiers, IERC7589, ERC1155Holder {
     /// @param _tokenAddress The token address.
     /// @param _operator The user approved to grant and revoke roles.
     /// @param _isApproved The approval status.
-    function setRoleApprovalForAll(address _tokenAddress, address _operator, bool _isApproved) external override diamondNotPaused {
+    function setRoleApprovalForAll(address _tokenAddress, address _operator, bool _isApproved) external override whenNotPaused {
         s.itemsRoleApprovals[LibMeta.msgSender()][_tokenAddress][_operator] = _isApproved;
         emit RoleApprovalForAll(_tokenAddress, _operator, _isApproved);
     }

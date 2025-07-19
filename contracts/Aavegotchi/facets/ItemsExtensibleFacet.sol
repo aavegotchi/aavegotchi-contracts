@@ -20,7 +20,7 @@ contract ItemsExtensibleFacet is Modifiers {
         uint256 _tokenId,
         uint256[] calldata _itemIds,
         uint256[] calldata _quantities
-    ) external diamondNotPaused onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
+    ) external whenNotPaused onlyUnlocked(_tokenId) onlyAavegotchiOwner(_tokenId) {
         require(_itemIds.length == _quantities.length, "ItemsFacet: _itemIds length != _quantities length");
         require(s.aavegotchis[_tokenId].status == LibAavegotchi.STATUS_AAVEGOTCHI, "LibAavegotchi: Only valid for AG");
 

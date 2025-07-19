@@ -124,7 +124,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint16[2] memory _principalSplit,
         address _affiliate,
         uint32 _whitelistId
-    ) internal diamondNotPaused {
+    ) internal whenNotPaused {
         IERC721 erc721Token = IERC721(_erc721TokenAddress);
         address msgSender = LibMeta.msgSender();
         require(erc721Token.ownerOf(_erc721TokenId) == msgSender, "ERC721Marketplace: Not owner of ERC721 token");
@@ -203,14 +203,14 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@dev If the NFT has not been listed before, it will be rejected
     ///@param _listingId The identifier of the listing to execute
     ///@param _priceInWei The price of the item
-    function updateERC721ListingPrice(uint256 _listingId, uint256 _priceInWei) external diamondNotPaused {
+    function updateERC721ListingPrice(uint256 _listingId, uint256 _priceInWei) external whenNotPaused {
         LibERC721Marketplace.updateERC721ListingPrice(_listingId, _priceInWei);
         if (s.listingFeeInWei > 0) {
             LibSharedMarketplace.burnListingFee(s.listingFeeInWei, LibMeta.msgSender(), s.ghstContract);
         }
     }
 
-    function batchUpdateERC721ListingPrice(uint256[] calldata _listingIds, uint256[] calldata _priceInWeis) external diamondNotPaused {
+    function batchUpdateERC721ListingPrice(uint256[] calldata _listingIds, uint256[] calldata _priceInWeis) external whenNotPaused {
         require(_listingIds.length == _priceInWeis.length, "ERC721Marketplace: listing ids not same length as prices");
 
         for (uint256 i; i < _listingIds.length; i++) {
@@ -226,14 +226,14 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@notice Allow an ERC721 owner to cancel his NFT listing by providing the NFT contract address and identifier
     ///@param _erc721TokenAddress The contract address of the NFT to be delisted
     ///@param _erc721TokenId The identifier of the NFT to be delisted
-    function cancelERC721ListingByToken(address _erc721TokenAddress, uint256 _erc721TokenId) external diamondNotPaused {
+    function cancelERC721ListingByToken(address _erc721TokenAddress, uint256 _erc721TokenId) external whenNotPaused {
         LibERC721Marketplace.cancelERC721Listing(_erc721TokenAddress, _erc721TokenId, LibMeta.msgSender());
     }
 
     ///@notice Allow an ERC721 owner to cancel his NFT listing through the listingID
     ///@param _listingId The identifier of the listing to be cancelled
 
-    function cancelERC721Listing(uint256 _listingId) external diamondNotPaused {
+    function cancelERC721Listing(uint256 _listingId) external whenNotPaused {
         LibERC721Marketplace.cancelERC721Listing(_listingId, LibMeta.msgSender());
     }
 
@@ -287,7 +287,7 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 _priceInWei,
         uint256 _tokenId,
         address _recipient
-    ) internal diamondNotPaused {
+    ) internal whenNotPaused {
         ERC721Listing storage listing = s.erc721Listings[_listingId];
         require(listing.timePurchased == 0, "ERC721Marketplace: listing already sold");
         require(listing.cancelled == false, "ERC721Marketplace: listing cancelled");
@@ -375,7 +375,7 @@ contract ERC721MarketplaceFacet is Modifiers {
     ///@param _erc721TokenAddress Contract address of the ERC721 token
     ///@param _erc721TokenId Identifier of the ERC721 token
     ///@param _owner Owner of the ERC721 token
-    function updateERC721Listing(address _erc721TokenAddress, uint256 _erc721TokenId, address _owner) external diamondNotPaused {
+    function updateERC721Listing(address _erc721TokenAddress, uint256 _erc721TokenId, address _owner) external whenNotPaused {
         LibERC721Marketplace.updateERC721Listing(_erc721TokenAddress, _erc721TokenId, _owner);
     }
 

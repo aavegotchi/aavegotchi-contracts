@@ -118,7 +118,7 @@ contract VrfFacet is Modifiers {
     //     }
     // }
 
-    function openPortals(uint256[] calldata _tokenIds) external diamondNotPaused {
+    function openPortals(uint256[] calldata _tokenIds) external whenNotPaused {
         address owner = LibMeta.msgSender();
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
@@ -176,7 +176,7 @@ contract VrfFacet is Modifiers {
      * @param _requestId The Id initially returned by requestRandomness
      * @param _randomNumber the VRF output
      */
-    function rawFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) external diamondNotPaused {
+    function rawFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) external whenNotPaused {
         uint256 tokenId = s.vrfRequestIdToTokenId[_requestId];
 
         require(LibMeta.msgSender() == s.vrfCoordinator, "Only VRFCoordinator can fulfill");

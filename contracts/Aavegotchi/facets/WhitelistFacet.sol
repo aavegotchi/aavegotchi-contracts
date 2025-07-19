@@ -10,7 +10,7 @@ contract WhitelistFacet is Modifiers {
     event WhitelistUpdated(uint32 indexed whitelistId);
     event WhitelistOwnershipTransferred(uint32 indexed whitelistId, address indexed newOwner);
 
-    function createWhitelist(string calldata _name, address[] calldata _whitelistAddresses) external diamondNotPaused {
+    function createWhitelist(string calldata _name, address[] calldata _whitelistAddresses) external whenNotPaused {
         require(_whitelistAddresses.length > 0, "WhitelistFacet: Whitelist length should be larger than zero");
         require(bytes(_name).length > 0, "WhitelistFacet: Whitelist name cannot be blank");
 
@@ -25,7 +25,7 @@ contract WhitelistFacet is Modifiers {
         emit WhitelistCreated(whitelistId);
     }
 
-    function updateWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external diamondNotPaused {
+    function updateWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external whenNotPaused {
         require(_whitelistAddresses.length > 0, "WhitelistFacet: Whitelist length should be larger than zero");
         require(LibWhitelist._whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
         require(LibWhitelist.checkWhitelistOwner(_whitelistId), "WhitelistFacet: Not whitelist owner");
@@ -35,7 +35,7 @@ contract WhitelistFacet is Modifiers {
         emit WhitelistUpdated(_whitelistId);
     }
 
-    function removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external diamondNotPaused {
+    function removeAddressesFromWhitelist(uint32 _whitelistId, address[] calldata _whitelistAddresses) external whenNotPaused {
         require(_whitelistAddresses.length > 0, "WhitelistFacet: Whitelist length should be larger than zero");
         require(LibWhitelist._whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
         require(LibWhitelist.checkWhitelistOwner(_whitelistId), "WhitelistFacet: Not whitelist owner");
@@ -45,7 +45,7 @@ contract WhitelistFacet is Modifiers {
         emit WhitelistUpdated(_whitelistId);
     }
 
-    function transferOwnershipOfWhitelist(uint32 _whitelistId, address _whitelistOwner) external diamondNotPaused {
+    function transferOwnershipOfWhitelist(uint32 _whitelistId, address _whitelistOwner) external whenNotPaused {
         require(LibWhitelist._whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
         require(LibWhitelist.checkWhitelistOwner(_whitelistId), "WhitelistFacet: Not whitelist owner");
 
@@ -56,7 +56,7 @@ contract WhitelistFacet is Modifiers {
         emit WhitelistOwnershipTransferred(_whitelistId, _whitelistOwner);
     }
 
-    function setWhitelistAccessRight(uint32 _whitelistId, uint256 _actionRight, uint256 _accessRight) external diamondNotPaused {
+    function setWhitelistAccessRight(uint32 _whitelistId, uint256 _actionRight, uint256 _accessRight) external whenNotPaused {
         require(LibWhitelist._whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
         require(LibWhitelist.checkWhitelistOwner(_whitelistId), "WhitelistFacet: Not whitelist owner");
 
@@ -71,7 +71,7 @@ contract WhitelistFacet is Modifiers {
         return s.whitelistAccessRights[_whitelistId][0];
     }
 
-    function setBorrowLimit(uint32 _whitelistId, uint256 _borrowlimit) external diamondNotPaused {
+    function setBorrowLimit(uint32 _whitelistId, uint256 _borrowlimit) external whenNotPaused {
         require(LibWhitelist._whitelistExists(_whitelistId), "WhitelistFacet: Whitelist not found");
         require(LibWhitelist.checkWhitelistOwner(_whitelistId), "WhitelistFacet: Not whitelist owner");
 
