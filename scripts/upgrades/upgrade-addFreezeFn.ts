@@ -73,14 +73,15 @@ export async function upgrade() {
       removeSelectors: [],
     },
     // {
-    //   facetName:
-    //     "EscrowFacet",
+    //   facetName: "EscrowFacet",
     //   addSelectors: [],
     //   removeSelectors: [],
     // },
     {
       facetName: "GotchiLendingFacet",
-      addSelectors: [],
+      addSelectors: [
+        "function batchForceEndGotchiLending(uint32[] calldata _listingIds) external",
+      ],
       removeSelectors: [],
     },
 
@@ -130,6 +131,19 @@ export async function upgrade() {
       addSelectors: [],
       removeSelectors: [],
     },
+
+    {
+      facetName: "PolygonXGeistBridgeFacet",
+      addSelectors: [],
+      removeSelectors: [
+        "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable",
+        "function getMinFees(address connector_, uint256 msgGasLimit_, uint256 payloadSize_) external view returns (uint256)",
+        "function getGotchiBridge() external view returns (address)",
+        "function getItemBridge() external view returns (address)",
+        "function setMetadata(uint _tokenId, bytes memory _metadata) external",
+        "function setBridges(address _gotchiBridge, address _itemBridge) external",
+      ],
+    },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
@@ -139,6 +153,7 @@ export async function upgrade() {
     DAOFacet__factory.abi
   ) as DAOFacetInterface;
 
+  //NOTE: running this upgrade also pauses the diamond
   const calldata = iface.encodeFunctionData("toggleDiamondPaused", []);
 
   const args: DeployUpgradeTaskArgs = {

@@ -29,29 +29,6 @@ export async function upgrade() {
   };
 
   await run("deployUpgrade", args);
-
-  //A quick local test to see that the lendings were completed
-  // const lendingFacet = await ethers.getContractAt(
-  //   "GotchiLendingFacet",
-  //   maticDiamondAddress
-  // );
-  // const lendingGetter = await ethers.getContractAt(
-  //   "LendingGetterAndSetterFacet",
-  //   maticDiamondAddress
-  // );
-
-  // let lendingDeets = await lendingGetter.getLendingListingInfo(1052222);
-  // console.log(lendingDeets.completed);
-
-  // const lendings = await lendingFacet.batchForceEndGotchiLending([
-  //   1052222, 1052223, 1052224, 1052226,
-  // ]);
-
-  // let tx = await lendings.wait();
-  // console.log(tx.gasUsed);
-
-  // lendingDeets = await lendingGetter.getLendingListingInfo(1052222);
-  // console.log(lendingDeets.completed);
 }
 
 if (require.main === module) {
