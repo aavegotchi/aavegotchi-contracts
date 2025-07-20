@@ -110,7 +110,7 @@ contract AavegotchiFacet is Modifiers {
     /// @return owner_ The address of the owner of the NFT
     function ownerOf(uint256 _tokenId) external view returns (address owner_) {
         owner_ = s.aavegotchis[_tokenId].owner;
-        require(owner_ != address(0), "AavegotchiFacet: invalid _tokenId");
+        //require(owner_ != address(0), "AavegotchiFacet: invalid _tokenId");
     }
 
     /// @notice Get the approved address for a single NFT
