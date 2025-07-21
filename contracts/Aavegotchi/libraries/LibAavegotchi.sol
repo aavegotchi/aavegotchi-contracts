@@ -8,6 +8,7 @@ import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 import {IERC721} from "../../shared/interfaces/IERC721.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibItems, ItemTypeIO} from "../libraries/LibItems.sol";
+import {LibDiamond} from "../../shared/libraries/LibDiamond.sol";
 
 struct AavegotchiCollateralTypeIO {
     address collateralType;
@@ -393,7 +394,9 @@ library LibAavegotchi {
 
     function transfer(address _from, address _to, uint256 _tokenId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-
+        if (LibMeta.msgSender() != LibDiamond.contractOwner()) {
+            require(!s.diamondPaused, "AavegotchiFacet: Diamond is paused");
+        }
         // remove
         uint256 index = s.ownerTokenIdIndexes[_from][_tokenId];
         uint256 lastIndex = s.ownerTokenIds[_from].length - 1;

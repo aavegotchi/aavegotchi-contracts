@@ -17,27 +17,27 @@ export async function upgrade() {
       addSelectors: [],
       removeSelectors: [],
     },
-    {
-      facetName: "AavegotchiGameFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "AavegotchiGameFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
     {
       facetName: "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
       addSelectors: [],
       removeSelectors: [],
     },
-    {
-      facetName: "CollateralFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "CollateralFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
 
-    {
-      facetName: "DAOFacet",
-      addSelectors: ["function toggleDiamondPaused(bool _paused) external"],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "DAOFacet",
+    //   addSelectors: ["function toggleDiamondPaused(bool _paused) external"],
+    //   removeSelectors: [],
+    // },
     {
       facetName: "ERC721BuyOrderFacet",
       addSelectors: [],
@@ -48,30 +48,30 @@ export async function upgrade() {
       addSelectors: [],
       removeSelectors: [],
     },
-    {
-      facetName: "ERC1155BuyOrderFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "ERC1155MarketplaceFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
-      addSelectors: [],
-      removeSelectors: [
-        "function useConsumables(uint256 _tokenId, uint256[] calldata _itemIds, uint256[] calldata _quantities) external",
-      ],
-    },
-    {
-      facetName: "ItemsExtensibleFacet",
-      addSelectors: [
-        "function useConsumables(uint256 _tokenId, uint256[] calldata _itemIds, uint256[] calldata _quantities) external",
-      ],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "ERC1155BuyOrderFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "ERC1155MarketplaceFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "contracts/Aavegotchi/facets/ItemsFacet.sol:ItemsFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [
+    //     "function useConsumables(uint256 _tokenId, uint256[] calldata _itemIds, uint256[] calldata _quantities) external",
+    //   ],
+    // },
+    // {
+    //   facetName: "ItemsExtensibleFacet",
+    //   addSelectors: [
+    //     "function useConsumables(uint256 _tokenId, uint256[] calldata _itemIds, uint256[] calldata _quantities) external",
+    //   ],
+    //   removeSelectors: [],
+    // },
     // {
     //   facetName: "EscrowFacet",
     //   addSelectors: [],
@@ -90,60 +90,60 @@ export async function upgrade() {
       addSelectors: [],
       removeSelectors: [],
     },
-    {
-      facetName: "ItemsTransferFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "ItemsTransferFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
     {
       facetName: "LendingGetterAndSetterFacet",
       addSelectors: [],
       removeSelectors: [],
     },
-    {
-      facetName: "MerkleDropFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "MetaTransactionsFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "ShopFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "VrfFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "MerkleDropFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "MetaTransactionsFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "ShopFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "VrfFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
 
-    {
-      facetName: "WearablesConfigFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "WhitelistFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "WearablesConfigFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "WhitelistFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
 
-    {
-      facetName: "PolygonXGeistBridgeFacet",
-      addSelectors: [],
-      removeSelectors: [
-        "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable",
-        "function getMinFees(address connector_, uint256 msgGasLimit_, uint256 payloadSize_) external view returns (uint256)",
-        "function getGotchiBridge() external view returns (address)",
-        "function getItemBridge() external view returns (address)",
-        "function setMetadata(uint _tokenId, bytes memory _metadata) external",
-        "function setBridges(address _gotchiBridge, address _itemBridge) external",
-      ],
-    },
+    // {
+    //   facetName: "PolygonXGeistBridgeFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [
+    //     "function bridgeGotchi(address _receiver, uint256 _tokenId, uint256 _msgGasLimit, address _connector) external payable",
+    //     "function getMinFees(address connector_, uint256 msgGasLimit_, uint256 payloadSize_) external view returns (uint256)",
+    //     "function getGotchiBridge() external view returns (address)",
+    //     "function getItemBridge() external view returns (address)",
+    //     "function setMetadata(uint _tokenId, bytes memory _metadata) external",
+    //     "function setBridges(address _gotchiBridge, address _itemBridge) external",
+    //   ],
+    // },
   ];
 
   const joined = convertFacetAndSelectorsToString(facets);
