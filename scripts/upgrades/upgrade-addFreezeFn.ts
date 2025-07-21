@@ -80,7 +80,7 @@ export async function upgrade() {
     {
       facetName: "GotchiLendingFacet",
       addSelectors: [
-        "function batchForceEndGotchiLending(uint32[] calldata _listingIds) external",
+        // "function batchForceEndGotchiLending(uint32[] calldata _listingIds) external",
       ],
       removeSelectors: [],
     },
