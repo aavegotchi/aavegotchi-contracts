@@ -10,19 +10,13 @@ import {
   maticWearableDiamondAddress,
 } from "../../helperFunctions";
 
-const itemBridgingParams = `tuple(address receiver, uint256 tokenId, uint256 amount, uint256 msgGasLimit)`;
 export async function upgrade() {
   const facets: FacetsAndAddSelectors[] = [
     {
       facetName:
-        "contracts/Aavegotchi/WearableDiamond/facets/WearablesFacet.sol:WearablesFacet",
-      addSelectors: ["function toggleDiamondPaused(bool _paused) external"],
-      removeSelectors: [
-        "function bridgeItem(address _receiver, uint256 _tokenId, uint256 _amount, uint256 _msgGasLimit, address _connector) external",
-        "function setItemGeistBridge(address _itemBridge) external",
-        // "function getItemGeistBridge() external view returns (address)",
-        // `function bridgeItems(${itemBridgingParams}[] calldata bridgingParams, address _connector) external payable`,
-      ],
+        "contracts/Aavegotchi/WearableDiamond/facets/EventHandlerFacet.sol:EventHandlerFacet",
+      addSelectors: [],
+      removeSelectors: [],
     },
   ];
   const joined = convertFacetAndSelectorsToString(facets);
