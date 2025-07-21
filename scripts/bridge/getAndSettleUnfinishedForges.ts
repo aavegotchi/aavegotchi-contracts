@@ -1,12 +1,10 @@
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
 import { ADDRESSES } from "./constants";
-import { upgrade } from "../upgrades/forge/upgrade-addForceClaimForgings";
+
 import { diamondOwner, impersonate } from "../helperFunctions";
 
 async function main() {
-  await upgrade();
-
   const [signer] = await ethers.getSigners();
   const testing = ["hardhat", "localhost"].includes(network.name);
   const owner = await diamondOwner(ADDRESSES.forgeDiamond, ethers);
