@@ -3,6 +3,7 @@ import { ethers, network } from "hardhat";
 import { ADDRESSES } from "./constants";
 
 import { diamondOwner, impersonate } from "../helperFunctions";
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 async function main() {
   const [signer] = await ethers.getSigners();
@@ -21,6 +22,12 @@ async function main() {
 
   if (testing) {
     forgeFacet = await impersonate(owner, forgeFacet, ethers, network);
+  } else {
+    forgeFacet = await ethers.getContractAt(
+      "ForgeFacet",
+      ADDRESSES.forgeDiamond,
+      new LedgerSigner(ethers.provider, "m/44'/60'/1'/0/0")
+    );
   }
 
   const TOTAL_IDS = 25_000; // Maximum gotchi supply on Polygon

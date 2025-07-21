@@ -4,8 +4,8 @@ import fs from "fs";
 import path from "path";
 import { ethers, network } from "hardhat";
 import { ADDRESSES } from "./constants";
-import { diamondOwner, impersonate } from "../helperFunctions";
-import { LedgerSigner } from "@ethersproject/hardware-wallets";
+import { diamondOwner, gasPrice, impersonate } from "../helperFunctions";
+import { LedgerSigner } from "@anders-t/ethers-ledger";
 import { GotchiLendingFacet } from "../../typechain";
 
 dotenv.config();
@@ -13,7 +13,7 @@ dotenv.config();
 const LENDINGS_OUTPUT_DIR = path.join(__dirname, "lendings");
 const OUTPUT_FILE = path.join(LENDINGS_OUTPUT_DIR, "unfinishedLendings.json");
 const PROGRESS_FILE = path.join(LENDINGS_OUTPUT_DIR, "progress.json");
-const BATCH_SIZE = 2;
+const BATCH_SIZE = 100;
 
 interface Lending {
   id: string;
@@ -177,7 +177,8 @@ async function main() {
     try {
       const uint32Batch = batch.map((id) => parseInt(id, 10)); // Convert string IDs to uint32
       const tx = await gotchiLendingFacet.batchForceEndGotchiLending(
-        uint32Batch
+        uint32Batch,
+        { gasPrice: gasPrice }
       );
       console.log(
         `Transaction sent for batch ${batchNumber}. Hash: ${tx.hash}`
