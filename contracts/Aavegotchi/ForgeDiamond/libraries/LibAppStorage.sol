@@ -212,7 +212,9 @@ contract Modifiers {
     }
 
     modifier whenNotPaused() {
-        require(!s.contractPaused, "LibAppStorage: Contract paused");
+        if (msg.sender != ForgeLibDiamond.contractOwner()) {
+            require(!s.contractPaused, "LibAppStorage: Contract paused");
+        }
         _;
     }
 }

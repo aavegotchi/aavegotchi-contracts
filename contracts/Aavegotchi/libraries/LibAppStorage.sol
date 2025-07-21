@@ -393,7 +393,9 @@ struct AppStorage {
     // gotchi => owner => wearable configs
     mapping(uint256 => mapping(address => WearablesConfig[])) gotchiWearableConfigs;
     // owner => gotchi => slots used
-    mapping(address => mapping (uint256 => uint16)) ownerGotchiSlotsUsed;
+    mapping(address => mapping(uint256 => uint16)) ownerGotchiSlotsUsed;
+    //diamond paused
+    bool diamondPaused;
 }
 
 library LibAppStorage {
@@ -469,6 +471,13 @@ contract Modifiers {
     modifier onlyPeriphery() {
         address sender = LibMeta.msgSender();
         require(sender == s.wearableDiamond, "LibAppStorage: Not wearable diamond");
+        _;
+    }
+    modifier whenNotPaused() {
+        ///we exempt diamond owner from the freeze
+        if (msg.sender != LibDiamond.contractOwner()) {
+            require(!s.diamondPaused, "AppStorage: Diamond paused");
+        }
         _;
     }
 }

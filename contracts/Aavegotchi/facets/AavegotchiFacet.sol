@@ -110,7 +110,7 @@ contract AavegotchiFacet is Modifiers {
     /// @return owner_ The address of the owner of the NFT
     function ownerOf(uint256 _tokenId) external view returns (address owner_) {
         owner_ = s.aavegotchis[_tokenId].owner;
-        require(owner_ != address(0), "AavegotchiFacet: invalid _tokenId");
+        //require(owner_ != address(0), "AavegotchiFacet: invalid _tokenId");
     }
 
     /// @notice Get the approved address for a single NFT
@@ -217,7 +217,7 @@ contract AavegotchiFacet is Modifiers {
     }
 
     // This function is used by transfer functions
-    function internalTransferFrom(address _sender, address _from, address _to, uint256 _tokenId) internal {
+    function internalTransferFrom(address _sender, address _from, address _to, uint256 _tokenId) internal whenNotPaused {
         LibGotchiLending.enforceAavegotchiNotInLending(uint32(_tokenId), _sender);
         _enforceAavegotchiNotForging(_tokenId);
         _enforceAavegotchiNotEquippedWithDelegatedItems(_tokenId);
@@ -239,7 +239,7 @@ contract AavegotchiFacet is Modifiers {
     ///  operator of the current owner.
     /// @param _approved The new approved NFT controller
     /// @param _tokenId The NFT to approve
-    function approve(address _approved, uint256 _tokenId) external {
+    function approve(address _approved, uint256 _tokenId) external whenNotPaused {
         address owner = s.aavegotchis[_tokenId].owner;
         require(owner == LibMeta.msgSender() || s.operators[owner][LibMeta.msgSender()], "ERC721: Not owner or operator of token.");
         s.approved[_tokenId] = _approved;
@@ -252,7 +252,7 @@ contract AavegotchiFacet is Modifiers {
     ///  multiple operators per owner.
     /// @param _operator Address to add to the set of authorized operators
     /// @param _approved True if the operator is approved, false to revoke approval
-    function setApprovalForAll(address _operator, bool _approved) external {
+    function setApprovalForAll(address _operator, bool _approved) external whenNotPaused {
         s.operators[LibMeta.msgSender()][_operator] = _approved;
         emit LibERC721.ApprovalForAll(LibMeta.msgSender(), _operator, _approved);
     }
@@ -262,7 +262,7 @@ contract AavegotchiFacet is Modifiers {
     ///@param _operator Address to disable/enable as a pet operator
     ///@param _approved True if operator is approved,False if approval is revoked
 
-    function setPetOperatorForAll(address _operator, bool _approved) external {
+    function setPetOperatorForAll(address _operator, bool _approved) external whenNotPaused {
         s.petOperators[LibMeta.msgSender()][_operator] = _approved;
         emit PetOperatorApprovalForAll(LibMeta.msgSender(), _operator, _approved);
     }

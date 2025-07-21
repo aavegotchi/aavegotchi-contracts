@@ -384,13 +384,34 @@ contract ForgeFacet is Modifiers {
         emit ForgeQueueClaimed(queueItem.itemId, gotchiId);
     }
 
+    //we allow the admin to force claim all ongoing forges even if they are not claimable yet
+    function forceClaimForgeQueueItems(uint256[] calldata gotchiIds) external onlyDaoOrOwner {
+        for (uint256 i; i < gotchiIds.length; i++) {
+            //get aavegotchi owner
+            uint256 gotchiId = gotchiIds[i];
+            address owner = aavegotchiFacet().ownerOf(gotchiId);
+
+            ForgeQueueItem storage queueItem = s.forgeQueue[s.gotchiForging[gotchiId].forgeQueueId];
+
+            if (queueItem.id > 0 && !queueItem.claimed && owner != address(0)) {
+                // ready to be claimed, transfer.
+                s.forgeQueue[queueItem.id].claimed = true;
+                s.itemForging[queueItem.itemId] -= 1;
+                delete s.gotchiForging[gotchiId];
+                wearablesFacet().safeTransferFrom(address(this), owner, queueItem.itemId, 1, "");
+
+                emit ForgeQueueClaimed(queueItem.itemId, gotchiId);
+            }
+        }
+    }
+
     /// @notice Allow a user to speed up multiple queues(installation craft time) by paying the correct amount of $GLTR tokens
     /// @dev Will throw if the caller is not the queue owner
     /// @dev $GLTR tokens are burnt upon usage
     /// @dev amount expressed in block numbers
     /// @param _gotchiIds An array containing the gotchi ID queues to speed up
     /// @param _amounts An array containing the corresponding amounts of $GLTR tokens to pay for each queue speedup
-    function reduceQueueTime(uint256[] calldata _gotchiIds, uint40[] calldata _amounts) external {
+    function reduceQueueTime(uint256[] calldata _gotchiIds, uint40[] calldata _amounts) external whenNotPaused {
         require(_gotchiIds.length == _amounts.length, "InstallationFacet: Mismatched arrays");
         for (uint256 i; i < _gotchiIds.length; i++) {
             uint256 gotchiId = _gotchiIds[i];
@@ -535,7 +556,7 @@ contract ForgeFacet is Modifiers {
         _mintBatch(to, ids, amounts);
     }
 
-    function burn(address account, uint256 id, uint256 amount) external {
+    function burn(address account, uint256 id, uint256 amount) external whenNotPaused {
         require(
             account == msg.sender || forgeTokenFacet().isApprovedForAll(account, msg.sender),
             "ForgeFacet: caller is not token owner or approved"

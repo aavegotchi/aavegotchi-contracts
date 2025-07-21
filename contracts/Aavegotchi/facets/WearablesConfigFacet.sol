@@ -48,7 +48,7 @@ contract WearablesConfigFacet is Modifiers {
         uint256 _tokenId,
         string calldata _name,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToStore
-    ) external returns (uint16 wearablesConfigId) {
+    ) external whenNotPaused returns (uint16 wearablesConfigId) {
         // check that creation of this wearables config is allowed (only unsacrificed aavegotchi)
         require(LibWearablesConfig._isAavegotchi(_tokenId), "WearablesConfigFacet: Invalid aavegotchi token id");
         // check that wearables are valid and for the right slots
@@ -115,7 +115,7 @@ contract WearablesConfigFacet is Modifiers {
         uint16 _wearablesConfigId,
         string calldata _name,
         uint16[EQUIPPED_WEARABLE_SLOTS] calldata _wearablesToStore
-    ) external onlyAavegotchiOwner(_tokenId) {
+    ) external whenNotPaused onlyAavegotchiOwner(_tokenId) {
         // check that wearables are valid and for the right slots
         require(LibWearablesConfig._checkValidWearables(_wearablesToStore), "WearablesConfigFacet: Invalid wearables");
 

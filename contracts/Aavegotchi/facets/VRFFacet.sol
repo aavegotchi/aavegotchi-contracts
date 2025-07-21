@@ -118,7 +118,7 @@ contract VrfFacet is Modifiers {
     //     }
     // }
 
-    function openPortals(uint256[] calldata _tokenIds) external {
+    function openPortals(uint256[] calldata _tokenIds) external whenNotPaused {
         address owner = LibMeta.msgSender();
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
@@ -176,7 +176,7 @@ contract VrfFacet is Modifiers {
      * @param _requestId The Id initially returned by requestRandomness
      * @param _randomNumber the VRF output
      */
-    function rawFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) external {
+    function rawFulfillRandomness(bytes32 _requestId, uint256 _randomNumber) external whenNotPaused {
         uint256 tokenId = s.vrfRequestIdToTokenId[_requestId];
 
         require(LibMeta.msgSender() == s.vrfCoordinator, "Only VRFCoordinator can fulfill");
@@ -194,12 +194,7 @@ contract VrfFacet is Modifiers {
     //@param _keyHash New keyhash
     //@param _vrfCoordinator The new vrf coordinator address
     //@param _link New LINK token contract address
-    function changeVrf(
-        uint256 _newFee,
-        bytes32 _keyHash,
-        address _vrfCoordinator,
-        address _link
-    ) external onlyOwner {
+    function changeVrf(uint256 _newFee, bytes32 _keyHash, address _vrfCoordinator, address _link) external onlyOwner {
         if (_newFee != 0) {
             s.fee = uint96(_newFee);
         }
