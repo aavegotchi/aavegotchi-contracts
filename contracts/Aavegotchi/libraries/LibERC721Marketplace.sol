@@ -5,7 +5,6 @@ import {LibAppStorage, AppStorage, ListingListItem, ERC721Listing} from "./LibAp
 import {LibMeta} from "../../shared/libraries/LibMeta.sol";
 
 import "../../shared/interfaces/IERC721.sol";
-import {LibEvents} from "../../shared/libraries/LibEvents.sol";
 
 // import "hardhat/console.sol";
 
@@ -30,7 +29,6 @@ library LibERC721Marketplace {
         //Unlock Aavegotchis when listing is created
         if (listing.erc721TokenAddress == address(this)) {
             s.aavegotchis[listing.erc721TokenId].locked = false;
-            LibEvents.emitUnlockNFT(listing.erc721TokenId);
         }
 
         emit ERC721ListingCancelled(_listingId, listing.category, block.number);
