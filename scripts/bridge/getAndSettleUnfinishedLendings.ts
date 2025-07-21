@@ -2,15 +2,18 @@ import { GraphQLClient, gql } from "graphql-request";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { ADDRESSES } from "./constants";
+import { diamondOwner, impersonate } from "../helperFunctions";
+import { LedgerSigner } from "@ethersproject/hardware-wallets";
+import { GotchiLendingFacet } from "../../typechain";
 
 dotenv.config();
 
 const LENDINGS_OUTPUT_DIR = path.join(__dirname, "lendings");
 const OUTPUT_FILE = path.join(LENDINGS_OUTPUT_DIR, "unfinishedLendings.json");
 const PROGRESS_FILE = path.join(LENDINGS_OUTPUT_DIR, "progress.json");
-const BATCH_SIZE = 30;
+const BATCH_SIZE = 2;
 
 interface Lending {
   id: string;
@@ -119,14 +122,32 @@ async function main() {
   console.log("\nStarting to force-end lendings in batches...");
   const progress = loadProgress();
 
-  const [signer] = await ethers.getSigners();
-  console.log("Using signer:", signer.address);
+  const testing = ["hardhat", "localhost"].includes(network.name);
 
-  const gotchiLendingFacet = await ethers.getContractAt(
+  let gotchiLendingFacet: GotchiLendingFacet;
+
+  gotchiLendingFacet = await ethers.getContractAt(
     "GotchiLendingFacet",
-    ADDRESSES.aavegotchiDiamond,
-    signer
+    ADDRESSES.aavegotchiDiamond
   );
+
+  if (testing) {
+    const owner = await diamondOwner(ADDRESSES.aavegotchiDiamond, ethers);
+
+    gotchiLendingFacet = await impersonate(
+      owner,
+      gotchiLendingFacet,
+      ethers,
+      network
+    );
+  } else {
+    const signer = new LedgerSigner(ethers.provider, "m/44'/60'/1'/0/0");
+    gotchiLendingFacet = await ethers.getContractAt(
+      "GotchiLendingFacet",
+      ADDRESSES.aavegotchiDiamond,
+      signer
+    );
+  }
 
   const startIndex = progress.lastProcessedIndex + 1;
   if (startIndex >= lendingIds.length) {

@@ -1,5 +1,6 @@
 import { ethers, network } from "hardhat";
 import {
+  gasPrice,
   impersonate,
   maticDiamondAddress,
   maticForgeDiamond,
@@ -12,6 +13,7 @@ export async function lockDiamonds() {
   let signer;
 
   const testing = ["hardhat", "localhost"].includes(network.name);
+
   let aavegotchiDiamond: DAOFacet;
   let forgeDiamond: ForgeDAOFacet;
   let wearableDiamond: WearablesFacet;
@@ -31,6 +33,8 @@ export async function lockDiamonds() {
   if (testing) {
     const aavegotchiDiamondOwner = await getOwner(maticDiamondAddress);
 
+    console.log("aavegotchiDiamondOwner", aavegotchiDiamondOwner);
+
     aavegotchiDiamond = await impersonate(
       aavegotchiDiamondOwner,
       aavegotchiDiamond,
@@ -40,6 +44,8 @@ export async function lockDiamonds() {
 
     const forgeDiamondOwner = await getOwner(maticForgeDiamond);
 
+    console.log("forgeDiamondOwner", forgeDiamondOwner);
+
     forgeDiamond = await impersonate(
       forgeDiamondOwner,
       forgeDiamond,
@@ -48,6 +54,8 @@ export async function lockDiamonds() {
     );
 
     const wearableDiamondOwner = await getOwner(maticWearableDiamondAddress);
+
+    console.log("wearableDiamondOwner", wearableDiamondOwner);
 
     wearableDiamond = await impersonate(
       wearableDiamondOwner,
@@ -60,13 +68,17 @@ export async function lockDiamonds() {
     signer = new LedgerSigner(ethers.provider, "m/44'/60'/1'/0/0");
   } else throw Error("Incorrect network selected");
 
-  let tx = await aavegotchiDiamond.connect(signer).toggleDiamondPaused(true);
+  let tx = await aavegotchiDiamond
+    .connect(signer)
+    .toggleDiamondPaused(true, { gasPrice: gasPrice });
   await tx.wait();
   console.log("Aavegotchi diamond paused at txn", tx.hash);
-  tx = await wearableDiamond.connect(signer).toggleDiamondPaused(true);
+  tx = await wearableDiamond
+    .connect(signer)
+    .toggleDiamondPaused(true, { gasPrice: gasPrice });
   await tx.wait();
   console.log("Wearable diamond paused at txn", tx.hash);
-  tx = await forgeDiamond.connect(signer).pauseContract();
+  tx = await forgeDiamond.connect(signer).pauseContract({ gasPrice: gasPrice });
   await tx.wait();
   console.log("Forge diamond paused at txn", tx.hash);
   console.log("Diamonds paused");
