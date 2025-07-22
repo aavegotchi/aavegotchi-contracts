@@ -12,9 +12,7 @@ export async function upgrade() {
     {
       facetName:
         "contracts/Aavegotchi/ForgeDiamond/facets/ForgeFacet.sol:ForgeFacet",
-      addSelectors: [
-        "function forceClaimForgeQueueItems(uint256[] calldata gotchiIds) external",
-      ],
+      addSelectors: [],
       removeSelectors: [],
     },
     {

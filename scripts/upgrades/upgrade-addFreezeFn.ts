@@ -22,11 +22,11 @@ export async function upgrade() {
     //   addSelectors: [],
     //   removeSelectors: [],
     // },
-    {
-      facetName: "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "contracts/Aavegotchi/facets/BridgeFacet.sol:BridgeFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
     // {
     //   facetName: "CollateralFacet",
     //   addSelectors: [],
@@ -38,16 +38,16 @@ export async function upgrade() {
     //   addSelectors: ["function toggleDiamondPaused(bool _paused) external"],
     //   removeSelectors: [],
     // },
-    {
-      facetName: "ERC721BuyOrderFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
-    {
-      facetName: "ERC721MarketplaceFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "ERC721BuyOrderFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
+    // {
+    //   facetName: "ERC721MarketplaceFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
     // {
     //   facetName: "ERC1155BuyOrderFacet",
     //   addSelectors: [],
@@ -77,29 +77,29 @@ export async function upgrade() {
     //   addSelectors: [],
     //   removeSelectors: [],
     // },
-    {
-      facetName: "GotchiLendingFacet",
-      addSelectors: [
-        // "function batchForceEndGotchiLending(uint32[] calldata _listingIds) external",
-      ],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "GotchiLendingFacet",
+    //   addSelectors: [
+    //     // "function batchForceEndGotchiLending(uint32[] calldata _listingIds) external",
+    //   ],
+    //   removeSelectors: [],
+    // },
 
-    {
-      facetName: "ItemsRolesRegistryFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "ItemsRolesRegistryFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
     // {
     //   facetName: "ItemsTransferFacet",
     //   addSelectors: [],
     //   removeSelectors: [],
     // },
-    {
-      facetName: "LendingGetterAndSetterFacet",
-      addSelectors: [],
-      removeSelectors: [],
-    },
+    // {
+    //   facetName: "LendingGetterAndSetterFacet",
+    //   addSelectors: [],
+    //   removeSelectors: [],
+    // },
     // {
     //   facetName: "MerkleDropFacet",
     //   addSelectors: [],
