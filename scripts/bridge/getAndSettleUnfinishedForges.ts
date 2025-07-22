@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
 import { ADDRESSES } from "./constants";
 
-import { diamondOwner, impersonate } from "../helperFunctions";
+import { diamondOwner, gasPrice, impersonate } from "../helperFunctions";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
 async function main() {
@@ -32,7 +32,7 @@ async function main() {
 
   const TOTAL_IDS = 25_000; // Maximum gotchi supply on Polygon
   const QUERY_BATCH_SIZE = 1_000;
-  const SETTLE_BATCH_SIZE = 20;
+  const SETTLE_BATCH_SIZE = 500;
 
   const gotchisWithSkill: number[] = [];
 
@@ -82,7 +82,9 @@ async function main() {
     const chunk = gotchisWithSkill.slice(start, start + SETTLE_BATCH_SIZE);
 
     console.log(`Settling gotchi IDs: [${chunk.join(", ")}]`);
-    const tx = await forgeFacet.forceClaimForgeQueueItems(chunk);
+    const tx = await forgeFacet.forceClaimForgeQueueItems(chunk, {
+      gasPrice: gasPrice,
+    });
     console.log(`  ➜ Tx submitted: ${tx.hash}`);
     await tx.wait();
     console.log("  ✓ Settled");
