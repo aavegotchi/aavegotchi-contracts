@@ -969,7 +969,7 @@ contract ACL is IACL, TimeHelpers, AragonApp, ACLHelpers {
     }
 
     /**
-     * @dev Revokes permission if allowed. This requires `msg.sender` to be the the permission manager
+     * @dev Revokes permission if allowed. This requires `msg.sender` to be the permission manager
      * @notice Revoke from `_entity` the ability to perform actions requiring `_role` on `_app`
      * @param _entity Address of the whitelisted entity to revoke access from
      * @param _app Address of the app in which the role will be revoked
@@ -1280,7 +1280,7 @@ contract ACL is IACL, TimeHelpers, AragonApp, ACLHelpers {
             return r1 != r2;
         }
 
-        return r2; // both or and and depend on result of r2 after checks
+        return r2; // both or and depend on result of r2 after checks
     }
 
     function compare(
