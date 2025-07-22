@@ -18,6 +18,12 @@ export async function upgrade() {
       addSelectors: [],
       removeSelectors: [],
     },
+    {
+      facetName:
+        "contracts/Aavegotchi/WearableDiamond/facets/WearablesFacet.sol:WearablesFacet",
+      addSelectors: [],
+      removeSelectors: [],
+    },
   ];
   const joined = convertFacetAndSelectorsToString(facets);
 

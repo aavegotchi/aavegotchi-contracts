@@ -15,6 +15,7 @@ import {LibMeta} from "../../../shared/libraries/LibMeta.sol";
 library WearableLibDiamond {
     bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
     address constant AAVEGOTCHI_DIAMOND = 0x86935F11C86623deC8a25696E1C19a8659CbF95d;
+    address constant FORGE_DIAMOND = 0x4fDfc1B53Fd1D80d969C984ba7a8CE4c7bAaD442;
 
     struct FacetAddressAndPosition {
         address facetAddress;

@@ -5,7 +5,7 @@ import { ADDRESSES } from "./constants";
 import { diamondOwner, gasPrice, impersonate } from "../helperFunctions";
 import { LedgerSigner } from "@anders-t/ethers-ledger";
 
-async function main() {
+export async function getAndSettleUnfinishedForges() {
   const [signer] = await ethers.getSigners();
   const testing = ["hardhat", "localhost"].includes(network.name);
   const owner = await diamondOwner(ADDRESSES.forgeDiamond, ethers);
@@ -94,7 +94,7 @@ async function main() {
 }
 
 if (require.main === module) {
-  main()
+  getAndSettleUnfinishedForges()
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
