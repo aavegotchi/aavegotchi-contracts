@@ -54,7 +54,7 @@ contract GotchiLendingFacet is Modifiers {
 
     ///@notice Allow an aavegotchi lender or lending operator to cancel his NFT lending through the listingId
     ///@param _listingId The identifier of the lending to be cancelled
-    function cancelGotchiLending(uint32 _listingId) public whenNotPaused {
+    function cancelGotchiLending(uint32 _listingId) public {
         GotchiLending storage lending = s.gotchiLendings[_listingId];
         require(lending.timeCreated != 0, "GotchiLending: Listing not found");
         address sender = LibMeta.msgSender();
